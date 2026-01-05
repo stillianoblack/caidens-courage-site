@@ -15,7 +15,9 @@ const Resources: React.FC = () => {
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
+  const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -127,14 +129,17 @@ const Resources: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showResourcesDropdown]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (closeTimeout) {
         clearTimeout(closeTimeout);
       }
+      if (shopCloseTimeout) {
+        clearTimeout(shopCloseTimeout);
+      }
     };
-  }, [closeTimeout]);
+  }, [closeTimeout, shopCloseTimeout]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -262,10 +267,10 @@ const Resources: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-3">
-              {/* Mobile Menu Button - Left of Logo, Centered */}
+              {/* Hamburger Menu Button - Mobile only */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
+                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -299,11 +304,113 @@ const Resources: React.FC = () => {
                 />
               </Link>
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/comicbook" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Comic Book</Link>
-              <Link to="/#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</Link>
-              <Link to="/#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</Link>
-              <Link to="/#products" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Shop</Link>
+            
+            {/* Desktop Navigation - Only visible on desktop (lg and up) */}
+            <nav className="hidden lg:flex items-center gap-8">
+              <Link 
+                to="/#about" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                About
+              </Link>
+              <Link 
+                to="/#characters" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Characters
+              </Link>
+              
+              {/* Shop Dropdown */}
+              <div 
+                className="relative has-dropdown"
+                onMouseEnter={() => {
+                  if (shopCloseTimeout) {
+                    clearTimeout(shopCloseTimeout);
+                    setShopCloseTimeout(null);
+                  }
+                  setShowShopDropdown(true);
+                }}
+                onMouseLeave={() => {
+                  const timeout = setTimeout(() => {
+                    setShowShopDropdown(false);
+                  }, 200);
+                  setShopCloseTimeout(timeout);
+                }}
+              >
+                <div
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowShopDropdown(!showShopDropdown);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setShowShopDropdown(!showShopDropdown);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-haspopup="true"
+                  aria-expanded={showShopDropdown}
+                >
+                  Shop
+                  <svg 
+                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                
+                {/* Invisible hover bridge */}
+                <div className="absolute top-full left-0 w-full h-3" />
+                
+                <div 
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+                    showShopDropdown 
+                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
+                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
+                  }`}
+                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                  onMouseEnter={() => {
+                    if (shopCloseTimeout) {
+                      clearTimeout(shopCloseTimeout);
+                      setShopCloseTimeout(null);
+                    }
+                    setShowShopDropdown(true);
+                  }}
+                  onMouseLeave={() => {
+                    const timeout = setTimeout(() => {
+                      setShowShopDropdown(false);
+                    }, 200);
+                    setShopCloseTimeout(timeout);
+                  }}
+                >
+                  <Link
+                    to="/comicbook"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">Comic Book</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
+                  </Link>
+                  <Link
+                    to="/#products"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
+                  </Link>
+                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 opacity-60 cursor-not-allowed">
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
+                  </div>
+                </div>
+              </div>
               
               {/* Resources Dropdown */}
               <div 
@@ -311,10 +418,12 @@ const Resources: React.FC = () => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                <div
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
                   onClick={handleToggleDropdown}
                   onKeyDown={handleKeyDown}
+                  role="button"
+                  tabIndex={0}
                   aria-haspopup="true"
                   aria-expanded={showResourcesDropdown}
                 >
@@ -327,7 +436,7 @@ const Resources: React.FC = () => {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </div>
                 
                 {/* Invisible hover bridge */}
                 <div className="absolute top-full left-0 w-full h-3" />
@@ -367,7 +476,7 @@ const Resources: React.FC = () => {
                     <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
                   </Link>
                   <Link
-                    to="/resources?audience=all"
+                    to="/resources"
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
@@ -376,9 +485,24 @@ const Resources: React.FC = () => {
                   </Link>
                 </div>
               </div>
-            </div>
+              
+              {/* Comic Book */}
+              <Link 
+                to="/comicbook" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Comic Book
+              </Link>
+            </nav>
+            
+            {/* Action Area - Contact + Join Waitlist Button */}
             <div className="flex items-center gap-6">
-              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              <a 
+                href="mailto:stills@caidenscourage.com" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Contact
+              </a>
               <Button
                 variant="primary"
                 size="sm"

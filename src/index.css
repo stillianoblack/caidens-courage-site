@@ -554,11 +554,11 @@ a.bg-golden-500:hover,
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
 
-/* Scroll-triggered fade-in-up animation - medium speed */
+/* Scroll-triggered fade-in-up animation - faster speed */
 .fade-in-up {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 .fade-in-up.visible {
@@ -570,12 +570,24 @@ a.bg-golden-500:hover,
 .fade-in-card {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 .fade-in-card.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Typographic widow/orphan control for intro copy */
+.intro-copy-container {
+  padding-inline: clamp(16px, 4vw, 32px);
+}
+
+.intro-copy {
+  text-wrap: pretty;
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Rotating word fade animation */

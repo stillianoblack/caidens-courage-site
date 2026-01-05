@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getStripePreorderUrl, openExternalUrl } from '../config/externalLinks';
+import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 
 // Reusable InsideCard Component for "What's Inside" section
@@ -128,16 +128,14 @@ const Product: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
+  const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
 
   // Gallery images - can be expanded later
   const galleryImages = [
-    {
-      src: "/Courageforeverykid_COMICBOOK.png",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover"
-    },
     {
       src: "/Comic5_Coverpage_header_2.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
@@ -200,6 +198,11 @@ const Product: React.FC = () => {
     console.log('Digital download coming soon');
   };
 
+  const handleWaitlistClick = () => {
+    const waitlistUrl = getWaitlistUrl();
+    if (waitlistUrl) return openExternalUrl(waitlistUrl);
+  };
+
   const handlePreviewClick = () => {
     // TODO: Add preview pages link
     console.log('Preview pages coming soon');
@@ -241,6 +244,31 @@ const Product: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-3">
+              {/* Hamburger Menu Button - Mobile only */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
+                aria-label="Toggle menu"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <svg 
+                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg 
+                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
               <Link 
                 to="/"
                 onClick={handleLogoClick}
@@ -253,10 +281,113 @@ const Product: React.FC = () => {
                 />
               </Link>
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</Link>
-              <Link to="/#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</Link>
-              <Link to="/#products" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Shop</Link>
+            
+            {/* Desktop Navigation - Only visible on desktop (lg and up) */}
+            <nav className="hidden lg:flex items-center gap-8">
+              <Link 
+                to="/#about" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                About
+              </Link>
+              <Link 
+                to="/#characters" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Characters
+              </Link>
+              
+              {/* Shop Dropdown */}
+              <div 
+                className="relative has-dropdown"
+                onMouseEnter={() => {
+                  if (shopCloseTimeout) {
+                    clearTimeout(shopCloseTimeout);
+                    setShopCloseTimeout(null);
+                  }
+                  setShowShopDropdown(true);
+                }}
+                onMouseLeave={() => {
+                  const timeout = setTimeout(() => {
+                    setShowShopDropdown(false);
+                  }, 200);
+                  setShopCloseTimeout(timeout);
+                }}
+              >
+                <div
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowShopDropdown(!showShopDropdown);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setShowShopDropdown(!showShopDropdown);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-haspopup="true"
+                  aria-expanded={showShopDropdown}
+                >
+                  Shop
+                  <svg 
+                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                
+                {/* Invisible hover bridge */}
+                <div className="absolute top-full left-0 w-full h-3" />
+                
+                <div 
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+                    showShopDropdown 
+                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
+                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
+                  }`}
+                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                  onMouseEnter={() => {
+                    if (shopCloseTimeout) {
+                      clearTimeout(shopCloseTimeout);
+                      setShopCloseTimeout(null);
+                    }
+                    setShowShopDropdown(true);
+                  }}
+                  onMouseLeave={() => {
+                    const timeout = setTimeout(() => {
+                      setShowShopDropdown(false);
+                    }, 200);
+                    setShopCloseTimeout(timeout);
+                  }}
+                >
+                  <Link
+                    to="/comicbook"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">Comic Book</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
+                  </Link>
+                  <Link
+                    to="/#products"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
+                  </Link>
+                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 opacity-60 cursor-not-allowed">
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
+                  </div>
+                </div>
+              </div>
               
               {/* Resources Dropdown */}
               <div 
@@ -264,10 +395,12 @@ const Product: React.FC = () => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                <div
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
                   onClick={handleToggleDropdown}
                   onKeyDown={handleKeyDown}
+                  role="button"
+                  tabIndex={0}
                   aria-haspopup="true"
                   aria-expanded={showResourcesDropdown}
                 >
@@ -280,7 +413,7 @@ const Product: React.FC = () => {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </div>
                 
                 {/* Invisible hover bridge */}
                 <div className="absolute top-full left-0 w-full h-3" />
@@ -330,43 +463,30 @@ const Product: React.FC = () => {
                 </div>
               </div>
               
-              {/* Comic Book - Moved to right of Resources */}
-              <Link to="/comicbook" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Comic Book</Link>
-            </div>
+              {/* Comic Book */}
+              <Link 
+                to="/comicbook" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Comic Book
+              </Link>
+            </nav>
+            
+            {/* Action Area - Contact + Join Waitlist Button */}
             <div className="flex items-center gap-6">
-              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              <a 
+                href="mailto:stills@caidenscourage.com" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Contact
+              </a>
               <Button
                 variant="primary"
                 size="sm"
-                onClick={handlePhysicalCopyClick}
+                onClick={handleWaitlistClick}
               >
-                Pre-order
+                Join Waitlist
               </Button>
-              
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`md:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
@@ -500,17 +620,6 @@ const Product: React.FC = () => {
                 </div>
               </div>
               
-              <a
-                href="mailto:stills@caidenscourage.com"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Contact</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-              
               {/* CTA Button in Mobile Menu */}
               <div className="px-6 py-6 mt-4">
                 <Button
@@ -552,27 +661,30 @@ const Product: React.FC = () => {
           animationDelay: '2s'
         }}></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-[5%] sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* LEFT COLUMN: Interactive Image Gallery */}
-            <div className="order-2 md:order-1">
-              {/* Main Image */}
+            <div className="order-1 md:order-1 flex flex-col">
+              {/* Main Image - First on both mobile and desktop */}
               <div 
-                className="bg-white rounded-2xl overflow-hidden mb-4 cursor-zoom-in relative"
+                className="bg-white rounded-2xl overflow-hidden mb-4 cursor-default md:cursor-zoom-in relative flex justify-center order-1"
                 onMouseMove={(e) => {
-                  const img = e.currentTarget.querySelector('img') as HTMLImageElement;
-                  if (img && img.style.transform.includes('scale(2.25)')) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    img.style.transformOrigin = `${x}% ${y}%`;
+                  // Only enable on desktop (md and up)
+                  if (window.innerWidth >= 768) {
+                    const img = e.currentTarget.querySelector('img') as HTMLImageElement;
+                    if (img && img.style.transform.includes('scale(2.25)')) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = ((e.clientX - rect.left) / rect.width) * 100;
+                      const y = ((e.clientY - rect.top) / rect.height) * 100;
+                      img.style.transformOrigin = `${x}% ${y}%`;
+                    }
                   }
                 }}
               >
                 <img
                   src={galleryImages[selectedImageIndex].src}
                   alt={galleryImages[selectedImageIndex].alt}
-                  className="w-full h-auto object-cover"
+                  className="w-full h-auto object-cover mx-auto"
                   style={{ 
                     transformOrigin: 'center center',
                     transform: 'scale(1)',
@@ -580,12 +692,18 @@ const Product: React.FC = () => {
                     willChange: 'transform'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(2.25)';
-                    e.currentTarget.style.transformOrigin = 'center center';
+                    // Only enable magnify on desktop (md and up)
+                    if (window.innerWidth >= 768) {
+                      e.currentTarget.style.transform = 'scale(2.25)';
+                      e.currentTarget.style.transformOrigin = 'center center';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.transformOrigin = 'center center';
+                    // Only enable magnify on desktop (md and up)
+                    if (window.innerWidth >= 768) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.transformOrigin = 'center center';
+                    }
                   }}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logoCaiden.png';
@@ -593,8 +711,8 @@ const Product: React.FC = () => {
                 />
               </div>
               
-              {/* Thumbnail Gallery - Horizontal scrollable on mobile */}
-              <div className="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:overflow-visible">
+              {/* Thumbnail Gallery - Below main image on both mobile and desktop */}
+              <div className="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:overflow-visible order-2">
                 {galleryImages.map((image, index) => (
                   <button
                     key={index}
@@ -620,28 +738,28 @@ const Product: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN: Product Info */}
-            <div className="order-1 md:order-2">
+            <div className="order-2 md:order-2">
               {/* Eyebrow */}
-              <div className="mb-3 text-center md:text-left">
+              <div className="mb-3 text-left">
                 <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
                   THE GRAPHIC NOVEL
                 </p>
               </div>
               
               {/* Title */}
-              <h1 className="font-display text-4xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-center md:text-left">
+              <h1 className="font-display text-4xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-left">
                 Caiden's Courage and the Dragon's Nest
               </h1>
               
               {/* Tagline - Secondary */}
-              <p className="text-base text-navy-500 mb-4 font-normal leading-relaxed text-center md:text-left">
-                When the world feels loud, Caiden learns how to lock in.
-                <br className="hidden sm:block" />
-                <span className="block mt-2">Pulled into a hidden realm of ancient guardians and powerful forces, Caiden must learn to trust his instincts, face the noise in his mind, and discover what makes him different is also what makes him brave.</span>
-              </p>
+              <div className="mb-4 text-left">
+                <p className="text-base text-navy-500 font-normal leading-relaxed">
+                  When the world feels loud, Caiden learns how to lock in. Pulled into a hidden realm of ancient guardians and powerful forces, Caiden must learn to trust his instincts, face the noise in his mind, and discover what makes him different is also what makes him brave.
+                </p>
+              </div>
 
               {/* Metadata Pills - Smaller, Softer */}
-              <div className="flex flex-wrap gap-2 mb-10 justify-center md:justify-start">
+              <div className="flex flex-wrap gap-2 mb-10 justify-start">
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
                   Ages 7–12
                 </span>
@@ -657,12 +775,11 @@ const Product: React.FC = () => {
               </div>
 
               {/* CTA Buttons - Side by Side */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-start">
                 <Button
                   variant="primary"
                   size="md"
                   onClick={handlePhysicalCopyClick}
-                  fullWidth
                   className="sm:w-auto sm:flex-none"
                 >
                   Pre-order Physical Copy
@@ -671,7 +788,6 @@ const Product: React.FC = () => {
                   variant="secondary"
                   size="md"
                   onClick={handleDigitalClick}
-                  fullWidth
                   className="sm:w-auto sm:flex-none"
                 >
                   Download Digital Edition
