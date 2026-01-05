@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import Button from '../components/ui/Button';
 
 const Resources: React.FC = () => {
   const navigate = useNavigate();
@@ -52,12 +53,54 @@ const Resources: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const typeParam = params.get('type');
+    const audienceParam = params.get('audience');
+    
     if (typeParam === 'all') {
       setSelectedType('all');
     } else if (typeParam && ['wallpaper', 'coloring', 'worksheet', 'teacher-pack'].includes(typeParam)) {
       setSelectedType(typeParam as ResourceType);
     }
+    
+    if (audienceParam === 'kids') {
+      setSelectedAudience('students');
+    } else if (audienceParam && ['parents', 'teachers', 'all'].includes(audienceParam)) {
+      setSelectedAudience(audienceParam as Audience);
+    }
   }, [location.search]);
+
+  // Handle scroll + highlight when audience filter changes (from URL or dropdown)
+  useEffect(() => {
+    if (location.pathname === '/resources') {
+      const params = new URLSearchParams(location.search);
+      const audienceParam = params.get('audience');
+      
+      // Only scroll/highlight if audience param is present (user clicked dropdown or deep-linked)
+      if (audienceParam) {
+        // Wait for DOM to update, then scroll and highlight
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const el = document.getElementById('resource-results');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              
+              // Remove any existing highlight classes
+              document.querySelectorAll('.section-anchor.anchor-landed').forEach(element => {
+                element.classList.remove('anchor-landed');
+              });
+              
+              // Add highlight animation class
+              el.classList.add('anchor-landed');
+              
+              // Remove class after animation completes
+              setTimeout(() => {
+                el.classList.remove('anchor-landed');
+              }, 1100);
+            }
+          }, 100);
+        });
+      }
+    }
+  }, [location.search, location.pathname]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -111,7 +154,6 @@ const Resources: React.FC = () => {
   };
 
   const handleLogoClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (location.pathname !== '/') {
       navigate('/');
     }
@@ -258,6 +300,7 @@ const Resources: React.FC = () => {
               </Link>
             </div>
             <div className="hidden md:flex items-center gap-8">
+              <Link to="/comicbook" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Comic Book</Link>
               <Link to="/#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</Link>
               <Link to="/#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</Link>
               <Link to="/#products" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Shop</Link>
@@ -290,7 +333,7 @@ const Resources: React.FC = () => {
                 <div className="absolute top-full left-0 w-full h-3" />
                 
                 <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[200px] z-50 transition-all duration-200 ${
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
                     showResourcesDropdown 
                       ? 'opacity-100 visible pointer-events-auto translate-y-0' 
                       : 'opacity-0 invisible pointer-events-none -translate-y-2'
@@ -300,59 +343,49 @@ const Resources: React.FC = () => {
                   onMouseLeave={handleMouseLeave}
                 >
                   <Link
-                    to="/resources?type=all"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium font-semibold border-b border-navy-100"
+                    to="/resources?audience=kids"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    Start Here
+                    <div className="font-semibold text-sm">For Kids</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
                   </Link>
                   <Link
-                    to="/resources?type=wallpaper"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
+                    to="/resources?audience=parents"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    Wallpapers
+                    <div className="font-semibold text-sm">For Parents</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
                   </Link>
-                    <Link
-                      to="/resources?type=coloring"
-                      className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
-                      onClick={() => setShowResourcesDropdown(false)}
-                    >
-                      Coloring Pages
-                    </Link>
-                    <Link
-                      to="/resources?type=worksheet"
-                      className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
-                      onClick={() => setShowResourcesDropdown(false)}
-                    >
-                      SEL Worksheets
-                    </Link>
-                    <Link
-                      to="/resources?type=teacher-pack"
-                      className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
-                      onClick={() => setShowResourcesDropdown(false)}
-                    >
-                      Teacher Packs
-                    </Link>
-                  </div>
+                  <Link
+                    to="/resources?audience=teachers"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">For Teachers</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
+                  </Link>
+                  <Link
+                    to="/resources?audience=all"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">All Resources</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
+                  </Link>
+                </div>
               </div>
-              
-              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
             </div>
-            <div className="flex items-center gap-3">
-              <button
+            <div className="flex items-center gap-6">
+              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleWaitlistClick}
-                className={`text-sm sm:text-base px-6 py-2.5 rounded-full font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 ${isScrolled ? 'bg-orange-500 text-white border-2 border-white hover:bg-orange-600 hover:border-orange-600' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
-                style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08)';
-                }}
               >
                 Join Waitlist
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -375,6 +408,17 @@ const Resources: React.FC = () => {
           {/* Menu Items - Centered */}
           <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
             <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
+              <Link
+                to="/comicbook"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Comic Book</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
               <Link
                 to="/#about"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -429,54 +473,48 @@ const Resources: React.FC = () => {
                   showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 }`}>
                   <Link
-                    to="/resources?type=all"
+                    to="/resources?audience=kids"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Start Here
+                    <div className="font-semibold text-lg">For Kids</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
                   </Link>
                   <Link
-                    to="/resources?type=wallpaper"
+                    to="/resources?audience=parents"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Wallpapers
+                    <div className="font-semibold text-lg">For Parents</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
                   </Link>
                   <Link
-                    to="/resources?type=coloring"
+                    to="/resources?audience=teachers"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Coloring Pages
+                    <div className="font-semibold text-lg">For Teachers</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
                   </Link>
                   <Link
-                    to="/resources?type=worksheet"
+                    to="/resources?audience=all"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
                   >
-                    SEL Worksheets
-                  </Link>
-                  <Link
-                    to="/resources?type=teacher-pack"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
-                  >
-                    Teacher Packs
+                    <div className="font-semibold text-lg">All Resources</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
                   </Link>
                 </div>
               </div>
@@ -494,15 +532,17 @@ const Resources: React.FC = () => {
               
               {/* CTA Button in Mobile Menu */}
               <div className="px-6 py-6 mt-4">
-                <button
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
                   onClick={() => {
                     handleWaitlistClick();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-8 py-5 bg-orange-500 text-white text-xl rounded-full font-bold transition-all duration-300 hover:bg-orange-600 hover:shadow-lg active:scale-95"
                 >
                   Join Waitlist
-                </button>
+                </Button>
               </div>
             </div>
           </nav>
@@ -540,44 +580,36 @@ const Resources: React.FC = () => {
           {/* Audience Filter Buttons */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-navy-700 mb-3">I'm looking for resources for:</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="pill-toggle is-scroll">
               <button
                 onClick={() => setSelectedAudience('all')}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 ${
-                  selectedAudience === 'all'
-                    ? 'bg-orange-500 text-white shadow-md hover:shadow-lg'
-                    : 'bg-white text-navy-500 border-2 border-gray-300 hover:border-orange-500 hover:shadow-sm'
-                }`}
+                className="pill"
+                data-persona="everyone"
+                data-selected={selectedAudience === 'all'}
               >
                 Everyone
               </button>
               <button
                 onClick={() => setSelectedAudience('parents')}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 ${
-                  selectedAudience === 'parents'
-                    ? 'bg-orange-500 text-white shadow-md hover:shadow-lg'
-                    : 'bg-white text-navy-500 border-2 border-gray-300 hover:border-orange-500 hover:shadow-sm'
-                }`}
+                className="pill"
+                data-persona="parents"
+                data-selected={selectedAudience === 'parents'}
               >
                 Parents
               </button>
               <button
                 onClick={() => setSelectedAudience('teachers')}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 ${
-                  selectedAudience === 'teachers'
-                    ? 'bg-orange-500 text-white shadow-md hover:shadow-lg'
-                    : 'bg-white text-navy-500 border-2 border-gray-300 hover:border-orange-500 hover:shadow-sm'
-                }`}
+                className="pill"
+                data-persona="teachers"
+                data-selected={selectedAudience === 'teachers'}
               >
                 Teachers
               </button>
               <button
                 onClick={() => setSelectedAudience('students')}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105 ${
-                  selectedAudience === 'students'
-                    ? 'bg-orange-500 text-white shadow-md hover:shadow-lg'
-                    : 'bg-white text-navy-500 border-2 border-gray-300 hover:border-orange-500 hover:shadow-sm'
-                }`}
+                className="pill"
+                data-persona="kids"
+                data-selected={selectedAudience === 'students'}
               >
                 Students
               </button>
@@ -651,7 +683,8 @@ const Resources: React.FC = () => {
           </p>
         </div>
 
-        {/* Resources Grid */}
+        {/* Resources Grid - Wrapped in anchor div for scroll target */}
+        <div id="resource-results" className="section-anchor">
         <div 
           id="resources-grid"
           data-section="grid"
@@ -677,7 +710,13 @@ const Resources: React.FC = () => {
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-navy-500 text-white rounded-full font-semibold hover:bg-navy-600 hover:shadow-lg hover:scale-105 transition-all duration-300 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
+                  className="btn btn--sm"
+                  style={{
+                    backgroundColor: 'var(--navy-500)',
+                    color: 'white',
+                    border: 'none'
+                  }}
+                  disabled={emailSubmitted}
                 >
                   {emailSubmitted ? '✓ Notified!' : 'Notify Me'}
                 </button>
@@ -772,6 +811,15 @@ const Resources: React.FC = () => {
                         handleDownload(resource.fileUrl, resource.title);
                       }}
                       className="flex-1 px-4 py-2 bg-golden-500 text-navy-500 rounded-full font-semibold hover:bg-golden-600 hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-golden-500 focus:ring-offset-2"
+                      style={{ opacity: 1, backgroundColor: '#F0CE6E' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = '#e8c255';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = '#F0CE6E';
+                      }}
                     >
                       Download
                     </button>
@@ -781,6 +829,7 @@ const Resources: React.FC = () => {
             ))}
           </div>
         )}
+        </div>
         </div>
 
         {/* FAQ / Help Section */}

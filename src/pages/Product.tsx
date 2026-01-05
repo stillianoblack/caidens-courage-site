@@ -1,0 +1,1346 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { getStripePreorderUrl, openExternalUrl } from '../config/externalLinks';
+import Button from '../components/ui/Button';
+
+// Reusable InsideCard Component for "What's Inside" section
+interface InsideCardProps {
+  title: string;
+  bullets: string[];
+  iconType: 'adventure' | 'feelings' | 'confidence' | 'read';
+  helpView: 'kids' | 'parents' | 'teachers';
+}
+
+const InsideCard: React.FC<InsideCardProps> = ({ title, bullets, iconType, helpView }) => {
+  // Color system based on active role
+  const getIconStyles = () => {
+    if (helpView === 'kids') {
+      return {
+        background: 'rgba(37, 99, 235, 0.15)', // brand-blue-600 at 15% opacity (darker for accessibility)
+        iconColor: '#2563eb' // brand-blue-600 (darker for accessibility)
+      };
+    } else if (helpView === 'parents') {
+      return {
+        background: 'rgba(168, 85, 247, 0.15)', // purple-500 at 15% opacity
+        iconColor: '#a855f7' // purple-500
+      };
+    } else if (helpView === 'teachers') {
+      return {
+        background: 'rgba(249, 115, 22, 0.15)', // orange-500 at 15% opacity
+        iconColor: '#f97316' // orange-500
+      };
+    }
+    
+    // Fallback
+    return {
+      background: 'transparent',
+      iconColor: '#6b7280'
+    };
+  };
+
+  const iconStyles = getIconStyles();
+
+  // Render symbolic SVG icon based on card type
+  const renderIcon = () => {
+    const iconColor = iconStyles.iconColor;
+    
+    switch (iconType) {
+      case 'adventure':
+        // Adventure/Journey symbol - compass or map
+        return (
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[65%] h-[65%]">
+            <circle cx="12" cy="12" r="9" stroke={iconColor} strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+            <path d="M12 3 L12 12 L16 16" stroke={iconColor} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="2" fill={iconColor}/>
+          </svg>
+        );
+      case 'feelings':
+        // Emotion/Communication symbol - heart or speech bubble
+        return (
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[65%] h-[65%]">
+            <path d="M12 21 C16.5 17 20 13.5 20 9.5 C20 7 18 5 15.5 5 C14 5 12.5 5.5 12 6.5 C11.5 5.5 10 5 8.5 5 C6 5 4 7 4 9.5 C4 13.5 7.5 17 12 21 Z" 
+                  stroke={iconColor} strokeWidth="1.5" fill={iconColor} fillOpacity="0.1" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 10 C8 10.5 8.5 11 9 11 C9.5 11 10 10.5 10 10" stroke={iconColor} strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+            <path d="M14 10 C14 10.5 14.5 11 15 11 C15.5 11 16 10.5 16 10" stroke={iconColor} strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+            <path d="M9 14 C9.5 14.5 10.5 14.5 11 14" stroke={iconColor} strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        );
+      case 'confidence':
+        // Strength/Shield symbol
+        return (
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[65%] h-[65%]">
+            <path d="M12 2 L4 5 L4 11 C4 16 7 20 12 22 C17 20 20 16 20 11 L20 5 Z" 
+                  stroke={iconColor} strokeWidth="1.5" fill={iconColor} fillOpacity="0.1" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 8 L10 10 L12 12 L14 10 Z" stroke={iconColor} strokeWidth="1.5" fill={iconColor} fillOpacity="0.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 12 L12 16" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        );
+      case 'read':
+        // Book/Backpack symbol
+        return (
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[65%] h-[65%]">
+            <path d="M4 19.5 C4 19.5 5.5 19 7 19 C10.5 19 11.5 20 12 20 C12.5 20 13.5 19 17 19 C18.5 19 20 19.5 20 19.5 L20 4.5 C20 4.5 18.5 5 17 5 C13.5 5 12.5 4 12 4 C11.5 4 10.5 5 7 5 C5.5 5 4 4.5 4 4.5 Z" 
+                  stroke={iconColor} strokeWidth="1.5" fill={iconColor} fillOpacity="0.1" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 4.5 L4 19.5" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M20 4.5 L20 19.5" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M12 4 L12 20" stroke={iconColor} strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 2"/>
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-[18px] sm:rounded-[20px] p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)] relative overflow-hidden">
+      {/* Circular Icon Badge - Top Right with role-based colors */}
+      <div 
+        className="absolute top-3 right-3 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300"
+        style={{
+          backgroundColor: iconStyles.background
+        }}
+      >
+        {renderIcon()}
+      </div>
+      
+      <div className="relative z-10 pr-20 sm:pr-22">
+        {/* Card Title */}
+        <h3 className="font-display text-xl sm:text-[26px] font-bold text-navy-500 mb-3">
+          {title}
+        </h3>
+        
+        {/* Bullet List */}
+        <ul className="space-y-2.5 sm:space-y-3 text-navy-600 text-base sm:text-lg leading-[1.5]">
+          {bullets.map((bullet, index) => (
+            <li key={index} className="flex items-start">
+              <span className="text-navy-400/60 mr-2.5 text-[14px] mt-0.5 flex-shrink-0">•</span>
+              <span>{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const Product: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
+  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
+  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
+
+  // Gallery images - can be expanded later
+  const galleryImages = [
+    {
+      src: "/Courageforeverykid_COMICBOOK.png",
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover"
+    },
+    {
+      src: "/Comic5_Coverpage_header_2.jpg",
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
+    },
+    {
+      src: "/Comic5_Coverpage_header.jpg",
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
+    },
+    {
+      src: "/Caiden'sCourage_SocialImage.JPG", // Placeholder - replace with character art
+      alt: "Character art from Caiden's Courage"
+    }
+  ];
+
+  // Set page title
+  useEffect(() => {
+    document.title = "Caiden's Courage and the Dragon's Nest: The Graphic Novel | Caiden's Courage";
+  }, []);
+
+  // Page-local scroll reset: Only for /comicbook when there's no hash
+  useEffect(() => {
+    // Only scroll to top if there's no hash fragment (preserve anchor navigation)
+    if (!window.location.hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeout) {
+        clearTimeout(closeTimeout);
+      }
+    };
+  }, [closeTimeout]);
+
+  const handleLogoClick = () => {
+    // Navigation handled by Link component
+  };
+
+  const handlePhysicalCopyClick = () => {
+    const stripeUrl = getStripePreorderUrl();
+    if (stripeUrl) return openExternalUrl(stripeUrl);
+  };
+
+  const handleDigitalClick = () => {
+    // TODO: Add digital download link
+    console.log('Digital download coming soon');
+  };
+
+  const handlePreviewClick = () => {
+    // TODO: Add preview pages link
+    console.log('Preview pages coming soon');
+  };
+
+  // Resources dropdown handlers
+  const handleMouseEnter = () => {
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+    setShowResourcesDropdown(true);
+  };
+
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => {
+      setShowResourcesDropdown(false);
+    }, 200);
+    setCloseTimeout(timeout);
+  };
+
+  const handleToggleDropdown = () => {
+    setShowResourcesDropdown(!showResourcesDropdown);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggleDropdown();
+    } else if (e.key === 'Escape') {
+      setShowResourcesDropdown(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-cream font-body">
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center gap-3">
+              <Link 
+                to="/"
+                onClick={handleLogoClick}
+                className="inline-block hover:opacity-80 transition-opacity"
+              >
+                <img 
+                  src="/logoCaiden.png" 
+                  alt="Caiden's Courage" 
+                  className="h-10 sm:h-12 w-auto"
+                />
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center gap-8">
+              <Link to="/#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</Link>
+              <Link to="/#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</Link>
+              <Link to="/#products" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Shop</Link>
+              
+              {/* Resources Dropdown */}
+              <div 
+                className="relative has-dropdown"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                  onClick={handleToggleDropdown}
+                  onKeyDown={handleKeyDown}
+                  aria-haspopup="true"
+                  aria-expanded={showResourcesDropdown}
+                >
+                  Resources
+                  <svg 
+                    className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Invisible hover bridge */}
+                <div className="absolute top-full left-0 w-full h-3" />
+                
+                <div 
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+                    showResourcesDropdown 
+                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
+                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
+                  }`}
+                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <Link
+                    to="/resources?audience=kids"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">For Kids</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
+                  </Link>
+                  <Link
+                    to="/resources?audience=parents"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">For Parents</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
+                  </Link>
+                  <Link
+                    to="/resources?audience=teachers"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">For Teachers</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
+                  </Link>
+                  <Link
+                    to="/resources"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
+                    onClick={() => setShowResourcesDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">All Resources</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Comic Book - Moved to right of Resources */}
+              <Link to="/comicbook" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Comic Book</Link>
+            </div>
+            <div className="flex items-center gap-6">
+              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handlePhysicalCopyClick}
+              >
+                Pre-order
+              </Button>
+              
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`md:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
+                aria-label="Toggle menu"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <svg 
+                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg 
+                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation */}
+      <div 
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 md:hidden transition-opacity duration-300 ${
+          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        {/* Full Screen Menu Panel - Slides from Left */}
+        <div 
+          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Menu Items - Centered */}
+          <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
+            <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
+              <Link
+                to="/comicbook"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Comic Book</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>About</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#characters"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Characters</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#products"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Shop</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              {/* Resources Dropdown in Mobile Menu */}
+              <div className="border-b border-navy-100">
+                <button
+                  onClick={() => setShowMobileResourcesDropdown(!showMobileResourcesDropdown)}
+                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
+                >
+                  <span>Resources</span>
+                  <svg 
+                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileResourcesDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <div className={`overflow-hidden transition-all duration-300 ${
+                  showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                  <Link
+                    to="/resources?audience=kids"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileResourcesDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">For Kids</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
+                  </Link>
+                  <Link
+                    to="/resources?audience=parents"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileResourcesDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">For Parents</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
+                  </Link>
+                  <Link
+                    to="/resources?audience=teachers"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileResourcesDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">For Teachers</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
+                  </Link>
+                  <Link
+                    to="/resources"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileResourcesDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
+                  >
+                    <div className="font-semibold text-lg">All Resources</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
+                  </Link>
+                </div>
+              </div>
+              
+              <a
+                href="mailto:stills@caidenscourage.com"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Contact</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+              
+              {/* CTA Button in Mobile Menu */}
+              <div className="px-6 py-6 mt-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  onClick={() => {
+                    handlePhysicalCopyClick();
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Pre-order
+                </Button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      {/* Section 1: Hero Product Area */}
+      <section className="pb-16 sm:pb-24 bg-white relative overflow-hidden" style={{ paddingTop: '150px' }}>
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '25%',
+          right: '15%',
+          width: '24px',
+          height: '24px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '0s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '30%',
+          left: '18%',
+          width: '20px',
+          height: '20px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #3b82f6, #2563eb)',
+          boxShadow: '0 8px 16px rgba(59, 130, 246, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2s'
+        }}></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
+            {/* LEFT COLUMN: Interactive Image Gallery */}
+            <div className="order-2 md:order-1">
+              {/* Main Image */}
+              <div 
+                className="bg-white rounded-2xl overflow-hidden mb-4 cursor-zoom-in relative"
+                onMouseMove={(e) => {
+                  const img = e.currentTarget.querySelector('img') as HTMLImageElement;
+                  if (img && img.style.transform.includes('scale(2.25)')) {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    img.style.transformOrigin = `${x}% ${y}%`;
+                  }
+                }}
+              >
+                <img
+                  src={galleryImages[selectedImageIndex].src}
+                  alt={galleryImages[selectedImageIndex].alt}
+                  className="w-full h-auto object-cover"
+                  style={{ 
+                    transformOrigin: 'center center',
+                    transform: 'scale(1)',
+                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    willChange: 'transform'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(2.25)';
+                    e.currentTarget.style.transformOrigin = 'center center';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.transformOrigin = 'center center';
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                  }}
+                />
+              </div>
+              
+              {/* Thumbnail Gallery - Horizontal scrollable on mobile */}
+              <div className="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:overflow-visible">
+                {galleryImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all duration-200 flex-shrink-0 ${
+                      selectedImageIndex === index
+                        ? 'border-navy-500 shadow-md scale-105'
+                        : 'border-gray-200 hover:border-navy-300 opacity-70 hover:opacity-100'
+                    }`}
+                    aria-label={`View ${image.alt}`}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Product Info */}
+            <div className="order-1 md:order-2">
+              {/* Eyebrow */}
+              <div className="mb-3 text-center md:text-left">
+                <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
+                  THE GRAPHIC NOVEL
+                </p>
+              </div>
+              
+              {/* Title */}
+              <h1 className="font-display text-4xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-center md:text-left">
+                Caiden's Courage and the Dragon's Nest
+              </h1>
+              
+              {/* Tagline - Secondary */}
+              <p className="text-base text-navy-500 mb-4 font-normal leading-relaxed text-center md:text-left">
+                When the world feels loud, Caiden learns how to lock in.
+                <br className="hidden sm:block" />
+                <span className="block mt-2">Pulled into a hidden realm of ancient guardians and powerful forces, Caiden must learn to trust his instincts, face the noise in his mind, and discover what makes him different is also what makes him brave.</span>
+              </p>
+
+              {/* Metadata Pills - Smaller, Softer */}
+              <div className="flex flex-wrap gap-2 mb-10 justify-center md:justify-start">
+                <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
+                  Ages 7–12
+                </span>
+                <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
+                  Full-Color Comic
+                </span>
+                <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
+                  30+ Pages
+                </span>
+                <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
+                  Print & Digital Friendly
+                </span>
+              </div>
+
+              {/* CTA Buttons - Side by Side */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handlePhysicalCopyClick}
+                  fullWidth
+                  className="sm:w-auto sm:flex-none"
+                >
+                  Pre-order Physical Copy
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={handleDigitalClick}
+                  fullWidth
+                  className="sm:w-auto sm:flex-none"
+                >
+                  Download Digital Edition
+                </Button>
+              </div>
+
+              {/* Tertiary CTA - Subtle */}
+              <button
+                onClick={handlePreviewClick}
+                className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+              >
+                Preview Pages
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 2: This Story Helps With - NOW THE ONLY STORY SECTION */}
+      <section className="py-16 sm:py-24 bg-cream relative overflow-hidden">
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '12%',
+          left: '12%',
+          width: '22px',
+          height: '22px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '0s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '28%',
+          right: '18%',
+          width: '26px',
+          height: '26px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #3b82f6, #2563eb)',
+          boxShadow: '0 8px 16px rgba(59, 130, 246, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '1.5s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '20%',
+          left: '15%',
+          width: '20px',
+          height: '20px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), #facc15, #eab308)',
+          boxShadow: '0 8px 16px rgba(250, 204, 21, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '3s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '52%',
+          right: '14%',
+          width: '18px',
+          height: '18px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #a855f7, #9333ea)',
+          boxShadow: '0 8px 16px rgba(168, 85, 247, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '16%',
+          right: '20%',
+          width: '24px',
+          height: '24px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '4s'
+        }}></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Eyebrow - Small, uppercase, letter-spaced, muted color */}
+          <div className="text-center mb-3">
+            <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
+              A STORY FOR KIDS WHO THINK DIFFERENTLY
+            </p>
+          </div>
+
+          {/* Main Headline */}
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-8 text-center">
+            This Story Helps With…
+          </h2>
+
+          {/* Toggle */}
+          <div className="flex justify-center mb-8 md:mb-12 overflow-x-auto">
+            <div className="pill-toggle is-scroll">
+              <button
+                onClick={() => setHelpView('kids')}
+                className="pill"
+                data-persona="kids"
+                data-selected={helpView === 'kids'}
+              >
+                For Kids
+              </button>
+              <button
+                onClick={() => setHelpView('parents')}
+                className="pill"
+                data-persona="parents"
+                data-selected={helpView === 'parents'}
+              >
+                For Parents
+              </button>
+              <button
+                onClick={() => setHelpView('teachers')}
+                className="pill"
+                data-persona="teachers"
+                data-selected={helpView === 'teachers'}
+              >
+                For Teachers
+              </button>
+            </div>
+          </div>
+
+          {/* Content Layout: Desktop - Image Left, Content Right | Mobile - Stack (toggle -> image -> bullets) */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+            {/* Image - Mobile: Below toggle, Desktop: Left */}
+            <div className="order-1 md:order-1 flex justify-center">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <img
+                  src="/Caiden'sCourage_SocialImage.JPG"
+                  alt="Caiden from Caiden's Courage"
+                  className="w-full h-auto object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Content - Mobile: Below image, Desktop: Right */}
+            <div className="order-2 md:order-2">
+              {/* FOR KIDS Content (Blue) */}
+              {helpView === 'kids' && (
+                <div className="space-y-4 text-left">
+                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
+                    What Kids Learn From This Story
+                  </h3>
+                  <ul className="list-none space-y-3">
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                        Understanding big feelings
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                        How my brain works
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                        Finding focus my way
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                        Believing in myself
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                        Being brave when things feel hard
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {/* FOR PARENTS Content (Purple) */}
+              {helpView === 'parents' && (
+                <div className="space-y-4 text-left">
+                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
+                    What Kids Learn From This Story
+                  </h3>
+                  <ul className="list-none space-y-3">
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
+                        Emotional awareness and self-regulation
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
+                        Confidence for children with ADHD
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
+                        Positive representation of neurodiversity
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
+                        Language to talk about focus and overwhelm
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
+                        A story kids actually want to read
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {/* FOR TEACHERS Content (Orange) */}
+              {helpView === 'teachers' && (
+                <div className="space-y-4 text-left">
+                  <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
+                    How This Book Supports Learning
+                  </h3>
+                  <ul className="list-none space-y-3">
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
+                        Social-emotional learning (SEL) support
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
+                        Classroom discussion starter
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
+                        Neurodiversity-affirming content
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
+                        Suitable for grades 2–6
+                      </span>
+                    </li>
+                    <li>
+                      <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
+                        Works for independent or group reading
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3: What's Inside */}
+      <section className="py-12 sm:py-20 bg-cream relative overflow-hidden">
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '18%',
+          right: '20%',
+          width: '24px',
+          height: '24px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #facc15, #eab308)',
+          boxShadow: '0 8px 16px rgba(250, 204, 21, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '0.5s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '22%',
+          left: '22%',
+          width: '20px',
+          height: '20px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #3b82f6, #2563eb)',
+          boxShadow: '0 8px 16px rgba(59, 130, 246, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2.5s'
+        }}></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Eyebrow */}
+          <div className="text-center mb-3">
+            <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
+              WHAT YOU'LL FIND INSIDE
+            </p>
+          </div>
+
+          {/* Main Headline */}
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 text-center">
+            What's Inside the Book
+          </h2>
+
+          {/* Subtitle */}
+          <p className="text-sm sm:text-base text-navy-400 text-center mb-10 sm:mb-12">
+            A quick peek at what kids will experience.
+          </p>
+
+          {/* Feature Cards Grid - 2x2 on desktop, stack on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <InsideCard
+              title="A Big Adventure"
+              bullets={[
+                "Full-color graphic novel (30+ pages)",
+                "Fantasy, friendship, and courage",
+                "A story kids actually want to finish"
+              ]}
+              iconType="adventure"
+              helpView={helpView}
+            />
+            <InsideCard
+              title="Big Feelings, Explained"
+              bullets={[
+                "Emotions kids recognize",
+                "Language for focus and overwhelm",
+                "Gentle moments that help kids feel seen"
+              ]}
+              iconType="feelings"
+              helpView={helpView}
+            />
+            <InsideCard
+              title="Built for Confidence"
+              bullets={[
+                "Celebrates neurodiverse minds",
+                "Shows strength in being different",
+                "Encourages kids to trust how they work"
+              ]}
+              iconType="confidence"
+              helpView={helpView}
+            />
+            <InsideCard
+              title="Read It Anywhere"
+              bullets={[
+                "Great for home reading",
+                "Perfect for classrooms",
+                "Works solo or together"
+              ]}
+              iconType="read"
+              helpView={helpView}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4: Reviews */}
+      <section className="py-12 sm:py-20 bg-cream relative overflow-hidden">
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '20%',
+          left: '18%',
+          width: '22px',
+          height: '22px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '1s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '24%',
+          right: '20%',
+          width: '18px',
+          height: '18px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #a855f7, #9333ea)',
+          boxShadow: '0 8px 16px rgba(168, 85, 247, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2.5s'
+        }}></div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Eyebrow */}
+          <div className="text-center mb-3">
+            <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
+              FROM PARENTS, CAREGIVERS & EDUCATORS
+            </p>
+          </div>
+
+          {/* Main Headline */}
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 text-center">
+            What Families Are Saying
+          </h2>
+
+          {/* Subhead */}
+          <p className="text-sm sm:text-base text-navy-400 text-center mb-10 sm:mb-12">
+            Real words from parents, educators, and creators discovering Caiden's Courage.
+          </p>
+
+          {/* Testimonials Grid */}
+          <div className="space-y-5 sm:space-y-6">
+            {/* Testimonial 1 - Slightly left-aligned on desktop */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "My child finally saw themselves in a character. That alone made this worth it."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — Parent of a 9-year-old
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 2 - Slightly right-aligned on desktop */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:ml-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "This opened up conversations about focus and feelings we couldn't have before."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — 3rd Grade Teacher
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 3 - Centered as soft closing moment */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "I met a kid at Barnes & Noble who couldn't wait to read this. He picked it up on his own and asked if he could start right there."
+                </p>
+                <p className="text-navy-400/70 text-xs sm:text-sm mt-3">
+                  — From a Barnes & Noble moment
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 4 - New testimonial */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "My son is self-taught and loves to draw, and seeing your work made him light up. He immediately wanted to know how it was made and couldn't stop asking questions. It's rare to find something that sparks both creativity and confidence like this."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — Parent of a 10-year-old
+                </p>
+              </div>
+            </div>
+
+            <p className="text-center text-navy-400 text-sm italic pt-2">
+              (More reviews coming as the Courage community grows.)
+            </p>
+          </div>
+
+          {/* CTA Block */}
+          <div className="mt-10 sm:mt-12 mb-8 sm:mb-10">
+            <h3 className="font-display text-xl sm:text-2xl font-semibold text-navy-500 mb-3 text-center">
+              Want to share your experience?
+            </h3>
+            <p className="text-sm sm:text-base text-navy-400 text-center mb-6 max-w-2xl mx-auto">
+              Parents, caregivers, and educators — your words help other families discover Caiden's Courage.
+            </p>
+            
+            {/* Prompt Container */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm max-w-2xl mx-auto mb-6">
+              <ul className="space-y-3 text-navy-600 text-sm sm:text-base leading-relaxed">
+                <li className="flex items-start">
+                  <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
+                  <span>What moment made your child or student feel seen or understood?</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
+                  <span>Did this story open up new conversations about feelings or focus?</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
+                  <span>How did it inspire creativity or confidence?</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
+                  <span>Where do you imagine this being used most? (home, classroom, library, etc.)</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
+                  <span>Who would you recommend this for?</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Primary Email CTA Block */}
+            <div className="max-w-2xl mx-auto">
+              <a 
+                href="mailto:hello@caidenscourage.com"
+                className="flex items-center justify-center gap-3 bg-white/80 rounded-full px-6 py-4 sm:px-8 sm:py-5 shadow-sm hover:shadow-md transition-all duration-200 group"
+              >
+                {/* Envelope Icon */}
+                <svg 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-navy-500 group-hover:text-navy-600 transition-colors"
+                >
+                  <path 
+                    d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                  <path 
+                    d="M22 6L12 13L2 6" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="text-navy-600 font-medium text-lg sm:text-xl group-hover:text-navy-700 transition-colors">
+                  hello@caidenscourage.com
+                </span>
+              </a>
+              <p className="text-navy-400 text-xs sm:text-sm mt-3 text-center">
+                Short notes are perfect — even one sentence helps.
+              </p>
+            </div>
+          </div>
+
+          {/* Soft Divider */}
+          <div className="mt-12 sm:mt-16 mb-8 sm:mb-10">
+            <div className="h-px bg-navy-200/40 max-w-2xl mx-auto"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Related Items */}
+      <section className="py-16 sm:py-24 bg-white relative overflow-hidden">
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '22%',
+          left: '16%',
+          width: '24px',
+          height: '24px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #a855f7, #9333ea)',
+          boxShadow: '0 8px 16px rgba(168, 85, 247, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '0.5s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '26%',
+          right: '18%',
+          width: '20px',
+          height: '20px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2.5s'
+        }}></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 text-center">
+            You May Also Like
+          </h2>
+          <p className="text-sm sm:text-base text-navy-400/75 text-center mb-10 sm:mb-12">
+            Free activities and resources to keep the story going.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Caiden Coloring Pages */}
+            <Link
+              to="/resources?type=coloring&audience=kids"
+              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
+            >
+              <div className="aspect-square bg-navy-100 relative overflow-hidden">
+                <img
+                  src="/coloringpage_Caiden.png"
+                  alt="Caiden Coloring Pages"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                  }}
+                />
+              </div>
+              <div className="px-5 pt-5 pb-6 flex flex-col flex-grow min-h-[140px]">
+                <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
+                  Caiden Coloring Pages
+                </h3>
+                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                  Explore
+                </span>
+              </div>
+            </Link>
+
+            {/* Caiden Desktop Wallpaper */}
+            <Link
+              to="/resources?type=wallpaper&audience=kids"
+              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
+            >
+              <div className="aspect-square bg-navy-100 relative overflow-hidden">
+                <img
+                  src="/CoolCaiden_header.png"
+                  alt="Caiden Desktop Wallpaper"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                  }}
+                />
+              </div>
+              <div className="px-5 pt-5 pb-6 flex flex-col flex-grow min-h-[140px]">
+                <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
+                  Caiden Desktop Wallpaper
+                </h3>
+                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                  Explore
+                </span>
+              </div>
+            </Link>
+
+            {/* Emotional Awareness Worksheet */}
+            <Link
+              to="/resources?type=worksheet&audience=teachers"
+              className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
+            >
+              <div className="aspect-square bg-navy-100 relative overflow-hidden">
+                <img
+                  src="/SELThubmails.jpg"
+                  alt="Emotional Awareness Worksheet"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                  }}
+                />
+              </div>
+              <div className="px-5 pt-5 pb-6 flex flex-col flex-grow min-h-[140px]">
+                <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
+                  Emotional Awareness Worksheet
+                </h3>
+                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                  Explore
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer - Reuse from Home page */}
+      <footer className="bg-navy-500 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
+              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
+              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
+              <Link to="/#about" className="text-white/70 hover:text-white transition-colors">About</Link>
+              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
+              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
+              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
+            </div>
+            <p className="text-white/80 mb-4">
+              © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
+            </p>
+            <p className="text-white/60 text-sm">
+              Courage looks like doing things your own way.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Product;
+

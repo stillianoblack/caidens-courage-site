@@ -47,6 +47,21 @@ module.exports = {
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
+        },
+        // Accessibility: Muted text token
+        'text-muted': '#4b5563', // gray-600 - passes WCAG AA on white
+        // Darkened blue for accessibility (replaces light blue-300/400/500)
+        'brand-blue': {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd', // Accessible light blue
+          400: '#60a5fa', // Accessible medium blue
+          500: '#3b82f6', // Accessible primary blue (darker than default blue-500)
+          600: '#2563eb', // Accessible dark blue
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         }
       },
       fontFamily: {
@@ -62,8 +77,10 @@ module.exports = {
       },
       keyframes: {
         float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' },
+          '0%, 100%': { transform: 'translateY(0px) translateX(0px)' },
+          '25%': { transform: 'translateY(-15px) translateX(8px)' },
+          '50%': { transform: 'translateY(-20px) translateX(-5px)' },
+          '75%': { transform: 'translateY(-10px) translateX(10px)' },
         },
         'pulse-soft': {
           '0%, 100%': { opacity: '1' },

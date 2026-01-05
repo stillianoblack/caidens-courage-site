@@ -27,6 +27,34 @@
   --golden-500: #F0CE6E;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
   --cream: #faf9f7;
+  
+  /* Persona brand colors */
+  --persona-kids: #2563eb; /* brand-blue-600 */
+  --persona-kids-dark: #1e40af; /* brand-blue-700 */
+  --persona-kids-light: #dbeafe; /* brand-blue-100 */
+  --persona-parents: #a855f7; /* purple-500 */
+  --persona-parents-dark: #9333ea; /* purple-600 */
+  --persona-parents-light: #f3e8ff; /* purple-50 */
+  --persona-teachers: #f97316; /* orange-500 */
+  --persona-teachers-dark: #ea580c; /* orange-600 */
+  --persona-teachers-light: #ffedd5; /* orange-50 */
+  --persona-students: #2563eb; /* Same as kids */
+  --persona-everyone: #243E70; /* navy-500 */
+  
+  /* Accessibility: Muted text token */
+  --text-muted: #4b5563; /* gray-600 - passes WCAG AA on white */
+  
+  /* Pill Toggle System */
+  --pill-radius: 9999px;
+  --pill-border: rgba(35, 55, 90, 0.22);
+  --pill-text: #23375A;
+  --pill-bg: #ffffff;
+  
+  /* Pill persona colors (using brand colors) */
+  --pill-persona-kids: #2F5BFF;
+  --pill-persona-parents: #8B5CF6;
+  --pill-persona-teachers: #F97316;
+  --pill-persona-everyone: #23375A;
 }
 
 * {
@@ -309,23 +337,189 @@ code {
   widows: 2;
 }
 
-/* Button styles - updated to golden yellow with dark text */
+/* Global Button System - Standardized */
+/* Base button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 9999px;
+  
+  /* Smooth expand hover animation - NO opacity transitions */
+  transition: transform 200ms ease-out, background-color 200ms ease-out, 
+              border-color 200ms ease-out, box-shadow 200ms ease-out;
+  /* Explicitly exclude opacity from transitions to prevent transparency */
+  transition-property: transform, background-color, border-color, box-shadow;
+  
+  /* Default shadow */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  /* Focus ring - accessible */
+  outline: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--navy-500);
+  outline-offset: 2px;
+  outline-style: solid;
+}
+
+.btn:disabled,
+.btn.btn--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size variants - Standard padding and min-height */
+.btn--sm {
+  padding: 0.75rem 1.5rem; /* py-3 px-6 */
+  min-height: 44px;
+  font-size: 0.875rem;
+}
+
+.btn--md {
+  padding: 1rem 2rem; /* py-4 px-8 */
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .btn--md {
+    padding: 0.75rem 1.5rem; /* py-3 px-6 */
+    min-height: 44px;
+    font-size: 0.9375rem;
+  }
+}
+
+.btn--lg {
+  padding: 1rem 2rem; /* py-4 px-8 */
+  min-height: 52px;
+  font-size: 1.125rem;
+}
+
+@media (max-width: 640px) {
+  .btn--lg {
+    padding: 0.75rem 1.5rem; /* py-3 px-6 */
+    min-height: 44px;
+    font-size: 1rem;
+  }
+}
+
+/* Width variant */
+.btn--full {
+  width: 100%;
+}
+
+/* Primary button variant - Yellow filled pill - FULLY OPAQUE ALWAYS */
+.btn--primary {
+  background-color: #F0CE6E !important; /* Direct hex value - fully opaque yellow */
+  color: var(--navy-500);
+  border: none;
+  opacity: 1 !important; /* Explicitly enforce full opacity */
+  /* Remove any potential opacity transitions */
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+.btn--primary:hover:not(:disabled):not(.btn--disabled) {
+  background-color: #e8c255 !important; /* Direct hex value - deeper yellow, fully opaque */
+  opacity: 1 !important; /* Force full opacity on hover */
+  transform: scale(1.04);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Explicitly prevent any opacity changes */
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+.btn--primary:active:not(:disabled):not(.btn--disabled) {
+  background-color: #e8c255 !important; /* Keep deeper yellow on active */
+  opacity: 1 !important; /* Force full opacity on active */
+  transform: scale(0.98);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+.btn--primary:focus-visible {
+  background-color: #F0CE6E !important; /* Keep yellow on focus */
+  opacity: 1 !important;
+}
+
+/* Prevent any parent group-hover effects from affecting primary buttons */
+.btn--primary,
+.btn--primary * {
+  opacity: 1 !important;
+}
+
+/* Ensure any buttons using bg-golden-500 directly are also fully opaque */
+button.bg-golden-500,
+a.bg-golden-500,
+.bg-golden-500.rounded-full {
+  opacity: 1 !important;
+  background-color: #F0CE6E !important;
+}
+
+button.bg-golden-500:hover,
+a.bg-golden-500:hover,
+.bg-golden-500.rounded-full:hover {
+  opacity: 1 !important;
+  background-color: #e8c255 !important;
+}
+
+/* Secondary button variant - Navy outline pill */
+.btn--secondary {
+  background-color: transparent;
+  color: var(--navy-500);
+  border: 2px solid var(--navy-500);
+}
+
+.btn--secondary:hover:not(:disabled):not(.btn--disabled) {
+  background-color: rgba(36, 62, 112, 0.05); /* Subtle navy tint (5% opacity) */
+  border-color: var(--navy-500); /* Keep border navy */
+  transform: scale(1.04);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn--secondary:active:not(:disabled):not(.btn--disabled) {
+  transform: scale(0.98);
+  background-color: rgba(36, 62, 112, 0.08);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Navy button variant (for form submits and special cases) */
+.btn[style*="--navy-500"],
+.btn[style*="navy-500"] {
+  background-color: var(--navy-500) !important;
+  color: white !important;
+}
+
+.btn[style*="--navy-500"]:hover:not(:disabled):not(.btn--disabled),
+.btn[style*="navy-500"]:hover:not(:disabled):not(.btn--disabled) {
+  background-color: var(--navy-600) !important;
+  transform: scale(1.04);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn[style*="--navy-500"]:active:not(:disabled):not(.btn--disabled),
+.btn[style*="navy-500"]:active:not(:disabled):not(.btn--disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Legacy button classes for backward compatibility */
 .btn-primary {
-  @apply px-8 py-3 rounded-full bg-golden-500 text-navy-500 font-bold 
-         shadow-golden transition-all duration-300 hover:bg-golden-600 
-         hover:shadow-xl hover:scale-105 active:scale-95;
+  @apply btn btn--primary btn--md;
 }
 
 .btn-secondary {
-  @apply px-8 py-3 rounded-full bg-white text-navy-500 font-semibold 
-         border-2 border-navy-500 transition-all duration-300 
-         hover:bg-navy-500 hover:text-white hover:shadow-xl hover:scale-105 active:scale-95;
-}
-
-.btn-nav {
-  @apply px-6 py-2.5 rounded-full bg-golden-500 text-navy-500 font-bold 
-         transition-all duration-300 hover:bg-golden-600 
-         shadow-md hover:shadow-lg active:scale-95;
+  @apply btn btn--secondary btn--md;
 }
 
 /* Section dividers */
@@ -455,5 +649,132 @@ code {
 @media (max-width: 768px) {
   .has-dropdown .dropdown-menu {
     position: absolute;
+  }
+}
+
+/* Resources page anchor offset and highlight animation */
+:root {
+  --nav-offset: 50px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-offset: 64px;
+  }
+}
+
+.section-anchor {
+  scroll-margin-top: var(--nav-offset, 50px);
+}
+
+@keyframes anchorPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 204, 77, 0.55); background-color: rgba(255, 204, 77, 0.10); }
+  60%  { box-shadow: 0 0 0 10px rgba(255, 204, 77, 0.00); background-color: rgba(255, 204, 77, 0.00); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 204, 77, 0.00); background-color: transparent; }
+}
+
+.section-anchor.anchor-landed {
+  border-radius: 16px;
+  animation: anchorPulse 900ms ease-out 1;
+}
+
+/* Pill Toggle System - Global Branded Design */
+
+.pill-toggle {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pill-toggle.is-scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+.pill {
+  appearance: none;
+  border: 1.5px solid var(--pill-border);
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  border-radius: var(--pill-radius);
+  padding: 12px 18px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  box-shadow: 0 6px 18px rgba(35, 55, 90, 0.08);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pill:hover {
+  box-shadow: 0 10px 24px rgba(35, 55, 90, 0.14);
+}
+
+.pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(47, 91, 255, 0.3), 0 10px 24px rgba(35, 55, 90, 0.14);
+}
+
+.pill[data-selected="true"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 6px 18px rgba(35, 55, 90, 0.08);
+}
+
+/* Selected states */
+.pill[data-selected="true"][data-persona="kids"] {
+  background: var(--pill-persona-kids);
+  border-color: transparent;
+  color: #fff;
+}
+
+.pill[data-selected="true"][data-persona="parents"] {
+  background: var(--pill-persona-parents);
+  border-color: transparent;
+  color: #fff;
+}
+
+.pill[data-selected="true"][data-persona="teachers"] {
+  background: var(--pill-persona-teachers);
+  border-color: transparent;
+  color: #fff;
+}
+
+.pill[data-selected="true"][data-persona="everyone"] {
+  background: var(--pill-persona-everyone);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Hover tints for unselected */
+.pill[data-selected="false"][data-persona="kids"]:hover {
+  background: rgba(47, 91, 255, 0.10);
+  border-color: rgba(47, 91, 255, 0.30);
+}
+
+.pill[data-selected="false"][data-persona="parents"]:hover {
+  background: rgba(139, 92, 246, 0.10);
+  border-color: rgba(139, 92, 246, 0.30);
+}
+
+.pill[data-selected="false"][data-persona="teachers"]:hover {
+  background: rgba(249, 115, 22, 0.10);
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.pill[data-selected="false"][data-persona="everyone"]:hover {
+  background: rgba(35, 55, 90, 0.06);
+  border-color: rgba(35, 55, 90, 0.28);
+}
+
+/* Mobile sizing */
+@media (max-width: 640px) {
+  .pill {
+    padding: 10px 14px;
+    font-size: 14px;
   }
 }

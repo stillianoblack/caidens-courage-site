@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import Button from '../components/ui/Button';
 
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
@@ -77,10 +78,10 @@ const features = [
     icon: StrengthIcon,
     title: 'Emotional Courage',
     description: "Through challenges and big feelings, Caiden learns to understand his emotions, communicate openly, and show up bravely in everyday moments.",
-    bgGradient: 'from-blue-400/20 via-cyan-400/15 to-sky-400/20',
-    glowColor: 'rgba(59, 130, 246, 0.4)',
-    borderColor: 'border-blue-300/30',
-    iconColor: 'text-blue-500',
+    bgGradient: 'from-brand-blue-400/20 via-brand-blue-400/15 to-brand-blue-500/20',
+    glowColor: 'rgba(37, 99, 235, 0.4)',
+    borderColor: 'border-brand-blue-400/30',
+    iconColor: 'text-brand-blue-600',
   },
   {
     icon: StarIcon,
@@ -169,19 +170,25 @@ const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [rotatingWord, setRotatingWord] = useState(0);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
+  const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
+  const [showMobileShopDropdown, setShowMobileShopDropdown] = useState(false);
   const words = ['Superpower', 'Strength', 'Courage', 'Power'];
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (closeTimeout) {
         clearTimeout(closeTimeout);
       }
+      if (shopCloseTimeout) {
+        clearTimeout(shopCloseTimeout);
+      }
     };
-  }, [closeTimeout]);
+  }, [closeTimeout, shopCloseTimeout]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -194,6 +201,19 @@ const Home = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showResourcesDropdown]);
+
+  // Handle hash anchor scrolling (for homepage section deep-links)
+  useEffect(() => {
+    if (location.pathname === '/' && location.hash) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.querySelector(location.hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [location.hash, location.pathname]);
 
   // Handle click outside to close dropdown (mobile)
   useEffect(() => {
@@ -302,7 +322,6 @@ const Home = () => {
   };
 
   const handleLogoClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (location.pathname !== '/') {
       navigate('/');
     }
@@ -353,9 +372,100 @@ const Home = () => {
               </Link>
             </div>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</a>
-              <a href="#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</a>
-              <a href="#products" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Shop</a>
+              <Link to="/#about" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>About</Link>
+              <Link to="/#characters" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Characters</Link>
+              
+              {/* Shop Dropdown */}
+              <div 
+                className="relative has-dropdown"
+                onMouseEnter={() => {
+                  if (shopCloseTimeout) {
+                    clearTimeout(shopCloseTimeout);
+                    setShopCloseTimeout(null);
+                  }
+                  setShowShopDropdown(true);
+                }}
+                onMouseLeave={() => {
+                  const timeout = setTimeout(() => {
+                    setShowShopDropdown(false);
+                  }, 200);
+                  setShopCloseTimeout(timeout);
+                }}
+              >
+                <div
+                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowShopDropdown(!showShopDropdown);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setShowShopDropdown(!showShopDropdown);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-haspopup="true"
+                  aria-expanded={showShopDropdown}
+                >
+                  Shop
+                  <svg 
+                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                
+                {/* Invisible hover bridge */}
+                <div className="absolute top-full left-0 w-full h-3" />
+                
+                <div 
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+                    showShopDropdown 
+                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
+                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
+                  }`}
+                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                  onMouseEnter={() => {
+                    if (shopCloseTimeout) {
+                      clearTimeout(shopCloseTimeout);
+                      setShopCloseTimeout(null);
+                    }
+                    setShowShopDropdown(true);
+                  }}
+                  onMouseLeave={() => {
+                    const timeout = setTimeout(() => {
+                      setShowShopDropdown(false);
+                    }, 200);
+                    setShopCloseTimeout(timeout);
+                  }}
+                >
+                  <Link
+                    to="/comicbook"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">Comic Book</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
+                  </Link>
+                  <Link
+                    to="/#products"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                    onClick={() => setShowShopDropdown(false)}
+                  >
+                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
+                  </Link>
+                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors opacity-60 cursor-not-allowed">
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
+                  </div>
+                </div>
+              </div>
               
               {/* Resources Dropdown */}
               <div 
@@ -406,7 +516,7 @@ const Home = () => {
                 <div className="absolute top-full left-0 w-full h-3" />
                 
                 <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[200px] z-50 transition-all duration-200 ${
+                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
                     showResourcesDropdown 
                       ? 'opacity-100 visible pointer-events-auto translate-y-0' 
                       : 'opacity-0 invisible pointer-events-none -translate-y-2'
@@ -427,59 +537,52 @@ const Home = () => {
                   }}
                 >
                   <Link
-                    to="/resources?type=all"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium font-semibold border-b border-navy-100"
+                    to="/resources?audience=kids"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    Start Here
+                    <div className="font-semibold text-sm">For Kids</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
                   </Link>
                   <Link
-                    to="/resources?type=wallpaper"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
+                    to="/resources?audience=parents"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    Wallpapers
+                    <div className="font-semibold text-sm">For Parents</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
                   </Link>
                   <Link
-                    to="/resources?type=coloring"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
+                    to="/resources?audience=teachers"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    Coloring Pages
+                    <div className="font-semibold text-sm">For Teachers</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
                   </Link>
                   <Link
-                    to="/resources?type=worksheet"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
+                    to="/resources"
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
-                    SEL Worksheets
-                  </Link>
-                  <Link
-                    to="/resources?type=teacher-pack"
-                    className="block w-full text-left px-4 py-2 text-navy-500 hover:bg-navy-50 transition-colors text-sm font-medium"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    Teacher Packs
+                    <div className="font-semibold text-sm">All Resources</div>
+                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
                   </Link>
                 </div>
               </div>
               
-              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              {/* Comic Book - Moved to right of Resources */}
+              <Link to="/comicbook" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Comic Book</Link>
             </div>
-            <div className="flex items-center gap-3">
-              <button
+            <div className="flex items-center gap-6">
+              <a href="mailto:stills@caidenscourage.com" className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}>Contact</a>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleWaitlistClick}
-                className={`text-sm sm:text-base px-6 py-2.5 rounded-full font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 ${isScrolled ? 'bg-orange-500 text-white border-2 border-white hover:bg-orange-600 hover:border-orange-600' : 'bg-orange-500 text-white hover:bg-orange-600'}`}
-                style={{ boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08)';
-                }}
               >
                 Join Waitlist
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -502,8 +605,19 @@ const Home = () => {
           {/* Menu Items - Centered */}
           <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
             <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
-              <a
-                href="#about"
+              <Link
+                to="/comicbook"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Comic Book</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#about"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
@@ -511,10 +625,10 @@ const Home = () => {
                 <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
               
-              <a
-                href="#characters"
+              <Link
+                to="/#characters"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
@@ -522,18 +636,56 @@ const Home = () => {
                 <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
               
-              <a
-                href="#products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Shop</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
+              {/* Shop Dropdown in Mobile Menu */}
+              <div className="border-b border-navy-100">
+                <button
+                  onClick={() => setShowMobileShopDropdown(!showMobileShopDropdown)}
+                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
+                >
+                  <span>Shop</span>
+                  <svg 
+                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileShopDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <div className={`overflow-hidden transition-all duration-300 ${
+                  showMobileShopDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                  <Link
+                    to="/comicbook"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileShopDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">Comic Book</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
+                  </Link>
+                  <Link
+                    to="/#products"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileShopDropdown(false);
+                    }}
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">T-shirts</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
+                  </Link>
+                  <div className="block px-12 py-4 text-navy-500 opacity-60 cursor-not-allowed">
+                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">(Coming soon)</span></div>
+                    <div className="text-sm text-navy-400 mt-0.5">Soft companions for your journey</div>
+                  </div>
+                </div>
+              </div>
               
               {/* Resources Dropdown in Mobile Menu */}
               <div className="border-b border-navy-100">
@@ -556,54 +708,48 @@ const Home = () => {
                   showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 }`}>
                   <Link
-                    to="/resources?type=all"
+                    to="/resources?audience=kids"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Start Here
+                    <div className="font-semibold text-lg">For Kids</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
                   </Link>
                   <Link
-                    to="/resources?type=wallpaper"
+                    to="/resources?audience=parents"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Wallpapers
+                    <div className="font-semibold text-lg">For Parents</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
                   </Link>
                   <Link
-                    to="/resources?type=coloring"
+                    to="/resources?audience=teachers"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    Coloring Pages
+                    <div className="font-semibold text-lg">For Teachers</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
                   </Link>
                   <Link
-                    to="/resources?type=worksheet"
+                    to="/resources"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileResourcesDropdown(false);
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
+                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
                   >
-                    SEL Worksheets
-                  </Link>
-                  <Link
-                    to="/resources?type=teacher-pack"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors text-lg font-medium"
-                  >
-                    Teacher Packs
+                    <div className="font-semibold text-lg">All Resources</div>
+                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
                   </Link>
                 </div>
               </div>
@@ -621,15 +767,17 @@ const Home = () => {
               
               {/* CTA Button in Mobile Menu */}
               <div className="px-6 py-6 mt-4">
-                <button
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
                   onClick={() => {
                     handleWaitlistClick();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-8 py-5 bg-orange-500 text-white text-xl rounded-full font-bold transition-all duration-300 hover:bg-orange-600 hover:shadow-lg active:scale-95"
                 >
                   Join Waitlist
-                </button>
+                </Button>
               </div>
             </div>
           </nav>
@@ -690,12 +838,12 @@ const Home = () => {
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Hero image - First on mobile, right side on desktop */}
               <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2 w-full">
-                <div className="relative w-full max-w-xs lg:max-w-md xl:max-w-lg">
+                <div className="relative w-full max-w-sm lg:max-w-xl xl:max-w-2xl" style={{ transform: 'scale(1.25)' }}>
                   {/* Geometric shape behind image - blue and larger to cover body, visible on all devices */}
-                  <div className="geometric-shape shape-blob-blue w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] xl:w-[32rem] xl:h-[32rem] absolute -z-10" style={{ top: '50%', left: '50%' }} />
+                  <div className="geometric-shape shape-blob-blue w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] xl:w-[32rem] xl:h-[32rem] absolute -z-10" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) scale(1.25)' }} />
                   
                   <img
-                    src="/Courageforeverykid_header_ADHD.png"
+                    src="/Courageforeverykid_COMICBOOK.png"
                     alt="Caiden - The Boy Who Turned ADHD Into His Superpower"
                     className="w-full h-auto object-contain drop-shadow-lg relative z-10 image-geometric-mask"
                   />
@@ -718,19 +866,22 @@ const Home = () => {
                 </p>
                 
                 {/* CTAs - right below text, centered on mobile */}
-                <div className="flex flex-wrap gap-3 sm:gap-4 mt-8 justify-center lg:justify-start">
-                  <button
+                <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                  <Button
+                    variant="primary"
+                    size="lg"
                     onClick={handlePreorderClick}
-                    className="px-9 py-4 rounded-full bg-golden-500 text-navy-500 font-bold text-base sm:text-lg shadow-md transition-all duration-500 ease-in-out hover:bg-navy-500 hover:text-white hover:shadow-xl hover:scale-105"
                   >
                     Pre-order Now
-                  </button>
-                  <a
-                    href="#about"
-                    className="px-9 py-4 rounded-full bg-navy-500 text-white font-bold text-base sm:text-lg shadow-md transition-all duration-500 ease-in-out hover:bg-golden-500 hover:text-navy-500 hover:shadow-xl hover:scale-105"
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    as="a"
+                    href="/#about"
                   >
                     Learn More
-                  </a>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -764,13 +915,48 @@ const Home = () => {
               <p className="mt-4 text-white/80 leading-relaxed">
                 Through adventure, imagination, and everyday courage, Caiden learns to understand his emotions, trust himself, and show up bravely in a world that doesn't always see him clearly.
               </p>
-              <div className="flex justify-center lg:justify-start">
-                <button
-                  onClick={handlePreorderClick}
-                  className="mt-8 btn-primary min-w-[220px] text-center"
+              
+              {/* Comic Book Callout */}
+              <div className="mt-4 max-w-[420px] mx-auto lg:mx-0">
+                <Link
+                  to="/comicbook"
+                  className="block bg-white/95 rounded-2xl p-4 sm:p-5 shadow-lg border border-white/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
-                  Explore the Story
-                </button>
+                  <div className="flex items-center gap-4">
+                    {/* Comic Book Image - Circular with blue border */}
+                    <div className="flex-shrink-0">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
+                        <img
+                          src="/Comic5_Coverpage_header_2.jpg"
+                          alt="Caiden's Courage Comic Book"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Text Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold text-white uppercase tracking-wide bg-golden-500 px-2 py-0.5 rounded-md">New</span>
+                      </div>
+                      <h3 className="font-display font-bold text-lg sm:text-xl text-navy-500 mb-1.5">
+                        The Comic Book
+                      </h3>
+                      <p className="text-sm sm:text-base text-navy-600 leading-relaxed mb-3">
+                        Start Volume 1 and follow Caiden's first "Lock In" moment.
+                      </p>
+                      <span className="inline-flex items-center text-sm sm:text-base font-semibold text-navy-500 hover:text-navy-600 transition-colors">
+                        View Comic Book
+                        <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               </div>
             </div>
 
@@ -844,7 +1030,7 @@ const Home = () => {
               </div>
             </div>
             <div className="order-1 lg:order-2 text-center lg:text-left">
-              <p className="text-golden-500 font-semibold text-lg">Our Mission:</p>
+              <span className="inline-block px-3 py-1 bg-golden-500 text-navy-500 font-semibold text-sm rounded-md">Our Mission:</span>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mt-2">
                 Courage for Every Kid
               </h2>
@@ -855,12 +1041,22 @@ const Home = () => {
                 Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href="#about" className="btn-primary text-center inline-block min-w-[220px]">
+                <Button
+                  variant="primary"
+                  size="md"
+                  as="a"
+                  href="/"
+                >
                   Learn About the Mission
-                </a>
-                <a href="#characters" className="btn-secondary text-center inline-block min-w-[220px]">
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  as="a"
+                  href="/#characters"
+                >
                   Meet the Characters
-                </a>
+                </Button>
               </div>
             </div>
           </div>
@@ -950,9 +1146,9 @@ const Home = () => {
                       {product.badge}
                     </span>
                     {product.available && (
-                      <span className="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                      <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                         <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                        Available Now
+                        Coming Soon
                       </span>
                     )}
                   </div>
@@ -966,6 +1162,15 @@ const Home = () => {
                     <button
                       onClick={() => openExternalUrl(product.purchaseUrl!)}
                       className="mt-5 w-full py-3 px-6 bg-golden-500 text-navy-500 font-bold rounded-full shadow-golden hover:bg-golden-600 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                      style={{ opacity: 1, backgroundColor: '#F0CE6E' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = '#e8c255';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                        e.currentTarget.style.backgroundColor = '#F0CE6E';
+                      }}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -1005,12 +1210,13 @@ const Home = () => {
             Be the first to know when the book launches and get exclusive updates.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={handleWaitlistClick}
-              className="btn-primary min-w-[220px] text-center"
             >
               Join the Waitlist
-            </button>
+            </Button>
             <a
               href="mailto:stills@caidenscourage.com"
               className="px-8 py-3 rounded-full bg-transparent text-white font-semibold border-2 border-white/40 transition-all duration-300 hover:bg-white/10"
@@ -1043,9 +1249,17 @@ const Home = () => {
               </a>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-center">
-            <p className="text-white/60 text-sm">
-              © {new Date().getFullYear()} Caiden's Courage. All rights reserved.
+          <div className="mt-8 pt-8 border-t border-white/10">
+            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
+              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
+              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
+              <Link to="/#about" className="text-white/70 hover:text-white transition-colors">About</Link>
+              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
+              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
+              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
+            </div>
+            <p className="text-white/60 text-sm text-center">
+              © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
             </p>
           </div>
         </div>
