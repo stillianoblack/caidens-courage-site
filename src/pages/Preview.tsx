@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
@@ -102,19 +102,19 @@ const Preview = () => {
   }, [currentPage]);
 
   // Navigation handlers
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
       setIsZoomed(false);
     }
-  };
+  }, [currentPage]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
       setIsZoomed(false);
     }
-  };
+  }, [currentPage, totalPages]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -125,7 +125,7 @@ const Preview = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, totalPages]);
+  }, [handlePrevious, handleNext]);
 
   // Touch swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
