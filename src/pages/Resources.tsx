@@ -13,6 +13,7 @@ const Resources: React.FC = () => {
   const [selectedAudience, setSelectedAudience] = useState<Audience | 'all'>('all');
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
@@ -156,6 +157,7 @@ const Resources: React.FC = () => {
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
+    setIsPreorderOpen(true);
   };
 
   const handleLogoClick = () => {
@@ -517,7 +519,7 @@ const Resources: React.FC = () => {
 
       {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation */}
       <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -1175,6 +1177,26 @@ const Resources: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Pre-order Modal */}
+      {isPreorderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="relative w-full max-w-2xl animate-slide-up">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsPreorderOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            <iframe
+              src="https://beacons.ai/stillianoblack"
+              title="Join the Courage Community"
+              className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

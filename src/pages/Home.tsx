@@ -131,6 +131,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
     available: true,
+    image: "/Comic5_Coverpage_header_Shop.jpg",
   },
   {
     title: "Caiden's Courage T-Shirt",
@@ -139,6 +140,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.tShirt,
     available: true,
+    image: "/Caiden'Courage_Tshirt.jpg",
   },
   {
     title: "B-4 Plush Companions",
@@ -147,6 +149,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.b4Plush,
     available: true,
+    image: "/Caiden'sCOurage_Plushie (1).jpg",
   },
 ];
 
@@ -593,37 +596,39 @@ const Home = () => {
               </div>
               
               {/* Comic Book - Moved to right of Resources */}
-              <Link 
+                  <Link
                 to="/comicbook" 
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
+                  >
                 Comic Book
-              </Link>
+                  </Link>
             </nav>
             
-            {/* Action Area - Contact + Join Waitlist Button */}
-            <div className="flex items-center gap-6">
+            {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
+            <div className="flex items-center gap-4 lg:gap-6">
+              {/* Contact Link - Desktop only */}
               <a 
                 href="mailto:stills@caidenscourage.com" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 Contact
               </a>
+              {/* Join Waitlist Button - All screens */}
               <Button
                 variant="primary"
                 size="sm"
                 onClick={handleWaitlistClick}
               >
-                Join Waitlist
+                Join the Courage Community
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation */}
+      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation - Visible up to lg (1024px) for iPad portrait */}
       <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -798,7 +803,7 @@ const Home = () => {
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Join Waitlist
+                  Join the Courage Community
                 </Button>
               </div>
             </div>
@@ -860,9 +865,9 @@ const Home = () => {
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Hero image - First on mobile, right side on desktop */}
               <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2 w-full mb-[35px] lg:mb-0">
-                <div className="relative w-full max-w-sm lg:max-w-xl xl:max-w-2xl scale-[1.08] lg:scale-[1.35]">
+                <div className="relative w-full max-w-sm lg:max-w-xl xl:max-w-2xl scale-[1.08] lg:scale-[1.215]">
                   {/* Geometric shape behind image - blue and larger to cover body, visible on all devices */}
-                  <div className="geometric-shape shape-blob-blue w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] xl:w-[32rem] xl:h-[32rem] absolute -z-10 scale-[1.08] lg:scale-[1.35]" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                  <div className="geometric-shape shape-blob-blue w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] xl:w-[32rem] xl:h-[32rem] absolute -z-10 scale-[1.08] lg:scale-[1.215]" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
                   
                   <img
                     src="/Courageforeverykid_COMICBOOK.png"
@@ -949,7 +954,7 @@ const Home = () => {
                     <div className="flex-shrink-0">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
                         <img
-                          src="/Comic5_Coverpage_header_2.jpg"
+                          src="/Comic5_Coverpage_header.jpg"
                           alt="Caiden's Courage Comic Book"
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -1161,6 +1166,16 @@ const Home = () => {
                   product.available ? 'ring-2 ring-golden-500/50' : ''
                 }`}
               >
+                {/* Product Image */}
+                {product.image && (
+                  <div className="w-full h-48 sm:h-56 overflow-hidden bg-navy-50">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <div className="p-6">
                   {/* Badges */}
                   <div className="flex items-center justify-between mb-4">
@@ -1237,7 +1252,7 @@ const Home = () => {
               size="md"
               onClick={handleWaitlistClick}
             >
-              Join the Waitlist
+              Join the Courage Community
             </Button>
             <a
               href="mailto:stills@caidenscourage.com"

@@ -124,6 +124,7 @@ const InsideCard: React.FC<InsideCardProps> = ({ title, bullets, iconType, helpV
 };
 
 const Product: React.FC = () => {
+  const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
@@ -137,7 +138,7 @@ const Product: React.FC = () => {
   // Gallery images - can be expanded later
   const galleryImages = [
     {
-      src: "/Comic5_Coverpage_header_2.jpg",
+      src: "/Comic5_Coverpage_header.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
     },
     {
@@ -201,11 +202,7 @@ const Product: React.FC = () => {
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
-  };
-
-  const handlePreviewClick = () => {
-    // TODO: Add preview pages link
-    console.log('Preview pages coming soon');
+    setIsPreorderOpen(true);
   };
 
   // Resources dropdown handlers
@@ -334,12 +331,12 @@ const Product: React.FC = () => {
                   Shop
                   <svg 
                     className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                </svg>
                 </div>
                 
                 {/* Invisible hover bridge */}
@@ -407,13 +404,13 @@ const Product: React.FC = () => {
                   Resources
                   <svg 
                     className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                </svg>
+            </div>
                 
                 {/* Invisible hover bridge */}
                 <div className="absolute top-full left-0 w-full h-3" />
@@ -472,29 +469,31 @@ const Product: React.FC = () => {
               </Link>
             </nav>
             
-            {/* Action Area - Contact + Join Waitlist Button */}
-            <div className="flex items-center gap-6">
+            {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
+            <div className="flex items-center gap-4 lg:gap-6">
+              {/* Contact Link - Desktop only */}
               <a 
                 href="mailto:stills@caidenscourage.com" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 Contact
               </a>
+              {/* Join Waitlist Button - All screens */}
               <Button
                 variant="primary"
                 size="sm"
                 onClick={handleWaitlistClick}
               >
-                Join Waitlist
+                Join the Courage Community
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation */}
+      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation - Visible up to lg (1024px) for iPad portrait */}
       <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -755,7 +754,7 @@ const Product: React.FC = () => {
               <div className="mb-4 text-left">
                 <p className="text-base text-navy-500 font-normal leading-relaxed">
                   When the world feels loud, Caiden learns how to lock in. Pulled into a hidden realm of ancient guardians and powerful forces, Caiden must learn to trust his instincts, face the noise in his mind, and discover what makes him different is also what makes him brave.
-                </p>
+              </p>
               </div>
 
               {/* Metadata Pills - Smaller, Softer */}
@@ -795,12 +794,13 @@ const Product: React.FC = () => {
               </div>
 
               {/* Tertiary CTA - Subtle */}
-              <button
-                onClick={handlePreviewClick}
-                className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+              <Link
+                to="/preview"
+                className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors block text-center"
               >
-                Preview Pages
-              </button>
+                <div>Preview Pages</div>
+                <div className="text-xs text-navy-300 mt-0.5">See sample art & story</div>
+              </Link>
             </div>
           </div>
         </div>
@@ -1257,28 +1257,28 @@ const Product: React.FC = () => {
             {/* Prompt Container */}
             <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm max-w-2xl mx-auto mb-6">
               <ul className="space-y-3 text-navy-600 text-sm sm:text-base leading-relaxed">
-                <li className="flex items-start">
+            <li className="flex items-start">
                   <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
                   <span>What moment made your child or student feel seen or understood?</span>
-                </li>
-                <li className="flex items-start">
+            </li>
+            <li className="flex items-start">
                   <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
                   <span>Did this story open up new conversations about feelings or focus?</span>
-                </li>
-                <li className="flex items-start">
+            </li>
+            <li className="flex items-start">
                   <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
                   <span>How did it inspire creativity or confidence?</span>
-                </li>
-                <li className="flex items-start">
+            </li>
+            <li className="flex items-start">
                   <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
                   <span>Where do you imagine this being used most? (home, classroom, library, etc.)</span>
-                </li>
-                <li className="flex items-start">
+            </li>
+            <li className="flex items-start">
                   <span className="text-navy-400/60 mr-3 mt-0.5 flex-shrink-0">•</span>
                   <span>Who would you recommend this for?</span>
-                </li>
-              </ul>
-            </div>
+            </li>
+          </ul>
+        </div>
 
             {/* Primary Email CTA Block */}
             <div className="max-w-2xl mx-auto">
@@ -1316,7 +1316,7 @@ const Product: React.FC = () => {
                 Short notes are perfect — even one sentence helps.
               </p>
             </div>
-          </div>
+            </div>
 
           {/* Soft Divider */}
           <div className="mt-12 sm:mt-16 mb-8 sm:mb-10">
@@ -1454,6 +1454,26 @@ const Product: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Pre-order Modal */}
+      {isPreorderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="relative w-full max-w-2xl animate-slide-up">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsPreorderOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            <iframe
+              src="https://beacons.ai/stillianoblack"
+              title="Join the Courage Community"
+              className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
