@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 
 // Pop art style icon components

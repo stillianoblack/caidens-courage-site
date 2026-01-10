@@ -174,10 +174,6 @@ const Preview = () => {
     touchEndX.current = null;
   };
 
-  // Zoom handler (legacy - kept for compatibility)
-  const handleZoom = () => {
-    setIsZoomed(!isZoomed);
-  };
 
   // Full-screen reading modal handlers
   const openReadingModal = () => {
