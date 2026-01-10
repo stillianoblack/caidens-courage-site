@@ -1,11 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
-  as?: 'a' | 'button';
+  as?: 'a' | 'button' | typeof Link;
   href?: string;
+  to?: string;
   children: React.ReactNode;
 }
 
@@ -15,6 +17,7 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   as = 'button',
   href,
+  to,
   children,
   className = '',
   ...props
@@ -23,18 +26,35 @@ const Button: React.FC<ButtonProps> = ({
   
   const variantClasses = {
     primary: 'bg-golden-500 text-navy-500 hover:bg-golden-400 focus:ring-golden-500 shadow-md hover:shadow-lg hover:scale-105 active:scale-95',
-    secondary: 'bg-transparent border-2 border-navy-500 text-navy-500 hover:bg-navy-50 focus:ring-navy-500'
+    secondary: 'bg-transparent border-2 border-navy-500 text-navy-500 hover:bg-navy-50 focus:ring-navy-500 hover:border-navy-600'
   };
   
   const sizeClasses = {
-    sm: 'px-6 py-2.5 text-sm min-h-[44px]',
-    md: 'px-8 py-3 text-base min-h-[52px]',
-    lg: 'px-10 py-4 text-lg min-h-[56px]'
+    sm: 'px-6 py-2.5 text-sm h-11 md:h-11',
+    md: 'px-8 py-3 text-base h-14 md:h-14',
+    lg: 'px-10 py-4 text-lg h-14 md:h-14'
   };
   
-  const widthClass = fullWidth ? 'w-full' : '';
+  // Mobile: full-width on screens ≤768px, unless fullWidth prop is explicitly false
+  // Tablet/Desktop: respect fullWidth prop or default to auto-width with consistent min-width for paired buttons
+  const widthClass = fullWidth ? 'w-full' : 'w-full md:w-auto md:min-w-[260px]';
   
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`;
+  
+  // Handle React Router Link component - if to prop is provided and as is Link or not a string
+  if (to) {
+    if (as === Link || (typeof as !== 'string')) {
+      return (
+        <Link
+          to={to}
+          className={classes}
+          {...(props as any)}
+        >
+          {children}
+        </Link>
+      );
+    }
+  }
   
   if (as === 'a' && href) {
     return (

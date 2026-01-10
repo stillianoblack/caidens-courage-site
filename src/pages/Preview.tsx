@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 
@@ -22,12 +22,31 @@ const ANCHOR_MESSAGES: Record<number, string> = {
 
 const Preview = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
+  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
+  
+  // Full-screen reading modal state
+  const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const [isFitted, setIsFitted] = useState(true);
+  const [showHelperText, setShowHelperText] = useState(false);
+  
+  // Touch gesture tracking
+  const touchStartDistance = useRef<number | null>(null);
+  const touchStartCenter = useRef<{ x: number; y: number } | null>(null);
+  const lastTapTime = useRef<number>(0);
+  const lastPanPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isPanning = useRef<boolean>(false);
+  const swipeStartY = useRef<number | null>(null);
+  const initialZoomLevel = useRef<number>(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
   const [showMobileShopDropdown, setShowMobileShopDropdown] = useState(false);
@@ -155,9 +174,163 @@ const Preview = () => {
     touchEndX.current = null;
   };
 
-  // Zoom handler
+  // Zoom handler (legacy - kept for compatibility)
   const handleZoom = () => {
     setIsZoomed(!isZoomed);
+  };
+
+  // Full-screen reading modal handlers
+  const openReadingModal = () => {
+    setIsReadingModalOpen(true);
+    // Disable body scroll
+    document.body.style.overflow = 'hidden';
+    // Check if helper text should show (first time only)
+    const hasSeenHelper = localStorage.getItem('preview-helper-dismissed');
+    if (!hasSeenHelper) {
+      setShowHelperText(true);
+      setTimeout(() => setShowHelperText(false), 4000);
+    }
+    // Reset zoom and pan
+    setZoomLevel(1);
+    setPanX(0);
+    setPanY(0);
+    setIsFitted(true);
+  };
+
+  const closeReadingModal = () => {
+    setIsReadingModalOpen(false);
+    // Re-enable body scroll
+    document.body.style.overflow = '';
+    // Reset zoom and pan
+    setZoomLevel(1);
+    setPanX(0);
+    setPanY(0);
+    setIsFitted(true);
+  };
+
+  const dismissHelperText = () => {
+    setShowHelperText(false);
+    localStorage.setItem('preview-helper-dismissed', 'true');
+  };
+
+  // Calculate distance between two touches
+  const getTouchDistance = (touch1: React.Touch, touch2: React.Touch): number => {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Calculate center point between two touches
+  const getTouchCenter = (touch1: React.Touch, touch2: React.Touch): { x: number; y: number } => {
+    return {
+      x: (touch1.clientX + touch2.clientX) / 2,
+      y: (touch1.clientY + touch2.clientY) / 2
+    };
+  };
+
+  // Handle touch start for reading modal
+  const handleReadingModalTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      // Pinch gesture - store initial zoom level
+      const distance = getTouchDistance(e.touches[0], e.touches[1]);
+      touchStartDistance.current = distance;
+      initialZoomLevel.current = zoomLevel;
+      const center = getTouchCenter(e.touches[0], e.touches[1]);
+      touchStartCenter.current = center;
+      isPanning.current = false;
+      swipeStartY.current = null;
+    } else if (e.touches.length === 1) {
+      // Single touch - check for double tap or start pan/swipe
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTime.current;
+      
+      if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+        // Double tap - toggle fit-to-screen
+        e.preventDefault();
+        toggleFitToScreen();
+        lastTapTime.current = 0;
+      } else {
+        lastTapTime.current = now;
+        const touch = e.touches[0];
+        lastPanPosition.current = { x: touch.clientX, y: touch.clientY };
+        swipeStartY.current = touch.clientY;
+        isPanning.current = zoomLevel > 1.1; // Only pan if zoomed
+      }
+    }
+  };
+
+  // Handle touch move for reading modal
+  const handleReadingModalTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStartDistance.current !== null && touchStartCenter.current) {
+      // Pinch to zoom
+      e.preventDefault();
+      const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+      const scale = currentDistance / touchStartDistance.current;
+      const newZoom = Math.max(1, Math.min(5, initialZoomLevel.current * scale));
+      setZoomLevel(newZoom);
+      setIsFitted(false);
+      
+      touchStartDistance.current = currentDistance;
+    } else if (e.touches.length === 1 && isPanning.current && zoomLevel > 1.1) {
+      // Pan when zoomed
+      e.preventDefault();
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const deltaX = currentX - lastPanPosition.current.x;
+      const deltaY = currentY - lastPanPosition.current.y;
+      
+      setPanX(prev => {
+        const maxPan = (zoomLevel - 1) * 200; // Limit pan based on zoom
+        return Math.max(-maxPan, Math.min(maxPan, prev + deltaX));
+      });
+      setPanY(prev => {
+        const maxPan = (zoomLevel - 1) * 200;
+        return Math.max(-maxPan, Math.min(maxPan, prev + deltaY));
+      });
+      
+      lastPanPosition.current = { x: currentX, y: currentY };
+    }
+  };
+
+  // Handle touch end for reading modal
+  const handleReadingModalTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) {
+      touchStartDistance.current = null;
+      touchStartCenter.current = null;
+      isPanning.current = false;
+    }
+    
+    // Check for swipe down to close (only when not zoomed and single touch)
+    if (e.changedTouches.length === 1 && zoomLevel <= 1.1 && swipeStartY.current !== null) {
+      const touch = e.changedTouches[0];
+      const startY = swipeStartY.current;
+      const endY = touch.clientY;
+      const swipeDistance = endY - startY;
+      
+      // Swipe down more than 100px to close
+      if (swipeDistance > 100) {
+        closeReadingModal();
+      }
+    }
+    
+    swipeStartY.current = null;
+  };
+
+  // Toggle fit-to-screen vs full scale
+  const toggleFitToScreen = () => {
+    if (isFitted) {
+      // Switch to full scale
+      setZoomLevel(2);
+      setIsFitted(false);
+      setPanX(0);
+      setPanY(0);
+    } else {
+      // Switch to fit-to-screen
+      setZoomLevel(1);
+      setIsFitted(true);
+      setPanX(0);
+      setPanY(0);
+    }
   };
 
   // External link handlers
@@ -175,6 +348,10 @@ const Preview = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
     setIsPreorderOpen(true);
+  };
+
+  const handleComingSoonClick = () => {
+    setIsComingSoonModalOpen(true);
   };
 
   const handleLogoClick = () => {
@@ -239,7 +416,25 @@ const Preview = () => {
             {/* Desktop Navigation - Only visible on desktop (lg and up) */}
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
-                to="/#about" 
+                to="/mission" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
+              >
+                Mission
+              </Link>
+              <Link 
+                to="/#about"
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 About
@@ -327,18 +522,26 @@ const Preview = () => {
                     <div className="font-semibold text-sm">Comic Book</div>
                     <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
                   </Link>
-                  <Link
-                    to="/#products"
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
                   >
-                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </Link>
-                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 opacity-60 cursor-not-allowed">
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </div>
+                  </button>
                 </div>
               </div>
               
@@ -454,7 +657,7 @@ const Preview = () => {
             </nav>
             
             {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
-            <div className="flex items-center gap-4 lg:gap-6">
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
               {/* Contact Link - Desktop only */}
               <a 
                 href="mailto:stills@caidenscourage.com" 
@@ -462,13 +665,14 @@ const Preview = () => {
               >
                 Contact
               </a>
-              {/* Join Waitlist Button - All screens */}
+              {/* Join Waitlist Button - All screens, responsive padding */}
               <Button
                 variant="primary"
                 size="sm"
                 onClick={handleWaitlistClick}
+                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
               >
-                Join the Courage Community
+                Join Courage Community
               </Button>
             </div>
           </div>
@@ -504,8 +708,31 @@ const Preview = () => {
               </Link>
               
               <Link
-                to="/#about"
+                to="/mission"
                 onClick={() => setIsMobileMenuOpen(false)}
+                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
+              >
+                <span>Mission</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#about"
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
                 <span>About</span>
@@ -556,21 +783,28 @@ const Preview = () => {
                     <div className="font-semibold text-lg">Comic Book</div>
                     <div className="text-sm text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
                   </Link>
-                  <Link
-                    to="/#products"
+                  <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileShopDropdown(false);
+                      handleComingSoonClick();
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    <div className="font-semibold text-lg">T-shirts</div>
+                    <div className="font-semibold text-lg">T-shirts <span className="text-base font-normal">— Coming Soon</span></div>
                     <div className="text-sm text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </Link>
-                  <div className="block px-12 py-4 text-navy-500 opacity-60 cursor-not-allowed">
-                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">(Coming soon)</span></div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
+                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">— Coming Soon</span></div>
                     <div className="text-sm text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </div>
+                  </button>
                 </div>
               </div>
               
@@ -759,8 +993,8 @@ const Preview = () => {
             >
               {/* Page Image - Centered within viewer */}
               <div 
-                className={`relative transition-all duration-300 flex items-center justify-center bg-navy-50/30 rounded-lg ${imageErrors.has(currentPage) ? '' : isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'}`} 
-                onClick={!imageErrors.has(currentPage) && imagesLoaded.has(currentPage) ? handleZoom : undefined}
+                className={`relative transition-all duration-300 flex items-center justify-center bg-navy-50/30 rounded-lg ${imageErrors.has(currentPage) ? '' : 'cursor-zoom-in'}`} 
+                onClick={!imageErrors.has(currentPage) && imagesLoaded.has(currentPage) ? openReadingModal : undefined}
                 style={{ 
                   aspectRatio: '3/4',
                   width: '100%',
@@ -789,7 +1023,7 @@ const Preview = () => {
                     <img
                       src={PREVIEW_PAGES[currentPage - 1].image}
                       alt={PREVIEW_PAGES[currentPage - 1].alt}
-                      className={`rounded-lg shadow-md ${isZoomed ? 'w-full h-full max-w-none' : 'w-full h-full max-w-full'} transition-all duration-300 object-contain ${imagesLoaded.has(currentPage) ? 'opacity-100' : 'opacity-0'}`}
+                      className="rounded-lg shadow-md w-full h-full max-w-full transition-all duration-300 object-contain"
                       style={{ 
                         aspectRatio: '3/4',
                         maxHeight: '75vh'
@@ -816,7 +1050,7 @@ const Preview = () => {
                         <div className="text-navy-300 text-sm">Loading preview page...</div>
                       </div>
                     )}
-                    {!isZoomed && imagesLoaded.has(currentPage) && !imageErrors.has(currentPage) && (
+                    {imagesLoaded.has(currentPage) && !imageErrors.has(currentPage) && (
                       <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm pointer-events-none">
                         Tap to zoom
                       </div>
@@ -881,17 +1115,17 @@ const Preview = () => {
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+            <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-6">
               <Button
                 variant="primary"
-                size="lg"
+                size="md"
                 onClick={handlePhysicalCopyClick}
               >
                 Pre-order Physical Copy
               </Button>
               <Button
                 variant="secondary"
-                size="lg"
+                size="md"
                 onClick={handleDigitalClick}
               >
                 Download Digital Edition
@@ -908,6 +1142,112 @@ const Preview = () => {
           </div>
         </section>
       </main>
+
+      {/* Full-Screen Reading Modal */}
+      {isReadingModalOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
+          onClick={(e) => {
+            // Close if clicking outside the image
+            if (e.target === e.currentTarget) {
+              closeReadingModal();
+            }
+          }}
+          onTouchStart={handleReadingModalTouchStart}
+          onTouchMove={handleReadingModalTouchMove}
+          onTouchEnd={handleReadingModalTouchEnd}
+          style={{ touchAction: 'none' }}
+        >
+          {/* Helper Text - First time only */}
+          {showHelperText && (
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-10 bg-black/70 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm animate-fade-in">
+              <div className="flex items-center gap-3">
+                <span>Pinch to zoom. Swipe down to close.</span>
+                <button
+                  onClick={dismissHelperText}
+                  className="text-white/70 hover:text-white transition-colors"
+                  aria-label="Dismiss"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Comic Page Image */}
+          <div
+            className="relative max-w-full max-h-full"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              transform: `translate(${panX}px, ${panY}px) scale(${zoomLevel})`,
+              transformOrigin: 'center center',
+              transition: isFitted ? 'transform 0.3s ease-out' : 'none',
+              willChange: 'transform'
+            }}
+          >
+            <img
+              src={PREVIEW_PAGES[currentPage - 1].image}
+              alt={PREVIEW_PAGES[currentPage - 1].alt}
+              className="max-w-full max-h-[100vh] object-contain"
+              draggable={false}
+              style={{ userSelect: 'none' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Coming Soon Modal */}
+      {isComingSoonModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsComingSoonModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsComingSoonModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
+                We're building this next.
+              </h2>
+              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
+                We're designing Caiden & B-4 plushies and limited-edition shirts.
+                <br />
+                Join the Courage Community to get early access when they launch.
+              </p>
+              
+              <div className="flex flex-col gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => {
+                    handleWaitlistClick();
+                    setIsComingSoonModalOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Join the Courage Community
+                </Button>
+                <button
+                  onClick={() => setIsComingSoonModalOpen(false)}
+                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pre-order Modal */}
       {isPreorderOpen && (
@@ -940,22 +1280,37 @@ const Preview = () => {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
               <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
               <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">
-                Contact
-              </a>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10">
             <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
               <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
               <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link to="/#about" className="text-white/70 hover:text-white transition-colors">About</Link>
+              <Link 
+                to="/#about" 
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                About
+              </Link>
               <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
               <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
               <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>

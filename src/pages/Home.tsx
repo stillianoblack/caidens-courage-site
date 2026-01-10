@@ -139,7 +139,8 @@ const products = [
     badge: "New",
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.tShirt,
-    available: true,
+    available: false,
+    comingSoon: true,
     image: "/Caiden'Courage_Tshirt.jpg",
   },
   {
@@ -148,7 +149,8 @@ const products = [
     badge: "New",
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.b4Plush,
-    available: true,
+    available: false,
+    comingSoon: true,
     image: "/Caiden'sCOurage_Plushie (1).jpg",
   },
 ];
@@ -170,6 +172,7 @@ const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
+  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [rotatingWord, setRotatingWord] = useState(0);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
@@ -209,12 +212,12 @@ const Home = () => {
   useEffect(() => {
     // If navigating to homepage with hash, scroll to section
     if (location.pathname === '/' && location.hash) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
+      // Use a slightly longer delay to ensure DOM is fully ready after navigation
+      const scrollTimeout = setTimeout(() => {
         const element = document.querySelector(location.hash);
         if (element) {
-          // Calculate offset for fixed header (approximately 80px on desktop)
-          const headerOffset = 80;
+          // Calculate offset for fixed header (approximately 80px on desktop, 64px on mobile)
+          const headerOffset = window.innerWidth < 768 ? 64 : 80;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
           
@@ -223,9 +226,35 @@ const Home = () => {
             behavior: 'smooth'
           });
         }
-      }, 100);
+      }, 200);
+      
+      return () => clearTimeout(scrollTimeout);
     }
   }, [location.hash, location.pathname]);
+
+  // Handle About link click - navigate and scroll
+  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    if (location.pathname !== '/') {
+      // If not on homepage, navigate to homepage with hash
+      e.preventDefault();
+      navigate('/#about');
+      // Scroll will happen after navigation via the useEffect above
+    } else {
+      // If already on homepage, just scroll
+      e.preventDefault();
+      const element = document.getElementById('about');
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   // Handle click outside to close dropdown (mobile)
   useEffect(() => {
@@ -285,16 +314,14 @@ const Home = () => {
       }
     });
 
-    // Observe feature cards individually for staggered fade-in
+    // Observe feature cards individually for fast fade-in (no stagger)
     const featureCards = document.querySelectorAll('.fade-in-card');
-    featureCards.forEach((card, index) => {
+    featureCards.forEach((card) => {
       const cardObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Add visible class with staggered delay based on card index
-            setTimeout(() => {
-              entry.target.classList.add('visible');
-            }, index * 150);
+            // Add visible class immediately for snappy animation
+            entry.target.classList.add('visible');
             cardObserver.unobserve(entry.target);
           }
         });
@@ -322,15 +349,18 @@ const Home = () => {
   }, [words.length]);
 
   const handlePreorderClick = () => {
-    const stripeUrl = getStripePreorderUrl();
-    if (stripeUrl) return openExternalUrl(stripeUrl);
-    setIsPreorderOpen(true);
+    navigate('/comicbook');
+    window.scrollTo(0, 0);
   };
 
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
     setIsPreorderOpen(true);
+  };
+
+  const handleComingSoonClick = () => {
+    setIsComingSoonModalOpen(true);
   };
 
   const handleLogoClick = () => {
@@ -387,7 +417,14 @@ const Home = () => {
             {/* Desktop Navigation - Only visible on desktop (lg and up) */}
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
-                to="/#about" 
+                to="/mission" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
+              >
+                Mission
+              </Link>
+              <Link 
+                to="/#about"
+                onClick={handleAboutClick}
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 About
@@ -476,18 +513,26 @@ const Home = () => {
                     <div className="font-semibold text-sm">Comic Book</div>
                     <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
                   </Link>
-                  <Link
-                    to="/#products"
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
                   >
-                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </Link>
-                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 opacity-60 cursor-not-allowed">
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </div>
+                  </button>
                 </div>
               </div>
               
@@ -605,7 +650,7 @@ const Home = () => {
             </nav>
             
             {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
-            <div className="flex items-center gap-4 lg:gap-6">
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
               {/* Contact Link - Desktop only */}
               <a 
                 href="mailto:stills@caidenscourage.com" 
@@ -613,13 +658,14 @@ const Home = () => {
               >
                 Contact
               </a>
-              {/* Join Waitlist Button - All screens */}
+              {/* Join Waitlist Button - All screens, responsive padding */}
               <Button
                 variant="primary"
                 size="sm"
                 onClick={handleWaitlistClick}
+                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
               >
-                Join the Courage Community
+                Join Courage Community
               </Button>
             </div>
           </div>
@@ -644,11 +690,11 @@ const Home = () => {
           <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
             <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
               <Link
-                to="/comicbook"
+                to="/mission"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
               >
-                <span>Comic Book</span>
+                <span>Mission</span>
                 <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -656,10 +702,24 @@ const Home = () => {
               
               <Link
                 to="/#about"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  handleAboutClick(e);
+                }}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
                 <span>About</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/comicbook"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
+              >
+                <span>Comic Book</span>
                 <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -707,21 +767,28 @@ const Home = () => {
                     <div className="font-semibold text-lg">Comic Book</div>
                     <div className="text-sm text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
                   </Link>
-                  <Link
-                    to="/#products"
+                  <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setShowMobileShopDropdown(false);
+                      handleComingSoonClick();
                     }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                   >
-                    <div className="font-semibold text-lg">T-shirts</div>
+                    <div className="font-semibold text-lg">T-shirts <span className="text-base font-normal">— Coming Soon</span></div>
                     <div className="text-sm text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </Link>
-                  <div className="block px-12 py-4 text-navy-500 opacity-60 cursor-not-allowed">
-                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">(Coming soon)</span></div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowMobileShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
+                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">— Coming Soon</span></div>
                     <div className="text-sm text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </div>
+                  </button>
                 </div>
               </div>
               
@@ -893,19 +960,21 @@ const Home = () => {
                 </p>
                 
                 {/* CTAs - right below text, centered on mobile */}
-                <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                <div className="flex flex-col md:flex-row gap-4 mt-8 justify-center lg:justify-start">
                   <Button
                     variant="primary"
-                    size="lg"
+                    size="md"
                     onClick={handlePreorderClick}
                   >
                     Pre-order Now
                   </Button>
                   <Button
                     variant="secondary"
-                    size="lg"
-                    as="a"
-                    href="/#about"
+                    size="md"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAboutClick(e as any);
+                    }}
                   >
                     Learn More
                   </Button>
@@ -949,7 +1018,7 @@ const Home = () => {
                   to="/comicbook"
                   className="block bg-white/95 rounded-2xl p-4 sm:p-5 shadow-lg border border-white/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-start gap-4">
                     {/* Comic Book Image - Circular with blue border */}
                     <div className="flex-shrink-0">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
@@ -996,7 +1065,7 @@ const Home = () => {
                 >
                   {/* Card container - solid base */}
                   <div
-                    className={`relative feature-card fade-in-card rounded-3xl p-6 sm:p-7 bg-white/85 border-2 ${feature.borderColor} shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer h-full flex flex-col`}
+                    className={`relative feature-card fade-in-card rounded-3xl p-6 sm:p-7 bg-white/85 border-2 ${feature.borderColor} shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full flex flex-col`}
                   >
                     {/* Gradient background layer */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgGradient} rounded-3xl opacity-40`}></div>
@@ -1014,7 +1083,7 @@ const Home = () => {
                     {/* Content layer */}
                     <div className="relative z-10 flex flex-col flex-grow">
                       {/* Icon - simplified */}
-                      <div className={`w-16 h-16 sm:w-20 sm:h-20 mb-4 transition-transform duration-300 group-hover:scale-105`}>
+                      <div className={`w-16 h-16 sm:w-20 sm:h-20 mb-4 transition-transform duration-200 group-hover:scale-105`}>
                         <feature.icon className={`w-full h-full ${feature.iconColor}`} />
                       </div>
                       
@@ -1052,6 +1121,8 @@ const Home = () => {
                   src="/Courageforeverykid.jpeg"
                   alt="Caiden celebrating - Courage for Every Kid"
                   className="w-full max-w-lg mx-auto rounded-3xl shadow-card"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-golden-500/20 rounded-full blur-2xl" />
               </div>
@@ -1067,12 +1138,12 @@ const Home = () => {
               <p className="mt-4 text-navy-600 leading-relaxed">
                 Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center lg:justify-start">
                 <Button
                   variant="primary"
                   size="md"
-                  as="a"
-                  href="/"
+                  as={Link}
+                  to="/mission"
                 >
                   Learn About the Mission
                 </Button>
@@ -1092,8 +1163,8 @@ const Home = () => {
 
       {/* Meet the Characters Section */}
       <section id="characters" className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        <div className="hidden sm:block circle-accent circle-coral w-28 h-28 top-12 left-8 opacity-40" style={{ animationDelay: '1s' }} />
-        <div className="hidden sm:block circle-accent circle-coral w-20 h-20 bottom-16 right-12 opacity-50" style={{ animationDelay: '2s' }} />
+        <div className="hidden sm:block circle-accent circle-coral w-28 h-28 top-12 left-8 opacity-40" style={{ animationDelay: '0.2s' }} />
+        <div className="hidden sm:block circle-accent circle-coral w-20 h-20 bottom-16 right-12 opacity-50" style={{ animationDelay: '0.4s' }} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -1112,7 +1183,7 @@ const Home = () => {
             {characters.map((character, index) => (
               <div
                 key={character.name}
-                className="character-card fade-in-card bg-navy-600/50 rounded-2xl p-5 text-center backdrop-blur-sm border border-white/10 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                className="character-card fade-in-card bg-navy-600/50 rounded-2xl p-5 text-center backdrop-blur-sm border border-white/10 hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
               >
                 <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto">
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-golden-400 to-golden-600 p-1 shadow-golden">
@@ -1121,6 +1192,8 @@ const Home = () => {
                         src={character.image}
                         alt={character.name}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </div>
@@ -1142,8 +1215,8 @@ const Home = () => {
 
       {/* Shop Section */}
       <section id="products" className="py-20 sm:py-28 bg-cream relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 top-16 left-1/3 opacity-40" style={{ animationDelay: '2.5s' }} />
-        <div className="hidden sm:block circle-accent circle-navy w-12 h-12 bottom-24 right-8 opacity-30" style={{ animationDelay: '4s' }} />
+        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 top-16 left-1/3 opacity-40" style={{ animationDelay: '0.3s' }} />
+        <div className="hidden sm:block circle-accent circle-navy w-12 h-12 bottom-24 right-8 opacity-30" style={{ animationDelay: '0.5s' }} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -1162,8 +1235,8 @@ const Home = () => {
             {products.map((product, index) => (
               <div
                 key={product.title}
-                className={`feature-card fade-in-card bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ${
-                  product.available ? 'ring-2 ring-golden-500/50' : ''
+                className={`feature-card fade-in-card bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl hover:scale-[1.02] transition-all duration-200 ${
+                  product.available && !product.comingSoon ? 'ring-2 ring-golden-500/50' : ''
                 }`}
               >
                 {/* Product Image */}
@@ -1173,6 +1246,8 @@ const Home = () => {
                       src={product.image}
                       alt={product.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 )}
@@ -1182,7 +1257,7 @@ const Home = () => {
                     <span className={`px-4 py-1.5 ${product.badgeColor} text-navy-500 text-sm font-semibold rounded-full`}>
                       {product.badge}
                     </span>
-                    {product.available && (
+                    {product.comingSoon && (
                       <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                         <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                         Coming Soon
@@ -1197,7 +1272,10 @@ const Home = () => {
                   </p>
                   {product.available && product.purchaseUrl ? (
                     <button
-                      onClick={() => openExternalUrl(product.purchaseUrl!)}
+                      onClick={() => {
+                        navigate('/comicbook');
+                        window.scrollTo(0, 0);
+                      }}
                       className="mt-5 w-full py-3 px-6 bg-golden-500 text-navy-500 font-bold rounded-full shadow-golden hover:bg-golden-600 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
                       style={{ opacity: 1, backgroundColor: '#F0CE6E' }}
                       onMouseEnter={(e) => {
@@ -1213,6 +1291,13 @@ const Home = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                       Pre-order
+                    </button>
+                  ) : product.comingSoon ? (
+                    <button
+                      onClick={handleComingSoonClick}
+                      className="mt-5 w-full py-3 px-6 bg-transparent border-2 border-navy-300 text-navy-600 font-semibold rounded-full hover:bg-navy-50 hover:border-navy-400 hover:shadow-md transition-all duration-300"
+                    >
+                      {product.title.includes('T-Shirt') ? 'T-Shirts — Coming Soon' : product.title.includes('Plush') ? 'Plushies — Coming Soon' : 'Coming Soon'}
                     </button>
                   ) : (
                     <button
@@ -1246,7 +1331,7 @@ const Home = () => {
           <p className="mt-4 text-white/80 text-lg">
             Be the first to know when the book launches and get exclusive updates.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center items-center">
             <Button
               variant="primary"
               size="md"
@@ -1254,12 +1339,15 @@ const Home = () => {
             >
               Join the Courage Community
             </Button>
-            <a
+            <Button
+              variant="secondary"
+              size="md"
+              as="a"
               href="mailto:stills@caidenscourage.com"
-              className="px-8 py-3 rounded-full bg-transparent text-white font-semibold border-2 border-white/40 transition-all duration-300 hover:bg-white/10"
+              className="!bg-transparent !border-2 !border-white/40 !text-white hover:!bg-white/10 focus:!ring-white/50 hover:!border-white/60"
             >
               Contact Us
-            </a>
+            </Button>
           </div>
         </div>
       </section>
@@ -1275,22 +1363,20 @@ const Home = () => {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
               <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
               <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">
-                Contact
-              </a>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10">
             <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
               <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
               <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link to="/#about" className="text-white/70 hover:text-white transition-colors">About</Link>
+              <Link to="/#about" onClick={handleAboutClick} className="text-white/70 hover:text-white transition-colors">About</Link>
               <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
               <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
               <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
@@ -1301,6 +1387,112 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* Coming Soon Modal */}
+      {isComingSoonModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsComingSoonModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsComingSoonModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
+                We're building this next.
+              </h2>
+              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
+                We're designing Caiden & B-4 plushies and limited-edition shirts.
+                <br />
+                Join the Courage Community to get early access when they launch.
+              </p>
+              
+              <div className="flex flex-col gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => {
+                    handleWaitlistClick();
+                    setIsComingSoonModalOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Join the Courage Community
+                </Button>
+                <button
+                  onClick={() => setIsComingSoonModalOpen(false)}
+                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Coming Soon Modal */}
+      {isComingSoonModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsComingSoonModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsComingSoonModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
+                We're building this next.
+              </h2>
+              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
+                We're designing Caiden & B-4 plushies and limited-edition shirts.
+                <br />
+                Join the Courage Community to get early access when they launch.
+              </p>
+              
+              <div className="flex flex-col gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => {
+                    handleWaitlistClick();
+                    setIsComingSoonModalOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Join the Courage Community
+                </Button>
+                <button
+                  onClick={() => setIsComingSoonModalOpen(false)}
+                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pre-order Modal */}
       {isPreorderOpen && (

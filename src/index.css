@@ -312,18 +312,18 @@ code {
   opacity: 0.9;
 }
 
-/* Card hover effects */
+/* Card hover effects - optimized for responsiveness */
 .feature-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .feature-card:hover {
   transform: translateY(-5px);
 }
 
-/* Character card styles */
+/* Character card styles - optimized for responsiveness */
 .character-card {
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease-out;
 }
 
 .character-card:hover {
@@ -554,11 +554,11 @@ a.bg-golden-500:hover,
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
 
-/* Scroll-triggered fade-in-up animation - faster speed */
+/* Scroll-triggered fade-in-up animation - optimized for speed */
 .fade-in-up {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transform: translateY(20px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .fade-in-up.visible {
@@ -566,11 +566,11 @@ a.bg-golden-500:hover,
   transform: translateY(0);
 }
 
-/* Fade-in animation for cards on page load */
+/* Fade-in animation for cards on page load - optimized for speed */
 .fade-in-card {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .fade-in-card.visible {
@@ -682,7 +682,7 @@ a.bg-golden-500:hover,
 @keyframes slide-up {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   100% {
     opacity: 1;
@@ -691,13 +691,28 @@ a.bg-golden-500:hover,
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.2s ease-out;
 }
 
 @keyframes anchorPulse {
   0%   { box-shadow: 0 0 0 0 rgba(255, 204, 77, 0.55); background-color: rgba(255, 204, 77, 0.10); }
   60%  { box-shadow: 0 0 0 10px rgba(255, 204, 77, 0.00); background-color: rgba(255, 204, 77, 0.00); }
   100% { box-shadow: 0 0 0 0 rgba(255, 204, 77, 0.00); background-color: transparent; }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
 }
 
 .section-anchor.anchor-landed {

@@ -8,6 +8,8 @@ import Cancelled from './pages/Cancelled';
 import Resources from './pages/Resources';
 import Product from './pages/Product';
 import Preview from './pages/Preview';
+import Mission from './pages/Mission';
+import About from './pages/About';
 
 const App: React.FC = () => {
   return (
@@ -23,9 +25,12 @@ const App: React.FC = () => {
         <Route path="/resources/wallpapers" element={<Navigate to="/resources?type=wallpaper" replace />} />
         <Route path="/resources/teachers" element={<Navigate to="/resources?type=teacher-pack" replace />} />
         <Route path="/comicbook" element={<Product />} />
+        <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
         <Route path="/product" element={<Navigate to="/comicbook" replace />} />
         <Route path="/preview" element={<Preview />} />
         <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
+        <Route path="/mission" element={<Mission />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );

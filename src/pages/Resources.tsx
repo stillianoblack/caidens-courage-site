@@ -14,6 +14,7 @@ const Resources: React.FC = () => {
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
+  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
@@ -158,6 +159,10 @@ const Resources: React.FC = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
     setIsPreorderOpen(true);
+  };
+
+  const handleComingSoonClick = () => {
+    setIsComingSoonModalOpen(true);
   };
 
   const handleLogoClick = () => {
@@ -310,7 +315,31 @@ const Resources: React.FC = () => {
             {/* Desktop Navigation - Only visible on desktop (lg and up) */}
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
-                to="/#about" 
+                to="/mission" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+              >
+                Mission
+              </Link>
+              <Link 
+                to="/mission" 
+                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
+              >
+                Mission
+              </Link>
+              <Link 
+                to="/#about"
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 About
@@ -399,18 +428,26 @@ const Resources: React.FC = () => {
                     <div className="font-semibold text-sm">Comic Book</div>
                     <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
                   </Link>
-                  <Link
-                    to="/#products"
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
                   >
-                    <div className="font-semibold text-sm">T-shirts</div>
+                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </Link>
-                  <div className="block w-full text-left px-4 py-2.5 text-navy-500 opacity-60 cursor-not-allowed">
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">(Coming soon)</span></div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowShopDropdown(false);
+                      handleComingSoonClick();
+                    }}
+                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
+                  >
+                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
                     <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </div>
+                  </button>
                 </div>
               </div>
               
@@ -498,10 +535,10 @@ const Resources: React.FC = () => {
             </nav>
             
             {/* Action Area - Contact + Join Waitlist Button */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
               <a 
                 href="mailto:stills@caidenscourage.com" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
               >
                 Contact
               </a>
@@ -509,6 +546,7 @@ const Resources: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={handleWaitlistClick}
+                className="whitespace-nowrap flex-shrink-0"
               >
                 Join Waitlist
               </Button>
@@ -546,8 +584,31 @@ const Resources: React.FC = () => {
               </Link>
               
               <Link
-                to="/#about"
+                to="/mission"
                 onClick={() => setIsMobileMenuOpen(false)}
+                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
+              >
+                <span>Mission</span>
+                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              
+              <Link
+                to="/#about"
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
                 <span>About</span>
@@ -1159,24 +1220,100 @@ const Resources: React.FC = () => {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
               <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
               <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">
-                Contact
-              </a>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-center">
-            <p className="text-white/60 text-sm">
+          <div className="mt-8 pt-8 border-t border-white/10">
+            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
+              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
+              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
+              <Link 
+                to="/#about" 
+                onClick={(e) => {
+                  if (location.pathname === '/') {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const headerOffset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }
+                  }
+                }}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                About
+              </Link>
+              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
+              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
+              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
+            </div>
+            <p className="text-white/60 text-sm text-center">
               © {new Date().getFullYear()} Caiden's Courage. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
+
+      {/* Coming Soon Modal */}
+      {isComingSoonModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsComingSoonModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsComingSoonModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
+                We're building this next.
+              </h2>
+              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
+                We're designing Caiden & B-4 plushies and limited-edition shirts.
+                <br />
+                Join the Courage Community to get early access when they launch.
+              </p>
+              
+              <div className="flex flex-col gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => {
+                    handleWaitlistClick();
+                    setIsComingSoonModalOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Join the Courage Community
+                </Button>
+                <button
+                  onClick={() => setIsComingSoonModalOpen(false)}
+                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pre-order Modal */}
       {isPreorderOpen && (
