@@ -124,6 +124,7 @@ const InsideCard: React.FC<InsideCardProps> = ({ title, bullets, iconType, helpV
 };
 
 const Product: React.FC = () => {
+  const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
