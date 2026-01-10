@@ -27,7 +27,6 @@ const Preview = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isZoomed, setIsZoomed] = useState(false);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
   
@@ -124,14 +123,12 @@ const Preview = () => {
   const handlePrevious = useCallback(() => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      setIsZoomed(false);
     }
   }, [currentPage]);
 
   const handleNext = useCallback(() => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      setIsZoomed(false);
     }
   }, [currentPage, totalPages]);
 
@@ -140,7 +137,6 @@ const Preview = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrevious();
       if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'Escape') setIsZoomed(false);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
