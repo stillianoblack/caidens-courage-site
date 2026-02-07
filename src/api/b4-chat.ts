@@ -1,12 +1,12 @@
 // Client-side API handler for B-4 chat
-// Calls the server-side API route at /api/b4-chat
+// Calls the Netlify serverless function
 
 export async function handleB4Chat(messages: Array<{ role: string; content: string }>): Promise<{ reply: string }> {
   try {
     // Use relative path - works in both development and production
     // In development, React dev server proxies to the Express server
     // In production, the Express server serves both the React app and API
-    const response = await fetch('/api/b4-chat', {
+    const response = await fetch('/.netlify/functions/b4-chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -23,12 +23,18 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [worldCloseTimeout, setWorldCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Handle scroll for header
+  // Handle scroll for header (UI state only; throttled)
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 50);
+        ticking = false;
+      });
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

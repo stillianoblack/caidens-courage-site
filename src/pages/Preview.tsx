@@ -52,12 +52,18 @@ const Preview = () => {
 
   const totalPages = PREVIEW_PAGES.length;
 
-  // Handle scroll for navigation styling
+  // Handle scroll for nav styling (UI state only; throttled)
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 20);
+        ticking = false;
+      });
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

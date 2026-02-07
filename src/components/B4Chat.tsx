@@ -44,7 +44,7 @@ const B4Chat: React.FC = () => {
 
     try {
       // Use relative path - CRA proxy handles routing to backend
-      const apiUrl = '/api/b4-chat';
+      const apiUrl = '/.netlify/functions/b4-chat';
       
       const response = await fetch(apiUrl, {
         method: 'POST',

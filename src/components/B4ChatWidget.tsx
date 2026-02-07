@@ -118,7 +118,7 @@ const B4ChatWidget: React.FC = () => {
 
     try {
       // Direct fetch to API
-      const response = await fetch('/api/b4-chat', {
+      const response = await fetch('/.netlify/functions/b4-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
