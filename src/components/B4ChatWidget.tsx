@@ -116,42 +116,50 @@ const B4ChatWidget: React.FC = () => {
     // Clear input AFTER capturing text
     setInputValue('');
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
-      // Direct fetch to API
-      const response = await fetch('/.netlify/functions/b4-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/.netlify/functions/b4-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const msg = errorData?.error || errorData?.message || `HTTP ${response.status}`;
-        throw new Error(msg);
+        const msg = errorData?.error || errorData?.message;
+        throw new Error(msg ? `code ${response.status}: ${msg}` : `code ${response.status}`);
       }
 
       const data = await response.json();
-      
-      // Append assistant message using data.reply (with fallback)
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.reply || "I'm not sure how to respond to that. Can you try asking in a different way?"
       };
-      
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('[B4ChatWidget] Error:', error);
-      
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: error instanceof Error 
-          ? `B-4 couldn't connect. ERROR: ${error.message}`
-          : "B-4 couldn't connect. Check the API route."
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
+
+      let displayMessage: string;
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          displayMessage = "B-4 couldn't connect (timeout).";
+        } else {
+          const codeMatch = error.message.match(/code (\d+)/);
+          displayMessage = codeMatch
+            ? `B-4 couldn't connect (code ${codeMatch[1]}).`
+            : `B-4 couldn't connect (code ???). ${error.message}`;
+        }
+      } else {
+        displayMessage = "B-4 couldn't connect (code ???).";
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: displayMessage }]);
     } finally {
       setIsLoading(false);
       isSendingRef.current = false; // Release sending lock
