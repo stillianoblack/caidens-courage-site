@@ -41,6 +41,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <B4ChatWidget />
+      {/* Root-level Suspense: shows NavigationLoader (skeleton) immediately on link click while route chunk loads. No layout.tsx/loading.tsx – this is the single loading boundary. */}
       <Suspense fallback={<NavigationLoader />}>
         <Routes>
         <Route path="/" element={<Home />} />

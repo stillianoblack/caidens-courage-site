@@ -48,7 +48,7 @@ This project uses **React with React Router**, not Next.js. The audit below maps
 
 - **Status:** Addressed.
 - **reportWebVitals:** Moved to run **after idle** (`requestIdleCallback` in `src/index.js`) so it never blocks the main thread or navigation.
-- **LaunchDarkly / analytics:** This repo does not include LaunchDarkly. If you add it (or any SDK that uses EventSource/long-lived connections), initialize it in **`src/lib/initNonBlockingSDK.ts`** so it runs only when the browser is idle. That prevents the SDK from blocking the router and reduces canceled eventsource requests during client-side navigation.
+- **LaunchDarkly / analytics:** LaunchDarkly must **not** use `waitForInitialization: true` or any blocking await. Use **`src/lib/launchDarklyNonBlocking.ts`** and **`src/lib/initNonBlockingSDK.ts`**: init runs only after the browser is idle (client-only, like `ssr: false`). If LaunchDarkly is injected via a **script tag** on production (e.g. Netlify), load that script only after idle or use a non-blocking snippet so the EventSource does not block navigation or cause timeouts.
 - **Loading states:** There is no `/app` directory (this is React Router). The equivalent of `loading.tsx` is the single **Suspense** fallback **`NavigationLoader`** in `App.tsx`; the UI swaps to this skeleton immediately while route chunks load.
 
 ---

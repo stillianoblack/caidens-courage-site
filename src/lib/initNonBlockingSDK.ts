@@ -1,19 +1,16 @@
+import { initLaunchDarklyNonBlocking } from './launchDarklyNonBlocking';
+
 /**
  * Non-blocking SDK / analytics initializer.
  * Run after first paint and when the browser is idle so the router and navigation
- * are never blocked. Use this for LaunchDarkly, analytics, or any script that
- * opens EventSource/long-lived connections (which can show as "canceled" during
- * client-side navigation if started too early).
- *
- * If you add LaunchDarkly (or similar), initialize it inside runNonBlockingInit
- * so it runs after the app has mounted and the first route has rendered.
+ * are never blocked. LaunchDarkly (and any SDK that uses EventSource) must NOT
+ * use waitForInitialization: true or block the first render – init here only after idle.
  */
 
 const runNonBlockingInit = (): void => {
-  // Add any third-party SDK init here, e.g.:
-  // - LaunchDarkly LDClient.init()
-  // - Analytics (gtag, Segment, etc.)
-  // They will run after idle and will not block navigation or cause premature canceled requests.
+  // LaunchDarkly: init only after idle; never use waitForInitialization: true.
+  void initLaunchDarklyNonBlocking();
+  // Add other analytics (gtag, Segment, etc.) here – they will not block navigation.
 };
 
 /**

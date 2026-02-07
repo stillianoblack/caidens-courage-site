@@ -1,5 +1,5 @@
 // Navigation configuration for desktop and mobile
-// This ensures both use the same structure
+// All internal links are rendered with React Router <Link> (never <a>). Prefetch is enabled via onMouseEnter + useEffect(import) in Header/Footer – equivalent to prefetch={true} for instant transitions.
 
 export interface NavItem {
   label: string;
