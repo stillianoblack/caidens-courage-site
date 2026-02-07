@@ -102,21 +102,19 @@ const B4ChatWidget: React.FC = () => {
     // Debug log
     console.log('[B4ChatWidget] sending:', text);
 
-    // Set sending lock immediately
+    // Set sending lock and loading UI immediately so the button updates right away
     isSendingRef.current = true;
     setIsLoading(true);
 
-    // Create user message
     const userMessage: Message = {
       role: 'user',
       content: text
     };
-
-    // Add user message immediately
     setMessages(prev => [...prev, userMessage]);
-
-    // Clear input AFTER capturing text
     setInputValue('');
+
+    // Yield one frame so the loading state can paint before we block on the network
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -152,10 +150,12 @@ const B4ChatWidget: React.FC = () => {
         if (error.name === 'AbortError') {
           displayMessage = "B-4 couldn't connect (timeout).";
         } else {
-          const codeMatch = error.message.match(/code (\d+)/);
-          displayMessage = codeMatch
-            ? `B-4 couldn't connect (code ${codeMatch[1]}).`
-            : `B-4 couldn't connect (code ???). ${error.message}`;
+          const codeMatch = error.message.match(/code (\d+)(?::\s*(.+))?/);
+          const code = codeMatch ? codeMatch[1] : '???';
+          const detail = codeMatch?.[2]?.trim();
+          displayMessage = detail
+            ? `B-4 couldn't connect (${code}): ${detail}`
+            : `B-4 couldn't connect (code ${code}).`;
         }
       } else {
         displayMessage = "B-4 couldn't connect (code ???).";
@@ -338,21 +338,25 @@ const B4ChatWidget: React.FC = () => {
                   type="submit"
                   disabled={!inputValue.trim() || isLoading || isSendingRef.current}
                   className="bg-orange-500 hover:bg-orange-600 disabled:bg-navy-300 disabled:cursor-not-allowed text-white rounded-full w-11 h-11 flex items-center justify-center transition-colors shadow-md flex-shrink-0"
-                  aria-label="Send message"
+                  aria-label={isLoading ? 'Sending…' : 'Send message'}
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    />
-                  </svg>
+                  {isLoading ? (
+                    <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden />
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                      />
+                    </svg>
+                  )}
                 </button>
               </form>
               <p className="text-xs text-navy-500 mt-1.5 px-1">
