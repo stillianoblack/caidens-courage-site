@@ -1,23 +1,46 @@
 /**
- * LaunchDarkly – non-blocking, client-only init (stub).
+ * LaunchDarkly – completely decoupled, non-blocking init with 100ms global timeout.
  *
- * RULES (apply when you add LaunchDarkly):
- * - Do NOT use waitForInitialization: true or any blocking await before render.
- * - Do NOT wrap the root in a provider that awaits LD client – that blocks navigation and causes EventSource timeouts.
- * - DO load the SDK only on the client: call init from runNonBlockingInit() in initNonBlockingSDK.ts (runs after idle).
- * - DO use bootstrap or defaultFlags so the UI shows immediately; let EventSource connect in the background.
+ * REQUIRED when you add LaunchDarkly:
+ * - deferInitialization: true (do not open EventSource until you explicitly start).
+ * - Never waitForInitialization: true or any blocking await before render.
+ * - No LDProvider in the root layout that waits for flags.
+ * - If LD is injected via <script> in HTML, add async and defer to that tag.
  *
- * If you use launchdarkly-react-client-sdk:
- * - Use LDProvider with bootstrap option, or AsyncLDProvider with a short timeout and render children before ready.
- * - Or dynamically import the provider and render it only after init (so root layout never waits).
- *
- * If LaunchDarkly is injected via a script tag (e.g. Netlify): load that script only after idle, or ensure the script
- * does not use waitForInitialization / blocking init. This stub is a no-op until you add the package or wire your own init.
+ * To enable: add launchdarkly-react-client-sdk and REACT_APP_LAUNCHDARKLY_CLIENT_ID,
+ * then uncomment the dynamic import and initialize() below.
  */
 
-export async function initLaunchDarklyNonBlocking(): Promise<void> {
-  // Stub: no LaunchDarkly package in repo. When you add it:
-  // 1. Dynamic import: const { initialize } = await import('launchdarkly-react-client-sdk');
-  // 2. Call initialize({ clientSideID, bootstrap?: {...} });  // never waitForInitialization: true
-  // 3. Call this from runNonBlockingInit() in initNonBlockingSDK.ts so it runs only after idle.
+const LD_INIT_TIMEOUT_MS = 100;
+
+/**
+ * Initialize LaunchDarkly in the background. If it doesn't respond within LD_INIT_TIMEOUT_MS,
+ * the site proceeds without it so navigation is never blocked.
+ * Uses deferInitialization: true and never waitForInitialization.
+ */
+export function initLaunchDarklyNonBlocking(): void {
+  const run = async (): Promise<void> => {
+    try {
+      const clientId =
+        typeof process !== 'undefined' && process.env?.REACT_APP_LAUNCHDARKLY_CLIENT_ID
+          ? process.env.REACT_APP_LAUNCHDARKLY_CLIENT_ID
+          : '';
+      if (!clientId) return;
+
+      // When you add launchdarkly-react-client-sdk, uncomment below. Pattern: 100ms timeout + deferInitialization: true, never waitForInitialization.
+      // const mod = await Promise.race([
+      //   import('launchdarkly-react-client-sdk').catch(() => null),
+      //   new Promise<null>((r) => setTimeout(() => r(null), LD_INIT_TIMEOUT_MS)),
+      // ]);
+      // if (!mod?.initialize) return;
+      // await Promise.race([
+      //   mod.initialize({ clientSideID: clientId, deferInitialization: true }),
+      //   new Promise((_, rej) => setTimeout(() => rej(new Error('LD timeout')), LD_INIT_TIMEOUT_MS)),
+      // ]);
+    } catch {
+      // Proceed without LaunchDarkly.
+    }
+  };
+
+  void run();
 }

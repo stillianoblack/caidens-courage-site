@@ -1,38 +1,22 @@
 import { initLaunchDarklyNonBlocking } from './launchDarklyNonBlocking';
 
 /**
- * Non-blocking SDK / analytics initializer.
- * Run after first paint and when the browser is idle so the router and navigation
- * are never blocked. LaunchDarkly (and any SDK that uses EventSource) must NOT
- * use waitForInitialization: true or block the first render – init here only after idle.
+ * Non-blocking SDK initializer. LaunchDarkly is fully decoupled: no provider in the tree,
+ * init runs after a 100ms global timeout so the site always proceeds without waiting.
  */
 
+const SDK_INIT_DELAY_MS = 100;
+
 const runNonBlockingInit = (): void => {
-  // LaunchDarkly: init only after idle; never use waitForInitialization: true.
   void initLaunchDarklyNonBlocking();
-  // Add other analytics (gtag, Segment, etc.) here – they will not block navigation.
 };
 
 /**
- * Schedules runNonBlockingInit to run when the main thread is idle (or after a short timeout).
- * Call this once from the root component (e.g. App) in a useEffect.
+ * Schedules runNonBlockingInit after a 100ms global timeout. If LaunchDarkly (or any SDK)
+ * doesn't respond instantly, the site has already rendered and navigation is unblocked.
+ * Call once from App in a useEffect.
  */
 export const scheduleNonBlockingSDK = (): (() => void) => {
-  let canceled = false;
-  const run = () => {
-    if (canceled) return;
-    runNonBlockingInit();
-  };
-  if (typeof requestIdleCallback !== 'undefined') {
-    const id = requestIdleCallback(run, { timeout: 2500 });
-    return () => {
-      canceled = true;
-      cancelIdleCallback(id);
-    };
-  }
-  const t = setTimeout(run, 500);
-  return () => {
-    canceled = true;
-    clearTimeout(t);
-  };
+  const t = setTimeout(runNonBlockingInit, SDK_INIT_DELAY_MS);
+  return () => clearTimeout(t);
 };

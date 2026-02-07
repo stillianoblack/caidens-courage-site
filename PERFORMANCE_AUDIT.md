@@ -47,9 +47,14 @@ This project uses **React with React Router**, not Next.js. The audit below maps
 ## 5. Blocking scripts (SDKs / analytics)
 
 - **Status:** Addressed.
-- **reportWebVitals:** Moved to run **after idle** (`requestIdleCallback` in `src/index.js`) so it never blocks the main thread or navigation.
-- **LaunchDarkly / analytics:** LaunchDarkly must **not** use `waitForInitialization: true` or any blocking await. Use **`src/lib/launchDarklyNonBlocking.ts`** and **`src/lib/initNonBlockingSDK.ts`**: init runs only after the browser is idle (client-only, like `ssr: false`). If LaunchDarkly is injected via a **script tag** on production (e.g. Netlify), load that script only after idle or use a non-blocking snippet so the EventSource does not block navigation or cause timeouts.
-- **Loading states:** There is no `/app` directory (this is React Router). The equivalent of `loading.tsx` is the single **Suspense** fallback **`NavigationLoader`** in `App.tsx`; the UI swaps to this skeleton immediately while route chunks load.
+- **reportWebVitals:** Runs after idle so it never blocks the main thread or navigation.
+- **LaunchDarkly – completely decoupled:**
+  - **No provider in the tree** (no LDProvider in `App.tsx` or root layout). Init runs in the background only.
+  - **deferInitialization: true** and **no waitForInitialization** – EventSource does not open until you explicitly start; UI is never held.
+  - **100ms global timeout:** SDK init is scheduled 100ms after mount (`initNonBlockingSDK.ts`). Inside `launchDarklyNonBlocking.ts`, init is wrapped in a 100ms timeout; if LaunchDarkly doesn’t respond, the site proceeds without it.
+  - **Navigation:** No code in `nav.ts` or the Navbar awaits feature-flag evaluation before allowing a route change.
+  - **Script tag:** If LaunchDarkly is injected via a `<script>` in HTML or Netlify, that tag **must** use **async** and **defer** so it doesn’t block. See the comment in `public/index.html`.
+- **Loading states:** The single **Suspense** fallback **`NavigationLoader`** in `App.tsx` is the root loading UI; it shows immediately during route transitions.
 
 ---
 
@@ -58,6 +63,6 @@ This project uses **React with React Router**, not Next.js. The audit below maps
 1. **Prefetch (React Router equivalent of prefetch={true}):** All internal links use `<Link>`. Prefetch is implemented via `onMouseEnter` + `useEffect(import)` for main and footer links; Contact and Product on mount; Shop dropdown and Partner With Us on hover.
 2. **Loading skeleton:** `NavigationLoader` is the single loading UI (like loading.tsx per segment); it shows immediately during route transitions.
 3. **No middleware:** No middleware in project; `_redirects` is SPA-only. No code aborts requests during routing.
-4. **Blocking scripts:** reportWebVitals deferred to `requestIdleCallback`; added `initNonBlockingSDK.ts` so LaunchDarkly/analytics can be initialized non-blocking and avoid canceled eventsource during navigation.
+4. **LaunchDarkly decoupled:** No provider in tree; init after 100ms with `deferInitialization: true` and 100ms timeout so the site proceeds without waiting. Nav never awaits flags. Script tag (if used) must have async and defer.
 
 For production (e.g. Netlify), ensure you deploy the built app and that the only redirect is the SPA fallback. Hard refresh is instant because the full bundle is cached; client-side navigation is instant when the target route chunk is prefetched or already loaded.

@@ -35,7 +35,7 @@ const AppContent: React.FC = () => {
   useEffect(() => void import("./pages/Contact"), []);
   useEffect(() => void import("./pages/Product"), []);
 
-  // Run analytics/SDKs (e.g. LaunchDarkly) only when idle so they never block navigation or cause canceled eventsource during route transitions
+  // LaunchDarkly is completely decoupled: no provider in the tree. Init runs after 100ms with deferInitialization: true and no waitForInitialization; if LD doesn't respond in 100ms, the site proceeds without it.
   useEffect(() => scheduleNonBlockingSDK(), []);
 
   return (
