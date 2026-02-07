@@ -313,7 +313,7 @@ const Home = () => {
         {/* Background Image */}
         <div className="major-publisher-hero-bg absolute inset-0 z-0">
           <img 
-            src={isMobile ? "/homepage_hero-bg_mobile_img.jpg" : "/hero-bg_img_2.jpg"} 
+            src={isMobile ? "/homepage_hero-bg_mobile_img.jpg" : "/hero-bg_img_2.png"} 
             alt="Caiden falling through a fantastical sky"
             className="w-full h-full object-cover"
             style={isMobile ? {
@@ -523,7 +523,7 @@ const Home = () => {
                     <div className="flex-shrink-0">
                       <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
                         <img
-                          src="/Comic5_Coverpage_header.jpg"
+                          src="/Comic5_Coverpage_header.png"
                           alt="Caiden's Courage Comic Book"
                           width="80"
                           height="80"

@@ -134,11 +134,11 @@ const Product: React.FC = () => {
   // Gallery images - can be expanded later
   const galleryImages = [
     {
-      src: "/Comic5_Coverpage_header.jpg",
+      src: "/Comic5_Coverpage_header.png",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
     },
     {
-      src: "/Comic5_Coverpage_header.jpg",
+      src: "/Comic5_Coverpage_header.png",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
     },
     {
