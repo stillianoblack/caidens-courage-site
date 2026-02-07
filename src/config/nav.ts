@@ -1,6 +1,5 @@
 // Navigation configuration for desktop and mobile
-// All internal links are rendered with React Router <Link> (never <a>). Prefetch via onMouseEnter + useEffect(import).
-// No code in nav or Navbar awaits feature-flag evaluation before allowing a route change – navigation is never blocked by LaunchDarkly or any SDK.
+// All internal links use React Router <Link> (never <a>). Prefetch is on for nav: onMouseEnter + useEffect(import) (React Router has no prefetch prop). No loading="lazy" on Links – only on images where appropriate.
 
 export interface NavItem {
   label: string;

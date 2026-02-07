@@ -35,7 +35,7 @@ const AppContent: React.FC = () => {
   useEffect(() => void import("./pages/Contact"), []);
   useEffect(() => void import("./pages/Product"), []);
 
-  // LaunchDarkly is completely decoupled: no provider in the tree. Init runs after 100ms with deferInitialization: true and no waitForInitialization; if LD doesn't respond in 100ms, the site proceeds without it.
+  // LaunchDarkly zero-wait: no provider in tree. Init runs with 0ms delay; use withLDProvider (not asyncWithLDProvider), deferInitialization: true, startWaitSeconds: 0, waitForInitialization: false.
   useEffect(() => scheduleNonBlockingSDK(), []);
 
   return (
