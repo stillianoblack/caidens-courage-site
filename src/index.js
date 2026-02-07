@@ -11,7 +11,15 @@ root.render(
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Defer non-critical work so navigation and first paint are not blocked.
+// Run web vitals (and any analytics) after the browser is idle.
+const scheduleWhenIdle = (fn) => {
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(fn, { timeout: 3000 });
+  } else {
+    setTimeout(fn, 0);
+  }
+};
+scheduleWhenIdle(() => {
+  reportWebVitals();
+});

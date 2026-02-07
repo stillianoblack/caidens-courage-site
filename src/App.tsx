@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
 import NavigationLoader from './components/NavigationLoader';
+import { scheduleNonBlockingSDK } from './lib/initNonBlockingSDK';
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -33,6 +34,9 @@ const AppContent: React.FC = () => {
   useEffect(() => void import("./pages/Characters"), []);
   useEffect(() => void import("./pages/Contact"), []);
   useEffect(() => void import("./pages/Product"), []);
+
+  // Run analytics/SDKs (e.g. LaunchDarkly) only when idle so they never block navigation or cause canceled eventsource during route transitions
+  useEffect(() => scheduleNonBlockingSDK(), []);
 
   return (
     <>
