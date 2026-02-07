@@ -159,7 +159,7 @@ const CourageAcademy: React.FC = () => {
               }}>
                 <div className="aspect-square bg-gradient-to-br from-navy-100 via-golden-100 to-navy-50 overflow-hidden">
                   <img
-                    src="/NeuroCamp.jpg"
+                    src="/NeuroCamp_smaller.jpg"
                     alt="Courage Academy camp visual"
                     className="w-full h-full object-cover scale-110"
                     style={{ objectPosition: 'center center' }}
@@ -536,7 +536,7 @@ const CourageAcademy: React.FC = () => {
             {/* Left: Preview Image */}
             <div className="order-2 lg:order-1 flex items-center justify-center">
               <img
-                src="/NeuroCamp_explore.jpg"
+                src="/NeuroCamp_explore_smaller.jpg"
                 alt="Explore Camp Courage"
                 className="w-full max-w-lg rounded-2xl shadow-lg"
                 onError={(e) => {

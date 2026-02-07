@@ -136,7 +136,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
     available: true,
-    image: "/Comic5_Coverpage_header_Shop.png",
+    image: "/Comic5_Coverpage_header_Shop_smaller.jpg",
   },
   {
     title: "Caiden's Courage T-Shirt",
@@ -146,7 +146,7 @@ const products = [
     purchaseUrl: productLinks.tShirt,
     available: false,
     comingSoon: true,
-    image: "/Caiden_Courage_Tshirt.png",
+    image: "/Caiden'Courage_Tshirt_smaller.jpg",
   },
   {
     title: "B-4 Plush Companions",
@@ -454,7 +454,7 @@ const Home = () => {
                     <div className="flex-shrink-0">
                       <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
                         <img
-                          src="/Comic5_Coverpage_header.png"
+                          src="/Comic5_Coverpage_header_smaller.jpg"
                           alt="Caiden's Courage Comic Book"
                           width="80"
                           height="80"

@@ -134,15 +134,15 @@ const Product: React.FC = () => {
   // Gallery images - can be expanded later
   const galleryImages = [
     {
-      src: "/Comic5_Coverpage_header.png",
+      src: "/Comic5_Coverpage_header_smaller.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
     },
     {
-      src: "/Comic5_Coverpage_header.png",
+      src: "/Comic5_Coverpage_header_smaller.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
     },
     {
-      src: "/CaidensCourage_SocialImage.png", // Placeholder - replace with character art
+      src: "/Caiden'sCourage_SocialImage_smaller.jpg", // Placeholder - replace with character art
       alt: "Character art from Caiden's Courage"
     }
   ];
@@ -449,7 +449,7 @@ const Product: React.FC = () => {
             <div className="order-1 md:order-1 flex justify-center">
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <img
-                  src="/CaidensCourage_SocialImage.png"
+                  src="/Caiden'sCourage_SocialImage_smaller.jpg"
                   alt="Caiden from Caiden's Courage"
                   className="w-full h-auto object-cover"
                   onError={(e) => {
