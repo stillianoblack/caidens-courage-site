@@ -128,7 +128,8 @@ const B4ChatWidget: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        const msg = errorData?.error || errorData?.message || `HTTP ${response.status}`;
+        throw new Error(msg);
       }
 
       const data = await response.json();
