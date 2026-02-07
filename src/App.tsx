@@ -1,6 +1,7 @@
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigationType } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
+import NavigationLoader from './components/NavigationLoader';
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -11,7 +12,7 @@ const Cancelled = lazy(() => import('./pages/Cancelled'));
 const Resources = lazy(() => import('./pages/Resources'));
 const Product = lazy(() => import('./pages/Product'));
 const Preview = lazy(() => import('./pages/Preview'));
-const Mission = lazy(() => import('./pages/Mission'));
+const Mission = React.lazy(() => import("./pages/Mission"));
 const About = lazy(() => import('./pages/About'));
 const B4Clicker = lazy(() => import('./pages/B4Clicker'));
 const CourageAcademy = lazy(() => import('./pages/CourageAcademy'));
@@ -47,10 +48,24 @@ const LoadingFallback = () => (
   </div>
 );
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 250);
+    return () => clearTimeout(t);
+  }, [location]);
+
+  useEffect(() => {
+    import("./pages/Mission");
+  }, []);
+
   return (
-    <Router>
+    <>
       <B4ChatWidget />
+      {loading && <NavigationLoader />}
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
         <Route path="/" element={<Home />} />
@@ -85,6 +100,14 @@ const App: React.FC = () => {
         <Route path="/world" element={<World />} />
         </Routes>
       </Suspense>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

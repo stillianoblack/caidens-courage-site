@@ -129,7 +129,8 @@ const About: React.FC = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
-                to="/mission" 
+                to="/mission"
+                onMouseEnter={() => import("./Mission")}
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive('/mission') ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
                 Mission
@@ -331,6 +332,7 @@ const About: React.FC = () => {
             <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
               <Link
                 to="/mission"
+                onMouseEnter={() => import("./Mission")}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isActive('/mission') ? 'bg-navy-50 font-bold' : ''}`}
               >
@@ -450,7 +452,7 @@ const About: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <section className="text-center">
           <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-            This page will be expanded soon. For more information about our mission, please visit the <Link to="/mission" className="text-golden-500 hover:text-golden-600 font-semibold underline">Mission page</Link>.
+            This page will be expanded soon. For more information about our mission, please visit the <Link to="/mission" onMouseEnter={() => import("./Mission")} className="text-golden-500 hover:text-golden-600 font-semibold underline">Mission page</Link>.
           </p>
         </section>
       </main>
@@ -466,7 +468,7 @@ const About: React.FC = () => {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
+              <Link to="/mission" onMouseEnter={() => import("./Mission")} className="text-white/70 hover:text-white transition-colors">Mission</Link>
               <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">Privacy Policy</Link>
               <Link to="/terms" className="text-white/70 hover:text-white transition-colors">Terms of Service</Link>
             </div>

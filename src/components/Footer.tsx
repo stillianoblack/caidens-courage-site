@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
             </span>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
-            <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
+            <Link to="/mission" onMouseEnter={() => import("../pages/Mission")} className="text-white/70 hover:text-white transition-colors">Mission</Link>
             <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
               Privacy Policy
             </Link>

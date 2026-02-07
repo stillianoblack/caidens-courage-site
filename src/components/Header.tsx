@@ -133,6 +133,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     return (
       <Link
         to={item.href}
+        onMouseEnter={item.href === '/mission' ? () => import('../pages/Mission') : undefined}
         onClick={(e) => handleNavLinkClick(e, item.href)}
         className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
       >
@@ -534,6 +535,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                     <Link
                       key={item.label}
                       to={item.href}
+                      onMouseEnter={item.href === '/mission' ? () => import('../pages/Mission') : undefined}
                       onClick={(e) => {
                         setIsMobileMenuOpen(false);
                         handleNavLinkClick(e, item.href);

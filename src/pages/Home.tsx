@@ -799,6 +799,7 @@ const Home = () => {
                       size="md"
                       as={Link}
                       to="/mission"
+                      onMouseEnter={() => import("./Mission")}
                       className="w-full"
                     >
                       Learn About the Mission
