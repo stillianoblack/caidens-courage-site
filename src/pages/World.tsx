@@ -51,7 +51,7 @@ const World: React.FC = () => {
             rgba(7, 17, 36, 0.08) 72%,
             rgba(7, 17, 36, 0) 85%
           ),
-          url('${isMobile ? '/Headers_world_mobile.png' : '/background_caidensworld_img.jpg'}')`,
+          url('${isMobile ? '/Headers_world_mobile.png' : '/background_caidensworld_img.png'}')`,
           backgroundSize: 'cover',
           backgroundPosition: isMobile ? 'center top' : 'right top',
           backgroundRepeat: 'no-repeat',

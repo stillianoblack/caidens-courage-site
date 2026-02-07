@@ -529,7 +529,7 @@ const Resources: React.FC = () => {
               {/* Left: Illustration */}
               <div className="order-2 lg:order-1 flex items-center justify-center">
                 <img
-                  src="/Caiden_FAQ_section.jpg"
+                  src="/Caiden_FAQ_section.png"
                   alt="Child using resources"
                   className="w-full max-w-lg rounded-2xl shadow-lg"
                   onError={(e) => {

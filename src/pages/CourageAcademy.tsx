@@ -750,7 +750,7 @@ const CourageAcademy: React.FC = () => {
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
               <div className="w-full aspect-square bg-gradient-to-br from-blue-400 to-yellow-400 overflow-hidden flex items-center justify-center">
                 <img
-                  src="/CoolCaiden_header.jpg"
+                  src="/CoolCaiden_header.png"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
                   onError={(e) => {

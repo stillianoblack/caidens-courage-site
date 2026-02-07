@@ -136,7 +136,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
     available: true,
-    image: "/Comic5_Coverpage_header_Shop.jpg",
+    image: "/Comic5_Coverpage_header_Shop.png",
   },
   {
     title: "Caiden's Courage T-Shirt",
@@ -146,7 +146,7 @@ const products = [
     purchaseUrl: productLinks.tShirt,
     available: false,
     comingSoon: true,
-    image: "/Caiden'Courage_Tshirt.jpg",
+    image: "/Caiden_Courage_Tshirt.png",
   },
   {
     title: "B-4 Plush Companions",
@@ -254,7 +254,7 @@ const Home = () => {
               objectPosition: 'center 30%'
             }}
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/hero-bg.jpg';
+              (e.target as HTMLImageElement).src = '/hero-bg.png';
             }}
           />
         </div>
@@ -690,13 +690,13 @@ const Home = () => {
                 style={{ aspectRatio: '1/1' }}
               >
                 <img
-                  src="/Courageforeverykid_1.jpeg"
+                  src="/Courageforeverykid.png"
                   alt="Caiden celebrating - Courage for Every Kid"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/Courageforeverykid.jpeg';
+                    (e.target as HTMLImageElement).src = '/Courageforeverykid.png';
                   }}
                 />
               </div>

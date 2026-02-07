@@ -566,7 +566,7 @@ const Mission: React.FC = () => {
                     alt="Caiden's Courage world exploration and discovery"
                     className="world-beginning-bloop-image"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/hero-bg.jpg';
+                      (e.target as HTMLImageElement).src = '/hero-bg.png';
                     }}
                   />
                 </div>

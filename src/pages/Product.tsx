@@ -142,7 +142,7 @@ const Product: React.FC = () => {
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
     },
     {
-      src: "/Caiden'sCourage_SocialImage.JPG", // Placeholder - replace with character art
+      src: "/CaidensCourage_SocialImage.png", // Placeholder - replace with character art
       alt: "Character art from Caiden's Courage"
     }
   ];
@@ -449,7 +449,7 @@ const Product: React.FC = () => {
             <div className="order-1 md:order-1 flex justify-center">
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <img
-                  src="/Caiden'sCourage_SocialImage.JPG"
+                  src="/CaidensCourage_SocialImage.png"
                   alt="Caiden from Caiden's Courage"
                   className="w-full h-auto object-cover"
                   onError={(e) => {
@@ -932,7 +932,7 @@ const Product: React.FC = () => {
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
                 <img
-                  src="/CoolCaiden_header.jpg"
+                  src="/CoolCaiden_header.png"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
                   onError={(e) => {

@@ -47,7 +47,7 @@ export const RESOURCES: Resource[] = [
     title: "Caiden Desktop Wallpaper",
     type: "wallpaper",
     tags: ["caiden", "desktop", "inspirational"],
-    thumbnail: "/CoolCaiden_header.jpg",
+    thumbnail: "/CoolCaiden_header.png",
     fileUrl: "/downloads/wallpapers/caiden-desktop.png",
     description: "A fun, confidence-boosting wallpaper to inspire kids at home or school",
     format: "PNG",
