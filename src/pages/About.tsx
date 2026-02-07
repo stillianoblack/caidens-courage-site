@@ -304,10 +304,10 @@ const About: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={handleWaitlistClick}
+                onClick={() => navigate('/comicbook')}
                 className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
               >
-                Join Courage Community
+                Pre-Order Volume 1
               </Button>
             </div>
           </div>
@@ -425,11 +425,11 @@ const About: React.FC = () => {
                   size="lg"
                   fullWidth
                   onClick={() => {
-                    handleWaitlistClick();
+                    navigate('/comicbook');
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Join the Courage Community
+                  Pre-Order Volume 1
                 </Button>
               </div>
             </div>

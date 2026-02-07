@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Resources: React.FC = () => {
   const navigate = useNavigate();
@@ -15,15 +17,8 @@ const Resources: React.FC = () => {
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
 
   // Scroll-triggered animations for sections
   useEffect(() => {
@@ -70,7 +65,66 @@ const Resources: React.FC = () => {
     } else if (audienceParam && ['parents', 'teachers', 'all'].includes(audienceParam)) {
       setSelectedAudience(audienceParam as Audience);
     }
-  }, [location.search]);
+
+    // Handle hash navigation (#kids, #parents, #teachers, #downloads, #library)
+    if (location.hash) {
+      const hash = location.hash.substring(1); // Remove #
+      if (hash === 'kids') {
+        setSelectedAudience('students');
+        setTimeout(() => {
+          const element = document.getElementById('kids');
+          if (element) {
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (hash === 'parents') {
+        setSelectedAudience('parents');
+        setTimeout(() => {
+          const element = document.getElementById('parents');
+          if (element) {
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (hash === 'teachers') {
+        setSelectedAudience('teachers');
+        setTimeout(() => {
+          const element = document.getElementById('teachers');
+          if (element) {
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (hash === 'downloads' || hash === 'library') {
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (hash === 'faq') {
+        setTimeout(() => {
+          const element = document.getElementById('faq');
+          if (element) {
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 300);
+      }
+    }
+  }, [location.search, location.hash]);
 
   // Handle scroll + highlight when audience filter changes (from URL or dropdown)
   useEffect(() => {
@@ -106,54 +160,6 @@ const Resources: React.FC = () => {
     }
   }, [location.search, location.pathname]);
 
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showResourcesDropdown) {
-        setShowResourcesDropdown(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showResourcesDropdown]);
-
-  // Handle click outside to close dropdown (mobile)
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (showResourcesDropdown && !target.closest('.has-dropdown')) {
-        setShowResourcesDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showResourcesDropdown]);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (closeTimeout) {
-        clearTimeout(closeTimeout);
-      }
-      if (shopCloseTimeout) {
-        clearTimeout(shopCloseTimeout);
-      }
-    };
-  }, [closeTimeout, shopCloseTimeout]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
@@ -163,12 +169,6 @@ const Resources: React.FC = () => {
 
   const handleComingSoonClick = () => {
     setIsComingSoonModalOpen(true);
-  };
-
-  const handleLogoClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
-    }
   };
 
   // Get all unique tags from resources
@@ -241,500 +241,9 @@ const Resources: React.FC = () => {
     window.open(fileUrl, '_blank');
   };
 
-  const handleMouseEnter = () => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
-    }
-    setShowResourcesDropdown(true);
-  };
-
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setShowResourcesDropdown(false);
-    }, 200); // 200ms delay before closing
-    setCloseTimeout(timeout);
-  };
-
-  const handleToggleDropdown = () => {
-    setShowResourcesDropdown(!showResourcesDropdown);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleToggleDropdown();
-    }
-  };
-
   return (
     <div className="min-h-screen bg-cream font-body">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3">
-              {/* Hamburger Menu Button - Mobile only */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              
-              <Link 
-                to="/"
-                onClick={handleLogoClick}
-                className="inline-block hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="/logoCaiden.png" 
-                  alt="Caiden's Courage" 
-                  className="h-10 sm:h-12 w-auto"
-                />
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation - Only visible on desktop (lg and up) */}
-            <nav className="hidden lg:flex items-center gap-8">
-              <Link 
-                to="/mission" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Mission
-              </Link>
-              <Link 
-                to="/mission" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
-              >
-                Mission
-              </Link>
-              <Link 
-                to="/#about"
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                About
-              </Link>
-              <Link 
-                to="/#characters" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Characters
-              </Link>
-              
-              {/* Shop Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={() => {
-                  if (shopCloseTimeout) {
-                    clearTimeout(shopCloseTimeout);
-                    setShopCloseTimeout(null);
-                  }
-                  setShowShopDropdown(true);
-                }}
-                onMouseLeave={() => {
-                  const timeout = setTimeout(() => {
-                    setShowShopDropdown(false);
-                  }, 200);
-                  setShopCloseTimeout(timeout);
-                }}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowShopDropdown(!showShopDropdown);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowShopDropdown(!showShopDropdown);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showShopDropdown}
-                >
-                  Shop
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                {/* Invisible hover bridge */}
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showShopDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={() => {
-                    if (shopCloseTimeout) {
-                      clearTimeout(shopCloseTimeout);
-                      setShopCloseTimeout(null);
-                    }
-                    setShowShopDropdown(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowShopDropdown(false);
-                    }, 200);
-                    setShopCloseTimeout(timeout);
-                  }}
-                >
-                  <Link
-                    to="/comicbook"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">Comic Book</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Resources Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={handleToggleDropdown}
-                  onKeyDown={handleKeyDown}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showResourcesDropdown}
-                >
-                  Resources
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                {/* Invisible hover bridge */}
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showResourcesDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <Link
-                    to="/resources?audience=kids"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Kids</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Parents</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Teachers</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">All Resources</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* Comic Book */}
-              <Link 
-                to="/comicbook" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Comic Book
-              </Link>
-            </nav>
-            
-            {/* Action Area - Contact + Join Waitlist Button */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-              <a 
-                href="mailto:stills@caidenscourage.com" 
-                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Contact
-              </a>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleWaitlistClick}
-                className="whitespace-nowrap flex-shrink-0"
-              >
-                Join Waitlist
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation */}
-      <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {/* Full Screen Menu Panel - Slides from Left */}
-        <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Menu Items - Centered */}
-          <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
-            <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
-              <Link
-                to="/comicbook"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Comic Book</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/mission"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
-              >
-                <span>Mission</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#about"
-                onClick={(e) => {
-                  setIsMobileMenuOpen(false);
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>About</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#characters"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Characters</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Shop</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              {/* Resources Dropdown in Mobile Menu */}
-              <div className="border-b border-navy-100">
-                <button
-                  onClick={() => setShowMobileResourcesDropdown(!showMobileResourcesDropdown)}
-                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
-                >
-                  <span>Resources</span>
-                  <svg 
-                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                  <Link
-                    to="/resources?audience=kids"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Kids</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Parents</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Teachers</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=all"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
-                  >
-                    <div className="font-semibold text-lg">All Resources</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              <a
-                href="mailto:stills@caidenscourage.com"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Contact</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-              
-              {/* CTA Button in Mobile Menu */}
-              <div className="px-6 py-6 mt-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Join Waitlist
-                </Button>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
+      <Header onComingSoonClick={handleComingSoonClick} />
 
       {/* Header */}
       <div 
@@ -765,7 +274,9 @@ const Resources: React.FC = () => {
         {/* White Card Container */}
         <div className="bg-white rounded-2xl p-6 shadow-md mb-8">
           {/* Audience Filter Buttons */}
-          <div className="mb-6">
+          <div className="mb-6" id="kids">
+            <div id="parents" style={{ position: 'absolute', marginTop: '-100px' }}></div>
+            <div id="teachers" style={{ position: 'absolute', marginTop: '-100px' }}></div>
             <label className="block text-sm font-semibold text-navy-700 mb-3">I'm looking for resources for:</label>
             <div className="pill-toggle is-scroll">
               <button
@@ -871,6 +382,7 @@ const Resources: React.FC = () => {
         </div>
 
         {/* Resources Grid - Wrapped in anchor div for scroll target */}
+        <div id="downloads" className="section-anchor">
         <div id="resource-results" className="section-anchor">
         <div 
           id="resources-grid"
@@ -1018,249 +530,322 @@ const Resources: React.FC = () => {
         )}
         </div>
         </div>
+        </div>
 
-        {/* FAQ / Help Section */}
-        <div style={{ marginTop: '180px', marginBottom: '100px' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* B-4 Tools Section */}
+        <div 
+          id="library"
+          data-section="b4-tools"
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in-up ${visibleSections.has('b4-tools') ? 'visible' : ''}`}
+        >
+          <div className="text-center mb-10">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">
+              B-4 Tools Library
+            </h2>
+            <p className="text-lg sm:text-xl text-navy-600 max-w-3xl mx-auto mb-8">
+              Download guides and resources to support the B-4 Reset missions at home or in the classroom.
+            </p>
+            <Link to="/courage-academy#educator-access">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto">
+                Request Educator Access
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+      {/* FAQ Section - Full Width */}
+      <div id="faq" className="faqSectionFullBleed bg-white py-12 sm:py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 sm:mb-3">
+            <div className="text-center mb-12 lg:mb-16">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">
                 Frequently Asked Questions
               </h2>
-              <p className="text-lg sm:text-xl text-navy-600 max-w-3xl mx-auto mb-2">
+              <p className="text-lg sm:text-xl text-navy-600 max-w-3xl mx-auto mb-3">
                 Everything you need to know about downloading and using our free resources.
               </p>
-              <p className="text-sm text-navy-500 max-w-2xl mx-auto">
-                Parents, teachers, and students can download resources instantly — no login required.
+              <p className="text-base text-navy-500">
+                Parents, teachers, and students can download resources instantly – no login required.
               </p>
             </div>
 
-            {/* Two-column layout: Illustration + FAQ Accordion */}
-            <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Left: FAQ Illustration */}
-              <div className="order-2 md:order-1 mb-12 md:mb-0">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-navy-100">
-                  <img
-                    src="/Caiden_FAQ_section.jpg"
-                    alt="Caiden using resources and worksheets"
-                    className="w-full h-auto object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
-                    }}
-                  />
-                </div>
+            {/* Two Column Layout */}
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+              {/* Left: Illustration */}
+              <div className="order-2 lg:order-1 flex items-center justify-center">
+                <img
+                  src="/Caiden_FAQ_section.jpg"
+                  alt="Child using resources"
+                  className="w-full max-w-lg rounded-2xl shadow-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
               </div>
 
               {/* Right: FAQ Accordion */}
-              <div className="order-1 md:order-2">
-                <div className="space-y-1">
-                  {[
-                    {
-                      question: "Are these resources free?",
-                      answer: "Yes. All resources on this page are free to download and designed to support courage, creativity, and neurodiverse kids."
-                    },
-                    {
-                      question: "Do I need an account to download?",
-                      answer: "No account needed. Just click Download and you'll get the file instantly."
-                    },
-                    {
-                      question: "What ages are these for?",
-                      answer: "Most resources are best for ages 7–12, but parents and teachers can adapt them for younger or older kids."
-                    },
-                    {
-                      question: "Can I use these in the classroom?",
-                      answer: "Yes. Teacher-friendly resources are made for classroom and home use. You can print and share them with your students."
-                    },
-                    {
-                      question: "Can I print these worksheets?",
-                      answer: "Yes. PDFs are printable. For best results, print at 100% scale on letter-size paper unless the download notes say otherwise."
-                    },
-                    {
-                      question: "How do I use the SEL worksheets?",
-                      answer: "Use them as a short reflection activity, a conversation starter, or part of a weekly check-in. They're designed to build emotional vocabulary and self-awareness."
-                    },
-                    {
-                      question: "What if I can't open the file?",
-                      answer: "Try opening PDFs in a browser or Adobe Reader. If you still have issues, contact us and we'll help."
-                    },
-                    {
-                      question: "Will you add more resources?",
-                      answer: "Yes. We're adding new wallpapers, coloring pages, SEL worksheets, and teacher packs regularly."
-                    }
-                  ].map((faq, index) => (
-                    <div key={index} className="border-b border-navy-100 last:border-b-0">
-                      <button
-                        onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            setOpenFaqIndex(openFaqIndex === index ? null : index);
-                          } else if (e.key === 'Escape' && openFaqIndex === index) {
-                            setOpenFaqIndex(null);
-                          }
-                        }}
-                        className="w-full py-6 sm:py-7 text-left flex items-center justify-between focus:outline-none"
-                        aria-expanded={openFaqIndex === index}
-                        aria-controls={`faq-answer-${index}`}
-                        id={`faq-question-${index}`}
-                      >
-                        <span className="font-semibold text-lg text-navy-600 pr-4 flex-1">
-                          {faq.question}
+              <div className="order-1 lg:order-2">
+                <div className="space-y-0">
+                  {/* FAQ Item 1 */}
+                  <div className="border-t border-navy-200 first:border-t-0">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 0 ? null : 0)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 0}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        Are these resources free?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 0 ? '−' : '+'}
                         </span>
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center transition-colors duration-200 hover:bg-orange-600">
-                          {openFaqIndex === index ? (
-                            <svg
-                              className="w-4 h-4 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" />
-                            </svg>
-                          ) : (
-                            <svg
-                              className="w-4 h-4 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                            </svg>
-                          )}
-                        </div>
-                      </button>
-                      <div
-                        id={`faq-answer-${index}`}
-                        role="region"
-                        aria-labelledby={`faq-question-${index}`}
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          openFaqIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                        }`}
-                      >
-                        <div className="pb-6 sm:pb-7 text-navy-600 leading-relaxed text-base">
-                          {faq.answer}
-                        </div>
+                      </span>
+                    </button>
+                    {openFaqIndex === 0 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Yes. All resources on this page are free to download and designed to support courage, creativity, and neurodiverse kids.
+                        </p>
                       </div>
-                    </div>
-                  ))}
+                    )}
+                  </div>
+
+                  {/* FAQ Item 2 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 1 ? null : 1)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 1}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        Do I need an account to download?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 1 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 1 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          No account needed. Simply click the download button on any resource to get started.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 3 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 2 ? null : 2)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 2}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        What ages are these for?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 2 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 2 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Most resources are designed for ages 6-12, but many can be adapted for younger or older kids. Check the age range on each resource card.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 4 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 3}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        Can I use these in the classroom?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 3 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 3 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Absolutely! Many resources are designed for classroom use. Look for the "Classroom & Home" or "Classroom" tag on resource cards.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 5 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 4}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        Can I print these worksheets?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 4 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 4 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Yes! All printable resources are designed to be printed at home or in the classroom. They're formatted for standard letter-size paper.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 6 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 5 ? null : 5)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 5}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        How do I use the SEL worksheets?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 5 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 5 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          SEL worksheets can be used one-on-one, in small groups, or as a class activity. Each worksheet includes guidance for use at home or in the classroom.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 7 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 6 ? null : 6)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 6}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        What if I can't open the file?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 6 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 6 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Most resources are PDFs, which can be opened with any PDF reader. If you're having trouble, try using a different browser or device. Contact us if you need help.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* FAQ Item 8 */}
+                  <div className="border-t border-navy-200">
+                    <button
+                      onClick={() => setOpenFaqIndex(openFaqIndex === 7 ? null : 7)}
+                      className="w-full flex items-center justify-between py-6 text-left hover:bg-navy-50 transition-colors px-1"
+                      aria-expanded={openFaqIndex === 7}
+                    >
+                      <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
+                        Will you add more resources?
+                      </h3>
+                      <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
+                        <span className="text-white text-xl font-bold">
+                          {openFaqIndex === 7 ? '−' : '+'}
+                        </span>
+                      </span>
+                    </button>
+                    {openFaqIndex === 7 && (
+                      <div className="pb-6 px-1">
+                        <p className="text-lg text-navy-600 leading-relaxed">
+                          Yes! We're always creating new resources. Check back regularly or sign up to be notified when new downloads are available.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Soft Engagement CTA */}
-        {filteredResources.length > 0 && (
-          <div 
-            id="resources-cta"
-            data-section="cta"
-            className={`px-4 fade-in-up ${visibleSections.has('resources-cta') ? 'visible' : ''}`}
-            style={{ marginTop: '150px', marginBottom: '150px' }}
-          >
-            <div className="relative w-full max-w-7xl mx-auto">
-              {/* Blue to yellow gradient background */}
-              <div className="relative bg-gradient-to-r from-navy-500 via-navy-400 to-yellow-200 rounded-3xl py-16 sm:py-20 lg:py-24 px-8 sm:px-12 lg:px-16 shadow-2xl overflow-hidden">
-                <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-                  {/* Left: Image */}
-                  <div className="flex-shrink-0">
+        {/* Newsletter Subscribe Banner - Full Width */}
+        <div className="newsletterSectionFullBleed bg-white py-12 sm:py-16 lg:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-r from-navy-500 to-golden-400 rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10">
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                {/* Left: Character Image */}
+                <div className="flex-shrink-0">
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                     <img
                       src="/Caiden@4x-100.jpeg"
                       alt="Caiden"
-                      className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full object-cover border-4 border-white/50 shadow-lg"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
                       }}
                     />
                   </div>
+                </div>
 
-                  {/* Right: Content - center aligned to image */}
-                  <div className="flex-1 text-left flex flex-col justify-center">
-                    <h3 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-white mb-3">
-                      Get notified when new free resources are added
-                    </h3>
-                    <p className="text-white/90 mb-6 text-base sm:text-lg">
-                      Join the Courage community for free tools and updates
-                    </p>
-                    <form onSubmit={handleEmailSubmit} className="max-w-lg">
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="Enter your email"
-                          required
-                          className="flex-1 px-5 py-3.5 rounded-full bg-white border-2 border-white/50 focus:border-white focus:outline-none text-navy-700 placeholder-navy-400/60 shadow-lg transition-all duration-300 hover:shadow-xl"
-                        />
-                        <button
-                          type="submit"
-                          className="px-8 py-3.5 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-all duration-300 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-navy-500 shadow-lg hover:shadow-xl hover:scale-105"
-                        >
-                          {emailSubmitted ? '✓ Subscribed!' : 'Subscribe'}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+                {/* Right: Text and Form */}
+                <div className="flex-grow w-full lg:w-auto">
+                  <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
+                    Get notified when new free resources are added
+                  </h3>
+                  <p className="text-white/90 text-base sm:text-lg mb-6">
+                    Join the Courage community for free tools and updates
+                  </p>
+                  <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                      className="flex-1 px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={emailSubmitted}
+                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {emailSubmitted ? '✓ Subscribed!' : 'Subscribe'}
+                    </button>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-navy-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-xl font-extrabold">
-                <span className="text-white">Caiden's</span>
-                <span className="text-golden-400">Courage</span>
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
-              <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-white/10">
-            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
-              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link 
-                to="/#about" 
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="text-white/70 hover:text-white transition-colors"
-              >
-                About
-              </Link>
-              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
-              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
-            </div>
-            <p className="text-white/60 text-sm text-center">
-              © {new Date().getFullYear()} Caiden's Courage. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (

@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "brandName": "Caiden's Courage",
+    "assistantName": "B-4",
+    "lastUpdated": "2024-12-19"
+  },
+  "sections": [
+    {
+      "id": "camp-courage-overview",
+      "title": "Camp Courage",
+      "tags": ["camp", "courage", "academy", "overview", "educators", "caregivers", "missions", "pilots"],
+      "audiences": ["parents", "teachers", "counselors", "kids"],
+      "snippets": [
+        {
+          "id": "camp-1",
+          "text": "Camp Courage is a Courage Academy experience with guided SEL missions, companion activities, and classroom pilots for educators and caregivers."
+        },
+        {
+          "id": "camp-2",
+          "text": "Camp Courage offers guided SEL missions, companion activities, and classroom-ready tools—built for kids and the grown-ups who support them."
+        },
+        {
+          "id": "camp-3",
+          "text": "The Request Educator Access button on Camp Courage scrolls to the FOR PARENTS + EDUCATORS section where you can unlock printable guides, prompts, and pilot resources."
+        },
+        {
+          "id": "camp-4",
+          "text": "Camp Courage includes: Guided Missions (feelings check-ins, body reset, courage practice), Companion Activities (printable reflection sheets, discussion prompts), Classroom Pilots (bring Caiden's Courage to your school), and Training & Guides (implementation support)."
+        }
+      ]
+    },
+    {
+      "id": "faqs",
+      "title": "FAQs",
+      "tags": ["faq", "download", "printing", "account", "classroom", "ages", "free", "resources"],
+      "audiences": ["parents", "teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "faq-free",
+          "q": "Are these resources free?",
+          "a": "Yes. All resources on this page are free to download and designed to support courage, creativity, and neurodiverse kids."
+        },
+        {
+          "id": "faq-account",
+          "q": "Do I need an account to download?",
+          "a": "No account needed. Simply click the download button on any resource to get started."
+        },
+        {
+          "id": "faq-ages",
+          "q": "What ages are these for?",
+          "a": "Most resources are designed for ages 6-12, but many can be adapted for younger or older kids. Check the age range on each resource card."
+        },
+        {
+          "id": "faq-classroom",
+          "q": "Can I use these in the classroom?",
+          "a": "Absolutely! Many resources are designed for classroom use. Look for the Classroom & Home or Classroom tag on resource cards."
+        },
+        {
+          "id": "faq-print",
+          "q": "Can I print these worksheets?",
+          "a": "Yes! All printable resources are designed to be printed at home or in the classroom. They're formatted for standard letter-size paper."
+        },
+        {
+          "id": "faq-sel",
+          "q": "How do I use the SEL worksheets?",
+          "a": "SEL worksheets can be used one-on-one, in small groups, or as a class activity. Each worksheet includes guidance for use at home or in the classroom."
+        },
+        {
+          "id": "faq-file",
+          "q": "What if I can't open the file?",
+          "a": "Most resources are PDFs, which can be opened with any PDF reader. If you're having trouble, try using a different browser or device. Contact us if you need help."
+        },
+        {
+          "id": "faq-more",
+          "q": "Will you add more resources?",
+          "a": "Yes! We're always creating new resources. Check back regularly or sign up to be notified when new downloads are available."
+        }
+      ]
+    },
+    {
+      "id": "b4-reset-tools",
+      "title": "B-4 Reset Tools",
+      "tags": ["reset", "calm", "routine", "regulation", "tools", "b-4", "modules", "mission"],
+      "audiences": ["parents", "teachers", "kids"],
+      "snippets": [
+        {
+          "id": "reset-1",
+          "text": "B-4 Reset Tools are short, supportive resets that help kids notice feelings and find calm—one step at a time."
+        },
+        {
+          "id": "reset-2",
+          "text": "The B-4 Reset Tools help children pause, identify how their body feels, and take a small step toward regulation. Each interaction follows a simple flow: notice → acknowledge → reset."
+        },
+        {
+          "id": "reset-3",
+          "text": "B-4 Reset Tools are designed for calm, predictable use—no timers, no scores, no wrong answers. Built for neurodivergent learners without pressure or overwhelm."
+        },
+        {
+          "id": "reset-4",
+          "text": "B-4 Reset Tools include four Courage Modules: The Fire (hot/angry/frustrated), The Static (worried/jittery/scared), The Cloud (heavy/sad/tired), and The Spark (busy/fast/everywhere)."
+        },
+        {
+          "id": "reset-5",
+          "text": "B-4 Reset Tools work on tablets for classroom use and are designed for short attention spans. The experience is child-led with emotional identification."
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Resources",
+      "tags": ["resources", "download", "printable", "coloring", "wallpaper", "worksheet", "teacher", "pack"],
+      "audiences": ["parents", "teachers", "counselors", "kids"],
+      "snippets": [
+        {
+          "id": "resources-1",
+          "text": "Resources include: coloring pages, wallpapers, SEL worksheets, teacher packs, and printable guides. All are free to download with no login required."
+        },
+        {
+          "id": "resources-2",
+          "text": "Resources are organized by audience: For Kids (coloring pages, wallpapers), For Parents (discussion prompts, reflection sheets), For Teachers (classroom activities, teacher packs), and All Resources."
+        },
+        {
+          "id": "resources-3",
+          "text": "You can filter resources by type: coloring pages, wallpapers, SEL worksheets, and teacher packs. All resources are instantly downloadable."
+        },
+        {
+          "id": "resources-4",
+          "text": "Resources are available at /resources. The FAQ section answers common questions about downloading, printing, and using resources in the classroom."
+        }
+      ]
+    },
+    {
+      "id": "classroom-pilots",
+      "title": "Classroom Pilots",
+      "tags": ["pilot", "classroom", "school", "organization", "educator", "program"],
+      "audiences": ["teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "pilot-1",
+          "text": "Classroom Pilots help bring Caiden's Courage to your school or organization. Pilots help us learn what works best for neurodivergent learners with simple routines that fit real schedules."
+        },
+        {
+          "id": "pilot-2",
+          "text": "To request a Classroom Pilot, visit /classroom-pilots or use the Request Educator Access button on Camp Courage which scrolls to the FOR PARENTS + EDUCATORS section."
+        }
+      ]
+    },
+    {
+      "id": "training-guides",
+      "title": "Training & Guides",
+      "tags": ["training", "guide", "implementation", "how-to", "support"],
+      "audiences": ["parents", "teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "training-1",
+          "text": "Training & Guides provide quick guidance for adults on how to introduce B-4 tools, support different learners, and keep the experience calm, predictable, and non-judgmental."
+        },
+        {
+          "id": "training-2",
+          "text": "Training & Guides are available at /training-guides and include implementation guides, routine cards, and printable prompts for families, counselors, and teachers."
+        }
+      ]
+    },
+    {
+      "id": "companion-activities",
+      "title": "Companion Activities",
+      "tags": ["companion", "activities", "printable", "reflection", "discussion", "prompts"],
+      "audiences": ["parents", "teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "companion-1",
+          "text": "Companion Activities are printable activities and conversation prompts that help caregivers and educators bring the story into real-life moments—before, during, and after big feelings."
+        },
+        {
+          "id": "companion-2",
+          "text": "Companion Activities include: printable reflection sheets, discussion prompts for families, and classroom-friendly extensions. Available in the Resources section."
+        }
+      ]
+    },
+    {
+      "id": "about-caidens-courage",
+      "title": "What is Caiden's Courage?",
+      "tags": ["about", "caiden", "story", "comic", "neurodiversity", "adhd", "mission", "what is"],
+      "audiences": ["parents", "teachers", "counselors", "kids"],
+      "snippets": [
+        {
+          "id": "about-1",
+          "text": "Caiden's Courage is a story and learning platform that helps kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave."
+        },
+        {
+          "id": "about-2",
+          "text": "Caiden is an 11-year-old who discovers that the thing he struggles with most—his ADHD—is actually his superpower. The story shows kids that ADHD isn't a flaw—it's a source of creativity, energy, and unique strength."
+        },
+        {
+          "id": "about-3",
+          "text": "Caiden's Courage includes: a comic book story, B-4 Reset Tools (interactive calm-down missions), Camp Courage (guided SEL missions and activities), and free printable resources for home and classroom use."
+        },
+        {
+          "id": "about-4",
+          "text": "The mission of Caiden's Courage is to help every child see their mind as powerful—especially the ones who feel different. We celebrate neurodiversity and help kids understand that courage looks like doing things your own way."
+        }
+      ]
+    },
+    {
+      "id": "printable-resources",
+      "title": "Printable Resources",
+      "tags": ["printable", "printables", "mission prompts", "worksheet", "download", "ages 7-12", "7-12"],
+      "audiences": ["parents", "teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "printable-1",
+          "text": "Printable resources include: mission prompts, B-4 reset routine cards, reflection sheets, discussion prompts, coloring pages, wallpapers, and SEL worksheets. Most are designed for ages 6-12, but many can be adapted for younger or older kids."
+        },
+        {
+          "id": "printable-2",
+          "text": "For printables for ages 7-12, check the Resources page at /resources. You can filter by type (coloring pages, wallpapers, worksheets, teacher packs) and by audience (For Kids, For Parents, For Teachers). All resources are free to download with no login required."
+        },
+        {
+          "id": "printable-3",
+          "text": "Printable mission prompts help caregivers and educators guide kids through B-4 reset routines. These are available in the Resources section under 'B-4 Tools Library' or by requesting educator access on the Camp Courage page."
+        },
+        {
+          "id": "printable-4",
+          "text": "To find printables for ages 7-12: Visit /resources, filter by 'For Kids' or 'For Teachers', and look for resources tagged with age ranges. Coloring pages, wallpapers, and SEL worksheets are all available as instant downloads."
+        }
+      ]
+    },
+    {
+      "id": "courage-definition",
+      "title": "What is Courage?",
+      "tags": ["courage", "what is", "definition", "sel", "emotional"],
+      "audiences": ["parents", "teachers", "counselors", "kids"],
+      "snippets": [
+        {
+          "id": "courage-1",
+          "text": "Courage looks like doing things your own way. At Caiden's Courage, we believe courage means understanding your emotions, celebrating your unique strengths, and showing up bravely in everyday moments—even when things feel hard."
+        },
+        {
+          "id": "courage-2",
+          "text": "Courage isn't about being fearless. It's about feeling scared or worried and still trying. It's about naming what you're feeling, asking for help when you need it, and being kind to yourself when things don't go perfectly."
+        }
+      ]
+    },
+    {
+      "id": "classroom-usage",
+      "title": "How to Use in the Classroom",
+      "tags": ["classroom", "use", "how", "teacher", "students", "lesson", "school"],
+      "audiences": ["teachers", "counselors"],
+      "snippets": [
+        {
+          "id": "classroom-1",
+          "text": "Many resources are designed for classroom use. Look for the 'Classroom & Home' or 'Classroom' tag on resource cards. SEL worksheets can be used one-on-one, in small groups, or as a class activity. Each worksheet includes guidance for use at home or in the classroom."
+        },
+        {
+          "id": "classroom-2",
+          "text": "B-4 Reset Tools work on tablets for classroom use and are designed for short attention spans. The experience is child-led with emotional identification—no timers, no scores, no wrong answers. Perfect for calm corners or quick resets between activities."
+        },
+        {
+          "id": "classroom-3",
+          "text": "To use Caiden's Courage in your classroom: Start with B-4 Reset Tools for quick calm-down moments, use printable mission prompts for guided SEL activities, and explore Companion Activities for reflection and discussion. All resources are free and no login is required."
+        }
+      ]
+    }
+  ]
+}

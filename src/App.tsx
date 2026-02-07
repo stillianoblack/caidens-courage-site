@@ -1,20 +1,58 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Terms from './pages/Terms';
-import ThankYou from './pages/ThankYou';
-import Cancelled from './pages/Cancelled';
-import Resources from './pages/Resources';
-import Product from './pages/Product';
-import Preview from './pages/Preview';
-import Mission from './pages/Mission';
-import About from './pages/About';
+import B4ChatWidget from './components/B4ChatWidget';
+
+// Lazy load pages for code splitting
+const Home = lazy(() => import('./pages/Home'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const ThankYou = lazy(() => import('./pages/ThankYou'));
+const Cancelled = lazy(() => import('./pages/Cancelled'));
+const Resources = lazy(() => import('./pages/Resources'));
+const Product = lazy(() => import('./pages/Product'));
+const Preview = lazy(() => import('./pages/Preview'));
+const Mission = lazy(() => import('./pages/Mission'));
+const About = lazy(() => import('./pages/About'));
+const B4Clicker = lazy(() => import('./pages/B4Clicker'));
+const CourageAcademy = lazy(() => import('./pages/CourageAcademy'));
+const ClassroomPilots = lazy(() => import('./pages/ClassroomPilots'));
+const TrainingGuides = lazy(() => import('./pages/TrainingGuides'));
+const ResourcesB4ToolsLibrary = lazy(() => import('./pages/ResourcesB4ToolsLibrary'));
+const ResourcesDownloads = lazy(() => import('./pages/ResourcesDownloads'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Characters = lazy(() => import('./pages/Characters'));
+const World = lazy(() => import('./pages/World'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    minHeight: '100vh',
+    backgroundColor: '#faf9f7'
+  }}>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ 
+        width: '40px', 
+        height: '40px', 
+        border: '4px solid #f3f3f3',
+        borderTop: '4px solid #243e70',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+        margin: '0 auto 16px'
+      }}></div>
+      <p style={{ color: '#243e70', fontSize: '16px' }}>Loading...</p>
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   return (
     <Router>
-      <Routes>
+      <B4ChatWidget />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
@@ -31,7 +69,22 @@ const App: React.FC = () => {
         <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
         <Route path="/mission" element={<Mission />} />
         <Route path="/about" element={<About />} />
-      </Routes>
+        <Route path="/b4-clicker" element={<Navigate to="/b4-tools" replace />} />
+        <Route path="/b4-tools" element={<B4Clicker />} />
+                <Route path="/camp-courage" element={<CourageAcademy />} />
+                <Route path="/courage-academy" element={<Navigate to="/camp-courage" replace />} />
+        <Route path="/classroom-pilots" element={<ClassroomPilots />} />
+        <Route path="/training-guides" element={<TrainingGuides />} />
+        <Route path="/courage-academy/classroom-pilots" element={<Navigate to="/classroom-pilots" replace />} />
+        <Route path="/courage-academy/training-guides" element={<Navigate to="/training-guides" replace />} />
+        <Route path="/resources/b4-tools-library" element={<ResourcesB4ToolsLibrary />} />
+        <Route path="/resources/downloads" element={<ResourcesDownloads />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/characters" element={<Characters />} />
+        <Route path="/meet-the-characters" element={<Characters />} />
+        <Route path="/world" element={<World />} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }
