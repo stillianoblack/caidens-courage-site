@@ -86,6 +86,8 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       setShopCloseTimeout(null);
     }
     setShowShopDropdown(true);
+    void import('../pages/Product');
+    void import('../pages/Preview');
   };
 
   const handleShopMouseLeave = () => {
@@ -500,6 +502,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
+                onMouseEnter={() => void import('../pages/Contact')}
                 onClick={(e) => handleNavLinkClick(e, RIGHT_NAV_ITEMS.partnerLink.href)}
                 className={`hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
@@ -716,6 +719,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link in Mobile Menu */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
+                onMouseEnter={() => void import('../pages/Contact')}
                 onClick={(e) => {
                   setIsMobileMenuOpen(false);
                   handleNavLinkClick(e, RIGHT_NAV_ITEMS.partnerLink.href);
