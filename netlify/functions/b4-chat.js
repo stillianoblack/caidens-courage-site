@@ -11,6 +11,8 @@ function jsonResponse(statusCode, data) {
 }
 
 exports.handler = async (event, context) => {
+  console.log('[b4-chat] invoked', event.httpMethod);
+
   try {
     if (event.httpMethod === 'OPTIONS') {
       return { statusCode: 204, headers: corsHeaders, body: '' };
@@ -22,7 +24,8 @@ exports.handler = async (event, context) => {
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return jsonResponse(500, { error: 'OPENAI_API_KEY is not configured. Add it in Netlify site settings → Environment variables.' });
+      console.log('[b4-chat] Missing OPENAI_API_KEY');
+      return jsonResponse(500, { error: 'Missing OPENAI_API_KEY' });
     }
 
     let body;
@@ -30,6 +33,11 @@ exports.handler = async (event, context) => {
       body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body || {};
     } catch (_) {
       return jsonResponse(400, { error: 'Invalid JSON body' });
+    }
+
+    const message = body.message != null && typeof body.message === 'string' ? body.message.trim() : '';
+    if (!message && (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0)) {
+      return jsonResponse(400, { error: 'Missing or invalid message' });
     }
 
     const systemContent = "You are B-4, a friendly, supportive chatbot for Caiden's Courage — an illustrated adventure about courage, imagination, and neurodiverse kids. Keep replies concise, warm, and appropriate for families.";
@@ -43,15 +51,14 @@ exports.handler = async (event, context) => {
           content: typeof m.content === 'string' ? m.content : String(m.content || ''),
         })),
       ];
-    } else if (body.message != null && typeof body.message === 'string' && body.message.trim()) {
+    } else {
       openaiMessages = [
         { role: 'system', content: systemContent },
-        { role: 'user', content: body.message.trim() },
+        { role: 'user', content: message },
       ];
-    } else {
-      return jsonResponse(400, { error: 'Missing or invalid message or messages' });
     }
 
+    console.log('[b4-chat] calling OpenAI');
     const openai = new OpenAI({ apiKey });
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -63,9 +70,11 @@ exports.handler = async (event, context) => {
       completion.choices?.[0]?.message?.content?.trim() ||
       "I'm not sure what to say right now. Try asking again?";
 
+    console.log('[b4-chat] success');
     return jsonResponse(200, { reply: assistantMessage });
   } catch (err) {
-    const message = err?.message || String(err);
-    return jsonResponse(500, { error: message });
+    const msg = err?.message || String(err);
+    console.error('[b4-chat] error', msg);
+    return jsonResponse(500, { error: msg });
   }
 };

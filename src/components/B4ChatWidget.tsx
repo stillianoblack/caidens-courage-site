@@ -88,14 +88,16 @@ const B4ChatWidget: React.FC = () => {
 
   // Single send path - all sends must go through this function
   const sendMessage = async (rawText?: string) => {
+    console.log("B4 SEND TRIGGERED");
+
     // Get text from argument or input value
     const text = (rawText ?? inputValue).trim();
-    
+
     // Guard: prevent sending if empty
     if (!text) return;
-    
-    // Guard: prevent sending if already sending (sending lock)
-    if (isSendingRef.current || isLoading) return;
+
+    // Guard: prevent sending if already sending (sending lock) — temporarily commented for debugging
+    // if (isSendingRef.current || isLoading) return;
 
     // Debug log
     console.log('[B4ChatWidget] sending:', text);

@@ -651,9 +651,11 @@ a.bg-golden-500:hover,
   }
 }
 
-/* Navigation underline draw animation */
+/* Navigation underline - transition only (no animation) for better INP */
 .nav-link-underline {
   position: relative;
+  transition: color 0.15s ease-out, border-color 0.15s ease-out;
+  contain: layout style;
 }
 
 .nav-link-underline::after {
@@ -663,22 +665,12 @@ a.bg-golden-500:hover,
   bottom: 0;
   width: 0;
   height: 2px;
-  background-color: #f97316; /* orange-500 */
-  transition: width 0.4s ease-in-out;
+  background-color: #f97316;
+  transition: width 0.2s ease-out;
 }
 
 .nav-link-underline:hover::after {
   width: 100%;
-  animation: drawLine 0.4s ease-in-out;
-}
-
-@keyframes drawLine {
-  0% {
-    width: 0;
-  }
-  100% {
-    width: 100%;
-  }
 }
 
 /* Resources Dropdown Styles */

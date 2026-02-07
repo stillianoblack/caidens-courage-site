@@ -141,7 +141,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
         to={item.href}
         onMouseEnter={item.href === '/mission' ? () => import('../pages/Mission') : undefined}
         onClick={(e) => handleNavLinkClick(e, item.href)}
-        className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
+        className={`nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
       >
         {item.label}
       </Link>
@@ -159,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -172,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           >
             {item.label}
             <svg 
-              className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           </div>
           <div className="absolute top-full left-0 w-full h-3" />
           <div 
-            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-xl py-6 px-6 min-w-[600px] z-50 transition-all duration-200 ${
+            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-xl py-6 px-6 min-w-[600px] z-50 transition-[opacity,transform] duration-200 ${
               isOpen 
                 ? 'opacity-100 visible pointer-events-auto translate-y-0' 
                 : 'opacity-0 invisible pointer-events-none -translate-y-2'
@@ -278,7 +278,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -291,7 +291,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           >
             {item.label}
             <svg 
-              className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -301,7 +301,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           </div>
           <div className="absolute top-full left-0 w-full h-3" />
           <div 
-            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-[opacity,transform] duration-200 ${
               isOpen 
                 ? 'opacity-100 visible pointer-events-auto translate-y-0' 
                 : 'opacity-0 invisible pointer-events-none -translate-y-2'
@@ -358,7 +358,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -371,7 +371,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           >
             {item.label}
             <svg 
-              className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -381,7 +381,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           </div>
           <div className="absolute top-full left-0 w-full h-3" />
           <div 
-            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
+            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-[opacity,transform] duration-200 ${
               isOpen 
                 ? 'opacity-100 visible pointer-events-auto translate-y-0' 
                 : 'opacity-0 invisible pointer-events-none -translate-y-2'
@@ -414,7 +414,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-[background-color,box-shadow] duration-200 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Left Cluster: Logo + Navigation */}
@@ -422,12 +422,12 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Hamburger Menu Button - Mobile only */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
+                className={`lg:hidden p-2 rounded-lg transition-colors duration-150 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
                 <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
+                  className={`w-7 h-7 transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -435,7 +435,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
+                  className={`w-7 h-7 absolute transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -498,7 +498,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
                 onClick={(e) => handleNavLinkClick(e, RIGHT_NAV_ITEMS.partnerLink.href)}
-                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
+                className={`hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
                 {RIGHT_NAV_ITEMS.partnerLink.label}
               </Link>
@@ -519,14 +519,14 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
       {/* Mobile Menu - Full Screen, Slides from Left */}
       <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-200 ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
         {/* Full Screen Menu Panel - Slides from Left */}
         <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
+          className={`absolute inset-0 bg-white transform transition-transform duration-200 ease-out ${
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
           onClick={(e) => e.stopPropagation()}
