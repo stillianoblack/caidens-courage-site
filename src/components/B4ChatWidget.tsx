@@ -28,6 +28,7 @@ const B4ChatWidget: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const isSendingRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
@@ -39,6 +40,14 @@ const B4ChatWidget: React.FC = () => {
       scrollToBottom();
     }
   }, [isOpen, messages, scrollToBottom]);
+
+  // Abort in-flight B-4 request on unmount (e.g. user navigates away) to avoid setState after unmount
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+    };
+  }, []);
 
   // Focus management and keyboard shortcuts
   useEffect(() => {
@@ -117,6 +126,7 @@ const B4ChatWidget: React.FC = () => {
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
 
     const controller = new AbortController();
+    abortControllerRef.current = controller;
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
@@ -128,6 +138,7 @@ const B4ChatWidget: React.FC = () => {
       });
 
       clearTimeout(timeoutId);
+      abortControllerRef.current = null;
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -143,6 +154,7 @@ const B4ChatWidget: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       clearTimeout(timeoutId);
+      abortControllerRef.current = null;
       console.error('[B4ChatWidget] Error:', error);
 
       let displayMessage: string;
@@ -163,6 +175,7 @@ const B4ChatWidget: React.FC = () => {
 
       setMessages(prev => [...prev, { role: 'assistant', content: displayMessage }]);
     } finally {
+      abortControllerRef.current = null;
       setIsLoading(false);
       isSendingRef.current = false; // Release sending lock
     }
