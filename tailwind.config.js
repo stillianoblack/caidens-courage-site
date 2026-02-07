@@ -44,6 +44,11 @@ module.exports = {
           900: '#a67d1c',
         },
         cream: '#faf9f7',
+        orange: {
+          400: '#FF6B35',
+          500: '#FF6B35',
+          600: '#E55A2B',
+        },
         slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
