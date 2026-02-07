@@ -101,6 +101,9 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       setWorldCloseTimeout(null);
     }
     setShowWorldDropdown(true);
+    // Prefetch The World pages so clicking feels instant
+    void import('../pages/World');
+    void import('../pages/Characters');
   };
 
   const handleWorldMouseLeave = () => {
@@ -572,7 +575,13 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   return (
                     <div key={item.label} className="border-b border-navy-100">
                       <button
-                        onClick={() => setIsOpen(!isOpen)}
+                        onClick={() => {
+                          if (item.label === 'The World' && !isOpen) {
+                            void import('../pages/World');
+                            void import('../pages/Characters');
+                          }
+                          setIsOpen(!isOpen);
+                        }}
                         className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
                       >
                         <span>{item.label}</span>

@@ -1,5 +1,5 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
 import NavigationLoader from './components/NavigationLoader';
 
@@ -25,23 +25,16 @@ const Characters = lazy(() => import('./pages/Characters'));
 const World = lazy(() => import('./pages/World'));
 
 const AppContent: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    setLoading(true);
-    const t = setTimeout(() => setLoading(false), 250);
-    return () => clearTimeout(t);
-  }, [location]);
-
+  // Prefetch main menu routes so transitions feel instant (no blocking overlay)
   useEffect(() => void import("./pages/Mission"), []);
   useEffect(() => void import("./pages/Resources"), []);
   useEffect(() => void import("./pages/About"), []);
+  useEffect(() => void import("./pages/World"), []);
+  useEffect(() => void import("./pages/Characters"), []);
 
   return (
     <>
       <B4ChatWidget />
-      {loading && <NavigationLoader />}
       <Suspense fallback={<NavigationLoader />}>
         <Routes>
         <Route path="/" element={<Home />} />
