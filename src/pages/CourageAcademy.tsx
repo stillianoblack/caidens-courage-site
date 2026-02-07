@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
 
 const CourageAcademy: React.FC = () => {
-  const navigate = useNavigate();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [role, setRole] = useState<'parent' | 'teacher' | 'counselor' | 'admin'>('teacher');
   const [schoolOrg, setSchoolOrg] = useState('');
@@ -100,44 +99,6 @@ const CourageAcademy: React.FC = () => {
       }
     }, 100);
   };
-
-  // Improved mockup tile component with labels and watermark
-  const MockupTile: React.FC<{ className?: string; label: string }> = ({ className = '', label }) => (
-    <div className={`bg-gradient-to-br from-navy-100 to-navy-200 rounded-2xl shadow-lg flex items-center justify-center relative overflow-hidden ${className}`} style={{ minHeight: '450px', width: '100%' }}>
-      {/* Label chip */}
-      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-navy-600 shadow-sm">
-        {label}
-      </div>
-      {/* B-4 watermark */}
-      <div className="absolute bottom-4 right-4 opacity-10">
-        <div className="w-16 h-16 bg-navy-400 rounded-full flex items-center justify-center">
-          <span className="text-2xl">B-4</span>
-        </div>
-      </div>
-      {/* Content */}
-      <div className="text-center p-8 z-10">
-        <div className="w-24 h-24 mx-auto mb-4 bg-navy-300 rounded-full flex items-center justify-center opacity-50">
-          <span className="text-4xl">📚</span>
-        </div>
-        <div className="w-16 h-16 mx-auto bg-golden-400 rounded-lg opacity-30"></div>
-      </div>
-    </div>
-  );
-
-  // Decorative blob shapes
-  const BlobShape = ({ className = '', style = {} }: { className?: string; style?: React.CSSProperties }) => (
-    <div
-      className={`absolute ${className}`}
-      style={{
-        width: '200px',
-        height: '200px',
-        borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.05) 100%)',
-        opacity: 0.4,
-        ...style,
-      }}
-    />
-  );
 
   return (
     <div className="min-h-screen bg-white font-body">

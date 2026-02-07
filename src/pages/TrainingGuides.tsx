@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
 
 const TrainingGuides: React.FC = () => {
-  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
+  const [, setIsComingSoonModalOpen] = useState(false);
 
   const handleComingSoonClick = () => {
     setIsComingSoonModalOpen(true);

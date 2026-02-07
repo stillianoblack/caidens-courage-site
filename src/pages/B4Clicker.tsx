@@ -54,8 +54,6 @@ const B4Clicker: React.FC = () => {
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [selectedUnitData, setSelectedUnitData] = useState<Unit | null>(null);
 
-  const selectedUnitDataFromId = selectedUnit ? units.find((u) => u.id === selectedUnit) : null;
-
   const missions: Record<string, { header: string; script: string }> = {
     fire: {
       header: 'Cool the Flames',

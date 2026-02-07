@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import Button from './ui/Button';
 
@@ -48,15 +47,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     };
   }, [closeTimeout, shopCloseTimeout, worldCloseTimeout]);
 
-  const handleWaitlistClick = () => {
-    const waitlistUrl = getWaitlistUrl();
-    if (waitlistUrl) {
-      openExternalUrl(waitlistUrl);
-    } else {
-      setIsPreorderOpen(true);
-    }
-  };
-
   const handleComingSoonClick = () => {
     if (onComingSoonClick) {
       onComingSoonClick();
@@ -66,30 +56,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const handleLogoClick = () => {
     if (location.pathname !== '/') {
       navigate('/');
-    }
-  };
-
-  // Handle About link click - navigate and scroll
-  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (location.pathname !== '/') {
-      // If not on homepage, navigate to homepage with hash
-      e.preventDefault();
-      navigate('/#about');
-      // Scroll will happen after navigation via hash
-    } else {
-      // If already on homepage, just scroll
-      e.preventDefault();
-      const element = document.getElementById('about');
-      if (element) {
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
     }
   };
 
@@ -145,16 +111,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       return item.activePaths.some(path => location.pathname === path);
     }
     return location.pathname === item.href;
-  };
-
-  const handleToggleResourcesDropdown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowResourcesDropdown(!showResourcesDropdown);
-  };
-
-  const handleToggleShopDropdown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowShopDropdown(!showShopDropdown);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, toggleFn: () => void) => {

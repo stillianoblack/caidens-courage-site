@@ -11,7 +11,7 @@ interface ComingSoonProps {
 }
 
 const ComingSoon: React.FC<ComingSoonProps> = ({ title, description }) => {
-  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
+  const [, setIsComingSoonModalOpen] = useState(false);
 
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();

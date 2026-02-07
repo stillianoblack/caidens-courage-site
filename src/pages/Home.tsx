@@ -178,7 +178,7 @@ const Home = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [rotatingWord, setRotatingWord] = useState(0);
+  const [, setRotatingWord] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const words = ['Superpower', 'Strength', 'Courage', 'Power'];
 
