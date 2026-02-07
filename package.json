@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "openai": "^4.52.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -15,6 +14,7 @@
     "autoprefixer": "^10.4.14",
     "cors": "^2.8.6",
     "express": "^4.18.2",
+    "openai": "^4.52.0",
     "postcss": "^8.4.24",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -25,12 +25,13 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "netlify-cli": "^23.15.1"
   },
   "scripts": {
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "server": "node server.js",
-    "dev": "concurrently \"npm run server\" \"npm start\"",
+    "dev": "netlify dev",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

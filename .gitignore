@@ -11,6 +11,8 @@ node_modules/
 
 # Misc
 .DS_Store
+.env
+.env*
 .env.local
 .env.development.local
 .env.test.local
@@ -31,3 +33,6 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+
+# Local Netlify folder
+.netlify
