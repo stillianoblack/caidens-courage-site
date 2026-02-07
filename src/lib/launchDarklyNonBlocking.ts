@@ -25,7 +25,7 @@ export function initLaunchDarklyNonBlocking(): void {
         typeof process !== 'undefined' && process.env?.REACT_APP_LAUNCHDARKLY_CLIENT_ID
           ? process.env.REACT_APP_LAUNCHDARKLY_CLIENT_ID
           : '';
-      if (!clientId) return;
+      if (!clientId || LD_INIT_TIMEOUT_MS <= 0) return;
 
       // When you add launchdarkly-react-client-sdk, uncomment below. Pattern: 100ms timeout + deferInitialization: true, never waitForInitialization.
       // const mod = await Promise.race([
