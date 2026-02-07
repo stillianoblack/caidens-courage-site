@@ -17,36 +17,6 @@ const Resources: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-
-  // Scroll-triggered animations for sections
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setVisibleSections((prev) => new Set(prev).add(entry.target.id));
-        }
-      });
-    }, observerOptions);
-
-    // Observe all sections
-    const sections = document.querySelectorAll('[data-section]');
-    sections.forEach((section) => {
-      observer.observe(section);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        observer.unobserve(section);
-      });
-    };
-  }, []);
-
   // Check URL params for filter on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -125,36 +95,22 @@ const Resources: React.FC = () => {
     }
   }, [location.search, location.hash]);
 
-  // Handle scroll + highlight when audience filter changes (from URL or dropdown)
+  // Scroll to results when audience filter changes (from URL or dropdown)
   useEffect(() => {
     if (location.pathname === '/resources') {
       const params = new URLSearchParams(location.search);
       const audienceParam = params.get('audience');
-      
-      // Only scroll/highlight if audience param is present (user clicked dropdown or deep-linked)
       if (audienceParam) {
-        // Wait for DOM to update, then scroll and highlight
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            const el = document.getElementById('resource-results');
-            if (el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              
-              // Remove any existing highlight classes
-              document.querySelectorAll('.section-anchor.anchor-landed').forEach(element => {
-                element.classList.remove('anchor-landed');
-              });
-              
-              // Add highlight animation class
-              el.classList.add('anchor-landed');
-              
-              // Remove class after animation completes
-              setTimeout(() => {
-                el.classList.remove('anchor-landed');
-              }, 1100);
-            }
-          }, 100);
-        });
+        const t = setTimeout(() => {
+          const el = document.getElementById('resource-results');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.querySelectorAll('.section-anchor.anchor-landed').forEach((element) => element.classList.remove('anchor-landed'));
+            el.classList.add('anchor-landed');
+            setTimeout(() => el.classList.remove('anchor-landed'), 1100);
+          }
+        }, 100);
+        return () => clearTimeout(t);
       }
     }
   }, [location.search, location.pathname]);
@@ -248,7 +204,7 @@ const Resources: React.FC = () => {
       <div 
         id="resources-header"
         data-section="header"
-        className={`bg-navy-500 text-white py-16 pt-32 fade-in-up ${visibleSections.has('resources-header') ? 'visible' : ''}`}
+        className="bg-navy-500 text-white py-16 pt-32"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
@@ -267,7 +223,7 @@ const Resources: React.FC = () => {
       <div 
         id="resources-filters"
         data-section="filters"
-        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in-up ${visibleSections.has('resources-filters') ? 'visible' : ''}`}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         style={{ marginTop: '70px' }}
       >
         {/* White Card Container */}
@@ -386,7 +342,7 @@ const Resources: React.FC = () => {
         <div 
           id="resources-grid"
           data-section="grid"
-          className={`fade-in-up ${visibleSections.has('resources-grid') ? 'visible' : ''}`}
+          className=""
         >
         {filteredResources.length === 0 ? (
           <div className="text-center py-16 px-4">
@@ -535,7 +491,7 @@ const Resources: React.FC = () => {
         <div 
           id="library"
           data-section="b4-tools"
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 fade-in-up ${visibleSections.has('b4-tools') ? 'visible' : ''}`}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="text-center mb-10">
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">

@@ -173,33 +173,33 @@ const CourageAcademy: React.FC = () => {
 
               {/* Floating Sticker Circles */}
               {/* Top-right sticker - Star */}
-              <div className="absolute top-4 right-4 lg:top-8 lg:right-8 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg z-10" style={{
+              <div className="float-y absolute top-4 right-4 lg:top-8 lg:right-8 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
                 border: '3px solid white',
                 boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
-                animation: 'float-slow 6s ease-in-out infinite'
+                animationDuration: '6s'
               }}>
                 <span className="text-2xl sm:text-3xl">⭐</span>
               </div>
 
               {/* Mid-left sticker - Target/Arrow (moved closer) */}
-              <div className="absolute top-1/3 -translate-y-1/3 -left-2 lg:-left-4 bg-white rounded-full flex items-center justify-center shadow-lg z-10" style={{
+              <div className="float-y absolute top-1/3 -translate-y-1/3 -left-2 lg:-left-4 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
                 border: '3px solid white',
                 boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
                 width: '56px',
                 height: '56px',
-                animation: 'float-slow 5s ease-in-out infinite',
+                animationDuration: '5s',
                 animationDelay: '0.5s'
               }}>
                 <span className="text-xl sm:text-2xl">🎯</span>
               </div>
 
               {/* Bottom-right sticker - Rocket */}
-              <div className="absolute bottom-4 right-8 lg:bottom-8 lg:right-12 bg-white rounded-full flex items-center justify-center shadow-lg z-10" style={{
+              <div className="float-y absolute bottom-4 right-8 lg:bottom-8 lg:right-12 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
                 border: '3px solid white',
                 boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
                 width: '56px',
                 height: '56px',
-                animation: 'float-slow 7s ease-in-out infinite',
+                animationDuration: '7s',
                 animationDelay: '1s'
               }}>
                 <span className="text-xl sm:text-2xl">🚀</span>

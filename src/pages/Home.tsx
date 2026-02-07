@@ -178,9 +178,7 @@ const Home = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [, setRotatingWord] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const words = ['Superpower', 'Strength', 'Courage', 'Power'];
 
   // Handle hash anchor scrolling (for homepage section deep-links)
   useEffect(() => {
@@ -208,78 +206,11 @@ const Home = () => {
 
 
   useEffect(() => {
-    // Check if mobile on mount and resize
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
-    const observerOptions = {
-      threshold: 0.05, // Lower threshold for better mobile detection
-      rootMargin: '0px 0px -20px 0px', // Adjusted for mobile
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          // Don't observe again once visible for performance
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    // Observe all sections except the hero section
-    const sections = document.querySelectorAll('section:not(#hero)');
-    sections.forEach((section) => {
-      section.classList.add('fade-in-up');
-      observer.observe(section);
-    });
-
-    // Also observe key content elements within sections for staggered animation
-    const contentElements = document.querySelectorAll('.animate-fade-in, .animate-slide-up');
-    contentElements.forEach((element) => {
-      if (!element.closest('#hero')) {
-        element.classList.add('fade-in-up');
-        observer.observe(element);
-      }
-    });
-
-    // Observe feature cards individually for fast fade-in (no stagger)
-    const featureCards = document.querySelectorAll('.fade-in-card');
-    featureCards.forEach((card) => {
-      const cardObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Add visible class immediately for snappy animation
-            entry.target.classList.add('visible');
-            cardObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-      cardObserver.observe(card);
-    });
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      sections.forEach((section) => {
-        observer.unobserve(section);
-      });
-      contentElements.forEach((element) => {
-        observer.unobserve(element);
-      });
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Rotate words in the title
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotatingWord((prev) => (prev + 1) % words.length);
-    }, 7000); // Change every 7 seconds (between 6-8 seconds)
-
-    return () => clearInterval(interval);
-  }, [words.length]);
 
   const handlePreorderClick = () => {
     navigate('/comicbook');

@@ -273,82 +273,35 @@ code {
   background-clip: text;
 }
 
-/* Decorative circle styles */
+/* Subtle floating decorative elements - CSS only, respects reduced motion */
+@keyframes floatY {
+  0%, 100% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+}
+
+.float-y {
+  animation: floatY 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-y,
+  .circle-accent,
+  .animate-float {
+    animation: none !important;
+  }
+}
+
+/* Decorative circle styles - use subtle float */
 .circle-accent {
   border-radius: 50%;
   position: absolute;
   pointer-events: none;
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-10px) translateX(5px);
-  }
-  66% {
-    transform: translateY(5px) translateX(-3px);
-  }
-}
-
-@keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-8px) translateX(4px);
-  }
-  66% {
-    transform: translateY(4px) translateX(-2px);
-  }
-}
-
-/* Bubble animations for header */
-@keyframes bubble-float-1 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  25% {
-    transform: translate(15px, -20px) scale(1.05);
-  }
-  50% {
-    transform: translate(-10px, -35px) scale(0.95);
-  }
-  75% {
-    transform: translate(20px, -15px) scale(1.02);
-  }
-}
-
-@keyframes bubble-float-2 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(-20px, -25px) scale(1.03);
-  }
-  66% {
-    transform: translate(10px, -40px) scale(0.98);
-  }
-}
-
-@keyframes bubble-float-3 {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  20% {
-    transform: translate(25px, -15px) scale(1.04);
-  }
-  40% {
-    transform: translate(-15px, -30px) scale(0.96);
-  }
-  60% {
-    transform: translate(30px, -20px) scale(1.01);
-  }
-  80% {
-    transform: translate(-5px, -10px) scale(0.99);
-  }
+  animation: floatY 8s ease-in-out infinite;
 }
 
 .bubble {
@@ -371,11 +324,10 @@ code {
   border-radius: 50%;
   position: absolute;
   pointer-events: none;
-  background-color: #f97316; /* orange-500 */
+  background-color: #f97316;
   opacity: 0.25;
 }
 
-/* Playful geometric shapes */
 .geometric-shape {
   position: absolute;
   pointer-events: none;
@@ -383,81 +335,19 @@ code {
   z-index: 0;
 }
 
-.shape-blob {
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  background: linear-gradient(135deg, var(--golden-500) 0%, #f97316 100%);
-  animation: blob-morph 8s ease-in-out infinite;
-}
-
-.shape-blob-blue {
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  background: linear-gradient(135deg, var(--navy-500) 0%, #3b82f6 100%);
-  animation: blob-morph 8s ease-in-out infinite, rotate-very-slow 30s linear infinite;
-  opacity: 0.3;
-}
-
-@keyframes rotate-very-slow {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
+/* Alias for inline float-slow (e.g. CourageAcademy stickers) */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(-6px);
   }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
+  50% {
+    transform: translateY(0);
   }
-}
-
-.shape-star {
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  background: linear-gradient(135deg, var(--navy-500) 0%, #3b82f6 100%);
-  animation: rotate-slow 20s linear infinite;
-}
-
-.shape-squiggle {
-  border-radius: 50% 20% 80% 40% / 60% 30% 70% 40%;
-  background: linear-gradient(135deg, #f97316 0%, var(--golden-500) 100%);
-  animation: squiggle-morph 10s ease-in-out infinite;
 }
 
 /* Geometric mask for hero image */
 .image-geometric-mask {
   clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 95% 100%, 5% 100%, 0% 85%);
-}
-
-@keyframes blob-morph {
-  0%, 100% {
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    transform: rotate(0deg);
-  }
-  33% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: rotate(120deg);
-  }
-  66% {
-    border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
-    transform: rotate(240deg);
-  }
-}
-
-@keyframes rotate-slow {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
-}
-
-@keyframes squiggle-morph {
-  0%, 100% {
-    border-radius: 50% 20% 80% 40% / 60% 30% 70% 40%;
-    transform: rotate(0deg);
-  }
-  50% {
-    border-radius: 40% 60% 30% 70% / 50% 50% 50% 50%;
-    transform: rotate(180deg);
-  }
 }
 
 .circle-coral {
@@ -716,25 +606,14 @@ a.bg-golden-500:hover,
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
 
-/* Scroll-triggered fade-in-up animation - optimized for speed */
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
-}
-
+/* Legacy scroll-triggered classes - now static (no JS observers) */
+.fade-in-up,
 .fade-in-up.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Fade-in animation for cards on page load - optimized for speed */
-.fade-in-card {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
-}
-
+.fade-in-card,
 .fade-in-card.visible {
   opacity: 1;
   transform: translateY(0);
