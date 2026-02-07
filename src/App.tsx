@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigationType } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
 import NavigationLoader from './components/NavigationLoader';
 
@@ -24,30 +24,6 @@ const Contact = lazy(() => import('./pages/Contact'));
 const Characters = lazy(() => import('./pages/Characters'));
 const World = lazy(() => import('./pages/World'));
 
-// Loading fallback component
-const LoadingFallback = () => (
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    minHeight: '100vh',
-    backgroundColor: '#faf9f7'
-  }}>
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ 
-        width: '40px', 
-        height: '40px', 
-        border: '4px solid #f3f3f3',
-        borderTop: '4px solid #243e70',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto 16px'
-      }}></div>
-      <p style={{ color: '#243e70', fontSize: '16px' }}>Loading...</p>
-    </div>
-  </div>
-);
-
 const AppContent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -58,15 +34,15 @@ const AppContent: React.FC = () => {
     return () => clearTimeout(t);
   }, [location]);
 
-  useEffect(() => {
-    import("./pages/Mission");
-  }, []);
+  useEffect(() => void import("./pages/Mission"), []);
+  useEffect(() => void import("./pages/Resources"), []);
+  useEffect(() => void import("./pages/About"), []);
 
   return (
     <>
       <B4ChatWidget />
       {loading && <NavigationLoader />}
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={<NavigationLoader />}>
         <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
