@@ -30,7 +30,7 @@ This project uses **React with React Router**, not Next.js. The audit below maps
 - **Redirects:** `public/_redirects` contains only the SPA fallback: `/* /index.html 200`. No extra redirects that would cause full reloads or duplicate requests.
 - **“Canceled” requests:**  
   - **Development:** A canceled request with initiator **eventsource** is from **webpack-dev-server HMR**; not from app code.  
-  - **Production (e.g. caidenscourage.com):** If you see canceled **eventsource** requests, they may be from **LaunchDarkly** or another SDK that uses EventSource and is loaded before or during route transitions. This repo does not include LaunchDarkly; if you add it (or inject it via Netlify/script tag), initialize it **non-blocking** via `src/lib/initNonBlockingSDK.ts` so it runs after the browser is idle and does not open connections during navigation (which gets aborted and shows as “canceled”).  
+  - **Production (e.g. caidenscourage.com):** If you see canceled **eventsource** requests, they may be from **LaunchDarkly** or another SDK that uses EventSource. LaunchDarkly is initialized via `src/lib/launchdarkly.ts` with **streaming: false** and **bootstrap: "localStorage"** so it does not open EventSource connections.  
   - **Middleware:** There is no middleware in this project. The only redirect is the SPA fallback in `_redirects`. Nothing in the app aborts requests during client-side routing.
 
 ---
@@ -48,12 +48,10 @@ This project uses **React with React Router**, not Next.js. The audit below maps
 
 - **Status:** Addressed.
 - **reportWebVitals:** Runs after idle so it never blocks the main thread or navigation.
-- **LaunchDarkly – completely decoupled:**
-  - **No provider in the tree** (no LDProvider in `App.tsx` or root layout). Init runs in the background only.
-  - **deferInitialization: true** and **no waitForInitialization** – EventSource does not open until you explicitly start; UI is never held.
-  - **100ms global timeout:** SDK init is scheduled 100ms after mount (`initNonBlockingSDK.ts`). Inside `launchDarklyNonBlocking.ts`, init is wrapped in a 100ms timeout; if LaunchDarkly doesn’t respond, the site proceeds without it.
-  - **Navigation:** No code in `nav.ts` or the Navbar awaits feature-flag evaluation before allowing a route change.
-  - **Script tag:** If LaunchDarkly is injected via a `<script>` in HTML or Netlify, that tag **must** use **async** and **defer** so it doesn’t block. See the comment in `public/index.html`.
+- **LaunchDarkly – no streaming:**
+  - Single init in `src/lib/launchdarkly.ts` via `getLDClient()` with **streaming: false** and **bootstrap: "localStorage"** so EventSource is never used and the app does not hang on LD requests.
+  - No provider in the tree; init is triggered from `App.tsx` in a useEffect. If `REACT_APP_LAUNCHDARKLY_CLIENT_ID` is missing, a warning is logged and the app runs without LD.
+  - Script tag: Do not add a LaunchDarkly `<script>` in HTML or Netlify; see comment in `public/index.html`.
 - **Loading states:** The single **Suspense** fallback **`NavigationLoader`** in `App.tsx` is the root loading UI; it shows immediately during route transitions.
 
 ---
