@@ -22,9 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <!-- Preload LCP hero image so it loads immediately (desktop: 1280w WebP; mobile: 800w WebP) -->
-    <link rel="preload" as="image" href="/hero-bg_desktop_1280w.webp" media="(min-width: 769px)" />
-    <link rel="preload" as="image" href="/hero-bg_mobile_800w.webp" media="(max-width: 768px)" />
+    <!-- Home hero is not preloaded here: it lives inside a lazy-loaded route, so a document preload would often be "unused" by load event and trigger console warnings. The hero still loads eagerly when Home mounts. -->
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
