@@ -1,7 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
-import NavigationLoader from './components/NavigationLoader';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 
 // Lazy load pages for code splitting
@@ -43,8 +42,8 @@ const AppContent: React.FC = () => {
   return (
     <>
       <B4ChatWidget />
-      {/* Root-level Suspense: shows NavigationLoader (skeleton) immediately on link click while route chunk loads. No layout.tsx/loading.tsx – this is the single loading boundary. */}
-      <Suspense fallback={<NavigationLoader />}>
+      {/* Route-based code splitting: each page loads on demand. Fallback shown while chunk loads. */}
+      <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
         <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -84,11 +83,9 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <LaunchDarklyProvider>
-        <AppContent />
-      </LaunchDarklyProvider>
-    </Router>
+    <LaunchDarklyProvider>
+      <AppContent />
+    </LaunchDarklyProvider>
   );
 }
 
