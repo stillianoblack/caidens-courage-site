@@ -250,7 +250,7 @@ const B4ChatWidget: React.FC = () => {
                 {/* B-4 Avatar */}
                 <div className="w-10 h-10 rounded-full bg-golden-500 flex items-center justify-center overflow-hidden border-2 border-white flex-shrink-0">
                   <img
-                    src="/B-4@4x-100.jpeg"
+                    src="/optimized/B-4@4x-100.webp"
                     alt="B-4"
                     className="w-full h-full object-cover"
                     loading="lazy"

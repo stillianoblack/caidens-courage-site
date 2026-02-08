@@ -57,7 +57,7 @@ const World: React.FC = () => {
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/Headers_world_mobile.png' : '/background_caidensworld_img.jpg'}
+              src={isMobile ? '/optimized/Headers_world_mobile.webp' : '/optimized/background_caidensworld_img.webp'}
               alt=""
               width={1600}
               height={900}
@@ -215,7 +215,7 @@ const World: React.FC = () => {
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <img
-                    src="/theknowworld_img.jpg"
+                    src="/optimized/theknowworld_img.webp"
                     alt="Where Courage Begins"
                     width={640}
                     height={400}
@@ -287,7 +287,7 @@ const World: React.FC = () => {
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <img
-                    src="/TheOtherworld_genesis_img.jpg"
+                    src="/optimized/TheOtherworld_genesis_img.webp"
                     alt="Where Courage Is Tested"
                     width={640}
                     height={400}
@@ -379,7 +379,7 @@ const World: React.FC = () => {
               }}
             >
               <img
-                src="/TheOtherworld_img.jpg"
+                src="/optimized/TheOtherworld_img.webp"
                 alt="The Otherworld - A world beyond the veil"
                 width={1280}
                 height={720}
@@ -434,7 +434,7 @@ const World: React.FC = () => {
             {/* World map image */}
             <div className="w-full overflow-hidden rounded-3xl" style={{ aspectRatio: '16/9' }}>
               <img
-                src="/map.jpg"
+                src="/optimized/map.webp"
                 alt="Caiden's World Map - The Veil, Ember Mountains, Whisper Forest, Sky Passage, Forgotten Gate"
                 width={1280}
                 height={720}

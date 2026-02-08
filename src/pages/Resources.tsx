@@ -393,7 +393,7 @@ const Resources: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                   {resource.format && (
@@ -531,7 +531,7 @@ const Resources: React.FC = () => {
               {/* Left: Illustration */}
               <div className="order-2 lg:order-1 flex items-center justify-center">
                 <img
-                  src="/Caiden_FAQ_section.png"
+                  src="/optimized/Caiden_FAQ_section.webp"
                   alt="Child using resources"
                   className="w-full max-w-lg rounded-2xl shadow-lg"
                   loading="lazy"
@@ -760,7 +760,7 @@ const Resources: React.FC = () => {
                 <div className="flex-shrink-0">
                   <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                     <img
-                      src="/Caiden@4x-100.jpeg"
+                      src="/optimized/Caiden@4x-100.webp"
                       alt="Caiden"
                       className="w-full h-full object-cover"
                       loading="lazy"

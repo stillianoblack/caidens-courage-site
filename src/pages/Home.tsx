@@ -105,25 +105,25 @@ const characters = [
     name: 'Caiden',
     microLabel: 'The Dreamer',
     description: "The brave, imaginative 11-year-old at the center of our story — learning how his ADHD is actually his greatest strength.",
-    image: '/Caiden@4x-100.jpeg',
+    image: '/optimized/Caiden@4x-100.webp',
   },
   {
     name: 'Genesis',
     microLabel: 'The Potential',
     description: "Caiden's heroic alter-ego, unlocked when he taps into courage and creativity. Genesis is everything Caiden is becoming.",
-    image: '/Genesis@4x-100.jpeg',
+    image: '/optimized/Genesis@4x-100.webp',
   },
   {
     name: 'B-4',
     microLabel: 'The Mind in Motion',
     description: "A floating robotic companion who represents what's happening inside Caiden's mind. B-4 helps him understand his ADHD.",
-    image: '/B-4@4x-100.jpeg',
+    image: '/optimized/B-4@4x-100.webp',
   },
   {
     name: 'Ollie Buck',
     microLabel: 'Patience & Grounding',
     description: "Caiden's loyal companion who reminds him that slow and steady wins the race — patience is a superpower too.",
-    image: '/Turtle@4x-100.jpeg',
+    image: '/optimized/Turtle@4x-100.webp',
   },
 ];
 
@@ -136,7 +136,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
     available: true,
-    image: "/Comic5_Coverpage_header_Shop_smaller.jpg",
+    image: "/optimized/Comic5_Coverpage_header_Shop_smaller.webp",
   },
   {
     title: "Caiden's Courage T-Shirt",
@@ -146,7 +146,7 @@ const products = [
     purchaseUrl: productLinks.tShirt,
     available: false,
     comingSoon: true,
-    image: "/Caiden'Courage_Tshirt_smaller.jpg",
+    image: "/optimized/Caiden'Courage_Tshirt_smaller.webp",
   },
   {
     title: "B-4 Plush Companions",
@@ -156,7 +156,7 @@ const products = [
     purchaseUrl: productLinks.b4Plush,
     available: false,
     comingSoon: true,
-    image: "/B-4plushcompanions_img.jpg",
+    image: "/optimized/B-4plushcompanions_img.webp",
   },
 ];
 
@@ -167,7 +167,7 @@ const products = [
 //     description: "A kid-friendly guided journal that helps children express feelings, track creative ideas, and build emotional strength.",
 //     badge: "Coming Soon",
 //     badgeColor: "bg-navy-400",
-//     image: '/balance.png',
+//     image: '/optimized/balance.webp',
 //     purchaseUrl: null,
 //     available: false,
 //   },
@@ -279,7 +279,7 @@ const Home = () => {
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/homepage_hero-bg_mobile_img.jpg' : '/hero-bg_img_2.png'}
+              src={isMobile ? '/optimized/homepage_hero-bg_mobile_img.webp' : '/optimized/hero-bg_img_2.webp'}
               alt="Caiden falling through a fantastical sky"
               width={1600}
               height={817}
@@ -293,7 +293,7 @@ const Home = () => {
               loading="eager"
               decoding="async"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/hero-bg.png';
+                (e.target as HTMLImageElement).src = '/optimized/hero-bg.webp';
               }}
             />
           </picture>
@@ -465,7 +465,7 @@ const Home = () => {
                 }}
               >
                 <img 
-                  src="/Caiden_img_profile.jpg"
+                  src="/optimized/Caiden_img_profile.webp"
                   alt="Caiden - The Hero"
                   className="w-full h-full object-cover"
                   style={{ 
@@ -495,7 +495,7 @@ const Home = () => {
                     <div className="flex-shrink-0">
                       <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
                         <img
-                          src="/Comic5_Coverpage_header_smaller.jpg"
+                          src="/optimized/Comic5_Coverpage_header_smaller.webp"
                           alt="Caiden's Courage Comic Book"
                           width="80"
                           height="80"
@@ -504,7 +504,7 @@ const Home = () => {
                           decoding="async"
                           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                            (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                           }}
                         />
                       </div>
@@ -733,13 +733,13 @@ const Home = () => {
                 style={{ aspectRatio: '1/1' }}
               >
                 <img
-                  src="/Courageforeverykid.png"
+                  src="/optimized/Courageforeverykid.webp"
                   alt="Caiden celebrating - Courage for Every Kid"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/Courageforeverykid.png';
+                    (e.target as HTMLImageElement).src = '/optimized/Courageforeverykid.webp';
                   }}
                 />
               </div>
@@ -796,7 +796,7 @@ const Home = () => {
                 style={{ aspectRatio: '1/1' }}
               >
                 <img
-                  src="/SEL_Caidenshield_img.png"
+                  src="/optimized/SEL_Caidenshield_img.webp"
                   alt="Caiden deflecting the dragon's energy with his courage shield — Interactive SEL Adventures"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"

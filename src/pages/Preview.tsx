@@ -7,11 +7,11 @@ import Footer from '../components/Footer';
 
 // Preview page data
 const PREVIEW_PAGES = [
-  { id: 1, image: '/previews/page-01.jpg', alt: 'Preview page 1' },
-  { id: 2, image: '/previews/page-02.jpg', alt: 'Preview page 2' },
-  { id: 3, image: '/previews/page-03.jpg', alt: 'Preview page 3' },
-  { id: 4, image: '/previews/page-04.jpg', alt: 'Preview page 4' },
-  { id: 5, image: '/previews/page-05.jpg', alt: 'Preview page 5' },
+  { id: 1, image: '/previews/optimized/page-01.webp', alt: 'Preview page 1' },
+  { id: 2, image: '/previews/optimized/page-02.webp', alt: 'Preview page 2' },
+  { id: 3, image: '/previews/optimized/page-03.webp', alt: 'Preview page 3' },
+  { id: 4, image: '/previews/optimized/page-04.webp', alt: 'Preview page 4' },
+  { id: 5, image: '/previews/optimized/page-05.webp', alt: 'Preview page 5' },
 ];
 
 // Gentle anchor messages between pages

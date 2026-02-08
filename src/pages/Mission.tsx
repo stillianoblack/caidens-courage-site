@@ -62,7 +62,7 @@ const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/Caiden@4x-100.jpeg';
+                    (e.target as HTMLImageElement).src = '/optimized/Caiden@4x-100.webp';
                   }}
                 />
               </div>
@@ -179,7 +179,7 @@ const Mission: React.FC = () => {
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/background_ourstory_mobile_img.jpg' : '/background_ourstory_img.jpg'}
+              src={isMobile ? '/optimized/background_ourstory_mobile_img.webp' : '/optimized/background_ourstory_img.webp'}
               alt=""
               width={1600}
               height={900}
@@ -344,7 +344,7 @@ const Mission: React.FC = () => {
                 'Built with emotional intelligence at the core',
                 'Designed to help kids feel seen and powerful'
               ]}
-              imageSrc="/ourhistory_img.png"
+              imageSrc="/optimized/ourhistory_img.webp"
               imageAlt="Our History - The origin story of Caiden's Courage"
               imageSide="right"
             />
@@ -368,7 +368,7 @@ const Mission: React.FC = () => {
                 link: '/contact',
                 variant: 'primary'
               }}
-              imageSrc="/OurPromise_img.png"
+              imageSrc="/optimized/OurPromise_img.webp"
               imageAlt="Our Promise - Children engaging with Caiden's Courage tools and activities"
               imageSide="left"
             />
@@ -399,7 +399,7 @@ const Mission: React.FC = () => {
                   <div className="creator-portrait-glow"></div>
                   <div className="creator-portrait-blob">
                     <img
-                      src="/creator-photo.png"
+                      src="/optimized/creator-photo.webp"
                       alt="Tarus D. Stills - Creator of Caiden's Courage"
                       width={420}
                       height={420}
@@ -407,7 +407,7 @@ const Mission: React.FC = () => {
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                        (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                       }}
                     />
                   </div>
@@ -461,7 +461,7 @@ const Mission: React.FC = () => {
               <div className="world-different-card">
                 <div className="world-different-blob">
                   <img
-                    src="/Emotionallearningthroughstory_img.png"
+                    src="/optimized/Emotionallearningthroughstory_img.webp"
                     alt="Emotional learning through story"
                     width={80}
                     height={80}
@@ -469,7 +469,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                 </div>
@@ -486,7 +486,7 @@ const Mission: React.FC = () => {
               <div className="world-different-card">
                 <div className="world-different-blob">
                   <img
-                    src="/Neurodiversity-positiveheroes_img.png"
+                    src="/optimized/Neurodiversity-positiveheroes_img.webp"
                     alt="Neurodiversity-positive heroes"
                     width={80}
                     height={80}
@@ -494,7 +494,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                 </div>
@@ -511,7 +511,7 @@ const Mission: React.FC = () => {
               <div className="world-different-card">
                 <div className="world-different-blob">
                   <img
-                    src="/Character-drivengrowth_img.png"
+                    src="/optimized/Character-drivengrowth_img.webp"
                     alt="Character-driven growth"
                     width={80}
                     height={80}
@@ -519,7 +519,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                 </div>
@@ -536,7 +536,7 @@ const Mission: React.FC = () => {
               <div className="world-different-card">
                 <div className="world-different-blob">
                   <img
-                    src="/Toolsthatsupportkidsbeyondthepage_img.png"
+                    src="/optimized/Toolsthatsupportkidsbeyondthepage_img.webp"
                     alt="Tools that support kids beyond the page"
                     width={80}
                     height={80}
@@ -544,7 +544,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                 </div>
@@ -595,7 +595,7 @@ const Mission: React.FC = () => {
               <div className="world-beginning-image">
                 <div className="world-beginning-bloop">
                   <img
-                    src="/TheWorldIsJustBeginning_img.jpg"
+                    src="/optimized/TheWorldIsJustBeginning_img.webp"
                     alt="Caiden's Courage world exploration and discovery"
                     width={468}
                     height={468}
@@ -603,7 +603,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/hero-bg.png';
+                      (e.target as HTMLImageElement).src = '/optimized/hero-bg.webp';
                     }}
                   />
                 </div>
@@ -628,7 +628,7 @@ const Mission: React.FC = () => {
                   className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36"
                 >
                   <img
-                    src="/Comic5_Coverpage_header_smaller.jpg"
+                    src="/optimized/Comic5_Coverpage_header_smaller.webp"
                     alt="Caiden's Courage Comic Book"
                     width={144}
                     height={144}
@@ -636,7 +636,7 @@ const Mission: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
+                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
                     }}
                   />
                 </div>
