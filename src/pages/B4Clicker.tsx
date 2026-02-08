@@ -211,7 +211,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/optimized/Caiden@4x-100.webp" 
+                        src="/images/Caiden@4x-100.webp" 
                         alt="Caiden" 
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -228,7 +228,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/optimized/B-4@4x-100.webp" 
+                        src="/images/B-4@4x-100.webp" 
                         alt="B-4" 
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -245,7 +245,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/optimized/Genesis@4x-100.webp" 
+                        src="/images/Genesis@4x-100.webp" 
                         alt="Genesis" 
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -262,7 +262,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/optimized/Turtle@4x-100.webp" 
+                        src="/images/Turtle@4x-100.webp" 
                         alt="Turtle" 
                         className="w-full h-full object-cover"
                         loading="lazy"

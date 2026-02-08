@@ -159,7 +159,7 @@ const CourageAcademy: React.FC = () => {
               }}>
                 <div className="aspect-square bg-gradient-to-br from-navy-100 via-golden-100 to-navy-50 overflow-hidden">
                   <img
-                    src="/optimized/NeuroCamp_smaller.webp"
+                    src="/images/NeuroCamp_smaller.webp"
                     alt="Courage Academy camp visual"
                     className="w-full h-full object-cover scale-110"
                     style={{ objectPosition: 'center center' }}
@@ -538,7 +538,7 @@ const CourageAcademy: React.FC = () => {
             {/* Left: Preview Image */}
             <div className="order-2 lg:order-1 flex items-center justify-center">
               <img
-                src="/optimized/NeuroCamp_explore_smaller.webp"
+                src="/images/NeuroCamp_explore_smaller.webp"
                 alt="Explore Camp Courage"
                 className="w-full max-w-lg rounded-2xl shadow-lg"
                 loading="lazy"
@@ -729,7 +729,7 @@ const CourageAcademy: React.FC = () => {
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
               <div className="w-full aspect-square bg-white overflow-hidden">
                 <img
-                  src="/optimized/coloringpage_Caiden.webp"
+                  src="/images/coloringpage_Caiden.webp"
                   alt="Caiden Coloring Pages"
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -756,7 +756,7 @@ const CourageAcademy: React.FC = () => {
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
               <div className="w-full aspect-square bg-gradient-to-br from-blue-400 to-yellow-400 overflow-hidden flex items-center justify-center">
                 <img
-                  src="/optimized/CoolCaiden_header.webp"
+                  src="/images/CoolCaiden_header.webp"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -783,7 +783,7 @@ const CourageAcademy: React.FC = () => {
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
               <div className="w-full aspect-square bg-white overflow-hidden flex items-center justify-center relative">
                 <img
-                  src="/optimized/SELThubmails.webp"
+                  src="/images/SELThubmails.webp"
                   alt="Emotional Awareness Worksheet"
                   className="w-full h-full object-cover"
                   loading="lazy"

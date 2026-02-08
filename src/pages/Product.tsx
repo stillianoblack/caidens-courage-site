@@ -135,15 +135,15 @@ const Product: React.FC = () => {
   // Gallery images - can be expanded later
   const galleryImages = [
     {
-      src: "/optimized/Comic5_Coverpage_header_smaller.webp",
+      src: "/images/Comic5_Coverpage_header_smaller.webp",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
     },
     {
-      src: "/optimized/Comic5_Coverpage_header_smaller.webp",
+      src: "/images/Comic5_Coverpage_header_smaller.webp",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
     },
     {
-      src: "/optimized/Caiden'sCourage_SocialImage_smaller.webp", // Placeholder - replace with character art
+      src: "/images/Caiden'sCourage_SocialImage_smaller.webp", // Placeholder - replace with character art
       alt: "Character art from Caiden's Courage"
     }
   ];
@@ -253,7 +253,7 @@ const Product: React.FC = () => {
                     }
                   }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                   }}
                 />
               </div>
@@ -278,7 +278,7 @@ const Product: React.FC = () => {
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                       }}
                     />
                   </button>
@@ -452,13 +452,13 @@ const Product: React.FC = () => {
             <div className="order-1 md:order-1 flex justify-center">
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <img
-                  src="/optimized/Caiden'sCourage_SocialImage_smaller.webp"
+                  src="/images/Caiden'sCourage_SocialImage_smaller.webp"
                   alt="Caiden from Caiden's Courage"
                   className="w-full h-auto object-cover"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                   }}
                 />
               </div>
@@ -912,13 +912,13 @@ const Product: React.FC = () => {
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
                 <img
-                  src="/optimized/coloringpage_Caiden.webp"
+                  src="/images/coloringpage_Caiden.webp"
                   alt="Caiden Coloring Pages"
                   className="w-full h-full object-cover"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                   }}
                 />
               </div>
@@ -939,13 +939,13 @@ const Product: React.FC = () => {
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
                 <img
-                  src="/optimized/CoolCaiden_header.webp"
+                  src="/images/CoolCaiden_header.webp"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                   }}
                 />
               </div>
@@ -966,13 +966,13 @@ const Product: React.FC = () => {
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
                 <img
-                  src="/optimized/SELThubmails.webp"
+                  src="/images/SELThubmails.webp"
                   alt="Emotional Awareness Worksheet"
                   className="w-full h-full object-cover"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                   }}
                 />
               </div>

@@ -17,49 +17,49 @@ const characters: Character[] = [
     name: 'Caiden',
     role: 'Hero',
     bio: "Curious, creative, and brave in ways he doesn't always recognize yet. Caiden learns that what makes him different can also make him powerful—especially when others need help.",
-    image: '/optimized/Caiden_img_profile.webp'
+    image: '/images/characters/Caiden_img_profile.webp'
   },
   {
     name: 'Genesis',
     role: 'Alter-Ego',
     bio: "When courage kicks in, Caiden becomes Genesis—focused, fearless, and ready to protect the vulnerable. Genesis is the 'mythic version' of Caiden's best self.",
-    image: '/optimized/genesis_img_pic.webp'
+    image: '/images/genesis_img_pic.webp'
   },
   {
     name: 'B-4',
     role: 'Companion',
     bio: 'Part guide, part gadget, part best friend. B-4 helps Caiden stay grounded, spot patterns, and make bold choices—especially when the world gets loud.',
-    image: '/optimized/b4_img_profile.webp'
+    image: '/images/characters/b4_img_profile.webp'
   },
   {
     name: 'Ollis Buck',
     role: 'Ally',
     bio: 'Wise, steady, and unexpectedly funny. Ollis Buck reminds Caiden that slow thinking can be a superpower—and that every journey needs patience.',
-    image: '/optimized/ollie_img_profile.webp'
+    image: '/images/characters/ollie_img_profile.webp'
   },
   {
     name: 'Breath of Life',
     role: 'Mythic Force',
     bio: 'An ancient energy that awakens courage and clarity. The Breath of Life connects the ordinary world to the Otherworld—and chooses its moments carefully.',
-    image: '/optimized/breathoflife_img_profile.webp'
+    image: '/images/characters/breathoflife_img_profile.webp'
   },
   {
     name: 'Father Dragon',
     role: 'Guardian',
     bio: 'A legendary protector with a deep sense of purpose. Father Dragon watches the boundary between worlds—and tests Caiden\'s heart as much as his strength.',
-    image: '/optimized/dragon_img_profile.webp'
+    image: '/images/characters/dragon_img_profile.webp'
   },
   {
     name: 'Uncle T',
     role: 'Mentor',
     bio: 'Supportive, real, and always keeping it honest. Uncle T helps Caiden believe in himself, even when confidence feels out of reach.',
-    image: '/optimized/unclet_img_profile.webp'
+    image: '/images/characters/unclet_img_profile.webp'
   },
   {
     name: 'Maria',
     role: 'Anchor',
     bio: 'Smart, grounded, and fearless in her own way. Maria challenges Caiden to be accountable and brave—and never lets him forget who he is.',
-    image: '/optimized/maria_img_profile.webp'
+    image: '/images/characters/maria_img_profile.webp'
   }
 ];
 
@@ -105,17 +105,17 @@ const Characters: React.FC = () => {
             <source
               media="(max-width: 768px)"
               type="image/webp"
-              srcSet="/characters_hero_mobile_400w.webp 400w, /characters_hero_mobile_600w.webp 600w, /characters_hero_mobile_800w.webp 800w"
+              srcSet="/images/heroes/characters_hero_mobile_400w.webp 400w, /images/heroes/characters_hero_mobile_600w.webp 600w, /images/heroes/characters_hero_mobile_800w.webp 800w"
               sizes="100vw"
             />
             <source
               media="(min-width: 769px)"
               type="image/webp"
-              srcSet="/characters_hero_desktop_640w.webp 640w, /characters_hero_desktop_960w.webp 960w, /characters_hero_desktop_1280w.webp 1280w, /characters_hero_desktop_1600w.webp 1600w"
+              srcSet="/images/heroes/characters_hero_desktop_640w.webp 640w, /images/heroes/characters_hero_desktop_960w.webp 960w, /images/heroes/characters_hero_desktop_1280w.webp 1280w, /images/heroes/characters_hero_desktop_1600w.webp 1600w"
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/optimized/background_caidenscharacter_mobile_img.webp' : '/optimized/background_caidenscharacter_img.webp'}
+              src={isMobile ? '/images/backgrounds/background_caidenscharacter_mobile_img.webp' : '/images/backgrounds/background_caidenscharacter_img.webp'}
               alt=""
               width={1600}
               height={900}
@@ -297,7 +297,7 @@ const Characters: React.FC = () => {
                             : 'center center'
                         }}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                          (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                         }}
                       />
                     </div>
@@ -357,7 +357,7 @@ const Characters: React.FC = () => {
       <section 
         className="py-20 sm:py-28 relative overflow-hidden"
         style={{
-          backgroundImage: 'url(/optimized/background_img.webp)',
+          backgroundImage: 'url(/images/backgrounds/background_img.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -416,7 +416,7 @@ const Characters: React.FC = () => {
                   backgroundColor: '#ffffff'
                 }}>
                   <img
-                    src="/optimized/dragon_img_profile.webp"
+                    src="/images/characters/dragon_img_profile.webp"
                     alt="Father Dragon - Guardian of Caiden's Courage"
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -425,7 +425,7 @@ const Characters: React.FC = () => {
                     height={533}
                     style={{ objectPosition: 'center' }}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/optimized/logoCaiden.webp';
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
                     }}
                   />
                 </div>

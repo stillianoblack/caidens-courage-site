@@ -47,17 +47,17 @@ const World: React.FC = () => {
             <source
               media="(max-width: 768px)"
               type="image/webp"
-              srcSet="/world_hero_mobile_400w.webp 400w, /world_hero_mobile_600w.webp 600w, /world_hero_mobile_800w.webp 800w"
+              srcSet="/images/heroes/world_hero_mobile_400w.webp 400w, /images/heroes/world_hero_mobile_600w.webp 600w, /images/heroes/world_hero_mobile_800w.webp 800w"
               sizes="100vw"
             />
             <source
               media="(min-width: 769px)"
               type="image/webp"
-              srcSet="/world_hero_desktop_640w.webp 640w, /world_hero_desktop_960w.webp 960w, /world_hero_desktop_1280w.webp 1280w, /world_hero_desktop_1600w.webp 1600w"
+              srcSet="/images/heroes/world_hero_desktop_640w.webp 640w, /images/heroes/world_hero_desktop_960w.webp 960w, /images/heroes/world_hero_desktop_1280w.webp 1280w, /images/heroes/world_hero_desktop_1600w.webp 1600w"
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/optimized/Headers_world_mobile.webp' : '/optimized/background_caidensworld_img.webp'}
+              src={isMobile ? '/images/Headers_world_mobile.webp' : '/images/backgrounds/background_caidensworld_img.webp'}
               alt=""
               width={1600}
               height={900}
@@ -212,11 +212,11 @@ const World: React.FC = () => {
                 <picture>
                   <source
                     type="image/webp"
-                    srcSet="/world_card_know_640w.webp 640w, /world_card_know_960w.webp 960w, /world_card_know_1280w.webp 1280w"
+                    srcSet="/images/world_card_know_640w.webp 640w, /images/world_card_know_960w.webp 960w, /images/world_card_know_1280w.webp 1280w"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <img
-                    src="/optimized/theknowworld_img.webp"
+                    src="/images/theknowworld_img.webp"
                     alt="Where Courage Begins"
                     width={640}
                     height={400}
@@ -284,11 +284,11 @@ const World: React.FC = () => {
                 <picture>
                   <source
                     type="image/webp"
-                    srcSet="/world_card_other_640w.webp 640w, /world_card_other_960w.webp 960w, /world_card_other_1280w.webp 1280w"
+                    srcSet="/images/world_card_other_640w.webp 640w, /images/world_card_other_960w.webp 960w, /images/world_card_other_1280w.webp 1280w"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <img
-                    src="/optimized/TheOtherworld_genesis_img.webp"
+                    src="/images/TheOtherworld_genesis_img.webp"
                     alt="Where Courage Is Tested"
                     width={640}
                     height={400}
@@ -380,7 +380,7 @@ const World: React.FC = () => {
               }}
             >
               <img
-                src="/optimized/TheOtherworld_img.webp"
+                src="/images/TheOtherworld_img.webp"
                 alt="The Otherworld - A world beyond the veil"
                 width={1280}
                 height={720}
@@ -435,7 +435,7 @@ const World: React.FC = () => {
             {/* World map image */}
             <div className="w-full overflow-hidden rounded-3xl" style={{ aspectRatio: '16/9' }}>
               <img
-                src="/optimized/map.webp"
+                src="/images/map.webp"
                 alt="Caiden's World Map - The Veil, Ember Mountains, Whisper Forest, Sky Passage, Forgotten Gate"
                 width={1280}
                 height={720}
