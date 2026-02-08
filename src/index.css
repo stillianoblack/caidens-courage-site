@@ -1873,42 +1873,6 @@ a.bg-golden-500:hover,
   .character-card .flex {
     flex-direction: column;
   }
-}
-
-/* Character Cards */
-.character-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.character-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
-}
-
-.character-bloop {
-  transition: transform 0.3s ease;
-}
-
-.character-card:hover .character-bloop {
-  transform: scale(1.02);
-}
-
-.character-bloop img {
-  transition: transform 0.3s ease;
-}
-
-.character-card:hover .character-bloop img {
-  transform: scale(1.05);
-}
-
-@media (max-width: 767px) {
-  .character-card {
-    text-align: left;
-  }
-  
-  .character-card .flex {
-    flex-direction: column;
-  }
   
   .character-card .character-bloop {
     order: 1;

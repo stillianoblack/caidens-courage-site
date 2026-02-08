@@ -241,22 +241,40 @@ const Home = () => {
           alignItems: isMobile ? 'flex-start' : undefined
         }}
       >
-        {/* Background Image */}
+        {/* Background Image — responsive WebP srcset, no lazy load (LCP). Explicit width/height to prevent layout shift. */}
         <div className="major-publisher-hero-bg absolute inset-0 z-0">
-          <img 
-            src={isMobile ? "/homepage_hero-bg_mobile_img.jpg" : "/hero-bg_img_2.png"} 
-            alt="Caiden falling through a fantastical sky"
-            className="w-full h-full object-cover"
-            style={isMobile ? {
-              objectPosition: 'center 35%',
-              transform: 'translateY(-130px)'
-            } : {
-              objectPosition: 'center 30%'
-            }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/hero-bg.png';
-            }}
-          />
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet="/hero-bg_mobile_400w.webp 400w, /hero-bg_mobile_600w.webp 600w, /hero-bg_mobile_800w.webp 800w"
+              sizes="100vw"
+            />
+            <source
+              media="(min-width: 769px)"
+              type="image/webp"
+              srcSet="/hero-bg_desktop_640w.webp 640w, /hero-bg_desktop_960w.webp 960w, /hero-bg_desktop_1280w.webp 1280w, /hero-bg_desktop_1600w.webp 1600w"
+              sizes="100vw"
+            />
+            <img
+              src={isMobile ? '/homepage_hero-bg_mobile_img.jpg' : '/hero-bg_img_2.png'}
+              alt="Caiden falling through a fantastical sky"
+              width={1600}
+              height={817}
+              className="w-full h-full object-cover"
+              style={isMobile ? {
+                objectPosition: 'center 35%',
+                transform: 'translateY(-130px)'
+              } : {
+                objectPosition: 'center 30%'
+              }}
+              loading="eager"
+              decoding="async"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/hero-bg.png';
+              }}
+            />
+          </picture>
         </div>
         
         {/* Gradient Overlay */}

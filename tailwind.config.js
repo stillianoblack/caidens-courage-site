@@ -1,4 +1,5 @@
 module.exports = {
+  // content paths for tree-shaking: only classes found here are included in production
   content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   darkMode: 'media',
   theme: {
