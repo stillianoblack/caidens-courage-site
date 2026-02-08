@@ -30,7 +30,7 @@
     "concurrently": "^8.2.2",
     "cssnano": "^7.1.2",
     "netlify-cli": "^23.15.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.5"
   },
   "scripts": {
     "optimize-hero": "node scripts/optimize-hero.mjs",
