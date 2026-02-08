@@ -4,28 +4,28 @@ import { useLocation } from 'react-router-dom';
 const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
 
 /**
- * Map of pathname -> desktop hero image URL (1600w) for LCP preloading.
- * Only routes with a dedicated hero under /public/images/heroes are included.
+ * Route -> desktop hero WebP URL (1600w) for <picture> LCP preloading.
+ * One hero per route; desktop only (no mobile preload here).
+ * Filenames match <picture><source> usage on each page.
  */
 const ROUTE_TO_HERO: Record<string, string> = {
   '/': '/images/heroes/hero-bg_desktop_1600w.webp',
-  '/world': '/images/heroes/world_hero_desktop_1600w.webp',
   '/mission': '/images/heroes/mission_hero_desktop_1600w.webp',
+  '/world': '/images/heroes/world_hero_desktop_1600w.webp',
   '/characters': '/images/heroes/characters_hero_desktop_1600w.webp',
   '/meet-the-characters': '/images/heroes/characters_hero_desktop_1600w.webp',
 };
 
 /**
- * Injects a single <link rel="preload" as="image"> for the current route's hero
- * into document head. Removes or updates it when the route changes.
+ * Injects or updates a single <link rel="preload" as="image"> in <head>
+ * for the current route's desktop hero. Removes it when route has no hero.
  */
-const RoutePreloads: React.FC = () => {
+const RouteHeroPreload: React.FC = () => {
   const location = useLocation();
   const currentHrefRef = useRef<string | null>(null);
 
   useEffect(() => {
     const heroUrl = ROUTE_TO_HERO[location.pathname] ?? null;
-
     let link = document.getElementById(ROUTE_HERO_PRELOAD_ID) as HTMLLinkElement | null;
 
     if (heroUrl) {
@@ -46,7 +46,7 @@ const RoutePreloads: React.FC = () => {
         currentHrefRef.current = heroUrl;
       }
     } else {
-      if (link && link.parentNode) {
+      if (link?.parentNode) {
         link.parentNode.removeChild(link);
         currentHrefRef.current = null;
       }
@@ -56,7 +56,7 @@ const RoutePreloads: React.FC = () => {
   useEffect(() => {
     return () => {
       const link = document.getElementById(ROUTE_HERO_PRELOAD_ID);
-      if (link && link.parentNode) link.parentNode.removeChild(link);
+      if (link?.parentNode) link.parentNode.removeChild(link);
       currentHrefRef.current = null;
     };
   }, []);
@@ -64,4 +64,4 @@ const RoutePreloads: React.FC = () => {
   return null;
 };
 
-export default RoutePreloads;
+export default RouteHeroPreload;

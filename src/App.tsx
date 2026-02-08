@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
-import RoutePreloads from './components/RoutePreloads';
+import RouteHeroPreload from './components/RouteHeroPreload';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 
 // Lazy load pages for code splitting
@@ -33,7 +33,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      <RoutePreloads />
+      <RouteHeroPreload />
       <B4ChatWidget />
       {/* Route-based code splitting: each page loads on demand. Fallback shown while chunk loads. */}
       <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
