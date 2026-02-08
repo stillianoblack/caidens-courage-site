@@ -4,6 +4,13 @@
   command = "yarn build"
   functions = "netlify/functions"
 
+# SPA fallback first: serve index.html for all paths so client-side routing works (no document reloads on nav).
+# netlify.toml redirects take precedence; build/_redirects is also copied during build for redundancy.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 [functions]
   directory = "netlify/functions"
 
@@ -104,9 +111,3 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
-# SPA fallback: serve index.html for all paths so client-side routing works.
-# This is defined here (not in public/_redirects) so it works even if _redirects is ignored.
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
