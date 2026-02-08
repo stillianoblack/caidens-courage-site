@@ -25,15 +25,6 @@ const Characters = lazy(() => import('./pages/Characters'));
 const World = lazy(() => import('./pages/World'));
 
 const AppContent: React.FC = () => {
-  // Prefetch main menu + CTA routes so transitions feel instant (no blocking overlay)
-  useEffect(() => void import("./pages/Mission"), []);
-  useEffect(() => void import("./pages/Resources"), []);
-  useEffect(() => void import("./pages/About"), []);
-  useEffect(() => void import("./pages/World"), []);
-  useEffect(() => void import("./pages/Characters"), []);
-  useEffect(() => void import("./pages/Contact"), []);
-  useEffect(() => void import("./pages/Product"), []);
-
   // LaunchDarkly: init only after first paint (non-blocking). Prevents NO_FCP; no await, no gating.
   useEffect(() => {
     initLaunchDarkly();

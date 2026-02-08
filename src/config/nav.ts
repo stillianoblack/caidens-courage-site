@@ -1,5 +1,5 @@
 // Navigation configuration for desktop and mobile
-// All internal links use React Router <Link> (never <a>). Prefetch is on for nav: onMouseEnter + useEffect(import) (React Router has no prefetch prop). No loading="lazy" on Links – only on images where appropriate.
+// All internal links use React Router <Link> (never <a>). No hover prefetch (avoids ChunkLoadError in dev). No loading="lazy" on Links – only on images where appropriate.
 
 export interface NavItem {
   label: string;

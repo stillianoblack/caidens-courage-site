@@ -86,8 +86,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       setShopCloseTimeout(null);
     }
     setShowShopDropdown(true);
-    void import('../pages/Product');
-    void import('../pages/Preview');
   };
 
   const handleShopMouseLeave = () => {
@@ -103,9 +101,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       setWorldCloseTimeout(null);
     }
     setShowWorldDropdown(true);
-    // Prefetch The World pages so clicking feels instant
-    void import('../pages/World');
-    void import('../pages/Characters');
   };
 
   const handleWorldMouseLeave = () => {
@@ -144,7 +139,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     return (
       <Link
         to={item.href}
-        onMouseEnter={item.href === '/mission' ? () => import('../pages/Mission') : undefined}
         onClick={(e) => handleNavLinkClick(e, item.href)}
         className={`nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
       >
@@ -503,7 +497,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
-                onMouseEnter={() => void import('../pages/Contact')}
                 onClick={(e) => handleNavLinkClick(e, RIGHT_NAV_ITEMS.partnerLink.href)}
                 className={`hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
@@ -548,7 +541,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                     <Link
                       key={item.label}
                       to={item.href}
-                      onMouseEnter={item.href === '/mission' ? () => import('../pages/Mission') : undefined}
                       onClick={(e) => {
                         setIsMobileMenuOpen(false);
                         handleNavLinkClick(e, item.href);
@@ -579,13 +571,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   return (
                     <div key={item.label} className="border-b border-navy-100">
                       <button
-                        onClick={() => {
-                          if (item.label === 'The World' && !isOpen) {
-                            void import('../pages/World');
-                            void import('../pages/Characters');
-                          }
-                          setIsOpen(!isOpen);
-                        }}
+                        onClick={() => setIsOpen(!isOpen)}
                         className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
                       >
                         <span>{item.label}</span>
@@ -720,7 +706,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link in Mobile Menu */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
-                onMouseEnter={() => void import('../pages/Contact')}
                 onClick={(e) => {
                   setIsMobileMenuOpen(false);
                   handleNavLinkClick(e, RIGHT_NAV_ITEMS.partnerLink.href);
