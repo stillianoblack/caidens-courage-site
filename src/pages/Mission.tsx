@@ -127,35 +127,13 @@ const Mission: React.FC = () => {
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Set page title and preload LCP hero (only this page's hero)
+  // Set page title; hero loads with page (no preload — only homepage preloads hero for performance).
   useEffect(() => {
     document.title = "Our Mission | Caiden's Courage";
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
-    const preloadDesktop = document.createElement('link');
-    preloadDesktop.rel = 'preload';
-    preloadDesktop.as = 'image';
-    preloadDesktop.href = '/mission_hero_desktop_1280w.webp';
-    preloadDesktop.setAttribute('type', 'image/webp');
-    preloadDesktop.setAttribute('fetchpriority', 'high');
-    preloadDesktop.setAttribute('media', '(min-width: 769px)');
-    const preloadMobile = document.createElement('link');
-    preloadMobile.rel = 'preload';
-    preloadMobile.as = 'image';
-    preloadMobile.href = '/mission_hero_mobile_800w.webp';
-    preloadMobile.setAttribute('type', 'image/webp');
-    preloadMobile.setAttribute('fetchpriority', 'high');
-    preloadMobile.setAttribute('media', '(max-width: 768px)');
-    document.head.appendChild(preloadDesktop);
-    document.head.appendChild(preloadMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      preloadDesktop.remove();
-      preloadMobile.remove();
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handleWaitlistClick = () => {

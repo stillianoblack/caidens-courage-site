@@ -14,29 +14,7 @@ const World: React.FC = () => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
-    const preloadDesktop = document.createElement('link');
-    preloadDesktop.rel = 'preload';
-    preloadDesktop.as = 'image';
-    preloadDesktop.href = '/world_hero_desktop_1280w.webp';
-    preloadDesktop.setAttribute('type', 'image/webp');
-    preloadDesktop.setAttribute('fetchpriority', 'high');
-    preloadDesktop.setAttribute('media', '(min-width: 769px)');
-    const preloadMobile = document.createElement('link');
-    preloadMobile.rel = 'preload';
-    preloadMobile.as = 'image';
-    preloadMobile.href = '/world_hero_mobile_800w.webp';
-    preloadMobile.setAttribute('type', 'image/webp');
-    preloadMobile.setAttribute('fetchpriority', 'high');
-    preloadMobile.setAttribute('media', '(max-width: 768px)');
-    document.head.appendChild(preloadDesktop);
-    document.head.appendChild(preloadMobile);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      preloadDesktop.remove();
-      preloadMobile.remove();
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handlePreorderClick = () => {
