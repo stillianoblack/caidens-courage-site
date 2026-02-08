@@ -382,7 +382,7 @@ const Mission: React.FC = () => {
         <section 
           className="creator-section"
           style={{
-            backgroundImage: 'url(/images/backgrounds/meetthecreator_bg.jpg)',
+            backgroundImage: 'url(/images/backgrounds/meetthecreator_bg.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
