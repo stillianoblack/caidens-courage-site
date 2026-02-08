@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -126,6 +126,7 @@ const InsideCard: React.FC<InsideCardProps> = ({ title, bullets, iconType, helpV
 };
 
 const Product: React.FC = () => {
+  const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -152,13 +153,12 @@ const Product: React.FC = () => {
     document.title = "Caiden's Courage and the Dragon's Nest: The Graphic Novel | Caiden's Courage";
   }, []);
 
-  // Page-local scroll reset: Only for /comicbook when there's no hash
+  // Page-local scroll reset: only when there's no hash (preserve anchor navigation). Use router location, not window.location.
   useEffect(() => {
-    // Only scroll to top if there's no hash fragment (preserve anchor navigation)
-    if (!window.location.hash) {
+    if (!location.hash) {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
-  }, []);
+  }, [location.pathname, location.hash]);
 
 
   const handlePhysicalCopyClick = () => {
