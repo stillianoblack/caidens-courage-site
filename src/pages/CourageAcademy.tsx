@@ -163,6 +163,8 @@ const CourageAcademy: React.FC = () => {
                     alt="Courage Academy camp visual"
                     className="w-full h-full object-cover scale-110"
                     style={{ objectPosition: 'center center' }}
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -539,6 +541,8 @@ const CourageAcademy: React.FC = () => {
                 src="/NeuroCamp_explore_smaller.jpg"
                 alt="Explore Camp Courage"
                 className="w-full max-w-lg rounded-2xl shadow-lg"
+                loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
@@ -728,6 +732,8 @@ const CourageAcademy: React.FC = () => {
                   src="/coloringpage_Caiden.png"
                   alt="Caiden Coloring Pages"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
@@ -753,6 +759,8 @@ const CourageAcademy: React.FC = () => {
                   src="/CoolCaiden_header.png"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
@@ -778,6 +786,8 @@ const CourageAcademy: React.FC = () => {
                   src="/SELThubmails.jpg"
                   alt="Emotional Awareness Worksheet"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

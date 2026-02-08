@@ -480,6 +480,7 @@ const Home = () => {
                     outline: 'none',
                   }}
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               
@@ -499,6 +500,8 @@ const Home = () => {
                           width="80"
                           height="80"
                           className="object-cover"
+                          loading="lazy"
+                          decoding="async"
                           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/logoCaiden.png';
@@ -798,6 +801,7 @@ const Home = () => {
                   alt="Caiden deflecting the dragon's energy with his courage shield — Interactive SEL Adventures"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             </div>
@@ -1295,6 +1299,7 @@ const Home = () => {
               src="https://beacons.ai/stillianoblack"
               title="Caiden's Courage Pre-order"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>

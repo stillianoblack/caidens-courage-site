@@ -390,6 +390,8 @@ const Resources: React.FC = () => {
                     src={resource.thumbnail}
                     alt={resource.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
                     }}
@@ -532,6 +534,8 @@ const Resources: React.FC = () => {
                   src="/Caiden_FAQ_section.png"
                   alt="Child using resources"
                   className="w-full max-w-lg rounded-2xl shadow-lg"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
@@ -759,6 +763,8 @@ const Resources: React.FC = () => {
                       src="/Caiden@4x-100.jpeg"
                       alt="Caiden"
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
@@ -870,6 +876,7 @@ const Resources: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>

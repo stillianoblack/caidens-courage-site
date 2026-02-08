@@ -214,6 +214,8 @@ const B4Clicker: React.FC = () => {
                         src="/Caiden@4x-100.jpeg" 
                         alt="Caiden" 
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </button>
@@ -229,6 +231,8 @@ const B4Clicker: React.FC = () => {
                         src="/B-4@4x-100.jpeg" 
                         alt="B-4" 
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </button>
@@ -244,6 +248,8 @@ const B4Clicker: React.FC = () => {
                         src="/Genesis@4x-100.jpeg" 
                         alt="Genesis" 
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </button>
@@ -259,6 +265,8 @@ const B4Clicker: React.FC = () => {
                         src="/Turtle@4x-100.jpeg" 
                         alt="Turtle" 
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </button>

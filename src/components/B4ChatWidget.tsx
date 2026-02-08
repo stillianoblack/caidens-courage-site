@@ -253,6 +253,8 @@ const B4ChatWidget: React.FC = () => {
                     src="/B-4@4x-100.jpeg"
                     alt="B-4"
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';

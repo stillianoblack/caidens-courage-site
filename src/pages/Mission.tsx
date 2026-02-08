@@ -781,6 +781,7 @@ const Mission: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>

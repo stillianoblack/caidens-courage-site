@@ -237,6 +237,7 @@ const Product: React.FC = () => {
                     transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                     willChange: 'transform'
                   }}
+                  decoding="async"
                   onMouseEnter={(e) => {
                     // Only enable magnify on desktop (md and up)
                     if (window.innerWidth >= 768) {
@@ -274,6 +275,8 @@ const Product: React.FC = () => {
                       src={image.src}
                       alt={image.alt}
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/logoCaiden.png';
                       }}
@@ -452,6 +455,8 @@ const Product: React.FC = () => {
                   src="/Caiden'sCourage_SocialImage_smaller.jpg"
                   alt="Caiden from Caiden's Courage"
                   className="w-full h-auto object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logoCaiden.png';
                   }}
@@ -910,6 +915,8 @@ const Product: React.FC = () => {
                   src="/coloringpage_Caiden.png"
                   alt="Caiden Coloring Pages"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logoCaiden.png';
                   }}
@@ -935,6 +942,8 @@ const Product: React.FC = () => {
                   src="/CoolCaiden_header.png"
                   alt="Caiden Desktop Wallpaper"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logoCaiden.png';
                   }}
@@ -960,6 +969,8 @@ const Product: React.FC = () => {
                   src="/SELThubmails.jpg"
                   alt="Emotional Awareness Worksheet"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/logoCaiden.png';
                   }}
@@ -1049,6 +1060,7 @@ const Product: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>

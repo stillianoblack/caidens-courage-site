@@ -296,6 +296,7 @@ const Terms: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               className="w-full h-[600px] border-0 rounded-lg"
               title="Join the Courage Community"
+              loading="lazy"
             />
           </div>
         </div>

@@ -459,6 +459,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   src="/logoCaiden.png" 
                   alt="Caiden's Courage" 
                   className="h-10 sm:h-12 w-auto"
+                  decoding="async"
                 />
               </Link>
               
@@ -769,6 +770,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               src="https://beacons.ai/stillianoblack"
               className="w-full h-[600px] border-0 rounded-lg"
               title="Join the Courage Community"
+              loading="lazy"
             />
           </div>
         </div>

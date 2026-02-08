@@ -370,6 +370,8 @@ const Preview = () => {
               alt="" 
               className="w-full h-full"
               style={{ filter: 'blur(0.5px)' }}
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -485,6 +487,7 @@ const Preview = () => {
                         aspectRatio: '3/4',
                         maxHeight: '75vh'
                       }}
+                      decoding="async"
                       onLoad={() => {
                         setImagesLoaded(prev => new Set(prev).add(currentPage));
                         setImageErrors(prev => {
@@ -648,6 +651,7 @@ const Preview = () => {
               className="max-w-full max-h-[100vh] object-contain"
               draggable={false}
               style={{ userSelect: 'none' }}
+              decoding="async"
             />
           </div>
         </div>
@@ -721,6 +725,7 @@ const Preview = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>
