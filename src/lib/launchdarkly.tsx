@@ -16,14 +16,22 @@ let envWarned = false;
 
 function getClientId(): string {
   let id = '';
+  // Create React App: process.env.REACT_APP_* at build time
   if (typeof process !== 'undefined' && process.env?.REACT_APP_LAUNCHDARKLY_CLIENT_ID) {
     id = process.env.REACT_APP_LAUNCHDARKLY_CLIENT_ID;
-  } else if (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { VITE_LAUNCHDARKLY_CLIENT_ID?: string } }).env?.VITE_LAUNCHDARKLY_CLIENT_ID) {
-    id = (import.meta as unknown as { env: { VITE_LAUNCHDARKLY_CLIENT_ID?: string } }).env.VITE_LAUNCHDARKLY_CLIENT_ID ?? '';
+  }
+  // Vite: import.meta.env.VITE_* at build time
+  if (!id && typeof import.meta !== 'undefined') {
+    const viteEnv = (import.meta as unknown as { env?: { VITE_LAUNCHDARKLY_CLIENT_ID?: string } }).env;
+    if (viteEnv?.VITE_LAUNCHDARKLY_CLIENT_ID) {
+      id = viteEnv.VITE_LAUNCHDARKLY_CLIENT_ID;
+    }
   }
   if (!id && !envWarned) {
     envWarned = true;
-    console.warn('[LaunchDarkly] REACT_APP_LAUNCHDARKLY_CLIENT_ID (or VITE_LAUNCHDARKLY_CLIENT_ID) is not set. LaunchDarkly is disabled; using default flags.');
+    console.warn(
+      '[LaunchDarkly] Set REACT_APP_LAUNCHDARKLY_CLIENT_ID (Create React App) or VITE_LAUNCHDARKLY_CLIENT_ID (Vite) in your environment. LaunchDarkly is disabled; using default flags.'
+    );
   }
   return id;
 }
