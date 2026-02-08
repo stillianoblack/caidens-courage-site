@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <link rel="preload" as="image" type="image/webp" href="/images/heroes/hero-bg_desktop_1600w.webp" />
-    <link rel="preload" as="image" href="/images/heroes/world_hero_desktop_1600w.webp" />
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/logo192.png" />
@@ -20,12 +18,10 @@
       content="Caiden's Courage - Courage looks like doing things your own way."
     />
     
-    <!-- Performance: no video backgrounds (no autoplay/video on initial load). Hero preload only on homepage. -->
+    <!-- Hero image preload is injected by RoutePreloads based on current route. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <!-- Home hero is not preloaded here: it lives inside a lazy-loaded route, so a document preload would often be "unused" by load event and trigger console warnings. The hero still loads eagerly when Home mounts. -->
-    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://caidenscourage.com/" />
