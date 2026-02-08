@@ -64,6 +64,7 @@ const World: React.FC = () => {
               className="w-full h-full object-cover"
               style={{ objectPosition: isMobile ? 'center top' : 'right top' }}
               loading="eager"
+              fetchPriority="high"
               decoding="async"
             />
           </picture>
