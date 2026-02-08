@@ -58,7 +58,7 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!-- Do not add a LaunchDarkly <script> tag here or via Netlify inject. LaunchDarkly loads only via the app (src/lib/launchdarkly.ts) to prevent EventSource from blocking initial render and navigation. -->
+    <!-- Do not add a LaunchDarkly <script> tag here or via Netlify inject. LaunchDarkly loads only via the app (src/lib/launchdarkly.tsx) after first paint; no script tag to avoid NO_FCP and EventSource blocking. -->
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

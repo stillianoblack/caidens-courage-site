@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import B4ChatWidget from './components/B4ChatWidget';
 import NavigationLoader from './components/NavigationLoader';
-import { getLDClient } from './lib/launchdarkly';
+import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -35,9 +35,9 @@ const AppContent: React.FC = () => {
   useEffect(() => void import("./pages/Contact"), []);
   useEffect(() => void import("./pages/Product"), []);
 
-  // LaunchDarkly: single init via getLDClient() — streaming: false, bootstrap: 'localStorage' (no EventSource).
+  // LaunchDarkly: init only after first paint (non-blocking). Prevents NO_FCP; no await, no gating.
   useEffect(() => {
-    void getLDClient();
+    initLaunchDarkly();
   }, []);
 
   return (
@@ -85,7 +85,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppContent />
+      <LaunchDarklyProvider>
+        <AppContent />
+      </LaunchDarklyProvider>
     </Router>
   );
 }
