@@ -52,11 +52,15 @@ const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
             <div
               className="min-w-0 w-full max-w-full overflow-hidden rounded-[2.5rem] aspect-[2/3] md:aspect-[4/3] md:rounded-[16%] md:box-border md:border-[6px] md:border-[#E9C46A] lg:aspect-square lg:rounded-full lg:max-w-[520px] lg:w-[40vw]"
             >
-              <div className="h-full w-full p-0">
+              <div className="h-full w-full p-0" style={{ aspectRatio: '1/1' }}>
                 <img
                   src={imageSrc}
                   alt={imageAlt}
+                  width={520}
+                  height={520}
                   className="block w-full max-w-full h-full object-cover object-top rounded-[2.5rem] md:rounded-none lg:rounded-full"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/Caiden@4x-100.jpeg';
                   }}
@@ -123,17 +127,31 @@ const Mission: React.FC = () => {
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Set page title
+  // Set page title and preload LCP hero (only this page's hero)
   useEffect(() => {
     document.title = "Our Mission | Caiden's Courage";
-    
-    // Check if mobile on mount and resize
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    const preloadDesktop = document.createElement('link');
+    preloadDesktop.rel = 'preload';
+    preloadDesktop.as = 'image';
+    preloadDesktop.href = '/mission_hero_desktop_1280w.webp';
+    preloadDesktop.setAttribute('media', '(min-width: 769px)');
+    const preloadMobile = document.createElement('link');
+    preloadMobile.rel = 'preload';
+    preloadMobile.as = 'image';
+    preloadMobile.href = '/mission_hero_mobile_800w.webp';
+    preloadMobile.setAttribute('media', '(max-width: 768px)');
+    document.head.appendChild(preloadDesktop);
+    document.head.appendChild(preloadMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      preloadDesktop.remove();
+      preloadMobile.remove();
+    };
   }, []);
 
   const handleWaitlistClick = () => {
@@ -150,8 +168,8 @@ const Mission: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
-      {/* Cinematic Hero Section */}
-      <header 
+      {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
+      <header
         className="relative overflow-hidden"
         style={{
           paddingTop: isMobile ? '70px' : 'clamp(67px, 10vh, 112px)',
@@ -161,31 +179,44 @@ const Mission: React.FC = () => {
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
           minHeight: isMobile ? '100vh' : '92vh',
-          backgroundImage: isMobile 
-            ? `linear-gradient(
-                180deg,
-                rgba(8, 18, 38, 0.92) 0%,
-                rgba(8, 18, 38, 0.85) 30%,
-                rgba(8, 18, 38, 0.65) 50%,
-                rgba(8, 18, 38, 0.35) 70%,
-                rgba(8, 18, 38, 0.15) 85%,
-                rgba(8, 18, 38, 0) 100%
-              ),
-              url('/background_ourstory_mobile_img.jpg')`
-            : `linear-gradient(
-                90deg,
-                rgba(8, 15, 35, 0.72) 0%,
-                rgba(8, 15, 35, 0.55) 35%,
-                rgba(8, 15, 35, 0.25) 60%,
-                rgba(8, 15, 35, 0.08) 80%,
-                rgba(8, 15, 35, 0) 100%
-              ),
-              url(/background_ourstory_img.jpg)`,
-          backgroundSize: 'cover',
-          backgroundPosition: isMobile ? 'center bottom' : '70% center',
-          backgroundRepeat: 'no-repeat',
         }}
       >
+        {/* Hero image layer — full bleed, no lazy (LCP) */}
+        <div className="absolute inset-0 z-0">
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet="/mission_hero_mobile_400w.webp 400w, /mission_hero_mobile_600w.webp 600w, /mission_hero_mobile_800w.webp 800w"
+              sizes="100vw"
+            />
+            <source
+              media="(min-width: 769px)"
+              type="image/webp"
+              srcSet="/mission_hero_desktop_640w.webp 640w, /mission_hero_desktop_960w.webp 960w, /mission_hero_desktop_1280w.webp 1280w, /mission_hero_desktop_1600w.webp 1600w"
+              sizes="100vw"
+            />
+            <img
+              src={isMobile ? '/background_ourstory_mobile_img.jpg' : '/background_ourstory_img.jpg'}
+              alt=""
+              width={1600}
+              height={900}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: isMobile ? 'center bottom' : '70% center' }}
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
+        </div>
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: isMobile
+              ? 'linear-gradient(180deg, rgba(8,18,38,0.92) 0%, rgba(8,18,38,0.85) 30%, rgba(8,18,38,0.65) 50%, rgba(8,18,38,0.35) 70%, rgba(8,18,38,0.15) 85%, transparent 100%)'
+              : 'linear-gradient(90deg, rgba(8,15,35,0.72) 0%, rgba(8,15,35,0.55) 35%, rgba(8,15,35,0.25) 60%, rgba(8,15,35,0.08) 80%, transparent 100%)',
+          }}
+        />
         {/* Content - Aligned to Global Grid */}
         <div 
           className="w-full" 
@@ -385,10 +416,14 @@ const Mission: React.FC = () => {
                 <div className="creator-portrait-wrapper">
                   <div className="creator-portrait-glow"></div>
                   <div className="creator-portrait-blob">
-                    <img 
-                      src="/creator-photo.png" 
+                    <img
+                      src="/creator-photo.png"
                       alt="Tarus D. Stills - Creator of Caiden's Courage"
+                      width={420}
+                      height={420}
                       className="creator-portrait-image"
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = '/logoCaiden.png';
                       }}
@@ -443,10 +478,14 @@ const Mission: React.FC = () => {
             <div className="world-different-grid">
               <div className="world-different-card">
                 <div className="world-different-blob">
-                  <img 
-                    src="/Emotionallearningthroughstory_img.png" 
+                  <img
+                    src="/Emotionallearningthroughstory_img.png"
                     alt="Emotional learning through story"
+                    width={80}
+                    height={80}
                     className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
                     }}
@@ -464,10 +503,14 @@ const Mission: React.FC = () => {
               
               <div className="world-different-card">
                 <div className="world-different-blob">
-                  <img 
-                    src="/Neurodiversity-positiveheroes_img.png" 
+                  <img
+                    src="/Neurodiversity-positiveheroes_img.png"
                     alt="Neurodiversity-positive heroes"
+                    width={80}
+                    height={80}
                     className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
                     }}
@@ -485,10 +528,14 @@ const Mission: React.FC = () => {
               
               <div className="world-different-card">
                 <div className="world-different-blob">
-                  <img 
-                    src="/Character-drivengrowth_img.png" 
+                  <img
+                    src="/Character-drivengrowth_img.png"
                     alt="Character-driven growth"
+                    width={80}
+                    height={80}
                     className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
                     }}
@@ -506,10 +553,14 @@ const Mission: React.FC = () => {
               
               <div className="world-different-card">
                 <div className="world-different-blob">
-                  <img 
-                    src="/Toolsthatsupportkidsbeyondthepage_img.png" 
+                  <img
+                    src="/Toolsthatsupportkidsbeyondthepage_img.png"
                     alt="Tools that support kids beyond the page"
+                    width={80}
+                    height={80}
                     className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
                     }}
@@ -561,10 +612,14 @@ const Mission: React.FC = () => {
               {/* Right Column: Bloop Image */}
               <div className="world-beginning-image">
                 <div className="world-beginning-bloop">
-                  <img 
-                    src="/TheWorldIsJustBeginning_img.jpg" 
+                  <img
+                    src="/TheWorldIsJustBeginning_img.jpg"
                     alt="Caiden's Courage world exploration and discovery"
+                    width={468}
+                    height={468}
                     className="world-beginning-bloop-image"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/hero-bg.png';
                     }}
@@ -593,6 +648,8 @@ const Mission: React.FC = () => {
                   <img
                     src="/Comic5_Coverpage_header_smaller.jpg"
                     alt="Caiden's Courage Comic Book"
+                    width={144}
+                    height={144}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"

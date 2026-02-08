@@ -11,14 +11,28 @@ const World: React.FC = () => {
 
   useEffect(() => {
     document.title = "Explore Caiden's World | Caiden's Courage";
-    
-    // Check if mobile on mount and resize
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    const preloadDesktop = document.createElement('link');
+    preloadDesktop.rel = 'preload';
+    preloadDesktop.as = 'image';
+    preloadDesktop.href = '/world_hero_desktop_1280w.webp';
+    preloadDesktop.setAttribute('media', '(min-width: 769px)');
+    const preloadMobile = document.createElement('link');
+    preloadMobile.rel = 'preload';
+    preloadMobile.as = 'image';
+    preloadMobile.href = '/world_hero_mobile_800w.webp';
+    preloadMobile.setAttribute('media', '(max-width: 768px)');
+    document.head.appendChild(preloadDesktop);
+    document.head.appendChild(preloadMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      preloadDesktop.remove();
+      preloadMobile.remove();
+    };
   }, []);
 
   const handlePreorderClick = () => {
@@ -34,39 +48,51 @@ const World: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header />
 
-      {/* Cinematic Hero Section */}
-      <header 
+      {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
+      <header
         className="hero-cinematic relative flex items-start overflow-hidden"
         style={{
           minHeight: isMobile ? '100vh' : '92vh',
           paddingTop: isMobile ? '130px' : 'clamp(96px, 14vh, 160px)',
           paddingBottom: isMobile ? '40px' : '160px',
           flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: isMobile ? 'flex-start' : 'flex-start',
-          backgroundImage: `linear-gradient(
-            90deg,
-            rgba(7, 17, 36, 0.82) 0%,
-            rgba(7, 17, 36, 0.65) 35%,
-            rgba(7, 17, 36, 0.35) 55%,
-            rgba(7, 17, 36, 0.08) 72%,
-            rgba(7, 17, 36, 0) 85%
-          ),
-          url('${isMobile ? '/Headers_world_mobile.png' : '/background_caidensworld_img.jpg'}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: isMobile ? 'center top' : 'right top',
-          backgroundRepeat: 'no-repeat',
+          justifyContent: 'flex-start',
         }}
       >
+        {/* Hero image layer — full bleed, LCP */}
+        <div className="absolute inset-0 z-0">
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet="/world_hero_mobile_400w.webp 400w, /world_hero_mobile_600w.webp 600w, /world_hero_mobile_800w.webp 800w"
+              sizes="100vw"
+            />
+            <source
+              media="(min-width: 769px)"
+              type="image/webp"
+              srcSet="/world_hero_desktop_640w.webp 640w, /world_hero_desktop_960w.webp 960w, /world_hero_desktop_1280w.webp 1280w, /world_hero_desktop_1600w.webp 1600w"
+              sizes="100vw"
+            />
+            <img
+              src={isMobile ? '/Headers_world_mobile.png' : '/background_caidensworld_img.jpg'}
+              alt=""
+              width={1600}
+              height={900}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: isMobile ? 'center top' : 'right top' }}
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
+        </div>
         {/* Top Gradient Overlay */}
-        <div 
-          className="absolute inset-0"
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
           style={{
             background: 'linear-gradient(to bottom, rgba(5, 18, 48, 0.75) 0%, rgba(5, 18, 48, 0.35) 35%, rgba(5, 18, 48, 0.1) 60%, transparent 80%)',
-            pointerEvents: 'none',
-            zIndex: 1
           }}
-        ></div>
-        
+        />
         {/* Content - Aligned to Global Grid */}
         <div className="hero-container relative z-10 w-full flex flex-col md:block" style={{ paddingTop: '0' }}>
           <div className="hero-text text-left" style={{ maxWidth: '640px', marginTop: '0', paddingTop: '0' }}>
@@ -199,13 +225,23 @@ const World: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              <div className="w-full h-64 overflow-hidden">
-                <img 
-                  src="/theknowworld_img.jpg"
-                  alt="Where Courage Begins"
-                  className="world-card-image w-full h-full object-cover"
-                  loading="lazy"
-                />
+              <div className="w-full h-64 overflow-hidden" style={{ aspectRatio: '16/10' }}>
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcSet="/world_card_know_640w.webp 640w, /world_card_know_960w.webp 960w, /world_card_know_1280w.webp 1280w"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <img
+                    src="/theknowworld_img.jpg"
+                    alt="Where Courage Begins"
+                    width={640}
+                    height={400}
+                    className="world-card-image w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
               </div>
               <div className="p-8 lg:p-10">
                 <h3 
@@ -261,13 +297,23 @@ const World: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              <div className="w-full h-64 overflow-hidden">
-                <img 
-                  src="/TheOtherworld_genesis_img.jpg"
-                  alt="Where Courage Is Tested"
-                  className="world-card-image w-full h-full object-cover"
-                  loading="lazy"
-                />
+              <div className="w-full h-64 overflow-hidden" style={{ aspectRatio: '16/10' }}>
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcSet="/world_card_other_640w.webp 640w, /world_card_other_960w.webp 960w, /world_card_other_1280w.webp 1280w"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <img
+                    src="/TheOtherworld_genesis_img.jpg"
+                    alt="Where Courage Is Tested"
+                    width={640}
+                    height={400}
+                    className="world-card-image w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
               </div>
               <div className="p-8 lg:p-10">
                 <h3 
@@ -350,12 +396,15 @@ const World: React.FC = () => {
                 maxHeight: '650px'
               }}
             >
-              <img 
+              <img
                 src="/TheOtherworld_img.jpg"
                 alt="The Otherworld - A world beyond the veil"
+                width={1280}
+                height={720}
                 className="w-full h-full object-cover"
                 style={{ objectPosition: 'center' }}
                 loading="lazy"
+                decoding="async"
               />
             </div>
           </div>
@@ -401,12 +450,15 @@ const World: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
             {/* World map image */}
-            <div className="w-full overflow-hidden rounded-3xl">
-              <img 
+            <div className="w-full overflow-hidden rounded-3xl" style={{ aspectRatio: '16/9' }}>
+              <img
                 src="/map.jpg"
                 alt="Caiden's World Map - The Veil, Ember Mountains, Whisper Forest, Sky Passage, Forgotten Gate"
+                width={1280}
+                height={720}
                 className="w-full h-auto object-cover"
                 loading="lazy"
+                decoding="async"
               />
             </div>
           </div>

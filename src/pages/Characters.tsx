@@ -69,14 +69,28 @@ const Characters: React.FC = () => {
 
   useEffect(() => {
     document.title = "Meet the Characters | Caiden's Courage";
-    
-    // Check if mobile on mount and resize
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    const preloadDesktop = document.createElement('link');
+    preloadDesktop.rel = 'preload';
+    preloadDesktop.as = 'image';
+    preloadDesktop.href = '/characters_hero_desktop_1280w.webp';
+    preloadDesktop.setAttribute('media', '(min-width: 769px)');
+    const preloadMobile = document.createElement('link');
+    preloadMobile.rel = 'preload';
+    preloadMobile.as = 'image';
+    preloadMobile.href = '/characters_hero_mobile_800w.webp';
+    preloadMobile.setAttribute('media', '(max-width: 768px)');
+    document.head.appendChild(preloadDesktop);
+    document.head.appendChild(preloadMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      preloadDesktop.remove();
+      preloadMobile.remove();
+    };
   }, []);
 
   const handlePreorderClick = () => {
@@ -92,8 +106,8 @@ const Characters: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header />
 
-      {/* Cinematic Hero Section */}
-      <header 
+      {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
+      <header
         className="hero-cinematic relative flex items-center overflow-hidden"
         style={{
           minHeight: isMobile ? '100vh' : '92vh',
@@ -101,31 +115,44 @@ const Characters: React.FC = () => {
           paddingBottom: isMobile ? '40px' : '120px',
           flexDirection: isMobile ? 'column' : 'row',
           justifyContent: isMobile ? 'flex-start' : 'center',
-          backgroundImage: isMobile 
-            ? `linear-gradient(
-                180deg,
-                rgba(8, 18, 38, 0.92) 0%,
-                rgba(8, 18, 38, 0.85) 30%,
-                rgba(8, 18, 38, 0.65) 50%,
-                rgba(8, 18, 38, 0.35) 70%,
-                rgba(8, 18, 38, 0.15) 85%,
-                rgba(8, 18, 38, 0) 100%
-              ),
-              url('/background_caidenscharacter_mobile_img.jpg')`
-            : `linear-gradient(
-                90deg,
-                rgba(8, 18, 38, 0.92) 0%,
-                rgba(8, 18, 38, 0.82) 35%,
-                rgba(8, 18, 38, 0.45) 55%,
-                rgba(8, 18, 38, 0.15) 70%,
-                rgba(8, 18, 38, 0) 85%
-              ),
-              url('/background_caidenscharacter_img.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: isMobile ? 'center bottom' : '72% center',
-          backgroundRepeat: 'no-repeat',
         }}
       >
+        {/* Hero image layer — full bleed, LCP */}
+        <div className="absolute inset-0 z-0">
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              type="image/webp"
+              srcSet="/characters_hero_mobile_400w.webp 400w, /characters_hero_mobile_600w.webp 600w, /characters_hero_mobile_800w.webp 800w"
+              sizes="100vw"
+            />
+            <source
+              media="(min-width: 769px)"
+              type="image/webp"
+              srcSet="/characters_hero_desktop_640w.webp 640w, /characters_hero_desktop_960w.webp 960w, /characters_hero_desktop_1280w.webp 1280w, /characters_hero_desktop_1600w.webp 1600w"
+              sizes="100vw"
+            />
+            <img
+              src={isMobile ? '/background_caidenscharacter_mobile_img.jpg' : '/background_caidenscharacter_img.jpg'}
+              alt=""
+              width={1600}
+              height={900}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: isMobile ? 'center bottom' : '72% center' }}
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
+        </div>
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: isMobile
+              ? 'linear-gradient(180deg, rgba(8,18,38,0.92) 0%, rgba(8,18,38,0.85) 30%, rgba(8,18,38,0.65) 50%, rgba(8,18,38,0.35) 70%, rgba(8,18,38,0.15) 85%, transparent 100%)'
+              : 'linear-gradient(90deg, rgba(8,18,38,0.92) 0%, rgba(8,18,38,0.82) 35%, rgba(8,18,38,0.45) 55%, rgba(8,18,38,0.15) 70%, transparent 85%)',
+          }}
+        />
         {/* Content - Aligned to Global Grid */}
         <div className="hero-container relative z-10 w-full flex flex-col md:block">
           <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
@@ -275,8 +302,9 @@ const Characters: React.FC = () => {
                         alt={character.name}
                         className="w-full h-full object-cover transition-transform duration-300"
                         loading="lazy"
-                        width="96"
-                        height="96"
+                        decoding="async"
+                        width={96}
+                        height={96}
                         style={{
                           objectPosition: character.name === 'Uncle T' 
                             ? 'center 30%' 
@@ -410,8 +438,9 @@ const Characters: React.FC = () => {
                     alt="Father Dragon - Guardian of Caiden's Courage"
                     className="w-full h-full object-cover"
                     loading="lazy"
-                    width="400"
-                    height="533"
+                    decoding="async"
+                    width={400}
+                    height={533}
                     style={{ objectPosition: 'center' }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/logoCaiden.png';
