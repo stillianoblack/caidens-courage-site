@@ -104,7 +104,8 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
-# Redirects for SPA routing
+# SPA fallback: serve index.html for all paths so client-side routing works.
+# This is defined here (not in public/_redirects) so it works even if _redirects is ignored.
 [[redirects]]
   from = "/*"
   to = "/index.html"
