@@ -264,7 +264,6 @@ const Home = () => {
               width={1600}
               height={817}
               className="w-full h-full object-cover"
-              fetchPriority="high"
               style={isMobile ? {
                 objectPosition: 'center 35%',
                 transform: 'translateY(-130px)'

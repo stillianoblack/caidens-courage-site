@@ -237,7 +237,6 @@ const Product: React.FC = () => {
                   height={600}
                   className="w-full h-auto object-cover mx-auto"
                   loading="eager"
-                  fetchPriority="high"
                   style={{ 
                     transformOrigin: 'center center',
                     transform: 'scale(1)',

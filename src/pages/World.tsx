@@ -65,7 +65,6 @@ const World: React.FC = () => {
               style={{ objectPosition: isMobile ? 'center top' : 'right top' }}
               loading="eager"
               decoding="async"
-              {...({ fetchPriority: 'high' } as React.ImgHTMLAttributes<HTMLImageElement>)}
             />
           </picture>
         </div>

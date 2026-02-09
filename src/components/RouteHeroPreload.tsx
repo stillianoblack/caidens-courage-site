@@ -40,7 +40,6 @@ const RouteHeroPreload: React.FC = () => {
           link.as = 'image';
           link.href = heroUrl;
           link.type = 'image/webp';
-          link.setAttribute('fetchpriority', 'high');
           document.head.appendChild(link);
           currentHrefRef.current = heroUrl;
         }
