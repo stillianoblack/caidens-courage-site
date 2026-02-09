@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import './debug/navDebug';
 import './debug/navWatch';
 import './perf/routePerf';
+import './perf/longTasks';
 
 // Enable extra navigation debug logs in development only.
 if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
