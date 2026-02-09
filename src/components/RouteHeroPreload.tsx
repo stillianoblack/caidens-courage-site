@@ -5,21 +5,16 @@ import { afterPaint } from '../lib/defer';
 const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
 
 /**
- * Route -> desktop hero WebP URL (1600w) for <picture> LCP preloading.
- * One hero per route; desktop only (no mobile preload here).
- * Filenames match <picture><source> usage on each page.
+ * Preload only the hero that renders immediately above the fold (homepage on first load).
+ * Other routes do not get preload; their hero images load normally when the page renders.
  */
-const ROUTE_TO_HERO: Record<string, string> = {
+const ABOVE_THE_FOLD_HERO: Record<string, string> = {
   '/': '/images/heroes/hero-bg_desktop_1600w.webp',
-  '/mission': '/images/heroes/mission_hero_desktop_1600w.webp',
-  '/world': '/images/heroes/world_hero_desktop_1600w.webp',
-  '/characters': '/images/heroes/characters_hero_desktop_1600w.webp',
-  '/meet-the-characters': '/images/heroes/characters_hero_desktop_1600w.webp',
 };
 
 /**
  * Injects or updates a single <link rel="preload" as="image"> in <head>
- * for the current route's desktop hero. Removes it when route has no hero.
+ * only for the homepage hero (above the fold on initial load). Removes preload on other routes.
  */
 const RouteHeroPreload: React.FC = () => {
   const location = useLocation();
@@ -29,7 +24,7 @@ const RouteHeroPreload: React.FC = () => {
   useEffect(() => {
     const pathname = location.pathname;
     afterPaint(() => {
-      const heroUrl = ROUTE_TO_HERO[pathname] ?? null;
+      const heroUrl = ABOVE_THE_FOLD_HERO[pathname] ?? null;
       let link = document.getElementById(ROUTE_HERO_PRELOAD_ID) as HTMLLinkElement | null;
 
       if (heroUrl) {

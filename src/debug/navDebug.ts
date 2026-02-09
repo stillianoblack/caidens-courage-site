@@ -152,10 +152,13 @@ function initNavDebug(): void {
     }
 
     // Heartbeat to detect event loop stalls > 500ms beyond the expected interval.
-    const HEARTBEAT_INTERVAL = 1000;
+    // Runs only when tab is visible; ~2s interval (reduced from 1s); cleanup on visibility change.
+    const HEARTBEAT_INTERVAL = 2000;
     let lastBeat = perf.now();
+    let heartbeatId: ReturnType<typeof setInterval> | null = null;
 
-    setInterval(() => {
+    const runBeat = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       const now = perf.now();
       const expectedNext = lastBeat + HEARTBEAT_INTERVAL;
       const delay = now - expectedNext;
@@ -167,7 +170,43 @@ function initNavDebug(): void {
       }
 
       lastBeat = now;
-    }, HEARTBEAT_INTERVAL);
+    };
+
+    const startHeartbeat = () => {
+      if (heartbeatId != null) return;
+      heartbeatId = setInterval(runBeat, HEARTBEAT_INTERVAL);
+    };
+
+    const stopHeartbeat = () => {
+      if (heartbeatId != null) {
+        clearInterval(heartbeatId);
+        heartbeatId = null;
+      }
+    };
+
+    startHeartbeat();
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stopHeartbeat();
+      } else {
+        lastBeat = perf.now();
+        startHeartbeat();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // Cleanup: remove listener and interval (no component unmount for this module; cleanup on visibility or teardown).
+    const teardown = () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      stopHeartbeat();
+    };
+
+    if (typeof (window as any).__navDebugTeardown === 'function') {
+      (window as any).__navDebugTeardown();
+    }
+    (window as any).__navDebugTeardown = teardown;
 
     console.log('[navDebug] enabled');
   } catch (error) {

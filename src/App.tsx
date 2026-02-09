@@ -88,22 +88,61 @@ const routeList = (
 // Lazy chat widget – not in initial bundle; load only after first paint.
 const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
 
+// Floating animation controller – dynamic import; not in initial bundle; load only after page is interactive.
+const FloatingAnimationController = React.lazy(() => import('./components/FloatingAnimationController'));
+
 const AppContent: React.FC = () => {
   const location = useLocation();
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [showFloatingController, setShowFloatingController] = useState(false);
   const [enableMotion, setEnableMotion] = useState(false);
   const navIdRef = useRef(0);
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // Route change log for debugging navigation
+  // Route change log for debugging (deferred so it never blocks initial render)
   useEffect(() => {
-    if (typeof console !== 'undefined' && console.log) {
-      console.log('[ROUTE]', location.pathname);
+    const path = location.pathname;
+    if (typeof window === 'undefined') return;
+    if (typeof (window as any).requestIdleCallback === 'function') {
+      const id = (window as any).requestIdleCallback(() => {
+        if (typeof console !== 'undefined' && console.log) console.log('[ROUTE]', path);
+      }, { timeout: 500 });
+      return () => (window as any).cancelIdleCallback?.(id);
     }
+    const id = window.setTimeout(() => {
+      if (typeof console !== 'undefined' && console.log) console.log('[ROUTE]', path);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [location.pathname]);
+
+  // Load floating animation controller only after page is interactive (dynamic import; not in initial bundle).
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const enable = () => setShowFloatingController(true);
+    let cleanup: (() => void) | undefined;
+    const schedule = () => {
+      if ('requestIdleCallback' in window) {
+        const id = (window as any).requestIdleCallback(enable, { timeout: 2500 });
+        cleanup = () => (window as any).cancelIdleCallback?.(id);
+      } else {
+        const id = window.setTimeout(enable, 1500);
+        cleanup = () => window.clearTimeout(id);
+      }
+    };
+    if (document.readyState === 'complete') {
+      schedule();
+      return () => cleanup?.();
+    }
+    const onLoad = () => schedule();
+    window.addEventListener('load', onLoad, { once: true });
+    return () => {
+      window.removeEventListener('load', onLoad);
+      cleanup?.();
+    };
+  }, []);
 
   // Animations: enable only after first paint so they never block nav.
   useEffect(() => {
@@ -210,6 +249,9 @@ const AppContent: React.FC = () => {
       <RouteHeroPreload />
       <Suspense fallback={null}>
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
+      </Suspense>
+      <Suspense fallback={null}>
+        {showFloatingController && <FloatingAnimationController pathname={location.pathname} />}
       </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={<RouteFallbackHeroSkeleton />}>

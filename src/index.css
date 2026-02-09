@@ -284,8 +284,11 @@ code {
 }
 
 .float-y {
-  animation: floatY 8s ease-in-out infinite;
+  animation: none;
   pointer-events: none;
+}
+.float-y.animate-in-view {
+  animation: floatY 8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -296,11 +299,30 @@ code {
   }
 }
 
-/* Decorative circle styles - use subtle float */
+/* Pause decorative animations when tab is hidden (Page Visibility API) */
+body[data-tab-active='false'] .circle-accent,
+body[data-tab-active='false'] .animate-float,
+body[data-tab-active='false'] .floaty,
+body[data-tab-active='false'] .float-y,
+body[data-tab-active='false'] .major-publisher-stardust {
+  animation-play-state: paused !important;
+}
+
+/* Decorative circle styles - animate only when in view (see App.tsx observer) */
 .circle-accent {
   border-radius: 50%;
   position: absolute;
   pointer-events: none;
+  animation: none;
+}
+.circle-accent.animate-in-view {
+  animation: floatY 8s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: none;
+}
+.animate-float.animate-in-view {
   animation: floatY 8s ease-in-out infinite;
 }
 
