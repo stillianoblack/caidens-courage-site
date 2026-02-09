@@ -1,0 +1,24 @@
+/* GPU-friendly float animation: transform-only (no layout thrash) */
+.floaty {
+  will-change: transform;
+  transform: translateZ(0);
+  animation: floaty 10s ease-in-out infinite;
+}
+.floaty--slow { animation-duration: 14s; }
+.floaty--fast { animation-duration: 7s; }
+
+/* Small variations so multiple objects dont sync */
+.floaty--a { animation-delay: -1.2s; }
+.floaty--b { animation-delay: -3.8s; }
+.floaty--c { animation-delay: -6.4s; }
+
+@keyframes floaty {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, -14px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Respect users + reduce CPU on constrained devices */
+@media (prefers-reduced-motion: reduce) {
+  .floaty { animation: none !important; }
+}
