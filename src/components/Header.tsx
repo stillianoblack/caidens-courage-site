@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import Button from './ui/Button';
+import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
 
 interface HeaderProps {
   onComingSoonClick?: () => void;
@@ -23,19 +24,30 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [worldCloseTimeout, setWorldCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Handle scroll for header (UI state only; throttled)
+  // Handle scroll for header (UI state only; throttled).
+  // In SAFE_MODE or when reduced motion is requested, we skip this entirely.
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (SAFE_MODE || reduceMotion) return;
+
     let ticking = false;
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         setIsScrolled(window.scrollY > 50);
         ticking = false;
       });
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    runAfterPaint(() => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   // Cleanup timeouts on unmount

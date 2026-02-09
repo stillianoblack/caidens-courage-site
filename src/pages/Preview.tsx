@@ -4,6 +4,7 @@ import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
 
 // Preview page data
 const PREVIEW_PAGES = [
@@ -52,19 +53,30 @@ const Preview = () => {
 
   const totalPages = PREVIEW_PAGES.length;
 
-  // Handle scroll for nav styling (UI state only; throttled)
+  // Handle scroll for nav styling (UI state only; throttled).
+  // Skip when SAFE_MODE is on or user prefers reduced motion.
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (SAFE_MODE || reduceMotion) return;
+
     let ticking = false;
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         setIsScrolled(window.scrollY > 20);
         ticking = false;
       });
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    runAfterPaint(() => {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
 

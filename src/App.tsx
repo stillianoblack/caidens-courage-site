@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
+import { SAFE_MODE, runAfterPaint } from './lib/safeMode';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -72,10 +73,13 @@ const AppContent: React.FC = () => {
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // Initialize LaunchDarkly lazily after first paint / idle.
-  // This call never blocks render or navigation; flags update asynchronously via context.
+  // Initialize LaunchDarkly lazily after first paint / idle when SAFE_MODE is off.
+  // In SAFE_MODE, we skip flags entirely and rely on defaultFlags.
   useEffect(() => {
-    initLaunchDarkly();
+    if (SAFE_MODE) return;
+    runAfterPaint(() => {
+      initLaunchDarkly();
+    });
   }, []);
 
   // Route-change instrumentation for debugging navigation freezes.

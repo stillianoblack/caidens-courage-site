@@ -8,11 +8,17 @@ import './debug/navDebug';
 import './debug/navWatch';
 import './perf/routePerf';
 import './perf/longTasks';
+import { SAFE_MODE } from './lib/safeMode';
 
 // Enable extra navigation debug logs in development only.
 if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   // eslint-disable-next-line no-underscore-dangle
   window.__NAV_DEBUG__ = true;
+}
+
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line no-console
+  console.log('[SAFE_MODE]', SAFE_MODE ? 'ON' : 'OFF');
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
