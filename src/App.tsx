@@ -112,10 +112,10 @@ const AppContent: React.FC = () => {
       }, { timeout: 500 });
       return () => (window as any).cancelIdleCallback?.(id);
     }
-    const id = window.setTimeout(() => {
+    const id = setTimeout(() => {
       if (typeof console !== 'undefined' && console.log) console.log('[ROUTE]', path);
     }, 0);
-    return () => window.clearTimeout(id);
+    return () => clearTimeout(id);
   }, [location.pathname]);
 
   // Load floating animation controller only after page is interactive (dynamic import; not in initial bundle).
@@ -128,8 +128,8 @@ const AppContent: React.FC = () => {
         const id = (window as any).requestIdleCallback(enable, { timeout: 2500 });
         cleanup = () => (window as any).cancelIdleCallback?.(id);
       } else {
-        const id = window.setTimeout(enable, 1500);
-        cleanup = () => window.clearTimeout(id);
+        const id = setTimeout(enable, 1500);
+        cleanup = () => clearTimeout(id);
       }
     };
     if (document.readyState === 'complete') {
@@ -161,7 +161,7 @@ const AppContent: React.FC = () => {
       if (typeof window !== 'undefined' && typeof (window as any).requestIdleCallback === 'function') {
         id = (window as any).requestIdleCallback(enable, { timeout: 1500 });
       } else {
-        id = window.setTimeout(enable, 800) as unknown as number;
+        id = setTimeout(enable, 800) as unknown as number;
       }
     };
     if (typeof requestAnimationFrame !== 'undefined') {
