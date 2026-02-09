@@ -36,3 +36,7 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+public/optimized/
+public/optimized/**
+public/images/optimized/
+public/images/optimized/**
