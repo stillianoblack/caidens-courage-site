@@ -13,13 +13,6 @@ import { SAFE_MODE } from './lib/safeMode';
 import './lib/historyGuard';
 // [prod-guard] import { installClickBlockerFix } from './utils/clickBlockerFix';
 
-// Click-blocker debug: only when ?debugClicks=1 or localStorage.debugClicks=1
-if (typeof window !== 'undefined') {
-  const debugClicks =
-    window.location.search.includes('debugClicks=1') ||
-    (typeof localStorage !== 'undefined' && localStorage.getItem('debugClicks') === '1');
-}
-
 // Perf Detective: run before first paint to catch nav freezes (production + dev).
 if (typeof window !== 'undefined') {
   if (process.env.NODE_ENV !== "production") { try { const m2 = require("./perf/perfDetective"); m2 && m2.installPerfDetective && m2.installPerfDetective(); } catch (e) {} }
