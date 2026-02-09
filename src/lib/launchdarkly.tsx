@@ -1,11 +1,11 @@
 /**
- * LaunchDarkly – non-blocking init only after first paint.
- * Prevents NO_FCP: UI renders immediately; LD initializes in the background (never awaited before render).
- * SDK is lazy-loaded via dynamic import so it is not in the initial bundle.
+ * LaunchDarkly – non-blocking, lazy, and scheduled after first paint.
+ * UI renders immediately with defaultFlags; LD initializes in the background via dynamic import.
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { LDClient } from 'launchdarkly-js-client-sdk';
+import { afterPaint } from './afterPaint';
 
 // Safe defaults so the app never shows a blank screen waiting for flags.
 export const defaultFlags: Record<string, unknown> = {};
@@ -37,42 +37,50 @@ function getClientId(): string {
 }
 
 /**
+ * Low-level initializer – dynamically imports the SDK and creates the client.
+ * This is never called at module load; always schedule via afterPaint / getLDClient.
+ */
+export async function initLD(clientIdOverride?: string): Promise<LDClient | null> {
+  const clientId = clientIdOverride ?? getClientId();
+  if (!clientId) return null;
+
+  try {
+    const ld = await import('launchdarkly-js-client-sdk');
+    const client = ld.initialize(
+      clientId,
+      { key: 'anonymous' },
+      {
+        streaming: false,
+        bootstrap: 'localStorage',
+      }
+    );
+    clientRef = client;
+    return client;
+  } catch (e) {
+    console.warn('[LaunchDarkly] Failed to initialize:', e);
+    return null;
+  }
+}
+
+/**
  * Returns the LD client, initializing once in the background.
  * Never call this before first paint; use initLaunchDarkly() from useEffect instead.
  */
 function getLDClient(): Promise<LDClient | null> {
   if (cached !== undefined) return cached;
 
-  const clientId = getClientId();
-  if (!clientId) {
-    cached = Promise.resolve(null);
-    return cached;
-  }
-
-  cached = (async (): Promise<LDClient | null> => {
-    try {
-      const ld = await import('launchdarkly-js-client-sdk');
-      const client = ld.initialize(clientId, { key: 'anonymous' }, {
-        streaming: false,
-        bootstrap: 'localStorage',
-      });
-      clientRef = client;
-      return client;
-    } catch (e) {
-      console.warn('[LaunchDarkly] Failed to initialize:', e);
-      return null;
-    }
-  })();
-
+  cached = initLD();
   return cached;
 }
 
 /**
- * Call this from useEffect only (after first paint). Starts LD init in the background;
- * never awaited, so it cannot block render or cause NO_FCP.
+ * Public entry point for app code.
+ * Schedules LD initialization after first paint / idle, and never blocks render or navigation.
  */
 export function initLaunchDarkly(): void {
-  void getLDClient();
+  afterPaint(() => {
+    void getLDClient();
+  });
 }
 
 /**

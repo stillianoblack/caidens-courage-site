@@ -1,9 +1,9 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import B4ChatWidget from './components/B4ChatWidget';
+import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import RouteHeroPreload from './components/RouteHeroPreload';
-// import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly'; // Temporarily disabled for LaunchDarkly debugging.
+import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -68,21 +68,11 @@ const AppContent: React.FC = () => {
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
 
-  // NOTE: LaunchDarkly initialization is temporarily disabled for debugging navigation stalls.
-  // The app now renders immediately without attempting to load or evaluate any flags.
-  // useEffect(() => {
-  //   const schedule = (fn: () => void) => {
-  //     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-  //       (window as any).requestIdleCallback(fn, { timeout: 2000 });
-  //     } else {
-  //       setTimeout(fn, 1500);
-  //     }
-  //   };
-  //
-  //   schedule(() => {
-  //     initLaunchDarkly();
-  //   });
-  // }, []);
+  // Initialize LaunchDarkly lazily after first paint / idle.
+  // This call never blocks render or navigation; flags update asynchronously via context.
+  useEffect(() => {
+    initLaunchDarkly();
+  }, []);
 
   useEffect(() => {
     if (location.pathname !== prevLocationRef.current.pathname) {
@@ -101,7 +91,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <RouteHeroPreload />
-      <B4ChatWidget />
+      <DeferredB4ChatWidget />
       <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
         <div style={{ position: 'relative' }}>
           {/* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */}
@@ -122,14 +112,11 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  // LaunchDarklyProvider is temporarily disabled so no feature flag initialization
-  // can affect navigation or perceived responsiveness during debugging.
-  // return (
-  //   <LaunchDarklyProvider>
-  //     <AppContent />
-  //   </LaunchDarklyProvider>
-  // );
-  return <AppContent />;
+  return (
+    <LaunchDarklyProvider>
+      <AppContent />
+    </LaunchDarklyProvider>
+  );
 }
 
 export default App;

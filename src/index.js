@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './debug/navDebug';
+import './debug/navWatch';
 import './perf/routePerf';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
