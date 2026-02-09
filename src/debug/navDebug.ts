@@ -17,6 +17,8 @@
 
 /* eslint-disable no-console */
 
+import { SAFE_MODE } from '../lib/safeMode';
+
 export {};
 
 declare global {
@@ -37,7 +39,13 @@ function shouldEnableNavDebug(): boolean {
     typeof process.env !== 'undefined' &&
     process.env.REACT_APP_DEBUG_NAV === '1';
 
-  return hostMatches || hasDebugFlag;
+  const isDev =
+    typeof process !== 'undefined' &&
+    typeof process.env !== 'undefined' &&
+    process.env.NODE_ENV === 'development';
+
+  // Only enable in development and when SAFE_MODE is off.
+  return !SAFE_MODE && isDev && (hostMatches || hasDebugFlag);
 }
 
 function initNavDebug(): void {

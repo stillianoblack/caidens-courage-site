@@ -10,6 +10,7 @@ import './perf/routePerf';
 import './perf/longTasks';
 import { SAFE_MODE } from './lib/safeMode';
 import { installPerfDetective } from './lib/perfDetective';
+import './lib/historyGuard';
 
 // Perf Detective: run before first paint to catch nav freezes (production + dev).
 if (typeof window !== 'undefined') {

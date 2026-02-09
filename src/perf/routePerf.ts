@@ -19,6 +19,8 @@
 
 /* eslint-disable no-console */
 
+import { SAFE_MODE } from '../lib/safeMode';
+
 export {};
 
 declare global {
@@ -30,7 +32,9 @@ declare global {
 const PERF_ENABLED =
   typeof process !== 'undefined' &&
   typeof process.env !== 'undefined' &&
-  process.env.REACT_APP_PERF_LOG === 'true';
+  process.env.REACT_APP_PERF_LOG === 'true' &&
+  process.env.NODE_ENV === 'development' &&
+  !SAFE_MODE;
 
 if (typeof window !== 'undefined' && PERF_ENABLED && !window.__routePerfInit) {
   window.__routePerfInit = true;
