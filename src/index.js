@@ -4,14 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import './debug/navDebug';
+// [prod-guard] import './debug/navDebug';
 import './debug/navWatch';
 import './perf/routePerf';
 import './perf/longTasks';
 import { SAFE_MODE } from './lib/safeMode';
-import { installPerfDetective } from './lib/perfDetective';
+// [prod-guard] import { installPerfDetective } from './lib/perfDetective';
 import './lib/historyGuard';
-import { installClickBlockerFix } from './utils/clickBlockerFix';
+// [prod-guard] import { installClickBlockerFix } from './utils/clickBlockerFix';
 
 // Click-blocker debug: only when ?debugClicks=1 or localStorage.debugClicks=1
 if (typeof window !== 'undefined') {
@@ -75,3 +75,22 @@ const scheduleWhenIdle = (fn) => {
 scheduleWhenIdle(() => {
   reportWebVitals();
 });
+
+/* [prod-guard] DEV ONLY: load debug tooling only in development */
+if (process.env.NODE_ENV !== "production") {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const m1 = require("./utils/clickBlockerFix");
+    m1?.installClickBlockerFix?.();
+  } catch (e) {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const m2 = require("./perf/perfDetective");
+    m2?.installPerfDetective?.({ safe: true });
+  } catch (e) {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const m3 = require("./debug/navDebug");
+    m3?.enableNavDebug?.();
+  } catch (e) {}
+}

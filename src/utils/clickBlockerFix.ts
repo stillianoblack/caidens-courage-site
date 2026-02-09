@@ -68,6 +68,11 @@ function handlePointerDown(e: PointerEvent): void {
 }
 
 export function installClickBlockerFix(): void {
+  
+  if (typeof document === "undefined") return;
+  if (process.env.NODE_ENV === "production") return;
+if (typeof document === "undefined") return;
+  if (process.env.NODE_ENV === "production") return;
   if (typeof document === 'undefined') return;
 
   const fromQuery =
