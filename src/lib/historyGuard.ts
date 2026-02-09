@@ -1,9 +1,11 @@
 /**
  * historyGuard – temporary instrumentation to detect unexpected history.replaceState usage.
- * Logs every replaceState call so we can see who is rewriting URLs.
+ * In production, OFF unless ?debugPerf=1.
  */
 
 /* eslint-disable no-console */
+
+import { allowPerfTools } from '../perf/prodGuards';
 
 export {};
 
@@ -13,7 +15,7 @@ declare global {
   }
 }
 
-if (typeof window !== 'undefined' && typeof window.history !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== 'undefined' && typeof window.history !== 'undefined' && allowPerfTools()) {
   if (!window.__historyGuardInstalled && typeof window.history.replaceState === 'function') {
     window.__historyGuardInstalled = true;
 

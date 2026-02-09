@@ -17,6 +17,7 @@
 
 /* eslint-disable no-console */
 
+import { allowPerfTools } from '../perf/prodGuards';
 import { SAFE_MODE } from '../lib/safeMode';
 
 export {};
@@ -175,10 +176,12 @@ function initNavDebug(): void {
   }
 }
 
-// Initialize only in non-production so production never runs click/history patches.
-if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-  // Use requestIdleCallback when available so we don't interfere with first paint.
-  const start = () => initNavDebug();
+// Initialize only when perf tools are allowed (dev or ?debugPerf=1).
+if (typeof window !== 'undefined' && allowPerfTools()) {
+  const start = () => {
+    if (!allowPerfTools()) return;
+    initNavDebug();
+  };
 
   if (typeof (window as any).requestIdleCallback === 'function') {
     (window as any).requestIdleCallback(start, { timeout: 2000 });

@@ -11,6 +11,7 @@
 
 /* eslint-disable no-console */
 
+import { allowPerfTools } from '../perf/prodGuards';
 import { SAFE_MODE } from '../lib/safeMode';
 
 export {};
@@ -22,10 +23,10 @@ declare global {
 }
 
 const DEBUG_ENABLED =
+  allowPerfTools() &&
   typeof process !== 'undefined' &&
   typeof process.env !== 'undefined' &&
   process.env.REACT_APP_DEBUG_NAV === '1' &&
-  process.env.NODE_ENV === 'development' &&
   !SAFE_MODE;
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined' && DEBUG_ENABLED) {

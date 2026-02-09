@@ -1,8 +1,10 @@
 /**
  * Perf Detective – instrumentation to identify code paths blocking navigation.
- * Runs in production so we can capture real-world freezes.
  * Use __NAV_START(path) / __NAV_END() from navMarks or directly for router-level marks.
+ * In production, OFF unless ?debugPerf=1.
  */
+
+import { allowPerfTools } from '../perf/prodGuards';
 
 const SAFE_MODE = (process.env.REACT_APP_SAFE_MODE ?? '1') === '1';
 
@@ -31,6 +33,7 @@ function observe(
 }
 
 export function installPerfDetective(): void {
+  if (!allowPerfTools()) return;
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   if (process.env.NODE_ENV !== 'development') return;
   if ((window as unknown as { __SAFE_MODE__?: boolean }).__SAFE_MODE__) return;

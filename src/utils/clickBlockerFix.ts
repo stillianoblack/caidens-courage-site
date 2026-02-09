@@ -1,9 +1,10 @@
 /**
  * Production-safe click-blocker detector (temporary).
- * Only runs when ?debugClicks=1 or localStorage.debugClicks === '1'.
- * Adds capture-phase listeners to detect invisible overlays that block clicks
- * and auto-fix by setting pointer-events: none and display: none.
+ * Only runs when ?debugClicks=1 (always) or localStorage.debugClicks === '1' (dev only).
+ * In production, localStorage is ignored so we never enable from storage.
  */
+
+import { isProd } from '../perf/prodGuards';
 
 const BLOCKER_CLASS_PATTERN = /backdrop|overlay|transition|loader|modal|curtain|screenblocker/i;
 
@@ -69,13 +70,15 @@ function handlePointerDown(e: PointerEvent): void {
 export function installClickBlockerFix(): void {
   if (typeof document === 'undefined') return;
 
-  const enabled =
-    (typeof window !== 'undefined' && window.location.search.includes('debugClicks=1')) ||
-    (typeof localStorage !== 'undefined' && localStorage.getItem('debugClicks') === '1');
+  const fromQuery =
+    typeof window !== 'undefined' && window.location && window.location.search.includes('debugClicks=1');
+  const fromStorage =
+    !isProd() && typeof localStorage !== 'undefined' && localStorage.getItem('debugClicks') === '1';
+  const enabled = fromQuery || fromStorage;
 
   if (!enabled) return;
 
   document.addEventListener('click', handleClick, true);
   document.addEventListener('pointerdown', handlePointerDown, true);
-  console.warn('[ClickBlockerFix] installed (debug mode). Use ?debugClicks=1 or localStorage.debugClicks=1');
+  console.warn('[ClickBlockerFix] installed (debug). Use ?debugClicks=1 or in dev localStorage.debugClicks=1');
 }
