@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './debug/navDebug';
+import './perf/routePerf';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -15,6 +16,19 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// SERVICE WORKER SAFETY:
+// Ensure no stale service worker can hijack navigation or cache old bundles.
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((registrations) => {
+      registrations.forEach((reg) => reg.unregister());
+    })
+    .catch(() => {
+      // Swallow errors – diagnostics only.
+    });
+}
 
 // Defer non-critical work so navigation and first paint are not blocked.
 // Run web vitals (and any analytics) after the browser is idle.
