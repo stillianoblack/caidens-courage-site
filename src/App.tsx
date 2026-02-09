@@ -3,7 +3,7 @@ import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import B4ChatWidget from './components/B4ChatWidget';
 import RouteHeroPreload from './components/RouteHeroPreload';
-import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
+// import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly'; // Temporarily disabled for LaunchDarkly debugging.
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -68,21 +68,21 @@ const AppContent: React.FC = () => {
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
 
-  useEffect(() => {
-    // Initialize LaunchDarkly only after first paint and when the browser is idle,
-    // so feature flags never block navigation or route transitions.
-    const schedule = (fn: () => void) => {
-      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(fn, { timeout: 2000 });
-      } else {
-        setTimeout(fn, 1500);
-      }
-    };
-
-    schedule(() => {
-      initLaunchDarkly();
-    });
-  }, []);
+  // NOTE: LaunchDarkly initialization is temporarily disabled for debugging navigation stalls.
+  // The app now renders immediately without attempting to load or evaluate any flags.
+  // useEffect(() => {
+  //   const schedule = (fn: () => void) => {
+  //     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+  //       (window as any).requestIdleCallback(fn, { timeout: 2000 });
+  //     } else {
+  //       setTimeout(fn, 1500);
+  //     }
+  //   };
+  //
+  //   schedule(() => {
+  //     initLaunchDarkly();
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (location.pathname !== prevLocationRef.current.pathname) {
@@ -122,11 +122,14 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  return (
-    <LaunchDarklyProvider>
-      <AppContent />
-    </LaunchDarklyProvider>
-  );
+  // LaunchDarklyProvider is temporarily disabled so no feature flag initialization
+  // can affect navigation or perceived responsiveness during debugging.
+  // return (
+  //   <LaunchDarklyProvider>
+  //     <AppContent />
+  //   </LaunchDarklyProvider>
+  // );
+  return <AppContent />;
 }
 
 export default App;
