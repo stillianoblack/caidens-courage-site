@@ -18,12 +18,12 @@ if (typeof window !== 'undefined') {
   const debugClicks =
     window.location.search.includes('debugClicks=1') ||
     (typeof localStorage !== 'undefined' && localStorage.getItem('debugClicks') === '1');
-  if (debugClicks) installClickBlockerFix();
+  if (debugClicks) if (process.env.NODE_ENV !== "production") { try { const m1 = require("./utils/clickBlockerFix"); m1 && m1.installClickBlockerFix && m1.installClickBlockerFix(); } catch (e) {} }
 }
 
 // Perf Detective: run before first paint to catch nav freezes (production + dev).
 if (typeof window !== 'undefined') {
-  installPerfDetective();
+  if (process.env.NODE_ENV !== "production") { try { const m2 = require("./perf/perfDetective"); m2 && m2.installPerfDetective && m2.installPerfDetective(); } catch (e) {} }
 }
 
 // Enable extra navigation debug logs in development only.
