@@ -1,13 +1,12 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
-import { afterPaint, afterIdle } from './lib/defer';
-import { SAFE_MODE, runAfterPaint } from './lib/safeMode';
-import { markNavEnd } from './lib/navMarks';
+import { runAfterPaint } from './lib/safeMode';
+import { FLAGS } from './lib/flags';
+import { SAFE_MODE } from './lib/safeMode';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -67,19 +66,36 @@ const routeList = (
   </>
 );
 
+// Lazy chat widget – load and mount only after first paint.
+const DeferredB4ChatWidget = lazy(() => import('./components/DeferredB4ChatWidget'));
+
 const AppContent: React.FC = () => {
   const location = useLocation();
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
-  const [mountChat, setMountChat] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const navIdRef = useRef(0);
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // B-4 chat: mount only after first paint and on idle; never in SAFE_MODE.
+  // B-4 chat: mount only after first paint (requestIdleCallback or setTimeout 1500); respect FLAGS.CHATBOT.
   useEffect(() => {
-    if (SAFE_MODE) return;
-    afterIdle(() => setMountChat(true));
+    if (!FLAGS.CHATBOT) return;
+    let usedIdle = false;
+    let id: number;
+    if (typeof requestIdleCallback !== 'undefined') {
+      usedIdle = true;
+      id = requestIdleCallback(() => setShowChat(true), { timeout: 1500 });
+    } else {
+      id = window.setTimeout(() => setShowChat(true), 1500) as unknown as number;
+    }
+    return () => {
+      if (usedIdle && typeof cancelIdleCallback !== 'undefined') {
+        cancelIdleCallback(id);
+      } else {
+        clearTimeout(id);
+      }
+    };
   }, []);
 
   // Initialize LaunchDarkly lazily after first paint / idle when SAFE_MODE is off.
@@ -141,11 +157,6 @@ const AppContent: React.FC = () => {
     }
   }, [location]);
 
-  // Router-level nav end marker for Perf Detective (when pathname has changed).
-  useEffect(() => {
-    afterPaint(() => markNavEnd());
-  }, [location.pathname]);
-
   const routeTransitionProps = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
@@ -156,7 +167,11 @@ const AppContent: React.FC = () => {
   return (
     <>
       <RouteHeroPreload />
-      {!SAFE_MODE && mountChat && <DeferredB4ChatWidget />}
+      {FLAGS.CHATBOT && showChat && (
+        <Suspense fallback={null}>
+          <DeferredB4ChatWidget />
+        </Suspense>
+      )}
       <ChunkErrorBoundary>
         <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>

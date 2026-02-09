@@ -44,8 +44,8 @@ function shouldEnableNavDebug(): boolean {
     typeof process.env !== 'undefined' &&
     process.env.NODE_ENV === 'development';
 
-  // Only enable in development and when SAFE_MODE is off.
-  return !SAFE_MODE && isDev && (hostMatches || hasDebugFlag);
+  const safeModeRuntime = (window as unknown as { __SAFE_MODE__?: boolean }).__SAFE_MODE__;
+  return !SAFE_MODE && !safeModeRuntime && isDev && (hostMatches || hasDebugFlag);
 }
 
 function initNavDebug(): void {

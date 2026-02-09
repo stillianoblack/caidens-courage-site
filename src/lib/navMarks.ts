@@ -1,7 +1,6 @@
 /**
  * Router-level navigation markers for Perf Detective.
- * Call markNavStart(to) when user initiates navigation (e.g. link click).
- * Call markNavEnd() when the route has finished updating (e.g. location.pathname changed).
+ * No-op in production or when SAFE_MODE; only runs in development.
  */
 
 declare global {
@@ -11,7 +10,12 @@ declare global {
   }
 }
 
+function shouldRun(): boolean {
+  return process.env.NODE_ENV === 'development' && !(typeof window !== 'undefined' && (window as unknown as { __SAFE_MODE__?: boolean }).__SAFE_MODE__);
+}
+
 export function markNavStart(to: string): void {
+  if (!shouldRun()) return;
   if (typeof window !== 'undefined' && window.__NAV_START) {
     window.__NAV_START(to);
   }
@@ -22,6 +26,7 @@ export function markNavStart(to: string): void {
 }
 
 export function markNavEnd(): void {
+  if (!shouldRun()) return;
   if (typeof window !== 'undefined' && window.__NAV_END) {
     window.__NAV_END();
   }

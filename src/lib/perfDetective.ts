@@ -32,6 +32,8 @@ function observe(
 
 export function installPerfDetective(): void {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (process.env.NODE_ENV !== 'development') return;
+  if ((window as unknown as { __SAFE_MODE__?: boolean }).__SAFE_MODE__) return;
 
   // eslint-disable-next-line no-console
   console.log('[PerfDetective] install', { safe: SAFE_MODE });

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
-import Button from './ui/Button';
-import { afterPaint, afterIdle } from '../lib/defer';
 import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
-import { markNavStart } from '../lib/navMarks';
 
 interface HeaderProps {
   onComingSoonClick?: () => void;
@@ -73,15 +70,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     }
   };
 
-  const handleLogoClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/') return;
-    try { e?.preventDefault?.(); } catch {}
-    markNavStart('/');
-    navigate('/');
-    afterPaint(() => window.scrollTo({ top: 0, behavior: 'auto' }));
-    afterIdle(() => {});
-  };
-
   const handleMouseEnter = () => {
     if (closeTimeout) {
       clearTimeout(closeTimeout);
@@ -143,35 +131,22 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     }
   };
 
-  // Non-blocking nav: navigate() synchronously, then UI cleanup/heavy work after paint/idle.
-  const onNav = (to: string, closeMenus?: () => void) => (e?: React.MouseEvent<HTMLAnchorElement>) => {
-    try { e?.preventDefault?.(); } catch {}
-    markNavStart(to);
-    navigate(to);
-    afterPaint(() => {
-      closeMenus?.();
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    });
-    afterIdle(() => { if (!SAFE_MODE) {} });
-  };
-
-  const onNavLink = (href: string, closeMenus?: () => void) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+  // Anchor-only handler: for /# links, scroll or navigate; no history/tracking in click path.
+  const handleAnchorOnly = (e: React.MouseEvent<HTMLAnchorElement>, href: string, closeMenus?: () => void) => {
     if (href.startsWith('/#')) {
-      markNavStart(href);
       handleAnchorClick(e, href, navigate, location);
-      afterPaint(() => closeMenus?.());
-    } else {
-      onNav(href, closeMenus)(e);
     }
+    closeMenus?.();
   };
 
-  // Render a simple nav link
+  // Render a simple nav link (router-native: no preventDefault, no nav instrumentation).
   const renderNavLink = (item: NavItem) => {
     const isActive = isNavItemActive(item);
+    const isAnchor = item.href.startsWith('/#');
     return (
       <Link
         to={item.href}
-        onClick={(e) => onNavLink(item.href)(e)}
+        onClick={isAnchor ? (e) => handleAnchorOnly(e, item.href) : undefined}
         className={`nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
       >
         {item.label}
@@ -231,7 +206,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                     <Link
                       key={idx}
                       to={dropdownItem.href}
-                      onClick={onNavLink(dropdownItem.href, () => setShowResourcesDropdown(false))}
+                      onClick={() => setShowResourcesDropdown(false)}
                       className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
                     >
                       <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
@@ -252,7 +227,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                       key={idx + 3}
                       to={dropdownItem.href}
                       className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={onNavLink(dropdownItem.href, () => setShowResourcesDropdown(false))}
+                      onClick={() => setShowResourcesDropdown(false)}
                     >
                       <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
                       {dropdownItem.description && (
@@ -266,7 +241,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                       key={idx + 6}
                       to={dropdownItem.href}
                       className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={onNavLink(dropdownItem.href, () => setShowResourcesDropdown(false))}
+                      onClick={() => setShowResourcesDropdown(false)}
                     >
                       <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
                       {dropdownItem.description && (
@@ -280,16 +255,16 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             <div className="border-t border-navy-200 mt-4 pt-4">
               <h3 className="font-display font-bold text-xs text-navy-500 mb-3 uppercase tracking-wide">Browse by audience</h3>
               <div className="grid grid-cols-4 gap-2">
-                <Link to="/resources#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={onNavLink('/resources#kids', () => setShowResourcesDropdown(false))}>
+                <Link to="/resources#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Kids</div>
                 </Link>
-                <Link to="/resources#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={onNavLink('/resources#parents', () => setShowResourcesDropdown(false))}>
+                <Link to="/resources#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Parents</div>
                 </Link>
-                <Link to="/resources#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={onNavLink('/resources#teachers', () => setShowResourcesDropdown(false))}>
+                <Link to="/resources#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Teachers</div>
                 </Link>
-                <Link to="/resources" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={onNavLink('/resources', () => setShowResourcesDropdown(false))}>
+                <Link to="/resources" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">All Resources</div>
                 </Link>
               </div>
@@ -361,7 +336,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 <Link
                   key={idx}
                   to={dropdownItem.href}
-                  onClick={onNavLink(dropdownItem.href, () => setShowShopDropdown(false))}
+                  onClick={() => setShowShopDropdown(false)}
                   className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                 >
                   <div className="font-semibold text-sm">{dropdownItem.label}</div>
@@ -419,7 +394,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               <Link
                 key={idx}
                 to={dropdownItem.href}
-                onClick={onNavLink(dropdownItem.href, () => item.label === 'The World' && setShowWorldDropdown(false))}
+                onClick={() => item.label === 'The World' && setShowWorldDropdown(false)}
                 className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
               >
                 <div className="font-semibold text-sm">{dropdownItem.label}</div>
@@ -466,10 +441,9 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 </svg>
               </button>
               
-              {/* Logo */}
-              <Link 
+              {/* Logo - router-native, no click interception */}
+              <Link
                 to="/"
-                onClick={handleLogoClick}
                 className="inline-block hover:opacity-80 transition-opacity flex-shrink-0"
               >
                 <img 
@@ -520,26 +494,18 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
-                onClick={onNavLink(RIGHT_NAV_ITEMS.partnerLink.href)}
                 className={`hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
                 {RIGHT_NAV_ITEMS.partnerLink.label}
               </Link>
               
-              {/* CTA Button - Narrower */}
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => {
-                  markNavStart('/comicbook');
-                  navigate('/comicbook');
-                  afterPaint(() => window.scrollTo({ top: 0, behavior: 'auto' }));
-                  afterIdle(() => {});
-                }}
-                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm px-4 lg:px-5 !min-w-0"
+              {/* CTA - router-native Link */}
+              <Link
+                to="/comicbook"
+                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm px-4 lg:px-5 !min-w-0 inline-flex items-center justify-center font-bold rounded-lg bg-golden-500 hover:bg-golden-400 text-navy-500 transition-colors"
               >
                 Pre-Order Volume 1
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -569,7 +535,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                     <Link
                       key={item.label}
                       to={item.href}
-                      onClick={onNavLink(item.href, () => setIsMobileMenuOpen(false))}
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isActive ? 'bg-navy-50 font-bold' : ''}`}
                     >
                       <span>{item.label}</span>
@@ -622,7 +588,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                                   <Link
                                     key={idx}
                                     to={dropdownItem.href}
-                                    onClick={onNavLink(dropdownItem.href, () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })}
+                                    onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }}
                                     className="block rounded-xl p-4 bg-white hover:bg-navy-50 transition-colors border border-navy-100"
                                   >
                                     <div className="font-semibold text-base text-navy-700 mb-1">{dropdownItem.label}</div>
@@ -640,7 +606,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                                   <Link
                                     key={idx + 3}
                                     to={dropdownItem.href}
-                                    onClick={onNavLink(dropdownItem.href, () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })}
+                                    onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }}
                                     className="block rounded-xl p-4 bg-white hover:bg-navy-50 transition-colors border border-navy-100"
                                   >
                                     <div className="font-semibold text-base text-navy-700 mb-1">{dropdownItem.label}</div>
@@ -653,16 +619,16 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                             </div>
                             <div className="px-12 py-4 border-t border-navy-200">
                               <div className="grid grid-cols-2 gap-2">
-                                <Link to="/resources?audience=kids" onClick={onNavLink('/resources?audience=kids', () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=kids" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Kids</div>
                                 </Link>
-                                <Link to="/resources?audience=parents" onClick={onNavLink('/resources?audience=parents', () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=parents" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Parents</div>
                                 </Link>
-                                <Link to="/resources?audience=teachers" onClick={onNavLink('/resources?audience=teachers', () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=teachers" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Teachers</div>
                                 </Link>
-                                <Link to="/resources" onClick={onNavLink('/resources', () => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); })} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">All Resources</div>
                                 </Link>
                               </div>
@@ -693,11 +659,11 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                                 <Link
                                   key={idx}
                                   to={dropdownItem.href}
-                                  onClick={onNavLink(dropdownItem.href, () => {
+                                  onClick={() => {
                                     setIsMobileMenuOpen(false);
                                     if (item.label === 'Shop') setShowMobileShopDropdown(false);
                                     if (item.label === 'The World') setShowMobileWorldDropdown(false);
-                                  })}
+                                  }}
                                   className="block px-4 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
                                 >
                                   <div className="font-semibold text-lg">{dropdownItem.label}</div>
@@ -722,7 +688,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Partner With Us Link in Mobile Menu */}
               <Link
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
-                onClick={onNavLink(RIGHT_NAV_ITEMS.partnerLink.href, () => setIsMobileMenuOpen(false))}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'bg-navy-50 font-bold' : ''}`}
               >
                 <span>{RIGHT_NAV_ITEMS.partnerLink.label}</span>
@@ -731,24 +697,15 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 </svg>
               </Link>
               
-              {/* CTA Button in Mobile Menu */}
+              {/* CTA in Mobile Menu - router-native Link */}
               <div className="px-6 py-6 mt-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={() => {
-                    markNavStart('/comicbook');
-                    navigate('/comicbook');
-                    afterPaint(() => {
-                      setIsMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, behavior: 'auto' });
-                    });
-                    afterIdle(() => {});
-                  }}
+                <Link
+                  to="/comicbook"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full text-center font-bold rounded-lg bg-golden-500 hover:bg-golden-400 text-navy-500 py-4 px-6 transition-colors"
                 >
                   Pre-Order Volume 1
-                </Button>
+                </Link>
               </div>
             </div>
           </nav>

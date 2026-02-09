@@ -13,7 +13,7 @@ declare global {
   }
 }
 
-if (typeof window !== 'undefined' && typeof window.history !== 'undefined') {
+if (typeof window !== 'undefined' && typeof window.history !== 'undefined' && process.env.NODE_ENV === 'development') {
   if (!window.__historyGuardInstalled && typeof window.history.replaceState === 'function') {
     window.__historyGuardInstalled = true;
 
