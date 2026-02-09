@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import Button from './ui/Button';
 import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
+import { markNavStart } from '../lib/navMarks';
 
 interface HeaderProps {
   onComingSoonClick?: () => void;
@@ -73,6 +74,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   const handleLogoClick = () => {
     if (location.pathname !== '/') {
+      markNavStart('/');
       navigate('/');
     }
   };
@@ -140,6 +142,9 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   // Helper to handle nav link clicks (including anchors)
   const handleNavLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('/')) {
+      markNavStart(href);
+    }
     if (href.startsWith('/#')) {
       handleAnchorClick(e, href, navigate, location);
     }
@@ -235,7 +240,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                       key={idx + 3}
                       to={dropdownItem.href}
                       className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={() => setShowResourcesDropdown(false)}
+                      onClick={() => { markNavStart(dropdownItem.href); setShowResourcesDropdown(false); }}
                     >
                       <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
                       {dropdownItem.description && (
@@ -249,7 +254,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                       key={idx + 6}
                       to={dropdownItem.href}
                       className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={() => setShowResourcesDropdown(false)}
+                      onClick={() => { markNavStart(dropdownItem.href); setShowResourcesDropdown(false); }}
                     >
                       <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
                       {dropdownItem.description && (
@@ -263,16 +268,16 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             <div className="border-t border-navy-200 mt-4 pt-4">
               <h3 className="font-display font-bold text-xs text-navy-500 mb-3 uppercase tracking-wide">Browse by audience</h3>
               <div className="grid grid-cols-4 gap-2">
-                <Link to="/resources#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/resources#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => { markNavStart('/resources#kids'); setShowResourcesDropdown(false); }}>
                   <div className="font-semibold text-xs text-navy-700">For Kids</div>
                 </Link>
-                <Link to="/resources#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/resources#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => { markNavStart('/resources#parents'); setShowResourcesDropdown(false); }}>
                   <div className="font-semibold text-xs text-navy-700">For Parents</div>
                 </Link>
-                <Link to="/resources#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/resources#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => { markNavStart('/resources#teachers'); setShowResourcesDropdown(false); }}>
                   <div className="font-semibold text-xs text-navy-700">For Teachers</div>
                 </Link>
-                <Link to="/resources" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/resources" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => { markNavStart('/resources'); setShowResourcesDropdown(false); }}>
                   <div className="font-semibold text-xs text-navy-700">All Resources</div>
                 </Link>
               </div>
@@ -519,7 +524,10 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => navigate('/comicbook')}
+                onClick={() => {
+                  markNavStart('/comicbook');
+                  navigate('/comicbook');
+                }}
                 className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm px-4 lg:px-5 !min-w-0"
               >
                 Pre-Order Volume 1
@@ -648,16 +656,16 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                             </div>
                             <div className="px-12 py-4 border-t border-navy-200">
                               <div className="grid grid-cols-2 gap-2">
-                                <Link to="/resources?audience=kids" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=kids" onClick={() => { markNavStart('/resources?audience=kids'); setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Kids</div>
                                 </Link>
-                                <Link to="/resources?audience=parents" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=parents" onClick={() => { markNavStart('/resources?audience=parents'); setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Parents</div>
                                 </Link>
-                                <Link to="/resources?audience=teachers" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources?audience=teachers" onClick={() => { markNavStart('/resources?audience=teachers'); setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Teachers</div>
                                 </Link>
-                                <Link to="/resources" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/resources" onClick={() => { markNavStart('/resources'); setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">All Resources</div>
                                 </Link>
                               </div>
@@ -737,6 +745,7 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   size="lg"
                   fullWidth
                   onClick={() => {
+                    markNavStart('/comicbook');
                     navigate('/comicbook');
                     setIsMobileMenuOpen(false);
                   }}

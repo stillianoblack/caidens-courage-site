@@ -6,6 +6,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { LDClient } from 'launchdarkly-js-client-sdk';
 import { onIdle, safeOnce } from '../perf/defer';
+import { SAFE_MODE } from './safeMode';
 
 // Safe defaults so the app never shows a blank screen waiting for flags.
 export const defaultFlags: Record<string, unknown> = {};
@@ -27,7 +28,7 @@ function getClientId(): string {
       id = viteEnv.VITE_LAUNCHDARKLY_CLIENT_ID;
     }
   }
-  if (!id && !envWarned) {
+  if (!id && !envWarned && !SAFE_MODE) {
     envWarned = true;
     console.warn(
       '[LaunchDarkly] Set REACT_APP_LAUNCHDARKLY_CLIENT_ID (Create React App) or VITE_LAUNCHDARKLY_CLIENT_ID (Vite) in your environment. LaunchDarkly is disabled; using default flags.'

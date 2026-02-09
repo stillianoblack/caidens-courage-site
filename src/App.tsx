@@ -6,6 +6,7 @@ import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { SAFE_MODE, runAfterPaint } from './lib/safeMode';
+import { markNavEnd } from './lib/navMarks';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -131,6 +132,11 @@ const AppContent: React.FC = () => {
       prevLocationRef.current = location;
     }
   }, [location]);
+
+  // Router-level nav end marker for Perf Detective (when pathname has changed).
+  useEffect(() => {
+    markNavEnd();
+  }, [location.pathname]);
 
   const routeTransitionProps = {
     initial: { opacity: 0 },
