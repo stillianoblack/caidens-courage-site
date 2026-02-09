@@ -1,6 +1,6 @@
 import React from "react";
 
-const LazyWidget = React.lazy(() => import("./B4ChatWidget"));
+const LazyWidget = React.lazy(() => import("../B4ChatWidget"));
 
 function onIdle(cb: () => void) {
   // @ts-ignore
