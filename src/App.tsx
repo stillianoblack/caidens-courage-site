@@ -3,6 +3,7 @@ import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import RouteHeroPreload from './components/RouteHeroPreload';
+import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
@@ -92,21 +93,23 @@ const AppContent: React.FC = () => {
     <>
       <RouteHeroPreload />
       <DeferredB4ChatWidget />
-      <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
-        <div style={{ position: 'relative' }}>
-          {/* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */}
-          <AnimatePresence mode="wait" onExitComplete={() => setExitingLocation(null)}>
-            {exitingLocation != null && (
-              <motion.div key={exitingLocation.pathname} {...routeTransitionProps} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                <Routes location={exitingLocation}>{routeList}</Routes>
+      <ChunkErrorBoundary>
+        <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
+          <div style={{ position: 'relative' }}>
+            {/* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */}
+            <AnimatePresence mode="wait" onExitComplete={() => setExitingLocation(null)}>
+              {exitingLocation != null && (
+                <motion.div key={exitingLocation.pathname} {...routeTransitionProps} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                  <Routes location={exitingLocation}>{routeList}</Routes>
+                </motion.div>
+              )}
+              <motion.div key={location.pathname} {...routeTransitionProps}>
+                <Routes location={location}>{routeList}</Routes>
               </motion.div>
-            )}
-            <motion.div key={location.pathname} {...routeTransitionProps}>
-              <Routes location={location}>{routeList}</Routes>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </Suspense>
+            </AnimatePresence>
+          </div>
+        </Suspense>
+      </ChunkErrorBoundary>
     </>
   );
 };
