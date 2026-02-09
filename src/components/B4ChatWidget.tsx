@@ -95,6 +95,8 @@ const B4ChatWidget: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  if (typeof window !== 'undefined' && (window as any).__SAFE_MODE__) return null;
+
   // Single send path - all sends must go through this function
   const sendMessage = async (rawText?: string) => {
     console.log("B4 SEND TRIGGERED");

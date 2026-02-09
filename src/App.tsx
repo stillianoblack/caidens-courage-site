@@ -5,7 +5,6 @@ import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { runAfterPaint } from './lib/safeMode';
-import { FLAGS } from './lib/flags';
 import { SAFE_MODE } from './lib/safeMode';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
@@ -66,8 +65,8 @@ const routeList = (
   </>
 );
 
-// Lazy chat widget – load and mount only after first paint.
-const DeferredB4ChatWidget = lazy(() => import('./components/DeferredB4ChatWidget'));
+// Lazy chat widget – not in initial bundle; load only after first paint.
+const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -78,20 +77,19 @@ const AppContent: React.FC = () => {
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // B-4 chat: mount only after first paint (requestIdleCallback or setTimeout 1500); respect FLAGS.CHATBOT.
+  // B-4 chat: mount only after first paint (requestIdleCallback or setTimeout 2000).
   useEffect(() => {
-    if (!FLAGS.CHATBOT) return;
-    let usedIdle = false;
     let id: number;
-    if (typeof requestIdleCallback !== 'undefined') {
-      usedIdle = true;
-      id = requestIdleCallback(() => setShowChat(true), { timeout: 1500 });
+    const useIdle =
+      typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function';
+    if (useIdle) {
+      id = window.requestIdleCallback(() => setShowChat(true));
     } else {
-      id = window.setTimeout(() => setShowChat(true), 1500) as unknown as number;
+      id = window.setTimeout(() => setShowChat(true), 2000) as unknown as number;
     }
     return () => {
-      if (usedIdle && typeof cancelIdleCallback !== 'undefined') {
-        cancelIdleCallback(id);
+      if (useIdle && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(id);
       } else {
         clearTimeout(id);
       }
@@ -167,11 +165,9 @@ const AppContent: React.FC = () => {
   return (
     <>
       <RouteHeroPreload />
-      {FLAGS.CHATBOT && showChat && (
-        <Suspense fallback={null}>
-          <DeferredB4ChatWidget />
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
+      </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>
