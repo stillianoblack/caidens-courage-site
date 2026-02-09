@@ -8,6 +8,12 @@ import './debug/navDebug';
 import './debug/navWatch';
 import './perf/routePerf';
 
+// Enable extra navigation debug logs in development only.
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+  // eslint-disable-next-line no-underscore-dangle
+  window.__NAV_DEBUG__ = true;
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

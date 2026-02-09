@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { afterPaint } from '../lib/afterPaint';
+import React, { useCallback, useRef, useState } from 'react';
+import { safeOnce } from '../perf/defer';
 
 type B4ChatWidgetComponent = React.ComponentType<unknown>;
 
@@ -9,9 +9,7 @@ type B4ChatWidgetComponent = React.ComponentType<unknown>;
  * Goals:
  * - Never block first paint or navigation.
  * - Do not load the chat bundle at startup.
- * - Load the real widget only:
- *     - when the user clicks "Chat with B-4", OR
- *     - after first paint + ~3s idle (preload only, without opening UI).
+ * - Load the real widget only when the user clicks "Chat with B-4".
  * - Ensure initialization happens at most once per tab.
  */
 const DeferredB4ChatWidget: React.FC = () => {
@@ -23,34 +21,29 @@ const DeferredB4ChatWidget: React.FC = () => {
     if (loadOnceRef.current) return;
     loadOnceRef.current = true;
 
+    (window as any).__INIT_CHAT_RUNNING__ = true;
+
     import('./B4ChatWidget')
       .then((mod) => {
         setWidget(() => mod.default as B4ChatWidgetComponent);
+        (window as any).__INIT_CHAT_LOADED__ = true;
       })
       .catch((error) => {
         // Fail silent for users; log for debugging.
         // Chat should never break the main app.
         // eslint-disable-next-line no-console
         console.error('[DeferredB4ChatWidget] Failed to load B-4 widget', error);
+      })
+      .finally(() => {
+        (window as any).__INIT_CHAT_RUNNING__ = false;
       });
   }, []);
 
-  // Idle-time preload only: after first paint, wait ~3s then load the bundle,
-  // but do NOT open the UI. This keeps first interaction fast while avoiding
-  // any work on the initial critical path.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    afterPaint(() => {
-      window.setTimeout(() => {
-        loadWidget();
-      }, 3000);
-    });
-  }, [loadWidget]);
-
   const handleLauncherClick = () => {
     setShouldRenderWidget(true);
-    loadWidget();
+    safeOnce('b4-chat-load', () => {
+      loadWidget();
+    });
   };
 
   // Once the real widget bundle is loaded and the user has expressed intent,

@@ -5,7 +5,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { LDClient } from 'launchdarkly-js-client-sdk';
-import { afterPaint } from './afterPaint';
+import { onIdle, safeOnce } from '../perf/defer';
 
 // Safe defaults so the app never shows a blank screen waiting for flags.
 export const defaultFlags: Record<string, unknown> = {};
@@ -76,10 +76,25 @@ function getLDClient(): Promise<LDClient | null> {
 /**
  * Public entry point for app code.
  * Schedules LD initialization after first paint / idle, and never blocks render or navigation.
+ * Guarded by safeOnce so we don't re-initialize on rerenders or route changes.
  */
 export function initLaunchDarkly(): void {
-  afterPaint(() => {
-    void getLDClient();
+  if (typeof window === 'undefined') return;
+
+  (window as any).__INIT_FLAGS_QUEUED__ = true;
+
+  safeOnce('launchdarkly-init', () => {
+    (window as any).__INIT_FLAGS_RUNNING__ = true;
+    onIdle(() => {
+      void getLDClient()
+        .catch(() => {
+          // Errors are already logged in initLD; keep UX safe.
+        })
+        .finally(() => {
+          (window as any).__INIT_FLAGS_RUNNING__ = false;
+          (window as any).__INIT_FLAGS_DONE__ = true;
+        });
+    });
   });
 }
 

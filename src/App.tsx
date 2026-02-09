@@ -68,12 +68,58 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
+  const navIdRef = useRef(0);
+  const navStartTimeRef = useRef<number | null>(null);
+  const navTimerRef = useRef<number | null>(null);
 
   // Initialize LaunchDarkly lazily after first paint / idle.
   // This call never blocks render or navigation; flags update asynchronously via context.
   useEffect(() => {
     initLaunchDarkly();
   }, []);
+
+  // Route-change instrumentation for debugging navigation freezes.
+  useEffect(() => {
+    const debugEnabled =
+      typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const navId = ++navIdRef.current;
+    navStartTimeRef.current = now;
+
+    if (debugEnabled) {
+      // eslint-disable-next-line no-console
+      console.log('[navTrace] NAV_START', {
+        id: navId,
+        path: location.pathname,
+        t: now,
+      });
+    }
+
+    if (navTimerRef.current != null && typeof window !== 'undefined') {
+      window.clearTimeout(navTimerRef.current);
+    }
+
+    if (typeof window !== 'undefined') {
+      navTimerRef.current = window.setTimeout(() => {
+        if (navIdRef.current !== navId) return; // a newer nav started
+        if (!debugEnabled) return;
+
+        const flagsRunning = !!(window as any).__INIT_FLAGS_RUNNING__;
+        const chatRunning = !!(window as any).__INIT_CHAT_RUNNING__;
+
+        // eslint-disable-next-line no-console
+        console.warn('[navTrace] NAV_STALL', {
+          id: navId,
+          path: location.pathname,
+          elapsedMs: 2000,
+          initializers: {
+            flagsRunning,
+            chatRunning,
+          },
+        });
+      }, 2000);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (location.pathname !== prevLocationRef.current.pathname) {
@@ -97,7 +143,35 @@ const AppContent: React.FC = () => {
         <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>
             {/* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */}
-            <AnimatePresence mode="wait" onExitComplete={() => setExitingLocation(null)}>
+            <AnimatePresence
+              mode="wait"
+              onExitComplete={() => {
+                setExitingLocation(null);
+                const debugEnabled =
+                  typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
+                const now =
+                  typeof performance !== 'undefined' ? performance.now() : Date.now();
+                const start = navStartTimeRef.current;
+                const id = navIdRef.current;
+
+                if (typeof window !== 'undefined' && navTimerRef.current != null) {
+                  window.clearTimeout(navTimerRef.current);
+                  navTimerRef.current = null;
+                }
+
+                if (debugEnabled && start != null) {
+                  const elapsed = now - start;
+                  // eslint-disable-next-line no-console
+                  console.log('[navTrace] NAV_END', {
+                    id,
+                    path: location.pathname,
+                    ms: Math.round(elapsed),
+                  });
+                }
+
+                navStartTimeRef.current = null;
+              }}
+            >
               {exitingLocation != null && (
                 <motion.div key={exitingLocation.pathname} {...routeTransitionProps} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
                   <Routes location={exitingLocation}>{routeList}</Routes>
