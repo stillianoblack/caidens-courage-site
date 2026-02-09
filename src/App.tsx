@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+// import DeferredB4ChatWidget from './components/DeferredB4ChatWidget'; // Temporarily disabled to diagnose navigation freezes.
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
@@ -138,7 +138,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <RouteHeroPreload />
-      <DeferredB4ChatWidget />
+      {/* <DeferredB4ChatWidget /> */} {/* Chat temporarily removed for diagnostics */}
       <ChunkErrorBoundary>
         <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>
