@@ -4,6 +4,7 @@ import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { afterIdle } from '../lib/defer';
 import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
 
 // Preview page data
@@ -80,46 +81,54 @@ const Preview = () => {
   }, []);
 
 
-  // Check if image exists when page changes - add timeout to detect missing images
+  // Check if image exists when page changes; defer to idle so it never blocks nav or first paint.
+  const imageCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    const currentImageSrc = PREVIEW_PAGES[currentPage - 1].image;
-    const img = new Image();
-    let timeoutId: NodeJS.Timeout;
+    const page = currentPage;
+    const currentImageSrc = PREVIEW_PAGES[page - 1]?.image;
+    if (!currentImageSrc) return;
 
-    // Set timeout to show error if image doesn't load within 3 seconds
-    timeoutId = setTimeout(() => {
-      setImageErrors(prev => {
-        if (!prev.has(currentPage)) {
-          return new Set(prev).add(currentPage);
-        }
-        return prev;
-      });
-    }, 3000);
+    let cancelled = false;
 
-    img.onload = () => {
-      clearTimeout(timeoutId);
-      setImagesLoaded(prev => new Set(prev).add(currentPage));
-      setImageErrors(prev => {
-        const next = new Set(prev);
-        next.delete(currentPage);
-        return next;
-      });
-    };
+    afterIdle(() => {
+      if (cancelled) return;
+      const img = new Image();
+      imageCheckTimeoutRef.current = setTimeout(() => {
+        if (cancelled) return;
+        setImageErrors(prev => (prev.has(page) ? prev : new Set(prev).add(page)));
+      }, 3000);
 
-    img.onerror = () => {
-      clearTimeout(timeoutId);
-      setImageErrors(prev => new Set(prev).add(currentPage));
-      setImagesLoaded(prev => {
-        const next = new Set(prev);
-        next.delete(currentPage);
-        return next;
-      });
-    };
+      img.onload = () => {
+        if (cancelled) return;
+        if (imageCheckTimeoutRef.current) clearTimeout(imageCheckTimeoutRef.current);
+        setImagesLoaded(prev => new Set(prev).add(page));
+        setImageErrors(prev => {
+          const next = new Set(prev);
+          next.delete(page);
+          return next;
+        });
+      };
 
-    img.src = currentImageSrc;
+      img.onerror = () => {
+        if (cancelled) return;
+        if (imageCheckTimeoutRef.current) clearTimeout(imageCheckTimeoutRef.current);
+        setImageErrors(prev => new Set(prev).add(page));
+        setImagesLoaded(prev => {
+          const next = new Set(prev);
+          next.delete(page);
+          return next;
+        });
+      };
+
+      img.src = currentImageSrc;
+    });
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
+      if (imageCheckTimeoutRef.current) {
+        clearTimeout(imageCheckTimeoutRef.current);
+        imageCheckTimeoutRef.current = null;
+      }
     };
   }, [currentPage]);
 

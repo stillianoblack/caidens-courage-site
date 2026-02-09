@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { afterPaint } from '../lib/defer';
 
 const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
 
@@ -24,33 +25,37 @@ const RouteHeroPreload: React.FC = () => {
   const location = useLocation();
   const currentHrefRef = useRef<string | null>(null);
 
+  // Defer preload DOM updates to after paint so they never run during nav click or before first paint.
   useEffect(() => {
-    const heroUrl = ROUTE_TO_HERO[location.pathname] ?? null;
-    let link = document.getElementById(ROUTE_HERO_PRELOAD_ID) as HTMLLinkElement | null;
+    const pathname = location.pathname;
+    afterPaint(() => {
+      const heroUrl = ROUTE_TO_HERO[pathname] ?? null;
+      let link = document.getElementById(ROUTE_HERO_PRELOAD_ID) as HTMLLinkElement | null;
 
-    if (heroUrl) {
-      if (link) {
-        if (currentHrefRef.current !== heroUrl) {
+      if (heroUrl) {
+        if (link) {
+          if (currentHrefRef.current !== heroUrl) {
+            link.href = heroUrl;
+            currentHrefRef.current = heroUrl;
+          }
+        } else {
+          link = document.createElement('link');
+          link.id = ROUTE_HERO_PRELOAD_ID;
+          link.rel = 'preload';
+          link.as = 'image';
           link.href = heroUrl;
+          link.type = 'image/webp';
+          link.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(link);
           currentHrefRef.current = heroUrl;
         }
       } else {
-        link = document.createElement('link');
-        link.id = ROUTE_HERO_PRELOAD_ID;
-        link.rel = 'preload';
-        link.as = 'image';
-        link.href = heroUrl;
-        link.type = 'image/webp';
-        link.setAttribute('fetchpriority', 'high');
-        document.head.appendChild(link);
-        currentHrefRef.current = heroUrl;
+        if (link?.parentNode) {
+          link.parentNode.removeChild(link);
+          currentHrefRef.current = null;
+        }
       }
-    } else {
-      if (link?.parentNode) {
-        link.parentNode.removeChild(link);
-        currentHrefRef.current = null;
-      }
-    }
+    });
   }, [location.pathname]);
 
   useEffect(() => {

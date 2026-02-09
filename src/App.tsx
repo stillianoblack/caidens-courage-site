@@ -1,10 +1,11 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-// import DeferredB4ChatWidget from './components/DeferredB4ChatWidget'; // Temporarily disabled to diagnose navigation freezes.
+import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
+import { afterPaint, afterIdle } from './lib/defer';
 import { SAFE_MODE, runAfterPaint } from './lib/safeMode';
 import { markNavEnd } from './lib/navMarks';
 
@@ -70,9 +71,16 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
+  const [mountChat, setMountChat] = useState(false);
   const navIdRef = useRef(0);
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
+
+  // B-4 chat: mount only after first paint and on idle; never in SAFE_MODE.
+  useEffect(() => {
+    if (SAFE_MODE) return;
+    afterIdle(() => setMountChat(true));
+  }, []);
 
   // Initialize LaunchDarkly lazily after first paint / idle when SAFE_MODE is off.
   // In SAFE_MODE, we skip flags entirely and rely on defaultFlags.
@@ -135,7 +143,7 @@ const AppContent: React.FC = () => {
 
   // Router-level nav end marker for Perf Detective (when pathname has changed).
   useEffect(() => {
-    markNavEnd();
+    afterPaint(() => markNavEnd());
   }, [location.pathname]);
 
   const routeTransitionProps = {
@@ -148,7 +156,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <RouteHeroPreload />
-      {/* <DeferredB4ChatWidget /> */} {/* Chat temporarily removed for diagnostics */}
+      {!SAFE_MODE && mountChat && <DeferredB4ChatWidget />}
       <ChunkErrorBoundary>
         <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>

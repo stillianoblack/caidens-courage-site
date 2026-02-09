@@ -39,9 +39,10 @@ function getClientId(): string {
 
 /**
  * Low-level initializer – dynamically imports the SDK and creates the client.
- * This is never called at module load; always schedule via afterPaint / getLDClient.
+ * Never runs in SAFE_MODE; no streaming connection unless client id exists AND SAFE_MODE is false.
  */
 export async function initLD(clientIdOverride?: string): Promise<LDClient | null> {
+  if (SAFE_MODE) return null;
   const clientId = clientIdOverride ?? getClientId();
   if (!clientId) return null;
 
@@ -58,16 +59,17 @@ export async function initLD(clientIdOverride?: string): Promise<LDClient | null
     clientRef = client;
     return client;
   } catch (e) {
-    console.warn('[LaunchDarkly] Failed to initialize:', e);
+    if (!SAFE_MODE) console.warn('[LaunchDarkly] Failed to initialize:', e);
     return null;
   }
 }
 
 /**
  * Returns the LD client, initializing once in the background.
- * Never call this before first paint; use initLaunchDarkly() from useEffect instead.
+ * In SAFE_MODE returns a resolved null; no connection is ever opened.
  */
 function getLDClient(): Promise<LDClient | null> {
+  if (SAFE_MODE) return Promise.resolve(null);
   if (cached !== undefined) return cached;
 
   cached = initLD();
@@ -76,11 +78,15 @@ function getLDClient(): Promise<LDClient | null> {
 
 /**
  * Public entry point for app code.
- * Schedules LD initialization after first paint / idle, and never blocks render or navigation.
- * Guarded by safeOnce so we don't re-initialize on rerenders or route changes.
+ * In SAFE_MODE does nothing and never opens a connection.
  */
 export function initLaunchDarkly(): void {
   if (typeof window === 'undefined') return;
+  if (SAFE_MODE) {
+    // eslint-disable-next-line no-console
+    console.log('[LaunchDarkly] skipped (SAFE_MODE)');
+    return;
+  }
 
   (window as any).__INIT_FLAGS_QUEUED__ = true;
 
@@ -88,9 +94,7 @@ export function initLaunchDarkly(): void {
     (window as any).__INIT_FLAGS_RUNNING__ = true;
     onIdle(() => {
       void getLDClient()
-        .catch(() => {
-          // Errors are already logged in initLD; keep UX safe.
-        })
+        .catch(() => {})
         .finally(() => {
           (window as any).__INIT_FLAGS_RUNNING__ = false;
           (window as any).__INIT_FLAGS_DONE__ = true;
@@ -132,6 +136,7 @@ export function LaunchDarklyProvider({ children }: { children: React.ReactNode }
   const [client, setClient] = useState<LDClient | null>(null);
 
   useEffect(() => {
+    if (SAFE_MODE) return;
     getLDClient().then((c) => {
       setClient(c);
     });
