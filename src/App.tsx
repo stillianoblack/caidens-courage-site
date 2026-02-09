@@ -9,6 +9,26 @@ import { SAFE_MODE } from './lib/safeMode';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
+/** Minimal hero skeleton so Lighthouse always sees painted content while route chunks load. */
+const RouteFallbackHeroSkeleton: React.FC = () => (
+  <div className="min-h-screen bg-cream font-body" aria-label="Loading">
+    <header className="h-16 sm:h-20 w-full bg-navy-500 shrink-0" />
+    <section
+      className="relative flex flex-col justify-center px-4 sm:px-6 pt-12 pb-16"
+      style={{ minHeight: '60vh' }}
+    >
+      <div className="max-w-4xl mx-auto w-full space-y-4">
+        <div className="h-8 sm:h-10 bg-navy-200/40 rounded w-3/4 max-w-md animate-pulse" />
+        <div className="h-4 bg-navy-200/30 rounded w-full max-w-xl animate-pulse" />
+        <div className="h-4 bg-navy-200/30 rounded w-5/6 max-w-lg animate-pulse" />
+        <div className="pt-4">
+          <span className="inline-block h-12 w-40 bg-golden-500/50 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    </section>
+  </div>
+);
+
 // Lazy load pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -192,7 +212,7 @@ const AppContent: React.FC = () => {
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
       </Suspense>
       <ChunkErrorBoundary>
-        <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', pointerEvents: 'none' }}>Loading...</div>}>
+        <Suspense fallback={<RouteFallbackHeroSkeleton />}>
           <div style={{ position: 'relative' }}>
             {enableMotion ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
