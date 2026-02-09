@@ -69,7 +69,19 @@ const AppContent: React.FC = () => {
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
 
   useEffect(() => {
-    initLaunchDarkly();
+    // Initialize LaunchDarkly only after first paint and when the browser is idle,
+    // so feature flags never block navigation or route transitions.
+    const schedule = (fn: () => void) => {
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(fn, { timeout: 2000 });
+      } else {
+        setTimeout(fn, 1500);
+      }
+    };
+
+    schedule(() => {
+      initLaunchDarkly();
+    });
   }, []);
 
   useEffect(() => {
