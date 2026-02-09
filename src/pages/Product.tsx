@@ -132,17 +132,21 @@ const Product: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
 
-  // Gallery images: src = full-size hero/LCP; thumb = small image for thumbnail strip (avoids loading 257 KiB for 80x80).
-  const galleryImages: { src: string; thumb?: string; alt: string }[] = [
+  // Gallery images: responsive comic cover (900/1600w); thumb = small for strip.
+  const galleryImages: { src: string; thumb?: string; alt: string; heroSrcSet?: string; heroSizes?: string }[] = [
     {
-      src: "/images/Comic5_Coverpage_header_smaller.webp",
+      src: "/images/Comic5_Coverpage_header_smaller-1600.webp",
       thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)",
+      heroSrcSet: "/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w",
+      heroSizes: "(max-width: 768px) 92vw, 742px",
     },
     {
-      src: "/images/Comic5_Coverpage_header_smaller.webp",
+      src: "/images/Comic5_Coverpage_header_smaller-1600.webp",
       thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)",
+      heroSrcSet: "/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w",
+      heroSizes: "(max-width: 768px) 92vw, 742px",
     },
     {
       src: "/images/Caiden'sCourage_SocialImage_smaller.webp",
@@ -230,38 +234,76 @@ const Product: React.FC = () => {
                   }
                 }}
               >
-                <img
-                  src={galleryImages[selectedImageIndex].src}
-                  alt={galleryImages[selectedImageIndex].alt}
-                  width={600}
-                  height={600}
-                  className="w-full h-auto object-cover mx-auto"
-                  loading="eager"
-                  style={{ 
-                    transformOrigin: 'center center',
-                    transform: 'scale(1)',
-                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: 'transform'
-                  }}
-                  decoding="async"
-                  onMouseEnter={(e) => {
-                    // Only enable magnify on desktop (md and up)
-                    if (window.innerWidth >= 768) {
-                      e.currentTarget.style.transform = 'scale(2.25)';
-                      e.currentTarget.style.transformOrigin = 'center center';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    // Only enable magnify on desktop (md and up)
-                    if (window.innerWidth >= 768) {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.transformOrigin = 'center center';
-                    }
-                  }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
-                  }}
-                />
+                {galleryImages[selectedImageIndex].heroSrcSet ? (
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcSet={galleryImages[selectedImageIndex].heroSrcSet}
+                      sizes={galleryImages[selectedImageIndex].heroSizes}
+                    />
+                    <img
+                      src={galleryImages[selectedImageIndex].src}
+                      alt={galleryImages[selectedImageIndex].alt}
+                      width={742}
+                      height={494}
+                      className="w-full h-auto object-cover mx-auto"
+                      loading="eager"
+                      style={{
+                        transformOrigin: 'center center',
+                        transform: 'scale(1)',
+                        transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                        willChange: 'transform',
+                      }}
+                      decoding="async"
+                      onMouseEnter={(e) => {
+                        if (window.innerWidth >= 768) {
+                          e.currentTarget.style.transform = 'scale(2.25)';
+                          e.currentTarget.style.transformOrigin = 'center center';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (window.innerWidth >= 768) {
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.transformOrigin = 'center center';
+                        }
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                      }}
+                    />
+                  </picture>
+                ) : (
+                  <img
+                    src={galleryImages[selectedImageIndex].src}
+                    alt={galleryImages[selectedImageIndex].alt}
+                    width={600}
+                    height={600}
+                    className="w-full h-auto object-cover mx-auto"
+                    loading="eager"
+                    style={{
+                      transformOrigin: 'center center',
+                      transform: 'scale(1)',
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                      willChange: 'transform',
+                    }}
+                    decoding="async"
+                    onMouseEnter={(e) => {
+                      if (window.innerWidth >= 768) {
+                        e.currentTarget.style.transform = 'scale(2.25)';
+                        e.currentTarget.style.transformOrigin = 'center center';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (window.innerWidth >= 768) {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.transformOrigin = 'center center';
+                      }
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                    }}
+                  />
+                )}
               </div>
               
               {/* Thumbnail Gallery - Below main image on both mobile and desktop */}

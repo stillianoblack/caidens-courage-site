@@ -9,7 +9,7 @@ const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
  * Homepage LCP is preloaded in index.html (initial document) for early discovery; only other routes here.
  */
 const ABOVE_THE_FOLD_HERO: Record<string, string> = {
-  '/comicbook': '/images/Comic5_Coverpage_header_smaller.webp',
+  '/comicbook': '/images/Comic5_Coverpage_header_smaller-1600.webp',
 };
 
 /**
