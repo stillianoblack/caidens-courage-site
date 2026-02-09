@@ -26,10 +26,12 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
 }
 
 if (typeof window !== 'undefined') {
-  // eslint-disable-next-line no-console
-  console.log('[SAFE_MODE]', SAFE_MODE ? 'ON' : 'OFF');
   // eslint-disable-next-line no-underscore-dangle
   window.__SAFE_MODE__ = SAFE_MODE;
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log('[SAFE_MODE]', SAFE_MODE ? 'DEV' : 'OFF');
+  }
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
