@@ -11,6 +11,15 @@ import './perf/longTasks';
 import { SAFE_MODE } from './lib/safeMode';
 import { installPerfDetective } from './lib/perfDetective';
 import './lib/historyGuard';
+import { installClickBlockerFix } from './utils/clickBlockerFix';
+
+// Click-blocker debug: only when ?debugClicks=1 or localStorage.debugClicks=1
+if (typeof window !== 'undefined') {
+  const debugClicks =
+    window.location.search.includes('debugClicks=1') ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('debugClicks') === '1');
+  if (debugClicks) installClickBlockerFix();
+}
 
 // Perf Detective: run before first paint to catch nav freezes (production + dev).
 if (typeof window !== 'undefined') {

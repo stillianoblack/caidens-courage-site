@@ -73,23 +73,46 @@ const AppContent: React.FC = () => {
   const prevLocationRef = useRef(location);
   const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [enableMotion, setEnableMotion] = useState(false);
   const navIdRef = useRef(0);
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // B-4 chat: mount only after first paint (requestIdleCallback or setTimeout 2000).
+  // Route change log for debugging navigation
+  useEffect(() => {
+    if (typeof console !== 'undefined' && console.log) {
+      console.log('[ROUTE]', location.pathname);
+    }
+  }, [location.pathname]);
+
+  // Animations: enable only after first paint so they never block nav.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setEnableMotion(true);
+      setExitingLocation(null); // avoid showing stale exiting route when motion turns on
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // B-4 chat: mount only after first paint + idle (never block nav or first paint).
   useEffect(() => {
     let id: number;
-    const useIdle =
-      typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function';
-    if (useIdle) {
-      id = window.requestIdleCallback(() => setShowChat(true));
+    const enable = () => setShowChat(true);
+    const schedule = () => {
+      if (typeof window !== 'undefined' && typeof (window as any).requestIdleCallback === 'function') {
+        id = (window as any).requestIdleCallback(enable, { timeout: 1500 });
+      } else {
+        id = window.setTimeout(enable, 800) as unknown as number;
+      }
+    };
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(schedule);
     } else {
-      id = window.setTimeout(() => setShowChat(true), 2000) as unknown as number;
+      schedule();
     }
     return () => {
-      if (useIdle && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(id);
+      if (typeof (window as any).cancelIdleCallback === 'function' && typeof id === 'number') {
+        (window as any).cancelIdleCallback(id);
       } else {
         clearTimeout(id);
       }
@@ -169,47 +192,55 @@ const AppContent: React.FC = () => {
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
       </Suspense>
       <ChunkErrorBoundary>
-        <Suspense fallback={<div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ padding: 24, textAlign: 'center', pointerEvents: 'none' }}>Loading...</div>}>
           <div style={{ position: 'relative' }}>
-            {/* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */}
-            <AnimatePresence
-              mode="wait"
-              onExitComplete={() => {
-                setExitingLocation(null);
-                const debugEnabled =
-                  typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
-                const now =
-                  typeof performance !== 'undefined' ? performance.now() : Date.now();
-                const start = navStartTimeRef.current;
-                const id = navIdRef.current;
+            {enableMotion ? (
+              /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
+              <AnimatePresence
+                mode="wait"
+                onExitComplete={() => {
+                  setExitingLocation(null);
+                  const debugEnabled =
+                    typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
+                  const now =
+                    typeof performance !== 'undefined' ? performance.now() : Date.now();
+                  const start = navStartTimeRef.current;
+                  const id = navIdRef.current;
 
-                if (typeof window !== 'undefined' && navTimerRef.current != null) {
-                  window.clearTimeout(navTimerRef.current);
-                  navTimerRef.current = null;
-                }
+                  if (typeof window !== 'undefined' && navTimerRef.current != null) {
+                    window.clearTimeout(navTimerRef.current);
+                    navTimerRef.current = null;
+                  }
 
-                if (debugEnabled && start != null) {
-                  const elapsed = now - start;
-                  // eslint-disable-next-line no-console
-                  console.log('[navTrace] NAV_END', {
-                    id,
-                    path: location.pathname,
-                    ms: Math.round(elapsed),
-                  });
-                }
+                  if (debugEnabled && start != null) {
+                    const elapsed = now - start;
+                    // eslint-disable-next-line no-console
+                    console.log('[navTrace] NAV_END', {
+                      id,
+                      path: location.pathname,
+                      ms: Math.round(elapsed),
+                    });
+                  }
 
-                navStartTimeRef.current = null;
-              }}
-            >
-              {exitingLocation != null && (
-                <motion.div key={exitingLocation.pathname} {...routeTransitionProps} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-                  <Routes location={exitingLocation}>{routeList}</Routes>
+                  navStartTimeRef.current = null;
+                }}
+              >
+                {exitingLocation != null && (
+                  <motion.div
+                    key={exitingLocation.pathname}
+                    {...routeTransitionProps}
+                    style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+                  >
+                    <Routes location={exitingLocation}>{routeList}</Routes>
+                  </motion.div>
+                )}
+                <motion.div key={location.pathname} {...routeTransitionProps}>
+                  <Routes location={location}>{routeList}</Routes>
                 </motion.div>
-              )}
-              <motion.div key={location.pathname} {...routeTransitionProps}>
-                <Routes location={location}>{routeList}</Routes>
-              </motion.div>
-            </AnimatePresence>
+              </AnimatePresence>
+            ) : (
+              <Routes location={location}>{routeList}</Routes>
+            )}
           </div>
         </Suspense>
       </ChunkErrorBoundary>
