@@ -1,6 +1,6 @@
 /**
  * historyGuard – temporary instrumentation to detect unexpected history.replaceState usage.
- * In production, OFF unless ?debugPerf=1.
+ * In production, OFF (no-op). Entry import is commented out; this guard is belt-and-suspenders.
  */
 
 /* eslint-disable no-console */
@@ -15,7 +15,14 @@ declare global {
   }
 }
 
-if (typeof window !== 'undefined' && typeof window.history !== 'undefined' && allowPerfTools()) {
+// No-op in production so replaceState is never patched
+const shouldInstall =
+  typeof process !== 'undefined' &&
+  process.env &&
+  process.env.NODE_ENV !== 'production' &&
+  allowPerfTools();
+
+if (typeof window !== 'undefined' && typeof window.history !== 'undefined' && shouldInstall) {
   if (!window.__historyGuardInstalled && typeof window.history.replaceState === 'function') {
     window.__historyGuardInstalled = true;
 

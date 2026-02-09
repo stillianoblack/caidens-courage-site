@@ -11,7 +11,7 @@ import './perf/routePerf';
 import './perf/longTasks';
 import { SAFE_MODE } from './lib/safeMode';
 // [prod-guard] import { installPerfDetective } from './lib/perfDetective';
-import './lib/historyGuard';
+// [disabled-prod] import './lib/historyGuard';
 // [prod-guard] import { installClickBlockerFix } from './utils/clickBlockerFix';
 
 // Perf Detective: run before first paint to catch nav freezes (production + dev).
