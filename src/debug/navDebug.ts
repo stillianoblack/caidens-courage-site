@@ -175,8 +175,8 @@ function initNavDebug(): void {
   }
 }
 
-// Initialize immediately on module load in the browser environment.
-if (typeof window !== 'undefined') {
+// Initialize only in non-production so production never runs click/history patches.
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
   // Use requestIdleCallback when available so we don't interfere with first paint.
   const start = () => initNavDebug();
 

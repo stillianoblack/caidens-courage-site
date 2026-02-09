@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
 
@@ -131,26 +131,37 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     }
   };
 
-  // Anchor-only handler: for /# links, scroll or navigate; no history/tracking in click path.
-  const handleAnchorOnly = (e: React.MouseEvent<HTMLAnchorElement>, href: string, closeMenus?: () => void) => {
+  // For /# links only: intercept to scroll or navigate (preventDefault required for same-page scroll).
+  const handleAnchorClickOnly = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('/#')) {
       handleAnchorClick(e, href, navigate, location);
     }
-    closeMenus?.();
   };
 
-  // Render a simple nav link (router-native: no preventDefault, no nav instrumentation).
+  // Plain NavLink/Link – no preventDefault, no nav wrappers. Menu-close in onClick only where needed.
   const renderNavLink = (item: NavItem) => {
-    const isActive = isNavItemActive(item);
     const isAnchor = item.href.startsWith('/#');
+    const baseClass = `nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`;
+    const activeClass = 'font-bold border-b-2 border-golden-500';
+
+    if (isAnchor) {
+      return (
+        <Link
+          to={item.href}
+          onClick={(e) => handleAnchorClickOnly(e, item.href)}
+          className={`${baseClass} ${isNavItemActive(item) ? activeClass : ''}`}
+        >
+          {item.label}
+        </Link>
+      );
+    }
     return (
-      <Link
+      <NavLink
         to={item.href}
-        onClick={isAnchor ? (e) => handleAnchorOnly(e, item.href) : undefined}
-        className={`nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`}
+        className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ''}`}
       >
         {item.label}
-      </Link>
+      </NavLink>
     );
   };
 
@@ -492,12 +503,14 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             {/* Right Cluster: Partner With Us + CTA Button */}
             <div className="flex items-center gap-4 lg:gap-5">
               {/* Partner With Us Link */}
-              <Link
+              <NavLink
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
-                className={`hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'font-bold border-b-2 border-golden-500' : ''}`}
+                className={({ isActive }) =>
+                  `hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`
+                }
               >
                 {RIGHT_NAV_ITEMS.partnerLink.label}
-              </Link>
+              </NavLink>
               
               {/* CTA - router-native Link */}
               <Link
@@ -530,19 +543,33 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
               {NAV_ITEMS.map((item) => {
                 if (item.type === 'link') {
-                  const isActive = isNavItemActive(item);
-                  return (
+                  const isAnchor = item.href.startsWith('/#');
+                  return isAnchor ? (
                     <Link
                       key={item.label}
                       to={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isActive ? 'bg-navy-50 font-bold' : ''}`}
+                      onClick={(e) => { handleAnchorClickOnly(e, item.href); setIsMobileMenuOpen(false); }}
+                      className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isNavItemActive(item) ? 'bg-navy-50 font-bold' : ''}`}
                     >
                       <span>{item.label}</span>
                       <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
+                  ) : (
+                    <NavLink
+                      key={item.label}
+                      to={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isActive ? 'bg-navy-50 font-bold' : ''}`
+                      }
+                    >
+                      <span>{item.label}</span>
+                      <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </NavLink>
                   );
                 } else if (item.type === 'dropdown') {
                   let isOpen = false;
@@ -686,16 +713,18 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               })}
               
               {/* Partner With Us Link in Mobile Menu */}
-              <Link
+              <NavLink
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isNavItemActive({ href: RIGHT_NAV_ITEMS.partnerLink.href, activePaths: RIGHT_NAV_ITEMS.partnerLink.activePaths } as NavItem) ? 'bg-navy-50 font-bold' : ''}`}
+                className={({ isActive }) =>
+                  `px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${isActive ? 'bg-navy-50 font-bold' : ''}`
+                }
               >
                 <span>{RIGHT_NAV_ITEMS.partnerLink.label}</span>
                 <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </Link>
+              </NavLink>
               
               {/* CTA in Mobile Menu - router-native Link */}
               <div className="px-6 py-6 mt-4">
