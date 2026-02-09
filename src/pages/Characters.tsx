@@ -12,6 +12,19 @@ interface Character {
   image: string;
 }
 
+/** Responsive srcSet for character profile images (192w/400w generated at build). */
+function getProfileImageSet(src: string): { src: string; srcSet?: string; sizes?: string } {
+  if (!src.includes('/characters/') || !src.endsWith('.webp') || !src.includes('_profile')) {
+    return { src };
+  }
+  const base = src.replace(/\.webp$/, '');
+  return {
+    src,
+    srcSet: `${base}_192w.webp 192w, ${base}_400w.webp 400w, ${src} 1024w`,
+    sizes: '96px', // card portrait; promo section overrides with sizes="400px"
+  };
+}
+
 const characters: Character[] = [
   {
     name: 'Caiden',
@@ -252,7 +265,9 @@ const Characters: React.FC = () => {
 
           {/* Character Grid */}
           <div className="character-grid">
-            {characters.map((character, index) => (
+            {characters.map((character, index) => {
+              const imgSet = getProfileImageSet(character.image);
+              return (
               <div
                 key={index}
                 className="character-card bg-white border border-navy-200/30 transition-all duration-300 hover:-translate-y-1 w-full"
@@ -281,6 +296,8 @@ const Characters: React.FC = () => {
                     }}>
                       <img
                         src={character.image}
+                        srcSet={imgSet.srcSet}
+                        sizes={imgSet.sizes}
                         alt={character.name}
                         className="w-full h-full object-cover transition-transform duration-300"
                         loading="lazy"
@@ -348,7 +365,8 @@ const Characters: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>
@@ -417,6 +435,8 @@ const Characters: React.FC = () => {
                 }}>
                   <img
                     src="/images/characters/dragon_img_profile.webp"
+                    srcSet="/images/characters/dragon_img_profile_192w.webp 192w, /images/characters/dragon_img_profile_400w.webp 400w, /images/characters/dragon_img_profile.webp 1024w"
+                    sizes="(max-width: 1023px) 100vw, 400px"
                     alt="Father Dragon - Guardian of Caiden's Courage"
                     className="w-full h-full object-cover"
                     loading="lazy"

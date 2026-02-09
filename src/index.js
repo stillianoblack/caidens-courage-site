@@ -46,6 +46,15 @@ scheduleWhenIdle(() => {
   reportWebVitals();
 });
 
+// Load Google Fonts after first paint so they never block LCP (was ~800 ms render-blocking).
+scheduleWhenIdle(() => {
+  if (typeof document === 'undefined' || !document.head) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap';
+  document.head.appendChild(link);
+});
+
 scheduleWhenIdle(() => {
   if (typeof document !== 'undefined' && document.body) {
     const setTabActive = () => {

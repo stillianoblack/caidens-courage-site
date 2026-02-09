@@ -5,16 +5,16 @@ import { afterPaint } from '../lib/defer';
 const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
 
 /**
- * Preload only the hero that renders immediately above the fold (homepage on first load).
- * Other routes do not get preload; their hero images load normally when the page renders.
+ * Preload only heroes that render immediately above the fold for that route.
+ * Homepage LCP is preloaded in index.html (initial document) for early discovery; only other routes here.
  */
 const ABOVE_THE_FOLD_HERO: Record<string, string> = {
-  '/': '/images/heroes/hero-bg_desktop_1600w.webp',
+  '/comicbook': '/images/Comic5_Coverpage_header_smaller.webp',
 };
 
 /**
  * Injects or updates a single <link rel="preload" as="image"> in <head>
- * only for the homepage hero (above the fold on initial load). Removes preload on other routes.
+ * for routes whose hero is above the fold. Removes preload on other routes.
  */
 const RouteHeroPreload: React.FC = () => {
   const location = useLocation();

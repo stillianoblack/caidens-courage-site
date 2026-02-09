@@ -264,6 +264,7 @@ const Home = () => {
               width={1600}
               height={817}
               className="w-full h-full object-cover"
+              fetchPriority="high"
               style={isMobile ? {
                 objectPosition: 'center 35%',
                 transform: 'translateY(-130px)'
@@ -444,11 +445,15 @@ const Home = () => {
                   padding: 0,
                 }}
               >
-                <img 
+                <img
                   src="/images/characters/Caiden_img_profile.webp"
+                  srcSet="/images/characters/Caiden_img_profile_192w.webp 192w, /images/characters/Caiden_img_profile_400w.webp 400w, /images/characters/Caiden_img_profile.webp 1024w"
+                  sizes="(max-width: 768px) 100vw, 42vw"
+                  width={560}
+                  height={560}
                   alt="Caiden - The Hero"
                   className="w-full h-full object-cover"
-                  style={{ 
+                  style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',

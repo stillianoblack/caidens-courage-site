@@ -21,10 +21,14 @@
     <link rel="preconnect" href="https://caidenscourage.com" crossorigin>
     <link rel="dns-prefetch" href="//caidenscourage.com">
 
-    <!-- Hero image preload is injected by RoutePreloads based on current route. -->
+    <!-- LCP hero: preload in initial document so the request is discoverable before JS (homepage above-the-fold only). -->
+    <link rel="preload" href="/images/heroes/hero-bg_mobile_800w.webp" as="image" type="image/webp" media="(max-width: 768px)" fetchpriority="high" />
+    <link rel="preload" href="/images/heroes/hero-bg_desktop_1600w.webp" as="image" type="image/webp" media="(min-width: 769px)" fetchpriority="high" />
+    <!-- Other routes: RouteHeroPreload injects preload after paint. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <!-- Fonts loaded by script after first paint (index.js); noscript fallback below. -->
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://caidenscourage.com/" />

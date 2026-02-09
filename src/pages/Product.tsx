@@ -132,18 +132,21 @@ const Product: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
 
-  // Gallery images - can be expanded later
-  const galleryImages = [
+  // Gallery images: src = full-size hero/LCP; thumb = small image for thumbnail strip (avoids loading 257 KiB for 80x80).
+  const galleryImages: { src: string; thumb?: string; alt: string }[] = [
     {
       src: "/images/Comic5_Coverpage_header_smaller.webp",
+      thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)"
     },
     {
       src: "/images/Comic5_Coverpage_header_smaller.webp",
+      thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
       alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)"
     },
     {
-      src: "/images/Caiden'sCourage_SocialImage_smaller.webp", // Placeholder - replace with character art
+      src: "/images/Caiden'sCourage_SocialImage_smaller.webp",
+      thumb: "/images/Caiden'sCourage_SocialImage_smaller.webp",
       alt: "Character art from Caiden's Courage"
     }
   ];
@@ -230,7 +233,11 @@ const Product: React.FC = () => {
                 <img
                   src={galleryImages[selectedImageIndex].src}
                   alt={galleryImages[selectedImageIndex].alt}
+                  width={600}
+                  height={600}
                   className="w-full h-auto object-cover mx-auto"
+                  loading="eager"
+                  fetchPriority="high"
                   style={{ 
                     transformOrigin: 'center center',
                     transform: 'scale(1)',
@@ -272,13 +279,16 @@ const Product: React.FC = () => {
                     aria-label={`View ${image.alt}`}
                   >
                     <img
-                      src={image.src}
+                      src={image.thumb ?? image.src}
                       alt={image.alt}
+                      width={96}
+                      height={96}
+                      sizes="96px"
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover"
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                        (e.target as HTMLImageElement).src = image.src;
                       }}
                     />
                   </button>

@@ -136,9 +136,13 @@ const About: React.FC = () => {
                 onClick={handleLogoClick}
                 className="inline-block hover:opacity-80 transition-opacity"
               >
-                <img 
-                  src="/images/ui/logoCaiden.webp" 
-                  alt="Caiden's Courage" 
+                <img
+                  src="/images/ui/logoCaiden.webp"
+                  srcSet="/images/ui/logoCaiden_480w.webp 480w, /images/ui/logoCaiden.webp 1500w"
+                  sizes="(max-width: 640px) 213px, 256px"
+                  width={213}
+                  height={80}
+                  alt="Caiden's Courage"
                   className="h-10 sm:h-12 w-auto"
                   decoding="async"
                 />
