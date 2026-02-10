@@ -16,7 +16,6 @@ import B4Clicker from './pages/B4Clicker';
 import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
 import ChatWithB4 from './pages/ChatWithB4';
 import CampCourage from './pages/CampCourage';
-import CourageAcademy from './pages/CourageAcademy';
 import ClassroomPilots from './pages/ClassroomPilots';
 import TrainingGuides from './pages/TrainingGuides';
 
@@ -25,6 +24,9 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/camp-courage" element={<CampCourage />} />
+        <Route path="/classroom-pilots" element={<ClassroomPilots />} />
+        <Route path="/training-guides" element={<TrainingGuides />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/thank-you" element={<ThankYou />} />
@@ -45,10 +47,6 @@ const App: React.FC = () => {
         <Route path="/b4-tools" element={<B4Clicker />} />
         <Route path="/resources/b4-tools-library" element={<B4ToolsLibrary />} />
         <Route path="/chat" element={<ChatWithB4 />} />
-        <Route path="/camp-courage" element={<CampCourage />} />
-        <Route path="/courage-academy" element={<CourageAcademy />} />
-        <Route path="/classroom-pilots" element={<ClassroomPilots />} />
-        <Route path="/training-guides" element={<TrainingGuides />} />
       </Routes>
     </Router>
   );

@@ -278,7 +278,7 @@ const Mission: React.FC = () => {
         <section
           className="creator-split-section relative overflow-hidden"
           style={{
-            backgroundImage: 'url(/images/backgrounds/background_img.webp)',
+            backgroundImage: 'url(/images/backgrounds/meetthecreator_bg_dragpn.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -300,9 +300,9 @@ const Mission: React.FC = () => {
                 </p>
               </>
             }
-            imageSrc="/images/backgrounds/meetthecreator_bg.webp"
-            imageAlt="Meet the Creator - Tarus D. Stills background"
-            radiusClass="rounded-[28px]"
+            imageSrc="/images/Profile%20Picture/meetthecreator_tarus.jpg"
+            imageAlt="Meet the Creator - Tarus D. Stills"
+            radiusClass="rounded-[16%]"
             wrapClassName="creator-split-dark relative z-10"
           />
         </section>

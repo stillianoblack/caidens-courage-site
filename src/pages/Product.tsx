@@ -5,6 +5,7 @@ import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import InlineNotice from '../components/InlineNotice';
 
 // Reusable InsideCard Component for "What's Inside" section
 interface InsideCardProps {
@@ -130,30 +131,41 @@ const Product: React.FC = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
+  const [showDigitalNotice, setShowDigitalNotice] = useState(false);
+  const [digitalNoticeKey, setDigitalNoticeKey] = useState<number>(0);
+
+  // Auto close after 4 seconds (premium: matches progress bar)
+  useEffect(() => {
+    if (!showDigitalNotice) return;
+    const timer = setTimeout(() => setShowDigitalNotice(false), 4000);
+    return () => clearTimeout(timer);
+  }, [showDigitalNotice]);
+
+  const handleDigitalClick = () => {
+    setDigitalNoticeKey(Date.now());
+    setShowDigitalNotice(true);
+  };
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
 
   // Gallery images: responsive comic cover (900/1600w); thumb = small for strip.
   const galleryImages: { src: string; thumb?: string; alt: string; heroSrcSet?: string; heroSizes?: string }[] = [
     {
-      src: "/images/Comic5_Coverpage_header_smaller-1600.webp",
-      thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate)",
-      heroSrcSet: "/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w",
-      heroSizes: "(max-width: 768px) 92vw, 742px",
+      src: "/images/comic-book/Comic5_Coverpage_header_2.jpg",
+      thumb: "/images/comic-book/Comic5_Coverpage_header_2.jpg",
+      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover",
     },
     {
-      src: "/images/Comic5_Coverpage_header_smaller-1600.webp",
-      thumb: "/images/Comic5_Coverpage_header_Shop_smaller.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover (Alternate 2)",
-      heroSrcSet: "/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w",
-      heroSizes: "(max-width: 768px) 92vw, 742px",
+      src: "/images/comic-book/Comic5_Coverpage_header_Shop_2.jpg",
+      thumb: "/images/comic-book/Comic5_Coverpage_header_Shop_2.jpg",
+      alt: "Caiden's Courage and the Dragon's Nest: Interior spread",
     },
     {
-      src: "/images/Caiden'sCourage_SocialImage_smaller.webp",
-      thumb: "/images/Caiden'sCourage_SocialImage_smaller.webp",
-      alt: "Character art from Caiden's Courage"
-    }
+      src: "/images/comic-book/zThirdpage_Comic5_Coverpage_header_Shop.jpg",
+      thumb: "/images/comic-book/zThirdpage_Comic5_Coverpage_header_Shop.jpg",
+      alt: "Caiden's Courage: Third page",
+    },
   ];
 
   // Set page title
@@ -172,11 +184,6 @@ const Product: React.FC = () => {
   const handlePhysicalCopyClick = () => {
     const stripeUrl = getStripePreorderUrl();
     if (stripeUrl) return openExternalUrl(stripeUrl);
-  };
-
-  const handleDigitalClick = () => {
-    // TODO: Add digital download link
-    console.log('Digital download coming soon');
   };
 
   const handleWaitlistClick = () => {
@@ -314,7 +321,7 @@ const Product: React.FC = () => {
               </div>
               
               {/* Thumbnail Gallery - Below main image on both mobile and desktop */}
-              <div className="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:overflow-visible order-2">
+              <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start overflow-x-auto pb-2 -mx-2 px-2 md:mx-0 md:px-0 md:overflow-visible order-2">
                 {galleryImages.map((image, index) => (
                   <button
                     key={index}
@@ -341,6 +348,13 @@ const Product: React.FC = () => {
                     />
                   </button>
                 ))}
+                <Link
+                  to="/preview"
+                  className="flex-shrink-0 text-navy-500 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  <div>Preview Pages</div>
+                  <div className="text-xs text-navy-400 mt-0.5">See sample art & story</div>
+                </Link>
               </div>
             </div>
 
@@ -374,7 +388,7 @@ const Product: React.FC = () => {
                   Full-Color Comic
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  30+ Pages
+                  50+ Pages
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
                   Print & Digital Friendly
@@ -383,30 +397,49 @@ const Product: React.FC = () => {
 
               {/* CTA Buttons - Side by Side */}
               <div className="flex flex-col md:flex-row gap-4 mb-6 justify-start">
-                <Button
-                  variant="primary"
-                  size="md"
+                <button
+                  type="button"
                   onClick={handlePhysicalCopyClick}
+                  className="
+                    inline-flex items-center justify-center
+                    rounded-full border-2 border-transparent
+                    px-7 py-4 text-[16px] font-semibold text-navy-600
+                    shadow-[0_10px_24px_rgba(245,210,107,0.35)]
+                    transition
+                    hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)]
+                    active:translate-y-0 active:scale-[0.98]
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2
+                  "
+                  style={{ backgroundColor: '#F2D06B' }}
                 >
                   Pre-order Physical Copy
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
+                </button>
+                <button
+                  type="button"
                   onClick={handleDigitalClick}
+                  aria-describedby="digital-download-notice"
+                  className="
+                    inline-flex items-center justify-center
+                    rounded-full border-2 border-slate-900/70 bg-white
+                    px-7 py-4 text-[16px] font-semibold text-slate-900
+                    shadow-[0_10px_24px_rgba(2,6,23,0.10)]
+                    transition
+                    hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(2,6,23,0.14)]
+                    active:translate-y-0 active:scale-[0.98]
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2
+                  "
                 >
                   Download Digital Edition
-                </Button>
+                </button>
               </div>
-
-              {/* Tertiary CTA - Subtle */}
-              <Link
-                to="/preview"
-                className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors block text-center"
-              >
-                <div>Preview Pages</div>
-                <div className="text-xs text-navy-300 mt-0.5">See sample art & story</div>
-              </Link>
+              <InlineNotice
+                open={showDigitalNotice}
+                noticeKey={digitalNoticeKey}
+                title="Digital edition coming soon"
+                message="Digital downloads aren't available for pre-order yet — please grab your physical copy while supplies last."
+                onClose={() => setShowDigitalNotice(false)}
+                durationMs={4000}
+              />
             </div>
           </div>
         </div>
@@ -970,7 +1003,7 @@ const Product: React.FC = () => {
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
                 <img
-                  src="/images/coloringpage_Caiden.webp"
+                  src="/images/coloringpage_Caiden.jpg"
                   alt="Caiden Coloring Pages"
                   className="w-full h-full object-cover"
                   loading="lazy"

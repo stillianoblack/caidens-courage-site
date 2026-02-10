@@ -60,7 +60,7 @@ export const RESOURCES: Resource[] = [
     title: "Caiden Coloring Page",
     type: "coloring",
     tags: ["caiden", "coloring", "kids"],
-    thumbnail: "/images/coloringpage_Caiden.webp",
+    thumbnail: "/images/coloringpage_Caiden.jpg",
     fileUrl: "/downloads/coloring-pages/caiden-coloring.pdf",
     description: "A calming, creative activity that helps kids express themselves while building fine motor skills",
     format: "PDF",

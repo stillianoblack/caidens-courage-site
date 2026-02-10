@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
-import PageHeaderLockup from '../components/sections/PageHeaderLockup';
+import BluePageHeader from '../components/sections/BluePageHeader';
 
 const TrainingGuides: React.FC = () => {
   const [, setIsComingSoonModalOpen] = useState(false);
@@ -16,12 +16,23 @@ const TrainingGuides: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
-      <PageHeaderLockup
+      <BluePageHeader
         title="Training & Guides"
         description="Simple guidance for using B-4 tools at home and in the classroom."
-        subDescription="Getting started, tips for different learners, and downloadables."
         cta={{ label: 'Browse resources', href: '/resources' }}
       />
+
+      {/* Hero Section */}
+      <div className="bg-cream px-4 py-16 sm:py-20" style={{ marginTop: '70px' }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-5">
+            Training & Guides
+          </h2>
+          <p className="text-lg sm:text-xl text-navy-600 max-w-2xl mx-auto">
+            Simple guidance for using B-4 tools at home and in the classroom.
+          </p>
+        </div>
+      </div>
 
       {/* Section 1: Getting started */}
       <div className="py-16 sm:py-20 px-4 bg-cream">

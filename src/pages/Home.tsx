@@ -308,9 +308,9 @@ const Home = () => {
         </div>
         
         {/* Content - aligned to global nav grid; vertically centered on desktop only */}
-        <div className="relative z-10 w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex md:items-center md:min-h-[calc(92vh-120px)]">
+        <div className="relative z-10 w-full md:flex md:min-h-[calc(92vh-120px)] md:items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="flex md:items-center md:min-h-0">
               <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
             <div 
@@ -328,7 +328,7 @@ const Home = () => {
             
                 {/* Headline */}
                 <h1 
-                  className="font-display font-extrabold text-white"
+                  className="font-display font-extrabold text-white max-w-[15ch]"
                   style={{ 
                     fontSize: 'clamp(44px, 5vw, 64px)',
                     lineHeight: '1.05',
@@ -336,7 +336,7 @@ const Home = () => {
                     marginBottom: '16px'
                   }}
                 >
-                  Every Hero Starts Somewhere.
+                  Where Courage Begins.
                 </h1>
             
                 {/* Subheader */}
@@ -349,7 +349,7 @@ const Home = () => {
                     opacity: 0.92
                   }}
                 >
-                  An illustrated adventure where imagination, courage, and ancient mysteries collide.
+                  Stories that help kids see their differences as strengths — and discover the hero already inside them.
                 </p>
 
                 {/* CTA Row */}

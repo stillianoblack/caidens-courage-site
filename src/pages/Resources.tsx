@@ -5,7 +5,6 @@ import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import PageHeaderLockup from '../components/sections/PageHeaderLockup';
 
 const Resources: React.FC = () => {
   const location = useLocation();
@@ -68,6 +67,11 @@ const Resources: React.FC = () => {
       timeoutIds.forEach((id) => clearTimeout(id));
     };
   }, [location.search, location.hash]);
+
+  // Scroll to top when Resources page mounts (e.g. from Explore buttons on Camp Courage)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Scroll to results when audience filter changes (from URL or dropdown)
   useEffect(() => {
@@ -174,12 +178,24 @@ const Resources: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
-      <PageHeaderLockup
+      {/* Header */}
+      <div 
         id="resources-header"
-        title="B-4 Tools Library"
-        description="Download free wallpapers, coloring pages, SEL worksheets, and teacher packs to support courage, creativity, and neurodiverse kids."
-        subDescription="All resources are free and designed to support neurodiverse kids."
-      />
+        data-section="header"
+        className="bg-navy-500 text-white py-16 pt-32"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+            B-4 Tools Library
+          </h1>
+          <p className="text-lg sm:text-xl text-white/90 max-w-3xl mb-2">
+            Download free wallpapers, coloring pages, SEL worksheets, and teacher packs to support courage, creativity, and neurodiverse kids.
+          </p>
+          <p className="text-sm sm:text-base text-white/80">
+            All resources are free and designed to support neurodiverse kids.
+          </p>
+        </div>
+      </div>
 
       {/* Filters and Search */}
       <div 
