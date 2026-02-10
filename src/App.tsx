@@ -6,6 +6,7 @@ import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { runAfterPaint } from './lib/safeMode';
 import { SAFE_MODE } from './lib/safeMode';
+import Home from './pages/Home';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
@@ -29,8 +30,7 @@ const RouteFallbackHeroSkeleton: React.FC = () => (
   </div>
 );
 
-// Lazy load pages for code splitting
-const Home = lazy(() => import('./pages/Home'));
+// Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const ThankYou = lazy(() => import('./pages/ThankYou'));
@@ -38,7 +38,7 @@ const Cancelled = lazy(() => import('./pages/Cancelled'));
 const Resources = lazy(() => import('./pages/Resources'));
 const Product = lazy(() => import('./pages/Product'));
 const Preview = lazy(() => import('./pages/Preview'));
-const Mission = React.lazy(() => import("./pages/Mission"));
+const Mission = lazy(() => import('./pages/Mission'));
 const About = lazy(() => import('./pages/About'));
 const B4Clicker = lazy(() => import('./pages/B4Clicker'));
 const CourageAcademy = lazy(() => import('./pages/CourageAcademy'));
@@ -66,7 +66,7 @@ const routeList = (
     <Route path="/product" element={<Navigate to="/comicbook" replace />} />
     <Route path="/preview" element={<Preview />} />
     <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
-    <Route path="/mission" element={<Mission />} />
+    <Route path="/mission" element={<Suspense fallback={null}><Mission /></Suspense>} />
     <Route path="/about" element={<About />} />
     <Route path="/b4-clicker" element={<Navigate to="/b4-tools" replace />} />
     <Route path="/b4-tools" element={<B4Clicker />} />
@@ -79,9 +79,9 @@ const routeList = (
     <Route path="/resources/b4-tools-library" element={<ResourcesB4ToolsLibrary />} />
     <Route path="/resources/downloads" element={<ResourcesDownloads />} />
     <Route path="/contact" element={<Contact />} />
-    <Route path="/characters" element={<Characters />} />
-    <Route path="/meet-the-characters" element={<Characters />} />
-    <Route path="/world" element={<World />} />
+    <Route path="/characters" element={<Suspense fallback={null}><Characters /></Suspense>} />
+    <Route path="/meet-the-characters" element={<Suspense fallback={null}><Characters /></Suspense>} />
+    <Route path="/world" element={<Suspense fallback={null}><World /></Suspense>} />
   </>
 );
 
