@@ -36,63 +36,36 @@ const Resources: React.FC = () => {
     }
 
     // Handle hash navigation (#kids, #parents, #teachers, #downloads, #library)
+    const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    const scrollToEl = (id: string) => {
+      const element = document.getElementById(id);
+      if (element) {
+        const headerOffset = 100;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+      }
+    };
     if (location.hash) {
       const hash = location.hash.substring(1); // Remove #
       if (hash === 'kids') {
         setSelectedAudience('students');
-        setTimeout(() => {
-          const element = document.getElementById('kids');
-          if (element) {
-            const headerOffset = 100;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 300);
+        timeoutIds.push(setTimeout(() => scrollToEl('kids'), 300));
       } else if (hash === 'parents') {
         setSelectedAudience('parents');
-        setTimeout(() => {
-          const element = document.getElementById('parents');
-          if (element) {
-            const headerOffset = 100;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 300);
+        timeoutIds.push(setTimeout(() => scrollToEl('parents'), 300));
       } else if (hash === 'teachers') {
         setSelectedAudience('teachers');
-        setTimeout(() => {
-          const element = document.getElementById('teachers');
-          if (element) {
-            const headerOffset = 100;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 300);
+        timeoutIds.push(setTimeout(() => scrollToEl('teachers'), 300));
       } else if (hash === 'downloads' || hash === 'library') {
-        setTimeout(() => {
-          const element = document.getElementById(hash);
-          if (element) {
-            const headerOffset = 100;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 300);
+        timeoutIds.push(setTimeout(() => scrollToEl(hash), 300));
       } else if (hash === 'faq') {
-        setTimeout(() => {
-          const element = document.getElementById('faq');
-          if (element) {
-            const headerOffset = 100;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 300);
+        timeoutIds.push(setTimeout(() => scrollToEl('faq'), 300));
       }
     }
+    return () => {
+      timeoutIds.forEach((id) => clearTimeout(id));
+    };
   }, [location.search, location.hash]);
 
   // Scroll to results when audience filter changes (from URL or dropdown)

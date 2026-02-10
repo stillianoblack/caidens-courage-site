@@ -46,6 +46,8 @@ if (typeof window !== 'undefined') {
   try {
     const q = new URLSearchParams(window.location.search);
     if (q.get('debug') === '1') {
+      // Patch setInterval/setTimeout/requestAnimationFrame to count active handles (dev-only).
+      import('./debug/timerDebug').then((m) => m.installTimerDebug()).catch(() => {});
       const badge = document.createElement('div');
       badge.setAttribute('aria-hidden', 'true');
       badge.style.cssText =

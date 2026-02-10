@@ -12,6 +12,9 @@ const ROUTE_TRANSITION = { duration: 0.12 };
 const DISABLE_MOTION = process.env.REACT_APP_DISABLE_MOTION === 'true';
 const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
 
+/** Paths that render .circle-accent / .animate-float; only run FloatingAnimationController on these. */
+const FLOATING_ANIMATION_PATHS = ['/', '/comicbook', '/b4-tools'];
+
 // Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -110,6 +113,20 @@ const AppContent: React.FC = () => {
   // Perf debug (?perf=1): route timings and top resources; no-op when not enabled.
   useEffect(() => {
     (window as unknown as { __PERF_DEBUG_ON_ROUTE__?: (path: string) => void }).__PERF_DEBUG_ON_ROUTE__?.(location.pathname);
+  }, [location.pathname]);
+
+  // Dev-only (?debug=1): log active timer/RAF counts on route change to spot cleanup leaks.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || typeof window === 'undefined') return;
+    try {
+      if (new URLSearchParams(window.location.search).get('debug') !== '1') return;
+      import('./debug/timerDebug').then((m) => {
+        m.installTimerDebug();
+        const counts = m.getActiveCounts();
+        // eslint-disable-next-line no-console
+        console.log('[timerDebug] route=', location.pathname, 'active:', counts);
+      }).catch(() => {});
+    } catch (e) {}
   }, [location.pathname]);
 
   // Load floating animation controller only after page is interactive (dynamic import; not in initial bundle).
@@ -282,7 +299,11 @@ const AppContent: React.FC = () => {
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
       </Suspense>
       <Suspense fallback={null}>
-        {showFloatingController && !DISABLE_HEADER_ANIMATIONS && <FloatingAnimationController pathname={location.pathname} />}
+        {showFloatingController &&
+          !DISABLE_HEADER_ANIMATIONS &&
+          FLOATING_ANIMATION_PATHS.includes(location.pathname) && (
+            <FloatingAnimationController pathname={location.pathname} />
+          )}
       </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={null}>

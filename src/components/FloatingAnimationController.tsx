@@ -20,6 +20,7 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
   useEffect(() => {
     if (typeof document === 'undefined' || typeof IntersectionObserver === 'undefined') return;
 
+    let cancelled = false;
     const selector = '.circle-accent, .animate-float';
     const inView = new Set<Element>();
     let userHasInteracted = false;
@@ -37,7 +38,7 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
     };
 
     const runTick = () => {
-      if (document.hidden) return;
+      if (cancelled || document.hidden) return;
       const t = (Date.now() - startTime) / 1000;
       const base = (t * (Math.PI * 2)) / PERIOD_SEC;
       inView.forEach((el) => {
@@ -48,7 +49,7 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
     };
 
     const maybeStartLoop = () => {
-      if (document.hidden || tickId !== null) return;
+      if (cancelled || document.hidden || tickId !== null) return;
       if (inView.size === 0 && !userHasInteracted) return;
       tickId = setInterval(runTick, TICK_MS);
     };
@@ -75,11 +76,13 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
     };
 
     const run = () => {
+      if (cancelled) return;
       const elements = document.querySelectorAll(selector);
       if (elements.length === 0) return;
 
       observer = new IntersectionObserver(
         (entries) => {
+          if (cancelled) return;
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               inView.add(entry.target);
@@ -110,6 +113,7 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
 
     let idleOrTimeoutId: number | undefined;
     const scheduleRun = () => {
+      if (cancelled) return;
       if (typeof (window as any).requestIdleCallback !== 'undefined') {
         idleOrTimeoutId = (window as any).requestIdleCallback(run, { timeout: 400 });
       } else {
@@ -119,6 +123,7 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
     const timeoutId = window.setTimeout(scheduleRun, 0);
 
     return () => {
+      cancelled = true;
       window.clearTimeout(timeoutId);
       if (idleOrTimeoutId != null && typeof (window as any).cancelIdleCallback !== 'undefined') {
         (window as any).cancelIdleCallback(idleOrTimeoutId);
