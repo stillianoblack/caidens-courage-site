@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
@@ -179,7 +179,9 @@ const Home = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false)
+  );
 
   // Handle hash anchor scrolling (for homepage section deep-links)
   useEffect(() => {
@@ -205,14 +207,12 @@ const Home = () => {
     }
   }, [location.hash, location.pathname]);
 
-
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
+    if (typeof window === 'undefined') return;
+    const m = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    m.addEventListener('change', handler);
+    return () => m.removeEventListener('change', handler);
   }, []);
 
   const handlePreorderClick = () => {
@@ -226,9 +226,9 @@ const Home = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream font-body">

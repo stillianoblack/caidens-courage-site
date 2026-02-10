@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
@@ -122,9 +122,9 @@ const Resources: React.FC = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   // Get all unique tags from resources
   const allTags = useMemo(() => {

@@ -3,7 +3,7 @@
  * UI renders immediately with defaultFlags; LD initializes in the background via dynamic import.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { LDClient } from 'launchdarkly-js-client-sdk';
 import { onIdle, safeOnce } from '../perf/defer';
 import { SAFE_MODE } from './safeMode';
@@ -147,10 +147,13 @@ export function LaunchDarklyProvider({ children }: { children: React.ReactNode }
     return defaultFlags[key];
   }, [client]);
 
-  const value: LaunchDarklyContextValue = {
-    getFlag: getFlagCallback,
-    isReady: client !== null,
-  };
+  const value = useMemo<LaunchDarklyContextValue>(
+    () => ({
+      getFlag: getFlagCallback,
+      isReady: client !== null,
+    }),
+    [getFlagCallback, client]
+  );
 
   return (
     <LaunchDarklyContext.Provider value={value}>

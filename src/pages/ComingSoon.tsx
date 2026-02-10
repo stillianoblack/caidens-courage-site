@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -20,9 +20,9 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ title, description }) => {
     }
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream font-body">

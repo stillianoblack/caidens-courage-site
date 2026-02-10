@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -7,9 +7,9 @@ import Button from '../components/ui/Button';
 const TrainingGuides: React.FC = () => {
   const [, setIsComingSoonModalOpen] = useState(false);
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream font-body">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -8,9 +8,9 @@ const ClassroomPilots: React.FC = () => {
   const [, setIsComingSoonModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   const handleContactClick = () => {
     navigate('/contact?subject=Classroom%20Pilot');

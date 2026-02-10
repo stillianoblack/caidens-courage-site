@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import RouteHeroPreload from './components/RouteHeroPreload';
@@ -235,12 +235,42 @@ const AppContent: React.FC = () => {
     }
   }, [location]);
 
-  const routeTransitionProps = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: ROUTE_TRANSITION,
-  };
+  const routeTransitionProps = useMemo(
+    () => ({
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: ROUTE_TRANSITION,
+    }),
+    []
+  );
+
+  const onExitComplete = useCallback(() => {
+    setExitingLocation(null);
+    const debugEnabled =
+      typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
+    const now =
+      typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const start = navStartTimeRef.current;
+    const id = navIdRef.current;
+
+    if (typeof window !== 'undefined' && navTimerRef.current != null) {
+      window.clearTimeout(navTimerRef.current);
+      navTimerRef.current = null;
+    }
+
+    if (debugEnabled && start != null) {
+      const elapsed = now - start;
+      // eslint-disable-next-line no-console
+      console.log('[navTrace] NAV_END', {
+        id,
+        path: location.pathname,
+        ms: Math.round(elapsed),
+      });
+    }
+
+    navStartTimeRef.current = null;
+  }, [location.pathname]);
 
   return (
     <>
@@ -256,35 +286,7 @@ const AppContent: React.FC = () => {
           <div style={{ position: 'relative' }}>
             {enableMotion ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
-              <AnimatePresence
-                mode="wait"
-                onExitComplete={() => {
-                  setExitingLocation(null);
-                  const debugEnabled =
-                    typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
-                  const now =
-                    typeof performance !== 'undefined' ? performance.now() : Date.now();
-                  const start = navStartTimeRef.current;
-                  const id = navIdRef.current;
-
-                  if (typeof window !== 'undefined' && navTimerRef.current != null) {
-                    window.clearTimeout(navTimerRef.current);
-                    navTimerRef.current = null;
-                  }
-
-                  if (debugEnabled && start != null) {
-                    const elapsed = now - start;
-                    // eslint-disable-next-line no-console
-                    console.log('[navTrace] NAV_END', {
-                      id,
-                      path: location.pathname,
-                      ms: Math.round(elapsed),
-                    });
-                  }
-
-                  navStartTimeRef.current = null;
-                }}
-              >
+              <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
                 {exitingLocation != null && (
                   <motion.div
                     key={exitingLocation.pathname}

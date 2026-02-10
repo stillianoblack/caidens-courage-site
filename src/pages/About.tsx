@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
@@ -11,6 +11,7 @@ const About: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const prevScrolledRef = useRef<boolean | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
@@ -38,7 +39,11 @@ const About: React.FC = () => {
         ticking = true;
         window.requestAnimationFrame(() => {
           if (cancelled) return;
-          setIsScrolled(window.scrollY > 20);
+          const scrolled = window.scrollY > 20;
+          if (prevScrolledRef.current !== scrolled) {
+            prevScrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+          }
           ticking = false;
         });
       };
@@ -70,9 +75,9 @@ const About: React.FC = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   // Dropdown handlers
   const handleMouseEnter = () => {

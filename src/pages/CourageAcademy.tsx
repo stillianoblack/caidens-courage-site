@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -29,9 +29,9 @@ const CourageAcademy: React.FC = () => {
     }
   }, []);
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     // Handler for coming soon clicks
-  };
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import { SAFE_MODE } from '../lib/safeMode';
@@ -7,11 +7,13 @@ interface HeaderProps {
   onComingSoonClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
+const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const prevScrolledRef = useRef<boolean | null>(null);
+  const renderCountRef = useRef(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
@@ -39,7 +41,11 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
         ticking = true;
         window.requestAnimationFrame(() => {
           if (cancelled) return;
-          setIsScrolled(window.scrollY > 50);
+          const scrolled = window.scrollY > 50;
+          if (prevScrolledRef.current !== scrolled) {
+            prevScrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+          }
           ticking = false;
         });
       };
@@ -59,6 +65,18 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       if (h) window.removeEventListener('scroll', h);
     };
   }, []);
+
+  // Dev-only: log Header render count when ?perf=1
+  renderCountRef.current += 1;
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || typeof window === 'undefined') return;
+    try {
+      if (new URLSearchParams(window.location.search).get('perf') === '1') {
+        // eslint-disable-next-line no-console
+        console.log('[Header] render count', renderCountRef.current);
+      }
+    } catch (e) {}
+  });
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -783,5 +801,6 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   );
 };
 
+const Header = React.memo(HeaderInner);
 export default Header;
 

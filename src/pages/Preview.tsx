@@ -39,7 +39,8 @@ const Preview = () => {
   const [panY, setPanY] = useState(0);
   const [isFitted, setIsFitted] = useState(true);
   const [showHelperText, setShowHelperText] = useState(false);
-  
+  const prevScrolledRef = useRef<boolean | null>(null);
+
   // Touch gesture tracking
   const touchStartDistance = useRef<number | null>(null);
   const touchStartCenter = useRef<{ x: number; y: number } | null>(null);
@@ -70,7 +71,11 @@ const Preview = () => {
         ticking = true;
         window.requestAnimationFrame(() => {
           if (cancelled) return;
-          setIsScrolled(window.scrollY > 20);
+          const scrolled = window.scrollY > 20;
+          if (prevScrolledRef.current !== scrolled) {
+            prevScrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+          }
           ticking = false;
         });
       };
@@ -90,7 +95,6 @@ const Preview = () => {
       if (h) window.removeEventListener('scroll', h);
     };
   }, []);
-
 
   // Check if image exists when page changes; defer to idle so it never blocks nav or first paint.
   const imageCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -366,9 +370,9 @@ const Preview = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   // Check if anchor message should show for current page
   const shouldShowAnchorMessage = (pageNumber: number) => {
