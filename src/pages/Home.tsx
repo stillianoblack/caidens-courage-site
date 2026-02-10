@@ -434,7 +434,7 @@ const Home = () => {
 
       {/* Meet the Hero Section */}
       <section className="bg-cream relative overflow-hidden meet-hero-section pt-20 md:pt-0">
-        <div className="hero-container">
+        <div className="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center meet-hero-grid">
             {/* Left Column - Image - Below text on mobile */}
             <div className="order-2 md:order-1">
