@@ -1,6 +1,5 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
@@ -8,7 +7,6 @@ import { runAfterPaint } from './lib/safeMode';
 import { SAFE_MODE } from './lib/safeMode';
 import Home from './pages/Home';
 
-const DISABLE_MOTION = process.env.REACT_APP_DISABLE_MOTION === 'true';
 const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
 
 /** Paths that render .circle-accent / .animate-float; only run FloatingAnimationController on these. */
@@ -79,7 +77,6 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const [showChat, setShowChat] = useState(false);
   const [showFloatingController, setShowFloatingController] = useState(false);
-  const [enableMotion, setEnableMotion] = useState(false);
   const navIdRef = useRef(0);
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
@@ -149,20 +146,6 @@ const AppContent: React.FC = () => {
     return () => {
       window.removeEventListener('load', onLoad);
       cleanup?.();
-    };
-  }, []);
-
-  // Animations: enable after idle so route render/paint happens first (no-op when REACT_APP_DISABLE_MOTION).
-  useEffect(() => {
-    if (DISABLE_MOTION) return;
-    const enable = () => setEnableMotion(true);
-    const id =
-      typeof (window as any).requestIdleCallback !== 'undefined'
-        ? (window as any).requestIdleCallback(enable, { timeout: 300 })
-        : (setTimeout(enable, 150) as unknown as number);
-    return () => {
-      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
-      else clearTimeout(id);
     };
   }, []);
 
@@ -242,32 +225,6 @@ const AppContent: React.FC = () => {
     }
   }, [location.pathname]);
 
-  const onExitComplete = useCallback(() => {
-    const debugEnabled =
-      typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
-    const now =
-      typeof performance !== 'undefined' ? performance.now() : Date.now();
-    const start = navStartTimeRef.current;
-    const id = navIdRef.current;
-
-    if (typeof window !== 'undefined' && navTimerRef.current != null) {
-      window.clearTimeout(navTimerRef.current);
-      navTimerRef.current = null;
-    }
-
-    if (debugEnabled && start != null) {
-      const elapsed = now - start;
-      // eslint-disable-next-line no-console
-      console.log('[navTrace] NAV_END', {
-        id,
-        path: location.pathname,
-        ms: Math.round(elapsed),
-      });
-    }
-
-    navStartTimeRef.current = null;
-  }, [location.pathname]);
-
   // Temporary debug: ?debugNav=1 logs location.pathname on every route render to confirm React Router updates.
   if (typeof window !== 'undefined') {
     try {
@@ -294,16 +251,7 @@ const AppContent: React.FC = () => {
       <ChunkErrorBoundary>
         <Suspense fallback={null}>
           <div style={{ position: 'relative' }}>
-            {enableMotion && !DISABLE_MOTION ? (
-              /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
-              <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
-                <Routes location={location} key={location.pathname}>
-                  {routeList}
-                </Routes>
-              </AnimatePresence>
-            ) : (
-              <Routes location={location}>{routeList}</Routes>
-            )}
+            <Routes location={location}>{routeList}</Routes>
           </div>
         </Suspense>
       </ChunkErrorBoundary>
