@@ -63,6 +63,13 @@ scheduleWhenIdle(() => {
   import('./perf/routePerf').catch(() => {});
   import('./perf/longTasks').catch(() => {});
 
+  if (typeof window !== 'undefined') {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      if (q.get('perf') === '1') import('./perf/perfDebug').then((m) => m.enablePerfDebug?.());
+    } catch (e) {}
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     try {
       const m1 = require('./utils/clickBlockerFix');

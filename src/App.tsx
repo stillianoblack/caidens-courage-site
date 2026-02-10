@@ -105,6 +105,11 @@ const AppContent: React.FC = () => {
     };
   }, [location.pathname]);
 
+  // Perf debug (?perf=1): route timings and top resources; no-op when not enabled.
+  useEffect(() => {
+    (window as unknown as { __PERF_DEBUG_ON_ROUTE__?: (path: string) => void }).__PERF_DEBUG_ON_ROUTE__?.(location.pathname);
+  }, [location.pathname]);
+
   // Load floating animation controller only after page is interactive (dynamic import; not in initial bundle).
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
