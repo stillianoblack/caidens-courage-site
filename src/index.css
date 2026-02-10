@@ -354,8 +354,7 @@ code {
 }
 
 .character-card p {
-  text-align: justify;
-  text-align-last: center;
+  text-align: left;
   orphans: 2;
   widows: 2;
 }
@@ -657,26 +656,32 @@ a.bg-golden-500:hover,
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
 }
 
+/* Circle thumbnail: clip + center + slightly enlarged fill; yellow ring on wrapper */
 .world-different-blob {
   flex-shrink: 0;
   width: 72px;
   height: 72px;
   border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-right: 1rem;
   padding: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 3px solid #facc6b; /* yellow/gold trim - on wrapper so it always shows */
+  box-sizing: content-box; /* 72px is inner circle; border adds outside */
 }
 
 .world-different-blob-image {
-  width: 72px;
-  height: 72px;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
   border-radius: 9999px;
-  border: 3px solid #facc6b; /* soft golden trim */
-  object-fit: cover;
-  object-position: center center;
   display: block;
+  object-fit: cover;
+  /* Slightly above center so character (often in upper half of asset) is centered in circle */
+  object-position: center 45%;
+  transform: scale(1.18);
 }
 
 .world-different-card-content {

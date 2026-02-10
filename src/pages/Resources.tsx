@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PageHeaderLockup from '../components/sections/PageHeaderLockup';
 
 const Resources: React.FC = () => {
   const location = useLocation();
@@ -173,24 +174,12 @@ const Resources: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
-      {/* Header */}
-      <div 
+      <PageHeaderLockup
         id="resources-header"
-        data-section="header"
-        className="bg-navy-500 text-white py-16 pt-32"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
-            Resources
-          </h1>
-          <p className="text-lg sm:text-xl text-white/90 max-w-3xl mb-2">
-            Download free wallpapers, coloring pages, SEL worksheets, and teacher packs to support courage, creativity, and neurodiverse kids.
-          </p>
-          <p className="text-sm sm:text-base text-white/80">
-            All resources are free and designed to support neurodiverse kids.
-          </p>
-        </div>
-      </div>
+        title="B-4 Tools Library"
+        description="Download free wallpapers, coloring pages, SEL worksheets, and teacher packs to support courage, creativity, and neurodiverse kids."
+        subDescription="All resources are free and designed to support neurodiverse kids."
+      />
 
       {/* Filters and Search */}
       <div 
@@ -460,27 +449,6 @@ const Resources: React.FC = () => {
         )}
         </div>
         </div>
-        </div>
-
-        {/* B-4 Tools Section */}
-        <div 
-          id="library"
-          data-section="b4-tools"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="text-center mb-10">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">
-              B-4 Tools Library
-            </h2>
-            <p className="text-lg sm:text-xl text-navy-600 max-w-3xl mx-auto mb-8">
-              Download guides and resources to support the B-4 Reset missions at home or in the classroom.
-            </p>
-            <Link to="/courage-academy#educator-access">
-              <Button variant="primary" size="lg" className="w-full sm:w-auto">
-                Request Educator Access
-              </Button>
-            </Link>
-          </div>
         </div>
 
       {/* FAQ Section - Full Width */}

@@ -94,26 +94,21 @@ const Mission: React.FC = () => {
               : 'linear-gradient(90deg, rgba(8,15,35,0.72) 0%, rgba(8,15,35,0.55) 35%, rgba(8,15,35,0.25) 60%, rgba(8,15,35,0.08) 80%, transparent 100%)',
           }}
         />
-        {/* Content - Aligned to Global Grid */}
+        {/* Content - within site width; desktop: vertically centered */}
         <div 
-          className="w-full" 
+          className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[50vh] md:min-h-[calc(92vh-200px)] flex flex-col md:justify-center"
           style={{ 
-            position: 'relative',
-            paddingTop: '0',
+            paddingTop: isMobile ? '0' : '0',
             marginTop: '0',
-            paddingLeft: isMobile ? '20px' : '0',
-            paddingRight: isMobile ? '20px' : '0',
-            maxWidth: isMobile ? '100%' : '1200px',
-            marginLeft: isMobile ? '0' : 'auto',
-            marginRight: isMobile ? '0' : 'auto',
-            zIndex: 10
+            paddingLeft: isMobile ? '20px' : undefined,
+            paddingRight: isMobile ? '20px' : undefined,
           }}
         >
           <div 
-            className="text-left w-full" 
+            className="text-left w-full max-w-full"
             style={{ 
               maxWidth: isMobile ? '100%' : '540px',
-              paddingTop: '50px',
+              paddingTop: isMobile ? '50px' : '0',
               marginTop: '0',
               paddingLeft: '0',
               paddingRight: '0'
@@ -333,13 +328,13 @@ const Mission: React.FC = () => {
             {/* The Four Pillars of the Caiden's Courage World */}
             <div className="world-different-grid">
               <div className="world-different-card">
-                <div className="world-different-blob">
+                <div className="world-different-blob overflow-hidden grid place-items-center">
                   <img
                     src="/images/Emotionallearningthroughstory_img.webp"
                     alt="Emotional learning through story"
                     width={80}
                     height={80}
-                    className="world-different-blob-image"
+                    className="world-different-blob-image w-full h-full object-cover object-center block scale-[1.18]"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -358,13 +353,13 @@ const Mission: React.FC = () => {
               </div>
               
               <div className="world-different-card">
-                <div className="world-different-blob">
+                <div className="world-different-blob overflow-hidden grid place-items-center">
                   <img
                     src="/images/heroes/Neurodiversity-positiveheroes_img.webp"
                     alt="Neurodiversity-positive heroes"
                     width={80}
                     height={80}
-                    className="world-different-blob-image"
+                    className="world-different-blob-image w-full h-full object-cover object-center block scale-[1.18]"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -383,13 +378,13 @@ const Mission: React.FC = () => {
               </div>
               
               <div className="world-different-card">
-                <div className="world-different-blob">
+                <div className="world-different-blob overflow-hidden grid place-items-center">
                   <img
                     src="/images/characters/Character-drivengrowth_img.webp"
                     alt="Character-driven growth"
                     width={80}
                     height={80}
-                    className="world-different-blob-image"
+                    className="world-different-blob-image w-full h-full object-cover object-center block scale-[1.18]"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -408,13 +403,13 @@ const Mission: React.FC = () => {
               </div>
               
               <div className="world-different-card">
-                <div className="world-different-blob">
+                <div className="world-different-blob overflow-hidden grid place-items-center">
                   <img
                     src="/images/Toolsthatsupportkidsbeyondthepage_img.webp"
                     alt="Tools beyond the page"
                     width={80}
                     height={80}
-                    className="world-different-blob-image"
+                    className="world-different-blob-image w-full h-full object-cover object-center block scale-[1.18]"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -458,9 +453,9 @@ const Mission: React.FC = () => {
               </p>
             </>
           }
-          imageSrc="/images/TheWorldIsJustBeginning_img.webp"
+          imageSrc="/images/TheWorldIsJustBeginning_img.jpg"
           imageAlt="Caiden's Courage world exploration and discovery"
-          radiusClass="rounded-[28px]"
+          radiusClass="rounded-[16%]"
           wrapClassName="mb-16 sm:mb-20 lg:mb-24"
         />
 

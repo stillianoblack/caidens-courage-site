@@ -159,9 +159,11 @@ const Characters: React.FC = () => {
               : 'linear-gradient(90deg, rgba(8,18,38,0.92) 0%, rgba(8,18,38,0.82) 35%, rgba(8,18,38,0.45) 55%, rgba(8,18,38,0.15) 70%, transparent 85%)',
           }}
         />
-        {/* Content - Aligned to Global Grid */}
-        <div className="hero-container relative z-10 w-full flex flex-col md:block">
-          <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
+        {/* Content - within site width; desktop: vertically centered */}
+        <div 
+          className="hero-container relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-[50vh] md:min-h-[calc(92vh-200px)] md:justify-center"
+        >
+          <div className="hero-text text-left w-full max-w-full md:max-w-[520px] md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
             <div 
               className="text-xs sm:text-sm font-semibold uppercase"
@@ -274,8 +276,8 @@ const Characters: React.FC = () => {
             </p>
           </div>
 
-          {/* Character Grid */}
-          <div className="character-grid">
+          {/* Character Grid — 3 columns desktop, stacked with gap on mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {characters.map((character, index) => {
               const imgSet = getProfileImageSet(character.image);
               return (
@@ -359,13 +361,12 @@ const Characters: React.FC = () => {
                     </span>
 
                     <p 
-                      className="text-navy-700/80" 
+                      className="text-navy-700/80 text-left" 
                       style={{
                         width: '100%',
                         fontSize: '16px',
                         lineHeight: '1.6',
                         letterSpacing: '0.2px',
-                        textAlign: 'left',
                         maxWidth: '38ch',
                         marginTop: '0',
                         marginBottom: '0'

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
+import PageHeaderLockup from '../components/sections/PageHeaderLockup';
 
 const CourageAcademy: React.FC = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -32,16 +33,6 @@ const CourageAcademy: React.FC = () => {
   const handleComingSoonClick = useCallback(() => {
     // Handler for coming soon clicks
   }, []);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerOffset = 100;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
-  };
 
   const handleEducatorAccessClick = () => {
     const element = document.getElementById('educator-toolkit');
@@ -104,115 +95,16 @@ const CourageAcademy: React.FC = () => {
     <div className="min-h-screen bg-white font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
-      {/* Hero Section with subtle gradient */}
-      <div className="bg-white px-4 py-20 sm:py-24 lg:py-28 pb-24 sm:pb-28 lg:pb-32" style={{ marginTop: '100px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left Column: Text Content */}
-            <div className="relative z-10">
-              <p className="text-sm sm:text-base text-navy-500 font-semibold mb-3 uppercase tracking-wide">
-                COURAGE ACADEMY
-              </p>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-5">
-                Camp Courage
-              </h1>
-              <p className="text-lg sm:text-xl text-navy-600 max-w-2xl mb-8">
-                A calm, welcoming space for kids to practice courage — together with the adults who support them.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4" style={{ transform: 'scale(0.9)', transformOrigin: 'left center' }}>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() => scrollToSection('explore-modules')}
-                  className="w-full sm:w-auto"
-                >
-                  Explore the Academy
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={handleEducatorAccessClick}
-                  className="w-full sm:w-auto"
-                >
-                  Request Educator Access
-                </Button>
-              </div>
-            </div>
+      <PageHeaderLockup
+        id="courage-academy-header"
+        title="Courage Academy"
+        description="A calm, welcoming space for kids to practice courage — together with the adults who support them. Camp Courage includes guided SEL missions, companion activities, and classroom pilots."
+        subDescription="Explore the academy below or request educator access for the Courage Toolkit."
+        cta={{ label: 'Request Educator Access', onClick: handleEducatorAccessClick }}
+      />
 
-            {/* Right Column: Camp Visual */}
-            <div className="relative lg:order-2 mt-12 lg:mt-0 flex justify-end">
-              {/* Colorful Background Shapes */}
-              <div className="absolute inset-0 -z-10" style={{ right: '-40px', left: 'auto', width: '600px', height: '600px' }}>
-                {/* Orange shape */}
-                <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-orange-400 opacity-40 blur-xl"></div>
-                {/* Blue shape */}
-                <div className="absolute bottom-1/4 left-1/4 w-40 h-40 rounded-full bg-blue-400 opacity-35 blur-xl"></div>
-                {/* Yellow/Golden shape */}
-                <div className="absolute top-1/2 left-1/3 w-36 h-36 rounded-full bg-yellow-400 opacity-40 blur-xl"></div>
-              </div>
-
-              {/* Masked Image Container */}
-              <div className="relative max-w-md lg:max-w-lg z-10" style={{
-                clipPath: 'polygon(50% 0%, 88% 10%, 100% 45%, 90% 88%, 52% 100%, 12% 90%, 0% 52%, 10% 12%)',
-                border: '3px solid white',
-                boxShadow: '0 10px 30px -5px rgba(36, 62, 112, 0.15), 0 4px 12px -2px rgba(36, 62, 112, 0.08)'
-              }}>
-                <div className="aspect-square bg-gradient-to-br from-navy-100 via-golden-100 to-navy-50 overflow-hidden">
-                  <img
-                    src="/images/NeuroCamp_smaller.webp"
-                    alt="Courage Academy camp visual"
-                    className="w-full h-full object-cover scale-110"
-                    style={{ objectPosition: 'center center' }}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Floating Sticker Circles */}
-              {/* Top-right sticker - Star */}
-              <div className="float-y absolute top-4 right-4 lg:top-8 lg:right-8 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
-                border: '3px solid white',
-                boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
-                animationDuration: '6s'
-              }}>
-                <span className="text-2xl sm:text-3xl">⭐</span>
-              </div>
-
-              {/* Mid-left sticker - Target/Arrow (moved closer) */}
-              <div className="float-y absolute top-1/3 -translate-y-1/3 -left-2 lg:-left-4 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
-                border: '3px solid white',
-                boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
-                width: '56px',
-                height: '56px',
-                animationDuration: '5s',
-                animationDelay: '0.5s'
-              }}>
-                <span className="text-xl sm:text-2xl">🎯</span>
-              </div>
-
-              {/* Bottom-right sticker - Rocket */}
-              <div className="float-y absolute bottom-4 right-8 lg:bottom-8 lg:right-12 bg-white rounded-full flex items-center justify-center shadow-lg z-10 pointer-events-none" style={{
-                border: '3px solid white',
-                boxShadow: '0 4px 12px rgba(36, 62, 112, 0.15)',
-                width: '56px',
-                height: '56px',
-                animationDuration: '7s',
-                animationDelay: '1s'
-              }}>
-                <span className="text-xl sm:text-2xl">🚀</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Educator + Parent Toolkit Section */}
-      <div id="educator-toolkit" className="py-24 sm:py-28 lg:py-32 px-4 relative overflow-hidden mt-16 lg:mt-20 scroll-mt-[100px]" style={{ backgroundColor: '#F3F8FF' }}>
+      {/* FOR PARENTS + EDUCATORS — Get calm-ready tools (directly under blue header) */}
+      <div id="educator-toolkit" className="py-24 sm:py-28 lg:py-32 px-4 relative overflow-hidden scroll-mt-[100px]" style={{ backgroundColor: '#F3F8FF' }}>
         {/* Decorative elements */}
         <div className="absolute top-6 right-6 opacity-10">
           <div className="w-20 h-20 bg-navy-400 rounded-full flex items-center justify-center">
