@@ -5,7 +5,7 @@ import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { afterIdle } from '../lib/defer';
-import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
+import { SAFE_MODE } from '../lib/safeMode';
 
 // Preview page data
 const PREVIEW_PAGES = [
@@ -54,29 +54,40 @@ const Preview = () => {
 
   const totalPages = PREVIEW_PAGES.length;
 
-  // Handle scroll for nav styling (UI state only; throttled).
-  // Skip when SAFE_MODE is on or user prefers reduced motion.
+  // Handle scroll for nav styling (UI state only; throttled). Defer to idle so route render/paint happens first.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (SAFE_MODE || reduceMotion) return;
 
+    let cancelled = false;
     let ticking = false;
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 20);
-        ticking = false;
-      });
-    };
-
-    runAfterPaint(() => {
+    const handlerRef = { current: null as (() => void) | null };
+    const schedule = () => {
+      if (cancelled) return;
+      const handleScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+      };
+      handlerRef.current = handleScroll;
       window.addEventListener('scroll', handleScroll, { passive: true });
-    });
+    };
+    const id =
+      typeof (window as any).requestIdleCallback !== 'undefined'
+        ? (window as any).requestIdleCallback(schedule, { timeout: 600 })
+        : (setTimeout(schedule, 400) as unknown as number);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      cancelled = true;
+      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
+      else clearTimeout(id);
+      const h = handlerRef.current;
+      if (h) window.removeEventListener('scroll', h);
     };
   }, []);
 

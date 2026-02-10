@@ -6,6 +6,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { SAFE_MODE } from './lib/safeMode';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // Minimal sync setup only; heavy and non-critical work runs after idle (see below).
 // Enable extra navigation debug logs in development only.
@@ -55,17 +56,8 @@ scheduleWhenIdle(() => {
     document.addEventListener('visibilitychange', setTabActive);
   }
 
-  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .getRegistrations()
-      .then((registrations) => {
-        registrations.forEach((reg) => reg.unregister());
-      })
-      .catch(() => {});
-  }
-  if (typeof window !== 'undefined' && 'caches' in window) {
-    window.caches.keys().then((keys) => Promise.all(keys.map((k) => window.caches.delete(k)))).catch(() => {});
-  }
+  // Service worker: registration is disabled (see serviceWorkerRegistration.js). Unregister any existing SW so users get fresh bundles.
+  serviceWorkerRegistration.unregister().catch(() => {});
 
   import('./debug/navWatch').catch(() => {});
   import('./perf/routePerf').catch(() => {});

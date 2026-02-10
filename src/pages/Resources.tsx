@@ -393,7 +393,7 @@ const Resources: React.FC = () => {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                     }}
                   />
                   {resource.format && (

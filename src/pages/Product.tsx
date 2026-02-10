@@ -268,7 +268,7 @@ const Product: React.FC = () => {
                         }
                       }}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                       }}
                     />
                   </picture>
@@ -300,7 +300,7 @@ const Product: React.FC = () => {
                       }
                     }}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                     }}
                   />
                 )}
@@ -509,7 +509,7 @@ const Product: React.FC = () => {
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                   }}
                 />
               </div>
@@ -969,7 +969,7 @@ const Product: React.FC = () => {
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                   }}
                 />
               </div>
@@ -996,7 +996,7 @@ const Product: React.FC = () => {
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                   }}
                 />
               </div>
@@ -1023,7 +1023,7 @@ const Product: React.FC = () => {
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                    (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                   }}
                 />
               </div>

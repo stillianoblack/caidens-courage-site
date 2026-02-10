@@ -314,7 +314,7 @@ const Characters: React.FC = () => {
                             : 'center center'
                         }}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                          (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                         }}
                       />
                     </div>
@@ -445,7 +445,7 @@ const Characters: React.FC = () => {
                     height={533}
                     style={{ objectPosition: 'center' }}
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                     }}
                   />
                 </div>

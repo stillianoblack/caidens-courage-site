@@ -10,26 +10,6 @@ import Home from './pages/Home';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 
-/** Minimal hero skeleton so Lighthouse always sees painted content while route chunks load. */
-const RouteFallbackHeroSkeleton: React.FC = () => (
-  <div className="min-h-screen bg-cream font-body" aria-label="Loading">
-    <header className="h-16 sm:h-20 w-full bg-navy-500 shrink-0" />
-    <section
-      className="relative flex flex-col justify-center px-4 sm:px-6 pt-12 pb-16"
-      style={{ minHeight: '60vh' }}
-    >
-      <div className="max-w-4xl mx-auto w-full space-y-4">
-        <div className="h-8 sm:h-10 bg-navy-200/40 rounded w-3/4 max-w-md animate-pulse" />
-        <div className="h-4 bg-navy-200/30 rounded w-full max-w-xl animate-pulse" />
-        <div className="h-4 bg-navy-200/30 rounded w-5/6 max-w-lg animate-pulse" />
-        <div className="pt-4">
-          <span className="inline-block h-12 w-40 bg-golden-500/50 rounded-lg animate-pulse" />
-        </div>
-      </div>
-    </section>
-  </div>
-);
-
 // Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -102,20 +82,27 @@ const AppContent: React.FC = () => {
   const navStartTimeRef = useRef<number | null>(null);
   const navTimerRef = useRef<number | null>(null);
 
-  // Route change log for debugging (deferred so it never blocks initial render)
+  // Route timing (dev only): log path and time-to-first-render after paint so we can see improvements.
   useEffect(() => {
     const path = location.pathname;
+    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
     if (typeof window === 'undefined') return;
-    if (typeof (window as any).requestIdleCallback === 'function') {
-      const id = (window as any).requestIdleCallback(() => {
-        if (typeof console !== 'undefined' && console.log) console.log('[ROUTE]', path);
-      }, { timeout: 500 });
-      return () => (window as any).cancelIdleCallback?.(id);
+    const afterPaint = () => {
+      const elapsed = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - start;
+      if (process.env.NODE_ENV === 'development' && typeof console !== 'undefined' && console.log) {
+        console.log('[routeTiming]', path, `${Math.round(elapsed)}ms`);
+      }
+    };
+    let rafId = 0;
+    if (typeof requestAnimationFrame !== 'undefined') {
+      rafId = requestAnimationFrame(() => requestAnimationFrame(afterPaint));
+    } else {
+      rafId = setTimeout(afterPaint, 0) as unknown as number;
     }
-    const id = setTimeout(() => {
-      if (typeof console !== 'undefined' && console.log) console.log('[ROUTE]', path);
-    }, 0);
-    return () => clearTimeout(id);
+    return () => {
+      if (typeof cancelAnimationFrame !== 'undefined') cancelAnimationFrame(rafId);
+      else clearTimeout(rafId);
+    };
   }, [location.pathname]);
 
   // Load floating animation controller only after page is interactive (dynamic import; not in initial bundle).
@@ -144,13 +131,20 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  // Animations: enable only after first paint so they never block nav.
+  // Animations: enable after idle so route render/paint happens first.
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
+    const enable = () => {
       setEnableMotion(true);
-      setExitingLocation(null); // avoid showing stale exiting route when motion turns on
-    });
-    return () => cancelAnimationFrame(id);
+      setExitingLocation(null);
+    };
+    const id =
+      typeof (window as any).requestIdleCallback !== 'undefined'
+        ? (window as any).requestIdleCallback(enable, { timeout: 300 })
+        : (setTimeout(enable, 150) as unknown as number);
+    return () => {
+      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
+      else clearTimeout(id);
+    };
   }, []);
 
   // B-4 chat: mount only after first paint + idle (never block nav or first paint).
@@ -253,7 +247,7 @@ const AppContent: React.FC = () => {
         {showFloatingController && <FloatingAnimationController pathname={location.pathname} />}
       </Suspense>
       <ChunkErrorBoundary>
-        <Suspense fallback={<RouteFallbackHeroSkeleton />}>
+        <Suspense fallback={null}>
           <div style={{ position: 'relative' }}>
             {enableMotion ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */

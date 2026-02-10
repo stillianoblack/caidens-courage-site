@@ -108,10 +108,23 @@ const FloatingAnimationController: React.FC<FloatingAnimationControllerProps> = 
       maybeStartLoop();
     };
 
-    const timeoutId = window.setTimeout(run, 100);
+    let idleOrTimeoutId: number | undefined;
+    const scheduleRun = () => {
+      if (typeof (window as any).requestIdleCallback !== 'undefined') {
+        idleOrTimeoutId = (window as any).requestIdleCallback(run, { timeout: 400 });
+      } else {
+        idleOrTimeoutId = window.setTimeout(run, 200) as unknown as number;
+      }
+    };
+    const timeoutId = window.setTimeout(scheduleRun, 0);
 
     return () => {
       window.clearTimeout(timeoutId);
+      if (idleOrTimeoutId != null && typeof (window as any).cancelIdleCallback !== 'undefined') {
+        (window as any).cancelIdleCallback(idleOrTimeoutId);
+      } else if (idleOrTimeoutId != null) {
+        window.clearTimeout(idleOrTimeoutId);
+      }
       stopLoop();
       document.removeEventListener('visibilitychange', onVisibilityChange);
       ['click', 'scroll', 'keydown', 'touchstart'].forEach((ev) => {

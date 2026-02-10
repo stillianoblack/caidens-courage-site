@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
-import { SAFE_MODE, runAfterPaint } from '../lib/safeMode';
+import { SAFE_MODE } from '../lib/safeMode';
 
 interface HeaderProps {
   onComingSoonClick?: () => void;
@@ -23,29 +23,40 @@ const Header: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [worldCloseTimeout, setWorldCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Handle scroll for header (UI state only; throttled).
-  // In SAFE_MODE or when reduced motion is requested, we skip this entirely.
+  // Handle scroll for header (UI state only; throttled). Defer to idle so route render/paint happens first.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (SAFE_MODE || reduceMotion) return;
 
+    let cancelled = false;
     let ticking = false;
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 50);
-        ticking = false;
-      });
-    };
-
-    runAfterPaint(() => {
+    const handlerRef = { current: null as (() => void) | null };
+    const schedule = () => {
+      if (cancelled) return;
+      const handleScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          setIsScrolled(window.scrollY > 50);
+          ticking = false;
+        });
+      };
+      handlerRef.current = handleScroll;
       window.addEventListener('scroll', handleScroll, { passive: true });
-    });
+    };
+    const id =
+      typeof (window as any).requestIdleCallback !== 'undefined'
+        ? (window as any).requestIdleCallback(schedule, { timeout: 600 })
+        : (setTimeout(schedule, 400) as unknown as number);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      cancelled = true;
+      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
+      else clearTimeout(id);
+      const h = handlerRef.current;
+      if (h) window.removeEventListener('scroll', h);
     };
   }, []);
 
