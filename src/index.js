@@ -1,5 +1,6 @@
 import React from 'react';
 import "./styles/motion-safe.css";
+import "./styles/minimal-css-overrides.css";
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
@@ -24,6 +25,11 @@ if (typeof window !== 'undefined') {
   }
 }
 
+const minimalCssMode = process.env.REACT_APP_MINIMAL_CSS_MODE === 'true';
+if (typeof document !== 'undefined' && document.body && minimalCssMode) {
+  document.body.classList.add('minimal-css');
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -33,6 +39,20 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+if (typeof window !== 'undefined') {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('debug') === '1') {
+      const badge = document.createElement('div');
+      badge.setAttribute('aria-hidden', 'true');
+      badge.style.cssText =
+        'position:fixed;bottom:8px;right:8px;z-index:9999;font:11px monospace;background:rgba(0,0,0,0.75);color:#fff;padding:4px 8px;border-radius:4px;pointer-events:none;';
+      badge.textContent = `minimalCss=${minimalCssMode}`;
+      document.body.appendChild(badge);
+    }
+  } catch (e) {}
+}
 
 // Defer all non-critical work so initial render and first paint are not blocked.
 const scheduleWhenIdle = (fn) => {
