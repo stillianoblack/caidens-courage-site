@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
-
-// Perf guard: disable heavy Home animations by default in production.
-// To re-enable them in prod, set REACT_APP_ENABLE_HOME_ANIMATIONS=true.
-const ENABLE_HOME_ANIMATIONS =
-  process.env.NODE_ENV !== 'production' ||
-  process.env.REACT_APP_ENABLE_HOME_ANIMATIONS === 'true';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
@@ -25,12 +22,15 @@ const SparkleIcon = ({ className }: { className?: string }) => (
 const PaletteIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="20" y="30" width="60" height="50" rx="5" fill="#FF6B6B" stroke="#FF4757" strokeWidth="3"/>
-    <circle cx="35" cy="45" r="8" fill="#4ECDC4"/>
-    <circle cx="50" cy="45" r="8" fill="#FFD700"/>
-    <circle cx="65" cy="45" r="8" fill="#95E1D3"/>
-    <circle cx="35" cy="60" r="8" fill="#F38181"/>
-    <circle cx="50" cy="60" r="8" fill="#A8E6CF"/>
-    <circle cx="65" cy="60" r="8" fill="#FFD93D"/>
+    {/* 8 colorful squares in a 2x4 grid - fully opaque, no transparency */}
+    <rect x="28" y="38" width="10" height="10" fill="#4A90E2" opacity="1"/>
+    <rect x="40" y="38" width="10" height="10" fill="#50C878" opacity="1"/>
+    <rect x="52" y="38" width="10" height="10" fill="#FFD700" opacity="1"/>
+    <rect x="64" y="38" width="10" height="10" fill="#FFA500" opacity="1"/>
+    <rect x="28" y="50" width="10" height="10" fill="#4A90E2" opacity="1"/>
+    <rect x="40" y="50" width="10" height="10" fill="#50C878" opacity="1"/>
+    <rect x="52" y="50" width="10" height="10" fill="#FFD700" opacity="1"/>
+    <rect x="64" y="50" width="10" height="10" fill="#FFA500" opacity="1"/>
     <rect x="25" y="20" width="15" height="15" rx="3" fill="#FF6B6B" transform="rotate(-15 32.5 27.5)"/>
     <rect x="60" y="20" width="15" height="15" rx="3" fill="#4ECDC4" transform="rotate(15 67.5 27.5)"/>
   </svg>
@@ -64,8 +64,8 @@ const StarIcon = ({ className }: { className?: string }) => (
 const features = [
   {
     icon: SparkleIcon,
-    title: 'Neurodiversity Positive',
-    description: "We celebrate the power of different minds. Caiden's story shows kids that ADHD isn't a flaw — it's a source of creativity, energy, and unique strength.",
+    title: 'Different Minds Hold Hidden Power',
+    description: "Caiden's story shows kids that ADHD isn't a flaw — it can be a source of creativity, energy, and unique strength.",
     bgGradient: 'from-yellow-400/20 via-orange-400/15 to-amber-400/20',
     glowColor: 'rgba(251, 191, 36, 0.4)',
     borderColor: 'border-yellow-300/30',
@@ -73,8 +73,8 @@ const features = [
   },
   {
     icon: PaletteIcon,
-    title: 'Creativity & Imagination',
-    description: "Caiden explores the world through art, imagination, and adventure. His story inspires kids to dream boldly and express their ideas freely.",
+    title: 'Where Imagination Becomes Armor',
+    description: "Creativity becomes more than play — it becomes confidence kids can carry into every challenge.",
     bgGradient: 'from-pink-400/20 via-purple-400/15 to-fuchsia-400/20',
     glowColor: 'rgba(236, 72, 153, 0.4)',
     borderColor: 'border-pink-300/30',
@@ -82,8 +82,8 @@ const features = [
   },
   {
     icon: StrengthIcon,
-    title: 'Emotional Courage',
-    description: "Through challenges and big feelings, Caiden learns to understand his emotions, communicate openly, and show up bravely in everyday moments.",
+    title: 'Courage Is a Skill You Learn',
+    description: "By facing big feelings and uncertain moments, kids learn that bravery is something you practice.",
     bgGradient: 'from-brand-blue-400/20 via-brand-blue-400/15 to-brand-blue-500/20',
     glowColor: 'rgba(37, 99, 235, 0.4)',
     borderColor: 'border-brand-blue-400/30',
@@ -91,8 +91,8 @@ const features = [
   },
   {
     icon: StarIcon,
-    title: 'Representation Matters',
-    description: "Caiden is a hero who looks, feels, and dreams like the kids who rarely see themselves in stories. His journey helps every child feel seen, valued, and powerful.",
+    title: 'Every Hero Deserves to Be Seen',
+    description: "When children see themselves reflected in a hero, they begin to believe they belong in their own story.",
     bgGradient: 'from-green-400/20 via-emerald-400/15 to-teal-400/20',
     glowColor: 'rgba(34, 197, 94, 0.4)',
     borderColor: 'border-green-300/30',
@@ -106,25 +106,25 @@ const characters = [
     name: 'Caiden',
     microLabel: 'The Dreamer',
     description: "The brave, imaginative 11-year-old at the center of our story — learning how his ADHD is actually his greatest strength.",
-    image: '/Caiden@4x-100.jpeg',
+    image: '/images/Caiden@4x-100.webp',
   },
   {
     name: 'Genesis',
     microLabel: 'The Potential',
     description: "Caiden's heroic alter-ego, unlocked when he taps into courage and creativity. Genesis is everything Caiden is becoming.",
-    image: '/Genesis@4x-100.jpeg',
+    image: '/images/Genesis@4x-100.webp',
   },
   {
     name: 'B-4',
     microLabel: 'The Mind in Motion',
     description: "A floating robotic companion who represents what's happening inside Caiden's mind. B-4 helps him understand his ADHD.",
-    image: '/B-4@4x-100.jpeg',
+    image: '/images/B-4@4x-100.webp',
   },
   {
     name: 'Ollie Buck',
     microLabel: 'Patience & Grounding',
     description: "Caiden's loyal companion who reminds him that slow and steady wins the race — patience is a superpower too.",
-    image: '/Turtle@4x-100.jpeg',
+    image: '/images/Turtle@4x-100.webp',
   },
 ];
 
@@ -137,7 +137,7 @@ const products = [
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
     available: true,
-    image: "/Comic5_Coverpage_header_Shop.jpg",
+    image: "/images/Comic5_Coverpage_header_Shop_smaller.webp",
   },
   {
     title: "Caiden's Courage T-Shirt",
@@ -147,7 +147,7 @@ const products = [
     purchaseUrl: productLinks.tShirt,
     available: false,
     comingSoon: true,
-    image: "/Caiden'Courage_Tshirt.jpg",
+    image: "/images/Caiden'Courage_Tshirt_smaller.webp",
   },
   {
     title: "B-4 Plush Companions",
@@ -157,7 +157,7 @@ const products = [
     purchaseUrl: productLinks.b4Plush,
     available: false,
     comingSoon: true,
-    image: "/Caiden'sCOurage_Plushie (1).jpg",
+    image: "/images/B-4plushcompanions_img.webp",
   },
 ];
 
@@ -168,7 +168,7 @@ const products = [
 //     description: "A kid-friendly guided journal that helps children express feelings, track creative ideas, and build emotional strength.",
 //     badge: "Coming Soon",
 //     badgeColor: "bg-navy-400",
-//     image: '/balance.png',
+//     image: '/images/balance.webp',
 //     purchaseUrl: null,
 //     available: false,
 //   },
@@ -179,42 +179,9 @@ const Home = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [rotatingWord, setRotatingWord] = useState(0);
-  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
-  const [showMobileShopDropdown, setShowMobileShopDropdown] = useState(false);
-  const words = ['Superpower', 'Strength', 'Courage', 'Power'];
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    if (!ENABLE_HOME_ANIMATIONS) return;
-    return () => {
-      if (closeTimeout) {
-        clearTimeout(closeTimeout);
-      }
-      if (shopCloseTimeout) {
-        clearTimeout(shopCloseTimeout);
-      }
-    };
-  }, [closeTimeout, shopCloseTimeout]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    if (!ENABLE_HOME_ANIMATIONS) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showResourcesDropdown) {
-        setShowResourcesDropdown(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showResourcesDropdown]);
+  const [isMobile, setIsMobile] = useState(
+    () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false)
+  );
 
   // Handle hash anchor scrolling (for homepage section deep-links)
   useEffect(() => {
@@ -240,121 +207,13 @@ const Home = () => {
     }
   }, [location.hash, location.pathname]);
 
-  // Handle About link click - navigate and scroll
-  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-    if (location.pathname !== '/') {
-      // If not on homepage, navigate to homepage with hash
-      e.preventDefault();
-      navigate('/#about');
-      // Scroll will happen after navigation via the useEffect above
-    } else {
-      // If already on homepage, just scroll
-      e.preventDefault();
-      const element = document.getElementById('about');
-      if (element) {
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
-
-  // Handle click outside to close dropdown (mobile)
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (showResourcesDropdown && !target.closest('.has-dropdown')) {
-        setShowResourcesDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showResourcesDropdown]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    // Check initial scroll position
-    handleScroll();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (typeof window === 'undefined') return;
+    const m = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    m.addEventListener('change', handler);
+    return () => m.removeEventListener('change', handler);
   }, []);
-
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.05, // Lower threshold for better mobile detection
-      rootMargin: '0px 0px -20px 0px', // Adjusted for mobile
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          // Don't observe again once visible for performance
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    // Observe all sections except the hero section
-    const sections = document.querySelectorAll('section:not(#hero)');
-    sections.forEach((section) => {
-      section.classList.add('fade-in-up');
-      observer.observe(section);
-    });
-
-    // Also observe key content elements within sections for staggered animation
-    const contentElements = document.querySelectorAll('.animate-fade-in, .animate-slide-up');
-    contentElements.forEach((element) => {
-      if (!element.closest('#hero')) {
-        element.classList.add('fade-in-up');
-        observer.observe(element);
-      }
-    });
-
-    // Observe feature cards individually for fast fade-in (no stagger)
-    const featureCards = document.querySelectorAll('.fade-in-card');
-    featureCards.forEach((card) => {
-      const cardObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Add visible class immediately for snappy animation
-            entry.target.classList.add('visible');
-            cardObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-      cardObserver.observe(card);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        observer.unobserve(section);
-      });
-      contentElements.forEach((element) => {
-        observer.unobserve(element);
-      });
-    };
-  }, []);
-
-  // Rotate words in the title
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotatingWord((prev) => (prev + 1) % words.length);
-    }, 7000); // Change every 7 seconds (between 6-8 seconds)
-
-    return () => clearInterval(interval);
-  }, [words.length]);
 
   const handlePreorderClick = () => {
     navigate('/comicbook');
@@ -367,681 +226,278 @@ const Home = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
-
-  const handleLogoClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
-    }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream font-body">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3">
-              {/* Hamburger Menu Button - Mobile only */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              
-              <Link 
-                to="/"
-                onClick={handleLogoClick}
-                className="inline-block hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="/logoCaiden.png" 
-                  alt="Caiden's Courage" 
-                  className="h-10 sm:h-12 w-auto"
-                />
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation - Only visible on desktop (lg and up) */}
-            <nav className="hidden lg:flex items-center gap-8">
-              <Link 
-                to="/mission" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
-              >
-                Mission
-              </Link>
-              <Link 
-                to="/#about"
-                onClick={handleAboutClick}
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                About
-              </Link>
-              <Link 
-                to="/#characters" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Characters
-              </Link>
-              
-              {/* Shop Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={() => {
-                  if (shopCloseTimeout) {
-                    clearTimeout(shopCloseTimeout);
-                    setShopCloseTimeout(null);
-                  }
-                  setShowShopDropdown(true);
-                }}
-                onMouseLeave={() => {
-                  const timeout = setTimeout(() => {
-                    setShowShopDropdown(false);
-                  }, 200);
-                  setShopCloseTimeout(timeout);
-                }}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowShopDropdown(!showShopDropdown);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowShopDropdown(!showShopDropdown);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showShopDropdown}
-                >
-                  Shop
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                {/* Invisible hover bridge */}
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showShopDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={() => {
-                    if (shopCloseTimeout) {
-                      clearTimeout(shopCloseTimeout);
-                      setShopCloseTimeout(null);
-                    }
-                    setShowShopDropdown(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowShopDropdown(false);
-                    }, 200);
-                    setShopCloseTimeout(timeout);
-                  }}
-                >
-                  <Link
-                    to="/comicbook"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">Comic Book</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Resources Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={() => {
-                  if (closeTimeout) {
-                    clearTimeout(closeTimeout);
-                    setCloseTimeout(null);
-                  }
-                  setShowResourcesDropdown(true);
-                }}
-                onMouseLeave={() => {
-                  const timeout = setTimeout(() => {
-                    setShowResourcesDropdown(false);
-                  }, 200);
-                  setCloseTimeout(timeout);
-                }}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowResourcesDropdown(!showResourcesDropdown);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowResourcesDropdown(!showResourcesDropdown);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showResourcesDropdown}
-                >
-                  Resources
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                {/* Invisible hover bridge */}
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showResourcesDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={() => {
-                    if (closeTimeout) {
-                      clearTimeout(closeTimeout);
-                      setCloseTimeout(null);
-                    }
-                    setShowResourcesDropdown(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowResourcesDropdown(false);
-                    }, 200);
-                    setCloseTimeout(timeout);
-                  }}
-                >
-                  <Link
-                    to="/resources?audience=kids"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Kids</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Parents</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Teachers</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">All Resources</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* Comic Book - Moved to right of Resources */}
-                  <Link
-                to="/comicbook" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  >
-                Comic Book
-                  </Link>
-            </nav>
-            
-            {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-              {/* Contact Link - Desktop only */}
-              <a 
-                href="mailto:stills@caidenscourage.com" 
-                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Contact
-              </a>
-              {/* Join Waitlist Button - All screens, responsive padding */}
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleWaitlistClick}
-                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
-              >
-                Join Courage Community
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Header onComingSoonClick={handleComingSoonClick} />
 
-      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation - Visible up to lg (1024px) for iPad portrait */}
-      <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {/* Full Screen Menu Panel - Slides from Left */}
-        <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Menu Items - Centered */}
-          <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
-            <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
-              <Link
-                to="/mission"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
-              >
-                <span>Mission</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#about"
-                onClick={(e) => {
-                  setIsMobileMenuOpen(false);
-                  handleAboutClick(e);
-                }}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>About</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/comicbook"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Comic Book</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#characters"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Characters</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              {/* Shop Dropdown in Mobile Menu */}
-              <div className="border-b border-navy-100">
-                <button
-                  onClick={() => setShowMobileShopDropdown(!showMobileShopDropdown)}
-                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
-                >
-                  <span>Shop</span>
-                  <svg 
-                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  showMobileShopDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                  <Link
-                    to="/comicbook"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">Comic Book</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">T-shirts <span className="text-base font-normal">— Coming Soon</span></div>
-                    <div className="text-sm text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">— Coming Soon</span></div>
-                    <div className="text-sm text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Resources Dropdown in Mobile Menu */}
-              <div className="border-b border-navy-100">
-                <button
-                  onClick={() => setShowMobileResourcesDropdown(!showMobileResourcesDropdown)}
-                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
-                >
-                  <span>Resources</span>
-                  <svg 
-                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                  <Link
-                    to="/resources?audience=kids"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Kids</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Parents</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Teachers</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
-                  >
-                    <div className="font-semibold text-lg">All Resources</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* CTA Button in Mobile Menu */}
-              <div className="px-6 py-6 mt-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Join the Courage Community
-                </Button>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
-
-      {/* Hero Section - White background */}
+      {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="relative min-h-screen flex items-end sm:items-center bg-white pt-20 overflow-hidden"
+        className="major-publisher-hero relative overflow-hidden"
+        style={{ 
+          paddingTop: isMobile ? '130px' : '120px',
+          minHeight: isMobile ? '100vh' : '92vh',
+          alignItems: isMobile ? 'flex-start' : undefined
+        }}
       >
-        {ENABLE_HOME_ANIMATIONS && (
-          <>
-            {/* Animated circles - spread out across entire header, hidden on mobile */}
-            <div className="absolute inset-0 z-0 hidden sm:block">
-              {/* Yellow circles */}
-              <div className="bubble w-20 h-20 top-12 left-[10%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0s' }} />
-              <div className="bubble top-40 left-[25%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2.5s' }} />
-              <div className="bubble w-16 h-16 top-68 left-[50%]" style={{ animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
-              <div className="bubble top-88 right-[30%]" style={{ width: '5.5rem', height: '5.5rem', animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3.5s' }} />
-              
-              {/* Blue circles */}
-              <div className="bubble-navy w-24 h-24 top-24 right-[15%]" style={{ animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2s' }} />
-              <div className="bubble-navy w-16 h-16 top-52 left-[35%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '4s' }} />
-              <div className="bubble-navy w-20 h-20 top-76 right-[45%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '1.5s' }} />
-              
-              {/* Orange circles */}
-              <div className="bubble-orange top-32 left-[60%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
-              <div className="bubble-orange w-20 h-20 top-60 right-[20%]" style={{ animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3s' }} />
-              <div className="bubble-orange w-14 h-14 top-84 left-[75%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2s' }} />
-            </div>
-            
-            {/* Small random circles in header - visible on all devices */}
-            <div className="absolute inset-0 z-0">
-              {/* Small yellow circles */}
-              <div className="bubble" style={{ width: '8px', height: '8px', top: '15%', left: '20%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '0s', opacity: 0.3 }} />
-              <div className="bubble" style={{ width: '10px', height: '10px', top: '45%', left: '75%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '1s', opacity: 0.25 }} />
-              <div className="bubble" style={{ width: '6px', height: '6px', top: '70%', left: '15%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '2s', opacity: 0.3 }} />
-              
-              {/* Small blue circles */}
-              <div className="bubble-navy" style={{ width: '9px', height: '9px', top: '30%', left: '60%', animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0.5s', opacity: 0.25 }} />
-              <div className="bubble-navy" style={{ width: '7px', height: '7px', top: '65%', left: '85%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.3 }} />
-              
-              {/* Small orange circles */}
-              <div className="bubble-orange" style={{ width: '8px', height: '8px', top: '55%', left: '35%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2.5s', opacity: 0.25 }} />
-              <div className="bubble-orange" style={{ width: '6px', height: '6px', top: '25%', left: '90%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '3s', opacity: 0.3 }} />
-            </div>
-            
-            {/* Mid-size circles in header to fill white space at top - visible on all devices */}
-            <div className="absolute inset-0 z-0">
-              {/* Mid-size yellow circle - top left white space */}
-              <div className="bubble" style={{ width: '40px', height: '40px', top: '10%', left: '15%', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '0s', opacity: 0.2 }} />
-              {/* Mid-size blue circle - top right white space */}
-              <div className="bubble-navy" style={{ width: '36px', height: '36px', top: '8%', right: '12%', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.2 }} />
-            </div>
-          </>
-        )}
+        {/* Background — image or solid when REACT_APP_DISABLE_HEROES */}
+        <div className="major-publisher-hero-bg absolute inset-0 z-0">
+          {DISABLE_HEROES ? (
+            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+          ) : (
+            <picture>
+              <source
+                media="(max-width: 768px)"
+                type="image/webp"
+                srcSet="/images/heroes/hero-bg_mobile_400w.webp 400w, /images/heroes/hero-bg_mobile_600w.webp 600w, /images/heroes/hero-bg_mobile_800w.webp 800w"
+                sizes="100vw"
+              />
+              <source
+                media="(min-width: 769px)"
+                type="image/webp"
+                srcSet="/images/heroes/hero-bg_desktop_640w.webp 640w, /images/heroes/hero-bg_desktop_960w.webp 960w, /images/heroes/hero-bg_desktop_1280w.webp 1280w, /images/heroes/hero-bg_desktop_1600w.webp 1600w"
+                sizes="100vw"
+              />
+              <img
+                src={isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp'}
+                alt="Caiden falling through a fantastical sky"
+                width={1600}
+                height={817}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp';
+                }}
+              />
+            </picture>
+          )}
+        </div>
         
-        {/* Hero content + CTAs - bottom on mobile, centered on desktop */}
-        <div className="relative z-10 w-full pb-28 sm:pb-0 sm:py-12" style={{ paddingTop: '70px' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Hero image - First on mobile, right side on desktop */}
-              <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2 w-full mb-[35px] lg:mb-0">
-                <div className="relative w-full max-w-sm lg:max-w-xl xl:max-w-2xl scale-[1.08] lg:scale-[1.215]">
-                  {/* Geometric shape behind image - blue and larger to cover body, visible on all devices */}
-                  <div className="geometric-shape shape-blob-blue w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] xl:w-[32rem] xl:h-[32rem] absolute -z-10 scale-[1.08] lg:scale-[1.215]" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-                  
-                  <img
-                    src="/Courageforeverykid_COMICBOOK.png"
-                    alt="Caiden - The Boy Who Turned ADHD Into His Superpower"
-                    className="w-full h-auto object-contain drop-shadow-lg relative z-10 image-geometric-mask mx-auto lg:mx-0"
-                  />
-                </div>
-              </div>
-              
-              {/* Text content - Second on mobile, left side on desktop, centered on mobile */}
-              <div className="max-w-xl animate-slide-up order-2 lg:order-1 text-center lg:text-left">
-                {/* Title and subtitle */}
-                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 leading-tight">
-                  The Boy Who Turned ADHD Into His{' '}
-                  <span className="text-golden-500 inline-block min-w-[200px] sm:min-w-[240px] lg:min-w-[280px]">
-                    <span key={rotatingWord} className="rotating-word inline-block">
-                      {words[rotatingWord]}
-                    </span>
-                  </span>
-                </h1>
-                <p className="mt-4 text-lg sm:text-xl text-navy-600">
-                  Meet Caiden — an illustrated kids' universe about courage, creativity, and emotional growth. <span className="italic">A story for kids who think differently—and the adults who support them.</span>
-                </p>
-                
-                {/* CTAs - right below text, centered on mobile */}
-                <div className="flex flex-col md:flex-row gap-4 mt-8 justify-center lg:justify-start">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={handlePreorderClick}
-                  >
-                    Pre-order Now
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleAboutClick(e as any);
-                    }}
-                  >
-                    Learn More
-                  </Button>
-                </div>
-              </div>
+        {/* Gradient Overlay */}
+        <div className="major-publisher-hero-overlay absolute inset-0" style={{ zIndex: 1 }}></div>
+        
+        {/* Star Dust Animation */}
+        <div className="major-publisher-stardust absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true"></div>
+        
+        {/* Mythic Silhouettes */}
+        <div className="major-publisher-silhouettes absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true">
+          {/* Dragon Silhouette */}
+          <svg className="major-publisher-silhouette major-publisher-dragon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 20 C120 40, 140 60, 160 80 C170 90, 175 100, 180 110 C185 120, 180 130, 175 140 C170 150, 160 155, 150 160 C140 165, 130 165, 120 160 C110 155, 100 150, 90 145 C80 140, 70 135, 60 130 C50 125, 40 120, 30 115 C20 110, 15 100, 20 90 C25 80, 35 70, 45 60 C55 50, 65 40, 75 30 C85 25, 95 20, 100 20 Z" fill="currentColor" opacity="0.1"/>
+            <path d="M100 40 L110 60 L120 80 L130 100 L125 120 L115 130 L105 125 L95 115 L85 100 L80 80 L85 60 L95 50 Z" fill="currentColor" opacity="0.08"/>
+          </svg>
+          
+          {/* Spider Glyph */}
+          <svg className="major-publisher-silhouette major-publisher-spider" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="75" cy="50" r="20" fill="currentColor" opacity="0.1"/>
+            <path d="M75 70 L75 90 M55 60 L45 70 M95 60 L105 70 M55 80 L45 90 M95 80 L105 90 M55 100 L45 110 M95 100 L105 110" stroke="currentColor" strokeWidth="3" opacity="0.1" strokeLinecap="round"/>
+          </svg>
+          
+          {/* Portal Swirl */}
+          <svg className="major-publisher-silhouette major-publisher-portal" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M90 90 m-60,0 a60,60 0 1,1 120,0 a60,60 0 1,1 -120,0" stroke="currentColor" strokeWidth="2" opacity="0.12" fill="none"/>
+            <path d="M90 90 m-40,0 a40,40 0 1,1 80,0 a40,40 0 1,1 -80,0" stroke="currentColor" strokeWidth="2" opacity="0.1" fill="none"/>
+            <path d="M90 90 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0" stroke="currentColor" strokeWidth="2" opacity="0.08" fill="none"/>
+          </svg>
+        </div>
+        
+        {/* Content - Aligned to Global Grid */}
+        <div className="hero-container relative z-10 w-full flex flex-col md:block">
+          <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
+            {/* Eyebrow */}
+            <div 
+              className="text-xs sm:text-sm font-semibold uppercase"
+              style={{ 
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '12px'
+              }}
+            >
+              INTRODUCING THE WORLD OF CAIDEN
+            </div>
+            
+            {/* Headline */}
+            <h1 
+              className="font-display font-extrabold text-white"
+              style={{ 
+                fontSize: 'clamp(44px, 5vw, 64px)',
+                lineHeight: '1.05',
+                letterSpacing: '-1px',
+                marginBottom: '16px'
+              }}
+            >
+              Every Hero Starts Somewhere.
+            </h1>
+            
+            {/* Subheader */}
+            <p 
+              className="text-white font-medium"
+              style={{ 
+                fontSize: '22px',
+                lineHeight: '1.4',
+                marginBottom: '12px',
+                opacity: 0.92
+              }}
+            >
+              An illustrated adventure where imagination, courage, and ancient mysteries collide.
+            </p>
+
+            {/* CTA Row */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handlePreorderClick}
+                className="w-full sm:w-auto"
+              >
+                Pre-Order Volume 1
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                as={Link}
+                to="/world"
+                className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+              >
+                Explore the World
+              </Button>
+            </div>
+
+            {/* Trust Line */}
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
+              </svg>
+              <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
             </div>
           </div>
         </div>
 
-        {/* Scroll indicator - hidden on mobile, visible on desktop */}
-        <div className="hidden md:flex absolute bottom-6 left-0 right-0 justify-center items-center animate-bounce">
-          <svg className="w-10 h-10 text-navy-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        {/* Slanted Wave Transition */}
+        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+          <svg 
+            className="w-full h-full" 
+            viewBox="0 0 1440 150" 
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path 
+              d="M0,60 C360,140 1080,0 1440,80 L1440,150 L0,150 Z"
+              fill="#ffffff"
+            />
           </svg>
         </div>
       </section>
 
-      {/* Who Is Caiden Section */}
-      <section id="about" className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        {/* Decorative elements - hidden on mobile */}
-        <div className="hidden sm:block circle-accent circle-coral w-24 h-24 -top-12 left-1/4 opacity-50" style={{ animationDelay: '0s' }} />
-        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 bottom-20 left-8 opacity-40" style={{ animationDelay: '1.5s' }} />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left content */}
-            <div className="animate-fade-in text-center lg:text-left">
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
-                Who Is Caiden?
-              </h2>
-              <p className="mt-6 text-lg text-white/90 leading-relaxed">
-                <strong className="text-golden-400">Caiden is an 11-year-old boy who discovers that the thing he struggles with the most — his ADHD — is actually the source of his greatest power.</strong>
-              </p>
-              <p className="mt-4 text-white/80 leading-relaxed">
-                Through adventure, imagination, and everyday courage, Caiden learns to understand his emotions, trust himself, and show up bravely in a world that doesn't always see him clearly.
-              </p>
+      {/* Trust Strip */}
+      <section className="bg-white border-b border-navy-100/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 lg:gap-16">
+            {/* Trust Item 1 */}
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              <span className="text-navy-600 font-medium text-base sm:text-lg">Loved by parents and educators</span>
+            </div>
+            
+            {/* Trust Item 2 */}
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              <span className="text-navy-600 font-medium text-base sm:text-lg">Built for growing readers</span>
+            </div>
+            
+            {/* Trust Item 3 */}
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              <span className="text-navy-600 font-medium text-base sm:text-lg">Designed to strengthen emotional confidence</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Meet the Hero Section */}
+      <section className="bg-cream relative overflow-hidden meet-hero-section pt-20 md:pt-0">
+        <div className="hero-container">
+          <div className="grid gap-12 lg:gap-16 items-center meet-hero-grid">
+            {/* Left Column - Image - Below text on mobile */}
+            <div className="order-2 md:order-1">
+              <div 
+                className="w-full mb-6 relative overflow-hidden cinematic-hero-image"
+                style={{ 
+                  width: '100%',
+                  height: 'clamp(320px, 42vw, 560px)',
+                  borderRadius: '20px',
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
+                <img
+                  src="/images/characters/Caiden_img_profile.webp"
+                  srcSet="/images/characters/Caiden_img_profile_192w.webp 192w, /images/characters/Caiden_img_profile_400w.webp 400w, /images/characters/Caiden_img_profile.webp 1024w"
+                  sizes="(max-width: 768px) 100vw, 42vw"
+                  width={560}
+                  height={560}
+                  alt="Caiden - The Hero"
+                  className="w-full h-full object-cover"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    display: 'block',
+                    margin: 0,
+                    padding: 0,
+                    border: 'none',
+                    outline: 'none',
+                  }}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
               
               {/* Comic Book Callout */}
-              <div className="mt-4 max-w-[420px] mx-auto lg:mx-0">
+              <div className="w-full">
                 <Link
                   to="/comicbook"
-                  className="block bg-white/95 rounded-2xl p-4 sm:p-5 shadow-lg border border-white/20 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                  className="block bg-transparent rounded-2xl p-4 sm:p-5 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   <div className="flex items-start gap-4">
                     {/* Comic Book Image - Circular with blue border */}
                     <div className="flex-shrink-0">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-blue-500 shadow-md">
-                        <img
-                          src="/Comic5_Coverpage_header.jpg"
-                          alt="Caiden's Courage Comic Book"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/logoCaiden.png';
-                          }}
-                        />
+                      <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet="/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w"
+                            sizes="160px"
+                          />
+                          <img
+                            src="/images/Comic5_Coverpage_header_smaller-1600.webp"
+                            alt="Caiden's Courage Comic Book"
+                            width={80}
+                            height={80}
+                            className="object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                            }}
+                          />
+                        </picture>
                       </div>
                     </div>
                     
@@ -1068,50 +524,184 @@ const Home = () => {
               </div>
             </div>
 
+            {/* Right Column - Copy - Above image on mobile; center-aligned on mobile only */}
+            <div className="order-1 md:order-2 hero-text text-center md:text-left">
+              {/* Eyebrow */}
+              <div 
+                className="text-xs sm:text-sm font-semibold uppercase mb-4"
+                style={{ 
+                  letterSpacing: '0.12em',
+                  color: 'rgba(36, 62, 112, 0.8)'
+                }}
+              >
+                MEET CAIDEN
+              </div>
+
+              {/* Headline */}
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-6">
+                Not Every Hero Looks Fearless.
+              </h2>
+
+              {/* Body Paragraphs */}
+              <div className="space-y-4 mb-8">
+                <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
+                  Caiden is an 11-year-old boy who discovers that the thing he struggles with most… may also be the source of his greatest strength.
+                </p>
+                <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
+                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn't always see him clearly.
+                </p>
+              </div>
+
+              {/* Power Line */}
+              <div className="mb-0">
+                <p className="text-navy-500 leading-relaxed meet-hero-thesis" style={{ fontWeight: 600 }}>
+                  Being different isn't a weakness.
+                  <br />
+                  It's where courage begins.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who Is Caiden Section */}
+      <section id="about" className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
+        {/* Anchor for "What is Caiden's Courage?" navigation */}
+        <span id="who-is-caiden" style={{ position: 'absolute', top: '-80px', visibility: 'hidden' }} aria-hidden="true"></span>
+        {/* Decorative elements - hidden on mobile */}
+        <div className="hidden sm:block circle-accent circle-coral w-24 h-24 -top-12 left-1/4 opacity-50" style={{ animationDelay: '0s' }} />
+        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 bottom-20 left-8 opacity-40" style={{ animationDelay: '1.5s' }} />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left content */}
+            <div className="animate-fade-in text-center lg:text-left">
+              {/* Eyebrow */}
+              <div 
+                className="text-xs sm:text-sm font-semibold uppercase mb-4"
+                style={{ 
+                  letterSpacing: '0.12em',
+                  color: 'rgba(255, 255, 255, 0.8)'
+                }}
+              >
+                HERO'S PATHS
+              </div>
+              
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">
+                Kids Learn This In The Universe?
+              </h2>
+              
+              <p className="mt-4 text-lg sm:text-xl text-white font-semibold leading-relaxed mb-6">
+                Not just a story world — a courage practice. Kids learn to name big feelings, trust their minds, and take brave next steps.
+              </p>
+              
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <Button
+                  variant="primary"
+                  size="md"
+                  as={Link}
+                  to="/characters"
+                  className="w-full sm:w-auto"
+                >
+                  Meet the Characters
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  as={Link}
+                  to="/world"
+                  className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+                >
+                  Enter Caiden's World
+                </Button>
+              </div>
+
+              {/* Helper Line */}
+              <p className="text-sm text-white/60">
+                For readers ages 6–12 — and anyone discovering their courage.
+              </p>
+            </div>
+
             {/* Right - Feature cards optimized for performance */}
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid sm:grid-cols-2 gap-6 relative z-10">
               {features.map((feature, index) => (
                 <div
                   key={feature.title}
                   className="relative group h-full"
                 >
-                  {/* Card container - solid base */}
+                  {/* Card container with cinematic styling */}
                   <div
-                    className={`relative feature-card fade-in-card rounded-3xl p-6 sm:p-7 bg-white/85 border-2 ${feature.borderColor} shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer h-full flex flex-col`}
+                    className="relative cinematic-pillar-card rounded-3xl p-6 sm:p-7 transition-all duration-300 cursor-pointer h-full flex flex-col"
+                    style={{
+                      borderRadius: '26px',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+                    }}
                   >
-                    {/* Gradient background layer */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgGradient} rounded-3xl opacity-40`}></div>
-                    
-                    {/* Small glass overlay only on top section */}
+                    {/* Dark cinematic gradient background */}
                     <div 
-                      className="absolute top-0 left-0 right-0 h-24 bg-white/20 backdrop-blur-[10px] rounded-t-3xl pointer-events-none"
-                      style={{ 
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)'
+                      className="absolute inset-0 rounded-3xl z-0 cinematic-card-bg"
+                      style={{
+                        background: index === 0 
+                          ? 'linear-gradient(135deg, rgba(36, 62, 112, 0.95) 0%, rgba(55, 48, 163, 0.85) 100%)'
+                          : index === 1
+                          ? 'linear-gradient(135deg, rgba(55, 48, 163, 0.95) 0%, rgba(79, 70, 229, 0.85) 100%)'
+                          : index === 2
+                          ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%)'
+                          : 'linear-gradient(135deg, rgba(36, 62, 112, 0.95) 0%, rgba(55, 48, 163, 0.85) 100%)',
+                        transition: 'transform 0.3s ease',
                       }}
                     ></div>
-                    <div className="absolute top-0 left-0 right-0 h-24 bg-white/20 rounded-t-3xl pointer-events-none supports-[backdrop-filter]:hidden"></div>
+                    
+                    {/* Vignette overlay */}
+                    <div 
+                      className="absolute inset-0 rounded-3xl z-0"
+                      style={{
+                        background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.15) 100%)',
+                      }}
+                    ></div>
+                    
+                    {/* Grain texture */}
+                    <div 
+                      className="absolute inset-0 rounded-3xl z-0 opacity-[0.04]"
+                      style={{
+                        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.1) 2px, rgba(255, 255, 255, 0.1) 4px)',
+                      }}
+                    ></div>
                     
                     {/* Content layer */}
-                    <div className="relative z-10 flex flex-col flex-grow">
-                      {/* Icon - simplified */}
-                      <div className={`w-16 h-16 sm:w-20 sm:h-20 mb-4 transition-transform duration-200 group-hover:scale-105`}>
-                        <feature.icon className={`w-full h-full ${feature.iconColor}`} />
+                    <div className="relative z-20 flex flex-col flex-grow">
+                      {/* Icon badge with scene glow */}
+                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 mb-4">
+                        <div 
+                          className="absolute inset-0 rounded-full z-0"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%)',
+                            transform: 'scale(1.5)',
+                          }}
+                        ></div>
+                        <div 
+                          className="relative z-10 transition-transform duration-200 group-hover:scale-105"
+                          style={{ 
+                            filter: 'brightness(1.2) saturate(1.1)',
+                            color: index === 0 ? '#F0CE6E' : index === 1 ? '#E879F9' : index === 2 ? '#60A5FA' : '#34D399'
+                          }}
+                        >
+                          <feature.icon className="w-full h-full" />
+                        </div>
                       </div>
                       
-                      {/* Title */}
-                      <h3 className="font-display font-bold text-lg sm:text-xl md:text-2xl mt-3 text-navy-600 leading-tight">
+                      {/* Title - reduced size and weight */}
+                      <h3 className="font-display font-semibold text-white leading-tight mb-3" style={{ fontWeight: 600, fontSize: '20px' }}>
                         {feature.title}
                       </h3>
                       
                       {/* Description */}
-                      <p className="mt-3 text-sm sm:text-base leading-relaxed text-navy-600/90 flex-grow">
+                      <p className="text-white/90 flex-grow leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.65' }}>
                         {feature.description}
                       </p>
                     </div>
-                    
-                    {/* Decorative corner accent - static */}
-                    <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${feature.bgGradient} rounded-bl-3xl opacity-15`}></div>
                   </div>
                 </div>
               ))}
@@ -1121,52 +711,118 @@ const Home = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 sm:py-28 bg-cream relative overflow-hidden">
+      <section className="py-12 sm:py-20 md:py-28 bg-cream relative overflow-hidden pb-16">
         <div className="hidden sm:block circle-accent circle-navy w-20 h-20 top-20 right-16 opacity-60" style={{ animationDelay: '0.5s' }} />
         <div className="hidden sm:block circle-accent circle-coral w-12 h-12 bottom-24 left-12 opacity-50" style={{ animationDelay: '3s' }} />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="order-2 lg:order-1">
-              <div className="relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-20 items-center min-w-0" style={{ gridTemplateColumns: '1fr 1.2fr' }}>
+            {/* Image Column - First on mobile */}
+            <div className="order-1 lg:order-1 w-full min-w-0">
+              <div 
+                className="mx-auto overflow-hidden w-full max-w-full lg:max-w-[440px] rounded-[16%]"
+                style={{ aspectRatio: '1/1' }}
+              >
                 <img
-                  src="/Courageforeverykid.jpeg"
+                  src="/images/Courageforeverykid.webp"
                   alt="Caiden celebrating - Courage for Every Kid"
-                  className="w-full max-w-lg mx-auto rounded-3xl shadow-card"
+                  className="w-full h-full object-cover object-center"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid.webp';
+                  }}
+                />
+              </div>
+            </div>
+            {/* Text Column - Second on mobile */}
+            <div className="order-2 lg:order-2 w-full text-left min-w-0">
+              <div className="mx-auto lg:mx-0 max-w-full break-words px-2 sm:px-4 md:px-5" style={{ maxWidth: '560px' }}>
+                <span className="inline-block px-3 py-1 bg-golden-500 text-navy-500 font-semibold text-sm rounded-md">Our Mission:</span>
+                <h2 
+                  className="font-display font-extrabold text-navy-500 mt-2 break-words"
+                  style={{ fontSize: 'clamp(32px, 4vw, 40px)' }}
+                >
+                  Courage for Every Kid
+                </h2>
+                <p 
+                  className="mt-6 text-navy-600 leading-relaxed break-words"
+                  style={{ fontSize: '16px', lineHeight: '1.6' }}
+                >
+                  Every child deserves to see their mind as powerful — especially the ones who feel different.
+                </p>
+                <p 
+                  className="mt-4 text-navy-600 leading-relaxed break-words"
+                  style={{ fontSize: '16px', lineHeight: '1.6' }}
+                >
+                  Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
+                </p>
+                <div className="mt-8">
+                  <div className="w-full max-w-[360px] mx-auto lg:mx-0">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      as={Link}
+                      to="/mission"
+                      className="w-full"
+                    >
+                      Learn About the Mission
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enter the World / SEL Section */}
+      <section className="py-12 sm:py-16 md:py-24 bg-cream relative overflow-hidden pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-w-0" style={{ gridTemplateColumns: '1fr 1.2fr' }}>
+            {/* Image Column - First on mobile */}
+            <div className="order-1 lg:order-2 relative w-full min-w-0">
+              <div 
+                className="mx-auto overflow-hidden w-full max-w-full lg:max-w-[440px] rounded-[16%]"
+                style={{ aspectRatio: '1/1' }}
+              >
+                <img
+                  src="/images/SEL_Caidenshield_img.webp"
+                  alt="Caiden deflecting the dragon's energy with his courage shield — Interactive SEL Adventures"
+                  className="w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                 />
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-golden-500/20 rounded-full blur-2xl" />
               </div>
             </div>
-            <div className="order-1 lg:order-2 text-center lg:text-left">
-              <span className="inline-block px-3 py-1 bg-golden-500 text-navy-500 font-semibold text-sm rounded-md">Our Mission:</span>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mt-2">
-                Courage for Every Kid
-              </h2>
-              <p className="mt-6 text-navy-600 leading-relaxed">
-                Every child deserves to see their mind as powerful — especially the ones who feel different.
-              </p>
-              <p className="mt-4 text-navy-600 leading-relaxed">
-                Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
-              </p>
-              <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  variant="primary"
-                  size="md"
-                  as={Link}
-                  to="/mission"
+            
+            {/* Text Column - Second on mobile */}
+            <div className="order-2 lg:order-1 w-full min-w-0">
+              <div className="mx-auto lg:mx-0 max-w-full break-words px-2 sm:px-4 md:px-5" style={{ maxWidth: '560px' }}>
+                <h2 
+                  className="font-display font-extrabold text-navy-500 mb-6 text-left break-words"
+                  style={{ fontSize: 'clamp(32px, 4vw, 40px)' }}
                 >
-                  Learn About the Mission
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  as="a"
-                  href="/#characters"
+                  Discover the Courage Inside You
+                </h2>
+                <p 
+                  className="text-navy-600 leading-relaxed mb-8 text-left break-words"
+                  style={{ fontSize: '16px', lineHeight: '1.6' }}
                 >
-                  Meet the Characters
-                </Button>
+                  Step into Caiden's world with interactive social-emotional adventures that help kids think bravely, feel deeply, and grow with confidence.
+                </p>
+                <div className="w-full max-w-[360px] mx-auto lg:mx-0">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    as={Link}
+                    to="/b4-tools"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="w-full"
+                  >
+                    Start Your Brave Journey
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -1222,6 +878,152 @@ const Home = () => {
               </div>
             ))}
           </div>
+          
+          {/* Navigation Button */}
+          <div className="mt-12 sm:mt-16 text-center">
+            <Button
+              variant="primary"
+              size="lg"
+              as={Link}
+              to="/characters"
+              className="w-full sm:w-auto"
+            >
+              Meet the Characters
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-12 sm:py-20 bg-cream relative overflow-hidden">
+        {/* 3D Animated Bubbles - Organic placement near content */}
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          top: '20%',
+          left: '18%',
+          width: '22px',
+          height: '22px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
+          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '1s'
+        }}></div>
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+          bottom: '24%',
+          right: '20%',
+          width: '18px',
+          height: '18px',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #a855f7, #9333ea)',
+          boxShadow: '0 8px 16px rgba(168, 85, 247, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          animationDelay: '2.5s'
+        }}></div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Eyebrow */}
+          <div className="text-center mb-3">
+            <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
+              FROM PARENTS, CAREGIVERS & EDUCATORS
+            </p>
+          </div>
+
+          {/* Main Headline */}
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 text-center">
+            What Families Are Saying
+          </h2>
+
+          {/* Subhead */}
+          <p className="text-sm sm:text-base text-navy-400 text-center mb-10 sm:mb-12">
+            Real words from parents, educators, and creators discovering Caiden's Courage.
+          </p>
+
+          {/* Testimonials Grid */}
+          <div className="space-y-5 sm:space-y-6">
+            {/* Testimonial 1 - Slightly left-aligned on desktop */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "My child finally saw themselves in a character. That alone made this worth it."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — Parent of a 9-year-old
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 2 - Slightly right-aligned on desktop */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:ml-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "This opened up conversations about focus and feelings we couldn't have before."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — 3rd Grade Teacher
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 3 - Centered as soft closing moment */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "I met a kid at Barnes & Noble who couldn't wait to read this. He picked it up on his own and asked if he could start right there."
+                </p>
+                <p className="text-navy-400/70 text-xs sm:text-sm mt-3">
+                  — From a Barnes & Noble moment
+                </p>
+              </div>
+            </div>
+
+            {/* Testimonial 4 - New testimonial */}
+            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
+              {/* Quote Icon Badge - Top Right */}
+              <div className="absolute top-4 right-4 opacity-[0.08]">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
+                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
+                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
+                </svg>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
+                  "My son is self-taught and loves to draw, and seeing your work made him light up. He immediately wanted to know how it was made and couldn't stop asking questions. It's rare to find something that sparks both creativity and confidence like this."
+                </p>
+                <p className="text-navy-400 text-sm mt-3">
+                  — Parent of a 10-year-old
+                </p>
+              </div>
+            </div>
+
+            <p className="text-center text-navy-400 text-sm italic pt-2">
+              (More reviews coming as the Courage community grows.)
+            </p>
+          </div>
         </div>
       </section>
 
@@ -1233,7 +1035,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500">
-              Shop
+              Begin the First Adventure
             </h2>
             <p className="text-gradient font-display text-2xl sm:text-3xl lg:text-4xl font-bold mt-2">
               Caiden's Courage
@@ -1364,41 +1166,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-navy-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-xl font-extrabold">
-                <span className="text-white">Caiden's</span>
-                <span className="text-golden-400">Courage</span>
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
-              <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-white/10">
-            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
-              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link to="/#about" onClick={handleAboutClick} className="text-white/70 hover:text-white transition-colors">About</Link>
-              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
-              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
-            </div>
-            <p className="text-white/60 text-sm text-center">
-              © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (
@@ -1521,6 +1289,7 @@ const Home = () => {
               src="https://beacons.ai/stillianoblack"
               title="Caiden's Courage Pre-order"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>
