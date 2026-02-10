@@ -3,6 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 
+// Perf guard: disable heavy Home animations by default in production.
+// To re-enable them in prod, set REACT_APP_ENABLE_HOME_ANIMATIONS=true.
+const ENABLE_HOME_ANIMATIONS =
+  process.env.NODE_ENV !== 'production' ||
+  process.env.REACT_APP_ENABLE_HOME_ANIMATIONS === 'true';
+
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -186,6 +192,7 @@ const Home = () => {
 
   // Cleanup timeouts on unmount
   useEffect(() => {
+    if (!ENABLE_HOME_ANIMATIONS) return;
     return () => {
       if (closeTimeout) {
         clearTimeout(closeTimeout);
@@ -198,6 +205,7 @@ const Home = () => {
 
   // Handle keyboard navigation
   useEffect(() => {
+    if (!ENABLE_HOME_ANIMATIONS) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showResourcesDropdown) {
         setShowResourcesDropdown(false);
@@ -883,48 +891,52 @@ const Home = () => {
         id="hero"
         className="relative min-h-screen flex items-end sm:items-center bg-white pt-20 overflow-hidden"
       >
-        {/* Animated circles - spread out across entire header, hidden on mobile */}
-        <div className="absolute inset-0 z-0 hidden sm:block">
-          {/* Yellow circles */}
-          <div className="bubble w-20 h-20 top-12 left-[10%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0s' }} />
-          <div className="bubble top-40 left-[25%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2.5s' }} />
-          <div className="bubble w-16 h-16 top-68 left-[50%]" style={{ animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
-          <div className="bubble top-88 right-[30%]" style={{ width: '5.5rem', height: '5.5rem', animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3.5s' }} />
-          
-          {/* Blue circles */}
-          <div className="bubble-navy w-24 h-24 top-24 right-[15%]" style={{ animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2s' }} />
-          <div className="bubble-navy w-16 h-16 top-52 left-[35%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '4s' }} />
-          <div className="bubble-navy w-20 h-20 top-76 right-[45%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '1.5s' }} />
-          
-          {/* Orange circles */}
-          <div className="bubble-orange top-32 left-[60%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
-          <div className="bubble-orange w-20 h-20 top-60 right-[20%]" style={{ animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3s' }} />
-          <div className="bubble-orange w-14 h-14 top-84 left-[75%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2s' }} />
-        </div>
-        
-        {/* Small random circles in header - visible on all devices */}
-        <div className="absolute inset-0 z-0">
-          {/* Small yellow circles */}
-          <div className="bubble" style={{ width: '8px', height: '8px', top: '15%', left: '20%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '0s', opacity: 0.3 }} />
-          <div className="bubble" style={{ width: '10px', height: '10px', top: '45%', left: '75%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '1s', opacity: 0.25 }} />
-          <div className="bubble" style={{ width: '6px', height: '6px', top: '70%', left: '15%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '2s', opacity: 0.3 }} />
-          
-          {/* Small blue circles */}
-          <div className="bubble-navy" style={{ width: '9px', height: '9px', top: '30%', left: '60%', animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0.5s', opacity: 0.25 }} />
-          <div className="bubble-navy" style={{ width: '7px', height: '7px', top: '65%', left: '85%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.3 }} />
-          
-          {/* Small orange circles */}
-          <div className="bubble-orange" style={{ width: '8px', height: '8px', top: '55%', left: '35%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2.5s', opacity: 0.25 }} />
-          <div className="bubble-orange" style={{ width: '6px', height: '6px', top: '25%', left: '90%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '3s', opacity: 0.3 }} />
-        </div>
-        
-        {/* Mid-size circles in header to fill white space at top - visible on all devices */}
-        <div className="absolute inset-0 z-0">
-          {/* Mid-size yellow circle - top left white space */}
-          <div className="bubble" style={{ width: '40px', height: '40px', top: '10%', left: '15%', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '0s', opacity: 0.2 }} />
-          {/* Mid-size blue circle - top right white space */}
-          <div className="bubble-navy" style={{ width: '36px', height: '36px', top: '8%', right: '12%', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.2 }} />
-        </div>
+        {ENABLE_HOME_ANIMATIONS && (
+          <>
+            {/* Animated circles - spread out across entire header, hidden on mobile */}
+            <div className="absolute inset-0 z-0 hidden sm:block">
+              {/* Yellow circles */}
+              <div className="bubble w-20 h-20 top-12 left-[10%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0s' }} />
+              <div className="bubble top-40 left-[25%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2.5s' }} />
+              <div className="bubble w-16 h-16 top-68 left-[50%]" style={{ animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
+              <div className="bubble top-88 right-[30%]" style={{ width: '5.5rem', height: '5.5rem', animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3.5s' }} />
+              
+              {/* Blue circles */}
+              <div className="bubble-navy w-24 h-24 top-24 right-[15%]" style={{ animation: 'float-slow 12s ease-in-out infinite', animationDelay: '2s' }} />
+              <div className="bubble-navy w-16 h-16 top-52 left-[35%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '4s' }} />
+              <div className="bubble-navy w-20 h-20 top-76 right-[45%]" style={{ animation: 'float-slow 10s ease-in-out infinite', animationDelay: '1.5s' }} />
+              
+              {/* Orange circles */}
+              <div className="bubble-orange top-32 left-[60%]" style={{ width: '4.5rem', height: '4.5rem', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1s' }} />
+              <div className="bubble-orange w-20 h-20 top-60 right-[20%]" style={{ animation: 'float-slow 13s ease-in-out infinite', animationDelay: '3s' }} />
+              <div className="bubble-orange w-14 h-14 top-84 left-[75%]" style={{ animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2s' }} />
+            </div>
+            
+            {/* Small random circles in header - visible on all devices */}
+            <div className="absolute inset-0 z-0">
+              {/* Small yellow circles */}
+              <div className="bubble" style={{ width: '8px', height: '8px', top: '15%', left: '20%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '0s', opacity: 0.3 }} />
+              <div className="bubble" style={{ width: '10px', height: '10px', top: '45%', left: '75%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '1s', opacity: 0.25 }} />
+              <div className="bubble" style={{ width: '6px', height: '6px', top: '70%', left: '15%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '2s', opacity: 0.3 }} />
+              
+              {/* Small blue circles */}
+              <div className="bubble-navy" style={{ width: '9px', height: '9px', top: '30%', left: '60%', animation: 'float-slow 10s ease-in-out infinite', animationDelay: '0.5s', opacity: 0.25 }} />
+              <div className="bubble-navy" style={{ width: '7px', height: '7px', top: '65%', left: '85%', animation: 'float-slow 8s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.3 }} />
+              
+              {/* Small orange circles */}
+              <div className="bubble-orange" style={{ width: '8px', height: '8px', top: '55%', left: '35%', animation: 'float-slow 9s ease-in-out infinite', animationDelay: '2.5s', opacity: 0.25 }} />
+              <div className="bubble-orange" style={{ width: '6px', height: '6px', top: '25%', left: '90%', animation: 'float-slow 7s ease-in-out infinite', animationDelay: '3s', opacity: 0.3 }} />
+            </div>
+            
+            {/* Mid-size circles in header to fill white space at top - visible on all devices */}
+            <div className="absolute inset-0 z-0">
+              {/* Mid-size yellow circle - top left white space */}
+              <div className="bubble" style={{ width: '40px', height: '40px', top: '10%', left: '15%', animation: 'float-slow 12s ease-in-out infinite', animationDelay: '0s', opacity: 0.2 }} />
+              {/* Mid-size blue circle - top right white space */}
+              <div className="bubble-navy" style={{ width: '36px', height: '36px', top: '8%', right: '12%', animation: 'float-slow 11s ease-in-out infinite', animationDelay: '1.5s', opacity: 0.2 }} />
+            </div>
+          </>
+        )}
         
         {/* Hero content + CTAs - bottom on mobile, centered on desktop */}
         <div className="relative z-10 w-full pb-28 sm:pb-0 sm:py-12" style={{ paddingTop: '70px' }}>
