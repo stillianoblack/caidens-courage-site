@@ -1520,7 +1520,7 @@ a.bg-golden-500:hover,
   }
 }
 
-/* Major Publisher Hero Section */
+/* Major Publisher Hero Section - static background, no GPU-heavy effects */
 .major-publisher-hero {
   width: 100%;
   min-height: 92vh;
@@ -1529,6 +1529,7 @@ a.bg-golden-500:hover,
   align-items: center;
   padding-top: 120px;
   padding-bottom: clamp(120px, 14vh, 180px);
+  will-change: auto;
 }
 
 @media (max-width: 1023px) {
@@ -1551,6 +1552,7 @@ a.bg-golden-500:hover,
   inset: 0;
   bottom: -40px;
   z-index: 0;
+  will-change: auto;
 }
 
 .major-publisher-hero-bg img {
@@ -1558,6 +1560,7 @@ a.bg-golden-500:hover,
   height: calc(100% + 40px);
   object-fit: cover;
   object-position: center;
+  will-change: auto;
 }
 
 @media (max-width: 767px) {
@@ -1572,22 +1575,26 @@ a.bg-golden-500:hover,
     rgba(6, 18, 40, 0.5) 0%,
     rgba(6, 18, 40, 0) 60%
   );
+  will-change: auto;
 }
 
-/* Hero subtle highlight (no heavy blur or layered gradients) */
+/* Hero subtle highlight (static overlay, no blur/animation) */
 .major-publisher-stardust {
   background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
   pointer-events: none;
+  will-change: auto;
 }
 
 /* Mythic Silhouettes */
 .major-publisher-silhouettes {
   pointer-events: none;
+  will-change: auto;
 }
 
 .major-publisher-silhouette {
   position: absolute;
   color: white;
+  will-change: auto;
 }
 
 .major-publisher-dragon {
@@ -1782,7 +1789,7 @@ a.bg-golden-500:hover,
   flex-shrink: 0;
 }
 
-/* Art Column */
+/* Art Column - no transform to avoid GPU layer */
 .major-publisher-hero-art {
   position: relative;
   height: 100%;
@@ -1790,11 +1797,13 @@ a.bg-golden-500:hover,
   display: flex;
   align-items: center;
   justify-content: center;
+  will-change: auto;
 }
 
 @media (min-width: 1024px) {
   .major-publisher-hero-art {
-    transform: scale(0.9);
+    max-width: 90%;
+    margin: 0 auto;
   }
 }
 

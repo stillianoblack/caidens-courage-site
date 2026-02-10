@@ -264,12 +264,7 @@ const Home = () => {
               width={1600}
               height={817}
               className="w-full h-full object-cover"
-              style={isMobile ? {
-                objectPosition: 'center 35%',
-                transform: 'translateY(-130px)'
-              } : {
-                objectPosition: 'center 30%'
-              }}
+              style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
               loading="eager"
               decoding="async"
               onError={(e) => {
