@@ -10,6 +10,7 @@ import Home from './pages/Home';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
 const DISABLE_MOTION = process.env.REACT_APP_DISABLE_MOTION === 'true';
+const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
 
 // Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -281,7 +282,7 @@ const AppContent: React.FC = () => {
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
       </Suspense>
       <Suspense fallback={null}>
-        {showFloatingController && <FloatingAnimationController pathname={location.pathname} />}
+        {showFloatingController && !DISABLE_HEADER_ANIMATIONS && <FloatingAnimationController pathname={location.pathname} />}
       </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={null}>

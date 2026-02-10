@@ -26,8 +26,10 @@ if (typeof window !== 'undefined') {
 }
 
 const minimalCssMode = process.env.REACT_APP_MINIMAL_CSS_MODE === 'true';
-if (typeof document !== 'undefined' && document.body && minimalCssMode) {
-  document.body.classList.add('minimal-css');
+const disableHeaderAnimations = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
+if (typeof document !== 'undefined' && document.body) {
+  if (minimalCssMode) document.body.classList.add('minimal-css');
+  if (disableHeaderAnimations) document.body.classList.add('no-header-animations');
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

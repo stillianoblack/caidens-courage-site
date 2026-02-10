@@ -19,3 +19,29 @@ body.minimal-css *::after {
 html:has(body.minimal-css) {
   scroll-behavior: auto !important;
 }
+
+/*
+ * Floating/circle/blob animation kill: when body.minimal-css OR body.no-header-animations
+ * (REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true'), disable animations on header and
+ * common decorative animation elements (B-4 page, Product, Home, etc.).
+ */
+body.minimal-css nav.fixed,
+body.minimal-css .circle-accent,
+body.minimal-css .animate-float,
+body.minimal-css .floating,
+body.minimal-css .blob,
+body.minimal-css .bg-orb,
+body.minimal-css [data-anim],
+body.minimal-css [data-float],
+body.no-header-animations nav.fixed,
+body.no-header-animations .circle-accent,
+body.no-header-animations .animate-float,
+body.no-header-animations .floating,
+body.no-header-animations .blob,
+body.no-header-animations .bg-orb,
+body.no-header-animations [data-anim],
+body.no-header-animations [data-float] {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}

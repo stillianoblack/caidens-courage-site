@@ -3,6 +3,8 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import { SAFE_MODE } from '../lib/safeMode';
 
+const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
+
 interface HeaderProps {
   onComingSoonClick?: () => void;
 }
@@ -451,7 +453,10 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-[background-color,box-shadow] duration-200 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 ${DISABLE_HEADER_ANIMATIONS ? '' : 'backdrop-blur-md transition-[background-color,box-shadow] duration-200'} ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`}
+        style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Left Cluster: Logo + Navigation */}
@@ -558,15 +563,15 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       </nav>
 
       {/* Mobile Menu - Full Screen, Slides from Left */}
-      <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-200 ${
+      <div
+        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden ${DISABLE_HEADER_ANIMATIONS ? '' : 'transition-opacity duration-200'} ${
           isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
       >
         {/* Full Screen Menu Panel - Slides from Left */}
-        <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-200 ease-out ${
+        <div
+          className={`absolute inset-0 bg-white ${DISABLE_HEADER_ANIMATIONS ? '' : 'transform transition-transform duration-200 ease-out'} ${
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
           onClick={(e) => e.stopPropagation()}
@@ -776,8 +781,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
       {/* Pre-order Modal */}
       {isPreorderOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 ${DISABLE_HEADER_ANIMATIONS ? '' : 'backdrop-blur-sm'}`}
           onClick={() => setIsPreorderOpen(false)}
         >
           <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 sm:p-10 max-h-[90vh] overflow-y-auto">
