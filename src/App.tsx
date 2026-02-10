@@ -9,6 +9,7 @@ import { SAFE_MODE } from './lib/safeMode';
 import Home from './pages/Home';
 
 const ROUTE_TRANSITION = { duration: 0.12 };
+const DISABLE_MOTION = process.env.REACT_APP_DISABLE_MOTION === 'true';
 
 // Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -136,8 +137,9 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  // Animations: enable after idle so route render/paint happens first.
+  // Animations: enable after idle so route render/paint happens first (no-op when REACT_APP_DISABLE_MOTION).
   useEffect(() => {
+    if (DISABLE_MOTION) return;
     const enable = () => {
       setEnableMotion(true);
       setExitingLocation(null);
@@ -284,7 +286,7 @@ const AppContent: React.FC = () => {
       <ChunkErrorBoundary>
         <Suspense fallback={null}>
           <div style={{ position: 'relative' }}>
-            {enableMotion ? (
+            {enableMotion && !DISABLE_MOTION ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
               <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
                 {exitingLocation != null && (
