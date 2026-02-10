@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -243,35 +244,39 @@ const Home = () => {
           alignItems: isMobile ? 'flex-start' : undefined
         }}
       >
-        {/* Background Image — responsive WebP srcset, no lazy load (LCP). Explicit width/height to prevent layout shift. */}
+        {/* Background — image or solid when REACT_APP_DISABLE_HEROES */}
         <div className="major-publisher-hero-bg absolute inset-0 z-0">
-          <picture>
-            <source
-              media="(max-width: 768px)"
-              type="image/webp"
-              srcSet="/images/heroes/hero-bg_mobile_400w.webp 400w, /images/heroes/hero-bg_mobile_600w.webp 600w, /images/heroes/hero-bg_mobile_800w.webp 800w"
-              sizes="100vw"
-            />
-            <source
-              media="(min-width: 769px)"
-              type="image/webp"
-              srcSet="/images/heroes/hero-bg_desktop_640w.webp 640w, /images/heroes/hero-bg_desktop_960w.webp 960w, /images/heroes/hero-bg_desktop_1280w.webp 1280w, /images/heroes/hero-bg_desktop_1600w.webp 1600w"
-              sizes="100vw"
-            />
-            <img
-              src={isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp'}
-              alt="Caiden falling through a fantastical sky"
-              width={1600}
-              height={817}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
-              loading="eager"
-              decoding="async"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp';
-              }}
-            />
-          </picture>
+          {DISABLE_HEROES ? (
+            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+          ) : (
+            <picture>
+              <source
+                media="(max-width: 768px)"
+                type="image/webp"
+                srcSet="/images/heroes/hero-bg_mobile_400w.webp 400w, /images/heroes/hero-bg_mobile_600w.webp 600w, /images/heroes/hero-bg_mobile_800w.webp 800w"
+                sizes="100vw"
+              />
+              <source
+                media="(min-width: 769px)"
+                type="image/webp"
+                srcSet="/images/heroes/hero-bg_desktop_640w.webp 640w, /images/heroes/hero-bg_desktop_960w.webp 960w, /images/heroes/hero-bg_desktop_1280w.webp 1280w, /images/heroes/hero-bg_desktop_1600w.webp 1600w"
+                sizes="100vw"
+              />
+              <img
+                src={isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp'}
+                alt="Caiden falling through a fantastical sky"
+                width={1600}
+                height={817}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
+                loading="eager"
+                decoding="async"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp';
+                }}
+              />
+            </picture>
+          )}
         </div>
         
         {/* Gradient Overlay */}

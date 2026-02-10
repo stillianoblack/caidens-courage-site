@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { afterPaint } from '../lib/defer';
+import { DISABLE_HEROES } from '../config/heroes';
 
 const ENABLE_PRELOADS = process.env.REACT_APP_ENABLE_PRELOADS === 'true';
 const ROUTE_HERO_PRELOAD_ID = 'route-hero-preload';
@@ -25,6 +26,12 @@ const RouteHeroPreload: React.FC = () => {
 
   useEffect(() => {
     if (!ENABLE_PRELOADS) return;
+    if (DISABLE_HEROES) {
+      const link = document.getElementById(ROUTE_HERO_PRELOAD_ID);
+      if (link?.parentNode) link.parentNode.removeChild(link);
+      currentHrefRef.current = null;
+      return;
+    }
 
     const pathname = location.pathname;
     afterPaint(() => {
@@ -57,7 +64,7 @@ const RouteHeroPreload: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!ENABLE_PRELOADS) return;
+    if (!ENABLE_PRELOADS || DISABLE_HEROES) return;
     return () => {
       const link = document.getElementById(ROUTE_HERO_PRELOAD_ID);
       if (link?.parentNode) link.parentNode.removeChild(link);

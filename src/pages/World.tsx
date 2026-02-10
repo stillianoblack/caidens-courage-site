@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -41,32 +42,36 @@ const World: React.FC = () => {
           justifyContent: 'flex-start',
         }}
       >
-        {/* Hero image layer — full bleed, LCP */}
+        {/* Hero image layer — or solid when REACT_APP_DISABLE_HEROES */}
         <div className="absolute inset-0 z-0">
-          <picture>
-            <source
-              media="(max-width: 768px)"
-              type="image/webp"
-              srcSet="/images/heroes/world_hero_mobile_400w.webp 400w, /images/heroes/world_hero_mobile_600w.webp 600w, /images/heroes/world_hero_mobile_800w.webp 800w"
-              sizes="100vw"
-            />
-            <source
-              media="(min-width: 769px)"
-              type="image/webp"
-              srcSet="/images/heroes/world_hero_desktop_640w.webp 640w, /images/heroes/world_hero_desktop_960w.webp 960w, /images/heroes/world_hero_desktop_1280w.webp 1280w, /images/heroes/world_hero_desktop_1600w.webp 1600w"
-              sizes="100vw"
-            />
-            <img
-              src={isMobile ? '/images/Headers_world_mobile.webp' : '/images/backgrounds/background_caidensworld_img.webp'}
-              alt=""
-              width={1600}
-              height={900}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: isMobile ? 'center top' : 'right top' }}
-              loading="eager"
-              decoding="async"
-            />
-          </picture>
+          {DISABLE_HEROES ? (
+            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+          ) : (
+            <picture>
+              <source
+                media="(max-width: 768px)"
+                type="image/webp"
+                srcSet="/images/heroes/world_hero_mobile_400w.webp 400w, /images/heroes/world_hero_mobile_600w.webp 600w, /images/heroes/world_hero_mobile_800w.webp 800w"
+                sizes="100vw"
+              />
+              <source
+                media="(min-width: 769px)"
+                type="image/webp"
+                srcSet="/images/heroes/world_hero_desktop_640w.webp 640w, /images/heroes/world_hero_desktop_960w.webp 960w, /images/heroes/world_hero_desktop_1280w.webp 1280w, /images/heroes/world_hero_desktop_1600w.webp 1600w"
+                sizes="100vw"
+              />
+              <img
+                src={isMobile ? '/images/Headers_world_mobile.webp' : '/images/backgrounds/background_caidensworld_img.webp'}
+                alt=""
+                width={1600}
+                height={900}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: isMobile ? 'center top' : 'right top' }}
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
+          )}
         </div>
         {/* Top Gradient Overlay */}
         <div

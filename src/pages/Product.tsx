@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -234,7 +235,13 @@ const Product: React.FC = () => {
                   }
                 }}
               >
-                {galleryImages[selectedImageIndex].heroSrcSet ? (
+                {DISABLE_HEROES ? (
+                  <div
+                    className="w-full mx-auto bg-navy-500"
+                    style={{ aspectRatio: '742/494', maxWidth: 742 }}
+                    aria-hidden="true"
+                  />
+                ) : galleryImages[selectedImageIndex].heroSrcSet ? (
                   <picture>
                     <source
                       type="image/webp"
