@@ -553,7 +553,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* CTA - router-native Link */}
               <Link
                 to="/comicbook"
-                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm px-4 lg:px-5 !min-w-0 inline-flex items-center justify-center font-bold rounded-lg bg-golden-500 hover:bg-golden-400 text-navy-500 transition-colors"
+                className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-500 transition-colors shadow-md hover:shadow-lg"
               >
                 Pre-Order Volume 1
               </Link>
