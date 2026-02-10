@@ -1,0 +1,10 @@
+/* Minimal CSS overrides for SAFE_MODE / minimal-css runs.
+ * Intentionally tiny so that importing this file never breaks builds,
+ * even if the original overrides are trimmed down.
+ */
+
+body.minimal-css {
+  /* Keep background consistent but avoid heavy global styles. */
+  background-color: #fdfaf4;
+}
+

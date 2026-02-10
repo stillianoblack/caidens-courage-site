@@ -6,7 +6,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { SAFE_MODE } from './lib/safeMode';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // Minimal sync setup only; heavy and non-critical work runs after idle (see below).
 // Enable extra navigation debug logs in development only.
@@ -75,9 +74,6 @@ scheduleWhenIdle(() => {
     setTabActive();
     document.addEventListener('visibilitychange', setTabActive);
   }
-
-  // Service worker: unregister so users get fresh bundles.
-  serviceWorkerRegistration.unregister().catch(() => {});
 
   if (process.env.NODE_ENV !== 'production') {
     try {

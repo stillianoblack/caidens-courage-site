@@ -1,0 +1,9 @@
+/* Placeholder motion-safe stylesheet.
+ * This file previously lived in the project when motion/animation utilities were split out.
+ * It is kept minimal here so imports from index.js do not break builds.
+ */
+
+/* Ensure the file participates in the bundle without changing layout. */
+:root {
+}
+
