@@ -5,10 +5,10 @@
  */
 
 /**
- * Register service worker. No-op: registration is disabled so users do not get stale cached JS/CSS.
+ * Register service worker. Calls unregister() instead so we never register; users always get fresh bundles.
  */
 export function register() {
-  // UNREGISTER by default: do not register a service worker.
+  unregister().catch(() => {});
 }
 
 /**

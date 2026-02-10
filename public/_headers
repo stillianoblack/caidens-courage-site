@@ -1,19 +1,7 @@
-# Hashed static assets: long-term immutable caching
+# Hashed static assets only (JS/CSS in /static/): immutable long-term caching
 /static/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/images/*
   Cache-Control: public, max-age=31536000, immutable
 
 # HTML and SPA routes: never cache so users always get latest deploy
 /*
   Cache-Control: public, max-age=0, must-revalidate
-
-# Service worker files (if present): do not cache
-/sw.js
-  Cache-Control: no-store, no-cache, must-revalidate
-/service-worker.js
-  Cache-Control: no-store, no-cache, must-revalidate
