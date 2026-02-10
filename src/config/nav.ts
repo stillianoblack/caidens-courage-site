@@ -1,5 +1,6 @@
-// Navigation configuration for desktop and mobile
-// All internal links use React Router <Link> (never <a>). No hover prefetch (avoids ChunkLoadError in dev). No loading="lazy" on Links – only on images where appropriate.
+// Navigation configuration for desktop and mobile.
+// All internal links use React Router <Link> / <NavLink> / useNavigate() only.
+// No window.history.pushState, replaceState, or <a href="/path"> for in-app routes.
 
 export interface NavItem {
   label: string;
