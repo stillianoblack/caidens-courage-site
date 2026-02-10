@@ -1,0 +1,50 @@
+[
+  {
+    "id": "camp_courage",
+    "title": "What is Camp Courage?",
+    "answer": "Camp Courage is a Courage Academy experience with guided SEL missions, companion activities, and classroom pilots for educators and caregivers. It's a calm, welcoming space for kids to practice courage — together with the adults who support them.",
+    "keywords": ["camp courage", "courage camp", "what is camp courage", "courage academy", "what is camp", "guided sel missions", "companion activities", "classroom pilots"]
+  },
+  {
+    "id": "resources_free",
+    "title": "Are these resources free?",
+    "answer": "Yes. All resources on this page are free to download and designed to support courage, creativity, and neurodiverse kids.",
+    "keywords": ["free", "cost", "pricing", "pay", "download free", "are these free", "resources free"]
+  },
+  {
+    "id": "classroom_use",
+    "title": "How do I use these in class?",
+    "answer": "Many resources are designed for classroom use. Look for the 'Classroom & Home' or 'Classroom' tag on resource cards. SEL worksheets can be used one-on-one, in small groups, or as a class activity. Each worksheet includes guidance for use at home or in the classroom.",
+    "keywords": ["classroom", "use in class", "how do i use", "class", "students", "lesson", "school", "teacher"]
+  },
+  {
+    "id": "ages",
+    "title": "What ages are these for?",
+    "answer": "Most resources are designed for ages 6-12, but many can be adapted for younger or older kids. Check the age range on each resource card.",
+    "keywords": ["ages", "age", "7-12", "grade", "elementary", "middle school", "what ages"]
+  },
+  {
+    "id": "printables",
+    "title": "Printables for ages 7-12?",
+    "answer": "For printables for ages 7-12, check the Resources page at /resources. You can filter by type (coloring pages, wallpapers, worksheets, teacher packs) and by audience (For Kids, For Parents, For Teachers). All resources are free to download with no login required.",
+    "keywords": ["printables", "printable", "7-12", "ages 7-12", "download", "worksheets", "coloring pages"]
+  },
+  {
+    "id": "educator_access",
+    "title": "How do I request educator access?",
+    "answer": "To request educator access, visit the Camp Courage page and click 'Request Educator Access'. This will scroll to the FOR PARENTS + EDUCATORS section where you can unlock printable guides, prompts, and pilot resources.",
+    "keywords": ["educator access", "request access", "teacher access", "educator", "parent access"]
+  },
+  {
+    "id": "what_is_courage",
+    "title": "What is courage?",
+    "answer": "Courage looks like doing things your own way. At Caiden's Courage, we believe courage means understanding your emotions, celebrating your unique strengths, and showing up bravely in everyday moments—even when things feel hard.",
+    "keywords": ["what is courage", "courage", "definition", "what does courage mean"]
+  },
+  {
+    "id": "b4_tools",
+    "title": "What are B-4 Reset Tools?",
+    "answer": "B-4 Reset Tools are short, supportive resets that help kids notice feelings and find calm—one step at a time. The tools help children pause, identify how their body feels, and take a small step toward regulation. Each interaction follows a simple flow: notice → acknowledge → reset.",
+    "keywords": ["b-4", "b4", "reset tools", "reset", "calm", "tools", "what are b-4"]
+  }
+]

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
@@ -14,9 +14,9 @@ const Terms: React.FC = () => {
     document.title = "Terms of Service | Caiden's Courage";
   }, []);
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   const handleWaitlistClick = () => {
     const url = getWaitlistUrl();
@@ -296,6 +296,7 @@ const Terms: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               className="w-full h-[600px] border-0 rounded-lg"
               title="Join the Courage Community"
+              loading="lazy"
             />
           </div>
         </div>

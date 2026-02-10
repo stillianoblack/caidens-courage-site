@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { afterIdle } from '../lib/defer';
+import { SAFE_MODE } from '../lib/safeMode';
 
 // Preview page data
 const PREVIEW_PAGES = [
-  { id: 1, image: '/previews/page-01.jpg', alt: 'Preview page 1' },
-  { id: 2, image: '/previews/page-02.jpg', alt: 'Preview page 2' },
-  { id: 3, image: '/previews/page-03.jpg', alt: 'Preview page 3' },
-  { id: 4, image: '/previews/page-04.jpg', alt: 'Preview page 4' },
-  { id: 5, image: '/previews/page-05.jpg', alt: 'Preview page 5' },
+  { id: 1, image: '/images/page-01.webp', alt: 'Preview page 1' },
+  { id: 2, image: '/images/page-02.webp', alt: 'Preview page 2' },
+  { id: 3, image: '/images/page-03.webp', alt: 'Preview page 3' },
+  { id: 4, image: '/images/page-04.webp', alt: 'Preview page 4' },
+  { id: 5, image: '/images/page-05.webp', alt: 'Preview page 5' },
 ];
 
 // Gentle anchor messages between pages
@@ -21,12 +25,10 @@ const ANCHOR_MESSAGES: Record<number, string> = {
 };
 
 const Preview = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [, setIsScrolled] = useState(false);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set());
   
@@ -37,7 +39,8 @@ const Preview = () => {
   const [panY, setPanY] = useState(0);
   const [isFitted, setIsFitted] = useState(true);
   const [showHelperText, setShowHelperText] = useState(false);
-  
+  const prevScrolledRef = useRef<boolean | null>(null);
+
   // Touch gesture tracking
   const touchStartDistance = useRef<number | null>(null);
   const touchStartCenter = useRef<{ x: number; y: number } | null>(null);
@@ -46,76 +49,101 @@ const Preview = () => {
   const isPanning = useRef<boolean>(false);
   const swipeStartY = useRef<number | null>(null);
   const initialZoomLevel = useRef<number>(1);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showMobileResourcesDropdown, setShowMobileResourcesDropdown] = useState(false);
-  const [showMobileShopDropdown, setShowMobileShopDropdown] = useState(false);
-  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
   const totalPages = PREVIEW_PAGES.length;
 
-  // Handle scroll for navigation styling
+  // Handle scroll for nav styling (UI state only; throttled). Defer to idle so route render/paint happens first.
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (SAFE_MODE || reduceMotion) return;
+
+    let cancelled = false;
+    let ticking = false;
+    const handlerRef = { current: null as (() => void) | null };
+    const schedule = () => {
+      if (cancelled) return;
+      const handleScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          const scrolled = window.scrollY > 20;
+          if (prevScrolledRef.current !== scrolled) {
+            prevScrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+          }
+          ticking = false;
+        });
+      };
+      handlerRef.current = handleScroll;
+      window.addEventListener('scroll', handleScroll, { passive: true });
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const id =
+      typeof (window as any).requestIdleCallback !== 'undefined'
+        ? (window as any).requestIdleCallback(schedule, { timeout: 600 })
+        : (setTimeout(schedule, 400) as unknown as number);
+
+    return () => {
+      cancelled = true;
+      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
+      else clearTimeout(id);
+      const h = handlerRef.current;
+      if (h) window.removeEventListener('scroll', h);
+    };
   }, []);
 
-  // Cleanup timeouts on unmount
+  // Check if image exists when page changes; defer to idle so it never blocks nav or first paint.
+  const imageCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    return () => {
-      if (closeTimeout) clearTimeout(closeTimeout);
-      if (shopCloseTimeout) clearTimeout(shopCloseTimeout);
-    };
-  }, [closeTimeout, shopCloseTimeout]);
+    const page = currentPage;
+    const currentImageSrc = PREVIEW_PAGES[page - 1]?.image;
+    if (!currentImageSrc) return;
 
-  // Check if image exists when page changes - add timeout to detect missing images
-  useEffect(() => {
-    const currentImageSrc = PREVIEW_PAGES[currentPage - 1].image;
-    const img = new Image();
-    let timeoutId: NodeJS.Timeout;
+    let cancelled = false;
 
-    // Set timeout to show error if image doesn't load within 3 seconds
-    timeoutId = setTimeout(() => {
-      setImageErrors(prev => {
-        if (!prev.has(currentPage)) {
-          return new Set(prev).add(currentPage);
-        }
-        return prev;
-      });
-    }, 3000);
+    afterIdle(() => {
+      if (cancelled) return;
+      const img = new Image();
+      imageCheckTimeoutRef.current = setTimeout(() => {
+        if (cancelled) return;
+        setImageErrors(prev => (prev.has(page) ? prev : new Set(prev).add(page)));
+      }, 3000);
 
-    img.onload = () => {
-      clearTimeout(timeoutId);
-      setImagesLoaded(prev => new Set(prev).add(currentPage));
-      setImageErrors(prev => {
-        const next = new Set(prev);
-        next.delete(currentPage);
-        return next;
-      });
-    };
+      img.onload = () => {
+        if (cancelled) return;
+        if (imageCheckTimeoutRef.current) clearTimeout(imageCheckTimeoutRef.current);
+        setImagesLoaded(prev => new Set(prev).add(page));
+        setImageErrors(prev => {
+          const next = new Set(prev);
+          next.delete(page);
+          return next;
+        });
+      };
 
-    img.onerror = () => {
-      clearTimeout(timeoutId);
-      setImageErrors(prev => new Set(prev).add(currentPage));
-      setImagesLoaded(prev => {
-        const next = new Set(prev);
-        next.delete(currentPage);
-        return next;
-      });
-    };
+      img.onerror = () => {
+        if (cancelled) return;
+        if (imageCheckTimeoutRef.current) clearTimeout(imageCheckTimeoutRef.current);
+        setImageErrors(prev => new Set(prev).add(page));
+        setImagesLoaded(prev => {
+          const next = new Set(prev);
+          next.delete(page);
+          return next;
+        });
+      };
 
-    img.src = currentImageSrc;
+      img.src = currentImageSrc;
+    });
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
+      if (imageCheckTimeoutRef.current) {
+        clearTimeout(imageCheckTimeoutRef.current);
+        imageCheckTimeoutRef.current = null;
+      }
     };
   }, [currentPage]);
 
@@ -342,14 +370,9 @@ const Preview = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
-
-  const handleLogoClick = () => {
-    navigate('/');
-    window.scrollTo(0, 0);
-  };
+  }, []);
 
   // Check if anchor message should show for current page
   const shouldShowAnchorMessage = (pageNumber: number) => {
@@ -362,529 +385,7 @@ const Preview = () => {
 
   return (
     <div className="min-h-screen bg-cream font-body">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3">
-              {/* Hamburger Menu Button - Mobile only */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              
-              <Link 
-                to="/"
-                onClick={handleLogoClick}
-                className="inline-block hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="/logoCaiden.png" 
-                  alt="Caiden's Courage" 
-                  className="h-10 sm:h-12 w-auto"
-                />
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation - Only visible on desktop (lg and up) */}
-            <nav className="hidden lg:flex items-center gap-8">
-              <Link 
-                to="/mission" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
-              >
-                Mission
-              </Link>
-              <Link 
-                to="/#about"
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                About
-              </Link>
-              <Link 
-                to="/#characters" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Characters
-              </Link>
-              
-              {/* Shop Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={() => {
-                  if (shopCloseTimeout) {
-                    clearTimeout(shopCloseTimeout);
-                    setShopCloseTimeout(null);
-                  }
-                  setShowShopDropdown(true);
-                }}
-                onMouseLeave={() => {
-                  const timeout = setTimeout(() => {
-                    setShowShopDropdown(false);
-                  }, 200);
-                  setShopCloseTimeout(timeout);
-                }}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowShopDropdown(!showShopDropdown);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowShopDropdown(!showShopDropdown);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showShopDropdown}
-                >
-                  Shop
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showShopDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={() => {
-                    if (shopCloseTimeout) {
-                      clearTimeout(shopCloseTimeout);
-                      setShopCloseTimeout(null);
-                    }
-                    setShowShopDropdown(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowShopDropdown(false);
-                    }, 200);
-                    setShopCloseTimeout(timeout);
-                  }}
-                >
-                  <Link
-                    to="/comicbook"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">Comic Book</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Resources Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={() => {
-                  if (closeTimeout) {
-                    clearTimeout(closeTimeout);
-                    setCloseTimeout(null);
-                  }
-                  setShowResourcesDropdown(true);
-                }}
-                onMouseLeave={() => {
-                  const timeout = setTimeout(() => {
-                    setShowResourcesDropdown(false);
-                  }, 200);
-                  setCloseTimeout(timeout);
-                }}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowResourcesDropdown(!showResourcesDropdown);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setShowResourcesDropdown(!showResourcesDropdown);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup="true"
-                  aria-expanded={showResourcesDropdown}
-                >
-                  Resources
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showResourcesDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                  onMouseEnter={() => {
-                    if (closeTimeout) {
-                      clearTimeout(closeTimeout);
-                      setCloseTimeout(null);
-                    }
-                    setShowResourcesDropdown(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setShowResourcesDropdown(false);
-                    }, 200);
-                    setCloseTimeout(timeout);
-                  }}
-                >
-                  <Link
-                    to="/resources?audience=kids"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Kids</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Parents</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Teachers</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">All Resources</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              <Link
-                to="/comicbook" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Comic Book
-              </Link>
-            </nav>
-            
-            {/* Action Area - Contact (desktop only) + Join Waitlist Button */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-              {/* Contact Link - Desktop only */}
-              <a 
-                href="mailto:stills@caidenscourage.com" 
-                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Contact
-              </a>
-              {/* Join Waitlist Button - All screens, responsive padding */}
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleWaitlistClick}
-                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
-              >
-                Join Courage Community
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Menu - Full Screen, Slides from Left, Under Navigation - Visible up to lg (1024px) for iPad portrait */}
-      <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        {/* Full Screen Menu Panel - Slides from Left */}
-        <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Menu Items - Centered */}
-          <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
-            <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
-              <Link
-                to="/comicbook"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Comic Book</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/mission"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
-              >
-                <span>Mission</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#about"
-                onClick={(e) => {
-                  setIsMobileMenuOpen(false);
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>About</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#characters"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Characters</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              {/* Shop Dropdown in Mobile Menu */}
-              <div className="border-b border-navy-100">
-                <button
-                  onClick={() => setShowMobileShopDropdown(!showMobileShopDropdown)}
-                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
-                >
-                  <span>Shop</span>
-                  <svg 
-                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  showMobileShopDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                  <Link
-                    to="/comicbook"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">Comic Book</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">T-shirts <span className="text-base font-normal">— Coming Soon</span></div>
-                    <div className="text-sm text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">Plushies <span className="text-base font-normal">— Coming Soon</span></div>
-                    <div className="text-sm text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Resources Dropdown in Mobile Menu */}
-              <div className="border-b border-navy-100">
-                <button
-                  onClick={() => setShowMobileResourcesDropdown(!showMobileResourcesDropdown)}
-                  className="w-full px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors flex items-center justify-between rounded-lg"
-                >
-                  <span>Resources</span>
-                  <svg 
-                    className={`w-7 h-7 text-navy-400 transition-transform duration-300 ${showMobileResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  showMobileResourcesDropdown ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}>
-                  <Link
-                    to="/resources?audience=kids"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Kids</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Parents</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-lg">For Teachers</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setShowMobileResourcesDropdown(false);
-                    }}
-                    className="block px-12 py-4 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-4"
-                  >
-                    <div className="font-semibold text-lg">All Resources</div>
-                    <div className="text-sm text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* CTA Button in Mobile Menu */}
-              <div className="px-6 py-6 mt-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Join the Courage Community
-                </Button>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
+      <Header onComingSoonClick={handleComingSoonClick} />
 
       {/* Main Content */}
       <main className="pt-20 sm:pt-24 pb-16">
@@ -901,10 +402,12 @@ const Preview = () => {
             }}
           >
             <img 
-              src="/b4-watermark.svg" 
+              src="/images/ui/b4-watermark.svg" 
               alt="" 
               className="w-full h-full"
               style={{ filter: 'blur(0.5px)' }}
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -1020,6 +523,7 @@ const Preview = () => {
                         aspectRatio: '3/4',
                         maxHeight: '75vh'
                       }}
+                      decoding="async"
                       onLoad={() => {
                         setImagesLoaded(prev => new Set(prev).add(currentPage));
                         setImageErrors(prev => {
@@ -1183,6 +687,7 @@ const Preview = () => {
               className="max-w-full max-h-[100vh] object-contain"
               draggable={false}
               style={{ userSelect: 'none' }}
+              decoding="async"
             />
           </div>
         </div>
@@ -1256,63 +761,14 @@ const Preview = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>
       )}
 
       {/* Footer */}
-      <footer className="bg-navy-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-xl font-extrabold">
-                <span className="text-white">Caiden's</span>
-                <span className="text-golden-400">Courage</span>
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
-              <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-white/70 hover:text-white transition-colors">
-                Terms of Service
-              </Link>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-white/10">
-            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
-              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link 
-                to="/#about" 
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="text-white/70 hover:text-white transition-colors"
-              >
-                About
-              </Link>
-              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
-              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
-            </div>
-            <p className="text-white/60 text-sm text-center">
-              © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

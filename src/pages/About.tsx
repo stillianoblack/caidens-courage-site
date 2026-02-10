@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import SecondaryPageHeader from '../components/SecondaryPageHeader';
+import { SAFE_MODE } from '../lib/safeMode';
 
 const About: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const About: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const prevScrolledRef = useRef<boolean | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
@@ -21,13 +23,45 @@ const About: React.FC = () => {
     document.title = "About | Caiden's Courage";
   }, []);
 
-  // Handle scroll for navigation styling
+  // Handle scroll for nav styling (UI state only; throttled). Defer to idle so route render/paint happens first.
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (SAFE_MODE || reduceMotion) return;
+
+    let cancelled = false;
+    let ticking = false;
+    const handlerRef = { current: null as (() => void) | null };
+    const schedule = () => {
+      if (cancelled) return;
+      const handleScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          if (cancelled) return;
+          const scrolled = window.scrollY > 20;
+          if (prevScrolledRef.current !== scrolled) {
+            prevScrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+          }
+          ticking = false;
+        });
+      };
+      handlerRef.current = handleScroll;
+      window.addEventListener('scroll', handleScroll, { passive: true });
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const id =
+      typeof (window as any).requestIdleCallback !== 'undefined'
+        ? (window as any).requestIdleCallback(schedule, { timeout: 600 })
+        : (setTimeout(schedule, 400) as unknown as number);
+
+    return () => {
+      cancelled = true;
+      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
+      else clearTimeout(id);
+      const h = handlerRef.current;
+      if (h) window.removeEventListener('scroll', h);
+    };
   }, []);
 
   const handleLogoClick = () => {
@@ -41,9 +75,9 @@ const About: React.FC = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
+  }, []);
 
   // Dropdown handlers
   const handleMouseEnter = () => {
@@ -118,10 +152,15 @@ const About: React.FC = () => {
                 onClick={handleLogoClick}
                 className="inline-block hover:opacity-80 transition-opacity"
               >
-                <img 
-                  src="/logoCaiden.png" 
-                  alt="Caiden's Courage" 
+                <img
+                  src="/images/ui/logoCaiden_480w.webp"
+                  srcSet="/images/ui/logoCaiden_240w.webp 240w, /images/ui/logoCaiden_480w.webp 480w"
+                  sizes="(max-width: 640px) 180px, 213px"
+                  width={213}
+                  height={80}
+                  alt="Caiden's Courage"
                   className="h-10 sm:h-12 w-auto"
+                  decoding="async"
                 />
               </Link>
             </div>
@@ -129,7 +168,7 @@ const About: React.FC = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
               <Link 
-                to="/mission" 
+                to="/mission"
                 className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive('/mission') ? 'font-bold border-b-2 border-golden-500' : ''}`}
               >
                 Mission
@@ -304,10 +343,10 @@ const About: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={handleWaitlistClick}
+                onClick={() => navigate('/comicbook')}
                 className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
               >
-                Join Courage Community
+                Pre-Order Volume 1
               </Button>
             </div>
           </div>
@@ -425,11 +464,11 @@ const About: React.FC = () => {
                   size="lg"
                   fullWidth
                   onClick={() => {
-                    handleWaitlistClick();
+                    navigate('/comicbook');
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Join the Courage Community
+                  Pre-Order Volume 1
                 </Button>
               </div>
             </div>
@@ -572,6 +611,7 @@ const About: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>
