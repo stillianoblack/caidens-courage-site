@@ -728,13 +728,13 @@ const Home = () => {
                 style={{ aspectRatio: '1/1' }}
               >
                 <img
-                  src="/images/Courageforeverykid.webp"
+                  src="/images/Courageforeverykid_1.webp"
                   alt="Caiden celebrating - Courage for Every Kid"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid.webp';
+                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid_1.webp';
                   }}
                 />
               </div>
