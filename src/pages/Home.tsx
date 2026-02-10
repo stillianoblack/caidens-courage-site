@@ -307,9 +307,11 @@ const Home = () => {
           </svg>
         </div>
         
-        {/* Content - Aligned to Global Grid */}
-        <div className="hero-container relative z-10 w-full flex flex-col md:block">
-          <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
+        {/* Content - aligned to global nav grid and vertically centered */}
+        <div className="relative z-10 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center min-h-[calc(92vh-120px)]">
+              <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
             <div 
               className="text-xs sm:text-sm font-semibold uppercase"
@@ -324,59 +326,61 @@ const Home = () => {
               INTRODUCING THE WORLD OF CAIDEN
             </div>
             
-            {/* Headline */}
-            <h1 
-              className="font-display font-extrabold text-white"
-              style={{ 
-                fontSize: 'clamp(44px, 5vw, 64px)',
-                lineHeight: '1.05',
-                letterSpacing: '-1px',
-                marginBottom: '16px'
-              }}
-            >
-              Every Hero Starts Somewhere.
-            </h1>
+                {/* Headline */}
+                <h1 
+                  className="font-display font-extrabold text-white"
+                  style={{ 
+                    fontSize: 'clamp(44px, 5vw, 64px)',
+                    lineHeight: '1.05',
+                    letterSpacing: '-1px',
+                    marginBottom: '16px'
+                  }}
+                >
+                  Every Hero Starts Somewhere.
+                </h1>
             
-            {/* Subheader */}
-            <p 
-              className="text-white font-medium"
-              style={{ 
-                fontSize: '22px',
-                lineHeight: '1.4',
-                marginBottom: '12px',
-                opacity: 0.92
-              }}
-            >
-              An illustrated adventure where imagination, courage, and ancient mysteries collide.
-            </p>
+                {/* Subheader */}
+                <p 
+                  className="text-white font-medium"
+                  style={{ 
+                    fontSize: '22px',
+                    lineHeight: '1.4',
+                    marginBottom: '12px',
+                    opacity: 0.92
+                  }}
+                >
+                  An illustrated adventure where imagination, courage, and ancient mysteries collide.
+                </p>
 
-            {/* CTA Row */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handlePreorderClick}
-                className="w-full sm:w-auto"
-              >
-                Pre-Order Volume 1
-              </Button>
-              <Button
-                variant="secondary"
-                size="md"
-                as={Link}
-                to="/world"
-                className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
-              >
-                Explore the World
-              </Button>
-            </div>
+                {/* CTA Row */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={handlePreorderClick}
+                    className="w-full sm:w-auto"
+                  >
+                    Pre-Order Volume 1
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    as={Link}
+                    to="/world"
+                    className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+                  >
+                    Explore the World
+                  </Button>
+                </div>
 
-            {/* Trust Line */}
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
-              </svg>
-              <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
+                {/* Trust Line */}
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
+                  </svg>
+                  <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
