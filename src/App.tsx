@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { runAfterPaint } from './lib/safeMode';
@@ -65,7 +65,6 @@ const routeList = (
 const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
 
 const AppContent: React.FC = () => {
-  const location = useLocation();
   const [showChat, setShowChat] = useState(false);
 
   // B-4 chat: mount only after first paint + idle (never block nav or first paint).
@@ -108,7 +107,7 @@ const AppContent: React.FC = () => {
       </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={null}>
-          <Routes key={location.pathname}>{routeList}</Routes>
+          <Routes>{routeList}</Routes>
         </Suspense>
       </ChunkErrorBoundary>
     </>
@@ -117,16 +116,17 @@ const AppContent: React.FC = () => {
 
 const ENABLE_LAUNCHDARKLY = process.env.REACT_APP_ENABLE_LAUNCHDARKLY === 'true';
 
-const App: React.FC = () => {
-  if (ENABLE_LAUNCHDARKLY) {
-    return (
+const App: React.FC = () => (
+  <BrowserRouter>
+    {ENABLE_LAUNCHDARKLY ? (
       <LaunchDarklyProvider>
         <AppContent />
       </LaunchDarklyProvider>
-    );
-  }
-  return <AppContent />;
-};
+    ) : (
+      <AppContent />
+    )}
+  </BrowserRouter>
+);
 
 export default App;
 

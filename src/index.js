@@ -2,7 +2,6 @@ import React from 'react';
 import "./styles/motion-safe.css";
 import "./styles/minimal-css-overrides.css";
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -35,10 +34,7 @@ if (typeof document !== 'undefined' && document.body) {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    {/* BrowserRouter at root: all navigation is client-side; no document requests on link click */}
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <App />
   </React.StrictMode>
 );
 
