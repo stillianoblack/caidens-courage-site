@@ -80,19 +80,8 @@ scheduleWhenIdle(() => {
     document.addEventListener('visibilitychange', setTabActive);
   }
 
-  // Service worker: registration is disabled (see serviceWorkerRegistration.js). Unregister any existing SW so users get fresh bundles.
+  // Service worker: unregister so users get fresh bundles.
   serviceWorkerRegistration.unregister().catch(() => {});
-
-  import('./debug/navWatch').catch(() => {});
-  import('./perf/routePerf').catch(() => {});
-  import('./perf/longTasks').catch(() => {});
-
-  if (typeof window !== 'undefined') {
-    try {
-      const q = new URLSearchParams(window.location.search);
-      if (q.get('perf') === '1') import('./perf/perfDebug').then((m) => m.enablePerfDebug?.());
-    } catch (e) {}
-  }
 
   if (process.env.NODE_ENV !== 'production') {
     try {
