@@ -1,38 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+
+// Reusable Mission Split Section Component
+interface MissionSplitSectionProps {
+  eyebrow?: string;
+  title: string;
+  highlightWord: string;
+  body: string | React.ReactNode;
+  bullets?: string[];
+  cta?: {
+    text: string;
+    link: string;
+    variant?: 'primary' | 'secondary';
+  };
+  imageSrc: string;
+  imageAlt: string;
+  imageSide: 'left' | 'right';
+}
+
+const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
+  eyebrow,
+  title,
+  highlightWord,
+  body,
+  bullets,
+  cta,
+  imageSrc,
+  imageAlt,
+  imageSide,
+}) => {
+  const titleParts = title.split(highlightWord);
+  const dotPosition = imageSide === 'left' ? 'left' : 'right';
+  const pillLabel = eyebrow ?? `${title}:`;
+
+  return (
+    <div className="why-world-block mb-16 sm:mb-20 lg:mb-32 overflow-hidden md:overflow-visible w-full md:w-auto">
+      <div className="w-full max-w-full md:max-w-6xl mx-auto pl-5 pr-5 sm:pl-6 sm:pr-6 box-border overflow-x-hidden">
+        {/* Mobile: vertical stack — image on top, then content card (reference layout) */}
+        <div className="mission-block-stack flex flex-col lg:grid lg:grid-cols-12 items-stretch gap-0 lg:gap-x-12 lg:gap-y-0 relative w-full min-w-0 max-w-full">
+          {/* Accent Dot — desktop only */}
+          <div className={`why-world-block__dot why-world-block__dot--${dotPosition} hidden lg:block`} aria-hidden="true"></div>
+
+          {/* Image — mobile: full-width top; desktop: grid column */}
+          <div
+            className={`w-full min-w-0 overflow-hidden order-1 lg:col-span-6 flex justify-center ${imageSide === 'left' ? 'lg:order-1 lg:justify-start' : 'lg:order-2 lg:justify-end'}`}
+          >
+            <div
+              className="min-w-0 w-full max-w-full overflow-hidden rounded-[2.5rem] aspect-[2/3] md:aspect-[4/3] md:rounded-[16%] md:box-border md:border-[6px] md:border-[#E9C46A] lg:aspect-square lg:rounded-full lg:max-w-[520px] lg:w-[40vw]"
+            >
+              <div className="h-full w-full p-0" style={{ aspectRatio: '1/1' }}>
+                <img
+                  src={imageSrc}
+                  alt={imageAlt}
+                  width={520}
+                  height={520}
+                  className="block w-full max-w-full h-full object-cover object-top rounded-[2.5rem] md:rounded-none lg:rounded-full"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/Caiden@4x-100.webp';
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Content — mobile: light card below image; desktop: grid column */}
+          <div
+            className={`order-2 lg:col-span-6 min-w-0 max-w-full flex flex-col text-left ${imageSide === 'left' ? 'lg:order-2' : 'lg:order-1'}`}
+            style={{ maxWidth: 'min(100%, 560px)' }}
+          >
+            <div className="mission-block-card bg-[#F8F8F8] rounded-b-2xl lg:rounded-2xl lg:bg-transparent lg:rounded-none pt-0 pb-8 px-6 lg:pt-0 lg:pb-0 lg:px-0">
+              {/* Pill label (reference: "Our Mission:" style) — block to avoid inline line-height gap */}
+              <span
+                className="block w-fit text-sm font-medium text-navy-700 bg-[#F7DF79] px-4 py-1.5 rounded-full mb-5"
+                aria-hidden="true"
+              >
+                {pillLabel}
+              </span>
+              <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-500 mb-4 sm:mb-6 break-words">
+                {titleParts[0]}
+                <span className="text-golden-500">{highlightWord}</span>
+                {titleParts[1]}
+              </h3>
+              <div className="text-navy-600 text-base sm:text-lg leading-relaxed space-y-4 break-words max-w-full text-left">
+                {typeof body === 'string' ? <p>{body}</p> : body}
+              </div>
+              {bullets && bullets.length > 0 && (
+                <ul className="mt-6 space-y-2 text-navy-600 text-base sm:text-lg break-words max-w-full">
+                  {bullets.map((bullet, index) => (
+                    <li key={index} className="flex items-start min-w-0">
+                      <span className="text-navy-700 mr-2 flex-shrink-0">•</span>
+                      <span className="min-w-0 break-words">{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {cta && (
+                <div className="mt-8">
+                  <Link
+                    to={cta.link}
+                    className={`inline-block px-8 py-3.5 font-semibold rounded-full hover:shadow-lg transition-all duration-300 text-navy-700 ${
+                      cta.variant === 'primary'
+                        ? 'bg-[#F7DF79] hover:bg-[#F0D66B]'
+                        : 'bg-transparent border-2 border-golden-500 text-golden-500 hover:bg-golden-500 hover:text-navy-500'
+                    }`}
+                  >
+                    {cta.text}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Mission: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [closeTimeout, setCloseTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isMobile, setIsMobile] = useState(
+    () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false)
+  );
 
-  // Set page title
+  // Set page title; hero loads with page (no preload — only homepage preloads hero for performance).
   useEffect(() => {
     document.title = "Our Mission | Caiden's Courage";
   }, []);
 
-  // Handle scroll for navigation styling
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    if (typeof window === 'undefined') return;
+    const m = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    m.addEventListener('change', handler);
+    return () => m.removeEventListener('change', handler);
   }, []);
-
-  const handleLogoClick = () => {
-    navigate('/');
-    window.scrollTo(0, 0);
-  };
 
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
@@ -40,590 +149,477 @@ const Mission: React.FC = () => {
     setIsPreorderOpen(true);
   };
 
-  const handleComingSoonClick = () => {
+  const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
-  };
-
-  // Dropdown handlers
-  const handleMouseEnter = () => {
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
-    }
-    setShowResourcesDropdown(true);
-  };
-
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setShowResourcesDropdown(false);
-    }, 200);
-    setCloseTimeout(timeout);
-  };
-
-  const handleShopMouseEnter = () => {
-    if (shopCloseTimeout) {
-      clearTimeout(shopCloseTimeout);
-      setShopCloseTimeout(null);
-    }
-    setShowShopDropdown(true);
-  };
-
-  const handleShopMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setShowShopDropdown(false);
-    }, 200);
-    setShopCloseTimeout(timeout);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream font-body">
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300 ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`} style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3">
-              {/* Hamburger Menu Button - Mobile only */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-all duration-300 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              
-              <Link 
-                to="/"
-                onClick={handleLogoClick}
-                className="inline-block hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="/logoCaiden.png" 
-                  alt="Caiden's Courage" 
-                  className="h-10 sm:h-12 w-auto"
-                />
-              </Link>
+      <Header onComingSoonClick={handleComingSoonClick} />
+
+      {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
+      <header
+        className="relative overflow-hidden"
+        style={{
+          paddingTop: isMobile ? '70px' : 'clamp(67px, 10vh, 112px)',
+          paddingBottom: isMobile ? '40px' : '160px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          minHeight: isMobile ? '100vh' : '92vh',
+        }}
+      >
+        {/* Hero image layer — or solid when REACT_APP_DISABLE_HEROES */}
+        <div className="absolute inset-0 z-0">
+          {DISABLE_HEROES ? (
+            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+          ) : (
+            <picture>
+              <source
+                media="(max-width: 768px)"
+                type="image/webp"
+                srcSet="/images/heroes/mission_hero_mobile_400w.webp 400w, /images/heroes/mission_hero_mobile_600w.webp 600w, /images/heroes/mission_hero_mobile_800w.webp 800w"
+                sizes="100vw"
+              />
+              <source
+                media="(min-width: 769px)"
+                type="image/webp"
+                srcSet="/images/heroes/mission_hero_desktop_640w.webp 640w, /images/heroes/mission_hero_desktop_960w.webp 960w, /images/heroes/mission_hero_desktop_1280w.webp 1280w, /images/heroes/mission_hero_desktop_1600w.webp 1600w"
+                sizes="100vw"
+              />
+              <img
+                src={isMobile ? '/images/backgrounds/background_ourstory_mobile_img.webp' : '/images/backgrounds/background_ourstory_img.webp'}
+                alt=""
+                width={1600}
+                height={900}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: isMobile ? 'center bottom' : '70% center' }}
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
+          )}
+        </div>
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: isMobile
+              ? 'linear-gradient(180deg, rgba(8,18,38,0.92) 0%, rgba(8,18,38,0.85) 30%, rgba(8,18,38,0.65) 50%, rgba(8,18,38,0.35) 70%, rgba(8,18,38,0.15) 85%, transparent 100%)'
+              : 'linear-gradient(90deg, rgba(8,15,35,0.72) 0%, rgba(8,15,35,0.55) 35%, rgba(8,15,35,0.25) 60%, rgba(8,15,35,0.08) 80%, transparent 100%)',
+          }}
+        />
+        {/* Content - Aligned to Global Grid */}
+        <div 
+          className="w-full" 
+          style={{ 
+            position: 'relative',
+            paddingTop: '0',
+            marginTop: '0',
+            paddingLeft: isMobile ? '20px' : '0',
+            paddingRight: isMobile ? '20px' : '0',
+            maxWidth: isMobile ? '100%' : '1200px',
+            marginLeft: isMobile ? '0' : 'auto',
+            marginRight: isMobile ? '0' : 'auto',
+            zIndex: 10
+          }}
+        >
+          <div 
+            className="text-left w-full" 
+            style={{ 
+              maxWidth: isMobile ? '100%' : '540px',
+              paddingTop: '50px',
+              marginTop: '0',
+              paddingLeft: '0',
+              paddingRight: '0'
+            }}
+          >
+            {/* Eyebrow */}
+            <div 
+              className="text-xs sm:text-sm font-semibold uppercase"
+              style={{ 
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '12px'
+              }}
+            >
+              Our Story
             </div>
             
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
-              <Link 
-                to="/mission" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'} ${location.pathname === '/mission' ? 'font-bold border-b-2 border-golden-500' : ''}`}
-              >
-                Mission
-              </Link>
-              <Link 
-                to="/#about"
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                About
-              </Link>
-              <Link 
-                to="/#characters" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Characters
-              </Link>
-              
-              {/* Resources Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                >
-                  Resources
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showResourcesDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showResourcesDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                >
-                  <Link
-                    to="/resources?audience=kids"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Kids</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=parents"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Parents</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
-                  </Link>
-                  <Link
-                    to="/resources?audience=teachers"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">For Teachers</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
-                  </Link>
-                  <Link
-                    to="/resources"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
-                    onClick={() => setShowResourcesDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">All Resources</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Browse everything</div>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* Shop Dropdown */}
-              <div 
-                className="relative has-dropdown"
-                onMouseEnter={handleShopMouseEnter}
-                onMouseLeave={handleShopMouseLeave}
-              >
-                <div
-                  className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-                >
-                  Shop
-                  <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showShopDropdown ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                
-                <div className="absolute top-full left-0 w-full h-3" />
-                
-                <div 
-                  className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[240px] z-50 transition-all duration-200 ${
-                    showShopDropdown 
-                      ? 'opacity-100 visible pointer-events-auto translate-y-0' 
-                      : 'opacity-0 invisible pointer-events-none -translate-y-2'
-                  }`}
-                  style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                >
-                  <Link
-                    to="/comicbook"
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                    onClick={() => setShowShopDropdown(false)}
-                  >
-                    <div className="font-semibold text-sm">Comic Book</div>
-                    <div className="text-xs text-navy-400 mt-0.5">Volume 1: The Graphic Novel</div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">T-shirts <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Caiden's courage t-shirts</div>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowShopDropdown(false);
-                      handleComingSoonClick();
-                    }}
-                    className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
-                  >
-                    <div className="font-semibold text-sm">Plushies <span className="text-xs font-normal">— Coming Soon</span></div>
-                    <div className="text-xs text-navy-400 mt-0.5">Soft companions for your journey</div>
-                  </button>
-                </div>
-              </div>
-              
-              <Link 
-                to="/comicbook" 
-                className={`nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Comic Book
-              </Link>
-            </nav>
+            {/* Headline */}
+            <h1 
+              className="font-display font-extrabold text-white"
+              style={{ 
+                fontSize: 'clamp(44px, 5vw, 64px)',
+                lineHeight: '1.05',
+                letterSpacing: '-1px',
+                marginBottom: '16px'
+              }}
+            >
+              Every Hero Starts Somewhere.
+            </h1>
             
-            {/* Action Area */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-              <a 
-                href="mailto:stills@caidenscourage.com" 
-                className={`hidden lg:block nav-link-underline font-semibold transition-all duration-300 hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`}
-              >
-                Contact
-              </a>
+            {/* Subtext */}
+            <p 
+              className="text-white font-medium"
+              style={{ 
+                fontSize: '22px',
+                lineHeight: '1.4',
+                marginBottom: '32px',
+                opacity: 0.92
+              }}
+            >
+              Caiden's Courage was created to help kids see their differences as strengths — and discover the courage already inside them.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 variant="primary"
-                size="sm"
-                onClick={handleWaitlistClick}
-                className="whitespace-nowrap flex-shrink-0 text-xs sm:text-sm"
+                size="md"
+                as={Link}
+                to="/comicbook"
+                className="w-full sm:w-auto"
               >
-                Join Courage Community
+                Pre-Order Volume 1
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                as={Link}
+                to="/world"
+                className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+              >
+                Enter Caiden's World
               </Button>
             </div>
           </div>
         </div>
-      </nav>
 
-      {/* Mobile Menu */}
-      <div 
-        className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        <div 
-          className={`absolute inset-0 bg-white transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <nav className="px-6 pt-8 pb-8 overflow-y-auto h-[calc(100vh-96px)]">
-            <div className="flex flex-col space-y-2 max-w-7xl mx-auto" style={{ paddingTop: '100px' }}>
-              <Link
-                to="/mission"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg ${location.pathname === '/mission' ? 'bg-navy-50 font-bold' : ''}`}
-              >
-                <span>Mission</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/comicbook"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Comic Book</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#about"
-                onClick={(e) => {
-                  setIsMobileMenuOpen(false);
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>About</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#characters"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Characters</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/resources"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Resources</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link
-                to="/#products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Shop</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <a
-                href="mailto:stills@caidenscourage.com"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
-              >
-                <span>Contact</span>
-                <svg className="w-7 h-7 text-navy-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-              
-              {/* CTA Button in Mobile Menu */}
-              <div className="px-6 py-6 mt-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Join the Courage Community
-                </Button>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
-
-      {/* Blue Header - Matching Resources Page Style */}
-      <header 
-        className="bg-navy-500 text-white py-16 pt-32 relative overflow-hidden"
-      >
-        {/* B-4 Watermark - Very subtle, only on desktop */}
-        <div 
-          className="absolute right-0 top-1/2 -translate-y-1/2 opacity-[0.03] lg:opacity-[0.04] pointer-events-none select-none hidden sm:block"
-          style={{ 
-            transform: 'translateY(-50%)',
-            width: '300px',
-            height: '300px',
-            maxWidth: '40vw'
-          }}
-          aria-hidden="true"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="w-full h-full">
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#ffffff" strokeWidth="2" opacity="1"/>
-            <circle cx="100" cy="100" r="60" fill="none" stroke="#ffffff" strokeWidth="1.5" opacity="0.8"/>
-            <circle cx="100" cy="100" r="40" fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.6"/>
-            <circle cx="85" cy="90" r="4" fill="#ffffff" opacity="0.7"/>
-            <circle cx="115" cy="90" r="4" fill="#ffffff" opacity="0.7"/>
-            <line x1="100" y1="50" x2="100" y2="70" stroke="#ffffff" strokeWidth="1.5" opacity="0.6"/>
-            <line x1="100" y1="130" x2="100" y2="150" stroke="#ffffff" strokeWidth="1.5" opacity="0.6"/>
+        {/* Slanted Wave Transition */}
+        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+          <svg 
+            className="w-full h-full" 
+            viewBox="0 0 1440 150" 
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path 
+              d="M0,60 C360,140 1080,0 1440,80 L1440,150 L0,150 Z"
+              fill="#faf9f7"
+            />
           </svg>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-left">
-            {/* Breadcrumb */}
-            <Link 
-              to="/"
-              className="inline-block text-sm text-white/70 hover:text-white transition-colors mb-4 group"
-            >
-              <span className="group-hover:underline">← Back to Home</span>
-            </Link>
-            
-            {/* Title with Pill Label */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
-                Our Mission
-              </h1>
-              <span className="inline-flex items-center px-3 py-1.5 bg-golden-500 text-navy-500 font-semibold text-xs sm:text-sm rounded-full w-fit">
-                Mission
-              </span>
-            </div>
-            
-            {/* Subtitle */}
-            <p className="text-lg sm:text-xl lg:text-2xl text-white/90 font-medium leading-relaxed max-w-3xl">
-              Courage for Every Kid
-            </p>
-          </div>
         </div>
       </header>
 
+      {/* Spacing after hero */}
+      <div className="h-20 sm:h-24 lg:h-28 bg-cream" />
+
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20">
-        {/* Section A: Hero Statement */}
-        <section className="mb-16 sm:mb-20 lg:mb-24">
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-navy-500 mb-6 sm:mb-8">
-            Courage for Every Kid
-          </h2>
-          <div className="space-y-6 sm:space-y-8 text-lg sm:text-xl text-navy-600 leading-relaxed">
-            <p>
-              Every child deserves to see their mind as powerful — especially the ones who feel different.
-            </p>
-            <p>
-              Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them.
-            </p>
-            <p>
-              Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
-            </p>
-            <p className="font-semibold text-navy-700">
-              This isn't about fixing kids.
-              <br />
-              It's about helping them recognize their strengths.
-            </p>
+      <main className="pb-12 sm:pb-16 lg:pb-20" style={{ 
+        paddingTop: 'calc(3rem - 60px)',
+        marginTop: '-60px'
+      }}>
+        {/* Origin Section — "Why This World Was Created" (reference: light bg, pill labels, rounded image) */}
+        <section className="why-world-blocks overflow-x-hidden bg-[#F8F8F8] lg:bg-transparent py-10 lg:py-0">
+          <div className="max-w-7xl mx-auto pl-5 pr-5 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 w-full overflow-x-hidden box-border">
+            {/* Section Header */}
+            <div className="mb-12 sm:mb-16 lg:mb-20 text-center">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-4 sm:mb-6">
+                Why This World Was Created
+              </h2>
+              <p className="text-lg sm:text-xl text-navy-600/80 font-medium max-w-3xl mx-auto why-world-subheader">
+                Every child deserves to see their mind as powerful — especially the ones who feel different.
+              </p>
+            </div>
+
+            {/* Block A: Our History */}
+            <MissionSplitSection
+              title="Our History"
+              highlightWord="History"
+              body={
+                <>
+                  <p>
+                    Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
+                  </p>
+                  <p>
+                    This isn't about fixing kids. It's about helping them recognize their strengths. When kids understand themselves, confidence follows.
+                  </p>
+                </>
+              }
+              bullets={[
+                'Created to celebrate neurodiversity as strength',
+                'Built with emotional intelligence at the core',
+                'Designed to help kids feel seen and powerful'
+              ]}
+              imageSrc="/images/ourhistory_img.webp"
+              imageAlt="Our History - The origin story of Caiden's Courage"
+              imageSide="right"
+            />
+
+            {/* Block B: Our Promise */}
+            <MissionSplitSection
+              title="Our Promise"
+              highlightWord="Promise"
+              body={
+                <>
+                  <p>
+                    We promise to create stories, tools, and experiences that help every child see their differences as strengths. We're committed to building a world where neurodiversity is celebrated, emotional intelligence is nurtured, and courage is discovered through understanding.
+                  </p>
+                  <p>
+                    Our promise extends to parents, educators, and partners who share our vision of empowering kids to feel confident, capable, and never alone in their journey.
+                  </p>
+                </>
+              }
+              cta={{
+                text: 'Partner With Us',
+                link: '/contact',
+                variant: 'primary'
+              }}
+              imageSrc="/images/OurPromise_img.webp"
+              imageAlt="Our Promise - Children engaging with Caiden's Courage tools and activities"
+              imageSide="left"
+            />
           </div>
         </section>
 
         {/* Section Separator */}
-        <div className="border-t border-navy-200 my-16 sm:my-20 lg:my-24"></div>
+        <div className="border-t border-navy-200 my-20 sm:my-24 lg:my-28"></div>
 
-        {/* Section B: Why We Created */}
-        <section className="mb-16 sm:mb-20 lg:mb-24">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-6 sm:mb-8">
-            Why We Created Caiden's Courage
-          </h2>
-          <div className="space-y-6 sm:space-y-8 text-lg sm:text-xl text-navy-600 leading-relaxed">
-            <p>
-              Many kids grow up hearing that they're "too much," "too distracted," or "not paying attention."
-            </p>
-            <p>
-              Caiden's Courage was born from the belief that these differences are not flaws — they're signals of creativity, curiosity, and potential.
-            </p>
-            <p>
-              By turning inner challenges into visible adventures, Caiden's Courage helps kids:
-            </p>
-            <ul className="list-disc list-inside space-y-3 sm:space-y-4 ml-4 sm:ml-6">
-              <li>name what they're feeling</li>
-              <li>understand how their mind works</li>
-              <li>build courage through self-awareness</li>
-            </ul>
-            <p>
-              When kids understand themselves, confidence follows.
-            </p>
+        {/* Premium Meet the Creator Section - Cinematic Hero Style */}
+        <section 
+          className="creator-section"
+          style={{
+            backgroundImage: 'url(/images/backgrounds/meetthecreator_bg.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Darkened Blue Tint Overlay - Matching Hero */}
+          <div className="creator-overlay"></div>
+          
+          {/* Content Container */}
+          <div className="creator-content">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+                {/* LEFT: Creator Portrait with Organic Blob Mask */}
+                <div className="creator-portrait-wrapper">
+                  <div className="creator-portrait-glow"></div>
+                  <div className="creator-portrait-blob">
+                    <img
+                      src="/images/creator-photo.webp"
+                      alt="Tarus D. Stills - Creator of Caiden's Courage"
+                      width={420}
+                      height={420}
+                      className="creator-portrait-image"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* RIGHT: Creator Content */}
+                <div className="creator-text-content">
+                  <span className="creator-eyebrow">
+                    MEET THE CREATOR
+                  </span>
+                  <h2 className="creator-title">
+                    Tarus D. Stills
+                  </h2>
+                  <div className="creator-copy">
+                    <p>
+                      Tarus D. Stills is an illustrator, filmmaker, writer, and creative entrepreneur whose work is rooted in creativity, imagination, and the power of neurodivergent thinking. With a background in visual design and years of experience spanning illustration, storytelling, and digital media, he creates worlds that invite children to see themselves with confidence and possibility.
+                    </p>
+                    <p>
+                      Inspired by his own creative journey and a deep belief in art as a tool for focus, expression, and emotional growth, Tarus created <em>Caiden's Courage</em> to celebrate kids who think differently and imagine boldly. His work blends expressive illustration with heartfelt storytelling, encouraging young readers to recognize their minds as strengths rather than limitations.
+                    </p>
+                    <p>
+                      Beyond the page, Tarus is a passionate advocate for creative education and representation. Through his stories, he hopes to remind every child that what makes them different may also be what makes them extraordinary.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Section Separator */}
-        <div className="border-t border-navy-200 my-16 sm:my-20 lg:my-24"></div>
+        <div className="border-t border-navy-200 my-20 sm:my-24 lg:my-28"></div>
 
-        {/* Section C: Who This Is For */}
-        <section className="mb-16 sm:mb-20 lg:mb-24">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-6 sm:mb-8">
-            Who This Is For
-          </h2>
-          <div className="space-y-6 sm:space-y-8 text-lg sm:text-xl text-navy-600 leading-relaxed">
-            <p className="font-medium text-navy-700">
-              Caiden's Courage is designed for:
+        {/* What Makes This World Different Section */}
+        <section className="world-different-section mb-20 sm:mb-24 lg:mb-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-6 text-center">
+              A World Built for Courage
+            </h2>
+            
+            <p className="world-different-subheader">
+              We don't just tell stories — we help children discover the strength already inside them.
             </p>
-            <ul className="space-y-6 sm:space-y-8">
-              <li>
-                <p>
-                  <strong className="font-bold text-navy-700">Kids (ages 7–12)</strong> — who feel different, imaginative, distracted, sensitive, or unsure of themselves
-                </p>
-              </li>
-              <li>
-                <p>
-                  <strong className="font-bold text-navy-700">Parents & Caregivers</strong> — who want stories that reflect emotional intelligence and empathy
-                </p>
-              </li>
-              <li>
-                <p>
-                  <strong className="font-bold text-navy-700">Educators & Mentors</strong> — who believe learning should include self-understanding, not just academics
-                </p>
-              </li>
-            </ul>
-            <p className="font-semibold text-navy-700">
-              This world is built to grow with kids — not talk down to them.
+            
+            <p className="world-different-positioning">
+              Trusted by parents. Embraced by educators. Loved by young readers.
             </p>
+            
+            {/* The Four Pillars of the Caiden's Courage World */}
+            <div className="world-different-grid">
+              <div className="world-different-card">
+                <div className="world-different-blob">
+                  <img
+                    src="/images/Emotionallearningthroughstory_img.webp"
+                    alt="Emotional learning through story"
+                    width={80}
+                    height={80}
+                    className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                    }}
+                  />
+                </div>
+                <div className="world-different-card-content">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500 mb-3">
+                    Emotional learning through story
+                  </h3>
+                  <p className="text-navy-600 leading-relaxed text-base">
+                    Kids learn to understand and name their feelings through character-driven adventures, not lectures.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="world-different-card">
+                <div className="world-different-blob">
+                  <img
+                    src="/images/heroes/Neurodiversity-positiveheroes_img.webp"
+                    alt="Neurodiversity-positive heroes"
+                    width={80}
+                    height={80}
+                    className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                    }}
+                  />
+                </div>
+                <div className="world-different-card-content">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500 mb-3">
+                    Neurodiversity-positive heroes
+                  </h3>
+                  <p className="text-navy-600 leading-relaxed text-base">
+                    Characters like Caiden show that differences are sources of strength, creativity, and unique power.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="world-different-card">
+                <div className="world-different-blob">
+                  <img
+                    src="/images/characters/Character-drivengrowth_img.webp"
+                    alt="Character-driven growth"
+                    width={80}
+                    height={80}
+                    className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                    }}
+                  />
+                </div>
+                <div className="world-different-card-content">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500 mb-3">
+                    Character-driven growth
+                  </h3>
+                  <p className="text-navy-600 leading-relaxed text-base">
+                    Every story centers on real emotional challenges kids face, with heroes who grow through courage and self-awareness.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="world-different-card">
+                <div className="world-different-blob">
+                  <img
+                    src="/images/Toolsthatsupportkidsbeyondthepage_img.webp"
+                    alt="Tools that support kids beyond the page"
+                    width={80}
+                    height={80}
+                    className="world-different-blob-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                    }}
+                  />
+                </div>
+                <div className="world-different-card-content">
+                  <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500 mb-3">
+                    Tools that support kids beyond the page
+                  </h3>
+                  <p className="text-navy-600 leading-relaxed text-base">
+                    Interactive B-4 tools, printable resources, and classroom guides extend the story into real-world practice.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Section Separator */}
-        <div className="border-t border-navy-200 my-16 sm:my-20 lg:my-24"></div>
+        <div className="border-t border-navy-200 my-20 sm:my-24 lg:my-28"></div>
 
-        {/* Section D: Our Approach */}
-        <section className="mb-16 sm:mb-20 lg:mb-24">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-6 sm:mb-8">
-            Our Approach
-          </h2>
-          <div className="space-y-6 sm:space-y-8 text-lg sm:text-xl text-navy-600 leading-relaxed">
-            <p>
-              We believe stories are one of the most powerful tools for learning.
-            </p>
-            <p>
-              That's why Caiden's Courage blends:
-            </p>
-            <ul className="list-disc list-inside space-y-3 sm:space-y-4 ml-4 sm:ml-6">
-              <li>graphic storytelling</li>
-              <li>character-driven emotional learning</li>
-              <li>imaginative metaphors kids can actually understand</li>
-            </ul>
-            <p>
-              Every character represents a different way of thinking, feeling, or processing the world — because no two minds work the same.
-            </p>
-          </div>
-        </section>
-
-        {/* Section Separator */}
-        <div className="border-t border-navy-200 my-16 sm:mb-20 lg:mb-24"></div>
-
-        {/* Section E: Growing the World */}
-        <section className="mb-16 sm:mb-20 lg:mb-24">
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500 mb-6 sm:mb-8">
-            Growing the World
-          </h2>
-          <div className="space-y-6 sm:space-y-8 text-lg sm:text-xl text-navy-600 leading-relaxed">
-            <p>
-              Caiden's Courage is more than a single story.
-            </p>
-            <p>
-              It's a growing world that includes:
-            </p>
-            <ul className="list-disc list-inside space-y-3 sm:space-y-4 ml-4 sm:ml-6">
-              <li>graphic novels</li>
-              <li>characters and companions</li>
-              <li>future learning tools</li>
-              <li>digital experiences (coming later), including interactive storytelling and streaming/animated content</li>
-            </ul>
-            <p>
-              We're building this slowly and intentionally — alongside the families and kids who believe in it.
-            </p>
+        {/* Expansion Section */}
+        <section className="world-beginning-section mb-16 sm:mb-20 lg:mb-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="world-beginning-grid">
+              {/* Left Column: Text Content */}
+              <div className="world-beginning-content">
+                <div className="world-beginning-header-group">
+                  <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500">
+                    The World Is Just Beginning…
+                  </h2>
+                  <p className="world-beginning-subheader">
+                    Caiden's Courage is more than a single story. It's a growing world that includes:
+                  </p>
+                </div>
+                <div className="world-beginning-text">
+                  <ul className="world-beginning-list">
+                    <li>graphic novels</li>
+                    <li>characters and companions</li>
+                    <li>future learning tools</li>
+                    <li>digital experiences (coming later), including interactive storytelling and streaming/animated content</li>
+                  </ul>
+                  <p>
+                    We're building this slowly and intentionally — alongside the families and kids who believe in it.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Right Column: Bloop Image */}
+              <div className="world-beginning-image">
+                <div className="world-beginning-bloop">
+                  <img
+                    src="/images/TheWorldIsJustBeginning_img.webp"
+                    alt="Caiden's Courage world exploration and discovery"
+                    width={468}
+                    height={468}
+                    className="world-beginning-bloop-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/heroes/hero-bg.webp';
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -642,16 +638,25 @@ const Mission: React.FC = () => {
                 <div 
                   className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36"
                 >
-                  <img
-                    src="/Comic5_Coverpage_header.jpg"
-                    alt="Caiden's Courage Comic Book"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logoCaiden.png';
-                    }}
-                  />
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcSet="/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w"
+                      sizes="(max-width: 768px) 92vw, 742px"
+                    />
+                    <img
+                      src="/images/Comic5_Coverpage_header_smaller-1600.webp"
+                      alt="Caiden's Courage Comic Book"
+                      width={144}
+                      height={144}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                      }}
+                    />
+                  </picture>
                 </div>
               </div>
               
@@ -702,53 +707,7 @@ const Mission: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-navy-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="font-display text-xl font-extrabold">
-                <span className="text-white">Caiden's</span>
-                <span className="text-golden-400">Courage</span>
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
-              <Link to="/privacy" className="text-white/70 hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="text-white/70 hover:text-white transition-colors">Terms of Service</Link>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-white/10">
-            <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
-              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-              <Link 
-                to="/#about" 
-                onClick={(e) => {
-                  if (location.pathname === '/') {
-                    e.preventDefault();
-                    const element = document.getElementById('about');
-                    if (element) {
-                      const headerOffset = 80;
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                    }
-                  }
-                }}
-                className="text-white/70 hover:text-white transition-colors"
-              >
-                About
-              </Link>
-              <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
-              <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
-              <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
-            </div>
-            <p className="text-white/60 text-sm text-center">
-              © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (
@@ -818,6 +777,7 @@ const Mission: React.FC = () => {
               src="https://beacons.ai/stillianoblack"
               title="Join the Courage Community"
               className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
+              loading="lazy"
             />
           </div>
         </div>

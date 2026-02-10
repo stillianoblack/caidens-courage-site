@@ -56,6 +56,19 @@ const Button: React.FC<ButtonProps> = ({
     }
   }
   
+  // Internal paths: use Link for SPA navigation (no full document reload)
+  if (href && href.startsWith('/')) {
+    return (
+      <Link
+        to={href}
+        className={classes}
+        {...(props as any)}
+      >
+        {children}
+      </Link>
+    );
+  }
+  // External links (https://, mailto:, etc.): keep as <a>
   if (as === 'a' && href) {
     return (
       <a
