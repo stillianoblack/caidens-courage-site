@@ -10,6 +10,11 @@ import Product from './pages/Product';
 import Preview from './pages/Preview';
 import Mission from './pages/Mission';
 import About from './pages/About';
+import World from './pages/World';
+import Characters from './pages/Characters';
+import B4Clicker from './pages/B4Clicker';
+import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
+import ChatWithB4 from './pages/ChatWithB4';
 
 const App: React.FC = () => {
   return (
@@ -31,6 +36,11 @@ const App: React.FC = () => {
         <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
         <Route path="/mission" element={<Mission />} />
         <Route path="/about" element={<About />} />
+        <Route path="/world" element={<World />} />
+        <Route path="/characters" element={<Characters />} />
+        <Route path="/b4-tools" element={<B4Clicker />} />
+        <Route path="/resources/b4-tools-library" element={<B4ToolsLibrary />} />
+        <Route path="/chat" element={<ChatWithB4 />} />
       </Routes>
     </Router>
   );
