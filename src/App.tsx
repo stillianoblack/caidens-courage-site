@@ -1,6 +1,6 @@
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import RouteHeroPreload from './components/RouteHeroPreload';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
@@ -8,7 +8,6 @@ import { runAfterPaint } from './lib/safeMode';
 import { SAFE_MODE } from './lib/safeMode';
 import Home from './pages/Home';
 
-const ROUTE_TRANSITION = { duration: 0.12 };
 const DISABLE_MOTION = process.env.REACT_APP_DISABLE_MOTION === 'true';
 const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
 
@@ -243,16 +242,6 @@ const AppContent: React.FC = () => {
     }
   }, [location.pathname]);
 
-  const routeTransitionProps = useMemo(
-    () => ({
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-      transition: ROUTE_TRANSITION,
-    }),
-    []
-  );
-
   const onExitComplete = useCallback(() => {
     const debugEnabled =
       typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
@@ -279,6 +268,16 @@ const AppContent: React.FC = () => {
     navStartTimeRef.current = null;
   }, [location.pathname]);
 
+  // Temporary debug: ?debugNav=1 logs location.pathname on every route render to confirm React Router updates.
+  if (typeof window !== 'undefined') {
+    try {
+      if (new URLSearchParams(window.location.search).get('debugNav') === '1') {
+        // eslint-disable-next-line no-console
+        console.log('[debugNav] location.pathname=', location.pathname);
+      }
+    } catch (e) {}
+  }
+
   return (
     <>
       <RouteHeroPreload />
@@ -298,9 +297,9 @@ const AppContent: React.FC = () => {
             {enableMotion && !DISABLE_MOTION ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
               <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
-                <motion.div key={location.pathname} {...routeTransitionProps}>
-                  <Routes location={location}>{routeList}</Routes>
-                </motion.div>
+                <Routes location={location} key={location.pathname}>
+                  {routeList}
+                </Routes>
               </AnimatePresence>
             ) : (
               <Routes location={location}>{routeList}</Routes>
