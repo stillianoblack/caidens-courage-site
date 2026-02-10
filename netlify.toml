@@ -4,3 +4,41 @@
 
 [build.environment]
   CI = "false"
+
+# Cache-busting: HTML never cached so clients always get latest app; hashed assets immutable.
+# Service worker: app unregisters any SW at runtime (see public/index.html + serviceWorkerRegistration.js).
+# These headers ensure no SW or HTML is cached by CDN/browser.
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML and SPA entry: never cache so deploys take effect immediately.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# If a service worker file ever exists, do not cache it.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
+[[headers]]
+  for = "/workbox-*.js"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
