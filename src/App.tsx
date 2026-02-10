@@ -1,10 +1,17 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { runAfterPaint } from './lib/safeMode';
 import { SAFE_MODE } from './lib/safeMode';
 import Home from './pages/Home';
+
+/** Minimal fallback when a lazy route chunk is loading; avoids blank "stuck" screen. */
+const RouteFallback = () => (
+  <div style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 14 }}>
+    Loading…
+  </div>
+);
 
 // Lazy load non-home pages for code splitting (Home is eager above).
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -64,6 +71,21 @@ const routeList = (
 // Lazy chat widget – not in initial bundle; load only after first paint.
 const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
 
+/**
+ * Renders Routes with a key from the current path so the route tree always remounts on navigation.
+ * This lives inside BrowserRouter so useLocation() sees the updated URL when you click a link.
+ */
+const RouterContent: React.FC = () => {
+  const location = useLocation();
+  return (
+    <ChunkErrorBoundary>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes key={location.pathname}>{routeList}</Routes>
+      </Suspense>
+    </ChunkErrorBoundary>
+  );
+};
+
 const AppContent: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
 
@@ -105,11 +127,7 @@ const AppContent: React.FC = () => {
       <Suspense fallback={null}>
         {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
       </Suspense>
-      <ChunkErrorBoundary>
-        <Suspense fallback={null}>
-          <Routes>{routeList}</Routes>
-        </Suspense>
-      </ChunkErrorBoundary>
+      <RouterContent />
     </>
   );
 };

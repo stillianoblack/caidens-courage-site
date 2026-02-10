@@ -71,6 +71,20 @@
     <title>Caiden's Courage</title>
   </head>
   <body>
+    <!-- Unregister service workers and clear caches before app runs so chunk requests on client-side nav are never intercepted by an old SW. -->
+    <script>
+      (function() {
+        if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(r) { r.unregister(); });
+        }).catch(function() {});
+        if (typeof caches !== 'undefined' && caches.keys) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { caches.delete(k); });
+          }).catch(function() {});
+        }
+      })();
+    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!-- Do not add a LaunchDarkly <script> tag here or via Netlify inject. LaunchDarkly loads only via the app (src/lib/launchdarkly.tsx) after first paint; no script tag to avoid NO_FCP and EventSource blocking. -->
