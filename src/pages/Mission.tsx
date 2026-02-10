@@ -627,18 +627,25 @@ const Mission: React.FC = () => {
                 <div 
                   className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36"
                 >
-                  <img
-                    src="/images/Comic5_Coverpage_header_smaller.webp"
-                    alt="Caiden's Courage Comic Book"
-                    width={144}
-                    height={144}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
-                    }}
-                  />
+                  <picture>
+                    <source
+                      type="image/webp"
+                      srcSet="/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w"
+                      sizes="(max-width: 768px) 92vw, 742px"
+                    />
+                    <img
+                      src="/images/Comic5_Coverpage_header_smaller-1600.webp"
+                      alt="Caiden's Courage Comic Book"
+                      width={144}
+                      height={144}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden.webp';
+                      }}
+                    />
+                  </picture>
                 </div>
               </div>
               

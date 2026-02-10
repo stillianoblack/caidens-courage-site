@@ -178,10 +178,9 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  // Initialize LaunchDarkly lazily after first paint / idle when SAFE_MODE is off.
-  // In SAFE_MODE, we skip flags entirely and rely on defaultFlags.
+  // Initialize LaunchDarkly only when explicitly enabled (temporarily disable via env).
   useEffect(() => {
-    if (SAFE_MODE) return;
+    if (SAFE_MODE || process.env.REACT_APP_ENABLE_LAUNCHDARKLY !== 'true') return;
     runAfterPaint(() => {
       initLaunchDarkly();
     });
@@ -310,13 +309,18 @@ const AppContent: React.FC = () => {
   );
 };
 
+const ENABLE_LAUNCHDARKLY = process.env.REACT_APP_ENABLE_LAUNCHDARKLY === 'true';
+
 const App: React.FC = () => {
-  return (
-    <LaunchDarklyProvider>
-      <AppContent />
-    </LaunchDarklyProvider>
-  );
-}
+  if (ENABLE_LAUNCHDARKLY) {
+    return (
+      <LaunchDarklyProvider>
+        <AppContent />
+      </LaunchDarklyProvider>
+    );
+  }
+  return <AppContent />;
+};
 
 export default App;
 

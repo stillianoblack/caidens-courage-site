@@ -36,8 +36,8 @@
   "scripts": {
     "optimize-hero": "node scripts/optimize-hero.mjs",
     "optimize-page-heroes": "node scripts/optimize-page-heroes.mjs",
-    "optimize-images": "node scripts/optimize-logo.mjs && node scripts/optimize-character-profiles.mjs",
-    "optimize:images": "node scripts/optimize-logo.mjs && node scripts/optimize-character-profiles.mjs && node scripts/optimize-comic-cover.mjs",
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "optimize:images": "node scripts/optimize-images.mjs",
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "server": "node server.js",
     "dev": "netlify dev",
