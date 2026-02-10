@@ -307,10 +307,10 @@ const Home = () => {
           </svg>
         </div>
         
-        {/* Content - aligned to global nav grid and vertically centered */}
+        {/* Content - aligned to global nav grid; vertically centered on desktop only */}
         <div className="relative z-10 w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center min-h-[calc(92vh-120px)]">
+            <div className="flex md:items-center md:min-h-[calc(92vh-120px)]">
               <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
             <div 
@@ -435,7 +435,7 @@ const Home = () => {
       {/* Meet the Hero Section */}
       <section className="bg-cream relative overflow-hidden meet-hero-section pt-20 md:pt-0">
         <div className="hero-container">
-          <div className="grid gap-12 lg:gap-16 items-center meet-hero-grid">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center meet-hero-grid">
             {/* Left Column - Image - Below text on mobile */}
             <div className="order-2 md:order-1">
               <div 
