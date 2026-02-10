@@ -19,20 +19,23 @@ export interface DropdownItem {
   subtitle?: string;
 }
 
-// Helper function to handle anchor scrolling
+// React Router navigate (To = string or { pathname, hash?, search? })
+type NavigateTo = (to: string | { pathname: string; hash?: string; search?: string }) => void;
+
+// Helper: handle /#anchor links with React Router only (no pushState/replaceState).
+// When not on home, navigate to pathname '/' with hash so route and URL both update.
 export const handleAnchorClick = (
   e: React.MouseEvent<HTMLAnchorElement>,
   href: string,
-  navigate: (path: string) => void,
+  navigate: NavigateTo,
   location: { pathname: string }
 ) => {
   if (href.startsWith('/#')) {
     const anchor = href.substring(2);
+    e.preventDefault();
     if (location.pathname !== '/') {
-      e.preventDefault();
-      navigate(`/#${anchor}`);
+      navigate({ pathname: '/', hash: anchor });
     } else {
-      e.preventDefault();
       const element = document.getElementById(anchor);
       if (element) {
         const headerOffset = 80;
