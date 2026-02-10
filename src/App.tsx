@@ -250,7 +250,7 @@ const AppContent: React.FC = () => {
       </Suspense>
       <ChunkErrorBoundary>
         <Suspense fallback={null}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }} key={location.pathname}>
             <Routes location={location}>{routeList}</Routes>
           </div>
         </Suspense>
