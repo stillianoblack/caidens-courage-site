@@ -78,8 +78,6 @@ const FloatingAnimationController = React.lazy(() => import('./components/Floati
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const prevLocationRef = useRef(location);
-  const [exitingLocation, setExitingLocation] = useState<typeof location | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showFloatingController, setShowFloatingController] = useState(false);
   const [enableMotion, setEnableMotion] = useState(false);
@@ -158,10 +156,7 @@ const AppContent: React.FC = () => {
   // Animations: enable after idle so route render/paint happens first (no-op when REACT_APP_DISABLE_MOTION).
   useEffect(() => {
     if (DISABLE_MOTION) return;
-    const enable = () => {
-      setEnableMotion(true);
-      setExitingLocation(null);
-    };
+    const enable = () => setEnableMotion(true);
     const id =
       typeof (window as any).requestIdleCallback !== 'undefined'
         ? (window as any).requestIdleCallback(enable, { timeout: 300 })
@@ -248,13 +243,6 @@ const AppContent: React.FC = () => {
     }
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (location.pathname !== prevLocationRef.current.pathname) {
-      setExitingLocation(prevLocationRef.current);
-      prevLocationRef.current = location;
-    }
-  }, [location]);
-
   const routeTransitionProps = useMemo(
     () => ({
       initial: { opacity: 0 },
@@ -266,7 +254,6 @@ const AppContent: React.FC = () => {
   );
 
   const onExitComplete = useCallback(() => {
-    setExitingLocation(null);
     const debugEnabled =
       typeof window !== 'undefined' && (window as any).__NAV_DEBUG__ === true;
     const now =
@@ -311,15 +298,6 @@ const AppContent: React.FC = () => {
             {enableMotion && !DISABLE_MOTION ? (
               /* @ts-expect-error framer-motion AnimatePresence return type is Element | undefined in strict TS */
               <AnimatePresence mode="wait" onExitComplete={onExitComplete}>
-                {exitingLocation != null && (
-                  <motion.div
-                    key={exitingLocation.pathname}
-                    {...routeTransitionProps}
-                    style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-                  >
-                    <Routes location={exitingLocation}>{routeList}</Routes>
-                  </motion.div>
-                )}
                 <motion.div key={location.pathname} {...routeTransitionProps}>
                   <Routes location={location}>{routeList}</Routes>
                 </motion.div>
