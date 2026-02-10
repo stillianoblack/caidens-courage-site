@@ -303,9 +303,6 @@ body[data-tab-active='false'] .circle-accent,
 body[data-tab-active='false'] .animate-float,
 body[data-tab-active='false'] .floaty,
 body[data-tab-active='false'] .float-y,
-body[data-tab-active='false'] .major-publisher-stardust {
-  animation-play-state: paused !important;
-}
 
 /* Decorative circle styles - animate only when in view (see App.tsx observer) */
 .circle-accent {
@@ -1572,50 +1569,15 @@ a.bg-golden-500:hover,
 .major-publisher-hero-overlay {
   background: linear-gradient(
     to bottom,
-    rgba(6, 18, 40, 0.55) 0%,
-    rgba(6, 18, 40, 0.35) 30%,
-    rgba(6, 18, 40, 0) 65%
+    rgba(6, 18, 40, 0.5) 0%,
+    rgba(6, 18, 40, 0) 60%
   );
 }
 
-/* Star Dust Animation */
-@keyframes stardust {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.08;
-  }
-  90% {
-    opacity: 0.08;
-  }
-  100% {
-    transform: translateY(-100vh) translateX(20px);
-    opacity: 0;
-  }
-}
-
+/* Hero subtle highlight (no heavy blur or layered gradients) */
 .major-publisher-stardust {
-  background-image: 
-    radial-gradient(2px 2px at 20% 30%, white, transparent),
-    radial-gradient(2px 2px at 60% 70%, white, transparent),
-    radial-gradient(1px 1px at 50% 50%, white, transparent),
-    radial-gradient(1px 1px at 80% 10%, white, transparent),
-    radial-gradient(2px 2px at 90% 40%, white, transparent),
-    radial-gradient(1px 1px at 33% 60%, white, transparent),
-    radial-gradient(1px 1px at 55% 80%, white, transparent);
-  background-repeat: repeat;
-  background-size: 200% 200%;
-  animation: stardust 20s linear infinite;
-  opacity: 0.06;
+  background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .major-publisher-stardust {
-    animation: none;
-  }
 }
 
 /* Mythic Silhouettes */

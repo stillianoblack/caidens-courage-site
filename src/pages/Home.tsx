@@ -259,7 +259,7 @@ const Home = () => {
               sizes="100vw"
             />
             <img
-              src={isMobile ? '/images/heroes/homepage_hero-bg_mobile_img.webp' : '/images/heroes/hero-bg_img_2.webp'}
+              src={isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp'}
               alt="Caiden falling through a fantastical sky"
               width={1600}
               height={817}
@@ -273,7 +273,7 @@ const Home = () => {
               loading="eager"
               decoding="async"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/images/heroes/hero-bg.webp';
+                (e.target as HTMLImageElement).src = isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp';
               }}
             />
           </picture>
