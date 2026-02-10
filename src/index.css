@@ -259,6 +259,29 @@ code {
   clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 95% 100%, 5% 100%, 0% 85%);
 }
 
+/* Global rounded-rectangle image mask (used for mission/story images) */
+.story-image-mask {
+  border-radius: 16%;
+  overflow: hidden;
+}
+
+/* Meet the Creator split section: background image + dark overlay, light text */
+.creator-split-section .creator-split-dark .max-w-xl > span {
+  background: rgba(245, 215, 122, 0.95);
+  color: #1F3A5F;
+}
+.creator-split-section .creator-split-dark .max-w-xl h2 {
+  color: #fff;
+}
+.creator-split-section .creator-split-dark .max-w-xl > div[class*="space-y"] {
+  color: rgba(255, 255, 255, 0.92);
+}
+.creator-split-section .creator-split-dark .max-w-xl p,
+.creator-split-section .creator-split-dark .max-w-xl li {
+  color: inherit;
+}
+
+
 @keyframes blob-morph {
   0%, 100% {
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
@@ -589,6 +612,77 @@ a.bg-golden-500:hover,
   margin-left: auto;
   margin-right: auto;
 }
+
+/* "A World Built for Courage" section */
+.world-different-section {
+  background-color: #faf9f7;
+}
+
+.world-different-subheader {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #4b5563; /* gray-600 */
+}
+
+.world-different-positioning {
+  margin-bottom: 2.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #6b7280; /* gray-500 */
+}
+
+.world-different-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .world-different-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.world-different-card {
+  background-color: #ffffff;
+  border-radius: 9999px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.world-different-blob {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  padding: 0;
+}
+
+.world-different-blob-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  border: 3px solid #facc6b; /* soft golden trim */
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+
+.world-different-card-content {
+  min-width: 0;
+}
+
 
 /* Rotating word fade animation */
 .rotating-word {

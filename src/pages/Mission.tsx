@@ -5,6 +5,7 @@ import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import SplitStorySection from '../components/sections/SplitStorySection';
 
 // Reusable Mission Split Section Component
 interface MissionSplitSectionProps {
@@ -41,17 +42,17 @@ const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
   return (
     <div className="why-world-block mb-16 sm:mb-20 lg:mb-32 overflow-hidden md:overflow-visible w-full md:w-auto">
       <div className="w-full max-w-full md:max-w-6xl mx-auto pl-5 pr-5 sm:pl-6 sm:pr-6 box-border overflow-x-hidden">
-        {/* Mobile: vertical stack — image on top, then content card (reference layout) */}
-        <div className="mission-block-stack flex flex-col lg:grid lg:grid-cols-12 items-stretch gap-0 lg:gap-x-12 lg:gap-y-0 relative w-full min-w-0 max-w-full">
+        {/* Mobile: vertical stack; tablet/desktop: simple two-column layout */}
+        <div className="mission-block-stack flex flex-col md:grid md:grid-cols-2 items-stretch md:items-start gap-8 lg:gap-12 relative w-full min-w-0 max-w-full">
           {/* Accent Dot — desktop only */}
           <div className={`why-world-block__dot why-world-block__dot--${dotPosition} hidden lg:block`} aria-hidden="true"></div>
 
-          {/* Image — mobile: full-width top; desktop: grid column */}
+          {/* Image — mobile: full-width top; tablet/desktop: left or right column */}
           <div
-            className={`w-full min-w-0 overflow-hidden order-1 lg:col-span-6 flex justify-center ${imageSide === 'left' ? 'lg:order-1 lg:justify-start' : 'lg:order-2 lg:justify-end'}`}
+            className={`w-full min-w-0 overflow-hidden order-1 flex justify-center ${imageSide === 'left' ? 'md:order-1 md:justify-start' : 'md:order-2 md:justify-end'}`}
           >
             <div
-              className="min-w-0 w-full max-w-full overflow-hidden rounded-[2.5rem] aspect-[2/3] md:aspect-[4/3] md:rounded-[16%] md:box-border md:border-[6px] md:border-[#E9C46A] lg:aspect-square lg:rounded-full lg:max-w-[520px] lg:w-[40vw]"
+              className="min-w-0 w-full max-w-full overflow-hidden aspect-[2/3] md:aspect-[4/3] md:box-border md:border-[6px] md:border-[#E9C46A] lg:aspect-square lg:max-w-[520px] lg:w-[40vw] story-image-mask"
             >
               <div className="h-full w-full p-0" style={{ aspectRatio: '1/1' }}>
                 <img
@@ -59,7 +60,7 @@ const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
                   alt={imageAlt}
                   width={520}
                   height={520}
-                  className="block w-full max-w-full h-full object-cover object-top rounded-[2.5rem] md:rounded-none lg:rounded-full"
+                  className="block w-full max-w-full h-full object-cover object-top"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
@@ -70,9 +71,9 @@ const MissionSplitSection: React.FC<MissionSplitSectionProps> = ({
             </div>
           </div>
 
-          {/* Content — mobile: light card below image; desktop: grid column */}
+          {/* Content — mobile: card below image; tablet/desktop: opposite column */}
           <div
-            className={`order-2 lg:col-span-6 min-w-0 max-w-full flex flex-col text-left ${imageSide === 'left' ? 'lg:order-2' : 'lg:order-1'}`}
+            className={`order-2 min-w-0 max-w-full flex flex-col text-left ${imageSide === 'left' ? 'md:order-2' : 'md:order-1'}`}
             style={{ maxWidth: 'min(100%, 560px)' }}
           >
             <div className="mission-block-card bg-[#F8F8F8] rounded-b-2xl lg:rounded-2xl lg:bg-transparent lg:rounded-none pt-0 pb-8 px-6 lg:pt-0 lg:pb-0 lg:px-0">
@@ -323,7 +324,7 @@ const Mission: React.FC = () => {
         paddingTop: 'calc(3rem - 60px)',
         marginTop: '-60px'
       }}>
-        {/* Origin Section — "Why This World Was Created" (reference: light bg, pill labels, rounded image) */}
+        {/* Origin Section — "Why This World Was Created" (reference: light bg, pill labels, rounded-rectangle image) */}
         <section className="why-world-blocks overflow-x-hidden bg-[#F8F8F8] lg:bg-transparent py-10 lg:py-0">
           <div className="max-w-7xl mx-auto pl-5 pr-5 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8 w-full overflow-x-hidden box-border">
             {/* Section Header */}
@@ -337,51 +338,57 @@ const Mission: React.FC = () => {
             </div>
 
             {/* Block A: Our History */}
-            <MissionSplitSection
+            <SplitStorySection
+              label="Our History:"
               title="Our History"
-              highlightWord="History"
               body={
                 <>
                   <p>
-                    Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
+                    Caiden&apos;s Courage was created to help kids understand their emotions, celebrate neurodiversity, and
+                    discover the superhero that already lives inside them. Through stories, characters, and imaginative learning
+                    tools, we empower children to feel seen, confident, and brave in their everyday world.
                   </p>
                   <p>
-                    This isn't about fixing kids. It's about helping them recognize their strengths. When kids understand themselves, confidence follows.
+                    This isn&apos;t about fixing kids. It&apos;s about helping them recognize their strengths. When kids understand
+                    themselves, confidence follows.
                   </p>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Created to celebrate neurodiversity as strength</li>
+                    <li>Built with emotional intelligence at the core</li>
+                    <li>Designed to help kids feel seen and powerful</li>
+                  </ul>
                 </>
               }
-              bullets={[
-                'Created to celebrate neurodiversity as strength',
-                'Built with emotional intelligence at the core',
-                'Designed to help kids feel seen and powerful'
-              ]}
+              cta={{ label: 'Learn About the Mission', href: '/mission' }}
               imageSrc="/images/ourhistory_img.webp"
-              imageAlt="Our History - The origin story of Caiden's Courage"
-              imageSide="right"
+              imageAlt="Our History - The origin story of Caiden&apos;s Courage"
+              radiusClass="rounded-[16%]"
+              imageFrameClassName="story-image-mask"
             />
 
             {/* Block B: Our Promise */}
-            <MissionSplitSection
+            <SplitStorySection
+              label="Our Promise:"
               title="Our Promise"
-              highlightWord="Promise"
               body={
                 <>
                   <p>
-                    We promise to create stories, tools, and experiences that help every child see their differences as strengths. We're committed to building a world where neurodiversity is celebrated, emotional intelligence is nurtured, and courage is discovered through understanding.
+                    We promise to create stories, tools, and experiences that help every child see their differences as strengths.
+                    We&apos;re committed to building a world where neurodiversity is celebrated, emotional intelligence is
+                    nurtured, and courage is discovered through understanding.
                   </p>
                   <p>
-                    Our promise extends to parents, educators, and partners who share our vision of empowering kids to feel confident, capable, and never alone in their journey.
+                    Our promise extends to parents, educators, and partners who share our vision of empowering kids to feel
+                    confident, capable, and never alone in their journey.
                   </p>
                 </>
               }
-              cta={{
-                text: 'Partner With Us',
-                link: '/contact',
-                variant: 'primary'
-              }}
+              cta={{ label: 'Partner With Us', href: '/contact' }}
               imageSrc="/images/OurPromise_img.webp"
-              imageAlt="Our Promise - Children engaging with Caiden's Courage tools and activities"
-              imageSide="left"
+              imageAlt="Our Promise - Children engaging with Caiden&apos;s Courage tools and activities"
+              reverse
+              radiusClass="rounded-[16%]"
+              imageFrameClassName="story-image-mask"
             />
           </div>
         </section>
@@ -389,64 +396,37 @@ const Mission: React.FC = () => {
         {/* Section Separator */}
         <div className="border-t border-navy-200 my-20 sm:my-24 lg:my-28"></div>
 
-        {/* Premium Meet the Creator Section - Cinematic Hero Style */}
-        <section 
-          className="creator-section"
+        {/* Meet the Creator — global two-column component over background image */}
+        <section
+          className="creator-split-section relative overflow-hidden"
           style={{
-            backgroundImage: 'url(/images/backgrounds/meetthecreator_bg.webp)',
+            backgroundImage: 'url(/images/backgrounds/background_img.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          {/* Darkened Blue Tint Overlay - Matching Hero */}
-          <div className="creator-overlay"></div>
-          
-          {/* Content Container */}
-          <div className="creator-content">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
-                {/* LEFT: Creator Portrait with Organic Blob Mask */}
-                <div className="creator-portrait-wrapper">
-                  <div className="creator-portrait-glow"></div>
-                  <div className="creator-portrait-blob">
-                    <img
-                      src="/images/creator-photo.webp"
-                      alt="Tarus D. Stills - Creator of Caiden's Courage"
-                      width={420}
-                      height={420}
-                      className="creator-portrait-image"
-                      loading="lazy"
-                      decoding="async"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                {/* RIGHT: Creator Content */}
-                <div className="creator-text-content">
-                  <span className="creator-eyebrow">
-                    MEET THE CREATOR
-                  </span>
-                  <h2 className="creator-title">
-                    Tarus D. Stills
-                  </h2>
-                  <div className="creator-copy">
-                    <p>
-                      Tarus D. Stills is an illustrator, filmmaker, writer, and creative entrepreneur whose work is rooted in creativity, imagination, and the power of neurodivergent thinking. With a background in visual design and years of experience spanning illustration, storytelling, and digital media, he creates worlds that invite children to see themselves with confidence and possibility.
-                    </p>
-                    <p>
-                      Inspired by his own creative journey and a deep belief in art as a tool for focus, expression, and emotional growth, Tarus created <em>Caiden's Courage</em> to celebrate kids who think differently and imagine boldly. His work blends expressive illustration with heartfelt storytelling, encouraging young readers to recognize their minds as strengths rather than limitations.
-                    </p>
-                    <p>
-                      Beyond the page, Tarus is a passionate advocate for creative education and representation. Through his stories, he hopes to remind every child that what makes them different may also be what makes them extraordinary.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-navy-500/70 z-0" aria-hidden="true" />
+          <SplitStorySection
+            label="MEET THE CREATOR"
+            title="Tarus D. Stills"
+            body={
+              <>
+                <p>
+                  Tarus D. Stills is an illustrator, filmmaker, writer, and creative entrepreneur whose work is rooted in creativity, imagination, and the power of neurodivergent thinking. With a background in visual design and years of experience spanning illustration, storytelling, and digital media, he creates worlds that invite children to see themselves with confidence and possibility.
+                </p>
+                <p>
+                  Inspired by his own creative journey and a deep belief in art as a tool for focus, expression, and emotional growth, Tarus created <em>Caiden&apos;s Courage</em> to celebrate kids who think differently and imagine boldly. His work blends expressive illustration with heartfelt storytelling, encouraging young readers to recognize their minds as strengths rather than limitations.
+                </p>
+                <p>
+                  Beyond the page, Tarus is a passionate advocate for creative education and representation. Through his stories, he hopes to remind every child that what makes them different may also be what makes them extraordinary.
+                </p>
+              </>
+            }
+            imageSrc="/images/backgrounds/meetthecreator_bg.webp"
+            imageAlt="Meet the Creator - Tarus D. Stills background"
+            radiusClass="rounded-[28px]"
+            wrapClassName="creator-split-dark relative z-10"
+          />
         </section>
 
         {/* Section Separator */}
@@ -548,7 +528,7 @@ const Mission: React.FC = () => {
                 <div className="world-different-blob">
                   <img
                     src="/images/Toolsthatsupportkidsbeyondthepage_img.webp"
-                    alt="Tools that support kids beyond the page"
+                    alt="Tools beyond the page"
                     width={80}
                     height={80}
                     className="world-different-blob-image"
@@ -561,7 +541,7 @@ const Mission: React.FC = () => {
                 </div>
                 <div className="world-different-card-content">
                   <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500 mb-3">
-                    Tools that support kids beyond the page
+                    Tools beyond the page
                   </h3>
                   <p className="text-navy-600 leading-relaxed text-base">
                     Interactive B-4 tools, printable resources, and classroom guides extend the story into real-world practice.
@@ -575,53 +555,31 @@ const Mission: React.FC = () => {
         {/* Section Separator */}
         <div className="border-t border-navy-200 my-20 sm:my-24 lg:my-28"></div>
 
-        {/* Expansion Section */}
-        <section className="world-beginning-section mb-16 sm:mb-20 lg:mb-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="world-beginning-grid">
-              {/* Left Column: Text Content */}
-              <div className="world-beginning-content">
-                <div className="world-beginning-header-group">
-                  <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-navy-500">
-                    The World Is Just Beginning…
-                  </h2>
-                  <p className="world-beginning-subheader">
-                    Caiden's Courage is more than a single story. It's a growing world that includes:
-                  </p>
-                </div>
-                <div className="world-beginning-text">
-                  <ul className="world-beginning-list">
-                    <li>graphic novels</li>
-                    <li>characters and companions</li>
-                    <li>future learning tools</li>
-                    <li>digital experiences (coming later), including interactive storytelling and streaming/animated content</li>
-                  </ul>
-                  <p>
-                    We're building this slowly and intentionally — alongside the families and kids who believe in it.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Right Column: Bloop Image */}
-              <div className="world-beginning-image">
-                <div className="world-beginning-bloop">
-                  <img
-                    src="/images/TheWorldIsJustBeginning_img.webp"
-                    alt="Caiden's Courage world exploration and discovery"
-                    width={468}
-                    height={468}
-                    className="world-beginning-bloop-image"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/heroes/hero-bg.webp';
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Expansion Section — two-column grid via global SplitStorySection */}
+        <SplitStorySection
+          label="Our World:"
+          title="The World Is Just Beginning…"
+          body={
+            <>
+              <p>
+                Caiden&apos;s Courage is more than a single story. It&apos;s a growing world that includes:
+              </p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>graphic novels</li>
+                <li>characters and companions</li>
+                <li>future learning tools</li>
+                <li>digital experiences (coming later), including interactive storytelling and streaming/animated content</li>
+              </ul>
+              <p>
+                We&apos;re building this slowly and intentionally — alongside the families and kids who believe in it.
+              </p>
+            </>
+          }
+          imageSrc="/images/TheWorldIsJustBeginning_img.webp"
+          imageAlt="Caiden's Courage world exploration and discovery"
+          radiusClass="rounded-[28px]"
+          wrapClassName="mb-16 sm:mb-20 lg:mb-24"
+        />
 
         {/* Section Separator */}
         <div className="border-t border-navy-200 my-16 sm:my-20 lg:my-24"></div>
@@ -636,7 +594,7 @@ const Mission: React.FC = () => {
               {/* Left Side - Circular Image */}
               <div className="flex justify-start md:flex-shrink-0">
                 <div 
-                  className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36"
+                  className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 shrink-0"
                 >
                   <picture>
                     <source
@@ -649,7 +607,7 @@ const Mission: React.FC = () => {
                       alt="Caiden's Courage Comic Book"
                       width={144}
                       height={144}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-center scale-110"
                       loading="lazy"
                       decoding="async"
                       onError={(e) => {
