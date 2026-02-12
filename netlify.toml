@@ -2,6 +2,7 @@
 [build]
   publish = "build"
   command = "yarn build"
+  functions = "netlify/functions"
 
 # Enable asset optimization
 [build.processing]

@@ -1,7 +1,6 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import B4ChatGate from '../components/b4/B4ChatGate';
 
 const ChatWithB4: React.FC = () => {
   return (
@@ -14,7 +13,9 @@ const ChatWithB4: React.FC = () => {
         <p className="text-navy-600 mb-8 text-left max-w-2xl">
           B-4 is here to help with questions about Caiden&apos;s Courage, resources, and how to use our tools.
         </p>
-        <B4ChatGate />
+        <p className="text-navy-600 mb-4 text-left max-w-2xl">
+          Use the chat widget in the bottom-right corner of any page to start a conversation with B-4.
+        </p>
       </main>
       <Footer />
     </div>
