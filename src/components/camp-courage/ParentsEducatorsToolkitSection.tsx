@@ -1,6 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import FormNotice from "../ui/FormNotice";
+import { submitNetlifyForm } from "../../utils/netlifyForms";
+
+const REDIRECT_ON_SUCCESS = false;
 
 export default function ParentsEducatorsToolkitSection() {
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showNotice, setShowNotice] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const role = (form.elements.namedItem("role") as HTMLSelectElement)?.value || "";
+    const organization = (form.elements.namedItem("organization") as HTMLInputElement)?.value?.trim() || "";
+    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value?.trim() || "";
+    const consent = (form.elements.namedItem("consent") as HTMLInputElement)?.checked;
+    const botField = (form.elements.namedItem("bot-field") as HTMLInputElement)?.value || "";
+
+    if (!email || status === "sending") return;
+
+    setStatus("sending");
+    setErrorMsg(null);
+    setShowNotice(false);
+
+    try {
+      const res = await submitNetlifyForm("courage_toolkit", {
+        role,
+        organization,
+        email,
+        consent: consent ? "yes" : "no",
+        "bot-field": botField,
+      });
+
+      if (res.ok) {
+        setStatus("success");
+        setShowNotice(true);
+        form.reset();
+        if (REDIRECT_ON_SUCCESS) {
+          setTimeout(() => navigate("/camp-courage/toolkit-success"), 1000);
+        }
+      } else {
+        setStatus("error");
+        setErrorMsg("Please try again in a moment.");
+        setShowNotice(true);
+      }
+    } catch {
+      setStatus("error");
+      setErrorMsg("Please try again in a moment.");
+      setShowNotice(true);
+    } finally {
+      setStatus((s) => (s === "sending" ? "idle" : s));
+    }
+  };
+
   return (
     <section
       aria-labelledby="parents-educators-toolkit"
@@ -36,14 +91,16 @@ export default function ParentsEducatorsToolkitSection() {
             <div className="grid gap-10 px-8 py-10 md:grid-cols-2 md:gap-12 md:px-12">
               {/* Left: form */}
               <form
-                name="camp-courage-toolkit"
+                name="courage_toolkit"
                 method="POST"
-                action="/camp-courage/success"
                 data-netlify="true"
                 data-netlify-honeypot="bot-field"
+                action="/camp-courage/toolkit-success"
+                onSubmit={handleSubmit}
                 className="space-y-6"
               >
-                <input type="hidden" name="form-name" value="camp-courage-toolkit" />
+                <input type="hidden" name="form-name" value="courage_toolkit" />
+                <input type="hidden" name="source" value="camp-courage" />
                 <p className="hidden">
                   <label>
                     Don&apos;t fill this out: <input name="bot-field" />
@@ -98,14 +155,30 @@ export default function ParentsEducatorsToolkitSection() {
 
                 <button
                   type="submit"
-                  className="mt-2 h-14 w-full rounded-full bg-[#F4D477] px-6 text-[15px] font-semibold text-[#1F3C63] shadow-[0_10px_22px_rgba(244,212,119,0.55)] hover:brightness-[0.98]"
+                  disabled={status === "sending"}
+                  className="mt-2 h-14 w-full rounded-full bg-[#F4D477] px-6 text-[15px] font-semibold text-[#1F3C63] shadow-[0_10px_22px_rgba(244,212,119,0.55)] hover:brightness-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Send me the Courage Toolkit
+                  {status === "sending" ? "Sending…" : "Send me the Courage Toolkit"}
                 </button>
 
                 <div className="text-center text-[12px] text-[#7A94AE]">
                   No spam. Just tools + occasional updates.
                 </div>
+
+                {showNotice && (
+                  <FormNotice
+                    variant={status === "success" ? "success" : "error"}
+                    title={status === "success" ? "You're in!" : "Hmm — that didn't send."}
+                    message={
+                      status === "success"
+                        ? "Thanks — we'll email your Courage Toolkit shortly. Keep an eye on your inbox (and spam folder)."
+                        : errorMsg || "Please try again in a moment."
+                    }
+                    durationMs={4000}
+                    onClose={() => setShowNotice(false)}
+                    showProgress
+                  />
+                )}
               </form>
 
               {/* Right: what you get */}

@@ -6,6 +6,7 @@ import Terms from './pages/Terms';
 import ThankYou from './pages/ThankYou';
 import Success from './pages/Success';
 import NotifySuccess from './pages/NotifySuccess';
+import ToolkitSuccess from './pages/ToolkitSuccess';
 import Cancelled from './pages/Cancelled';
 import Resources from './pages/Resources';
 import Product from './pages/Product';
@@ -29,6 +30,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/camp-courage" element={<CampCourage />} />
+          <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
           <Route path="/classroom-pilots" element={<ClassroomPilots />} />
           <Route path="/training-guides" element={<TrainingGuides />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />

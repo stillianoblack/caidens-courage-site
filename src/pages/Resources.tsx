@@ -5,6 +5,8 @@ import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import FormNotice from '../components/ui/FormNotice';
+import { submitNetlifyForm } from '../utils/netlifyForms';
 
 const Resources: React.FC = () => {
   const location = useLocation();
@@ -18,6 +20,7 @@ const Resources: React.FC = () => {
   const [notifySubmitting, setNotifySubmitting] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
   const [notifyError, setNotifyError] = useState<string | null>(null);
+  const [notifyShowNotice, setNotifyShowNotice] = useState(false);
   // Check URL params for filter on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -105,38 +108,32 @@ const Resources: React.FC = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim();
+    const botField = (form.elements.namedItem('bot-field') as HTMLInputElement)?.value || '';
     if (!email || notifySubmitting) return;
 
     setNotifySubmitting(true);
     setNotifyError(null);
-
-    const encode = (k: string, v: string) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
-    const body = [
-      ['form-name', 'resource_notify'],
-      ['email', email],
-      ['bot-field', (form.elements.namedItem('bot-field') as HTMLInputElement)?.value || ''],
-    ].map(([k, v]) => encode(k, v)).join('&');
+    setNotifyShowNotice(false);
 
     try {
-      const res = await fetch('/resources/notify-success', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
+      const res = await submitNetlifyForm('resource_notify', {
+        email,
+        'bot-field': botField,
       });
 
       if (res.ok) {
         setNotifySuccess(true);
+        setNotifyShowNotice(true);
         if (form.elements.namedItem('email')) {
           (form.elements.namedItem('email') as HTMLInputElement).value = '';
         }
-        setTimeout(() => setNotifySuccess(false), 4000);
-        // Optionally redirect after brief delay
-        // setTimeout(() => navigate('/resources/notify-success'), 1500);
       } else {
-        setNotifyError('Something went wrong. Please try again.');
+        setNotifyError('Please try again in a moment.');
+        setNotifyShowNotice(true);
       }
     } catch {
-      setNotifyError('Something went wrong. Please try again.');
+      setNotifyError('Please try again in a moment.');
+      setNotifyShowNotice(true);
     } finally {
       setNotifySubmitting(false);
     }
@@ -396,10 +393,23 @@ const Resources: React.FC = () => {
                     border: 'none'
                   }}
                 >
-                  {notifySuccess ? 'Subscribed!' : notifySubmitting ? '…' : 'Notify Me'}
+                  {notifySuccess ? 'Subscribed!' : notifySubmitting ? 'Sending…' : 'Notify Me'}
                 </button>
               </div>
-              {notifyError && <p className="mt-2 text-sm text-red-600">{notifyError}</p>}
+              {notifyShowNotice && (
+                <FormNotice
+                  variant={notifySuccess ? 'success' : 'error'}
+                  title={notifySuccess ? 'Subscribed' : 'Hmm — that didn\'t send.'}
+                  message={
+                    notifySuccess
+                      ? 'Thanks — we\'ll notify you when new free resources drop.'
+                      : notifyError || 'Please try again in a moment.'
+                  }
+                  durationMs={4000}
+                  onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
+                  showProgress
+                />
+              )}
             </form>
           </div>
         ) : (
@@ -811,10 +821,23 @@ const Resources: React.FC = () => {
                       disabled={notifySubmitting}
                       className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {notifySuccess ? 'Subscribed!' : notifySubmitting ? '…' : 'Subscribe'}
+                      {notifySuccess ? 'Subscribed!' : notifySubmitting ? 'Sending…' : 'Subscribe'}
                     </button>
                   </form>
-                  {notifyError && <p className="mt-2 text-sm text-white/90">{notifyError}</p>}
+                  {notifyShowNotice && (
+                    <FormNotice
+                      variant={notifySuccess ? 'success' : 'error'}
+                      title={notifySuccess ? 'Subscribed' : 'Hmm — that didn\'t send.'}
+                      message={
+                        notifySuccess
+                          ? 'Thanks — we\'ll notify you when new free resources drop.'
+                          : notifyError || 'Please try again in a moment.'
+                      }
+                      durationMs={4000}
+                      onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
+                      showProgress
+                    />
+                  )}
                 </div>
               </div>
             </div>
