@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FormNotice from "../ui/FormNotice";
+import GlobalNotification from "../GlobalNotification";
 import { submitNetlifyForm } from "../../utils/netlifyForms";
 
 const REDIRECT_ON_SUCCESS = false;
@@ -166,17 +166,18 @@ export default function ParentsEducatorsToolkitSection() {
                 </div>
 
                 {showNotice && (
-                  <FormNotice
-                    variant={status === "success" ? "success" : "error"}
+                  <GlobalNotification
+                    show={showNotice}
                     title={status === "success" ? "You're in!" : "Hmm — that didn't send."}
                     message={
                       status === "success"
-                        ? "Thanks — we'll email your Courage Toolkit shortly. Keep an eye on your inbox (and spam folder)."
+                        ? "Thanks — we'll email you shortly. Keep an eye on your inbox (and spam folder)."
                         : errorMsg || "Please try again in a moment."
                     }
+                    tone={status === "success" ? "success" : "error"}
                     durationMs={4000}
+                    autoClose
                     onClose={() => setShowNotice(false)}
-                    showProgress
                   />
                 )}
               </form>

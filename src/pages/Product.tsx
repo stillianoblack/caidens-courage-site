@@ -5,7 +5,7 @@ import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import InlineNotice from '../components/InlineNotice';
+import GlobalNotification from '../components/GlobalNotification';
 
 // Reusable InsideCard Component for "What's Inside" section
 interface InsideCardProps {
@@ -132,17 +132,8 @@ const Product: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [showDigitalNotice, setShowDigitalNotice] = useState(false);
-  const [digitalNoticeKey, setDigitalNoticeKey] = useState<number>(0);
-
-  // Auto close after 4 seconds (premium: matches progress bar)
-  useEffect(() => {
-    if (!showDigitalNotice) return;
-    const timer = setTimeout(() => setShowDigitalNotice(false), 4000);
-    return () => clearTimeout(timer);
-  }, [showDigitalNotice]);
 
   const handleDigitalClick = () => {
-    setDigitalNoticeKey(Date.now());
     setShowDigitalNotice(true);
   };
 
@@ -432,13 +423,14 @@ const Product: React.FC = () => {
                   Download Digital Edition
                 </button>
               </div>
-              <InlineNotice
-                open={showDigitalNotice}
-                noticeKey={digitalNoticeKey}
+              <GlobalNotification
+                show={showDigitalNotice}
                 title="Digital edition coming soon"
                 message="Digital downloads aren't available for pre-order yet — please grab your physical copy while supplies last."
-                onClose={() => setShowDigitalNotice(false)}
+                tone="info"
                 durationMs={4000}
+                autoClose
+                onClose={() => setShowDigitalNotice(false)}
               />
             </div>
           </div>

@@ -5,7 +5,7 @@ import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import FormNotice from '../components/ui/FormNotice';
+import GlobalNotification from '../components/GlobalNotification';
 import { submitNetlifyForm } from '../utils/netlifyForms';
 
 const Resources: React.FC = () => {
@@ -397,17 +397,18 @@ const Resources: React.FC = () => {
                 </button>
               </div>
               {notifyShowNotice && (
-                <FormNotice
-                  variant={notifySuccess ? 'success' : 'error'}
-                  title={notifySuccess ? 'Subscribed' : 'Hmm — that didn\'t send.'}
+                <GlobalNotification
+                  show={notifyShowNotice}
+                  title={notifySuccess ? 'You\'re in!' : 'Hmm — that didn\'t send.'}
                   message={
                     notifySuccess
-                      ? 'Thanks — we\'ll notify you when new free resources drop.'
+                      ? 'Thanks — we\'ll email you shortly. Keep an eye on your inbox (and spam folder).'
                       : notifyError || 'Please try again in a moment.'
                   }
+                  tone={notifySuccess ? 'success' : 'error'}
                   durationMs={4000}
+                  autoClose
                   onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
-                  showProgress
                 />
               )}
             </form>
@@ -825,17 +826,18 @@ const Resources: React.FC = () => {
                     </button>
                   </form>
                   {notifyShowNotice && (
-                    <FormNotice
-                      variant={notifySuccess ? 'success' : 'error'}
-                      title={notifySuccess ? 'Subscribed' : 'Hmm — that didn\'t send.'}
+                    <GlobalNotification
+                      show={notifyShowNotice}
+                      title={notifySuccess ? 'You\'re in!' : 'Hmm — that didn\'t send.'}
                       message={
                         notifySuccess
-                          ? 'Thanks — we\'ll notify you when new free resources drop.'
+                          ? 'Thanks — we\'ll email you shortly. Keep an eye on your inbox (and spam folder).'
                           : notifyError || 'Please try again in a moment.'
                       }
+                      tone={notifySuccess ? 'success' : 'error'}
                       durationMs={4000}
+                      autoClose
                       onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
-                      showProgress
                     />
                   )}
                 </div>
