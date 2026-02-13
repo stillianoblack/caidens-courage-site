@@ -12,8 +12,6 @@ const Resources: React.FC = () => {
   const [selectedType, setSelectedType] = useState<ResourceType | 'all'>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [selectedAudience, setSelectedAudience] = useState<Audience | 'all'>('all');
-  const [email, setEmail] = useState('');
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -151,14 +149,6 @@ const Resources: React.FC = () => {
 
   const handleTagClick = (tag: string) => {
     setSelectedTag(tag);
-  };
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Integrate with email service
-    setEmailSubmitted(true);
-    setEmail('');
-    setTimeout(() => setEmailSubmitted(false), 3000);
   };
 
   const handleDownload = (fileUrl: string, title: string) => {
@@ -330,14 +320,20 @@ const Resources: React.FC = () => {
             <p className="text-navy-500 text-base mb-6">
               Want to be notified when new resources are added?
             </p>
-            <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
+            <form
+              name="newsletter"
+              method="POST"
+              data-netlify="true"
+              action="/success"
+              className="max-w-md mx-auto"
+            >
+              <input type="hidden" name="form-name" value="newsletter" />
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  name="email"
                   required
+                  placeholder="Enter your email"
                   className="flex-1 px-4 py-3 rounded-lg border-2 border-navy-300 focus:border-navy-500 focus:outline-none text-navy-700"
                 />
                 <button
@@ -348,9 +344,8 @@ const Resources: React.FC = () => {
                     color: 'white',
                     border: 'none'
                   }}
-                  disabled={emailSubmitted}
                 >
-                  {emailSubmitted ? '✓ Notified!' : 'Notify Me'}
+                  Notify Me
                 </button>
               </div>
             </form>
@@ -738,21 +733,26 @@ const Resources: React.FC = () => {
                   <p className="text-white/90 text-base sm:text-lg mb-6">
                     Join the Courage community for free tools and updates
                   </p>
-                  <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
+                  <form
+                    name="newsletter"
+                    method="POST"
+                    data-netlify="true"
+                    action="/success"
+                    className="flex flex-col sm:flex-row gap-3"
+                  >
+                    <input type="hidden" name="form-name" value="newsletter" />
                     <input
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      name="email"
                       required
+                      placeholder="Enter your email"
                       className="flex-1 px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/50"
                     />
                     <button
                       type="submit"
-                      disabled={emailSubmitted}
-                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap"
                     >
-                      {emailSubmitted ? '✓ Subscribed!' : 'Subscribe'}
+                      Subscribe
                     </button>
                   </form>
                 </div>

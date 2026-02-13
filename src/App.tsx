@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import ThankYou from './pages/ThankYou';
+import Success from './pages/Success';
 import Cancelled from './pages/Cancelled';
 import Resources from './pages/Resources';
 import Product from './pages/Product';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/success" element={<Success />} />
           <Route path="/cancelled" element={<Cancelled />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/resources/coloring-pages" element={<Navigate to="/resources?type=coloring" replace />} />
