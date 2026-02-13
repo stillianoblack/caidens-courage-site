@@ -24,7 +24,6 @@ const ClassroomPilots: React.FC = () => {
       <BluePageHeader
         title="Classroom Pilots"
         description="Bring Caiden's Courage tools into real classrooms — and help shape what we build next."
-        cta={{ label: 'Request a Pilot', onClick: handleContactClick }}
       />
 
       {/* Hero Section */}

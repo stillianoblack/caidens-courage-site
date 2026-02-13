@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BluePageHeader from '../components/sections/BluePageHeader';
@@ -9,15 +8,10 @@ import ResourcesRecommendationsSection from '../components/resources/ResourcesRe
 
 const CampCourage: React.FC = () => {
   const [, setIsComingSoonModalOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
   }, []);
-
-  const handleEducatorAccess = () => {
-    navigate('/courage-academy#educator-access');
-  };
 
   return (
     <div className="min-h-screen bg-cream font-body">
@@ -27,7 +21,6 @@ const CampCourage: React.FC = () => {
         title="Camp Courage"
         description="A Courage Academy experience with guided SEL missions, companion activities, and classroom pilots for educators and caregivers."
         subtitle="A calm, welcoming space for kids to practice courage — together with the adults who support them."
-        cta={{ label: 'Request Educator Access', onClick: handleEducatorAccess }}
       />
 
       <ParentsEducatorsToolkitSection />
