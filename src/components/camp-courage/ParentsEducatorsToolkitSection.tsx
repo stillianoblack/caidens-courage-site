@@ -35,11 +35,20 @@ export default function ParentsEducatorsToolkitSection() {
           <div className="rounded-[16px] border border-[#E7EEF7] bg-white shadow-[0_12px_35px_rgba(31,60,99,0.12)]">
             <div className="grid gap-10 px-8 py-10 md:grid-cols-2 md:gap-12 md:px-12">
               {/* Left: form */}
-              <form className="space-y-6">
+              <form
+                name="courage-toolkit"
+                method="POST"
+                data-netlify="true"
+                data-netlify-honeypot="bot-field"
+                className="space-y-6"
+              >
+                <input type="hidden" name="form-name" value="courage-toolkit" />
+                <input type="hidden" name="bot-field" />
                 <div>
                   <label className="block text-[13px] font-semibold text-[#2B4A73]">I am a:</label>
                   <div className="mt-2">
                     <select
+                      name="role"
                       className="h-12 w-full rounded-[10px] border border-[#C7D6EA] bg-white px-4 text-[15px] text-[#2B4A73] outline-none focus:ring-2 focus:ring-[#F4D477]"
                       defaultValue="Teacher"
                     >
@@ -57,6 +66,7 @@ export default function ParentsEducatorsToolkitSection() {
                     School / Organization<span className="text-[#D54B4B]"> *</span>
                   </label>
                   <input
+                    name="school-org"
                     className="mt-2 h-12 w-full rounded-[10px] border border-[#C7D6EA] bg-white px-4 text-[15px] text-[#2B4A73] placeholder:text-[#9AB0C6] outline-none focus:ring-2 focus:ring-[#F4D477]"
                     placeholder="e.g., Jefferson Elementary"
                   />
@@ -67,6 +77,7 @@ export default function ParentsEducatorsToolkitSection() {
                     Email<span className="text-[#D54B4B]"> *</span>
                   </label>
                   <input
+                    name="email"
                     type="email"
                     className="mt-2 h-12 w-full rounded-[10px] border border-[#C7D6EA] bg-white px-4 text-[15px] text-[#2B4A73] placeholder:text-[#9AB0C6] outline-none focus:ring-2 focus:ring-[#F4D477]"
                     placeholder="you@school.org or you@gmail.com"
@@ -74,14 +85,14 @@ export default function ParentsEducatorsToolkitSection() {
                 </div>
 
                 <label className="flex items-start gap-3 text-[13px] text-[#4E6A86]">
-                  <input type="checkbox" className="mt-1 h-4 w-4 rounded border-[#C7D6EA]" />
+                  <input name="consent" type="checkbox" className="mt-1 h-4 w-4 rounded border-[#C7D6EA]" />
                   <span>
                     Email me the toolkit + occasional updates. No spam.<span className="text-[#D54B4B]"> *</span>
                   </span>
                 </label>
 
                 <button
-                  type="button"
+                  type="submit"
                   className="mt-2 h-14 w-full rounded-full bg-[#F4D477] px-6 text-[15px] font-semibold text-[#1F3C63] shadow-[0_10px_22px_rgba(244,212,119,0.55)] hover:brightness-[0.98]"
                 >
                   Send me the Courage Toolkit
