@@ -101,7 +101,12 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
-# Redirects for SPA routing
+# Redirects for SPA routing (specific rules first)
+[[redirects]]
+  from = "/thank-you"
+  to = "/thank-you.html"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

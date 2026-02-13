@@ -38,6 +38,7 @@ export default function ParentsEducatorsToolkitSection() {
               <form
                 name="courage-toolkit"
                 method="POST"
+                action="/thank-you"
                 data-netlify="true"
                 data-netlify-honeypot="bot-field"
                 className="space-y-6"
