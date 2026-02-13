@@ -101,12 +101,23 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
-# Redirects for SPA routing (specific rules first)
+# Redirects: success pages first, then SPA catch-all
+[[redirects]]
+  from = "/camp-courage/success"
+  to = "/camp-courage-success.html"
+  status = 200
+
+[[redirects]]
+  from = "/success"
+  to = "/success.html"
+  status = 200
+
 [[redirects]]
   from = "/thank-you"
   to = "/thank-you.html"
   status = 200
 
+# SPA fallback (must be last)
 [[redirects]]
   from = "/*"
   to = "/index.html"

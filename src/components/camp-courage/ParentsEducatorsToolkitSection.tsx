@@ -36,15 +36,19 @@ export default function ParentsEducatorsToolkitSection() {
             <div className="grid gap-10 px-8 py-10 md:grid-cols-2 md:gap-12 md:px-12">
               {/* Left: form */}
               <form
-                name="courage-toolkit"
+                name="camp-courage-toolkit"
                 method="POST"
-                action="/thank-you"
+                action="/camp-courage/success"
                 data-netlify="true"
                 data-netlify-honeypot="bot-field"
                 className="space-y-6"
               >
-                <input type="hidden" name="form-name" value="courage-toolkit" />
-                <input type="hidden" name="bot-field" />
+                <input type="hidden" name="form-name" value="camp-courage-toolkit" />
+                <p className="hidden">
+                  <label>
+                    Don&apos;t fill this out: <input name="bot-field" />
+                  </label>
+                </p>
                 <div>
                   <label className="block text-[13px] font-semibold text-[#2B4A73]">I am a:</label>
                   <div className="mt-2">
@@ -67,7 +71,7 @@ export default function ParentsEducatorsToolkitSection() {
                     School / Organization<span className="text-[#D54B4B]"> *</span>
                   </label>
                   <input
-                    name="school-org"
+                    name="organization"
                     className="mt-2 h-12 w-full rounded-[10px] border border-[#C7D6EA] bg-white px-4 text-[15px] text-[#2B4A73] placeholder:text-[#9AB0C6] outline-none focus:ring-2 focus:ring-[#F4D477]"
                     placeholder="e.g., Jefferson Elementary"
                   />
