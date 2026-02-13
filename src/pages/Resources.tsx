@@ -15,6 +15,9 @@ const Resources: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [notifySubmitting, setNotifySubmitting] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
   // Check URL params for filter on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -96,6 +99,47 @@ const Resources: React.FC = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
     setIsPreorderOpen(true);
+  };
+
+  const handleResourceNotifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim();
+    if (!email || notifySubmitting) return;
+
+    setNotifySubmitting(true);
+    setNotifyError(null);
+
+    const encode = (k: string, v: string) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
+    const body = [
+      ['form-name', 'resource_notify'],
+      ['email', email],
+      ['bot-field', (form.elements.namedItem('bot-field') as HTMLInputElement)?.value || ''],
+    ].map(([k, v]) => encode(k, v)).join('&');
+
+    try {
+      const res = await fetch('/resources/notify-success', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+
+      if (res.ok) {
+        setNotifySuccess(true);
+        if (form.elements.namedItem('email')) {
+          (form.elements.namedItem('email') as HTMLInputElement).value = '';
+        }
+        setTimeout(() => setNotifySuccess(false), 4000);
+        // Optionally redirect after brief delay
+        // setTimeout(() => navigate('/resources/notify-success'), 1500);
+      } else {
+        setNotifyError('Something went wrong. Please try again.');
+      }
+    } catch {
+      setNotifyError('Something went wrong. Please try again.');
+    } finally {
+      setNotifySubmitting(false);
+    }
   };
 
   const handleComingSoonClick = useCallback(() => {
@@ -321,23 +365,30 @@ const Resources: React.FC = () => {
               Want to be notified when new resources are added?
             </p>
             <form
-              name="newsletter"
+              name="resource_notify"
               method="POST"
               data-netlify="true"
-              action="/success"
+              data-netlify-honeypot="bot-field"
+              action="/resources/notify-success"
+              onSubmit={handleResourceNotifySubmit}
               className="max-w-md mx-auto"
             >
-              <input type="hidden" name="form-name" value="newsletter" />
+              <input type="hidden" name="form-name" value="resource_notify" />
+              <p className="hidden">
+                <label>Don&apos;t fill this out: <input name="bot-field" /></label>
+              </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   name="email"
                   required
+                  autoComplete="email"
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-3 rounded-lg border-2 border-navy-300 focus:border-navy-500 focus:outline-none text-navy-700"
                 />
                 <button
                   type="submit"
+                  disabled={notifySubmitting}
                   className="btn btn--sm"
                   style={{
                     backgroundColor: 'var(--navy-500)',
@@ -345,9 +396,10 @@ const Resources: React.FC = () => {
                     border: 'none'
                   }}
                 >
-                  Notify Me
+                  {notifySuccess ? 'Subscribed!' : notifySubmitting ? '…' : 'Notify Me'}
                 </button>
               </div>
+              {notifyError && <p className="mt-2 text-sm text-red-600">{notifyError}</p>}
             </form>
           </div>
         ) : (
@@ -734,27 +786,35 @@ const Resources: React.FC = () => {
                     Join the Courage community for free tools and updates
                   </p>
                   <form
-                    name="newsletter"
+                    name="resource_notify"
                     method="POST"
                     data-netlify="true"
-                    action="/success"
+                    data-netlify-honeypot="bot-field"
+                    action="/resources/notify-success"
+                    onSubmit={handleResourceNotifySubmit}
                     className="flex flex-col sm:flex-row gap-3"
                   >
-                    <input type="hidden" name="form-name" value="newsletter" />
+                    <input type="hidden" name="form-name" value="resource_notify" />
+                    <p className="hidden">
+                      <label>Don&apos;t fill this out: <input name="bot-field" /></label>
+                    </p>
                     <input
                       type="email"
                       name="email"
                       required
+                      autoComplete="email"
                       placeholder="Enter your email"
                       className="flex-1 px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/50"
                     />
                     <button
                       type="submit"
-                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap"
+                      disabled={notifySubmitting}
+                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Subscribe
+                      {notifySuccess ? 'Subscribed!' : notifySubmitting ? '…' : 'Subscribe'}
                     </button>
                   </form>
+                  {notifyError && <p className="mt-2 text-sm text-white/90">{notifyError}</p>}
                 </div>
               </div>
             </div>

@@ -5,6 +5,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import ThankYou from './pages/ThankYou';
 import Success from './pages/Success';
+import NotifySuccess from './pages/NotifySuccess';
 import Cancelled from './pages/Cancelled';
 import Resources from './pages/Resources';
 import Product from './pages/Product';
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           <Route path="/success" element={<Success />} />
           <Route path="/cancelled" element={<Cancelled />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/resources/notify-success" element={<NotifySuccess />} />
           <Route path="/resources/coloring-pages" element={<Navigate to="/resources?type=coloring" replace />} />
           <Route path="/resources/wallpapers" element={<Navigate to="/resources?type=wallpaper" replace />} />
           <Route path="/resources/teachers" element={<Navigate to="/resources?type=teacher-pack" replace />} />
