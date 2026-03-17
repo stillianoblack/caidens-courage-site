@@ -5,8 +5,7 @@
  * - Wallpapers: /public/downloads/wallpapers/
  * - Coloring pages: /public/downloads/coloring-pages/
  * - SEL worksheets: /public/downloads/sel-worksheets/
- *
- * Thumbnail = file path (same image used for preview and download).
+ * - Thumbnails: /public/downloads/thumbnails/{category}/ (800px for retina)
  */
 
 export type ResourceType = "wallpaper" | "coloring" | "worksheet" | "teacher-pack";
@@ -18,12 +17,17 @@ export interface Resource {
   title: string;
   type: ResourceType;
   tags: string[];
-  fileUrl: string; // Used for thumbnail, preview, and download
+  fileUrl: string; // Full-size file for download
   description?: string;
   format?: string;
   audience: Audience[];
   ageRange?: string;
   useCase: UseCase;
+}
+
+/** Derives thumbnail path from fileUrl (e.g. /downloads/coloring-pages/X.jpg → /downloads/thumbnails/coloring-pages/X.jpg) */
+export function getThumbnailUrl(fileUrl: string): string {
+  return fileUrl.replace("/downloads/", "/downloads/thumbnails/");
 }
 
 export const RESOURCES: Resource[] = [

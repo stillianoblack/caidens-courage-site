@@ -1,34 +1,43 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Terms from './pages/Terms';
-import ThankYou from './pages/ThankYou';
-import Success from './pages/Success';
-import NotifySuccess from './pages/NotifySuccess';
-import ToolkitSuccess from './pages/ToolkitSuccess';
-import FormSuccess from './pages/FormSuccess';
-import Cancelled from './pages/Cancelled';
-import Resources from './pages/Resources';
-import Product from './pages/Product';
-import Preview from './pages/Preview';
-import Mission from './pages/Mission';
-import About from './pages/About';
-import World from './pages/World';
-import Characters from './pages/Characters';
-import B4Clicker from './pages/B4Clicker';
-import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
-import ChatWithB4 from './pages/ChatWithB4';
-import CampCourage from './pages/CampCourage';
-import ClassroomPilots from './pages/ClassroomPilots';
-import TrainingGuides from './pages/TrainingGuides';
-import Journey from './pages/Journey';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+
+// Route-based code splitting: only load page chunks when navigated to
+const Home = lazy(() => import('./pages/Home'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const ThankYou = lazy(() => import('./pages/ThankYou'));
+const Success = lazy(() => import('./pages/Success'));
+const NotifySuccess = lazy(() => import('./pages/NotifySuccess'));
+const ToolkitSuccess = lazy(() => import('./pages/ToolkitSuccess'));
+const FormSuccess = lazy(() => import('./pages/FormSuccess'));
+const Cancelled = lazy(() => import('./pages/Cancelled'));
+const Resources = lazy(() => import('./pages/Resources'));
+const Product = lazy(() => import('./pages/Product'));
+const Preview = lazy(() => import('./pages/Preview'));
+const Mission = lazy(() => import('./pages/Mission'));
+const About = lazy(() => import('./pages/About'));
+const World = lazy(() => import('./pages/World'));
+const Characters = lazy(() => import('./pages/Characters'));
+const B4Clicker = lazy(() => import('./pages/B4Clicker'));
+const B4ToolsLibrary = lazy(() => import('./pages/ResourcesB4ToolsLibrary'));
+const ChatWithB4 = lazy(() => import('./pages/ChatWithB4'));
+const CampCourage = lazy(() => import('./pages/CampCourage'));
+const ClassroomPilots = lazy(() => import('./pages/ClassroomPilots'));
+const TrainingGuides = lazy(() => import('./pages/TrainingGuides'));
+const Journey = lazy(() => import('./pages/Journey'));
+
+const PageFallback = () => (
+  <div className="min-h-screen bg-cream flex items-center justify-center" aria-label="Loading">
+    <div className="w-10 h-10 border-2 border-navy-300 border-t-navy-600 rounded-full animate-spin" />
+  </div>
+);
 
 const App: React.FC = () => {
   return (
     <Router>
       <>
+        <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/camp-courage" element={<CampCourage />} />
@@ -60,6 +69,7 @@ const App: React.FC = () => {
           <Route path="/chat" element={<ChatWithB4 />} />
           <Route path="/journey" element={<Journey />} />
         </Routes>
+        </Suspense>
         <DeferredB4ChatWidget />
       </>
     </Router>

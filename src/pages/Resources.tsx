@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import JSZip from 'jszip';
 import { useLocation } from 'react-router-dom';
-import { RESOURCES, ResourceType, Audience } from '../data/resources';
+import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -543,7 +543,7 @@ const Resources: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredResources.map((resource) => (
+            {filteredResources.map((resource, index) => (
               <div
                 key={resource.id}
                 role="button"
@@ -557,13 +557,15 @@ const Resources: React.FC = () => {
                 }}
                 className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
               >
-                {/* Thumbnail - uses file path as image */}
+                {/* Thumbnail - optimized 400px image for fast load */}
                 <div className="aspect-square bg-navy-100 relative overflow-hidden">
                   <img
-                    src={resource.fileUrl}
+                    src={getThumbnailUrl(resource.fileUrl)}
                     alt={resource.title}
+                    width={800}
+                    height={800}
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    loading={index < 6 ? "eager" : "lazy"}
                     decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';

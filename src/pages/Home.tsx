@@ -482,26 +482,19 @@ const Home = () => {
                     {/* Comic Book Image - Circular with blue border */}
                     <div className="flex-shrink-0">
                       <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
-                        <picture>
-                          <source
-                            type="image/webp"
-                            srcSet="/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w"
-                            sizes="160px"
-                          />
-                          <img
-                            src="/images/Comic5_Coverpage_header_smaller-1600.webp"
-                            alt="Caiden's Courage Comic Book"
-                            width={80}
-                            height={80}
-                            className="object-cover"
-                            loading="lazy"
-                            decoding="async"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
-                            }}
-                          />
-                        </picture>
+                        <img
+                          src="/images/Comic5_Coverpage_header_smaller-200w.jpg"
+                          alt="Caiden's Courage Comic Book"
+                          width={80}
+                          height={80}
+                          className="object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                          }}
+                        />
                       </div>
                     </div>
                     
