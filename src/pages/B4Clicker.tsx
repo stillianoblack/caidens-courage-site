@@ -552,7 +552,7 @@ const B4Clicker: React.FC = () => {
                 </div>
                 <div className="text-center">
                   <Link
-                    to="/resources#library"
+                    to="/braveminds#library"
                     className="text-sm text-navy-500 hover:text-navy-700 underline"
                     onClick={handleCloseModal}
                   >

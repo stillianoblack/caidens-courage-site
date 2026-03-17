@@ -88,12 +88,12 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'Brave Mind Club Activities',
-        href: '/resources',
+        href: '/braveminds',
         description: 'Printable guides, posters, and worksheets for home and classroom use.'
       },
       {
         label: 'FAQs',
-        href: '/resources#faq',
+        href: '/braveminds#faq',
         description: 'Quick answers about using our free resources.'
       },
       {

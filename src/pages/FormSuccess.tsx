@@ -23,7 +23,7 @@ const FormSuccess: React.FC = () => {
             Thanks — we&apos;ll be in touch soon.
           </p>
           <Link
-            to="/resources"
+            to="/braveminds"
             className="mt-7 inline-flex items-center justify-center rounded-full bg-golden-500 text-navy-700 px-7 py-3.5 font-semibold transition-all hover:brightness-[0.98]"
             style={{ boxShadow: '0 10px 22px rgba(244, 212, 119, 0.55)' }}
           >

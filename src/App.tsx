@@ -40,12 +40,15 @@ const App: React.FC = () => {
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancelled" element={<Cancelled />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/resources/notify-success" element={<NotifySuccess />} />
+          <Route path="/braveminds" element={<Resources />} />
+          <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
           <Route path="/form-success" element={<FormSuccess />} />
-          <Route path="/resources/coloring-pages" element={<Navigate to="/resources?type=coloring" replace />} />
-          <Route path="/resources/wallpapers" element={<Navigate to="/resources?type=wallpaper" replace />} />
-          <Route path="/resources/teachers" element={<Navigate to="/resources?type=teacher-pack" replace />} />
+          <Route path="/resources" element={<Navigate to="/braveminds" replace />} />
+          <Route path="/resources/notify-success" element={<Navigate to="/braveminds/notify-success" replace />} />
+          <Route path="/resources/coloring-pages" element={<Navigate to="/braveminds?type=coloring" replace />} />
+          <Route path="/resources/wallpapers" element={<Navigate to="/braveminds?type=wallpaper" replace />} />
+          <Route path="/resources/teachers" element={<Navigate to="/braveminds?type=teacher-pack" replace />} />
+          <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
           <Route path="/comicbook" element={<Product />} />
           <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
           <Route path="/product" element={<Navigate to="/comicbook" replace />} />
@@ -56,7 +59,7 @@ const App: React.FC = () => {
           <Route path="/world" element={<World />} />
           <Route path="/characters" element={<Characters />} />
           <Route path="/b4-tools" element={<B4Clicker />} />
-          <Route path="/resources/b4-tools-library" element={<B4ToolsLibrary />} />
+          <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
           <Route path="/chat" element={<ChatWithB4 />} />
           <Route path="/journey" element={<Journey />} />
         </Routes>

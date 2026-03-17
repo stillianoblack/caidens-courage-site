@@ -12,17 +12,17 @@ export default function ResourcesRecommendationsSection() {
     {
       title: "Caiden Coloring Pages",
       imageSrc: "/images/coloringpage_Caiden.jpg",
-      href: "/resources?type=coloring",
+      href: "/braveminds?type=coloring",
     },
     {
       title: "Caiden Desktop Wallpaper",
       imageSrc: "/images/CoolCaiden_header.webp",
-      href: "/resources?type=wallpaper",
+      href: "/braveminds?type=wallpaper",
     },
     {
       title: "Emotional Awareness Worksheet",
       imageSrc: "/images/SELThubmails.webp",
-      href: "/resources?type=worksheet",
+      href: "/braveminds?type=worksheet",
     },
   ];
 
@@ -87,7 +87,7 @@ export default function ResourcesRecommendationsSection() {
 
               <div className="mt-8">
                 <Link
-                  to="/resources"
+                  to="/braveminds"
                   className="inline-flex h-12 items-center justify-center rounded-full bg-[#F2D06B] px-8 text-[14px] font-extrabold text-[#1F3C63] shadow-[0_14px_28px_rgba(0,0,0,0.18)]"
                 >
                   Explore Resources

@@ -1039,7 +1039,7 @@ const Product: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Caiden Coloring Pages */}
             <Link
-              to="/resources?type=coloring&audience=kids"
+              to="/braveminds?type=coloring&audience=kids"
               className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
@@ -1066,7 +1066,7 @@ const Product: React.FC = () => {
 
             {/* Caiden Desktop Wallpaper */}
             <Link
-              to="/resources?type=wallpaper&audience=kids"
+              to="/braveminds?type=wallpaper&audience=kids"
               className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">
@@ -1093,7 +1093,7 @@ const Product: React.FC = () => {
 
             {/* Emotional Awareness Worksheet */}
             <Link
-              to="/resources?type=worksheet&audience=teachers"
+              to="/braveminds?type=worksheet&audience=teachers"
               className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
             >
               <div className="aspect-square bg-navy-100 relative overflow-hidden">

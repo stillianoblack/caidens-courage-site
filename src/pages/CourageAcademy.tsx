@@ -433,7 +433,7 @@ const CourageAcademy: React.FC = () => {
                   <p className="text-sm text-navy-600 mb-4 flex-grow">
                     Complete guide to using B-4 reset tools in the classroom and at home.
                   </p>
-                  <Link to="/resources#library">
+                  <Link to="/braveminds#library">
                     <Button variant="primary" size="md" className="w-full">
                       Download
                     </Button>
@@ -448,7 +448,7 @@ const CourageAcademy: React.FC = () => {
                   <p className="text-sm text-navy-600 mb-4 flex-grow">
                     Ready-to-use prompts for guided SEL missions and reflection.
                   </p>
-                  <Link to="/resources#teachers">
+                  <Link to="/braveminds#teachers">
                     <Button variant="primary" size="md" className="w-full">
                       Download
                     </Button>
@@ -463,7 +463,7 @@ const CourageAcademy: React.FC = () => {
                   <p className="text-sm text-navy-600 mb-4 flex-grow">
                     Step-by-step guide for creating a calm space in your classroom or home.
                   </p>
-                  <Link to="/resources#downloads">
+                  <Link to="/braveminds#downloads">
                     <Button variant="primary" size="md" className="w-full">
                       Download
                     </Button>
@@ -508,7 +508,7 @@ const CourageAcademy: React.FC = () => {
                   <p className="text-sm text-navy-600 mb-4 flex-grow">
                     Explore our full library of printables, guides, and classroom tools.
                   </p>
-                  <Link to="/resources">
+                  <Link to="/braveminds">
                     <Button variant="primary" size="md" className="w-full">
                       Browse
                     </Button>
@@ -584,7 +584,7 @@ const CourageAcademy: React.FC = () => {
                             Start B-4 Reset Tools
                           </Button>
                         </Link>
-                        <Link to="/resources#teachers">
+                        <Link to="/braveminds#teachers">
                           <Button variant="secondary" size="lg" className="w-full sm:w-auto">
                             Download Mission Prompts
                           </Button>
@@ -633,7 +633,7 @@ const CourageAcademy: React.FC = () => {
                           <span>Classroom-friendly extensions</span>
                         </li>
                       </ul>
-                      <Link to="/resources">
+                      <Link to="/braveminds">
                         <Button variant="primary" size="lg" className="w-full sm:w-auto">
                           Browse resources
                         </Button>
@@ -744,7 +744,7 @@ const CourageAcademy: React.FC = () => {
                 <h4 className="font-display text-xl font-bold text-navy-500 mb-4">
                   Caiden Coloring Pages
                 </h4>
-                <Link to="/resources?type=coloring" className="mt-auto">
+                <Link to="/braveminds?type=coloring" className="mt-auto">
                   <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
                     Explore
                   </button>
@@ -771,7 +771,7 @@ const CourageAcademy: React.FC = () => {
                 <h4 className="font-display text-xl font-bold text-navy-500 mb-4">
                   Caiden Desktop Wallpaper
                 </h4>
-                <Link to="/resources?type=wallpaper" className="mt-auto">
+                <Link to="/braveminds?type=wallpaper" className="mt-auto">
                   <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
                     Explore
                   </button>
@@ -798,7 +798,7 @@ const CourageAcademy: React.FC = () => {
                 <h4 className="font-display text-xl font-bold text-navy-500 mb-4">
                   Emotional Awareness Worksheet
                 </h4>
-                <Link to="/resources?type=worksheet" className="mt-auto">
+                <Link to="/braveminds?type=worksheet" className="mt-auto">
                   <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
                     Explore
                   </button>
@@ -820,7 +820,7 @@ const CourageAcademy: React.FC = () => {
               <p className="text-lg sm:text-xl text-white/90 mb-8">
                 More free tools, printable supports, and missions for home and classroom.
               </p>
-              <Link to="/resources">
+              <Link to="/braveminds">
                 <Button variant="primary" size="lg" className="bg-golden-500 hover:bg-golden-400 text-navy-500">
                   Explore Resources
                 </Button>

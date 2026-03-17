@@ -19,7 +19,7 @@ const TrainingGuides: React.FC = () => {
       <BluePageHeader
         title="Training & Guides"
         description="Simple guidance for using B-4 tools at home and in the classroom."
-        cta={{ label: 'Browse resources', href: '/resources' }}
+        cta={{ label: 'Browse resources', href: '/braveminds' }}
       />
 
       {/* Hero Section */}
@@ -93,7 +93,7 @@ const TrainingGuides: React.FC = () => {
           <p className="text-lg sm:text-xl text-navy-600 max-w-2xl mx-auto mb-8">
             Download guides, worksheets, and classroom tools to support your implementation.
           </p>
-          <Link to="/resources">
+          <Link to="/braveminds">
             <Button variant="primary" size="lg" className="w-full sm:w-auto">
               Browse resources
             </Button>

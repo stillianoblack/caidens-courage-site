@@ -297,16 +297,16 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             <div className="border-t border-navy-200 mt-4 pt-4">
               <h3 className="font-display font-bold text-xs text-navy-500 mb-3 uppercase tracking-wide">Browse by audience</h3>
               <div className="grid grid-cols-4 gap-2">
-                <Link to="/resources#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/braveminds#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Kids</div>
                 </Link>
-                <Link to="/resources#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/braveminds#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Parents</div>
                 </Link>
-                <Link to="/resources#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/braveminds#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">For Teachers</div>
                 </Link>
-                <Link to="/resources" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
+                <Link to="/braveminds" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
                   <div className="font-semibold text-xs text-navy-700">All Resources</div>
                 </Link>
               </div>
@@ -684,16 +684,16 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                             </div>
                             <div className="px-12 py-4 border-t border-navy-200">
                               <div className="grid grid-cols-2 gap-2">
-                                <Link to="/resources?audience=kids" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/braveminds?audience=kids" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Kids</div>
                                 </Link>
-                                <Link to="/resources?audience=parents" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/braveminds?audience=parents" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Parents</div>
                                 </Link>
-                                <Link to="/resources?audience=teachers" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/braveminds?audience=teachers" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">For Teachers</div>
                                 </Link>
-                                <Link to="/resources" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
+                                <Link to="/braveminds" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
                                   <div className="font-semibold text-sm text-navy-700">All Resources</div>
                                 </Link>
                               </div>

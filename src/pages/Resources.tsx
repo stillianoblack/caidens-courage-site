@@ -81,7 +81,7 @@ const Resources: React.FC = () => {
 
   // Scroll to results when audience filter changes (from URL or dropdown)
   useEffect(() => {
-    if (location.pathname === '/resources') {
+    if (location.pathname === '/braveminds') {
       const params = new URLSearchParams(location.search);
       const audienceParam = params.get('audience');
       if (audienceParam) {
@@ -494,7 +494,7 @@ const Resources: React.FC = () => {
               method="POST"
               data-netlify="true"
               data-netlify-honeypot="bot-field"
-              action="/resources/notify-success"
+              action="/braveminds/notify-success"
               onSubmit={handleResourceNotifySubmit}
               className="max-w-md mx-auto"
             >
@@ -883,7 +883,7 @@ const Resources: React.FC = () => {
                     method="POST"
                     data-netlify="true"
                     data-netlify-honeypot="bot-field"
-                    action="/resources/notify-success"
+                    action="/braveminds/notify-success"
                     onSubmit={handleResourceNotifySubmit}
                     className="flex flex-col sm:flex-row gap-3"
                   >
