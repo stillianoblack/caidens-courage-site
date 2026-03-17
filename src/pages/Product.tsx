@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -171,11 +171,6 @@ const Product: React.FC = () => {
     }
   }, [location.pathname, location.hash]);
 
-
-  const handlePhysicalCopyClick = () => {
-    const stripeUrl = getStripePreorderUrl();
-    if (stripeUrl) return openExternalUrl(stripeUrl);
-  };
 
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
