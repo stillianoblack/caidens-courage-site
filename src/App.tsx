@@ -22,6 +22,7 @@ import ChatWithB4 from './pages/ChatWithB4';
 import CampCourage from './pages/CampCourage';
 import ClassroomPilots from './pages/ClassroomPilots';
 import TrainingGuides from './pages/TrainingGuides';
+import Journey from './pages/Journey';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 
 const App: React.FC = () => {
@@ -57,6 +58,7 @@ const App: React.FC = () => {
           <Route path="/b4-tools" element={<B4Clicker />} />
           <Route path="/resources/b4-tools-library" element={<B4ToolsLibrary />} />
           <Route path="/chat" element={<ChatWithB4 />} />
+          <Route path="/journey" element={<Journey />} />
         </Routes>
         <DeferredB4ChatWidget />
       </>
