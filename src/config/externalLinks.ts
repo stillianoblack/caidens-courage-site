@@ -6,6 +6,8 @@ export function getStripePreorderUrl(): string | undefined {
 // Product-specific Stripe links
 export const productLinks = {
   limitedEdition: 'https://buy.stripe.com/9B6bJ03DVe0ogMTaZG3Ru00',
+  hardcoverBundle: 'https://buy.stripe.com/fZufZggqHbSg7cjd7O3Ru04',
+  paperback: 'https://buy.stripe.com/6oU5kCeiz4pO2W3gk03Ru03',
   b4Plush: 'https://buy.stripe.com/6oUaEWa2j9K89kr9VC3Ru01',
   tShirt: 'https://buy.stripe.com/9B6dR80rJ2hGaov0l23Ru02',
   // Coming soon - add link when ready

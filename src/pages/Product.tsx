@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -233,6 +233,10 @@ const Product: React.FC = () => {
                   }
                 }}
               >
+                {/* First Edition Badge - subtle, near cover */}
+                <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-navy-600 text-xs font-semibold border border-navy-100 shadow-sm">
+                  First Edition Print
+                </div>
                 {DISABLE_HEROES ? (
                   <div
                     className="w-full mx-auto bg-navy-500"
@@ -343,8 +347,8 @@ const Product: React.FC = () => {
                   to="/preview"
                   className="flex-shrink-0 text-navy-500 text-sm font-medium hover:text-navy-600 transition-colors"
                 >
-                  <div>Preview Pages</div>
-                  <div className="text-xs text-navy-400 mt-0.5">See sample art & story</div>
+                  <div>Inside the Book</div>
+                  <div className="text-xs text-navy-400 mt-0.5">Explore sample pages from Caiden's Courage</div>
                 </Link>
               </div>
             </div>
@@ -354,7 +358,7 @@ const Product: React.FC = () => {
               {/* Eyebrow */}
               <div className="mb-3 text-left">
                 <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
-                  THE GRAPHIC NOVEL
+                  THE GRAPHIC NOVEL — FIRST EDITION
                 </p>
               </div>
               
@@ -366,63 +370,113 @@ const Product: React.FC = () => {
               {/* Tagline - Secondary */}
               <div className="mb-4 text-left">
                 <p className="text-base text-navy-500 font-normal leading-relaxed">
-                  When the world feels loud, Caiden learns how to lock in. Pulled into a hidden realm of ancient guardians and powerful forces, Caiden must learn to trust his instincts, face the noise in his mind, and discover what makes him different is also what makes him brave.
-              </p>
+                  When the world feels loud, Caiden learns how to lock in. Pulled into a hidden realm of ancient guardians and powerful forces, he must face the noise in his mind and discover what makes him different is also what makes him brave. Originally created as a 54-page story, now expanded into a 120-page hardcover graphic novel.
+                </p>
               </div>
 
               {/* Metadata Pills - Smaller, Softer */}
-              <div className="flex flex-wrap gap-2 mb-10 justify-start">
+              <div className="flex flex-wrap gap-2 mb-8 justify-start">
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
                   Ages 7–12
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  Full-Color Comic
+                  Full-Color Graphic Novel
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  50+ Pages
+                  120 Pages
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
                   Print & Digital Friendly
                 </span>
               </div>
 
-              {/* CTA Buttons - Side by Side */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6 justify-start">
-                <button
-                  type="button"
-                  onClick={handlePhysicalCopyClick}
-                  className="
-                    inline-flex items-center justify-center
-                    rounded-full border-2 border-transparent
-                    px-7 py-4 text-[16px] font-semibold text-navy-600
-                    shadow-[0_10px_24px_rgba(245,210,107,0.35)]
-                    transition
-                    hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)]
-                    active:translate-y-0 active:scale-[0.98]
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2
-                  "
-                  style={{ backgroundColor: '#F2D06B' }}
-                >
-                  Pre-order Physical Copy
-                </button>
+              {/* Pricing Blocks - Stacked */}
+              <div className="flex flex-col gap-4 mb-6">
+                {/* Block 1: Founder's Edition - Sold Out */}
+                <div className="rounded-2xl border border-gray-200 bg-gray-50/50 p-4 sm:p-5 opacity-75">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                    <h3 className="font-display font-bold text-navy-500 text-lg">Founder's Edition</h3>
+                    <span className="text-navy-400">
+                      <span className="line-through">$24</span>
+                      <span className="ml-2 text-sm font-medium text-navy-500">Sold Out</span>
+                    </span>
+                  </div>
+                  <p className="text-sm text-navy-600 leading-relaxed">
+                    Early supporters locked in the first print of Caiden's Courage. All Founder copies will receive the upgraded hardcover edition.
+                  </p>
+                </div>
+
+                {/* Block 2: Hardcover + Companion Workbook - Primary */}
+                <div className="rounded-2xl border-2 border-navy-200 bg-white p-4 sm:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                    <h3 className="font-display font-bold text-navy-500 text-lg">Hardcover + Companion Workbook</h3>
+                    <span className="font-bold text-navy-600 text-xl">$50</span>
+                  </div>
+                  <ul className="space-y-1.5 mb-3 text-sm text-navy-600">
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      120-page hardcover graphic novel
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      Courage Companion activity workbook
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      <span className="font-semibold">Signed first edition copy (limited)</span>
+                    </li>
+                  </ul>
+                  <p className="text-xs text-navy-400 mb-4">Limited first print run</p>
+                  <button
+                    type="button"
+                    onClick={() => productLinks.hardcoverBundle && openExternalUrl(productLinks.hardcoverBundle)}
+                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 shadow-[0_10px_24px_rgba(245,210,107,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)] active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2"
+                    style={{ backgroundColor: '#F2D06B' }}
+                  >
+                    Pre-order Hardcover Bundle
+                  </button>
+                </div>
+
+                {/* Block 3: Paperback Edition */}
+                <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                    <h3 className="font-display font-bold text-navy-500 text-lg">Paperback Edition</h3>
+                    <span className="font-bold text-navy-600 text-xl">$30</span>
+                  </div>
+                  <ul className="space-y-1.5 mb-4 text-sm text-navy-600">
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      120-page full-color paperback
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      Perfect for young readers & classrooms
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => productLinks.paperback && openExternalUrl(productLinks.paperback)}
+                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-navy-500 bg-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 transition hover:bg-navy-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-300 focus-visible:ring-offset-2"
+                  >
+                    Pre-order Paperback
+                  </button>
+                </div>
+
+                {/* Digital - Secondary */}
                 <button
                   type="button"
                   onClick={handleDigitalClick}
                   aria-describedby="digital-download-notice"
-                  className="
-                    inline-flex items-center justify-center
-                    rounded-full border-2 border-slate-900/70 bg-white
-                    px-7 py-4 text-[16px] font-semibold text-slate-900
-                    shadow-[0_10px_24px_rgba(2,6,23,0.10)]
-                    transition
-                    hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(2,6,23,0.14)]
-                    active:translate-y-0 active:scale-[0.98]
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2
-                  "
+                  className="w-full md:w-auto inline-flex items-center justify-center rounded-full border border-gray-300 bg-white px-6 py-3 text-[15px] font-medium text-navy-600 transition hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-300 focus-visible:ring-offset-2"
                 >
                   Download Digital Edition
                 </button>
               </div>
+
+              {/* Trust Line */}
+              <p className="text-xs text-navy-400 mb-6">
+                First print copies are part of the official launch edition of Caiden's Courage.
+              </p>
               <GlobalNotification
                 show={showDigitalNotice}
                 title="Digital edition coming soon"
