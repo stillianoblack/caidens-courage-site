@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import JSZip from 'jszip';
 import { useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
@@ -215,6 +214,7 @@ const Resources: React.FC = () => {
     if (filteredResources.length === 0 || isDownloadingAll) return;
     setIsDownloadingAll(true);
     try {
+      const { default: JSZip } = await import('jszip');
       const zip = new JSZip();
       for (const resource of filteredResources) {
         const filename = resource.fileUrl.split('/').pop() || `${resource.title.replace(/\s+/g, '-')}.jpg`;
