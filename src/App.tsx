@@ -1,19 +1,12 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
 import { runAfterPaint } from './lib/safeMode';
 import { SAFE_MODE } from './lib/safeMode';
-import Home from './pages/Home';
 
-/** Minimal fallback when a lazy route chunk is loading; avoids blank "stuck" screen. */
-const RouteFallback = () => (
-  <div style={{ minHeight: '40vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 14 }}>
-    Loading…
-  </div>
-);
-
-// Lazy load non-home pages for code splitting (Home is eager above).
+// Lazy load routes for code splitting.
+const Home = lazy(() => import('./pages/Home'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const ThankYou = lazy(() => import('./pages/ThankYou'));
@@ -78,11 +71,10 @@ const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
  * This lives inside BrowserRouter so useLocation() sees the updated URL when you click a link.
  */
 const RouterContent: React.FC = () => {
-  const location = useLocation();
   return (
     <ChunkErrorBoundary>
-      <Suspense fallback={<RouteFallback />}>
-        <Routes key={location.pathname}>{routeList}</Routes>
+      <Suspense fallback={null}>
+        <Routes>{routeList}</Routes>
       </Suspense>
     </ChunkErrorBoundary>
   );

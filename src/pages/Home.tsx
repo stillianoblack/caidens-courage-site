@@ -252,8 +252,18 @@ const Home = () => {
           ) : (
             <picture>
               <source
+                type="image/webp"
+                media="(max-width: 768px)"
+                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.webp"
+              />
+              <source
                 media="(max-width: 768px)"
                 srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
+              />
+              <source
+                type="image/webp"
+                media="(min-width: 769px)"
+                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header.webp"
               />
               <source
                 media="(min-width: 769px)"
@@ -270,6 +280,7 @@ const Home = () => {
                 style={{ objectPosition: isMobile ? 'center 35%' : 'center center' }}
                 loading="eager"
                 decoding="async"
+                sizes="(max-width: 768px) 100vw, 50vw"
                 onError={(e) => {
                   const el = e.target as HTMLImageElement;
                   el.src = isMobile

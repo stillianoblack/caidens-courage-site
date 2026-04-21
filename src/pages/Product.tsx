@@ -250,8 +250,9 @@ const Product: React.FC = () => {
                       alt={galleryImages[selectedImageIndex].alt}
                       width={742}
                       height={494}
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className="w-full h-auto object-cover mx-auto"
-                      loading="eager"
+                      loading="lazy"
                       style={{
                         transformOrigin: 'center center',
                         transform: 'scale(1)',
@@ -282,8 +283,9 @@ const Product: React.FC = () => {
                     alt={galleryImages[selectedImageIndex].alt}
                     width={600}
                     height={600}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="w-full h-auto object-cover mx-auto"
-                    loading="eager"
+                    loading="lazy"
                     style={{
                       transformOrigin: 'center center',
                       transform: 'scale(1)',
