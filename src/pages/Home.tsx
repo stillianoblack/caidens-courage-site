@@ -237,6 +237,7 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
+        data-deploy-trigger="2026-04-21"
         className="major-publisher-hero relative overflow-hidden"
         style={{
           paddingTop: isMobile ? '130px' : '120px',
