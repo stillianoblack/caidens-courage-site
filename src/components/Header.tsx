@@ -492,9 +492,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 className="inline-block hover:opacity-80 transition-opacity flex-shrink-0"
               >
                 <img
-                  src="/images/ui/logoCaiden_480w.webp"
-                  srcSet="/images/ui/logoCaiden_240w.webp 240w, /images/ui/logoCaiden_480w.webp 480w"
-                  sizes="(max-width: 640px) 180px, 213px"
+                  src="/images/backgrounds/caiden'scourage_logo_1.png"
                   width={213}
                   height={80}
                   alt="Caiden's Courage"

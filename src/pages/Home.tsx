@@ -238,10 +238,10 @@ const Home = () => {
       <section
         id="hero"
         className="major-publisher-hero relative overflow-hidden"
-        style={{ 
+        style={{
           paddingTop: isMobile ? '130px' : '120px',
           minHeight: isMobile ? '100vh' : '92vh',
-          alignItems: isMobile ? 'flex-start' : undefined
+          alignItems: isMobile ? 'flex-start' : undefined,
         }}
       >
         {/* Background — image or solid when REACT_APP_DISABLE_HEROES */}
@@ -252,27 +252,28 @@ const Home = () => {
             <picture>
               <source
                 media="(max-width: 768px)"
-                type="image/webp"
-                srcSet="/images/heroes/hero-bg_mobile_400w.webp 400w, /images/heroes/hero-bg_mobile_600w.webp 600w, /images/heroes/hero-bg_mobile_800w.webp 800w"
-                sizes="100vw"
+                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
               />
               <source
                 media="(min-width: 769px)"
-                type="image/webp"
-                srcSet="/images/heroes/hero-bg_desktop_640w.webp 640w, /images/heroes/hero-bg_desktop_960w.webp 960w, /images/heroes/hero-bg_desktop_1280w.webp 1280w, /images/heroes/hero-bg_desktop_1600w.webp 1600w"
-                sizes="100vw"
+                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"
               />
               <img
-                src={isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp'}
-                alt="Caiden falling through a fantastical sky"
-                width={1600}
-                height={817}
+                src={
+                  isMobile
+                    ? "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
+                    : "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"
+                }
+                alt="Caiden Vale and the Focus Flame — hero background"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = isMobile ? '/images/heroes/hero-bg_mobile_800w.webp' : '/images/heroes/hero-bg_desktop_1600w.webp';
+                  const el = e.target as HTMLImageElement;
+                  el.src = isMobile
+                    ? "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
+                    : "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg";
                 }}
               />
             </picture>
@@ -284,29 +285,7 @@ const Home = () => {
         
         {/* Star Dust Animation */}
         <div className="major-publisher-stardust absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true"></div>
-        
-        {/* Mythic Silhouettes */}
-        <div className="major-publisher-silhouettes absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true">
-          {/* Dragon Silhouette */}
-          <svg className="major-publisher-silhouette major-publisher-dragon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 20 C120 40, 140 60, 160 80 C170 90, 175 100, 180 110 C185 120, 180 130, 175 140 C170 150, 160 155, 150 160 C140 165, 130 165, 120 160 C110 155, 100 150, 90 145 C80 140, 70 135, 60 130 C50 125, 40 120, 30 115 C20 110, 15 100, 20 90 C25 80, 35 70, 45 60 C55 50, 65 40, 75 30 C85 25, 95 20, 100 20 Z" fill="currentColor" opacity="0.1"/>
-            <path d="M100 40 L110 60 L120 80 L130 100 L125 120 L115 130 L105 125 L95 115 L85 100 L80 80 L85 60 L95 50 Z" fill="currentColor" opacity="0.08"/>
-          </svg>
-          
-          {/* Spider Glyph */}
-          <svg className="major-publisher-silhouette major-publisher-spider" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="75" cy="50" r="20" fill="currentColor" opacity="0.1"/>
-            <path d="M75 70 L75 90 M55 60 L45 70 M95 60 L105 70 M55 80 L45 90 M95 80 L105 90 M55 100 L45 110 M95 100 L105 110" stroke="currentColor" strokeWidth="3" opacity="0.1" strokeLinecap="round"/>
-          </svg>
-          
-          {/* Portal Swirl */}
-          <svg className="major-publisher-silhouette major-publisher-portal" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M90 90 m-60,0 a60,60 0 1,1 120,0 a60,60 0 1,1 -120,0" stroke="currentColor" strokeWidth="2" opacity="0.12" fill="none"/>
-            <path d="M90 90 m-40,0 a40,40 0 1,1 80,0 a40,40 0 1,1 -80,0" stroke="currentColor" strokeWidth="2" opacity="0.1" fill="none"/>
-            <path d="M90 90 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0" stroke="currentColor" strokeWidth="2" opacity="0.08" fill="none"/>
-          </svg>
-        </div>
-        
+
         {/* Content - Aligned to Global Grid */}
         <div className="hero-container relative z-10 w-full flex flex-col md:block">
           <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
@@ -334,7 +313,7 @@ const Home = () => {
                 marginBottom: '16px'
               }}
             >
-              Every Hero Starts Somewhere.
+              Where focus becomes power.
             </h1>
             
             {/* Subheader */}
@@ -545,19 +524,19 @@ const Home = () => {
               {/* Body Paragraphs */}
               <div className="space-y-4 mb-8">
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Caiden is an 11-year-old boy who discovers that the thing he struggles with most… may also be the source of his greatest strength.
+                  Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
                 </p>
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn't always see him clearly.
+                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn’t always see him clearly.
                 </p>
               </div>
 
               {/* Power Line */}
               <div className="mb-0">
                 <p className="text-navy-500 leading-relaxed meet-hero-thesis" style={{ fontWeight: 600 }}>
-                  Being different isn't a weakness.
+                  Being different isn’t a weakness.
                   <br />
-                  It's where courage begins.
+                  It’s where courage begins.
                 </p>
               </div>
             </div>
