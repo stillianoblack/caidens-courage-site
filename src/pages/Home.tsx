@@ -240,7 +240,7 @@ const Home = () => {
         data-deploy-trigger="2026-04-21"
         className="major-publisher-hero relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '130px' : '120px',
+          paddingTop: isMobile ? '100px' : '120px',
           minHeight: isMobile ? '100vh' : '92vh',
           alignItems: isMobile ? 'flex-start' : undefined,
         }}
@@ -522,7 +522,7 @@ const Home = () => {
               {/* Body Paragraphs */}
               <div className="space-y-4 mb-8">
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Caiden is an 11-year-old boy who discovers that the thing he struggles with most… may also be the source of his greatest strength.
+                  Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
                 </p>
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
                   Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn't always see him clearly.
