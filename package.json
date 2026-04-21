@@ -38,7 +38,7 @@
     "optimize-page-heroes": "node scripts/optimize-page-heroes.mjs",
     "optimize-images": "node scripts/optimize-images.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
-    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "start": "DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true react-scripts start",
     "server": "node server.js",
     "dev": "netlify dev",
     "build": "react-scripts build && node -e \"require('fs').copyFileSync('public/_redirects','build/_redirects')\"",
