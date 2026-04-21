@@ -266,7 +266,7 @@ const Home = () => {
                 }
                 alt="Caiden Vale and the Focus Flame — hero background"
                 className="w-full h-full object-cover"
-                style={{ objectPosition: isMobile ? 'center 35%' : 'center 30%' }}
+                style={{ objectPosition: isMobile ? 'center 35%' : 'center center' }}
                 loading="eager"
                 decoding="async"
                 onError={(e) => {
@@ -285,10 +285,12 @@ const Home = () => {
         
         {/* Star Dust Animation */}
         <div className="major-publisher-stardust absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true"></div>
-
-        {/* Content - Aligned to Global Grid */}
-        <div className="hero-container relative z-10 w-full flex flex-col md:block">
-          <div className="hero-text text-left md:max-w-[520px] w-full md:w-auto" style={{ maxWidth: '520px', marginBottom: '0' }}>
+        
+        {/* Content - aligned to global nav grid; vertically centered on desktop only */}
+        <div className="relative z-10 w-full md:flex md:min-h-[calc(92vh-120px)] md:items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="flex md:items-center md:min-h-0">
+              <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
             <div 
               className="text-xs sm:text-sm font-semibold uppercase"
@@ -303,59 +305,61 @@ const Home = () => {
               INTRODUCING THE WORLD OF CAIDEN
             </div>
             
-            {/* Headline */}
-            <h1 
-              className="font-display font-extrabold text-white"
-              style={{ 
-                fontSize: 'clamp(44px, 5vw, 64px)',
-                lineHeight: '1.05',
-                letterSpacing: '-1px',
-                marginBottom: '16px'
-              }}
-            >
-              Where focus becomes power.
-            </h1>
+                {/* Headline */}
+                <h1 
+                  className="font-display font-extrabold text-white"
+                  style={{ 
+                    fontSize: 'clamp(44px, 5vw, 64px)',
+                    lineHeight: '1.05',
+                    letterSpacing: '-1px',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <span className="block">Where focus becomes power.</span>
+                </h1>
             
-            {/* Subheader */}
-            <p 
-              className="text-white font-medium"
-              style={{ 
-                fontSize: '22px',
-                lineHeight: '1.4',
-                marginBottom: '12px',
-                opacity: 0.92
-              }}
-            >
-              An illustrated adventure where imagination, courage, and ancient mysteries collide.
-            </p>
+                {/* Subheader */}
+                <p 
+                  className="text-white font-medium"
+                  style={{ 
+                    fontSize: '22px',
+                    lineHeight: '1.4',
+                    marginBottom: '12px',
+                    opacity: 0.92
+                  }}
+                >
+                  Stories that help kids see their differences as strengths — and discover the hero already inside them.
+                </p>
 
-            {/* CTA Row */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handlePreorderClick}
-                className="w-full sm:w-auto"
-              >
-                Pre-Order Volume 1
-              </Button>
-              <Button
-                variant="secondary"
-                size="md"
-                as={Link}
-                to="/world"
-                className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
-              >
-                Explore the World
-              </Button>
-            </div>
+                {/* CTA Row */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={handlePreorderClick}
+                    className="w-full sm:w-auto"
+                  >
+                    Pre-Order Volume 1
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    as={Link}
+                    to="/world"
+                    className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+                  >
+                    Explore the World
+                  </Button>
+                </div>
 
-            {/* Trust Line */}
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
-              </svg>
-              <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
+                {/* Trust Line */}
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
+                  </svg>
+                  <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -409,8 +413,8 @@ const Home = () => {
 
       {/* Meet the Hero Section */}
       <section className="bg-cream relative overflow-hidden meet-hero-section pt-20 md:pt-0">
-        <div className="hero-container">
-          <div className="grid gap-12 lg:gap-16 items-center meet-hero-grid">
+        <div className="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center meet-hero-grid">
             {/* Left Column - Image - Below text on mobile */}
             <div className="order-2 md:order-1">
               <div 
@@ -457,26 +461,19 @@ const Home = () => {
                     {/* Comic Book Image - Circular with blue border */}
                     <div className="flex-shrink-0">
                       <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
-                        <picture>
-                          <source
-                            type="image/webp"
-                            srcSet="/images/Comic5_Coverpage_header_smaller-900.webp 900w, /images/Comic5_Coverpage_header_smaller-1600.webp 1600w"
-                            sizes="160px"
-                          />
-                          <img
-                            src="/images/Comic5_Coverpage_header_smaller-1600.webp"
-                            alt="Caiden's Courage Comic Book"
-                            width={80}
-                            height={80}
-                            className="object-cover"
-                            loading="lazy"
-                            decoding="async"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
-                            }}
-                          />
-                        </picture>
+                        <img
+                          src="/images/Comic5_Coverpage_header_smaller-200w.jpg"
+                          alt="Caiden's Courage Comic Book"
+                          width={80}
+                          height={80}
+                          className="object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
+                          }}
+                        />
                       </div>
                     </div>
                     
@@ -524,19 +521,19 @@ const Home = () => {
               {/* Body Paragraphs */}
               <div className="space-y-4 mb-8">
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
+                  Caiden is an 11-year-old boy who discovers that the thing he struggles with most… may also be the source of his greatest strength.
                 </p>
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn’t always see him clearly.
+                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn't always see him clearly.
                 </p>
               </div>
 
               {/* Power Line */}
               <div className="mb-0">
                 <p className="text-navy-500 leading-relaxed meet-hero-thesis" style={{ fontWeight: 600 }}>
-                  Being different isn’t a weakness.
+                  Being different isn't a weakness.
                   <br />
-                  It’s where courage begins.
+                  It's where courage begins.
                 </p>
               </div>
             </div>
@@ -703,13 +700,13 @@ const Home = () => {
                 style={{ aspectRatio: '1/1' }}
               >
                 <img
-                  src="/images/Courageforeverykid.webp"
+                  src="/images/Courageforeverykid_1.webp"
                   alt="Caiden celebrating - Courage for Every Kid"
                   className="w-full h-full object-cover object-center"
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid.webp';
+                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid_1.webp';
                   }}
                 />
               </div>
@@ -1146,59 +1143,6 @@ const Home = () => {
       </section>
 
       <Footer />
-
-      {/* Coming Soon Modal */}
-      {isComingSoonModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsComingSoonModalOpen(false);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
-            <button
-              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
-              onClick={() => setIsComingSoonModalOpen(false)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            
-            <div className="text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
-                We're building this next.
-              </h2>
-              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
-                We're designing Caiden & B-4 plushies and limited-edition shirts.
-                <br />
-                Join the Courage Community to get early access when they launch.
-              </p>
-              
-              <div className="flex flex-col gap-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsComingSoonModalOpen(false);
-                  }}
-                  className="w-full"
-                >
-                  Join the Courage Community
-                </Button>
-                <button
-                  onClick={() => setIsComingSoonModalOpen(false)}
-                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (
