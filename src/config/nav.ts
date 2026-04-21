@@ -152,6 +152,12 @@ export const NAV_ITEMS: NavItem[] = [
         description: 'Soft companions for your journey'
       }
     ]
+  },
+  {
+    label: 'Journey',
+    href: '/journey',
+    type: 'link',
+    activePaths: ['/journey']
   }
 ];
 

@@ -32,6 +32,7 @@ const ResourcesDownloads = lazy(() => import('./pages/ResourcesDownloads'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Characters = lazy(() => import('./pages/Characters'));
 const World = lazy(() => import('./pages/World'));
+const Journey = lazy(() => import('./pages/Journey'));
 
 const routeList = (
   <>
@@ -47,6 +48,7 @@ const routeList = (
     <Route path="/comicbook" element={<Product />} />
     <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
     <Route path="/product" element={<Navigate to="/comicbook" replace />} />
+    <Route path="/journey" element={<Journey />} />
     <Route path="/preview" element={<Preview />} />
     <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
     <Route path="/mission" element={<Suspense fallback={null}><Mission /></Suspense>} />
