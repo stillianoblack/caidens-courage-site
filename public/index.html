@@ -27,9 +27,9 @@
         var p = typeof location !== 'undefined' && location.pathname;
         if (!p || p === '/' || p === '') {
           var mobile = document.createElement('link');
-          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = '/images/heroes/hero-bg_mobile_800w.webp'; mobile.type = 'image/webp'; mobile.media = '(max-width: 768px)';
+          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"; mobile.type = 'image/jpeg'; mobile.media = '(max-width: 768px)';
           var desktop = document.createElement('link');
-          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = '/images/heroes/hero-bg_desktop_1600w.webp'; desktop.type = 'image/webp'; desktop.media = '(min-width: 769px)';
+          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"; desktop.type = 'image/jpeg'; desktop.media = '(min-width: 769px)';
           document.head.appendChild(mobile); document.head.appendChild(desktop);
         }
       })();
