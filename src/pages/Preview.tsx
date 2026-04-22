@@ -453,8 +453,8 @@ const Preview = () => {
         <section className="w-full px-4 sm:px-6 lg:px-8 pb-16">
           {/* Preview Microcopy - Left aligned */}
           <div className="max-w-4xl mx-auto mb-6 text-left">
-            <h2 className="text-2xl sm:text-3xl font-bold text-navy-500 mb-2">Preview Pages</h2>
-            <p className="text-navy-400">See sample art & story</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-navy-500 mb-2">Inside the Book</h2>
+            <p className="text-navy-400">Explore sample pages from Caiden's Courage</p>
           </div>
 
           {/* Guidance Text - Left aligned, subtle */}

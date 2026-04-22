@@ -27,9 +27,9 @@
         var p = typeof location !== 'undefined' && location.pathname;
         if (!p || p === '/' || p === '') {
           var mobile = document.createElement('link');
-          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.webp"; mobile.type = 'image/webp'; mobile.media = '(max-width: 768px)';
+          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"; mobile.type = 'image/jpeg'; mobile.media = '(max-width: 768px)';
           var desktop = document.createElement('link');
-          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header.webp"; desktop.type = 'image/webp'; desktop.media = '(min-width: 769px)';
+          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"; desktop.type = 'image/jpeg'; desktop.media = '(min-width: 769px)';
           document.head.appendChild(mobile); document.head.appendChild(desktop);
         }
       })();
@@ -37,7 +37,9 @@
     <!-- Other routes: RouteHeroPreload injects preload after paint when REACT_APP_ENABLE_PRELOADS=true. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Non-blocking fonts: reduced weights (dropped 900) for faster load -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://caidenscourage.com/" />
@@ -71,21 +73,36 @@
     <title>Caiden's Courage</title>
   </head>
   <body>
-    <!-- Unregister service workers and clear caches before app runs so chunk requests on client-side nav are never intercepted by an old SW. -->
+    <!-- Defer SW/cache cleanup until after first paint to avoid blocking -->
     <script>
       (function() {
         if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          regs.forEach(function(r) { r.unregister(); });
-        }).catch(function() {});
-        if (typeof caches !== 'undefined' && caches.keys) {
-          caches.keys().then(function(keys) {
-            keys.forEach(function(k) { caches.delete(k); });
+        var run = function() {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { r.unregister(); });
           }).catch(function() {});
+          if (typeof caches !== 'undefined' && caches.keys) {
+            caches.keys().then(function(keys) {
+              keys.forEach(function(k) { caches.delete(k); });
+            }).catch(function() {});
+          }
+        };
+        if (window.requestIdleCallback) {
+          requestIdleCallback(run, { timeout: 2000 });
+        } else {
+          setTimeout(run, 500);
         }
       })();
     </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <form name="courage_toolkit" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="courage_toolkit" />
+      <input name="role" />
+      <input name="organization" />
+      <input name="email" />
+      <input name="consent" />
+      <input name="bot-field" />
+    </form>
     <div id="root"></div>
     <!-- Do not add a LaunchDarkly <script> tag here or via Netlify inject. LaunchDarkly loads only via the app (src/lib/launchdarkly.tsx) after first paint; no script tag to avoid NO_FCP and EventSource blocking. -->
     <!--

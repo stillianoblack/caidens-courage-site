@@ -229,7 +229,7 @@ const About: React.FC = () => {
                   style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
                 >
                   <Link
-                    to="/resources?audience=kids"
+                    to="/braveminds?audience=kids"
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
@@ -237,7 +237,7 @@ const About: React.FC = () => {
                     <div className="text-xs text-navy-400 mt-0.5">Coloring pages, wallpapers, fun activities</div>
                   </Link>
                   <Link
-                    to="/resources?audience=parents"
+                    to="/braveminds?audience=parents"
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
@@ -245,7 +245,7 @@ const About: React.FC = () => {
                     <div className="text-xs text-navy-400 mt-0.5">Guides, tips, explanations</div>
                   </Link>
                   <Link
-                    to="/resources?audience=teachers"
+                    to="/braveminds?audience=teachers"
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
@@ -253,7 +253,7 @@ const About: React.FC = () => {
                     <div className="text-xs text-navy-400 mt-0.5">Worksheets, classroom tools</div>
                   </Link>
                   <Link
-                    to="/resources"
+                    to="/braveminds"
                     className="block w-full text-left px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors border-t border-navy-100 mt-1 pt-2"
                     onClick={() => setShowResourcesDropdown(false)}
                   >
@@ -425,7 +425,7 @@ const About: React.FC = () => {
               </Link>
               
               <Link
-                to="/resources"
+                to="/braveminds"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-6 py-6 text-navy-600 text-2xl font-semibold hover:bg-navy-50 transition-colors border-b border-navy-100 flex items-center justify-between rounded-lg"
               >
@@ -513,7 +513,7 @@ const About: React.FC = () => {
           <div className="mt-8 pt-8 border-t border-white/10">
             <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
               <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
-              <Link to="/resources" className="text-white/70 hover:text-white transition-colors">Resources</Link>
+              <Link to="/braveminds" className="text-white/70 hover:text-white transition-colors">Resources</Link>
               <Link 
                 to="/#about" 
                 onClick={(e) => {

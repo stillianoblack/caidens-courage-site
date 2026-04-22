@@ -1,26 +1,11 @@
 /**
  * RESOURCES CATALOG
- * 
- * HOW TO ADD A NEW RESOURCE:
- * 
- * 1. Drop your file in the appropriate folder:
- *    - Wallpapers: /public/downloads/wallpapers/
- *    - Coloring pages: /public/downloads/coloring-pages/
- *    - SEL worksheets: /public/downloads/sel-worksheets/
- *    - Teacher packs: /public/downloads/teacher-packs/
- * 
- * 2. Create or add a thumbnail image:
- *    - Save thumbnail in: /public/thumbnails/
- *    - Recommended size: 300x300px or similar square format
- *    - Use the same filename or a descriptive name
- * 
- * 3. Add one object to the RESOURCES array below:
- *    - Copy an existing resource object
- *    - Update all fields with your new resource's information
- *    - Make sure fileUrl points to your file in /public/downloads/
- *    - Make sure thumbnail points to your image in /public/thumbnails/
- * 
- * That's it! The new resource will appear on the Resources page automatically.
+ *
+ * Folder structure:
+ * - Wallpapers: /public/downloads/wallpapers/
+ * - Coloring pages: /public/downloads/coloring-pages/
+ * - SEL worksheets: /public/downloads/sel-worksheets/
+ * - Thumbnails: /public/downloads/thumbnails/{category}/ (800px for retina)
  */
 
 export type ResourceType = "wallpaper" | "coloring" | "worksheet" | "teacher-pack";
@@ -32,54 +17,84 @@ export interface Resource {
   title: string;
   type: ResourceType;
   tags: string[];
-  thumbnail: string;
-  fileUrl: string;
+  fileUrl: string; // Full-size file for download
   description?: string;
   format?: string;
-  audience: Audience[]; // Who this resource is for
-  ageRange?: string; // e.g., "Ages 6-12"
-  useCase: UseCase; // Where it's used
+  audience: Audience[];
+  ageRange?: string;
+  useCase: UseCase;
+}
+
+/** Derives thumbnail path from fileUrl (e.g. /downloads/coloring-pages/X.jpg → /downloads/thumbnails/coloring-pages/X.jpg) */
+export function getThumbnailUrl(fileUrl: string): string {
+  return fileUrl.replace("/downloads/", "/downloads/thumbnails/");
 }
 
 export const RESOURCES: Resource[] = [
+  // Wallpapers
   {
     id: "wallpaper-1",
-    title: "Caiden Desktop Wallpaper",
+    title: "Happy Focus Wallpaper",
     type: "wallpaper",
-    tags: ["caiden", "desktop", "inspirational"],
-    thumbnail: "/images/CoolCaiden_header.webp",
-    fileUrl: "/downloads/wallpapers/caiden-desktop.png",
-    description: "A fun, confidence-boosting wallpaper to inspire kids at home or school",
-    format: "PNG",
+    tags: ["wallpaper", "focus"],
+    fileUrl: "/downloads/wallpapers/Caiden'sCourage_Wallpaper_Tablet_Happy.jpg",
     audience: ["parents", "students", "teachers"],
-    ageRange: "Ages 6-12",
-    useCase: "both"
+    useCase: "both",
   },
+  {
+    id: "wallpaper-2",
+    title: "Focus Mode Wallpaper",
+    type: "wallpaper",
+    tags: ["wallpaper", "focus"],
+    fileUrl: "/downloads/wallpapers/Caiden'sCourage_Wallpaper_Tablet.jpg",
+    audience: ["parents", "students", "teachers"],
+    useCase: "both",
+  },
+  // Coloring Pages
   {
     id: "coloring-1",
-    title: "Caiden Coloring Page",
+    title: "B-4 Focus Coloring Page",
     type: "coloring",
-    tags: ["caiden", "coloring", "kids"],
-    thumbnail: "/images/coloringpage_Caiden.webp",
-    fileUrl: "/downloads/coloring-pages/caiden-coloring.pdf",
-    description: "A calming, creative activity that helps kids express themselves while building fine motor skills",
-    format: "PDF",
+    tags: ["coloring", "b-4"],
+    fileUrl: "/downloads/coloring-pages/B4_CaidensCourage_ColoringBook.jpg",
     audience: ["parents", "teachers", "students"],
-    ageRange: "Ages 5-10",
-    useCase: "both"
+    useCase: "both",
   },
   {
+    id: "coloring-2",
+    title: "Caiden Coloring Page",
+    type: "coloring",
+    tags: ["coloring", "caiden"],
+    fileUrl: "/downloads/coloring-pages/Caiden_CaidensCourage_ColoringBook.jpg",
+    audience: ["parents", "teachers", "students"],
+    useCase: "both",
+  },
+  {
+    id: "coloring-3",
+    title: "Maria Coloring Page",
+    type: "coloring",
+    tags: ["coloring", "maria"],
+    fileUrl: "/downloads/coloring-pages/Maria_CaidensCourage_ColoringBook.jpg",
+    audience: ["parents", "teachers", "students"],
+    useCase: "both",
+  },
+  {
+    id: "coloring-4",
+    title: "Ollie Coloring Page",
+    type: "coloring",
+    tags: ["coloring", "ollie"],
+    fileUrl: "/downloads/coloring-pages/Ollie_CaidensCourage_ColoringBook.jpg",
+    audience: ["parents", "teachers", "students"],
+    useCase: "both",
+  },
+  // Worksheets
+  {
     id: "worksheet-1",
-    title: "Emotional Awareness Worksheet",
+    title: "B-4 Scan Worksheet",
     type: "worksheet",
-    tags: ["sel", "emotions", "learning"],
-    thumbnail: "/images/SELThubmails.webp",
-    fileUrl: "/downloads/sel-worksheets/emotional-awareness.pdf",
-    description: "Build emotional vocabulary and self-awareness through guided reflection and discussion",
-    format: "PDF",
+    tags: ["worksheet", "sel", "b-4"],
+    fileUrl: "/downloads/sel-worksheets/SELWorkshet_B-4Scan.jpg",
     audience: ["teachers", "parents"],
-    ageRange: "Ages 7-12",
-    useCase: "both"
-  }
+    useCase: "both",
+  },
 ];
-

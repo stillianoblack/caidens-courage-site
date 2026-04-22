@@ -131,11 +131,14 @@ const B4ChatWidget: React.FC = () => {
     abortControllerRef.current = controller;
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
+    const endpoint = "/.netlify/functions/b4-chat";
+    const history = [...messages, userMessage].map((m) => ({ role: m.role, content: m.content }));
+
     try {
-      const response = await fetch("/.netlify/functions/b4-chat", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
         signal: controller.signal,
       });
 
@@ -143,9 +146,19 @@ const B4ChatWidget: React.FC = () => {
       abortControllerRef.current = null;
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const msg = errorData?.error || errorData?.message;
-        throw new Error(msg ? `code ${response.status}: ${msg}` : `code ${response.status}`);
+        const status = response.status;
+        let displayMessage: string;
+        if (status === 404) {
+          displayMessage = "B-4 is offline right now (server not found).";
+        } else if (status === 500) {
+          displayMessage = "B-4 needs a server key configured.";
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          const msg = errorData?.error || errorData?.message;
+          displayMessage = msg ? `B-4 couldn't connect (${status}): ${msg}` : `B-4 couldn't connect (code ${status}).`;
+        }
+        setMessages((prev) => [...prev, { role: "assistant", content: displayMessage }]);
+        return;
       }
 
       const data = await response.json();

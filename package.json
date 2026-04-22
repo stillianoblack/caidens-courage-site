@@ -12,12 +12,8 @@
     "@types/react-dom": "^18.2.4",
     "@types/react-router-dom": "^5.3.3",
     "autoprefixer": "^10.4.14",
-    "cors": "^2.8.6",
-    "express": "^4.18.2",
-    "framer-motion": "^11.11.17",
+    "jszip": "^3.10.1",
     "launchdarkly-js-client-sdk": "^3.9.0",
-    "launchdarkly-react-client-sdk": "^3.9.0",
-    "openai": "^4.52.0",
     "postcss": "^8.4.24",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -27,21 +23,9 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "cssnano": "^7.1.2",
-    "netlify-cli": "^23.15.1",
-    "sharp": "^0.34.5"
-  },
   "scripts": {
-    "optimize-hero": "node scripts/optimize-hero.mjs",
-    "optimize-page-heroes": "node scripts/optimize-page-heroes.mjs",
-    "optimize-images": "node scripts/optimize-images.mjs",
-    "optimize:images": "node scripts/optimize-images.mjs",
-    "start": "DISABLE_ESLINT_PLUGIN=true CHOKIDAR_USEPOLLING=true WATCHPACK_POLLING=true react-scripts start",
-    "server": "node server.js",
-    "dev": "netlify dev",
-    "build": "react-scripts build && node -e \"require('fs').copyFileSync('public/_redirects','build/_redirects')\"",
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

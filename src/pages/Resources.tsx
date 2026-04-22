@@ -1,22 +1,27 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { RESOURCES, ResourceType, Audience } from '../data/resources';
+import { useLocation } from 'react-router-dom';
+import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import GlobalNotification from '../components/GlobalNotification';
+import { submitNetlifyForm } from '../utils/netlifyForms';
 
 const Resources: React.FC = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<ResourceType | 'all'>('all');
+  const [selectedType, setSelectedType] = useState<ResourceType | 'all'>('coloring');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [selectedAudience, setSelectedAudience] = useState<Audience | 'all'>('all');
-  const [email, setEmail] = useState('');
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [notifySubmitting, setNotifySubmitting] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
+  const [notifyError, setNotifyError] = useState<string | null>(null);
+  const [notifyShowNotice, setNotifyShowNotice] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
   // Check URL params for filter on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -24,7 +29,7 @@ const Resources: React.FC = () => {
     const audienceParam = params.get('audience');
     
     if (typeParam === 'all') {
-      setSelectedType('all');
+      setSelectedType('coloring');
     } else if (typeParam && ['wallpaper', 'coloring', 'worksheet', 'teacher-pack'].includes(typeParam)) {
       setSelectedType(typeParam as ResourceType);
     }
@@ -68,9 +73,14 @@ const Resources: React.FC = () => {
     };
   }, [location.search, location.hash]);
 
+  // Scroll to top when Resources page mounts (e.g. from Explore buttons on Camp Courage)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Scroll to results when audience filter changes (from URL or dropdown)
   useEffect(() => {
-    if (location.pathname === '/resources') {
+    if (location.pathname === '/braveminds') {
       const params = new URLSearchParams(location.search);
       const audienceParam = params.get('audience');
       if (audienceParam) {
@@ -93,6 +103,41 @@ const Resources: React.FC = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
     setIsPreorderOpen(true);
+  };
+
+  const handleResourceNotifySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem('email') as HTMLInputElement)?.value?.trim();
+    const botField = (form.elements.namedItem('bot-field') as HTMLInputElement)?.value || '';
+    if (!email || notifySubmitting) return;
+
+    setNotifySubmitting(true);
+    setNotifyError(null);
+    setNotifyShowNotice(false);
+
+    try {
+      const res = await submitNetlifyForm('resource_notify', {
+        email,
+        'bot-field': botField,
+      });
+
+      if (res.ok) {
+        setNotifySuccess(true);
+        setNotifyShowNotice(true);
+        if (form.elements.namedItem('email')) {
+          (form.elements.namedItem('email') as HTMLInputElement).value = '';
+        }
+      } else {
+        setNotifyError('Please try again in a moment.');
+        setNotifyShowNotice(true);
+      }
+    } catch {
+      setNotifyError('Please try again in a moment.');
+      setNotifyShowNotice(true);
+    } finally {
+      setNotifySubmitting(false);
+    }
   };
 
   const handleComingSoonClick = useCallback(() => {
@@ -144,22 +189,18 @@ const Resources: React.FC = () => {
     });
   }, [searchQuery, selectedType, selectedTag, selectedAudience]);
 
+  // Kept for when HIDE_FILTERS is false (tag filter restored)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTagClick = (tag: string) => {
     setSelectedTag(tag);
-  };
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Integrate with email service
-    setEmailSubmitted(true);
-    setEmail('');
-    setTimeout(() => setEmailSubmitted(false), 3000);
   };
 
   const handleDownload = (fileUrl: string, title: string) => {
     const link = document.createElement('a');
     link.href = fileUrl;
-    link.download = title;
+    // Use filename from URL to preserve extension (e.g. .jpg, .png)
+    const filenameFromUrl = fileUrl.split('/').pop();
+    link.download = filenameFromUrl || title;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -168,6 +209,64 @@ const Resources: React.FC = () => {
   const handlePreview = (fileUrl: string) => {
     window.open(fileUrl, '_blank');
   };
+
+  const handleDownloadAll = async () => {
+    if (filteredResources.length === 0 || isDownloadingAll) return;
+    setIsDownloadingAll(true);
+    try {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      for (const resource of filteredResources) {
+        const filename = resource.fileUrl.split('/').pop() || `${resource.title.replace(/\s+/g, '-')}.jpg`;
+        const res = await fetch(resource.fileUrl);
+        if (res.ok) {
+          const blob = await res.blob();
+          zip.file(filename, blob);
+        }
+      }
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(zipBlob);
+      const zipName = `Caiden-Courage-${getFilteredSectionTitle().replace(/\s+/g, '-')}.zip`;
+      link.download = zipName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      // Fallback: try sequential individual downloads
+      filteredResources.forEach((resource, index) => {
+        setTimeout(() => handleDownload(resource.fileUrl, resource.title), index * 400);
+      });
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
+
+  const getCategoryCount = (type: ResourceType) =>
+    RESOURCES.filter((r) => r.type === type).length;
+
+  const CATEGORY_CARDS = [
+    { type: 'coloring' as const, title: 'Coloring Pages', description: 'Print and color your own Courage moments', cta: 'Explore Coloring Pages' },
+    { type: 'wallpaper' as const, title: 'Wallpapers', description: "Bring Caiden's Courage to your screen", cta: 'Explore Wallpapers' },
+    { type: 'worksheet' as const, title: 'Worksheets', description: 'Build focus, confidence, and emotional strength', cta: 'Explore Worksheets' },
+  ];
+
+  const getDownloadAllLabel = () => {
+    if (selectedType === 'coloring') return 'Download All Coloring Pages';
+    if (selectedType === 'wallpaper') return 'Download All Wallpapers';
+    if (selectedType === 'worksheet') return 'Download Worksheet';
+    return null;
+  };
+
+  const getFilteredSectionTitle = () => {
+    if (selectedType === 'coloring') return 'Coloring Pages';
+    if (selectedType === 'wallpaper') return 'Wallpapers';
+    if (selectedType === 'worksheet') return 'Worksheets';
+    return 'Resources';
+  };
+
+  const HIDE_FILTERS = true; // Set to false to restore search, audience, tag filters
 
   return (
     <div className="min-h-screen bg-cream font-body">
@@ -181,10 +280,10 @@ const Resources: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
-            Resources
+            Brave Mind Club Activities
           </h1>
           <p className="text-lg sm:text-xl text-white/90 max-w-3xl mb-2">
-            Download free wallpapers, coloring pages, SEL worksheets, and teacher packs to support courage, creativity, and neurodiverse kids.
+            SEL tools, coloring pages, wallpapers, and worksheets for kids, parents, and educators.
           </p>
           <p className="text-sm sm:text-base text-white/80">
             All resources are free and designed to support neurodiverse kids.
@@ -199,7 +298,8 @@ const Resources: React.FC = () => {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         style={{ marginTop: '70px' }}
       >
-        {/* White Card Container */}
+        {/* White Card Container - Filters (hidden when HIDE_FILTERS) */}
+        {!HIDE_FILTERS && (
         <div className="bg-white rounded-2xl p-6 shadow-md mb-8">
           {/* Audience Filter Buttons */}
           <div className="mb-6" id="kids">
@@ -301,12 +401,76 @@ const Resources: React.FC = () => {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Results Count */}
-        <div className="mb-6 text-navy-600">
-          <p className="text-sm">
-            Showing {filteredResources.length} of {RESOURCES.length} resources
-          </p>
+        {/* Category Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          {CATEGORY_CARDS.map((card) => {
+            const isSelected = selectedType === card.type;
+            const count = getCategoryCount(card.type);
+            return (
+              <button
+                key={card.type}
+                type="button"
+                onClick={() => {
+                  setSelectedType(card.type);
+                  setSelectedTag('all');
+                }}
+                className={`rounded-2xl p-6 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2 ${
+                  isSelected
+                    ? 'bg-navy-500 border-2 border-navy-600 shadow-xl'
+                    : 'bg-white border-2 border-gray-200 shadow-md opacity-90 hover:opacity-100 hover:border-navy-200 hover:shadow-lg'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className={`font-display font-bold text-lg ${isSelected ? 'text-white' : 'text-navy-500'}`}>
+                    {card.title}
+                  </h3>
+                  <span
+                    className={`inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-full text-sm font-bold ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-navy-100 text-navy-600'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </div>
+                <p className={`text-sm mb-4 leading-relaxed ${isSelected ? 'text-white/90' : 'text-navy-600'}`}>
+                  {card.description}
+                </p>
+                <span className={`inline-flex items-center text-sm font-semibold ${isSelected ? 'text-white' : 'text-navy-600 hover:text-navy-700'}`}>
+                  {card.cta}
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic heading + Download All */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-navy-500">
+              {getFilteredSectionTitle()}
+            </h2>
+            {getDownloadAllLabel() && filteredResources.length > 0 && (
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleDownloadAll}
+                disabled={isDownloadingAll}
+                className="w-full sm:w-auto sm:flex-shrink-0"
+              >
+                {isDownloadingAll ? 'Creating zip…' : getDownloadAllLabel()}
+              </Button>
+            )}
+          </div>
+          {filteredResources.length > 0 && (
+            <p className="text-sm text-navy-500 mt-1">
+              {filteredResources.length} {filteredResources.length === 1 ? 'item' : 'items'}
+            </p>
+          )}
         </div>
 
         {/* Resources Grid - Wrapped in anchor div for scroll target */}
@@ -325,134 +489,112 @@ const Resources: React.FC = () => {
             <p className="text-navy-500 text-base mb-6">
               Want to be notified when new resources are added?
             </p>
-            <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
+            <form
+              name="resource_notify"
+              method="POST"
+              data-netlify="true"
+              data-netlify-honeypot="bot-field"
+              action="/braveminds/notify-success"
+              onSubmit={handleResourceNotifySubmit}
+              className="max-w-md mx-auto"
+            >
+              <input type="hidden" name="form-name" value="resource_notify" />
+              <p className="hidden">
+                <label>Don&apos;t fill this out: <input name="bot-field" /></label>
+              </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  name="email"
                   required
+                  autoComplete="email"
+                  placeholder="Enter your email"
                   className="flex-1 px-4 py-3 rounded-lg border-2 border-navy-300 focus:border-navy-500 focus:outline-none text-navy-700"
                 />
                 <button
                   type="submit"
+                  disabled={notifySubmitting}
                   className="btn btn--sm"
                   style={{
                     backgroundColor: 'var(--navy-500)',
                     color: 'white',
                     border: 'none'
                   }}
-                  disabled={emailSubmitted}
                 >
-                  {emailSubmitted ? '✓ Notified!' : 'Notify Me'}
+                  {notifySuccess ? 'Subscribed!' : notifySubmitting ? 'Sending…' : 'Notify Me'}
                 </button>
               </div>
+              {notifyShowNotice && (
+                <GlobalNotification
+                  show={notifyShowNotice}
+                  title={notifySuccess ? 'You\'re in!' : 'Hmm — that didn\'t send.'}
+                  message={
+                    notifySuccess
+                      ? 'Thanks — we\'ll email you shortly. Keep an eye on your inbox (and spam folder).'
+                      : notifyError || 'Please try again in a moment.'
+                  }
+                  tone={notifySuccess ? 'success' : 'error'}
+                  durationMs={4000}
+                  autoClose
+                  onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
+                />
+              )}
             </form>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredResources.map((resource) => (
+            {filteredResources.map((resource, index) => (
               <div
                 key={resource.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col h-full"
+                role="button"
+                tabIndex={0}
+                onClick={() => handlePreview(resource.fileUrl)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePreview(resource.fileUrl);
+                  }
+                }}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-navy-100 flex flex-col h-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
               >
-                {/* Thumbnail */}
+                {/* Thumbnail - optimized 400px image for fast load */}
                 <div className="aspect-square bg-navy-100 relative overflow-hidden">
                   <img
-                    src={resource.thumbnail}
+                    src={getThumbnailUrl(resource.fileUrl)}
                     alt={resource.title}
+                    width={800}
+                    height={800}
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    loading={index < 6 ? "eager" : "lazy"}
                     decoding="async"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
                     }}
                   />
-                  {resource.format && (
-                    <div className="absolute top-2 right-2 bg-navy-500 text-white text-xs px-2 py-1 rounded font-semibold">
-                      {resource.format}
-                    </div>
-                  )}
                 </div>
 
                 {/* Content */}
                 <div className="px-5 pt-5 pb-6 flex flex-col flex-grow">
-                  <h3 className="font-display font-bold text-lg text-navy-500 mb-2" title={resource.title}>
+                  <h3 className="font-display font-bold text-lg text-navy-500 mb-4" title={resource.title}>
                     {resource.title}
                   </h3>
 
-                  {resource.description && (
-                    <p className="text-sm text-navy-600 mb-4 leading-relaxed flex-grow">
-                      {resource.description}
-                    </p>
-                  )}
-
-                  {/* Metadata Row */}
-                  <div className="flex flex-wrap items-center gap-2 mb-4">
-                    {resource.ageRange && (
-                      <span className="text-xs px-3 py-1 bg-navy-100 text-navy-600 rounded-full font-semibold">
-                        {resource.ageRange}
-                      </span>
-                    )}
-                    {resource.format && (
-                      <span className="text-xs px-3 py-1 bg-navy-100 text-navy-600 rounded-full font-semibold">
-                        {resource.format === 'PDF' ? 'Printable' : resource.format}
-                      </span>
-                    )}
-                    {resource.useCase && (
-                      <span className="text-xs px-3 py-1 bg-navy-100 text-navy-600 rounded-full font-semibold">
-                        {resource.useCase === 'both' ? 'Classroom & Home' : resource.useCase === 'home' ? 'Home' : 'Classroom'}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {resource.tags.map(tag => (
-                      <button
-                        key={tag}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTagClick(tag);
-                        }}
-                        className="text-xs px-2 py-1 bg-golden-100 text-navy-600 rounded-full hover:bg-golden-200 hover:shadow-md hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-golden-500"
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-2 mt-auto pt-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePreview(resource.fileUrl);
-                      }}
-                      className="flex-1 px-4 py-2 bg-navy-500 text-white rounded-full font-semibold hover:bg-navy-600 hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                    >
-                      Preview
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(resource.fileUrl, resource.title);
-                      }}
-                      className="flex-1 px-4 py-2 bg-golden-500 text-navy-500 rounded-full font-semibold hover:bg-golden-600 hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-golden-500 focus:ring-offset-2"
-                      style={{ opacity: 1, backgroundColor: '#F0CE6E' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#e8c255';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#F0CE6E';
-                      }}
-                    >
-                      Download
-                    </button>
-                  </div>
+                  {/* Download button - stops propagation so card click doesn't fire */}
+                  <a
+                    href={resource.fileUrl}
+                    download={resource.title}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-auto inline-flex items-center justify-center px-4 py-2 bg-golden-500 text-navy-500 rounded-full font-semibold hover:bg-golden-600 hover:shadow-lg transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-golden-500 focus:ring-offset-2"
+                    style={{ backgroundColor: '#F0CE6E' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#e8c255';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#F0CE6E';
+                    }}
+                  >
+                    Download
+                  </a>
                 </div>
               </div>
             ))}
@@ -462,26 +604,8 @@ const Resources: React.FC = () => {
         </div>
         </div>
 
-        {/* B-4 Tools Section */}
-        <div 
-          id="library"
-          data-section="b4-tools"
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="text-center mb-10">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">
-              B-4 Tools Library
-            </h2>
-            <p className="text-lg sm:text-xl text-navy-600 max-w-3xl mx-auto mb-8">
-              Download guides and resources to support the B-4 Reset missions at home or in the classroom.
-            </p>
-            <Link to="/courage-academy#educator-access">
-              <Button variant="primary" size="lg" className="w-full sm:w-auto">
-                Request Educator Access
-              </Button>
-            </Link>
-          </div>
-        </div>
+      {/* Spacer between resource cards and FAQ */}
+      <div className="h-16 sm:h-20 lg:h-24" aria-hidden="true" />
 
       {/* FAQ Section - Full Width */}
       <div id="faq" className="faqSectionFullBleed bg-white py-12 sm:py-16 lg:py-24">
@@ -754,23 +878,50 @@ const Resources: React.FC = () => {
                   <p className="text-white/90 text-base sm:text-lg mb-6">
                     Join the Courage community for free tools and updates
                   </p>
-                  <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row gap-3">
+                  <form
+                    name="resource_notify"
+                    method="POST"
+                    data-netlify="true"
+                    data-netlify-honeypot="bot-field"
+                    action="/braveminds/notify-success"
+                    onSubmit={handleResourceNotifySubmit}
+                    className="flex flex-col sm:flex-row gap-3"
+                  >
+                    <input type="hidden" name="form-name" value="resource_notify" />
+                    <p className="hidden">
+                      <label>Don&apos;t fill this out: <input name="bot-field" /></label>
+                    </p>
                     <input
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      name="email"
                       required
+                      autoComplete="email"
+                      placeholder="Enter your email"
                       className="flex-1 px-4 py-3 rounded-lg border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/70 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/50"
                     />
                     <button
                       type="submit"
-                      disabled={emailSubmitted}
-                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                      disabled={notifySubmitting}
+                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {emailSubmitted ? '✓ Subscribed!' : 'Subscribe'}
+                      {notifySuccess ? 'Subscribed!' : notifySubmitting ? 'Sending…' : 'Subscribe'}
                     </button>
                   </form>
+                  {notifyShowNotice && (
+                    <GlobalNotification
+                      show={notifyShowNotice}
+                      title={notifySuccess ? 'You\'re in!' : 'Hmm — that didn\'t send.'}
+                      message={
+                        notifySuccess
+                          ? 'Thanks — we\'ll email you shortly. Keep an eye on your inbox (and spam folder).'
+                          : notifyError || 'Please try again in a moment.'
+                      }
+                      tone={notifySuccess ? 'success' : 'error'}
+                      durationMs={4000}
+                      autoClose
+                      onClose={() => { setNotifyShowNotice(false); setNotifySuccess(false); }}
+                    />
+                  )}
                 </div>
               </div>
             </div>

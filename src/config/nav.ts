@@ -87,13 +87,13 @@ export const NAV_ITEMS: NavItem[] = [
         description: 'Interactive reset missions to help kids notice feelings and find calm.'
       },
       {
-        label: 'B-4 Tools Library',
-        href: '/resources',
+        label: 'Brave Mind Club Activities',
+        href: '/braveminds',
         description: 'Printable guides, posters, and worksheets for home and classroom use.'
       },
       {
         label: 'FAQs',
-        href: '/resources#faq',
+        href: '/braveminds#faq',
         description: 'Quick answers about using our free resources.'
       },
       {

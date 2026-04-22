@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+  <!-- B-4 Robot Ring Icon - Minimal line art for watermark -->
+  <!-- Simple concentric circles representing B-4's ring structure -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#243E70" stroke-width="2" opacity="1"/>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="#243E70" stroke-width="1.5" opacity="0.8"/>
+  <circle cx="100" cy="100" r="40" fill="none" stroke="#243E70" stroke-width="1" opacity="0.6"/>
+  <!-- Simple "eyes" or sensor dots -->
+  <circle cx="85" cy="90" r="4" fill="#243E70" opacity="0.7"/>
+  <circle cx="115" cy="90" r="4" fill="#243E70" opacity="0.7"/>
+  <!-- Subtle connecting lines -->
+  <line x1="100" y1="50" x2="100" y2="70" stroke="#243E70" stroke-width="1.5" opacity="0.6"/>
+  <line x1="100" y1="130" x2="100" y2="150" stroke="#243E70" stroke-width="1.5" opacity="0.6"/>
+</svg>
+

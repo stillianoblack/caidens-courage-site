@@ -1,144 +1,75 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
-import { initLaunchDarkly, LaunchDarklyProvider } from './lib/launchdarkly';
-import { runAfterPaint } from './lib/safeMode';
-import { SAFE_MODE } from './lib/safeMode';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
+import ThankYou from './pages/ThankYou';
+import Success from './pages/Success';
+import NotifySuccess from './pages/NotifySuccess';
+import ToolkitSuccess from './pages/ToolkitSuccess';
+import FormSuccess from './pages/FormSuccess';
+import Cancelled from './pages/Cancelled';
+import Resources from './pages/Resources';
+import Product from './pages/Product';
+import Preview from './pages/Preview';
+import Mission from './pages/Mission';
+import About from './pages/About';
+import World from './pages/World';
+import Characters from './pages/Characters';
+import B4Clicker from './pages/B4Clicker';
+import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
+import ChatWithB4 from './pages/ChatWithB4';
+import CampCourage from './pages/CampCourage';
+import ClassroomPilots from './pages/ClassroomPilots';
+import TrainingGuides from './pages/TrainingGuides';
+import Journey from './pages/Journey';
+import Contact from './pages/Contact';
+import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 
-// Lazy load routes for code splitting.
-const Home = lazy(() => import('./pages/Home'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const Terms = lazy(() => import('./pages/Terms'));
-const ThankYou = lazy(() => import('./pages/ThankYou'));
-const Cancelled = lazy(() => import('./pages/Cancelled'));
-const Resources = lazy(() => import('./pages/Resources'));
-const Product = lazy(() => import('./pages/Product'));
-const Preview = lazy(() => import('./pages/Preview'));
-const Mission = lazy(() => import('./pages/Mission'));
-const About = lazy(() => import('./pages/About'));
-const B4Clicker = lazy(() => import('./pages/B4Clicker'));
-const CourageAcademy = lazy(() => import('./pages/CourageAcademy'));
-const ClassroomPilots = lazy(() => import('./pages/ClassroomPilots'));
-const TrainingGuides = lazy(() => import('./pages/TrainingGuides'));
-const ResourcesB4ToolsLibrary = lazy(() => import('./pages/ResourcesB4ToolsLibrary'));
-const ResourcesDownloads = lazy(() => import('./pages/ResourcesDownloads'));
-const Contact = lazy(() => import('./pages/Contact'));
-const Characters = lazy(() => import('./pages/Characters'));
-const World = lazy(() => import('./pages/World'));
-const Journey = lazy(() => import('./pages/Journey'));
-
-const routeList = (
-  <>
-    <Route path="/" element={<Home />} />
-    <Route path="/privacy" element={<PrivacyPolicy />} />
-    <Route path="/terms" element={<Terms />} />
-    <Route path="/thank-you" element={<ThankYou />} />
-    <Route path="/cancelled" element={<Cancelled />} />
-    <Route path="/resources" element={<Resources />} />
-    <Route path="/resources/coloring-pages" element={<Navigate to="/resources?type=coloring" replace />} />
-    <Route path="/resources/wallpapers" element={<Navigate to="/resources?type=wallpaper" replace />} />
-    <Route path="/resources/teachers" element={<Navigate to="/resources?type=teacher-pack" replace />} />
-    <Route path="/comicbook" element={<Product />} />
-    <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
-    <Route path="/product" element={<Navigate to="/comicbook" replace />} />
-    <Route path="/journey" element={<Journey />} />
-    <Route path="/preview" element={<Preview />} />
-    <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
-    <Route path="/mission" element={<Suspense fallback={null}><Mission /></Suspense>} />
-    <Route path="/about" element={<About />} />
-    <Route path="/b4-clicker" element={<Navigate to="/b4-tools" replace />} />
-    <Route path="/b4-tools" element={<B4Clicker />} />
-    <Route path="/camp-courage" element={<CourageAcademy />} />
-    <Route path="/courage-academy" element={<Navigate to="/camp-courage" replace />} />
-    <Route path="/classroom-pilots" element={<ClassroomPilots />} />
-    <Route path="/training-guides" element={<TrainingGuides />} />
-    <Route path="/courage-academy/classroom-pilots" element={<Navigate to="/classroom-pilots" replace />} />
-    <Route path="/courage-academy/training-guides" element={<Navigate to="/training-guides" replace />} />
-    <Route path="/resources/b4-tools-library" element={<ResourcesB4ToolsLibrary />} />
-    <Route path="/resources/downloads" element={<ResourcesDownloads />} />
-    <Route path="/contact" element={<Contact />} />
-    <Route path="/characters" element={<Suspense fallback={null}><Characters /></Suspense>} />
-    <Route path="/meet-the-characters" element={<Suspense fallback={null}><Characters /></Suspense>} />
-    <Route path="/world" element={<Suspense fallback={null}><World /></Suspense>} />
-  </>
-);
-
-// Lazy chat widget – not in initial bundle; load only after first paint.
-const B4ChatWidget = lazy(() => import('./components/B4ChatWidget'));
-
-/**
- * Renders Routes with a key from the current path so the route tree always remounts on navigation.
- * This lives inside BrowserRouter so useLocation() sees the updated URL when you click a link.
- */
-const RouterContent: React.FC = () => {
+const App: React.FC = () => {
   return (
-    <ChunkErrorBoundary>
-      <Suspense fallback={null}>
-        <Routes>{routeList}</Routes>
-      </Suspense>
-    </ChunkErrorBoundary>
+    <Router>
+      <>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/camp-courage" element={<CampCourage />} />
+          <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
+          <Route path="/classroom-pilots" element={<ClassroomPilots />} />
+          <Route path="/training-guides" element={<TrainingGuides />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancelled" element={<Cancelled />} />
+          <Route path="/braveminds" element={<Resources />} />
+          <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
+          <Route path="/form-success" element={<FormSuccess />} />
+          <Route path="/resources" element={<Navigate to="/braveminds" replace />} />
+          <Route path="/resources/notify-success" element={<Navigate to="/braveminds/notify-success" replace />} />
+          <Route path="/resources/coloring-pages" element={<Navigate to="/braveminds?type=coloring" replace />} />
+          <Route path="/resources/wallpapers" element={<Navigate to="/braveminds?type=wallpaper" replace />} />
+          <Route path="/resources/teachers" element={<Navigate to="/braveminds?type=teacher-pack" replace />} />
+          <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
+          <Route path="/comicbook" element={<Product />} />
+          <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
+          <Route path="/product" element={<Navigate to="/comicbook" replace />} />
+          <Route path="/preview" element={<Preview />} />
+          <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
+          <Route path="/mission" element={<Mission />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/world" element={<World />} />
+          <Route path="/characters" element={<Characters />} />
+          <Route path="/b4-tools" element={<B4Clicker />} />
+          <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
+          <Route path="/chat" element={<ChatWithB4 />} />
+          <Route path="/journey" element={<Journey />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <DeferredB4ChatWidget />
+      </>
+    </Router>
   );
-};
-
-const AppContent: React.FC = () => {
-  const [showChat, setShowChat] = useState(false);
-
-  // B-4 chat: mount only after first paint + idle (never block nav or first paint).
-  useEffect(() => {
-    let id: number;
-    const enable = () => setShowChat(true);
-    const schedule = () => {
-      if (typeof window !== 'undefined' && typeof (window as any).requestIdleCallback === 'function') {
-        id = (window as any).requestIdleCallback(enable, { timeout: 1500 });
-      } else {
-        id = setTimeout(enable, 800) as unknown as number;
-      }
-    };
-    if (typeof requestAnimationFrame !== 'undefined') {
-      requestAnimationFrame(schedule);
-    } else {
-      schedule();
-    }
-    return () => {
-      if (typeof (window as any).cancelIdleCallback === 'function' && typeof id === 'number') {
-        (window as any).cancelIdleCallback(id);
-      } else {
-        clearTimeout(id);
-      }
-    };
-  }, []);
-
-  // Initialize LaunchDarkly only when explicitly enabled.
-  useEffect(() => {
-    if (SAFE_MODE || process.env.REACT_APP_ENABLE_LAUNCHDARKLY !== 'true') return;
-    runAfterPaint(() => {
-      initLaunchDarkly();
-    });
-  }, []);
-
-  return (
-    <>
-      <Suspense fallback={null}>
-        {showChat && typeof window !== 'undefined' && !(window as any).__SAFE_MODE__ && <B4ChatWidget />}
-      </Suspense>
-      <RouterContent />
-    </>
-  );
-};
-
-const ENABLE_LAUNCHDARKLY = process.env.REACT_APP_ENABLE_LAUNCHDARKLY === 'true';
-
-const App: React.FC = () => (
-  <BrowserRouter>
-    {ENABLE_LAUNCHDARKLY ? (
-      <LaunchDarklyProvider>
-        <AppContent />
-      </LaunchDarklyProvider>
-    ) : (
-      <AppContent />
-    )}
-  </BrowserRouter>
-);
+}
 
 export default App;
 
