@@ -1,0 +1,450 @@
+Recovery baseline: commit e5c47557 (origin/restore-jan14 tip)
+Branch: recovery-live-baseline
+Restored via: git checkout e5c47557 -- <paths below>
+
+ROOT FILES (exact versions from e5c47557):
+  package.json
+  package-lock.json
+  yarn.lock
+  netlify.toml
+  postcss.config.js
+  tailwind.config.js
+  netlify/functions/b4-chat.js
+
+TREES (entire directory contents from e5c47557):
+  src/
+  public/
+
+Full enumerations follow.
+
+---
+
+Post-restore cleanup (not in e5c47557; removed so TypeScript build matches snapshot):
+  src/api/b4-chat.ts
+  src/components/b4/B4ChatGate.tsx
+  src/debug/navDebug.ts
+  src/debug/navWatch.ts
+  src/debug/timerDebug.ts
+  src/perf/longTasks.ts
+  src/perf/perfDebug.ts
+  src/perf/perfDetective.js
+  src/perf/routePerf.ts
+  src/serviceWorkerRegistration.js
+  src/utils/clickBlockerFix.ts
+  public/images/Comic5_Coverpage_header_2.png
+  public/images/backgrounds/Caiden's Courage Flame_Page_Website header.webp
+  public/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.webp
+
+---
+=== src/ (all paths) ===
+src/App.css
+src/App.test.tsx
+src/App.tsx
+src/components/B4Chat.tsx
+src/components/B4ChatWidget.tsx
+src/components/ChunkErrorBoundary.tsx
+src/components/DeferredB4ChatWidget.tsx
+src/components/FloatingAnimationController.tsx
+src/components/Footer.tsx
+src/components/GlobalNotification.tsx
+src/components/Header.tsx
+src/components/InlineNotice.tsx
+src/components/NavigationLoader 2.tsx
+src/components/NavigationLoader.tsx
+src/components/RouteHeroPreload.tsx
+src/components/SecondaryPageHeader.tsx
+src/components/camp-courage/ExploreInsideCampCourageSection.tsx
+src/components/camp-courage/ParentsEducatorsToolkitSection.tsx
+src/components/resources/ResourcesRecommendationsSection.tsx
+src/components/sections/BluePageHeader.tsx
+src/components/sections/SplitStorySection.tsx
+src/components/ui/Button.tsx
+src/components/ui/FormNotice.tsx
+src/config/externalLinks.ts
+src/config/heroes.ts
+src/config/nav.ts
+src/data/b4_kb.json
+src/data/resources.ts
+src/debug/navDebug.js
+src/debug/timerDebug.js
+src/hooks/useCountdownBar.ts
+src/index.css
+src/index.js
+src/lib/afterPaint.ts
+src/lib/b4Retrieval.ts
+src/lib/defer.ts
+src/lib/flags.ts
+src/lib/historyGuard.ts
+src/lib/launchdarkly.tsx
+src/lib/navMarks.ts
+src/lib/perfDetective.ts
+src/lib/safeMode.ts
+src/logo.svg
+src/pages/About.tsx
+src/pages/B4Clicker.tsx
+src/pages/CampCourage.tsx
+src/pages/Cancelled.tsx
+src/pages/Characters.tsx
+src/pages/ChatWithB4.tsx
+src/pages/ClassroomPilots.tsx
+src/pages/ComingSoon.tsx
+src/pages/Contact.tsx
+src/pages/CourageAcademy.tsx
+src/pages/CourageAcademyClassroomPilots.tsx
+src/pages/CourageAcademyTrainingGuides.tsx
+src/pages/FormSuccess.tsx
+src/pages/Home.tsx
+src/pages/Journey.tsx
+src/pages/Mission.tsx
+src/pages/NotifySuccess.tsx
+src/pages/Preview.tsx
+src/pages/PrivacyPolicy.tsx
+src/pages/Product.tsx
+src/pages/Resources.module.css
+src/pages/Resources.tsx
+src/pages/ResourcesB4ToolsLibrary.tsx
+src/pages/ResourcesDownloads.tsx
+src/pages/Success.tsx
+src/pages/Terms.tsx
+src/pages/ThankYou.tsx
+src/pages/ToolkitSuccess.tsx
+src/pages/TrainingGuides.tsx
+src/pages/World.tsx
+src/perf/defer.ts
+src/perf/prodGuards.ts
+src/reportWebVitals.js
+src/setupTests.js
+src/styles/minimal-css-overrides.css
+src/styles/motion-safe.css
+src/utils/clickBlockerFix.js
+src/utils/netlifyForms.ts
+
+=== public/ (all paths) ===
+public/.DS_Store
+public/B-4@4x-100.jpeg
+public/Caiden'Courage_Tshirt.jpg
+public/Caiden'sCOurage_Plushie (1).jpg
+public/Caiden'sCourage_SocialImage.JPG
+public/Caiden@4x-100.jpeg
+public/CaidenBackground.jpeg
+public/CaidenCool_Hero_2.PNG
+public/Caiden_FAQ_section.jpg
+public/Caidenbackground_desktop.jpg
+public/Caidenbackground_phone.jpg
+public/Comic5_Coverpage_header.jpg
+public/Comic5_Coverpage_header_2.jpg
+public/Comic5_Coverpage_header_Shop.jpg
+public/CoolCaiden_header.png
+public/Courageforeverykid.jpeg
+public/Courageforeverykid_COMICBOOK.png
+public/Courageforeverykid_header_ADHD.png
+public/Courageforeverykid_tipping toe.png
+public/Genesis@4x-100.jpeg
+public/Genesis_1.svg
+public/SELThubmails.jpg
+public/Turtle@4x-100.jpeg
+public/_headers
+public/_redirects
+public/b4-watermark.svg
+public/balance.png
+public/camp-courage-success.html
+public/coloringpage_Caiden.png
+public/downloads/coloring-pages/B4_CaidensCourage_ColoringBook.jpg
+public/downloads/coloring-pages/Caiden_CaidensCourage_ColoringBook.jpg
+public/downloads/coloring-pages/Maria_CaidensCourage_ColoringBook.jpg
+public/downloads/coloring-pages/Ollie_CaidensCourage_ColoringBook.jpg
+public/downloads/sel-worksheets/SELWorkshet_B-4Scan.jpg
+public/downloads/thumbnails/coloring-pages/B4_CaidensCourage_ColoringBook.jpg
+public/downloads/thumbnails/coloring-pages/Caiden_CaidensCourage_ColoringBook.jpg
+public/downloads/thumbnails/coloring-pages/Maria_CaidensCourage_ColoringBook.jpg
+public/downloads/thumbnails/coloring-pages/Ollie_CaidensCourage_ColoringBook.jpg
+public/downloads/thumbnails/sel-worksheets/SELWorkshet_B-4Scan.jpg
+public/downloads/thumbnails/wallpapers/Caiden'sCourage_Wallpaper_Tablet.jpg
+public/downloads/thumbnails/wallpapers/Caiden'sCourage_Wallpaper_Tablet_Happy.jpg
+public/downloads/wallpapers/Caiden'sCourage_Wallpaper_Tablet.jpg
+public/downloads/wallpapers/Caiden'sCourage_Wallpaper_Tablet_Happy.jpg
+public/favicon.ico
+public/images/B-4@4x-100.jpeg
+public/images/B-4@4x-100.webp
+public/images/B-4plushcompanions_img 2.jpg
+public/images/B-4plushcompanions_img 2.webp
+public/images/B-4plushcompanions_img.jpg
+public/images/B-4plushcompanions_img.webp
+public/images/Caiden'Courage_Tshirt.jpg
+public/images/Caiden'Courage_Tshirt.webp
+public/images/Caiden'Courage_Tshirt_smaller.jpg
+public/images/Caiden'Courage_Tshirt_smaller.webp
+public/images/Caiden'sCOurage_Plushie (1).jpg
+public/images/Caiden'sCOurage_Plushie (1).webp
+public/images/Caiden'sCOurage_Plushie-(1)_smaller.jpg
+public/images/Caiden'sCOurage_Plushie-(1)_smaller.webp
+public/images/Caiden'sCourage_SocialImage.JPG
+public/images/Caiden'sCourage_SocialImage.webp
+public/images/Caiden'sCourage_SocialImage_smaller.jpg
+public/images/Caiden'sCourage_SocialImage_smaller.webp
+public/images/Caiden@4x-100.jpeg
+public/images/Caiden@4x-100.webp
+public/images/Caiden_Courage_Tshirt.png
+public/images/Caiden_Courage_Tshirt.webp
+public/images/Caiden_FAQ_section.jpg
+public/images/Caiden_FAQ_section.png
+public/images/Caiden_FAQ_section.webp
+public/images/Caiden_sCOurage_Plushie_1.png
+public/images/Caiden_sCOurage_Plushie_1.webp
+public/images/CaidensCourage_SocialImage.png
+public/images/CaidensCourage_SocialImage.webp
+public/images/Comic5_Coverpage_header.jpg
+public/images/Comic5_Coverpage_header.png
+public/images/Comic5_Coverpage_header.webp
+public/images/Comic5_Coverpage_header_2.jpg
+public/images/Comic5_Coverpage_header_2.webp
+public/images/Comic5_Coverpage_header_2_smaller.jpg
+public/images/Comic5_Coverpage_header_2_smaller.webp
+public/images/Comic5_Coverpage_header_Shop.jpg
+public/images/Comic5_Coverpage_header_Shop.png
+public/images/Comic5_Coverpage_header_Shop.webp
+public/images/Comic5_Coverpage_header_Shop_smaller.jpg
+public/images/Comic5_Coverpage_header_Shop_smaller.webp
+public/images/Comic5_Coverpage_header_smaller-1600.webp
+public/images/Comic5_Coverpage_header_smaller-200w.jpg
+public/images/Comic5_Coverpage_header_smaller-900.webp
+public/images/Comic5_Coverpage_header_smaller.jpg
+public/images/Comic5_Coverpage_header_smaller.webp
+public/images/CoolCaiden_header.jpg
+public/images/CoolCaiden_header.png
+public/images/CoolCaiden_header.webp
+public/images/Courageforeverykid.jpeg
+public/images/Courageforeverykid.png
+public/images/Courageforeverykid.webp
+public/images/Courageforeverykid_1.jpeg
+public/images/Courageforeverykid_1.webp
+public/images/Courageforeverykid_COMICBOOK.png
+public/images/Courageforeverykid_COMICBOOK.webp
+public/images/Courageforeverykid_header_ADHD.png
+public/images/Courageforeverykid_header_ADHD.webp
+public/images/Courageforeverykid_tipping toe.png
+public/images/Courageforeverykid_tipping toe.webp
+public/images/Courageforeverykid_tipping_toe.png
+public/images/Courageforeverykid_tipping_toe.webp
+public/images/Emotionallearningthroughstory_img 2.png
+public/images/Emotionallearningthroughstory_img 2.webp
+public/images/Emotionallearningthroughstory_img.png
+public/images/Emotionallearningthroughstory_img.webp
+public/images/Genesis@4x-100.jpeg
+public/images/Genesis@4x-100.webp
+public/images/Genesis_1.svg
+public/images/Headers_world_mobile 2.png
+public/images/Headers_world_mobile 2.webp
+public/images/Headers_world_mobile.png
+public/images/Headers_world_mobile.webp
+public/images/NeuroCamp.jpg
+public/images/NeuroCamp.png
+public/images/NeuroCamp.webp
+public/images/NeuroCamp_explore.jpg
+public/images/NeuroCamp_explore.webp
+public/images/NeuroCamp_explore_smaller.jpg
+public/images/NeuroCamp_explore_smaller.webp
+public/images/NeuroCamp_smaller.jpg
+public/images/NeuroCamp_smaller.webp
+public/images/OurPromise_img 2.png
+public/images/OurPromise_img 2.webp
+public/images/OurPromise_img.jpg
+public/images/OurPromise_img.png
+public/images/OurPromise_img.webp
+public/images/Profile Picture/meetthecreator_tarus.jpg
+public/images/SELThubmails.jpg
+public/images/SELThubmails.webp
+public/images/SEL_Caidenshield_img 2.png
+public/images/SEL_Caidenshield_img 2.webp
+public/images/SEL_Caidenshield_img.png
+public/images/SEL_Caidenshield_img.webp
+public/images/TheOtherworld_genesis_img.jpg
+public/images/TheOtherworld_genesis_img.webp
+public/images/TheOtherworld_img.jpg
+public/images/TheOtherworld_img.webp
+public/images/TheWorldIsJustBeginning_img.jpg
+public/images/TheWorldIsJustBeginning_img.webp
+public/images/Toolsthatsupportkidsbeyondthepage_img 2.png
+public/images/Toolsthatsupportkidsbeyondthepage_img 2.webp
+public/images/Toolsthatsupportkidsbeyondthepage_img.png
+public/images/Toolsthatsupportkidsbeyondthepage_img.webp
+public/images/Turtle@4x-100.jpeg
+public/images/Turtle@4x-100.webp
+public/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg
+public/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg
+public/images/backgrounds/CaidenBackground.jpeg
+public/images/backgrounds/CaidenBackground.png
+public/images/backgrounds/CaidenBackground.webp
+public/images/backgrounds/CaidenBackground_smaller.jpg
+public/images/backgrounds/CaidenBackground_smaller.webp
+public/images/backgrounds/Caidenbackground_desktop.jpg
+public/images/backgrounds/Caidenbackground_desktop.png
+public/images/backgrounds/Caidenbackground_desktop.webp
+public/images/backgrounds/Caidenbackground_phone.jpg
+public/images/backgrounds/Caidenbackground_phone.png
+public/images/backgrounds/Caidenbackground_phone.webp
+public/images/backgrounds/background_caidenscharacter_img.jpg
+public/images/backgrounds/background_caidenscharacter_img.webp
+public/images/backgrounds/background_caidenscharacter_mobile_img.jpg
+public/images/backgrounds/background_caidenscharacter_mobile_img.webp
+public/images/backgrounds/background_caidensworld_img-1.jpg
+public/images/backgrounds/background_caidensworld_img.jpg
+public/images/backgrounds/background_caidensworld_img.png
+public/images/backgrounds/background_caidensworld_img.webp
+public/images/backgrounds/background_caidensworld_img_smaller.jpg
+public/images/backgrounds/background_caidensworld_img_smaller.webp
+public/images/backgrounds/background_img.jpg
+public/images/backgrounds/background_img.webp
+public/images/backgrounds/background_ourstory_img.webp
+public/images/backgrounds/background_ourstory_mobile_img.jpg
+public/images/backgrounds/background_ourstory_mobile_img.webp
+public/images/backgrounds/caiden'scourage_logo_1.png
+public/images/backgrounds/meetthecreator_bg.webp
+public/images/backgrounds/meetthecreator_bg_dragpn.jpg
+public/images/balance.png
+public/images/balance.webp
+public/images/camp-courage/coloringpage_Caiden.jpg
+public/images/camp-courage/explore-inside-camp-courage.webp
+public/images/characters/Caiden_img_profile.jpg
+public/images/characters/Caiden_img_profile.webp
+public/images/characters/Caiden_img_profile_192w.webp
+public/images/characters/Caiden_img_profile_400w.webp
+public/images/characters/Character-drivengrowth_img 2.png
+public/images/characters/Character-drivengrowth_img 2.webp
+public/images/characters/Character-drivengrowth_img.png
+public/images/characters/Character-drivengrowth_img.webp
+public/images/characters/b4_img_profile.jpg
+public/images/characters/b4_img_profile.webp
+public/images/characters/b4_img_profile_192w.webp
+public/images/characters/b4_img_profile_400w.webp
+public/images/characters/breathoflife_img_profile.jpg
+public/images/characters/breathoflife_img_profile.webp
+public/images/characters/breathoflife_img_profile_192w.webp
+public/images/characters/breathoflife_img_profile_400w.webp
+public/images/characters/dragon_img_profile.jpg
+public/images/characters/dragon_img_profile.webp
+public/images/characters/dragon_img_profile_192w.webp
+public/images/characters/dragon_img_profile_400w.webp
+public/images/characters/maria_img_profile.jpg
+public/images/characters/maria_img_profile.webp
+public/images/characters/maria_img_profile_192w.webp
+public/images/characters/maria_img_profile_400w.webp
+public/images/characters/ollie_img_profile.jpg
+public/images/characters/ollie_img_profile.webp
+public/images/characters/ollie_img_profile_192w.webp
+public/images/characters/ollie_img_profile_400w.webp
+public/images/characters/unclet_img_profile.jpg
+public/images/characters/unclet_img_profile.webp
+public/images/characters/unclet_img_profile_192w.webp
+public/images/characters/unclet_img_profile_400w.webp
+public/images/coloringpage_Caiden.jpg
+public/images/coloringpage_Caiden.png
+public/images/coloringpage_Caiden.webp
+public/images/comic-book/Comic5_Coverpage_header_2.jpg
+public/images/comic-book/Comic5_Coverpage_header_Shop_2.jpg
+public/images/comic-book/zThirdpage_Comic5_Coverpage_header_Shop.jpg
+public/images/creator-photo 2.png
+public/images/creator-photo 2.webp
+public/images/creator-photo.png
+public/images/genesis_img_pic.jpeg
+public/images/genesis_img_pic.webp
+public/images/heroes/Ciaden'sheader_desktop.jpg
+public/images/heroes/Ciaden'sheader_old.jpg
+public/images/heroes/Neurodiversity-positiveheroes_img 2.png
+public/images/heroes/Neurodiversity-positiveheroes_img 2.webp
+public/images/heroes/Neurodiversity-positiveheroes_img.png
+public/images/heroes/Neurodiversity-positiveheroes_img.webp
+public/images/heroes/characters_hero_desktop_1280w.webp
+public/images/heroes/characters_hero_desktop_1600w.webp
+public/images/heroes/characters_hero_desktop_640w.webp
+public/images/heroes/characters_hero_desktop_960w.webp
+public/images/heroes/characters_hero_mobile_400w.webp
+public/images/heroes/characters_hero_mobile_600w.webp
+public/images/heroes/characters_hero_mobile_800w.webp
+public/images/heroes/hero-bg.jpg
+public/images/heroes/hero-bg.png
+public/images/heroes/hero-bg.webp
+public/images/heroes/hero-bg_desktop_1280w.webp
+public/images/heroes/hero-bg_desktop_1600w.webp
+public/images/heroes/hero-bg_desktop_640w.webp
+public/images/heroes/hero-bg_desktop_960w.webp
+public/images/heroes/hero-bg_desktop_ciaden.jpg
+public/images/heroes/hero-bg_desktop_ciaden.png
+public/images/heroes/hero-bg_img_2.jpg
+public/images/heroes/hero-bg_img_2.png
+public/images/heroes/hero-bg_img_2.webp
+public/images/heroes/hero-bg_mobile_400w.webp
+public/images/heroes/hero-bg_mobile_600w.webp
+public/images/heroes/hero-bg_mobile_800w.webp
+public/images/heroes/homepage_hero-bg_mobile_img.jpg
+public/images/heroes/homepage_hero-bg_mobile_img.webp
+public/images/heroes/mission_hero_desktop_1280w.webp
+public/images/heroes/mission_hero_desktop_1600w.webp
+public/images/heroes/mission_hero_desktop_640w.webp
+public/images/heroes/mission_hero_desktop_960w.webp
+public/images/heroes/mission_hero_mobile_400w.webp
+public/images/heroes/mission_hero_mobile_600w.webp
+public/images/heroes/mission_hero_mobile_800w.webp
+public/images/heroes/world_hero_desktop_1280w.webp
+public/images/heroes/world_hero_desktop_1600w.webp
+public/images/heroes/world_hero_desktop_640w.webp
+public/images/heroes/world_hero_desktop_960w.webp
+public/images/heroes/world_hero_mobile_400w.webp
+public/images/heroes/world_hero_mobile_600w.webp
+public/images/heroes/world_hero_mobile_800w.webp
+public/images/map.jpg
+public/images/map.webp
+public/images/ourhistory_img 2.png
+public/images/ourhistory_img 2.webp
+public/images/ourhistory_img.png
+public/images/ourhistory_img.webp
+public/images/page-01.webp
+public/images/page-02.webp
+public/images/page-03.webp
+public/images/page-04.webp
+public/images/page-05.webp
+public/images/phone.png
+public/images/phone.webp
+public/images/phoneMobile.png
+public/images/phoneMobile.webp
+public/images/resources/reco-coloring.webp
+public/images/resources/reco-wallpaper.webp
+public/images/resources/reco-worksheet.webp
+public/images/theknowworld_img.jpg
+public/images/theknowworld_img.webp
+public/images/ui/b4-watermark.svg
+public/images/ui/logo.png
+public/images/ui/logo.webp
+public/images/ui/logo192.webp
+public/images/ui/logo512.webp
+public/images/ui/logoCaiden.png
+public/images/ui/logoCaiden.webp
+public/images/ui/logoCaiden_240w.webp
+public/images/ui/logoCaiden_480w.webp
+public/images/world_card_know_1280w.webp
+public/images/world_card_know_640w.webp
+public/images/world_card_know_960w.webp
+public/images/world_card_other_1280w.webp
+public/images/world_card_other_640w.webp
+public/images/world_card_other_960w.webp
+public/index.html
+public/logo.png
+public/logo192.png
+public/logo512.png
+public/logoCaiden.png
+public/manifest.json
+public/masks/puzzle.svg
+public/masks/water-ripple.svg
+public/masks/wavy-circle.svg
+public/netlify-forms.html
+public/phone.png
+public/phoneMobile.png
+public/previews/README.md
+public/previews/page-01.jpg
+public/previews/page-02.jpg
+public/previews/page-03.jpg
+public/previews/page-04.jpg
+public/previews/page-05.jpg
+public/robots.txt
+public/success.html
+public/thank-you.html

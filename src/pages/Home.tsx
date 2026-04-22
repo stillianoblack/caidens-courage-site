@@ -237,10 +237,9 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        data-deploy-trigger="2026-04-21"
         className="major-publisher-hero relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '100px' : '120px',
+          paddingTop: isMobile ? '130px' : '120px',
           minHeight: isMobile ? '100vh' : '92vh',
           alignItems: isMobile ? 'flex-start' : undefined,
         }}
@@ -252,18 +251,8 @@ const Home = () => {
           ) : (
             <picture>
               <source
-                type="image/webp"
-                media="(max-width: 768px)"
-                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.webp"
-              />
-              <source
                 media="(max-width: 768px)"
                 srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
-              />
-              <source
-                type="image/webp"
-                media="(min-width: 769px)"
-                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header.webp"
               />
               <source
                 media="(min-width: 769px)"
@@ -280,7 +269,6 @@ const Home = () => {
                 style={{ objectPosition: isMobile ? 'center 35%' : 'center center' }}
                 loading="eager"
                 decoding="async"
-                sizes="(max-width: 768px) 100vw, 50vw"
                 onError={(e) => {
                   const el = e.target as HTMLImageElement;
                   el.src = isMobile
@@ -536,16 +524,16 @@ const Home = () => {
                   Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
                 </p>
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn't always see him clearly.
+                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn’t always see him clearly.
                 </p>
               </div>
 
               {/* Power Line */}
               <div className="mb-0">
                 <p className="text-navy-500 leading-relaxed meet-hero-thesis" style={{ fontWeight: 600 }}>
-                  Being different isn't a weakness.
+                  Being different isn’t a weakness.
                   <br />
-                  It's where courage begins.
+                  It’s where courage begins.
                 </p>
               </div>
             </div>
@@ -1155,6 +1143,59 @@ const Home = () => {
       </section>
 
       <Footer />
+
+      {/* Coming Soon Modal */}
+      {isComingSoonModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsComingSoonModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+            <button
+              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
+              onClick={() => setIsComingSoonModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
+                We're building this next.
+              </h2>
+              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
+                We're designing Caiden & B-4 plushies and limited-edition shirts.
+                <br />
+                Join the Courage Community to get early access when they launch.
+              </p>
+              
+              <div className="flex flex-col gap-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => {
+                    handleWaitlistClick();
+                    setIsComingSoonModalOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Join the Courage Community
+                </Button>
+                <button
+                  onClick={() => setIsComingSoonModalOpen(false)}
+                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (

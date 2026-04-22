@@ -1,24 +1,25 @@
-export function isProd(): boolean {
-  try {
-    if (typeof (globalThis as any).import_meta !== 'undefined' && (globalThis as any).import_meta?.env) {
-      return !!((globalThis as any).import_meta as any).env?.PROD;
-    }
-  } catch {}
-  return typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production';
-}
+/**
+ * prodGuards – central gate for perf/debug tooling.
+ *
+ * In production builds this should safely return false so that optional
+ * instrumentation (PerfDetective, historyGuard, navMarks) never runs unless
+ * explicitly opted in via query params.
+ */
 
-export function hasQueryFlag(name: string): boolean {
+/* eslint-disable no-console */
+
+export function allowPerfTools(): boolean {
+  if (typeof window === 'undefined') return false;
+
   try {
-    return typeof window !== 'undefined' && new URLSearchParams(window.location.search).get(name) === '1';
+    const params = new URLSearchParams(window.location.search);
+    const debugPerf = params.get('debugPerf') === '1' || params.get('perf') === '1';
+    const debugNav = params.get('debugNav') === '1';
+
+    // Enable tools only when explicitly requested via query params
+    return debugPerf || debugNav;
   } catch {
     return false;
   }
 }
 
-/**
- * In production, ALL perf/debug tooling should be OFF by default.
- * Turn on explicitly with: ?debugPerf=1
- */
-export function allowPerfTools(): boolean {
-  return !isProd() || hasQueryFlag('debugPerf');
-}

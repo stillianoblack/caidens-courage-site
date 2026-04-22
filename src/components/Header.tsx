@@ -497,8 +497,6 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   height={80}
                   alt="Caiden's Courage"
                   className="h-10 sm:h-12 w-auto"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  loading="lazy"
                   decoding="async"
                 />
               </Link>

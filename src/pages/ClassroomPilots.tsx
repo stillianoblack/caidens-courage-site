@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
+import BluePageHeader from '../components/sections/BluePageHeader';
 
 const ClassroomPilots: React.FC = () => {
   const [, setIsComingSoonModalOpen] = useState(false);
@@ -20,12 +21,17 @@ const ClassroomPilots: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
 
+      <BluePageHeader
+        title="Classroom Pilots"
+        description="Bring Caiden's Courage tools into real classrooms — and help shape what we build next."
+      />
+
       {/* Hero Section */}
-      <div className="bg-cream px-4 py-16 sm:py-20" style={{ marginTop: '100px' }}>
+      <div className="bg-cream px-4 py-16 sm:py-20" style={{ marginTop: '70px' }}>
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-5">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-5">
             Classroom Pilots
-          </h1>
+          </h2>
           <p className="text-lg sm:text-xl text-navy-600 max-w-2xl mx-auto">
             Bring Caiden's Courage tools into real classrooms — and help shape what we build next.
           </p>
