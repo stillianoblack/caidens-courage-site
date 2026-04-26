@@ -276,16 +276,16 @@ const Resources: React.FC = () => {
       <div 
         id="resources-header"
         data-section="header"
-        className="bg-navy-500 text-white py-16 pt-32"
+        className="cv-cinematic-section text-white py-16 pt-32 relative overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
             Brave Mind Club Activities
           </h1>
-          <p className="text-lg sm:text-xl text-white/90 max-w-3xl mb-2">
+          <p className="text-lg sm:text-xl max-w-3xl mb-2" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
             SEL tools, coloring pages, wallpapers, and worksheets for kids, parents, and educators.
           </p>
-          <p className="text-sm sm:text-base text-white/80">
+          <p className="text-sm sm:text-base" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             All resources are free and designed to support neurodiverse kids.
           </p>
         </div>
@@ -418,7 +418,7 @@ const Resources: React.FC = () => {
                 }}
                 className={`rounded-2xl p-6 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2 ${
                   isSelected
-                    ? 'bg-navy-500 border-2 border-navy-600 shadow-xl'
+                    ? 'cv-cinematic-card border border-white/[0.08] shadow-xl'
                     : 'bg-white border-2 border-gray-200 shadow-md opacity-90 hover:opacity-100 hover:border-navy-200 hover:shadow-lg'
                 }`}
               >
@@ -434,7 +434,7 @@ const Resources: React.FC = () => {
                     {count}
                   </span>
                 </div>
-                <p className={`text-sm mb-4 leading-relaxed ${isSelected ? 'text-white/90' : 'text-navy-600'}`}>
+                <p className={`text-sm mb-4 leading-relaxed ${isSelected ? '' : 'text-navy-600'}`} style={isSelected ? { color: 'rgba(255, 255, 255, 0.75)' } : undefined}>
                   {card.description}
                 </p>
                 <span className={`inline-flex items-center text-sm font-semibold ${isSelected ? 'text-white' : 'text-navy-600 hover:text-navy-700'}`}>
@@ -585,12 +585,12 @@ const Resources: React.FC = () => {
                     download={resource.title}
                     onClick={(e) => e.stopPropagation()}
                     className="mt-auto inline-flex items-center justify-center px-4 py-2 bg-golden-500 text-navy-500 rounded-full font-semibold hover:bg-golden-600 hover:shadow-lg transition-all duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-golden-500 focus:ring-offset-2"
-                    style={{ backgroundColor: '#F0CE6E' }}
+                    style={{ backgroundColor: '#E5C06A' }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#e8c255';
+                      e.currentTarget.style.backgroundColor = '#d4b35a';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#F0CE6E';
+                      e.currentTarget.style.backgroundColor = '#E5C06A';
                     }}
                   >
                     Download
@@ -851,7 +851,7 @@ const Resources: React.FC = () => {
         {/* Newsletter Subscribe Banner - Full Width */}
         <div className="newsletterSectionFullBleed bg-white py-12 sm:py-16 lg:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-r from-navy-500 to-golden-400 rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10">
+            <div className="cv-cinematic-inset rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 border border-white/10">
               <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
                 {/* Left: Character Image */}
                 <div className="flex-shrink-0">
@@ -875,7 +875,7 @@ const Resources: React.FC = () => {
                   <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                     Get notified when new free resources are added
                   </h3>
-                  <p className="text-white/90 text-base sm:text-lg mb-6">
+                  <p className="text-base sm:text-lg mb-6" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                     Join the Courage community for free tools and updates
                   </p>
                   <form
@@ -902,7 +902,7 @@ const Resources: React.FC = () => {
                     <button
                       type="submit"
                       disabled={notifySubmitting}
-                      className="px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 rounded-full font-semibold transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-navy-500 shadow-md hover:shadow-lg bg-golden-500 hover:bg-golden-600"
                     >
                       {notifySuccess ? 'Subscribed!' : notifySubmitting ? 'Sending…' : 'Subscribe'}
                     </button>

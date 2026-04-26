@@ -8,12 +8,12 @@ const Contact: React.FC = () => {
       <Header />
 
       {/* Hero Section */}
-      <div className="bg-navy-500 text-white py-16 pt-32 px-4">
+      <div className="cv-cinematic-section text-white py-16 pt-32 px-4 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
             Contact Us
           </h1>
-          <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl max-w-2xl mx-auto" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
             Have a question? Want to bring Caiden's Courage to your school? We'd love to hear from you.
           </p>
         </div>

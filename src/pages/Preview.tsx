@@ -565,7 +565,7 @@ const Preview = () => {
                 className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full font-semibold transition-all duration-200 text-sm sm:text-base ${
                   currentPage === 1
                     ? 'bg-navy-100 text-navy-300 cursor-not-allowed'
-                    : 'bg-navy-500 text-white hover:bg-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2'
+                    : 'bg-[#1B2A44] text-white hover:bg-[#243A5E] focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2'
                 }`}
                 aria-label="Previous page"
               >
@@ -587,7 +587,7 @@ const Preview = () => {
                 className={`flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full font-semibold transition-all duration-200 text-sm sm:text-base ${
                   currentPage === totalPages
                     ? 'bg-navy-100 text-navy-300 cursor-not-allowed'
-                    : 'bg-navy-500 text-white hover:bg-navy-600 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2'
+                    : 'bg-[#1B2A44] text-white hover:bg-[#243A5E] focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2'
                 }`}
                 aria-label="Next page"
               >

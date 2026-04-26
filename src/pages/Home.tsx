@@ -66,37 +66,21 @@ const features = [
     icon: SparkleIcon,
     title: 'Different Minds Hold Hidden Power',
     description: "Caiden's story shows kids that ADHD isn't a flaw — it can be a source of creativity, energy, and unique strength.",
-    bgGradient: 'from-yellow-400/20 via-orange-400/15 to-amber-400/20',
-    glowColor: 'rgba(251, 191, 36, 0.4)',
-    borderColor: 'border-yellow-300/30',
-    iconColor: 'text-yellow-500',
   },
   {
     icon: PaletteIcon,
     title: 'Where Imagination Becomes Armor',
     description: "Creativity becomes more than play — it becomes confidence kids can carry into every challenge.",
-    bgGradient: 'from-pink-400/20 via-purple-400/15 to-fuchsia-400/20',
-    glowColor: 'rgba(236, 72, 153, 0.4)',
-    borderColor: 'border-pink-300/30',
-    iconColor: 'text-pink-500',
   },
   {
     icon: StrengthIcon,
     title: 'Courage Is a Skill You Learn',
     description: "By facing big feelings and uncertain moments, kids learn that bravery is something you practice.",
-    bgGradient: 'from-brand-blue-400/20 via-brand-blue-400/15 to-brand-blue-500/20',
-    glowColor: 'rgba(37, 99, 235, 0.4)',
-    borderColor: 'border-brand-blue-400/30',
-    iconColor: 'text-brand-blue-600',
   },
   {
     icon: StarIcon,
     title: 'Every Hero Deserves to Be Seen',
     description: "When children see themselves reflected in a hero, they begin to believe they belong in their own story.",
-    bgGradient: 'from-green-400/20 via-emerald-400/15 to-teal-400/20',
-    glowColor: 'rgba(34, 197, 94, 0.4)',
-    borderColor: 'border-green-300/30',
-    iconColor: 'text-green-500',
   },
 ];
 
@@ -277,7 +261,7 @@ const Home = () => {
       >
         {/* Background disabled mode */}
         {DISABLE_HEROES && (
-          <div className="absolute inset-0 -z-10 bg-navy-500" aria-hidden="true" />
+          <div className="absolute inset-0 -z-10 bg-[#1B2A44]" aria-hidden="true" />
         )}
         
         {/* Star Dust Animation */}
@@ -542,14 +526,15 @@ const Home = () => {
       </section>
 
       {/* Who Is Caiden Section */}
-      <section id="about" className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
+      <section
+        id="about"
+        className="cv-cinematic-section py-20 sm:py-28 relative overflow-hidden"
+        style={{ scrollMarginTop: '80px' }}
+      >
         {/* Anchor for "What is Caiden's Courage?" navigation */}
         <span id="who-is-caiden" style={{ position: 'absolute', top: '-80px', visibility: 'hidden' }} aria-hidden="true"></span>
-        {/* Decorative elements - hidden on mobile */}
-        <div className="hidden sm:block circle-accent circle-coral w-24 h-24 -top-12 left-1/4 opacity-50" style={{ animationDelay: '0s' }} />
-        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 bottom-20 left-8 opacity-40" style={{ animationDelay: '1.5s' }} />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left content */}
             <div className="animate-fade-in text-center lg:text-left">
@@ -558,17 +543,20 @@ const Home = () => {
                 className="text-xs sm:text-sm font-semibold uppercase mb-4"
                 style={{ 
                   letterSpacing: '0.12em',
-                  color: 'rgba(255, 255, 255, 0.8)'
+                  color: 'rgba(255, 255, 255, 0.72)'
                 }}
               >
                 HERO'S PATHS
               </div>
               
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6" style={{ color: '#FFFFFF' }}>
                 Kids Learn This In The Universe?
               </h2>
               
-              <p className="mt-4 text-lg sm:text-xl text-white font-semibold leading-relaxed mb-6">
+              <p
+                className="mt-4 text-lg sm:text-xl leading-relaxed mb-6 font-medium"
+                style={{ color: 'rgba(255, 255, 255, 0.75)' }}
+              >
                 Not just a story world — a courage practice. Kids learn to name big feelings, trust their minds, and take brave next steps.
               </p>
               
@@ -588,64 +576,49 @@ const Home = () => {
                   size="md"
                   as={Link}
                   to="/world"
-                  className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
+                  className="w-full sm:w-auto !bg-transparent !border !border-[rgba(255,255,255,0.4)] !text-white hover:!bg-white/[0.06] !shadow-none backdrop-blur-[6px] focus:!ring-white/40"
                 >
                   Enter Caiden's World
                 </Button>
               </div>
 
               {/* Helper Line */}
-              <p className="text-sm text-white/60">
+              <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                 For readers ages 6–12 — and anyone discovering their courage.
               </p>
             </div>
 
             {/* Right - Feature cards optimized for performance */}
             <div className="grid sm:grid-cols-2 gap-6 relative z-10">
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <div
                   key={feature.title}
                   className="relative group h-full"
                 >
                   {/* Card container with cinematic styling */}
                   <div
-                    className="relative cinematic-pillar-card rounded-3xl p-6 sm:p-7 transition-all duration-300 cursor-pointer h-full flex flex-col"
+                    className="relative cinematic-pillar-card rounded-3xl p-6 sm:p-7 transition-all duration-300 cursor-pointer h-full flex flex-col border border-white/[0.06]"
                     style={{
                       borderRadius: '26px',
-                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
                     }}
                   >
-                    {/* Dark cinematic gradient background */}
-                    <div 
+                    {/* Dark cinematic card surface */}
+                    <div
                       className="absolute inset-0 rounded-3xl z-0 cinematic-card-bg"
                       style={{
-                        background: index === 0 
-                          ? 'linear-gradient(135deg, rgba(36, 62, 112, 0.95) 0%, rgba(55, 48, 163, 0.85) 100%)'
-                          : index === 1
-                          ? 'linear-gradient(135deg, rgba(55, 48, 163, 0.95) 0%, rgba(79, 70, 229, 0.85) 100%)'
-                          : index === 2
-                          ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%)'
-                          : 'linear-gradient(135deg, rgba(36, 62, 112, 0.95) 0%, rgba(55, 48, 163, 0.85) 100%)',
-                        transition: 'transform 0.3s ease',
+                        background: 'linear-gradient(180deg, #243A5E 0%, #1B2A44 100%)',
                       }}
-                    ></div>
-                    
-                    {/* Vignette overlay */}
-                    <div 
-                      className="absolute inset-0 rounded-3xl z-0"
+                    />
+
+                    {/* Subtle depth (no heavy color ramps) */}
+                    <div
+                      className="absolute inset-0 rounded-3xl z-0 pointer-events-none"
                       style={{
-                        background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.15) 100%)',
+                        background: 'radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%)',
                       }}
-                    ></div>
-                    
-                    {/* Grain texture */}
-                    <div 
-                      className="absolute inset-0 rounded-3xl z-0 opacity-[0.04]"
-                      style={{
-                        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.1) 2px, rgba(255, 255, 255, 0.1) 4px)',
-                      }}
-                    ></div>
-                    
+                    />
+
                     {/* Content layer */}
                     <div className="relative z-20 flex flex-col flex-grow">
                       {/* Icon badge with scene glow */}
@@ -653,15 +626,15 @@ const Home = () => {
                         <div 
                           className="absolute inset-0 rounded-full z-0"
                           style={{
-                            background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, rgba(229, 192, 106, 0.18) 0%, transparent 72%)',
                             transform: 'scale(1.5)',
                           }}
                         ></div>
                         <div 
                           className="relative z-10 transition-transform duration-200 group-hover:scale-105"
                           style={{ 
-                            filter: 'brightness(1.2) saturate(1.1)',
-                            color: index === 0 ? '#F0CE6E' : index === 1 ? '#E879F9' : index === 2 ? '#60A5FA' : '#34D399'
+                            filter: 'brightness(1.08)',
+                            color: '#E5C06A',
                           }}
                         >
                           <feature.icon className="w-full h-full" />
@@ -669,12 +642,12 @@ const Home = () => {
                       </div>
                       
                       {/* Title - reduced size and weight */}
-                      <h3 className="font-display font-semibold text-white leading-tight mb-3" style={{ fontWeight: 600, fontSize: '20px' }}>
+                      <h3 className="font-display font-semibold leading-tight mb-3 text-white" style={{ fontWeight: 600, fontSize: '20px', color: '#FFFFFF' }}>
                         {feature.title}
                       </h3>
                       
                       {/* Description */}
-                      <p className="text-white/90 flex-grow leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.65' }}>
+                      <p className="flex-grow leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.65', color: 'rgba(255, 255, 255, 0.75)' }}>
                         {feature.description}
                       </p>
                     </div>
@@ -755,21 +728,21 @@ const Home = () => {
       {/* Meet B-4 Section */}
       <section className="py-12 sm:py-16 md:py-24 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl bg-[#050B18] border border-white/10 overflow-hidden bg-[radial-gradient(circle_at_75%_40%,rgba(59,130,246,0.25),transparent_60%)] bg-[radial-gradient(circle_at_70%_60%,rgba(230,185,76,0.12),transparent_70%)]">
+          <div className="relative rounded-3xl border border-white/10 overflow-hidden cv-cinematic-inset">
             {/* Subtle atmosphere */}
             <div
               className="pointer-events-none absolute inset-0"
               aria-hidden="true"
             >
               <div
-                className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 blur-[90px] opacity-45"
+                className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 blur-[90px] opacity-35"
                 style={{
                   background:
-                    'radial-gradient(circle at 35% 40%, rgba(96,165,250,0.45), rgba(34,211,238,0.10), rgba(5,11,24,0))',
+                    'radial-gradient(circle at 40% 45%, rgba(229, 192, 106, 0.22), rgba(255, 215, 120, 0.06), rgba(5,11,24,0))',
                 }}
               />
               <div
-                className="absolute inset-0 opacity-[0.06] mix-blend-soft-light"
+                className="absolute inset-0 opacity-[0.05] mix-blend-soft-light"
                 style={{
                   backgroundImage: "url('/images/ui/b4-watermark.svg')",
                   backgroundRepeat: 'repeat',
@@ -781,16 +754,16 @@ const Home = () => {
             <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 p-7 sm:p-10 lg:p-14 items-center">
               {/* Left: Copy + Feature cards */}
               <div className="order-1">
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] text-white/70">
+                <p className="text-xs sm:text-sm font-semibold tracking-[0.2em]" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                   MEET B-4
                 </p>
-                <h2 className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.05]">
+                <h2 className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05]" style={{ color: '#FFFFFF' }}>
                   <span className="block">More than a robot.</span>
                   <span className="block">
                     Your <span className="focus-highlight">focus</span> companion.
                   </span>
                 </h2>
-                <p className="mt-5 text-white/80 text-base sm:text-lg leading-relaxed max-w-xl">
+                <p className="mt-5 text-base sm:text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                   B-4 is here to help you understand your mind, navigate big emotions, and unlock your inner hero.
                 </p>
 
@@ -798,25 +771,17 @@ const Home = () => {
                 <div className="mt-8 lg:hidden">
                   <div className="relative mx-auto w-full max-w-[280px]">
                     <div
-                      className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                      className="absolute inset-0 -z-10 blur-[60px] opacity-45"
                       style={{
                         background:
-                          'radial-gradient(circle at 50% 30%, rgba(34,211,238,0.44), rgba(59,130,246,0.18), rgba(5,11,24,0) 62%)',
-                      }}
-                      aria-hidden="true"
-                    />
-                    <div
-                      className="absolute inset-0 -z-10 blur-[60px] opacity-50"
-                      style={{
-                        background:
-                          'radial-gradient(circle at 52% 52%, rgba(240,206,110,0.30), rgba(240,206,110,0.10), rgba(5,11,24,0) 70%)',
+                          'radial-gradient(circle at 50% 35%, rgba(229, 192, 106, 0.2), rgba(229, 192, 106, 0.06), rgba(5,11,24,0) 65%)',
                       }}
                       aria-hidden="true"
                     />
                     <img
                       src="/images/characters/B4_Robot_Hero.webp"
                       alt="B-4 — your focus companion"
-                      className="w-full h-auto object-contain scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(59,130,246,0.22)]"
+                      className="w-full h-auto object-contain scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(0,0,0,0.45)]"
                       loading="lazy"
                       decoding="async"
                     />
@@ -832,17 +797,17 @@ const Home = () => {
                   ].map((f) => (
                     <div
                       key={f.title}
-                      className="rounded-2xl bg-[#071426]/70 border border-blue-400/15 px-4 py-4 sm:px-5 sm:py-5 transition-transform duration-200 lg:hover:-translate-y-0.5 lg:hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)]"
+                      className="cv-cinematic-card rounded-2xl px-4 py-4 sm:px-5 sm:py-5 transition-transform duration-200 lg:hover:-translate-y-0.5 lg:hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.55)]"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex-shrink-0 text-golden-500">
+                        <div className="mt-0.5 flex-shrink-0" style={{ color: '#E5C06A' }}>
                           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" />
                           </svg>
                         </div>
                         <div className="min-w-0">
                           <div className="font-display font-bold text-white">{f.title}</div>
-                          <div className="mt-1 text-sm text-white/70 leading-relaxed">{f.body}</div>
+                          <div className="mt-1 text-sm leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>{f.body}</div>
                         </div>
                       </div>
                     </div>
@@ -869,25 +834,17 @@ const Home = () => {
                 <div className="relative w-full flex justify-center lg:justify-end items-center pr-6 pb-6">
                   {/* Layered cinematic glows behind B-4 */}
                   <div
-                    className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                    className="absolute inset-0 -z-10 blur-[60px] opacity-45"
                     style={{
                       background:
-                        'radial-gradient(circle at 55% 28%, rgba(34,211,238,0.42), rgba(59,130,246,0.22), rgba(5,11,24,0) 62%)',
-                    }}
-                    aria-hidden="true"
-                  />
-                  <div
-                    className="absolute inset-0 -z-10 blur-[60px] opacity-50"
-                    style={{
-                      background:
-                        'radial-gradient(circle at 58% 48%, rgba(240,206,110,0.34), rgba(240,206,110,0.10), rgba(5,11,24,0) 70%)',
+                        'radial-gradient(circle at 55% 30%, rgba(229, 192, 106, 0.2), rgba(229, 192, 106, 0.07), rgba(5,11,24,0) 65%)',
                     }}
                     aria-hidden="true"
                   />
                   <img
                     src="/images/characters/B4_Robot_Hero.webp"
                     alt="B-4 — your focus companion"
-                    className="w-full h-auto object-contain max-w-[460px] scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(59,130,246,0.25)]"
+                    className="w-full h-auto object-contain max-w-[460px] scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(0,0,0,0.45)]"
                     loading="lazy"
                     decoding="async"
                   />
@@ -899,19 +856,16 @@ const Home = () => {
       </section>
 
       {/* Meet the Characters Section */}
-      <section id="characters" className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        <div className="hidden sm:block circle-accent circle-coral w-28 h-28 top-12 left-8 opacity-40" style={{ animationDelay: '0.2s' }} />
-        <div className="hidden sm:block circle-accent circle-coral w-20 h-20 bottom-16 right-12 opacity-50" style={{ animationDelay: '0.4s' }} />
-        
+      <section id="characters" className="cv-cinematic-section py-20 sm:py-28 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold" style={{ color: '#FFFFFF' }}>
               Meet the Characters of
             </h2>
-            <p className="text-golden-400 font-display text-2xl sm:text-3xl lg:text-4xl font-bold mt-2">
+            <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold mt-2" style={{ color: '#E5C06A' }}>
               Caiden's Courage
             </p>
-            <p className="mt-6 text-white/80 max-w-2xl mx-auto">
+            <p className="mt-6 max-w-2xl mx-auto" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
               Discover the heroes, friends, and guides who help Caiden navigate courage, creativity, and everyday challenges.
             </p>
           </div>
@@ -920,10 +874,10 @@ const Home = () => {
             {characters.map((character, index) => (
               <div
                 key={character.name}
-                className="character-card fade-in-card bg-navy-600/50 rounded-2xl p-5 text-center backdrop-blur-sm border border-white/10 hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                className="character-card fade-in-card cv-cinematic-card rounded-2xl p-5 text-center backdrop-blur-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
               >
                 <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-golden-400 to-golden-600 p-1 shadow-golden">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 shadow-[0_0_0_1px_rgba(229,192,106,0.35)]" style={{ background: 'linear-gradient(180deg, #e5c06a 0%, #c9a85a 100%)' }}>
                     <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                       <img
                         src={character.image}
@@ -935,13 +889,13 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-                <h3 className="font-display text-xl font-bold text-white mt-4">
+                <h3 className="font-display text-xl font-bold mt-4 text-center" style={{ color: '#FFFFFF' }}>
                   {character.name}
                 </h3>
-                <p className="text-golden-400 text-xs font-semibold mt-1 mb-2 min-h-[1.25rem]">
+                <p className="text-xs font-semibold mt-1 mb-2 min-h-[1.25rem] text-center" style={{ color: '#E5C06A' }}>
                   {character.microLabel}
                 </p>
-                <p className="mt-3 text-sm text-white/70 leading-snug px-2" style={{ wordBreak: 'break-word', hyphens: 'auto' }}>
+                <p className="mt-3 text-sm leading-snug px-2 text-center" style={{ wordBreak: 'break-word', hyphens: 'auto', color: 'rgba(255, 255, 255, 0.75)' }}>
                   {character.description}
                 </p>
               </div>
@@ -966,22 +920,22 @@ const Home = () => {
       {/* Testimonials Section */}
       <section className="py-12 sm:py-20 bg-cream relative overflow-hidden">
         {/* 3D Animated Bubbles - Organic placement near content */}
-        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-60" style={{ 
           top: '20%',
           left: '18%',
           width: '22px',
           height: '22px',
-          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #f97316, #ea580c)',
-          boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), rgba(229, 192, 106, 0.35), rgba(27, 42, 68, 0.2))',
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12), inset -2px -2px 6px rgba(0,0,0,0.15), inset 2px 2px 6px rgba(255,255,255,0.12)',
           animationDelay: '1s'
         }}></div>
-        <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
+        <div className="absolute rounded-full pointer-events-none animate-float opacity-50" style={{ 
           bottom: '24%',
           right: '20%',
           width: '18px',
           height: '18px',
-          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), #a855f7, #9333ea)',
-          boxShadow: '0 8px 16px rgba(168, 85, 247, 0.4), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.3)',
+          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(36, 58, 94, 0.5), rgba(27, 42, 68, 0.35))',
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1), inset -2px -2px 6px rgba(0,0,0,0.12), inset 2px 2px 6px rgba(255,255,255,0.1)',
           animationDelay: '2.5s'
         }}></div>
         
@@ -1016,7 +970,7 @@ const Home = () => {
               </div>
               
               <div className="relative z-10">
-                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
                 <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
                   "My child finally saw themselves in a character. That alone made this worth it."
                 </p>
@@ -1037,7 +991,7 @@ const Home = () => {
               </div>
               
               <div className="relative z-10">
-                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
                 <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
                   "This opened up conversations about focus and feelings we couldn't have before."
                 </p>
@@ -1058,7 +1012,7 @@ const Home = () => {
               </div>
               
               <div className="relative z-10">
-                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
                 <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
                   "I met a kid at Barnes & Noble who couldn't wait to read this. He picked it up on his own and asked if he could start right there."
                 </p>
@@ -1079,7 +1033,7 @@ const Home = () => {
               </div>
               
               <div className="relative z-10">
-                <div className="text-yellow-500 text-xl sm:text-2xl mb-3">★★★★★</div>
+                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
                 <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
                   "My son is self-taught and loves to draw, and seeing your work made him light up. He immediately wanted to know how it was made and couldn't stop asking questions. It's rare to find something that sparks both creativity and confidence like this."
                 </p>
@@ -1160,14 +1114,14 @@ const Home = () => {
                         window.scrollTo(0, 0);
                       }}
                       className="mt-5 w-full py-3 px-6 bg-golden-500 text-navy-500 font-bold rounded-full shadow-golden hover:bg-golden-600 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
-                      style={{ opacity: 1, backgroundColor: '#F0CE6E' }}
+                      style={{ opacity: 1, backgroundColor: '#E5C06A' }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#e8c255';
+                        e.currentTarget.style.backgroundColor = '#d4b35a';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#F0CE6E';
+                        e.currentTarget.style.backgroundColor = '#E5C06A';
                       }}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1201,17 +1155,17 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-[#050B18] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-1/4 w-64 h-64 bg-golden-500 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-golden-400 rounded-full blur-3xl" />
+      <section className="cv-cinematic-section py-16 sm:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-30" aria-hidden>
+          <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full blur-3xl" style={{ background: 'rgba(229, 192, 106, 0.12)' }} />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'rgba(229, 192, 106, 0.08)' }} />
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold" style={{ color: '#FFFFFF' }}>
             Ready to Join Caiden's Journey?
           </h2>
-          <p className="mt-4 text-white/80 text-lg">
+          <p className="mt-4 text-lg" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
             Be the first to know when the book launches and get exclusive updates.
           </p>
           <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center items-center">

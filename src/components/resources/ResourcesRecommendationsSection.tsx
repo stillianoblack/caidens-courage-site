@@ -62,7 +62,7 @@ export default function ResourcesRecommendationsSection() {
                 <div className="mt-5">
                   <Link
                     to={c.href}
-                    className="inline-flex h-11 w-full items-center justify-center rounded-[10px] bg-[#203B63] px-5 text-[14px] font-semibold text-white shadow-[0_10px_22px_rgba(32,59,99,0.18)]"
+                    className="inline-flex h-11 w-full items-center justify-center rounded-[10px] bg-[#1B2A44] border border-white/[0.08] px-5 text-[14px] font-semibold text-white shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
                   >
                     Explore
                   </Link>
@@ -73,22 +73,23 @@ export default function ResourcesRecommendationsSection() {
         </div>
       </div>
 
-      {/* KEEP THE COURAGE GOING (BLUE BAND) */}
-      <div className="w-full bg-[#203B63]">
-        <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
+      {/* KEEP THE COURAGE GOING */}
+      <div className="w-full cv-cinematic-section relative overflow-hidden py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-6">
           <div className="grid items-center gap-10 md:grid-cols-2">
             <div>
-              <h3 className="text-[36px] font-extrabold leading-tight text-white md:text-[44px]">
+              <h3 className="text-[36px] font-extrabold leading-tight md:text-[44px]" style={{ color: '#FFFFFF' }}>
                 Keep the Courage going
               </h3>
-              <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-[#D5E3F5]">
+              <p className="mt-3 max-w-xl text-[16px] leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                 More free tools, printable supports, and missions for home and classroom.
               </p>
 
               <div className="mt-8">
                 <Link
                   to="/braveminds"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-[#F2D06B] px-8 text-[14px] font-extrabold text-[#1F3C63] shadow-[0_14px_28px_rgba(0,0,0,0.18)]"
+                  className="inline-flex h-12 items-center justify-center rounded-full px-8 text-[14px] font-extrabold shadow-[0_14px_28px_rgba(0,0,0,0.25)] transition-shadow hover:shadow-[0_16px_32px_rgba(0,0,0,0.3)]"
+                  style={{ backgroundColor: '#E5C06A', color: '#1B2A44' }}
                 >
                   Explore Resources
                 </Link>
@@ -97,7 +98,7 @@ export default function ResourcesRecommendationsSection() {
 
             <div className="relative hidden h-[180px] md:block">
               <svg
-                className="absolute right-0 top-1/2 -translate-y-1/2 opacity-35"
+                className="absolute right-0 top-1/2 -translate-y-1/2 opacity-25"
                 width="360"
                 height="200"
                 viewBox="0 0 360 200"
@@ -105,18 +106,18 @@ export default function ResourcesRecommendationsSection() {
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
-                <circle cx="240" cy="70" r="34" stroke="#D5E3F5" strokeWidth="2" />
-                <circle cx="320" cy="120" r="26" stroke="#D5E3F5" strokeWidth="2" />
-                <circle cx="250" cy="150" r="18" stroke="#D5E3F5" strokeWidth="2" />
+                <circle cx="240" cy="70" r="34" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+                <circle cx="320" cy="120" r="26" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
+                <circle cx="250" cy="150" r="18" stroke="rgba(229,192,106,0.2)" strokeWidth="2" />
                 <path
                   d="M265 90 L300 110"
-                  stroke="#D5E3F5"
+                  stroke="rgba(255,255,255,0.1)"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
                 <path
                   d="M260 120 L300 120"
-                  stroke="#D5E3F5"
+                  stroke="rgba(255,255,255,0.1)"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />

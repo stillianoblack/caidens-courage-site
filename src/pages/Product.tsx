@@ -20,18 +20,18 @@ const InsideCard: React.FC<InsideCardProps> = ({ title, bullets, iconType, helpV
   const getIconStyles = () => {
     if (helpView === 'kids') {
       return {
-        background: 'rgba(37, 99, 235, 0.15)', // brand-blue-600 at 15% opacity (darker for accessibility)
-        iconColor: '#2563eb' // brand-blue-600 (darker for accessibility)
+        background: 'rgba(229, 192, 106, 0.14)',
+        iconColor: '#e5c06a',
       };
     } else if (helpView === 'parents') {
       return {
-        background: 'rgba(168, 85, 247, 0.15)', // purple-500 at 15% opacity
-        iconColor: '#a855f7' // purple-500
+        background: 'rgba(36, 58, 94, 0.12)',
+        iconColor: '#5a6d8c',
       };
     } else if (helpView === 'teachers') {
       return {
-        background: 'rgba(249, 115, 22, 0.15)', // orange-500 at 15% opacity
-        iconColor: '#f97316' // orange-500
+        background: 'rgba(27, 42, 68, 0.1)',
+        iconColor: '#243a5e',
       };
     }
     
@@ -234,7 +234,7 @@ const Product: React.FC = () => {
                 </div>
                 {DISABLE_HEROES ? (
                   <div
-                    className="w-full mx-auto bg-navy-500"
+                    className="w-full mx-auto cv-cinematic-section"
                     style={{ aspectRatio: '742/494', maxWidth: 742 }}
                     aria-hidden="true"
                   />
@@ -606,27 +606,27 @@ const Product: React.FC = () => {
                   </h3>
                   <ul className="list-none space-y-3">
                     <li>
-                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                      <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
                         Understanding big feelings
                       </span>
                     </li>
                     <li>
-                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                      <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
                         How my brain works
                       </span>
                     </li>
                     <li>
-                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                      <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
                         Finding focus my way
                       </span>
                     </li>
                     <li>
-                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                      <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
                         Believing in myself
                       </span>
                     </li>
                     <li>
-                      <span className="inline-block px-4 py-2 rounded-full bg-brand-blue-100 text-brand-blue-700 text-base font-medium border border-brand-blue-300">
+                      <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
                         Being brave when things feel hard
                       </span>
                     </li>
@@ -1058,7 +1058,7 @@ const Product: React.FC = () => {
                 <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
                   Caiden Coloring Pages
                 </h3>
-                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                <span className="mt-auto px-4 py-2.5 rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center border border-white/10 bg-[#1B2A44] text-white/95">
                   Explore
                 </span>
               </div>
@@ -1085,7 +1085,7 @@ const Product: React.FC = () => {
                 <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
                   Caiden Desktop Wallpaper
                 </h3>
-                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                <span className="mt-auto px-4 py-2.5 rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center border border-white/10 bg-[#1B2A44] text-white/95">
                   Explore
                 </span>
               </div>
@@ -1112,7 +1112,7 @@ const Product: React.FC = () => {
                 <h3 className="font-display font-bold text-lg text-navy-500 mb-3 line-clamp-2">
                   Emotional Awareness Worksheet
                 </h3>
-                <span className="mt-auto px-4 py-2.5 bg-navy-500 text-white rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center">
+                <span className="mt-auto px-4 py-2.5 rounded-full font-semibold text-sm text-center min-h-[44px] flex items-center justify-center border border-white/10 bg-[#1B2A44] text-white/95">
                   Explore
                 </span>
               </div>

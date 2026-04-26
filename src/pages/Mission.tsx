@@ -57,7 +57,7 @@ const Mission: React.FC = () => {
         {/* Hero image layer — or solid when REACT_APP_DISABLE_HEROES */}
         <div className="absolute inset-0 z-0">
           {DISABLE_HEROES ? (
-            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+            <div className="w-full h-full cv-cinematic-section" aria-hidden="true" />
           ) : (
             <picture>
               <source
@@ -283,7 +283,7 @@ const Mission: React.FC = () => {
             backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-navy-500/70 z-0" aria-hidden="true" />
+          <div className="absolute inset-0 z-0" style={{ backgroundColor: 'rgba(27, 42, 68, 0.78)' }} aria-hidden="true" />
           <SplitStorySection
             label="MEET THE CREATOR"
             title="Tarus D. Stills"
@@ -464,7 +464,7 @@ const Mission: React.FC = () => {
       </main>
 
       {/* Featured Comic Book Section - Blue Backdrop */}
-      <section className="bg-navy-500 py-10 sm:py-12 lg:py-16">
+      <section className="cv-cinematic-section py-10 sm:py-12 lg:py-16 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* White Featured Card */}
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 max-w-5xl mx-auto">
@@ -472,7 +472,8 @@ const Mission: React.FC = () => {
               {/* Left Side - Circular Image */}
               <div className="flex justify-start md:flex-shrink-0">
                 <div 
-                  className="rounded-full overflow-hidden border-4 border-blue-500 shadow-sm ring-1 ring-blue-500/15 md:ring-blue-500/10 w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 shrink-0"
+                  className="rounded-full overflow-hidden border-4 shadow-sm w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 shrink-0"
+                  style={{ borderColor: '#E5C06A', boxShadow: '0 0 0 1px rgba(229, 192, 106, 0.2)' }}
                 >
                   <picture>
                     <source

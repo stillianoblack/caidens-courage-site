@@ -144,11 +144,9 @@ const CourageAcademy: React.FC = () => {
               {/* Colorful Background Shapes */}
               <div className="absolute inset-0 -z-10" style={{ right: '-40px', left: 'auto', width: '600px', height: '600px' }}>
                 {/* Orange shape */}
-                <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full bg-orange-400 opacity-40 blur-xl"></div>
-                {/* Blue shape */}
-                <div className="absolute bottom-1/4 left-1/4 w-40 h-40 rounded-full bg-blue-400 opacity-35 blur-xl"></div>
-                {/* Yellow/Golden shape */}
-                <div className="absolute top-1/2 left-1/3 w-36 h-36 rounded-full bg-yellow-400 opacity-40 blur-xl"></div>
+                <div className="absolute top-1/4 right-1/4 w-32 h-32 rounded-full opacity-30 blur-xl" style={{ background: 'rgba(229, 192, 106, 0.35)' }} />
+                <div className="absolute bottom-1/4 left-1/4 w-40 h-40 rounded-full opacity-25 blur-xl" style={{ background: 'rgba(36, 58, 94, 0.45)' }} />
+                <div className="absolute top-1/2 left-1/3 w-36 h-36 rounded-full opacity-28 blur-xl" style={{ background: 'rgba(229, 192, 106, 0.2)' }} />
               </div>
 
               {/* Masked Image Container */}
@@ -745,7 +743,7 @@ const CourageAcademy: React.FC = () => {
                   Caiden Coloring Pages
                 </h4>
                 <Link to="/braveminds?type=coloring" className="mt-auto">
-                  <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
+                  <button className="w-full px-6 py-3 rounded-lg font-semibold transition-colors duration-200 bg-golden-500 text-navy-500 hover:bg-golden-600">
                     Explore
                   </button>
                 </Link>
@@ -754,7 +752,7 @@ const CourageAcademy: React.FC = () => {
             
             {/* Card 2: Caiden Desktop Wallpaper */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
-              <div className="w-full aspect-square bg-gradient-to-br from-blue-400 to-yellow-400 overflow-hidden flex items-center justify-center">
+              <div className="w-full aspect-square overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #243A5E 0%, #1B2A44 100%)' }}>
                 <img
                   src="/images/CoolCaiden_header.webp"
                   alt="Caiden Desktop Wallpaper"
@@ -772,7 +770,7 @@ const CourageAcademy: React.FC = () => {
                   Caiden Desktop Wallpaper
                 </h4>
                 <Link to="/braveminds?type=wallpaper" className="mt-auto">
-                  <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
+                  <button className="w-full px-6 py-3 rounded-lg font-semibold transition-colors duration-200 bg-golden-500 text-navy-500 hover:bg-golden-600">
                     Explore
                   </button>
                 </Link>
@@ -799,7 +797,7 @@ const CourageAcademy: React.FC = () => {
                   Emotional Awareness Worksheet
                 </h4>
                 <Link to="/braveminds?type=worksheet" className="mt-auto">
-                  <button className="w-full px-6 py-3 bg-navy-500 text-white rounded-lg font-semibold hover:bg-navy-600 transition-colors duration-200">
+                  <button className="w-full px-6 py-3 rounded-lg font-semibold transition-colors duration-200 bg-golden-500 text-navy-500 hover:bg-golden-600">
                     Explore
                   </button>
                 </Link>
@@ -810,18 +808,18 @@ const CourageAcademy: React.FC = () => {
       </div>
 
       {/* Closing CTA Band */}
-      <div className="bg-navy-500 text-white py-20 sm:py-24 lg:py-28 px-4 relative overflow-hidden">
+      <div className="cv-cinematic-section text-white py-20 sm:py-24 lg:py-28 px-4 relative overflow-hidden">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4">
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
                 Keep the Courage going
               </h2>
-              <p className="text-lg sm:text-xl text-white/90 mb-8">
+              <p className="text-lg sm:text-xl mb-8" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                 More free tools, printable supports, and missions for home and classroom.
               </p>
               <Link to="/braveminds">
-                <Button variant="primary" size="lg" className="bg-golden-500 hover:bg-golden-400 text-navy-500">
+                <Button variant="primary" size="lg" className="text-navy-500">
                   Explore Resources
                 </Button>
               </Link>

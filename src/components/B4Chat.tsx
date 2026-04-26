@@ -134,10 +134,10 @@ const B4Chat: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-navy-500 text-white px-6 py-4 rounded-t-2xl sm:rounded-tl-2xl sm:rounded-tr-none flex items-center justify-between">
+            <div className="cv-cinematic-inset text-white px-6 py-4 rounded-t-2xl sm:rounded-tl-2xl sm:rounded-tr-none flex items-center justify-between relative overflow-hidden border-b border-white/[0.06]">
               <div>
-                <h2 className="font-display text-xl font-bold">Chat with B-4</h2>
-                <p className="text-sm text-white/80 mt-0.5">SEL support + site help</p>
+                <h2 className="font-display text-xl font-bold" style={{ color: '#FFFFFF' }}>Chat with B-4</h2>
+                <p className="text-sm mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>SEL support + site help</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -199,7 +199,7 @@ const B4Chat: React.FC = () => {
                 <button
                   onClick={handleSend}
                   disabled={!inputValue.trim() || isLoading}
-                  className="bg-navy-500 hover:bg-navy-600 disabled:bg-navy-300 disabled:cursor-not-allowed text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-md"
+                  className="bg-golden-500 hover:bg-golden-600 disabled:bg-navy-200 disabled:cursor-not-allowed text-navy-500 rounded-full w-12 h-12 flex items-center justify-center transition-colors shadow-md"
                   aria-label="Send message"
                 >
                   <svg

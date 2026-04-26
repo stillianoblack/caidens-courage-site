@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
 import { SAFE_MODE } from '../lib/safeMode';
@@ -13,7 +13,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
-  const [, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const prevScrolledRef = useRef<boolean | null>(null);
   const renderCountRef = useRef(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -67,6 +67,14 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
       if (h) window.removeEventListener('scroll', h);
     };
   }, []);
+
+  // Sync scroll state when route changes (fixed header + SPA navigation).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const scrolled = window.scrollY > 50;
+    prevScrolledRef.current = scrolled;
+    setIsScrolled(scrolled);
+  }, [location.pathname]);
 
   // Dev-only: log Header render count when ?perf=1
   renderCountRef.current += 1;
@@ -169,10 +177,20 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
     }
   };
 
+  const navSurfaceClass = useMemo(() => {
+    const base = isScrolled ? 'cv-nav--scrolled' : 'cv-nav--top';
+    if (DISABLE_HEADER_ANIMATIONS || SAFE_MODE) return `${base} cv-nav--no-blur`;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      return `${base} cv-nav--no-blur`;
+    }
+    return base;
+  }, [isScrolled]);
+
   // Plain NavLink/Link – no preventDefault, no nav wrappers. Menu-close in onClick only where needed.
   const renderNavLink = (item: NavItem) => {
     const isAnchor = item.href.startsWith('/#');
-    const baseClass = 'nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors';
+    const baseClass =
+      'nav-link-underline font-semibold tracking-wide cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease';
     const activeClass = 'font-bold text-white border-b-2 border-golden-500';
 
     if (isAnchor) {
@@ -207,7 +225,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="nav-link-underline font-semibold tracking-wide cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -323,7 +341,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="nav-link-underline font-semibold tracking-wide cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -400,7 +418,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="nav-link-underline font-semibold tracking-wide cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -453,14 +471,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 ${DISABLE_HEADER_ANIMATIONS ? '' : 'transition-[background-color,backdrop-filter] duration-200'}`}
-        style={{
-          backgroundColor: 'rgba(7, 15, 28, 0.82)',
-          backdropFilter: DISABLE_HEADER_ANIMATIONS ? undefined : 'blur(10px)',
-          WebkitBackdropFilter: DISABLE_HEADER_ANIMATIONS ? undefined : 'blur(10px)',
-        }}
-      >
+      <nav className={`fixed top-0 left-0 right-0 z-50 ${navSurfaceClass}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Left: Hamburger (mobile) + Logo */}
@@ -539,7 +550,9 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               <NavLink
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
                 className={({ isActive }) =>
-                  `hidden lg:block nav-link-underline font-semibold tracking-wide whitespace-nowrap text-white/90 hover:text-golden-500 transition-colors ${isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''}`
+                  `hidden lg:block nav-link-underline font-semibold tracking-wide whitespace-nowrap cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease ${
+                    isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''
+                  }`
                 }
               >
                 {RIGHT_NAV_ITEMS.partnerLink.label}

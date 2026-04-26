@@ -51,7 +51,7 @@ const World: React.FC = () => {
         {/* Hero image layer — background_caidensworld_img.jpg */}
         <div className="absolute inset-0 z-0">
           {DISABLE_HEROES ? (
-            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+            <div className="w-full h-full cv-cinematic-section" aria-hidden="true" />
           ) : (
             <img
               src={isMobile ? '/images/Headers_world_mobile.webp' : '/images/backgrounds/background_caidensworld_img.jpg'}
@@ -344,7 +344,7 @@ const World: React.FC = () => {
       </section>
 
       {/* Creature Tease Section */}
-      <section className="bg-navy-500 relative overflow-hidden" style={{ paddingTop: '140px', paddingBottom: '140px' }}>
+      <section className="cv-cinematic-section relative overflow-hidden" style={{ paddingTop: '140px', paddingBottom: '140px' }}>
         {/* Subtle fog texture overlay */}
         <div 
           className="absolute inset-0 opacity-5 pointer-events-none"
@@ -357,13 +357,13 @@ const World: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Text Block */}
           <div className="text-center mb-16 lg:mb-20">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
               Not Everything That Exists Can Be Seen.
             </h2>
-            <p className="text-lg sm:text-xl text-white/90 font-medium max-w-3xl mx-auto mb-6">
+            <p className="text-lg sm:text-xl font-medium max-w-3xl mx-auto mb-6" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
               Beyond the familiar lies a world waiting to awaken.
             </p>
-            <p className="text-base sm:text-lg text-white/80 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg leading-relaxed max-w-3xl mx-auto" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
               Across the veil live beings both wondrous and dangerous — some waiting to be saved, others guarding truths older than memory.
             </p>
           </div>
@@ -393,7 +393,7 @@ const World: React.FC = () => {
 
           {/* Narrative Sentence */}
           <div className="text-center mb-10">
-            <p className="text-lg sm:text-xl text-white/90 font-medium leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl font-medium leading-relaxed max-w-2xl mx-auto" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
               Some are guardians. Some are lost. Some are waiting for a hero brave enough to see them.
             </p>
           </div>
@@ -428,7 +428,7 @@ const World: React.FC = () => {
       </section>
 
       {/* Visual Map Section */}
-      <section className="py-20 sm:py-28 bg-navy-500 relative overflow-hidden">
+      <section className="cv-cinematic-section py-20 sm:py-28 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
             {/* World map image */}

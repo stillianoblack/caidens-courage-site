@@ -24,7 +24,7 @@ module.exports = {
           200: '#f9edca',
           300: '#f5e3b0',
           400: '#f2da97',
-          500: '#F0CE6E', // Primary golden yellow (updated)
+          500: '#E5C06A', // Cinematic gold (aligned with brand)
           600: '#e8c255',
           700: '#deb23c',
           800: '#c99a28',
@@ -37,7 +37,7 @@ module.exports = {
           200: '#f9edca',
           300: '#f5e3b0',
           400: '#f2da97',
-          500: '#F0CE6E', // Now points to golden yellow
+          500: '#E5C06A', // Aligned with golden
           600: '#e8c255',
           700: '#deb23c',
           800: '#c99a28',

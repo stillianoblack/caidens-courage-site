@@ -24,9 +24,15 @@
 
 :root {
   --navy-500: #243E70;
-  --golden-500: #F0CE6E;
+  --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
   --cream: #faf9f7;
+
+  /* Global navigation tokens */
+  --cv-nav-navy: rgba(7, 15, 28, 0.88);
+  --cv-nav-link: rgba(255, 255, 255, 0.92);
+  --cv-nav-link-hover: #f2c94c;
+  --cv-nav-border: rgba(255, 255, 255, 0.08);
   
   /* Persona brand colors */
   --persona-kids: #2563eb; /* brand-blue-600 */
@@ -55,6 +61,75 @@
   --pill-persona-parents: #8B5CF6;
   --pill-persona-teachers: #F97316;
   --pill-persona-everyone: #23375A;
+}
+
+/* Global header: dark cinematic navy (all routes) */
+.cv-nav--top {
+  background: rgba(7, 15, 28, 0.96);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--cv-nav-border);
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease,
+    backdrop-filter 200ms ease,
+    -webkit-backdrop-filter 200ms ease,
+    border-color 200ms ease;
+}
+
+.cv-nav--scrolled {
+  background: rgba(7, 15, 28, 0.92);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease,
+    backdrop-filter 200ms ease,
+    -webkit-backdrop-filter 200ms ease,
+    border-color 200ms ease;
+}
+
+.cv-nav--no-blur {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.cv-nav-link {
+  color: var(--cv-nav-link);
+  transition: color 200ms ease;
+}
+
+.cv-nav-link:hover {
+  color: var(--cv-nav-link-hover);
+}
+
+/* Cinematic section surface (site-wide dark blue — no bright UI blues) */
+.cv-cinematic-section {
+  background-image:
+    radial-gradient(circle at 70% 30%, rgba(255, 215, 120, 0.08), transparent 40%),
+    linear-gradient(180deg, #16233a 0%, #1b2a44 100%);
+  background-blend-mode: overlay, normal;
+}
+
+/* Premium card surface for grids inside cinematic sections */
+.cv-cinematic-card {
+  background: linear-gradient(180deg, #243a5e 0%, #1b2a44 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* Inset panel (e.g. Meet B-4 rounded shell) — same language, contained */
+.cv-cinematic-inset {
+  background-color: #1b2a44;
+  background-image:
+    radial-gradient(circle at 72% 32%, rgba(255, 215, 120, 0.09), transparent 46%),
+    linear-gradient(180deg, #16233a 0%, #1b2a44 100%);
+  background-blend-mode: overlay, normal;
 }
 
 * {
@@ -115,8 +190,8 @@ code {
 }
 
 .focus-highlight {
-  color: #E6B94C;
-  opacity: 0.85;
+  color: #e5c06a;
+  opacity: 0.95;
 }
 
 .hero-power {
@@ -385,7 +460,6 @@ code {
 }
 
 .character-card p {
-  text-align: left;
   orphans: 2;
   widows: 2;
 }
@@ -475,7 +549,7 @@ code {
 
 /* Primary button variant - Yellow filled pill - FULLY OPAQUE ALWAYS */
 .btn--primary {
-  background-color: #F0CE6E !important; /* Direct hex value - fully opaque yellow */
+  background-color: #e5c06a !important;
   color: var(--navy-500);
   border: none;
   opacity: 1 !important; /* Explicitly enforce full opacity */
@@ -484,7 +558,7 @@ code {
 }
 
 .btn--primary:hover:not(:disabled):not(.btn--disabled) {
-  background-color: #e8c255 !important; /* Direct hex value - deeper yellow, fully opaque */
+  background-color: #d4b35a !important;
   opacity: 1 !important; /* Force full opacity on hover */
   transform: scale(1.04);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -493,7 +567,7 @@ code {
 }
 
 .btn--primary:active:not(:disabled):not(.btn--disabled) {
-  background-color: #e8c255 !important; /* Keep deeper yellow on active */
+  background-color: #d4b35a !important;
   opacity: 1 !important; /* Force full opacity on active */
   transform: scale(0.98);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -501,7 +575,7 @@ code {
 }
 
 .btn--primary:focus-visible {
-  background-color: #F0CE6E !important; /* Keep yellow on focus */
+  background-color: #e5c06a !important;
   opacity: 1 !important;
 }
 
@@ -516,14 +590,14 @@ button.bg-golden-500,
 a.bg-golden-500,
 .bg-golden-500.rounded-full {
   opacity: 1 !important;
-  background-color: #F0CE6E !important;
+  background-color: #e5c06a !important;
 }
 
 button.bg-golden-500:hover,
 a.bg-golden-500:hover,
 .bg-golden-500.rounded-full:hover {
   opacity: 1 !important;
-  background-color: #e8c255 !important;
+  background-color: #d4b35a !important;
 }
 
 /* Secondary button variant - Navy outline pill */

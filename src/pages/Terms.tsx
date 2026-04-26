@@ -33,15 +33,15 @@ const Terms: React.FC = () => {
       <Header onComingSoonClick={handleComingSoonClick} />
 
       {/* Blue Header - Matching Resources Page */}
-      <div className="bg-navy-500 text-white py-16 pt-32">
+      <div className="cv-cinematic-section text-white py-16 pt-32 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
             Terms of Service
           </h1>
-          <p className="text-lg sm:text-xl text-white/90 max-w-3xl mb-2">
+          <p className="text-lg sm:text-xl max-w-3xl mb-2" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
             The rules for using Caiden's Courage and our website.
           </p>
-          <p className="text-sm sm:text-base text-white/80">
+          <p className="text-sm sm:text-base" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             Please read carefully before using the site.
           </p>
         </div>

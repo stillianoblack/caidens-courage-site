@@ -122,7 +122,7 @@ const Characters: React.FC = () => {
         {/* Hero image layer — or solid when REACT_APP_DISABLE_HEROES */}
         <div className="absolute inset-0 z-0">
           {DISABLE_HEROES ? (
-            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
+            <div className="w-full h-full cv-cinematic-section" aria-hidden="true" />
           ) : (
             <picture>
               <source

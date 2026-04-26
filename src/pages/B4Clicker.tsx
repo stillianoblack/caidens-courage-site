@@ -141,24 +141,24 @@ const B4Clicker: React.FC = () => {
 
       {/* Hero Section with floating shapes */}
       <div className="bg-cream py-20 lg:py-28 relative overflow-hidden" style={{ marginTop: '100px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Column - Text and Button */}
             <div className="relative z-10 max-w-xl">
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-navy-400 mb-3 text-left">
+              <p className="text-xs sm:text-sm uppercase tracking-widest text-navy-400 mb-4 text-left max-w-3xl">
                 COURAGE RESET TOOLS
               </p>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-5 text-left leading-[1.05]">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-4 text-left max-w-3xl leading-[1.05]">
                 Courage Command:{' '}
                 <span className="text-golden-500">Power up your brain</span>
               </h1>
-              <p className="text-lg sm:text-xl text-navy-600 mb-3 font-medium text-left leading-relaxed">
+              <p className="text-lg sm:text-xl text-navy-600 mb-6 font-medium text-left max-w-3xl leading-relaxed">
                 Feeling a system glitch? Pick a Courage Module to clear the static and get back into the action!
               </p>
-              <p className="text-sm md:text-base text-gray-600 mt-3 max-w-[52ch] text-left">
+              <p className="text-sm md:text-base text-gray-600 mb-6 text-left max-w-3xl leading-relaxed">
                 Each module helps your body and brain reset in a different way.
               </p>
-              <div className="text-left mt-12">
+              <div className="text-left mb-8">
                 <Button
                   variant="primary"
                   size="lg"
@@ -171,9 +171,9 @@ const B4Clicker: React.FC = () => {
             </div>
 
             {/* Right Column - Circular Character Images with Bubble Alignment */}
-            <div className="relative flex justify-end min-h-[400px] lg:min-h-[500px]">
+            <div className="relative flex justify-start lg:justify-end min-h-[400px] lg:min-h-[500px]">
               {/* Bubble Field - Anchored to Right Edge */}
-              <div className="absolute inset-y-0 right-0 w-[520px] max-w-full pointer-events-none">
+              <div className="hidden lg:block absolute inset-y-0 right-0 w-[520px] max-w-full pointer-events-none">
                 {/* Floating organic shapes */}
                 <FloatingShape 
                   className="top-10 -left-4" 
@@ -200,76 +200,146 @@ const B4Clicker: React.FC = () => {
                 <div className="hidden sm:block circle-accent circle-coral w-10 h-10 top-40 right-32 opacity-45" style={{ animationDelay: '0.5s' }} />
               </div>
 
-              {/* Circular Character Images - 2x2 Grid - Right-aligned to header button */}
-              <div className="relative z-10 flex items-center">
-                <div className="grid grid-cols-2 gap-4 sm:gap-5">
-                  {/* Caiden - Top Left */}
+              {/* Circular Module Images */}
+              <div className="relative z-10 flex w-full items-center lg:w-auto">
+                {/* Mobile: big 2x2 grid */}
+                <div className="grid w-full grid-cols-2 gap-8 justify-start mt-10 mb-12 lg:hidden">
                   <button
                     onClick={handleOpenModal}
-                    className="flex justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
+                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
                     aria-label="Open Courage Module: Caiden"
                   >
-                    <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img 
-                        src="/images/characters/Caiden_img_profile.webp" 
-                        alt="Caiden" 
+                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+                      <img
+                        src="/images/characters/Caiden_img_profile.webp"
+                        alt="Caiden"
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"
                       />
                     </div>
                   </button>
-                  
-                  {/* B-4 - Top Right */}
+
                   <button
                     onClick={handleOpenModal}
-                    className="flex justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
+                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
                     aria-label="Open Courage Module: B-4"
                   >
-                    <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img 
-                        src="/images/characters/b4_img_profile_192w.webp" 
-                        alt="B-4" 
+                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+                      <img
+                        src="/images/characters/b4_img_profile_192w.webp"
+                        alt="B-4"
                         className="w-full h-full object-cover object-[50%_20%]"
                         loading="lazy"
                         decoding="async"
                       />
                     </div>
                   </button>
-                  
-                  {/* Genesis - Bottom Left */}
+
                   <button
                     onClick={handleOpenModal}
-                    className="flex justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
+                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
                     aria-label="Open Courage Module: Genesis"
                   >
-                    <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img 
-                        src="/images/genesis_img_pic.webp" 
-                        alt="Genesis" 
+                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+                      <img
+                        src="/images/genesis_img_pic.webp"
+                        alt="Genesis"
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"
                       />
                     </div>
                   </button>
-                  
-                  {/* Turtle - Bottom Right */}
+
                   <button
                     onClick={handleOpenModal}
-                    className="flex justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
+                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
                     aria-label="Open Courage Module: Turtle"
                   >
-                    <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img 
-                        src="/images/characters/ollie_img_profile_192w.webp" 
-                        alt="Ollie Buck" 
+                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
+                      <img
+                        src="/images/characters/ollie_img_profile_192w.webp"
+                        alt="Ollie Buck"
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"
                       />
                     </div>
                   </button>
+                </div>
+
+                {/* Desktop: clean 2x2 grid cluster (no overlaps) */}
+                <div className="hidden lg:block relative w-[520px] h-[520px] mt-6 mb-12">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center">
+                    <div className="max-w-[520px] w-full">
+                      <div className="grid grid-cols-2 gap-4 items-center justify-center place-items-center">
+                    <button
+                      onClick={handleOpenModal}
+                      className="translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
+                      aria-label="Open Courage Module: Caiden"
+                    >
+                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
+                        <img
+                          src="/images/characters/Caiden_img_profile.webp"
+                          alt="Caiden"
+                          className="w-full h-full object-cover rounded-full"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleOpenModal}
+                      className="-translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
+                      aria-label="Open Courage Module: B-4"
+                    >
+                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
+                        <img
+                          src="/images/characters/b4_img_profile_192w.webp"
+                          alt="B-4"
+                          className="w-full h-full object-cover object-[50%_20%] rounded-full"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleOpenModal}
+                      className="translate-y-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
+                      aria-label="Open Courage Module: Genesis"
+                    >
+                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
+                        <img
+                          src="/images/genesis_img_pic.webp"
+                          alt="Genesis"
+                          className="w-full h-full object-cover rounded-full"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleOpenModal}
+                      className="translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
+                      aria-label="Open Courage Module: Turtle"
+                    >
+                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
+                        <img
+                          src="/images/characters/ollie_img_profile_192w.webp"
+                          alt="Ollie Buck"
+                          className="w-full h-full object-cover rounded-full"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -278,13 +348,13 @@ const B4Clicker: React.FC = () => {
       </div>
 
       {/* Informational Section */}
-      <div className="py-16 sm:py-20 px-4 mt-16" style={{ backgroundColor: '#F3F7FB' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4">
+      <div className="py-16 sm:py-20 mt-16" style={{ backgroundColor: '#F3F7FB' }}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="mb-12">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-left max-w-3xl">
               Why B-4 Reset Tools?
             </h2>
-            <p className="text-xl sm:text-2xl text-navy-600 font-semibold max-w-3xl mx-auto">
+            <p className="text-xl sm:text-2xl text-navy-600 font-semibold mb-8 text-left max-w-3xl leading-relaxed">
               Because kids don't need to be fixed — they need help understanding their system.
             </p>
           </div>
@@ -296,7 +366,7 @@ const B4Clicker: React.FC = () => {
                 {units.map((unit) => (
                   <div
                     key={unit.id}
-                    className="bg-white rounded-2xl p-6 text-center border border-navy-100 shadow-sm"
+                    className="bg-white rounded-2xl p-6 text-left border border-navy-100 shadow-sm"
                   >
                     <div className="text-4xl sm:text-5xl mb-3">{unit.icon}</div>
                     <p className="text-sm sm:text-base font-semibold text-navy-600">{unit.name}</p>
@@ -466,7 +536,7 @@ const B4Clicker: React.FC = () => {
               <>
                 <div className="text-center mb-8">
                   <div className="inline-block mb-4">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-navy-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto animate-pulse bg-[#1B2A44] border border-white/[0.08]">
                       <span className="text-4xl sm:text-5xl text-white">✓</span>
                     </div>
                   </div>
