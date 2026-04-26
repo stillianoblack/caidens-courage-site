@@ -239,11 +239,10 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="major-publisher-hero relative overflow-hidden pb-24 md:pb-0"
+        className="major-publisher-hero relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '130px' : '120px',
-          minHeight: isMobile ? '100vh' : '92vh',
-          alignItems: isMobile ? 'flex-start' : undefined,
+          paddingTop: '120px',
+          minHeight: '92vh',
           backgroundImage: `
             linear-gradient(
               to right,
@@ -254,7 +253,7 @@ const Home = () => {
             url('${isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp'}')
           `,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: isMobile ? '60% 30%' : 'center',
           backgroundRepeat: 'no-repeat',
           ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
@@ -269,7 +268,7 @@ const Home = () => {
         
         {/* Content - aligned to global nav grid; vertically centered on desktop only */}
         <div className="relative z-10 w-full flex flex-col md:flex-row md:min-h-[calc(92vh-120px)] md:items-center">
-          <div className="relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:-mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
+          <div className="hero-content relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:-mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
             <div className="flex md:items-center md:min-h-0">
               <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
@@ -280,7 +279,7 @@ const Home = () => {
                 textTransform: 'uppercase',
                 opacity: 0.8,
                 color: 'rgba(255, 255, 255, 0.9)',
-                marginBottom: '12px'
+                marginBottom: isMobile ? '12px' : '12px'
               }}
             >
               INTRODUCING THE WORLD OF CAIDEN
@@ -290,10 +289,10 @@ const Home = () => {
                 <h1 
                   className="font-display font-extrabold text-white"
                   style={{ 
-                    fontSize: 'clamp(44px, 5vw, 64px)',
-                    lineHeight: '1.05',
-                    letterSpacing: '-1px',
-                    marginBottom: '16px'
+                    fontSize: isMobile ? '2.2rem' : 'clamp(44px, 5vw, 64px)',
+                    lineHeight: isMobile ? '1.1' : '1.05',
+                    letterSpacing: isMobile ? '-0.5px' : '-1px',
+                    marginBottom: isMobile ? '12px' : '16px',
                   }}
                 >
                   <span className="block">Where focus</span>
@@ -306,9 +305,9 @@ const Home = () => {
                 <p 
                   className="text-white/90 font-medium"
                   style={{ 
-                    fontSize: '22px',
-                    lineHeight: '1.5',
-                    marginBottom: '16px',
+                    fontSize: isMobile ? '18px' : '22px',
+                    lineHeight: isMobile ? '1.45' : '1.5',
+                    marginBottom: isMobile ? '12px' : '16px',
                     maxWidth: '580px'
                   }}
                 >
@@ -316,7 +315,7 @@ const Home = () => {
                 </p>
 
                 {/* CTA Row */}
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="hero-buttons flex flex-col sm:flex-row gap-3 mb-6">
                   <Button
                     variant="primary"
                     size="md"

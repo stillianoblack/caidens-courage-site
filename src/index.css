@@ -199,6 +199,33 @@ code {
   text-shadow: 0 0 10px rgba(255, 204, 80, 0.28), 0 0 22px rgba(255, 179, 40, 0.16);
 }
 
+/* Homepage Hero (mobile only) — preserve desktop composition */
+@media (max-width: 768px) {
+  .major-publisher-hero {
+    min-height: 80vh;
+    height: auto;
+    padding-top: 72px;
+    padding-bottom: 32px;
+    background-position: 60% 30% !important;
+  }
+
+  .major-publisher-hero .hero-content {
+    padding-top: 72px !important;
+    padding-bottom: 32px !important;
+    justify-content: flex-start;
+  }
+
+  .major-publisher-hero h1 {
+    font-size: 2.2rem;
+    line-height: 1.1;
+  }
+
+  .major-publisher-hero .hero-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
 @media (min-width: 1024px) {
   .header-logo-img {
     transition: filter 200ms ease;
