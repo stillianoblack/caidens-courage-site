@@ -40,3 +40,7 @@ public/optimized/
 public/optimized/**
 public/images/optimized/
 public/images/optimized/**
+
+# Nested/duplicate repos (do not track)
+/caidens-courage-site/
+/caidenscourage/
