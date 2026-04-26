@@ -8,6 +8,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   as?: 'a' | 'button' | typeof Link;
   href?: string;
   to?: string;
+  /** Optional left icon. Defaults to FocusFlame for primary buttons. Set to null to disable. */
+  leftIconSrc?: string | null;
   children: React.ReactNode;
 }
 
@@ -18,6 +20,7 @@ const Button: React.FC<ButtonProps> = ({
   as = 'button',
   href,
   to,
+  leftIconSrc,
   children,
   className = '',
   ...props
@@ -40,6 +43,25 @@ const Button: React.FC<ButtonProps> = ({
   const widthClass = fullWidth ? 'w-full' : 'w-full md:w-auto md:min-w-[260px]';
   
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`;
+
+  const effectiveLeftIconSrc =
+    variant === 'primary' ? (leftIconSrc === undefined ? '/images/icons/button_icon.svg' : leftIconSrc) : null;
+
+  const contents =
+    effectiveLeftIconSrc ? (
+      <span className="inline-flex items-center justify-center gap-2">
+        <img
+          src={effectiveLeftIconSrc}
+          alt=""
+          aria-hidden="true"
+          className="h-5 w-auto object-contain flex-shrink-0"
+          decoding="async"
+        />
+        <span>{children}</span>
+      </span>
+    ) : (
+      children
+    );
   
   // Handle React Router Link component - if to prop is provided and as is Link or not a string
   if (to) {
@@ -50,7 +72,7 @@ const Button: React.FC<ButtonProps> = ({
           className={classes}
           {...(props as any)}
         >
-          {children}
+          {contents}
         </Link>
       );
     }
@@ -64,7 +86,7 @@ const Button: React.FC<ButtonProps> = ({
         className={classes}
         {...(props as any)}
       >
-        {children}
+        {contents}
       </Link>
     );
   }
@@ -76,7 +98,7 @@ const Button: React.FC<ButtonProps> = ({
         className={classes}
         {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
-        {children}
+        {contents}
       </a>
     );
   }
@@ -86,7 +108,7 @@ const Button: React.FC<ButtonProps> = ({
       className={classes}
       {...props}
     >
-      {children}
+      {contents}
     </button>
   );
 };

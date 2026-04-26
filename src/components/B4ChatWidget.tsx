@@ -226,12 +226,22 @@ const B4ChatWidget: React.FC = () => {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-golden-500 hover:bg-golden-400 text-navy-500 font-bold py-3 px-5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 group"
-        aria-label="Chat with B-4"
-        style={{ boxShadow: '0 4px 12px rgba(240, 206, 110, 0.4)' }}
+        className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 h-14 px-4 sm:px-5 rounded-full bg-[#050B18]/95 text-white font-bold border border-golden-500/60 shadow-[0_0_0_1px_rgba(240,206,110,0.14),0_14px_36px_-18px_rgba(240,206,110,0.55)] hover:border-golden-500/80 hover:shadow-[0_0_0_1px_rgba(240,206,110,0.18),0_18px_44px_-18px_rgba(240,206,110,0.7)] transition-all duration-200 flex items-center gap-3"
+        aria-label="Talk to B-4"
       >
-        <span className="text-lg">💬</span>
-        <span>Chat with B-4</span>
+        <img
+          src="/images/icons/B4_Chat_Icon.webp"
+          alt=""
+          aria-hidden="true"
+          className="h-[42px] w-auto object-contain flex-shrink-0"
+          decoding="async"
+        />
+        <span className="leading-none">Talk to B-4</span>
+        <span className="ml-1 w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
+          <svg className="w-4 h-4 text-golden-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+          </svg>
+        </span>
       </button>
 
       {/* Chat Panel */}
@@ -247,7 +257,7 @@ const B4ChatWidget: React.FC = () => {
           {/* Drawer */}
           <div
             ref={drawerRef}
-            className={`fixed bottom-0 right-0 z-50 bg-white rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+            className={`fixed bottom-0 right-0 z-50 bg-[#050B18] rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none shadow-2xl flex flex-col border border-white/10 transition-transform duration-300 ease-out ${
               isOpen ? 'translate-y-0' : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
             }`}
             style={{
@@ -260,34 +270,23 @@ const B4ChatWidget: React.FC = () => {
             aria-labelledby="b4-chat-title"
           >
             {/* Header */}
-            <div className="bg-navy-500 text-white px-4 py-3 rounded-t-2xl sm:rounded-tl-2xl sm:rounded-tr-none flex items-center justify-between flex-shrink-0">
+            <div className="bg-[#071426]/80 text-white px-4 py-3 rounded-t-2xl sm:rounded-tl-2xl sm:rounded-tr-none flex items-center justify-between flex-shrink-0 border-b border-golden-500/25">
               <div className="flex items-center gap-3">
                 {/* B-4 Avatar */}
-                <div className="w-10 h-10 rounded-full bg-golden-500 flex items-center justify-center overflow-hidden border-2 border-white flex-shrink-0">
-                  <img
-                    src="/images/B-4@4x-100.webp"
-                    alt="B-4"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.textContent = 'B-4';
-                        parent.className = 'w-10 h-10 rounded-full bg-golden-500 flex items-center justify-center text-navy-500 font-bold text-sm border-2 border-white flex-shrink-0';
-                      }
-                    }}
-                  />
-                </div>
+                <img
+                  src="/images/icons/B4_Chat_Icon.webp"
+                  alt="B-4"
+                  className="h-10 w-auto object-contain flex-shrink-0"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div>
-                  <h2 id="b4-chat-title" className="font-display text-lg font-bold">Chat with B-4</h2>
+                  <h2 id="b4-chat-title" className="font-display text-lg font-bold text-white/95">Chat with B-4</h2>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors text-white"
+                className="w-9 h-9 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-white/90"
                 aria-label="Close chat"
               >
                 <span className="text-2xl leading-none">×</span>
@@ -295,7 +294,7 @@ const B4ChatWidget: React.FC = () => {
             </div>
 
             {/* Messages Container */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#050B18]">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -304,8 +303,8 @@ const B4ChatWidget: React.FC = () => {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
                       message.role === 'user'
-                        ? 'bg-golden-500 text-navy-500 rounded-br-sm'
-                        : 'bg-navy-100 text-navy-700 rounded-bl-sm'
+                        ? 'bg-[#071426]/80 text-white/95 border border-golden-500/30 rounded-br-sm'
+                        : 'bg-[#0B1E3A]/80 text-white/95 border border-white/10 rounded-bl-sm'
                     }`}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
@@ -316,11 +315,11 @@ const B4ChatWidget: React.FC = () => {
               {/* Typing Indicator */}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-navy-100 text-navy-700 rounded-2xl rounded-bl-sm px-4 py-2.5">
+                  <div className="bg-[#0B1E3A]/80 text-white/90 border border-white/10 rounded-2xl rounded-bl-sm px-4 py-2.5">
                     <div className="flex gap-1.5">
-                      <span className="w-2 h-2 bg-navy-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 bg-navy-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 bg-navy-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      <span className="w-2 h-2 bg-golden-500/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-2 h-2 bg-golden-500/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-2 h-2 bg-golden-500/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                     </div>
                   </div>
                 </div>
@@ -331,12 +330,12 @@ const B4ChatWidget: React.FC = () => {
 
             {/* Quick Suggestions */}
             {messages.length === 1 && !isLoading && (
-              <div className="px-4 pt-2 pb-2 flex flex-wrap gap-2 bg-white border-t border-navy-100">
+              <div className="px-4 pt-2 pb-2 flex flex-wrap gap-2 bg-[#050B18] border-t border-white/10">
                 {QUICK_SUGGESTIONS.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="text-xs px-3 py-1.5 bg-navy-50 hover:bg-navy-100 text-navy-700 rounded-full transition-colors border border-navy-200"
+                    className="text-xs px-3 py-1.5 bg-[#071426]/60 hover:bg-[#071426]/80 text-white/90 rounded-full transition-colors border border-golden-500/25"
                     aria-label={`Ask: ${suggestion}`}
                   >
                     {suggestion}
@@ -346,7 +345,7 @@ const B4ChatWidget: React.FC = () => {
             )}
 
             {/* Input Area */}
-            <div className="border-t border-navy-200 bg-white px-4 py-3 flex-shrink-0">
+            <div className="border-t border-white/10 bg-[#071426]/70 px-4 py-3 flex-shrink-0">
               <form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
                 <textarea
                   ref={inputRef}
@@ -356,7 +355,7 @@ const B4ChatWidget: React.FC = () => {
                   placeholder="Ask B-4 something…"
                   disabled={isLoading}
                   rows={1}
-                  className="flex-1 px-4 py-2.5 rounded-full border-2 border-navy-300 focus:border-navy-500 focus:outline-none text-navy-700 placeholder-navy-400 disabled:opacity-50 disabled:cursor-not-allowed resize-none text-sm leading-relaxed"
+                  className="flex-1 px-4 py-2.5 rounded-full border border-golden-500/35 focus:border-golden-500 focus:outline-none bg-[#050B18]/70 text-white/90 placeholder-white/50 disabled:opacity-50 disabled:cursor-not-allowed resize-none text-sm leading-relaxed"
                   style={{ 
                     minHeight: '44px',
                     maxHeight: '120px',
@@ -367,7 +366,7 @@ const B4ChatWidget: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!inputValue.trim() || isLoading || isSendingRef.current}
-                  className="bg-orange-500 hover:bg-orange-600 disabled:bg-navy-300 disabled:cursor-not-allowed text-white rounded-full w-11 h-11 flex items-center justify-center transition-colors shadow-md flex-shrink-0"
+                  className="ml-3 bg-gradient-to-br from-[#F6D06F] via-[#E6B94C] to-[#C8922E] hover:scale-105 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[#0B1A2B] rounded-full w-10 h-10 flex items-center justify-center transition-all duration-200 ease-out shadow-[0_0_12px_rgba(230,185,76,0.35)] hover:shadow-[0_0_18px_rgba(230,185,76,0.5)] flex-shrink-0"
                   aria-label={isLoading ? 'Sending…' : 'Send message'}
                 >
                   {isLoading ? (
@@ -389,7 +388,7 @@ const B4ChatWidget: React.FC = () => {
                   )}
                 </button>
               </form>
-              <p className="text-xs text-navy-500 mt-1.5 px-1">
+              <p className="text-xs text-white/50 mt-1.5 px-1">
                 Press Enter to send, Shift+Enter for newline
               </p>
             </div>

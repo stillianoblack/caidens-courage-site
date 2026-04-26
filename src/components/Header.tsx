@@ -13,7 +13,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [, setIsScrolled] = useState(false);
   const prevScrolledRef = useRef<boolean | null>(null);
   const renderCountRef = useRef(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -172,8 +172,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   // Plain NavLink/Link – no preventDefault, no nav wrappers. Menu-close in onClick only where needed.
   const renderNavLink = (item: NavItem) => {
     const isAnchor = item.href.startsWith('/#');
-    const baseClass = `nav-link-underline font-semibold hover:font-bold ${isScrolled ? 'text-white' : 'text-navy-500'}`;
-    const activeClass = 'font-bold border-b-2 border-golden-500';
+    const baseClass = 'nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors';
+    const activeClass = 'font-bold text-white border-b-2 border-golden-500';
 
     if (isAnchor) {
       return (
@@ -207,7 +207,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -323,7 +323,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -400,7 +400,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           onMouseLeave={onMouseLeave}
         >
           <div
-            className={`nav-link-underline font-semibold hover:font-bold flex items-center gap-1.5 cursor-pointer ${isScrolled ? 'text-white' : 'text-navy-500'}`}
+            className="nav-link-underline font-semibold tracking-wide text-white/90 hover:text-golden-500 transition-colors flex items-center gap-1.5 cursor-pointer"
             onClick={(e) => {
               e.preventDefault();
               onToggle();
@@ -454,17 +454,21 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 ${DISABLE_HEADER_ANIMATIONS ? '' : 'backdrop-blur-md transition-[background-color,box-shadow] duration-200'} ${isScrolled ? 'bg-navy-500 shadow-xl' : 'bg-white/90 shadow-md'}`}
-        style={isScrolled ? { boxShadow: '0 10px 25px -5px rgba(36, 62, 112, 0.4), 0 8px 10px -6px rgba(36, 62, 112, 0.3)' } : { boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 ${DISABLE_HEADER_ANIMATIONS ? '' : 'transition-[background-color,backdrop-filter] duration-200'}`}
+        style={{
+          backgroundColor: 'rgba(7, 15, 28, 0.82)',
+          backdropFilter: DISABLE_HEADER_ANIMATIONS ? undefined : 'blur(10px)',
+          WebkitBackdropFilter: DISABLE_HEADER_ANIMATIONS ? undefined : 'blur(10px)',
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Left Cluster: Logo + Navigation */}
-            <div className="flex items-center gap-4 lg:gap-6">
-              {/* Hamburger Menu Button - Mobile only */}
+            {/* Left: Hamburger (mobile) + Logo */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 pl-1">
+              {/* Hamburger Menu Button - Mobile only (left) */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-colors duration-150 ${isScrolled ? 'text-white' : 'text-navy-500'} hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isScrolled ? 'focus:ring-white' : 'focus:ring-navy-500'} relative flex items-center justify-center`}
+                className="lg:hidden p-2 rounded-lg transition-colors duration-150 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60 relative flex items-center justify-center"
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -486,63 +490,56 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 </svg>
               </button>
               
-              {/* Logo - router-native, no click interception */}
-              <Link
-                to="/"
-                className="inline-block hover:opacity-80 transition-opacity flex-shrink-0"
-              >
+              <Link to="/" className="header-logo-link flex items-center flex-shrink-0">
                 <img
-                  src="/images/backgrounds/caiden'scourage_logo_1.png"
-                  width={213}
-                  height={80}
-                  alt="Caiden's Courage"
-                  className="h-10 sm:h-12 w-auto"
-                  decoding="async"
+                  src="/images/logos/CaidenVale_Logo_Web.svg"
+                  alt="Caiden Vale and the Focus Flame"
+                  className="header-logo-img h-[22px] md:h-[26px] w-auto object-contain brightness-0 invert"
                 />
               </Link>
-              
-              {/* Desktop Navigation - Left-aligned */}
-              <nav className="hidden lg:flex items-center gap-4">
-                {NAV_ITEMS.map((item) => {
-                  if (item.type === 'link') {
-                    return <React.Fragment key={item.label}>{renderNavLink(item)}</React.Fragment>;
-                  } else if (item.type === 'dropdown') {
-                    let isOpen = false;
-                    let onMouseEnter = () => {};
-                    let onMouseLeave = () => {};
-                    let onToggle = () => {};
-                    
-                    if (item.label === 'Resources') {
-                      isOpen = showResourcesDropdown;
-                      onMouseEnter = handleMouseEnter;
-                      onMouseLeave = handleMouseLeave;
-                      onToggle = () => setShowResourcesDropdown(!showResourcesDropdown);
-                    } else if (item.label === 'Shop') {
-                      isOpen = showShopDropdown;
-                      onMouseEnter = handleShopMouseEnter;
-                      onMouseLeave = handleShopMouseLeave;
-                      onToggle = () => setShowShopDropdown(!showShopDropdown);
-                    } else if (item.label === 'The World') {
-                      isOpen = showWorldDropdown;
-                      onMouseEnter = handleWorldMouseEnter;
-                      onMouseLeave = handleWorldMouseLeave;
-                      onToggle = () => setShowWorldDropdown(!showWorldDropdown);
-                    }
-                    
-                    return <React.Fragment key={item.label}>{renderDropdown(item, isOpen, onMouseEnter, onMouseLeave, onToggle)}</React.Fragment>;
-                  }
-                  return null;
-                })}
-              </nav>
             </div>
+
+            {/* Center: Desktop Navigation */}
+            <nav className="hidden lg:flex items-center justify-center gap-6 flex-1 min-w-0 px-6">
+              {NAV_ITEMS.map((item) => {
+                if (item.type === 'link') {
+                  return <React.Fragment key={item.label}>{renderNavLink(item)}</React.Fragment>;
+                } else if (item.type === 'dropdown') {
+                  let isOpen = false;
+                  let onMouseEnter = () => {};
+                  let onMouseLeave = () => {};
+                  let onToggle = () => {};
+
+                  if (item.label === 'Resources') {
+                    isOpen = showResourcesDropdown;
+                    onMouseEnter = handleMouseEnter;
+                    onMouseLeave = handleMouseLeave;
+                    onToggle = () => setShowResourcesDropdown(!showResourcesDropdown);
+                  } else if (item.label === 'Shop') {
+                    isOpen = showShopDropdown;
+                    onMouseEnter = handleShopMouseEnter;
+                    onMouseLeave = handleShopMouseLeave;
+                    onToggle = () => setShowShopDropdown(!showShopDropdown);
+                  } else if (item.label === 'The World') {
+                    isOpen = showWorldDropdown;
+                    onMouseEnter = handleWorldMouseEnter;
+                    onMouseLeave = handleWorldMouseLeave;
+                    onToggle = () => setShowWorldDropdown(!showWorldDropdown);
+                  }
+
+                  return <React.Fragment key={item.label}>{renderDropdown(item, isOpen, onMouseEnter, onMouseLeave, onToggle)}</React.Fragment>;
+                }
+                return null;
+              })}
+            </nav>
             
-            {/* Right Cluster: Partner With Us + CTA Button */}
-            <div className="flex items-center gap-4 lg:gap-5">
+            {/* Right: Partner With Us + Pre-Order */}
+            <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 flex-shrink-0">
               {/* Partner With Us Link */}
               <NavLink
                 to={RIGHT_NAV_ITEMS.partnerLink.href}
                 className={({ isActive }) =>
-                  `hidden lg:block nav-link-underline font-semibold hover:font-bold whitespace-nowrap ${isScrolled ? 'text-white' : 'text-navy-500'} ${isActive ? 'font-bold border-b-2 border-golden-500' : ''}`
+                  `hidden lg:block nav-link-underline font-semibold tracking-wide whitespace-nowrap text-white/90 hover:text-golden-500 transition-colors ${isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''}`
                 }
               >
                 {RIGHT_NAV_ITEMS.partnerLink.label}
@@ -551,7 +548,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* CTA - router-native Link */}
               <Link
                 to="/comicbook"
-                className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-500 transition-colors shadow-md hover:shadow-lg"
+                className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
               >
                 Pre-Order Volume 1
               </Link>

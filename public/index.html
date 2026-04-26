@@ -2,14 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo192.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/logo192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/logo512.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo192.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="/logo192.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="/logo512.png" />
-    <meta name="msapplication-TileImage" content="/logo192.png" />
+    <link rel="icon" href="/images/icons/FocusFlame_Icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/images/icons/FocusFlame_Icon.svg" />
+    <link rel="apple-touch-icon" href="/images/icons/FocusFlame_Icon.svg" />
+    <meta name="msapplication-TileImage" content="/images/icons/FocusFlame_Icon.svg" />
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -27,9 +23,9 @@
         var p = typeof location !== 'undefined' && location.pathname;
         if (!p || p === '/' || p === '') {
           var mobile = document.createElement('link');
-          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"; mobile.type = 'image/jpeg'; mobile.media = '(max-width: 768px)';
+          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/hero/hero-mobile.webp"; mobile.type = 'image/webp'; mobile.media = '(max-width: 768px)';
           var desktop = document.createElement('link');
-          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"; desktop.type = 'image/jpeg'; desktop.media = '(min-width: 769px)';
+          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/hero/hero-desktop.webp"; desktop.type = 'image/webp'; desktop.media = '(min-width: 769px)';
           document.head.appendChild(mobile); document.head.appendChild(desktop);
         }
       })();
@@ -45,7 +41,7 @@
     <meta property="og:url" content="https://caidenscourage.com/" />
     <meta property="og:title" content="Caiden's Courage" />
     <meta property="og:description" content="Caiden's Courage - Courage looks like doing things your own way." />
-    <meta property="og:image" content="https://caidenscourage.com/images/Caiden'sCourage_SocialImage_smaller.jpg" />
+    <meta property="og:image" content="https://caidenscourage.com/images/backgrounds/CaidenVale_SocialImage.webp" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     
@@ -54,7 +50,7 @@
     <meta name="twitter:url" content="https://caidenscourage.com/" />
     <meta name="twitter:title" content="Caiden's Courage" />
     <meta name="twitter:description" content="Caiden's Courage - Courage looks like doing things your own way." />
-    <meta name="twitter:image" content="https://caidenscourage.com/images/Caiden'sCourage_SocialImage_smaller.jpg" />
+    <meta name="twitter:image" content="https://caidenscourage.com/images/backgrounds/CaidenVale_SocialImage.webp" />
     
     <!--
       manifest.json provides metadata used when your web app is installed on a

@@ -122,3 +122,15 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "https://caidenscourage.com/*"
+  to = "https://caidenvale.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.caidenscourage.com/*"
+  to = "https://caidenvale.com/:splat"
+  status = 301
+  force = true

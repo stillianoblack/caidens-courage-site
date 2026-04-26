@@ -106,25 +106,25 @@ const characters = [
     name: 'Caiden',
     microLabel: 'The Dreamer',
     description: "The brave, imaginative 11-year-old at the center of our story — learning how his ADHD is actually his greatest strength.",
-    image: '/images/Caiden@4x-100.webp',
+    image: '/images/characters/Caiden_img_profile.webp',
   },
   {
     name: 'Genesis',
     microLabel: 'The Potential',
     description: "Caiden's heroic alter-ego, unlocked when he taps into courage and creativity. Genesis is everything Caiden is becoming.",
-    image: '/images/Genesis@4x-100.webp',
+    image: '/images/genesis_img_pic.webp',
   },
   {
     name: 'B-4',
     microLabel: 'The Mind in Motion',
     description: "A floating robotic companion who represents what's happening inside Caiden's mind. B-4 helps him understand his ADHD.",
-    image: '/images/B-4@4x-100.webp',
+    image: '/images/characters/b4_img_profile_192w.webp',
   },
   {
     name: 'Ollie Buck',
     microLabel: 'Patience & Grounding',
     description: "Caiden's loyal companion who reminds him that slow and steady wins the race — patience is a superpower too.",
-    image: '/images/Turtle@4x-100.webp',
+    image: '/images/characters/ollie_img_profile_192w.webp',
   },
 ];
 
@@ -179,6 +179,7 @@ const Home = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
+  const [heroBgOk, setHeroBgOk] = useState<boolean | null>(null);
   const [isMobile, setIsMobile] = useState(
     () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false)
   );
@@ -215,6 +216,23 @@ const Home = () => {
     return () => m.removeEventListener('change', handler);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp';
+    const img = new Image();
+    img.onload = () => {
+      // eslint-disable-next-line no-console
+      console.log('[Hero] background loaded', url);
+      setHeroBgOk(true);
+    };
+    img.onerror = () => {
+      // eslint-disable-next-line no-console
+      console.log('[Hero] background failed', url);
+      setHeroBgOk(false);
+    };
+    img.src = url;
+  }, [isMobile]);
+
   const handlePreorderClick = () => {
     navigate('/comicbook');
     window.scrollTo(0, 0);
@@ -237,58 +255,37 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="major-publisher-hero relative overflow-hidden"
+        className="major-publisher-hero relative overflow-hidden pb-24 md:pb-0"
         style={{
           paddingTop: isMobile ? '130px' : '120px',
           minHeight: isMobile ? '100vh' : '92vh',
           alignItems: isMobile ? 'flex-start' : undefined,
+          backgroundImage: `
+            linear-gradient(
+              to right,
+              rgba(0,0,0,0.75),
+              rgba(0,0,0,0.45),
+              rgba(0,0,0,0.1)
+            ),
+            url('${isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp'}')
+          `,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
       >
-        {/* Background — image or solid when REACT_APP_DISABLE_HEROES */}
-        <div className="major-publisher-hero-bg absolute inset-0 z-0">
-          {DISABLE_HEROES ? (
-            <div className="w-full h-full bg-navy-500" aria-hidden="true" />
-          ) : (
-            <picture>
-              <source
-                media="(max-width: 768px)"
-                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
-              />
-              <source
-                media="(min-width: 769px)"
-                srcSet="/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"
-              />
-              <img
-                src={
-                  isMobile
-                    ? "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
-                    : "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg"
-                }
-                alt="Caiden Vale and the Focus Flame — hero background"
-                className="w-full h-full object-cover"
-                style={{ objectPosition: isMobile ? 'center 35%' : 'center center' }}
-                loading="eager"
-                decoding="async"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.src = isMobile
-                    ? "/images/backgrounds/Caiden's Courage Flame_Page_Website header_mobile.jpg"
-                    : "/images/backgrounds/Caiden's Courage Flame_Page_Website header.jpg";
-                }}
-              />
-            </picture>
-          )}
-        </div>
-        
-        {/* Gradient Overlay */}
-        <div className="major-publisher-hero-overlay absolute inset-0" style={{ zIndex: 1 }}></div>
+        {/* Background disabled mode */}
+        {DISABLE_HEROES && (
+          <div className="absolute inset-0 -z-10 bg-navy-500" aria-hidden="true" />
+        )}
         
         {/* Star Dust Animation */}
-        <div className="major-publisher-stardust absolute inset-0" style={{ zIndex: 1 }} aria-hidden="true"></div>
+        <div className="major-publisher-stardust absolute inset-0 hidden md:block" style={{ zIndex: 1 }} aria-hidden="true"></div>
         
         {/* Content - aligned to global nav grid; vertically centered on desktop only */}
-        <div className="relative z-10 w-full md:flex md:min-h-[calc(92vh-120px)] md:items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="relative z-10 w-full flex flex-col md:flex-row md:min-h-[calc(92vh-120px)] md:items-center">
+          <div className="relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:-mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
             <div className="flex md:items-center md:min-h-0">
               <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
@@ -315,24 +312,27 @@ const Home = () => {
                     marginBottom: '16px'
                   }}
                 >
-                  <span className="block">Where focus becomes power.</span>
+                  <span className="block">Where focus</span>
+                  <span className="block">
+                    becomes <span className="hero-power text-brand-gold">power</span>.
+                  </span>
                 </h1>
             
                 {/* Subheader */}
                 <p 
-                  className="text-white font-medium"
+                  className="text-white/90 font-medium"
                   style={{ 
                     fontSize: '22px',
-                    lineHeight: '1.4',
-                    marginBottom: '12px',
-                    opacity: 0.92
+                    lineHeight: '1.5',
+                    marginBottom: '16px',
+                    maxWidth: '580px'
                   }}
                 >
-                  Stories that help kids see their differences as strengths — and discover the hero already inside them.
+                  A story that helps kids with ADHD turn creativity into focus—without feeling like something is wrong with them.
                 </p>
 
                 {/* CTA Row */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
                   <Button
                     variant="primary"
                     size="md"
@@ -752,42 +752,105 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Enter the World / SEL Section */}
-      <section className="py-12 sm:py-16 md:py-24 bg-cream relative overflow-hidden pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-w-0" style={{ gridTemplateColumns: '1fr 1.2fr' }}>
-            {/* Image Column - First on mobile */}
-            <div className="order-1 lg:order-2 relative w-full min-w-0">
-              <div 
-                className="mx-auto overflow-hidden w-full max-w-full lg:max-w-[440px] rounded-[16%]"
-                style={{ aspectRatio: '1/1' }}
-              >
-                <img
-                  src="/images/SEL_Caidenshield_img.webp"
-                  alt="Caiden deflecting the dragon's energy with his courage shield — Interactive SEL Adventures"
-                  className="w-full h-full object-cover object-center"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
+      {/* Meet B-4 Section */}
+      <section className="py-12 sm:py-16 md:py-24 bg-cream">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-3xl bg-[#050B18] border border-white/10 overflow-hidden bg-[radial-gradient(circle_at_75%_40%,rgba(59,130,246,0.25),transparent_60%)] bg-[radial-gradient(circle_at_70%_60%,rgba(230,185,76,0.12),transparent_70%)]">
+            {/* Subtle atmosphere */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              aria-hidden="true"
+            >
+              <div
+                className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 blur-[90px] opacity-45"
+                style={{
+                  background:
+                    'radial-gradient(circle at 35% 40%, rgba(96,165,250,0.45), rgba(34,211,238,0.10), rgba(5,11,24,0))',
+                }}
+              />
+              <div
+                className="absolute inset-0 opacity-[0.06] mix-blend-soft-light"
+                style={{
+                  backgroundImage: "url('/images/ui/b4-watermark.svg')",
+                  backgroundRepeat: 'repeat',
+                  backgroundSize: '420px 420px',
+                }}
+              />
             </div>
-            
-            {/* Text Column - Second on mobile */}
-            <div className="order-2 lg:order-1 w-full min-w-0">
-              <div className="mx-auto lg:mx-0 max-w-full break-words px-2 sm:px-4 md:px-5" style={{ maxWidth: '560px' }}>
-                <h2 
-                  className="font-display font-extrabold text-navy-500 mb-6 text-left break-words"
-                  style={{ fontSize: 'clamp(32px, 4vw, 40px)' }}
-                >
-                  Discover the Courage Inside You
-                </h2>
-                <p 
-                  className="text-navy-600 leading-relaxed mb-8 text-left break-words"
-                  style={{ fontSize: '16px', lineHeight: '1.6' }}
-                >
-                  Step into Caiden's world with interactive social-emotional adventures that help kids think bravely, feel deeply, and grow with confidence.
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 p-7 sm:p-10 lg:p-14 items-center">
+              {/* Left: Copy + Feature cards */}
+              <div className="order-1">
+                <p className="text-xs sm:text-sm font-semibold tracking-[0.2em] text-white/70">
+                  MEET B-4
                 </p>
-                <div className="w-full max-w-[360px] mx-auto lg:mx-0">
+                <h2 className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.05]">
+                  <span className="block">More than a robot.</span>
+                  <span className="block">
+                    Your <span className="focus-highlight">focus</span> companion.
+                  </span>
+                </h2>
+                <p className="mt-5 text-white/80 text-base sm:text-lg leading-relaxed max-w-xl">
+                  B-4 is here to help you understand your mind, navigate big emotions, and unlock your inner hero.
+                </p>
+
+                {/* Mobile image placement (below text, above cards) */}
+                <div className="mt-8 lg:hidden">
+                  <div className="relative mx-auto w-full max-w-[280px]">
+                    <div
+                      className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                      style={{
+                        background:
+                          'radial-gradient(circle at 50% 30%, rgba(34,211,238,0.44), rgba(59,130,246,0.18), rgba(5,11,24,0) 62%)',
+                      }}
+                      aria-hidden="true"
+                    />
+                    <div
+                      className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                      style={{
+                        background:
+                          'radial-gradient(circle at 52% 52%, rgba(240,206,110,0.30), rgba(240,206,110,0.10), rgba(5,11,24,0) 70%)',
+                      }}
+                      aria-hidden="true"
+                    />
+                    <img
+                      src="/images/characters/B4_Robot_Hero.webp"
+                      alt="B-4 — your focus companion"
+                      className="w-full h-auto object-contain scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(59,130,246,0.22)]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {[
+                    { title: 'Understand', body: 'Learn how your mind works.' },
+                    { title: 'Build', body: 'Strengthen focus and confidence.' },
+                    { title: 'Grow', body: 'Turn challenges into superpowers.' },
+                    { title: 'Connect', body: 'You’re never alone.' },
+                  ].map((f) => (
+                    <div
+                      key={f.title}
+                      className="rounded-2xl bg-[#071426]/70 border border-blue-400/15 px-4 py-4 sm:px-5 sm:py-5 transition-transform duration-200 lg:hover:-translate-y-0.5 lg:hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)]"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 flex-shrink-0 text-golden-500">
+                          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-display font-bold text-white">{f.title}</div>
+                          <div className="mt-1 text-sm text-white/70 leading-relaxed">{f.body}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA: directly under feature cards */}
+                <div className="mt-8 sm:mt-9 w-full max-w-[360px] mx-auto lg:mx-0">
                   <Button
                     variant="primary"
                     size="lg"
@@ -796,8 +859,38 @@ const Home = () => {
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     className="w-full"
                   >
-                    Start Your Brave Journey
+                    Meet B-4
                   </Button>
+                </div>
+              </div>
+
+              {/* Right: B-4 image (desktop) */}
+              <div className="order-2 hidden lg:block">
+                <div className="relative w-full flex justify-center lg:justify-end items-center pr-6 pb-6">
+                  {/* Layered cinematic glows behind B-4 */}
+                  <div
+                    className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                    style={{
+                      background:
+                        'radial-gradient(circle at 55% 28%, rgba(34,211,238,0.42), rgba(59,130,246,0.22), rgba(5,11,24,0) 62%)',
+                    }}
+                    aria-hidden="true"
+                  />
+                  <div
+                    className="absolute inset-0 -z-10 blur-[60px] opacity-50"
+                    style={{
+                      background:
+                        'radial-gradient(circle at 58% 48%, rgba(240,206,110,0.34), rgba(240,206,110,0.10), rgba(5,11,24,0) 70%)',
+                    }}
+                    aria-hidden="true"
+                  />
+                  <img
+                    src="/images/characters/B4_Robot_Hero.webp"
+                    alt="B-4 — your focus companion"
+                    className="w-full h-auto object-contain max-w-[460px] scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(59,130,246,0.25)]"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
               </div>
             </div>
@@ -835,7 +928,7 @@ const Home = () => {
                       <img
                         src={character.image}
                         alt={character.name}
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-cover ${character.name === 'B-4' ? 'object-[50%_20%]' : ''}`}
                         loading="lazy"
                         decoding="async"
                       />
@@ -1108,7 +1201,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-r from-navy-500 to-navy-600 relative overflow-hidden">
+      <section className="py-16 sm:py-20 bg-[#050B18] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-1/4 w-64 h-64 bg-golden-500 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-golden-400 rounded-full blur-3xl" />

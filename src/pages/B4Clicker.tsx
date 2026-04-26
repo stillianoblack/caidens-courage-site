@@ -211,7 +211,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/images/Caiden@4x-100.webp" 
+                        src="/images/characters/Caiden_img_profile.webp" 
                         alt="Caiden" 
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -228,9 +228,9 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/images/B-4@4x-100.webp" 
+                        src="/images/characters/b4_img_profile_192w.webp" 
                         alt="B-4" 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-[50%_20%]"
                         loading="lazy"
                         decoding="async"
                       />
@@ -245,7 +245,7 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/images/Genesis@4x-100.webp" 
+                        src="/images/genesis_img_pic.webp" 
                         alt="Genesis" 
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -262,8 +262,8 @@ const B4Clicker: React.FC = () => {
                   >
                     <div className="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
                       <img 
-                        src="/images/Turtle@4x-100.webp" 
-                        alt="Turtle" 
+                        src="/images/characters/ollie_img_profile_192w.webp" 
+                        alt="Ollie Buck" 
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"

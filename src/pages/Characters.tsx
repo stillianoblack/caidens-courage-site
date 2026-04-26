@@ -43,13 +43,13 @@ const characters: Character[] = [
     name: 'B-4',
     role: 'Companion',
     bio: 'Part guide, part gadget, part best friend. B-4 helps Caiden stay grounded, spot patterns, and make bold choices—especially when the world gets loud.',
-    image: '/images/characters/b4_img_profile.webp'
+    image: '/images/characters/b4_img_profile_192w.webp'
   },
   {
-    name: 'Ollis Buck',
+    name: 'Ollie Buck',
     role: 'Ally',
-    bio: 'Wise, steady, and unexpectedly funny. Ollis Buck reminds Caiden that slow thinking can be a superpower—and that every journey needs patience.',
-    image: '/images/characters/ollie_img_profile.webp'
+    bio: 'Wise, steady, and unexpectedly funny. Ollie Buck reminds Caiden that slow thinking can be a superpower—and that every journey needs patience.',
+    image: '/images/characters/ollie_img_profile_192w.webp'
   },
   {
     name: 'Breath of Life',

@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-navy-600 py-12">
+    <footer className="bg-[#050B18] py-12 border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <span className="font-display text-xl font-extrabold">
-              <span className="text-white">Caiden's</span>
-              <span className="text-golden-400">Courage</span>
-            </span>
+            <img
+              src="/images/logos/CaidenVale_Logo_Web.svg"
+              alt="Caiden Vale and the Focus Flame"
+              className="footer-logo-img h-5 sm:h-6 w-auto object-contain"
+              decoding="async"
+            />
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>
