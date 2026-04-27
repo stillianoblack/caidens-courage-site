@@ -253,7 +253,7 @@ const Home = () => {
             url('${isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp'}')
           `,
           backgroundSize: 'cover',
-          backgroundPosition: isMobile ? '60% 30%' : 'center',
+          backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
@@ -348,7 +348,7 @@ const Home = () => {
         </div>
 
         {/* Slanted Wave Transition */}
-        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+        <div className="hero-wave absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
           <svg 
             className="w-full h-full" 
             viewBox="0 0 1440 150" 
