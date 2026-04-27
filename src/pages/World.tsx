@@ -39,10 +39,9 @@ const World: React.FC = () => {
 
       {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
       <header
-        className="hero-cinematic relative flex items-start overflow-hidden"
+        className="hero-cinematic cv-hero relative flex items-start overflow-hidden"
         style={{
           minHeight: isMobile ? '100vh' : '92vh',
-          paddingTop: isMobile ? '130px' : 'clamp(96px, 14vh, 160px)',
           paddingBottom: isMobile ? '40px' : '160px',
           flexDirection: isMobile ? 'column' : 'row',
           justifyContent: 'flex-start',

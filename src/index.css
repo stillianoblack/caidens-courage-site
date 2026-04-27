@@ -23,6 +23,7 @@
 }
 
 :root {
+  --nav-height: 80px;
   --navy-500: #243E70;
   --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
@@ -61,6 +62,17 @@
   --pill-persona-parents: #8B5CF6;
   --pill-persona-teachers: #F97316;
   --pill-persona-everyone: #23375A;
+}
+
+/* Global hero spacing — consistent separation from navigation */
+.cv-hero {
+  padding-top: calc(var(--nav-height) + 48px) !important;
+}
+
+@media (max-width: 768px) {
+  .cv-hero {
+    padding-top: calc(var(--nav-height) + 32px) !important;
+  }
 }
 
 /* Global header: dark cinematic navy (all routes) */

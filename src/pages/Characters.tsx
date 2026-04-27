@@ -110,10 +110,9 @@ const Characters: React.FC = () => {
 
       {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
       <header
-        className="hero-cinematic relative flex items-center overflow-hidden"
+        className="hero-cinematic cv-hero relative flex items-center overflow-hidden"
         style={{
           minHeight: isMobile ? '100vh' : '92vh',
-          paddingTop: isMobile ? '130px' : '120px',
           paddingBottom: isMobile ? '40px' : '120px',
           flexDirection: isMobile ? 'column' : 'row',
           justifyContent: isMobile ? 'flex-start' : 'center',

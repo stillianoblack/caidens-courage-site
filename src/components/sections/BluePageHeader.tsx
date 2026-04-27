@@ -42,7 +42,7 @@ export default function BluePageHeader({
     <div
       id={id}
       data-section="header"
-      className="cv-cinematic-section text-white py-16 pt-32 relative overflow-hidden"
+      className="cv-cinematic-section cv-hero text-white py-16 relative overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {eyebrow && (
