@@ -239,8 +239,9 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="major-publisher-hero cv-hero relative overflow-hidden"
+        className="major-publisher-hero relative overflow-hidden"
         style={{
+          paddingTop: '120px',
           minHeight: '92vh',
           backgroundImage: `
             linear-gradient(
