@@ -108,6 +108,19 @@
   color: var(--cv-nav-link-hover);
 }
 
+/* Desktop "Marvel-style" header wrapper: blur + shadow on scroll (rows supply their own backgrounds). */
+.cv-marvel-nav {
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.cv-marvel-nav--scrolled {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+
 /* Cinematic section surface (site-wide dark blue — no bright UI blues) */
 .cv-cinematic-section {
   background-image:

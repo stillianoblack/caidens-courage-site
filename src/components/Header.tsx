@@ -471,100 +471,174 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 ${navSurfaceClass}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Left: Hamburger (mobile) + Logo */}
-            <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 pl-1">
-              {/* Hamburger Menu Button - Mobile only (left) */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg transition-colors duration-150 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60 relative flex items-center justify-center"
-                aria-label="Toggle menu"
-                aria-expanded={isMobileMenuOpen}
-              >
-                <svg 
-                  className={`w-7 h-7 transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
+      <nav className="fixed top-0 left-0 right-0 z-50">
+        {/* Mobile header — keep existing layout/behavior exactly as-is */}
+        <div className={`lg:hidden ${navSurfaceClass}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 sm:h-20">
+              {/* Left: Hamburger (mobile) + Logo */}
+              <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 pl-1">
+                {/* Hamburger Menu Button - Mobile only (left) */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="lg:hidden p-2 rounded-lg transition-colors duration-150 text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/60 relative flex items-center justify-center"
+                  aria-label="Toggle menu"
+                  aria-expanded={isMobileMenuOpen}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <svg 
-                  className={`w-7 h-7 absolute transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                  <svg 
+                    className={`w-7 h-7 transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <svg 
+                    className={`w-7 h-7 absolute transition-[opacity,transform] duration-200 ${isMobileMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                
+                <Link to="/" className="header-logo-link flex items-center flex-shrink-0">
+                  <img
+                    src="/images/logos/CaidenVale_Logo_Web.svg"
+                    alt="Caiden Vale and the Focus Flame"
+                    className="header-logo-img h-[22px] md:h-[26px] w-auto object-contain brightness-0 invert"
+                  />
+                </Link>
+              </div>
               
-              <Link to="/" className="header-logo-link flex items-center flex-shrink-0">
-                <img
-                  src="/images/logos/CaidenVale_Logo_Web.svg"
-                  alt="Caiden Vale and the Focus Flame"
-                  className="header-logo-img h-[22px] md:h-[26px] w-auto object-contain brightness-0 invert"
-                />
-              </Link>
+              {/* Right: Pre-Order (mobile) */}
+              <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 flex-shrink-0">
+                <Link
+                  to="/comicbook"
+                  className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
+                >
+                  Pre-Order Volume 1
+                </Link>
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Center: Desktop Navigation */}
-            <nav className="hidden lg:flex items-center justify-center gap-6 flex-1 min-w-0 px-6">
-              {NAV_ITEMS.map((item) => {
-                if (item.type === 'link') {
-                  return <React.Fragment key={item.label}>{renderNavLink(item)}</React.Fragment>;
-                } else if (item.type === 'dropdown') {
-                  let isOpen = false;
-                  let onMouseEnter = () => {};
-                  let onMouseLeave = () => {};
-                  let onToggle = () => {};
+        {/* Desktop header — Marvel-inspired two-tier + promo strip */}
+        <div className={`hidden lg:block cv-marvel-nav ${isScrolled ? 'cv-marvel-nav--scrolled' : ''}`}>
+          {/* A) Top utility bar */}
+          <div
+            className="border-b"
+            style={{
+              background: 'rgba(7, 15, 28, 0.98)',
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+              <div className="h-16 grid grid-cols-3 items-center">
+                <div className="flex items-center justify-start" aria-hidden="true">
+                  {/* intentionally empty: preserves centered logo geometry */}
+                </div>
 
-                  if (item.label === 'Resources') {
-                    isOpen = showResourcesDropdown;
-                    onMouseEnter = handleMouseEnter;
-                    onMouseLeave = handleMouseLeave;
-                    onToggle = () => setShowResourcesDropdown(!showResourcesDropdown);
-                  } else if (item.label === 'Shop') {
-                    isOpen = showShopDropdown;
-                    onMouseEnter = handleShopMouseEnter;
-                    onMouseLeave = handleShopMouseLeave;
-                    onToggle = () => setShowShopDropdown(!showShopDropdown);
-                  } else if (item.label === 'The World') {
-                    isOpen = showWorldDropdown;
-                    onMouseEnter = handleWorldMouseEnter;
-                    onMouseLeave = handleWorldMouseLeave;
-                    onToggle = () => setShowWorldDropdown(!showWorldDropdown);
-                  }
+                <div className="flex items-center justify-center">
+                  <Link to="/" className="header-logo-link flex items-center">
+                    <img
+                      src="/images/logos/CaidenVale_Logo_Web.svg"
+                      alt="Caiden Vale and the Focus Flame"
+                      className="header-logo-img h-[26px] w-auto object-contain brightness-0 invert"
+                    />
+                  </Link>
+                </div>
 
-                  return <React.Fragment key={item.label}>{renderDropdown(item, isOpen, onMouseEnter, onMouseLeave, onToggle)}</React.Fragment>;
-                }
-                return null;
-              })}
-            </nav>
-            
-            {/* Right: Partner With Us + Pre-Order */}
-            <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 flex-shrink-0">
-              {/* Partner With Us Link */}
-              <NavLink
-                to={RIGHT_NAV_ITEMS.partnerLink.href}
-                className={({ isActive }) =>
-                  `hidden lg:block nav-link-underline font-semibold tracking-wide whitespace-nowrap cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease ${
-                    isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''
-                  }`
-                }
-              >
-                {RIGHT_NAV_ITEMS.partnerLink.label}
-              </NavLink>
-              
-              {/* CTA - router-native Link */}
-              <Link
-                to="/comicbook"
-                className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
-              >
-                Pre-Order Volume 1
-              </Link>
+                <div className="flex items-center justify-end gap-5">
+                  <NavLink
+                    to={RIGHT_NAV_ITEMS.partnerLink.href}
+                    className={({ isActive }) =>
+                      `nav-link-underline font-semibold tracking-wide whitespace-nowrap cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease ${
+                        isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''
+                      }`
+                    }
+                  >
+                    {RIGHT_NAV_ITEMS.partnerLink.label}
+                  </NavLink>
+
+                  <Link
+                    to="/comicbook"
+                    className="whitespace-nowrap flex-shrink-0 text-sm px-6 py-2.5 h-11 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
+                  >
+                    Pre-Order Volume 1
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* B) Main nav row */}
+          <div
+            className="border-b"
+            style={{
+              background: '#111A2A',
+              borderColor: 'rgba(255, 255, 255, 0.06)',
+            }}
+          >
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+              <div className="h-11 flex items-center justify-center">
+                <nav className="flex items-center justify-center gap-8">
+                  {NAV_ITEMS.map((item) => {
+                    if (item.type === 'link') {
+                      return <React.Fragment key={item.label}>{renderNavLink(item)}</React.Fragment>;
+                    }
+                    if (item.type === 'dropdown') {
+                      let isOpen = false;
+                      let onMouseEnter = () => {};
+                      let onMouseLeave = () => {};
+                      let onToggle = () => {};
+
+                      if (item.label === 'Resources') {
+                        isOpen = showResourcesDropdown;
+                        onMouseEnter = handleMouseEnter;
+                        onMouseLeave = handleMouseLeave;
+                        onToggle = () => setShowResourcesDropdown(!showResourcesDropdown);
+                      } else if (item.label === 'Shop') {
+                        isOpen = showShopDropdown;
+                        onMouseEnter = handleShopMouseEnter;
+                        onMouseLeave = handleShopMouseLeave;
+                        onToggle = () => setShowShopDropdown(!showShopDropdown);
+                      } else if (item.label === 'The World') {
+                        isOpen = showWorldDropdown;
+                        onMouseEnter = handleWorldMouseEnter;
+                        onMouseLeave = handleWorldMouseLeave;
+                        onToggle = () => setShowWorldDropdown(!showWorldDropdown);
+                      }
+
+                      return (
+                        <React.Fragment key={item.label}>
+                          {renderDropdown(item, isOpen, onMouseEnter, onMouseLeave, onToggle)}
+                        </React.Fragment>
+                      );
+                    }
+                    return null;
+                  })}
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          {/* C) Promo strip */}
+          <div style={{ background: '#000000' }}>
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+              <div className="h-9 flex items-center justify-center gap-2 text-center">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full" style={{ background: 'rgba(229, 192, 106, 0.18)' }} aria-hidden="true">
+                  <span className="block w-1.5 h-1.5 rounded-full" style={{ background: '#E5C06A' }} />
+                </span>
+                <span
+                  className="text-xs font-semibold uppercase tracking-[0.22em]"
+                  style={{ color: 'rgba(255, 255, 255, 0.88)' }}
+                >
+                  A STORY THAT HELPS KIDS WITH ADHD TURN CREATIVITY INTO FOCUS
+                </span>
+              </div>
             </div>
           </div>
         </div>
