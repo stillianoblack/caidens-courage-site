@@ -23,6 +23,7 @@
 }
 
 :root {
+  --desktop-header-height: 156px;
   --navy-500: #243E70;
   --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
@@ -106,6 +107,13 @@
 
 .cv-nav-link:hover {
   color: var(--cv-nav-link-hover);
+}
+
+/* When using the 3-row desktop header, push hero content below it (desktop only). */
+@media (min-width: 1024px) {
+  .cv-under-marvel-header {
+    padding-top: calc(var(--desktop-header-height) + 48px) !important;
+  }
 }
 
 /* Desktop "Marvel-style" header wrapper: blur + shadow on scroll (rows supply their own backgrounds). */

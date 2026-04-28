@@ -43,9 +43,9 @@ const Mission: React.FC = () => {
 
       {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
       <header
-        className="relative overflow-hidden"
+        className="cv-under-marvel-header relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '70px' : 'clamp(67px, 10vh, 112px)',
+          paddingTop: isMobile ? '70px' : undefined,
           paddingBottom: isMobile ? '40px' : '160px',
           display: 'flex',
           flexDirection: 'column',

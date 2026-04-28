@@ -239,9 +239,9 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="major-publisher-hero relative overflow-hidden"
+        className="major-publisher-hero cv-under-marvel-header relative overflow-hidden"
         style={{
-          paddingTop: '120px',
+          paddingTop: isMobile ? '120px' : undefined,
           minHeight: '92vh',
           backgroundImage: `
             linear-gradient(
@@ -268,7 +268,7 @@ const Home = () => {
         
         {/* Content - aligned to global nav grid; vertically centered on desktop only */}
         <div className="relative z-10 w-full flex flex-col md:flex-row md:min-h-[calc(92vh-120px)] md:items-center">
-          <div className="hero-content relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:-mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
+          <div className="hero-content relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
             <div className="flex md:items-center md:min-h-0">
               <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
             {/* Eyebrow */}
