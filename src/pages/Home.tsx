@@ -453,14 +453,14 @@ const Home = () => {
               </div>
               
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6" style={{ color: '#FFFFFF' }}>
-                Kids Learn This In The Universe?
+                Where Kids Learn Courage.
               </h2>
               
               <p
                 className="mt-4 text-lg sm:text-xl leading-relaxed mb-6 font-medium"
                 style={{ color: 'rgba(255, 255, 255, 0.75)' }}
               >
-                Not just a story world — a courage practice. Kids learn to name big feelings, trust their minds, and take brave next steps.
+                More than a story — a place kids practice courage. Kids learn to name big feelings, trust their minds, and take brave next steps.
               </p>
               
               {/* CTAs */}
