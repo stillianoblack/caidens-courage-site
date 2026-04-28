@@ -28,6 +28,7 @@
   --mobile-promo-height: 34px;
   --nav-height: 80px;
   --mobile-header-stack-height: 98px; /* 64px mobile nav + promo strip */
+  --mobile-header-height: 150px; /* fallback for overlays like chat drawers */
   --navy-500: #243E70;
   --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
@@ -72,6 +73,18 @@
   :root {
     /* 80px mobile nav (sm) + promo strip */
     --mobile-header-stack-height: 114px;
+  }
+}
+
+/* Mobile chat drawer: sit below fixed header stack */
+@media (max-width: 639px) {
+  .b4-chat-drawer {
+    top: var(--mobile-header-stack-height, var(--mobile-header-height, 150px));
+    bottom: auto !important;
+    height: calc(100dvh - var(--mobile-header-stack-height, var(--mobile-header-height, 150px)));
+    max-height: calc(100dvh - var(--mobile-header-stack-height, var(--mobile-header-height, 150px)));
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 

@@ -257,12 +257,12 @@ const B4ChatWidget: React.FC = () => {
           {/* Drawer */}
           <div
             ref={drawerRef}
-            className={`fixed bottom-0 right-0 z-50 bg-[#050B18] rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none shadow-2xl flex flex-col border border-white/10 transition-transform duration-300 ease-out ${
+            className={`b4-chat-drawer fixed bottom-0 right-0 z-50 bg-[#050B18] rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none shadow-2xl flex flex-col border border-white/10 transition-transform duration-300 ease-out ${
               isOpen ? 'translate-y-0' : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
             }`}
             style={{
-              height: window.innerWidth < 640 ? '90vh' : '520px',
-              width: window.innerWidth < 640 ? '100%' : '380px',
+              height: '520px',
+              width: '380px',
             }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
@@ -286,7 +286,7 @@ const B4ChatWidget: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-9 h-9 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-white/90"
+                className="w-11 h-11 sm:w-9 sm:h-9 rounded-full hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-white/90"
                 aria-label="Close chat"
               >
                 <span className="text-2xl leading-none">×</span>
