@@ -5,6 +5,7 @@ import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import HeroCarousel from '../components/HeroCarousel';
 
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
@@ -217,11 +218,6 @@ const Home = () => {
     img.src = url;
   }, [isMobile]);
 
-  const handlePreorderClick = () => {
-    navigate('/comicbook');
-    window.scrollTo(0, 0);
-  };
-
   const handleWaitlistClick = () => {
     const waitlistUrl = getWaitlistUrl();
     if (waitlistUrl) return openExternalUrl(waitlistUrl);
@@ -239,22 +235,9 @@ const Home = () => {
       {/* Hero Section - Major Publisher Quality */}
       <section
         id="hero"
-        className="major-publisher-hero cv-under-marvel-header relative overflow-hidden"
+        className="major-publisher-hero homepage-hero relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '120px' : undefined,
-          minHeight: '92vh',
-          backgroundImage: `
-            linear-gradient(
-              to right,
-              rgba(0,0,0,0.75),
-              rgba(0,0,0,0.45),
-              rgba(0,0,0,0.1)
-            ),
-            url('${isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp'}')
-          `,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          minHeight: 'clamp(860px, 92vh, 1150px)',
           ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
       >
@@ -266,89 +249,10 @@ const Home = () => {
         {/* Star Dust Animation */}
         <div className="major-publisher-stardust absolute inset-0 hidden md:block" style={{ zIndex: 1 }} aria-hidden="true"></div>
         
-        {/* Content - aligned to global nav grid; vertically centered on desktop only */}
-        <div className="relative z-10 w-full flex flex-col md:flex-row md:min-h-[calc(92vh-120px)] md:items-center">
-          <div className="hero-content relative z-10 px-6 pt-16 md:pt-20 pb-10 max-w-md -mt-[15px] md:max-w-7xl md:mx-auto md:px-4 md:sm:px-6 md:lg:px-8 md:w-full">
-            <div className="flex md:items-center md:min-h-0">
-              <div className="text-left w-full md:max-w-[520px]" style={{ maxWidth: '520px', marginBottom: '0' }}>
-            {/* Eyebrow */}
-            <div 
-              className="text-xs sm:text-sm font-semibold uppercase"
-              style={{ 
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                opacity: 0.8,
-                color: 'rgba(255, 255, 255, 0.9)',
-                marginBottom: isMobile ? '12px' : '12px'
-              }}
-            >
-              INTRODUCING THE WORLD OF CAIDEN
-            </div>
-            
-                {/* Headline */}
-                <h1 
-                  className="font-display font-extrabold text-white"
-                  style={{ 
-                    fontSize: isMobile ? '2.2rem' : 'clamp(44px, 5vw, 64px)',
-                    lineHeight: isMobile ? '1.1' : '1.05',
-                    letterSpacing: isMobile ? '-0.5px' : '-1px',
-                    marginBottom: isMobile ? '12px' : '16px',
-                  }}
-                >
-                  <span className="block">Where focus</span>
-                  <span className="block">
-                    becomes <span className="hero-power text-brand-gold">power</span>.
-                  </span>
-                </h1>
-            
-                {/* Subheader */}
-                <p 
-                  className="text-white/90 font-medium"
-                  style={{ 
-                    fontSize: isMobile ? '18px' : '22px',
-                    lineHeight: isMobile ? '1.45' : '1.5',
-                    marginBottom: isMobile ? '12px' : '16px',
-                    maxWidth: '580px'
-                  }}
-                >
-                  A story that helps kids with ADHD turn creativity into focus—without feeling like something is wrong with them.
-                </p>
-
-                {/* CTA Row */}
-                <div className="hero-buttons flex flex-col sm:flex-row gap-3 mb-6">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={handlePreorderClick}
-                    className="w-full sm:w-auto"
-                  >
-                    Pre-Order Volume 1
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    as={Link}
-                    to="/world"
-                    className="w-full sm:w-auto !bg-transparent !border-2 !border-white !text-white hover:!bg-white/10"
-                  >
-                    Explore the World
-                  </Button>
-                </div>
-
-                {/* Trust Line */}
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-golden-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor"/>
-                  </svg>
-                  <span className="text-sm text-white/80">Built for ages 6–12 • Loved by parents & educators</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HeroCarousel isMobile={isMobile} autoplayMs={8000} />
 
         {/* Slanted Wave Transition */}
-        <div className="hero-wave absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+        <div className="hero-wave absolute bottom-0 left-0 right-0 z-10" style={{ height: 'var(--hero-wave-height)', lineHeight: 0, overflow: 'hidden' }}>
           <svg 
             className="w-full h-full" 
             viewBox="0 0 1440 150" 
@@ -357,7 +261,7 @@ const Home = () => {
           >
             <path 
               d="M0,60 C360,140 1080,0 1440,80 L1440,150 L0,150 Z"
-              fill="#ffffff"
+              fill="#faf9f7"
             />
           </svg>
         </div>

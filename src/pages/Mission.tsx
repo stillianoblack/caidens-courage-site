@@ -43,15 +43,15 @@ const Mission: React.FC = () => {
 
       {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
       <header
-        className="cv-under-marvel-header relative overflow-hidden"
+        className="relative overflow-hidden"
         style={{
-          paddingTop: isMobile ? '70px' : undefined,
+          paddingTop: isMobile ? 'calc(70px + var(--mobile-promo-height))' : undefined,
           paddingBottom: isMobile ? '40px' : '160px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          justifyContent: 'flex-start',
-          minHeight: isMobile ? '100vh' : '92vh',
+          justifyContent: isMobile ? 'flex-start' : 'center',
+          minHeight: isMobile ? '100vh' : 'clamp(860px, 92vh, 1150px)',
         }}
       >
         {/* Hero image layer — or solid when REACT_APP_DISABLE_HEROES */}
@@ -96,9 +96,9 @@ const Mission: React.FC = () => {
         />
         {/* Content - within site width; desktop: vertically centered */}
         <div 
-          className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[50vh] md:min-h-[calc(92vh-200px)] flex flex-col md:justify-center"
+          className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 min-h-[50vh] flex flex-col md:justify-center"
           style={{ 
-            paddingTop: isMobile ? '0' : '0',
+            paddingTop: isMobile ? '0' : 'var(--desktop-header-height)',
             marginTop: '0',
             paddingLeft: isMobile ? '20px' : undefined,
             paddingRight: isMobile ? '20px' : undefined,
@@ -179,7 +179,7 @@ const Mission: React.FC = () => {
         </div>
 
         {/* Slanted Wave Transition */}
-        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: 'var(--hero-wave-height)', lineHeight: 0, overflow: 'hidden' }}>
           <svg 
             className="w-full h-full" 
             viewBox="0 0 1440 150" 

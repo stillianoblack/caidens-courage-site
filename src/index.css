@@ -23,7 +23,11 @@
 }
 
 :root {
-  --desktop-header-height: 156px;
+  --desktop-header-height: 188px;
+  --hero-wave-height: 100px;
+  --mobile-promo-height: 34px;
+  --nav-height: 80px;
+  --mobile-header-stack-height: 98px; /* 64px mobile nav + promo strip */
   --navy-500: #243E70;
   --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
@@ -62,6 +66,13 @@
   --pill-persona-parents: #8B5CF6;
   --pill-persona-teachers: #F97316;
   --pill-persona-everyone: #23375A;
+}
+
+@media (min-width: 640px) {
+  :root {
+    /* 80px mobile nav (sm) + promo strip */
+    --mobile-header-stack-height: 114px;
+  }
 }
 
 /* Global header: dark cinematic navy (all routes) */
@@ -127,6 +138,11 @@
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+
+/* Homepage hero wave mask (scope to homepage only) */
+.homepage-hero .hero-wave {
+  height: 150px;
 }
 
 /* Cinematic section surface (site-wide dark blue — no bright UI blues) */
@@ -220,35 +236,9 @@ code {
   text-shadow: 0 0 10px rgba(255, 204, 80, 0.28), 0 0 22px rgba(255, 179, 40, 0.16);
 }
 
-/* Homepage Hero (mobile only) — preserve desktop composition */
 @media (max-width: 768px) {
-  .major-publisher-hero {
-    min-height: 80vh;
-    height: auto;
-    padding-bottom: 32px;
-  }
-
-  .major-publisher-hero .hero-content {
-    /* Move whole hero stack upward without touching background image framing */
-    padding-top: 28px !important;
-    padding-bottom: 32px !important;
-    justify-content: flex-start;
-    transform: translateY(-40px);
-  }
-
-  .major-publisher-hero h1 {
-    font-size: 2.2rem;
-    line-height: 1.1;
-  }
-
-  .major-publisher-hero .hero-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  /* Push the bottom wave down so more hero image shows */
-  .major-publisher-hero .hero-wave {
-    transform: translateY(60px);
+  .homepage-hero .hero-wave {
+    display: none;
   }
 }
 

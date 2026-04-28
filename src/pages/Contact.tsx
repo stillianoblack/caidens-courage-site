@@ -8,7 +8,7 @@ const Contact: React.FC = () => {
       <Header />
 
       {/* Hero Section */}
-      <div className="cv-cinematic-section text-white py-16 pt-32 px-4 relative overflow-hidden">
+      <div className="cv-cinematic-section cv-under-marvel-header text-white py-16 pt-32 px-4 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
             Contact Us

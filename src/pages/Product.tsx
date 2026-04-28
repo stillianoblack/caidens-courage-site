@@ -187,7 +187,10 @@ const Product: React.FC = () => {
       <Header onComingSoonClick={handleComingSoonClick} />
 
       {/* Section 1: Hero Product Area */}
-      <section className="pb-16 sm:pb-24 bg-white relative overflow-hidden" style={{ paddingTop: '150px' }}>
+      <section
+        className="cv-under-marvel-header pb-16 sm:pb-24 bg-white relative overflow-hidden"
+        style={{ paddingTop: '150px' }}
+      >
         {/* 3D Animated Bubbles - Organic placement near content */}
         <div className="absolute rounded-full pointer-events-none animate-float opacity-100" style={{ 
           top: '25%',

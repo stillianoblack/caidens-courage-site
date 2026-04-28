@@ -523,25 +523,82 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               </div>
             </div>
           </div>
+
+          {/* Mobile promo strip (global) */}
+          <div
+            className="w-full border-t"
+            style={{
+              borderColor: 'rgba(255,255,255,0.08)',
+              height: 'var(--mobile-promo-height)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+              background: 'rgba(7, 15, 28, 0.96)',
+            }}
+          >
+            <div
+              className="flex items-center gap-2"
+              style={{
+                color: 'rgba(255,255,255,0.78)',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                fontSize: '11px',
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className="inline-block rounded-full"
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  background: 'var(--golden-500)',
+                  boxShadow: '0 0 14px rgba(229, 192, 106, 0.35)',
+                }}
+              />
+              <span>Where different minds discover their power</span>
+            </div>
+          </div>
         </div>
 
         {/* Desktop header — Marvel-inspired two-tier + promo strip */}
         <div className={`hidden lg:block cv-marvel-nav ${isScrolled ? 'cv-marvel-nav--scrolled' : ''}`}>
           {/* A) Top utility bar */}
           <div
-            className="border-b"
             style={{
               background: 'rgba(7, 15, 28, 0.98)',
-              borderColor: 'rgba(255, 255, 255, 0.08)',
             }}
           >
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
-              <div className="h-16 grid grid-cols-3 items-center">
-                <div className="flex items-center justify-start" aria-hidden="true">
-                  {/* intentionally empty: preserves centered logo geometry */}
+              <div className="h-16 grid items-center" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+                <div className="flex items-center justify-start">
+                  <div
+                    className="flex items-center justify-start gap-5 pr-6 pl-6 h-10"
+                    style={{
+                      borderLeft: '1px solid rgba(255,255,255,0.12)',
+                      borderRight: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
+                    <NavLink
+                      to={RIGHT_NAV_ITEMS.partnerLink.href}
+                      className={({ isActive }) =>
+                        `nav-link-underline font-semibold tracking-wide whitespace-nowrap transition-colors duration-200 ease ${
+                          isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''
+                        }`
+                      }
+                      style={{ color: 'rgba(255,255,255,0.92)' }}
+                    >
+                      {RIGHT_NAV_ITEMS.partnerLink.label}
+                    </NavLink>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-center">
+                <div
+                  className="flex items-center justify-center px-6"
+                >
                   <Link to="/" className="header-logo-link flex items-center">
                     <img
                       src="/images/logos/CaidenVale_Logo_Web.svg"
@@ -551,24 +608,36 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   </Link>
                 </div>
 
-                <div className="flex items-center justify-end gap-5">
-                  <NavLink
-                    to={RIGHT_NAV_ITEMS.partnerLink.href}
-                    className={({ isActive }) =>
-                      `nav-link-underline font-semibold tracking-wide whitespace-nowrap cv-nav-link hover:text-[color:var(--cv-nav-link-hover)] transition-colors duration-200 ease ${
-                        isActive ? 'font-bold text-white border-b-2 border-golden-500' : ''
-                      }`
-                    }
+                <div className="flex items-center justify-end">
+                  <div
+                    className="flex items-center justify-end gap-2 pr-6 pl-6 h-10"
+                    style={{
+                      borderLeft: '1px solid rgba(255,255,255,0.12)',
+                      borderRight: '1px solid rgba(255,255,255,0.12)',
+                    }}
                   >
-                    {RIGHT_NAV_ITEMS.partnerLink.label}
-                  </NavLink>
-
-                  <Link
-                    to="/comicbook"
-                    className="whitespace-nowrap flex-shrink-0 text-sm px-6 py-2.5 h-11 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
-                  >
-                    Pre-Order Volume 1
-                  </Link>
+                    <Link
+                      to="/comicbook"
+                      className="group inline-flex items-center whitespace-nowrap text-sm font-semibold tracking-wide leading-none transition-colors duration-200 ease hover:text-[#E5C06A]"
+                      style={{ color: 'rgba(255,255,255,0.92)' }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 317.81 450.05"
+                        fill="none"
+                        aria-hidden="true"
+                        className="flex-shrink-0 transition-colors duration-200 group-hover:text-[#E5C06A]"
+                        style={{ color: '#E5C06A' }}
+                      >
+                        <path
+                          d="M169.59,249.44c-.85-.45-1.36-1.87-2.18-2.62-3.58-4.02-7.9-.88-11.32-1.64-1.95-.32-2.98-2.63-4.88-3.43-2.34-.88-4.65.7-6.93,1.13-2.6.59-5.63-.79-7.81,1.65-.72.74-1.63,1.15-2.66.96-5.41-1.11-10.1,1.63-12.7,6.43-.55.96-1.38,1.66-2.33,2.2-5.25,3.03-5.79,7.51-5.5,12.99-2.48,3.31-2.68,5.02-1.75,8.99.15.83-.06,1.21-.37,1.91-1.71,4.35-5.26,11.02-5.81,13.99-.56,2.62-1.79,8.6-2.18,10.34-.17.79-1.28.68-2.03.78-8.54.66-12.18,8.29-11.55,15.71.62,7.43,5.49,14.64,13.87,14.47.79-.02,1.68.12,1.9.98-.05,10.9,10.43,16.53,3.19,25.71-.5.67-1.38,1.54-2.11,1.46-4.73-2.7-3.47-8.22-6.77-14.4-.74-1.49-1.75-3.09-3.06-4.72-1.83-2.36-3.76-3.93-5.94-6.04-7.11-7.01-8.77-15.78-15.08-15.86-1.64.13-1.78-.09-2.71-1.83-1.85-3.12-5.66-9.51-7.88-13.24-2.91-4.48-5.23-9.52-5.48-14.99-.86-10.91-3.24-21.16-6.73-31.39-1.22-3.01-2.14-7.06-.42-9.95,4.48-8.72,22.8-11.33,23.24-15.78-1.02-5.2-8.88-3.09-12.27-1.55-16.7,7.06,11.56-31.53-3.71-31.36-2.94,1.44-1.74,19.5-8.5,22.8-1.83.75-1.45-1.67-1.58-3.48-.44-6.88.58-14.42-2.37-20.76-.69-1.61-3.48-2.87-4.51-1.61-1.24,2.01-.46,4.44-.29,6.78.76,5.97,2.21,14.34-.44,19.97-1.41-2.67-4.57-10.25-6.17-13.79-2.03-3.87-1.43-5.32-4.32-7.35-2.61-1.14-4.65,2-3.46,4.55.89,2.29,4.11,9.75,5.82,13.92.6,1.05.7,2.8-.12,3.78-3.11,1.85-9.13-11.55-12.96-9.86-2.18,1.83-.61,5.17,1.17,6.84,5.27,5.78,7.47,7.12,7.74,15.06.02,1.39.33,2.84,1.18,3.91,16.32,21.77.72,49.05,20.39,78.38,1.01,1.9,4.5,8.46,5.69,10.72.67,1.2,1.24,2.7.98,4.18-1.04,4.71-5.63,9.97-.88,14.83,7.51,7.27,13.76,15.54,14.32,23.45.64,5.86-.81,12.23-4.37,19.91-.26.55-.66,1.25-1.18,1.34-11.84-8.84-17.57-22.76-26.08-35.29-5.24-8.91-13.43-16.38-18.61-25.43-31.86-66.71-27.81-151.68,13.95-213.63,2.87,21.17,7.48,44.48,26.47,56.86.43.29,1.28.81,1.58.34C69.35,91.96,133.82,26.26,213.42,0c-21.18,79.5,54.78,142.82,50.72,222.47-.14,1.18.07,1.42.66.39,11.89-20.3,28.91-41.6,53.01-43.26-11.64,23.4-8.25,50.07-4.9,75.01,26.2,118.69-64.23,224.4-186.55,188.25-1.07-5.68-4.78-32.23.72-34.64,4.48-2.29,13.53,3.29,17.97,4.66.59.15,1.12.02,1.68-.32,10.41-7.96,28.29,6.33,42,.15,7.6-2.34,19.66-5.33,26.5-7.23,1.95-.54,2.38-.72,3.22-.74,2.38.28,6.95.59,9.75.89,1.36.22,1.91-.07,3.09-.55,6.82-2.84,12.35,3.03,18.65.73.94-.34,1.27-1.24.56-2.03-2.74-3.56-7.04-4-11.17-5.82-.66-.59.92-.61,1.31-.73,6.53-.93,14.51-.36,15.18-3.29-.34-3.75-5.88-2.24-9.9-2.76-1.98-.09-3.63-.12-5.3-.19-1.17-.09-2.05.09-1.89-.38,3.76-6.81,17.02-4.96,17.22-10.53-.18-2.1-3.53-2.76-5.34-2.06-1.61.58-8.42,3.05-12.87,4.67-2.44.66-5.05,2.64-3.16-.27,3.37-6.29,11.07-8.9,12.19-14.3.02-1.61-1.45-2.64-2.97-2.24-7.57,1.3-11.1,10.81-17.79,16.27-.97.77-1.54.34-1.54-.81-.17-5.12,4.22-10.69-.36-13.15-.54-.29-1.27-.48-1.83-.24-4.79,5.51-4.45,14.43-5,21.37-.4,5.26-6.91,6.62-11.36,6.35-13.8.07-22.29,3.06-30.37,2.38-7.33-.18-13.92-5.33-22.17-12.47-8.32-2.54-16.06-6.01-24.25-9.53-1.93-.97-4.09-.53-6.17-1.21-4.04-1.31.48-7.13,3-4.81,10.1,7.36,23.77,5.75,35.76.78,2.51-1.09,3.24-3.67,5.35-5.52,9.05-9.55,27.33-19.88,20.06-32.28-.37-.7-1.2-1.94-.54-2.5,1.31-1.31,5.55-.91,8.52-3.94.74-.72,1.51-1.87,2.39-2.21,10.25-2.02,16.89-8.47,18.9-18.89,2.8-5.51,1.61-11.79-2.7-16.46-.72-.83-1.11-1.83-1.27-2.91-.69-4.29-3.15-7.79-7.23-9.43-1.2-.44-2.2-1.32-2.84-2.48-4.63-9.11-5.47-12.74-15.81-14.31-.34-.12-1.39-.37-1.52-.63-4.19-5.53-7.51-9.32-15.33-9.73l-.15-.07Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <span className="ml-2.5 group-hover:text-[#E5C06A]">Pre-Order Volume 1</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -576,10 +645,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
           {/* B) Main nav row */}
           <div
-            className="border-b"
             style={{
               background: '#111A2A',
-              borderColor: 'rgba(255, 255, 255, 0.06)',
             }}
           >
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -636,7 +703,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   className="text-xs font-semibold uppercase tracking-[0.22em]"
                   style={{ color: 'rgba(255, 255, 255, 0.88)' }}
                 >
-                  A STORY THAT HELPS KIDS WITH ADHD TURN CREATIVITY INTO FOCUS
+                  WHERE DIFFERENT MINDS DISCOVER THEIR POWER
                 </span>
               </div>
             </div>

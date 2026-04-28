@@ -39,13 +39,13 @@ const World: React.FC = () => {
 
       {/* Cinematic Hero Section — LCP image as <picture> (WebP), not lazy-loaded */}
       <header
-        className="hero-cinematic cv-under-marvel-header relative flex items-start overflow-hidden"
+        className="hero-cinematic relative flex items-start overflow-hidden"
         style={{
-          minHeight: isMobile ? '100vh' : '92vh',
-          paddingTop: isMobile ? '130px' : undefined,
+          minHeight: isMobile ? '100vh' : 'clamp(860px, 92vh, 1150px)',
+          paddingTop: isMobile ? 'calc(130px + var(--mobile-promo-height))' : undefined,
           paddingBottom: isMobile ? '40px' : '160px',
           flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'flex-start',
+          justifyContent: isMobile ? 'flex-start' : 'center',
         }}
       >
         {/* Hero image layer — background_caidensworld_img.jpg */}
@@ -74,8 +74,10 @@ const World: React.FC = () => {
         />
         {/* Content - within site width; desktop: vertically centered */}
         <div 
-          className="hero-container relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-[50vh] md:min-h-[calc(92vh-200px)] md:justify-center"
-          style={{ paddingTop: '0' }}
+          className="hero-container relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-[50vh] md:justify-center"
+          style={{
+            paddingTop: isMobile ? '0' : 'var(--desktop-header-height)',
+          }}
         >
           <div className="hero-text text-left max-w-full" style={{ maxWidth: '640px', marginTop: '0', paddingTop: '0' }}>
             {/* Eyebrow */}
@@ -166,7 +168,7 @@ const World: React.FC = () => {
         </div>
 
         {/* Slanted Wave Transition */}
-        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: '150px', lineHeight: 0, overflow: 'hidden' }}>
+        <div className="absolute bottom-0 left-0 right-0 z-10" style={{ height: 'var(--hero-wave-height)', lineHeight: 0, overflow: 'hidden' }}>
           <svg 
             className="w-full h-full" 
             viewBox="0 0 1440 150" 
