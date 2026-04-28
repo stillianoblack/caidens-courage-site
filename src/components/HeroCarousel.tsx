@@ -72,7 +72,7 @@ export default function HeroCarousel({
   slides: slidesProp,
   activeIndex: activeIndexProp,
   onActiveIndexChange,
-  autoplayMs = 8000,
+  autoplayMs = 6000,
   isMobile,
 }: HeroCarouselProps) {
   const slides = useMemo(() => slidesProp ?? DEFAULT_SLIDES, [slidesProp]);
@@ -80,9 +80,7 @@ export default function HeroCarousel({
   const [uncontrolledIndex, setUncontrolledIndex] = useState(0);
   const activeIndex = isControlled ? (activeIndexProp as number) : uncontrolledIndex;
 
-  const [isPaused, setIsPaused] = useState(false);
-  const pauseRef = useRef(false);
-  pauseRef.current = isPaused;
+  const intervalRef = useRef<number | null>(null);
 
   const resolvedIsMobile = useMemo(() => {
     if (typeof isMobile === 'boolean') return isMobile;
@@ -96,20 +94,111 @@ export default function HeroCarousel({
     else setUncontrolledIndex(clamped);
   }, [isControlled, onActiveIndexChange, slides.length]);
 
-  useEffect(() => {
+  const stopAutoplay = useCallback(() => {
+    if (intervalRef.current != null) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  const startAutoplay = useCallback(() => {
+    if (typeof window === 'undefined') return;
     if (slides.length <= 1) return;
     if (autoplayMs <= 0) return;
-    if (pauseRef.current) return;
-
-    const id = window.setInterval(() => {
-      if (pauseRef.current) return;
+    if (intervalRef.current != null) return;
+    intervalRef.current = window.setInterval(() => {
       setIndex(activeIndex + 1);
     }, autoplayMs);
+  }, [activeIndex, autoplayMs, setIndex, slides.length]);
 
-    return () => window.clearInterval(id);
-  }, [activeIndex, autoplayMs, slides.length, setIndex]);
+  const restartAutoplay = useCallback(() => {
+    stopAutoplay();
+    startAutoplay();
+  }, [startAutoplay, stopAutoplay]);
+
+  // Always reset interval on slide change (prevents "dead timer" after interactions).
+  useEffect(() => {
+    restartAutoplay();
+    return () => stopAutoplay();
+  }, [activeIndex, autoplayMs, slides.length, restartAutoplay, stopAutoplay]);
 
   const active = slides[activeIndex];
+
+  // Mobile: subtle fade transition between slides (image + content)
+  const [mobilePrevIndex, setMobilePrevIndex] = useState<number | null>(null);
+  const [mobileIsTransitioning, setMobileIsTransitioning] = useState(false);
+  useEffect(() => {
+    if (!resolvedIsMobile) return;
+    setMobilePrevIndex((prev) => (prev === activeIndex ? prev : activeIndex));
+    setMobileIsTransitioning(true);
+    const t = window.setTimeout(() => setMobileIsTransitioning(false), 320);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex, resolvedIsMobile]);
+
+  // Mobile swipe support (apply to full mobile carousel block)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchLastRef = useRef<{ x: number; y: number } | null>(null);
+  const touchIsDraggingRef = useRef(false);
+
+  const onMobileTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    touchLastRef.current = { x: t.clientX, y: t.clientY };
+    touchIsDraggingRef.current = true;
+    stopAutoplay(); // pause only while actively touching
+  };
+
+  const onMobileTouchMove = (e: React.TouchEvent) => {
+    if (!touchIsDraggingRef.current) return;
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchLastRef.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const onMobileTouchEnd = () => {
+    if (!touchIsDraggingRef.current) return;
+    touchIsDraggingRef.current = false;
+
+    const start = touchStartRef.current;
+    const last = touchLastRef.current;
+    touchStartRef.current = null;
+    touchLastRef.current = null;
+
+    if (!start || !last) {
+      restartAutoplay();
+      return;
+    }
+
+    const dx = last.x - start.x;
+    const dy = last.y - start.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    // Ignore mostly vertical gestures (allow page scroll)
+    if (absDy > absDx * 1.15) {
+      restartAutoplay();
+      return;
+    }
+
+    // Ignore small accidental swipes
+    if (absDx < 40) {
+      restartAutoplay();
+      return;
+    }
+
+    if (dx < 0) setIndex(activeIndex + 1);
+    else setIndex(activeIndex - 1);
+    restartAutoplay();
+  };
+
+  const onMobileTouchCancel = () => {
+    touchIsDraggingRef.current = false;
+    touchStartRef.current = null;
+    touchLastRef.current = null;
+    restartAutoplay();
+  };
 
   const renderHeadline = (slide: HeroSlide) => {
     const text = resolvedIsMobile && slide.mobileHeadline ? slide.mobileHeadline : slide.headline;
@@ -131,30 +220,59 @@ export default function HeroCarousel({
   return (
     <div
       className="relative w-full"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onFocusCapture={() => setIsPaused(true)}
-      onBlurCapture={() => setIsPaused(false)}
+      onMouseEnter={stopAutoplay}
+      onMouseLeave={restartAutoplay}
+      onFocusCapture={stopAutoplay}
+      onBlurCapture={restartAutoplay}
     >
       {resolvedIsMobile ? (
         <div
           className="w-full"
-          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#000000' }}
+          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#000000', touchAction: 'pan-y' }}
+          onTouchStart={onMobileTouchStart}
+          onTouchMove={onMobileTouchMove}
+          onTouchEnd={onMobileTouchEnd}
+          onTouchCancel={onMobileTouchCancel}
         >
           {/* Mobile image area (no text overlay) */}
           <div
-            className="relative w-full"
+            className="relative w-full overflow-hidden"
             style={{
-              height: 'clamp(360px, 44vh, 500px)',
+              aspectRatio: '16 / 9',
+              width: '100%',
+              maxHeight: '60vh',
               background: '#05070D',
             }}
           >
+            {mobilePrevIndex != null && mobileIsTransitioning && mobilePrevIndex !== activeIndex && (
+              <img
+                src={slides[mobilePrevIndex]?.mobileImage}
+                alt=""
+                className="absolute inset-0"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: slides[mobilePrevIndex]?.mobilePosition ?? 'center',
+                  opacity: 0,
+                  transition: 'opacity 320ms ease',
+                }}
+                aria-hidden="true"
+                decoding="async"
+              />
+            )}
             <img
-              key={active.tabLabel}
               src={active.mobileImage}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ objectPosition: active.mobilePosition ?? 'center center' }}
+              className="absolute inset-0"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: active.mobilePosition ?? 'center',
+                opacity: 1,
+                transition: 'opacity 320ms ease',
+              }}
               aria-hidden="true"
               loading="eager"
               decoding="async"
@@ -170,7 +288,10 @@ export default function HeroCarousel({
                   <button
                     key={s.tabLabel}
                     type="button"
-                    onClick={() => setIndex(idx)}
+                    onClick={() => {
+                      setIndex(idx);
+                      restartAutoplay();
+                    }}
                     className="h-[4px] w-[26px] rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5C06A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     style={{ backgroundColor: isActiveBar ? '#E5C06A' : 'rgba(255,255,255,0.28)' }}
                     aria-label={`Go to ${s.tabLabel}`}
@@ -182,7 +303,14 @@ export default function HeroCarousel({
           </div>
 
           {/* Mobile text panel */}
-          <div style={{ background: '#111111' }}>
+          <div
+            style={{
+              background: '#111111',
+              transition: 'opacity 320ms ease, transform 320ms ease',
+              opacity: mobileIsTransitioning ? 0.98 : 1,
+              transform: mobileIsTransitioning ? 'translateY(2px)' : 'translateY(0)',
+            }}
+          >
             <div className="mx-auto max-w-7xl px-7" style={{ paddingTop: '28px', paddingBottom: '30px' }}>
               <div
                 className="text-xs font-semibold uppercase"
@@ -350,7 +478,10 @@ export default function HeroCarousel({
                       <button
                         key={s.tabLabel}
                         type="button"
-                        onClick={() => setIndex(idx)}
+                        onClick={() => {
+                          setIndex(idx);
+                          restartAutoplay();
+                        }}
                         className="relative px-2 py-2 text-sm font-semibold tracking-wide transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E5C06A]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded-md"
                         style={{ color: isActiveTab ? '#FFFFFF' : 'rgba(255,255,255,0.72)' }}
                         aria-current={isActiveTab ? 'true' : undefined}
