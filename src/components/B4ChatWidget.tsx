@@ -224,25 +224,27 @@ const B4ChatWidget: React.FC = () => {
   return (
     <>
       {/* Floating Chat Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 h-14 px-4 sm:px-5 rounded-full bg-[#050B18]/95 text-white font-bold border border-golden-500/60 shadow-[0_0_0_1px_rgba(240,206,110,0.14),0_14px_36px_-18px_rgba(240,206,110,0.55)] hover:border-golden-500/80 hover:shadow-[0_0_0_1px_rgba(240,206,110,0.18),0_18px_44px_-18px_rgba(240,206,110,0.7)] transition-all duration-200 flex items-center gap-3"
-        aria-label="Talk to B-4"
-      >
-        <img
-          src="/images/icons/B4_Chat_Icon.webp"
-          alt=""
-          aria-hidden="true"
-          className="h-[42px] w-auto object-contain flex-shrink-0"
-          decoding="async"
-        />
-        <span className="leading-none">Talk to B-4</span>
-        <span className="ml-1 w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
-          <svg className="w-4 h-4 text-golden-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-          </svg>
-        </span>
-      </button>
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 h-14 px-4 sm:px-5 rounded-full bg-[#050B18]/95 text-white font-bold border border-golden-500/60 shadow-[0_0_0_1px_rgba(240,206,110,0.14),0_14px_36px_-18px_rgba(240,206,110,0.55)] hover:border-golden-500/80 hover:shadow-[0_0_0_1px_rgba(240,206,110,0.18),0_18px_44px_-18px_rgba(240,206,110,0.7)] transition-all duration-200 flex items-center gap-3"
+          aria-label="Talk to B-4"
+        >
+          <img
+            src="/images/icons/B4_Chat_Icon.webp"
+            alt=""
+            aria-hidden="true"
+            className="h-[42px] w-auto object-contain flex-shrink-0"
+            decoding="async"
+          />
+          <span className="leading-none">Talk to B-4</span>
+          <span className="ml-1 w-8 h-8 rounded-full border border-white/10 bg-white/5 flex items-center justify-center flex-shrink-0">
+            <svg className="w-4 h-4 text-golden-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+            </svg>
+          </span>
+        </button>
+      )}
 
       {/* Chat Panel */}
       {isOpen && (
@@ -345,7 +347,7 @@ const B4ChatWidget: React.FC = () => {
             )}
 
             {/* Input Area */}
-            <div className="border-t border-white/10 bg-[#071426]/70 px-4 py-3 flex-shrink-0">
+            <div className="border-t border-white/10 bg-[#071426]/70 px-4 py-3 flex-shrink-0" style={{ position: 'sticky', bottom: 0 }}>
               <form onSubmit={handleFormSubmit} className="flex gap-2 items-end">
                 <textarea
                   ref={inputRef}
