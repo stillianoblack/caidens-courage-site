@@ -14,7 +14,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const prevScrolledRef = useRef<boolean | null>(null);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastY = useRef(0);
   const renderCountRef = useRef(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
@@ -27,53 +28,35 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   const [shopCloseTimeout, setShopCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const [worldCloseTimeout, setWorldCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Handle scroll for header (UI state only; throttled). Defer to idle so route render/paint happens first.
+  // Hide/reveal header on scroll (simple + direct).
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (SAFE_MODE || reduceMotion) return;
 
-    let cancelled = false;
-    let ticking = false;
-    const handlerRef = { current: null as (() => void) | null };
-    const schedule = () => {
-      if (cancelled) return;
-      const handleScroll = () => {
-        if (ticking) return;
-        ticking = true;
-        window.requestAnimationFrame(() => {
-          if (cancelled) return;
-          const scrolled = window.scrollY > 50;
-          if (prevScrolledRef.current !== scrolled) {
-            prevScrolledRef.current = scrolled;
-            setIsScrolled(scrolled);
-          }
-          ticking = false;
-        });
-      };
-      handlerRef.current = handleScroll;
-      window.addEventListener('scroll', handleScroll, { passive: true });
-    };
-    const id =
-      typeof (window as any).requestIdleCallback !== 'undefined'
-        ? (window as any).requestIdleCallback(schedule, { timeout: 600 })
-        : (setTimeout(schedule, 400) as unknown as number);
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
 
-    return () => {
-      cancelled = true;
-      if (typeof (window as any).cancelIdleCallback !== 'undefined') (window as any).cancelIdleCallback(id);
-      else clearTimeout(id);
-      const h = handlerRef.current;
-      if (h) window.removeEventListener('scroll', h);
+      setIsScrolled(y > 50);
+
+      if (y <= 20) {
+        setHeaderVisible(true);
+      } else if (y > lastY.current && y > 120) {
+        setHeaderVisible(false);
+      } else if (y < lastY.current) {
+        setHeaderVisible(true);
+      }
+
+      lastY.current = Math.max(0, y);
     };
+
+    lastY.current = window.scrollY || window.pageYOffset;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Sync scroll state when route changes (fixed header + SPA navigation).
+  // Ensure header is visible on route changes.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const scrolled = window.scrollY > 50;
-    prevScrolledRef.current = scrolled;
-    setIsScrolled(scrolled);
+    setHeaderVisible(true);
+    lastY.current = typeof window !== 'undefined' ? (window.scrollY || window.pageYOffset) : 0;
   }, [location.pathname]);
 
   // Dev-only: log Header render count when ?perf=1
@@ -471,7 +454,19 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50">
+      <nav
+        className=""
+        style={{
+          transform: headerVisible ? 'translate3d(0,0,0)' : 'translate3d(0,-100%,0)',
+          transition: 'transform 280ms ease, box-shadow 280ms ease',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          willChange: 'transform',
+        }}
+      >
         {/* Mobile header — keep existing layout/behavior exactly as-is */}
         <div className={`lg:hidden ${navSurfaceClass}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -710,7 +705,6 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
           </div>
         </div>
       </nav>
-
       {/* Mobile Menu - Full Screen, Slides from Left */}
       <div
         className={`fixed top-16 sm:top-20 left-0 right-0 bottom-0 z-40 lg:hidden ${DISABLE_HEADER_ANIMATIONS ? '' : 'transition-opacity duration-200'} ${
