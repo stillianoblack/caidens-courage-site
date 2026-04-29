@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import HeroCarousel from '../components/HeroCarousel';
+import KidsGallerySection from '../components/KidsGallerySection';
 
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
@@ -237,7 +238,8 @@ const Home = () => {
         id="hero"
         className="major-publisher-hero homepage-hero relative overflow-hidden"
         style={{
-          minHeight: 'clamp(860px, 92vh, 1150px)',
+          minHeight: isMobile ? 'auto' : 'clamp(860px, 92vh, 1150px)',
+          backgroundColor: isMobile ? '#ffffff' : undefined,
           ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
       >
@@ -261,14 +263,14 @@ const Home = () => {
           >
             <path 
               d="M0,60 C360,140 1080,0 1440,80 L1440,150 L0,150 Z"
-              fill="#faf9f7"
+              fill="#ffffff"
             />
           </svg>
         </div>
       </section>
 
       {/* Trust Strip */}
-      <section className="bg-white border-b border-navy-100/50">
+      <section className="bg-white border-b border-navy-100/50" style={{ marginTop: '-1px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 lg:gap-16">
             {/* Trust Item 1 */}
@@ -298,8 +300,10 @@ const Home = () => {
         </div>
       </section>
 
+      <KidsGallerySection />
+
       {/* Meet the Hero Section */}
-      <section className="bg-cream relative overflow-hidden meet-hero-section pt-20 md:pt-0">
+      <section className="bg-cream relative overflow-hidden meet-hero-section pt-8 md:pt-0">
         <div className="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center meet-hero-grid">
             {/* Left Column - Image - Below text on mobile */}

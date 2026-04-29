@@ -228,7 +228,7 @@ export default function HeroCarousel({
       {resolvedIsMobile ? (
         <div
           className="w-full"
-          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#000000', touchAction: 'pan-y' }}
+          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#ffffff', touchAction: 'pan-y' }}
           onTouchStart={onMobileTouchStart}
           onTouchMove={onMobileTouchMove}
           onTouchEnd={onMobileTouchEnd}

@@ -76,6 +76,239 @@
   }
 }
 
+/* Kids gallery marquee + mobile scroll polish */
+.kids-marquee {
+  overflow: hidden;
+  padding-top: 28px; /* room for tape so it isn't clipped */
+  padding-bottom: 20px; /* prevent bottom edge/shadow clipping */
+}
+
+.kids-marquee-track {
+  width: max-content;
+  animation: kids-marquee-scroll 38s linear infinite;
+}
+
+.kids-marquee:hover .kids-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes kids-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Let the polaroid bottom/shadow breathe on desktop */
+@media (min-width: 768px) {
+  .kids-gallery-section {
+    overflow: visible;
+  }
+}
+
+/* On mobile, keep section clipping tidy but still allow tape room */
+@media (max-width: 767px) {
+  .kids-marquee {
+    margin-left: -24px;
+    margin-right: -24px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .kids-marquee-track {
+    animation-duration: 30s;
+  }
+  .kids-marquee:hover .kids-marquee-track {
+    animation-play-state: running;
+  }
+}
+
+.kids-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.kids-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Polaroid sizing + frame sizing (match reference) */
+.kids-polaroid-wrap {
+  overflow: visible;
+}
+
+.kids-polaroid {
+  width: 270px;
+  padding: 14px 14px 18px;
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.08),
+    0 2px 10px rgba(15, 23, 42, 0.06);
+}
+
+.kids-polaroid-frame {
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.85),
+    inset 0 10px 18px rgba(0, 0, 0, 0.06);
+}
+
+.kids-polaroid-img {
+  width: 100%;
+  height: 250px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Caption area inside the polaroid (handwritten-ish feel) */
+.kids-polaroid-caption {
+  margin-top: 10px;
+  padding: 8px 6px 2px;
+}
+
+.kids-polaroid-name {
+  font-family: 'Quicksand', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: rgba(15, 23, 42, 0.78);
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.kids-polaroid-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.kids-polaroid-mark {
+  color: rgba(36, 62, 112, 0.55);
+  padding-bottom: 2px;
+}
+
+@media (max-width: 767px) {
+  .kids-polaroid {
+    width: min(78vw, 340px);
+    padding: 14px 14px 18px;
+  }
+  .kids-polaroid-img {
+    height: 300px;
+  }
+  .kids-gallery-carousel {
+    padding-top: 28px; /* room for tape */
+  }
+}
+
+/* Kids gallery layout overrides (mobile-first, no blank gaps) */
+@media (max-width: 767px) {
+  .kids-gallery-section {
+    padding: 80px 24px 64px !important;
+    overflow: hidden;
+  }
+
+  .kids-gallery-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .kids-gallery-intro {
+    position: relative;
+    z-index: 2;
+    max-width: none;
+  }
+
+  /* mobile carousel removed in favor of marquee */
+}
+
+/* Polaroid tape sits above cards like mock */
+.kids-tape {
+  z-index: 5;
+  width: 110px;
+  height: 26px;
+  border-radius: 8px;
+  top: -18px;
+  opacity: 0.96;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  /* Tape texture + translucency */
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 55%, rgba(0,0,0,0.04) 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 2px, rgba(255,255,255,0.08) 2px, rgba(255,255,255,0.08) 5px);
+  background-blend-mode: overlay, normal;
+}
+
+.kids-tape::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 18% 30%, rgba(255,255,255,0.55), transparent 55%),
+    radial-gradient(circle at 78% 65%, rgba(255,255,255,0.35), transparent 60%);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.kids-tape::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.10);
+  transform: translateY(-50%);
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+/* Jagged/torn tape edges (like reference) */
+.kids-tape {
+  clip-path: polygon(
+    0% 10%,
+    6% 0%,
+    14% 10%,
+    22% 0%,
+    30% 10%,
+    38% 0%,
+    46% 10%,
+    54% 0%,
+    62% 10%,
+    70% 0%,
+    78% 10%,
+    86% 0%,
+    94% 10%,
+    100% 18%,
+    100% 90%,
+    94% 100%,
+    86% 90%,
+    78% 100%,
+    70% 90%,
+    62% 100%,
+    54% 90%,
+    46% 100%,
+    38% 90%,
+    30% 100%,
+    22% 90%,
+    14% 100%,
+    6% 90%,
+    0% 82%
+  );
+}
+
+@media (max-width: 639px) {
+  .kids-tape {
+    top: -14px;
+    width: 100px;
+    height: 24px;
+  }
+}
+
 /* Mobile chat drawer: sit below fixed header stack */
 @media (max-width: 639px) {
   .b4-chat-drawer {
