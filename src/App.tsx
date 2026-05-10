@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
@@ -24,49 +24,65 @@ import ClassroomPilots from './pages/ClassroomPilots';
 import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
+import FocusFlameLabPage from './pages/FocusFlameLab';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/camp-courage" element={<CampCourage />} />
+      <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
+      <Route path="/classroom-pilots" element={<ClassroomPilots />} />
+      <Route path="/training-guides" element={<TrainingGuides />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/thank-you" element={<ThankYou />} />
+      <Route path="/success" element={<Success />} />
+      <Route path="/cancelled" element={<Cancelled />} />
+      <Route path="/braveminds" element={<Resources />} />
+      <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
+      <Route path="/form-success" element={<FormSuccess />} />
+      <Route path="/resources" element={<Navigate to="/braveminds" replace />} />
+      <Route path="/resources/notify-success" element={<Navigate to="/braveminds/notify-success" replace />} />
+      <Route path="/resources/coloring-pages" element={<Navigate to="/braveminds?type=coloring" replace />} />
+      <Route path="/resources/wallpapers" element={<Navigate to="/braveminds?type=wallpaper" replace />} />
+      <Route path="/resources/teachers" element={<Navigate to="/braveminds?type=teacher-pack" replace />} />
+      <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
+      <Route path="/comicbook" element={<Product />} />
+      <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
+      <Route path="/product" element={<Navigate to="/comicbook" replace />} />
+      <Route path="/preview" element={<Preview />} />
+      <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
+      <Route path="/mission" element={<Mission />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/world" element={<World />} />
+      <Route path="/characters" element={<Characters />} />
+      <Route path="/b4-tools" element={<B4Clicker />} />
+      <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
+      <Route path="/chat" element={<ChatWithB4 />} />
+      <Route path="/journey" element={<Journey />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
+    </Routes>
+  );
+};
+
+const AppFrame: React.FC = () => {
+  const location = useLocation();
+  const isFocusFlameLab = location.pathname === '/focus-flame-lab';
+  return (
+    <>
+      <AppRoutes />
+      {!isFocusFlameLab ? <DeferredB4ChatWidget /> : null}
+    </>
+  );
+};
 
 const App: React.FC = () => {
   return (
     <Router>
-      <>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/camp-courage" element={<CampCourage />} />
-          <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
-          <Route path="/classroom-pilots" element={<ClassroomPilots />} />
-          <Route path="/training-guides" element={<TrainingGuides />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/thank-you" element={<ThankYou />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/cancelled" element={<Cancelled />} />
-          <Route path="/braveminds" element={<Resources />} />
-          <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
-          <Route path="/form-success" element={<FormSuccess />} />
-          <Route path="/resources" element={<Navigate to="/braveminds" replace />} />
-          <Route path="/resources/notify-success" element={<Navigate to="/braveminds/notify-success" replace />} />
-          <Route path="/resources/coloring-pages" element={<Navigate to="/braveminds?type=coloring" replace />} />
-          <Route path="/resources/wallpapers" element={<Navigate to="/braveminds?type=wallpaper" replace />} />
-          <Route path="/resources/teachers" element={<Navigate to="/braveminds?type=teacher-pack" replace />} />
-          <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
-          <Route path="/comicbook" element={<Product />} />
-          <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
-          <Route path="/product" element={<Navigate to="/comicbook" replace />} />
-          <Route path="/preview" element={<Preview />} />
-          <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
-          <Route path="/mission" element={<Mission />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/world" element={<World />} />
-          <Route path="/characters" element={<Characters />} />
-          <Route path="/b4-tools" element={<B4Clicker />} />
-          <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
-          <Route path="/chat" element={<ChatWithB4 />} />
-          <Route path="/journey" element={<Journey />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-        <DeferredB4ChatWidget />
-      </>
+      <AppFrame />
     </Router>
   );
 }
