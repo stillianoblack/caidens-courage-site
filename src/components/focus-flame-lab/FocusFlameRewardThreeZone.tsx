@@ -1,6 +1,7 @@
 import React from 'react';
 import { adventureReminderCopy } from './AdventureStatusPanel';
 import CompactB4HudCard from './CompactB4HudCard';
+import MobileSceneStatus from './MobileSceneStatus';
 
 type Feeling = 'Nervous' | 'Excited' | 'Embarrassed' | 'Angry';
 type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
@@ -92,8 +93,12 @@ export default function FocusFlameRewardThreeZone({
 
   return (
     <div className="ffl-reward-page-wrap">
-      <div className="ffl-reward-three-zone">
+      <div className="ffl-reward-three-zone ffl-reward-stack">
         <aside className="ffl-reward-left-hud" aria-label="Reward status panel">
+          <div className="ffl-reward-mobileSceneWrap">
+            <MobileSceneStatus scene={selectedScene} progressPercent={100} />
+          </div>
+
           <CompactB4HudCard message="Great job. Your Focus Flame is getting stronger." />
 
           <div className="ffl-hud-card ffl-hud-card--adventure ffl-reward-left-hud-card ffl-hud-adventure-card">
@@ -130,7 +135,7 @@ export default function FocusFlameRewardThreeZone({
           </div>
         </aside>
 
-        <main className="ffl-reward-hero">
+        <main className="ffl-reward-hero ffl-reward-main">
           <header className="ffl-reward-hero-intro">
             <p className="ffl-reward-eyebrow">CONGRATS, CAIDEN!</p>
             <h2 className="ffl-h2 ffl-reward-hero-title">Caiden’s flame stabilized.</h2>
@@ -142,7 +147,10 @@ export default function FocusFlameRewardThreeZone({
           </header>
 
           <div className="ffl-reward-card-row">
-            <section className="ffl-reward-surface-card ffl-reward-surface-card--kids" aria-labelledby="ffl-reward-kids-title">
+            <section
+              className="ffl-reward-surface-card ffl-reward-surface-card--kids ffl-kid-card"
+              aria-labelledby="ffl-reward-kids-title"
+            >
               <h3 id="ffl-reward-kids-title" className="ffl-reward-surface-title">
                 For kids
               </h3>
@@ -160,7 +168,11 @@ export default function FocusFlameRewardThreeZone({
                   <KidsBadgeTile src={icons.draw} alt="Draw badge" label="Draw" />
                 </div>
               </div>
-              <button type="button" className="ffl-ctaPrimary ffl-reward-kids-cta" onClick={onTryNewScene}>
+              <button
+                type="button"
+                className="ffl-ctaPrimary ffl-primary-button ffl-reward-kids-cta ffl-try-new-scene-button"
+                onClick={onTryNewScene}
+              >
                 Try a new scene
               </button>
             </section>

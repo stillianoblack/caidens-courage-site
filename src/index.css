@@ -6259,3 +6259,461 @@ a.bg-golden-500:hover,
     font-size: 14px;
   }
 }
+
+/* ========= Focus Flame Lab — compact phone / small tablet (max-width: 768px) ========= */
+
+.ffl-mobileSceneStatusWrap,
+.ffl-reward-mobileSceneWrap {
+  display: none;
+}
+
+.ffl-mobile-game-chrome {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .ffl-app {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .ffl-gameShell {
+    min-height: 100dvh;
+    height: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .ffl-gameStageWrap,
+  .focus-flame-game-shell {
+    align-items: flex-start;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .focus-flame-hud.ffl-gamePanel {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding: 72px 16px 48px;
+    box-sizing: border-box;
+    width: calc(100vw - 32px);
+    max-width: none;
+  }
+
+  .focus-flame-hud .ffl-gameHud {
+    flex: 1 1 auto;
+    grid-row: auto;
+    overflow: visible !important;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ffl-hudContent,
+  .ffl-gameHudMain {
+    overflow: visible !important;
+    min-height: 0;
+  }
+
+  .ffl-hudNavDesktop {
+    display: none !important;
+  }
+
+  .ffl-mobile-game-chrome {
+    display: block;
+  }
+
+  .ffl-mobile-game-back {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 52;
+  }
+
+  .ffl-mobile-menu-fab {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 52;
+  }
+
+  .ffl-mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: rgba(2, 6, 14, 0.55);
+    cursor: pointer;
+  }
+
+  .ffl-mobile-menu-sheet {
+    position: fixed;
+    top: 56px;
+    right: 16px;
+    z-index: 53;
+    min-width: 220px;
+    max-width: min(320px, calc(100vw - 32px));
+  }
+
+  .ffl-mobile-menu-sheet-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(6, 14, 28, 0.96);
+    border: 1px solid rgba(87, 190, 255, 0.28);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  }
+
+  .ffl-mobile-menu-row {
+    width: 100%;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .ffl-mobile-menu-sound .ffl-soundMenuPanel {
+    position: static;
+    top: auto;
+    right: auto;
+    max-width: none;
+    min-width: 0;
+    margin-top: 4px;
+  }
+
+  .ffl-mobile-menu-sound .ffl-soundMenuWrap {
+    width: 100%;
+  }
+
+  .ffl-mobile-menu-sound .ffl-soundMenuTrigger {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ffl-mobile-menu-parents .ffl-nav-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Adventure steps: one column; HUD children flatten into page flow */
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    column-gap: 0 !important;
+    row-gap: 24px;
+    width: 100%;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .ffl-mobile-stack.ffl-screen--reward.ffl-grid {
+    row-gap: 24px;
+  }
+
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-zone-hud {
+    display: contents;
+  }
+
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-zone-main--step {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    max-width: none !important;
+  }
+
+  .ffl-mobileSceneStatusWrap {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    grid-row: 1;
+  }
+
+  .ffl-hud-b4-wrap {
+    width: 100%;
+    min-width: 0;
+    grid-row: 2;
+  }
+
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-hud-adventure-card {
+    display: none !important;
+  }
+
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-hud-flame-card {
+    grid-row: 4;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ffl-hud-panel .ffl-hud-card--b4.ffl-b4-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .ffl-hud-panel .ffl-b4-avatar-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .ffl-hud-panel .ffl-b4-avatar-label {
+    max-width: 76px;
+  }
+
+  .ffl-hud-panel .ffl-b4-card .ffl-b4-bubble {
+    font-size: 16px;
+  }
+
+  .ffl-hud-panel .ffl-b4-card .ffl-b4-bubble::before {
+    top: 26px;
+  }
+
+  .ffl-reward-left-hud .ffl-hud-card--b4.ffl-b4-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .ffl-reward-left-hud .ffl-b4-avatar-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .ffl-reward-left-hud .ffl-b4-avatar-label {
+    max-width: 76px;
+  }
+
+  .ffl-reward-left-hud .ffl-b4-card .ffl-b4-bubble {
+    font-size: 16px;
+  }
+
+  .ffl-reward-left-hud .ffl-b4-card .ffl-b4-bubble::before {
+    top: 26px;
+  }
+
+  .ffl-step-main .ffl-comicFrame {
+    margin-top: 16px;
+    width: 100%;
+    max-width: none;
+  }
+
+  .ffl-step-main .ffl-comicAction {
+    margin-top: 18px;
+  }
+
+  .ffl-step-main .ffl-comicAction .ffl-ctaPrimary,
+  .ffl-step-main .ffl-stepActions .ffl-ctaPrimary,
+  .ffl-step-main .ffl-stepActions .ffl-ctaPrimary--small {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ffl-step-main .ffl-stepActions {
+    margin-top: 18px;
+  }
+
+  .ffl-mobileSceneStatus {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--ffl-radius-md);
+    background: var(--ffl-card-bg);
+    border: 1px solid var(--ffl-blue-border);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .ffl-mobileSceneStatus-thumbWrap {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(229, 192, 106, 0.2);
+  }
+
+  .ffl-mobileSceneStatus-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ffl-mobileSceneStatus-text {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .ffl-mobileSceneStatus-title {
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .ffl-mobileSceneStatus-progress {
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 750;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* Reward: hero (summary + cards) first, then chip + B-4, then ambient */
+  .ffl-reward-three-zone {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .ffl-reward-hero {
+    order: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ffl-reward-left-hud {
+    order: 2;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  .ffl-reward-ambient {
+    order: 3;
+    width: 100%;
+    max-width: none !important;
+    max-height: none !important;
+  }
+
+  .ffl-reward-left-hud .ffl-hud-adventure-card,
+  .ffl-reward-left-hud .ffl-reward-left-flame-card {
+    display: none !important;
+  }
+
+  .ffl-reward-mobileSceneWrap {
+    display: block;
+    width: 100%;
+  }
+
+  .ffl-reward-card-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ffl-mobile-content {
+    padding-top: 28px;
+    box-sizing: border-box;
+  }
+
+  .ffl-scene-select-header {
+    margin-top: 32px;
+    margin-bottom: 28px;
+  }
+
+  .ffl-hud-b4-wrap .ffl-hud-card--b4.ffl-b4-card,
+  .ffl-screen--stack.ffl-flow-layout .ffl-hud-card--b4.ffl-b4-card {
+    margin-bottom: 24px;
+  }
+
+  .ffl-kid-card .ffl-primary-button,
+  .ffl-kid-card .ffl-ctaPrimary.ffl-try-new-scene-button,
+  .ffl-try-new-scene-button {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  .ffl-reward-kids-cta {
+    max-width: none;
+  }
+
+  /* Full-viewport centered overlays (boot + sound gate) */
+  .ffl-focusFlameGame .ffl-loading-screen.ffl-bootLoader,
+  .ffl-focusFlameGame .ffl-modal-overlay.ffl-soundGate {
+    position: fixed;
+    inset: 0;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 80;
+  }
+
+  .ffl-focusFlameGame .ffl-modal-card.ffl-soundGateCard {
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    border-radius: 24px;
+    box-sizing: border-box;
+  }
+
+  .ffl-focusFlameGame .ffl-bootLoaderInner {
+    max-width: 420px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  @media (hover: none) {
+    .ffl-focusFlameGame .ffl-choice:hover,
+    .ffl-focusFlameGame .ffl-sceneRow:hover,
+    .ffl-focusFlameGame .ffl-sceneRow--featured:hover,
+    .ffl-focusFlameGame .ffl-ctaPrimary:hover,
+    .ffl-focusFlameGame .ffl-ctaSecondary:hover,
+    .ffl-focusFlameGame .ffl-reward-badge-tile:hover {
+      transform: none;
+    }
+
+    .ffl-focusFlameGame .ffl-choice:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: none;
+      filter: none;
+    }
+
+    .ffl-focusFlameGame .ffl-sceneRow:hover,
+    .ffl-focusFlameGame .ffl-sceneRow--featured:hover {
+      border-color: rgba(80, 190, 255, 0.36);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+      background: rgba(5, 12, 28, 0.72);
+    }
+
+    .ffl-focusFlameGame .ffl-sceneRow--featured:hover {
+      border-color: rgba(229, 192, 106, 0.58);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+    }
+
+    .ffl-focusFlameGame .ffl-reward-badge-tile:hover {
+      transform: none;
+      box-shadow: 0 0 22px rgba(229, 192, 106, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .ffl-focusFlameGame .ffl-reward-badge-tile--earned:hover {
+      box-shadow: 0 0 28px rgba(229, 192, 106, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+  }
+
+  .ffl-focusFlameGame .ffl-choice:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .ffl-focusFlameGame .ffl-sceneRow:active {
+    transform: scale(0.98);
+  }
+
+  .ffl-focusFlameGame .ffl-ctaPrimary:active:not(:disabled),
+  .ffl-focusFlameGame .ffl-ctaSecondary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}

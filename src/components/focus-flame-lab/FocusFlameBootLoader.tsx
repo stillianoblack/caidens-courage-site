@@ -32,7 +32,11 @@ export default function FocusFlameBootLoader({
   if (phase === 'done') return null;
 
   return (
-    <div className={`ffl-bootLoader ${phase === 'out' ? 'ffl-bootLoader--exit' : ''}`} aria-busy="true" aria-live="polite">
+    <div
+      className={`ffl-bootLoader ffl-loading-screen ${phase === 'out' ? 'ffl-bootLoader--exit' : ''}`}
+      aria-busy="true"
+      aria-live="polite"
+    >
       <div className="ffl-bootLoaderGlow" aria-hidden="true" />
       <div className="ffl-bootLoaderInner">
         <img className="ffl-bootLoaderMark" src={markSrc} alt="" width={120} height={120} decoding="async" />

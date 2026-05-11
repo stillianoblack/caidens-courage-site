@@ -11,9 +11,9 @@ export type FocusFlameSoundGateProps = {
  */
 export default function FocusFlameSoundGate({ onEnableSound, onContinueSilent }: FocusFlameSoundGateProps) {
   return (
-    <div className="ffl-soundGate" role="dialog" aria-modal="true" aria-labelledby="ffl-soundGate-title">
+    <div className="ffl-soundGate ffl-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="ffl-soundGate-title">
       <div className="ffl-soundGateBackdrop" aria-hidden="true" />
-      <div className="ffl-soundGateCard">
+      <div className="ffl-soundGateCard ffl-modal-card ffl-sound-gate-card">
         <h2 id="ffl-soundGate-title" className="ffl-soundGateTitle">
           Turn on sound?
         </h2>

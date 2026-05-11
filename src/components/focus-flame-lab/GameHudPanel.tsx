@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { adventureReminderCopy, type AdventureStatusPanelScene } from './AdventureStatusPanel';
 import CompactB4HudCard from './CompactB4HudCard';
+import MobileSceneStatus from './MobileSceneStatus';
 
 type Feeling = 'Nervous' | 'Excited' | 'Embarrassed' | 'Angry';
 type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
@@ -138,7 +139,13 @@ export default function GameHudPanel({
       className={['ffl-hud-panel', meterPulse ? 'ffl-hud-panel--meterPulse' : '', className].filter(Boolean).join(' ')}
       aria-label="B-4 guide and adventure status"
     >
-      <CompactB4HudCard message={b4Message} />
+      <div className="ffl-mobileSceneStatusWrap">
+        <MobileSceneStatus scene={selectedScene} progressPercent={progressPercent} />
+      </div>
+
+      <div className="ffl-hud-b4-wrap">
+        <CompactB4HudCard message={b4Message} />
+      </div>
 
       <div className="ffl-hud-card ffl-hud-card--adventure ffl-hud-adventure-card">
         <div className="ffl-hud-scene-thumbWrap ffl-hud-scene-thumbWrap--inCard">
@@ -155,7 +162,7 @@ export default function GameHudPanel({
         <p className="ffl-hud-scene-reminder">{adventureReminderCopy(selectedScene.id)}</p>
       </div>
 
-      <div className="ffl-hud-card ffl-hud-card--flame ffl-flame-status-card ffl-hud-flame-card--compact">
+      <div className="ffl-hud-card ffl-hud-card--flame ffl-flame-status-card ffl-hud-flame-card ffl-hud-flame-card--compact">
         <div className="ffl-flame-status-main">
           <div className="ffl-flame-status-icon-wrap" aria-hidden="true">
             {showSteadyHeadline ? (

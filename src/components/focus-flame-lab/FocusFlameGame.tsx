@@ -195,8 +195,9 @@ function SceneSelectMissionRow({
     <button
       type="button"
       className={`ffl-sceneRow${featured ? ' ffl-sceneRow--featured' : ''}`}
-      onPointerEnter={() => onCardHover()}
-      onFocus={() => onCardHover()}
+      onPointerEnter={(e) => {
+        if (e.pointerType === 'mouse') onCardHover();
+      }}
       onClick={() => {
         onCardSelect();
         onBegin();
@@ -270,6 +271,33 @@ export default function FocusFlameGame({
     mq.addEventListener('change', fn);
     return () => mq.removeEventListener('change', fn);
   }, []);
+
+  const [isMobileGameUi, setIsMobileGameUi] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
+  const [mobileGameMenuOpen, setMobileGameMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 768px)');
+    const apply = () => setIsMobileGameUi(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileGameMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileGameMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileGameMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileGameMenuOpen) setSoundMenuOpen(false);
+  }, [mobileGameMenuOpen, setSoundMenuOpen]);
 
   const handleSoundGateEnable = useCallback(() => {
     setMusicVolume(0.12);
@@ -363,8 +391,10 @@ export default function FocusFlameGame({
 
   const focusFlameMarkSrc = `${process.env.PUBLIC_URL || ''}/images/icons/focus-flame-mark.svg`;
 
+  const navDisabled = !bootDone || !soundGateResolved;
+
   return (
-    <section className="ffl-shell ffl-gameShell">
+    <section className="ffl-shell ffl-gameShell ffl-focusFlameGame">
       <div className="ffl-gameStageWrap">
         {!bootDone ? (
           <FocusFlameBootLoader
@@ -382,13 +412,96 @@ export default function FocusFlameGame({
         >
         <div className="focus-flame-game-shell">
           <div className="ffl-gameViewport focus-flame-hud ffl-gamePanel ffl-panel">
-            <div className="ffl-hudNavBar ffl-gameTopNav ffl-top-nav">
+            {isMobileGameUi ? (
+              <div className="ffl-mobile-game-chrome ffl-mobile-top-nav" data-open={mobileGameMenuOpen ? 'true' : undefined}>
+                <button
+                  type="button"
+                  className="ffl-back ffl-hudBack ffl-mobile-game-back"
+                  onClick={() => {
+                    goBack();
+                    setMobileGameMenuOpen(false);
+                  }}
+                  disabled={navDisabled}
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  className="ffl-mobile-menu-fab ffl-nav-button"
+                  aria-expanded={mobileGameMenuOpen}
+                  aria-haspopup="dialog"
+                  aria-controls="ffl-mobile-game-menu"
+                  onClick={() => setMobileGameMenuOpen((o) => !o)}
+                >
+                  Menu
+                </button>
+                {mobileGameMenuOpen ? (
+                  <>
+                    <button
+                      type="button"
+                      className="ffl-mobile-menu-backdrop"
+                      aria-label="Close menu"
+                      onClick={() => setMobileGameMenuOpen(false)}
+                    />
+                    <div
+                      id="ffl-mobile-game-menu"
+                      className="ffl-mobile-menu-sheet"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Game menu"
+                    >
+                      <div className="ffl-mobile-menu-sheet-inner">
+                        <Link
+                          to="/"
+                          className="ffl-nav-button ffl-mobile-menu-row"
+                          onClick={() => {
+                            playButtonClick();
+                            setMobileGameMenuOpen(false);
+                          }}
+                        >
+                          Exit Game
+                        </Link>
+                        <div className="ffl-mobile-menu-sound">
+                          <FocusFlameSoundMenu
+                            open={soundMenuOpen}
+                            onOpenChange={setSoundMenuOpen}
+                            soundEnabled={soundEnabled}
+                            onSoundEnabledChange={setSoundEnabled}
+                            voiceEnabled={voiceEnabled}
+                            onVoiceEnabledChange={setVoiceEnabled}
+                            musicVolume={musicVolume}
+                            onMusicVolumeChange={setMusicVolume}
+                            sfxVolume={sfxVolume}
+                            onSfxVolumeChange={setSfxVolume}
+                            voiceVolume={voiceVolume}
+                            onVoiceVolumeChange={setVoiceVolume}
+                          />
+                        </div>
+                        <div
+                          className="ffl-mobile-menu-parents"
+                          onClickCapture={(e) => {
+                            const el = e.target as HTMLElement | null;
+                            if (el?.closest('a, button')) {
+                              playButtonClick();
+                              setMobileGameMenuOpen(false);
+                            }
+                          }}
+                        >
+                          {parentsLink}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="ffl-hudNavBar ffl-gameTopNav ffl-top-nav ffl-hudNavDesktop">
               <div className="ffl-hudNavLeft">
                 <button
                   type="button"
                   className="ffl-back ffl-hudBack"
                   onClick={goBack}
-                  disabled={!bootDone || !soundGateResolved}
+                  disabled={navDisabled}
                 >
                   ← Back
                 </button>
@@ -403,20 +516,22 @@ export default function FocusFlameGame({
                 </Link>
               </div>
               <div className="ffl-hudNavRight">
-                <FocusFlameSoundMenu
-                  open={soundMenuOpen}
-                  onOpenChange={setSoundMenuOpen}
-                  soundEnabled={soundEnabled}
-                  onSoundEnabledChange={setSoundEnabled}
-                  voiceEnabled={voiceEnabled}
-                  onVoiceEnabledChange={setVoiceEnabled}
-                  musicVolume={musicVolume}
-                  onMusicVolumeChange={setMusicVolume}
-                  sfxVolume={sfxVolume}
-                  onSfxVolumeChange={setSfxVolume}
-                  voiceVolume={voiceVolume}
-                  onVoiceVolumeChange={setVoiceVolume}
-                />
+                {!isMobileGameUi ? (
+                  <FocusFlameSoundMenu
+                    open={soundMenuOpen}
+                    onOpenChange={setSoundMenuOpen}
+                    soundEnabled={soundEnabled}
+                    onSoundEnabledChange={setSoundEnabled}
+                    voiceEnabled={voiceEnabled}
+                    onVoiceEnabledChange={setVoiceEnabled}
+                    musicVolume={musicVolume}
+                    onMusicVolumeChange={setMusicVolume}
+                    sfxVolume={sfxVolume}
+                    onSfxVolumeChange={setSfxVolume}
+                    voiceVolume={voiceVolume}
+                    onVoiceVolumeChange={setVoiceVolume}
+                  />
+                ) : null}
                 <div
                   className="ffl-hudParents"
                   onClickCapture={(e) => {
@@ -439,7 +554,7 @@ export default function FocusFlameGame({
             >
               <GameHudChrome hideStatusLabels hideHudNodes hideHudEdges />
               <div className="ffl-hudContent">
-                <div className="ffl-gameHudMain">
+                <div className="ffl-gameHudMain ffl-mobile-content">
               {SHOW_ENTRY_SCREEN && screen === 'entry' ? (
                 <div className="ffl-screen ffl-screen--entry ffl-grid">
                   <div className="ffl-zone-hud">
@@ -484,7 +599,7 @@ export default function FocusFlameGame({
                     <B4GuidePanel message={b4Message} className="ffl-gameB4 ffl-b4-panel" />
                   </div>
                   <div className="ffl-scene-select-main">
-                    <div className="ffl-sceneSelectTitleBlock">
+                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header">
                       <h2 className="ffl-sceneSelectTitle">Where should Caiden go?</h2>
                       <p className="ffl-sceneSelectSubtitle">CHOOSE YOUR ADVENTURE.</p>
                     </div>
@@ -504,7 +619,7 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'step1' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout">
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
@@ -516,7 +631,7 @@ export default function FocusFlameGame({
                     body={body}
                     move={move}
                   />
-                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main">
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
                           <div className="ffl-comicFrame">
                             <div className="ffl-comicHeader">
                               <div className="ffl-comicTag">SCENE INTRO</div>
@@ -550,7 +665,7 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'step2' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout">
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
@@ -562,7 +677,7 @@ export default function FocusFlameGame({
                     body={body}
                     move={move}
                   />
-                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main">
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
                           <div className="ffl-questionHeader ffl-step-header">
                             <div className="ffl-kicker">STEP 1 OF 3</div>
                             <h2 className="ffl-h2">What is Caiden feeling?</h2>
@@ -598,7 +713,7 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'step3' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout">
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
@@ -610,7 +725,7 @@ export default function FocusFlameGame({
                     body={body}
                     move={move}
                   />
-                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main">
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
                           <div className="ffl-questionHeader ffl-step-header">
                             <div className="ffl-kicker">STEP 2 OF 3</div>
                             <h2 className="ffl-h2">Where does Caiden feel it?</h2>
@@ -646,7 +761,7 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'step4' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--stack ffl-screen--step4 ffl-flow-layout">
+                <AdventureFlowLayout className="ffl-screen--stack ffl-screen--step4 ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
@@ -658,7 +773,7 @@ export default function FocusFlameGame({
                     body={body}
                     move={move}
                   />
-                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main">
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
                           <div className="ffl-questionHeader ffl-step-header">
                             <div className="ffl-kicker">STEP 3 OF 3</div>
                             <h2 className="ffl-h2">Which Focus Flame move should he try?</h2>
@@ -705,7 +820,7 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'reward' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--reward">
+                <AdventureFlowLayout className="ffl-screen--reward ffl-mobile-stack">
                   <FocusFlameRewardThreeZone
                     selectedScene={selectedScene}
                     scenes={scenes}
