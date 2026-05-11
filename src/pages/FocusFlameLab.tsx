@@ -25,7 +25,6 @@ export default function FocusFlameLabPage() {
         intro: 'The camp gets loud. Everyone is watching. Caiden’s Focus Flame starts to flicker.',
         cardImageSrc: `${publicUrl}/images/focus-flame-lab/themove_intro_image.webp`,
         cardImageAlt: 'Caiden at The Camp',
-        featured: true,
         cardBadgeTone: 'gold',
       },
       {

@@ -3819,7 +3819,8 @@ a.ffl-ctaSecondary {
     color 0.18s ease;
 }
 
-@media (hover: hover) {
+/* Hide Begin pill until hover only on desktop — narrow viewports always show CTAs (some phones report hover: hover). */
+@media (hover: hover) and (min-width: 769px) {
   .ffl-sceneRowBegin--pill {
     opacity: 0;
     transform: translateX(8px);
@@ -6664,6 +6665,41 @@ a.bg-golden-500:hover,
     max-width: 420px;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  /* Scene select: no hover/focus “selected” card; Begin pills always visible */
+  .ffl-screen--sceneSelect .ffl-sceneRow {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneRow:hover,
+  .ffl-screen--sceneSelect .ffl-sceneRow:focus,
+  .ffl-screen--sceneSelect .ffl-sceneRow:focus-visible {
+    transform: none;
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneRow:hover,
+  .ffl-screen--sceneSelect .ffl-sceneRow:focus-visible {
+    border-color: rgba(80, 190, 255, 0.36);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+    background: rgba(5, 12, 28, 0.72);
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneRow--featured:hover,
+  .ffl-screen--sceneSelect .ffl-sceneRow--featured:focus,
+  .ffl-screen--sceneSelect .ffl-sceneRow--featured:focus-visible {
+    border-color: rgba(229, 192, 106, 0.58);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+    background: rgba(5, 12, 28, 0.72);
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneRow:focus-visible {
+    outline: none;
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneRow .ffl-sceneRowBegin--pill {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   @media (hover: none) {
