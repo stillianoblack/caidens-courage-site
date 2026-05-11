@@ -286,6 +286,11 @@ export default function FocusFlameGame({
     return () => mq.removeEventListener('change', apply);
   }, []);
 
+  const playSceneSelectCardHover = useCallback(() => {
+    if (isMobileGameUi) return;
+    playCardHover();
+  }, [isMobileGameUi, playCardHover]);
+
   useEffect(() => {
     if (!mobileGameMenuOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -609,7 +614,7 @@ export default function FocusFlameGame({
                           key={s.id}
                           scene={s}
                           onBegin={() => startScene(s)}
-                          onCardHover={playCardHover}
+                          onCardHover={playSceneSelectCardHover}
                           onCardSelect={playCardSelect}
                         />
                       ))}

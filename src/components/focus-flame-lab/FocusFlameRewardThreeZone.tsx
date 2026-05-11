@@ -20,10 +20,12 @@ function clamp<T>(v: T | null | undefined, fallback: T) {
 }
 
 function badgeIconUrls(publicUrl: string) {
+  const root = publicUrl.endsWith('/') ? publicUrl.slice(0, -1) : publicUrl;
+  const icons = `${root}/images/icons`;
   return {
-    noticing: `${publicUrl}/images/icons/Leading%20the%20Charge.webp`,
-    body: `${publicUrl}/images/icons/Post%20on%20Fire.webp`,
-    draw: `${publicUrl}/images/icons/The%20Warrior.webp`,
+    noticing: `${icons}/leading-the-charge.webp`,
+    body: `${icons}/post-on-fire.webp`,
+    draw: `${icons}/the-warrior.webp`,
   };
 }
 
@@ -44,7 +46,7 @@ function RewardHudBadge({
   return (
     <div className="ffl-reward-hud-badge" aria-label={label}>
       <div className="ffl-reward-hud-badge-iconWrap">
-        <img className="ffl-reward-hud-badge-img" src={src} alt={alt} loading="lazy" decoding="async" />
+        <img className="ffl-reward-hud-badge-img" src={src} alt={alt} loading="eager" decoding="async" />
       </div>
       <span className="ffl-reward-hud-badge-label">{label}</span>
     </div>
@@ -55,7 +57,7 @@ function KidsBadgeTile({ src, alt, label }: { src: string; alt: string; label: s
   return (
     <div className="ffl-reward-badge-tile ffl-reward-badge-tile--earned" aria-label={label}>
       <div className="ffl-reward-badge-tile-iconWrap">
-        <img className="ffl-reward-badge-tile-img" src={src} alt={alt} loading="lazy" decoding="async" />
+        <img className="ffl-reward-badge-tile-img" src={src} alt={alt} loading="eager" decoding="async" />
       </div>
       <span className="ffl-reward-badge-tile-label">{label}</span>
     </div>
