@@ -47,7 +47,7 @@ const OPTIONAL_CLIP_BY_KEY: Record<OptionalB4VoiceKey, B4ClipSlug> = {
 /** B-4 HUD copy during the scene-moment steady-flame beat. */
 export const FLAME_STEADY_B4_MESSAGES = {
   before: 'Caiden’s flame is flickering. Let’s help him steady it.',
-  after: 'You helped him steady it. Now let’s name what he might be feeling.',
+  after: 'You helped him steady it. Let’s think about what that means.',
 } as const;
 
 /** @deprecated Former 3-tap HUD messages. */

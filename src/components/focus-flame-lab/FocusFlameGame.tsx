@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import B4GuidePanel from './B4GuidePanel';
+import CompactB4HudCard from './CompactB4HudCard';
 import GameHudPanel from './GameHudPanel';
 import FocusFlameMark from '../FocusFlameMark';
 import FocusFlameBootLoader from './FocusFlameBootLoader';
@@ -9,6 +10,8 @@ import FocusFlameRewardThreeZone from './FocusFlameRewardThreeZone';
 import FocusFlameSoundGate from './FocusFlameSoundGate';
 import FocusFlameSoundMenu from './FocusFlameSoundMenu';
 import SceneMoment, { type SceneMomentPhase } from './SceneMoment';
+import FocusReflectionStep from './FocusReflectionStep';
+import { FOCUS_REFLECTION_B4 } from './focusFlameReflection';
 import RealLifePractice, { type RealLifePracticePhase } from './RealLifePractice';
 import EmotionTapStep from './EmotionTapStep';
 import BodySignalStep from './BodySignalStep';
@@ -18,6 +21,11 @@ import {
   MISSION_GOAL_COPY,
   MISSION_INTRO_B4,
   MISSION_TITLE,
+  SCENE_SELECT_B4_CONTINUE,
+  SCENE_SELECT_B4_MOBILE,
+  SCENE_SELECT_B4_WELCOME,
+  SCENE_SELECT_MOBILE_TITLE,
+  SCENE_MOMENT_MOBILE_COPY,
   SCENE_MISSION_ORDER,
   adventureLevelStatus,
   isMissionComplete,
@@ -69,6 +77,7 @@ type Screen =
   | 'entry'
   | 'sceneSelect'
   | 'sceneMoment'
+  | 'focusReflection'
   | 'step2'
   | 'step2Why'
   | 'step3'
@@ -91,6 +100,7 @@ function b4ClipForScreen(
     if (sceneMomentPhase === 'steady' || sceneMomentPhase === 'ready') return null;
     return sceneAdventureB4Clip(selectedScene.id);
   }
+  if (screen === 'focusReflection') return null;
   if (screen === 'step2') return 'feeling-prompt';
   if (screen === 'step2Why') return 'why-feeling';
   if (screen === 'step3') return 'body-prompt';
@@ -105,6 +115,7 @@ function b4ClipForScreen(
 /** Deterministic Focus Flame fill for adventure flow (intro → reward). */
 function focusFlameProgressPercent(screen: Screen): number {
   if (screen === 'sceneMoment') return 28;
+  if (screen === 'focusReflection') return 32;
   if (screen === 'step2') return 36;
   if (screen === 'step2Why') return 44;
   if (screen === 'step3') return 52;
@@ -273,6 +284,7 @@ export default function FocusFlameGame({
   const [body, setBody] = useState<BodySignal | null>(null);
   const [move, setMove] = useState<FocusFlameMove | null>(null);
   const [storyClueB4, setStoryClueB4] = useState<string | null>(null);
+  const [reflectionB4, setReflectionB4] = useState<string | null>(null);
   const [focusPoints, setFocusPoints] = useState(0);
   // TODO: persist completedSceneIds to localStorage if we want returning users to keep journey progress.
   const [completedSceneIds, setCompletedSceneIds] = useState<Set<FocusFlameSceneId>>(() => new Set());
@@ -283,6 +295,7 @@ export default function FocusFlameGame({
   const prevBodyWhyAwarded = useRef(false);
   const prevMoveAwarded = useRef(false);
   const prevMoveWhyAwarded = useRef(false);
+  const prevReflectionAwarded = useRef(false);
   const beatSteadyAwardedRef = useRef(false);
   const practiceAwardedRef = useRef(false);
   const [sceneMomentKey, setSceneMomentKey] = useState(0);
@@ -301,6 +314,15 @@ export default function FocusFlameGame({
   useEffect(() => {
     if (screen !== 'step2Why' && screen !== 'step3Why' && screen !== 'step4Why') {
       setStoryClueB4(null);
+    }
+    if (screen !== 'focusReflection') {
+      setReflectionB4(null);
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    if (screen === 'focusReflection') {
+      setReflectionB4(FOCUS_REFLECTION_B4.intro);
     }
   }, [screen]);
 
@@ -376,6 +398,8 @@ export default function FocusFlameGame({
 
   const missionProgress = missionProgressCount(completedSceneIds);
   const missionDone = isMissionComplete(completedSceneIds, scenes.length);
+  const sceneSelectB4Message =
+    missionProgress > 0 ? SCENE_SELECT_B4_CONTINUE : SCENE_SELECT_B4_WELCOME;
   const inProgressSceneId =
     screen !== 'sceneSelect' && screen !== 'reward' && selectedScene ? selectedScene.id : null;
 
@@ -443,6 +467,7 @@ export default function FocusFlameGame({
     prevBodyWhyAwarded.current = false;
     prevMoveAwarded.current = false;
     prevMoveWhyAwarded.current = false;
+    prevReflectionAwarded.current = false;
     beatSteadyAwardedRef.current = false;
     practiceAwardedRef.current = false;
   }, []);
@@ -455,13 +480,8 @@ export default function FocusFlameGame({
   }, []);
 
   const completeSceneMoment = useCallback(() => {
-    setScreen('step2');
+    setScreen('focusReflection');
   }, []);
-
-  const skipSceneMomentBeat = useCallback(() => {
-    playButtonClick();
-    setScreen('step2');
-  }, [playButtonClick]);
 
   const markSceneComplete = useCallback((sceneId: FocusFlameSceneId) => {
     setCompletedSceneIds((prev) => {
@@ -522,7 +542,12 @@ export default function FocusFlameGame({
       return;
     }
     if (screen === 'sceneMoment') return setScreen('sceneSelect');
-    if (screen === 'step2') return goToSceneMoment();
+    if (screen === 'focusReflection') {
+      sceneMomentPhaseRef.current = 'ready';
+      setSceneMomentPhase('ready');
+      return setScreen('sceneMoment');
+    }
+    if (screen === 'step2') return setScreen('focusReflection');
     if (screen === 'step2Why') return setScreen('step2');
     if (screen === 'step3') return setScreen('step2Why');
     if (screen === 'step3Why') return setScreen('step3');
@@ -565,7 +590,9 @@ export default function FocusFlameGame({
           : sceneMomentPhase === 'ready'
             ? FLAME_STEADY_B4_MESSAGES.after
             : FLAME_STEADY_B4_MESSAGES.before
-        : screen === 'step2'
+        : screen === 'focusReflection'
+          ? reflectionB4 ?? FOCUS_REFLECTION_B4.intro
+          : screen === 'step2'
             ? 'Let’s name what Caiden might be feeling.'
             : screen === 'step2Why'
               ? storyClueB4 ?? 'Why do you think Caiden feels that way?'
@@ -602,11 +629,21 @@ export default function FocusFlameGame({
     [awardFocusPoints, playUiConfirm]
   );
 
+  const awardReflectionPoints = useCallback(() => {
+    if (prevReflectionAwarded.current) return;
+    prevReflectionAwarded.current = true;
+    awardFocusPoints(FOCUS_POINT_AWARDS.reflection);
+    playUiConfirm();
+  }, [awardFocusPoints, playUiConfirm]);
+
   const sortedScenes = [...scenes].sort(
     (a, b) => SCENE_MISSION_ORDER.indexOf(a.id) - SCENE_MISSION_ORDER.indexOf(b.id)
   );
 
   const focusFlameMarkSrc = `${process.env.PUBLIC_URL || ''}/images/icons/focus-flame-mark.svg`;
+
+  const adventureStatusMode =
+    screen === 'sceneMoment' && sceneMomentPhase === 'watch' ? 'mission' : 'story';
 
   const navDisabled = !bootDone || !soundGateResolved;
 
@@ -810,16 +847,25 @@ export default function FocusFlameGame({
 
               {screen === 'sceneSelect' && (
                 <div className="ffl-screen ffl-screen--sceneSelect ffl-grid">
-                  <div className="ffl-zone-hud">
-                    <B4GuidePanel message={b4Message} className="ffl-gameB4 ffl-b4-panel" />
+                  <div className="ffl-zone-hud ffl-sceneSelectHudRail">
+                    <B4GuidePanel message={sceneSelectB4Message} className="ffl-gameB4 ffl-b4-panel" />
                   </div>
                   <div className="ffl-scene-select-main">
-                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header ffl-missionSelectHeader">
+                    <div className="ffl-sceneSelectMobileB4" aria-label="B-4 guide">
+                      <CompactB4HudCard message={SCENE_SELECT_B4_MOBILE} />
+                    </div>
+                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header ffl-missionSelectHeader ffl-sceneSelectTitleBlock--desktop">
                       <p className="ffl-missionSelectKicker">{MISSION_TITLE}</p>
                       <h2 className="ffl-sceneSelectTitle">Choose your next adventure</h2>
                       <p className="ffl-sceneSelectSubtitle">{MISSION_GOAL_COPY}</p>
                       <p className="ffl-missionSelectProgress" aria-live="polite">
                         {missionProgress} of {scenes.length} adventures complete
+                      </p>
+                    </div>
+                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header ffl-sceneSelectTitleBlock--mobile">
+                      <h2 className="ffl-sceneSelectTitle">{SCENE_SELECT_MOBILE_TITLE}</h2>
+                      <p className="ffl-sceneSelectProgress ffl-sceneSelectProgress--mobile" aria-live="polite">
+                        {missionProgress} of {scenes.length} complete
                       </p>
                     </div>
                     <div className="ffl-sceneSelectStack ffl-sceneCardList">
@@ -839,22 +885,31 @@ export default function FocusFlameGame({
               )}
 
               {screen === 'sceneMoment' && selectedScene && (
-                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
+                <AdventureFlowLayout className="ffl-screen--stack ffl-screen--sceneMoment ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('sceneMoment')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
                     move={move}
+                    hideFlameStatusCard={isMobileGameUi}
                   />
                   <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
                     <SceneMoment
                       key={`${selectedScene.id}-${sceneMomentKey}`}
-                      scene={selectedScene}
+                      scene={{
+                        ...selectedScene,
+                        momentCopy: isMobileGameUi
+                          ? SCENE_MOMENT_MOBILE_COPY[selectedScene.id]
+                          : selectedScene.momentCopy,
+                      }}
                       markSrc={focusFlameMarkSrc}
                       reduceMotion={reduceMotion}
                       onButtonClick={playButtonClick}
@@ -867,7 +922,36 @@ export default function FocusFlameGame({
                         awardFocusPoints(amount);
                       }}
                       onComplete={completeSceneMoment}
-                      onSkip={skipSceneMomentBeat}
+                    />
+                  </main>
+                </AdventureFlowLayout>
+              )}
+
+              {screen === 'focusReflection' && selectedScene && (
+                <AdventureFlowLayout className="ffl-screen--stack ffl-screen--focusReflection ffl-flow-layout ffl-mobile-stack">
+                  <GameHudPanel
+                    className="ffl-zone-hud"
+                    b4Message={b4Message}
+                    selectedScene={selectedScene}
+                    progressPercent={focusFlameProgressPercent('focusReflection')}
+                    markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
+                    reduceMotion={reduceMotion}
+                    feeling={feeling}
+                    body={body}
+                    move={move}
+                  />
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
+                    <FocusReflectionStep
+                      resetKey={selectedScene.id}
+                      onAwardPoints={awardReflectionPoints}
+                      onB4Message={setReflectionB4}
+                      onTryAgainSound={playButtonClick}
+                      onCorrectB4Clip={() => playB4Clip('reflection-correct')}
+                      onContinueClick={playButtonClick}
+                      onContinue={() => setScreen('step2')}
                     />
                   </main>
                 </AdventureFlowLayout>
@@ -881,6 +965,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step2')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -911,6 +998,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step2Why')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -940,6 +1030,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step3')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -968,6 +1061,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step3Why')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -997,6 +1093,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step4')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -1025,6 +1124,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('step4Why')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}
@@ -1057,6 +1159,9 @@ export default function FocusFlameGame({
                     selectedScene={selectedScene}
                     progressPercent={focusFlameProgressPercent('realLifePractice')}
                     markSrc={focusFlameMarkSrc}
+                    adventureStatusMode={adventureStatusMode}
+                    missionCompleted={missionProgress}
+                    missionTotal={scenes.length}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
                     body={body}

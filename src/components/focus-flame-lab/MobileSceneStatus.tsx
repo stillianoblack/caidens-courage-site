@@ -1,34 +1,38 @@
-import React from 'react';
-import HudSceneThumb from './HudSceneThumb';
+import AdventureStatusPanel, {
+  type AdventureStatusPanelScene,
+} from './AdventureStatusPanel';
 
-export type MobileSceneStatusScene = {
-  id: string;
-  title: string;
-  cardImageSrc: string;
-  videoSrc?: string;
-  thumbnail?: string;
-};
+export type MobileSceneStatusScene = AdventureStatusPanelScene;
 
+/** @deprecated Prefer AdventureStatusPanel with variant="bar". Kept for reward screen. */
 export default function MobileSceneStatus({
   scene,
   progressPercent,
   reduceMotion = false,
+  markSrc,
+  missionCompleted = 0,
+  missionTotal = 3,
 }: {
   scene: MobileSceneStatusScene;
   progressPercent: number;
   reduceMotion?: boolean;
+  markSrc?: string;
+  missionCompleted?: number;
+  missionTotal?: number;
 }) {
-  const pct = Math.max(0, Math.min(100, progressPercent));
-  const progressLine =
-    pct >= 100 ? 'Focus Flame steady' : `${pct}% steady`;
+  const publicUrl = process.env.PUBLIC_URL || '';
+  const emblem = markSrc ?? `${publicUrl}/images/icons/focus-flame-mark.svg`;
 
   return (
-    <div className="ffl-mobileSceneStatus" role="status" aria-live="polite">
-      <HudSceneThumb scene={scene} reduceMotion={reduceMotion} variant="mobile" />
-      <div className="ffl-mobileSceneStatus-text">
-        <div className="ffl-mobileSceneStatus-title">{scene.title}</div>
-        <div className="ffl-mobileSceneStatus-progress">{progressLine}</div>
-      </div>
-    </div>
+    <AdventureStatusPanel
+      mode="story"
+      variant="bar"
+      scene={scene}
+      progressPercent={progressPercent}
+      markSrc={emblem}
+      reduceMotion={reduceMotion}
+      missionCompleted={missionCompleted}
+      missionTotal={missionTotal}
+    />
   );
 }

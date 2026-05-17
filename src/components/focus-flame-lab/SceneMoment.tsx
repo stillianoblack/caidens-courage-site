@@ -2,10 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { B4ClipSlug } from '../../hooks/useFocusFlameAudio';
 import type { FocusFlameScene } from './FocusFlameGame';
 import { FOCUS_POINT_AWARDS } from './focusFlameRanks';
-import { sharedSteadyCompleteVideoCandidates } from './focusFlameTapVideos';
+import {
+  resolveTapVideoCandidates,
+  sharedSteadyCompleteVideoCandidates,
+  TAP_VIDEO_STEADY_INTERACTION_INDEX,
+} from './focusFlameTapVideos';
+import { FFL_TOAST_SUCCESS_MS } from './focusFlameToastTiming';
 
 const STEADY_FEEDBACK_MS = 900;
-const TOAST_MS = 2200;
 const VIDEO_FADE_MS = 320;
 
 const STEADY_TOAST = 'Nice. Caiden’s flame is getting steady.';
@@ -55,18 +59,16 @@ export default function SceneMoment({
   onButtonClick,
   onAwardPoints,
   onComplete,
-  onSkip,
   onPhaseChange,
   playFlameSteadySuccess,
   playB4Clip,
 }: {
-  scene: Pick<FocusFlameScene, 'id' | 'title' | 'momentCopy' | 'videoSrc' | 'thumbnail'>;
+  scene: Pick<FocusFlameScene, 'id' | 'title' | 'momentCopy' | 'videoSrc' | 'thumbnail' | 'tapVideoSequence'>;
   markSrc: string;
   reduceMotion: boolean;
   onButtonClick: () => void;
   onAwardPoints: (amount: number) => void;
   onComplete: () => void;
-  onSkip: () => void;
   onPhaseChange: (phase: SceneMomentPhase) => void;
   playFlameSteadySuccess?: () => Promise<void>;
   playB4Clip?: (slug: B4ClipSlug) => void;
@@ -83,7 +85,7 @@ export default function SceneMoment({
   const [loading, setLoading] = useState(!reduceMotion);
   const [failed, setFailed] = useState(false);
   const [hasSteadiedFlame, setHasSteadiedFlame] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [toastNotice, setToastNotice] = useState<{ id: number } | null>(null);
   const [floatPoints, setFloatPoints] = useState<FloatPoints | null>(null);
   const [steadiedPop, setSteadiedPop] = useState(false);
   const [interactionLocked, setInteractionLocked] = useState(false);
@@ -93,46 +95,53 @@ export default function SceneMoment({
   const showVideo = !reduceMotion && !failed && Boolean(scene.videoSrc);
   const useVideoLayers = showVideo;
 
-  const transitionToSteadyCompleteVideo = useCallback(async () => {
-    if (!useVideoLayers) return;
+  const transitionToVideoCandidates = useCallback(
+    async (candidates: string[], warnLabel: string) => {
+      if (!useVideoLayers || candidates.length === 0) return;
 
+      const inactiveLayer = activeLayerRef.current === 0 ? 1 : 0;
+      const inactiveEl = inactiveLayer === 0 ? videoARef.current : videoBRef.current;
+      const activeEl = inactiveLayer === 0 ? videoBRef.current : videoARef.current;
+
+      if (!inactiveEl) return;
+
+      const loadedSrc = await loadVideoFromCandidates(inactiveEl, candidates);
+      if (!loadedSrc) {
+        console.warn(`[Focus Flame tap video] ${warnLabel} clip missing; keeping scene video`);
+        return;
+      }
+
+      try {
+        inactiveEl.muted = true;
+        inactiveEl.loop = true;
+        inactiveEl.playsInline = true;
+        await inactiveEl.play();
+      } catch {
+        /* ignore autoplay quirks */
+      }
+
+      setVideoFading(true);
+      if (fadeTimerRef.current != null) window.clearTimeout(fadeTimerRef.current);
+
+      fadeTimerRef.current = window.setTimeout(() => {
+        activeLayerRef.current = inactiveLayer;
+        setActiveVideoLayer(inactiveLayer);
+        setVideoFading(false);
+        try {
+          activeEl?.pause();
+        } catch {
+          /* ignore */
+        }
+      }, VIDEO_FADE_MS);
+    },
+    [useVideoLayers]
+  );
+
+  const transitionToSteadyCompleteVideo = useCallback(async () => {
     const publicUrl = process.env.PUBLIC_URL || '';
     const candidates = sharedSteadyCompleteVideoCandidates(publicUrl);
-    const inactiveLayer = activeLayerRef.current === 0 ? 1 : 0;
-    const inactiveEl = inactiveLayer === 0 ? videoARef.current : videoBRef.current;
-    const activeEl = inactiveLayer === 0 ? videoBRef.current : videoARef.current;
-
-    if (!inactiveEl) return;
-
-    const loadedSrc = await loadVideoFromCandidates(inactiveEl, candidates);
-    if (!loadedSrc) {
-      console.warn('[Focus Flame tap video] shared steady-complete clip missing; keeping scene video');
-      return;
-    }
-
-    try {
-      inactiveEl.muted = true;
-      inactiveEl.loop = true;
-      inactiveEl.playsInline = true;
-      await inactiveEl.play();
-    } catch {
-      /* ignore autoplay quirks */
-    }
-
-    setVideoFading(true);
-    if (fadeTimerRef.current != null) window.clearTimeout(fadeTimerRef.current);
-
-    fadeTimerRef.current = window.setTimeout(() => {
-      activeLayerRef.current = inactiveLayer;
-      setActiveVideoLayer(inactiveLayer);
-      setVideoFading(false);
-      try {
-        activeEl?.pause();
-      } catch {
-        /* ignore */
-      }
-    }, VIDEO_FADE_MS);
-  }, [useVideoLayers]);
+    await transitionToVideoCandidates(candidates, 'steady-complete');
+  }, [transitionToVideoCandidates]);
 
   const loadMainSceneVideo = useCallback(async () => {
     const el = videoARef.current;
@@ -174,7 +183,7 @@ export default function SceneMoment({
     hasSteadiedFlameRef.current = false;
     flameSuccessPlayedRef.current = false;
     setHasSteadiedFlame(false);
-    setShowToast(false);
+    setToastNotice(null);
     setInteractionLocked(false);
     activeLayerRef.current = 0;
     setActiveVideoLayer(0);
@@ -201,10 +210,10 @@ export default function SceneMoment({
   }, [loadMainSceneVideo, reduceMotion, scene.id]);
 
   useEffect(() => {
-    if (!showToast) return;
-    const t = window.setTimeout(() => setShowToast(false), TOAST_MS);
+    if (!toastNotice) return;
+    const t = window.setTimeout(() => setToastNotice(null), FFL_TOAST_SUCCESS_MS);
     return () => window.clearTimeout(t);
-  }, [showToast]);
+  }, [toastNotice]);
 
   useEffect(() => {
     if (!floatPoints) return;
@@ -222,6 +231,17 @@ export default function SceneMoment({
     void playB4Clip?.('flame-start');
     onButtonClick();
     setPhase('steady');
+
+    if (scene.id === 'move' && scene.tapVideoSequence?.length) {
+      const publicUrl = process.env.PUBLIC_URL || '';
+      const candidates = resolveTapVideoCandidates(
+        publicUrl,
+        scene.tapVideoSequence,
+        TAP_VIDEO_STEADY_INTERACTION_INDEX,
+        scene.videoSrc
+      );
+      void transitionToVideoCandidates(candidates, 'steady-interaction');
+    }
   };
 
   const handleSteadyFlame = () => {
@@ -245,7 +265,7 @@ export default function SceneMoment({
         await transitionToSteadyCompleteVideo();
       }
 
-      setShowToast(true);
+      setToastNotice({ id: Date.now() });
       if (!reduceMotion) setSteadiedPop(true);
 
       readyTimerRef.current = window.setTimeout(() => {
@@ -261,11 +281,6 @@ export default function SceneMoment({
     onButtonClick();
     onComplete();
   };
-
-  const handleSkip = useCallback(() => {
-    onButtonClick();
-    onSkip();
-  }, [onButtonClick, onSkip]);
 
   const videoStackClass = [
     'ffl-sceneMoment-videoStack',
@@ -287,23 +302,29 @@ export default function SceneMoment({
   const mediaClass = [
     'ffl-scene-video-wrap',
     'ffl-sceneMoment-media',
-    phase === 'steady' || phase === 'ready' ? 'ffl-sceneMoment-media--steady' : '',
+    phase === 'steady' ? 'ffl-sceneMoment-media--steady' : '',
     hasSteadiedFlame
       ? 'ffl-sceneMoment-media--steadied'
-      : phase === 'steady' || phase === 'ready'
+      : phase === 'steady'
         ? 'ffl-sceneMoment-media--flickering'
         : '',
   ]
     .filter(Boolean)
     .join(' ');
 
+  const showSteadyOverlay = phase === 'steady';
+
   return (
-    <div className="ffl-comicFrame ffl-sceneMoment">
+    <div
+      className={['ffl-comicFrame', 'ffl-sceneMoment', `ffl-sceneMoment--${phase}`].join(' ')}
+      data-scene-moment-phase={phase}
+    >
       <div className="ffl-comicHeader">
         <div className="ffl-comicTag">SCENE INTRO</div>
         <div className="ffl-comicTitle">{scene.title}</div>
       </div>
 
+      <div className="ffl-sceneMoment-mediaBlock">
       <div className={mediaClass}>
         {showVideo ? (
           <div className={videoStackClass}>
@@ -350,8 +371,8 @@ export default function SceneMoment({
           </span>
         ) : null}
 
-        {phase === 'steady' || phase === 'ready' ? (
-          <div className="ffl-sceneMoment-steadyLayer">
+        {showSteadyOverlay ? (
+          <div className="ffl-sceneMoment-steadyLayer ffl-sceneMoment-steadyLayer--onVideo">
             {!hasSteadiedFlame ? (
               <div className="ffl-sceneMoment-promptCard">
                 <p className="ffl-sceneMoment-promptTitle">Help Caiden steady his flame.</p>
@@ -359,14 +380,8 @@ export default function SceneMoment({
               </div>
             ) : null}
 
-            {showToast ? (
-              <div className="ffl-tap-toast ffl-sceneMoment-steadyToast" role="status" aria-live="polite">
-                {STEADY_TOAST}
-              </div>
-            ) : null}
-
             {floatPoints ? (
-              <span key={floatPoints.id} className="ffl-sceneMoment-pointsFloat" aria-hidden="true">
+              <span key={floatPoints.id} className="ffl-sceneMoment-pointsFloat ffl-sceneMoment-pointsFloat--onVideo" aria-hidden="true">
                 +{floatPoints.amount} Focus Points
               </span>
             ) : null}
@@ -376,6 +391,7 @@ export default function SceneMoment({
                 type="button"
                 className={[
                   'ffl-flame-badge-button',
+                  'ffl-sceneMoment-flameBadge',
                   steadiedPop && !reduceMotion ? 'ffl-flame-badge-button--pop' : '',
                 ]
                   .filter(Boolean)
@@ -393,6 +409,7 @@ export default function SceneMoment({
               <span
                 className={[
                   'ffl-flame-badge-button',
+                  'ffl-sceneMoment-flameBadge',
                   'ffl-flame-badge-button--steadied',
                   steadiedPop && !reduceMotion ? 'ffl-flame-badge-button--pop' : '',
                 ]
@@ -408,6 +425,56 @@ export default function SceneMoment({
         ) : null}
       </div>
 
+      {showSteadyOverlay ? (
+        <div
+          className={[
+            'ffl-sceneMoment-steadyBelow',
+            hasSteadiedFlame ? 'ffl-sceneMoment-steadyBelow--done' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {!hasSteadiedFlame ? (
+            <>
+              <button
+                type="button"
+                className={[
+                  'ffl-ctaPrimary',
+                  'ffl-sceneMoment-steadyCta',
+                  steadiedPop && !reduceMotion ? 'ffl-sceneMoment-steadyCta--pop' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={handleSteadyFlame}
+                disabled={interactionLocked}
+              >
+                <img className="ffl-sceneMoment-steadyCtaIcon" src={markSrc} alt="" decoding="async" />
+                <span className="ffl-sceneMoment-steadyCtaLabel">Help Caiden steady his flame</span>
+              </button>
+              <p className="ffl-sceneMoment-steadyCtaSub">
+                One small step can help big feelings slow down.
+              </p>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+      </div>
+
+      {toastNotice || floatPoints ? (
+        <div className="ffl-sceneMoment-feedbackSlot">
+          {toastNotice ? (
+            <div key={toastNotice.id} className="ffl-sceneMoment-toastSlot" role="status" aria-live="polite">
+              <div className="ffl-tap-toast ffl-sceneMoment-steadyToast ffl-tap-toast--success">{STEADY_TOAST}</div>
+            </div>
+          ) : null}
+          {floatPoints ? (
+            <span key={floatPoints.id} className="ffl-sceneMoment-feedbackPoints" aria-hidden="true">
+              +{floatPoints.amount} Focus Points
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
       <p className="ffl-comicBody ffl-sceneMoment-copy">{scene.momentCopy}</p>
 
       {phase === 'watch' ? (
@@ -419,16 +486,10 @@ export default function SceneMoment({
       ) : phase === 'ready' ? (
         <div className="ffl-comicAction ffl-sceneMoment-action">
           <button type="button" className="ffl-ctaPrimary ffl-sceneMoment-cta" onClick={handleContinueToFeeling}>
-            What is Caiden feeling?
+            Continue
           </button>
         </div>
-      ) : (
-        <div className="ffl-sceneMoment-steadyFooter">
-          <button type="button" className="ffl-sceneMoment-skip" onClick={handleSkip}>
-            Skip
-          </button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

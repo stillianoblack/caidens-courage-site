@@ -5,6 +5,7 @@ export const FOCUS_POINT_AWARDS = {
   move: 20,
   practice: 10,
   reasoning: 10,
+  reflection: 10,
 } as const;
 
 /** One-time award when the child steadies the flame in the scene moment (same total as former 3-tap beat). */
@@ -16,6 +17,7 @@ export const FLAME_TAP_POINT_AWARDS = [3, 3, 4] as const;
 /** Points earned in one full adventure (beat + all three steps). */
 export const ADVENTURE_FOCUS_POINTS =
   FOCUS_POINT_AWARDS.tinyBeat +
+  FOCUS_POINT_AWARDS.reflection +
   FOCUS_POINT_AWARDS.feeling +
   FOCUS_POINT_AWARDS.reasoning +
   FOCUS_POINT_AWARDS.body +

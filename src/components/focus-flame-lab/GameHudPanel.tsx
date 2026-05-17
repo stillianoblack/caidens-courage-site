@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { adventureReminderCopy, type AdventureStatusPanelScene } from './AdventureStatusPanel';
+import AdventureStatusPanel, {
+  type AdventureStatusMode,
+  type AdventureStatusPanelScene,
+} from './AdventureStatusPanel';
 import CompactB4HudCard from './CompactB4HudCard';
-import HudSceneThumb from './HudSceneThumb';
-import MobileSceneStatus from './MobileSceneStatus';
 import { focusFlameMoveHudShort, type FocusFlameMove } from './focusFlameMoves';
 import type { BodySignal, Feeling } from './focusFlameSelTypes';
 
@@ -19,6 +20,11 @@ export type GameHudPanelProps = {
   body: BodySignal | null;
   move: FocusFlameMove | null;
   className?: string;
+  adventureStatusMode: AdventureStatusMode;
+  missionCompleted: number;
+  missionTotal: number;
+  /** Mobile scene intro: status bar already shows steady %; hide duplicate flame card. */
+  hideFlameStatusCard?: boolean;
 };
 
 type BadgeKey = 'noticing' | 'body' | 'move';
@@ -33,6 +39,10 @@ export default function GameHudPanel({
   body,
   move,
   className,
+  adventureStatusMode,
+  missionCompleted,
+  missionTotal,
+  hideFlameStatusCard = false,
 }: GameHudPanelProps) {
   const prevPctRef = useRef(progressPercent);
   const [meterPulse, setMeterPulse] = useState(false);
@@ -134,19 +144,36 @@ export default function GameHudPanel({
       aria-label="B-4 guide and adventure status"
     >
       <div className="ffl-mobileSceneStatusWrap">
-        <MobileSceneStatus scene={selectedScene} progressPercent={progressPercent} reduceMotion={reduceMotion} />
+        <AdventureStatusPanel
+          mode={adventureStatusMode}
+          variant="bar"
+          scene={selectedScene}
+          progressPercent={progressPercent}
+          markSrc={markSrc}
+          reduceMotion={reduceMotion}
+          missionCompleted={missionCompleted}
+          missionTotal={missionTotal}
+        />
       </div>
 
       <div className="ffl-hud-b4-wrap">
         <CompactB4HudCard message={b4Message} />
       </div>
 
-      <div className="ffl-hud-card ffl-hud-card--adventure ffl-hud-adventure-card">
-        <HudSceneThumb scene={selectedScene} reduceMotion={reduceMotion} />
-        <div className="ffl-hud-scene-title">{selectedScene.title}</div>
-        <p className="ffl-hud-scene-reminder">{adventureReminderCopy(selectedScene.id)}</p>
+      <div className="ffl-hud-adventure-slot">
+        <AdventureStatusPanel
+          mode={adventureStatusMode}
+          variant="sidebar"
+          scene={selectedScene}
+          progressPercent={progressPercent}
+          markSrc={markSrc}
+          reduceMotion={reduceMotion}
+          missionCompleted={missionCompleted}
+          missionTotal={missionTotal}
+        />
       </div>
 
+      {hideFlameStatusCard ? null : (
       <div className="ffl-hud-card ffl-hud-card--flame ffl-flame-status-card ffl-hud-flame-card ffl-hud-flame-card--compact">
         <div className="ffl-flame-status-main">
           <div className="ffl-flame-status-icon-wrap" aria-hidden="true">
@@ -235,6 +262,7 @@ export default function GameHudPanel({
           </span>
         </div>
       </div>
+      )}
     </aside>
   );
 }

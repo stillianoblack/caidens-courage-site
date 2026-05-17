@@ -4,6 +4,9 @@ export const TAP_VIDEO_BEFORE_STEADY_INDEX = 0;
 /** Tap video index after the child steadies the flame (The Path). */
 export const TAP_VIDEO_AFTER_STEADY_INDEX = 3;
 
+/** Tap video index during the steady-flame interaction beat (The Path). */
+export const TAP_VIDEO_STEADY_INTERACTION_INDEX = 2;
+
 /** Shared completed flame clip for all adventures after steady (MVP). */
 export function sharedSteadyCompleteVideoCandidates(publicUrl: string): string[] {
   const base = `${publicUrl}/videos/focus-flame/tap/`;

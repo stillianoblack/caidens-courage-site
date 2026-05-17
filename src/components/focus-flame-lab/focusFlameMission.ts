@@ -7,6 +7,23 @@ export const MISSION_GOAL_COPY = 'Complete all 3 adventures to unlock your certi
 export const MISSION_INTRO_B4 =
   'Welcome to the Focus Flame Mission. Help Caiden through all three adventures to unlock your certificate.';
 
+export const SCENE_SELECT_B4_WELCOME =
+  'Welcome to the Focus Flame Mission. Choose an adventure to help Caiden steady his flame.';
+
+export const SCENE_SELECT_B4_CONTINUE =
+  'Nice work. Choose another adventure to continue the mission.';
+
+export const SCENE_SELECT_B4_MOBILE = 'Pick a mission to help Caiden.';
+
+export const SCENE_SELECT_MOBILE_TITLE = 'Choose a mission';
+
+/** Shorter scene-intro copy for mobile scene moment card. */
+export const SCENE_MOMENT_MOBILE_COPY: Record<FocusFlameSceneId, string> = {
+  move: 'Caiden steps into a new place. Everything feels different.',
+  ceremony: 'Everyone is watching. Caiden’s flame starts to flicker.',
+  cave: 'The cave is quiet. Caiden has to listen closely.',
+};
+
 export const SCENE_MISSION_ORDER: readonly FocusFlameSceneId[] = ['move', 'ceremony', 'cave'];
 
 const LEVEL_BY_SCENE: Record<FocusFlameSceneId, number> = {

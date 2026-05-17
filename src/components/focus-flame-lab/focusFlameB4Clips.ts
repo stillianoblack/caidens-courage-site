@@ -28,6 +28,7 @@ export const B4_CLIP_SLUGS = [
   'why-feeling',
   'why-body',
   'why-move',
+  'reflection-correct',
   'spark-breath',
   'b4-pause',
   'b4-pause-countdown',

@@ -1557,6 +1557,132 @@ body.ffl-debug-grid .ffl-app .ffl-screen.ffl-grid::before {
   padding: 14px 14px 12px;
 }
 
+.ffl-hud-adventure-slot {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Stateful adventure status: mission HUD (pre-game) vs story reminder (gameplay) */
+.ffl-adventureStatusPanel-root {
+  width: 100%;
+  min-width: 0;
+}
+
+.ffl-adventureStatusPanel-root--sidebar {
+  min-height: 112px;
+}
+
+.ffl-adventureStatusPanel-root--sidebar.ffl-adventureStatusPanel-root--story {
+  min-height: 196px;
+}
+
+.ffl-adventureStatusPanel-swap {
+  animation: fflAdvStatusSwapIn 320ms ease;
+}
+
+.ffl-adventureStatusPanel-swap--reduced {
+  animation: none;
+}
+
+@keyframes fflAdvStatusSwapIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ffl-adventureStatusPanel-root--pulse .ffl-adventureStatusPanel-story {
+  animation: fflAdvStatusPanelPulse 0.68s ease-out 1;
+}
+
+.ffl-adventureStatusPanel-mission .ffl-adventureStatusPanel-kicker {
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(229, 192, 106, 0.88);
+}
+
+.ffl-adventureStatusPanel-missionRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ffl-adventureStatusPanel-missionText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ffl-adventureStatusPanel-emblemWrap {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(3, 8, 18, 0.55);
+  border: 1px solid rgba(229, 192, 106, 0.22);
+  box-sizing: border-box;
+}
+
+.ffl-adventureStatusPanel-emblemWrap--sidebar {
+  width: 64px;
+  height: 64px;
+}
+
+.ffl-adventureStatusPanel-emblemWrap--bar {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+}
+
+.ffl-adventureStatusPanel-emblem {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(229, 192, 106, 0.32));
+}
+
+.ffl-adventureStatusPanel-mission .ffl-hud-scene-title {
+  margin-top: 0;
+}
+
+.ffl-adventureStatusPanel-steady {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ffl-adventureStatusPanel-missionMeta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.ffl-adventureStatusPanel-mission .ffl-adventureStatusPanel-kicker {
+  display: block;
+}
+
+.ffl-adventureStatusPanel-mission.ffl-mobileSceneStatus .ffl-adventureStatusPanel-kicker {
+  margin: 0 0 2px;
+  font-size: 9px;
+}
+
+.ffl-adventureStatusPanel-storyClue {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 /* Bias crop toward upper field so character faces stay in frame (short wide HUD thumb). */
 .ffl-hud-scene-thumb {
   width: 100%;
@@ -2454,6 +2580,15 @@ body.ffl-debug-grid .ffl-app .ffl-screen.ffl-grid::before {
   width: 100%;
 }
 
+/* Scene select: mobile compact B-4 (hidden on desktop; rail uses B4GuidePanel) */
+.ffl-sceneSelectMobileB4 {
+  display: none;
+}
+
+.ffl-sceneSelectTitleBlock--mobile {
+  display: none;
+}
+
 .ffl-sceneSelectTitle {
   margin: 0;
   font-family: Nunito, system-ui, -apple-system, Segoe UI, sans-serif;
@@ -2522,6 +2657,44 @@ body.ffl-debug-grid .ffl-app .ffl-screen.ffl-grid::before {
   .ffl-screen--sceneSelect .ffl-sceneCardList {
     overflow: visible;
     padding: 10px 12px;
+  }
+
+  .ffl-screen--sceneSelect .ffl-zone-hud {
+    display: none !important;
+  }
+
+  .ffl-sceneSelectMobileB4 {
+    display: block;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-hud-card--b4.ffl-b4-card {
+    width: 100%;
+    margin: 0;
+  }
+
+  .ffl-sceneSelectTitleBlock--desktop {
+    display: none !important;
+  }
+
+  .ffl-sceneSelectTitleBlock--mobile {
+    display: block;
+    text-align: center;
+    margin: 0 0 24px;
+  }
+
+  .ffl-sceneSelectTitleBlock--mobile .ffl-sceneSelectTitle {
+    margin: 0;
+  }
+
+  .ffl-sceneSelectProgress--mobile {
+    margin: 12px 0 0;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(160, 210, 255, 0.92);
+    text-align: center;
   }
 
   .ffl-gameHud--entry {
@@ -4239,25 +4412,7 @@ a.ffl-ctaSecondary {
 }
 
 .ffl-sceneMoment-steadyToast {
-  animation: fflSteadyToastIn 2.2s ease-out forwards;
-}
-
-@keyframes fflSteadyToastIn {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 8px) scale(0.96);
-  }
-  10% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-  82% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -4px) scale(0.98);
-  }
+  animation: none;
 }
 
 .ffl-flame-badge-label {
@@ -4344,6 +4499,14 @@ a.ffl-ctaSecondary {
   width: 100%;
 }
 
+.ffl-sceneMoment-mediaBlock {
+  width: 100%;
+}
+
+.ffl-sceneMoment-mediaBlock > .ffl-sceneMoment-media {
+  margin-top: 12px;
+}
+
 .ffl-sceneMoment-steadyLayer {
   position: absolute;
   inset: 0;
@@ -4353,6 +4516,103 @@ a.ffl-ctaSecondary {
 
 .ffl-sceneMoment-steadyLayer > * {
   pointer-events: auto;
+}
+
+/* Below-video steady CTA (mobile); hidden on desktop */
+.ffl-sceneMoment-steadyBelow {
+  display: none;
+  width: 100%;
+  min-height: 96px;
+  margin-top: 12px;
+  box-sizing: border-box;
+}
+
+.ffl-sceneMoment-steadyBelow--done {
+  min-height: 96px;
+}
+
+.ffl-sceneMoment-steadyCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.ffl-sceneMoment-steadyCta--pop {
+  animation: fflFlameBadgePop 0.32s ease-out;
+}
+
+.ffl-sceneMoment-steadyCtaIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(231, 196, 90, 0.55));
+}
+
+.ffl-sceneMoment-steadyCtaLabel {
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.ffl-sceneMoment-steadyCtaSub {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.ffl-sceneMoment-feedbackSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  padding-inline: 16px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ffl-sceneMoment-toastSlot {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.ffl-sceneMoment-feedbackSlot .ffl-tap-toast {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+  margin: 0;
+  width: fit-content;
+  max-width: min(320px, calc(100% - 32px));
+  padding-inline: 20px;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ffl-sceneMoment-feedbackPoints {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(229, 192, 106, 0.95);
+  animation: fflFlamePointsFloat 0.95s ease-out forwards;
 }
 
 .ffl-sceneMoment-promptCard {
@@ -4392,9 +4652,10 @@ a.ffl-ctaSecondary {
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
-  max-width: min(320px, 88%);
+  max-width: min(320px, calc(100% - 32px));
+  width: fit-content;
   margin: 0;
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: 999px;
   border: 1px solid rgba(229, 192, 106, 0.45);
   background: rgba(8, 18, 38, 0.92);
@@ -4404,25 +4665,120 @@ a.ffl-ctaSecondary {
   line-height: 1.35;
   text-align: center;
   box-shadow: 0 0 18px rgba(231, 196, 90, 0.28);
-  animation: fflTapToastIn 1.2s ease-out forwards;
+  box-sizing: border-box;
   pointer-events: none;
+  --ffl-toast-duration: 3000ms;
 }
 
-@keyframes fflTapToastIn {
+.ffl-tap-toast--success {
+  animation: fflGameToastSuccess var(--ffl-toast-duration) ease forwards;
+}
+
+.ffl-tap-toast--wrong {
+  --ffl-toast-duration: 2350ms;
+  animation: fflGameToastWrong var(--ffl-toast-duration) ease forwards;
+}
+
+@keyframes fflGameToastSuccess {
   0% {
     opacity: 0;
-    transform: translate(-50%, 8px) scale(0.96);
+    transform: translateY(6px) scale(0.96);
   }
-  12% {
+  7% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
   }
-  78% {
+  87% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes fflGameToastWrong {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  8.5% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  85% {
     opacity: 1;
   }
   100% {
     opacity: 0;
+    transform: translateY(-3px) scale(0.99);
+  }
+}
+
+/* Desktop: toast over video uses absolute centering inside media */
+@media (min-width: 769px) {
+  .ffl-sceneMoment-mediaBlock {
+    position: relative;
+  }
+
+  .ffl-sceneMoment-feedbackSlot {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+    padding-inline: 12px;
+    z-index: 6;
+  }
+
+  .ffl-sceneMoment-feedbackSlot .ffl-tap-toast {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-name: fflGameToastSuccessDesktop;
+  }
+
+  .ffl-sceneMoment-feedbackSlot .ffl-tap-toast--wrong {
+    animation-name: fflGameToastWrongDesktop;
+  }
+}
+
+@keyframes fflGameToastSuccessDesktop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.96);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  87% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
     transform: translate(-50%, -4px) scale(0.98);
+  }
+}
+
+@keyframes fflGameToastWrongDesktop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.98);
+  }
+  8.5% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -3px) scale(0.99);
   }
 }
 
@@ -4721,7 +5077,56 @@ a.ffl-ctaSecondary {
 }
 
 @media (max-width: 768px) {
-  .ffl-flame-badge-button {
+  .ffl-sceneMoment-steadyBelow {
+    display: block;
+  }
+
+  /* Collapse empty CTA reserve after flame is steadied — removes dead gap above toast */
+  .ffl-sceneMoment-steadyBelow--done {
+    display: none;
+    min-height: 0;
+    margin: 0;
+  }
+
+  .ffl-sceneMoment-steadyLayer--onVideo .ffl-sceneMoment-promptCard,
+  .ffl-sceneMoment-steadyLayer--onVideo .ffl-sceneMoment-flameBadge,
+  .ffl-sceneMoment-pointsFloat--onVideo {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  .ffl-sceneMoment-feedbackSlot {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    margin-top: 18px;
+    margin-bottom: 0;
+    padding-inline: 12px;
+    gap: 6px;
+  }
+
+  .ffl-sceneMoment-feedbackSlot .ffl-tap-toast {
+    position: relative;
+    left: auto;
+    transform: none;
+    animation-name: fflGameToastSuccess;
+    max-width: 85%;
+    width: fit-content;
+    margin-inline: auto;
+  }
+
+  .ffl-sceneMoment-feedbackSlot .ffl-tap-toast--wrong {
+    animation-name: fflGameToastWrong;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-feedbackSlot {
+    order: 0;
+    margin-top: 18px;
+    margin-bottom: 0;
+  }
+
+  .ffl-flame-badge-button.ffl-sceneMoment-flameBadge {
     width: 104px;
     height: 104px;
     min-width: 88px;
@@ -4730,7 +5135,7 @@ a.ffl-ctaSecondary {
     bottom: 10%;
   }
 
-  .ffl-sceneMoment-pointsFloat {
+  .ffl-sceneMoment-pointsFloat--onVideo {
     right: 6%;
     bottom: calc(10% + 118px);
     font-size: 13px;
@@ -4752,6 +5157,10 @@ a.ffl-ctaSecondary {
   .ffl-tap-toast {
     font-size: 13px;
     padding: 8px 14px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-steadyCta {
+    width: 100%;
   }
 }
 
@@ -4780,9 +5189,16 @@ a.ffl-ctaSecondary {
     animation: none;
   }
 
-  .ffl-tap-toast {
-    animation: none;
+  .ffl-tap-toast,
+  .ffl-tap-toast--success,
+  .ffl-tap-toast--wrong {
+    animation: none !important;
     opacity: 1;
+    transform: none;
+  }
+
+  .ffl-sceneMoment-feedbackSlot .ffl-tap-toast {
+    transform: none;
   }
 
   .ffl-sceneMoment-pointsFloat {
@@ -5211,6 +5627,354 @@ a.ffl-ctaSecondary {
     rgba(7, 15, 28, 0.4);
   padding: 24px 16px 20px;
   box-sizing: border-box;
+}
+
+.ffl-bodySignal-card--silhouette {
+  max-width: 400px;
+  min-height: 0;
+  padding: 14px 6px 16px;
+  overflow: visible;
+}
+
+.ffl-bodySignal-hud {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  aspect-ratio: 100 / 108;
+  min-height: 300px;
+}
+
+.ffl-bodySignal-connectors {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ffl-bodySignal-line {
+  stroke: rgba(229, 192, 106, 0.28);
+  stroke-width: 0.45;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  transition: stroke 200ms ease, stroke-opacity 200ms ease;
+}
+
+.ffl-bodySignal-line--selected {
+  stroke: rgba(255, 224, 150, 0.82);
+  stroke-width: 0.55;
+}
+
+.ffl-bodySignal-line--dimmed {
+  stroke-opacity: 0.18;
+}
+
+.ffl-bodySignal-hud:has(.ffl-bodySignal-sideLabel--Head:hover) .ffl-bodySignal-line--Head,
+.ffl-bodySignal-hud:has(.ffl-bodyZone--head:hover) .ffl-bodySignal-line--Head,
+.ffl-bodySignal-hud:has(.ffl-bodySignal-sideLabel--Hands:hover) .ffl-bodySignal-line--Hands,
+.ffl-bodySignal-hud:has(.ffl-bodyZone--handLeft:hover) .ffl-bodySignal-line--Hands,
+.ffl-bodySignal-hud:has(.ffl-bodyZone--handRight:hover) .ffl-bodySignal-line--Hands,
+.ffl-bodySignal-hud:has(.ffl-bodySignal-sideLabel--Chest:hover) .ffl-bodySignal-line--Chest,
+.ffl-bodySignal-hud:has(.ffl-bodyZone--chest:hover) .ffl-bodySignal-line--Chest,
+.ffl-bodySignal-hud:has(.ffl-bodySignal-sideLabel--Stomach:hover) .ffl-bodySignal-line--Stomach,
+.ffl-bodySignal-hud:has(.ffl-bodyZone--stomach:hover) .ffl-bodySignal-line--Stomach {
+  stroke: rgba(229, 192, 106, 0.52);
+}
+
+.ffl-bodySignal-sideLabel {
+  position: absolute;
+  z-index: 4;
+  margin: 0;
+  padding: 5px 11px;
+  min-height: 32px;
+  border: 1px solid rgba(229, 192, 106, 0.42);
+  border-radius: 999px;
+  background: rgba(7, 15, 28, 0.9);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    opacity 200ms ease;
+}
+
+.ffl-bodySignal-sideLabel--left {
+  left: 0;
+  transform: translateX(0);
+}
+
+.ffl-bodySignal-sideLabel--right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.ffl-bodySignal-sideLabel--Head {
+  top: 8%;
+}
+
+.ffl-bodySignal-sideLabel--Hands {
+  top: 56%;
+}
+
+.ffl-bodySignal-sideLabel--Chest {
+  top: 22%;
+}
+
+.ffl-bodySignal-sideLabel--Stomach {
+  top: 42%;
+}
+
+.ffl-bodySignal-sideLabel:hover,
+.ffl-bodySignal-sideLabel:focus-visible {
+  border-color: rgba(255, 224, 150, 0.72);
+  box-shadow: 0 0 14px rgba(229, 192, 106, 0.32);
+  outline: none;
+}
+
+.ffl-bodySignal-sideLabel--selected {
+  background: rgba(229, 192, 106, 0.2);
+  border-color: rgba(255, 224, 150, 0.85);
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 0 18px rgba(229, 192, 106, 0.38);
+}
+
+.ffl-bodySignal-sideLabel--dimmed {
+  opacity: 0.45;
+}
+
+.ffl-bodySilhouette-wrap,
+.body-silhouette-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: min(272px, 58%);
+  transform: translate(-50%, -50%);
+}
+
+.ffl-bodySilhouette-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Body signal — ring hotspots on silhouette (HUD mode) */
+.body-silhouette-wrap > .ffl-bodyHotspot,
+.body-silhouette-wrap > .body-zone {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 11px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: opacity 200ms ease;
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot-ring {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(229, 192, 106, 0.72);
+  background: transparent;
+  box-shadow: 0 0 10px rgba(229, 192, 106, 0.28);
+  animation: fflBodyHotspotBreathe 2.5s ease-in-out infinite;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot:hover:not(:disabled) .ffl-bodyHotspot-ring,
+.body-silhouette-wrap .ffl-bodyHotspot:focus-visible .ffl-bodyHotspot-ring {
+  border-color: rgba(255, 224, 150, 0.9);
+  box-shadow: 0 0 16px rgba(229, 192, 106, 0.45);
+  transform: scale(1.08);
+  outline: none;
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot--selected {
+  z-index: 4;
+  opacity: 1;
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot--selected::before {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.2) 0%, rgba(229, 192, 106, 0) 72%);
+  animation: fflBodyRegionGlow 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot--selected .ffl-bodyHotspot-ring {
+  background: rgba(229, 192, 106, 0.24);
+  border-color: rgba(255, 224, 150, 0.95);
+  box-shadow:
+    0 0 0 2px rgba(229, 192, 106, 0.2),
+    0 0 22px rgba(229, 192, 106, 0.55);
+  transform: scale(1.12);
+  animation: fflBodyHotspotSparkle 0.55s ease-out, fflBodyHotspotBreathe 2.5s ease-in-out infinite 0.55s;
+}
+
+@keyframes fflBodyRegionGlow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.body-silhouette-wrap .ffl-bodyHotspot--dimmed {
+  opacity: 0.42;
+}
+
+.body-silhouette-wrap > .ffl-bodyZone--head {
+  top: 14%;
+  left: 50%;
+}
+
+.body-silhouette-wrap > .ffl-bodyZone--chest {
+  top: 35%;
+  left: 58%;
+}
+
+.body-silhouette-wrap > .ffl-bodyZone--stomach {
+  top: 48%;
+  left: 50%;
+}
+
+.body-silhouette-wrap > .ffl-bodyZone--handLeft {
+  top: 56%;
+  left: 14%;
+}
+
+.body-silhouette-wrap > .ffl-bodyZone--handRight {
+  top: 63%;
+  left: 86%;
+}
+
+.ffl-bodySignal-feedback .ffl-selStep-feedback {
+  min-height: 2rem;
+}
+
+.ffl-bodySignal-feedback .ffl-selStep-confirm {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(229, 192, 106, 0.55);
+}
+
+.ffl-bodySignal-feedback .ffl-selStep-points {
+  font-size: 12px;
+  color: rgba(229, 192, 106, 0.65);
+}
+
+@keyframes fflBodyHotspotBreathe {
+  0%,
+  100% {
+    opacity: 0.72;
+    box-shadow: 0 0 8px rgba(229, 192, 106, 0.22);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(229, 192, 106, 0.38);
+  }
+}
+
+@keyframes fflBodyHotspotSparkle {
+  0% {
+    transform: scale(0.92);
+    box-shadow: 0 0 6px rgba(229, 192, 106, 0.3);
+  }
+
+  45% {
+    transform: scale(1.14);
+    box-shadow: 0 0 26px rgba(255, 224, 150, 0.7);
+  }
+
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 22px rgba(229, 192, 106, 0.55);
+  }
+}
+
+/* Tuning helper — uncomment to verify zone alignment
+.ffl-bodyHotspot,
+.body-zone {
+  outline: 1px dashed rgba(255, 255, 255, 0.2);
+}
+*/
+
+@media (max-width: 767px) {
+  .ffl-bodySignal-hud {
+    max-width: 100%;
+    min-height: 260px;
+    aspect-ratio: 100 / 100;
+  }
+
+  .ffl-bodySilhouette-wrap,
+  .body-silhouette-wrap {
+    width: min(220px, 62%);
+  }
+
+  .body-silhouette-wrap .ffl-bodyHotspot-ring {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ffl-bodySignal-sideLabel {
+    font-size: 11px;
+    padding: 4px 9px;
+    min-height: 30px;
+  }
+
+  .ffl-bodySignal-sideLabel--left {
+    left: 2px;
+  }
+
+  .ffl-bodySignal-sideLabel--right {
+    right: 2px;
+  }
+
+  .ffl-bodySignal-line {
+    stroke-width: 0.4;
+  }
+
+  .body-silhouette-wrap > .ffl-bodyZone--handRight {
+    top: 67%;
+  }
 }
 
 .ffl-bodySilhouette {
@@ -6610,6 +7374,66 @@ a.ffl-ctaSecondary {
 @media (max-width: 639px) {
   .ffl-reasoningWhy-option--wrong .ffl-reasoningWhy-option-label {
     text-decoration-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.ffl-reasoningWhy-option-mark--check {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: rgba(229, 192, 106, 0.18);
+  color: rgba(229, 192, 106, 0.98);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ffl-focusReflectionStep .ffl-focusReflection-lead {
+  margin: 10px 0 0;
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ffl-focusReflection-actions {
+  min-height: 48px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.ffl-focusReflection-actions--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ffl-focusReflection-continue {
+  width: 100%;
+  max-width: none;
+  text-align: center;
+}
+
+.ffl-reasoningWhy-option--correct {
+  animation: fflReflectionCorrectPop 0.34s ease-out;
+}
+
+@keyframes fflReflectionCorrectPop {
+  0% {
+    transform: scale(0.98);
+  }
+  45% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffl-reasoningWhy-option--correct {
+    animation: none;
+  }
+
+  .ffl-focusReflection-actions {
+    transition: none;
   }
 }
 
@@ -8378,7 +9202,86 @@ a.bg-golden-500:hover,
     grid-row: 2;
   }
 
-  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-hud-adventure-card {
+  /* Scene select: compact B-4 on top, then title, then cards */
+  .ffl-gameHud--sceneSelect .ffl-gameHudMain {
+    padding-top: 24px;
+  }
+
+  .ffl-screen--sceneSelect.ffl-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    row-gap: 0;
+  }
+
+  .ffl-screen--sceneSelect .ffl-sceneSelectHudRail {
+    display: none !important;
+  }
+
+  .ffl-screen--sceneSelect .ffl-scene-select-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    order: 0;
+    padding-top: 0;
+  }
+
+  .ffl-sceneSelectMobileB4 {
+    display: block;
+    width: 100%;
+    margin: 0 0 24px;
+    flex: 0 0 auto;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-hud-card--b4.ffl-b4-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-b4-avatar-ring {
+    width: 72px;
+    height: 72px;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-b4-avatar-label {
+    max-width: 76px;
+    font-size: 9px;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-b4-bubble {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+
+  .ffl-sceneSelectMobileB4 .ffl-b4-bubble::before {
+    top: 26px;
+  }
+
+  .ffl-sceneSelectTitleBlock--desktop {
+    display: none !important;
+  }
+
+  .ffl-sceneSelectTitleBlock--mobile {
+    display: block;
+    text-align: center;
+    margin: 0 0 24px;
+    flex: 0 0 auto;
+  }
+
+  .ffl-sceneSelectTitleBlock--mobile .ffl-sceneSelectTitle {
+    margin: 0;
+  }
+
+  .ffl-sceneSelectProgress--mobile {
+    margin: 12px 0 0;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(229, 192, 106, 0.88);
+    text-align: center;
+  }
+
+  .ffl-screen--stack.ffl-flow-layout.ffl-grid .ffl-hud-adventure-slot {
     display: none !important;
   }
 
@@ -8499,6 +9402,92 @@ a.bg-golden-500:hover,
     font-size: 13px;
     font-weight: 750;
     color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* Scene intro: tighter stack, larger status thumb, no duplicate flame HUD */
+  .ffl-screen--sceneMoment.ffl-flow-layout.ffl-grid {
+    row-gap: 0;
+  }
+
+  .ffl-screen--sceneMoment .ffl-mobileSceneStatusWrap {
+    margin-bottom: 16px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-hud-b4-wrap {
+    margin-bottom: 20px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-hud-b4-wrap .ffl-hud-card--b4.ffl-b4-card {
+    margin-bottom: 0;
+  }
+
+  .ffl-screen--sceneMoment .ffl-zone-main--step {
+    margin-top: 0;
+  }
+
+  .ffl-screen--sceneMoment .ffl-step-main .ffl-comicFrame {
+    margin-top: 0;
+    padding: 14px 14px 16px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-hud-flame-card {
+    display: none !important;
+  }
+
+  .ffl-screen--sceneMoment .ffl-mobileSceneStatus {
+    padding: 16px 18px;
+    gap: 16px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-adventureStatusPanel-mission .ffl-adventureStatusPanel-emblemWrap--bar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-adventureStatusPanel-story .ffl-mobileSceneStatus-thumbWrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+  }
+
+  .ffl-adventureStatusPanel-root--bar.ffl-adventureStatusPanel-root--mission {
+    min-height: 72px;
+  }
+
+  .ffl-adventureStatusPanel-root--bar.ffl-adventureStatusPanel-root--story {
+    min-height: 80px;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-mediaBlock > .ffl-sceneMoment-media {
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-mediaBlock {
+    margin-bottom: 0;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-copy {
+    margin-top: 22px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-action {
+    margin-top: 28px;
+    justify-content: center;
+  }
+
+  .ffl-screen--sceneMoment .ffl-sceneMoment-cta {
+    text-align: center;
+  }
+
+  .ffl-sceneMoment--watch .ffl-sceneMoment-steadyLayer--onVideo,
+  .ffl-sceneMoment--ready .ffl-sceneMoment-steadyLayer--onVideo,
+  .ffl-sceneMoment--watch .ffl-sceneMoment-steadyBelow,
+  .ffl-sceneMoment--ready .ffl-sceneMoment-steadyBelow {
+    display: none !important;
+    pointer-events: none !important;
   }
 
   /* Reward: hero (summary + cards) first, then chip + B-4, then ambient */
