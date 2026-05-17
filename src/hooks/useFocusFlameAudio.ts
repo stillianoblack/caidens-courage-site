@@ -1,4 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FLAME_TAP_CLIP_BY_KEY,
+  FOCUS_FLAME_B4_SCREEN_SLUGS,
+  isB4OverlayClip,
+  type B4ClipSlug,
+  type FlameTapB4VoiceKey,
+  type FocusFlameB4ScreenSlug,
+} from '../components/focus-flame-lab/focusFlameB4Clips';
 
 /** Default background music level (~10% lower than prior 0.18). */
 export const DEFAULT_MUSIC_VOLUME = 0.16;
@@ -8,19 +16,47 @@ export const DEFAULT_VOICE_VOLUME = 0.9;
 /** @deprecated Use DEFAULT_VOICE_VOLUME */
 export const DEFAULT_B4_VOICE_VOLUME = DEFAULT_VOICE_VOLUME;
 
-/** Filenames under `public/audio/b4/` (without `.mp3`). */
-export const FOCUS_FLAME_B4_VOICE_KEYS = [
-  'intro-welcome',
-  'scene-move',
-  'scene-ceremony',
-  'scene-cave',
-  'feeling-prompt',
-  'body-prompt',
-  'focus-move-prompt',
-  'reward',
-] as const;
+export type { B4ClipSlug, FlameTapB4VoiceKey, FocusFlameB4ScreenSlug };
 
-export type FocusFlameB4VoiceKey = (typeof FOCUS_FLAME_B4_VOICE_KEYS)[number];
+/** @deprecated Use FocusFlameB4ScreenSlug — screen narration slugs. */
+export const FOCUS_FLAME_B4_VOICE_KEYS = FOCUS_FLAME_B4_SCREEN_SLUGS;
+export type FocusFlameB4VoiceKey = FocusFlameB4ScreenSlug;
+
+export const FLAME_TAP_B4_VOICE_KEYS = ['flameTapIntro', 'flameTap1', 'flameTap2', 'flameTap3'] as const;
+
+/** @deprecated Use B4ClipSlug directly. */
+export const PRACTICE_B4_VOICE_KEYS = ['practiceStart', 'practiceComplete'] as const;
+export type PracticeB4VoiceKey = (typeof PRACTICE_B4_VOICE_KEYS)[number];
+
+const PRACTICE_CLIP_BY_KEY: Record<PracticeB4VoiceKey, B4ClipSlug> = {
+  practiceStart: 'practice-start',
+  practiceComplete: 'end-encouragement',
+};
+
+/** @deprecated Use B4ClipSlug directly. */
+export const OPTIONAL_B4_VOICE_KEYS = ['watchScene', 'sparkBreath', 'sceneIntro', 'flameStart'] as const;
+export type OptionalB4VoiceKey = (typeof OPTIONAL_B4_VOICE_KEYS)[number];
+
+const OPTIONAL_CLIP_BY_KEY: Record<OptionalB4VoiceKey, B4ClipSlug> = {
+  watchScene: 'watch-scene',
+  sparkBreath: 'spark-breath',
+  sceneIntro: 'scene-intro',
+  flameStart: 'flame-start',
+};
+
+/** B-4 HUD copy during the scene-moment steady-flame beat. */
+export const FLAME_STEADY_B4_MESSAGES = {
+  before: 'Caiden’s flame is flickering. Let’s help him steady it.',
+  after: 'You helped him steady it. Now let’s name what he might be feeling.',
+} as const;
+
+/** @deprecated Former 3-tap HUD messages. */
+export const FLAME_TAP_B4_MESSAGES = [
+  'Tap the flame. Small steps help it steady.',
+  'Nice! You noticed the flame.',
+  'Keep going — it’s getting steadier.',
+  'You did it! Caiden’s flame is steady.',
+] as const;
 
 const CLICK_VOL = 0.22;
 const HOVER_VOL = 0.25;
@@ -61,6 +97,9 @@ export function useFocusFlameAudio() {
   const voiceVolumeRef = useRef(voiceVolume);
   const hoverLastRef = useRef(0);
   const fadeRafRef = useRef<number | null>(null);
+  const b4ClipsPreloadedRef = useRef(false);
+  const b4ClipAudioRef = useRef<Map<B4ClipSlug, HTMLAudioElement>>(new Map());
+  const b4OverlayRef = useRef<HTMLAudioElement | null>(null);
 
   soundEnabledRef.current = soundEnabled;
   musicVolumeRef.current = musicVolume;
@@ -218,58 +257,250 @@ export function useFocusFlameAudio() {
       el.onerror = null;
       el.onended = null;
       el.pause();
-      el.removeAttribute('src');
-      el.load();
+      el.currentTime = 0;
     } catch {
       /* ignore */
     }
   }, []);
 
-  const warnB4VoiceFailed = useCallback((key: FocusFlameB4VoiceKey) => {
-    if (process.env.NODE_ENV !== 'development') return;
-    console.warn(`B-4 voice file failed to play: [${key}]`);
+  const stopB4Overlay = useCallback(() => {
+    const el = b4OverlayRef.current;
+    if (!el) return;
+    b4OverlayRef.current = null;
+    try {
+      el.onerror = null;
+      el.onended = null;
+      el.pause();
+      el.currentTime = 0;
+    } catch {
+      /* ignore */
+    }
   }, []);
 
-  const playB4Voice = useCallback(
-    (key: FocusFlameB4VoiceKey, opts?: { bypassVoiceCheck?: boolean }) => {
+  const stopB4PracticeVoice = useCallback(() => {
+    stopB4Voice();
+    stopB4Overlay();
+  }, [stopB4Overlay, stopB4Voice]);
+
+  const warnB4ClipFailed = useCallback((slug: B4ClipSlug, src: string) => {
+    if (slug === 'flame-steady-success') {
+      console.warn('[B4 AUDIO] missing flame-steady-success');
+    }
+    console.warn(`B-4 voice file failed to play: [${slug}] (${src})`);
+  }, []);
+
+  const getB4ClipAudio = useCallback(
+    (slug: B4ClipSlug) => {
+      const cached = b4ClipAudioRef.current.get(slug);
+      if (cached) return cached;
+      const src = `${publicUrl}/audio/b4/${slug}.mp3`;
+      const el = new Audio(src);
+      el.preload = 'auto';
+      b4ClipAudioRef.current.set(slug, el);
+      return el;
+    },
+    [publicUrl]
+  );
+
+  const playB4ClipOverlay = useCallback(
+    (slug: B4ClipSlug, opts?: { bypassVoiceCheck?: boolean }) => {
+      if (!opts?.bypassVoiceCheck && !voiceEnabledRef.current) return;
+      const src = `${publicUrl}/audio/b4/${slug}.mp3`;
+      try {
+        const el = getB4ClipAudio(slug);
+        const vol = voiceVolumeRef.current;
+        el.volume = Math.min(1, Math.max(0, vol));
+        el.currentTime = 0;
+        b4OverlayRef.current = el;
+        el.onended = () => {
+          if (b4OverlayRef.current === el) b4OverlayRef.current = null;
+        };
+        el.onerror = () => {
+          warnB4ClipFailed(slug, src);
+          if (b4OverlayRef.current === el) b4OverlayRef.current = null;
+        };
+        void el.play().catch(() => {
+          warnB4ClipFailed(slug, src);
+          if (b4OverlayRef.current === el) b4OverlayRef.current = null;
+        });
+      } catch {
+        warnB4ClipFailed(slug, src);
+      }
+    },
+    [getB4ClipAudio, publicUrl, warnB4ClipFailed]
+  );
+
+  const playB4Clip = useCallback(
+    (slug: B4ClipSlug, opts?: { bypassVoiceCheck?: boolean }) => {
+      if (isB4OverlayClip(slug)) {
+        playB4ClipOverlay(slug, opts);
+        return;
+      }
       if (!opts?.bypassVoiceCheck && !voiceEnabledRef.current) return;
       stopB4Voice();
-      const src = `${publicUrl}/audio/b4/${key}.mp3`;
+      stopB4Overlay();
+      const src = `${publicUrl}/audio/b4/${slug}.mp3`;
       try {
-        const el = new Audio(src);
-        el.preload = 'auto';
+        const el = getB4ClipAudio(slug);
         el.volume = Math.min(1, Math.max(0, voiceVolumeRef.current));
+        el.currentTime = 0;
         b4NarrationRef.current = el;
         const clearIfCurrent = () => {
-          if (b4NarrationRef.current === el) {
-            b4NarrationRef.current = null;
-          }
+          if (b4NarrationRef.current === el) b4NarrationRef.current = null;
         };
-        el.addEventListener(
-          'error',
-          () => {
-            warnB4VoiceFailed(key);
-            clearIfCurrent();
-          },
-          { once: true }
-        );
-        el.addEventListener(
-          'ended',
-          () => {
-            clearIfCurrent();
-          },
-          { once: true }
-        );
+        el.onerror = () => {
+          warnB4ClipFailed(slug, src);
+          clearIfCurrent();
+        };
+        el.onended = () => {
+          clearIfCurrent();
+        };
         void el.play().catch(() => {
-          warnB4VoiceFailed(key);
+          warnB4ClipFailed(slug, src);
           clearIfCurrent();
         });
       } catch {
-        warnB4VoiceFailed(key);
+        warnB4ClipFailed(slug, src);
       }
     },
-    [publicUrl, stopB4Voice, warnB4VoiceFailed]
+    [getB4ClipAudio, playB4ClipOverlay, publicUrl, stopB4Overlay, stopB4Voice, warnB4ClipFailed]
   );
+
+  /** Plays one narration clip and resolves when it ends (or fails). Stops any in-flight narration first. */
+  const playB4ClipAsync = useCallback(
+    (slug: B4ClipSlug, opts?: { bypassVoiceCheck?: boolean }): Promise<void> => {
+      if (isB4OverlayClip(slug)) {
+        playB4ClipOverlay(slug, opts);
+        return Promise.resolve();
+      }
+      if (!opts?.bypassVoiceCheck && !voiceEnabledRef.current) {
+        return Promise.resolve();
+      }
+
+      stopB4Voice();
+      stopB4Overlay();
+
+      const src = `${publicUrl}/audio/b4/${slug}.mp3`;
+      return new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+
+        try {
+          const el = getB4ClipAudio(slug);
+          el.volume = Math.min(1, Math.max(0, voiceVolumeRef.current));
+          el.currentTime = 0;
+          b4NarrationRef.current = el;
+
+          const clearIfCurrent = () => {
+            if (b4NarrationRef.current === el) b4NarrationRef.current = null;
+          };
+
+          el.onerror = () => {
+            warnB4ClipFailed(slug, src);
+            clearIfCurrent();
+            finish();
+          };
+          el.onended = () => {
+            clearIfCurrent();
+            finish();
+          };
+          void el.play().catch(() => {
+            warnB4ClipFailed(slug, src);
+            clearIfCurrent();
+            finish();
+          });
+        } catch {
+          warnB4ClipFailed(slug, src);
+          finish();
+        }
+      });
+    },
+    [getB4ClipAudio, playB4ClipOverlay, publicUrl, stopB4Overlay, stopB4Voice, warnB4ClipFailed]
+  );
+
+  const playB4Voice = useCallback(
+    (key: FocusFlameB4VoiceKey, opts?: { bypassVoiceCheck?: boolean }) => {
+      return playB4ClipAsync(key, opts);
+    },
+    [playB4ClipAsync]
+  );
+
+  const playFlameTapB4Voice = useCallback(
+    (key: FlameTapB4VoiceKey) => {
+      playB4Clip(FLAME_TAP_CLIP_BY_KEY[key]);
+    },
+    [playB4Clip]
+  );
+
+  const playFlameTapB4VoiceAsync = useCallback(
+    (key: FlameTapB4VoiceKey) => {
+      return playB4ClipAsync(FLAME_TAP_CLIP_BY_KEY[key]);
+    },
+    [playB4ClipAsync]
+  );
+
+  const playFlameSteadySuccess = useCallback(() => {
+    console.log('[B4 AUDIO] flame steady success');
+    return playFlameTapB4VoiceAsync('flameTap3');
+  }, [playFlameTapB4VoiceAsync]);
+
+  const playPracticeB4Voice = useCallback(
+    (key: PracticeB4VoiceKey) => {
+      playB4Clip(PRACTICE_CLIP_BY_KEY[key]);
+    },
+    [playB4Clip]
+  );
+
+  const playOptionalB4Voice = useCallback(
+    (key: OptionalB4VoiceKey) => {
+      playB4Clip(OPTIONAL_CLIP_BY_KEY[key]);
+    },
+    [playB4Clip]
+  );
+
+  const playUiConfirm = useCallback(() => {
+    playB4ClipOverlay('ui-confirm');
+  }, [playB4ClipOverlay]);
+
+  const preloadB4Clips = useCallback(() => {
+    if (!voiceEnabledRef.current) return;
+    if (b4ClipsPreloadedRef.current) return;
+    b4ClipsPreloadedRef.current = true;
+    const priority: B4ClipSlug[] = [
+      'scene-move',
+      'scene-ceremony',
+      'scene-cave',
+      'flame-tap-intro',
+      'flame-tap-1',
+      'flame-tap-2',
+      'flame-tap-3',
+      'flame-steady-success',
+      'mission-intro',
+      'mission-complete',
+      'why-feeling',
+      'why-body',
+      'why-move',
+      'flame-start',
+      'practice-start',
+    ];
+    priority.forEach((slug) => {
+      try {
+        getB4ClipAudio(slug).load();
+      } catch {
+        warnB4ClipFailed(slug, `${publicUrl}/audio/b4/${slug}.mp3`);
+      }
+    });
+  }, [getB4ClipAudio, publicUrl, warnB4ClipFailed]);
+
+  useEffect(() => {
+    if (soundEnabled && voiceEnabled) {
+      preloadB4Clips();
+    }
+  }, [soundEnabled, voiceEnabled, preloadB4Clips]);
 
   useEffect(() => {
     const el = b4NarrationRef.current;
@@ -302,7 +533,17 @@ export function useFocusFlameAudio() {
     toggleVoice,
     voiceVolume,
     setVoiceVolume,
+    playB4Clip,
+    playB4ClipAsync,
+    stopB4PracticeVoice,
     playB4Voice,
+    playFlameTapB4Voice,
+    playFlameTapB4VoiceAsync,
+    playFlameSteadySuccess,
+    playPracticeB4Voice,
+    playOptionalB4Voice,
+    playUiConfirm,
+    preloadB4Clips,
     stopB4Voice,
     playCardHover,
     playCardSelect,

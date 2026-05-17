@@ -8,10 +8,38 @@ import AdventureFlowLayout from './AdventureFlowLayout';
 import FocusFlameRewardThreeZone from './FocusFlameRewardThreeZone';
 import FocusFlameSoundGate from './FocusFlameSoundGate';
 import FocusFlameSoundMenu from './FocusFlameSoundMenu';
-import { useFocusFlameAudio, type FocusFlameB4VoiceKey } from '../../hooks/useFocusFlameAudio';
-
-/** Degrees for selection burst sparks (10 particles, within 8–12). */
-const CHOICE_BURST_DEGREES = Array.from({ length: 10 }, (_, i) => (360 * i) / 10);
+import SceneMoment, { type SceneMomentPhase } from './SceneMoment';
+import RealLifePractice, { type RealLifePracticePhase } from './RealLifePractice';
+import EmotionTapStep from './EmotionTapStep';
+import BodySignalStep from './BodySignalStep';
+import FocusMoveStep from './FocusMoveStep';
+import ReasoningWhyStep from './ReasoningWhyStep';
+import {
+  MISSION_GOAL_COPY,
+  MISSION_INTRO_B4,
+  MISSION_TITLE,
+  SCENE_MISSION_ORDER,
+  adventureLevelStatus,
+  isMissionComplete,
+  missionProgressCount,
+  sceneLevelNumber,
+} from './focusFlameMission';
+import {
+  bodyWhyOptions,
+  bodyWhyPrompt,
+  feelingWhyOptions,
+  feelingWhyPrompt,
+  moveWhyOptions,
+  moveWhyPrompt,
+} from './focusFlameReasoning';
+import type { Feeling, BodySignal } from './focusFlameSelTypes';
+import type { FocusFlameMove } from './focusFlameMoves';
+import { FOCUS_POINT_AWARDS } from './focusFlameRanks';
+import {
+  FLAME_STEADY_B4_MESSAGES,
+  useFocusFlameAudio,
+} from '../../hooks/useFocusFlameAudio';
+import { sceneAdventureB4Clip, type B4ClipSlug } from './focusFlameB4Clips';
 
 /**
  * Marketing entry/start screen (Focus Flame Lab title, flame, “Enter the Lab”) is kept in JSX below
@@ -26,44 +54,64 @@ export type FocusFlameScene = {
   id: FocusFlameSceneId;
   title: string;
   blurb: string;
-  intro: string;
+  momentCopy: string;
+  videoSrc: string;
+  /** Progressive tap videos during flame phase (The Path only). */
+  tapVideoSequence?: readonly string[] | null;
+  thumbnail: string;
   cardImageSrc: string;
   cardImageAlt: string;
   featured?: boolean;
   cardBadgeTone: 'blue' | 'gold' | 'violet';
 };
 
-type Feeling = 'Nervous' | 'Excited' | 'Embarrassed' | 'Angry';
-type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
-type Move = 'Spark Breath' | 'Anchor Step' | 'B-4 Pause' | 'Flame Draw' | 'Brave Choice';
+type Screen =
+  | 'entry'
+  | 'sceneSelect'
+  | 'sceneMoment'
+  | 'step2'
+  | 'step2Why'
+  | 'step3'
+  | 'step3Why'
+  | 'step4'
+  | 'step4Why'
+  | 'realLifePractice'
+  | 'reward';
 
-type Screen = 'entry' | 'sceneSelect' | 'step1' | 'step2' | 'step3' | 'step4' | 'reward';
-
-function b4VoiceKeyForScreen(
+function b4ClipForScreen(
   screen: Screen,
   selectedScene: FocusFlameScene | null,
-  showEntryScreen: boolean
-): FocusFlameB4VoiceKey | null {
+  showEntryScreen: boolean,
+  missionDone: boolean,
+  sceneMomentPhase: SceneMomentPhase
+): B4ClipSlug | null {
   if (showEntryScreen && screen === 'entry') return 'intro-welcome';
-  if (screen === 'sceneSelect') return 'intro-welcome';
-  if (screen === 'step1' && selectedScene) {
-    if (selectedScene.id === 'move') return 'scene-move';
-    if (selectedScene.id === 'ceremony') return 'scene-ceremony';
-    if (selectedScene.id === 'cave') return 'scene-cave';
+  if (screen === 'sceneSelect') return 'mission-intro';
+  if (screen === 'sceneMoment' && selectedScene) {
+    if (sceneMomentPhase === 'steady' || sceneMomentPhase === 'ready') return null;
+    return sceneAdventureB4Clip(selectedScene.id);
   }
   if (screen === 'step2') return 'feeling-prompt';
+  if (screen === 'step2Why') return 'why-feeling';
   if (screen === 'step3') return 'body-prompt';
+  if (screen === 'step3Why') return 'why-body';
   if (screen === 'step4') return 'focus-move-prompt';
-  if (screen === 'reward') return 'reward';
+  if (screen === 'step4Why') return 'why-move';
+  if (screen === 'realLifePractice') return null;
+  if (screen === 'reward') return missionDone ? 'mission-complete' : 'reward-screen';
   return null;
 }
 
 /** Deterministic Focus Flame fill for adventure flow (intro → reward). */
 function focusFlameProgressPercent(screen: Screen): number {
-  if (screen === 'step1') return 15;
-  if (screen === 'step2') return 30;
-  if (screen === 'step3') return 60;
-  if (screen === 'step4') return 85;
+  if (screen === 'sceneMoment') return 28;
+  if (screen === 'step2') return 36;
+  if (screen === 'step2Why') return 44;
+  if (screen === 'step3') return 52;
+  if (screen === 'step3Why') return 60;
+  if (screen === 'step4') return 70;
+  if (screen === 'step4Why') return 78;
+  if (screen === 'realLifePractice') return 90;
   if (screen === 'reward') return 100;
   return 0;
 }
@@ -107,81 +155,24 @@ function GameHudChrome({
   );
 }
 
-function ChoiceButton({
-  label,
-  selected,
-  onClick,
-  soundOnClick,
-}: {
-  label: string;
-  selected?: boolean;
-  onClick: () => void;
-  soundOnClick?: () => void;
-}) {
-  const [burstKey, setBurstKey] = useState<number | null>(null);
-  const [selectPulse, setSelectPulse] = useState(false);
-
-  useEffect(() => {
-    if (burstKey == null) return;
-    const t = window.setTimeout(() => setBurstKey(null), 460);
-    return () => window.clearTimeout(t);
-  }, [burstKey]);
-
-  const handleClick = () => {
-    soundOnClick?.();
-    onClick();
-    setBurstKey((k) => (k == null ? 1 : k + 1));
-    setSelectPulse(true);
-  };
-
-  return (
-    <button
-      type="button"
-      className={['ffl-choice', selected ? 'ffl-choice--selected' : '', selectPulse ? 'ffl-choice--selectPulse' : '']
-        .filter(Boolean)
-        .join(' ')}
-      onClick={handleClick}
-      onAnimationEnd={(e) => {
-        if (e.animationName === 'fflChoiceSelectPop') setSelectPulse(false);
-      }}
-    >
-      {burstKey != null ? (
-        <span className="ffl-choiceBurstRoot" key={burstKey} aria-hidden="true">
-          {CHOICE_BURST_DEGREES.map((deg, i) => (
-            <span
-              key={`${burstKey}-${i}`}
-              className="ffl-choiceBurstSpark"
-              style={
-                {
-                  '--ffl-burst-deg': `${deg}deg`,
-                  '--ffl-burst-delay': `${i * 22}ms`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-        </span>
-      ) : null}
-      <span className="ffl-choiceLabel">{label}</span>
-      <span className="ffl-choiceChevron" aria-hidden="true">
-        →
-      </span>
-    </button>
-  );
-}
-
 /** Scene select: entire card is one button (image + copy + visual Begin pill). */
 function SceneSelectMissionRow({
   scene,
+  levelStatus,
   onBegin,
   onCardHover,
   onCardSelect,
 }: {
   scene: FocusFlameScene;
+  levelStatus: 'completed' | 'current' | 'available';
   onBegin: () => void;
   onCardHover: () => void;
   onCardSelect: () => void;
 }) {
   const featured = Boolean(scene.featured);
+  const levelNum = sceneLevelNumber(scene.id);
+  const statusLabel =
+    levelStatus === 'completed' ? 'Completed' : levelStatus === 'current' ? 'In progress' : 'Available';
   const imgPosClass =
     scene.id === 'move'
       ? 'ffl-sceneRowImg--move'
@@ -194,7 +185,13 @@ function SceneSelectMissionRow({
   return (
     <button
       type="button"
-      className={`ffl-sceneRow${featured ? ' ffl-sceneRow--featured' : ''}`}
+      className={[
+        'ffl-sceneRow',
+        featured ? 'ffl-sceneRow--featured' : '',
+        levelStatus === 'completed' ? 'ffl-sceneRow--completed' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       onPointerEnter={(e) => {
         if (e.pointerType === 'mouse') onCardHover();
       }}
@@ -202,7 +199,7 @@ function SceneSelectMissionRow({
         onCardSelect();
         onBegin();
       }}
-      aria-label={`Begin ${scene.title}`}
+      aria-label={`Level ${levelNum}: ${scene.title}. ${statusLabel}.`}
     >
       <span className="ffl-sceneRowMedia">
         <img
@@ -212,13 +209,24 @@ function SceneSelectMissionRow({
           loading="lazy"
           decoding="async"
         />
+        <span className="ffl-sceneRowLevel" aria-hidden="true">
+          Level {levelNum}
+        </span>
+        {levelStatus === 'completed' ? (
+          <span className="ffl-sceneRowCompletedMark" aria-hidden="true">
+            ✓
+          </span>
+        ) : null}
       </span>
       <span className="ffl-sceneRowText">
         <span className="ffl-sceneRowTitle">{scene.title}</span>
         <span className="ffl-sceneRowBlurb">{scene.blurb}</span>
+        <span className="ffl-sceneRowStatus" data-status={statusLabel}>
+          {statusLabel}
+        </span>
       </span>
       <span className="ffl-sceneRowBegin ffl-sceneRowBegin--pill" aria-hidden="true">
-        Begin
+        {levelStatus === 'completed' ? 'Play again' : 'Begin'}
       </span>
     </button>
   );
@@ -246,6 +254,11 @@ export default function FocusFlameGame({
     voiceVolume,
     setVoiceVolume,
     playB4Voice,
+    playFlameSteadySuccess,
+    playB4Clip,
+    playB4ClipAsync,
+    stopB4PracticeVoice,
+    playUiConfirm,
     stopB4Voice,
     playCardHover,
     playCardSelect,
@@ -258,10 +271,38 @@ export default function FocusFlameGame({
   const [selectedScene, setSelectedScene] = useState<FocusFlameScene | null>(null);
   const [feeling, setFeeling] = useState<Feeling | null>(null);
   const [body, setBody] = useState<BodySignal | null>(null);
-  const [move, setMove] = useState<Move | null>(null);
+  const [move, setMove] = useState<FocusFlameMove | null>(null);
+  const [storyClueB4, setStoryClueB4] = useState<string | null>(null);
+  const [focusPoints, setFocusPoints] = useState(0);
+  // TODO: persist completedSceneIds to localStorage if we want returning users to keep journey progress.
+  const [completedSceneIds, setCompletedSceneIds] = useState<Set<FocusFlameSceneId>>(() => new Set());
   const [soundGateResolved, setSoundGateResolved] = useState(false);
+  const prevFeelingAwarded = useRef(false);
+  const prevFeelingWhyAwarded = useRef(false);
+  const prevBodyAwarded = useRef(false);
+  const prevBodyWhyAwarded = useRef(false);
+  const prevMoveAwarded = useRef(false);
+  const prevMoveWhyAwarded = useRef(false);
+  const beatSteadyAwardedRef = useRef(false);
+  const practiceAwardedRef = useRef(false);
+  const [sceneMomentKey, setSceneMomentKey] = useState(0);
+  const [sceneMomentPhase, setSceneMomentPhase] = useState<SceneMomentPhase>('watch');
+  const [practicePhase, setPracticePhase] = useState<RealLifePracticePhase>('practice');
   /** After “Enable Sound”, skip one auto narration pass so intro is not played twice. */
   const skipNextB4ScreenVoiceRef = useRef(false);
+  const sceneMomentPhaseRef = useRef<SceneMomentPhase>(sceneMomentPhase);
+  sceneMomentPhaseRef.current = sceneMomentPhase;
+
+  const handleSceneMomentPhaseChange = useCallback((phase: SceneMomentPhase) => {
+    sceneMomentPhaseRef.current = phase;
+    setSceneMomentPhase(phase);
+  }, []);
+
+  useEffect(() => {
+    if (screen !== 'step2Why' && screen !== 'step3Why' && screen !== 'step4Why') {
+      setStoryClueB4(null);
+    }
+  }, [screen]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -290,6 +331,13 @@ export default function FocusFlameGame({
     if (isMobileGameUi) return;
     playCardHover();
   }, [isMobileGameUi, playCardHover]);
+
+  const confirmStepChoice = useCallback(
+    (isNewSelection: boolean) => {
+      if (isNewSelection) playUiConfirm();
+    },
+    [playUiConfirm]
+  );
 
   useEffect(() => {
     if (!mobileGameMenuOpen) return;
@@ -321,6 +369,17 @@ export default function FocusFlameGame({
   }, [setSoundEnabled, setVoiceEnabled, stopB4Voice]);
 
   useEffect(() => {
+    return () => {
+      stopB4Voice();
+    };
+  }, [screen, stopB4Voice]);
+
+  const missionProgress = missionProgressCount(completedSceneIds);
+  const missionDone = isMissionComplete(completedSceneIds, scenes.length);
+  const inProgressSceneId =
+    screen !== 'sceneSelect' && screen !== 'reward' && selectedScene ? selectedScene.id : null;
+
+  useEffect(() => {
     if (!bootDone || !soundGateResolved) {
       stopB4Voice();
       return;
@@ -331,36 +390,129 @@ export default function FocusFlameGame({
     }
     if (skipNextB4ScreenVoiceRef.current) {
       skipNextB4ScreenVoiceRef.current = false;
-      return () => {};
+      return;
+    }
+    const momentPhase = sceneMomentPhaseRef.current;
+    if (screen === 'sceneMoment' && (momentPhase === 'steady' || momentPhase === 'ready')) {
+      return;
+    }
+    if (screen === 'realLifePractice') {
+      return;
     }
     stopB4Voice();
-    const key = b4VoiceKeyForScreen(screen, selectedScene, SHOW_ENTRY_SCREEN);
-    if (!key) return;
+
+    const clip = b4ClipForScreen(
+      screen,
+      selectedScene,
+      SHOW_ENTRY_SCREEN,
+      missionDone,
+      momentPhase
+    );
+    if (!clip) return;
     const t = window.setTimeout(() => {
-      playB4Voice(key);
+      const phaseNow = sceneMomentPhaseRef.current;
+      if (screen === 'sceneMoment' && (phaseNow === 'steady' || phaseNow === 'ready')) return;
+      playB4Clip(clip);
     }, 320);
     return () => {
       window.clearTimeout(t);
-      stopB4Voice();
     };
-  }, [bootDone, soundGateResolved, voiceEnabled, screen, selectedScene, playB4Voice, stopB4Voice]);
+  }, [
+    bootDone,
+    soundGateResolved,
+    voiceEnabled,
+    screen,
+    selectedScene,
+    sceneMomentPhase,
+    missionDone,
+    playB4Clip,
+    stopB4Voice,
+  ]);
 
-  const resetRun = useCallback(() => {
-    playButtonClick();
-    setSelectedScene(null);
+  const awardFocusPoints = useCallback((amount: number) => {
+    setFocusPoints((p) => p + amount);
+  }, []);
+
+  const resetAdventureChoices = useCallback(() => {
     setFeeling(null);
     setBody(null);
     setMove(null);
-    setScreen('sceneSelect');
+    prevFeelingAwarded.current = false;
+    prevFeelingWhyAwarded.current = false;
+    prevBodyAwarded.current = false;
+    prevBodyWhyAwarded.current = false;
+    prevMoveAwarded.current = false;
+    prevMoveWhyAwarded.current = false;
+    beatSteadyAwardedRef.current = false;
+    practiceAwardedRef.current = false;
+  }, []);
+
+  const goToSceneMoment = useCallback(() => {
+    sceneMomentPhaseRef.current = 'watch';
+    setSceneMomentPhase('watch');
+    setSceneMomentKey((k) => k + 1);
+    setScreen('sceneMoment');
+  }, []);
+
+  const completeSceneMoment = useCallback(() => {
+    setScreen('step2');
+  }, []);
+
+  const skipSceneMomentBeat = useCallback(() => {
+    playButtonClick();
+    setScreen('step2');
   }, [playButtonClick]);
 
-  const startScene = (s: FocusFlameScene) => {
-    setSelectedScene(s);
-    setFeeling(null);
-    setBody(null);
-    setMove(null);
-    setScreen('step1');
-  };
+  const markSceneComplete = useCallback((sceneId: FocusFlameSceneId) => {
+    setCompletedSceneIds((prev) => {
+      if (prev.has(sceneId)) return prev;
+      const next = new Set(prev);
+      next.add(sceneId);
+      console.log('[Journey] completedSceneIds', next);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (screen === 'reward' && selectedScene) {
+      markSceneComplete(selectedScene.id);
+    }
+  }, [screen, selectedScene, markSceneComplete]);
+
+  const resetGameSession = useCallback(() => {
+    setCompletedSceneIds(new Set());
+    setSelectedScene(null);
+    resetAdventureChoices();
+    setFocusPoints(0);
+    sceneMomentPhaseRef.current = 'watch';
+    setSceneMomentPhase('watch');
+    setScreen('sceneSelect');
+  }, [resetAdventureChoices]);
+
+  const handleExitGame = useCallback(() => {
+    playButtonClick();
+    resetGameSession();
+  }, [playButtonClick, resetGameSession]);
+
+  const startScene = useCallback(
+    (s: FocusFlameScene) => {
+      setSelectedScene(s);
+      resetAdventureChoices();
+      goToSceneMoment();
+    },
+    [resetAdventureChoices, goToSceneMoment]
+  );
+
+  const startAdventureFromReward = useCallback(
+    (rewardScene: { id: FocusFlameScene['id'] }) => {
+      const fullScene = scenes.find((s) => s.id === rewardScene.id);
+      if (!fullScene) return;
+      playButtonClick();
+      playCardSelect();
+      startScene(fullScene);
+    },
+    [scenes, playButtonClick, playCardSelect, startScene]
+  );
 
   const goBack = () => {
     if (!bootDone || !soundGateResolved) return;
@@ -369,30 +521,90 @@ export default function FocusFlameGame({
       navigate('/');
       return;
     }
-    if (screen === 'step1') return setScreen('sceneSelect');
-    if (screen === 'step2') return setScreen('step1');
-    if (screen === 'step3') return setScreen('step2');
-    if (screen === 'step4') return setScreen('step3');
-    if (screen === 'reward') return setScreen('step4');
+    if (screen === 'sceneMoment') return setScreen('sceneSelect');
+    if (screen === 'step2') return goToSceneMoment();
+    if (screen === 'step2Why') return setScreen('step2');
+    if (screen === 'step3') return setScreen('step2Why');
+    if (screen === 'step3Why') return setScreen('step3');
+    if (screen === 'step4') return setScreen('step3Why');
+    if (screen === 'step4Why') return setScreen('step4');
+    if (screen === 'realLifePractice') return setScreen('step4Why');
+    if (screen === 'reward') return setScreen('realLifePractice');
   };
 
-  const getSceneIntroImageSrc = (scene: FocusFlameScene) => {
-    const publicUrl = process.env.PUBLIC_URL || '';
-    if (scene.id === 'move') return `${publicUrl}/images/focus-flame-lab/thepath.webp`;
-    if (scene.id === 'ceremony') return `${publicUrl}/images/focus-flame-lab/themove_intro_image.webp`;
-    return scene.cardImageSrc;
-  };
+  useEffect(() => {
+    if (feeling && !prevFeelingAwarded.current) {
+      prevFeelingAwarded.current = true;
+      awardFocusPoints(FOCUS_POINT_AWARDS.feeling);
+    }
+    if (!feeling) prevFeelingAwarded.current = false;
+  }, [feeling, awardFocusPoints]);
+
+  useEffect(() => {
+    if (body && !prevBodyAwarded.current) {
+      prevBodyAwarded.current = true;
+      awardFocusPoints(FOCUS_POINT_AWARDS.body);
+    }
+    if (!body) prevBodyAwarded.current = false;
+  }, [body, awardFocusPoints]);
+
+  useEffect(() => {
+    if (move && !prevMoveAwarded.current) {
+      prevMoveAwarded.current = true;
+      awardFocusPoints(FOCUS_POINT_AWARDS.move);
+    }
+    if (!move) prevMoveAwarded.current = false;
+  }, [move, awardFocusPoints]);
 
   const b4Message =
     screen === 'sceneSelect'
-      ? 'Pick a moment from Caiden’s story. I’ll help you steady the Focus Flame one step at a time.'
-      : screen === 'reward'
-        ? 'You did it. Want to try another moment?'
-        : 'Choose what feels true right now. We’ll steady the Focus Flame step by step.';
+      ? MISSION_INTRO_B4
+      : screen === 'sceneMoment'
+        ? sceneMomentPhase === 'watch'
+          ? 'Watch closely. Caiden’s flame is trying to tell us something.'
+          : sceneMomentPhase === 'ready'
+            ? FLAME_STEADY_B4_MESSAGES.after
+            : FLAME_STEADY_B4_MESSAGES.before
+        : screen === 'step2'
+            ? 'Let’s name what Caiden might be feeling.'
+            : screen === 'step2Why'
+              ? storyClueB4 ?? 'Why do you think Caiden feels that way?'
+              : screen === 'step3'
+                ? 'Big feelings can show up in the body too.'
+                : screen === 'step3Why'
+                  ? storyClueB4 ?? 'What clue did Caiden’s body give us?'
+                  : screen === 'step4'
+                    ? 'Choose one move to help Caiden steady his flame.'
+                    : screen === 'step4Why'
+                      ? storyClueB4 ?? 'Why could that Focus Flame move help?'
+                      : screen === 'realLifePractice'
+                  ? practicePhase === 'practice'
+                    ? 'Let’s try one Focus Flame move together.'
+                    : 'You can use this anytime your flame feels too big.'
+                  : screen === 'reward'
+                    ? missionDone
+                      ? 'You did it. You helped Caiden through all three adventures. Your Focus Flame certificate is unlocked.'
+                      : 'Nice work on this adventure. Ready for another?'
+                    : 'Choose what feels true right now. We’ll steady the Focus Flame step by step.';
 
   const canProceedStep2 = screen === 'step2' && feeling != null;
   const canProceedStep3 = screen === 'step3' && body != null;
   const canProceedStep4 = screen === 'step4' && move != null;
+
+  const awardReasoningPoints = useCallback(
+    (ref: React.MutableRefObject<boolean>) => {
+      if (ref.current) return;
+      ref.current = true;
+      console.log('[STORY CLUE] +10 Focus Points awarded');
+      awardFocusPoints(FOCUS_POINT_AWARDS.reasoning);
+      playUiConfirm();
+    },
+    [awardFocusPoints, playUiConfirm]
+  );
+
+  const sortedScenes = [...scenes].sort(
+    (a, b) => SCENE_MISSION_ORDER.indexOf(a.id) - SCENE_MISSION_ORDER.indexOf(b.id)
+  );
 
   const focusFlameMarkSrc = `${process.env.PUBLIC_URL || ''}/images/icons/focus-flame-mark.svg`;
 
@@ -460,7 +672,7 @@ export default function FocusFlameGame({
                           to="/"
                           className="ffl-nav-button ffl-mobile-menu-row"
                           onClick={() => {
-                            playButtonClick();
+                            handleExitGame();
                             setMobileGameMenuOpen(false);
                           }}
                         >
@@ -513,9 +725,7 @@ export default function FocusFlameGame({
                 <Link
                   to="/"
                   className="ffl-nav-button"
-                  onClick={() => {
-                    playButtonClick();
-                  }}
+                  onClick={handleExitGame}
                 >
                   Exit Game
                 </Link>
@@ -604,15 +814,20 @@ export default function FocusFlameGame({
                     <B4GuidePanel message={b4Message} className="ffl-gameB4 ffl-b4-panel" />
                   </div>
                   <div className="ffl-scene-select-main">
-                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header">
-                      <h2 className="ffl-sceneSelectTitle">Where should Caiden go?</h2>
-                      <p className="ffl-sceneSelectSubtitle">CHOOSE YOUR ADVENTURE.</p>
+                    <div className="ffl-sceneSelectTitleBlock ffl-scene-select-header ffl-missionSelectHeader">
+                      <p className="ffl-missionSelectKicker">{MISSION_TITLE}</p>
+                      <h2 className="ffl-sceneSelectTitle">Choose your next adventure</h2>
+                      <p className="ffl-sceneSelectSubtitle">{MISSION_GOAL_COPY}</p>
+                      <p className="ffl-missionSelectProgress" aria-live="polite">
+                        {missionProgress} of {scenes.length} adventures complete
+                      </p>
                     </div>
                     <div className="ffl-sceneSelectStack ffl-sceneCardList">
-                      {scenes.map((s) => (
+                      {sortedScenes.map((s) => (
                         <SceneSelectMissionRow
                           key={s.id}
                           scene={s}
+                          levelStatus={adventureLevelStatus(s.id, completedSceneIds, inProgressSceneId)}
                           onBegin={() => startScene(s)}
                           onCardHover={playSceneSelectCardHover}
                           onCardSelect={playCardSelect}
@@ -623,13 +838,13 @@ export default function FocusFlameGame({
                 </div>
               )}
 
-              {screen === 'step1' && selectedScene && (
+              {screen === 'sceneMoment' && selectedScene && (
                 <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
                   <GameHudPanel
                     className="ffl-zone-hud"
                     b4Message={b4Message}
                     selectedScene={selectedScene}
-                    progressPercent={focusFlameProgressPercent('step1')}
+                    progressPercent={focusFlameProgressPercent('sceneMoment')}
                     markSrc={focusFlameMarkSrc}
                     reduceMotion={reduceMotion}
                     feeling={feeling}
@@ -637,34 +852,23 @@ export default function FocusFlameGame({
                     move={move}
                   />
                   <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
-                          <div className="ffl-comicFrame">
-                            <div className="ffl-comicHeader">
-                              <div className="ffl-comicTag">SCENE INTRO</div>
-                              <div className="ffl-comicTitle">{selectedScene.title}</div>
-                            </div>
-                            <div className="ffl-comicMedia" aria-hidden="true">
-                              <img
-                                className="ffl-comicImg"
-                                src={getSceneIntroImageSrc(selectedScene)}
-                                alt=""
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            </div>
-                            <div className="ffl-comicBody">{selectedScene.intro}</div>
-                            <div className="ffl-comicAction">
-                              <button
-                                type="button"
-                                className="ffl-ctaPrimary"
-                                onClick={() => {
-                                  playButtonClick();
-                                  setScreen('step2');
-                                }}
-                              >
-                                Help Caiden
-                              </button>
-                            </div>
-                          </div>
+                    <SceneMoment
+                      key={`${selectedScene.id}-${sceneMomentKey}`}
+                      scene={selectedScene}
+                      markSrc={focusFlameMarkSrc}
+                      reduceMotion={reduceMotion}
+                      onButtonClick={playButtonClick}
+                      onPhaseChange={handleSceneMomentPhaseChange}
+                      playFlameSteadySuccess={playFlameSteadySuccess}
+                      playB4Clip={playB4Clip}
+                      onAwardPoints={(amount) => {
+                        if (beatSteadyAwardedRef.current) return;
+                        beatSteadyAwardedRef.current = true;
+                        awardFocusPoints(amount);
+                      }}
+                      onComplete={completeSceneMoment}
+                      onSkip={skipSceneMomentBeat}
+                    />
                   </main>
                 </AdventureFlowLayout>
               )}
@@ -683,36 +887,47 @@ export default function FocusFlameGame({
                     move={move}
                   />
                   <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
-                          <div className="ffl-questionHeader ffl-step-header">
-                            <div className="ffl-kicker">STEP 1 OF 3</div>
-                            <h2 className="ffl-h2">What is Caiden feeling?</h2>
-                          </div>
+                    <EmotionTapStep
+                      markSrc={focusFlameMarkSrc}
+                      value={feeling}
+                      reduceMotion={reduceMotion}
+                      canProceed={canProceedStep2}
+                      onSelect={(opt, isNew) => {
+                        confirmStepChoice(isNew);
+                        setFeeling(opt);
+                      }}
+                      onNextClick={playButtonClick}
+                      onNext={() => setScreen('step2Why')}
+                    />
+                  </main>
+                </AdventureFlowLayout>
+              )}
 
-                          <div className="ffl-choiceList" role="group" aria-label="Feeling choices">
-                            {(['Nervous', 'Excited', 'Embarrassed', 'Angry'] as Feeling[]).map((opt) => (
-                              <ChoiceButton
-                                key={opt}
-                                label={opt}
-                                selected={feeling === opt}
-                                soundOnClick={playButtonClick}
-                                onClick={() => setFeeling(opt)}
-                              />
-                            ))}
-                          </div>
-
-                          <div className="ffl-stepActions">
-                            <button
-                              type="button"
-                              className="ffl-ctaPrimary ffl-ctaPrimary--small"
-                              onClick={() => {
-                                playButtonClick();
-                                setScreen('step3');
-                              }}
-                              disabled={!canProceedStep2}
-                            >
-                              Next
-                            </button>
-                          </div>
+              {screen === 'step2Why' && selectedScene && feeling && (
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
+                  <GameHudPanel
+                    className="ffl-zone-hud"
+                    b4Message={b4Message}
+                    selectedScene={selectedScene}
+                    progressPercent={focusFlameProgressPercent('step2Why')}
+                    markSrc={focusFlameMarkSrc}
+                    reduceMotion={reduceMotion}
+                    feeling={feeling}
+                    body={body}
+                    move={move}
+                  />
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
+                    <ReasoningWhyStep
+                      resetKey={`feeling-why-${selectedScene.id}-${feeling}`}
+                      kicker="STORY CLUE"
+                      prompt={feelingWhyPrompt(feeling)}
+                      options={feelingWhyOptions(selectedScene.id)}
+                      onAwardPoints={() => awardReasoningPoints(prevFeelingWhyAwarded)}
+                      onB4Message={setStoryClueB4}
+                      onTryAgainSound={playButtonClick}
+                      onNextClick={playButtonClick}
+                      onNext={() => setScreen('step3')}
+                    />
                   </main>
                 </AdventureFlowLayout>
               )}
@@ -731,36 +946,45 @@ export default function FocusFlameGame({
                     move={move}
                   />
                   <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
-                          <div className="ffl-questionHeader ffl-step-header">
-                            <div className="ffl-kicker">STEP 2 OF 3</div>
-                            <h2 className="ffl-h2">Where does Caiden feel it?</h2>
-                          </div>
+                    <BodySignalStep
+                      value={body}
+                      canProceed={canProceedStep3}
+                      onSelect={(opt, isNew) => {
+                        confirmStepChoice(isNew);
+                        setBody(opt);
+                      }}
+                      onNextClick={playButtonClick}
+                      onNext={() => setScreen('step3Why')}
+                    />
+                  </main>
+                </AdventureFlowLayout>
+              )}
 
-                          <div className="ffl-choiceList" role="group" aria-label="Body signal choices">
-                            {(['Head', 'Chest', 'Hands', 'Stomach'] as BodySignal[]).map((opt) => (
-                              <ChoiceButton
-                                key={opt}
-                                label={opt}
-                                selected={body === opt}
-                                soundOnClick={playButtonClick}
-                                onClick={() => setBody(opt)}
-                              />
-                            ))}
-                          </div>
-
-                          <div className="ffl-stepActions">
-                            <button
-                              type="button"
-                              className="ffl-ctaPrimary ffl-ctaPrimary--small"
-                              onClick={() => {
-                                playButtonClick();
-                                setScreen('step4');
-                              }}
-                              disabled={!canProceedStep3}
-                            >
-                              Next
-                            </button>
-                          </div>
+              {screen === 'step3Why' && selectedScene && body && (
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
+                  <GameHudPanel
+                    className="ffl-zone-hud"
+                    b4Message={b4Message}
+                    selectedScene={selectedScene}
+                    progressPercent={focusFlameProgressPercent('step3Why')}
+                    markSrc={focusFlameMarkSrc}
+                    reduceMotion={reduceMotion}
+                    feeling={feeling}
+                    body={body}
+                    move={move}
+                  />
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
+                    <ReasoningWhyStep
+                      resetKey={`body-why-${selectedScene.id}-${body}`}
+                      kicker="STORY CLUE"
+                      prompt={bodyWhyPrompt(body)}
+                      options={bodyWhyOptions(selectedScene.id)}
+                      onAwardPoints={() => awardReasoningPoints(prevBodyWhyAwarded)}
+                      onB4Message={setStoryClueB4}
+                      onTryAgainSound={playButtonClick}
+                      onNextClick={playButtonClick}
+                      onNext={() => setScreen('step4')}
+                    />
                   </main>
                 </AdventureFlowLayout>
               )}
@@ -779,47 +1003,86 @@ export default function FocusFlameGame({
                     move={move}
                   />
                   <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
-                          <div className="ffl-questionHeader ffl-step-header">
-                            <div className="ffl-kicker">STEP 3 OF 3</div>
-                            <h2 className="ffl-h2">Which Focus Flame move should he try?</h2>
-                          </div>
+                    <FocusMoveStep
+                      value={move}
+                      canProceed={canProceedStep4}
+                      onSelect={(opt, isNew) => {
+                        confirmStepChoice(isNew);
+                        setMove(opt);
+                      }}
+                      onNextClick={playButtonClick}
+                      onNext={() => setScreen('step4Why')}
+                    />
+                  </main>
+                </AdventureFlowLayout>
+              )}
 
-                          <div className="ffl-choiceList" role="group" aria-label="Focus Flame move choices">
-                            {(
-                              [
-                                'Spark Breath — slow breathing',
-                                'Anchor Step — grounding',
-                                'B-4 Pause — stop before reacting',
-                                'Flame Draw — express the feeling through art',
-                                'Brave Choice — ask for help',
-                              ] as const
-                            ).map((label) => {
-                              const base = label.split(' — ')[0] as Move;
-                              return (
-                                <ChoiceButton
-                                  key={label}
-                                  label={label}
-                                  selected={move === base}
-                                  soundOnClick={playButtonClick}
-                                  onClick={() => setMove(base)}
-                                />
-                              );
-                            })}
-                          </div>
+              {screen === 'step4Why' && selectedScene && move && (
+                <AdventureFlowLayout className="ffl-screen--stack ffl-flow-layout ffl-mobile-stack">
+                  <GameHudPanel
+                    className="ffl-zone-hud"
+                    b4Message={b4Message}
+                    selectedScene={selectedScene}
+                    progressPercent={focusFlameProgressPercent('step4Why')}
+                    markSrc={focusFlameMarkSrc}
+                    reduceMotion={reduceMotion}
+                    feeling={feeling}
+                    body={body}
+                    move={move}
+                  />
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
+                    <ReasoningWhyStep
+                      resetKey={`move-why-${move}`}
+                      kicker="STORY CLUE"
+                      prompt={moveWhyPrompt(move)}
+                      options={moveWhyOptions(move)}
+                      onAwardPoints={() => awardReasoningPoints(prevMoveWhyAwarded)}
+                      onB4Message={setStoryClueB4}
+                      onTryAgainSound={playButtonClick}
+                      onNextClick={playButtonClick}
+                      onNext={() => {
+                        setPracticePhase('practice');
+                        setScreen('realLifePractice');
+                      }}
+                    />
+                  </main>
+                </AdventureFlowLayout>
+              )}
 
-                          <div className="ffl-stepActions">
-                            <button
-                              type="button"
-                              className="ffl-ctaPrimary ffl-ctaPrimary--small"
-                              onClick={() => {
-                                playButtonClick();
-                                setScreen('reward');
-                              }}
-                              disabled={!canProceedStep4}
-                            >
-                              Stabilize Flame
-                            </button>
-                          </div>
+              {screen === 'realLifePractice' && selectedScene && move && (
+                <AdventureFlowLayout className="ffl-screen--stack ffl-screen--practice ffl-flow-layout ffl-mobile-stack">
+                  <GameHudPanel
+                    className="ffl-zone-hud"
+                    b4Message={b4Message}
+                    selectedScene={selectedScene}
+                    progressPercent={focusFlameProgressPercent('realLifePractice')}
+                    markSrc={focusFlameMarkSrc}
+                    reduceMotion={reduceMotion}
+                    feeling={feeling}
+                    body={body}
+                    move={move}
+                  />
+                  <main className="ffl-zone-main ffl-zone-main--step ffl-step-main ffl-flow-main">
+                    <RealLifePractice
+                      selectedMove={move}
+                      reduceMotion={reduceMotion}
+                      onButtonClick={playButtonClick}
+                      onAwardPoints={(amount) => {
+                        if (practiceAwardedRef.current) return;
+                        practiceAwardedRef.current = true;
+                        awardFocusPoints(amount);
+                      }}
+                      onPhaseChange={setPracticePhase}
+                      playB4ClipAsync={playB4ClipAsync}
+                      stopB4PracticeVoice={stopB4PracticeVoice}
+                      playUiConfirm={playUiConfirm}
+                      onComplete={() => {
+                        stopB4PracticeVoice();
+                        playUiConfirm();
+                        if (selectedScene) markSceneComplete(selectedScene.id);
+                        setScreen('reward');
+                      }}
+                    />
                   </main>
                 </AdventureFlowLayout>
               )}
@@ -829,10 +1092,14 @@ export default function FocusFlameGame({
                   <FocusFlameRewardThreeZone
                     selectedScene={selectedScene}
                     scenes={scenes}
+                    completedSceneIds={completedSceneIds}
                     feeling={feeling}
                     body={body}
+                    focusPoints={focusPoints}
                     getBookHref={getBookHref}
-                    onTryNewScene={resetRun}
+                    onStartAdventure={startAdventureFromReward}
+                    onPlayAgain={resetGameSession}
+                    onExitGame={handleExitGame}
                     onPlayButtonClick={playButtonClick}
                     reduceMotion={reduceMotion}
                     markSrc={focusFlameMarkSrc}

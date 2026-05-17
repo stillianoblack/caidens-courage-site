@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { adventureReminderCopy } from './AdventureStatusPanel';
 import CompactB4HudCard from './CompactB4HudCard';
 import MobileSceneStatus from './MobileSceneStatus';
+import {
+  isMissionComplete,
+  missionProgressCount,
+  sceneLevelNumber,
+  SCENE_MISSION_ORDER,
+} from './focusFlameMission';
+import { focusFlameRankLabel } from './focusFlameRanks';
 
 type Feeling = 'Nervous' | 'Excited' | 'Embarrassed' | 'Angry';
 type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
@@ -9,11 +16,9 @@ type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
 export type FocusFlameRewardScene = {
   id: 'move' | 'ceremony' | 'cave';
   title: string;
+  blurb: string;
   cardImageSrc: string;
 };
-
-const TOTAL_FOCUS_POINTS = 40;
-const SCENE_ORDER: FocusFlameRewardScene['id'][] = ['move', 'ceremony', 'cave'];
 
 function clamp<T>(v: T | null | undefined, fallback: T) {
   return (v ?? fallback) as T;
@@ -29,9 +34,10 @@ function badgeIconUrls(publicUrl: string) {
   };
 }
 
-function journeyLineStatus(sceneId: FocusFlameRewardScene['id'], selectedId: FocusFlameRewardScene['id']): string {
-  if (sceneId === selectedId) return 'Completed';
-  return 'Locked';
+function sceneImgClass(sceneId: FocusFlameRewardScene['id']): string {
+  if (sceneId === 'move') return 'ffl-sceneRowImg--move';
+  if (sceneId === 'ceremony') return 'ffl-sceneRowImg--ceremony';
+  return 'ffl-sceneRowImg--cave';
 }
 
 function RewardHudBadge({
@@ -53,55 +59,330 @@ function RewardHudBadge({
   );
 }
 
-function KidsBadgeTile({ src, alt, label }: { src: string; alt: string; label: string }) {
-  return (
-    <div className="ffl-reward-badge-tile ffl-reward-badge-tile--earned" aria-label={label}>
-      <div className="ffl-reward-badge-tile-iconWrap">
-        <img className="ffl-reward-badge-tile-img" src={src} alt={alt} loading="eager" decoding="async" />
+function MissionLevelCard({
+  scene,
+  isCompleted,
+  isJustCompleted,
+  onStart,
+  onPlayButtonClick,
+}: {
+  scene: FocusFlameRewardScene;
+  isCompleted: boolean;
+  isJustCompleted: boolean;
+  onStart: (scene: FocusFlameRewardScene) => void;
+  onPlayButtonClick: () => void;
+}) {
+  const levelNum = sceneLevelNumber(scene.id);
+  const statusPill = isCompleted ? (
+    <span className="ffl-level-status ffl-level-status--completed">✓ Completed</span>
+  ) : (
+    <span className="ffl-level-status ffl-level-status--available">Available</span>
+  );
+
+  const media = (
+    <span className="ffl-mission-level-media">
+      <img
+        className={`ffl-mission-level-img ffl-sceneRowImg ${sceneImgClass(scene.id)}`}
+        src={scene.cardImageSrc}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+      <span className="ffl-mission-level-num" aria-hidden="true">
+        Level {levelNum}
+      </span>
+    </span>
+  );
+
+  const cardClass = [
+    'ffl-mission-level-card',
+    isCompleted ? 'ffl-mission-level-card--completed' : 'ffl-mission-level-card--available',
+    isJustCompleted ? 'ffl-mission-level-card--justCompleted' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  if (isCompleted) {
+    return (
+      <div className={cardClass}>
+        {media}
+        <div className="ffl-mission-level-body">
+          <div className="ffl-mission-level-text">
+            <span className="ffl-mission-level-title">{scene.title}</span>
+            <span className="ffl-mission-level-blurb">{scene.blurb}</span>
+          </div>
+          <div className="ffl-mission-level-meta">
+            {statusPill}
+            {isJustCompleted ? <span className="ffl-mission-level-justDone">Just completed</span> : null}
+          </div>
+          <button
+            type="button"
+            className="ffl-mission-level-replay"
+            onClick={() => {
+              onPlayButtonClick();
+              onStart(scene);
+            }}
+          >
+            Replay
+          </button>
+        </div>
       </div>
-      <span className="ffl-reward-badge-tile-label">{label}</span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={cardClass}
+      onClick={() => {
+        onPlayButtonClick();
+        onStart(scene);
+      }}
+      aria-label={`Start ${scene.title}. Available.`}
+    >
+      {media}
+      <div className="ffl-mission-level-body">
+        <div className="ffl-mission-level-text">
+          <span className="ffl-mission-level-title">{scene.title}</span>
+          <span className="ffl-mission-level-blurb">{scene.blurb}</span>
+        </div>
+        <div className="ffl-mission-level-meta">
+          {statusPill}
+          {isJustCompleted ? <span className="ffl-mission-level-justDone">Just completed</span> : null}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function MissionCompletedThumbCard({ scene }: { scene: FocusFlameRewardScene }) {
+  const levelNum = sceneLevelNumber(scene.id);
+  return (
+    <div
+      className="ffl-mission-level-card ffl-mission-level-card--completed ffl-mission-level-card--display"
+      aria-label={`${scene.title}. Completed.`}
+    >
+      <span className="ffl-mission-level-media">
+        <img
+          className={`ffl-mission-level-img ffl-sceneRowImg ${sceneImgClass(scene.id)}`}
+          src={scene.cardImageSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <span className="ffl-mission-level-num" aria-hidden="true">
+          Level {levelNum}
+        </span>
+      </span>
+      <div className="ffl-mission-level-body">
+        <div className="ffl-mission-level-text">
+          <span className="ffl-mission-level-title">{scene.title}</span>
+        </div>
+        <div className="ffl-mission-level-meta">
+          <span className="ffl-level-status ffl-level-status--completed">✓ Completed</span>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function EndScreenSummary({
+  missionComplete,
+  progressCount,
+  sceneCount,
+  focusPoints,
+  rankLabel,
+  feeling,
+  body,
+}: {
+  missionComplete: boolean;
+  progressCount: number;
+  sceneCount: number;
+  focusPoints: number;
+  rankLabel: string;
+  feeling: Feeling | null;
+  body: BodySignal | null;
+}) {
+  return (
+    <header className="ffl-reward-hero-intro">
+      <p className="ffl-reward-mission-progress" aria-live="polite">
+        {progressCount} of {sceneCount} adventures complete
+      </p>
+      {missionComplete ? (
+        <>
+          <h1 className="ffl-h2 ffl-reward-hero-title">Mission complete.</h1>
+          <p className="ffl-reward-hero-sub">You helped Caiden through all three adventures.</p>
+          <p className="ffl-reward-hero-hint">Your Focus Flame certificate is unlocked.</p>
+        </>
+      ) : (
+        <>
+          <h1 className="ffl-h2 ffl-reward-hero-title">Adventure complete.</h1>
+          <p className="ffl-reward-hero-sub">You helped Caiden steady his flame.</p>
+          <p className="ffl-reward-hero-hint">Choose another adventure to continue the mission.</p>
+        </>
+      )}
+      <div className="ffl-reward-hero-pointsRow">
+        <span className="ffl-reward-hero-points-value" aria-label={`${focusPoints} Focus Points`}>
+          {focusPoints}
+        </span>
+        <span className="ffl-reward-hero-points-label">Focus Points total</span>
+      </div>
+      <p className="ffl-reward-hero-rank">Rank: {rankLabel}</p>
+      <p className="ffl-reward-hero-meta">
+        Feeling: <span className="ffl-strong">{clamp(feeling, '—')}</span> · Body signal:{' '}
+        <span className="ffl-strong">{clamp(body, '—')}</span>
+      </p>
+    </header>
   );
 }
 
 export default function FocusFlameRewardThreeZone({
   selectedScene,
   scenes,
+  completedSceneIds,
   feeling,
   body,
+  focusPoints,
   getBookHref,
-  onTryNewScene,
+  onStartAdventure,
+  onPlayAgain,
+  onExitGame,
   onPlayButtonClick,
-  reduceMotion,
   markSrc,
 }: {
   selectedScene: FocusFlameRewardScene;
   scenes: FocusFlameRewardScene[];
+  completedSceneIds: ReadonlySet<FocusFlameRewardScene['id']>;
   feeling: Feeling | null;
   body: BodySignal | null;
+  focusPoints: number;
   getBookHref?: string;
-  onTryNewScene: () => void;
+  onStartAdventure: (scene: FocusFlameRewardScene) => void;
+  onPlayAgain: () => void;
+  onExitGame: () => void;
   onPlayButtonClick: () => void;
-  reduceMotion: boolean;
+  reduceMotion?: boolean;
   markSrc: string;
 }) {
   const publicUrl = process.env.PUBLIC_URL || '';
   const icons = badgeIconUrls(publicUrl);
   const certificatePdfHref = `${publicUrl}/downloads/Certificates/focus-flame-certificate.pdf`;
+  const missionComplete = isMissionComplete(completedSceneIds, scenes.length);
+  const progressCount = missionProgressCount(completedSceneIds);
 
-  const journeyScenes = [...scenes].sort(
-    (a, b) => SCENE_ORDER.indexOf(a.id) - SCENE_ORDER.indexOf(b.id)
+  const orderedScenes = [...scenes].sort(
+    (a, b) => SCENE_MISSION_ORDER.indexOf(a.id) - SCENE_MISSION_ORDER.indexOf(b.id)
+  );
+  const rankLabel = focusFlameRankLabel(focusPoints);
+
+  useEffect(() => {
+    console.log('[Journey] completedSceneIds', completedSceneIds);
+  }, [completedSceneIds]);
+
+  const b4Message = missionComplete
+    ? 'You did it. All three adventures are complete.'
+    : 'Nice work on this adventure. Ready for another?';
+
+  const chooseAdventurePanel = (
+    <section
+      className="ffl-reward-surface-card ffl-reward-surface-card--mission ffl-end-screen-action-card ffl-mission-choose-card"
+      aria-labelledby="ffl-mission-choose-title"
+    >
+      <h3 id="ffl-mission-choose-title" className="ffl-reward-surface-title">
+        Choose next adventure
+      </h3>
+      <p className="ffl-reward-kids-copy ffl-mission-choose-sub">
+        Complete all 3 adventures to unlock your certificate.
+      </p>
+      <div className="ffl-mission-level-grid" role="list">
+        {orderedScenes.map((s) => {
+          const isCompleted = completedSceneIds.has(s.id);
+          const isJustCompleted = isCompleted && s.id === selectedScene.id;
+          return (
+            <div key={s.id} role="listitem">
+              <MissionLevelCard
+                scene={s}
+                isCompleted={isCompleted}
+                isJustCompleted={isJustCompleted}
+                onStart={onStartAdventure}
+                onPlayButtonClick={onPlayButtonClick}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="ffl-reward-cta-stack ffl-mission-choose-footer">
+        <button type="button" className="ffl-ctaSecondary ffl-reward-kids-cta" onClick={onExitGame}>
+          Exit game
+        </button>
+        <p className="ffl-reward-cert-locked" role="status">
+          Complete all 3 adventures to unlock your certificate.
+        </p>
+        {getBookHref ? (
+          <a
+            className="ffl-reward-book-link ffl-reward-book-link--tertiary"
+            href={getBookHref}
+            onClick={() => onPlayButtonClick()}
+          >
+            Get the book
+          </a>
+        ) : null}
+      </div>
+    </section>
+  );
+
+  const certificatePanel = (
+    <section
+      className="ffl-reward-surface-card ffl-reward-surface-card--mission ffl-end-screen-action-card ffl-mission-cert-card"
+      aria-labelledby="ffl-cert-unlocked-title"
+    >
+      <h3 id="ffl-cert-unlocked-title" className="ffl-reward-surface-title">
+        Certificate unlocked
+      </h3>
+      <div className="ffl-mission-level-grid" role="list" aria-label="Completed adventures">
+        {orderedScenes.map((s) => (
+          <div key={s.id} role="listitem">
+            <MissionCompletedThumbCard scene={s} />
+          </div>
+        ))}
+      </div>
+      <p className="ffl-reward-kids-copy ffl-mission-cert-copy">
+        You completed the full Focus Flame Mission.
+      </p>
+      <div className="ffl-reward-cta-stack ffl-mission-cert-footer">
+        <a
+          className="ffl-ctaPrimary ffl-primary-button ffl-reward-kids-cta ffl-reward-cert-download"
+          href={certificatePdfHref}
+          download="focus-flame-certificate.pdf"
+          onClick={() => onPlayButtonClick()}
+        >
+          Download Kid Certificate
+        </a>
+        <button type="button" className="ffl-ctaSecondary ffl-reward-kids-cta" onClick={onPlayAgain}>
+          Play again
+        </button>
+        {getBookHref ? (
+          <a
+            className="ffl-reward-book-link ffl-reward-book-link--tertiary"
+            href={getBookHref}
+            onClick={() => onPlayButtonClick()}
+          >
+            Get the book
+          </a>
+        ) : null}
+      </div>
+    </section>
   );
 
   return (
-    <div className="ffl-reward-page-wrap">
-      <div className="ffl-reward-three-zone ffl-reward-stack">
+    <div className="ffl-reward-page-wrap ffl-reward-page-wrap--end">
+      <div className="ffl-reward-three-zone ffl-reward-stack ffl-end-screen">
         <aside className="ffl-reward-left-hud" aria-label="Reward status panel">
           <div className="ffl-reward-mobileSceneWrap">
             <MobileSceneStatus scene={selectedScene} progressPercent={100} />
           </div>
 
-          <CompactB4HudCard message="Great job. Your Focus Flame is getting stronger." />
+          <CompactB4HudCard message={b4Message} />
 
           <div className="ffl-hud-card ffl-hud-card--adventure ffl-reward-left-hud-card ffl-hud-adventure-card">
             <div className="ffl-hud-scene-thumbWrap ffl-hud-scene-thumbWrap--inCard">
@@ -137,112 +418,23 @@ export default function FocusFlameRewardThreeZone({
           </div>
         </aside>
 
-        <main className="ffl-reward-hero ffl-reward-main">
-          <header className="ffl-reward-hero-intro">
-            <p className="ffl-reward-eyebrow">CONGRATS, CAIDEN!</p>
-            <h2 className="ffl-h2 ffl-reward-hero-title">Caiden’s flame stabilized.</h2>
-            <p className="ffl-p ffl-reward-hero-sub">You helped Caiden notice what was happening.</p>
-            <p className="ffl-reward-hero-meta">
-              Feeling: <span className="ffl-strong">{clamp(feeling, '—')}</span> · Body signal:{' '}
-              <span className="ffl-strong">{clamp(body, '—')}</span>
-            </p>
-          </header>
-
-          <div className="ffl-reward-card-row">
-            <section
-              className="ffl-reward-surface-card ffl-reward-surface-card--kids ffl-kid-card"
-              aria-labelledby="ffl-reward-kids-title"
-            >
-              <h3 id="ffl-reward-kids-title" className="ffl-reward-surface-title">
-                For kids
-              </h3>
-              <p className="ffl-reward-kids-copy">
-                You earned {TOTAL_FOCUS_POINTS} Focus Points for helping Caiden practice courage.
-              </p>
-              <div className="ffl-reward-badge-row" role="list">
-                <div role="listitem">
-                  <KidsBadgeTile src={icons.noticing} alt="Noticing badge" label="Noticing" />
-                </div>
-                <div role="listitem">
-                  <KidsBadgeTile src={icons.body} alt="Body badge" label="Body" />
-                </div>
-                <div role="listitem">
-                  <KidsBadgeTile src={icons.draw} alt="Draw badge" label="Draw" />
-                </div>
-              </div>
-              <button
-                type="button"
-                className="ffl-ctaPrimary ffl-primary-button ffl-reward-kids-cta ffl-try-new-scene-button"
-                onClick={onTryNewScene}
-              >
-                Try a new scene
-              </button>
-            </section>
-
-            <section
-              className="ffl-reward-surface-card ffl-reward-surface-card--parents"
-              aria-labelledby="ffl-reward-parents-title"
-            >
-              <h3 id="ffl-reward-parents-title" className="ffl-reward-surface-title">
-                For parents &amp; teachers
-              </h3>
-              <p className="ffl-reward-parents-copy">
-                Download a Focus Flame certificate your child or student can fill out and sign.
-              </p>
-              <p className="ffl-reward-cert-helper">Printable PDF. No child account needed.</p>
-              {/* Certificate asset: public/downloads/Certificates/focus-flame-certificate.pdf */}
-              {/* TODO: Add Netlify form email capture before certificate download in Phase 2. */}
-              <div className="ffl-reward-parent-actions">
-                <a
-                  className="ffl-ctaPrimary ffl-reward-cert-download"
-                  href={certificatePdfHref}
-                  download="focus-flame-certificate.pdf"
-                  onClick={() => {
-                    onPlayButtonClick();
-                  }}
-                >
-                  Download Kid Certificate
-                </a>
-                <a
-                  className="ffl-ctaSecondary ffl-reward-book-link"
-                  href={getBookHref || '/#preorder'}
-                  onClick={() => {
-                    onPlayButtonClick();
-                  }}
-                >
-                  Get the book
-                </a>
-              </div>
-            </section>
-          </div>
+        <main className="ffl-reward-hero ffl-reward-main ffl-reward-score-column">
+          <EndScreenSummary
+            missionComplete={missionComplete}
+            progressCount={progressCount}
+            sceneCount={scenes.length}
+            focusPoints={focusPoints}
+            rankLabel={rankLabel}
+            feeling={feeling}
+            body={body}
+          />
         </main>
 
-        <aside className="ffl-reward-ambient" aria-label="Journey reflection">
-          <div className={`ffl-reward-ambient-flameSlot${reduceMotion ? ' ffl-reward-ambient-flameSlot--still' : ''}`}>
-            <img
-              className="ffl-reward-ambient-flame"
-              src={markSrc}
-              alt=""
-              decoding="async"
-              aria-hidden="true"
-            />
-          </div>
-          <blockquote className="ffl-reward-ambient-b4">
-            Every brave step makes your flame shine brighter.
-          </blockquote>
-          <div className="ffl-reward-journey" aria-label="Adventure journey">
-            <div className="ffl-reward-journey-title">Your journey</div>
-            <ul className="ffl-reward-journey-list">
-              {journeyScenes.map((s) => (
-                <li key={s.id} className="ffl-reward-journey-item">
-                  <span className="ffl-reward-journey-scene">{s.title}</span>
-                  <span className="ffl-reward-journey-status" data-status={journeyLineStatus(s.id, selectedScene.id)}>
-                    — {journeyLineStatus(s.id, selectedScene.id)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <aside
+          className="ffl-reward-action-panel"
+          aria-label={missionComplete ? 'Certificate unlocked' : 'Choose next adventure'}
+        >
+          {missionComplete ? certificatePanel : chooseAdventurePanel}
         </aside>
       </div>
     </div>

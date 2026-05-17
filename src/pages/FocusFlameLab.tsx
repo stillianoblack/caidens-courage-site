@@ -12,8 +12,16 @@ export default function FocusFlameLabPage() {
         id: 'move',
         title: 'The Path',
         blurb: 'Caiden feels out of place on a new path.',
-        intro:
+        momentCopy:
           'Caiden steps into a new place. Everything feels different. His thoughts start moving faster than his feet.',
+        videoSrc: `${publicUrl}/videos/focus-flame/the-path.mp4`,
+        tapVideoSequence: [
+          `${publicUrl}/videos/focus-flame/tap/the-path-tap-0.mp4`,
+          `${publicUrl}/videos/focus-flame/tap/the-path-tap-1.mp4`,
+          `${publicUrl}/videos/focus-flame/tap/the-path-tap-2.mp4`,
+          `${publicUrl}/videos/focus-flame/tap/the-path-tap-3.mp4`,
+        ],
+        thumbnail: `${publicUrl}/images/focus-flame-lab/thepath.webp`,
         cardImageSrc: `${publicUrl}/images/focus-flame-lab/thepath.webp`,
         cardImageAlt: 'Caiden on The Path',
         cardBadgeTone: 'blue',
@@ -22,7 +30,10 @@ export default function FocusFlameLabPage() {
         id: 'ceremony',
         title: 'The Camp',
         blurb: 'Caiden feels overwhelmed when all eyes are on him at camp.',
-        intro: 'The camp gets loud. Everyone is watching. Caiden’s Focus Flame starts to flicker.',
+        momentCopy:
+          'The camp gets loud. Everyone seems to be watching Caiden. His Focus Flame begins to flicker.',
+        videoSrc: `${publicUrl}/videos/focus-flame/the-camp.mp4`,
+        thumbnail: `${publicUrl}/images/focus-flame-lab/themove_intro_image.webp`,
         cardImageSrc: `${publicUrl}/images/focus-flame-lab/themove_intro_image.webp`,
         cardImageAlt: 'Caiden at The Camp',
         cardBadgeTone: 'gold',
@@ -31,8 +42,9 @@ export default function FocusFlameLabPage() {
         id: 'cave',
         title: 'The Cave',
         blurb: 'Caiden has to listen to his body and trust himself.',
-        intro:
-          'The cave is quiet, but Caiden can feel something inside him shifting. He has to listen closely.',
+        momentCopy: 'The cave feels darker than before. Strange sounds echo around Caiden.',
+        videoSrc: `${publicUrl}/videos/focus-flame/the-cave.mp4`,
+        thumbnail: `${publicUrl}/images/focus-flame-lab/thecave_block_image.webp`,
         // TODO: If these files aren’t deployed here, they also exist as `/images/characters/*_block_image.webp`.
         cardImageSrc: `${publicUrl}/images/focus-flame-lab/thecave_block_image.webp`,
         cardImageAlt: 'Caiden in The Cave scene',
@@ -84,4 +96,3 @@ export default function FocusFlameLabPage() {
     </main>
   );
 }
-

@@ -1,31 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { adventureReminderCopy, type AdventureStatusPanelScene } from './AdventureStatusPanel';
 import CompactB4HudCard from './CompactB4HudCard';
+import HudSceneThumb from './HudSceneThumb';
 import MobileSceneStatus from './MobileSceneStatus';
-
-type Feeling = 'Nervous' | 'Excited' | 'Embarrassed' | 'Angry';
-type BodySignal = 'Head' | 'Chest' | 'Hands' | 'Stomach';
-type Move = 'Spark Breath' | 'Anchor Step' | 'B-4 Pause' | 'Flame Draw' | 'Brave Choice';
+import { focusFlameMoveHudShort, type FocusFlameMove } from './focusFlameMoves';
+import type { BodySignal, Feeling } from './focusFlameSelTypes';
 
 export type GameHudPanelProps = {
   b4Message: string;
-  selectedScene: AdventureStatusPanelScene;
+  selectedScene: AdventureStatusPanelScene & {
+    videoSrc?: string;
+    thumbnail?: string;
+  };
   progressPercent: number;
   markSrc: string;
   reduceMotion: boolean;
   feeling: Feeling | null;
   body: BodySignal | null;
-  move: Move | null;
+  move: FocusFlameMove | null;
   className?: string;
 };
-
-function moveShortLabel(move: Move): string {
-  if (move === 'B-4 Pause') return 'B-4';
-  if (move === 'Spark Breath') return 'Spark';
-  if (move === 'Anchor Step') return 'Anchor';
-  if (move === 'Flame Draw') return 'Draw';
-  return 'Brave';
-}
 
 type BadgeKey = 'noticing' | 'body' | 'move';
 
@@ -44,7 +38,7 @@ export default function GameHudPanel({
   const [meterPulse, setMeterPulse] = useState(false);
   const prevFeeling = useRef<Feeling | null>(null);
   const prevBody = useRef<BodySignal | null>(null);
-  const prevMove = useRef<Move | null>(null);
+  const prevMove = useRef<FocusFlameMove | null>(null);
   const prevAllChoicesEmpty = useRef(true);
   const [celebrateBadge, setCelebrateBadge] = useState<BadgeKey | null>(null);
   const [floatPoints, setFloatPoints] = useState<{ id: number; text: string; badge: BadgeKey } | null>(null);
@@ -140,7 +134,7 @@ export default function GameHudPanel({
       aria-label="B-4 guide and adventure status"
     >
       <div className="ffl-mobileSceneStatusWrap">
-        <MobileSceneStatus scene={selectedScene} progressPercent={progressPercent} />
+        <MobileSceneStatus scene={selectedScene} progressPercent={progressPercent} reduceMotion={reduceMotion} />
       </div>
 
       <div className="ffl-hud-b4-wrap">
@@ -148,16 +142,7 @@ export default function GameHudPanel({
       </div>
 
       <div className="ffl-hud-card ffl-hud-card--adventure ffl-hud-adventure-card">
-        <div className="ffl-hud-scene-thumbWrap ffl-hud-scene-thumbWrap--inCard">
-          <img
-            className="ffl-hud-scene-thumb"
-            src={selectedScene.cardImageSrc}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            data-ffl-scene={selectedScene.id}
-          />
-        </div>
+        <HudSceneThumb scene={selectedScene} reduceMotion={reduceMotion} />
         <div className="ffl-hud-scene-title">{selectedScene.title}</div>
         <p className="ffl-hud-scene-reminder">{adventureReminderCopy(selectedScene.id)}</p>
       </div>
@@ -245,7 +230,7 @@ export default function GameHudPanel({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {move ? moveShortLabel(move) : 'Brave'}
+              {move ? focusFlameMoveHudShort(move) : 'Brave'}
             </span>
           </span>
         </div>
