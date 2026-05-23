@@ -20,12 +20,12 @@ import B4Clicker from './pages/B4Clicker';
 import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
 import ChatWithB4 from './pages/ChatWithB4';
 import CampCourage from './pages/CampCourage';
-import ClassroomPilots from './pages/ClassroomPilots';
 import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
 import FocusFlameLabPage from './pages/FocusFlameLab';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+import CourageToolsPopup from './components/CourageToolsPopup';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<Home />} />
       <Route path="/camp-courage" element={<CampCourage />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
-      <Route path="/classroom-pilots" element={<ClassroomPilots />} />
+      <Route path="/classroom-pilots" element={<Navigate to="/camp-courage#camp-pilot-partnerships" replace />} />
       <Route path="/training-guides" element={<TrainingGuides />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
@@ -74,6 +74,7 @@ const AppFrame: React.FC = () => {
   return (
     <>
       <AppRoutes />
+      {!isFocusFlameLab ? <CourageToolsPopup /> : null}
       {!isFocusFlameLab ? <DeferredB4ChatWidget /> : null}
     </>
   );

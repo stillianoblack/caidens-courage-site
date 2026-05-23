@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import HeroCarousel from '../components/HeroCarousel';
 import KidsGallerySection from '../components/KidsGallerySection';
+import PilotProgramSummerSection from '../components/home/PilotProgramSummerSection';
 
 // Pop art style icon components
 const SparkleIcon = ({ className }: { className?: string }) => (
@@ -431,6 +432,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <PilotProgramSummerSection />
 
       {/* Who Is Caiden Section */}
       <section

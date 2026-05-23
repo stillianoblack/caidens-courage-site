@@ -8653,6 +8653,411 @@ a.bg-golden-500:hover,
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
 
+/* Homepage — Pilot Program Summer 2026 */
+.pilot-summer-section {
+  position: relative;
+  background:
+    linear-gradient(165deg, #faf8f4 0%, #f3f0ea 38%, #eef2f8 100%);
+  scroll-margin-top: 80px;
+}
+
+.pilot-summer-section__halftone {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(36, 62, 112, 0.09) 1px, transparent 1px);
+  background-size: 14px 14px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.pilot-summer-section__glow {
+  position: absolute;
+  width: min(420px, 55vw);
+  height: min(420px, 55vw);
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.pilot-summer-section__glow--left {
+  left: -12%;
+  top: 18%;
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.22), transparent 68%);
+}
+
+.pilot-summer-section__glow--right {
+  right: -8%;
+  bottom: 8%;
+  background: radial-gradient(circle, rgba(36, 62, 112, 0.14), transparent 70%);
+}
+
+.pilot-summer-eyebrow {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 192, 106, 0.45);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.pilot-summer-bullet {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: #e5c06a;
+  box-shadow: 0 0 0 3px rgba(229, 192, 106, 0.22);
+}
+
+.pilot-summer-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+}
+
+.pilot-summer-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 192, 106, 0.38);
+  background: linear-gradient(180deg, #faf6eb 0%, #f3ecd6 100%);
+  color: #243e70;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(36, 62, 112, 0.06);
+}
+
+.pilot-summer-meta-pill__dot {
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e5c06a;
+  box-shadow: 0 0 6px rgba(229, 192, 106, 0.45);
+}
+
+.pilot-summer-section__visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.pilot-summer-collage__magicalGlow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: min(94%, 560px);
+  height: min(92%, 520px);
+  transform: translate(-50%, -50%);
+  border-radius: 42% 58% 52% 48%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 65% at 38% 42%, rgba(229, 192, 106, 0.32) 0%, transparent 68%),
+    radial-gradient(ellipse 65% 60% at 68% 58%, rgba(90, 140, 200, 0.18) 0%, transparent 72%);
+  filter: blur(32px);
+  opacity: 0.88;
+}
+
+.pilot-summer-collage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 568px;
+  margin: 0 auto;
+  aspect-ratio: 4 / 5;
+  min-height: 392px;
+  filter: drop-shadow(0 24px 48px rgba(27, 42, 68, 0.12));
+}
+
+.pilot-summer-collage__frame {
+  position: absolute;
+  inset: 6% 4% 4% 6%;
+  border-radius: 28px;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(243, 246, 252, 0.75));
+  box-shadow:
+    0 28px 60px rgba(27, 42, 68, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.pilot-summer-collage__glow {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 0;
+  width: 78%;
+  height: 62%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.22), transparent 72%);
+  pointer-events: none;
+}
+
+.pilot-summer-collage__glow--blue {
+  top: 48%;
+  width: 68%;
+  height: 54%;
+  background: radial-gradient(circle, rgba(100, 150, 210, 0.14), transparent 74%);
+  opacity: 0.85;
+}
+
+.pilot-summer-collage__hero,
+.pilot-summer-collage__card {
+  position: absolute;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 16px 36px rgba(27, 42, 68, 0.18);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.pilot-summer-collage__hero:hover,
+.pilot-summer-collage__card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 22px 44px rgba(27, 42, 68, 0.22);
+}
+
+.pilot-summer-collage__hero {
+  left: 14%;
+  top: 10%;
+  width: 52%;
+  height: 58%;
+  z-index: 3;
+  border-radius: 22px;
+}
+
+.pilot-summer-collage__hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  display: block;
+}
+
+.pilot-summer-collage__card {
+  z-index: 4;
+}
+
+.pilot-summer-collage__card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pilot-summer-collage__card--comic {
+  right: 2%;
+  top: 4%;
+  width: 40%;
+  height: 36%;
+  transform: rotate(5deg);
+  z-index: 5;
+}
+
+.pilot-summer-collage__card--comic:hover {
+  transform: rotate(5deg) translateY(-4px) scale(1.02);
+}
+
+.pilot-summer-collage__card--camp {
+  left: 4%;
+  bottom: 20%;
+  width: 38%;
+  height: 32%;
+  transform: rotate(-6deg);
+  z-index: 4;
+}
+
+.pilot-summer-collage__card--camp:hover {
+  transform: rotate(-6deg) translateY(-4px) scale(1.02);
+}
+
+.pilot-summer-collage__card--activity {
+  right: 5%;
+  bottom: 11%;
+  width: 44%;
+  height: 34%;
+  transform: rotate(4deg);
+  z-index: 6;
+}
+
+.pilot-summer-collage__card--activity:hover {
+  transform: rotate(4deg) translateY(-4px) scale(1.02);
+}
+
+.pilot-summer-collage__card--guide {
+  right: 20%;
+  top: 36%;
+  width: 36%;
+  height: 28%;
+  transform: rotate(-4deg);
+  z-index: 7;
+  background: rgba(7, 15, 28, 0.92);
+}
+
+.pilot-summer-collage__card--guide img {
+  object-fit: contain;
+  object-position: center bottom;
+  padding: 6px;
+}
+
+.pilot-summer-collage__card--guide:hover {
+  transform: rotate(-4deg) translateY(-4px) scale(1.02);
+}
+
+.pilot-summer-collage__card--worksheet {
+  left: 10%;
+  top: 42%;
+  width: 30%;
+  height: 24%;
+  transform: rotate(-8deg);
+  z-index: 5;
+}
+
+.pilot-summer-collage__card--worksheet img {
+  object-fit: cover;
+  object-position: center top;
+}
+
+.pilot-summer-collage__card--worksheet:hover {
+  transform: rotate(-8deg) translateY(-4px) scale(1.02);
+}
+
+.pilot-summer-collage__tag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(7, 15, 28, 0.78);
+  border: 1px solid rgba(229, 192, 106, 0.45);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1023px) {
+  .pilot-summer-section__content {
+    text-align: center;
+  }
+
+  .pilot-summer-section__content .pilot-summer-eyebrow {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pilot-summer-meta-pills {
+    justify-content: center;
+  }
+
+  .pilot-summer-section__content .pilot-summer-bullets {
+    text-align: left;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pilot-summer-section__content .mt-10 {
+    align-items: stretch;
+  }
+
+  .pilot-summer-section__visual {
+    margin-top: 0.5rem;
+    padding: 0.75rem 0.5rem 0;
+  }
+
+  .pilot-summer-collage {
+    max-width: min(500px, 92vw);
+    min-height: 360px;
+  }
+
+  .pilot-summer-collage__magicalGlow {
+    width: min(88%, 480px);
+    height: min(88%, 440px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pilot-summer-section__visual {
+    padding: 0.25rem 0 0 0.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .pilot-summer-bullets {
+    grid-template-columns: 1fr;
+  }
+
+  .pilot-summer-collage {
+    min-height: 300px;
+    max-width: min(100%, 340px);
+  }
+
+  .pilot-summer-collage__magicalGlow {
+    width: 96%;
+    height: 90%;
+    filter: blur(24px);
+  }
+
+  .pilot-summer-collage__hero {
+    width: 56%;
+    height: 54%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilot-summer-collage__hero,
+  .pilot-summer-collage__card {
+    transition: none;
+  }
+
+  .pilot-summer-collage__hero:hover,
+  .pilot-summer-collage__card:hover {
+    transform: none;
+    box-shadow: 0 16px 36px rgba(27, 42, 68, 0.18);
+  }
+
+  .pilot-summer-collage__card--comic:hover {
+    transform: rotate(5deg);
+  }
+
+  .pilot-summer-collage__card--camp:hover {
+    transform: rotate(-6deg);
+  }
+
+  .pilot-summer-collage__card--activity:hover {
+    transform: rotate(4deg);
+  }
+
+  .pilot-summer-collage__card--guide:hover {
+    transform: rotate(-4deg);
+  }
+
+  .pilot-summer-collage__card--worksheet:hover {
+    transform: rotate(-8deg);
+  }
+}
+
 /* Scroll-triggered fade-in-up animation - optimized for speed */
 .fade-in-up {
   opacity: 0;
@@ -9878,5 +10283,43 @@ a.bg-golden-500:hover,
 
   .ffl-practice-breatheRing-progress {
     transition: none;
+  }
+}
+
+/* Courage tools popup — parents & educators CTA */
+.courage-tools-popup-backdrop {
+  background: rgba(27, 42, 68, 0.76);
+  backdrop-filter: blur(6px);
+  animation: courageToolsPopupFadeIn 0.35s ease-out;
+}
+
+.courage-tools-popup-panel {
+  animation: courageToolsPopupEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes courageToolsPopupFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes courageToolsPopupEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courage-tools-popup-backdrop,
+  .courage-tools-popup-panel {
+    animation: none;
   }
 }

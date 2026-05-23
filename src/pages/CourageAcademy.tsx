@@ -388,7 +388,7 @@ const CourageAcademy: React.FC = () => {
                       </li>
                       <li className="flex items-start">
                         <span className="text-2xl mr-3 flex-shrink-0">🏫</span>
-                        <span>Classroom pilot overview</span>
+                        <span>Pilot partnerships overview</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-2xl mr-3 flex-shrink-0">📘</span>
@@ -468,15 +468,15 @@ const CourageAcademy: React.FC = () => {
                   </Link>
                 </div>
 
-                {/* Download Card 4: Classroom Pilot Overview */}
+                {/* Download Card 4: Pilot Partnerships */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 border border-navy-100 flex flex-col">
                   <h4 className="font-display text-xl font-bold text-navy-500 mb-2">
-                    Classroom Pilot Overview
+                    Pilot Partnerships
                   </h4>
                   <p className="text-sm text-navy-600 mb-4 flex-grow">
-                    Learn how to bring Caiden's Courage tools to your school or organization.
+                    Bring Camp Courage to your school, camp, or youth program.
                   </p>
-                  <Link to="/classroom-pilots">
+                  <Link to="/camp-courage#camp-pilot-partnerships">
                     <Button variant="primary" size="md" className="w-full">
                       Learn more
                     </Button>
@@ -640,7 +640,7 @@ const CourageAcademy: React.FC = () => {
                   )}
                 </div>
 
-                {/* Accordion Item 3: Classroom Pilots */}
+                {/* Accordion Item 3: Pilot Partnerships */}
                 <div className="border-t border-navy-200">
                   <button
                     onClick={() => {
@@ -652,7 +652,7 @@ const CourageAcademy: React.FC = () => {
                     aria-expanded={openAccordionIndex === 2}
                   >
                     <h3 className="font-display text-xl sm:text-2xl font-bold text-navy-500">
-                      Classroom Pilots
+                      Pilot Partnerships
                     </h3>
                     <span className="ml-4 flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center" style={{ minWidth: '32px' }}>
                       <span className="text-white text-xl font-bold">
@@ -663,11 +663,11 @@ const CourageAcademy: React.FC = () => {
                   {openAccordionIndex === 2 && (
                     <div className="pb-6 px-1">
                       <p className="text-lg text-navy-600 leading-relaxed mb-6">
-                        Want to bring Caiden's Courage to your school or organization? Classroom pilots help us learn what works best for neurodivergent learners — with simple routines that fit real schedules.
+                        Bring Camp Courage to your school, camp, or youth program. Pilot partnerships combine guided missions, interactive SEL experiences, and practical tools that fit real schedules.
                       </p>
-                      <Link to="/classroom-pilots">
+                      <Link to="/camp-courage#camp-pilot-partnerships">
                         <Button variant="primary" size="lg" className="w-full sm:w-auto">
-                          Learn about pilots
+                          Explore pilot partnerships
                         </Button>
                       </Link>
                     </div>

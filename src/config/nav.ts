@@ -99,12 +99,12 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: 'Camp Courage',
         href: '/camp-courage',
-        description: 'Guided SEL missions, companion activities, and classroom pilots.'
+        description: 'Interactive SEL experiences, guided missions, and pilot partnerships.'
       },
       {
-        label: 'Classroom Pilots',
-        href: '/classroom-pilots',
-        description: 'Bring Caiden\'s Courage to your school or organization.'
+        label: 'Pilot Partnerships',
+        href: '/camp-courage#camp-pilot-partnerships',
+        description: 'Bring Camp Courage to your school, camp, or youth program.'
       },
       {
         label: 'Training & Guides',

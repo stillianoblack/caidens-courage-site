@@ -25,7 +25,7 @@
         },
         {
           "id": "camp-4",
-          "text": "Camp Courage includes: Guided Missions (feelings check-ins, body reset, courage practice), Companion Activities (printable reflection sheets, discussion prompts), Classroom Pilots (bring Caiden's Courage to your school), and Training & Guides (implementation support)."
+          "text": "Camp Courage includes: Guided Missions (interactive SEL experiences), Companion Activities (printable reflection sheets, discussion prompts), Pilot Partnerships (schools, camps, and youth programs), and the Camp Courage Toolkit (implementation support for educators and caregivers)."
         }
       ]
     },
@@ -130,18 +130,18 @@
       ]
     },
     {
-      "id": "classroom-pilots",
-      "title": "Classroom Pilots",
-      "tags": ["pilot", "classroom", "school", "organization", "educator", "program"],
+      "id": "camp-pilot-partnerships",
+      "title": "Camp Courage Pilot Partnerships",
+      "tags": ["pilot", "classroom", "camp", "school", "organization", "educator", "program", "sel"],
       "audiences": ["teachers", "counselors"],
       "snippets": [
         {
           "id": "pilot-1",
-          "text": "Classroom Pilots help bring Caiden's Courage to your school or organization. Pilots help us learn what works best for neurodivergent learners with simple routines that fit real schedules."
+          "text": "Camp Courage pilot partnerships help bring interactive SEL experiences to schools, camps, and youth organizations. Pilots combine guided missions, printable tools, and calm routines that fit real schedules."
         },
         {
           "id": "pilot-2",
-          "text": "To request a Classroom Pilot, visit /classroom-pilots or use the Request Educator Access button on Camp Courage which scrolls to the FOR PARENTS + EDUCATORS section."
+          "text": "To apply for a pilot or download the Camp Courage Toolkit, visit /camp-courage — use the Pilot Partnerships section or the FOR PARENTS + EDUCATORS toolkit signup."
         }
       ]
     },

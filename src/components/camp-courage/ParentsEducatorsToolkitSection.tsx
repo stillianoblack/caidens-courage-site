@@ -58,8 +58,9 @@ export default function ParentsEducatorsToolkitSection() {
 
   return (
     <section
+      id="camp-courage-toolkit"
       aria-labelledby="parents-educators-toolkit"
-      className="w-full bg-[#EEF6FF]/40 py-20 sm:py-28"
+      className="w-full bg-[#EEF6FF]/40 py-20 sm:py-28 scroll-mt-24"
     >
       <div className="mx-auto max-w-6xl px-6 pt-4 pb-20 sm:pb-28">
         {/* Header — eyebrow, H2, sub text (match reference) */}
@@ -200,7 +201,7 @@ export default function ParentsEducatorsToolkitSection() {
                   </li>
                   <li className="flex gap-3">
                     <span aria-hidden className="mt-[2px]">🏫</span>
-                    <span>Classroom pilot overview</span>
+                    <span>Pilot partnerships overview</span>
                   </li>
                   <li className="flex gap-3">
                     <span aria-hidden className="mt-[2px]">📘</span>

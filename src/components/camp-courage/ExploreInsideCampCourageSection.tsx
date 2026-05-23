@@ -19,14 +19,14 @@ export default function ExploreInsideCampCourageSection() {
           "Hands-on activities that extend the story into real moments and build confidence through practice.",
       },
       {
-        title: "Classroom Pilots",
+        title: "Pilot Partnerships",
         body:
-          "A classroom-ready pilot structure for educators to introduce routines, reflection, and group support.",
+          "Summer pilot partnerships for schools, camps, and youth programs—routines, reflection, and group support that fit real schedules.",
       },
       {
-        title: "Training & Guides",
+        title: "Camp Courage Toolkit",
         body:
-          "Clear implementation guidance for adults supporting kids—simple, practical, and repeatable.",
+          "Printable SEL tools, facilitator guides, and calm-ready supports for educators, counselors, and caregivers.",
       },
     ],
     []
@@ -47,11 +47,12 @@ export default function ExploreInsideCampCourageSection() {
             id="explore-inside"
             className="mt-3 font-display text-balance text-[42px] leading-[1.1] font-extrabold text-[#1F3C63] md:text-[52px]"
           >
-            Explore what&apos;s inside Camp Courage
+            Explore the Camp &amp; Classroom Experience
           </h2>
 
           <p className="mx-auto mt-4 max-w-3xl text-[18px] leading-relaxed text-[#4E6A86]">
-            Tap a module to see what you&apos;ll get — designed for calm, predictable use at home and in the classroom.
+            Tap a module to preview guided missions, interactive SEL tools, and implementation supports—designed
+            for calm, predictable use in schools, camps, and counseling spaces.
           </p>
         </div>
 
