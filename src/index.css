@@ -7743,6 +7743,12 @@ a.ffl-ctaSecondary {
 }
 
 /* Kids gallery marquee + mobile scroll polish */
+.kids-gallery-gallery {
+  min-width: 0; /* grid/flex child: allow shrink instead of expanding page width */
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .kids-marquee {
   overflow: hidden;
   padding-top: 28px; /* room for tape so it isn't clipped */
@@ -7764,13 +7770,6 @@ a.ffl-ctaSecondary {
   }
   100% {
     transform: translateX(-50%);
-  }
-}
-
-/* Let the polaroid bottom/shadow breathe on desktop */
-@media (min-width: 768px) {
-  .kids-gallery-section {
-    overflow: visible;
   }
 }
 

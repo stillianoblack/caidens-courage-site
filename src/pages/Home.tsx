@@ -240,7 +240,7 @@ const Home = () => {
         className="major-publisher-hero homepage-hero relative overflow-hidden"
         style={{
           minHeight: isMobile ? 'auto' : 'clamp(860px, 92vh, 1150px)',
-          backgroundColor: isMobile ? '#ffffff' : undefined,
+          backgroundColor: isMobile ? '#111111' : undefined,
           ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
         }}
       >

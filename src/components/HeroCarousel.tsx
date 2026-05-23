@@ -66,6 +66,20 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     mobileImage: '/images/heros/hero-mobile_slide_3.webp',
     tabLabel: 'B-4',
   },
+  {
+    eyebrow: 'CAMP COURAGE',
+    headline: 'Courage grows faster together.',
+    mobileHeadline: 'Courage grows faster together.',
+    mobilePosition: 'center 40%',
+    highlight: 'together',
+    description:
+      'Camp Courage blends comic storytelling, SEL activities, and guided experiences to help kids build confidence, communication, focus, and emotional resilience.',
+    primaryCta: { label: 'Explore Camp Courage', to: '/camp-courage' },
+    secondaryCta: { label: 'View Pilot Program', to: '/camp-courage#camp-pilot-partnerships' },
+    desktopImage: '/images/heros/hero-desktop_slide_4.webp',
+    mobileImage: '/images/heros/hero-desktop_slide_4.webp',
+    tabLabel: 'Camp Courage',
+  },
 ];
 
 export default function HeroCarousel({
@@ -122,19 +136,19 @@ export default function HeroCarousel({
     return () => stopAutoplay();
   }, [activeIndex, autoplayMs, slides.length, restartAutoplay, stopAutoplay]);
 
+  // Preload slide art so crossfades do not flash empty/white while images decode.
+  useEffect(() => {
+    slides.forEach((slide) => {
+      [slide.desktopImage, slide.mobileImage].forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    });
+  }, [slides]);
+
   const active = slides[activeIndex];
 
-  // Mobile: subtle fade transition between slides (image + content)
-  const [mobilePrevIndex, setMobilePrevIndex] = useState<number | null>(null);
-  const [mobileIsTransitioning, setMobileIsTransitioning] = useState(false);
-  useEffect(() => {
-    if (!resolvedIsMobile) return;
-    setMobilePrevIndex((prev) => (prev === activeIndex ? prev : activeIndex));
-    setMobileIsTransitioning(true);
-    const t = window.setTimeout(() => setMobileIsTransitioning(false), 320);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex, resolvedIsMobile]);
+  const CROSSFADE_MS = 500;
 
   // Mobile swipe support (apply to full mobile carousel block)
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -228,7 +242,7 @@ export default function HeroCarousel({
       {resolvedIsMobile ? (
         <div
           className="w-full"
-          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#ffffff', touchAction: 'pan-y' }}
+          style={{ paddingTop: 'var(--mobile-header-stack-height)', background: '#111111', touchAction: 'pan-y' }}
           onTouchStart={onMobileTouchStart}
           onTouchMove={onMobileTouchMove}
           onTouchEnd={onMobileTouchEnd}
@@ -244,39 +258,23 @@ export default function HeroCarousel({
               background: '#05070D',
             }}
           >
-            {mobilePrevIndex != null && mobileIsTransitioning && mobilePrevIndex !== activeIndex && (
+            {slides.map((slide, idx) => (
               <img
-                src={slides[mobilePrevIndex]?.mobileImage}
+                key={slide.mobileImage}
+                src={slide.mobileImage}
                 alt=""
-                className="absolute inset-0"
+                className="absolute inset-0 h-full w-full object-cover"
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: slides[mobilePrevIndex]?.mobilePosition ?? 'center',
-                  opacity: 0,
-                  transition: 'opacity 320ms ease',
+                  objectPosition: slide.mobilePosition ?? 'center',
+                  opacity: idx === activeIndex ? 1 : 0,
+                  zIndex: idx === activeIndex ? 1 : 0,
+                  transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
                 }}
-                aria-hidden="true"
+                aria-hidden={idx !== activeIndex}
+                loading={idx === 0 ? 'eager' : 'lazy'}
                 decoding="async"
               />
-            )}
-            <img
-              src={active.mobileImage}
-              alt=""
-              className="absolute inset-0"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: active.mobilePosition ?? 'center',
-                opacity: 1,
-                transition: 'opacity 320ms ease',
-              }}
-              aria-hidden="true"
-              loading="eager"
-              decoding="async"
-            />
+            ))}
           </div>
 
           {/* Mobile indicators (Marvel-style bars) */}
@@ -303,14 +301,7 @@ export default function HeroCarousel({
           </div>
 
           {/* Mobile text panel */}
-          <div
-            style={{
-              background: '#111111',
-              transition: 'opacity 320ms ease, transform 320ms ease',
-              opacity: mobileIsTransitioning ? 0.98 : 1,
-              transform: mobileIsTransitioning ? 'translateY(2px)' : 'translateY(0)',
-            }}
-          >
+          <div style={{ background: '#111111' }}>
             <div className="mx-auto max-w-7xl px-7" style={{ paddingTop: '28px', paddingBottom: '30px' }}>
               <div
                 className="text-xs font-semibold uppercase"
@@ -372,18 +363,22 @@ export default function HeroCarousel({
           className="relative w-full flex flex-col"
           style={{ minHeight: 'clamp(860px, 92vh, 1150px)' }}
         >
-          {/* Desktop background (active slide as background-image) */}
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${slides[activeIndex]?.desktopImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: slides[activeIndex]?.desktopPosition ?? 'center',
-              backgroundRepeat: 'no-repeat',
-              zIndex: 0,
-            }}
-            aria-hidden="true"
-          />
+          {/* Desktop backgrounds — stacked crossfade (avoids white flash on swap) */}
+          <div className="absolute inset-0 bg-[#0a1018]" aria-hidden="true">
+            {slides.map((slide, idx) => (
+              <div
+                key={slide.desktopImage}
+                className="absolute inset-0 bg-cover bg-no-repeat"
+                style={{
+                  backgroundImage: `url(${slide.desktopImage})`,
+                  backgroundPosition: slide.desktopPosition ?? 'center',
+                  opacity: idx === activeIndex ? 1 : 0,
+                  zIndex: idx === activeIndex ? 1 : 0,
+                  transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
+                }}
+              />
+            ))}
+          </div>
 
           {/* Desktop overlay */}
           <div

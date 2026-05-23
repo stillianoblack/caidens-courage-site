@@ -110,7 +110,7 @@ export default function KidsGallerySection() {
   const cards = useMemo<KidsArtworkCard[]>(
     () => [
       {
-        id: 'mariana-8',
+        id: 'mariana-colored',
         imageSrc: '/images/gallery/Mariana_Coloredpage.webp',
         caption: 'Mariana',
         meta: 'Age 8 • Colored Mariana',
@@ -121,7 +121,7 @@ export default function KidsGallerySection() {
         icon: 'heart',
       },
       {
-        id: 'ollie-7',
+        id: 'ollie-colored',
         imageSrc: '/images/gallery/Ollie_Coloredpage.webp',
         caption: 'Ollie Buck',
         meta: 'Age 7 • Colored Ollie Buck',
@@ -132,7 +132,7 @@ export default function KidsGallerySection() {
         icon: 'star',
       },
       {
-        id: 'b4-9',
+        id: 'b4-colored',
         imageSrc: '/images/gallery/B-4_Coloredpage.webp',
         caption: 'B-4',
         meta: 'Age 9 • Colored B-4',
@@ -143,15 +143,59 @@ export default function KidsGallerySection() {
         icon: 'bolt',
       },
       {
-        id: 'mariana-6',
-        imageSrc: '/images/gallery/Mariana_Coloredpage.webp',
-        caption: 'Mariana',
-        meta: 'Age 6 • Colored Mariana',
-        polaroidBg: '#E8CBEA',
-        tapeBg: 'rgba(232, 203, 234, 0.92)',
-        tapeRotate: 'rotate(6deg)',
-        rotate: 'rotate(3deg)',
+        id: 'marina-bre',
+        imageSrc: '/images/gallery/marina_bre.webp',
+        caption: 'Marina',
+        meta: 'Colored Marina',
+        polaroidBg: '#F9E2D8',
+        tapeBg: 'rgba(249, 226, 216, 0.95)',
+        tapeRotate: 'rotate(-5deg)',
+        rotate: 'rotate(-2deg)',
+        icon: 'heart',
+      },
+      {
+        id: 'marina-dez',
+        imageSrc: '/images/gallery/marina_dez.webp',
+        caption: 'Marina',
+        meta: 'Colored with courage',
+        polaroidBg: '#D4E8F7',
+        tapeBg: 'rgba(212, 232, 247, 0.92)',
+        tapeRotate: 'rotate(4deg)',
+        rotate: 'rotate(1deg)',
         icon: 'sparkle',
+      },
+      {
+        id: 'genesis-bre',
+        imageSrc: '/images/gallery/genesis_bre.webp',
+        caption: 'Genesis',
+        meta: 'Colored Genesis',
+        polaroidBg: '#E5F0D5',
+        tapeBg: 'rgba(229, 240, 213, 0.92)',
+        tapeRotate: 'rotate(-3deg)',
+        rotate: 'rotate(2deg)',
+        icon: 'star',
+      },
+      {
+        id: 'olliebuck-bre',
+        imageSrc: '/images/gallery/olliebuck_bre.webp',
+        caption: 'Ollie Buck',
+        meta: 'Colored Ollie Buck',
+        polaroidBg: '#F3E8C8',
+        tapeBg: 'rgba(243, 232, 200, 0.92)',
+        tapeRotate: 'rotate(5deg)',
+        rotate: 'rotate(-1deg)',
+        icon: 'heart',
+      },
+      {
+        id: 'b4-bre',
+        imageSrc: '/images/gallery/B4_bre.webp',
+        caption: 'B-4',
+        meta: 'Colored B-4',
+        polaroidBg: '#DCE8F5',
+        tapeBg: 'rgba(220, 232, 245, 0.92)',
+        tapeRotate: 'rotate(-6deg)',
+        rotate: 'rotate(3deg)',
+        icon: 'bolt',
       },
     ],
     []
@@ -202,7 +246,7 @@ export default function KidsGallerySection() {
           paddingRight: '24px',
         }}
       >
-        <div className="kids-gallery-inner flex flex-col lg:grid lg:grid-cols-[320px_1fr] gap-8 lg:gap-14 items-center">
+        <div className="kids-gallery-inner flex flex-col lg:grid lg:grid-cols-[320px_minmax(0,1fr)] gap-8 lg:gap-14 items-center">
           {/* Left intro */}
           <div className="kids-gallery-intro text-center lg:text-left">
             <div className="inline-flex items-center justify-center gap-2 text-golden-500 mb-4">
@@ -241,12 +285,12 @@ export default function KidsGallerySection() {
           </div>
 
           {/* Gallery */}
-          <div className="kids-gallery-gallery relative w-full">
+          <div className="kids-gallery-gallery relative w-full min-w-0 overflow-x-clip">
             {/* Marquee (desktop + mobile) */}
             <div className="kids-marquee kids-marquee--all">
               <div className="kids-marquee-track flex items-stretch gap-6 pr-8">
-                {marqueeItems.map((c) => (
-                  <PolaroidCard key={`${c.id}-marquee`} card={c} />
+                {marqueeItems.map((c, idx) => (
+                  <PolaroidCard key={`${c.id}-marquee-${idx}`} card={c} />
                 ))}
               </div>
             </div>
