@@ -8084,6 +8084,250 @@ a.ffl-ctaSecondary {
   background-blend-mode: overlay, normal;
 }
 
+/* Hide scrollbars for horizontal marketing carousels. */
+.cc-hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+.cc-hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
+}
+
+/* Caiden's Courage site container — 15% wider than max-w-7xl (80rem → 92rem) */
+.cc-site-container {
+  width: 100%;
+  max-width: 92rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Courage homepage — Monchier-style masked hero */
+.cc-hero-mask {
+  min-height: clamp(525px, 63vh, 588px);
+  overflow: hidden;
+  box-shadow:
+    0 28px 64px -32px rgba(36, 62, 112, 0.28),
+    0 0 0 1px rgba(36, 62, 112, 0.06);
+}
+
+@media (min-width: 640px) {
+  .cc-hero-mask {
+    min-height: clamp(588px, 69vh, 714px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-mask {
+    min-height: clamp(693px, 78vh, 840px);
+  }
+}
+
+.cc-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #243e70;
+}
+
+.cc-hero-media video,
+.cc-hero-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  /* Slight overscale prevents letterbox bars when container aspect ≠ video */
+  transform: scale(1.08);
+}
+
+.cc-hero-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 88% 82% at 56% 46%,
+      transparent 0%,
+      transparent 40%,
+      rgba(7, 14, 28, 0.28) 72%,
+      rgba(4, 8, 18, 0.58) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(7, 14, 28, 0.82) 0%,
+      rgba(7, 14, 28, 0.48) 26%,
+      rgba(7, 14, 28, 0.14) 50%,
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(4, 8, 18, 0.28) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(4, 8, 18, 0.28) 100%
+    );
+}
+
+.cc-hero-content {
+  display: flex;
+  min-height: inherit;
+  flex-direction: column;
+  justify-content: center;
+  padding: max(1.25rem, 5%);
+}
+
+.cc-hero-visual {
+  align-self: center;
+}
+
+@media (min-width: 768px) {
+  .cc-hero-visual {
+    align-self: flex-end;
+    transform: translateY(0.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-visual {
+    align-self: center;
+    transform: translateY(1.25rem);
+  }
+}
+
+/* How It Works carousel: left edge matches max-w-7xl; bleeds off the right viewport edge */
+.cc-how-works-track {
+  width: calc(100% + (100vw - 100%) / 2);
+  margin-right: calc((100% - 100vw) / 2);
+}
+
+/* Built From a Real Story — Clever-style card: viewport-left bleed, right edge at content column */
+.cc-real-story {
+  --cc-content-right-margin: max(1rem, calc((100vw - 92rem) / 2 + 1rem));
+  /* Matches sections like Choose Your Path: outer px + centered container */
+  --cc-site-content-inset: max(1rem, calc((100vw - 2rem - min(100vw - 2rem, 92rem)) / 2 + 1rem));
+  /* Letterbox fill behind contained collage */
+  --cc-real-story-bg: #23262e;
+}
+
+.cc-real-story-photo {
+  background-color: var(--cc-real-story-bg);
+}
+
+.cc-real-story-photo__frame {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.cc-real-story-photo__frame img {
+  position: relative;
+  top: 50px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center 68%;
+  transform: scale(1.14);
+  transform-origin: center 68%;
+}
+
+/* ~20% navy wash — collage stays visible as supporting context */
+.cc-real-story-photo__overlay {
+  background-color: rgba(15, 28, 52, 0.2);
+}
+
+@media (min-width: 640px) {
+  .cc-real-story {
+    --cc-content-right-margin: max(1.5rem, calc((100vw - 92rem) / 2 + 1.5rem));
+    --cc-site-content-inset: max(1.5rem, calc((100vw - 3rem - min(100vw - 3rem, 92rem)) / 2 + 1.5rem));
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-real-story {
+    --cc-content-right-margin: max(2rem, calc((100vw - 92rem) / 2 + 2rem));
+    --cc-site-content-inset: max(2rem, calc((100vw - 4rem - min(100vw - 4rem, 92rem)) / 2 + 2rem));
+  }
+
+  /* Parent is max-w-7xl — calc(50% - 50vw) pulls card to viewport left edge */
+  .cc-real-story-card-bleed {
+    box-sizing: border-box;
+    margin-left: calc(50% - 50vw);
+    /* ~20% narrower than full bleed; left edge unchanged */
+    width: calc((100vw - var(--cc-content-right-margin)) * 0.8);
+    max-width: none;
+    border-radius: 0 1.5rem 1.5rem 0;
+  }
+
+  /* Headline / copy align with site column (Choose Your Path, etc.) */
+  .cc-real-story-card__text {
+    padding-left: var(--cc-site-content-inset) !important;
+  }
+}
+
+/* Mobile: contained card, no bleed, no horizontal overflow */
+@media (max-width: 1023px) {
+  .cc-real-story-card-bleed {
+    width: 100%;
+    margin-left: 0;
+    border-radius: 1.5rem;
+  }
+}
+
+/* Image fills card; on hover it nudges up while the navy panel rises over it */
+.cc-how-card-media {
+  transform: translate3d(0, 0, 0);
+  transition: transform 650ms cubic-bezier(0.33, 1, 0.28, 1);
+  will-change: transform;
+}
+
+.cc-how-card-panel {
+  height: 5.5rem;
+  overflow: hidden;
+  background: #0b1e3a;
+  transition: height 650ms cubic-bezier(0.33, 1, 0.28, 1);
+}
+
+.cc-how-card--grow .cc-how-card-panel--grow {
+  background: #deb23c;
+}
+
+.cc-how-card-extra {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0);
+  transition:
+    opacity 480ms cubic-bezier(0.33, 1, 0.28, 1) 80ms,
+    transform 650ms cubic-bezier(0.33, 1, 0.28, 1) 80ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cc-how-card:hover .cc-how-card-media,
+  .cc-how-card:focus-within .cc-how-card-media {
+    transform: translate3d(0, -1.25rem, 0);
+  }
+
+  .cc-how-card:hover .cc-how-card-panel,
+  .cc-how-card:focus-within .cc-how-card-panel {
+    height: 11.25rem;
+  }
+
+  .cc-how-card:hover .cc-how-card-extra,
+  .cc-how-card:focus-within .cc-how-card-extra {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-how-card-media,
+  .cc-how-card-panel,
+  .cc-how-card-extra {
+    transition: none;
+  }
+}
+
 * {
   scroll-behavior: smooth;
 }

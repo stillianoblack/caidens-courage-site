@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BluePageHeader from '../components/sections/BluePageHeader';
@@ -37,6 +37,14 @@ const CampCourage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cream font-body">
       <Header onComingSoonClick={handleComingSoonClick} />
+
+      <div className="border-b border-golden-500/30 bg-golden-500/15 px-4 py-3 text-center text-sm text-navy-600">
+        Camp Courage now lives inside{' '}
+        <Link to="/focus-flame-academy" className="font-semibold text-navy-500 underline-offset-2 hover:underline">
+          Focus Flame Academy
+        </Link>
+        . This page remains available during the transition.
+      </div>
 
       <BluePageHeader
         title="Camp Courage"

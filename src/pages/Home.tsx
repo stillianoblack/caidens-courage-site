@@ -1,633 +1,343 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
-import { DISABLE_HEROES } from '../config/heroes';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import CourageHeader from '../components/CourageHeader';
+import CourageFooter from '../components/CourageFooter';
+import HubCard from '../components/ecosystem/HubCard';
+import ChoosePathSection from '../components/courage/ChoosePathSection';
+import BuiltFromRealStorySection from '../components/courage/BuiltFromRealStorySection';
 import Button from '../components/ui/Button';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import HeroCarousel from '../components/HeroCarousel';
-import KidsGallerySection from '../components/KidsGallerySection';
-import PilotProgramSummerSection from '../components/home/PilotProgramSummerSection';
+import HeroBackgroundVideo from '../components/courage/HeroBackgroundVideo';
+import HeroEcosystemVisuals from '../components/courage/HeroEcosystemVisuals';
+import CourageEmailSignup from '../components/courage/CourageEmailSignup';
+import useHashScroll from '../hooks/useHashScroll';
 
-// Pop art style icon components
-const SparkleIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="40" fill="#FFD700" stroke="#FFA500" strokeWidth="3"/>
-    <path d="M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z" fill="#FF6B6B" stroke="#FF4757" strokeWidth="2"/>
-    <circle cx="50" cy="50" r="15" fill="#FFD700"/>
-    <circle cx="35" cy="35" r="8" fill="#4ECDC4"/>
-    <circle cx="65" cy="35" r="8" fill="#FF6B6B"/>
-    <circle cx="35" cy="65" r="8" fill="#95E1D3"/>
-    <circle cx="65" cy="65" r="8" fill="#F38181"/>
-  </svg>
-);
+type HowItWorksStepName = 'Read' | 'Play' | 'Reflect' | 'Grow';
 
-const PaletteIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="30" width="60" height="50" rx="5" fill="#FF6B6B" stroke="#FF4757" strokeWidth="3"/>
-    {/* 8 colorful squares in a 2x4 grid - fully opaque, no transparency */}
-    <rect x="28" y="38" width="10" height="10" fill="#4A90E2" opacity="1"/>
-    <rect x="40" y="38" width="10" height="10" fill="#50C878" opacity="1"/>
-    <rect x="52" y="38" width="10" height="10" fill="#FFD700" opacity="1"/>
-    <rect x="64" y="38" width="10" height="10" fill="#FFA500" opacity="1"/>
-    <rect x="28" y="50" width="10" height="10" fill="#4A90E2" opacity="1"/>
-    <rect x="40" y="50" width="10" height="10" fill="#50C878" opacity="1"/>
-    <rect x="52" y="50" width="10" height="10" fill="#FFD700" opacity="1"/>
-    <rect x="64" y="50" width="10" height="10" fill="#FFA500" opacity="1"/>
-    <rect x="25" y="20" width="15" height="15" rx="3" fill="#FF6B6B" transform="rotate(-15 32.5 27.5)"/>
-    <rect x="60" y="20" width="15" height="15" rx="3" fill="#4ECDC4" transform="rotate(15 67.5 27.5)"/>
-  </svg>
-);
+type HowItWorksItem = {
+  step: HowItWorksStepName;
+  icon: string;
+  imageSrc: string;
+  imageObjectPosition?: string;
+  imageTranslateY?: number;
+  hoverTitle: string;
+  hoverText: string;
+};
 
-const StrengthIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="35" fill="#4ECDC4" stroke="#26A69A" strokeWidth="4"/>
-    <path d="M30 50 L50 30 L70 50 L50 70 Z" fill="#FFD700" stroke="#FFA500" strokeWidth="3"/>
-    <circle cx="50" cy="50" r="12" fill="#FF6B6B"/>
-    <rect x="45" y="25" width="10" height="20" rx="2" fill="#95E1D3"/>
-    <rect x="45" y="55" width="10" height="20" rx="2" fill="#95E1D3"/>
-    <rect x="25" y="45" width="20" height="10" rx="2" fill="#95E1D3"/>
-    <rect x="55" y="45" width="20" height="10" rx="2" fill="#95E1D3"/>
-  </svg>
-);
-
-const StarIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M50 10 L60 40 L90 40 L68 58 L78 88 L50 70 L22 88 L32 58 L10 40 L40 40 Z" fill="#FFD700" stroke="#FFA500" strokeWidth="3"/>
-    <circle cx="50" cy="50" r="15" fill="#FF6B6B"/>
-    <circle cx="50" cy="50" r="8" fill="#FFD700"/>
-    <circle cx="30" cy="30" r="6" fill="#4ECDC4"/>
-    <circle cx="70" cy="30" r="6" fill="#F38181"/>
-    <circle cx="30" cy="70" r="6" fill="#95E1D3"/>
-    <circle cx="70" cy="70" r="6" fill="#A8E6CF"/>
-  </svg>
-);
-
-// Feature card data - 2026 design trends with glassmorphism and bold gradients
-const features = [
+const HOW_IT_WORKS: HowItWorksItem[] = [
   {
-    icon: SparkleIcon,
-    title: 'Different Minds Hold Hidden Power',
-    description: "Caiden's story shows kids that ADHD isn't a flaw — it can be a source of creativity, energy, and unique strength.",
+    step: 'Read',
+    icon: '📖',
+    imageSrc: '/images/caidenscourage/How_It_Works/read_card_.webp',
+    imageTranslateY: -35,
+    hoverTitle: 'Read the story',
+    hoverText: 'Meet Caiden, B-4, and the Focus Flame through short story moments.',
   },
   {
-    icon: PaletteIcon,
-    title: 'Where Imagination Becomes Armor',
-    description: "Creativity becomes more than play — it becomes confidence kids can carry into every challenge.",
+    step: 'Play',
+    icon: '🎮',
+    imageSrc: '/images/caidenscourage/How_It_Works/The Opportunity_kid_Courage.webp',
+    hoverTitle: 'Practice through play',
+    hoverText: 'Interactive moments help kids notice feelings, focus, and make brave choices.',
   },
   {
-    icon: StrengthIcon,
-    title: 'Courage Is a Skill You Learn',
-    description: "By facing big feelings and uncertain moments, kids learn that bravery is something you practice.",
+    step: 'Reflect',
+    icon: '💭',
+    imageSrc: '/images/caidenscourage/How_It_Works/reflectcard_cc.webp',
+    hoverTitle: 'Name the feeling',
+    hoverText: 'Simple prompts help kids reflect, reset, and try a next step.',
   },
   {
-    icon: StarIcon,
-    title: 'Every Hero Deserves to Be Seen',
-    description: "When children see themselves reflected in a hero, they begin to believe they belong in their own story.",
+    step: 'Grow',
+    icon: '🌱',
+    imageSrc: '/images/focus-flame-lab/thepath.webp',
+    hoverTitle: 'Grow over time',
+    hoverText: 'Small, repeatable skills build confidence and courage day by day.',
   },
 ];
 
-// Character data
-const characters = [
-  {
-    name: 'Caiden',
-    microLabel: 'The Dreamer',
-    description: "The brave, imaginative 11-year-old at the center of our story — learning how his ADHD is actually his greatest strength.",
-    image: '/images/characters/Caiden_img_profile.webp',
-  },
-  {
-    name: 'Genesis',
-    microLabel: 'The Potential',
-    description: "Caiden's heroic alter-ego, unlocked when he taps into courage and creativity. Genesis is everything Caiden is becoming.",
-    image: '/images/genesis_img_pic.webp',
-  },
-  {
-    name: 'B-4',
-    microLabel: 'The Mind in Motion',
-    description: "A floating robotic companion who represents what's happening inside Caiden's mind. B-4 helps him understand his ADHD.",
-    image: '/images/characters/b4_img_profile_192w.webp',
-  },
-  {
-    name: 'Ollie Buck',
-    microLabel: 'Patience & Grounding',
-    description: "Caiden's loyal companion who reminds him that slow and steady wins the race — patience is a superpower too.",
-    image: '/images/characters/ollie_img_profile_192w.webp',
-  },
-];
+const HOW_IT_WORKS_IMAGE_ALT: Record<HowItWorksStepName, string> = {
+  Read: "Kid reading a Caiden's Courage story",
+  Play: 'Kid practicing courage through play',
+  Reflect: 'Kid reflecting on feelings',
+  Grow: 'Kid building courage over time',
+};
 
-// Shop products
-const products = [
-  {
-    title: "Caiden's Courage — Limited Edition",
-    description: "Caiden discovers that the thing he struggles with most — his ADHD — is actually his superpower. Pre-order the exclusive limited edition now!",
-    badge: "Limited Edition",
-    badgeColor: "bg-golden-500",
-    purchaseUrl: productLinks.limitedEdition,
-    available: true,
-    image: "/images/Comic5_Coverpage_header_Shop_smaller.webp",
-  },
-  {
-    title: "Caiden's Courage T-Shirt",
-    description: "Wear your courage! Show the world you support neurodiversity with our official Caiden's Courage t-shirt.",
-    badge: "New",
-    badgeColor: "bg-golden-500",
-    purchaseUrl: productLinks.tShirt,
-    available: false,
-    comingSoon: true,
-    image: "/images/Caiden'Courage_Tshirt_smaller.webp",
-  },
-  {
-    title: "B-4 Plush Companions",
-    description: "Floating robotic friends that represent different neurodivergent strengths — ADHD, Autism, Anxiety, Big Feelers, & more.",
-    badge: "New",
-    badgeColor: "bg-golden-500",
-    purchaseUrl: productLinks.b4Plush,
-    available: false,
-    comingSoon: true,
-    image: "/images/B-4plushcompanions_img.webp",
-  },
-];
+function HowItWorksCard({
+  step,
+  index,
+  imageSrc,
+  imageObjectPosition,
+  imageTranslateY,
+  icon,
+  hoverTitle,
+  hoverText,
+}: HowItWorksItem & { index: number }) {
+  const isGrow = step === 'Grow';
 
-// Coming soon products - uncomment when ready
-// const comingSoonProducts = [
-//   {
-//     title: "The Courage Journal",
-//     description: "A kid-friendly guided journal that helps children express feelings, track creative ideas, and build emotional strength.",
-//     badge: "Coming Soon",
-//     badgeColor: "bg-navy-400",
-//     image: '/images/balance.webp',
-//     purchaseUrl: null,
-//     available: false,
-//   },
-// ];
+  return (
+    <article
+      tabIndex={0}
+      className={[
+        'cc-how-card group relative aspect-[16/12] w-full overflow-hidden rounded-[30px] outline-none transition-transform duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-golden-400/80 motion-safe:hover:-translate-y-0.5',
+        isGrow
+          ? 'cc-how-card--grow bg-golden-500 shadow-[0_18px_54px_-26px_rgba(167,125,28,0.45)]'
+          : 'bg-[#0B1E3A] shadow-[0_18px_54px_-26px_rgba(7,20,38,0.55)]',
+      ].join(' ')}
+    >
+      <div className="cc-how-card-media absolute inset-0 overflow-hidden">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={HOW_IT_WORKS_IMAGE_ALT[step]}
+            className="h-full w-full object-cover object-center"
+            style={{
+              ...(imageObjectPosition ? { objectPosition: imageObjectPosition } : {}),
+              ...(imageTranslateY !== undefined ? { transform: `translateY(${imageTranslateY}px)` } : {}),
+            }}
+            decoding="async"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-navy-800/60">
+            <span className="text-6xl" aria-hidden="true">
+              {icon}
+            </span>
+          </div>
+        )}
+      </div>
 
-const Home = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isPreorderOpen, setIsPreorderOpen] = useState(false);
-  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [heroBgOk, setHeroBgOk] = useState<boolean | null>(null);
-  const [isMobile, setIsMobile] = useState(
-    () => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 768px)').matches : false)
+      <div
+        className={[
+          'cc-how-card-panel absolute inset-x-0 bottom-0 z-10 px-6 pb-5 pt-4 text-left',
+          isGrow ? 'cc-how-card-panel--grow' : '',
+        ].join(' ')}
+      >
+        <p
+          className={[
+            'text-xs font-semibold uppercase tracking-wider',
+            isGrow ? 'text-navy-600' : 'text-golden-300/90',
+          ].join(' ')}
+        >
+          Step {index + 1}
+        </p>
+        <p
+          className={[
+            'mt-1 font-display text-2xl font-extrabold leading-tight',
+            isGrow ? 'text-navy-800' : 'text-white',
+          ].join(' ')}
+        >
+          {step}
+        </p>
+        <div className="cc-how-card-extra">
+          <p className={['mt-3 text-sm font-semibold', isGrow ? 'text-navy-800' : 'text-white/95'].join(' ')}>
+            {hoverTitle}
+          </p>
+          <p className={['mt-2 text-sm leading-relaxed', isGrow ? 'text-navy-700' : 'text-white/75'].join(' ')}>
+            {hoverText}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function HowItWorksCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const alignRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const cards = useMemo(() => HOW_IT_WORKS, []);
+
+  const scrollToIndex = useCallback(
+    (idx: number) => {
+      const track = trackRef.current;
+      const alignEl = alignRef.current;
+      if (!track) return;
+
+      const nextIndex = Math.max(0, Math.min(cards.length - 1, idx));
+      const cardEl = track.querySelector<HTMLElement>(`[data-how-card-index="${nextIndex}"]`);
+      if (!cardEl) return;
+
+      if (nextIndex === 0) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+        setActiveIndex(0);
+        return;
+      }
+
+      const alignRect = alignEl?.getBoundingClientRect();
+      const cardRect = cardEl.getBoundingClientRect();
+      const isLast = nextIndex === cards.length - 1;
+
+      let scrollDelta = 0;
+      if (isLast && alignRect) {
+        scrollDelta = cardRect.right - alignRect.right;
+      } else if (alignRect) {
+        scrollDelta = cardRect.left - alignRect.left;
+      } else if (isLast) {
+        cardEl.scrollIntoView({ behavior: 'smooth', inline: 'end', block: 'nearest' });
+        setActiveIndex(nextIndex);
+        return;
+      } else {
+        cardEl.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        setActiveIndex(nextIndex);
+        return;
+      }
+
+      track.scrollTo({ left: track.scrollLeft + scrollDelta, behavior: 'smooth' });
+      setActiveIndex(nextIndex);
+    },
+    [cards.length],
   );
 
-  // Handle hash anchor scrolling (for homepage section deep-links)
-  useEffect(() => {
-    // If navigating to homepage with hash, scroll to section
-    if (location.pathname === '/' && location.hash) {
-      // Use a slightly longer delay to ensure DOM is fully ready after navigation
-      const scrollTimeout = setTimeout(() => {
-        const element = document.querySelector(location.hash);
-        if (element) {
-          // Calculate offset for fixed header (approximately 80px on desktop, 64px on mobile)
-          const headerOffset = window.innerWidth < 768 ? 64 : 80;
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 200);
-      
-      return () => clearTimeout(scrollTimeout);
-    }
-  }, [location.hash, location.pathname]);
+  const canPrev = activeIndex > 0;
+  const canNext = activeIndex < cards.length - 1;
+
+  return (
+    <section className="border-y border-navy-100/80 bg-[#EEF4FF] px-4 pt-20 pb-20 sm:px-6 sm:pt-28 sm:pb-24 lg:px-8 lg:pt-32 lg:pb-28">
+      <div ref={alignRef} className="cc-site-container mx-auto">
+        <div className="flex items-start justify-between gap-6">
+          <div className="min-w-0">
+            <h2 className="font-display text-2xl font-extrabold text-navy-700 sm:text-3xl">How It Works</h2>
+            <p className="mt-3 max-w-2xl text-base text-navy-600 sm:text-lg">
+              Kids enter the world through story, practice focus through play, reflect on emotions, and build courage over
+              time.
+            </p>
+          </div>
+
+          <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={() => scrollToIndex(activeIndex - 1)}
+              disabled={!canPrev}
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${
+                canPrev ? 'border-navy-200 text-navy-700 hover:bg-navy-50' : 'border-navy-100 text-navy-300'
+              }`}
+              aria-label="Previous"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToIndex(activeIndex + 1)}
+              disabled={!canNext}
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${
+                canNext ? 'border-navy-200 text-navy-700 hover:bg-navy-50' : 'border-navy-100 text-navy-300'
+              }`}
+              aria-label="Next"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={trackRef}
+          className={[
+            'cc-hide-scrollbar cc-how-works-track mt-12 flex gap-5 overflow-x-auto sm:mt-14',
+            '[-webkit-overflow-scrolling:touch]',
+            'sm:gap-6',
+          ].join(' ')}
+        >
+          {cards.map((card, index) => (
+            <div
+              key={card.step}
+              data-how-card-index={index}
+              className="shrink-0"
+              style={{ flex: '0 0 clamp(300px, 74vw, 420px)' }}
+            >
+              <HowItWorksCard {...card} index={index} />
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile arrows */}
+        <div className="mt-6 flex items-center justify-end gap-2 sm:hidden">
+          <button
+            type="button"
+            onClick={() => scrollToIndex(activeIndex - 1)}
+            disabled={!canPrev}
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${
+              canPrev ? 'border-navy-200 text-navy-700 hover:bg-navy-50' : 'border-navy-100 text-navy-300'
+            }`}
+            aria-label="Previous"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToIndex(activeIndex + 1)}
+            disabled={!canNext}
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${
+              canNext ? 'border-navy-200 text-navy-700 hover:bg-navy-50' : 'border-navy-100 text-navy-300'
+            }`}
+            aria-label="Next"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const Home: React.FC = () => {
+  useHashScroll();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const m = window.matchMedia('(max-width: 768px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    m.addEventListener('change', handler);
-    return () => m.removeEventListener('change', handler);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const url = isMobile ? '/images/heros/hero-mobile_1.webp' : '/images/heros/hero-desktop_1.webp';
-    const img = new Image();
-    img.onload = () => {
-      // eslint-disable-next-line no-console
-      console.log('[Hero] background loaded', url);
-      setHeroBgOk(true);
-    };
-    img.onerror = () => {
-      // eslint-disable-next-line no-console
-      console.log('[Hero] background failed', url);
-      setHeroBgOk(false);
-    };
-    img.src = url;
-  }, [isMobile]);
-
-  const handleWaitlistClick = () => {
-    const waitlistUrl = getWaitlistUrl();
-    if (waitlistUrl) return openExternalUrl(waitlistUrl);
-    setIsPreorderOpen(true);
-  };
-
-  const handleComingSoonClick = useCallback(() => {
-    setIsComingSoonModalOpen(true);
+    document.title = "Caiden's Courage";
   }, []);
 
   return (
-    <div className="min-h-screen bg-cream font-body">
-      <Header onComingSoonClick={handleComingSoonClick} />
+    <div className="min-h-screen overflow-x-clip bg-cream font-body">
+      <CourageHeader />
 
-      {/* Hero Section - Major Publisher Quality */}
-      <section
-        id="hero"
-        className="major-publisher-hero homepage-hero relative overflow-hidden"
-        style={{
-          minHeight: isMobile ? 'auto' : 'clamp(860px, 92vh, 1150px)',
-          backgroundColor: isMobile ? '#111111' : undefined,
-          ...(heroBgOk === false ? { backgroundColor: 'red' } : null),
-        }}
-      >
-        {/* Background disabled mode */}
-        {DISABLE_HEROES && (
-          <div className="absolute inset-0 -z-10 bg-[#1B2A44]" aria-hidden="true" />
-        )}
-        
-        {/* Star Dust Animation */}
-        <div className="major-publisher-stardust absolute inset-0 hidden md:block" style={{ zIndex: 1 }} aria-hidden="true"></div>
-        
-        <HeroCarousel isMobile={isMobile} autoplayMs={8000} />
-
-        {/* Slanted Wave Transition */}
-        <div className="hero-wave absolute bottom-0 left-0 right-0 z-10" style={{ height: 'var(--hero-wave-height)', lineHeight: 0, overflow: 'hidden' }}>
-          <svg 
-            className="w-full h-full" 
-            viewBox="0 0 1440 150" 
-            preserveAspectRatio="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M0,60 C360,140 1080,0 1440,80 L1440,150 L0,150 Z"
-              fill="#ffffff"
-            />
-          </svg>
-        </div>
-      </section>
-
-      {/* Trust Strip */}
-      <section className="bg-white border-b border-navy-100/50" style={{ marginTop: '-1px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 lg:gap-16">
-            {/* Trust Item 1 */}
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              <span className="text-navy-600 font-medium text-base sm:text-lg">Loved by parents and educators</span>
-            </div>
-            
-            {/* Trust Item 2 */}
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              <span className="text-navy-600 font-medium text-base sm:text-lg">Built for growing readers</span>
-            </div>
-            
-            {/* Trust Item 3 */}
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-golden-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              <span className="text-navy-600 font-medium text-base sm:text-lg">Designed to strengthen emotional confidence</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <KidsGallerySection />
-
-      {/* Meet the Hero Section */}
-      <section className="bg-cream relative overflow-hidden meet-hero-section pt-8 md:pt-0">
-        <div className="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center meet-hero-grid">
-            {/* Left Column - Image - Below text on mobile */}
-            <div className="order-2 md:order-1">
-              <div 
-                className="w-full mb-6 relative overflow-hidden cinematic-hero-image"
-                style={{ 
-                  width: '100%',
-                  height: 'clamp(320px, 42vw, 560px)',
-                  borderRadius: '20px',
-                  margin: 0,
-                  padding: 0,
-                }}
-              >
-                <img
-                  src="/images/characters/Caiden_img_profile.webp"
-                  srcSet="/images/characters/Caiden_img_profile_192w.webp 192w, /images/characters/Caiden_img_profile_400w.webp 400w, /images/characters/Caiden_img_profile.webp 1024w"
-                  sizes="(max-width: 768px) 100vw, 42vw"
-                  width={560}
-                  height={560}
-                  alt="Caiden - The Hero"
-                  className="w-full h-full object-cover"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                    display: 'block',
-                    margin: 0,
-                    padding: 0,
-                    border: 'none',
-                    outline: 'none',
-                  }}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              
-              {/* Comic Book Callout */}
-              <div className="w-full">
-                <Link
-                  to="/comicbook"
-                  className="block bg-transparent rounded-2xl p-4 sm:p-5 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Comic Book Image - Circular with blue border */}
-                    <div className="flex-shrink-0">
-                      <div className="rounded-full overflow-hidden" style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px', flexShrink: 0 }}>
-                        <img
-                          src="/images/Comic5_Coverpage_header_smaller-200w.jpg"
-                          alt="Caiden's Courage Comic Book"
-                          width={80}
-                          height={80}
-                          className="object-cover"
-                          loading="lazy"
-                          decoding="async"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block', margin: 0, padding: 0 }}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/ui/logoCaiden_480w.webp';
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Text Content */}
-                    <div className="flex-1 min-w-0 text-left">
-                      <div className="flex items-center gap-2 mb-1.5 justify-start">
-                        <span className="text-xs font-semibold text-white uppercase tracking-wide bg-golden-500 px-2 py-0.5 rounded-md">New</span>
-                      </div>
-                      <h3 className="font-display font-bold text-lg sm:text-xl text-navy-500 mb-1.5 text-left">
-                        The Comic Book
-                      </h3>
-                      <p className="text-sm sm:text-base text-navy-600 leading-relaxed mb-3 text-left">
-                        Start Volume 1 and follow Caiden's first "Lock In" moment.
-                      </p>
-                      <span className="inline-flex items-center text-sm sm:text-base font-semibold text-navy-500 hover:text-navy-600 transition-colors text-left">
-                        View Comic Book
-                        <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </div>
+      {/* Hero — masked rounded container on warm page background */}
+      <section className="bg-cream px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5 lg:px-8 lg:pb-5">
+        <div className="cc-site-container mx-auto">
+          <div className="cc-hero-mask relative overflow-hidden rounded-[1.35rem] text-white sm:rounded-[1.75rem] lg:rounded-[2rem]">
+            <div className="cc-hero-media" aria-hidden="true">
+              <HeroBackgroundVideo />
+              <div className="cc-hero-vignette" aria-hidden="true" />
             </div>
 
-            {/* Right Column - Copy - Above image on mobile; center-aligned on mobile only */}
-            <div className="order-1 md:order-2 hero-text text-center md:text-left">
-              {/* Eyebrow */}
-              <div 
-                className="text-xs sm:text-sm font-semibold uppercase mb-4"
-                style={{ 
-                  letterSpacing: '0.12em',
-                  color: 'rgba(36, 62, 112, 0.8)'
-                }}
-              >
-                MEET CAIDEN
-              </div>
-
-              {/* Headline */}
-              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-6">
-                Not Every Hero Looks Fearless.
-              </h2>
-
-              {/* Body Paragraphs */}
-              <div className="space-y-4 mb-8">
-                <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
-                </p>
-                <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn’t always see him clearly.
-                </p>
-              </div>
-
-              {/* Power Line */}
-              <div className="mb-0">
-                <p className="text-navy-500 leading-relaxed meet-hero-thesis" style={{ fontWeight: 600 }}>
-                  Being different isn’t a weakness.
-                  <br />
-                  It’s where courage begins.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <PilotProgramSummerSection />
-
-      {/* Who Is Caiden Section */}
-      <section
-        id="about"
-        className="cv-cinematic-section py-20 sm:py-28 relative overflow-hidden"
-        style={{ scrollMarginTop: '80px' }}
-      >
-        {/* Anchor for "What is Caiden's Courage?" navigation */}
-        <span id="who-is-caiden" style={{ position: 'absolute', top: '-80px', visibility: 'hidden' }} aria-hidden="true"></span>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left content */}
-            <div className="animate-fade-in text-center lg:text-left">
-              {/* Eyebrow */}
-              <div 
-                className="text-xs sm:text-sm font-semibold uppercase mb-4"
-                style={{ 
-                  letterSpacing: '0.12em',
-                  color: 'rgba(255, 255, 255, 0.72)'
-                }}
-              >
-                HERO'S PATHS
-              </div>
-              
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6" style={{ color: '#FFFFFF' }}>
-                Where Kids Learn Courage.
-              </h2>
-              
-              <p
-                className="mt-4 text-lg sm:text-xl leading-relaxed mb-6 font-medium"
-                style={{ color: 'rgba(255, 255, 255, 0.75)' }}
-              >
-                More than a story — a place kids practice courage. Kids learn to name big feelings, trust their minds, and take brave next steps.
-              </p>
-              
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <Button
-                  variant="primary"
-                  size="md"
-                  as={Link}
-                  to="/characters"
-                  className="w-full sm:w-auto"
-                >
-                  Meet the Characters
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  as={Link}
-                  to="/world"
-                  className="w-full sm:w-auto !bg-transparent !border !border-[rgba(255,255,255,0.4)] !text-white hover:!bg-white/[0.06] !shadow-none backdrop-blur-[6px] focus:!ring-white/40"
-                >
-                  Enter Caiden's World
-                </Button>
-              </div>
-
-              {/* Helper Line */}
-              <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-                For readers ages 6–12 — and anyone discovering their courage.
-              </p>
-            </div>
-
-            {/* Right - Feature cards optimized for performance */}
-            <div className="grid sm:grid-cols-2 gap-6 relative z-10">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="relative group h-full"
-                >
-                  {/* Card container with cinematic styling */}
-                  <div
-                    className="relative cinematic-pillar-card rounded-3xl p-6 sm:p-7 transition-all duration-300 cursor-pointer h-full flex flex-col border border-white/[0.06]"
-                    style={{
-                      borderRadius: '26px',
-                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
-                    }}
-                  >
-                    {/* Dark cinematic card surface */}
-                    <div
-                      className="absolute inset-0 rounded-3xl z-0 cinematic-card-bg"
-                      style={{
-                        background: 'linear-gradient(180deg, #243A5E 0%, #1B2A44 100%)',
-                      }}
-                    />
-
-                    {/* Subtle depth (no heavy color ramps) */}
-                    <div
-                      className="absolute inset-0 rounded-3xl z-0 pointer-events-none"
-                      style={{
-                        background: 'radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%)',
-                      }}
-                    />
-
-                    {/* Content layer */}
-                    <div className="relative z-20 flex flex-col flex-grow">
-                      {/* Icon badge with scene glow */}
-                      <div className="relative w-14 h-14 sm:w-16 sm:h-16 mb-4">
-                        <div 
-                          className="absolute inset-0 rounded-full z-0"
-                          style={{
-                            background: 'radial-gradient(circle, rgba(229, 192, 106, 0.18) 0%, transparent 72%)',
-                            transform: 'scale(1.5)',
-                          }}
-                        ></div>
-                        <div 
-                          className="relative z-10 transition-transform duration-200 group-hover:scale-105"
-                          style={{ 
-                            filter: 'brightness(1.08)',
-                            color: '#E5C06A',
-                          }}
-                        >
-                          <feature.icon className="w-full h-full" />
-                        </div>
-                      </div>
-                      
-                      {/* Title - reduced size and weight */}
-                      <h3 className="font-display font-semibold leading-tight mb-3 text-white" style={{ fontWeight: 600, fontSize: '20px', color: '#FFFFFF' }}>
-                        {feature.title}
-                      </h3>
-                      
-                      {/* Description */}
-                      <p className="flex-grow leading-relaxed" style={{ fontSize: '15px', lineHeight: '1.65', color: 'rgba(255, 255, 255, 0.75)' }}>
-                        {feature.description}
-                      </p>
+            <div className="cc-hero-content relative z-10">
+              <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-8 lg:gap-10 xl:gap-12">
+                <div className="min-w-0 flex-1 md:max-w-[50%]">
+                  <div className="max-w-[19rem] sm:max-w-md lg:max-w-[26rem]">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-300/90 sm:text-[11px]">
+                      Story &bull; Play &bull; SEL &bull; Focus Flame Academy
+                    </p>
+                    <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:mt-4 sm:text-5xl lg:text-6xl">
+                      Caiden&apos;s Courage
+                    </h1>
+                    <p className="mt-3 text-base leading-relaxed text-white/92 sm:mt-4 sm:text-lg lg:text-xl">
+                      A story-powered SEL world helping kids turn focus, feelings, and courage into everyday strengths.
+                    </p>
+                    <div className="mt-6 flex flex-col gap-3 sm:mt-8">
+                      <Button variant="primary" size="lg" as={Link} to="/kids" className="w-full">
+                        Explore Kids
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        as={Link}
+                        to="/focus-flame-academy"
+                        className="w-full !border-white/80 !text-white hover:!bg-white/15"
+                      >
+                        View Focus Flame Academy
+                      </Button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="py-12 sm:py-20 md:py-28 bg-cream relative overflow-hidden pb-16">
-        <div className="hidden sm:block circle-accent circle-navy w-20 h-20 top-20 right-16 opacity-60" style={{ animationDelay: '0.5s' }} />
-        <div className="hidden sm:block circle-accent circle-coral w-12 h-12 bottom-24 left-12 opacity-50" style={{ animationDelay: '3s' }} />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-20 items-center min-w-0" style={{ gridTemplateColumns: '1fr 1.2fr' }}>
-            {/* Image Column - First on mobile */}
-            <div className="order-1 lg:order-1 w-full min-w-0">
-              <div 
-                className="mx-auto overflow-hidden w-full max-w-full lg:max-w-[440px] rounded-[16%]"
-                style={{ aspectRatio: '1/1' }}
-              >
-                <img
-                  src="/images/Courageforeverykid_1.webp"
-                  alt="Caiden celebrating - Courage for Every Kid"
-                  className="w-full h-full object-cover object-center"
-                  loading="lazy"
-                  decoding="async"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/Courageforeverykid_1.webp';
-                  }}
-                />
-              </div>
-            </div>
-            {/* Text Column - Second on mobile */}
-            <div className="order-2 lg:order-2 w-full text-left min-w-0">
-              <div className="mx-auto lg:mx-0 max-w-full break-words px-2 sm:px-4 md:px-5" style={{ maxWidth: '560px' }}>
-                <span className="inline-block px-3 py-1 bg-golden-500 text-navy-500 font-semibold text-sm rounded-md">Our Mission:</span>
-                <h2 
-                  className="font-display font-extrabold text-navy-500 mt-2 break-words"
-                  style={{ fontSize: 'clamp(32px, 4vw, 40px)' }}
-                >
-                  Courage for Every Kid
-                </h2>
-                <p 
-                  className="mt-6 text-navy-600 leading-relaxed break-words"
-                  style={{ fontSize: '16px', lineHeight: '1.6' }}
-                >
-                  Every child deserves to see their mind as powerful — especially the ones who feel different.
-                </p>
-                <p 
-                  className="mt-4 text-navy-600 leading-relaxed break-words"
-                  style={{ fontSize: '16px', lineHeight: '1.6' }}
-                >
-                  Caiden's Courage was created to help kids understand their emotions, celebrate neurodiversity, and discover the superhero that already lives inside them. Through stories, characters, and imaginative learning tools, we empower children to feel seen, confident, and brave in their everyday world.
-                </p>
-                <div className="mt-8">
-                  <div className="w-full max-w-[360px] mx-auto lg:mx-0">
-                    <Button
-                      variant="primary"
-                      size="md"
-                      as={Link}
-                      to="/mission"
-                      className="w-full"
-                    >
-                      Learn About the Mission
-                    </Button>
-                  </div>
+                <div className="cc-hero-visual max-w-[46%] overflow-hidden">
+                  <HeroEcosystemVisuals />
                 </div>
               </div>
             </div>
@@ -635,598 +345,56 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Meet B-4 Section */}
-      <section className="py-12 sm:py-16 md:py-24 bg-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl border border-white/10 overflow-hidden cv-cinematic-inset">
-            {/* Subtle atmosphere */}
-            <div
-              className="pointer-events-none absolute inset-0"
-              aria-hidden="true"
-            >
-              <div
-                className="absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 blur-[90px] opacity-35"
-                style={{
-                  background:
-                    'radial-gradient(circle at 40% 45%, rgba(229, 192, 106, 0.22), rgba(255, 215, 120, 0.06), rgba(5,11,24,0))',
-                }}
-              />
-              <div
-                className="absolute inset-0 opacity-[0.05] mix-blend-soft-light"
-                style={{
-                  backgroundImage: "url('/images/ui/b4-watermark.svg')",
-                  backgroundRepeat: 'repeat',
-                  backgroundSize: '420px 420px',
-                }}
-              />
-            </div>
-
-            <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 p-7 sm:p-10 lg:p-14 items-center">
-              {/* Left: Copy + Feature cards */}
-              <div className="order-1">
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.2em]" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                  MEET B-4
-                </p>
-                <h2 className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05]" style={{ color: '#FFFFFF' }}>
-                  <span className="block">More than a robot.</span>
-                  <span className="block">
-                    Your <span className="focus-highlight">focus</span> companion.
-                  </span>
-                </h2>
-                <p className="mt-5 text-base sm:text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-                  B-4 is here to help you understand your mind, navigate big emotions, and unlock your inner hero.
-                </p>
-
-                {/* Mobile image placement (below text, above cards) */}
-                <div className="mt-8 lg:hidden">
-                  <div className="relative mx-auto w-full max-w-[280px]">
-                    <div
-                      className="absolute inset-0 -z-10 blur-[60px] opacity-45"
-                      style={{
-                        background:
-                          'radial-gradient(circle at 50% 35%, rgba(229, 192, 106, 0.2), rgba(229, 192, 106, 0.06), rgba(5,11,24,0) 65%)',
-                      }}
-                      aria-hidden="true"
-                    />
-                    <img
-                      src="/images/characters/B4_Robot_Hero.webp"
-                      alt="B-4 — your focus companion"
-                      className="w-full h-auto object-contain scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(0,0,0,0.45)]"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {[
-                    { title: 'Understand', body: 'Learn how your mind works.' },
-                    { title: 'Build', body: 'Strengthen focus and confidence.' },
-                    { title: 'Grow', body: 'Turn challenges into superpowers.' },
-                    { title: 'Connect', body: 'You’re never alone.' },
-                  ].map((f) => (
-                    <div
-                      key={f.title}
-                      className="cv-cinematic-card rounded-2xl px-4 py-4 sm:px-5 sm:py-5 transition-transform duration-200 lg:hover:-translate-y-0.5 lg:hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.55)]"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex-shrink-0" style={{ color: '#E5C06A' }}>
-                          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" />
-                          </svg>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-display font-bold text-white">{f.title}</div>
-                          <div className="mt-1 text-sm leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>{f.body}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA: directly under feature cards */}
-                <div className="mt-8 sm:mt-9 w-full max-w-[360px] mx-auto lg:mx-0">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    as={Link}
-                    to="/b4-tools"
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="w-full"
-                  >
-                    Meet B-4
-                  </Button>
-                </div>
-              </div>
-
-              {/* Right: B-4 image (desktop) */}
-              <div className="order-2 hidden lg:block">
-                <div className="relative w-full flex justify-center lg:justify-end items-center pr-6 pb-6">
-                  {/* Layered cinematic glows behind B-4 */}
-                  <div
-                    className="absolute inset-0 -z-10 blur-[60px] opacity-45"
-                    style={{
-                      background:
-                        'radial-gradient(circle at 55% 30%, rgba(229, 192, 106, 0.2), rgba(229, 192, 106, 0.07), rgba(5,11,24,0) 65%)',
-                    }}
-                    aria-hidden="true"
-                  />
-                  <img
-                    src="/images/characters/B4_Robot_Hero.webp"
-                    alt="B-4 — your focus companion"
-                    className="w-full h-auto object-contain max-w-[460px] scale-[0.82] md:scale-[0.85] drop-shadow-[0_0_28px_rgba(0,0,0,0.45)]"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Audience Cards */}
+      <section className="px-4 pt-5 pb-12 sm:px-6 sm:pt-6 sm:pb-14 lg:px-8 lg:pt-7 lg:pb-16" aria-label="Choose your audience">
+        <div className="cc-site-container mx-auto grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+          <HubCard
+            accent="blue"
+            eyebrow="FOR KIDS"
+            icon="kids"
+            title="Build Focus"
+            description="Games, comics, and brave activities that help kids practice focus, feelings, and courage."
+            to="/kids"
+          />
+          <HubCard
+            accent="yellow"
+            eyebrow="FOR FAMILIES"
+            icon="parents"
+            title="Build Confidence"
+            description="Simple tools that help kids name feelings, reset, and build confidence at home."
+            to="/#join"
+          />
+          <HubCard
+            accent="orange"
+            eyebrow="FOR EDUCATORS"
+            icon="teachers"
+            title="Build Courage"
+            description="Story-based SEL experiences built for classrooms, camps, counselors, and groups."
+            to="/focus-flame-academy"
+          />
         </div>
       </section>
 
-      {/* Meet the Characters Section */}
-      <section id="characters" className="cv-cinematic-section py-20 sm:py-28 relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold" style={{ color: '#FFFFFF' }}>
-              Meet the Characters of
-            </h2>
-            <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold mt-2" style={{ color: '#E5C06A' }}>
-              Caiden's Courage
-            </p>
-            <p className="mt-6 max-w-2xl mx-auto" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-              Discover the heroes, friends, and guides who help Caiden navigate courage, creativity, and everyday challenges.
-            </p>
-          </div>
+      <HowItWorksCarousel />
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {characters.map((character, index) => (
-              <div
-                key={character.name}
-                className="character-card fade-in-card cv-cinematic-card rounded-2xl p-5 text-center backdrop-blur-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
-              >
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 shadow-[0_0_0_1px_rgba(229,192,106,0.35)]" style={{ background: 'linear-gradient(180deg, #e5c06a 0%, #c9a85a 100%)' }}>
-                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                      <img
-                        src={character.image}
-                        alt={character.name}
-                        className={`w-full h-full object-cover ${character.name === 'B-4' ? 'object-[50%_20%]' : ''}`}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <h3 className="font-display text-xl font-bold mt-4 text-center" style={{ color: '#FFFFFF' }}>
-                  {character.name}
-                </h3>
-                <p className="text-xs font-semibold mt-1 mb-2 min-h-[1.25rem] text-center" style={{ color: '#E5C06A' }}>
-                  {character.microLabel}
-                </p>
-                <p className="mt-3 text-sm leading-snug px-2 text-center" style={{ wordBreak: 'break-word', hyphens: 'auto', color: 'rgba(255, 255, 255, 0.75)' }}>
-                  {character.description}
-                </p>
-              </div>
-            ))}
-          </div>
-          
-          {/* Navigation Button */}
-          <div className="mt-12 sm:mt-16 text-center">
-            <Button
-              variant="primary"
-              size="lg"
-              as={Link}
-              to="/characters"
-              className="w-full sm:w-auto"
-            >
-              Meet the Characters
-            </Button>
-          </div>
-        </div>
-      </section>
+      <ChoosePathSection />
 
-      {/* Testimonials Section */}
-      <section className="py-12 sm:py-20 bg-cream relative overflow-hidden">
-        {/* 3D Animated Bubbles - Organic placement near content */}
-        <div className="absolute rounded-full pointer-events-none animate-float opacity-60" style={{ 
-          top: '20%',
-          left: '18%',
-          width: '22px',
-          height: '22px',
-          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), rgba(229, 192, 106, 0.35), rgba(27, 42, 68, 0.2))',
-          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12), inset -2px -2px 6px rgba(0,0,0,0.15), inset 2px 2px 6px rgba(255,255,255,0.12)',
-          animationDelay: '1s'
-        }}></div>
-        <div className="absolute rounded-full pointer-events-none animate-float opacity-50" style={{ 
-          bottom: '24%',
-          right: '20%',
-          width: '18px',
-          height: '18px',
-          background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(36, 58, 94, 0.5), rgba(27, 42, 68, 0.35))',
-          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1), inset -2px -2px 6px rgba(0,0,0,0.12), inset 2px 2px 6px rgba(255,255,255,0.1)',
-          animationDelay: '2.5s'
-        }}></div>
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Eyebrow */}
-          <div className="text-center mb-3">
-            <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
-              FROM PARENTS, CAREGIVERS & EDUCATORS
-            </p>
-          </div>
+      <BuiltFromRealStorySection />
 
-          {/* Main Headline */}
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-2 text-center">
-            What Families Are Saying
-          </h2>
-
-          {/* Subhead */}
-          <p className="text-sm sm:text-base text-navy-400 text-center mb-10 sm:mb-12">
-            Real words from parents, educators, and creators discovering Caiden's Courage.
+      {/* Email Signup */}
+      <section id="join" className="scroll-mt-24 border-t border-navy-100/80 bg-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
+        <div className="cc-site-container mx-auto text-left">
+          <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl">Join the Courage Club</h2>
+          <p className="mt-3 max-w-2xl text-base text-navy-600 sm:text-lg">
+            Get new activities, updates, and Focus Flame tools for kids, parents, and educators.
           </p>
-
-          {/* Testimonials Grid */}
-          <div className="space-y-5 sm:space-y-6">
-            {/* Testimonial 1 - Slightly left-aligned on desktop */}
-            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
-              {/* Quote Icon Badge - Top Right */}
-              <div className="absolute top-4 right-4 opacity-[0.08]">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
-                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
-                </svg>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
-                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
-                  "My child finally saw themselves in a character. That alone made this worth it."
-                </p>
-                <p className="text-navy-400 text-sm mt-3">
-                  — Parent of a 9-year-old
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 2 - Slightly right-aligned on desktop */}
-            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:ml-auto md:max-w-[95%]">
-              {/* Quote Icon Badge - Top Right */}
-              <div className="absolute top-4 right-4 opacity-[0.08]">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
-                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
-                </svg>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
-                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
-                  "This opened up conversations about focus and feelings we couldn't have before."
-                </p>
-                <p className="text-navy-400 text-sm mt-3">
-                  — 3rd Grade Teacher
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 3 - Centered as soft closing moment */}
-            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
-              {/* Quote Icon Badge - Top Right */}
-              <div className="absolute top-4 right-4 opacity-[0.08]">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
-                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
-                </svg>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
-                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
-                  "I met a kid at Barnes & Noble who couldn't wait to read this. He picked it up on his own and asked if he could start right there."
-                </p>
-                <p className="text-navy-400/70 text-xs sm:text-sm mt-3">
-                  — From a Barnes & Noble moment
-                </p>
-              </div>
-            </div>
-
-            {/* Testimonial 4 - New testimonial */}
-            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden md:mr-auto md:max-w-[95%]">
-              {/* Quote Icon Badge - Top Right */}
-              <div className="absolute top-4 right-4 opacity-[0.08]">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-                  <path d="M3 21C3 17.4 5.4 15 9 15C10.2 15 11.4 15.3 12.6 15.9C13.2 16.2 13.5 16.8 13.2 17.4C12.9 18 12.3 18.3 11.7 18C10.8 17.4 9.9 17.1 9 17.1C7.2 17.1 6 18.3 6 20.1V21H3Z" fill="#243E70"/>
-                  <path d="M14.4 21C14.4 17.4 16.8 15 20.4 15C21.6 15 22.8 15.3 24 15.9C24.6 16.2 24.9 16.8 24.6 17.4C24.3 18 23.7 18.3 23.1 18C22.2 17.4 21.3 17.1 20.4 17.1C18.6 17.1 17.4 18.3 17.4 20.1V21H14.4Z" fill="#243E70"/>
-                </svg>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="text-xl sm:text-2xl mb-3" style={{ color: '#E5C06A' }}>★★★★★</div>
-                <p className="text-navy-600 text-base sm:text-lg leading-relaxed max-w-[85ch]">
-                  "My son is self-taught and loves to draw, and seeing your work made him light up. He immediately wanted to know how it was made and couldn't stop asking questions. It's rare to find something that sparks both creativity and confidence like this."
-                </p>
-                <p className="text-navy-400 text-sm mt-3">
-                  — Parent of a 10-year-old
-                </p>
-              </div>
-            </div>
-
-            <p className="text-center text-navy-400 text-sm italic pt-2">
-              (More reviews coming as the Courage community grows.)
-            </p>
+          <div className="max-w-xl">
+            <CourageEmailSignup />
           </div>
         </div>
       </section>
 
-      {/* Shop Section */}
-      <section id="products" className="py-20 sm:py-28 bg-cream relative overflow-hidden" style={{ scrollMarginTop: '80px' }}>
-        <div className="hidden sm:block circle-accent circle-coral w-16 h-16 top-16 left-1/3 opacity-40" style={{ animationDelay: '0.3s' }} />
-        <div className="hidden sm:block circle-accent circle-navy w-12 h-12 bottom-24 right-8 opacity-30" style={{ animationDelay: '0.5s' }} />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500">
-              Begin the First Adventure
-            </h2>
-            <p className="text-gradient font-display text-2xl sm:text-3xl lg:text-4xl font-bold mt-2">
-              Caiden's Courage
-            </p>
-            <p className="mt-4 text-navy-600/80 max-w-2xl mx-auto">
-              Support courage, creativity, and neurodiverse kids—at home and beyond.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {products.map((product, index) => (
-              <div
-                key={product.title}
-                className={`feature-card fade-in-card bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl hover:scale-[1.02] transition-all duration-200 ${
-                  product.available && !product.comingSoon ? 'ring-2 ring-golden-500/50' : ''
-                }`}
-              >
-                {/* Product Image */}
-                {product.image && (
-                  <div className="w-full h-48 sm:h-56 overflow-hidden bg-navy-50">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  {/* Badges */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`px-4 py-1.5 ${product.badgeColor} text-navy-500 text-sm font-semibold rounded-full`}>
-                      {product.badge}
-                    </span>
-                    {product.comingSoon && (
-                      <span className="px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                        Coming Soon
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-navy-500">
-                    {product.title}
-                  </h3>
-                  <p className="mt-3 text-navy-600/80 text-sm leading-relaxed">
-                    {product.description}
-                  </p>
-                  {product.available && product.purchaseUrl ? (
-                    <button
-                      onClick={() => {
-                        navigate('/comicbook');
-                        window.scrollTo(0, 0);
-                      }}
-                      className="mt-5 w-full py-3 px-6 bg-golden-500 text-navy-500 font-bold rounded-full shadow-golden hover:bg-golden-600 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
-                      style={{ opacity: 1, backgroundColor: '#E5C06A' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#d4b35a';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                        e.currentTarget.style.backgroundColor = '#E5C06A';
-                      }}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                      Pre-order
-                    </button>
-                  ) : product.comingSoon ? (
-                    <button
-                      onClick={handleComingSoonClick}
-                      className="mt-5 w-full py-3 px-6 bg-transparent border-2 border-navy-300 text-navy-600 font-semibold rounded-full hover:bg-navy-50 hover:border-navy-400 hover:shadow-md transition-all duration-300"
-                    >
-                      {product.title.includes('T-Shirt') ? 'T-Shirts — Coming Soon' : product.title.includes('Plush') ? 'Plushies — Coming Soon' : 'Coming Soon'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleWaitlistClick}
-                      className="mt-5 w-full py-3 px-6 bg-navy-200 text-navy-500 font-semibold rounded-full hover:bg-navy-300 hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                      </svg>
-                      Notify Me
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="cv-cinematic-section py-16 sm:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none opacity-30" aria-hidden>
-          <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full blur-3xl" style={{ background: 'rgba(229, 192, 106, 0.12)' }} />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'rgba(229, 192, 106, 0.08)' }} />
-        </div>
-        
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold" style={{ color: '#FFFFFF' }}>
-            Ready to Join Caiden's Journey?
-          </h2>
-          <p className="mt-4 text-lg" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-            Be the first to know when the book launches and get exclusive updates.
-          </p>
-          <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center items-center">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleWaitlistClick}
-            >
-              Join the Courage Community
-            </Button>
-            <Button
-              variant="secondary"
-              size="md"
-              as="a"
-              href="mailto:stills@caidenscourage.com"
-              className="!bg-transparent !border-2 !border-white/40 !text-white hover:!bg-white/10 focus:!ring-white/50 hover:!border-white/60"
-            >
-              Contact Us
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-
-      {/* Coming Soon Modal */}
-      {isComingSoonModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsComingSoonModalOpen(false);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
-            <button
-              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
-              onClick={() => setIsComingSoonModalOpen(false)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            
-            <div className="text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
-                We're building this next.
-              </h2>
-              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
-                We're designing Caiden & B-4 plushies and limited-edition shirts.
-                <br />
-                Join the Courage Community to get early access when they launch.
-              </p>
-              
-              <div className="flex flex-col gap-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsComingSoonModalOpen(false);
-                  }}
-                  className="w-full"
-                >
-                  Join the Courage Community
-                </Button>
-                <button
-                  onClick={() => setIsComingSoonModalOpen(false)}
-                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Coming Soon Modal */}
-      {isComingSoonModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsComingSoonModalOpen(false);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md animate-slide-up bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
-            <button
-              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
-              onClick={() => setIsComingSoonModalOpen(false)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            
-            <div className="text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4">
-                We're building this next.
-              </h2>
-              <p className="text-navy-600 text-base sm:text-lg leading-relaxed mb-8">
-                We're designing Caiden & B-4 plushies and limited-edition shirts.
-                <br />
-                Join the Courage Community to get early access when they launch.
-              </p>
-              
-              <div className="flex flex-col gap-4">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() => {
-                    handleWaitlistClick();
-                    setIsComingSoonModalOpen(false);
-                  }}
-                  className="w-full"
-                >
-                  Join the Courage Community
-                </Button>
-                <button
-                  onClick={() => setIsComingSoonModalOpen(false)}
-                  className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pre-order Modal */}
-      {isPreorderOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <div className="relative w-full max-w-2xl animate-slide-up">
-            <button
-              className="absolute -top-3 -right-3 h-10 w-10 rounded-full bg-white text-navy-500 font-bold shadow-lg flex items-center justify-center hover:bg-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 z-10"
-              onClick={() => setIsPreorderOpen(false)}
-              aria-label="Close pre-order"
-            >
-              ✕
-            </button>
-            <iframe
-              src="https://beacons.ai/stillianoblack"
-              title="Caiden's Courage Pre-order"
-              className="w-full h-[70vh] rounded-2xl bg-white shadow-2xl"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      )}
+      <CourageFooter />
     </div>
   );
 };

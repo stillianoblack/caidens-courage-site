@@ -23,8 +23,11 @@ export interface DropdownItem {
 // React Router navigate (To = string or { pathname, hash?, search? })
 type NavigateTo = (to: string | { pathname: string; hash?: string; search?: string }) => void;
 
+/** Caiden Vale marketing homepage (not the Courage ecosystem hub at `/`). */
+export const CAIDEN_VALE_HOME_PATH = '/classic-home';
+
 // Helper: handle /#anchor links with React Router only (no pushState/replaceState).
-// When not on home, navigate to pathname '/' with hash so route and URL both update.
+// When not on the Vale homepage, navigate there with hash so route and URL both update.
 export const handleAnchorClick = (
   e: React.MouseEvent<HTMLAnchorElement>,
   href: string,
@@ -34,8 +37,8 @@ export const handleAnchorClick = (
   if (href.startsWith('/#')) {
     const anchor = href.substring(2);
     e.preventDefault();
-    if (location.pathname !== '/') {
-      navigate({ pathname: '/', hash: anchor });
+    if (location.pathname !== CAIDEN_VALE_HOME_PATH) {
+      navigate({ pathname: CAIDEN_VALE_HOME_PATH, hash: anchor });
     } else {
       const element = document.getElementById(anchor);
       if (element) {

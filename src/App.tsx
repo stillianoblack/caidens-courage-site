@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
+import ClassicHome from './pages/ClassicHome';
+import KidsHub from './pages/KidsHub';
+import FocusFlameAcademy from './pages/FocusFlameAcademy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import ThankYou from './pages/ThankYou';
@@ -31,9 +34,12 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/kids" element={<KidsHub />} />
+      <Route path="/focus-flame-academy" element={<FocusFlameAcademy />} />
+      <Route path="/classic-home" element={<ClassicHome />} />
       <Route path="/camp-courage" element={<CampCourage />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
-      <Route path="/classroom-pilots" element={<Navigate to="/camp-courage#camp-pilot-partnerships" replace />} />
+      <Route path="/classroom-pilots" element={<Navigate to="/focus-flame-academy#camp-pilot-partnerships" replace />} />
       <Route path="/training-guides" element={<TrainingGuides />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
