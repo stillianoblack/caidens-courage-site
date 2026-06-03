@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { NAV_ITEMS, RIGHT_NAV_ITEMS, handleAnchorClick, NavItem } from '../config/nav';
+import { NAV_ITEMS, RIGHT_NAV_ITEMS, CAIDEN_VALE_HOME_PATH, handleAnchorClick, NavItem } from '../config/nav';
 import { SAFE_MODE } from '../lib/safeMode';
 
 const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
@@ -498,7 +498,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   </svg>
                 </button>
                 
-                <Link to="/" className="header-logo-link flex items-center flex-shrink-0">
+                <Link to={CAIDEN_VALE_HOME_PATH} className="header-logo-link flex items-center flex-shrink-0">
                   <img
                     src="/images/logos/CaidenVale_Logo_Web.svg"
                     alt="Caiden Vale and the Focus Flame"
@@ -594,7 +594,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 <div
                   className="flex items-center justify-center px-6"
                 >
-                  <Link to="/" className="header-logo-link flex items-center">
+                  <Link to={CAIDEN_VALE_HOME_PATH} className="header-logo-link flex items-center">
                     <img
                       src="/images/logos/CaidenVale_Logo_Web.svg"
                       alt="Caiden Vale and the Focus Flame"

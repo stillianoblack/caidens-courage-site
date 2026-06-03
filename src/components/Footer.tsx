@@ -28,9 +28,9 @@ const Footer: React.FC = () => {
           <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
             <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
             <Link to="/braveminds" className="text-white/70 hover:text-white transition-colors">Resources</Link>
-            <Link to="/#about" className="text-white/70 hover:text-white transition-colors">About</Link>
-            <Link to="/#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
-            <Link to="/#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
+            <Link to="/classic-home#about" className="text-white/70 hover:text-white transition-colors">About</Link>
+            <Link to="/classic-home#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>
+            <Link to="/classic-home#products" className="text-white/70 hover:text-white transition-colors">Shop</Link>
             <a href="mailto:stills@caidenscourage.com" className="text-white/70 hover:text-white transition-colors">Contact</a>
           </div>
           <p className="text-white/60 text-sm text-center">
