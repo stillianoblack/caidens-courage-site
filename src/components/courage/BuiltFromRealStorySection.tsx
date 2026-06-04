@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { CAIDEN_VALE_HOME_PATH } from '../../config/nav';
+import { VALE_CLASSIC_HOME_URL } from '../../config/valeLinks';
 
 const STORY_SECTION_BG = '/images/caidenscourage/backgrounds/community-strategy-background-story-bg.webp';
 const STORY_PORTRAIT = '/images/caidenscourage/backgrounds/caidenandme.webp';
@@ -102,15 +101,16 @@ export default function BuiltFromRealStorySection() {
                   </p>
 
                   <div className="mt-8 border-t border-navy-100 pt-6 sm:mt-9 sm:pt-7 lg:mt-10 lg:pt-8">
-                    <Link
-                      to={CAIDEN_VALE_HOME_PATH}
+                    <a
+                      href={VALE_CLASSIC_HOME_URL}
+                      rel="noopener noreferrer"
                       className="inline-flex min-h-[2.75rem] items-center gap-2 text-base font-semibold text-navy-700 transition-colors hover:text-navy-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-golden-500/80"
                     >
                       Explore the Story
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>

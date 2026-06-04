@@ -1,4 +1,4 @@
-import { CAIDEN_VALE_HOME_PATH } from './nav';
+import { VALE_CLASSIC_HOME_URL } from './valeLinks';
 
 export type CourageNavLink = {
   label: string;
@@ -51,5 +51,5 @@ export const LEGACY_CAMP_COURAGE_PATH = '/camp-courage';
 /** Story & shop hub — linked from Courage Resources for IP discovery only. */
 export const CAIDEN_VALE_STORY_LINK: CourageNavLink = {
   label: 'Caiden Vale Story & Book',
-  href: CAIDEN_VALE_HOME_PATH,
+  href: VALE_CLASSIC_HOME_URL,
 };

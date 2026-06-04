@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CAIDEN_VALE_HOME_PATH } from '../../config/nav';
+import { VALE_CLASSIC_HOME_URL } from '../../config/valeLinks';
 
 type PathCardConfig = {
   title: string;
@@ -41,7 +41,7 @@ const PATH_CARDS: PathCardConfig[] = [
     eyebrow: 'GRAPHIC NOVEL • STORY WORLD • CHARACTERS',
     text: 'A graphic novel adventure about focus, courage, and finding your flame.',
     cta: 'Explore the Story',
-    to: CAIDEN_VALE_HOME_PATH,
+    to: VALE_CLASSIC_HOME_URL,
     imageSrc: '/images/caidenscourage/Choose_your_path/caidenvale_card_1.webp',
     imageAlt: 'Caiden Vale story world',
     imageVignette: true,
@@ -58,6 +58,33 @@ const PATH_CARDS: PathCardConfig[] = [
 ];
 
 const BRAVE_MINDS_CHARACTER = '/images/caidenscourage/Choose_your_path/Caiden_brand_wave.svg';
+
+function isExternalPath(path: string): boolean {
+  return path.startsWith('http://') || path.startsWith('https://');
+}
+
+function PathCardLink({
+  to,
+  className,
+  children,
+}: {
+  to: string;
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (isExternalPath(to)) {
+    return (
+      <a href={to} className={className} rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={to} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 function PathCardCta({ label, variant = 'light' }: { label: string; variant?: 'light' | 'onDark' }) {
   const tone =
@@ -93,7 +120,7 @@ function BraveMindsBrandCard({ card }: { card: PathCardConfig }) {
   ].join(' ');
 
   return (
-    <Link to={card.to} className={className}>
+    <PathCardLink to={card.to} className={className}>
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#2a4a7f] via-[#243e70] to-[#1a2f52]"
@@ -140,7 +167,7 @@ function BraveMindsBrandCard({ card }: { card: PathCardConfig }) {
           </div>
         </div>
       </div>
-    </Link>
+    </PathCardLink>
   );
 }
 
@@ -197,9 +224,9 @@ function PathCard({ card }: { card: PathCardConfig }) {
   ].join(' ');
 
   return (
-    <Link to={card.to} className={className}>
+    <PathCardLink to={card.to} className={className}>
       {body}
-    </Link>
+    </PathCardLink>
   );
 }
 

@@ -9,7 +9,7 @@ import Button from '../components/ui/Button';
 import FocusFlameLabCallout from '../components/courage/FocusFlameLabCallout';
 import CourageEmailSignup from '../components/courage/CourageEmailSignup';
 import useHashScroll from '../hooks/useHashScroll';
-import { CAIDEN_VALE_HOME_PATH } from '../config/nav';
+import { VALE_CLASSIC_HOME_URL } from '../config/valeLinks';
 
 const HERO_BRAND_IMAGE = '/images/camp-courage/stackworksheets.webp';
 
@@ -325,8 +325,8 @@ const Home: React.FC = () => {
                     <Button
                       variant="secondary"
                       size="lg"
-                      as={Link}
-                      to={CAIDEN_VALE_HOME_PATH}
+                      as="a"
+                      href={VALE_CLASSIC_HOME_URL}
                       className="cc-hero-cta cc-hero-secondary-cta"
                     >
                       Explore Caiden Vale
