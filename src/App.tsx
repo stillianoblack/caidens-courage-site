@@ -32,10 +32,24 @@ import FocusFlameLabPage from './pages/FocusFlameLab';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 
+/** Vale domains must not render the Courage hub at `/` (client navigations skip Netlify root redirect). */
+const isCaidenValeHost = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname.toLowerCase();
+  return host === 'caidenvale.com' || host === 'www.caidenvale.com';
+};
+
+const RootRoute: React.FC = () => {
+  if (isCaidenValeHost()) {
+    return <Navigate to="/classic-home" replace />;
+  }
+  return <Home />;
+};
+
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<RootRoute />} />
       <Route path="/kids" element={<KidsHub />} />
       <Route path="/focus-flame-academy" element={<FocusFlameAcademy />} />
       <Route path="/portal" element={<Portal />} />
