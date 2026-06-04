@@ -2,40 +2,11 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CourageHeader from '../components/CourageHeader';
 import CourageFooter from '../components/CourageFooter';
+import KidsHubCard from '../components/courage/KidsHubCard';
+import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
-import HubCard from '../components/ecosystem/HubCard';
+import { FOCUS_FLAME_LAB_PATH } from '../config/courageNav';
 import useHashScroll from '../hooks/useHashScroll';
-
-function KidsSection({
-  id,
-  title,
-  description,
-  comingSoon = false,
-  cta,
-}: {
-  id?: string;
-  title: string;
-  description: string;
-  comingSoon?: boolean;
-  cta?: React.ReactNode;
-}) {
-  return (
-    <section id={id} className="scroll-mt-24 border-b border-navy-100/60 py-12 last:border-b-0 sm:py-14">
-      <div className="mx-auto max-w-3xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl">{title}</h2>
-          {comingSoon ? (
-            <span className="rounded-full bg-golden-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-golden-800">
-              Coming Soon
-            </span>
-          ) : null}
-        </div>
-        <p className="mt-3 text-base leading-relaxed text-navy-600 sm:text-lg">{description}</p>
-        {cta ? <div className="mt-6">{cta}</div> : null}
-      </div>
-    </section>
-  );
-}
 
 const KidsHub: React.FC = () => {
   useHashScroll();
@@ -45,95 +16,148 @@ const KidsHub: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FFFBF2] font-body">
+    <div className="min-h-screen bg-[#FAF9F7] font-body">
       <CourageHeader />
 
-      <section className="relative overflow-hidden border-b border-golden-500/20 bg-gradient-to-br from-[#FFF4D6] via-[#FFFBF2] to-[#E8F4FF]">
-        <div className="pointer-events-none absolute -right-16 top-8 h-48 w-48 rounded-full bg-golden-500/20 blur-3xl" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-4 py-14 pt-24 sm:px-6 sm:pt-28 lg:px-8 lg:py-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-golden-600">FOR KIDS</p>
-          <h1 className="mt-2 font-display text-4xl font-extrabold text-navy-500 sm:text-5xl">
-            Caiden&apos;s Courage Kids
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg text-navy-600">
-            Games, comics, and brave activities for kids learning to focus their flame.
-          </p>
-          <div className="mt-8">
-            <Button variant="primary" size="lg" as={Link} to="/focus-flame-lab" leftIconSrc={null} className="w-full sm:w-auto">
-              Enter Focus Flame Lab
-            </Button>
-          </div>
-        </div>
-      </section>
+      <SectionHero
+        variant="kids"
+        eyebrow="For Kids"
+        titleAccent="Caiden's Courage"
+        title="Kids"
+        description="Play in Focus Flame Lab, explore Brave Mind Club activities, and reset with B-4 — your kid-facing hub for courage and focus."
+        ctaLabel="Enter Focus Flame Lab"
+        ctaHref={FOCUS_FLAME_LAB_PATH}
+      />
 
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <KidsSection
+      <section className="cc-kids-hub-list px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
+        <div className="mx-auto flex max-w-5xl flex-col gap-5 sm:gap-6 lg:gap-7">
+          <KidsHubCard
             title="Focus Flame Lab"
             description="Practice focus, feelings, and brave choices through interactive story moments."
+            imageSrc="/images/caidenscourage/backgrounds/chooseyournextadvernture.webp"
+            imageAlt="Choose your next Focus Flame Lab adventure"
             cta={
-              <Button variant="primary" size="lg" as={Link} to="/focus-flame-lab" leftIconSrc={null} className="w-full sm:w-auto">
+              <Button
+                variant="primary"
+                size="lg"
+                as={Link}
+                to={FOCUS_FLAME_LAB_PATH}
+                leftIconSrc={null}
+                className="w-full sm:w-auto"
+              >
                 Play Focus Flame Lab
               </Button>
             }
           />
 
-          <KidsSection
+          {/* TODO(thumbnail): Replace with dedicated kids comics preview when available */}
+          <KidsHubCard
             id="comics"
             title="Comics"
             description="Short comic adventures that help kids explore courage, respect, focus, and feelings."
+            imageSrc="/images/comic-book/Comic5_Coverpage_header_2.jpg"
+            imageAlt="Caiden's Courage comic cover preview"
             comingSoon
           />
 
-          <KidsSection
+          <KidsHubCard
             id="coloring-pages"
             title="Coloring Pages"
-            description="Printable pages for calm focus, creativity, and character connection."
-            comingSoon
+            description="Printable pages from Brave Mind Club for calm focus, creativity, and character connection."
+            imageSrc="/images/gallery/Caiden_Coloredpage.webp"
+            imageAlt="Brave Mind Club coloring page preview"
+            cta={
+              <Button
+                variant="secondary"
+                size="lg"
+                as={Link}
+                to="/braveminds?type=coloring"
+                className="w-full sm:w-auto"
+              >
+                Browse coloring pages
+              </Button>
+            }
           />
 
-          <KidsSection
+          <KidsHubCard
             id="activities"
             title="Activities"
-            description="Quick focus challenges, reflection prompts, and brave choice missions."
-            comingSoon
+            description="Quick focus challenges, reflection prompts, and brave choice missions from Brave Mind Club."
+            imageSrc="/images/camp-courage/stackworksheets.webp"
+            imageAlt="Brave Mind Club activity worksheets stack"
+            imageFit="contain"
+            imagePosition="center"
+            cta={
+              <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
+                Explore activities
+              </Button>
+            }
           />
 
-          <KidsSection
+          <KidsHubCard
             title="Badges & Profiles"
             description="Soon, kids will be able to collect badges and track their Focus Flame progress."
+            imageSrc="/images/caidenscourage/backgrounds/certificate.webp"
+            imageAlt="Courage certificate and badge preview"
             comingSoon
           />
 
-          <section className="py-12 sm:py-14">
-            <div className="mx-auto max-w-3xl rounded-3xl border-2 border-navy-100 bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="font-display text-2xl font-extrabold text-navy-500">Ask B-4</h2>
-              <p className="mt-3 text-base text-navy-600 sm:text-lg">
-                Need a focus reset? B-4 is here to help. Tap the <strong>Ask B-4</strong> button in the corner to chat
-                anytime.
-              </p>
-              <div className="mt-6 flex items-center gap-3">
+          <KidsHubCard
+            title="Ask B-4"
+            description="Need a focus reset? Try B-4 Reset Tools or tap Ask B-4 in the corner to chat anytime."
+            imageSrc="/images/characters/B4_Robot_Hero.webp"
+            imageAlt="B-4 robot companion"
+            imageFit="contain"
+            imagePosition="center bottom"
+            cta={
+              <Button variant="primary" size="lg" as={Link} to="/b4-tools" className="w-full sm:w-auto">
+                Open B-4 Reset Tools
+              </Button>
+            }
+            footerNote={
+              <div className="flex items-center gap-3">
                 <img
                   src="/images/icons/B4_Chat_Icon.webp"
                   alt=""
-                  className="h-12 w-12 object-contain"
+                  className="h-10 w-10 object-contain sm:h-12 sm:w-12"
                   decoding="async"
                   aria-hidden
                 />
-                <p className="text-sm text-navy-500">Look for the floating button at the bottom of your screen.</p>
+                <p className="text-sm text-navy-500">Or use the floating Ask B-4 button on this site.</p>
               </div>
-            </div>
-          </section>
-        </div>
-      </section>
+            }
+          />
 
-      <section className="px-4 pb-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <HubCard
-            accent="kids"
+          <KidsHubCard
+            title="Brave Mind Club"
+            description="Browse the full library of free printables, worksheets, and activities for kids, parents, and educators."
+            imageSrc="/images/caidenscourage/backgrounds/community-strategy-story-bg.webp"
+            imageAlt="Brave Mind Club community and printable resources"
+            cta={
+              <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
+                Browse Brave Mind Club Activities
+              </Button>
+            }
+          />
+
+          <KidsHubCard
             title="Ready to play?"
             description="Jump into Focus Flame Lab and help Caiden navigate feelings, bravery, and focus."
-            to="/focus-flame-lab"
+            imageSrc="/images/focus-flame-lab/themove_intro_image.webp"
+            imageAlt="Focus Flame Lab gameplay preview"
+            featured
+            cta={
+              <Button
+                variant="primary"
+                size="lg"
+                as={Link}
+                to={FOCUS_FLAME_LAB_PATH}
+                leftIconSrc={null}
+                className="w-full sm:w-auto"
+              >
+                Enter Focus Flame Lab
+              </Button>
+            }
           />
         </div>
       </section>

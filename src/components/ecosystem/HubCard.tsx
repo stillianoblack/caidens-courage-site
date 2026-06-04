@@ -53,7 +53,7 @@ const accentText = {
   blue: {
     eyebrow: 'text-white/75',
     title: 'text-white',
-    body: 'text-white/92',
+    body: 'text-white',
     cta: 'text-golden-300',
     icon: 'text-white/55',
   },

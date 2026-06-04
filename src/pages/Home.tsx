@@ -6,10 +6,12 @@ import HubCard from '../components/ecosystem/HubCard';
 import ChoosePathSection from '../components/courage/ChoosePathSection';
 import BuiltFromRealStorySection from '../components/courage/BuiltFromRealStorySection';
 import Button from '../components/ui/Button';
-import HeroBackgroundVideo from '../components/courage/HeroBackgroundVideo';
-import HeroEcosystemVisuals from '../components/courage/HeroEcosystemVisuals';
+import FocusFlameLabCallout from '../components/courage/FocusFlameLabCallout';
 import CourageEmailSignup from '../components/courage/CourageEmailSignup';
 import useHashScroll from '../hooks/useHashScroll';
+import { CAIDEN_VALE_HOME_PATH } from '../config/nav';
+
+const HERO_BRAND_IMAGE = '/images/camp-courage/stackworksheets.webp';
 
 type HowItWorksStepName = 'Read' | 'Play' | 'Reflect' | 'Grow';
 
@@ -298,46 +300,52 @@ const Home: React.FC = () => {
     <div className="min-h-screen overflow-x-clip bg-cream font-body">
       <CourageHeader />
 
-      {/* Hero — masked rounded container on warm page background */}
-      <section className="bg-cream px-4 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5 lg:px-8 lg:pb-5">
+      {/* Hero — clean brand-led SEL platform intro */}
+      <section className="bg-cream px-4 pb-2 pt-4 sm:px-6 sm:pb-2 sm:pt-5 lg:px-8 lg:pb-3">
         <div className="cc-site-container mx-auto">
-          <div className="cc-hero-mask relative overflow-hidden rounded-[1.35rem] text-white sm:rounded-[1.75rem] lg:rounded-[2rem]">
-            <div className="cc-hero-media" aria-hidden="true">
-              <HeroBackgroundVideo />
-              <div className="cc-hero-vignette" aria-hidden="true" />
-            </div>
-
+          <div className="cc-hero-mask cc-hero-mask--brand relative overflow-hidden rounded-[1.35rem] sm:rounded-[1.75rem] lg:rounded-[2rem]">
             <div className="cc-hero-content relative z-10">
-              <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-8 lg:gap-10 xl:gap-12">
-                <div className="min-w-0 flex-1 md:max-w-[50%]">
-                  <div className="max-w-[19rem] sm:max-w-md lg:max-w-[26rem]">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-300/90 sm:text-[11px]">
-                      Story &bull; Play &bull; SEL &bull; Focus Flame Academy
+              <div className="cc-hero-layout">
+                <div className="cc-hero-main">
+                  <div className="cc-hero-copy">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-600 sm:text-[11px]">
+                      Story-Powered SEL
                     </p>
-                    <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:mt-4 sm:text-5xl lg:text-6xl">
+                    <h1 className="cc-hero-title mt-2.5 font-display font-extrabold leading-[1.08] text-navy-500 sm:mt-4 sm:text-5xl lg:text-6xl">
                       Caiden&apos;s Courage
                     </h1>
-                    <p className="mt-3 text-base leading-relaxed text-white/92 sm:mt-4 sm:text-lg lg:text-xl">
-                      A story-powered SEL world helping kids turn focus, feelings, and courage into everyday strengths.
+                    <p className="cc-hero-subtitle mt-2.5 text-[0.9375rem] leading-snug text-navy-600 sm:mt-4 sm:max-w-none sm:text-lg sm:leading-relaxed lg:text-xl">
+                      A story-powered SEL world helping kids build focus, confidence, and courage.
                     </p>
-                    <div className="mt-6 flex flex-col gap-3 sm:mt-8">
-                      <Button variant="primary" size="lg" as={Link} to="/kids" className="w-full">
-                        Explore Kids
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        as={Link}
-                        to="/focus-flame-academy"
-                        className="w-full !border-white/80 !text-white hover:!bg-white/15"
-                      >
-                        View Focus Flame Academy
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="cc-hero-ctas">
+                    <Button variant="primary" size="lg" as={Link} to="/kids" className="cc-hero-cta">
+                      Explore Kids
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      as={Link}
+                      to={CAIDEN_VALE_HOME_PATH}
+                      className="cc-hero-cta cc-hero-secondary-cta"
+                    >
+                      Explore Caiden Vale
+                    </Button>
                   </div>
                 </div>
-                <div className="cc-hero-visual max-w-[46%] overflow-hidden">
-                  <HeroEcosystemVisuals />
+                <div className="cc-hero-brand-visual">
+                  <img
+                    src={HERO_BRAND_IMAGE}
+                    alt="Camp Courage Experience Guide — SEL worksheets and activities"
+                    className="cc-hero-brand-img"
+                    decoding="async"
+                  />
+                  <div className="cc-hero-flyer-caption">
+                    <p className="cc-hero-flyer-caption-title">Camp Courage Experience Guide</p>
+                    <p className="cc-hero-flyer-caption-body">
+                      Story-based SEL activities for schools, camps, and families.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -346,7 +354,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Audience Cards */}
-      <section className="px-4 pt-5 pb-12 sm:px-6 sm:pt-6 sm:pb-14 lg:px-8 lg:pt-7 lg:pb-16" aria-label="Choose your audience">
+      <section className="px-4 pt-3 pb-12 sm:px-6 sm:pt-4 sm:pb-14 lg:px-8 lg:pt-5 lg:pb-16" aria-label="Choose your audience">
         <div className="cc-site-container mx-auto grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
           <HubCard
             accent="blue"
@@ -362,7 +370,7 @@ const Home: React.FC = () => {
             icon="parents"
             title="Build Confidence"
             description="Simple tools that help kids name feelings, reset, and build confidence at home."
-            to="/#join"
+            to="/braveminds#parents"
           />
           <HubCard
             accent="orange"
@@ -374,6 +382,8 @@ const Home: React.FC = () => {
           />
         </div>
       </section>
+
+      <FocusFlameLabCallout />
 
       <HowItWorksCarousel />
 

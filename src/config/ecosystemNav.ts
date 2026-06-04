@@ -4,7 +4,7 @@ export const ECOSYSTEM_NAV_ITEMS = [
   {
     label: 'Focus Flame Academy',
     href: '/focus-flame-academy',
-    activePaths: ['/focus-flame-academy', '/camp-courage'],
+    activePaths: ['/focus-flame-academy'],
   },
   { label: 'Focus Flame Lab', href: '/focus-flame-lab', activePaths: ['/focus-flame-lab'] },
 ] as const;
