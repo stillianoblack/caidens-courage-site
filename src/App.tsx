@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import ClassicHome from './pages/ClassicHome';
 import KidsHub from './pages/KidsHub';
 import FocusFlameAcademy from './pages/FocusFlameAcademy';
+import Portal from './pages/Portal';
+import PortalDashboard from './pages/PortalDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Terms from './pages/Terms';
 import ThankYou from './pages/ThankYou';
@@ -36,7 +38,10 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<Home />} />
       <Route path="/kids" element={<KidsHub />} />
       <Route path="/focus-flame-academy" element={<FocusFlameAcademy />} />
+      <Route path="/portal" element={<Portal />} />
+      <Route path="/portal/dashboard" element={<PortalDashboard />} />
       <Route path="/classic-home" element={<ClassicHome />} />
+      {/* TODO(migrate): legacy Vale program page — nav points to /focus-flame-academy; keep route until confirmed */}
       <Route path="/camp-courage" element={<CampCourage />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
       <Route path="/classroom-pilots" element={<Navigate to="/focus-flame-academy#camp-pilot-partnerships" replace />} />

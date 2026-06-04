@@ -1,11 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
-  FOCUS_FLAME_LAB_PATH,
+  GAMES_DROPDOWN,
+  PORTAL_PATH,
+  PORTAL_QUICK_LINKS,
   RESOURCES_DROPDOWN,
   SCHOOLS_DROPDOWN,
   type CourageNavLink,
 } from '../config/courageNav';
+import { PORTAL_DASHBOARD_PATH } from '../config/portalAccess';
+import PortalNavPanel from './courage/PortalNavPanel';
+import { usePortalUnlock } from '../hooks/usePortalUnlock';
 
 function navPillClass(isActive: boolean, mobile = false) {
   return [
@@ -15,12 +20,16 @@ function navPillClass(isActive: boolean, mobile = false) {
   ].join(' ');
 }
 
-function isDropdownActive(items: CourageNavLink[], pathname: string, hash: string) {
-  return items.some((item) => {
-    const [path, anchor] = item.href.split('#');
-    if (anchor) return pathname === path && hash === `#${anchor}`;
-    return pathname === path || pathname.startsWith(`${path}/`);
-  });
+function isNavHrefActive(href: string, pathname: string, hash: string, search: string) {
+  const url = new URL(href, 'https://caidenscourage.com');
+  if (url.pathname !== pathname) return false;
+  if (url.hash && url.hash !== hash) return false;
+  if (url.search && url.search !== search) return false;
+  return true;
+}
+
+function isDropdownActive(items: CourageNavLink[], pathname: string, hash: string, search: string) {
+  return items.some((item) => isNavHrefActive(item.href, pathname, hash, search));
 }
 
 type DropdownProps = {
@@ -116,14 +125,111 @@ function MobileDropdownGroup({
   );
 }
 
+function DesktopPortalDropdown({
+  isOpen,
+  onToggle,
+  onClose,
+  active,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  active: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('nav', onClose);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [isOpen, onClose]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+          active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
+        }`}
+      >
+        Portal
+        <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+        </svg>
+      </button>
+      {isOpen ? (
+        <div className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,20rem)] rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:left-auto sm:w-[19rem]">
+          <PortalNavPanel
+            accessCode={accessCode}
+            error={error}
+            onAccessCodeChange={onAccessCodeChange}
+            onSubmit={handleSubmit}
+            onLinkClick={onClose}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function MobilePortalGroup({
+  isOpen,
+  onToggle,
+  onClose,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
+  const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('nav', onClose);
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-semibold text-navy-500 hover:bg-navy-50"
+      >
+        Portal
+        <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+        </svg>
+      </button>
+      {isOpen ? (
+        <div className="mt-2 rounded-xl border border-navy-100/90 bg-white px-4 py-4">
+          <PortalNavPanel
+            accessCode={accessCode}
+            error={error}
+            onAccessCodeChange={onAccessCodeChange}
+            onSubmit={handleSubmit}
+            onLinkClick={onClose}
+            compact
+          />
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
 export default function CourageHeader() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [schoolsOpen, setSchoolsOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
+  const [portalOpen, setPortalOpen] = useState(false);
   const [mobileSchoolsOpen, setMobileSchoolsOpen] = useState(false);
   const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
+  const [mobileGamesOpen, setMobileGamesOpen] = useState(false);
+  const [mobilePortalOpen, setMobilePortalOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);
@@ -135,8 +241,12 @@ export default function CourageHeader() {
     setMenuOpen(false);
     setSchoolsOpen(false);
     setResourcesOpen(false);
+    setGamesOpen(false);
+    setPortalOpen(false);
     setMobileSchoolsOpen(false);
     setMobileResourcesOpen(false);
+    setMobileGamesOpen(false);
+    setMobilePortalOpen(false);
   }, [location.pathname, location.hash]);
 
   useEffect(() => {
@@ -149,8 +259,23 @@ export default function CourageHeader() {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
-  const schoolsActive = isDropdownActive(SCHOOLS_DROPDOWN, location.pathname, location.hash);
-  const resourcesActive = isDropdownActive(RESOURCES_DROPDOWN, location.pathname, location.hash);
+  const schoolsActive = isDropdownActive(
+    SCHOOLS_DROPDOWN,
+    location.pathname,
+    location.hash,
+    location.search
+  );
+  const resourcesActive = isDropdownActive(
+    RESOURCES_DROPDOWN,
+    location.pathname,
+    location.hash,
+    location.search
+  );
+  const gamesActive = isDropdownActive(GAMES_DROPDOWN, location.pathname, location.hash, location.search);
+  const portalActive =
+    location.pathname === PORTAL_PATH ||
+    location.pathname.startsWith(PORTAL_DASHBOARD_PATH) ||
+    isDropdownActive(PORTAL_QUICK_LINKS, location.pathname, location.hash, location.search);
 
   return (
     <header
@@ -162,17 +287,17 @@ export default function CourageHeader() {
       ].join(' ')}
       aria-label="Caiden's Courage header"
     >
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="cc-site-container mx-auto flex min-h-16 items-center justify-between gap-3 py-3.5 sm:min-h-[4.25rem] sm:py-4">
+      <div className="cc-courage-header-shell sm:px-6 lg:px-8">
+        <div className="cc-courage-header-inner cc-site-container mx-auto flex min-h-16 w-full items-center justify-between gap-3 py-3.5 sm:min-h-[4.25rem] sm:py-4">
           <Link
             to="/"
             className="flex shrink-0 items-center leading-none rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/60"
             aria-label="Caiden's Courage home"
           >
             <img
-              src="/images/icons/CC_logo_2_1.svg"
+              src="/images/icons/CC_logo.svg"
               alt="Caiden's Courage"
-              className="block h-8 w-auto flex-shrink-0 object-contain object-left sm:h-9 lg:h-[2.375rem]"
+              className="block h-10 w-auto flex-shrink-0 object-contain object-left sm:h-11 lg:h-12"
               decoding="async"
             />
           </Link>
@@ -191,6 +316,8 @@ export default function CourageHeader() {
             onToggle={() => {
               setSchoolsOpen((o) => !o);
               setResourcesOpen(false);
+              setGamesOpen(false);
+              setPortalOpen(false);
             }}
             onClose={() => setSchoolsOpen(false)}
             active={schoolsActive}
@@ -202,13 +329,36 @@ export default function CourageHeader() {
             onToggle={() => {
               setResourcesOpen((o) => !o);
               setSchoolsOpen(false);
+              setGamesOpen(false);
+              setPortalOpen(false);
             }}
             onClose={() => setResourcesOpen(false)}
             active={resourcesActive}
           />
-          <NavLink to={FOCUS_FLAME_LAB_PATH} className={({ isActive }) => navPillClass(isActive)}>
-            Focus Flame Lab
-          </NavLink>
+          <DesktopDropdown
+            label="Games"
+            items={GAMES_DROPDOWN}
+            isOpen={gamesOpen}
+            onToggle={() => {
+              setGamesOpen((o) => !o);
+              setSchoolsOpen(false);
+              setResourcesOpen(false);
+              setPortalOpen(false);
+            }}
+            onClose={() => setGamesOpen(false)}
+            active={gamesActive}
+          />
+          <DesktopPortalDropdown
+            isOpen={portalOpen}
+            onToggle={() => {
+              setPortalOpen((o) => !o);
+              setSchoolsOpen(false);
+              setResourcesOpen(false);
+              setGamesOpen(false);
+            }}
+            onClose={() => setPortalOpen(false)}
+            active={portalActive}
+          />
         </nav>
 
         <button
@@ -242,10 +392,10 @@ export default function CourageHeader() {
           />
           <nav
             id="courage-mobile-nav"
-            className="relative z-50 max-h-[70vh] overflow-y-auto border-t border-navy-100 bg-[#FAF9F7] px-4 py-4 shadow-lg sm:px-6 lg:hidden"
+            className="cc-courage-mobile-nav relative z-50 max-h-[70vh] overflow-y-auto border-t border-navy-100 bg-[#FAF9F7] shadow-lg sm:px-6 lg:hidden"
             aria-label="Caiden's Courage mobile navigation"
           >
-            <ul className="cc-site-container mx-auto flex flex-col gap-1">
+            <ul className="cc-courage-mobile-nav-list cc-courage-header-inner cc-site-container mx-auto flex w-full flex-col gap-1">
               <li>
                 <NavLink to="/" end className={({ isActive }) => navPillClass(isActive, true)} onClick={closeMenu}>
                   Home
@@ -263,6 +413,8 @@ export default function CourageHeader() {
                 onToggle={() => {
                   setMobileSchoolsOpen((o) => !o);
                   setMobileResourcesOpen(false);
+                  setMobileGamesOpen(false);
+                  setMobilePortalOpen(false);
                 }}
                 onClose={closeMenu}
               />
@@ -273,18 +425,33 @@ export default function CourageHeader() {
                 onToggle={() => {
                   setMobileResourcesOpen((o) => !o);
                   setMobileSchoolsOpen(false);
+                  setMobileGamesOpen(false);
+                  setMobilePortalOpen(false);
                 }}
                 onClose={closeMenu}
               />
-              <li>
-                <NavLink
-                  to={FOCUS_FLAME_LAB_PATH}
-                  className={({ isActive }) => navPillClass(isActive, true)}
-                  onClick={closeMenu}
-                >
-                  Focus Flame Lab
-                </NavLink>
-              </li>
+              <MobileDropdownGroup
+                label="Games"
+                items={GAMES_DROPDOWN}
+                isOpen={mobileGamesOpen}
+                onToggle={() => {
+                  setMobileGamesOpen((o) => !o);
+                  setMobileSchoolsOpen(false);
+                  setMobileResourcesOpen(false);
+                  setMobilePortalOpen(false);
+                }}
+                onClose={closeMenu}
+              />
+              <MobilePortalGroup
+                isOpen={mobilePortalOpen}
+                onToggle={() => {
+                  setMobilePortalOpen((o) => !o);
+                  setMobileSchoolsOpen(false);
+                  setMobileResourcesOpen(false);
+                  setMobileGamesOpen(false);
+                }}
+                onClose={closeMenu}
+              />
             </ul>
           </nav>
         </>

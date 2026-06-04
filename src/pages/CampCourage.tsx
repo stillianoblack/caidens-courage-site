@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import BluePageHeader from '../components/sections/BluePageHeader';
+import SectionHero from '../components/courage/SectionHero';
 import ParentsEducatorsToolkitSection from '../components/camp-courage/ParentsEducatorsToolkitSection';
 import ExploreInsideCampCourageSection from '../components/camp-courage/ExploreInsideCampCourageSection';
 import CampPilotPartnershipsSection from '../components/camp-courage/CampPilotPartnershipsSection';
@@ -46,10 +46,12 @@ const CampCourage: React.FC = () => {
         . This page remains available during the transition.
       </div>
 
-      <BluePageHeader
+      <SectionHero
+        headerOffset="vale"
+        eyebrow="Camp Courage"
         title="Camp Courage"
         description="The educational home of the Caiden Vale universe — interactive SEL experiences, guided missions, and the Camp Courage Toolkit for schools, camps, and youth programs."
-        subtitle="A calm, story-driven space where kids practice courage with the adults who support them."
+        supportingText="A calm, story-driven space where kids practice courage with the adults who support them."
       />
 
       <ParentsEducatorsToolkitSection />

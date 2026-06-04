@@ -85,42 +85,36 @@ export const NAV_ITEMS: NavItem[] = [
     type: 'dropdown',
     dropdownItems: [
       {
-        label: 'B-4 Reset Tools',
-        href: '/b4-tools',
-        description: 'Interactive reset missions to help kids notice feelings and find calm.'
+        label: 'Preview the Book',
+        href: '/preview',
+        description: 'See inside Volume 1 before you pre-order.'
       },
       {
-        label: 'Brave Mind Club Activities',
-        href: '/braveminds',
-        description: 'Printable guides, posters, and worksheets for home and classroom use.'
-      },
-      {
-        label: 'FAQs',
-        href: '/braveminds#faq',
-        description: 'Quick answers about using our free resources.'
-      },
-      {
-        label: 'Camp Courage',
-        href: '/camp-courage',
-        description: 'Interactive SEL experiences, guided missions, and pilot partnerships.'
-      },
-      {
-        label: 'Pilot Partnerships',
-        href: '/camp-courage#camp-pilot-partnerships',
-        description: 'Bring Camp Courage to your school, camp, or youth program.'
-      },
-      {
-        label: 'Training & Guides',
-        href: '/training-guides',
-        description: 'How to use B-4 tools at home and in the classroom.'
-      },
-      {
-        label: 'Shop',
+        label: 'Pre-Order Volume 1',
         href: '/comicbook',
-        description: 'Pre-order Volume 1 and explore our products'
+        description: 'The graphic novel and official shop.'
+      },
+      {
+        label: 'Characters',
+        href: '/characters',
+        description: 'Meet Caiden, B-4, Genesis, and the world’s heroes.'
+      },
+      {
+        label: 'Character Art Downloads',
+        href: '/braveminds?type=wallpaper',
+        description: 'Wallpapers and character art from the Caiden Vale universe.'
+      },
+      {
+        label: 'Story Journey',
+        href: '/journey',
+        description: 'Milestones, updates, and the story behind the book.'
+      },
+      {
+        label: 'Press & Media',
+        href: '/contact',
+        description: 'Partnerships, press, and media inquiries.'
       }
-    ],
-    twoColumn: true
+    ]
   },
   {
     label: 'Shop',

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
+import CourageHeader from '../components/CourageHeader';
 import Footer from '../components/Footer';
+import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
 
 interface Unit {
@@ -122,233 +123,23 @@ const B4Clicker: React.FC = () => {
 
   const canGoBack = screen === 'selection' || screen === 'acknowledgement' || screen === 'mission';
 
-  // Floating organic shapes component
-  const FloatingShape = ({ className = '', style = {} }: { className?: string; style?: React.CSSProperties }) => (
-    <div
-      className={`absolute ${className}`}
-      style={{
-        borderRadius: style.borderRadius || '50%',
-        background: style.background || 'linear-gradient(135deg, rgba(240, 206, 110, 0.2) 0%, rgba(255, 211, 61, 0.15) 100%)',
-        opacity: 0.6,
-        ...style,
-      }}
-    />
-  );
-
   return (
     <div className="min-h-screen bg-cream font-body">
-      <Header />
+      <CourageHeader />
 
-      {/* Hero Section with floating shapes */}
-      <div className="bg-cream py-20 lg:py-28 relative overflow-hidden" style={{ marginTop: '100px' }}>
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left Column - Text and Button */}
-            <div className="relative z-10 max-w-xl">
-              <p className="text-xs sm:text-sm uppercase tracking-widest text-navy-400 mb-4 text-left max-w-3xl">
-                COURAGE RESET TOOLS
-              </p>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-navy-500 mb-4 text-left max-w-3xl leading-[1.05]">
-                Courage Command:{' '}
-                <span className="text-golden-500">Power up your brain</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-navy-600 mb-6 font-medium text-left max-w-3xl leading-relaxed">
-                Feeling a system glitch? Pick a Courage Module to clear the static and get back into the action!
-              </p>
-              <p className="text-sm md:text-base text-gray-600 mb-6 text-left max-w-3xl leading-relaxed">
-                Each module helps your body and brain reset in a different way.
-              </p>
-              <div className="text-left mb-8">
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={handleOpenModal}
-                  className="w-full sm:w-auto"
-                >
-                  Get your focus back
-                </Button>
-              </div>
-            </div>
-
-            {/* Right Column - Circular Character Images with Bubble Alignment */}
-            <div className="relative flex justify-start lg:justify-end min-h-[400px] lg:min-h-[500px]">
-              {/* Bubble Field - Anchored to Right Edge */}
-              <div className="hidden lg:block absolute inset-y-0 right-0 w-[520px] max-w-full pointer-events-none">
-                {/* Floating organic shapes */}
-                <FloatingShape 
-                  className="top-10 -left-4" 
-                  style={{ width: '120px', height: '120px', borderRadius: '60% 40% 50% 50%' }}
-                />
-                <FloatingShape 
-                  className="top-20 -right-8" 
-                  style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 197, 253, 0.1) 100%)' }}
-                />
-                <FloatingShape 
-                  className="bottom-16 left-1/4" 
-                  style={{ width: '100px', height: '100px', borderRadius: '40% 60% 50% 50%', background: 'linear-gradient(135deg, rgba(155, 89, 182, 0.15) 0%, rgba(186, 104, 200, 0.1) 100%)' }}
-                />
-                <FloatingShape 
-                  className="bottom-10 -right-4" 
-                  style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 159, 64, 0.1) 100%)' }}
-                />
-
-                {/* 3D Small Circles with Animation */}
-                <div className="hidden sm:block circle-accent circle-coral w-20 h-20 top-8 right-16 opacity-60" style={{ animationDelay: '0s' }} />
-                <div className="hidden sm:block circle-accent circle-coral w-16 h-16 top-32 left-12 opacity-50" style={{ animationDelay: '0.3s' }} />
-                <div className="hidden sm:block circle-accent circle-coral w-12 h-12 bottom-24 right-24 opacity-40" style={{ animationDelay: '0.6s' }} />
-                <div className="hidden sm:block circle-accent w-14 h-14 bottom-32 left-16 opacity-50" style={{ background: '#FFD93D', animationDelay: '0.2s' }} />
-                <div className="hidden sm:block circle-accent circle-coral w-10 h-10 top-40 right-32 opacity-45" style={{ animationDelay: '0.5s' }} />
-              </div>
-
-              {/* Circular Module Images */}
-              <div className="relative z-10 flex w-full items-center lg:w-auto">
-                {/* Mobile: big 2x2 grid */}
-                <div className="grid w-full grid-cols-2 gap-8 justify-start mt-10 mb-12 lg:hidden">
-                  <button
-                    onClick={handleOpenModal}
-                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
-                    aria-label="Open Courage Module: Caiden"
-                  >
-                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img
-                        src="/images/characters/Caiden_img_profile.webp"
-                        alt="Caiden"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={handleOpenModal}
-                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
-                    aria-label="Open Courage Module: B-4"
-                  >
-                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img
-                        src="/images/characters/b4_img_profile_192w.webp"
-                        alt="B-4"
-                        className="w-full h-full object-cover object-[50%_20%]"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={handleOpenModal}
-                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
-                    aria-label="Open Courage Module: Genesis"
-                  >
-                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img
-                        src="/images/genesis_img_pic.webp"
-                        alt="Genesis"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={handleOpenModal}
-                    className="flex justify-start focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-transform transition-shadow duration-200 hover:scale-[1.03] hover:shadow-xl cursor-pointer"
-                    aria-label="Open Courage Module: Turtle"
-                  >
-                    <div className="w-[170px] h-[170px] rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                      <img
-                        src="/images/characters/ollie_img_profile_192w.webp"
-                        alt="Ollie Buck"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </button>
-                </div>
-
-                {/* Desktop: clean 2x2 grid cluster (no overlaps) */}
-                <div className="hidden lg:block relative w-[520px] h-[520px] mt-6 mb-12">
-                  <div className="absolute inset-0 z-10 flex items-center justify-center">
-                    <div className="max-w-[520px] w-full">
-                      <div className="grid grid-cols-2 gap-4 items-center justify-center place-items-center">
-                    <button
-                      onClick={handleOpenModal}
-                      className="translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
-                      aria-label="Open Courage Module: Caiden"
-                    >
-                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
-                        <img
-                          src="/images/characters/Caiden_img_profile.webp"
-                          alt="Caiden"
-                          className="w-full h-full object-cover rounded-full"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={handleOpenModal}
-                      className="-translate-y-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
-                      aria-label="Open Courage Module: B-4"
-                    >
-                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
-                        <img
-                          src="/images/characters/b4_img_profile_192w.webp"
-                          alt="B-4"
-                          className="w-full h-full object-cover object-[50%_20%] rounded-full"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={handleOpenModal}
-                      className="translate-y-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
-                      aria-label="Open Courage Module: Genesis"
-                    >
-                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
-                        <img
-                          src="/images/genesis_img_pic.webp"
-                          alt="Genesis"
-                          className="w-full h-full object-cover rounded-full"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={handleOpenModal}
-                      className="translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200 focus-visible:ring-offset-2 rounded-full transition-shadow duration-200 hover:shadow-2xl cursor-pointer"
-                      aria-label="Open Courage Module: Turtle"
-                    >
-                      <div className="w-[220px] h-[220px] rounded-full object-cover border-[6px] border-white shadow-xl overflow-hidden bg-white">
-                        <img
-                          src="/images/characters/ollie_img_profile_192w.webp"
-                          alt="Ollie Buck"
-                          className="w-full h-full object-cover rounded-full"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SectionHero
+        variant="compact"
+        eyebrow="Courage Reset Tools"
+        titleAccent="B-4"
+        title="Reset Tools"
+        description="Quick story-powered focus resets designed to help kids pause, regroup, and return to the adventure."
+        supportingText="Pick a Courage Module to clear the static and get back into the action."
+        ctaLabel="Get your focus back"
+        ctaOnClick={handleOpenModal}
+      />
 
       {/* Informational Section */}
-      <div className="py-16 sm:py-20 mt-16" style={{ backgroundColor: '#F3F7FB' }}>
+      <div id="b4-reset-modules" className="py-16 sm:py-20" style={{ backgroundColor: '#F3F7FB' }}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-12">
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-left max-w-3xl">

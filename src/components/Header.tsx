@@ -200,9 +200,9 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
   // Render a dropdown nav item
   const renderDropdown = (item: NavItem, isOpen: boolean, onMouseEnter: () => void, onMouseLeave: () => void, onToggle: () => void) => {
     if (item.label === 'Resources') {
-      // Special handling for Resources dropdown (two-column layout)
+      // Story & book resources only — SEL/program links live in Caiden's Courage nav
       return (
-        <div 
+        <div
           className="relative has-dropdown"
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
@@ -220,98 +220,39 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
             aria-expanded={isOpen}
           >
             {item.label}
-            <svg 
+            <svg
               className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
           <div className="absolute top-full left-0 w-full h-3" />
-          <div 
-            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-xl py-6 px-6 min-w-[600px] z-50 transition-[opacity,transform] duration-200 ${
-              isOpen 
-                ? 'opacity-100 visible pointer-events-auto translate-y-0' 
+          <div
+            className={`dropdown-menu absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl py-2 min-w-[280px] max-w-[320px] z-50 transition-[opacity,transform] duration-200 ${
+              isOpen
+                ? 'opacity-100 visible pointer-events-auto translate-y-0'
                 : 'opacity-0 invisible pointer-events-none -translate-y-2'
             }`}
             style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
           >
-            <div className="grid grid-cols-2 gap-8">
-              {/* Column 1: Classroom & Home Tools */}
-              <div>
-                <h3 className="font-display font-bold text-base text-navy-500 mb-4">Classroom & Home Tools</h3>
-                <div className="space-y-3">
-                  {item.dropdownItems?.slice(0, 3).map((dropdownItem, idx) => (
-                    <Link
-                      key={idx}
-                      to={dropdownItem.href}
-                      onClick={() => setShowResourcesDropdown(false)}
-                      className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                    >
-                      <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
-                      {dropdownItem.description && (
-                        <div className="text-xs text-navy-500">{dropdownItem.description}</div>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Column 2: For Educators */}
-              <div>
-                <h3 className="font-display font-bold text-base text-navy-500 mb-4">For Educators</h3>
-                <div className="space-y-3">
-                  {item.dropdownItems?.slice(3, 6).map((dropdownItem, idx) => (
-                    <Link
-                      key={idx + 3}
-                      to={dropdownItem.href}
-                      className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={() => setShowResourcesDropdown(false)}
-                    >
-                      <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
-                      {dropdownItem.description && (
-                        <div className="text-xs text-navy-500">{dropdownItem.description}</div>
-                      )}
-                    </Link>
-                  ))}
-                  {/* Shop link at bottom */}
-                  {item.dropdownItems?.slice(6).map((dropdownItem, idx) => (
-                    <Link
-                      key={idx + 6}
-                      to={dropdownItem.href}
-                      className="block rounded-xl p-4 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
-                      onClick={() => setShowResourcesDropdown(false)}
-                    >
-                      <div className="font-semibold text-sm text-navy-700 mb-1">{dropdownItem.label}</div>
-                      {dropdownItem.description && (
-                        <div className="text-xs text-navy-500">{dropdownItem.description}</div>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-navy-200 mt-4 pt-4">
-              <h3 className="font-display font-bold text-xs text-navy-500 mb-3 uppercase tracking-wide">Browse by audience</h3>
-              <div className="grid grid-cols-4 gap-2">
-                <Link to="/braveminds#kids" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
-                  <div className="font-semibold text-xs text-navy-700">For Kids</div>
-                </Link>
-                <Link to="/braveminds#parents" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
-                  <div className="font-semibold text-xs text-navy-700">For Parents</div>
-                </Link>
-                <Link to="/braveminds#teachers" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
-                  <div className="font-semibold text-xs text-navy-700">For Teachers</div>
-                </Link>
-                <Link to="/braveminds" className="block rounded-lg p-3 hover:bg-navy-50 transition-colors text-center focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2" onClick={() => setShowResourcesDropdown(false)}>
-                  <div className="font-semibold text-xs text-navy-700">All Resources</div>
-                </Link>
-              </div>
-            </div>
+            {item.dropdownItems?.map((dropdownItem, idx) => (
+              <Link
+                key={idx}
+                to={dropdownItem.href}
+                onClick={() => setShowResourcesDropdown(false)}
+                className="block px-4 py-2.5 text-navy-500 hover:bg-navy-50 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2"
+              >
+                <div className="font-semibold text-sm text-navy-700">{dropdownItem.label}</div>
+                {dropdownItem.description && (
+                  <div className="text-xs text-navy-500 mt-0.5">{dropdownItem.description}</div>
+                )}
+              </Link>
+            ))}
           </div>
         </div>
       );
@@ -788,60 +729,24 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                         isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
                       }`}>
                         {item.label === 'Resources' ? (
-                          <>
-                            <div className="px-12 py-4">
-                              <h3 className="font-display font-bold text-lg text-navy-700 mb-3">Classroom & Home Tools</h3>
-                              <div className="space-y-3">
-                                {item.dropdownItems?.slice(0, 3).map((dropdownItem, idx) => (
-                                  <Link
-                                    key={idx}
-                                    to={dropdownItem.href}
-                                    onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }}
-                                    className="block rounded-xl p-4 bg-white hover:bg-navy-50 transition-colors border border-navy-100"
-                                  >
-                                    <div className="font-semibold text-base text-navy-700 mb-1">{dropdownItem.label}</div>
-                                    {dropdownItem.description && (
-                                      <div className="text-sm text-navy-500">{dropdownItem.description}</div>
-                                    )}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="px-12 py-4 border-t border-navy-100">
-                              <h3 className="font-display font-bold text-lg text-navy-700 mb-3">For Educators</h3>
-                              <div className="space-y-3">
-                                {item.dropdownItems?.slice(3, 7).map((dropdownItem, idx) => (
-                                  <Link
-                                    key={idx + 3}
-                                    to={dropdownItem.href}
-                                    onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }}
-                                    className="block rounded-xl p-4 bg-white hover:bg-navy-50 transition-colors border border-navy-100"
-                                  >
-                                    <div className="font-semibold text-base text-navy-700 mb-1">{dropdownItem.label}</div>
-                                    {dropdownItem.description && (
-                                      <div className="text-sm text-navy-500">{dropdownItem.description}</div>
-                                    )}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="px-12 py-4 border-t border-navy-200">
-                              <div className="grid grid-cols-2 gap-2">
-                                <Link to="/braveminds?audience=kids" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
-                                  <div className="font-semibold text-sm text-navy-700">For Kids</div>
-                                </Link>
-                                <Link to="/braveminds?audience=parents" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
-                                  <div className="font-semibold text-sm text-navy-700">For Parents</div>
-                                </Link>
-                                <Link to="/braveminds?audience=teachers" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
-                                  <div className="font-semibold text-sm text-navy-700">For Teachers</div>
-                                </Link>
-                                <Link to="/braveminds" onClick={() => { setIsMobileMenuOpen(false); setShowMobileResourcesDropdown(false); }} className="block rounded-lg p-3 bg-white hover:bg-navy-50 transition-colors text-center border border-navy-100">
-                                  <div className="font-semibold text-sm text-navy-700">All Resources</div>
-                                </Link>
-                              </div>
-                            </div>
-                          </>
+                          <div className="px-12 py-4 space-y-3">
+                            {item.dropdownItems?.map((dropdownItem, idx) => (
+                              <Link
+                                key={idx}
+                                to={dropdownItem.href}
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setShowMobileResourcesDropdown(false);
+                                }}
+                                className="block rounded-xl p-4 bg-white hover:bg-navy-50 transition-colors border border-navy-100"
+                              >
+                                <div className="font-semibold text-base text-navy-700 mb-1">{dropdownItem.label}</div>
+                                {dropdownItem.description && (
+                                  <div className="text-sm text-navy-500">{dropdownItem.description}</div>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
                         ) : (
                           <div className="px-12 py-4">
                             {item.dropdownItems?.map((dropdownItem, idx) => {

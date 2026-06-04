@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
-import Header from '../components/Header';
+import CourageHeader from '../components/CourageHeader';
 import Footer from '../components/Footer';
+import SectionHero from '../components/courage/SectionHero';
 import GlobalNotification from '../components/GlobalNotification';
 import { submitNetlifyForm } from '../utils/netlifyForms';
 
@@ -140,10 +141,6 @@ const Resources: React.FC = () => {
     }
   };
 
-  const handleComingSoonClick = useCallback(() => {
-    setIsComingSoonModalOpen(true);
-  }, []);
-
   // Get all unique tags from resources
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -270,33 +267,21 @@ const Resources: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cream font-body">
-      <Header onComingSoonClick={handleComingSoonClick} />
+      <CourageHeader />
 
-      {/* Header */}
-      <div 
+      <SectionHero
         id="resources-header"
-        data-section="header"
-        className="cv-cinematic-section cv-under-marvel-header text-white py-16 pt-32 relative overflow-hidden"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4" style={{ color: '#FFFFFF' }}>
-            Brave Mind Club Activities
-          </h1>
-          <p className="text-lg sm:text-xl max-w-3xl mb-2" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-            SEL tools, coloring pages, wallpapers, and worksheets for kids, parents, and educators.
-          </p>
-          <p className="text-sm sm:text-base" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-            All resources are free and designed to support neurodiverse kids.
-          </p>
-        </div>
-      </div>
+        eyebrow="Brave Mind Club"
+        title="Brave Mind Club Activities"
+        description="SEL tools, coloring pages, wallpapers, and worksheets for kids, parents, and educators."
+        supportingText="All resources are free and designed to support neurodiverse kids."
+      />
 
       {/* Filters and Search */}
       <div 
         id="resources-filters"
         data-section="filters"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-        style={{ marginTop: '70px' }}
       >
         {/* White Card Container - Filters (hidden when HIDE_FILTERS) */}
         {!HIDE_FILTERS && (

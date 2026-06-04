@@ -29,6 +29,7 @@
   --nav-height: 80px;
   --mobile-header-stack-height: 98px; /* 64px mobile nav + promo strip */
   --mobile-header-height: 150px; /* fallback for overlays like chat drawers */
+  --courage-header-height: 4.25rem; /* CourageHeader sticky bar (sm+) */
   --navy-500: #243E70;
   --golden-500: #e5c06a;
   --coral-500: #F0CE6E; /* Alias for backward compatibility */
@@ -8068,6 +8069,145 @@ a.ffl-ctaSecondary {
   background-blend-mode: overlay, normal;
 }
 
+/* Caiden's Courage — premium second-level page hero */
+.cc-section-hero {
+  background: linear-gradient(180deg, #102c63 0%, #0b1f46 100%);
+}
+
+/* Decorative dot grid — lower-right, behind hero content */
+.cc-section-hero::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  width: 50%;
+  height: 62%;
+  opacity: 0.62;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.18) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(234, 196, 93, 0.14) 1.5px, transparent 1.5px);
+  background-size: 16px 16px, 16px 16px;
+  background-position: 0 0, 8px 8px;
+  -webkit-mask-image:
+    linear-gradient(to left, black 52%, transparent 100%),
+    linear-gradient(to top, black 50%, transparent 100%);
+  mask-image:
+    linear-gradient(to left, black 52%, transparent 100%),
+    linear-gradient(to top, black 50%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+@media (min-width: 768px) {
+  .cc-section-hero::after {
+    width: 44%;
+    height: 76%;
+    opacity: 0.8;
+    background-size: 18px 18px, 18px 18px;
+    background-position: 0 0, 9px 9px;
+    -webkit-mask-image:
+      linear-gradient(to left, black 58%, transparent 100%),
+      linear-gradient(to top, black 56%, transparent 100%);
+    mask-image:
+      linear-gradient(to left, black 58%, transparent 100%),
+      linear-gradient(to top, black 56%, transparent 100%);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-section-hero::after {
+    width: 42%;
+    height: 78%;
+    opacity: 0.85;
+  }
+}
+
+/* CourageHeader pages — offset matches sticky header + modest gap (mirrors BluePageHeader tightness) */
+.cc-section-hero--courage {
+  padding-top: calc(4rem + 1.5rem);
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 640px) {
+  .cc-section-hero--courage {
+    padding-top: calc(var(--courage-header-height) + 1.5rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .cc-section-hero--courage {
+    padding-bottom: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-section-hero--courage {
+    padding-top: calc(var(--courage-header-height) + 3rem);
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .cc-section-hero--courage {
+    padding-bottom: 6rem;
+  }
+}
+
+/* Vale Header pages (e.g. Camp Courage) — align with BluePageHeader / desktop-header-height */
+.cc-section-hero--vale {
+  padding-top: 8rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 1024px) {
+  .cc-section-hero--vale {
+    padding-top: calc(var(--desktop-header-height) + 3rem);
+  }
+}
+
+.cc-section-hero-glow {
+  z-index: 0;
+  background: radial-gradient(circle at 72% 28%, rgba(255, 255, 255, 0.05), transparent 52%);
+}
+
+.cc-section-hero-noise {
+  z-index: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+.cc-section-hero-title {
+  font-size: clamp(2.25rem, 5.2vw, 4.5rem);
+}
+
+/* Tighter hero — text sits higher under CourageHeader */
+.cc-section-hero--compact.cc-section-hero--courage {
+  padding-top: calc(3.5rem + 1rem);
+  padding-bottom: 2.75rem;
+}
+
+@media (min-width: 640px) {
+  .cc-section-hero--compact.cc-section-hero--courage {
+    padding-top: calc(var(--courage-header-height) + 1rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .cc-section-hero--compact.cc-section-hero--courage {
+    padding-bottom: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-section-hero--compact.cc-section-hero--courage {
+    padding-top: calc(var(--courage-header-height) + 1.75rem);
+    padding-bottom: 4rem;
+  }
+}
+
 /* Premium card surface for grids inside cinematic sections */
 .cv-cinematic-card {
   background: linear-gradient(180deg, #243a5e 0%, #1b2a44 100%);
@@ -8092,35 +8232,558 @@ a.ffl-ctaSecondary {
   display: none; /* Safari/Chrome */
 }
 
-/* Caiden's Courage site container — 15% wider than max-w-7xl (80rem → 92rem) */
+/* Caiden's Courage site container — matches Vale Tailwind max-w-7xl (80rem) */
+.cc-site-container,
+.cc-real-story {
+  --cc-site-container-max: 80rem;
+}
+
 .cc-site-container {
   width: 100%;
-  max-width: 92rem;
+  max-width: var(--cc-site-container-max);
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Courage homepage — Monchier-style masked hero */
-.cc-hero-mask {
-  min-height: clamp(525px, 63vh, 588px);
-  overflow: hidden;
+/* Courage header — wider mobile menu and bar alignment (phones only) */
+@media (max-width: 639px) {
+  .cc-courage-header-shell {
+    padding-inline: 0.5rem;
+  }
+
+  .cc-courage-header-inner,
+  .cc-courage-mobile-nav-list {
+    width: 100%;
+    max-width: none;
+  }
+
+  .cc-courage-mobile-nav {
+    padding-inline: 0.5rem;
+    padding-block: 1rem;
+  }
+}
+
+/* Caiden's Courage Portal — MVP access-code gateway */
+.cc-portal-hero-panel {
+  background: linear-gradient(135deg, #f3f8ff 0%, #faf9f3 100%);
   box-shadow:
-    0 28px 64px -32px rgba(36, 62, 112, 0.28),
+    0 20px 48px -28px rgba(36, 62, 112, 0.18),
     0 0 0 1px rgba(36, 62, 112, 0.06);
 }
 
-@media (min-width: 640px) {
-  .cc-hero-mask {
-    min-height: clamp(588px, 69vh, 714px);
+.cc-portal-code-input {
+  min-height: 3rem;
+}
+
+.cc-portal-resource-grid,
+.cc-portal-pricing-grid {
+  width: 100%;
+}
+
+.cc-portal-audience-tabs-inner {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.cc-portal-audience-tabs-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.cc-portal-audience-tab:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #faf9f7,
+    0 0 0 4px rgba(36, 62, 112, 0.75);
+}
+
+/* Portal path selector — homepage Build Focus / Confidence / Courage themes */
+.cc-portal-path-tab--inactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px -14px rgba(36, 62, 112, 0.18);
+  border-color: rgba(36, 62, 112, 0.14);
+}
+
+.cc-portal-path-tab--active-blue {
+  border-color: rgba(36, 62, 112, 0.45);
+  background: rgb(36 62 112);
+  color: #fff;
+  box-shadow: 0 12px 32px -16px rgba(36, 62, 112, 0.45);
+}
+
+.cc-portal-path-tab--active-gold {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: rgb(244 212 119);
+  color: rgb(36 62 112);
+  box-shadow: 0 12px 32px -16px rgba(229, 192, 106, 0.4);
+}
+
+.cc-portal-path-tab--active-orange {
+  border-color: rgba(249, 115, 22, 0.5);
+  background: rgb(249 115 22);
+  color: #fff;
+  box-shadow: 0 12px 32px -16px rgba(249, 115, 22, 0.38);
+}
+
+.cc-portal-path-tab--active-teal {
+  border-color: rgba(15, 118, 110, 0.5);
+  background: rgb(13 116 110);
+  color: #fff;
+  box-shadow: 0 12px 32px -16px rgba(13, 116, 110, 0.38);
+}
+
+.cc-portal-path-tab:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #faf9f7,
+    0 0 0 4px rgba(36, 62, 112, 0.75);
+}
+
+@media (max-width: 639px) {
+  .cc-portal-hero-panel > div {
+    padding-inline: 1.125rem;
+  }
+
+  .cc-portal-access-panel {
+    width: 100%;
+  }
+}
+
+/* Courage homepage — brand-led hero (static) */
+.cc-hero-mask {
+  overflow: hidden;
+  box-shadow:
+    0 20px 48px -28px rgba(36, 62, 112, 0.18),
+    0 0 0 1px rgba(36, 62, 112, 0.06);
+}
+
+.cc-hero-mask--brand {
+  min-height: auto;
+  background: linear-gradient(135deg, #f3f8ff 0%, #faf9f3 100%);
+}
+
+@media (max-width: 767px) {
+  .cc-hero-content {
+    padding: 1.25rem 0.875rem 1.375rem;
+    min-height: auto;
+  }
+
+  .cc-hero-layout {
+    width: 90%;
+    max-width: 100%;
+    margin-inline: auto;
+    gap: 0;
+  }
+
+  .cc-hero-main {
+    display: contents;
+  }
+
+  .cc-hero-copy {
+    order: 1;
+  }
+
+  .cc-hero-brand-visual {
+    order: 2;
+    margin-top: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .cc-hero-copy,
+  .cc-hero-ctas {
+    width: 100%;
+    max-width: none;
+  }
+
+  .cc-hero-subtitle {
+    max-width: none;
+  }
+
+  .cc-hero-brand-visual::before {
+    inset: 0 4% 18% 4%;
+  }
+
+  .cc-hero-brand-visual::after {
+    right: -4%;
+    width: 100%;
+    height: 88%;
+    max-height: 14rem;
+    opacity: 0.92;
+    -webkit-mask-image: linear-gradient(to left, black 32%, transparent 86%);
+    mask-image: linear-gradient(to left, black 32%, transparent 86%);
+  }
+
+  .cc-hero-brand-img {
+    width: 56%;
+    max-width: 56%;
+    max-height: min(11.5rem, 32vw);
+    margin-inline: auto;
+  }
+
+  .cc-hero-flyer-caption {
+    display: block;
+    margin-top: 0.875rem;
+    padding-inline: 0.5rem;
+  }
+
+  .cc-hero-ctas {
+    order: 3;
+    max-width: 100%;
+    margin-top: 1.25rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .cc-hero-mask--brand {
+    min-height: clamp(28rem, 52vh, 35rem);
   }
 }
 
 @media (min-width: 1024px) {
-  .cc-hero-mask {
-    min-height: clamp(693px, 78vh, 840px);
+  .cc-hero-mask--brand {
+    min-height: clamp(30rem, 54vh, 37rem);
   }
 }
 
+.cc-hero-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: inherit;
+  padding: clamp(2rem, 4vw, 2.75rem) 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .cc-hero-content {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-content {
+    padding: 2.75rem 2.5rem;
+  }
+}
+
+.cc-hero-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+
+.cc-hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.cc-hero-copy {
+  min-width: 0;
+}
+
+.cc-hero-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+  max-width: 19rem;
+}
+
+.cc-hero-ctas .cc-hero-cta {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .cc-hero-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-areas: 'main visual';
+    align-items: center;
+    gap: 1.5rem 2.25rem;
+    width: 100%;
+  }
+
+  .cc-hero-main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-self: center;
+  }
+
+  .cc-hero-copy,
+  .cc-hero-ctas,
+  .cc-hero-brand-visual {
+    order: unset;
+  }
+
+  .cc-hero-ctas {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: auto;
+    max-width: none;
+    margin-top: 0;
+    gap: 0.75rem 1rem;
+  }
+
+  .cc-hero-brand-visual {
+    grid-area: visual;
+    align-self: center;
+  }
+
+  .cc-hero-flyer-caption {
+    display: none;
+  }
+
+  .cc-hero-ctas .cc-hero-cta {
+    width: auto;
+    min-width: unset;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2.5rem 3rem;
+  }
+
+  .cc-hero-main {
+    gap: 1.125rem;
+  }
+}
+
+.cc-hero-title {
+  font-size: clamp(1.875rem, 7vw, 2.25rem);
+}
+
+@media (min-width: 640px) {
+  .cc-hero-title {
+    font-size: inherit;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-title {
+    font-size: clamp(3.5rem, 4.2vw, 4rem);
+    line-height: 1.04;
+  }
+}
+
+.cc-hero-subtitle {
+  max-width: none;
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-subtitle {
+    max-width: 34rem;
+  }
+}
+
+.cc-hero-brand-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+/* Soft navy atmosphere behind flyer — depth without a color block */
+.cc-hero-brand-visual::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset: 0 0 12% 10%;
+  background: radial-gradient(
+    ellipse 90% 80% at 55% 46%,
+    rgba(36, 62, 112, 0.08) 0%,
+    rgba(36, 62, 112, 0.05) 38%,
+    transparent 72%
+  );
+}
+
+/* Courage dot pattern — matches second-level hero language, adapted for light card */
+.cc-hero-brand-visual::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  right: -6%;
+  top: 50%;
+  width: 108%;
+  height: 92%;
+  max-height: 26rem;
+  transform: translateY(-50%);
+  background-image:
+    radial-gradient(circle, rgba(36, 62, 112, 0.14) 1px, transparent 1px),
+    radial-gradient(circle, rgba(36, 62, 112, 0.1) 1px, transparent 1px);
+  background-size: 18px 18px, 18px 18px;
+  background-position: 0 0, 9px 9px;
+  -webkit-mask-image: linear-gradient(to left, black 38%, transparent 88%);
+  mask-image: linear-gradient(to left, black 38%, transparent 88%);
+}
+
+.cc-hero-flyer-caption {
+  position: relative;
+  z-index: 2;
+  max-width: 16.5rem;
+  text-align: center;
+}
+
+.cc-hero-flyer-caption-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgb(36 62 112);
+}
+
+.cc-hero-flyer-caption-body {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.cc-hero-brand-img {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  max-width: min(100%, 22rem);
+  max-height: min(15rem, 40vw);
+  object-fit: contain;
+  object-position: center center;
+  filter: drop-shadow(0 16px 28px rgba(36, 62, 112, 0.14));
+}
+
+@media (min-width: 768px) {
+  .cc-hero-brand-visual {
+    justify-content: center;
+  }
+
+  .cc-hero-brand-visual::before {
+    inset: 4% -4% 8% 0;
+    background: radial-gradient(
+      ellipse 95% 85% at 62% 50%,
+      rgba(36, 62, 112, 0.07) 0%,
+      rgba(36, 62, 112, 0.045) 40%,
+      transparent 74%
+    );
+  }
+
+  .cc-hero-brand-visual::after {
+    right: -8%;
+    width: 112%;
+    height: 100%;
+    max-height: none;
+    background-size: 20px 20px, 20px 20px;
+    background-position: 0 0, 10px 10px;
+    -webkit-mask-image: linear-gradient(to left, black 44%, transparent 90%);
+    mask-image: linear-gradient(to left, black 44%, transparent 90%);
+  }
+
+  .cc-hero-brand-img {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(24rem, 38vh);
+    margin-inline: unset;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-brand-img {
+    max-height: min(27rem, 44vh);
+  }
+}
+
+/* Hero secondary CTA — lift/fill hover aligned with primary */
+.cc-hero-secondary-cta {
+  box-shadow: 0 4px 14px -6px rgba(36, 62, 112, 0.22);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.cc-hero-secondary-cta:hover {
+  transform: scale(1.03);
+  border-color: rgb(36 62 112);
+  background-color: rgba(36, 62, 112, 0.06);
+  box-shadow: 0 10px 24px -10px rgba(36, 62, 112, 0.28);
+}
+
+.cc-hero-secondary-cta:active {
+  transform: scale(0.98);
+}
+
+.cc-hero-secondary-cta:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px #faf9f7,
+    0 0 0 4px rgba(36, 62, 112, 0.85);
+}
+
+.cc-hero-copy {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .cc-hero-copy {
+    width: auto;
+  }
+}
+
+/* Focus Flame Lab — cave video product callout */
+.cc-ffl-callout-frame {
+  aspect-ratio: 16 / 10;
+  background: #243e70;
+}
+
+.cc-ffl-callout-video {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cc-ffl-callout-video video,
+.cc-ffl-callout-video img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.06);
+}
+
+.cc-ffl-callout-vignette {
+  background:
+    linear-gradient(to top, rgba(4, 8, 18, 0.45) 0%, transparent 35%),
+    linear-gradient(to bottom, rgba(4, 8, 18, 0.2) 0%, transparent 25%),
+    radial-gradient(ellipse 85% 75% at 50% 45%, transparent 35%, rgba(4, 8, 18, 0.35) 100%);
+}
+
+@media (max-width: 767px) {
+  .cc-ffl-callout-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cc-ffl-callout-frame {
+    aspect-ratio: 16 / 11;
+    max-height: min(52vh, 20rem);
+  }
+}
+
+/* Legacy hero video styles — used by HeroBackgroundVideo in FFL callout only */
 .cc-hero-media {
   position: absolute;
   inset: 0;
@@ -8136,7 +8799,6 @@ a.ffl-ctaSecondary {
   height: 100%;
   object-fit: cover;
   object-position: center center;
-  /* Slight overscale prevents letterbox bars when container aspect ≠ video */
   transform: scale(1.08);
 }
 
@@ -8169,32 +8831,6 @@ a.ffl-ctaSecondary {
     );
 }
 
-.cc-hero-content {
-  display: flex;
-  min-height: inherit;
-  flex-direction: column;
-  justify-content: center;
-  padding: max(1.25rem, 5%);
-}
-
-.cc-hero-visual {
-  align-self: center;
-}
-
-@media (min-width: 768px) {
-  .cc-hero-visual {
-    align-self: flex-end;
-    transform: translateY(0.75rem);
-  }
-}
-
-@media (min-width: 1024px) {
-  .cc-hero-visual {
-    align-self: center;
-    transform: translateY(1.25rem);
-  }
-}
-
 /* How It Works carousel: left edge matches max-w-7xl; bleeds off the right viewport edge */
 .cc-how-works-track {
   width: calc(100% + (100vw - 100%) / 2);
@@ -8203,9 +8839,9 @@ a.ffl-ctaSecondary {
 
 /* Built From a Real Story — Clever-style card: viewport-left bleed, right edge at content column */
 .cc-real-story {
-  --cc-content-right-margin: max(1rem, calc((100vw - 92rem) / 2 + 1rem));
+  --cc-content-right-margin: max(1rem, calc((100vw - var(--cc-site-container-max)) / 2 + 1rem));
   /* Matches sections like Choose Your Path: outer px + centered container */
-  --cc-site-content-inset: max(1rem, calc((100vw - 2rem - min(100vw - 2rem, 92rem)) / 2 + 1rem));
+  --cc-site-content-inset: max(1rem, calc((100vw - 2rem - min(100vw - 2rem, var(--cc-site-container-max))) / 2 + 1rem));
   /* Letterbox fill behind contained collage */
   --cc-real-story-bg: #23262e;
 }
@@ -8240,15 +8876,15 @@ a.ffl-ctaSecondary {
 
 @media (min-width: 640px) {
   .cc-real-story {
-    --cc-content-right-margin: max(1.5rem, calc((100vw - 92rem) / 2 + 1.5rem));
-    --cc-site-content-inset: max(1.5rem, calc((100vw - 3rem - min(100vw - 3rem, 92rem)) / 2 + 1.5rem));
+    --cc-content-right-margin: max(1.5rem, calc((100vw - var(--cc-site-container-max)) / 2 + 1.5rem));
+    --cc-site-content-inset: max(1.5rem, calc((100vw - 3rem - min(100vw - 3rem, var(--cc-site-container-max))) / 2 + 1.5rem));
   }
 }
 
 @media (min-width: 1024px) {
   .cc-real-story {
-    --cc-content-right-margin: max(2rem, calc((100vw - 92rem) / 2 + 2rem));
-    --cc-site-content-inset: max(2rem, calc((100vw - 4rem - min(100vw - 4rem, 92rem)) / 2 + 2rem));
+    --cc-content-right-margin: max(2rem, calc((100vw - var(--cc-site-container-max)) / 2 + 2rem));
+    --cc-site-content-inset: max(2rem, calc((100vw - 4rem - min(100vw - 4rem, var(--cc-site-container-max))) / 2 + 2rem));
   }
 
   /* Parent is max-w-7xl — calc(50% - 50vw) pulls card to viewport left edge */

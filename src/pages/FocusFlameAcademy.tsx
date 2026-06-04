@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CourageHeader from '../components/CourageHeader';
 import CourageFooter from '../components/CourageFooter';
+import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
 import useHashScroll from '../hooks/useHashScroll';
 
@@ -48,30 +49,26 @@ const FocusFlameAcademy: React.FC = () => {
     <div className="min-h-screen bg-cream font-body">
       <CourageHeader />
 
-      {/* Hero */}
-      <section className="cv-cinematic-section relative overflow-hidden text-white">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 pt-24 sm:px-6 sm:py-16 sm:pt-28 lg:px-8 lg:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">For Schools & Districts</p>
-          <h1 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl lg:text-6xl">Focus Flame Academy</h1>
-          <p className="mt-4 max-w-3xl text-lg text-white/85 sm:text-xl">
-            Story-based SEL tools for schools, districts, camps, counselors, and after-school programs.
-          </p>
-          <div className="mt-8 flex max-w-md flex-col gap-3 sm:max-w-none sm:flex-row">
-            <Button variant="primary" size="lg" as={Link} to="/focus-flame-academy#request-information" className="w-full sm:w-auto">
-              Request Pilot Information
-            </Button>
-            <Button
-              variant="secondary"
-              size="lg"
-              as={Link}
-              to="/kids"
-              className="w-full !border-white/70 !text-white hover:!bg-white/10 sm:w-auto"
-            >
-              Explore Kids Experience
-            </Button>
-          </div>
+      <SectionHero
+        eyebrow="Focus Flame Academy"
+        title="Focus Flame Academy"
+        description="Story-based SEL tools for schools, districts, camps, counselors, and after-school programs."
+      >
+        <div className="flex max-w-md flex-col gap-3 sm:max-w-none sm:flex-row">
+          <Button variant="primary" size="lg" as={Link} to="/focus-flame-academy#request-information" className="w-full sm:w-auto">
+            Request Pilot Information
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            as={Link}
+            to="/kids"
+            className="w-full !border-white/70 !text-white hover:!bg-white/10 sm:w-auto"
+          >
+            Explore Kids Experience
+          </Button>
         </div>
-      </section>
+      </SectionHero>
 
       {/* SEL Framework */}
       <section id="sel-framework" className="scroll-mt-24 border-b border-navy-100/80 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
