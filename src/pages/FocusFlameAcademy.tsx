@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
-import CourageFooter from '../components/CourageFooter';
+import CourageHeader from '../components/courage/CourageHeader';
+import CourageFooter from '../components/courage/CourageFooter';
 import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
 import useHashScroll from '../hooks/useHashScroll';

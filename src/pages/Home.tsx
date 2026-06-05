@@ -1,17 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
-import CourageFooter from '../components/CourageFooter';
-import HubCard from '../components/ecosystem/HubCard';
+import CourageHeader from '../components/courage/CourageHeader';
+import CourageFooter from '../components/courage/CourageFooter';
+import ThreeWaysSection from '../components/courage/ThreeWaysSection';
 import ChoosePathSection from '../components/courage/ChoosePathSection';
 import BuiltFromRealStorySection from '../components/courage/BuiltFromRealStorySection';
 import Button from '../components/ui/Button';
 import FocusFlameLabCallout from '../components/courage/FocusFlameLabCallout';
 import CourageEmailSignup from '../components/courage/CourageEmailSignup';
 import useHashScroll from '../hooks/useHashScroll';
-import { VALE_CLASSIC_HOME_URL } from '../config/valeLinks';
-
-const HERO_BRAND_IMAGE = '/images/camp-courage/stackworksheets.webp';
+import HeroVideoPreview from '../components/courage/HeroVideoPreview';
+import { VALE_COMICBOOK_URL } from '../config/valeLinks';
 
 type HowItWorksStepName = 'Read' | 'Play' | 'Reflect' | 'Grow';
 
@@ -301,7 +300,7 @@ const Home: React.FC = () => {
       <CourageHeader />
 
       {/* Hero — clean brand-led SEL platform intro */}
-      <section className="bg-cream px-4 pb-2 pt-4 sm:px-6 sm:pb-2 sm:pt-5 lg:px-8 lg:pb-3">
+      <section className="bg-cream px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5 lg:px-8 lg:pb-8">
         <div className="cc-site-container mx-auto">
           <div className="cc-hero-mask cc-hero-mask--brand relative overflow-hidden rounded-[1.35rem] sm:rounded-[1.75rem] lg:rounded-[2rem]">
             <div className="cc-hero-content relative z-10">
@@ -309,41 +308,30 @@ const Home: React.FC = () => {
                 <div className="cc-hero-main">
                   <div className="cc-hero-copy">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-600 sm:text-[11px]">
-                      Story-Powered SEL
+                      STORY-POWERED SEL
                     </p>
                     <h1 className="cc-hero-title mt-2.5 font-display font-extrabold leading-[1.08] text-navy-500 sm:mt-4 sm:text-5xl lg:text-6xl">
                       Caiden&apos;s Courage
                     </h1>
                     <p className="cc-hero-subtitle mt-2.5 text-[0.9375rem] leading-snug text-navy-600 sm:mt-4 sm:max-w-none sm:text-lg sm:leading-relaxed lg:text-xl">
-                      A story-powered SEL world helping kids build focus, confidence, and courage.
+                      A story-powered SEL adventure helping kids Ages 7-12 build focus, confidence, and courage.
                     </p>
                   </div>
                   <div className="cc-hero-ctas">
-                    <Button variant="primary" size="lg" as={Link} to="/kids" className="cc-hero-cta">
-                      Explore Kids
+                    <Button variant="primary" size="lg" as="a" href={VALE_COMICBOOK_URL} className="cc-hero-cta">
+                      Order the Book
                     </Button>
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      as="a"
-                      href={VALE_CLASSIC_HOME_URL}
-                      className="cc-hero-cta cc-hero-secondary-cta"
-                    >
-                      Explore Caiden Vale
+                    <Button variant="secondary" size="lg" as={Link} to="/kids" className="cc-hero-cta cc-hero-secondary-cta">
+                      Explore Kids Activities
                     </Button>
                   </div>
                 </div>
-                <div className="cc-hero-brand-visual">
-                  <img
-                    src={HERO_BRAND_IMAGE}
-                    alt="Camp Courage Experience Guide — SEL worksheets and activities"
-                    className="cc-hero-brand-img"
-                    decoding="async"
-                  />
+                <div className="cc-hero-brand-visual cc-hero-brand-visual--video">
+                  <HeroVideoPreview />
                   <div className="cc-hero-flyer-caption">
-                    <p className="cc-hero-flyer-caption-title">Camp Courage Experience Guide</p>
+                    <p className="cc-hero-flyer-caption-title">Volume 1: The Graphic Novel</p>
                     <p className="cc-hero-flyer-caption-body">
-                      Story-based SEL activities for schools, camps, and families.
+                      139 pages — meet Caiden, B-4, and the Focus Flame.
                     </p>
                   </div>
                 </div>
@@ -353,35 +341,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Audience Cards */}
-      <section className="px-4 pt-3 pb-12 sm:px-6 sm:pt-4 sm:pb-14 lg:px-8 lg:pt-5 lg:pb-16" aria-label="Choose your audience">
-        <div className="cc-site-container mx-auto grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
-          <HubCard
-            accent="blue"
-            eyebrow="FOR KIDS"
-            icon="kids"
-            title="Build Focus"
-            description="Games, comics, and brave activities that help kids practice focus, feelings, and courage."
-            to="/kids"
-          />
-          <HubCard
-            accent="yellow"
-            eyebrow="FOR FAMILIES"
-            icon="parents"
-            title="Build Confidence"
-            description="Simple tools that help kids name feelings, reset, and build confidence at home."
-            to="/braveminds#parents"
-          />
-          <HubCard
-            accent="orange"
-            eyebrow="FOR EDUCATORS"
-            icon="teachers"
-            title="Build Courage"
-            description="Story-based SEL experiences built for classrooms, camps, counselors, and groups."
-            to="/focus-flame-academy"
-          />
-        </div>
-      </section>
+      <ThreeWaysSection />
 
       <FocusFlameLabCallout />
 

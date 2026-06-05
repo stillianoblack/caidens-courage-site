@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
-import CourageFooter from '../components/CourageFooter';
+import CourageHeader from '../components/courage/CourageHeader';
+import CourageFooter from '../components/courage/CourageFooter';
 import PortalHero from '../components/courage/PortalHero';
 import PortalPricingSection from '../components/courage/PortalPricingSection';
 import { readPortalSessionUnlock } from '../config/portalAccess';

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
-import CourageHeader from '../components/CourageHeader';
+import CourageHeader from '../components/courage/CourageHeader';
 import Footer from '../components/Footer';
 import SectionHero from '../components/courage/SectionHero';
 import GlobalNotification from '../components/GlobalNotification';

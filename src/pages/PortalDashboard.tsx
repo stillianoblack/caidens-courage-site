@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
-import CourageFooter from '../components/CourageFooter';
+import CourageHeader from '../components/courage/CourageHeader';
+import CourageFooter from '../components/courage/CourageFooter';
 import PortalResourceCard from '../components/courage/PortalResourceCard';
 import SectionHero from '../components/courage/SectionHero';
 import { PORTAL_PATH } from '../config/courageNav';

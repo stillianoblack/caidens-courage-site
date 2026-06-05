@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
+import CourageHeader from '../components/courage/CourageHeader';
 import Footer from '../components/Footer';
 import Button from '../components/ui/Button';
 import SectionHero from '../components/courage/SectionHero';

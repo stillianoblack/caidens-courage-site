@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import CourageHeader from '../components/CourageHeader';
-import CourageFooter from '../components/CourageFooter';
+import CourageHeader from '../components/courage/CourageHeader';
+import CourageFooter from '../components/courage/CourageFooter';
 import KidsHubCard from '../components/courage/KidsHubCard';
 import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
@@ -32,7 +32,7 @@ const KidsHub: React.FC = () => {
       <section className="cc-kids-hub-list px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
         <div className="mx-auto flex max-w-5xl flex-col gap-5 sm:gap-6 lg:gap-7">
           <KidsHubCard
-            title="Focus Flame Lab"
+            title="Train Your Focus"
             description="Practice focus, feelings, and brave choices through interactive story moments."
             imageSrc="/images/caidenscourage/backgrounds/chooseyournextadvernture.webp"
             imageAlt="Choose your next Focus Flame Lab adventure"
@@ -53,7 +53,7 @@ const KidsHub: React.FC = () => {
           {/* TODO(thumbnail): Replace with dedicated kids comics preview when available */}
           <KidsHubCard
             id="comics"
-            title="Comics"
+            title="Read Brave Stories"
             description="Short comic adventures that help kids explore courage, respect, focus, and feelings."
             imageSrc="/images/comic-book/Comic5_Coverpage_header_2.jpg"
             imageAlt="Caiden's Courage comic cover preview"
@@ -81,7 +81,7 @@ const KidsHub: React.FC = () => {
 
           <KidsHubCard
             id="activities"
-            title="Activities"
+            title="Choose a Courage Mission"
             description="Quick focus challenges, reflection prompts, and brave choice missions from Brave Mind Club."
             imageSrc="/images/camp-courage/stackworksheets.webp"
             imageAlt="Brave Mind Club activity worksheets stack"
@@ -89,13 +89,13 @@ const KidsHub: React.FC = () => {
             imagePosition="center"
             cta={
               <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
-                Explore activities
+                Start a Mission
               </Button>
             }
           />
 
           <KidsHubCard
-            title="Badges & Profiles"
+            title="Earn Your Flame Badge"
             description="Soon, kids will be able to collect badges and track their Focus Flame progress."
             imageSrc="/images/caidenscourage/backgrounds/certificate.webp"
             imageAlt="Courage certificate and badge preview"
@@ -103,7 +103,7 @@ const KidsHub: React.FC = () => {
           />
 
           <KidsHubCard
-            title="Ask B-4"
+            title="Get a B-4 Reset"
             description="Need a focus reset? Try B-4 Reset Tools or tap Ask B-4 in the corner to chat anytime."
             imageSrc="/images/characters/B4_Robot_Hero.webp"
             imageAlt="B-4 robot companion"
@@ -129,13 +129,13 @@ const KidsHub: React.FC = () => {
           />
 
           <KidsHubCard
-            title="Brave Mind Club"
+            title="Join Brave Mind Club"
             description="Browse the full library of free printables, worksheets, and activities for kids, parents, and educators."
             imageSrc="/images/caidenscourage/backgrounds/community-strategy-story-bg.webp"
             imageAlt="Brave Mind Club community and printable resources"
             cta={
               <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
-                Browse Brave Mind Club Activities
+                Join the Club
               </Button>
             }
           />

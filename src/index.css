@@ -8368,9 +8368,9 @@ a.ffl-ctaSecondary {
   }
 
   .cc-hero-layout {
-    width: 90%;
+    width: 100%;
     max-width: 100%;
-    margin-inline: auto;
+    margin-inline: 0;
     gap: 0;
   }
 
@@ -8384,6 +8384,9 @@ a.ffl-ctaSecondary {
 
   .cc-hero-brand-visual {
     order: 2;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
     margin-top: 1.25rem;
     margin-bottom: 0;
   }
@@ -8399,36 +8402,41 @@ a.ffl-ctaSecondary {
   }
 
   .cc-hero-brand-visual::before {
-    inset: 0 4% 18% 4%;
+    inset: 0 0 10% 0;
   }
 
   .cc-hero-brand-visual::after {
-    right: -4%;
+    right: 0;
+    top: 50%;
     width: 100%;
-    height: 88%;
-    max-height: 14rem;
-    opacity: 0.92;
-    -webkit-mask-image: linear-gradient(to left, black 32%, transparent 86%);
-    mask-image: linear-gradient(to left, black 32%, transparent 86%);
+    height: 90%;
+    max-height: 16rem;
+    transform: translateY(-50%);
+    opacity: 0.88;
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, transparent 78%);
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 35%, transparent 78%);
   }
 
   .cc-hero-brand-img {
-    width: 56%;
-    max-width: 56%;
-    max-height: min(11.5rem, 32vw);
-    margin-inline: auto;
-  }
-
-  .cc-hero-flyer-caption {
-    display: block;
-    margin-top: 0.875rem;
-    padding-inline: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    margin-inline: 0;
+    object-fit: contain;
+    object-position: center center;
   }
 
   .cc-hero-ctas {
     order: 3;
+    width: 100%;
     max-width: 100%;
     margin-top: 1.25rem;
+  }
+
+  .cc-hero-ctas .cc-hero-cta {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
   }
 }
 
@@ -8489,7 +8497,6 @@ a.ffl-ctaSecondary {
   flex-direction: column;
   gap: 0.625rem;
   width: 100%;
-  max-width: 19rem;
 }
 
 .cc-hero-ctas .cc-hero-cta {
@@ -8656,11 +8663,37 @@ a.ffl-ctaSecondary {
   z-index: 2;
   display: block;
   width: 100%;
-  max-width: min(100%, 22rem);
-  max-height: min(15rem, 40vw);
+  max-width: 100%;
   object-fit: contain;
   object-position: center center;
   filter: drop-shadow(0 16px 28px rgba(36, 62, 112, 0.14));
+}
+
+/* Mobile hero image — must follow base .cc-hero-brand-img (overrides any later defaults) */
+@media (max-width: 767px) {
+  .cc-hero-brand-img {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    height: auto;
+    margin-inline: 0;
+    align-self: stretch;
+  }
+
+  .cc-hero-flyer-caption {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.875rem;
+    padding-inline: 0;
+    text-align: left;
+    align-self: stretch;
+  }
+
+  .cc-hero-flyer-caption-title,
+  .cc-hero-flyer-caption-body {
+    text-align: left;
+  }
 }
 
 @media (min-width: 768px) {
@@ -8700,6 +8733,145 @@ a.ffl-ctaSecondary {
 @media (min-width: 1024px) {
   .cc-hero-brand-img {
     max-height: min(27rem, 44vh);
+  }
+}
+
+/* Desktop: caption hidden in grid; centered when shown on smaller tablet layouts */
+@media (min-width: 768px) {
+  .cc-hero-flyer-caption {
+    max-width: 16.5rem;
+    text-align: center;
+  }
+
+  .cc-hero-flyer-caption-title,
+  .cc-hero-flyer-caption-body {
+    text-align: center;
+  }
+}
+
+/* Hero video preview — streaming-style media card */
+.cc-hero-brand-visual--video::before,
+.cc-hero-brand-visual--video::after {
+  display: none;
+}
+
+.cc-hero-video-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 100%;
+}
+
+.cc-hero-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 2px solid rgb(36 62 112 / 0.55);
+  background: rgb(11 30 58);
+  box-shadow:
+    0 18px 44px -22px rgb(36 62 112 / 0.38),
+    0 0 0 1px rgb(36 62 112 / 0.08);
+}
+
+@media (min-width: 640px) {
+  .cc-hero-video-frame {
+    border-radius: 1.125rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-video-frame {
+    border-radius: 1.5rem;
+  }
+}
+
+.cc-hero-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  background: rgb(11 30 58);
+}
+
+.cc-hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(0 0 0 / 0.15);
+  pointer-events: none;
+}
+
+.cc-hero-video-play {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  color: white;
+  background: rgb(16 44 99 / 0.75);
+  box-shadow: 0 12px 32px -8px rgb(7 20 38 / 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.cc-hero-video-play:hover {
+  background: rgb(16 44 99 / 0.92);
+  transform: scale(1.06);
+  box-shadow: 0 16px 36px -8px rgb(7 20 38 / 0.5);
+}
+
+.cc-hero-video-play:focus-visible {
+  outline: 2px solid rgb(229 192 106 / 0.85);
+  outline-offset: 3px;
+}
+
+.cc-hero-video-play-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.15rem;
+}
+
+@media (min-width: 768px) {
+  .cc-hero-video-play {
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .cc-hero-video-play-icon {
+    width: 2rem;
+    height: 2rem;
+    margin-left: 0.2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-hero-video-play {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .cc-hero-video-play-icon {
+    width: 2.25rem;
+    height: 2.25rem;
   }
 }
 
