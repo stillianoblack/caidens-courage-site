@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'r
 import Home from './pages/Home';
 import ClassicHome from './pages/ClassicHome';
 import KidsHub from './pages/KidsHub';
-import FocusFlameAcademy from './pages/FocusFlameAcademy';
+import Schools from './pages/Schools';
+import LegacySchoolRouteRedirect, { LegacyCampCourageRedirect } from './components/schools/LegacySchoolRouteRedirect';
 import Portal from './pages/Portal';
 import PortalDashboard from './pages/PortalDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -24,7 +25,6 @@ import Characters from './pages/Characters';
 import B4Clicker from './pages/B4Clicker';
 import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
 import ChatWithB4 from './pages/ChatWithB4';
-import CampCourage from './pages/CampCourage';
 import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
@@ -51,14 +51,14 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<RootRoute />} />
       <Route path="/kids" element={<KidsHub />} />
-      <Route path="/focus-flame-academy" element={<FocusFlameAcademy />} />
+      <Route path="/schools" element={<Schools />} />
+      <Route path="/focus-flame-academy" element={<LegacySchoolRouteRedirect />} />
       <Route path="/portal" element={<Portal />} />
       <Route path="/portal/dashboard" element={<PortalDashboard />} />
       <Route path="/classic-home" element={<ClassicHome />} />
-      {/* TODO(migrate): legacy Vale program page — nav points to /focus-flame-academy; keep route until confirmed */}
-      <Route path="/camp-courage" element={<CampCourage />} />
+      <Route path="/camp-courage" element={<LegacyCampCourageRedirect />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
-      <Route path="/classroom-pilots" element={<Navigate to="/focus-flame-academy#camp-pilot-partnerships" replace />} />
+      <Route path="/classroom-pilots" element={<Navigate to="/schools#pilot" replace />} />
       <Route path="/training-guides" element={<TrainingGuides />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />

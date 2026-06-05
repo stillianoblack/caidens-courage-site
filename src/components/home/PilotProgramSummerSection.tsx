@@ -33,7 +33,7 @@ export default function PilotProgramSummerSection() {
                 id="pilot-summer-heading"
                 className="mt-2 font-display text-2xl font-extrabold leading-[1.15] text-navy-500 sm:text-[1.65rem] lg:text-[1.85rem]"
               >
-                Bring Caiden Vale to your camp, classroom,
+                Bring Caiden&apos;s Courage to your camp, classroom,
                 <br />
                 or youth program.
               </h2>
@@ -63,7 +63,7 @@ export default function PilotProgramSummerSection() {
                   variant="primary"
                   size="md"
                   as={Link}
-                  to="/camp-courage#camp-courage-toolkit"
+                  to="/schools#pilot"
                   leftIconSrc={null}
                   className="w-full transition-all duration-200 hover:scale-100 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(27,42,68,0.22)] active:translate-y-0 sm:w-auto sm:min-w-[200px]"
                 >
@@ -73,10 +73,10 @@ export default function PilotProgramSummerSection() {
                   variant="secondary"
                   size="md"
                   as={Link}
-                  to="/camp-courage"
+                  to="/schools"
                   className="w-full sm:w-auto sm:min-w-[200px]"
                 >
-                  View Camp Courage
+                  Explore for Schools
                 </Button>
               </div>
             </div>

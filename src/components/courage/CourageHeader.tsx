@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
+  COURAGE_LOGO_SRC,
   GAMES_DROPDOWN,
   PORTAL_PATH,
   PORTAL_QUICK_LINKS,
@@ -295,9 +296,9 @@ export default function CourageHeader() {
             aria-label="Caiden's Courage home"
           >
             <img
-              src="/images/icons/CC_logo.svg"
+              src={COURAGE_LOGO_SRC}
               alt="Caiden's Courage"
-              className="block h-10 w-auto flex-shrink-0 object-contain object-left sm:h-11 lg:h-12"
+              className="block h-10 w-auto max-w-[min(100%,13.5rem)] flex-shrink-0 object-contain object-left sm:h-11 sm:max-w-[min(100%,15rem)] lg:h-12 lg:max-w-[min(100%,16.5rem)]"
               decoding="async"
             />
           </Link>

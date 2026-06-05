@@ -142,7 +142,7 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
       title: 'Discussion Guides',
       description: 'Story-based SEL discussion prompts for guided classroom conversations.',
       cta: 'View Discussion Guides',
-      ctaTo: '/focus-flame-academy#teacher-resources',
+      ctaTo: '/schools#teacher-resources',
     },
     {
       title: 'Classroom Activities',
@@ -158,7 +158,7 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
         'Designed for one classroom. Includes curriculum modules, Focus Flame Lab access, printable activities, educator resources, and digital story access for classroom use.',
       price: '$499/year',
       cta: 'Request Classroom Access',
-      ctaTo: '/focus-flame-academy#request-information',
+      ctaTo: '/schools#pilot',
       badges: ['School Ready'],
     },
     {
@@ -167,7 +167,7 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
         'Designed for school-wide use. Includes implementation resources, facilitator tools, group activities, school access support, and digital story access for school programming.',
       price: '$999/year',
       cta: 'Request School Access',
-      ctaTo: '/focus-flame-academy#request-information',
+      ctaTo: '/schools#pilot',
       badges: ['School Ready'],
     },
     {
@@ -176,7 +176,7 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
         'For districts, camps, counseling groups, and pilot partners that need implementation support, outcomes tracking, custom rollout planning, and digital story access.',
       price: 'Starting at $1,999',
       cta: 'Request Pilot Information',
-      ctaTo: '/focus-flame-academy#request-information',
+      ctaTo: '/schools#pilot',
       badges: ['Pilot Partner'],
       featured: true,
     },
@@ -190,7 +190,7 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
       title: 'Pilot Resources',
       description: 'Pilot materials, facilitator supports, and partnership resources for school programs.',
       cta: 'Explore Pilot Resources',
-      ctaTo: '/focus-flame-academy#pilot-program',
+      ctaTo: '/schools#pilot',
     },
   ],
 };

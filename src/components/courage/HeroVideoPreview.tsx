@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 const HERO_VIDEO_SRC = '/images/caidenscourage/Videos/hero_video_cc.mp4';
+const HERO_VIDEO_POSTER = '/images/caidenscourage/backgrounds/caidens_thumbnail.webp';
 const PIP_VISIBILITY_THRESHOLD = 0.375;
 
 function PlayIcon({ className }: { className?: string }) {
@@ -133,12 +134,20 @@ export default function HeroVideoPreview() {
           ref={videoRef}
           className="cc-hero-video"
           src={HERO_VIDEO_SRC}
+          poster={HERO_VIDEO_POSTER}
           preload="metadata"
           playsInline
           aria-label="Caiden's Courage introduction video preview"
         />
         {showPreviewChrome ? (
           <>
+            <img
+              src={HERO_VIDEO_POSTER}
+              alt=""
+              className="cc-hero-video-poster"
+              decoding="async"
+              aria-hidden
+            />
             <div className="cc-hero-video-overlay" aria-hidden />
             <button
               type="button"

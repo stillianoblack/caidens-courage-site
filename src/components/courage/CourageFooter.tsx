@@ -6,8 +6,8 @@ import { VALE_CLASSIC_HOME_URL } from '../../config/valeLinks';
 const FOOTER_LINKS: { label: string; href: string; external?: boolean }[] = [
   { label: "Caiden's Courage", href: '/' },
   { label: 'Kids', href: '/kids' },
-  { label: 'Schools & Districts', href: '/focus-flame-academy' },
-  { label: 'Focus Flame Academy', href: '/focus-flame-academy' },
+  { label: 'Schools & Districts', href: '/schools' },
+  { label: "For Schools", href: '/schools' },
   { label: 'Focus Flame Lab', href: FOCUS_FLAME_LAB_PATH },
   { label: 'Caiden Vale', href: VALE_CLASSIC_HOME_URL, external: true },
 ];

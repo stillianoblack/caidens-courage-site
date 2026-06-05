@@ -313,7 +313,7 @@ const Home: React.FC = () => {
                     <h1 className="cc-hero-title mt-2.5 font-display font-extrabold leading-[1.08] text-navy-500 sm:mt-4 sm:text-5xl lg:text-6xl">
                       Caiden&apos;s Courage
                     </h1>
-                    <p className="cc-hero-subtitle mt-2.5 text-[0.9375rem] leading-snug text-navy-600 sm:mt-4 sm:max-w-none sm:text-lg sm:leading-relaxed lg:text-xl">
+                    <p className="cc-hero-subtitle mt-2.5 text-[0.9375rem] leading-snug text-[#B0E0E6] sm:mt-4 sm:max-w-none sm:text-lg sm:leading-relaxed lg:text-xl">
                       A story-powered SEL adventure helping kids Ages 7-12 build focus, confidence, and courage.
                     </p>
                   </div>

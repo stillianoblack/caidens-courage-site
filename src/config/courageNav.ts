@@ -1,4 +1,5 @@
 import { VALE_CLASSIC_HOME_URL } from './valeLinks';
+import { schoolsHref, SCHOOLS_PATH } from './schoolsPaths';
 
 export type CourageNavLink = {
   label: string;
@@ -7,12 +8,16 @@ export type CourageNavLink = {
 
 export const COURAGE_HOME_PATH = '/';
 
+export const COURAGE_LOGO_SRC = "/images/icons/caiden%27scourage_logo_1.png";
+
+export { SCHOOLS_PATH, schoolsHref };
+
 /** SEL, classroom, and program content — owned by Caiden's Courage nav. */
 export const SCHOOLS_DROPDOWN: CourageNavLink[] = [
-  { label: 'Focus Flame Academy', href: '/focus-flame-academy' },
-  { label: 'Pilot Partnerships', href: '/focus-flame-academy#pilot-program' },
-  { label: 'Training & Guides', href: '/training-guides' },
-  { label: 'Educator Resources', href: '/focus-flame-academy#teacher-resources' },
+  { label: "Caiden's Courage for Schools", href: SCHOOLS_PATH },
+  { label: 'Classroom Pilot', href: schoolsHref('pilot') },
+  { label: 'Teacher Resources', href: schoolsHref('teacher-resources') },
+  { label: 'Training & Guides', href: schoolsHref('training-guides') },
 ];
 
 export const RESOURCES_DROPDOWN: CourageNavLink[] = [
@@ -42,11 +47,10 @@ export const GAMES_DROPDOWN: CourageNavLink[] = [
   { label: 'Focus Flame Lab', href: FOCUS_FLAME_LAB_PATH },
 ];
 
-/**
- * Legacy program route — keep working; nav uses Focus Flame Academy instead of "Camp Courage".
- * @see App.tsx `/camp-courage` route TODO
- */
+/** Legacy program route — redirects to /schools#pilot; keep working for bookmarks. */
 export const LEGACY_CAMP_COURAGE_PATH = '/camp-courage';
+
+export const LEGACY_FOCUS_FLAME_ACADEMY_PATH = '/focus-flame-academy';
 
 /** Story & shop hub — linked from Courage Resources for IP discovery only. */
 export const CAIDEN_VALE_STORY_LINK: CourageNavLink = {

@@ -27,13 +27,13 @@ const PATH_CARDS: PathCardConfig[] = [
     variant: 'photo',
   },
   {
-    title: 'Focus Flame Academy',
+    title: "Caiden's Courage for Schools",
     eyebrow: 'Schools • Districts • Programs',
     text: 'Story-powered SEL tools for classrooms, camps, counselors, and youth programs.',
-    cta: 'View Academy',
-    to: '/focus-flame-academy',
+    cta: 'Explore for Schools',
+    to: '/schools',
     imageSrc: '/images/caidenscourage/Choose_your_path/superintendent_card.webp',
-    imageAlt: 'Educator materials and worksheets for Focus Flame Academy',
+    imageAlt: "Educator materials and worksheets for Caiden's Courage for Schools",
     variant: 'photo',
   },
   {

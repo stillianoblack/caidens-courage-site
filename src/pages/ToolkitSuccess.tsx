@@ -23,11 +23,11 @@ const ToolkitSuccess: React.FC = () => {
             We got your request. We&apos;ll email you the Courage Toolkit + updates.
           </p>
           <Link
-            to="/camp-courage"
+            to="/schools#pilot"
             className="mt-7 inline-flex items-center justify-center rounded-full bg-golden-500 text-navy-700 px-7 py-3.5 font-semibold transition-all hover:brightness-[0.98]"
             style={{ boxShadow: '0 10px 22px rgba(244, 212, 119, 0.55)' }}
           >
-            Back to Camp Courage
+            Back to Schools
           </Link>
         </div>
       </main>

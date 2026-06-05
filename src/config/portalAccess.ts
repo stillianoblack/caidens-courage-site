@@ -74,7 +74,7 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
       {
         title: 'SEL Discussion Prompts',
         description: 'Story-based questions to spark classroom conversations.',
-        href: '/focus-flame-academy#teacher-resources',
+        href: '/schools#teacher-resources',
       },
       {
         title: 'Printable Worksheets',
@@ -106,8 +106,8 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
     resources: [
       {
         title: 'Pilot Overview',
-        description: 'Learn how Focus Flame Academy works for schools and programs.',
-        href: '/focus-flame-academy',
+        description: "Learn how Caiden's Courage for Schools works for schools and programs.",
+        href: '/schools',
       },
       {
         title: 'Implementation Guide',
@@ -116,8 +116,8 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
       },
       {
         title: 'Group Activities',
-        description: 'Camp Courage group activities for classrooms and camps.',
-        href: '/camp-courage',
+        description: "Group activities for classrooms, camps, and youth programs.",
+        href: '/schools#pilot',
       },
       {
         title: 'Student Reflection Tools',
@@ -127,7 +127,7 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
       {
         title: 'Request Support',
         description: 'Connect with the team for school implementation help.',
-        href: '/focus-flame-academy#request-information',
+        href: '/schools#pilot',
       },
     ],
   },
@@ -140,7 +140,7 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
       {
         title: 'Pilot Materials',
         description: 'Core materials for pilot partners and facilitators.',
-        href: '/camp-courage',
+        href: '/schools#pilot',
       },
       {
         title: 'Facilitator Guide',
