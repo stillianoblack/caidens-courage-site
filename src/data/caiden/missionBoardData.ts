@@ -1,0 +1,91 @@
+import { CAIDEN_QUEST_HUB_PATH } from '../../config/courageRoutes';
+import type { MissionBoardItem } from '../../types/missionBoard';
+import { CAIDEN_QUEST_1_ID } from './quest1WhatComesFirst';
+import { CAIDEN_QUEST_2_ID } from './quest2ChooseYourNextMove';
+
+export const CAIDEN_QUEST_BOARD_ITEMS: MissionBoardItem[] = [
+  {
+    id: CAIDEN_QUEST_1_ID,
+    fileNumber: 1,
+    title: 'What Comes First?',
+    subtitle: "Caiden's Focus Quest: What Comes First?",
+    description:
+      'Help Caiden choose what to do first, break down big tasks, spot distractions, and bring his attention back.',
+    route: `${CAIDEN_QUEST_HUB_PATH}/${CAIDEN_QUEST_1_ID}`,
+    iconType: 'focus-flame',
+    artworkType: 'focus-quest',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'available',
+    desktopPosition: 'grid-r1c1',
+    mobileOrder: 1,
+    skills: ['Executive Function', 'Planning', 'Prioritization', 'Organization'],
+  },
+  {
+    id: CAIDEN_QUEST_2_ID,
+    fileNumber: 2,
+    title: 'Choose Your Next Move',
+    subtitle: "Caiden's Focus Quest: Choose Your Next Move",
+    description: 'Help Caiden make strong choices, recover from mistakes, and keep growing.',
+    route: `${CAIDEN_QUEST_HUB_PATH}/${CAIDEN_QUEST_2_ID}`,
+    iconType: 'focus-flame',
+    artworkType: 'focus-quest',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'available',
+    desktopPosition: 'grid-r1c2',
+    mobileOrder: 2,
+    skills: ['Self-Regulation', 'Decision Making', 'Growth Mindset'],
+  },
+  {
+    id: 'quest-3',
+    fileNumber: 3,
+    title: 'Distraction Shield',
+    description: 'Spot what pulls your focus away and protect your attention.',
+    route: '#',
+    artworkType: 'focus-locked',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'locked',
+    desktopPosition: 'grid-r1c3',
+    mobileOrder: 3,
+  },
+  {
+    id: 'quest-4',
+    fileNumber: 4,
+    title: 'Time Tracker',
+    description: 'Use time wisely before the group heads out.',
+    route: '#',
+    artworkType: 'focus-locked',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'locked',
+    desktopPosition: 'grid-r2c1',
+    mobileOrder: 4,
+  },
+  {
+    id: 'quest-5',
+    fileNumber: 5,
+    title: 'Brave Reset',
+    description: 'Calm down, breathe, and try again when feelings get hot.',
+    route: '#',
+    artworkType: 'focus-locked',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'locked',
+    desktopPosition: 'grid-r2c2',
+    mobileOrder: 5,
+  },
+  {
+    id: 'quest-6',
+    fileNumber: 6,
+    title: 'Focus Flame Challenge',
+    description: 'Bring your attention back and finish strong.',
+    route: '#',
+    artworkType: 'focus-locked',
+    folderLabel: 'QUEST CHECKPOINT',
+    status: 'locked',
+    desktopPosition: 'grid-r2c3',
+    mobileOrder: 6,
+  },
+];
+
+export const CAIDEN_QUEST_RANK = {
+  rankTitle: 'Focus Starter',
+  statusLine: '2 Quests Available',
+};

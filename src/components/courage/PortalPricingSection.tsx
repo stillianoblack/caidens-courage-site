@@ -193,6 +193,40 @@ const CARDS_BY_AUDIENCE: Record<PortalAudienceTab, PathCard[]> = {
       ctaTo: '/schools#pilot',
     },
   ],
+  camps: [
+    {
+      title: 'Camp Pilot',
+      description: 'Digital SEL modules, facilitator guide, and group activities for camps and youth programs.',
+      price: '$750',
+      cta: 'Explore Camp Pilot',
+      ctaTo: '/camps',
+      badges: ['Camp Program'],
+      featured: true,
+    },
+    {
+      title: 'Focus Flame Lab',
+      description: 'Interactive story-powered focus adventures for camp groups.',
+      cta: 'Play Focus Flame Lab',
+      ctaTo: '/focus-flame-lab',
+    },
+  ],
+  districts: [
+    {
+      title: 'District / Pilot Partner',
+      description: 'Multi-school rollout, outcomes tracking, and implementation consultation.',
+      price: 'Starting at $1,999',
+      cta: 'Schedule a Pilot Call',
+      ctaTo: '/schools',
+      badges: ['District Partner'],
+      featured: true,
+    },
+    {
+      title: 'School License',
+      description: 'School-wide SEL materials, training video, and priority support.',
+      cta: 'Request School Pilot',
+      ctaTo: '/schools#pilot',
+    },
+  ],
 };
 
 const PATH_TAB_ACTIVE: Record<PortalPathTheme, string> = {

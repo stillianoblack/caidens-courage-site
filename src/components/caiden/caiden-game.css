@@ -1,0 +1,329 @@
+/* Caiden Focus Quest — game experience (Miranda engine, Caiden theme) */
+
+.caiden-game.bbc-app {
+  --caiden-navy: #1a2f52;
+  --caiden-gold: #e5c06a;
+  --caiden-orange: #f97316;
+  --caiden-cream: #fffaf5;
+  background: linear-gradient(180deg, #fffaf5 0%, #fff7ed 45%, #fef3c7 100%);
+  color: var(--caiden-navy);
+}
+
+.caiden-game--embedded.bbc-app {
+  min-height: 32rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(229, 192, 106, 0.25);
+  overflow: hidden;
+  position: relative;
+}
+
+.caiden-game--embedded .bbc-main {
+  min-height: 28rem;
+}
+
+.caiden-topBar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.caiden-exitBtn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(36, 62, 112, 0.12);
+}
+
+.caiden-progressTrack {
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+  max-width: 14rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.caiden-progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #243e70, #e5c06a 70%, #f97316);
+  transition: width 0.35s ease;
+}
+
+.caiden-topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.caiden-topFlames {
+  display: flex;
+}
+
+.caiden-topFlameIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0.35;
+}
+
+.caiden-topFlameIcon--lit {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.45));
+}
+
+/* Larger, kid-friendly prompt bubble */
+.caiden-quizPrompt.bbc-quizPrompt {
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.caiden-quizPrompt .bbc-quizB4 {
+  border: 3px solid #e5c06a;
+  box-shadow: 0 0 12px rgba(229, 192, 106, 0.35);
+}
+
+.caiden-quizPrompt .bbc-quizB4 img {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 9999px;
+  border: none;
+  box-shadow: none;
+}
+
+.caiden-quizPrompt .bbc-speechBubble {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.45;
+  color: #1a2f52;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(180deg, #fff 0%, #fffbeb 100%);
+  border: 2px solid rgba(229, 192, 106, 0.45);
+  box-shadow: 0 8px 24px -14px rgba(249, 115, 22, 0.28);
+}
+
+/* Centered completion layout */
+.game-complete--caiden {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.caiden-completeHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.caiden-completeAvatar {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 3px solid #e5c06a;
+  box-shadow: 0 0 12px rgba(229, 192, 106, 0.35);
+}
+
+.caiden-completeFlame {
+  font-size: 1.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.4));
+}
+
+.game-completeScore--caiden {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid rgba(229, 192, 106, 0.45);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1a2f52;
+  margin: 0.5rem 0 1rem;
+}
+
+.game-badgeRow--caiden {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.caiden-rewardPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.875rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid rgba(201, 164, 74, 0.55);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #1a2f52;
+  white-space: nowrap;
+}
+
+.caiden-questCard {
+  border-radius: 1.125rem;
+  border: 2px solid rgba(229, 192, 106, 0.45);
+  background: linear-gradient(180deg, #fff 0%, #fffbeb 100%);
+  padding: 1rem 1.125rem 1.125rem;
+  box-shadow: 0 10px 28px -18px rgba(249, 115, 22, 0.25);
+}
+
+.caiden-questCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.caiden-questCardLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #92400e;
+}
+
+.caiden-questCardTag {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #243e70;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(36, 62, 112, 0.08);
+}
+
+.caiden-questGraphic {
+  position: relative;
+  min-height: 8.5rem;
+  border-radius: 0.875rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #fff7ed 55%, #fef3c7 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.caiden-questSvg {
+  width: 100%;
+  max-width: 20rem;
+  height: auto;
+  display: block;
+}
+
+.caiden-questCardText {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(36, 62, 112, 0.82);
+  margin: 0;
+  max-width: 28rem;
+}
+
+.game-quizWrap--focusQuest .bbc-questionText {
+  color: #1a2f52;
+}
+
+.caiden-game .miranda-navBtn--next-case {
+  background: linear-gradient(135deg, #243e70, #1a2f52);
+  border-color: #e5c06a;
+}
+
+.caiden-game .miranda-navBtn--hub-return-outline {
+  border-color: rgba(229, 192, 106, 0.55);
+  color: #1a2f52;
+}
+
+/* Caiden background decor */
+.caiden-game .game-deco {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.12;
+  color: #243e70;
+}
+
+.caiden-game .game-deco--caiden-glow {
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.5) 0%, transparent 70%);
+}
+
+.caiden-game .game-deco--caiden-glow-a {
+  width: 8rem;
+  height: 8rem;
+  top: 4%;
+  right: 6%;
+}
+
+.caiden-game .game-deco--caiden-glow-b {
+  width: 6rem;
+  height: 6rem;
+  bottom: 12%;
+  left: 4%;
+}
+
+.caiden-game .game-deco--caiden-lines {
+  top: 20%;
+  left: 8%;
+  width: 5rem;
+  height: 4rem;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 10px,
+    rgba(36, 62, 112, 0.15) 10px,
+    rgba(36, 62, 112, 0.15) 12px
+  );
+}
+
+.caiden-game .game-deco--caiden-dots {
+  bottom: 18%;
+  right: 10%;
+  width: 4rem;
+  height: 4rem;
+  background-image: radial-gradient(circle, rgba(249, 115, 22, 0.35) 2px, transparent 2px);
+  background-size: 12px 12px;
+}
+
+.caiden-game .game-deco--caiden-timer {
+  top: 14%;
+  left: 5%;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.caiden-game .game-deco--caiden-backpack {
+  bottom: 8%;
+  right: 5%;
+  width: 2.25rem;
+  height: 2.75rem;
+}
+
+.caiden-game .game-deco--flame-c {
+  bottom: 22%;
+  left: 12%;
+  width: 2rem;
+  height: 2rem;
+  opacity: 0.1;
+}
+
+.caiden-game .game-deco--flame-watermark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

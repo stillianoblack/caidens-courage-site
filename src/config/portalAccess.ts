@@ -72,6 +72,11 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
     dashboardTitle: 'Teacher Portal',
     resources: [
       {
+        title: 'Focus Flame Academy Pilot Dashboard',
+        description: 'Your story-powered SEL hub for weekly modules, activities, and pilot resources.',
+        href: '/pilot-dashboard',
+      },
+      {
         title: 'SEL Discussion Prompts',
         description: 'Story-based questions to spark classroom conversations.',
         href: '/schools#teacher-resources',
@@ -105,6 +110,11 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
     dashboardTitle: 'School Hub',
     resources: [
       {
+        title: 'Focus Flame Academy Pilot Dashboard',
+        description: 'Weekly journey hub, assessments, activities, and facilitator tools for pilot partners.',
+        href: '/pilot-dashboard',
+      },
+      {
         title: 'Pilot Overview',
         description: "Learn how Caiden's Courage for Schools works for schools and programs.",
         href: '/schools',
@@ -137,6 +147,11 @@ export const PORTAL_ACCESS_TIERS: PortalAccessTier[] = [
     unlockLabel: 'Pilot Partner Hub',
     dashboardTitle: 'Pilot Partner Hub',
     resources: [
+      {
+        title: 'Focus Flame Academy Pilot Dashboard',
+        description: 'Paid pilot partner hub for camps, schools, and youth programs.',
+        href: '/pilot-dashboard',
+      },
       {
         title: 'Pilot Materials',
         description: 'Core materials for pilot partners and facilitators.',

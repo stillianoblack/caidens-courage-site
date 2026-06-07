@@ -67,18 +67,18 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     tabLabel: 'B-4',
   },
   {
-    eyebrow: 'CAMP COURAGE',
+    eyebrow: 'FOCUS FLAME ACADEMY',
     headline: 'Courage grows faster together.',
     mobileHeadline: 'Courage grows faster together.',
     mobilePosition: 'center 40%',
     highlight: 'together',
     description:
-      'Camp Courage blends comic storytelling, SEL activities, and guided experiences to help kids build confidence, communication, focus, and emotional resilience.',
-    primaryCta: { label: 'Explore Camp Courage', to: '/camp-courage' },
-    secondaryCta: { label: 'View Pilot Program', to: '/camp-courage#camp-pilot-partnerships' },
+      'Focus Flame Academy blends story-powered SEL, facilitator guides, and guided experiences for families, classrooms, camps, and school communities.',
+    primaryCta: { label: 'Explore Focus Flame Academy', to: '/camps' },
+    secondaryCta: { label: 'View Pilot Program', to: '/schools#pilot' },
     desktopImage: '/images/heros/hero-desktop_slide_4.webp',
     mobileImage: '/images/heros/hero-desktop_slide_4.webp',
-    tabLabel: 'Camp Courage',
+    tabLabel: 'Focus Flame Academy',
   },
 ];
 

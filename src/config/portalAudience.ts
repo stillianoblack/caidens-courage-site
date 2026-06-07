@@ -1,7 +1,7 @@
 import type { PortalAccessType } from './portalAccess';
 
 /** Portal audience path — maps to ?audience= URL param. */
-export type PortalAudienceTab = 'kids' | 'parents' | 'educators' | 'schools';
+export type PortalAudienceTab = 'kids' | 'parents' | 'educators' | 'schools' | 'camps' | 'districts';
 
 export type PortalPathTheme = 'blue' | 'gold' | 'orange' | 'teal';
 
@@ -53,6 +53,9 @@ const LEGACY_AUDIENCE_MAP: Record<string, PortalAudienceTab> = {
   confidence: 'parents',
   courage: 'educators',
   schools: 'schools',
+  teachers: 'educators',
+  camp: 'camps',
+  district: 'districts',
 };
 
 export function parsePortalAudienceParam(value: string | null): PortalAudienceTab {
@@ -86,6 +89,49 @@ export function getPortalPathTab(id: PortalAudienceTab): PortalPathTab | undefin
   return PORTAL_PATH_TABS.find((tab) => tab.id === id);
 }
 
+/** Hero eyebrow + access card label for audience-specific portal views. */
+export type PortalAudienceIdentity = {
+  heroEyebrow: string;
+  /** Shown under the icon inside the access card; omit on the main /portal view. */
+  cardAudienceLabel?: string;
+};
+
+export const PORTAL_AUDIENCE_IDENTITY: Record<PortalAudienceTab, PortalAudienceIdentity> = {
+  kids: {
+    heroEyebrow: 'Brave Mind Club Access',
+    cardAudienceLabel: 'Kids',
+  },
+  parents: {
+    heroEyebrow: 'Family Access',
+    cardAudienceLabel: 'Parents',
+  },
+  educators: {
+    heroEyebrow: 'Focus Flame Academy',
+    cardAudienceLabel: 'Educators',
+  },
+  schools: {
+    heroEyebrow: 'School Access',
+    cardAudienceLabel: 'Schools',
+  },
+  camps: {
+    heroEyebrow: 'Camp Program Access',
+    cardAudienceLabel: 'Camps',
+  },
+  districts: {
+    heroEyebrow: 'District Access',
+    cardAudienceLabel: 'Schools',
+  },
+};
+
+export const PORTAL_DEFAULT_IDENTITY: PortalAudienceIdentity = {
+  heroEyebrow: 'Courage Portal',
+};
+
+export function getPortalAudienceIdentity(audience: PortalAudienceTab | null): PortalAudienceIdentity {
+  if (!audience) return PORTAL_DEFAULT_IDENTITY;
+  return PORTAL_AUDIENCE_IDENTITY[audience];
+}
+
 export type PortalIncludedSection = {
   title: string;
   bullets: string[];
@@ -107,6 +153,14 @@ export const PORTAL_INCLUDED_BY_AUDIENCE: Record<PortalAudienceTab, PortalInclud
   schools: {
     title: "What's Included",
     bullets: ['Licensing', 'Implementation Resources', 'Facilitator Guides', 'Pilot Support'],
+  },
+  camps: {
+    title: "What's Included",
+    bullets: ['SEL Modules', 'Facilitator Guide', 'Group Activities', 'Focus Flame Lab Access'],
+  },
+  districts: {
+    title: "What's Included",
+    bullets: ['Multi-School Rollout', 'Outcomes Tracking', 'Implementation Support', 'Quarterly Review'],
   },
 };
 

@@ -4,6 +4,10 @@ import Home from './pages/Home';
 import ClassicHome from './pages/ClassicHome';
 import KidsHub from './pages/KidsHub';
 import Schools from './pages/Schools';
+import ParentsPage from './pages/ParentsPage';
+import TeachersPage from './pages/TeachersPage';
+import CampsPage from './pages/CampsPage';
+import StoryHub from './pages/StoryHub';
 import LegacySchoolRouteRedirect, { LegacyCampCourageRedirect } from './components/schools/LegacySchoolRouteRedirect';
 import Portal from './pages/Portal';
 import PortalDashboard from './pages/PortalDashboard';
@@ -29,8 +33,63 @@ import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
 import FocusFlameLabPage from './pages/FocusFlameLab';
+import Week0AssessmentPage from './pages/Week0AssessmentPage';
+import B4BaselineCheckPage from './pages/B4BaselineCheckPage';
+import B4ResultsAdminPage from './pages/B4ResultsAdminPage';
+import B4GuidePage from './pages/B4GuidePage';
+import PilotDashboardPage from './pages/PilotDashboardPage';
+import FamilyPortalLayout from './pages/FamilyPortalLayout';
+import KidsPortalPage from './pages/KidsPortalPage';
+import KidsCharacterPage from './pages/KidsCharacterPage';
+import FamilyOverviewPanel from './components/family-portal/panels/FamilyOverviewPanel';
+import FamilyContinueLearningPanel from './components/family-portal/panels/FamilyContinueLearningPanel';
+import FamilyCharactersPanel from './components/family-portal/panels/FamilyCharactersPanel';
+import FamilyGamesPanel from './components/family-portal/panels/FamilyGamesPanel';
+import FamilyDownloadsPanel from './components/family-portal/panels/FamilyDownloadsPanel';
+import FamilyGalleryPanel from './components/family-portal/panels/FamilyGalleryPanel';
+import FamilyCertificatesPanel from './components/family-portal/panels/FamilyCertificatesPanel';
+import FamilyGuidePanel from './components/family-portal/panels/FamilyGuidePanel';
+import CaidenQuestHubPage from './pages/CaidenQuestHubPage';
+import CaidenQuestPage from './pages/CaidenQuestPage';
+import B4PortalPage from './pages/B4PortalPage';
+import B4PortalCheckInPage from './pages/B4PortalCheckInPage';
+import B4PortalWeek1Page from './pages/B4PortalWeek1Page';
+import MirandaPortalHubPage from './pages/MirandaPortalHubPage';
+import MirandaPortalMissionPage from './pages/MirandaPortalMissionPage';
+import StudentGallerySubmitPage from './pages/StudentGallerySubmitPage';
+import StudentGalleryPublicPage from './pages/StudentGalleryPublicPage';
+import MirandaMysteryFilesHubPage from './pages/MirandaMysteryFilesHubPage';
+import MirandaMissionPage from './pages/MirandaMissionPage';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
+import {
+  BMC_ACTIVITIES_PATH,
+  BMC_COLORING_PATH,
+  BMC_RESET_TOOLS_PATH,
+  BRAVE_MIND_CLUB_PATH,
+  STORY_BOOKS_PATH,
+  STORY_CHARACTERS_PATH,
+  STORY_PATH,
+  B4_GUIDE_PATH,
+  B4_BASELINE_CHECK_PATH,
+  B4_RESULTS_ADMIN_PATH,
+  FACILITATOR_B4_BASELINE_RESULTS_PATH,
+  FACILITATOR_B4_RESULTS_PATH,
+  FACILITATOR_PORTAL_PATH,
+  WEEK_0_ASSESSMENT_ALIAS_PATH,
+  WEEK_0_ASSESSMENT_PATH,
+  FOCUS_FLAME_LAB_PATH,
+  PILOT_DASHBOARD_PATH,
+  BLUE_RIBBON_PILOT_PATH,
+  FAMILY_PORTAL_PATH,
+  KIDS_PORTAL_PATH,
+  CAIDEN_QUEST_HUB_PATH,
+  ACADEMY_DASHBOARD_ALIAS_PATH,
+  MIRANDA_MYSTERY_FILES_PATH,
+  MIRANDA_FIRST_DAY_PATH,
+  STUDENT_GALLERY_SUBMIT_PATH,
+  STUDENT_GALLERY_PUBLIC_PATH,
+} from './config/courageRoutes';
 
 /** Vale domains must not render the Courage hub at `/` (client navigations skip Netlify root redirect). */
 const isCaidenValeHost = (): boolean => {
@@ -50,11 +109,96 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<RootRoute />} />
+
+      {/* Story world */}
+      <Route path={STORY_PATH} element={<StoryHub />} />
+      <Route path={STORY_BOOKS_PATH} element={<Product />} />
+      <Route path={STORY_CHARACTERS_PATH} element={<Characters />} />
+
+      {/* Brave Mind Club */}
+      <Route path={BRAVE_MIND_CLUB_PATH} element={<Resources />} />
+      <Route path={BMC_COLORING_PATH} element={<Resources />} />
+      <Route path={BMC_ACTIVITIES_PATH} element={<Resources />} />
+      <Route path={BMC_RESET_TOOLS_PATH} element={<B4Clicker />} />
+
+      {/* Interactive */}
+      <Route path={B4_BASELINE_CHECK_PATH} element={<B4BaselineCheckPage />} />
+      <Route path={WEEK_0_ASSESSMENT_ALIAS_PATH} element={<Navigate to={B4_BASELINE_CHECK_PATH} replace />} />
+      <Route path={WEEK_0_ASSESSMENT_PATH} element={<Week0AssessmentPage />} />
+      <Route path={B4_GUIDE_PATH} element={<B4GuidePage />} />
+      <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
+
+      {/* Focus Flame Academy */}
+      <Route path={FACILITATOR_PORTAL_PATH} element={<PilotDashboardPage />} />
+      <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
+      <Route
+        path={FACILITATOR_B4_BASELINE_RESULTS_PATH}
+        element={<Navigate to={FACILITATOR_B4_RESULTS_PATH} replace />}
+      />
+      <Route path={PILOT_DASHBOARD_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
+      <Route path={BLUE_RIBBON_PILOT_PATH} element={<PilotDashboardPage />} />
+      <Route path={ACADEMY_DASHBOARD_ALIAS_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
+      <Route path={B4_RESULTS_ADMIN_PATH} element={<B4ResultsAdminPage />} />
+
+      {/* Family Portal shell — includes Caiden quest hub inside portal */}
+      <Route element={<FamilyPortalLayout />}>
+        <Route path={FAMILY_PORTAL_PATH}>
+          <Route index element={<FamilyOverviewPanel />} />
+          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="characters" element={<FamilyCharactersPanel />} />
+          <Route path="games" element={<FamilyGamesPanel />} />
+          <Route path="downloads" element={<FamilyDownloadsPanel />} />
+          <Route path="gallery" element={<FamilyGalleryPanel />} />
+          <Route path="certificates" element={<FamilyCertificatesPanel />} />
+          <Route path="guide" element={<FamilyGuidePanel />} />
+        </Route>
+        <Route path={CAIDEN_QUEST_HUB_PATH} element={<CaidenQuestHubPage />} />
+        <Route path={`${CAIDEN_QUEST_HUB_PATH}/:questId`} element={<CaidenQuestPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/miranda`} element={<MirandaPortalHubPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/miranda/:missionId`} element={<MirandaPortalMissionPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/b4`} element={<B4PortalPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/b4/check-in`} element={<B4PortalCheckInPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/b4/week-1`} element={<B4PortalWeek1Page />} />
+      </Route>
+
+      {/* Legacy kids hub (non-portal shell) */}
+      <Route path={KIDS_PORTAL_PATH} element={<KidsPortalPage />} />
+      <Route path={`${KIDS_PORTAL_PATH}/zeke`} element={<KidsCharacterPage character="zeke" />} />
+
+      <Route path={MIRANDA_MYSTERY_FILES_PATH} element={<MirandaMysteryFilesHubPage />} />
+      <Route path={`${MIRANDA_MYSTERY_FILES_PATH}/:missionId`} element={<MirandaMissionPage />} />
+      <Route
+        path={MIRANDA_FIRST_DAY_PATH}
+        element={<Navigate to={`${MIRANDA_MYSTERY_FILES_PATH}/the-missing-student`} replace />}
+      />
+      <Route path={STUDENT_GALLERY_SUBMIT_PATH} element={<StudentGallerySubmitPage />} />
+      <Route path={STUDENT_GALLERY_PUBLIC_PATH} element={<StudentGalleryPublicPage />} />
       <Route path="/kids" element={<KidsHub />} />
+      <Route path="/parents" element={<ParentsPage />} />
+      <Route path="/teachers" element={<TeachersPage />} />
+      <Route path="/camps" element={<CampsPage />} />
       <Route path="/schools" element={<Schools />} />
-      <Route path="/focus-flame-academy" element={<LegacySchoolRouteRedirect />} />
+
+      {/* Portal */}
       <Route path="/portal" element={<Portal />} />
       <Route path="/portal/dashboard" element={<PortalDashboard />} />
+
+      {/* Legacy redirects — preserve bookmarks */}
+      <Route path="/braveminds" element={<Navigate to={BRAVE_MIND_CLUB_PATH} replace />} />
+      <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
+      <Route path="/b4-tools" element={<Navigate to={BMC_RESET_TOOLS_PATH} replace />} />
+      <Route path="/comicbook" element={<Navigate to={STORY_BOOKS_PATH} replace />} />
+      <Route path="/comic-book" element={<Navigate to={STORY_BOOKS_PATH} replace />} />
+      <Route path="/product" element={<Navigate to={STORY_BOOKS_PATH} replace />} />
+      <Route path="/characters" element={<Navigate to={STORY_CHARACTERS_PATH} replace />} />
+      <Route path="/resources" element={<Navigate to={BRAVE_MIND_CLUB_PATH} replace />} />
+      <Route path="/resources/coloring-pages" element={<Navigate to={BMC_COLORING_PATH} replace />} />
+      <Route path="/resources/wallpapers" element={<Navigate to={`${BRAVE_MIND_CLUB_PATH}?type=wallpaper`} replace />} />
+      <Route path="/resources/teachers" element={<Navigate to={`${BRAVE_MIND_CLUB_PATH}?type=teacher-pack`} replace />} />
+      <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
+      <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
+
+      <Route path="/focus-flame-academy" element={<LegacySchoolRouteRedirect />} />
       <Route path="/classic-home" element={<ClassicHome />} />
       <Route path="/camp-courage" element={<LegacyCampCourageRedirect />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
@@ -65,42 +209,50 @@ const AppRoutes: React.FC = () => {
       <Route path="/thank-you" element={<ThankYou />} />
       <Route path="/success" element={<Success />} />
       <Route path="/cancelled" element={<Cancelled />} />
-      <Route path="/braveminds" element={<Resources />} />
-      <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
       <Route path="/form-success" element={<FormSuccess />} />
-      <Route path="/resources" element={<Navigate to="/braveminds" replace />} />
-      <Route path="/resources/notify-success" element={<Navigate to="/braveminds/notify-success" replace />} />
-      <Route path="/resources/coloring-pages" element={<Navigate to="/braveminds?type=coloring" replace />} />
-      <Route path="/resources/wallpapers" element={<Navigate to="/braveminds?type=wallpaper" replace />} />
-      <Route path="/resources/teachers" element={<Navigate to="/braveminds?type=teacher-pack" replace />} />
-      <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
-      <Route path="/comicbook" element={<Product />} />
-      <Route path="/comic-book" element={<Navigate to="/comicbook" replace />} />
-      <Route path="/product" element={<Navigate to="/comicbook" replace />} />
       <Route path="/preview" element={<Preview />} />
       <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
       <Route path="/mission" element={<Mission />} />
       <Route path="/about" element={<About />} />
       <Route path="/world" element={<World />} />
-      <Route path="/characters" element={<Characters />} />
-      <Route path="/b4-tools" element={<B4Clicker />} />
-      <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
-      <Route path="/chat" element={<ChatWithB4 />} />
       <Route path="/journey" element={<Journey />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
+      <Route path="/chat" element={<ChatWithB4 />} />
     </Routes>
   );
 };
 
 const AppFrame: React.FC = () => {
   const location = useLocation();
-  const isFocusFlameLab = location.pathname === '/focus-flame-lab';
+  const isMirandaExperience =
+    location.pathname === MIRANDA_MYSTERY_FILES_PATH ||
+    location.pathname.startsWith(`${MIRANDA_MYSTERY_FILES_PATH}/`) ||
+    location.pathname === MIRANDA_FIRST_DAY_PATH;
+  const isImmersiveKidsGame =
+    location.pathname === FOCUS_FLAME_LAB_PATH ||
+    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
+    location.pathname === B4_GUIDE_PATH ||
+    location.pathname === B4_BASELINE_CHECK_PATH ||
+    location.pathname === B4_RESULTS_ADMIN_PATH ||
+    isMirandaExperience ||
+    location.pathname === PILOT_DASHBOARD_PATH ||
+    location.pathname === BLUE_RIBBON_PILOT_PATH ||
+    location.pathname === FAMILY_PORTAL_PATH ||
+    location.pathname.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
+    location.pathname.startsWith(`${CAIDEN_QUEST_HUB_PATH}`) ||
+    location.pathname === KIDS_PORTAL_PATH ||
+    location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);
+  /** Full-screen flows where Ask B-4 would obstruct play — portals keep the floating button. */
+  const hideAskB4Chat =
+    location.pathname === FOCUS_FLAME_LAB_PATH ||
+    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
+    location.pathname === B4_GUIDE_PATH ||
+    location.pathname === B4_BASELINE_CHECK_PATH;
   return (
     <>
       <AppRoutes />
-      {!isFocusFlameLab ? <CourageToolsPopup /> : null}
-      {!isFocusFlameLab ? <DeferredB4ChatWidget /> : null}
+      {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
+      {!hideAskB4Chat ? <DeferredB4ChatWidget /> : null}
     </>
   );
 };
@@ -111,7 +263,6 @@ const App: React.FC = () => {
       <AppFrame />
     </Router>
   );
-}
+};
 
 export default App;
-

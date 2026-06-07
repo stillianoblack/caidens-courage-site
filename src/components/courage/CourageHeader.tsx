@@ -1,17 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   COURAGE_LOGO_SRC,
-  GAMES_DROPDOWN,
+  flattenKidsMegaNav,
+  FOR_DROPDOWN,
+  FOCUS_FLAME_LAB_PATH,
+  isNavPathActive,
+  KIDS_MEGA_DROPDOWN,
+  KIDS_NAV_PATHS,
   PORTAL_PATH,
-  PORTAL_QUICK_LINKS,
-  RESOURCES_DROPDOWN,
-  SCHOOLS_DROPDOWN,
+  type CourageKidsMegaNav,
   type CourageNavLink,
 } from '../../config/courageNav';
 import { PORTAL_DASHBOARD_PATH } from '../../config/portalAccess';
-import PortalNavPanel from './PortalNavPanel';
-import { usePortalUnlock } from '../../hooks/usePortalUnlock';
 
 function navPillClass(isActive: boolean, mobile = false) {
   return [
@@ -31,6 +32,69 @@ function isNavHrefActive(href: string, pathname: string, hash: string, search: s
 
 function isDropdownActive(items: CourageNavLink[], pathname: string, hash: string, search: string) {
   return items.some((item) => isNavHrefActive(item.href, pathname, hash, search));
+}
+
+function megaNavLinkClass(href: string, pathname: string, hash: string, search: string) {
+  const active = isNavHrefActive(href, pathname, hash, search);
+  return [
+    'block w-full rounded-lg px-2 py-2 text-sm font-semibold transition-colors',
+    active ? 'bg-navy-50 text-navy-800' : 'text-navy-600 hover:bg-navy-50 hover:text-navy-800',
+  ].join(' ');
+}
+
+const KIDS_MEGA_VIEWPORT_PADDING = 24;
+
+function useViewportCenteredPanel(isOpen: boolean, containerRef: React.RefObject<HTMLDivElement>, panelRef: React.RefObject<HTMLDivElement>) {
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({
+    left: '50%',
+    transform: 'translateX(-50%)',
+  });
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setPanelStyle({ left: '50%', transform: 'translateX(-50%)' });
+      return;
+    }
+
+    const clampPanel = () => {
+      const container = containerRef.current;
+      const panel = panelRef.current;
+      if (!container || !panel) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const panelWidth = panel.offsetWidth;
+      const centerX = containerRect.left + containerRect.width / 2;
+      const idealLeft = centerX - panelWidth / 2;
+      const clampedLeft = Math.max(
+        KIDS_MEGA_VIEWPORT_PADDING,
+        Math.min(window.innerWidth - KIDS_MEGA_VIEWPORT_PADDING - panelWidth, idealLeft),
+      );
+
+      setPanelStyle({
+        left: clampedLeft - containerRect.left,
+        transform: 'none',
+      });
+    };
+
+    clampPanel();
+    window.addEventListener('resize', clampPanel);
+    window.addEventListener('scroll', clampPanel, { passive: true });
+    return () => {
+      window.removeEventListener('resize', clampPanel);
+      window.removeEventListener('scroll', clampPanel);
+    };
+  }, [isOpen, containerRef, panelRef]);
+
+  return panelStyle;
+}
+
+function KidsMegaIntro({ intro }: { intro: NonNullable<CourageKidsMegaNav['intro']> }) {
+  return (
+    <div className="mb-5 border-b border-navy-100 pb-4">
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">{intro.label}</p>
+      <p className="mt-1 text-sm leading-relaxed text-navy-500">{intro.description}</p>
+    </div>
+  );
 }
 
 type DropdownProps = {
@@ -73,7 +137,7 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: Dr
         <div className="absolute left-0 top-full z-50 mt-2 min-w-[220px] max-w-[min(100vw-2rem,280px)] rounded-2xl border border-navy-100 bg-white py-2 shadow-xl">
           {items.map((item) => (
             <Link
-              key={item.href}
+              key={`${item.href}-${item.label}`}
               to={item.href}
               onClick={onClose}
               className="block px-4 py-2.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-navy-50 hover:text-navy-800"
@@ -81,6 +145,88 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: Dr
               {item.label}
             </Link>
           ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+type KidsMegaDropdownProps = {
+  mega: CourageKidsMegaNav;
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  active: boolean;
+};
+
+function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: KidsMegaDropdownProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const panelStyle = useViewportCenteredPanel(isOpen, ref, panelRef);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [isOpen, onClose]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+          active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
+        }`}
+      >
+        Kids
+        <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+        </svg>
+      </button>
+      {isOpen ? (
+        <div
+          ref={panelRef}
+          style={panelStyle}
+          className="absolute top-full z-50 mt-2 w-[min(880px,calc(100vw-3rem))] max-w-[min(900px,calc(100vw-3rem))] rounded-2xl border border-navy-100 bg-white p-5 shadow-xl"
+        >
+          {mega.intro ? <KidsMegaIntro intro={mega.intro} /> : null}
+          <div className="grid grid-cols-3 gap-6">
+            {mega.columns.map((column, columnIndex) => (
+              <div key={columnIndex} className="min-w-0">
+                {column.sections.map((section) => (
+                  <div key={section.heading}>
+                    <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">
+                      {section.heading}
+                    </p>
+                    <ul className="space-y-0.5">
+                      {section.items.map((item) => (
+                        <li key={`${item.href}-${item.label}`}>
+                          <Link
+                            to={item.href}
+                            onClick={onClose}
+                            className={megaNavLinkClass(
+                              item.href,
+                              location.pathname,
+                              location.hash,
+                              location.search,
+                            )}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>
@@ -110,7 +256,7 @@ function MobileDropdownGroup({
       {isOpen ? (
         <ul className="mt-1 space-y-1 pl-2">
           {items.map((item) => (
-            <li key={item.href}>
+            <li key={`${item.href}-${item.label}`}>
               <Link
                 to={item.href}
                 onClick={onClose}
@@ -126,70 +272,7 @@ function MobileDropdownGroup({
   );
 }
 
-function DesktopPortalDropdown({
-  isOpen,
-  onToggle,
-  onClose,
-  active,
-}: {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-  active: boolean;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('nav', onClose);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [isOpen, onClose]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={isOpen}
-        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
-          active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
-        }`}
-      >
-        Portal
-        <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-        </svg>
-      </button>
-      {isOpen ? (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,20rem)] rounded-2xl border border-navy-100 bg-white p-4 shadow-xl sm:left-auto sm:w-[19rem]">
-          <PortalNavPanel
-            accessCode={accessCode}
-            error={error}
-            onAccessCodeChange={onAccessCodeChange}
-            onSubmit={handleSubmit}
-            onLinkClick={onClose}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function MobilePortalGroup({
-  isOpen,
-  onToggle,
-  onClose,
-}: {
-  isOpen: boolean;
-  onToggle: () => void;
-  onClose: () => void;
-}) {
-  const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('nav', onClose);
-
+function MobileKidsMegaGroup({ mega, isOpen, onToggle, onClose }: Omit<KidsMegaDropdownProps, 'active'>) {
   return (
     <li>
       <button
@@ -198,21 +281,43 @@ function MobilePortalGroup({
         aria-expanded={isOpen}
         className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-semibold text-navy-500 hover:bg-navy-50"
       >
-        Portal
+        Kids
         <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
         </svg>
       </button>
       {isOpen ? (
-        <div className="mt-2 rounded-xl border border-navy-100/90 bg-white px-4 py-4">
-          <PortalNavPanel
-            accessCode={accessCode}
-            error={error}
-            onAccessCodeChange={onAccessCodeChange}
-            onSubmit={handleSubmit}
-            onLinkClick={onClose}
-            compact
-          />
+        <div className="mt-1 pl-2">
+          {mega.intro ? (
+            <div className="mb-4 px-4 pb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">{mega.intro.label}</p>
+              <p className="mt-1 text-sm leading-relaxed text-navy-500">{mega.intro.description}</p>
+            </div>
+          ) : null}
+          <div className="space-y-6">
+            {mega.columns.flatMap((column) =>
+              column.sections.map((section) => (
+                <div key={section.heading}>
+                  <p className="px-4 pb-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">
+                    {section.heading}
+                  </p>
+                  <ul className="space-y-1">
+                    {section.items.map((item) => (
+                      <li key={`${item.href}-${item.label}`}>
+                        <Link
+                          to={item.href}
+                          onClick={onClose}
+                          className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )),
+            )}
+          </div>
         </div>
       ) : null}
     </li>
@@ -223,14 +328,20 @@ export default function CourageHeader() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [schoolsOpen, setSchoolsOpen] = useState(false);
-  const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [gamesOpen, setGamesOpen] = useState(false);
-  const [portalOpen, setPortalOpen] = useState(false);
-  const [mobileSchoolsOpen, setMobileSchoolsOpen] = useState(false);
-  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
-  const [mobileGamesOpen, setMobileGamesOpen] = useState(false);
-  const [mobilePortalOpen, setMobilePortalOpen] = useState(false);
+  const [kidsOpen, setKidsOpen] = useState(false);
+  const [forOpen, setForOpen] = useState(false);
+  const [mobileKidsOpen, setMobileKidsOpen] = useState(false);
+  const [mobileForOpen, setMobileForOpen] = useState(false);
+
+  const closeAllDropdowns = () => {
+    setKidsOpen(false);
+    setForOpen(false);
+  };
+
+  const closeAllMobileDropdowns = () => {
+    setMobileKidsOpen(false);
+    setMobileForOpen(false);
+  };
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);
@@ -240,14 +351,8 @@ export default function CourageHeader() {
 
   useEffect(() => {
     setMenuOpen(false);
-    setSchoolsOpen(false);
-    setResourcesOpen(false);
-    setGamesOpen(false);
-    setPortalOpen(false);
-    setMobileSchoolsOpen(false);
-    setMobileResourcesOpen(false);
-    setMobileGamesOpen(false);
-    setMobilePortalOpen(false);
+    closeAllDropdowns();
+    closeAllMobileDropdowns();
   }, [location.pathname, location.hash]);
 
   useEffect(() => {
@@ -260,23 +365,14 @@ export default function CourageHeader() {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
-  const schoolsActive = isDropdownActive(
-    SCHOOLS_DROPDOWN,
-    location.pathname,
-    location.hash,
-    location.search
-  );
-  const resourcesActive = isDropdownActive(
-    RESOURCES_DROPDOWN,
-    location.pathname,
-    location.hash,
-    location.search
-  );
-  const gamesActive = isDropdownActive(GAMES_DROPDOWN, location.pathname, location.hash, location.search);
+  const kidsFlatLinks = flattenKidsMegaNav(KIDS_MEGA_DROPDOWN);
+  const kidsActive =
+    isNavPathActive(KIDS_NAV_PATHS, location.pathname) ||
+    isDropdownActive(kidsFlatLinks, location.pathname, location.hash, location.search);
+  const forActive = isDropdownActive(FOR_DROPDOWN, location.pathname, location.hash, location.search);
+  const gamesActive = location.pathname === FOCUS_FLAME_LAB_PATH || location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
   const portalActive =
-    location.pathname === PORTAL_PATH ||
-    location.pathname.startsWith(PORTAL_DASHBOARD_PATH) ||
-    isDropdownActive(PORTAL_QUICK_LINKS, location.pathname, location.hash, location.search);
+    location.pathname === PORTAL_PATH || location.pathname.startsWith(PORTAL_DASHBOARD_PATH);
 
   return (
     <header
@@ -304,82 +400,56 @@ export default function CourageHeader() {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Caiden's Courage navigation">
-          <NavLink to="/" end className={({ isActive }) => navPillClass(isActive)}>
-            Home
-          </NavLink>
-          <NavLink to="/kids" className={({ isActive }) => navPillClass(isActive)}>
-            Kids
-          </NavLink>
-          <DesktopDropdown
-            label="Schools & Districts"
-            items={SCHOOLS_DROPDOWN}
-            isOpen={schoolsOpen}
-            onToggle={() => {
-              setSchoolsOpen((o) => !o);
-              setResourcesOpen(false);
-              setGamesOpen(false);
-              setPortalOpen(false);
-            }}
-            onClose={() => setSchoolsOpen(false)}
-            active={schoolsActive}
-          />
-          <DesktopDropdown
-            label="Resources"
-            items={RESOURCES_DROPDOWN}
-            isOpen={resourcesOpen}
-            onToggle={() => {
-              setResourcesOpen((o) => !o);
-              setSchoolsOpen(false);
-              setGamesOpen(false);
-              setPortalOpen(false);
-            }}
-            onClose={() => setResourcesOpen(false)}
-            active={resourcesActive}
-          />
-          <DesktopDropdown
-            label="Games"
-            items={GAMES_DROPDOWN}
-            isOpen={gamesOpen}
-            onToggle={() => {
-              setGamesOpen((o) => !o);
-              setSchoolsOpen(false);
-              setResourcesOpen(false);
-              setPortalOpen(false);
-            }}
-            onClose={() => setGamesOpen(false)}
-            active={gamesActive}
-          />
-          <DesktopPortalDropdown
-            isOpen={portalOpen}
-            onToggle={() => {
-              setPortalOpen((o) => !o);
-              setSchoolsOpen(false);
-              setResourcesOpen(false);
-              setGamesOpen(false);
-            }}
-            onClose={() => setPortalOpen(false)}
-            active={portalActive}
-          />
-        </nav>
+            <NavLink to="/" end className={({ isActive }) => navPillClass(isActive)}>
+              Home
+            </NavLink>
+            <DesktopKidsMegaDropdown
+              mega={KIDS_MEGA_DROPDOWN}
+              isOpen={kidsOpen}
+              onToggle={() => {
+                setKidsOpen((o) => !o);
+                setForOpen(false);
+              }}
+              onClose={() => setKidsOpen(false)}
+              active={kidsActive}
+            />
+            <DesktopDropdown
+              label="For"
+              items={FOR_DROPDOWN}
+              isOpen={forOpen}
+              onToggle={() => {
+                setForOpen((o) => !o);
+                setKidsOpen(false);
+              }}
+              onClose={() => setForOpen(false)}
+              active={forActive}
+            />
+            <NavLink to={FOCUS_FLAME_LAB_PATH} className={() => navPillClass(gamesActive)}>
+              Games
+            </NavLink>
+            <NavLink to={PORTAL_PATH} className={({ isActive }) => navPillClass(isActive || portalActive)}>
+              Portal
+            </NavLink>
+          </nav>
 
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-navy-100 bg-white text-navy-500 shadow-sm transition-colors hover:bg-navy-50 lg:hidden"
-          aria-expanded={menuOpen}
-          aria-controls="courage-mobile-nav"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
-          {menuOpen ? (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-navy-100 bg-white text-navy-500 shadow-sm transition-colors hover:bg-navy-50 lg:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="courage-mobile-nav"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
+            {menuOpen ? (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
@@ -402,57 +472,43 @@ export default function CourageHeader() {
                   Home
                 </NavLink>
               </li>
+              <MobileKidsMegaGroup
+                mega={KIDS_MEGA_DROPDOWN}
+                isOpen={mobileKidsOpen}
+                onToggle={() => {
+                  setMobileKidsOpen((o) => !o);
+                  setMobileForOpen(false);
+                }}
+                onClose={closeMenu}
+              />
+              <MobileDropdownGroup
+                label="For"
+                items={FOR_DROPDOWN}
+                isOpen={mobileForOpen}
+                onToggle={() => {
+                  setMobileForOpen((o) => !o);
+                  setMobileKidsOpen(false);
+                }}
+                onClose={closeMenu}
+              />
               <li>
-                <NavLink to="/kids" className={({ isActive }) => navPillClass(isActive, true)} onClick={closeMenu}>
-                  Kids
+                <NavLink
+                  to={FOCUS_FLAME_LAB_PATH}
+                  className={() => navPillClass(gamesActive, true)}
+                  onClick={closeMenu}
+                >
+                  Games
                 </NavLink>
               </li>
-              <MobileDropdownGroup
-                label="Schools & Districts"
-                items={SCHOOLS_DROPDOWN}
-                isOpen={mobileSchoolsOpen}
-                onToggle={() => {
-                  setMobileSchoolsOpen((o) => !o);
-                  setMobileResourcesOpen(false);
-                  setMobileGamesOpen(false);
-                  setMobilePortalOpen(false);
-                }}
-                onClose={closeMenu}
-              />
-              <MobileDropdownGroup
-                label="Resources"
-                items={RESOURCES_DROPDOWN}
-                isOpen={mobileResourcesOpen}
-                onToggle={() => {
-                  setMobileResourcesOpen((o) => !o);
-                  setMobileSchoolsOpen(false);
-                  setMobileGamesOpen(false);
-                  setMobilePortalOpen(false);
-                }}
-                onClose={closeMenu}
-              />
-              <MobileDropdownGroup
-                label="Games"
-                items={GAMES_DROPDOWN}
-                isOpen={mobileGamesOpen}
-                onToggle={() => {
-                  setMobileGamesOpen((o) => !o);
-                  setMobileSchoolsOpen(false);
-                  setMobileResourcesOpen(false);
-                  setMobilePortalOpen(false);
-                }}
-                onClose={closeMenu}
-              />
-              <MobilePortalGroup
-                isOpen={mobilePortalOpen}
-                onToggle={() => {
-                  setMobilePortalOpen((o) => !o);
-                  setMobileSchoolsOpen(false);
-                  setMobileResourcesOpen(false);
-                  setMobileGamesOpen(false);
-                }}
-                onClose={closeMenu}
-              />
+              <li>
+                <NavLink
+                  to={PORTAL_PATH}
+                  className={({ isActive }) => navPillClass(isActive || portalActive, true)}
+                  onClick={closeMenu}
+                >
+                  Portal
+                </NavLink>
+              </li>
             </ul>
           </nav>
         </>

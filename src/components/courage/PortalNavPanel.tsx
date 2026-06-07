@@ -24,7 +24,7 @@ export default function PortalNavPanel({
   return (
     <div className={`cc-portal-nav-panel ${compact ? 'cc-portal-nav-panel--compact' : ''}`}>
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-navy-500 sm:text-[11px]">
-        Have a Courage Code?
+        Courage Code
       </p>
 
       <div className="mt-3">

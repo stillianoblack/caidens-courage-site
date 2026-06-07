@@ -8263,7 +8263,40 @@ a.ffl-ctaSecondary {
   }
 }
 
-/* Caiden's Courage Portal — MVP access-code gateway */
+/* Caiden's Courage Portal — premium full-viewport access screen */
+.cc-portal-hero--fullscreen.cc-section-hero--courage {
+  min-height: calc(100vh - var(--courage-header-height, 4rem));
+  padding-top: 3rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 640px) {
+  .cc-portal-hero--fullscreen.cc-section-hero--courage {
+    padding-top: 3.5rem;
+    padding-bottom: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-portal-hero--fullscreen.cc-section-hero--courage {
+    min-height: 85vh;
+    padding-top: 5rem;
+    padding-bottom: 7.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .cc-portal-hero--fullscreen.cc-section-hero--courage {
+    min-height: 90vh;
+    padding-top: 7.5rem;
+    padding-bottom: 7.5rem;
+  }
+}
+
+.cc-portal-hero-inner {
+  width: 100%;
+}
+
 .cc-portal-hero-panel {
   background: linear-gradient(135deg, #f3f8ff 0%, #faf9f3 100%);
   box-shadow:

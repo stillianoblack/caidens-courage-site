@@ -87,11 +87,11 @@ export default function FocusFlameLabPage() {
       <FocusFlameGame
         scenes={scenes}
         parentsLink={
-          <Link to="/training-guides" className="ffl-nav-button">
-            For parents &amp; teachers
+          <Link to="/parents" className="ffl-nav-button">
+            Focus Flame Academy
           </Link>
         }
-        getBookHref="/#preorder"
+        getBookHref="/brave-mind-club"
       />
     </main>
   );

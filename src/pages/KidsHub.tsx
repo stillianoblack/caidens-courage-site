@@ -5,7 +5,7 @@ import CourageFooter from '../components/courage/CourageFooter';
 import KidsHubCard from '../components/courage/KidsHubCard';
 import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
-import { FOCUS_FLAME_LAB_PATH } from '../config/courageNav';
+import { BMC_RESET_TOOLS_PATH, BRAVE_MIND_CLUB_PATH, FOCUS_FLAME_LAB_PATH } from '../config/courageRoutes';
 import useHashScroll from '../hooks/useHashScroll';
 
 const KidsHub: React.FC = () => {
@@ -30,7 +30,20 @@ const KidsHub: React.FC = () => {
       />
 
       <section className="cc-kids-hub-list px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
-        <div className="mx-auto flex max-w-5xl flex-col gap-5 sm:gap-6 lg:gap-7">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-8 rounded-2xl border border-navy-100 bg-white px-6 py-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy-500/80">For Parents</p>
+              <p className="mt-1 font-display text-lg font-bold text-navy-600 sm:text-xl">
+                Explore family tools for focus, feelings, and courage at home.
+              </p>
+            </div>
+            <Button variant="secondary" size="md" as={Link} to="/parents" className="mt-4 w-full shrink-0 sm:mt-0 sm:w-auto">
+              Parents: explore family tools
+            </Button>
+          </div>
+
+          <div className="flex flex-col gap-5 sm:gap-6 lg:gap-7">
           <KidsHubCard
             title="Train Your Focus"
             description="Practice focus, feelings, and brave choices through interactive story moments."
@@ -71,7 +84,7 @@ const KidsHub: React.FC = () => {
                 variant="secondary"
                 size="lg"
                 as={Link}
-                to="/braveminds?type=coloring"
+                to={`${BRAVE_MIND_CLUB_PATH}?type=coloring`}
                 className="w-full sm:w-auto"
               >
                 Browse coloring pages
@@ -88,7 +101,7 @@ const KidsHub: React.FC = () => {
             imageFit="contain"
             imagePosition="center"
             cta={
-              <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" as={Link} to={`${BRAVE_MIND_CLUB_PATH}#kids`} className="w-full sm:w-auto">
                 Start a Mission
               </Button>
             }
@@ -110,7 +123,7 @@ const KidsHub: React.FC = () => {
             imageFit="contain"
             imagePosition="center bottom"
             cta={
-              <Button variant="primary" size="lg" as={Link} to="/b4-tools" className="w-full sm:w-auto">
+              <Button variant="primary" size="lg" as={Link} to={BMC_RESET_TOOLS_PATH} className="w-full sm:w-auto">
                 Open B-4 Reset Tools
               </Button>
             }
@@ -134,7 +147,7 @@ const KidsHub: React.FC = () => {
             imageSrc="/images/caidenscourage/backgrounds/community-strategy-story-bg.webp"
             imageAlt="Brave Mind Club community and printable resources"
             cta={
-              <Button variant="secondary" size="lg" as={Link} to="/braveminds#kids" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" as={Link} to={`${BRAVE_MIND_CLUB_PATH}#kids`} className="w-full sm:w-auto">
                 Join the Club
               </Button>
             }
@@ -159,6 +172,7 @@ const KidsHub: React.FC = () => {
               </Button>
             }
           />
+          </div>
         </div>
       </section>
 

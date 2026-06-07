@@ -110,10 +110,10 @@ export default function KidsGallerySection() {
   const cards = useMemo<KidsArtworkCard[]>(
     () => [
       {
-        id: 'mariana-colored',
-        imageSrc: '/images/gallery/Mariana_Coloredpage.webp',
-        caption: 'Mariana',
-        meta: 'Age 8 • Colored Mariana',
+        id: 'miranda-colored',
+        imageSrc: '/images/gallery/Miranda_Coloredpage.webp',
+        caption: 'Miranda',
+        meta: 'Age 8 • Colored Miranda',
         polaroidBg: '#F6E4C2',
         tapeBg: 'rgba(248, 232, 200, 0.95)',
         tapeRotate: 'rotate(-6deg)',

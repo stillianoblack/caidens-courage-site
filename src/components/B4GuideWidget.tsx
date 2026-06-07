@@ -32,7 +32,7 @@ export default function B4GuideWidget({
         <div className="b4-guide-widget-ring">
           <img
             className="b4-guide-widget-img"
-            src="/images/characters/B4_Guide_LowerThird.webp"
+            src="/images/characters/b-4_photo_icon_game.webp"
             alt=""
             loading="lazy"
             decoding="async"

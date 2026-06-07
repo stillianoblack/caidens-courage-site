@@ -1,0 +1,200 @@
+/* Detective Notebook — File #4 context clue presentation */
+
+.detective-notebook {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.625rem 1fr;
+  margin: 0 0 1.5rem;
+  filter: drop-shadow(0 14px 28px -16px rgba(47, 33, 71, 0.35));
+}
+
+.detective-notebookSpine {
+  border-radius: 0.375rem 0 0 0.375rem;
+  background: linear-gradient(180deg, #5a408f 0%, #3d2a63 100%);
+  box-shadow: inset -2px 0 6px rgba(0, 0, 0, 0.18);
+}
+
+.detective-notebookPage {
+  position: relative;
+  padding: 1.375rem 1.5rem 1.25rem;
+  border-radius: 0 0.875rem 0.875rem 0;
+  border: 2px solid rgba(122, 92, 191, 0.22);
+  border-left: none;
+  background-color: #fffef8;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 1.6875rem,
+      rgba(122, 92, 191, 0.08) 1.6875rem,
+      rgba(122, 92, 191, 0.08) 1.75rem
+    ),
+    linear-gradient(90deg, rgba(229, 192, 106, 0.35) 0, rgba(229, 192, 106, 0.35) 2px, transparent 2px),
+    radial-gradient(circle at 12% 8%, rgba(250, 245, 255, 0.9) 0%, transparent 42%);
+  overflow: hidden;
+}
+
+.detective-notebookPage::before {
+  content: '';
+  position: absolute;
+  top: 0.75rem;
+  left: 0.625rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+  background: rgba(122, 92, 191, 0.12);
+  box-shadow:
+    0 1.125rem 0 rgba(122, 92, 191, 0.1),
+    0 2.25rem 0 rgba(122, 92, 191, 0.1);
+}
+
+.detective-notebookSticky {
+  position: absolute;
+  top: -0.35rem;
+  right: 1.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(145deg, #fff9c4 0%, #fde68a 100%);
+  box-shadow: 0 4px 12px -6px rgba(47, 33, 71, 0.35);
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #5a408f;
+  transform: rotate(3deg);
+}
+
+.detective-notebookClueTag {
+  position: absolute;
+  bottom: 0.875rem;
+  right: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1.5px dashed rgba(124, 92, 191, 0.35);
+  background: rgba(250, 245, 255, 0.85);
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c5cbf;
+  transform: rotate(-4deg);
+}
+
+.detective-notebookLabel {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c5cbf;
+}
+
+.detective-notebookText {
+  margin: 0 0 1.125rem;
+  padding-left: 0.125rem;
+  font-size: clamp(1.0625rem, 2.5vw, 1.2rem);
+  line-height: 1.75;
+  font-weight: 600;
+  font-style: italic;
+  color: #2f2147;
+}
+
+.detective-notebookInlineHighlight {
+  position: relative;
+  display: inline;
+  white-space: nowrap;
+}
+
+.detective-notebookInlineHighlight .detective-notebookMagnifierSvg {
+  position: absolute;
+  top: -0.85rem;
+  left: 50%;
+  width: 1.375rem;
+  height: 1.375rem;
+  transform: translateX(-50%);
+  color: rgba(124, 92, 191, 0.55);
+  pointer-events: none;
+}
+
+.detective-notebookWord {
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(180deg, #fff4cc 0%, #fde68a 100%);
+  color: #5a408f;
+  font-weight: 800;
+  font-style: normal;
+  box-shadow:
+    inset 0 -2px 0 rgba(201, 164, 74, 0.45),
+    0 0 0 1px rgba(229, 192, 106, 0.55);
+}
+
+.detective-notebookVocab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 2px solid rgba(124, 92, 191, 0.2);
+  background: linear-gradient(135deg, rgba(250, 245, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.detective-notebookVocabLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7c5cbf;
+}
+
+.detective-notebookVocabWord {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem 0.25rem 0.375rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c5cbf 0%, #9b7fd4 100%);
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 18px -8px rgba(124, 92, 191, 0.55);
+}
+
+.detective-notebookVocabWord .detective-notebookMagnifierSvg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #fde68a;
+  flex-shrink: 0;
+}
+
+.miranda-game .game-quizWrap--notebook {
+  max-width: 38rem;
+}
+
+.miranda-game .game-quizWrap--notebook .bbc-questionText {
+  margin-top: 0.25rem;
+  font-size: clamp(1.125rem, 2.8vw, 1.35rem);
+}
+
+.miranda-game .game-landing--notebook .bbc-eyebrow {
+  color: #6d28d9;
+}
+
+.miranda-game .game-landing--notebook .game-startBtn {
+  background: linear-gradient(135deg, #7c5cbf 0%, #9b7fd4 45%, #c9a44a 100%);
+}
+
+@media (max-width: 640px) {
+  .detective-notebookPage {
+    padding: 1.125rem 1.125rem 1rem;
+  }
+
+  .detective-notebookSticky {
+    right: 0.75rem;
+    font-size: 0.625rem;
+  }
+
+  .detective-notebookClueTag {
+    display: none;
+  }
+}

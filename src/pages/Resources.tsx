@@ -1,13 +1,27 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { RESOURCES, ResourceType, Audience, getThumbnailUrl } from '../data/resources';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import CourageHeader from '../components/courage/CourageHeader';
-import Footer from '../components/Footer';
+import CourageFooter from '../components/courage/CourageFooter';
 import SectionHero from '../components/courage/SectionHero';
 import GlobalNotification from '../components/GlobalNotification';
 import { submitNetlifyForm } from '../utils/netlifyForms';
+import {
+  BMC_ACTIVITIES_PATH,
+  BMC_COLORING_PATH,
+  BMC_RESET_TOOLS_PATH,
+  BRAVE_MIND_CLUB_PATH,
+} from '../config/courageRoutes';
+
+const BMC_CATEGORIES = [
+  { label: 'Coloring Pages', href: BMC_COLORING_PATH },
+  { label: 'B-4 Reset Tools', href: BMC_RESET_TOOLS_PATH },
+  { label: 'Worksheets', href: `${BRAVE_MIND_CLUB_PATH}?type=worksheet` },
+  { label: 'Wallpapers', href: `${BRAVE_MIND_CLUB_PATH}?type=wallpaper` },
+  { label: 'Activities', href: BMC_ACTIVITIES_PATH },
+] as const;
 
 const Resources: React.FC = () => {
   const location = useLocation();
@@ -23,14 +37,33 @@ const Resources: React.FC = () => {
   const [notifyError, setNotifyError] = useState<string | null>(null);
   const [notifyShowNotice, setNotifyShowNotice] = useState(false);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
-  // Check URL params for filter on mount
+  // Check URL params and canonical paths for filter on mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const typeParam = params.get('type');
+    const tabParam = params.get('tab');
     const audienceParam = params.get('audience');
-    
-    if (typeParam === 'all') {
+
+    const tabToType: Record<string, ResourceType> = {
+      wallpapers: 'wallpaper',
+      wallpaper: 'wallpaper',
+      coloring: 'coloring',
+      'coloring-pages': 'coloring',
+      worksheets: 'worksheet',
+      worksheet: 'worksheet',
+      activities: 'worksheet',
+      'teacher-packs': 'teacher-pack',
+      'teacher-pack': 'teacher-pack',
+    };
+
+    if (location.pathname === BMC_COLORING_PATH) {
       setSelectedType('coloring');
+    } else if (location.pathname === BMC_ACTIVITIES_PATH) {
+      setSelectedType('worksheet');
+    } else if (typeParam === 'all') {
+      setSelectedType('coloring');
+    } else if (tabParam && tabToType[tabParam]) {
+      setSelectedType(tabToType[tabParam]);
     } else if (typeParam && ['wallpaper', 'coloring', 'worksheet', 'teacher-pack'].includes(typeParam)) {
       setSelectedType(typeParam as ResourceType);
     }
@@ -72,11 +105,12 @@ const Resources: React.FC = () => {
     return () => {
       timeoutIds.forEach((id) => clearTimeout(id));
     };
-  }, [location.search, location.hash]);
+  }, [location.search, location.hash, location.pathname]);
 
-  // Scroll to top when Resources page mounts (e.g. from Explore buttons on Camp Courage)
+  // Scroll to top when Brave Mind Club page mounts
   useEffect(() => {
     window.scrollTo(0, 0);
+    document.title = "Brave Mind Club | Caiden's Courage";
   }, []);
 
   // Scroll to results when audience filter changes (from URL or dropdown)
@@ -272,10 +306,24 @@ const Resources: React.FC = () => {
       <SectionHero
         id="resources-header"
         eyebrow="Brave Mind Club"
-        title="Brave Mind Club Activities"
-        description="SEL tools, coloring pages, wallpapers, and worksheets for kids, parents, and educators."
-        supportingText="All resources are free and designed to support neurodiverse kids."
+        title="Brave Mind Club"
+        description="Free activities, coloring pages, B-4 reset tools, and printable adventures for brave minds."
+        supportingText="Most resources are free and designed for neurodivergent-friendly learning at home and in the classroom."
       />
+
+      <section className="border-b border-navy-100 bg-white py-6">
+        <div className="cc-site-container mx-auto flex flex-wrap gap-2 px-4 sm:px-6 lg:px-8">
+          {BMC_CATEGORIES.map((category) => (
+            <Link
+              key={category.label}
+              to={category.href}
+              className="rounded-full border border-navy-100 bg-cream px-4 py-2 text-sm font-semibold text-navy-600 transition-colors hover:border-navy-200 hover:bg-white hover:text-navy-800"
+            >
+              {category.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* Filters and Search */}
       <div 
@@ -915,7 +963,7 @@ const Resources: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <Footer />
+      <CourageFooter />
 
       {/* Coming Soon Modal */}
       {isComingSoonModalOpen && (

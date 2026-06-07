@@ -1,0 +1,91 @@
+.sg-lightboxBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.sg-lightboxDialog {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  width: min(56rem, 100%);
+  max-height: min(90vh, 48rem);
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  overflow: auto;
+}
+
+@media (min-width: 768px) {
+  .sg-lightboxDialog {
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: start;
+  }
+}
+
+.sg-lightboxClose {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  color: #243e70;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sg-lightboxImageWrap {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: rgba(36, 62, 112, 0.04);
+}
+
+.sg-lightboxImage {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 36rem);
+  object-fit: contain;
+}
+
+.sg-lightboxMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.sg-lightboxNickname {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.sg-lightboxTitle {
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #243e70;
+}
+
+.sg-lightboxCaption,
+.sg-lightboxFacilitatorNote {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.sg-lightboxReview {
+  margin-top: 0.5rem;
+}

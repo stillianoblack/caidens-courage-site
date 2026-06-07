@@ -33,6 +33,10 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# macOS duplicate copies (e.g. "file 2.webp")
+**/* 2.*
+**/* 2/
+
 
 # Local Netlify folder
 .netlify

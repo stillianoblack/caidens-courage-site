@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
-import Footer from '../components/Footer';
+import CourageFooter from '../components/courage/CourageFooter';
 import SectionHero from '../components/courage/SectionHero';
 import Button from '../components/ui/Button';
 
@@ -50,6 +50,10 @@ const units: Unit[] = [
 ];
 
 const B4Clicker: React.FC = () => {
+  useEffect(() => {
+    document.title = "B-4 Reset Tools | Brave Mind Club";
+  }, []);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [screen, setScreen] = useState<'intro' | 'selection' | 'acknowledgement' | 'mission' | 'success'>('intro');
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
@@ -129,11 +133,11 @@ const B4Clicker: React.FC = () => {
 
       <SectionHero
         variant="compact"
-        eyebrow="Courage Reset Tools"
+        eyebrow="Brave Mind Club"
         titleAccent="B-4"
         title="Reset Tools"
-        description="Quick story-powered focus resets designed to help kids pause, regroup, and return to the adventure."
-        supportingText="Pick a Courage Module to clear the static and get back into the action."
+        description="B-4 Reset Tools help kids pause, name what they feel, and take one small step back toward calm."
+        supportingText="Powered by Brave Mind Club — free, story-powered focus resets for home and classroom."
         ctaLabel="Get your focus back"
         ctaOnClick={handleOpenModal}
       />
@@ -213,7 +217,7 @@ const B4Clicker: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <Footer />
+      <CourageFooter />
 
       {/* Modal */}
       {isModalOpen && (

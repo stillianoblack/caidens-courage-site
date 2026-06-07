@@ -1,0 +1,350 @@
+.askB4-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  background: rgba(5, 11, 24, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.askB4-drawer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  width: min(24rem, 100vw);
+  height: min(34rem, 100dvh);
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: #050b18;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 640px) {
+  .askB4-drawer {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    height: 32.5rem;
+    max-height: calc(100dvh - 3rem);
+    border-radius: 1rem;
+  }
+}
+
+/* Mobile: bottom sheet — override legacy index.css top offset for Ask B-4 */
+@media (max-width: 639px) {
+  .askB4-drawer.b4-chat-drawer {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: min(88dvh, 100dvh) !important;
+    max-height: 88dvh !important;
+    border-radius: 1rem 1rem 0 0;
+  }
+}
+
+.askB4-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(240, 206, 110, 0.2);
+  background: rgba(7, 20, 38, 0.85);
+  border-radius: 1rem 1rem 0 0;
+  flex-shrink: 0;
+}
+
+.askB4-headerMain {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.askB4-avatarWrap {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 20, 38, 0.65);
+}
+
+.askB4-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.askB4-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.2;
+}
+
+.askB4-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.askB4-closeBtn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.askB4-modeRow {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.askB4-modePill {
+  flex: 1;
+  min-height: 1.875rem;
+  border: 1px solid rgba(240, 206, 110, 0.25);
+  border-radius: 999px;
+  background: rgba(7, 20, 38, 0.6);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.askB4-modePill--active {
+  background: rgba(240, 206, 110, 0.18);
+  border-color: rgba(240, 206, 110, 0.55);
+  color: #f6d06f;
+}
+
+.askB4-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.askB4-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.askB4-messageRow {
+  display: flex;
+}
+
+.askB4-messageRow--user {
+  justify-content: flex-end;
+}
+
+.askB4-messageRow--assistant {
+  justify-content: flex-start;
+}
+
+.askB4-bubble {
+  max-width: 88%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.askB4-bubble--user {
+  background: rgba(7, 20, 38, 0.85);
+  border: 1px solid rgba(240, 206, 110, 0.28);
+  color: rgba(255, 255, 255, 0.95);
+  border-bottom-right-radius: 0.25rem;
+}
+
+.askB4-bubble--assistant {
+  background: rgba(11, 30, 58, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  border-bottom-left-radius: 0.25rem;
+}
+
+.askB4-bubbleText {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.askB4-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+
+.askB4-actionBtn {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid rgba(240, 206, 110, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(240, 206, 110, 0.1);
+  color: #f6d06f;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.askB4-actionBtn:hover {
+  background: rgba(240, 206, 110, 0.18);
+}
+
+.askB4-typing {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.askB4-typing span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: rgba(240, 206, 110, 0.75);
+  animation: askB4-bounce 0.9s infinite ease-in-out;
+}
+
+.askB4-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.askB4-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes askB4-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.askB4-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0 0.75rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.askB4-starterBtn {
+  font-size: 0.6875rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 206, 110, 0.25);
+  background: rgba(7, 20, 38, 0.65);
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  text-align: left;
+}
+
+.askB4-footer {
+  padding: 0.625rem 0.75rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 20, 38, 0.95);
+  flex-shrink: 0;
+}
+
+.askB4-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.askB4-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 3.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(240, 206, 110, 0.32);
+  background: rgba(5, 11, 24, 0.75);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  line-height: 1.45;
+}
+
+.askB4-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.askB4-sendBtn {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f6d06f, #c8922e);
+  color: #0b1a2b;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.askB4-sendBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.askB4-disclaimer {
+  margin: 0.375rem 0 0;
+  font-size: 0.625rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+@media (max-width: 639px) {
+  .askB4-disclaimer {
+    display: none;
+  }
+
+  .askB4-subtitle {
+    font-size: 0.625rem;
+  }
+}

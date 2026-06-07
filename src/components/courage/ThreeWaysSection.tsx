@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FOCUS_FLAME_LAB_PATH, LEGACY_CAMP_COURAGE_PATH } from '../../config/courageNav';
+import { CAMPS_PATH, FOCUS_FLAME_LAB_PATH } from '../../config/courageNav';
 import { VALE_CLASSIC_HOME_URL } from '../../config/valeLinks';
 
 type Accent = 'gold' | 'blue' | 'teal';
@@ -13,6 +13,7 @@ type WayCard = {
   href: string;
   external?: boolean;
   accent: Accent;
+  bullets?: readonly string[];
 };
 
 const WAYS: WayCard[] = [
@@ -34,12 +35,14 @@ const WAYS: WayCard[] = [
     accent: 'blue',
   },
   {
-    title: 'Bring it to Your School',
-    label: 'Camp Courage',
-    description: 'Story-powered SEL experiences for classrooms, camps, and youth programs.',
-    cta: 'Explore Camp Courage',
-    href: LEGACY_CAMP_COURAGE_PATH,
+    title: 'Bring Focus Flame Academy to Your Program',
+    label: 'Focus Flame Academy',
+    description:
+      'Story-powered SEL experiences for families, classrooms, camps, after-school programs, and school communities.',
+    cta: 'Explore Focus Flame Academy',
+    href: CAMPS_PATH,
     accent: 'teal',
+    bullets: ['SEL Modules', 'Facilitator Guides', 'Camp & School Pilots'],
   },
 ];
 
@@ -116,6 +119,16 @@ function ExperienceCard({ card }: { card: WayCard }) {
         {card.title}
       </h3>
       <p className="mt-3 flex-1 text-sm leading-relaxed text-navy-600 sm:text-[0.9375rem]">{card.description}</p>
+      {card.bullets?.length ? (
+        <ul className="mt-4 space-y-2">
+          {card.bullets.map((bullet) => (
+            <li key={bullet} className="flex items-start gap-2 text-sm text-navy-600">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" aria-hidden />
+              {bullet}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <span className={`mt-5 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors ${styles.cta}`}>
         {card.cta}
         <svg

@@ -1,0 +1,317 @@
+.bbc-admin {
+  min-height: 100dvh;
+  background: #f9fafb;
+  color: #1a2f52;
+  padding: 2rem 1.25rem 3rem;
+  font-family: inherit;
+}
+
+.bbc-adminHeader {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.bbc-adminEyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.bbc-adminTitle {
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.bbc-adminSub {
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+  color: #6b7280;
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.bbc-adminWarning {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  max-width: 42rem;
+}
+
+.bbc-adminNote {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.bbc-adminDashboard {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem;
+}
+
+.bbc-adminStatGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .bbc-adminStatGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .bbc-adminStatGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.bbc-adminStatCard {
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 12px -8px rgba(36, 62, 112, 0.12);
+}
+
+.bbc-adminStatCard--highlight {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.bbc-adminStatLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.bbc-adminStatValue {
+  margin-top: 0.4rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a2f52;
+  line-height: 1.1;
+}
+
+.bbc-adminChartPanel {
+  padding: 1.25rem 1.375rem 1.375rem;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 4px 24px -16px rgba(36, 62, 112, 0.15);
+}
+
+.bbc-adminChartHead {
+  margin-bottom: 1.125rem;
+}
+
+.bbc-adminChartTitle {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.bbc-adminChartSub {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bbc-adminBarList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bbc-adminBarRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bbc-adminBarMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bbc-adminBarLabel {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.bbc-adminBarPct {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.bbc-adminBarTrack {
+  height: 0.875rem;
+  border-radius: 9999px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+
+.bbc-adminBarFill {
+  height: 100%;
+  border-radius: inherit;
+  min-width: 0;
+  transition: width 0.45s ease;
+}
+
+.bbc-adminBarFill--gold {
+  background: linear-gradient(90deg, #c9a44a, #e5c06a);
+}
+
+.bbc-adminBarFill--navy {
+  background: linear-gradient(90deg, #1a2f52, #243e70);
+}
+
+.bbc-adminBarFill--green {
+  background: linear-gradient(90deg, #047857, #059669);
+}
+
+.bbc-adminBarFill--overall {
+  background: linear-gradient(90deg, #243e70 0%, #e5c06a 100%);
+}
+
+.bbc-adminCompare {
+  margin-top: 1.25rem;
+  padding-top: 1.125rem;
+  border-top: 1px dashed #d1d5db;
+}
+
+.bbc-adminCompareTitle {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #243e70;
+  margin-bottom: 0.625rem;
+}
+
+.bbc-adminCompareGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bbc-adminCompareRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #4b5563;
+}
+
+.bbc-adminCompareLabel {
+  font-weight: 700;
+  color: #1a2f52;
+}
+
+.bbc-adminActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.bbc-adminBtn {
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border-radius: 0.75rem;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bbc-adminBtn--primary {
+  border-color: #243e70;
+  background: #243e70;
+  color: #fff;
+}
+
+.bbc-adminBtn--danger {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.bbc-adminEmpty {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 2px dashed #d1d5db;
+  background: #fff;
+  text-align: center;
+  color: #6b7280;
+}
+
+.bbc-adminTableWrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 4px 24px -16px rgba(36, 62, 112, 0.15);
+}
+
+.bbc-adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.bbc-adminTable th,
+.bbc-adminTable td {
+  padding: 0.75rem 0.875rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.bbc-adminTable th {
+  background: #f3f4f6;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.bbc-adminTable tbody tr:hover {
+  background: #f9fafb;
+}
+
+.bbc-adminMono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  color: #6b7280;
+  max-width: 10rem;
+  word-break: break-all;
+}

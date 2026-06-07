@@ -8,6 +8,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   as?: 'a' | 'button' | typeof Link;
   href?: string;
   to?: string;
+  target?: string;
+  rel?: string;
   /** Optional left icon. Defaults to FocusFlame for primary buttons. Set to null to disable. */
   leftIconSrc?: string | null;
   children: React.ReactNode;
@@ -20,6 +22,8 @@ const Button: React.FC<ButtonProps> = ({
   as = 'button',
   href,
   to,
+  target,
+  rel,
   leftIconSrc,
   children,
   className = '',
@@ -96,6 +100,8 @@ const Button: React.FC<ButtonProps> = ({
       <a
         href={href}
         className={classes}
+        target={target}
+        rel={rel}
         {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         {contents}

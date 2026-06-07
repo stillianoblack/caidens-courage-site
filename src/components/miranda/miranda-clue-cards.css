@@ -1,0 +1,412 @@
+/* Miranda clue cards — shared design language (Games 1–4) */
+
+.miranda-clueLabel {
+  margin: 0 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c5cbf;
+}
+
+.miranda-clueTag {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.miranda-clueTag--case {
+  background: rgba(229, 192, 106, 0.22);
+  border: 1.5px solid rgba(201, 164, 74, 0.45);
+  color: #5a408f;
+}
+
+.miranda-clueTag--grammar {
+  background: rgba(124, 92, 191, 0.12);
+  border: 1.5px solid rgba(124, 92, 191, 0.28);
+  color: #4a3568;
+}
+
+.miranda-clueTag--letters {
+  background: linear-gradient(135deg, rgba(124, 92, 191, 0.14) 0%, rgba(229, 192, 106, 0.18) 100%);
+  border: 1.5px solid rgba(124, 92, 191, 0.25);
+  color: #5a408f;
+}
+
+.miranda-evidenceStamp {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  padding: 0.2rem 0.5rem;
+  border: 2px solid rgba(201, 164, 74, 0.55);
+  border-radius: 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: rgba(201, 164, 74, 0.85);
+  transform: rotate(-8deg);
+  opacity: 0.85;
+}
+
+.miranda-clueAccent {
+  width: 2rem;
+  height: 2rem;
+  color: #7c5cbf;
+}
+
+.miranda-clueAccent--ember,
+.miranda-clueAccent--flame {
+  color: #c9a44a;
+}
+
+/* ── Game 1: Case File / Witness Report ── */
+
+.miranda-caseFile {
+  position: relative;
+  margin: 0 0 1.375rem;
+  filter: drop-shadow(0 12px 28px -16px rgba(47, 33, 71, 0.32));
+}
+
+.miranda-caseFileTab {
+  position: absolute;
+  top: -0.625rem;
+  left: 1rem;
+  z-index: 2;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.375rem 0.375rem 0 0;
+  background: linear-gradient(180deg, #e8d5a8 0%, #d4bc82 100%);
+  font-size: 0.5625rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #5a408f;
+  box-shadow: 0 -2px 8px -4px rgba(47, 33, 71, 0.2);
+}
+
+.miranda-caseFileBody {
+  position: relative;
+  padding: 1.375rem 1.375rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 2px solid rgba(201, 164, 74, 0.35);
+  background: linear-gradient(145deg, #fff8eb 0%, #f5ecd4 55%, #faf5ff 100%);
+  overflow: hidden;
+}
+
+.miranda-caseFileBody::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 1.5rem,
+    rgba(122, 92, 191, 0.04) 1.5rem,
+    rgba(122, 92, 191, 0.04) 1.5625rem
+  );
+  pointer-events: none;
+}
+
+.miranda-caseFileAccentWrap {
+  position: absolute;
+  bottom: 0.875rem;
+  right: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: rgba(250, 245, 255, 0.85);
+  border: 2px solid rgba(124, 92, 191, 0.18);
+}
+
+.miranda-caseFileText {
+  position: relative;
+  margin: 0;
+  padding-right: 3rem;
+  font-size: clamp(1rem, 2.4vw, 1.125rem);
+  line-height: 1.65;
+  font-weight: 600;
+  font-style: italic;
+  color: #2f2147;
+}
+
+/* ── Game 2: Grammar Clue Board ── */
+
+.miranda-grammarBoard {
+  position: relative;
+  margin: 0 0 1.375rem;
+  padding-top: 0.5rem;
+  filter: drop-shadow(0 12px 28px -16px rgba(47, 33, 71, 0.3));
+}
+
+.miranda-grammarBoardPin {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 3;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #fde68a 0%, #c9a44a 100%);
+  box-shadow: 0 2px 6px rgba(47, 33, 71, 0.25);
+  transform: translateX(-50%);
+}
+
+.miranda-grammarBoardStrings {
+  position: absolute;
+  top: 0.35rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.miranda-grammarBoardStrings span {
+  width: 2px;
+  height: 1.25rem;
+  background: rgba(124, 92, 191, 0.2);
+  border-radius: 999px;
+}
+
+.miranda-grammarBoardSurface {
+  position: relative;
+  padding: 1.375rem 1.25rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 2px solid rgba(122, 92, 191, 0.22);
+  background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+}
+
+.miranda-grammarBadge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  background: #7c5cbf;
+  color: #fff;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.miranda-grammarStrip {
+  position: relative;
+  margin-top: 0.25rem;
+  padding: 0.875rem 1rem 0.875rem 1.375rem;
+  border-radius: 0.625rem;
+  background: #fffef8;
+  border: 1.5px solid rgba(229, 192, 106, 0.45);
+  box-shadow: 0 4px 14px -10px rgba(124, 92, 191, 0.28);
+}
+
+.miranda-grammarStripPin {
+  position: absolute;
+  top: -0.35rem;
+  left: 0.75rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 999px;
+  background: #e5c06a;
+  box-shadow: 0 1px 4px rgba(47, 33, 71, 0.2);
+}
+
+.miranda-grammarStripText {
+  margin: 0;
+  font-size: clamp(1rem, 2.4vw, 1.125rem);
+  line-height: 1.7;
+  font-weight: 600;
+  color: #2f2147;
+}
+
+.miranda-grammarBlank {
+  display: inline;
+  padding: 0 0.15rem;
+  border-bottom: 3px solid #7c5cbf;
+  color: #7c5cbf;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: 0.08em;
+}
+
+.miranda-grammarBoardAccent {
+  position: absolute;
+  bottom: 0.625rem;
+  right: 0.625rem;
+  opacity: 0.45;
+}
+
+.miranda-grammarBoardAccent .miranda-clueAccent {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ── Game 3: Missing Letter Evidence ── */
+
+.miranda-missingLetterCard {
+  position: relative;
+  margin: 0 0 1.375rem;
+  filter: drop-shadow(0 12px 28px -16px rgba(47, 33, 71, 0.32));
+}
+
+.miranda-missingLetterTiles {
+  position: absolute;
+  top: -0.5rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.miranda-missingLetterTile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(145deg, #faf5ff 0%, #ede9fe 100%);
+  border: 1.5px solid rgba(124, 92, 191, 0.35);
+  font-size: 0.625rem;
+  font-weight: 900;
+  color: #7c5cbf;
+  box-shadow: 0 2px 6px -4px rgba(47, 33, 71, 0.25);
+}
+
+.miranda-missingLetterTile:nth-child(2) {
+  transform: translateY(3px) rotate(-4deg);
+}
+
+.miranda-missingLetterTile:nth-child(3) {
+  transform: translateY(-2px) rotate(3deg);
+}
+
+.miranda-missingLetterTile:nth-child(4) {
+  transform: translateY(4px) rotate(-2deg);
+}
+
+.miranda-missingLetterPage {
+  position: relative;
+  padding: 1.375rem 1.375rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 2px solid rgba(122, 92, 191, 0.22);
+  background-color: #fffef8;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 1.625rem,
+      rgba(122, 92, 191, 0.07) 1.625rem,
+      rgba(122, 92, 191, 0.07) 1.6875rem
+    ),
+    linear-gradient(90deg, rgba(229, 192, 106, 0.28) 0, rgba(229, 192, 106, 0.28) 2px, transparent 2px);
+}
+
+.miranda-missingLetterAccent {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  display: flex;
+  opacity: 0.55;
+}
+
+.miranda-missingLetterAccent .miranda-clueAccent {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.miranda-missingLetterSentence {
+  margin: 0 0 1rem;
+  padding-right: 2rem;
+  font-size: clamp(1rem, 2.4vw, 1.0625rem);
+  line-height: 1.75;
+  font-weight: 600;
+  color: #2f2147;
+}
+
+.miranda-missingInlineWord .game-missingBlank {
+  border-bottom-color: #7c5cbf;
+}
+
+.miranda-missingLetterWordHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border: 2px dashed rgba(124, 92, 191, 0.28);
+  background: linear-gradient(135deg, rgba(250, 245, 255, 0.95) 0%, rgba(255, 251, 235, 0.85) 100%);
+}
+
+.miranda-missingLetterWordLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7c5cbf;
+}
+
+.miranda-missingLetterWordLarge {
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #2f2147;
+}
+
+.miranda-missingLetterWordLarge .game-missingBlank {
+  width: max(1.25rem, calc(var(--blank-count, 1) * 0.85rem));
+  border-bottom-width: 5px;
+  border-bottom-color: #7c5cbf;
+  transform: translateY(-3px);
+}
+
+.miranda-missingLetterWordLarge .game-missingChar {
+  font-size: inherit;
+}
+
+/* Quiz wrap modifiers */
+
+.miranda-game .game-quizWrap--caseFile,
+.miranda-game .game-quizWrap--grammarBoard,
+.miranda-game .game-quizWrap--missingLetter,
+.miranda-game .game-quizWrap--notebook {
+  max-width: 38rem;
+}
+
+@media (max-width: 640px) {
+  .miranda-caseFileBody,
+  .miranda-grammarBoardSurface,
+  .miranda-missingLetterPage {
+    padding: 1.125rem 1rem 1rem;
+  }
+
+  .miranda-caseFileText,
+  .miranda-grammarStripText,
+  .miranda-missingLetterSentence {
+    padding-right: 0;
+  }
+
+  .miranda-caseFileAccentWrap,
+  .miranda-missingLetterAccent {
+    opacity: 0.65;
+    transform: scale(0.85);
+  }
+
+  .miranda-missingLetterTiles {
+    top: -0.35rem;
+    right: 0.5rem;
+  }
+
+  .miranda-missingLetterTile {
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 0.5625rem;
+  }
+}

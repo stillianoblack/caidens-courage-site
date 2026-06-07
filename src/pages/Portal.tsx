@@ -1,71 +1,39 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import PortalHero from '../components/courage/PortalHero';
-import PortalPricingSection from '../components/courage/PortalPricingSection';
-import { readPortalSessionUnlock } from '../config/portalAccess';
-import {
-  parsePortalAudienceParam,
-  portalAccessTypeToAudience,
-  type PortalAudienceTab,
-} from '../config/portalAudience';
+import { parsePortalAudienceParam, type PortalAudienceTab } from '../config/portalAudience';
 import { usePortalUnlock } from '../hooks/usePortalUnlock';
 
 /**
- * Caiden's Courage Portal — MVP code-based gateway.
- *
- * FUTURE-PROOFING:
- * - Access validation is client-side only for pilot testing.
- * - Move code verification to Netlify Functions, Supabase, or similar before launch.
- * - Paid tiers must not rely on front-end checks alone.
- * - sessionStorage unlock is a convenience, not authentication.
+ * Caiden's Courage Portal — access/login gateway only.
+ * Pricing and persona offers live on /parents, /teachers, /camps, and /schools.
  */
 const Portal: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('hero');
 
-  const audience = parsePortalAudienceParam(searchParams.get('audience'));
-
-  const setAudience = useCallback(
-    (tab: PortalAudienceTab) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('audience', tab);
-          return next;
-        },
-        { replace: true, preventScrollReset: true }
-      );
-    },
-    [setSearchParams]
-  );
+  const audienceParam = searchParams.get('audience');
+  const audience: PortalAudienceTab | null = audienceParam
+    ? parsePortalAudienceParam(audienceParam)
+    : null;
 
   useEffect(() => {
     document.title = "Caiden's Courage Portal";
   }, []);
 
-  // Sync tab to stored unlock tier on first load (e.g. returning visitor with session).
-  useEffect(() => {
-    const stored = readPortalSessionUnlock();
-    if (stored && !searchParams.get('audience')) {
-      setAudience(portalAccessTypeToAudience(stored));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
-  }, []);
-
   return (
-    <div className="min-h-screen overflow-x-clip bg-cream font-body">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-cream font-body">
       <CourageHeader />
 
       <PortalHero
+        audience={audience}
         accessCode={accessCode}
         error={error}
         onAccessCodeChange={onAccessCodeChange}
         onSubmit={handleSubmit}
       />
-
-      <PortalPricingSection audience={audience} onAudienceChange={setAudience} />
 
       <CourageFooter />
     </div>
