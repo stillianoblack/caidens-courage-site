@@ -29,7 +29,7 @@ export const HOMEPAGE_PATH_CARDS: RelatedPathCard[] = [
     bullets: ['SEL modules', 'Facilitator guides', 'Pilot materials'],
     cta: 'Explore Academy',
     to: '/camps',
-    imageSrc: '/images/caidenscourage/Choose_your_path/superintendent_card%202.webp',
+    imageSrc: '/images/caidenscourage/Choose_your_path/superintendent_card.webp',
     imageAlt: 'Focus Flame Academy for camps and schools',
   },
   {
@@ -39,7 +39,7 @@ export const HOMEPAGE_PATH_CARDS: RelatedPathCard[] = [
     bullets: ['Focus practice', 'Feeling check-ins', 'Brave choices'],
     cta: 'Play Focus Flame Lab',
     to: '/focus-flame-lab',
-    imageSrc: '/images/caidenscourage/Choose_your_path/caidenvale_card%202.webp',
+    imageSrc: '/images/caidenscourage/Choose_your_path/caidenvale_card.webp',
     imageAlt: 'Focus Flame Lab interactive adventure',
   },
 ];
