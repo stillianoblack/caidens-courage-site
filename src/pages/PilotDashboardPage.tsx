@@ -21,6 +21,7 @@ import {
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
   PILOT_DASHBOARD_TITLE,
+  PILOT_PAGE_SUBTITLES,
   PILOT_SIDEBAR_NAV,
   type PilotSidebarNavId,
 } from '../data/pilotDashboardContent';
@@ -51,6 +52,7 @@ export default function PilotDashboardPage() {
 
   const isB4Results = useMemo(() => isB4ResultsRoute(location.pathname), [location.pathname]);
   const pageTitle = isB4Results ? 'B-4 Baseline Check Results' : NAV_TITLE[activeNav];
+  const pageSubtitle = isB4Results ? undefined : PILOT_PAGE_SUBTITLES[activeNav];
 
   const { metrics, results, source, warning, loading } = useAssessmentResults(resultsVersion);
 
@@ -96,7 +98,7 @@ export default function PilotDashboardPage() {
       />
 
       <div className="pilot-main">
-        <PilotDashboardTopBar pageTitle={pageTitle} />
+        <PilotDashboardTopBar pageTitle={pageTitle} pageSubtitle={pageSubtitle} />
 
         <div className="pilot-content">
           {isB4Results ? (

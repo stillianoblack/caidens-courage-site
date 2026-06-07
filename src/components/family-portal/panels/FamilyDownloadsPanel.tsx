@@ -92,7 +92,7 @@ export default function FamilyDownloadsPanel() {
         <h2 className="family-panelBlockTitle">More Resources</h2>
         <div className="family-dash-grid family-dash-grid--2">
           <Link to={`${FAMILY_PORTAL_PATH}/guide`} className="family-dash-card">
-            <h3 className="family-dash-cardTitle">Family Guide</h3>
+            <h3 className="family-dash-cardTitle">Parent Corner</h3>
             <p className="family-dash-cardDesc">
               Discussion prompts and activity instructions for home learning.
             </p>

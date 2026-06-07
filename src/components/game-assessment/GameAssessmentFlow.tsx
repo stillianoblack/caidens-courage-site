@@ -25,9 +25,13 @@ import MirandaNavButton from '../miranda/MirandaNavButton';
 import MirandaClueCard, { questionHasMirandaClueGraphic } from '../miranda/MirandaClueCard';
 import CaidenGameHeader from '../caiden/CaidenGameHeader';
 import CaidenQuestCard, { questionHasCaidenQuestGraphic } from '../caiden/CaidenQuestCard';
+import VictoriaGameHeader from '../adult/VictoriaGameHeader';
+import VictoriaReflectionCard, { questionHasVictoriaReflectionGraphic } from '../adult/VictoriaReflectionCard';
+import VictoriaFeedbackCard from '../adult/VictoriaFeedbackCard';
 import { getCaidenNextQuest } from '../../data/caiden/progression';
 import { getMirandaNextCase, MIRANDA_RETURN_HUB_LABEL } from '../../data/miranda/progression';
 import '../caiden/caiden-game.css';
+import '../adult/adult-game.css';
 
 type GameView = 'landing' | 'quiz' | 'complete';
 
@@ -39,6 +43,10 @@ type GameAssessmentFlowProps = {
   useMirandaHeader?: boolean;
   /** Floating Caiden focus quest header */
   useCaidenHeader?: boolean;
+  /** Dr. Victoria adult training header */
+  useVictoriaHeader?: boolean;
+  /** Label for hub back link on landing */
+  exitLabel?: string;
   /** Render inside Family Portal content area */
   embedded?: boolean;
   /** Jump straight into quiz (skip landing) */
@@ -57,9 +65,11 @@ export default function GameAssessmentFlow({
   exitPath = '/',
   useMirandaHeader = false,
   useCaidenHeader = false,
+  useVictoriaHeader = false,
   embedded = false,
   skipLanding = false,
   familyPortalPath,
+  exitLabel,
 }: GameAssessmentFlowProps) {
   const navigate = useNavigate();
   const totalQuestions = config.questions.length;
@@ -85,7 +95,13 @@ export default function GameAssessmentFlow({
   const quizAvatarSrc = config.quizAvatarSrc ?? config.avatarSrc ?? '';
   const decorVariant =
     config.decorVariant ??
-    (themeClassName.includes('miranda') ? 'miranda' : themeClassName.includes('caiden') ? 'caiden' : 'default');
+    (themeClassName.includes('miranda')
+      ? 'miranda'
+      : themeClassName.includes('caiden')
+        ? 'caiden'
+        : themeClassName.includes('victoria')
+          ? 'victoria'
+          : 'default');
 
   useEffect(() => {
     document.title = `${config.landing.title} | Caiden's Courage`;
@@ -203,15 +219,19 @@ export default function GameAssessmentFlow({
         return 'game-quizWrap--missingLetter';
       case 'focus_quest':
         return 'game-quizWrap--focusQuest';
+      case 'reflection_card':
+        return 'game-quizWrap--reflectionCard';
       default:
         return '';
     }
   }, [presentationStyle]);
 
   const hasClueGraphic = currentQuestion
-    ? useCaidenHeader
-      ? questionHasCaidenQuestGraphic(currentQuestion)
-      : questionHasMirandaClueGraphic(currentQuestion)
+    ? useVictoriaHeader
+      ? questionHasVictoriaReflectionGraphic(currentQuestion)
+      : useCaidenHeader
+        ? questionHasCaidenQuestGraphic(currentQuestion)
+        : questionHasMirandaClueGraphic(currentQuestion)
     : false;
 
   const shellClass = [
@@ -221,11 +241,13 @@ export default function GameAssessmentFlow({
   ]
     .filter(Boolean)
     .join(' ');
-  const HeaderComponent = useCaidenHeader
-    ? CaidenGameHeader
-    : useMirandaHeader
-      ? MirandaGameHeader
-      : GameHeader;
+  const HeaderComponent = useVictoriaHeader
+    ? VictoriaGameHeader
+    : useCaidenHeader
+      ? CaidenGameHeader
+      : useMirandaHeader
+        ? MirandaGameHeader
+        : GameHeader;
 
   return (
     <div className={shellClass}>
@@ -262,7 +284,7 @@ export default function GameAssessmentFlow({
               />
             ) : showLegacyHubBackLink ? (
               <Link to={exitPath} className="game-hubBackLink">
-                ← Back to Mystery Files
+                ← {exitLabel ?? 'Back to Mystery Files'}
               </Link>
             ) : null}
             <p className="bbc-eyebrow">{config.landing.eyebrow}</p>
@@ -295,17 +317,36 @@ export default function GameAssessmentFlow({
               <CharacterPromptBubble
                 avatarSrc={quizAvatarSrc}
                 avatarAlt={config.avatarAlt}
-                className={useCaidenHeader ? 'caiden-quizPrompt' : undefined}
+                className={
+                  useVictoriaHeader
+                    ? 'victoria-quizPrompt'
+                    : useCaidenHeader
+                      ? 'caiden-quizPrompt'
+                      : undefined
+                }
                 message={
-                  useCaidenHeader
-                    ? 'Choose the best answer, then tap Check.'
-                    : getGamePromptHint(currentQuestion)
+                  useVictoriaHeader
+                    ? 'Read the reflection card, choose your answer, then tap Check.'
+                    : useCaidenHeader
+                      ? 'Choose the best answer, then tap Check.'
+                      : getGamePromptHint(currentQuestion)
                 }
               />
             ) : null}
 
             {hasClueGraphic ? (
-              useCaidenHeader && currentQuestion.clueCard?.variant === 'focus_quest' ? (
+              useVictoriaHeader && currentQuestion.clueCard?.variant === 'reflection_card' ? (
+                <VictoriaReflectionCard
+                  label={currentQuestion.clueCard.label}
+                  tag={currentQuestion.clueCard.tag}
+                  text={currentQuestion.clueCard.text}
+                  accent={
+                    currentQuestion.clueCard.variant === 'reflection_card'
+                      ? currentQuestion.clueCard.accent
+                      : undefined
+                  }
+                />
+              ) : useCaidenHeader && currentQuestion.clueCard?.variant === 'focus_quest' ? (
                 <CaidenQuestCard
                   label={currentQuestion.clueCard.label}
                   tag={currentQuestion.clueCard.tag}
@@ -350,6 +391,15 @@ export default function GameAssessmentFlow({
               }}
               onSequenceClear={() => setAnswer([])}
             />
+
+            {useVictoriaHeader && checked && feedback && quizAvatarSrc ? (
+              <VictoriaFeedbackCard
+                avatarSrc={quizAvatarSrc}
+                avatarAlt={config.guideAvatarAlt ?? config.avatarAlt}
+                message={feedback}
+                tone={feedbackTone}
+              />
+            ) : null}
           </div>
         ) : null}
 
@@ -365,15 +415,19 @@ export default function GameAssessmentFlow({
             }}
             showMirandaAvatar={useMirandaHeader}
             showCaidenAvatar={useCaidenHeader}
+            showVictoriaAvatar={useVictoriaHeader}
             avatarSrc={config.avatarSrc}
             avatarAlt={config.avatarAlt}
-            hubPath={useMirandaHeader || useCaidenHeader ? exitPath : undefined}
+            hubPath={useMirandaHeader || useCaidenHeader || useVictoriaHeader ? exitPath : undefined}
             nextCasePath={nextCase?.path ?? nextQuest?.path}
             nextCaseLabel={nextCase?.label ?? nextQuest?.label}
-            familyPortalPath={useCaidenHeader ? familyPortalPath : undefined}
-            scoreLabel={useCaidenHeader ? 'focus moments' : 'clues'}
-            continueLabel={useCaidenHeader ? 'Continue Journey' : undefined}
-            familyPortalLabel={useCaidenHeader ? 'Return to Family Portal' : undefined}
+            familyPortalPath={useCaidenHeader || useVictoriaHeader ? familyPortalPath : undefined}
+            scoreLabel={useVictoriaHeader ? 'reflections' : useCaidenHeader ? 'focus moments' : 'clues'}
+            continueLabel={useCaidenHeader ? 'Continue Journey' : useVictoriaHeader ? 'Return to Training' : undefined}
+            familyPortalLabel={
+              useVictoriaHeader && familyPortalPath ? 'Return to Parent Corner' : useCaidenHeader ? 'Return to Family Portal' : undefined
+            }
+            exitLabel={exitLabel}
             onNavClick={playItemButton}
           />
         ) : null}

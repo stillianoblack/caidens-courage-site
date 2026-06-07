@@ -5,14 +5,15 @@ import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTo
 import '../components/family-portal/family-dashboard.css';
 import { FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
-import { FAMILY_PORTAL_TITLE } from '../data/familyPortalContent';
-import { isWidePortalContentRoute, resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { FAMILY_PAGE_SUBTITLES, FAMILY_PORTAL_TITLE } from '../data/familyPortalContent';
+import { isWidePortalContentRoute, resolvePortalNavId, resolvePortalPageTitle } from '../lib/familyPortalNav';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasSession = readFamilyPortalSession();
   const pageTitle = resolvePortalPageTitle(location.pathname);
+  const pageSubtitle = FAMILY_PAGE_SUBTITLES[resolvePortalNavId(location.pathname)];
   const isWideContent = isWidePortalContentRoute(location.pathname);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function FamilyPortalLayout() {
       <FamilyDashboardSidebar />
 
       <div className="family-main">
-        <FamilyDashboardTopBar pageTitle={pageTitle} />
+        <FamilyDashboardTopBar pageTitle={pageTitle} pageSubtitle={pageSubtitle} />
 
         <div className={`family-content${isWideContent ? ' family-content--wide' : ''}`}>
           <Outlet />

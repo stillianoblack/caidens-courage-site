@@ -27,11 +27,15 @@ export const SCHOOLS_PATH = '/schools';
 export const PORTAL_PATH = '/portal';
 
 export const FAMILY_PORTAL_PATH = '/portal/family';
+export const FAMILY_PARENT_CORNER_PATH = `${FAMILY_PORTAL_PATH}/parent-corner`;
+export const FAMILY_DR_VICTORIA_MISSION_1_PATH = `${FAMILY_PARENT_CORNER_PATH}/dr-victoria/mission-1`;
 export const KIDS_PORTAL_PATH = '/portal/kids';
 export const CAIDEN_QUEST_HUB_PATH = `${KIDS_PORTAL_PATH}/caiden`;
 export const CAIDEN_QUEST_1_PATH = `${CAIDEN_QUEST_HUB_PATH}/quest-1`;
 
 export const FACILITATOR_PORTAL_PATH = '/portal/facilitator';
+export const FACILITATOR_ADULT_TRAINING_PATH = `${FACILITATOR_PORTAL_PATH}/adult-training`;
+export const FACILITATOR_DR_VICTORIA_MISSION_1_PATH = `${FACILITATOR_ADULT_TRAINING_PATH}/dr-victoria/mission-1`;
 export const FACILITATOR_B4_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b4`;
 /** @deprecated Use FACILITATOR_B4_RESULTS_PATH */
 export const FACILITATOR_B4_BASELINE_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b4-baseline`;

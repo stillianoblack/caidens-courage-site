@@ -14,6 +14,7 @@ type GameAssessmentCompleteProps = {
   avatarAlt?: string;
   showMirandaAvatar?: boolean;
   showCaidenAvatar?: boolean;
+  showVictoriaAvatar?: boolean;
   hubPath?: string;
   nextCasePath?: string | null;
   nextCaseLabel?: string | null;
@@ -21,6 +22,7 @@ type GameAssessmentCompleteProps = {
   familyPortalLabel?: string;
   continueLabel?: string;
   scoreLabel?: string;
+  exitLabel?: string;
   onNavClick?: () => void;
 };
 
@@ -42,6 +44,7 @@ export default function GameAssessmentComplete({
   avatarAlt,
   showMirandaAvatar = false,
   showCaidenAvatar = false,
+  showVictoriaAvatar = false,
   hubPath,
   nextCasePath,
   nextCaseLabel,
@@ -49,10 +52,12 @@ export default function GameAssessmentComplete({
   familyPortalLabel = 'Return to Family Portal',
   continueLabel = 'Continue Journey',
   scoreLabel = 'clues',
+  exitLabel = 'Return to Training',
   onNavClick,
 }: GameAssessmentCompleteProps) {
   const isMirandaProgression = showMirandaAvatar && hubPath;
   const isCaidenProgression = showCaidenAvatar && hubPath;
+  const isVictoriaProgression = showVictoriaAvatar && hubPath;
   const hasNextCase = Boolean(nextCasePath && nextCaseLabel);
 
   const panelClass = [
@@ -60,6 +65,7 @@ export default function GameAssessmentComplete({
     'bbc-resultPanel--detailed',
     'game-complete',
     isCaidenProgression ? 'game-complete--caiden' : '',
+    isVictoriaProgression ? 'game-complete--victoria' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -81,7 +87,15 @@ export default function GameAssessmentComplete({
         </div>
       ) : null}
 
-      {!isCaidenProgression ? (
+      {isVictoriaProgression ? (
+        <div className="victoria-completeHero">
+          {avatarSrc ? (
+            <img src={avatarSrc} alt={avatarAlt ?? 'Dr. Victoria'} className="victoria-completeAvatar" />
+          ) : null}
+        </div>
+      ) : null}
+
+      {!isCaidenProgression && !isVictoriaProgression ? (
         <div className="game-completeBadge" aria-hidden="true">
           🔍
         </div>
@@ -90,19 +104,27 @@ export default function GameAssessmentComplete({
       <h2 className="bbc-title">{config.title}</h2>
       <p className="bbc-body">{resolveScoreMessage(config, score)}</p>
 
-      <p className={`game-completeScore${isCaidenProgression ? ' game-completeScore--caiden' : ''}`}>
+      <p
+        className={`game-completeScore${isCaidenProgression ? ' game-completeScore--caiden' : ''}${
+          isVictoriaProgression ? ' game-completeScore--victoria' : ''
+        }`}
+      >
         You completed <strong>{score}</strong> of <strong>{total}</strong> {scoreLabel}.
       </p>
 
       <div
-        className={`game-badgeRow${isCaidenProgression ? ' game-badgeRow--caiden' : ''}`}
+        className={`game-badgeRow${isCaidenProgression ? ' game-badgeRow--caiden' : ''}${
+          isVictoriaProgression ? ' game-badgeRow--victoria' : ''
+        }`}
         role="list"
         aria-label="Rewards earned"
       >
         {config.badges.map((badge) => (
           <span
             key={badge}
-            className={isCaidenProgression ? 'caiden-rewardPill' : 'game-badge'}
+            className={
+              isCaidenProgression ? 'caiden-rewardPill' : isVictoriaProgression ? 'victoria-rewardPill' : 'game-badge'
+            }
             role="listitem"
           >
             ✦ {badge}
@@ -112,7 +134,7 @@ export default function GameAssessmentComplete({
 
       <div
         className={`bbc-resultActions${
-          isMirandaProgression || isCaidenProgression ? ' miranda-completeActions' : ''
+          isMirandaProgression || isCaidenProgression || isVictoriaProgression ? ' miranda-completeActions' : ''
         }`}
       >
         {isMirandaProgression ? (
@@ -144,6 +166,23 @@ export default function GameAssessmentComplete({
                 <span className="miranda-navBtnLabel">🔁 Play this case again</span>
               </button>
             )}
+          </>
+        ) : isVictoriaProgression ? (
+          <>
+            <MirandaNavButton
+              to={hubPath}
+              label={continueLabel ?? exitLabel}
+              variant="next-case"
+              onClick={onNavClick}
+            />
+            {familyPortalPath ? (
+              <MirandaNavButton
+                to={familyPortalPath}
+                label={familyPortalLabel}
+                variant="hub-return-outline"
+                onClick={onNavClick}
+              />
+            ) : null}
           </>
         ) : isCaidenProgression ? (
           <>

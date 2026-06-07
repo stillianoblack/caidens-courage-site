@@ -1,0 +1,102 @@
+.adultTraining-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .adultTraining-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.adultTraining-card {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(124, 106, 173, 0.22);
+  background: linear-gradient(180deg, #fff 0%, #f8f4fc 100%);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.adultTraining-card:hover {
+  border-color: rgba(201, 164, 74, 0.45);
+  box-shadow: 0 14px 32px -22px rgba(36, 62, 112, 0.28);
+  transform: translateY(-1px);
+}
+
+.adultTraining-card--locked {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.adultTraining-cardMedia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adultTraining-cardAvatar {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 9999px;
+  object-fit: contain;
+  background: #f3eef9;
+  border: 2px solid rgba(201, 164, 74, 0.35);
+}
+
+.adultTraining-cardBody {
+  min-width: 0;
+}
+
+.adultTraining-cardEyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c6aad;
+}
+
+.adultTraining-cardTitle {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #243e70;
+}
+
+.adultTraining-cardAudience {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.adultTraining-cardBadge {
+  display: inline-flex;
+  margin-top: 0.625rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: rgba(201, 164, 74, 0.14);
+  border: 1px solid rgba(201, 164, 74, 0.3);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #8a6b1d;
+}
+
+.adultTraining-cardCta {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #7c6aad;
+}
+
+.adultTraining-cardCta--disabled {
+  color: rgba(36, 62, 112, 0.45);
+}

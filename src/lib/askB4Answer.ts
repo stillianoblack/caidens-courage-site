@@ -73,7 +73,7 @@ export function answerAskB4Question(query: string, mode: AskB4Mode): AskB4Respon
     return {
       answer: BOUNDARY_ANSWER,
       actions: [
-        { label: 'Open Family Guide', href: '/portal/family/guide' },
+        { label: 'Open Parent Corner', href: '/portal/family/guide' },
         { label: 'Game Hub', href: '/portal/family/games' },
       ],
       matchedIds: ['boundary'],

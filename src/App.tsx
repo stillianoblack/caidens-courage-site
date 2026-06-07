@@ -60,6 +60,8 @@ import StudentGallerySubmitPage from './pages/StudentGallerySubmitPage';
 import StudentGalleryPublicPage from './pages/StudentGalleryPublicPage';
 import MirandaMysteryFilesHubPage from './pages/MirandaMysteryFilesHubPage';
 import MirandaMissionPage from './pages/MirandaMissionPage';
+import FacilitatorDrVictoriaMissionPage from './pages/FacilitatorDrVictoriaMissionPage';
+import FamilyDrVictoriaMissionPage from './pages/FamilyDrVictoriaMissionPage';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import {
@@ -75,7 +77,10 @@ import {
   B4_RESULTS_ADMIN_PATH,
   FACILITATOR_B4_BASELINE_RESULTS_PATH,
   FACILITATOR_B4_RESULTS_PATH,
+  FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
   FACILITATOR_PORTAL_PATH,
+  FAMILY_DR_VICTORIA_MISSION_1_PATH,
+  FAMILY_PARENT_CORNER_PATH,
   WEEK_0_ASSESSMENT_ALIAS_PATH,
   WEEK_0_ASSESSMENT_PATH,
   FOCUS_FLAME_LAB_PATH,
@@ -129,6 +134,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
 
       {/* Focus Flame Academy */}
+      <Route path={FACILITATOR_DR_VICTORIA_MISSION_1_PATH} element={<FacilitatorDrVictoriaMissionPage />} />
       <Route path={FACILITATOR_PORTAL_PATH} element={<PilotDashboardPage />} />
       <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
       <Route
@@ -152,6 +158,15 @@ const AppRoutes: React.FC = () => {
           <Route path="certificates" element={<FamilyCertificatesPanel />} />
           <Route path="guide" element={<FamilyGuidePanel />} />
         </Route>
+        <Route
+          path={FAMILY_PARENT_CORNER_PATH}
+          element={<Navigate to={`${FAMILY_PORTAL_PATH}/guide`} replace />}
+        />
+        <Route path={FAMILY_DR_VICTORIA_MISSION_1_PATH} element={<FamilyDrVictoriaMissionPage />} />
+        <Route
+          path={`${FAMILY_PORTAL_PATH}/guide/dr-victoria/mission-1`}
+          element={<Navigate to={FAMILY_DR_VICTORIA_MISSION_1_PATH} replace />}
+        />
         <Route path={CAIDEN_QUEST_HUB_PATH} element={<CaidenQuestHubPage />} />
         <Route path={`${CAIDEN_QUEST_HUB_PATH}/:questId`} element={<CaidenQuestPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/miranda`} element={<MirandaPortalHubPage />} />

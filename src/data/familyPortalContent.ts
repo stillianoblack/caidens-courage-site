@@ -1,4 +1,12 @@
-import { BMC_COLORING_PATH, FAMILY_PORTAL_PATH, KIDS_PORTAL_PATH, CAIDEN_QUEST_HUB_PATH } from '../config/courageRoutes';
+import {
+  BMC_COLORING_PATH,
+  FAMILY_DR_VICTORIA_MISSION_1_PATH,
+  FAMILY_PORTAL_PATH,
+  KIDS_PORTAL_PATH,
+  CAIDEN_QUEST_HUB_PATH,
+} from '../config/courageRoutes';
+import { DR_VICTORIA_GUIDE_SRC } from './adult/sharedAssets';
+import type { AdultTrainingCard } from './pilotDashboardContent';
 
 export const FAMILY_PORTAL_BRAND = 'Family Portal';
 export const FAMILY_PORTAL_SUBBRAND = 'FOCUS FLAME ACADEMY';
@@ -43,8 +51,12 @@ export const FAMILY_SIDEBAR_NAV: Array<{
     path: `${FAMILY_PORTAL_PATH}/certificates`,
     icon: 'certificates',
   },
-  { id: 'guide', label: 'Family Guide', path: `${FAMILY_PORTAL_PATH}/guide`, icon: 'guide' },
+  { id: 'guide', label: 'Parent Corner', path: `${FAMILY_PORTAL_PATH}/guide`, icon: 'guide' },
 ];
+
+export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> = {
+  guide: 'Guides, discussion tools, and adult learning activities for supporting kids at home.',
+};
 
 export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = Object.fromEntries(
   FAMILY_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -74,7 +86,26 @@ export const FAMILY_RECENT_ACTIVITY = [
   'Miranda Mystery Files available',
   'B-4 Focus Lab available',
   'Coloring pages ready',
-  'Family guide unlocked',
+  'Parent Corner unlocked',
+];
+
+export const FAMILY_PARENT_CORNER_INTRO = {
+  title: 'Parent Corner',
+  subtitle:
+    'Guides, discussion tools, and adult learning activities for supporting kids at home.',
+} as const;
+
+export const FAMILY_PARENT_CORNER_CARDS: AdultTrainingCard[] = [
+  {
+    title: "Dr. Victoria\u2019s Understanding Different Minds",
+    mission: 'Looking Beyond the Behavior',
+    audience: 'Parents, Teachers, Counselors, Camp Staff',
+    badge: 'Understanding Guide Badge',
+    cta: 'Start Parent Training',
+    href: FAMILY_DR_VICTORIA_MISSION_1_PATH,
+    imageSrc: DR_VICTORIA_GUIDE_SRC,
+    available: true,
+  },
 ];
 
 export const FAMILY_NEXT_STEP = {
@@ -231,9 +262,9 @@ export type FamilyDownloadCard = {
 
 export const FAMILY_DOWNLOADS: FamilyDownloadCard[] = [
   {
-    title: 'Family Guide',
-    description: 'Discussion prompts and activity instructions for home learning.',
-    cta: 'Open Guide',
+    title: 'Parent Corner',
+    description: 'Adult learning activities and discussion tools for supporting kids at home.',
+    cta: 'Open Parent Corner',
     href: `${FAMILY_PORTAL_PATH}/guide`,
   },
   {

@@ -3,11 +3,13 @@ import {
   BMC_COLORING_PATH,
   CAIDEN_QUEST_HUB_PATH,
   FACILITATOR_B4_RESULTS_PATH,
+  FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
   FACILITATOR_PORTAL_PATH,
   FOCUS_FLAME_LAB_PATH,
   KIDS_PORTAL_PATH,
   STUDENT_GALLERY_SUBMIT_PATH,
 } from '../config/courageRoutes';
+import { DR_VICTORIA_GUIDE_SRC } from './adult/sharedAssets';
 import {
   PORTAL_COLORING_PAGES,
   PORTAL_PRINTABLE_ACTIVITIES,
@@ -76,8 +78,14 @@ export const PILOT_SIDEBAR_NAV: Array<{
   { id: 'results', label: 'Results', icon: 'results' },
   { id: 'certificates', label: 'Certificates', icon: 'certificates' },
   { id: 'student-gallery', label: 'Student Gallery', icon: 'student-gallery' },
-  { id: 'facilitator-center', label: 'Facilitator Center', icon: 'facilitator-center' },
+  { id: 'facilitator-center', label: 'Adult Training', icon: 'facilitator-center' },
 ];
+
+export const PILOT_PAGE_SUBTITLES: Partial<Record<PilotSidebarNavId, string>> = {
+  assessments: 'Student and adult reflection checks in one place.',
+  'facilitator-center':
+    'Training games and guides for parents, teachers, counselors, and camp staff.',
+};
 
 /**
  * TODO: Replace placeholder links with uploaded PDF module files.
@@ -211,7 +219,17 @@ export const PILOT_FOCUS_FLAME_LAB_CARD = {
   href: FOCUS_FLAME_LAB_PATH,
 };
 
-export const PILOT_ASSESSMENT_CARDS = [
+export const PILOT_STUDENT_ASSESSMENT_SECTION = {
+  title: 'Student Assessments',
+  subtitle: 'Checks for students before, during, and after the program.',
+} as const;
+
+export const PILOT_ADULT_ASSESSMENT_SECTION = {
+  title: 'Adult Assessments',
+  subtitle: 'Short reflection checks for parents, teachers, counselors, and camp staff.',
+} as const;
+
+export const PILOT_STUDENT_ASSESSMENT_CARDS = [
   {
     title: 'B-4 Baseline Check',
     status: 'Available' as const,
@@ -238,6 +256,69 @@ export const PILOT_ASSESSMENT_CARDS = [
     cta: 'Coming Soon',
     href: '#',
     locked: true,
+  },
+];
+
+/** @deprecated Use PILOT_STUDENT_ASSESSMENT_CARDS */
+export const PILOT_ASSESSMENT_CARDS = PILOT_STUDENT_ASSESSMENT_CARDS;
+
+export const PILOT_ADULT_ASSESSMENT_CARDS = [
+  {
+    title: 'Adult Understanding Check',
+    status: 'Coming Soon' as const,
+    statusTone: 'locked' as const,
+    description: 'A quick reflection on how adults understand student behavior and needs.',
+    cta: 'Coming Soon',
+    href: '#',
+    locked: true,
+  },
+  {
+    title: 'Adult Growth Reflection',
+    status: 'Coming Soon' as const,
+    statusTone: 'locked' as const,
+    description: 'Track how your perspective and support strategies evolve over time.',
+    cta: 'Coming Soon',
+    href: '#',
+    locked: true,
+  },
+  {
+    title: 'Support Strategy Review',
+    status: 'Coming Soon' as const,
+    statusTone: 'locked' as const,
+    description: 'Review the support strategies you use most with learners.',
+    cta: 'Coming Soon',
+    href: '#',
+    locked: true,
+  },
+];
+
+export type AdultTrainingCard = {
+  title: string;
+  mission: string;
+  audience: string;
+  badge: string;
+  cta: string;
+  href: string;
+  imageSrc: string;
+  available: boolean;
+};
+
+export const PILOT_ADULT_TRAINING_INTRO = {
+  title: 'Adult Training',
+  subtitle:
+    'Training games and guides for parents, teachers, counselors, and camp staff.',
+} as const;
+
+export const PILOT_ADULT_TRAINING_CARDS: AdultTrainingCard[] = [
+  {
+    title: "Dr. Victoria\u2019s Understanding Different Minds",
+    mission: 'Looking Beyond the Behavior',
+    audience: 'Parents, Teachers, Counselors, Camp Staff',
+    badge: 'Understanding Guide Badge',
+    cta: 'Start Training',
+    href: FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
+    imageSrc: DR_VICTORIA_GUIDE_SRC,
+    available: true,
   },
 ];
 

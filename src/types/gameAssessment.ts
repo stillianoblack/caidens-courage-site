@@ -80,7 +80,22 @@ export type CaidenQuestClueCardData = {
   accent?: CaidenQuestAccent;
 };
 
-export type ClueCardData = MirandaClueCardData | CaidenQuestClueCardData;
+export type VictoriaReflectionAccent =
+  | 'clipboard'
+  | 'classroom'
+  | 'thought-bubble'
+  | 'behavior-need'
+  | 'support-strategy';
+
+export type VictoriaReflectionClueCardData = {
+  variant: 'reflection_card';
+  label: string;
+  tag: string;
+  text: string;
+  accent?: VictoriaReflectionAccent;
+};
+
+export type ClueCardData = MirandaClueCardData | CaidenQuestClueCardData | VictoriaReflectionClueCardData;
 
 export type GameQuestionBase = {
   id: string;
@@ -142,7 +157,7 @@ export type GameAssessmentConfig = {
   /** Circular avatar beside quiz prompt (falls back to avatarSrc) */
   quizAvatarSrc?: string;
   /** Decorative background variant for GameBackgroundDecor */
-  decorVariant?: 'default' | 'miranda' | 'caiden';
+  decorVariant?: 'default' | 'miranda' | 'caiden' | 'victoria';
   /** Unique quiz presentation across Miranda mystery files */
   presentationStyle?:
     | 'default'
@@ -151,7 +166,8 @@ export type GameAssessmentConfig = {
     | 'missing_letter'
     | 'detective_notebook'
     | 'trail_notebook'
-    | 'focus_quest';
+    | 'focus_quest'
+    | 'reflection_card';
   /** Optional guide avatar shown in prompt row (e.g. B-4) */
   guideAvatarSrc?: string;
   guideAvatarAlt?: string;

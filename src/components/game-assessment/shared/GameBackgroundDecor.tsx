@@ -1,7 +1,7 @@
 import React from 'react';
 
 type GameBackgroundDecorProps = {
-  variant?: 'default' | 'miranda' | 'caiden';
+  variant?: 'default' | 'miranda' | 'caiden' | 'victoria';
 };
 
 export default function GameBackgroundDecor({ variant = 'default' }: GameBackgroundDecorProps) {
@@ -29,6 +29,16 @@ export default function GameBackgroundDecor({ variant = 'default' }: GameBackgro
         <div className="game-deco game-deco--flame-watermark game-deco--flame-b" aria-hidden="true">
           <img src="/images/icons/focus-flame-mark.svg" alt="" />
         </div>
+      </>
+    );
+  }
+
+  if (variant === 'victoria') {
+    return (
+      <>
+        <div className="game-deco game-deco--victoria-glow game-deco--victoria-glow-a" aria-hidden="true" />
+        <div className="game-deco game-deco--victoria-glow game-deco--victoria-glow-b" aria-hidden="true" />
+        <div className="game-deco game-deco--victoria-dots" aria-hidden="true" />
       </>
     );
   }

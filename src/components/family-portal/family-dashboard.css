@@ -161,6 +161,33 @@
   line-height: 1.15;
 }
 
+.family-topbarSubtitle {
+  margin: 0.25rem 0 0;
+  max-width: 36rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.family-panelIntro {
+  margin-bottom: 1.5rem;
+}
+
+.family-panelIntroTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-panelIntroSubtitle {
+  margin: 0.45rem 0 0;
+  max-width: 42rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.72);
+}
+
 .family-topbarTag {
   margin-top: 0.2rem;
   font-size: 0.75rem;

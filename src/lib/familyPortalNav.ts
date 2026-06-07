@@ -1,4 +1,10 @@
-import { CAIDEN_QUEST_HUB_PATH, FAMILY_PORTAL_PATH, KIDS_PORTAL_PATH } from '../config/courageRoutes';
+import {
+  CAIDEN_QUEST_HUB_PATH,
+  FAMILY_DR_VICTORIA_MISSION_1_PATH,
+  FAMILY_PARENT_CORNER_PATH,
+  FAMILY_PORTAL_PATH,
+  KIDS_PORTAL_PATH,
+} from '../config/courageRoutes';
 import { FAMILY_NAV_TITLE, type FamilySidebarNavId } from '../data/familyPortalContent';
 
 const MIRANDA_PORTAL_PREFIX = `${KIDS_PORTAL_PATH}/miranda`;
@@ -19,7 +25,9 @@ export function isWidePortalContentRoute(pathname: string): boolean {
   return (
     pathname.startsWith(CAIDEN_QUEST_HUB_PATH) ||
     pathname.startsWith(MIRANDA_PORTAL_PREFIX) ||
-    pathname.startsWith(B4_PORTAL_PREFIX)
+    pathname.startsWith(B4_PORTAL_PREFIX) ||
+    pathname.startsWith(FAMILY_PARENT_CORNER_PATH) ||
+    pathname.startsWith(FAMILY_DR_VICTORIA_MISSION_1_PATH)
   );
 }
 
@@ -31,6 +39,10 @@ export function resolvePortalNavId(pathname: string): FamilySidebarNavId {
   if (isGameHubRoute(pathname)) {
     return 'games';
   }
+  if (pathname.startsWith(FAMILY_PARENT_CORNER_PATH) || pathname.startsWith(FAMILY_DR_VICTORIA_MISSION_1_PATH)) {
+    return 'guide';
+  }
+
   const match = [
     { id: 'overview' as const, path: FAMILY_PORTAL_PATH, exact: true },
     ...[
@@ -41,6 +53,7 @@ export function resolvePortalNavId(pathname: string): FamilySidebarNavId {
       'gallery',
       'certificates',
       'guide',
+      'parent-corner',
     ].map((segment) => ({
       id: segment as FamilySidebarNavId,
       path: `${FAMILY_PORTAL_PATH}/${segment}`,
@@ -69,6 +82,12 @@ export function resolvePortalPageTitle(pathname: string): string {
   }
   if (pathname.startsWith(B4_PORTAL_PREFIX)) {
     return 'B-4 Focus Missions';
+  }
+  if (pathname.startsWith(FAMILY_DR_VICTORIA_MISSION_1_PATH)) {
+    return "Dr. Victoria\u2019s Understanding Different Minds";
+  }
+  if (pathname.startsWith(FAMILY_PARENT_CORNER_PATH)) {
+    return 'Parent Corner';
   }
   return FAMILY_NAV_TITLE[resolvePortalNavId(pathname)];
 }
