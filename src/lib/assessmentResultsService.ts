@@ -261,7 +261,7 @@ export function supabaseRowToRecord(row: AssessmentResultRow): B4BaselineCheckRe
   return {
     assessmentName: B4_BASELINE_ASSESSMENT_NAME,
     anonymousStudentId: row.student_id ?? '',
-    nickname: row.nickname ?? row.first_name ?? '',
+    nickname: row.nickname ?? row.child_nickname ?? row.first_name ?? '',
     programCode: row.program_code ?? '',
     groupName: row.group_name ?? '',
     completedModules: parseModulesCompleted(row.modules_completed),

@@ -21,8 +21,35 @@ function normalizeCode(programCode?: string): string {
   return programCode?.trim().toUpperCase() ?? '';
 }
 
+function normalizeName(value?: string | null): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
 function childDisplayName(participant: Pick<StudentParticipantRecord, 'nickname' | 'first_name'>): string {
   return participant.nickname?.trim() || participant.first_name?.trim() || 'Child';
+}
+
+function matchesLegacyBaseline(
+  participantId: string | null,
+  displayName: string,
+  row: B4BaselineCheckRecord,
+): boolean {
+  const nameKey = normalizeName(displayName);
+  if (participantId && row.anonymousStudentId === participantId) {
+    return true;
+  }
+  return normalizeName(row.nickname) === nameKey;
+}
+
+function matchesV2StudentRow(
+  participantId: string | null,
+  displayName: string,
+  row: LocalAssessmentV2Record,
+): boolean {
+  if (row.role !== 'student') return false;
+  if (participantId && row.participant_id === participantId) return true;
+  const answers = row.answers_json as { nickname?: string } | undefined;
+  return normalizeName(answers?.nickname) === normalizeName(displayName);
 }
 
 function resolveBaselineStatus(input: {
@@ -31,14 +58,9 @@ function resolveBaselineStatus(input: {
   legacyBaselines: B4BaselineCheckRecord[];
   assessments: LocalAssessmentV2Record[];
 }): FamilyChildBaselineStatus {
-  const nameKey = input.displayName.trim().toLowerCase();
-
-  const v2Rows = input.assessments.filter((row) => {
-    if (row.role !== 'student') return false;
-    if (input.participantId && row.participant_id === input.participantId) return true;
-    const answers = row.answers_json as { nickname?: string } | undefined;
-    return answers?.nickname?.trim().toLowerCase() === nameKey;
-  });
+  const v2Rows = input.assessments.filter((row) =>
+    matchesV2StudentRow(input.participantId, input.displayName, row),
+  );
 
   if (v2Rows.some((row) => row.assessment_type === 'baseline')) {
     return 'Complete';
@@ -46,18 +68,15 @@ function resolveBaselineStatus(input: {
 
   if (v2Rows.length > 0) return 'In Progress';
 
-  const legacyComplete = input.legacyBaselines.some(
-    (row) =>
-      row.nickname.trim().toLowerCase() === nameKey &&
-      row.completedModules.length >= 3 &&
-      Boolean(row.completedAt),
+  const legacyMatch = input.legacyBaselines.filter((row) =>
+    matchesLegacyBaseline(input.participantId, input.displayName, row),
   );
-  if (legacyComplete) return 'Complete';
 
-  const legacyPartial = input.legacyBaselines.some(
-    (row) => row.nickname.trim().toLowerCase() === nameKey && row.completedModules.length > 0,
-  );
-  if (legacyPartial) return 'In Progress';
+  if (legacyMatch.some((row) => Boolean(row.completedAt))) {
+    return 'Complete';
+  }
+
+  if (legacyMatch.length > 0) return 'In Progress';
 
   return 'Not Started';
 }
@@ -69,11 +88,10 @@ function resolveLatestActivity(input: {
   legacyBaselines: B4BaselineCheckRecord[];
   assessments: LocalAssessmentV2Record[];
 }): string | null {
-  const nameKey = input.displayName.trim().toLowerCase();
   const events: Array<{ at: number; label: string }> = [];
 
   input.modules
-    .filter((row) => row.participant_id === input.participantId)
+    .filter((row) => input.participantId && row.participant_id === input.participantId)
     .forEach((row) => {
       events.push({
         at: new Date(row.completed_at).getTime(),
@@ -82,31 +100,30 @@ function resolveLatestActivity(input: {
     });
 
   input.assessments
-    .filter((row) => row.participant_id === input.participantId)
+    .filter((row) => matchesV2StudentRow(input.participantId, input.displayName, row))
     .forEach((row) => {
       events.push({
         at: new Date(row.completed_at).getTime(),
         label:
           row.assessment_type === 'baseline'
             ? `${input.displayName} completed B-4 Check-In`
-            : `${input.displayName} completed ${row.assessment_type} assessment`,
+            : `${input.displayName} completed ${row.assessment_type.replace(/_/g, ' ')}`,
       });
     });
 
   const hasV2Baseline = input.assessments.some(
     (row) =>
-      row.participant_id === input.participantId &&
-      row.role === 'student' &&
+      matchesV2StudentRow(input.participantId, input.displayName, row) &&
       row.assessment_type === 'baseline',
   );
 
   if (!hasV2Baseline) {
     input.legacyBaselines
-      .filter((row) => row.nickname.trim().toLowerCase() === nameKey)
+      .filter((row) => matchesLegacyBaseline(input.participantId, input.displayName, row))
       .forEach((row) => {
         events.push({
           at: new Date(row.completedAt).getTime(),
-          label: `${row.nickname} completed B-4 Check-In`,
+          label: `${input.displayName} completed B-4 Check-In`,
         });
       });
   }
@@ -116,12 +133,51 @@ function resolveLatestActivity(input: {
   return events[0]?.label ?? null;
 }
 
-function resolveProgressPct(participantId: string | null, modules: LocalModuleResultRecord[]): number {
-  if (!participantId) return 0;
-  const completed = new Set(
-    modules.filter((row) => row.participant_id === participantId).map((row) => row.module_id),
-  );
-  return Math.min(100, Math.round((completed.size / TRACKED_MODULE_COUNT) * 100));
+function resolveProgressPct(input: {
+  participantId: string | null;
+  displayName: string;
+  baselineStatus: FamilyChildBaselineStatus;
+  modules: LocalModuleResultRecord[];
+  assessments: LocalAssessmentV2Record[];
+  legacyBaselines: B4BaselineCheckRecord[];
+}): number {
+  if (input.participantId) {
+    const completed = new Set(
+      input.modules
+        .filter((row) => row.participant_id === input.participantId)
+        .map((row) => row.module_id),
+    );
+    if (completed.size > 0) {
+      return Math.min(100, Math.round((completed.size / TRACKED_MODULE_COUNT) * 100));
+    }
+  }
+
+  if (input.baselineStatus === 'Complete') {
+    const v2Baseline = input.assessments.find(
+      (row) =>
+        matchesV2StudentRow(input.participantId, input.displayName, row) &&
+        row.assessment_type === 'baseline',
+    );
+    if (v2Baseline?.percent_score != null) {
+      return Math.min(100, Math.round(Number(v2Baseline.percent_score)));
+    }
+
+    const legacy = input.legacyBaselines.find((row) =>
+      matchesLegacyBaseline(input.participantId, input.displayName, row),
+    );
+    if (legacy) {
+      const total = legacy.feelingsScore + legacy.readingScore + legacy.focusMovesScore;
+      return Math.min(100, Math.round((total / 60) * 100));
+    }
+
+    return 15;
+  }
+
+  if (input.baselineStatus === 'In Progress') {
+    return 5;
+  }
+
+  return 0;
 }
 
 function buildChildSummary(input: {
@@ -133,17 +189,19 @@ function buildChildSummary(input: {
   assessments: LocalAssessmentV2Record[];
   legacyBaselines: B4BaselineCheckRecord[];
 }): FamilyChildSummary {
+  const baselineStatus = resolveBaselineStatus({
+    participantId: input.participantId,
+    displayName: input.displayName,
+    legacyBaselines: input.legacyBaselines,
+    assessments: input.assessments,
+  });
+
   return {
     key: input.key,
     participantId: input.participantId,
     displayName: input.displayName,
     createdAt: input.createdAt,
-    baselineStatus: resolveBaselineStatus({
-      participantId: input.participantId,
-      displayName: input.displayName,
-      legacyBaselines: input.legacyBaselines,
-      assessments: input.assessments,
-    }),
+    baselineStatus,
     latestActivity: resolveLatestActivity({
       participantId: input.participantId,
       displayName: input.displayName,
@@ -151,7 +209,14 @@ function buildChildSummary(input: {
       legacyBaselines: input.legacyBaselines,
       assessments: input.assessments,
     }),
-    progressPct: resolveProgressPct(input.participantId, input.modules),
+    progressPct: resolveProgressPct({
+      participantId: input.participantId,
+      displayName: input.displayName,
+      baselineStatus,
+      modules: input.modules,
+      assessments: input.assessments,
+      legacyBaselines: input.legacyBaselines,
+    }),
   };
 }
 
@@ -170,7 +235,7 @@ export function computeFamilyChildrenSummaries(input: {
     (row) => normalizeCode(row.program_code) === code,
   );
   const legacyBaselines = (input.legacyBaselines ?? []).filter(
-    (row) => normalizeCode(row.programCode) === code && Boolean(row.completedAt),
+    (row) => normalizeCode(row.programCode) === code,
   );
 
   const summaries: FamilyChildSummary[] = [];
@@ -178,7 +243,7 @@ export function computeFamilyChildrenSummaries(input: {
 
   for (const participant of input.participants ?? []) {
     const displayName = childDisplayName(participant);
-    const nameKey = displayName.toLowerCase();
+    const nameKey = normalizeName(displayName);
     seenNames.add(nameKey);
     summaries.push(
       buildChildSummary({
@@ -196,15 +261,15 @@ export function computeFamilyChildrenSummaries(input: {
   for (const baseline of legacyBaselines) {
     const displayName = baseline.nickname.trim();
     if (!displayName) continue;
-    const nameKey = displayName.toLowerCase();
+    const nameKey = normalizeName(displayName);
     if (seenNames.has(nameKey)) continue;
 
-    const hasV2Baseline = assessments.some((row) => {
-      if (row.role !== 'student' || row.assessment_type !== 'baseline') return false;
-      const answers = row.answers_json as { nickname?: string } | undefined;
-      return answers?.nickname?.trim().toLowerCase() === nameKey;
-    });
-    if (hasV2Baseline) continue;
+    const hasParticipantMatch = (input.participants ?? []).some(
+      (participant) =>
+        participant.id === baseline.anonymousStudentId ||
+        normalizeName(childDisplayName(participant)) === nameKey,
+    );
+    if (hasParticipantMatch) continue;
 
     seenNames.add(nameKey);
     summaries.push(

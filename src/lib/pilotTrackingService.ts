@@ -624,12 +624,12 @@ export async function fetchModuleResultsFromSupabase(programCode?: string): Prom
 
     const { data, error } = await query;
     if (error) {
-      return { results: loadLocalModuleResults(), error: error.message };
+      return { results: programCode?.trim() ? [] : loadLocalModuleResults(), error: error.message };
     }
 
     return { results: (data ?? []) as LocalModuleResultRecord[] };
   } catch {
-    return { results: loadLocalModuleResults(), error: 'fetch_failed' };
+    return { results: programCode?.trim() ? [] : loadLocalModuleResults(), error: 'fetch_failed' };
   }
 }
 
@@ -692,12 +692,12 @@ export async function fetchAssessmentV2FromSupabase(programCode?: string): Promi
 
     const { data, error } = await query;
     if (error) {
-      return { results: loadLocalAssessmentV2Results(), error: error.message };
+      return { results: programCode?.trim() ? [] : loadLocalAssessmentV2Results(), error: error.message };
     }
 
     return { results: (data ?? []) as LocalAssessmentV2Record[] };
   } catch {
-    return { results: loadLocalAssessmentV2Results(), error: 'fetch_failed' };
+    return { results: programCode?.trim() ? [] : loadLocalAssessmentV2Results(), error: 'fetch_failed' };
   }
 }
 

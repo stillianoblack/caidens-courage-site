@@ -122,6 +122,7 @@ function buildRecentActivity(
   modules: LocalModuleResultRecord[],
   baselines: B4BaselineCheckRecord[],
   assessments: LocalAssessmentV2Record[] = [],
+  adultEvents: string[] = [],
 ): string[] {
   const moduleItems = modules
     .slice()
@@ -167,7 +168,7 @@ function buildRecentActivity(
         : 'B-4 Check-In completed',
     );
 
-  return [...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);
+  return [...adultEvents, ...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);
 }
 
 function buildFocusSkills(
@@ -238,6 +239,8 @@ export function computeFamilyProgressSnapshot(input: {
   moduleResults?: LocalModuleResultRecord[];
   assessmentResults?: LocalAssessmentV2Record[];
   legacyBaselines?: B4BaselineCheckRecord[];
+  adultBaselineComplete?: boolean;
+  adultGrowthComplete?: boolean;
 }): FamilyProgressSnapshot {
   const modules = filterModulesForProgram(input.moduleResults ?? [], input.programCode);
   const assessments = filterAssessmentsForProgram(input.assessmentResults ?? [], input.programCode);
@@ -248,11 +251,23 @@ export function computeFamilyProgressSnapshot(input: {
   );
   const hasBaselineFocusMoves =
     hasV2StudentBaseline ||
-    baselines.some((row) => row.completedModules.includes('focus-moves'));
+    baselines.some((row) => row.completedModules.includes('focus-moves') || Boolean(row.completedAt));
   const baselineBoost = hasBaselineFocusMoves ? 1 : 0;
 
   const hasActivity =
-    modules.length > 0 || assessments.length > 0 || baselines.length > 0;
+    modules.length > 0 ||
+    assessments.length > 0 ||
+    baselines.length > 0 ||
+    Boolean(input.adultBaselineComplete) ||
+    Boolean(input.adultGrowthComplete);
+
+  const adultEvents: string[] = [];
+  if (input.adultBaselineComplete) {
+    adultEvents.push('Parent completed Adult Baseline');
+  }
+  if (input.adultGrowthComplete) {
+    adultEvents.push('Parent completed Growth Check');
+  }
 
   if (!hasActivity) {
     return {
@@ -293,7 +308,7 @@ export function computeFamilyProgressSnapshot(input: {
       tone,
     })),
     focusSkills: buildFocusSkills(modules, baselines, assessments),
-    recentActivity: buildRecentActivity(modules, baselines, assessments),
+    recentActivity: buildRecentActivity(modules, baselines, assessments, adultEvents),
     hasActivity: true,
     overallLabel: overall >= 75 ? 'Strong Progress' : overall >= 25 ? 'Building Momentum' : 'Getting Started',
   };

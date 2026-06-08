@@ -4,8 +4,7 @@ import {
   CHARACTER_IMAGE_PATHS,
   FAMILY_NEXT_STEP,
 } from '../../../data/familyPortalContent';
-import { useFamilyChildrenMetrics } from '../../../hooks/useFamilyChildrenMetrics';
-import { useFamilyProgressMetrics } from '../../../hooks/useFamilyProgressMetrics';
+import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
@@ -17,22 +16,20 @@ import '../../focus-skills/focus-skills-snapshot.css';
 export default function FamilyOverviewPanel() {
   const location = useLocation();
   const programCode = readActivePilotProgram()?.programCode;
-  const { metrics, loading } = useFamilyProgressMetrics(programCode);
-  const { children, loading: childrenLoading } = useFamilyChildrenMetrics(programCode);
+  const { children, metrics, assessmentCount, loading } = useFamilyDashboardMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
 
   const overallPct = metrics.rows.find((row) => row.tone === 'overall')?.pct ?? 0;
-  const assessmentsComplete = children.filter((child) => child.baselineStatus === 'Complete').length;
 
   const kpis = useMemo(
     () => [
       {
         label: 'Children',
-        value: childrenLoading ? '—' : String(children.length),
+        value: loading ? '—' : String(children.length),
       },
       {
         label: 'Assessments',
-        value: loading || childrenLoading ? '—' : metrics.hasActivity ? String(assessmentsComplete) : '0',
+        value: loading ? '—' : String(assessmentCount),
       },
       {
         label: 'Overall Progress',
@@ -44,7 +41,7 @@ export default function FamilyOverviewPanel() {
         highlight: true as const,
       },
     ],
-    [assessmentsComplete, children.length, childrenLoading, loading, metrics.hasActivity, metrics.overallLabel, overallPct],
+    [assessmentCount, children.length, loading, metrics.hasActivity, metrics.overallLabel, overallPct],
   );
 
   return (
@@ -65,7 +62,7 @@ export default function FamilyOverviewPanel() {
 
       <FamilyValueCards />
 
-      <FamilyChildrenSection childSummaries={children} loading={childrenLoading} />
+      <FamilyChildrenSection childSummaries={children} loading={loading} />
 
       <section className="family-panelBlock">
         <div className="family-panelBlockHead">

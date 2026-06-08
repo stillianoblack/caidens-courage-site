@@ -1,54 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { readActivePilotProgram } from '../config/activePilotProgram';
-import { afterIdle } from '../lib/defer';
-import { loadAssessmentResults } from '../lib/assessmentResultsService';
-import {
-  computeFamilyProgressSnapshot,
-  type FamilyProgressSnapshot,
-} from '../lib/familyProgressMetrics';
-import { loadPilotTrackingData } from '../lib/pilotTrackingService';
+import { useFamilyDashboardMetrics } from './useFamilyDashboardMetrics';
 
-const EMPTY_SNAPSHOT = computeFamilyProgressSnapshot({ programCode: '' });
-
+/** @deprecated Prefer useFamilyDashboardMetrics for a single Supabase-backed load. */
 export function useFamilyProgressMetrics(programCode?: string) {
-  const resolvedCode = programCode ?? readActivePilotProgram()?.programCode;
-  const [loading, setLoading] = useState(false);
-  const [snapshot, setSnapshot] = useState<FamilyProgressSnapshot>(EMPTY_SNAPSHOT);
-
-  const refresh = useCallback(async () => {
-    if (!resolvedCode?.trim()) {
-      setSnapshot(computeFamilyProgressSnapshot({ programCode: '' }));
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const [legacyPayload, trackingPayload] = await Promise.all([
-        loadAssessmentResults(resolvedCode),
-        loadPilotTrackingData(resolvedCode),
-      ]);
-
-      setSnapshot(
-        computeFamilyProgressSnapshot({
-          programCode: resolvedCode,
-          moduleResults: trackingPayload.moduleResults,
-          assessmentResults: trackingPayload.assessmentResults,
-          legacyBaselines: legacyPayload.results,
-        }),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [resolvedCode]);
-
-  useEffect(() => {
-    afterIdle(() => {
-      void refresh();
-    });
-  }, [refresh]);
-
-  const metrics = useMemo(() => snapshot, [snapshot]);
-
+  const { metrics, loading, refresh } = useFamilyDashboardMetrics(programCode);
   return { metrics, loading, refresh };
 }

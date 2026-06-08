@@ -104,11 +104,14 @@ function resolveAssessmentPaths(pathname: string): {
   };
 }
 
-export function buildAdultLearningFlowCards(pathname: string): AdultLearningFlowCard[] {
-  const baselineComplete = isAdultBaselineComplete();
+export function buildAdultLearningFlowCards(
+  pathname: string,
+  overrides?: { baselineComplete?: boolean; growthComplete?: boolean },
+): AdultLearningFlowCard[] {
+  const baselineComplete = overrides?.baselineComplete ?? isAdultBaselineComplete();
   const drVictoriaComplete = isDrVictoriaTrainingComplete();
   const uncleTComplete = isUncleTTrainingComplete();
-  const growthComplete = isAdultGrowthComplete();
+  const growthComplete = overrides?.growthComplete ?? isAdultGrowthComplete();
   const trainingComplete = drVictoriaComplete && uncleTComplete;
 
   const { baselineHref, growthHref } = resolveAssessmentPaths(pathname);
@@ -178,11 +181,13 @@ export function buildAdultLearningFlowCards(pathname: string): AdultLearningFlow
   ];
 }
 
-export function resolveAdultLearningBannerVariant(): AdultLearningBannerVariant {
-  const baselineComplete = isAdultBaselineComplete();
+export function resolveAdultLearningBannerVariant(
+  overrides?: { baselineComplete?: boolean; growthComplete?: boolean },
+): AdultLearningBannerVariant {
+  const baselineComplete = overrides?.baselineComplete ?? isAdultBaselineComplete();
   const trainingComplete =
     isDrVictoriaTrainingComplete() && isUncleTTrainingComplete();
-  const growthComplete = isAdultGrowthComplete();
+  const growthComplete = overrides?.growthComplete ?? isAdultGrowthComplete();
 
   if (growthComplete) return 'complete';
   if (trainingComplete) return 'ready-for-growth';
