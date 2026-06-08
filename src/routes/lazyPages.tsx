@@ -7,9 +7,6 @@ export const PilotDashboardPage = lazy(() => import('../pages/PilotDashboardPage
 export const ProgramDashboardPage = lazy(() => import('../pages/ProgramDashboardPage'));
 export const PilotTermsPage = lazy(() => import('../pages/PilotTermsPage'));
 
-export const FamilyPortalLayout = lazy(() => import('../pages/FamilyPortalLayout'));
-export const FamilyHubLayout = lazy(() => import('../pages/FamilyHubLayout'));
-
 export const FacilitatorBaselineCheckPage = lazy(
   () => import('../pages/FacilitatorBaselineCheckPage'),
 );

@@ -62,6 +62,25 @@ export function isInternalPortalRoute(href: string): boolean {
   );
 }
 
+/** True when the URL should render a nested child route (Outlet), not a main nav panel. */
+export function isFamilyNestedRoute(pathname: string, basePath: string): boolean {
+  if (!pathname.startsWith(basePath)) return false;
+
+  const remainder = pathname.slice(basePath.length) || '';
+  if (!remainder || remainder === '/') return false;
+
+  const mainPanelPaths = new Set([
+    '/continue-learning',
+    '/downloads',
+    '/gallery',
+    '/certificates',
+    '/guide',
+    '/characters',
+  ]);
+
+  return !mainPanelPaths.has(remainder);
+}
+
 export function resolvePortalNavId(
   pathname: string,
   basePath = resolveFamilyBasePath(pathname),

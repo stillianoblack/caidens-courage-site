@@ -65,6 +65,10 @@
   gap: 0.25rem;
 }
 
+.family-tabPanel[hidden] {
+  display: none;
+}
+
 .family-railNavLink {
   display: flex;
   align-items: center;

@@ -1,21 +1,19 @@
-import React, { useCallback } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
 import {
   FAMILY_PORTAL_BRAND,
   FAMILY_PORTAL_SUBBRAND,
   FAMILY_SIDEBAR_NAV,
+  type FamilySidebarNavId,
   type FamilySidebarNavItem,
 } from '../../data/familyPortalContent';
-import {
-  isCharacterHubRoute,
-  resolveFamilyBasePath,
-} from '../../lib/familyPortalNav';
 import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
 import FamilyNavIcon from './FamilyNavIcon';
 import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
 type FamilyDashboardSidebarProps = {
+  activeId: FamilySidebarNavId;
+  onSelect: (id: FamilySidebarNavId) => void;
   navItems?: FamilySidebarNavItem[];
   brandTitle?: string;
   brandSubtitle?: string;
@@ -24,6 +22,8 @@ type FamilyDashboardSidebarProps = {
 };
 
 export default function FamilyDashboardSidebar({
+  activeId,
+  onSelect,
   navItems = FAMILY_SIDEBAR_NAV,
   brandTitle = FAMILY_PORTAL_BRAND,
   brandSubtitle = FAMILY_PORTAL_SUBBRAND,
@@ -31,24 +31,6 @@ export default function FamilyDashboardSidebar({
   showUpgradeCard = true,
 }: FamilyDashboardSidebarProps) {
   const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const basePath = resolveFamilyBasePath(location.pathname);
-  const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath);
-
-  const handleNavClick = useCallback(
-    (path: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
-      event.preventDefault();
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      document.querySelector('.family-content')?.scrollTo(0, 0);
-      if (location.pathname !== path) {
-        navigate(path);
-      }
-    },
-    [location.pathname, navigate],
-  );
 
   return (
     <aside className="family-rail" aria-label="Family portal navigation">
@@ -57,34 +39,28 @@ export default function FamilyDashboardSidebar({
         <p className="family-railBrandSub">{brandSubtitle}</p>
       </div>
 
-      <nav className="family-railNav" aria-label="Dashboard sections">
+      <nav className="family-railNav" role="tablist" aria-label="Dashboard sections">
         <ul className="family-railNavList">
-          {navItems.map((item) => {
-            const characterHubActive = item.id === 'character-hub' && onCharacterRoute;
-
-            return (
-              <li key={item.id}>
-                <NavLink
-                  to={item.path}
-                  end={item.id === 'overview'}
-                  onClick={handleNavClick(item.path)}
-                  className={({ isActive }) => {
-                    const active = isActive || characterHubActive;
-                    return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
-                  }}
-                >
-                  <span className="family-railIcon">
-                    <FamilyNavIcon name={item.icon} />
-                  </span>
-                  <span className="family-railNavLabel">
-                    {item.id === 'gallery'
-                      ? formatGalleryNavLabel(item.label, galleryNewCount)
-                      : item.label}
-                  </span>
-                </NavLink>
-              </li>
-            );
-          })}
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeId === item.id}
+                className={`family-railNavLink${activeId === item.id ? ' family-railNavLink--active' : ''}`}
+                onClick={() => onSelect(item.id)}
+              >
+                <span className="family-railIcon">
+                  <FamilyNavIcon name={item.icon} />
+                </span>
+                <span className="family-railNavLabel">
+                  {item.id === 'gallery'
+                    ? formatGalleryNavLabel(item.label, galleryNewCount)
+                    : item.label}
+                </span>
+              </button>
+            </li>
+          ))}
         </ul>
       </nav>
 
