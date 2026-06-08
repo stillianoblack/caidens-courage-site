@@ -5,8 +5,9 @@ import type {
   PilotProgramSignupInput,
   PilotProgramType,
 } from '../types/pilotProgram';
-import { recordToActivePilotProgram, readActivePilotProgram } from '../config/activePilotProgram';
+import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
+import { normalizeAccessCodeInput } from './portalAccessCodes';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type PilotProgramLookupResult = {
@@ -15,7 +16,11 @@ export type PilotProgramLookupResult = {
 };
 
 export function normalizePilotAccessCode(raw: string): string {
-  return raw.trim().toUpperCase().replace(/\s+/g, '');
+  return normalizeAccessCodeInput(raw);
+}
+
+function quotePostgrestValue(value: string): string {
+  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
 function resolveRoleFromCode(record: PilotProgramRecord, normalized: string): 'facilitator' | 'family' | null {
@@ -27,55 +32,61 @@ function resolveRoleFromCode(record: PilotProgramRecord, normalized: string): 'f
   return null;
 }
 
+export type PilotProgramLookupStatus = 'found' | 'not_found' | 'unavailable';
+
+export type PilotProgramLookupResponse = {
+  status: PilotProgramLookupStatus;
+  result: PilotProgramLookupResult | null;
+};
+
 export async function lookupPilotProgramByAccessCode(
   rawCode: string,
 ): Promise<PilotProgramLookupResult | null> {
-  const normalized = normalizePilotAccessCode(rawCode);
-  if (!normalized) return null;
+  const response = await lookupPilotProgramByAccessCodeDetailed(rawCode);
+  return response.result;
+}
 
-  const local = readActivePilotProgram();
-  if (local) {
-    const localRole =
-      normalized === normalizePilotAccessCode(local.familyAccessCode)
-        ? 'family'
-        : normalized === normalizePilotAccessCode(local.facilitatorAccessCode) ||
-            normalized === normalizePilotAccessCode(local.programCode)
-          ? 'facilitator'
-          : null;
-    if (localRole) {
-      return { role: localRole, program: local };
-    }
-  }
+/** Supabase-only lookup — never falls back to browser-stored programs. */
+export async function lookupPilotProgramByAccessCodeDetailed(
+  rawCode: string,
+): Promise<PilotProgramLookupResponse> {
+  const normalized = normalizePilotAccessCode(rawCode);
+  if (!normalized) return { status: 'not_found', result: null };
 
   if (!isSupabaseConfigured() || !supabase) {
-    return null;
+    return { status: 'unavailable', result: null };
   }
+
+  const quoted = quotePostgrestValue(normalized);
 
   try {
     const { data, error } = await supabase
       .from('pilot_programs')
       .select('*')
       .or(
-        `family_access_code.eq.${normalized},facilitator_access_code.eq.${normalized},program_code.eq.${normalized}`,
+        `family_access_code.eq.${quoted},facilitator_access_code.eq.${quoted},program_code.eq.${quoted}`,
       )
       .eq('pilot_status', 'active')
       .limit(5);
 
     if (error || !data?.length) {
-      return null;
+      return { status: 'not_found', result: null };
     }
 
     for (const row of data as PilotProgramRecord[]) {
       const role = resolveRoleFromCode(row, normalized);
       if (role) {
-        return { role, program: recordToActivePilotProgram(row) };
+        return {
+          status: 'found',
+          result: { role, program: recordToActivePilotProgram(row) },
+        };
       }
     }
   } catch (err) {
     console.warn('[pilot_programs] lookup error:', err);
   }
 
-  return null;
+  return { status: 'not_found', result: null };
 }
 
 export type PilotProgramRecoveryResult = {

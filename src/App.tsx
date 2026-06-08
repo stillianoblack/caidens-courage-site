@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import {
   MissionGamePhaseProvider,
@@ -36,52 +36,56 @@ import ChatWithB4 from './pages/ChatWithB4';
 import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
-import FocusFlameLabPage from './pages/FocusFlameLab';
-import Week0AssessmentPage from './pages/Week0AssessmentPage';
-import B4BaselineCheckPage from './pages/B4BaselineCheckPage';
-import B4ResultsAdminPage from './pages/B4ResultsAdminPage';
-import B4GuidePage from './pages/B4GuidePage';
-import PilotDashboardPage from './pages/PilotDashboardPage';
-import ProgramDashboardPage from './pages/ProgramDashboardPage';
 import PilotProgramSignupPage from './pages/PilotProgramSignupPage';
-import PilotTermsPage from './pages/PilotTermsPage';
-import FamilyPortalLayout from './pages/FamilyPortalLayout';
-import KidsPortalPage from './pages/KidsPortalPage';
-import KidsCharacterPage from './pages/KidsCharacterPage';
-import FamilyOverviewPanel from './components/family-portal/panels/FamilyOverviewPanel';
-import FamilyContinueLearningPanel from './components/family-portal/panels/FamilyContinueLearningPanel';
-import FamilyCharactersPanel from './components/family-portal/panels/FamilyCharactersPanel';
-import FamilyCharacterProfilePage from './components/family-portal/panels/FamilyCharacterProfilePage';
-import FamilyDownloadsPanel from './components/family-portal/panels/FamilyDownloadsPanel';
-import FamilyGalleryPanel from './components/family-portal/panels/FamilyGalleryPanel';
-import FamilyCertificatesPanel from './components/family-portal/panels/FamilyCertificatesPanel';
-import FamilyGuidePanel from './components/family-portal/panels/FamilyGuidePanel';
-import FamilyHubLayout from './pages/FamilyHubLayout';
-import FacilitatorBaselineCheckPage from './pages/FacilitatorBaselineCheckPage';
-import AdultAssessmentPage from './pages/AdultAssessmentPage';
-import FamilyBaselineCheckPanel from './components/family-portal/panels/FamilyBaselineCheckPanel';
-import FamilyAdultAssessmentPanel from './components/family-portal/panels/FamilyAdultAssessmentPanel';
-import CaidenQuestHubPage from './pages/CaidenQuestHubPage';
-import CaidenQuestPage from './pages/CaidenQuestPage';
-import B4PortalPage from './pages/B4PortalPage';
-import B4PortalCheckInPage from './pages/B4PortalCheckInPage';
-import B4PortalWeek1Page from './pages/B4PortalWeek1Page';
-import B4PortalFeelingFinderPage from './pages/B4PortalFeelingFinderPage';
-import CharliePortalHubPage from './pages/CharliePortalHubPage';
-import CharliePortalMissionPage from './pages/CharliePortalMissionPage';
-import MirandaPortalHubPage from './pages/MirandaPortalHubPage';
-import MirandaPortalMissionPage from './pages/MirandaPortalMissionPage';
-import StudentGallerySubmitPage from './pages/StudentGallerySubmitPage';
-import StudentGalleryPublicPage from './pages/StudentGalleryPublicPage';
-import MirandaMysteryFilesHubPage from './pages/MirandaMysteryFilesHubPage';
-import MirandaMissionPage from './pages/MirandaMissionPage';
-import FacilitatorAdultGuideHubPage from './pages/FacilitatorAdultGuideHubPage';
-import FacilitatorAdultGuideMissionPage from './pages/FacilitatorAdultGuideMissionPage';
-import FamilyAdultGuideHubPage from './pages/FamilyAdultGuideHubPage';
-import FamilyAdultGuideMissionPage from './pages/FamilyAdultGuideMissionPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
+import NavigationLoader from './components/NavigationLoader';
+import ScrollToTop from './components/ScrollToTop';
+import {
+  AdultAssessmentPage,
+  B4BaselineCheckPage,
+  B4GuidePage,
+  B4PortalCheckInPage,
+  B4PortalFeelingFinderPage,
+  B4PortalPage,
+  B4PortalWeek1Page,
+  B4ResultsAdminPage,
+  CaidenQuestHubPage,
+  CaidenQuestPage,
+  CharliePortalHubPage,
+  CharliePortalMissionPage,
+  FacilitatorAdultGuideHubPage,
+  FacilitatorAdultGuideMissionPage,
+  FacilitatorBaselineCheckPage,
+  FamilyAdultAssessmentPanel,
+  FamilyAdultGuideHubPage,
+  FamilyAdultGuideMissionPage,
+  FamilyBaselineCheckPanel,
+  FamilyCertificatesPanel,
+  FamilyCharacterProfilePage,
+  FamilyCharactersPanel,
+  FamilyContinueLearningPanel,
+  FamilyDownloadsPanel,
+  FamilyGalleryPanel,
+  FamilyGuidePanel,
+  FamilyHubLayout,
+  FamilyOverviewPanel,
+  FamilyPortalLayout,
+  FocusFlameLabPage,
+  KidsCharacterPage,
+  KidsPortalPage,
+  MirandaMissionPage,
+  MirandaMysteryFilesHubPage,
+  MirandaPortalHubPage,
+  MirandaPortalMissionPage,
+  PilotDashboardPage,
+  PilotTermsPage,
+  ProgramDashboardPage,
+  StudentGalleryPublicPage,
+  StudentGallerySubmitPage,
+  Week0AssessmentPage,
+} from './routes/lazyPages';
 import {
   BMC_ACTIVITIES_PATH,
   BMC_COLORING_PATH,
@@ -390,8 +394,11 @@ const AppFrame: React.FC = () => {
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
   return (
     <>
+      <ScrollToTop />
       <AnalyticsRouteTracker />
-      <AppRoutes />
+      <Suspense fallback={<NavigationLoader />}>
+        <AppRoutes />
+      </Suspense>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
       {!hideAskB4Chat ? <DeferredB4ChatWidget /> : null}
     </>

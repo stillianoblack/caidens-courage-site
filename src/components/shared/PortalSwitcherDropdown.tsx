@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
-import { applyProgramPortalUnlock, signOutPortal } from '../../config/portalContext';
+import { applyProgramPortalUnlock, readActivePortalRole, signOutPortal } from '../../config/portalContext';
 import {
   ensureFacilitatorPortalAccess,
   ensureFamilyPortalAccess,
@@ -27,11 +27,18 @@ type PortalOption = {
 
 function buildPortalOptions(): PortalOption[] {
   const program = readActivePilotProgram();
+  const role = readActivePortalRole();
   if (program) {
-    return [
-      { id: 'facilitator', label: 'Facilitator Portal', href: PROGRAM_DASHBOARD_PATH, isProgram: true },
-      { id: 'family', label: 'Family Portal', href: FAMILY_HUB_PATH, isProgram: true },
-    ];
+    // Program signups issue separate family vs facilitator codes — do not cross-grant.
+    if (role === 'family') {
+      return [{ id: 'family', label: 'Family Portal', href: FAMILY_HUB_PATH, isProgram: true }];
+    }
+    if (role === 'facilitator') {
+      return [
+        { id: 'facilitator', label: 'Facilitator Portal', href: PROGRAM_DASHBOARD_PATH, isProgram: true },
+      ];
+    }
+    return [];
   }
   return [
     { id: 'facilitator', label: 'Facilitator Portal', href: FACILITATOR_PORTAL_PATH },

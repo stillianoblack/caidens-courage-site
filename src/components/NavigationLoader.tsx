@@ -13,7 +13,8 @@ const NavigationLoader: React.FC = () => (
     {/* Skeleton header (matches site header height) */}
     <div className="h-16 sm:h-20 w-full bg-navy-100/30 shrink-0" />
     {/* Skeleton content */}
-    <div className="flex-1 flex items-center justify-center p-8">
+    <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
+      <p className="text-lg font-semibold text-navy-200">Loading Focus Flame Academy...</p>
       <div className="w-full max-w-2xl space-y-4">
         <div className="h-8 bg-navy-100/40 rounded animate-pulse w-3/4" />
         <div className="h-4 bg-navy-100/30 rounded animate-pulse w-full" />

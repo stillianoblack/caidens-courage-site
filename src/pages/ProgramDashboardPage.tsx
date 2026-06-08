@@ -17,9 +17,11 @@ import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { forcePortalRoleForRoute, logActivePortalDev } from '../config/portalContext';
+import { forcePortalRoleForRoute, logActivePortalDev, readActivePortalRole } from '../config/portalContext';
+import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
   PILOT_PROGRAM_SIGNUP_PATH,
+  PORTAL_PATH,
   PROGRAM_BASELINE_CHECK_PATH,
   PROGRAM_DASHBOARD_KIDS_BASE,
   PROGRAM_DASHBOARD_PATH,
@@ -74,6 +76,10 @@ export default function ProgramDashboardPage() {
   useEffect(() => {
     if (!activeProgram) {
       navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
+      return;
+    }
+    if (readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
+      navigate(PORTAL_PATH, { replace: true, state: { redirect: PROGRAM_DASHBOARD_PATH } });
     }
   }, [activeProgram, navigate]);
 
@@ -104,7 +110,7 @@ export default function ProgramDashboardPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  if (!activeProgram) {
+  if (!activeProgram || readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
     return null;
   }
 

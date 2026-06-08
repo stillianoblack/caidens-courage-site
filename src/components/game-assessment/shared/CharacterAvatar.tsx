@@ -10,6 +10,8 @@ type CharacterAvatarProps = {
   size?: CharacterAvatarSize;
   theme?: string;
   className?: string;
+  /** Set true for above-the-fold hero avatars on the current view. */
+  priority?: boolean;
 };
 
 export default function CharacterAvatar({
@@ -18,6 +20,7 @@ export default function CharacterAvatar({
   size = 'medium',
   theme,
   className = '',
+  priority = false,
 }: CharacterAvatarProps) {
   const themeColor = resolveCharacterThemeColor(theme);
   const bordered = Boolean(theme);
@@ -35,7 +38,13 @@ export default function CharacterAvatar({
       style={bordered ? { borderColor: themeColor } : undefined}
       aria-hidden={!alt}
     >
-      <img src={src} alt={alt} className="character-avatarImg" decoding="async" />
+      <img
+        src={src}
+        alt={alt}
+        className="character-avatarImg"
+        decoding="async"
+        loading={priority ? 'eager' : 'lazy'}
+      />
     </div>
   );
 }

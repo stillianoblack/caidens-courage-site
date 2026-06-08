@@ -16,7 +16,9 @@ import {
   resolvePortalAccessCode,
   writePortalSessionUnlock,
 } from '../config/portalAccess';
-import { lookupPilotProgramByAccessCode } from '../lib/pilotProgramService';
+import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
+import { looksLikeProgramAccessCode, PORTAL_DB_UNAVAILABLE_MESSAGE } from '../lib/portalAccessCodes';
+import { isSupabaseConfigReady } from '../lib/supabaseClient';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
 
@@ -27,22 +29,18 @@ const ERROR_BY_VARIANT: Record<PortalUnlockVariant, string> = {
 
 const BASELINE_RESULTS_CODES = new Set(['results', 'result']);
 
-function normalizePilotAccessCode(raw: string): string {
-  return raw.trim().toLowerCase().replace(/\s+/g, '');
-}
-
 function isBlueRibbonPilotCode(raw: string): boolean {
-  const normalized = normalizePilotAccessCode(raw);
+  const normalized = raw.trim().toLowerCase().replace(/\s+/g, '');
   return normalized === 'blueribbon2026' || normalized === 'blueribbon';
 }
 
 function isBlueRibbonFamilyCode(raw: string): boolean {
-  const normalized = normalizePilotAccessCode(raw);
+  const normalized = raw.trim().toLowerCase().replace(/\s+/g, '');
   return normalized === 'blueribbonfamily';
 }
 
 function isBlueRibbonKidsCode(raw: string): boolean {
-  const normalized = normalizePilotAccessCode(raw);
+  const normalized = raw.trim().toLowerCase().replace(/\s+/g, '');
   return normalized === 'blueribbonkids';
 }
 
@@ -57,7 +55,9 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       event.preventDefault();
       setError(null);
 
-      const normalizedCode = accessCode.trim().toLowerCase();
+      const trimmedCode = accessCode.trim();
+      const normalizedCode = trimmedCode.toLowerCase().replace(/\s+/g, '');
+
       if (BASELINE_RESULTS_CODES.has(normalizedCode)) {
         setAccessCode('');
         onUnlock?.();
@@ -65,7 +65,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
-      if (isBlueRibbonPilotCode(accessCode)) {
+      if (isBlueRibbonPilotCode(trimmedCode)) {
         writePortalSessionUnlock('pilot');
         writeBlueRibbonUnlock();
         setAccessCode('');
@@ -74,7 +74,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
-      if (isBlueRibbonFamilyCode(accessCode) || isBlueRibbonKidsCode(accessCode)) {
+      if (isBlueRibbonFamilyCode(trimmedCode) || isBlueRibbonKidsCode(trimmedCode)) {
         writeFamilyPortalSession();
         writeBlueRibbonUnlock();
         setAccessCode('');
@@ -83,20 +83,36 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
-      setSubmitting(true);
-      const programMatch = await lookupPilotProgramByAccessCode(accessCode);
-      setSubmitting(false);
+      if (looksLikeProgramAccessCode(trimmedCode)) {
+        if (!isSupabaseConfigReady()) {
+          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+          return;
+        }
 
-      if (programMatch) {
-        applyProgramPortalUnlock(programMatch.program, programMatch.role);
-        writeLastPilotProgram(programMatch.program, programMatch.role, programMatch.program.adminEmail);
-        setAccessCode('');
-        onUnlock?.();
-        navigate(programMatch.role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+        setSubmitting(true);
+        const lookup = await lookupPilotProgramByAccessCodeDetailed(trimmedCode);
+        setSubmitting(false);
+
+        if (lookup.status === 'unavailable') {
+          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+          return;
+        }
+
+        if (lookup.result) {
+          const { program, role } = lookup.result;
+          applyProgramPortalUnlock(program, role);
+          writeLastPilotProgram(program, role, program.adminEmail);
+          setAccessCode('');
+          onUnlock?.();
+          navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+          return;
+        }
+
+        setError(ERROR_BY_VARIANT[variant]);
         return;
       }
 
-      const tier = resolvePortalAccessCode(accessCode);
+      const tier = resolvePortalAccessCode(trimmedCode);
       if (!tier) {
         setError(ERROR_BY_VARIANT[variant]);
         return;

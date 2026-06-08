@@ -83,9 +83,10 @@ export function logActivePortalDev(): void {
 }
 
 export function forcePortalRoleForRoute(pathname: string): void {
-  if (pathname.startsWith('/program-dashboard')) {
+  const role = readActivePortalRole();
+  if (pathname.startsWith('/program-dashboard') && role !== 'family') {
     writeActivePortalRole('facilitator');
-  } else if (pathname.startsWith('/family-hub')) {
+  } else if (pathname.startsWith('/family-hub') && role !== 'facilitator') {
     writeActivePortalRole('family');
   }
   logActivePortalDev();

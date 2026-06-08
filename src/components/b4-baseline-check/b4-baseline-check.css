@@ -1101,10 +1101,61 @@
 .bbc-answerCard--assessment {
   width: 100%;
   max-width: 43.75rem;
-  min-height: 72px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   margin: 0 auto;
+  padding: 0.875rem 1.125rem;
+  border: 2px solid var(--bbc-border);
+  border-radius: 0.875rem;
+  background: #fff;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bbc-answerCard--assessment:hover {
+  border-color: rgba(36, 62, 112, 0.35);
+}
+
+.bbc-answerCard--assessment.bbc-answerCard--selected {
+  border-color: var(--bbc-navy);
+  background: #f8fafc;
+  box-shadow: 0 0 0 1px rgba(36, 62, 112, 0.12);
+}
+
+@media (min-width: 768px) {
+  .bbc-app--game-active .bbc-main--quiz,
+  .bbc-main--quiz {
+    padding-top: 1.5rem;
+    max-width: 47.5rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .bbc-quizLayout,
+  .mission-quizLayout {
+    gap: 0.625rem;
+  }
+
+  .bbc-questionText,
+  .bbc-questionText--centered,
+  .mission-questionText {
+    max-width: 47.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .bbc-answers,
+  .bbc-answers--centered {
+    gap: 0.75rem;
+    max-width: 47.5rem;
+  }
+
+  .bbc-answerCard--assessment {
+    max-width: 43.75rem;
+    min-height: 64px;
+  }
 }
 
 .bbc-answerLabel {
