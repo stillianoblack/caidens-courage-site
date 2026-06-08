@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
@@ -47,13 +47,16 @@ export default function ProgramDashboardPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeProgram = readActivePilotProgram();
-  const [activeNav, setActiveNav] = useState<PilotSidebarNavId>('overview');
   const [resultsVersion, setResultsVersion] = useState(0);
   const showWelcome = searchParams.get('welcome') === '1';
 
   const isKidsRoute = location.pathname.startsWith(`${PROGRAM_DASHBOARD_KIDS_BASE}/`);
   const brand = resolvePortalRailBrand();
   const programCode = activeProgram?.programCode;
+  const activeNav = useMemo<PilotSidebarNavId>(() => {
+    const hash = location.hash.replace('#', '') as PilotSidebarNavId;
+    return hash && VALID_NAV_IDS.has(hash) ? hash : 'overview';
+  }, [location.hash]);
   const pageTitle = isKidsRoute
     ? resolvePortalPageTitle(location.pathname, PROGRAM_DASHBOARD_PATH)
     : NAV_TITLE[activeNav];
@@ -73,6 +76,19 @@ export default function ProgramDashboardPage() {
     requestGalleryCountsRefresh();
   }, []);
 
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    // Refresh results when user switches to overview/results tab.
+    // Skip the initial mount (resultsVersion starts at 0).
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (activeNav === 'results' || activeNav === 'overview') {
+      setResultsVersion((v) => v + 1);
+    }
+  }, [activeNav]);
+
   useEffect(() => {
     if (!activeProgram) {
       navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
@@ -83,19 +99,8 @@ export default function ProgramDashboardPage() {
     }
   }, [activeProgram, navigate]);
 
-  useEffect(() => {
-    const hash = location.hash.replace('#', '') as PilotSidebarNavId;
-    if (hash && VALID_NAV_IDS.has(hash)) {
-      setActiveNav(hash);
-    }
-  }, [location.hash]);
-
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
-      setActiveNav(id);
-      if (id === 'results' || id === 'overview') {
-        setResultsVersion((v) => v + 1);
-      }
       if (isKidsRoute) {
         navigate(`${PROGRAM_DASHBOARD_PATH}#${id}`);
         return;
