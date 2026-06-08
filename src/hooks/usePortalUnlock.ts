@@ -1,5 +1,4 @@
 import { useCallback, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   B4_RESULTS_ADMIN_PATH,
   BLUE_RIBBON_PILOT_PATH,
@@ -24,6 +23,7 @@ import {
   PORTAL_CONNECTION_ERROR_MESSAGE,
 } from '../lib/portalAccessCodes';
 import { logPortalRedirect } from '../lib/portalDebug';
+import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 
@@ -46,18 +46,13 @@ function isBlueRibbonKidsCode(raw: string): boolean {
   return normalized === 'blueribbonkids';
 }
 
-function navigateToPortal(
-  navigate: ReturnType<typeof useNavigate>,
-  destination: string,
-  reason: string,
-): void {
+function navigateToPortal(destination: string, reason: string): void {
   resetPortalScroll();
   logPortalRedirect('/portal', destination, reason);
-  navigate(destination, { replace: true });
+  replaceWithPortalRoute(destination);
 }
 
 export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
-  const navigate = useNavigate();
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -78,7 +73,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       if (BASELINE_RESULTS_CODES.has(normalizedCode)) {
         setAccessCode('');
         onUnlock?.();
-        navigateToPortal(navigate, B4_RESULTS_ADMIN_PATH, 'baseline-results-code');
+        navigateToPortal(B4_RESULTS_ADMIN_PATH, 'baseline-results-code');
         return;
       }
 
@@ -94,7 +89,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
           writeLastPilotProgram(program, role, program.adminEmail);
           setAccessCode('');
           const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
-          navigateToPortal(navigate, destination, `program-code-${role}`);
+          navigateToPortal(destination, `program-code-${role}`);
           setSubmitting(false);
           onUnlock?.();
           return;
@@ -128,7 +123,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         writeActivePortalRole('facilitator');
         setAccessCode('');
         onUnlock?.();
-        navigateToPortal(navigate, BLUE_RIBBON_PILOT_PATH, 'blueribbon-pilot-code');
+        navigateToPortal(BLUE_RIBBON_PILOT_PATH, 'blueribbon-pilot-code');
         return;
       }
 
@@ -141,7 +136,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         writeActivePortalRole('family');
         setAccessCode('');
         onUnlock?.();
-        navigateToPortal(navigate, FAMILY_PORTAL_PATH, 'blueribbon-family-code');
+        navigateToPortal(FAMILY_PORTAL_PATH, 'blueribbon-family-code');
         return;
       }
 
@@ -154,9 +149,9 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       writePortalSessionUnlock(tier.type);
       setAccessCode('');
       onUnlock?.();
-      navigateToPortal(navigate, getDashboardPathForTier(tier), `tier-code-${tier.type}`);
+      navigateToPortal(getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, navigate, onUnlock],
+    [accessCode, onUnlock],
   );
 
   const handleAccessCodeChange = useCallback(

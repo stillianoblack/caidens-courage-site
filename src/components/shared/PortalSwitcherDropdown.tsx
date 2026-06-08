@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { readActivePortalRole, signOutPortal } from '../../config/portalContext';
 import { PORTAL_PATH } from '../../config/courageRoutes';
+import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import './portal-switcher.css';
 
 type PortalSwitcherDropdownProps = {
@@ -16,7 +16,6 @@ function resolvePortalLabel(): string {
 }
 
 export default function PortalSwitcherDropdown({ className = '' }: PortalSwitcherDropdownProps) {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const currentLabel = resolvePortalLabel();
@@ -34,7 +33,7 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
   const handleSignOut = () => {
     setOpen(false);
     signOutPortal();
-    navigate(PORTAL_PATH);
+    assignPortalRoute(PORTAL_PATH);
   };
 
   return (

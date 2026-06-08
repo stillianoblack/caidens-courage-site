@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import PortalHero from '../components/courage/PortalHero';
@@ -11,6 +11,7 @@ import {
   hasFacilitatorPortalSession,
   hasFamilyPortalSession,
 } from '../lib/portalSessionGuard';
+import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 
 /**
  * Caiden's Courage Portal — access-code entry only.
@@ -19,7 +20,6 @@ import {
 const Portal: React.FC = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const navigate = useNavigate();
   const portalMessage = useMemo(
     () => (location.state as { portalMessage?: string } | null)?.portalMessage ?? null,
     [location.state],
@@ -53,14 +53,14 @@ const Portal: React.FC = () => {
   useEffect(() => {
     if (hasFamilyPortalSession()) {
       logPortalRedirect(PORTAL_PATH, FAMILY_HUB_PATH, 'resume-family-session');
-      navigate(FAMILY_HUB_PATH, { replace: true });
+      replaceWithPortalRoute(FAMILY_HUB_PATH);
       return;
     }
     if (hasFacilitatorPortalSession()) {
       logPortalRedirect(PORTAL_PATH, PROGRAM_DASHBOARD_PATH, 'resume-facilitator-session');
-      navigate(PROGRAM_DASHBOARD_PATH, { replace: true });
+      replaceWithPortalRoute(PROGRAM_DASHBOARD_PATH);
     }
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip bg-cream font-body">

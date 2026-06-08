@@ -1,21 +1,19 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { maskAccessCode, type LastPilotProgram } from '../../config/lastPilotProgram';
+import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
 type PortalWelcomeBackCardProps = {
   saved: LastPilotProgram;
   onUseDifferentCode: () => void;
 };
 
 export default function PortalWelcomeBackCard({ saved, onUseDifferentCode }: PortalWelcomeBackCardProps) {
-  const navigate = useNavigate();
-
   const continueAs = (role: 'facilitator' | 'family') => {
     const code =
       role === 'family' ? saved.family_access_code : saved.facilitator_access_code;
     applyProgramPortalUnlock(saved.program, role, code);
-    navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH, { replace: true });
+    replaceWithPortalRoute(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
   };
 
   return (
