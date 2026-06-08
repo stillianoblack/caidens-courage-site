@@ -7,6 +7,7 @@ import {
 } from '../../data/pilotDashboardContent';
 import { useFacilitatorGalleryPendingCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
+import { programDashboardTabPath } from '../../lib/programDashboardNav';
 import type { PilotPricingTier } from '../../types/pilotProgram';
 import PilotNavIcon from './PilotNavIcon';
 import PilotPartnerSupportCard from './PilotPartnerSupportCard';
@@ -51,12 +52,15 @@ export default function PilotDashboardSidebar({
         <ul className="pilot-railNavList">
           {navItems.map((item) => (
             <li key={item.id}>
-              <button
-                type="button"
+              <a
+                href={programDashboardTabPath(item.id)}
                 role="tab"
                 aria-selected={activeId === item.id}
                 className={`pilot-railNavBtn${activeId === item.id ? ' pilot-railNavBtn--active' : ''}`}
-                onClick={() => onSelect(item.id)}
+                onClick={(event) => {
+                  if (event.defaultPrevented) return;
+                  onSelect(item.id);
+                }}
               >
                 <span className="pilot-railIcon">
                   <PilotNavIcon name={item.icon} />
@@ -66,7 +70,7 @@ export default function PilotDashboardSidebar({
                     ? formatGalleryNavLabel(item.label, galleryPendingCount)
                     : item.label}
                 </span>
-              </button>
+              </a>
             </li>
           ))}
         </ul>
