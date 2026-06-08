@@ -12,7 +12,7 @@ const EMPTY_SNAPSHOT = computeFamilyProgressSnapshot({ programCode: '' });
 
 export function useFamilyProgressMetrics(programCode?: string) {
   const resolvedCode = programCode ?? readActivePilotProgram()?.programCode;
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [snapshot, setSnapshot] = useState<FamilyProgressSnapshot>(EMPTY_SNAPSHOT);
 
   const refresh = useCallback(async () => {
@@ -23,20 +23,23 @@ export function useFamilyProgressMetrics(programCode?: string) {
     }
 
     setLoading(true);
-    const [legacyPayload, trackingPayload] = await Promise.all([
-      loadAssessmentResults(resolvedCode),
-      loadPilotTrackingData(resolvedCode),
-    ]);
+    try {
+      const [legacyPayload, trackingPayload] = await Promise.all([
+        loadAssessmentResults(resolvedCode),
+        loadPilotTrackingData(resolvedCode),
+      ]);
 
-    setSnapshot(
-      computeFamilyProgressSnapshot({
-        programCode: resolvedCode,
-        moduleResults: trackingPayload.moduleResults,
-        assessmentResults: trackingPayload.assessmentResults,
-        legacyBaselines: legacyPayload.results,
-      }),
-    );
-    setLoading(false);
+      setSnapshot(
+        computeFamilyProgressSnapshot({
+          programCode: resolvedCode,
+          moduleResults: trackingPayload.moduleResults,
+          assessmentResults: trackingPayload.assessmentResults,
+          legacyBaselines: legacyPayload.results,
+        }),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [resolvedCode]);
 
   useEffect(() => {

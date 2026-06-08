@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ensureFamilyPortalAccess } from '../../config/blueRibbonPortalAccess';
 import type {
   PilotCharacterTrackMetric,
   PilotCharacterTrackId,
@@ -40,7 +39,6 @@ export default function CharacterLearningTrackCard({
   const navigate = useNavigate();
 
   const openPreview = () => {
-    ensureFamilyPortalAccess();
     navigate(previewHref);
   };
 

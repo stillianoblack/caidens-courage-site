@@ -17,17 +17,17 @@ import {
   writePortalSessionUnlock,
 } from '../config/portalAccess';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
-import { looksLikeProgramAccessCode, PORTAL_DB_UNAVAILABLE_MESSAGE } from '../lib/portalAccessCodes';
+import {
+  isLegacyDemoAccessCode,
+  looksLikeProgramAccessCode,
+  PORTAL_CODE_NOT_FOUND_MESSAGE,
+  PORTAL_CONNECTION_ERROR_MESSAGE,
+} from '../lib/portalAccessCodes';
 import { logPortalRedirect } from '../lib/portalDebug';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
-
-const ERROR_BY_VARIANT: Record<PortalUnlockVariant, string> = {
-  nav: "That code didn't work.",
-  hero: "That code didn't work. Check your code or contact the Caiden's Courage team.",
-};
 
 const BASELINE_RESULTS_CODES = new Set(['results', 'result']);
 
@@ -56,7 +56,7 @@ function navigateToPortal(
   navigate(destination, { replace: true });
 }
 
-export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => void) {
+export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
   const navigate = useNavigate();
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +71,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       const normalizedCode = trimmedCode.toLowerCase().replace(/\s+/g, '');
 
       if (!trimmedCode) {
-        setError(ERROR_BY_VARIANT[variant]);
+        setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
         return;
       }
 
@@ -82,34 +82,47 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
-      // Supabase pilot_programs lookup first (trimmed, case-insensitive).
+      const isProgramShaped = looksLikeProgramAccessCode(trimmedCode);
+
       if (isSupabaseConfigReady()) {
         setSubmitting(true);
         const lookup = await lookupPilotProgramByAccessCodeDetailed(trimmedCode);
-        setSubmitting(false);
 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
           applyProgramPortalUnlock(program, role, trimmedCode);
           writeLastPilotProgram(program, role, program.adminEmail);
           setAccessCode('');
-          onUnlock?.();
           const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
           navigateToPortal(navigate, destination, `program-code-${role}`);
+          setSubmitting(false);
+          onUnlock?.();
           return;
         }
 
-        if (lookup.status === 'unavailable' && looksLikeProgramAccessCode(trimmedCode)) {
-          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+        setSubmitting(false);
+
+        if (lookup.status === 'error' || lookup.status === 'unavailable') {
+          setError(PORTAL_CONNECTION_ERROR_MESSAGE);
           return;
         }
-      } else if (looksLikeProgramAccessCode(trimmedCode)) {
-        setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+
+        if (lookup.status === 'not_found' && isProgramShaped) {
+          setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
+          return;
+        }
+      } else if (isProgramShaped) {
+        setError(PORTAL_CONNECTION_ERROR_MESSAGE);
         return;
       }
 
-      // Legacy demo codes (fallback only).
-      if (isBlueRibbonPilotCode(trimmedCode)) {
+      if (isProgramShaped) {
+        setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
+        return;
+      }
+
+      // Legacy demo codes only — never for program-shaped codes.
+      if (isLegacyDemoAccessCode(trimmedCode) && isBlueRibbonPilotCode(trimmedCode)) {
         writePortalSessionUnlock('pilot');
         writeBlueRibbonUnlock();
         writeActivePortalRole('facilitator');
@@ -119,7 +132,10 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
-      if (isBlueRibbonFamilyCode(trimmedCode) || isBlueRibbonKidsCode(trimmedCode)) {
+      if (
+        isLegacyDemoAccessCode(trimmedCode) &&
+        (isBlueRibbonFamilyCode(trimmedCode) || isBlueRibbonKidsCode(trimmedCode))
+      ) {
         writeFamilyPortalSession();
         writeBlueRibbonUnlock();
         writeActivePortalRole('family');
@@ -131,7 +147,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
 
       const tier = resolvePortalAccessCode(trimmedCode);
       if (!tier) {
-        setError(ERROR_BY_VARIANT[variant]);
+        setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
         return;
       }
 
@@ -140,7 +156,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       onUnlock?.();
       navigateToPortal(navigate, getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, navigate, onUnlock, variant],
+    [accessCode, navigate, onUnlock],
   );
 
   const handleAccessCodeChange = useCallback(

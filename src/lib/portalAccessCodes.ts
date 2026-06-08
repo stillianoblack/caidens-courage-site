@@ -32,5 +32,11 @@ export function looksLikeProgramAccessCode(raw: string): boolean {
   return normalized.includes('-');
 }
 
-export const PORTAL_DB_UNAVAILABLE_MESSAGE =
-  'Portal database connection is unavailable. Please try again later or contact the Caiden\'s Courage team.';
+export const PORTAL_CODE_NOT_FOUND_MESSAGE =
+  'That code was not found. Please check the full code.';
+
+export const PORTAL_CONNECTION_ERROR_MESSAGE =
+  'Portal connection issue. Please try again.';
+
+/** @deprecated Use PORTAL_CONNECTION_ERROR_MESSAGE */
+export const PORTAL_DB_UNAVAILABLE_MESSAGE = PORTAL_CONNECTION_ERROR_MESSAGE;

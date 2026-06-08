@@ -118,13 +118,12 @@ export function resolvePortalRailBrand(): { title: string; subtitle: string } {
   if (program?.programName) {
     return {
       title: program.programName,
-      subtitle: role === 'facilitator' ? 'Focus Flame Academy' : 'Focus Flame Academy',
+      subtitle: 'Focus Flame Academy',
     };
   }
 
-  if (role === 'facilitator') {
-    return { title: 'Focus Flame Academy Pilot', subtitle: 'Focus Flame Academy' };
-  }
-
-  return { title: 'Family Portal', subtitle: 'Focus Flame Academy' };
+  return {
+    title: role === 'facilitator' ? 'Facilitator Portal' : 'Family Portal',
+    subtitle: 'Focus Flame Academy',
+  };
 }

@@ -8,7 +8,17 @@ import { ensureFamilyPortalAccess } from './blueRibbonPortalAccess';
 
 export const FAMILY_PORTAL_SESSION_KEY = 'cc-family-portal-unlock';
 
+/** Program family hub — session flag only (no Blue Ribbon cross-grant). */
 export function readFamilyPortalSession(): boolean {
+  try {
+    return sessionStorage.getItem(FAMILY_PORTAL_SESSION_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Legacy /family-portal — may cross-grant from Blue Ribbon demo unlock. */
+export function readLegacyFamilyPortalSession(): boolean {
   return ensureFamilyPortalAccess();
 }
 

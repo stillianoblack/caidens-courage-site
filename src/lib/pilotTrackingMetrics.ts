@@ -76,7 +76,7 @@ export function computePilotTrackingMetrics(input: {
     completionRate:
       studentsEnrolled > 0
         ? Math.round((baselineChecksCompleted / studentsEnrolled) * 100)
-        : legacy.completionRate,
+        : 0,
     moduleCompletions: moduleResults.length,
     uniqueModulesCompleted: uniqueModules.size,
     averageModuleScorePct: average(moduleScores),

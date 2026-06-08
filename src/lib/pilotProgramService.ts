@@ -33,7 +33,7 @@ function resolveRoleFromCode(record: PilotProgramRecord, normalized: string): 'f
   return null;
 }
 
-export type PilotProgramLookupStatus = 'found' | 'not_found' | 'unavailable';
+export type PilotProgramLookupStatus = 'found' | 'not_found' | 'unavailable' | 'error';
 
 export type PilotProgramLookupResponse = {
   status: PilotProgramLookupStatus;
@@ -70,7 +70,13 @@ export async function lookupPilotProgramByAccessCodeDetailed(
       .eq('pilot_status', 'active')
       .limit(5);
 
-    if (error || !data?.length) {
+    if (error) {
+      const response = { status: 'error' as const, result: null };
+      logProgramCodeLookup(rawCode, response);
+      return response;
+    }
+
+    if (!data?.length) {
       const response = { status: 'not_found' as const, result: null };
       logProgramCodeLookup(rawCode, response);
       return response;
@@ -89,6 +95,9 @@ export async function lookupPilotProgramByAccessCodeDetailed(
     }
   } catch (err) {
     console.warn('[pilot_programs] lookup error:', err);
+    const response = { status: 'error' as const, result: null };
+    logProgramCodeLookup(rawCode, response);
+    return response;
   }
 
   const response = { status: 'not_found' as const, result: null };

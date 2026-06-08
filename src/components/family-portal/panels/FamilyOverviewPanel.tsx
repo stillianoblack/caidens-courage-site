@@ -42,12 +42,19 @@ export default function FamilyOverviewPanel() {
         <div className="family-panelBlockHead">
           <h2 className="family-panelBlockTitle">Family Progress</h2>
         </div>
-        {loading ? <p className="family-panelHelper">Loading...</p> : null}
+        {loading ? (
+          <div className="family-progressSkeleton" aria-busy="true" aria-label="Loading progress">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div key={index} className="family-skeletonBar" />
+            ))}
+          </div>
+        ) : null}
         {!loading && !metrics.hasActivity ? (
           <p className="family-panelHelper">
             Progress will appear here after your family completes activities.
           </p>
         ) : null}
+        {!loading ? (
         <div className="family-growthChart">
           {metrics.rows.map(({ key, label, pct, tone }) => (
             <div key={key} className="family-growthRow">
@@ -64,6 +71,7 @@ export default function FamilyOverviewPanel() {
             </div>
           ))}
         </div>
+        ) : null}
       </section>
 
       <FocusSkillsSnapshot

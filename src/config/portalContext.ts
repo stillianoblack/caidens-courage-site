@@ -4,6 +4,7 @@ import {
   readActivePilotProgram,
   writeActivePilotProgram,
 } from './activePilotProgram';
+import { clearBlueRibbonUnlock } from './blueRibbonPortalAccess';
 import { writeFamilyPortalSession, clearFamilyPortalSession } from './familyPortalAccess';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 
@@ -146,6 +147,7 @@ export function applyProgramPortalUnlock(
 }
 
 export function clearProgramPortalContext(): void {
+  clearBlueRibbonUnlock();
   clearActivePilotProgram();
   clearActiveAccessCode();
   try {

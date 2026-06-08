@@ -17,7 +17,7 @@ import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { readActivePortalRole } from '../config/portalContext';
+import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
   PILOT_PROGRAM_SIGNUP_PATH,
@@ -112,6 +112,12 @@ export default function ProgramDashboardPage() {
   const isKidsRoute = location.pathname.startsWith(`${PROGRAM_DASHBOARD_KIDS_BASE}/`);
   const brand = resolvePortalRailBrand();
   const programCode = activeProgram?.programCode;
+  const role = readActivePortalRole();
+  const hasUnlock = readPortalSessionUnlock();
+  const sessionValid = Boolean(
+    activeProgram && role === 'facilitator' && hasUnlock,
+  );
+
   const activeNav = useMemo<PilotSidebarNavId>(() => {
     const hash = location.hash.replace('#', '') as PilotSidebarNavId;
     return hash && VALID_NAV_IDS.has(hash) ? hash : 'overview';
@@ -124,7 +130,7 @@ export default function ProgramDashboardPage() {
   const { metrics, legacyResults: results, source, warning, loading } = usePilotTrackingResults(
     resultsVersion,
     programCode,
-    needsTracking,
+    needsTracking && sessionValid,
   );
 
   useEffect(() => {
@@ -132,8 +138,10 @@ export default function ProgramDashboardPage() {
   }, []);
 
   useEffect(() => {
-    afterIdle(() => requestGalleryCountsRefresh());
-  }, []);
+    if (sessionValid) {
+      afterIdle(() => requestGalleryCountsRefresh());
+    }
+  }, [sessionValid]);
 
   const didMountRef = useRef(false);
   useEffect(() => {
@@ -151,10 +159,11 @@ export default function ProgramDashboardPage() {
       navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
       return;
     }
-    if (readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
+    if (!sessionValid) {
+      clearProgramPortalContext();
       navigate(PORTAL_PATH, { replace: true, state: { redirect: PROGRAM_DASHBOARD_PATH } });
     }
-  }, [activeProgram, navigate]);
+  }, [activeProgram, navigate, sessionValid]);
 
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
@@ -173,7 +182,7 @@ export default function ProgramDashboardPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  if (!activeProgram || readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
+  if (!activeProgram) {
     return null;
   }
 

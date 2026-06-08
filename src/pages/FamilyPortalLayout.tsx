@@ -9,7 +9,8 @@ import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
-import { readFamilyPortalSession } from '../config/familyPortalAccess';
+import { readLegacyFamilyPortalSession } from '../config/familyPortalAccess';
+import { afterIdle } from '../lib/defer';
 import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
@@ -17,7 +18,7 @@ import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const hasSession = readFamilyPortalSession();
+  const hasSession = readLegacyFamilyPortalSession();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname);
   const programCode = readActivePilotProgram()?.programCode;
@@ -27,7 +28,7 @@ export default function FamilyPortalLayout() {
   }, []);
 
   useEffect(() => {
-    requestGalleryCountsRefresh();
+    afterIdle(() => requestGalleryCountsRefresh());
   }, []);
 
   useEffect(() => {

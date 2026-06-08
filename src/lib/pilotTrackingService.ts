@@ -1,5 +1,7 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import type { FormalAssessmentType } from '../types/moduleTracking';
+import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
+import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
   appendLocalAssessmentV2Result,
@@ -469,10 +471,15 @@ export async function loadPilotTrackingData(programCode?: string): Promise<{
   source: 'supabase' | 'local' | 'hybrid';
   warning?: string;
 }> {
+  const normalizedCode = programCode?.trim();
+  const scopedToProgram = Boolean(normalizedCode);
   const localModules = loadLocalModuleResults();
   const localAssessments = loadLocalAssessmentV2Results();
 
   if (!isSupabaseConfigured()) {
+    if (scopedToProgram) {
+      return { moduleResults: [], assessmentResults: [], source: 'supabase' };
+    }
     return {
       moduleResults: localModules,
       assessmentResults: localAssessments,
@@ -480,29 +487,59 @@ export async function loadPilotTrackingData(programCode?: string): Promise<{
     };
   }
 
-  const [modulePayload, assessmentPayload] = await Promise.all([
-    fetchModuleResultsFromSupabase(programCode),
-    fetchAssessmentV2FromSupabase(programCode),
-  ]);
+  try {
+    const [modulePayload, assessmentPayload] = await withTimeout(
+      Promise.all([
+        fetchModuleResultsFromSupabase(normalizedCode),
+        fetchAssessmentV2FromSupabase(normalizedCode),
+      ]),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'pilot_tracking',
+    );
 
-  const warning = modulePayload.error || assessmentPayload.error;
+    const fetchWarning = modulePayload.error || assessmentPayload.error;
 
-  const moduleResults =
-    modulePayload.results.length > 0 ? modulePayload.results : localModules;
-  const assessmentResults =
-    assessmentPayload.results.length > 0 ? assessmentPayload.results : localAssessments;
+    if (scopedToProgram) {
+      return {
+        moduleResults: modulePayload.results,
+        assessmentResults: assessmentPayload.results,
+        source: 'supabase',
+        warning: fetchWarning ? PORTAL_CONNECTION_ERROR_MESSAGE : undefined,
+      };
+    }
 
-  const source =
-    modulePayload.results.length > 0 || assessmentPayload.results.length > 0
-      ? localModules.length > 0 || localAssessments.length > 0
-        ? 'hybrid'
-        : 'supabase'
-      : 'local';
+    const moduleResults =
+      modulePayload.results.length > 0 ? modulePayload.results : localModules;
+    const assessmentResults =
+      assessmentPayload.results.length > 0 ? assessmentPayload.results : localAssessments;
 
-  return {
-    moduleResults,
-    assessmentResults,
-    source,
-    warning: warning || undefined,
-  };
+    const source =
+      modulePayload.results.length > 0 || assessmentPayload.results.length > 0
+        ? localModules.length > 0 || localAssessments.length > 0
+          ? 'hybrid'
+          : 'supabase'
+        : 'local';
+
+    return {
+      moduleResults,
+      assessmentResults,
+      source,
+      warning: fetchWarning || undefined,
+    };
+  } catch {
+    if (scopedToProgram) {
+      return {
+        moduleResults: [],
+        assessmentResults: [],
+        source: 'supabase',
+        warning: PORTAL_CONNECTION_ERROR_MESSAGE,
+      };
+    }
+    return {
+      moduleResults: localModules,
+      assessmentResults: localAssessments,
+      source: 'local',
+      warning: PORTAL_CONNECTION_ERROR_MESSAGE,
+    };
+  }
 }

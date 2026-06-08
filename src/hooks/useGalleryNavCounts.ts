@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { afterIdle } from '../lib/defer';
+import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from '../lib/fetchWithTimeout';
 import {
   GALLERY_COUNTS_REFRESH_EVENT,
   readLastGalleryViewedAt,
@@ -18,12 +19,25 @@ function useGalleryCountRefresh(refresh: () => void): void {
   }, [refresh]);
 }
 
+async function fetchGalleryCountWithTimeout<T>(
+  label: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await withTimeout(fetcher(), DASHBOARD_FETCH_TIMEOUT_MS, label);
+  } catch {
+    return 0 as T;
+  }
+}
+
 export function useFacilitatorGalleryPendingCount(programCode?: string): number {
   const [count, setCount] = useState(0);
   const resolvedCode = programCode ?? readActivePilotProgram()?.programCode;
 
   const refresh = useCallback(() => {
-    void fetchFacilitatorPendingGalleryCount(resolvedCode).then(setCount);
+    void fetchGalleryCountWithTimeout('gallery_pending_count', () =>
+      fetchFacilitatorPendingGalleryCount(resolvedCode),
+    ).then(setCount);
   }, [resolvedCode]);
 
   useEffect(() => {
@@ -41,7 +55,9 @@ export function useFamilyGalleryNewApprovedCount(programCode?: string): number {
 
   const refresh = useCallback(() => {
     const lastViewedAt = readLastGalleryViewedAt(resolvedCode);
-    void fetchFamilyNewApprovedGalleryCount(resolvedCode, lastViewedAt).then(setCount);
+    void fetchGalleryCountWithTimeout('gallery_approved_count', () =>
+      fetchFamilyNewApprovedGalleryCount(resolvedCode, lastViewedAt),
+    ).then(setCount);
   }, [resolvedCode]);
 
   useEffect(() => {

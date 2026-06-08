@@ -4,16 +4,24 @@ import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import { computePilotTrackingMetrics, type PilotTrackingMetrics } from '../lib/pilotTrackingMetrics';
 import { loadPilotTrackingData } from '../lib/pilotTrackingService';
 
+const EMPTY_METRICS = computePilotTrackingMetrics({
+  legacyBaselines: [],
+  moduleResults: [],
+  assessmentV2: [],
+});
+
 export function usePilotTrackingResults(
   refreshKey = 0,
   programCode?: string,
   enabled = true,
 ) {
-  const [loading, setLoading] = useState(enabled);
-  const [legacySource, setLegacySource] = useState<'supabase' | 'local'>('local');
-  const [trackingSource, setTrackingSource] = useState<'supabase' | 'local' | 'hybrid'>('local');
+  const [loading, setLoading] = useState(false);
+  const [legacySource, setLegacySource] = useState<'supabase' | 'local'>('supabase');
+  const [trackingSource, setTrackingSource] = useState<'supabase' | 'local' | 'hybrid'>('supabase');
   const [warning, setWarning] = useState<string | undefined>();
-  const [legacyResults, setLegacyResults] = useState<Awaited<ReturnType<typeof loadAssessmentResults>>['results']>([]);
+  const [legacyResults, setLegacyResults] = useState<
+    Awaited<ReturnType<typeof loadAssessmentResults>>['results']
+  >([]);
   const [moduleResults, setModuleResults] = useState<
     Awaited<ReturnType<typeof loadPilotTrackingData>>['moduleResults']
   >([]);
@@ -23,23 +31,25 @@ export function usePilotTrackingResults(
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const [legacyPayload, trackingPayload] = await Promise.all([
-      loadAssessmentResults(programCode),
-      loadPilotTrackingData(programCode),
-    ]);
+    try {
+      const [legacyPayload, trackingPayload] = await Promise.all([
+        loadAssessmentResults(programCode),
+        loadPilotTrackingData(programCode),
+      ]);
 
-    setLegacyResults(legacyPayload.results);
-    setLegacySource(legacyPayload.source);
-    setModuleResults(trackingPayload.moduleResults);
-    setAssessmentResults(trackingPayload.assessmentResults);
-    setTrackingSource(trackingPayload.source);
-    setWarning(legacyPayload.warning ?? trackingPayload.warning);
-    setLoading(false);
+      setLegacyResults(legacyPayload.results);
+      setLegacySource(legacyPayload.source);
+      setModuleResults(trackingPayload.moduleResults);
+      setAssessmentResults(trackingPayload.assessmentResults);
+      setTrackingSource(trackingPayload.source);
+      setWarning(legacyPayload.warning ?? trackingPayload.warning);
+    } finally {
+      setLoading(false);
+    }
   }, [programCode]);
 
   useEffect(() => {
     if (!enabled) {
-      setLoading(false);
       return;
     }
     afterIdle(() => {
@@ -49,12 +59,14 @@ export function usePilotTrackingResults(
 
   const metrics = useMemo(
     (): PilotTrackingMetrics =>
-      computePilotTrackingMetrics({
-        legacyBaselines: legacyResults,
-        moduleResults,
-        assessmentV2: assessmentResults,
-      }),
-    [assessmentResults, legacyResults, moduleResults],
+      enabled
+        ? computePilotTrackingMetrics({
+            legacyBaselines: legacyResults,
+            moduleResults,
+            assessmentV2: assessmentResults,
+          })
+        : EMPTY_METRICS,
+    [assessmentResults, enabled, legacyResults, moduleResults],
   );
 
   return {
@@ -69,7 +81,7 @@ export function usePilotTrackingResults(
         | 'supabase'
         | 'local',
     warning,
-    loading,
+    loading: enabled && loading,
     refresh,
   };
 }

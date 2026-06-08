@@ -38,6 +38,14 @@ export function hasBlueRibbonUnlock(): boolean {
   }
 }
 
+export function clearBlueRibbonUnlock(): void {
+  try {
+    sessionStorage.removeItem(BLUE_RIBBON_UNLOCK_KEY);
+  } catch {
+    /* sessionStorage unavailable */
+  }
+}
+
 function readFamilyPortalSessionDirect(): boolean {
   try {
     return sessionStorage.getItem(FAMILY_PORTAL_SESSION_KEY) === '1';

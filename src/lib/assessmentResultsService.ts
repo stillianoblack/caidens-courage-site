@@ -4,6 +4,8 @@ import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import { loadAllBaselineResults } from './b4BaselineCheckStorage';
 import type { AdultAssessmentRecord } from './adultAssessmentStorage';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
+import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type AssessmentResultRow = {
@@ -257,52 +259,66 @@ export async function fetchAssessmentResultsFromSupabase(programCode?: string): 
 export async function loadAssessmentResults(programCode?: string): Promise<AssessmentResultsLoad> {
   const localResults = loadAllBaselineResults();
   const normalizedCode = programCode?.trim();
-  const filteredLocal = normalizedCode
+  const scopedToProgram = Boolean(normalizedCode);
+  const filteredLocal = scopedToProgram
     ? localResults.filter(
-        (row) => row.programCode.trim().toUpperCase() === normalizedCode.toUpperCase(),
+        (row) => row.programCode.trim().toUpperCase() === normalizedCode!.toUpperCase(),
       )
     : localResults;
-  console.log('[DASHBOARD] Local rows:', filteredLocal.length, filteredLocal);
 
   if (!isSupabaseConfigured()) {
-    console.log('[DASHBOARD] Selected source:', 'local');
-    console.log('[DASHBOARD] Reason:', 'Supabase env vars not configured');
+    if (scopedToProgram) {
+      return { results: [], source: 'supabase' };
+    }
     return { results: filteredLocal, source: 'local' };
   }
 
-  const { results: remoteResults, error } = await fetchAssessmentResultsFromSupabase(normalizedCode);
-  console.log('[DASHBOARD] Supabase rows:', remoteResults.length, remoteResults);
-
-  if (error) {
-    console.log('[DASHBOARD] Selected source:', 'local');
-    console.log(
-      '[DASHBOARD] Reason:',
-      `Supabase SELECT failed (${error}); falling back to localStorage`,
+  try {
+    const { results: remoteResults, error } = await withTimeout(
+      fetchAssessmentResultsFromSupabase(normalizedCode),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'assessment_results',
     );
+
+    if (error) {
+      if (scopedToProgram) {
+        return {
+          results: [],
+          source: 'supabase',
+          warning: PORTAL_CONNECTION_ERROR_MESSAGE,
+        };
+      }
+      return {
+        results: filteredLocal,
+        source: 'local',
+        warning: SUPABASE_SELECT_POLICY_HINT,
+      };
+    }
+
+    if (remoteResults.length > 0) {
+      return { results: remoteResults, source: 'supabase' };
+    }
+
+    if (scopedToProgram) {
+      return { results: [], source: 'supabase' };
+    }
+
+    return {
+      results: filteredLocal,
+      source: filteredLocal.length > 0 ? 'local' : 'supabase',
+    };
+  } catch {
+    if (scopedToProgram) {
+      return {
+        results: [],
+        source: 'supabase',
+        warning: PORTAL_CONNECTION_ERROR_MESSAGE,
+      };
+    }
     return {
       results: filteredLocal,
       source: 'local',
-      warning: SUPABASE_SELECT_POLICY_HINT,
+      warning: PORTAL_CONNECTION_ERROR_MESSAGE,
     };
   }
-
-  if (remoteResults.length > 0) {
-    console.log('[DASHBOARD] Selected source:', 'supabase');
-    console.log('[DASHBOARD] Reason:', 'Supabase returned one or more valid rows');
-    return { results: remoteResults, source: 'supabase' };
-  }
-
-  const source = filteredLocal.length > 0 ? 'local' : 'supabase';
-  const reason =
-    filteredLocal.length > 0
-      ? 'Supabase returned zero rows; localStorage has data — hybrid fallback to local'
-      : 'Supabase returned zero rows; no local data — source marked supabase with empty results';
-
-  console.log('[DASHBOARD] Selected source:', source);
-  console.log('[DASHBOARD] Reason:', reason);
-
-  return {
-    results: filteredLocal,
-    source,
-  };
 }

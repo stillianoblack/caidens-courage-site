@@ -12,6 +12,7 @@ import {
 import CharacterLearningTrackCard from '../CharacterLearningTrackCard';
 import PilotLocalNote from '../PilotLocalNote';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
+import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
 
@@ -81,10 +82,18 @@ export default function PilotOverviewPanel({
     }
   };
 
+  if (loading) {
+    return (
+      <div className="pilot-panel pilot-panel--overview">
+        {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
+        <DashboardWidgetSkeleton kpiCount={4} showGrowth showActivity />
+      </div>
+    );
+  }
+
   return (
     <div className="pilot-panel pilot-panel--overview">
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
-      {loading ? <p className="pilot-panelIntro">Loading pilot results…</p> : null}
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
       <div className="pilot-kpiRow">
         <article className="pilot-kpiCard">

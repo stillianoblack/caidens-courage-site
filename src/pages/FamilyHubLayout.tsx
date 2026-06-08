@@ -7,9 +7,9 @@ import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { readActivePortalRole } from '../config/portalContext';
+import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { FAMILY_HUB_PATH, PORTAL_PATH } from '../config/courageRoutes';
-import { readFamilyPortalSession } from '../config/familyPortalAccess';
+import { clearFamilyPortalSession, readFamilyPortalSession } from '../config/familyPortalAccess';
 import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { afterIdle } from '../lib/defer';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
@@ -21,24 +21,30 @@ export default function FamilyHubLayout() {
   const location = useLocation();
   const activeProgram = readActivePilotProgram();
   const hasSession = readFamilyPortalSession();
+  const role = readActivePortalRole();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
+  const sessionValid = Boolean(activeProgram && hasSession && role === 'family');
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
   }, []);
 
   useEffect(() => {
-    afterIdle(() => requestGalleryCountsRefresh());
-  }, []);
+    if (sessionValid) {
+      afterIdle(() => requestGalleryCountsRefresh());
+    }
+  }, [sessionValid]);
 
   useEffect(() => {
-    if (!activeProgram || readActivePortalRole() !== 'family' || !hasSession) {
+    if (!sessionValid) {
+      clearProgramPortalContext();
+      clearFamilyPortalSession();
       navigate(PORTAL_PATH, { replace: true, state: { redirect: FAMILY_HUB_PATH } });
     }
-  }, [activeProgram, hasSession, navigate]);
+  }, [navigate, sessionValid]);
 
-  if (!activeProgram || !hasSession) {
+  if (!activeProgram) {
     return null;
   }
 

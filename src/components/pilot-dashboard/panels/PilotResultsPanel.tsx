@@ -6,6 +6,7 @@ import {
 import { formatAdminPct } from '../../../lib/b4BaselineAdminStats';
 import type { B4BaselineCheckRecord } from '../../../lib/b4BaselineCheckStorage';
 import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
+import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import PilotLocalNote, { PilotResultsStatusCopy } from '../PilotLocalNote';
 
 type PilotResultsPanelProps = {
@@ -39,13 +40,19 @@ export default function PilotResultsPanel({
   void refreshKey;
   const hasData = metrics.baselineChecksCompleted > 0;
 
+  if (loading) {
+    return (
+      <div className="pilot-panel pilot-panel--results">
+        <DashboardWidgetSkeleton kpiCount={6} showGrowth />
+      </div>
+    );
+  }
+
   return (
     <div className="pilot-panel pilot-panel--results">
       <PilotResultsStatusCopy source={source} />
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
       <PilotLocalNote source={source} />
-
-      {loading ? <p className="pilot-emptyNote">Loading results…</p> : null}
 
       <div className="pilot-resultsKpiGrid">
         <article className="pilot-kpiCard">
