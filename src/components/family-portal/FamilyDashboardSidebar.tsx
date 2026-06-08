@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   FAMILY_PORTAL_BRAND,
   FAMILY_PORTAL_SUBBRAND,
@@ -32,15 +32,23 @@ export default function FamilyDashboardSidebar({
 }: FamilyDashboardSidebarProps) {
   const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
   const location = useLocation();
+  const navigate = useNavigate();
   const basePath = resolveFamilyBasePath(location.pathname);
   const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath);
 
-  const handleNavClick = useCallback(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    document.querySelector('.family-content')?.scrollTo(0, 0);
-  }, []);
+  const handleNavClick = useCallback(
+    (path: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      document.querySelector('.family-content')?.scrollTo(0, 0);
+      if (location.pathname !== path) {
+        navigate(path);
+      }
+    },
+    [location.pathname, navigate],
+  );
 
   return (
     <aside className="family-rail" aria-label="Family portal navigation">
@@ -59,7 +67,7 @@ export default function FamilyDashboardSidebar({
                 <NavLink
                   to={item.path}
                   end={item.id === 'overview'}
-                  onClick={handleNavClick}
+                  onClick={handleNavClick(item.path)}
                   className={({ isActive }) => {
                     const active = isActive || characterHubActive;
                     return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;

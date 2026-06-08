@@ -1,18 +1,8 @@
-import React, { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
-
-function FamilyPanelLoading() {
-  return (
-    <div className="family-panelLoading" role="status" aria-live="polite">
-      Loading...
-    </div>
-  );
-}
+import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
 export default function FamilyPortalOutlet() {
-  return (
-    <Suspense fallback={<FamilyPanelLoading />}>
-      <Outlet />
-    </Suspense>
-  );
+  const location = useLocation();
+
+  return <Outlet key={location.pathname} />;
 }

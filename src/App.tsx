@@ -76,8 +76,6 @@ import {
 } from './routes/lazyPages';
 import {
   FamilyAdultAssessmentPanel,
-  FamilyAdultGuideHubPage,
-  FamilyAdultGuideMissionPage,
   FamilyBaselineCheckPanel,
   FamilyCertificatesPanel,
   FamilyCharacterProfilePage,
@@ -87,6 +85,10 @@ import {
   FamilyGalleryPanel,
   FamilyGuidePanel,
   FamilyOverviewPanel,
+} from './routes/familyPanels';
+import {
+  FamilyAdultGuideHubPage,
+  FamilyAdultGuideMissionPage,
 } from './routes/familyLazyPanels';
 import {
   BMC_ACTIVITIES_PATH,
