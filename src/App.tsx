@@ -4,39 +4,9 @@ import {
   MissionGamePhaseProvider,
   useMissionGamePhase,
 } from './context/MissionGamePhaseContext';
-import Home from './pages/Home';
-import ClassicHome from './pages/ClassicHome';
-import KidsHub from './pages/KidsHub';
-import Schools from './pages/Schools';
-import ParentsPage from './pages/ParentsPage';
-import TeachersPage from './pages/TeachersPage';
-import CampsPage from './pages/CampsPage';
-import StoryHub from './pages/StoryHub';
 import LegacySchoolRouteRedirect, { LegacyCampCourageRedirect } from './components/schools/LegacySchoolRouteRedirect';
 import Portal from './pages/Portal';
 import PortalDashboard from './pages/PortalDashboard';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Terms from './pages/Terms';
-import ThankYou from './pages/ThankYou';
-import Success from './pages/Success';
-import NotifySuccess from './pages/NotifySuccess';
-import ToolkitSuccess from './pages/ToolkitSuccess';
-import FormSuccess from './pages/FormSuccess';
-import Cancelled from './pages/Cancelled';
-import Resources from './pages/Resources';
-import Product from './pages/Product';
-import Preview from './pages/Preview';
-import Mission from './pages/Mission';
-import About from './pages/About';
-import World from './pages/World';
-import Characters from './pages/Characters';
-import B4Clicker from './pages/B4Clicker';
-import B4ToolsLibrary from './pages/ResourcesB4ToolsLibrary';
-import ChatWithB4 from './pages/ChatWithB4';
-import TrainingGuides from './pages/TrainingGuides';
-import Journey from './pages/Journey';
-import Contact from './pages/Contact';
-import PilotProgramSignupPage from './pages/PilotProgramSignupPage';
 import AdultAssessmentPage from './pages/AdultAssessmentPage';
 import PilotDashboardPage from './pages/PilotDashboardPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
@@ -60,8 +30,11 @@ import {
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import {
+  AboutPage,
+  B4ClickerPage,
   B4BaselineCheckPage,
   B4GuidePage,
+  B4ToolsLibraryPage,
   B4PortalCheckInPage,
   B4PortalFeelingFinderPage,
   B4PortalPage,
@@ -69,22 +42,49 @@ import {
   B4ResultsAdminPage,
   CaidenQuestHubPage,
   CaidenQuestPage,
+  CampsPage,
+  CancelledPage,
+  CharactersPage,
   CharliePortalHubPage,
   CharliePortalMissionPage,
+  ChatWithB4Page,
+  ClassicHomePage,
+  ContactPage,
   FacilitatorAdultGuideHubPage,
   FacilitatorAdultGuideMissionPage,
   FacilitatorBaselineCheckPage,
   FocusFlameLabPage,
+  FormSuccessPage,
+  HomePage,
+  JourneyPage,
+  KidsHubPage,
   KidsCharacterPage,
   KidsPortalPage,
+  MissionPage,
   MirandaMissionPage,
   MirandaMysteryFilesHubPage,
   MirandaPortalHubPage,
   MirandaPortalMissionPage,
+  NotifySuccessPage,
+  ParentsPage,
+  PilotProgramSignupPage,
   PilotTermsPage,
+  PreviewPage,
+  PrivacyPolicyPage,
+  ProductPage,
+  ResourcesPage,
+  SchoolsPage,
+  StoryHubPage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
+  SuccessPage,
+  TeachersPage,
+  TermsPage,
+  ThankYouPage,
+  ToolkitSuccessPage,
+  TrainingGuidesPage,
   Week0AssessmentPage,
+  WorldPage,
 } from './routes/lazyPages';
 import {
   FamilyAdultAssessmentPanel,
@@ -157,7 +157,7 @@ const RootRoute: React.FC = () => {
   if (isCaidenValeHost()) {
     return <Navigate to="/classic-home" replace />;
   }
-  return <Home />;
+  return <HomePage />;
 };
 
 const appRouteChildren = (
@@ -165,15 +165,15 @@ const appRouteChildren = (
       <Route path="/" element={<RootRoute />} />
 
       {/* Story world */}
-      <Route path={STORY_PATH} element={<StoryHub />} />
-      <Route path={STORY_BOOKS_PATH} element={<Product />} />
-      <Route path={STORY_CHARACTERS_PATH} element={<Characters />} />
+      <Route path={STORY_PATH} element={<StoryHubPage />} />
+      <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
+      <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
 
       {/* Brave Mind Club */}
-      <Route path={BRAVE_MIND_CLUB_PATH} element={<Resources />} />
-      <Route path={BMC_COLORING_PATH} element={<Resources />} />
-      <Route path={BMC_ACTIVITIES_PATH} element={<Resources />} />
-      <Route path={BMC_RESET_TOOLS_PATH} element={<B4Clicker />} />
+      <Route path={BRAVE_MIND_CLUB_PATH} element={<ResourcesPage />} />
+      <Route path={BMC_COLORING_PATH} element={<ResourcesPage />} />
+      <Route path={BMC_ACTIVITIES_PATH} element={<ResourcesPage />} />
+      <Route path={BMC_RESET_TOOLS_PATH} element={<B4ClickerPage />} />
 
       {/* Interactive */}
       <Route path={B4_BASELINE_CHECK_PATH} element={<B4BaselineCheckPage />} />
@@ -341,11 +341,11 @@ const appRouteChildren = (
       />
       <Route path={STUDENT_GALLERY_SUBMIT_PATH} element={<StudentGallerySubmitPage />} />
       <Route path={STUDENT_GALLERY_PUBLIC_PATH} element={<StudentGalleryPublicPage />} />
-      <Route path="/kids" element={<KidsHub />} />
+      <Route path="/kids" element={<KidsHubPage />} />
       <Route path="/parents" element={<ParentsPage />} />
       <Route path="/teachers" element={<TeachersPage />} />
       <Route path="/camps" element={<CampsPage />} />
-      <Route path="/schools" element={<Schools />} />
+      <Route path="/schools" element={<SchoolsPage />} />
 
       {/* Portal */}
       <Route path="/portal" element={<Portal />} />
@@ -353,7 +353,7 @@ const appRouteChildren = (
 
       {/* Legacy redirects — preserve bookmarks */}
       <Route path="/braveminds" element={<Navigate to={BRAVE_MIND_CLUB_PATH} replace />} />
-      <Route path="/braveminds/notify-success" element={<NotifySuccess />} />
+      <Route path="/braveminds/notify-success" element={<NotifySuccessPage />} />
       <Route path="/b4-tools" element={<Navigate to={BMC_RESET_TOOLS_PATH} replace />} />
       <Route path="/comicbook" element={<Navigate to={STORY_BOOKS_PATH} replace />} />
       <Route path="/comic-book" element={<Navigate to={STORY_BOOKS_PATH} replace />} />
@@ -364,28 +364,28 @@ const appRouteChildren = (
       <Route path="/resources/wallpapers" element={<Navigate to={`${BRAVE_MIND_CLUB_PATH}?type=wallpaper`} replace />} />
       <Route path="/resources/teachers" element={<Navigate to={`${BRAVE_MIND_CLUB_PATH}?type=teacher-pack`} replace />} />
       <Route path="/resources/b4-tools-library" element={<Navigate to="/braveminds/b4-tools-library" replace />} />
-      <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibrary />} />
+      <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibraryPage />} />
 
       <Route path="/focus-flame-academy" element={<LegacySchoolRouteRedirect />} />
-      <Route path="/classic-home" element={<ClassicHome />} />
+      <Route path="/classic-home" element={<ClassicHomePage />} />
       <Route path="/camp-courage" element={<LegacyCampCourageRedirect />} />
-      <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccess />} />
+      <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccessPage />} />
       <Route path="/classroom-pilots" element={<Navigate to="/schools#pilot" replace />} />
-      <Route path="/training-guides" element={<TrainingGuides />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/thank-you" element={<ThankYou />} />
-      <Route path="/success" element={<Success />} />
-      <Route path="/cancelled" element={<Cancelled />} />
-      <Route path="/form-success" element={<FormSuccess />} />
-      <Route path="/preview" element={<Preview />} />
+      <Route path="/training-guides" element={<TrainingGuidesPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/thank-you" element={<ThankYouPage />} />
+      <Route path="/success" element={<SuccessPage />} />
+      <Route path="/cancelled" element={<CancelledPage />} />
+      <Route path="/form-success" element={<FormSuccessPage />} />
+      <Route path="/preview" element={<PreviewPage />} />
       <Route path="/book/preview" element={<Navigate to="/preview" replace />} />
-      <Route path="/mission" element={<Mission />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/world" element={<World />} />
-      <Route path="/journey" element={<Journey />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/chat" element={<ChatWithB4 />} />
+      <Route path="/mission" element={<MissionPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/world" element={<WorldPage />} />
+      <Route path="/journey" element={<JourneyPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/chat" element={<ChatWithB4Page />} />
   </>
 );
 

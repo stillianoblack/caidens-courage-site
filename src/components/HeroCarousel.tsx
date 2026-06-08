@@ -136,17 +136,25 @@ export default function HeroCarousel({
     return () => stopAutoplay();
   }, [activeIndex, autoplayMs, slides.length, restartAutoplay, stopAutoplay]);
 
-  // Preload slide art so crossfades do not flash empty/white while images decode.
+  const active = slides[activeIndex];
+
+  // Keep the first paint light: load only the visible slide, then warm the next one.
   useEffect(() => {
-    slides.forEach((slide) => {
-      [slide.desktopImage, slide.mobileImage].forEach((src) => {
+    const next = slides[(activeIndex + 1) % slides.length];
+    const sources = [
+      resolvedIsMobile ? active.mobileImage : active.desktopImage,
+      resolvedIsMobile ? next.mobileImage : next.desktopImage,
+    ];
+
+    sources.forEach((src) => {
+      const load = () => {
         const img = new Image();
         img.src = src;
-      });
-    });
-  }, [slides]);
+      };
 
-  const active = slides[activeIndex];
+      globalThis.setTimeout(load, 250);
+    });
+  }, [active, activeIndex, resolvedIsMobile, slides]);
 
   const CROSSFADE_MS = 500;
 
@@ -258,23 +266,21 @@ export default function HeroCarousel({
               background: '#05070D',
             }}
           >
-            {slides.map((slide, idx) => (
-              <img
-                key={slide.mobileImage}
-                src={slide.mobileImage}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{
-                  objectPosition: slide.mobilePosition ?? 'center',
-                  opacity: idx === activeIndex ? 1 : 0,
-                  zIndex: idx === activeIndex ? 1 : 0,
-                  transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
-                }}
-                aria-hidden={idx !== activeIndex}
-                loading={idx === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-              />
-            ))}
+            <img
+              key={active.mobileImage}
+              src={active.mobileImage}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                objectPosition: active.mobilePosition ?? 'center',
+                opacity: 1,
+                zIndex: 1,
+                transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
+              }}
+              aria-hidden
+              loading="eager"
+              decoding="async"
+            />
           </div>
 
           {/* Mobile indicators (Marvel-style bars) */}
@@ -365,19 +371,17 @@ export default function HeroCarousel({
         >
           {/* Desktop backgrounds — stacked crossfade (avoids white flash on swap) */}
           <div className="absolute inset-0 bg-[#0a1018]" aria-hidden="true">
-            {slides.map((slide, idx) => (
-              <div
-                key={slide.desktopImage}
-                className="absolute inset-0 bg-cover bg-no-repeat"
-                style={{
-                  backgroundImage: `url(${slide.desktopImage})`,
-                  backgroundPosition: slide.desktopPosition ?? 'center',
-                  opacity: idx === activeIndex ? 1 : 0,
-                  zIndex: idx === activeIndex ? 1 : 0,
-                  transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
-                }}
-              />
-            ))}
+            <div
+              key={active.desktopImage}
+              className="absolute inset-0 bg-cover bg-no-repeat"
+              style={{
+                backgroundImage: `url(${active.desktopImage})`,
+                backgroundPosition: active.desktopPosition ?? 'center',
+                opacity: 1,
+                zIndex: 1,
+                transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
+              }}
+            />
           </div>
 
           {/* Desktop overlay */}
@@ -499,4 +503,3 @@ export default function HeroCarousel({
     </div>
   );
 }
-
