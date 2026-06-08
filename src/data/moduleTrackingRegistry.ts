@@ -174,3 +174,7 @@ export function resolveModuleTracking(
 export function registerModuleTracking(definition: ModuleTrackingDefinition): void {
   MODULE_TRACKING_BY_ID[definition.moduleId] = definition;
 }
+
+export function listTrackedStudentModules(): ModuleTrackingDefinition[] {
+  return Object.values(MODULE_TRACKING_BY_ID).filter((row) => row.role === 'student');
+}

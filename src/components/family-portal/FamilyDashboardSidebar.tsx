@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   FAMILY_PORTAL_BRAND,
@@ -35,6 +35,13 @@ export default function FamilyDashboardSidebar({
   const basePath = resolveFamilyBasePath(location.pathname);
   const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath);
 
+  const handleNavClick = useCallback(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document.querySelector('.family-content')?.scrollTo(0, 0);
+  }, []);
+
   return (
     <aside className="family-rail" aria-label="Family portal navigation">
       <div className="family-railBrand">
@@ -52,6 +59,7 @@ export default function FamilyDashboardSidebar({
                 <NavLink
                   to={item.path}
                   end={item.id === 'overview'}
+                  onClick={handleNavClick}
                   className={({ isActive }) => {
                     const active = isActive || characterHubActive;
                     return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;

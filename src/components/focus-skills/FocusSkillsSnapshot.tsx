@@ -1,19 +1,27 @@
 import React from 'react';
+import type { FamilyFocusSkill } from '../../lib/familyProgressMetrics';
 import './focus-skills-snapshot.css';
 
-const DEFAULT_SKILLS = [
-  { label: 'Executive Function', value: 42 },
-  { label: 'Self-Regulation', value: 28 },
-  { label: 'Focus Recovery', value: 35 },
-  { label: 'Overall', value: 35 },
-] as const;
+const EMPTY_SKILLS: FamilyFocusSkill[] = [
+  { label: 'Executive Function', value: 0 },
+  { label: 'Self-Regulation', value: 0 },
+  { label: 'Focus Recovery', value: 0 },
+  { label: 'Overall', value: 0 },
+];
 
 type FocusSkillsSnapshotProps = {
   className?: string;
   compact?: boolean;
+  skills?: FamilyFocusSkill[];
+  hasActivity?: boolean;
 };
 
-export default function FocusSkillsSnapshot({ className = '', compact = false }: FocusSkillsSnapshotProps) {
+export default function FocusSkillsSnapshot({
+  className = '',
+  compact = false,
+  skills = EMPTY_SKILLS,
+  hasActivity = false,
+}: FocusSkillsSnapshotProps) {
   return (
     <section
       className={['focusSkillsSnapshot', compact ? 'focusSkillsSnapshot--compact' : '', className]
@@ -23,11 +31,13 @@ export default function FocusSkillsSnapshot({ className = '', compact = false }:
     >
       <h2 className="focusSkillsSnapshotTitle">Focus Skills Snapshot</h2>
       <p className="focusSkillsSnapshotHelper">
-        These are practice areas from completed activities. They will grow as your child plays.
+        {hasActivity
+          ? 'These are practice areas from completed activities. They will grow as your child plays.'
+          : 'Progress will appear here after your family completes activities.'}
       </p>
 
       <div className="focusSkillsSnapshotGrid">
-        {DEFAULT_SKILLS.map((skill) => (
+        {skills.map((skill) => (
           <div key={skill.label} className="focusSkillsSnapshotCard">
             <span className="focusSkillsSnapshotLabel">{skill.label}</span>
             <div className="focusSkillsSnapshotBar" aria-hidden="true">

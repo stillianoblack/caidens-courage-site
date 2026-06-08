@@ -1,5 +1,11 @@
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
+function logGalleryDev(...args: unknown[]): void {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args);
+  }
+}
+
 export const STUDENT_GALLERY_BUCKET = 'student_gallery';
 export const DEFAULT_GALLERY_PROGRAM_CODE = 'BlueRibbon2026';
 export const FAMILY_GALLERY_PROGRAM_CODE = 'BlueRibbonFamily';
@@ -138,7 +144,7 @@ export async function fetchFacilitatorPendingGalleryCount(programCode?: string):
     }
 
     const total = count ?? 0;
-    console.log('FACILITATOR_PENDING_COUNT', total, {
+    logGalleryDev('FACILITATOR_PENDING_COUNT', total, {
       program_code: programCode?.trim() || '(all programs)',
     });
     return total;
@@ -173,7 +179,7 @@ export async function fetchFamilyNewApprovedGalleryCount(
     }
 
     const total = count ?? 0;
-    console.log('GALLERY_APPROVED_COUNT', total, {
+    logGalleryDev('GALLERY_APPROVED_COUNT', total, {
       program_code: programCode?.trim() || '(all programs)',
       since: lastViewedAt ?? '(all time)',
     });
@@ -208,7 +214,7 @@ export async function fetchFacilitatorPendingGalleryItems(
     }
 
     const items = (data ?? []) as StudentGalleryItem[];
-    console.log('FACILITATOR_PENDING_COUNT', items.length, {
+    logGalleryDev('FACILITATOR_PENDING_COUNT', items.length, {
       program_code: programCode?.trim() || '(all programs)',
       statuses: GALLERY_PENDING_STATUSES,
     });
@@ -243,7 +249,7 @@ export async function fetchFacilitatorApprovedGalleryItems(
     }
 
     const items = (data ?? []) as StudentGalleryItem[];
-    console.log('GALLERY_APPROVED_COUNT', items.length, {
+    logGalleryDev('GALLERY_APPROVED_COUNT', items.length, {
       program_code: programCode?.trim() || '(all programs)',
     });
     return items;
@@ -495,7 +501,7 @@ export async function uploadStudentGalleryItem(
 
     const item = data as StudentGalleryItem;
     if (uploadSource === 'family' || uploadSource === 'submit') {
-      console.log('FAMILY_UPLOAD_CREATED', {
+      logGalleryDev('FAMILY_UPLOAD_CREATED', {
         id: item.id,
         upload_source: uploadSource,
         program_code: programCode,

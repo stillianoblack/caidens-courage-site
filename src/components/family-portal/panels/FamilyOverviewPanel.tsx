@@ -4,9 +4,9 @@ import {
   CHARACTER_IMAGE_PATHS,
   FAMILY_NEXT_STEP,
   FAMILY_OVERVIEW_KPIS,
-  FAMILY_PROGRESS_ROWS,
-  FAMILY_RECENT_ACTIVITY,
 } from '../../../data/familyPortalContent';
+import { useFamilyProgressMetrics } from '../../../hooks/useFamilyProgressMetrics';
+import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import FamilyValueCards from '../FamilyValueCards';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
@@ -14,12 +14,18 @@ import '../../focus-skills/focus-skills-snapshot.css';
 
 export default function FamilyOverviewPanel() {
   const location = useLocation();
+  const programCode = readActivePilotProgram()?.programCode;
+  const { metrics, loading } = useFamilyProgressMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
+
+  const kpis = FAMILY_OVERVIEW_KPIS.map((kpi) =>
+    kpi.label === 'Progress' ? { ...kpi, value: metrics.overallLabel } : kpi,
+  );
 
   return (
     <div className="family-panel family-panel--overview">
       <div className="family-kpiRow">
-        {FAMILY_OVERVIEW_KPIS.map((kpi) => (
+        {kpis.map((kpi) => (
           <article
             key={kpi.label}
             className={`family-kpiCard${'highlight' in kpi && kpi.highlight ? ' family-kpiCard--highlight' : ''}`}
@@ -36,8 +42,14 @@ export default function FamilyOverviewPanel() {
         <div className="family-panelBlockHead">
           <h2 className="family-panelBlockTitle">Family Progress</h2>
         </div>
+        {loading ? <p className="family-panelHelper">Loading...</p> : null}
+        {!loading && !metrics.hasActivity ? (
+          <p className="family-panelHelper">
+            Progress will appear here after your family completes activities.
+          </p>
+        ) : null}
         <div className="family-growthChart">
-          {FAMILY_PROGRESS_ROWS.map(({ key, label, pct, tone }) => (
+          {metrics.rows.map(({ key, label, pct, tone }) => (
             <div key={key} className="family-growthRow">
               <div className="family-growthMeta">
                 <span className="family-growthLabel">{label}</span>
@@ -54,21 +66,31 @@ export default function FamilyOverviewPanel() {
         </div>
       </section>
 
-      <FocusSkillsSnapshot className="family-overviewSkills" />
+      <FocusSkillsSnapshot
+        className="family-overviewSkills"
+        skills={metrics.focusSkills}
+        hasActivity={metrics.hasActivity}
+      />
 
       <div className="family-overviewSplit">
         <section className="family-panelBlock">
           <div className="family-panelBlockHead">
             <h2 className="family-panelBlockTitle">Recent Activity</h2>
           </div>
-          <ul className="family-activityList">
-            {FAMILY_RECENT_ACTIVITY.map((item) => (
-              <li key={item} className="family-activityItem">
-                <span className="family-activityDot" aria-hidden="true" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          {metrics.recentActivity.length > 0 ? (
+            <ul className="family-activityList">
+              {metrics.recentActivity.map((item) => (
+                <li key={item} className="family-activityItem">
+                  <span className="family-activityDot" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="family-panelHelper">
+              Completed games and check-ins will show up here.
+            </p>
+          )}
         </section>
 
         <section className="family-panelBlock family-nextStepCard family-charCard--caiden">
@@ -84,6 +106,8 @@ export default function FamilyOverviewPanel() {
                 className="family-charCardAvatar family-charCardAvatar--sm family-charCardAvatar--caiden"
                 width={72}
                 height={72}
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <h3 className="family-nextTitle">{FAMILY_NEXT_STEP.headline}</h3>

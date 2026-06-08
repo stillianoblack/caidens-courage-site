@@ -106,25 +106,13 @@ export const FAMILY_OVERVIEW_KPIS = [
   { label: 'Progress', value: 'Getting Started', highlight: true },
 ] as const;
 
-export const FAMILY_PROGRESS_ROWS: Array<{
+/** @deprecated Use computeFamilyProgressSnapshot() — kept for label reference only. */
+export const FAMILY_PROGRESS_ROWS = [] as Array<{
   key: string;
   label: string;
   pct: number;
   tone: 'story' | 'reading' | 'focus' | 'creative' | 'overall';
-}> = [
-  { key: 'story', label: 'Story Activities', pct: 20, tone: 'story' },
-  { key: 'reading', label: 'Reading Games', pct: 60, tone: 'reading' },
-  { key: 'focus', label: 'Focus Moves', pct: 25, tone: 'focus' },
-  { key: 'creative', label: 'Creative Activities', pct: 0, tone: 'creative' },
-  { key: 'overall', label: 'Overall', pct: 35, tone: 'overall' },
-];
-
-export const FAMILY_RECENT_ACTIVITY = [
-  'Miranda Mystery Files available',
-  'B-4 Focus Lab available',
-  'Coloring pages ready',
-  'Parent Corner unlocked',
-];
+}>;
 
 export const FAMILY_PARENT_CORNER_INTRO = {
   title: 'Parent Corner',

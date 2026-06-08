@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
 import PortalShell from '../components/portal/PortalShell';
@@ -8,7 +8,7 @@ import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
-import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
+import FamilyPortalOutlet from '../components/family-portal/FamilyPortalOutlet';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
 import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
@@ -24,10 +24,6 @@ export default function FamilyPortalLayout() {
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
-  }, []);
-
-  useEffect(() => {
-    requestGalleryCountsRefresh();
   }, []);
 
   useEffect(() => {
@@ -62,7 +58,7 @@ export default function FamilyPortalLayout() {
         <footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>
       }
     >
-      <Outlet />
+      <FamilyPortalOutlet />
     </PortalShell>
   );
 }

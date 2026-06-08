@@ -296,6 +296,18 @@
   color: var(--family-navy);
 }
 
+.family-panelLoading,
+.family-panelHelper {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.family-panelLoading {
+  padding: 1.5rem 0;
+}
+
 .family-content {
   flex: 1;
   max-width: 70rem;
