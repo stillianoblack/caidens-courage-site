@@ -1,51 +1,44 @@
-import React, { useCallback, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import B4BaselineCheckFlow from '../components/b4/B4BaselineCheckFlow';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
+import PortalAccessRequired from '../components/portal/PortalAccessRequired';
 import PortalShell from '../components/portal/PortalShell';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram } from '../config/activePilotProgram';
-import { forcePortalRoleForRoute, readActivePortalRole } from '../config/portalContext';
-import { FAMILY_HUB_PATH, PORTAL_PATH } from '../config/courageRoutes';
-import { PROGRAM_FAMILY_SIDEBAR_NAV, type FamilySidebarNavId } from '../data/familyPortalContent';
-import { resolvePortalNavId } from '../lib/familyPortalNav';
+import { readActivePortalRole } from '../config/portalContext';
+import { PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
 import { getPortalRoute, resolvePortalRailBrand } from '../lib/portalGamePaths';
+import { resolveActivePilotProgram } from '../lib/portalProgramRestore';
+import { PORTAL_ROLE_MISMATCH_MESSAGE } from '../lib/portalSessionGuard';
 
 export default function FamilyHubBaselineCheckPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const activeProgram = readActivePilotProgram();
-  const hasSession = readFamilyPortalSession();
+  const activeProgram = resolveActivePilotProgram();
+  const activeRole = readActivePortalRole();
+  const hasLegacySession = readFamilyPortalSession();
+  const sessionOk = activeRole === 'family' && Boolean(activeProgram);
   const brand = resolvePortalRailBrand();
-  const activeNav = resolvePortalNavId(location.pathname, FAMILY_HUB_PATH);
 
-  const handleSelectNav = useCallback(
-    (id: FamilySidebarNavId) => {
-      const item = PROGRAM_FAMILY_SIDEBAR_NAV.find((nav) => nav.id === id);
-      if (item) navigate(item.path);
-    },
-    [navigate],
-  );
+  if (activeRole === 'facilitator') {
+    return <PortalAccessRequired message={PORTAL_ROLE_MISMATCH_MESSAGE} />;
+  }
 
-  useEffect(() => {
-    forcePortalRoleForRoute('/family-hub');
-    if (!activeProgram || readActivePortalRole() !== 'family' || !hasSession) {
-      navigate(PORTAL_PATH, { replace: true });
-    }
-  }, [activeProgram, hasSession, navigate]);
+  if (!sessionOk && !hasLegacySession) {
+    return <PortalAccessRequired />;
+  }
 
-  if (!activeProgram || !hasSession) return null;
+  if (!activeProgram) {
+    return <PortalAccessRequired />;
+  }
 
   return (
     <PortalShell
       variant="family"
       sidebar={
         <FamilyDashboardSidebar
-          activeId={activeNav}
-          onSelect={handleSelectNav}
           navItems={PROGRAM_FAMILY_SIDEBAR_NAV}
           brandTitle={brand.title}
           brandSubtitle={brand.subtitle}

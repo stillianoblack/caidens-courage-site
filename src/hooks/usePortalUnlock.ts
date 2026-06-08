@@ -8,8 +8,8 @@ import {
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
 import { writeBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
+import { applyProgramPortalUnlock, writeActivePortalRole } from '../config/portalContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
-import { applyProgramPortalUnlock } from '../config/portalContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import {
   getDashboardPathForTier,
@@ -19,6 +19,7 @@ import {
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
 import { looksLikeProgramAccessCode, PORTAL_DB_UNAVAILABLE_MESSAGE } from '../lib/portalAccessCodes';
 import { logPortalRedirect } from '../lib/portalDebug';
+import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
@@ -45,6 +46,16 @@ function isBlueRibbonKidsCode(raw: string): boolean {
   return normalized === 'blueribbonkids';
 }
 
+function navigateToPortal(
+  navigate: ReturnType<typeof useNavigate>,
+  destination: string,
+  reason: string,
+): void {
+  resetPortalScroll();
+  logPortalRedirect('/portal', destination, reason);
+  navigate(destination, { replace: true });
+}
+
 export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => void) {
   const navigate = useNavigate();
   const [accessCode, setAccessCode] = useState('');
@@ -59,62 +70,62 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       const trimmedCode = accessCode.trim();
       const normalizedCode = trimmedCode.toLowerCase().replace(/\s+/g, '');
 
-      if (BASELINE_RESULTS_CODES.has(normalizedCode)) {
-        setAccessCode('');
-        onUnlock?.();
-        logPortalRedirect('/portal', B4_RESULTS_ADMIN_PATH, 'baseline-results-code');
-        navigate(B4_RESULTS_ADMIN_PATH);
+      if (!trimmedCode) {
+        setError(ERROR_BY_VARIANT[variant]);
         return;
       }
 
+      if (BASELINE_RESULTS_CODES.has(normalizedCode)) {
+        setAccessCode('');
+        onUnlock?.();
+        navigateToPortal(navigate, B4_RESULTS_ADMIN_PATH, 'baseline-results-code');
+        return;
+      }
+
+      // Supabase pilot_programs lookup first (trimmed, case-insensitive).
+      if (isSupabaseConfigReady()) {
+        setSubmitting(true);
+        const lookup = await lookupPilotProgramByAccessCodeDetailed(trimmedCode);
+        setSubmitting(false);
+
+        if (lookup.status === 'found' && lookup.result) {
+          const { program, role } = lookup.result;
+          applyProgramPortalUnlock(program, role, trimmedCode);
+          writeLastPilotProgram(program, role, program.adminEmail);
+          setAccessCode('');
+          onUnlock?.();
+          const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
+          navigateToPortal(navigate, destination, `program-code-${role}`);
+          return;
+        }
+
+        if (lookup.status === 'unavailable' && looksLikeProgramAccessCode(trimmedCode)) {
+          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+          return;
+        }
+      } else if (looksLikeProgramAccessCode(trimmedCode)) {
+        setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
+        return;
+      }
+
+      // Legacy demo codes (fallback only).
       if (isBlueRibbonPilotCode(trimmedCode)) {
         writePortalSessionUnlock('pilot');
         writeBlueRibbonUnlock();
+        writeActivePortalRole('facilitator');
         setAccessCode('');
         onUnlock?.();
-        logPortalRedirect('/portal', BLUE_RIBBON_PILOT_PATH, 'blueribbon-pilot-code');
-        navigate(BLUE_RIBBON_PILOT_PATH);
+        navigateToPortal(navigate, BLUE_RIBBON_PILOT_PATH, 'blueribbon-pilot-code');
         return;
       }
 
       if (isBlueRibbonFamilyCode(trimmedCode) || isBlueRibbonKidsCode(trimmedCode)) {
         writeFamilyPortalSession();
         writeBlueRibbonUnlock();
+        writeActivePortalRole('family');
         setAccessCode('');
         onUnlock?.();
-        logPortalRedirect('/portal', FAMILY_PORTAL_PATH, 'blueribbon-family-code');
-        navigate(FAMILY_PORTAL_PATH);
-        return;
-      }
-
-      if (looksLikeProgramAccessCode(trimmedCode)) {
-        if (!isSupabaseConfigReady()) {
-          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
-          return;
-        }
-
-        setSubmitting(true);
-        const lookup = await lookupPilotProgramByAccessCodeDetailed(trimmedCode);
-        setSubmitting(false);
-
-        if (lookup.status === 'unavailable') {
-          setError(PORTAL_DB_UNAVAILABLE_MESSAGE);
-          return;
-        }
-
-        if (lookup.result) {
-          const { program, role } = lookup.result;
-          applyProgramPortalUnlock(program, role);
-          writeLastPilotProgram(program, role, program.adminEmail);
-          setAccessCode('');
-          onUnlock?.();
-          const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
-          logPortalRedirect('/portal', destination, `program-code-${role}`);
-          navigate(destination, { replace: true });
-          return;
-        }
-
-        setError(ERROR_BY_VARIANT[variant]);
+        navigateToPortal(navigate, FAMILY_PORTAL_PATH, 'blueribbon-family-code');
         return;
       }
 
@@ -127,9 +138,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       writePortalSessionUnlock(tier.type);
       setAccessCode('');
       onUnlock?.();
-      const destination = getDashboardPathForTier(tier);
-      logPortalRedirect('/portal', destination, `tier-code-${tier.type}`);
-      navigate(destination);
+      navigateToPortal(navigate, getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
     [accessCode, navigate, onUnlock, variant],
   );
@@ -149,5 +158,6 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
     handleSubmit,
     onAccessCodeChange: handleAccessCodeChange,
     clearAccessCode: () => setAccessCode(''),
+    setError,
   };
 }

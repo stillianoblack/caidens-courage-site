@@ -32,7 +32,7 @@ export default function PilotProgramSignupPage() {
       return;
     }
 
-    applyProgramPortalUnlock(result.program, 'facilitator');
+    applyProgramPortalUnlock(result.program, 'facilitator', result.program.facilitatorAccessCode);
     writeLastPilotProgram(result.program, 'facilitator', input.adminEmail);
     refreshAnalyticsIdentity();
     trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);

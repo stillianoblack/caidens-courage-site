@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { writeLastPilotProgram } from '../../config/lastPilotProgram';
-import { writeFamilyPortalSession } from '../../config/familyPortalAccess';
-import { writePortalSessionUnlock } from '../../config/portalAccess';
 import type { ActivePilotProgram } from '../../types/pilotProgram';
 import { lookupPilotProgramByAdmin } from '../../lib/pilotProgramService';
 import { useCopyToast } from '../shared/useCopyToast';
@@ -44,14 +42,10 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
 
   const continueAs = (role: 'facilitator' | 'family') => {
     if (!program) return;
-    applyProgramPortalUnlock(program, role);
+    const code = role === 'family' ? program.familyAccessCode : program.facilitatorAccessCode;
+    applyProgramPortalUnlock(program, role, code);
     writeLastPilotProgram(program, role, adminEmail.trim());
-    if (role === 'family') {
-      writeFamilyPortalSession();
-    } else {
-      writePortalSessionUnlock('pilot');
-    }
-    navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+    navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH, { replace: true });
   };
 
   return (

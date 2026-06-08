@@ -1,88 +1,73 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
 import FamilyPortalDashboardContent from '../components/family-portal/FamilyPortalDashboardContent';
+import PortalAccessRequired from '../components/portal/PortalAccessRequired';
 import PortalShell from '../components/portal/PortalShell';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram } from '../config/activePilotProgram';
-import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readActivePortalRole } from '../config/portalContext';
+import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH } from '../config/courageRoutes';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
-import {
-  FAMILY_PORTAL_TITLE,
-  FAMILY_SIDEBAR_NAV,
-  type FamilySidebarNavId,
-} from '../data/familyPortalContent';
+import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
+import { isFamilyNestedRoute, resolvePortalPageTitle } from '../lib/familyPortalNav';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
-import { resolvePortalNavId, resolvePortalPageTitle } from '../lib/familyPortalNav';
 import { logPortalRedirect } from '../lib/portalDebug';
+import { resolveActivePilotProgram } from '../lib/portalProgramRestore';
+import { resetPortalScroll } from '../lib/portalScroll';
+import { hasFamilyPortalSession, PORTAL_ROLE_MISMATCH_MESSAGE } from '../lib/portalSessionGuard';
 
-function resetFamilyScroll(): void {
-  window.scrollTo(0, 0);
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-  document.querySelector('.family-content')?.scrollTo(0, 0);
-}
-
+/** Legacy Blue Ribbon family portal shell at /portal/family. */
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const hasSession = readFamilyPortalSession();
-  const activeProgram = readActivePilotProgram();
+  const hasLegacySession = readFamilyPortalSession();
+  const activeProgram = resolveActivePilotProgram();
   const activeRole = readActivePortalRole();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname);
-  const programCode = activeProgram?.programCode;
-
-  const activeNav = useMemo(
-    () => resolvePortalNavId(location.pathname, FAMILY_PORTAL_PATH),
-    [location.pathname],
-  );
-
-  const handleSelectNav = useCallback(
-    (id: FamilySidebarNavId) => {
-      const item = FAMILY_SIDEBAR_NAV.find((nav) => nav.id === id);
-      if (!item || location.pathname === item.path) return;
-      resetFamilyScroll();
-      navigate(item.path);
-    },
-    [location.pathname, navigate],
-  );
+  const programSession = hasFamilyPortalSession();
+  const onLegacyFamilyPath = location.pathname.startsWith(FAMILY_PORTAL_PATH);
+  const showNestedRoute =
+    onLegacyFamilyPath && isFamilyNestedRoute(location.pathname, FAMILY_PORTAL_PATH);
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
   }, []);
 
   useEffect(() => {
-    if (!hasSession) {
-      logPortalRedirect(location.pathname, PORTAL_PATH, 'family-session-missing');
-      navigate(PORTAL_PATH, { replace: true, state: { redirect: FAMILY_PORTAL_PATH } });
+    if (hasLegacySession && activeRole === 'family' && activeProgram) {
+      const remainder = location.pathname.startsWith(FAMILY_PORTAL_PATH)
+        ? location.pathname.slice(FAMILY_PORTAL_PATH.length) || ''
+        : '';
+      const mappedRemainder = remainder.startsWith('/parent-corner')
+        ? remainder.replace('/parent-corner', '/guide')
+        : remainder.startsWith('/weekly-adventures')
+          ? remainder.replace('/weekly-adventures', '/continue-learning')
+          : remainder;
+      const destination = `${FAMILY_HUB_PATH}${mappedRemainder}`;
+      logPortalRedirect(location.pathname, destination, 'legacy-family-portal-to-hub');
+      navigate(destination, { replace: true });
     }
-  }, [hasSession, location.pathname, navigate]);
+  }, [activeProgram, activeRole, hasLegacySession, location.pathname, navigate]);
 
   useEffect(() => {
-    if (!hasSession) return;
-    if (activeRole !== 'family') return;
-    if (!activeProgram) return;
+    if (programSession || !hasLegacySession) return;
+    resetPortalScroll();
+  }, [hasLegacySession, location.pathname, programSession]);
 
-    const prefix = FAMILY_PORTAL_PATH;
-    if (!location.pathname.startsWith(prefix)) return;
+  if (programSession && onLegacyFamilyPath) {
+    return <PortalAccessRequired message="Opening your Family Portal..." />;
+  }
 
-    const remainder = location.pathname.slice(prefix.length) || '';
-    const mappedRemainder = remainder.startsWith('/parent-corner')
-      ? remainder.replace('/parent-corner', '/guide')
-      : remainder;
+  if (!hasLegacySession || activeRole === 'facilitator') {
+    return <PortalAccessRequired message={PORTAL_ROLE_MISMATCH_MESSAGE} />;
+  }
 
-    const destination = `${FAMILY_HUB_PATH}${mappedRemainder}`;
-    logPortalRedirect(location.pathname, destination, 'legacy-family-portal-to-hub');
-    navigate(destination, { replace: true });
-  }, [activeProgram, activeRole, hasSession, location.pathname, navigate]);
-
-  if (!hasSession) {
-    return null;
+  if (!onLegacyFamilyPath) {
+    return <Outlet />;
   }
 
   return (
@@ -90,12 +75,10 @@ export default function FamilyPortalLayout() {
       variant="family"
       sidebar={
         <FamilyDashboardSidebar
-          activeId={activeNav}
-          onSelect={handleSelectNav}
           navItems={FAMILY_SIDEBAR_NAV}
           brandTitle={brand.title}
           brandSubtitle={brand.subtitle}
-          programCode={programCode}
+          programCode={activeProgram?.programCode}
         />
       }
       topBar={
@@ -109,7 +92,11 @@ export default function FamilyPortalLayout() {
         <footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>
       }
     >
-      <FamilyPortalDashboardContent basePath={FAMILY_PORTAL_PATH} />
+      {showNestedRoute ? (
+        <Outlet />
+      ) : (
+        <FamilyPortalDashboardContent basePath={FAMILY_PORTAL_PATH} />
+      )}
     </PortalShell>
   );
 }

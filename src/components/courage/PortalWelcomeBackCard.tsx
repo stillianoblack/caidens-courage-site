@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { maskAccessCode, type LastPilotProgram } from '../../config/lastPilotProgram';
-import { writeFamilyPortalSession } from '../../config/familyPortalAccess';
-import { writePortalSessionUnlock } from '../../config/portalAccess';
-
 type PortalWelcomeBackCardProps = {
   saved: LastPilotProgram;
   onUseDifferentCode: () => void;
@@ -15,13 +12,10 @@ export default function PortalWelcomeBackCard({ saved, onUseDifferentCode }: Por
   const navigate = useNavigate();
 
   const continueAs = (role: 'facilitator' | 'family') => {
-    applyProgramPortalUnlock(saved.program, role);
-    if (role === 'family') {
-      writeFamilyPortalSession();
-    } else {
-      writePortalSessionUnlock('pilot');
-    }
-    navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+    const code =
+      role === 'family' ? saved.family_access_code : saved.facilitator_access_code;
+    applyProgramPortalUnlock(saved.program, role, code);
+    navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH, { replace: true });
   };
 
   return (

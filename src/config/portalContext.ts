@@ -17,7 +17,11 @@ export type ActiveFamilyContext = {
 };
 
 export const ACTIVE_PORTAL_ROLE_KEY = 'activePortalRole';
+export const ACTIVE_ACCESS_CODE_KEY = 'activeAccessCode';
 export const ACTIVE_FAMILY_CONTEXT_KEY = 'activeFamilyContext';
+
+export const PORTAL_ROLE_MISMATCH_MESSAGE =
+  'Enter the correct access code to open this portal.';
 
 const DEV_PORTAL_LOGGING =
   process.env.NODE_ENV === 'development' || process.env.REACT_APP_PORTAL_DEV_LOG === '1';
@@ -34,6 +38,31 @@ export function readActivePortalRole(): PortalRole | null {
 export function writeActivePortalRole(role: PortalRole): void {
   try {
     localStorage.setItem(ACTIVE_PORTAL_ROLE_KEY, role);
+  } catch {
+    /* localStorage unavailable */
+  }
+}
+
+export function readActiveAccessCode(): string | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_ACCESS_CODE_KEY);
+    return raw?.trim() ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeActiveAccessCode(code: string): void {
+  try {
+    localStorage.setItem(ACTIVE_ACCESS_CODE_KEY, code.trim());
+  } catch {
+    /* localStorage unavailable */
+  }
+}
+
+export function clearActiveAccessCode(): void {
+  try {
+    localStorage.removeItem(ACTIVE_ACCESS_CODE_KEY);
   } catch {
     /* localStorage unavailable */
   }
@@ -80,22 +109,23 @@ export function logActivePortalDev(): void {
   const program = readActivePilotProgram();
   console.log('ACTIVE PORTAL ROLE:', readActivePortalRole() ?? '(none)');
   console.log('ACTIVE PROGRAM CODE:', program?.programCode ?? '(none)');
+  console.log('ACTIVE ACCESS CODE:', readActiveAccessCode() ? '(set)' : '(none)');
 }
 
-export function forcePortalRoleForRoute(pathname: string): void {
-  const role = readActivePortalRole();
-  if (pathname.startsWith('/program-dashboard') && role !== 'family') {
-    writeActivePortalRole('facilitator');
-  } else if (pathname.startsWith('/family-hub') && role !== 'facilitator') {
-    writeActivePortalRole('family');
-  }
+/** @deprecated Role is set only by access-code unlock — do not override from URL. */
+export function forcePortalRoleForRoute(_pathname: string): void {
   logActivePortalDev();
 }
 
-export function applyProgramPortalUnlock(program: ActivePilotProgram, role: PortalRole): void {
+export function applyProgramPortalUnlock(
+  program: ActivePilotProgram,
+  role: PortalRole,
+  accessCode: string,
+): void {
   clearStalePortalRouteState();
   writeActivePilotProgram(program);
   writeActivePortalRole(role);
+  writeActiveAccessCode(accessCode);
 
   if (role === 'family') {
     writeActiveFamilyContext({
@@ -105,8 +135,10 @@ export function applyProgramPortalUnlock(program: ActivePilotProgram, role: Port
       groupName: program.groupName,
     });
     writeFamilyPortalSession();
+    clearPortalSessionUnlock();
   } else {
     clearActiveFamilyContext();
+    clearFamilyPortalSession();
     writePortalSessionUnlock('pilot');
   }
 
@@ -115,6 +147,7 @@ export function applyProgramPortalUnlock(program: ActivePilotProgram, role: Port
 
 export function clearProgramPortalContext(): void {
   clearActivePilotProgram();
+  clearActiveAccessCode();
   try {
     localStorage.removeItem(ACTIVE_PORTAL_ROLE_KEY);
   } catch {
@@ -123,7 +156,7 @@ export function clearProgramPortalContext(): void {
   clearActiveFamilyContext();
 }
 
-/** Sign out of portal session while preserving lastPilotProgram for recovery. */
+/** Sign out — clear portal session; user must re-enter access code at /portal. */
 export function signOutPortal(): void {
   clearProgramPortalContext();
   clearFamilyPortalSession();

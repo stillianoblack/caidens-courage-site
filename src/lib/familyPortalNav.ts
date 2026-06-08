@@ -71,10 +71,12 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
 
   const mainPanelPaths = new Set([
     '/continue-learning',
+    '/weekly-adventures',
     '/downloads',
     '/gallery',
     '/certificates',
     '/guide',
+    '/parent-corner',
     '/characters',
   ]);
 
@@ -109,6 +111,7 @@ export function resolvePortalNavId(
     { id: 'gallery', segment: `${basePath}/gallery` },
     { id: 'certificates', segment: `${basePath}/certificates` },
     { id: 'guide', segment: `${basePath}/guide` },
+    { id: 'guide', segment: `${basePath}/parent-corner` },
   ];
 
   const match = segments.find((item) =>

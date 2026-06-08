@@ -16,12 +16,9 @@ import '../components/portal/portal-header.css';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram } from '../config/activePilotProgram';
-import { forcePortalRoleForRoute, logActivePortalDev, readActivePortalRole } from '../config/portalContext';
-import { readPortalSessionUnlock } from '../config/portalAccess';
+import PortalAccessRequired from '../components/portal/PortalAccessRequired';
+import { readActivePortalRole } from '../config/portalContext';
 import {
-  PILOT_PROGRAM_SIGNUP_PATH,
-  PORTAL_PATH,
   PROGRAM_BASELINE_CHECK_PATH,
   PROGRAM_DASHBOARD_KIDS_BASE,
   PROGRAM_DASHBOARD_PATH,
@@ -34,6 +31,9 @@ import {
 import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { resolveActivePilotProgram } from '../lib/portalProgramRestore';
+import { resetPortalScroll } from '../lib/portalScroll';
+import { PORTAL_ROLE_MISMATCH_MESSAGE } from '../lib/portalSessionGuard';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
@@ -46,7 +46,9 @@ export default function ProgramDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeProgram = readActivePilotProgram();
+  const activeProgram = resolveActivePilotProgram();
+  const activeRole = readActivePortalRole();
+  const sessionOk = activeRole === 'facilitator' && Boolean(activeProgram);
   const [resultsVersion, setResultsVersion] = useState(0);
   const showWelcome = searchParams.get('welcome') === '1';
 
@@ -68,9 +70,7 @@ export default function ProgramDashboardPage() {
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
-    forcePortalRoleForRoute(location.pathname);
-    logActivePortalDev();
-  }, [location.pathname]);
+  }, []);
 
   useEffect(() => {
     requestGalleryCountsRefresh();
@@ -90,17 +90,14 @@ export default function ProgramDashboardPage() {
   }, [activeNav]);
 
   useEffect(() => {
-    if (!activeProgram) {
-      navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
-      return;
+    if (sessionOk) {
+      resetPortalScroll();
     }
-    if (readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
-      navigate(PORTAL_PATH, { replace: true, state: { redirect: PROGRAM_DASHBOARD_PATH } });
-    }
-  }, [activeProgram, navigate]);
+  }, [location.pathname, sessionOk]);
 
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
+      resetPortalScroll();
       if (isKidsRoute) {
         navigate(`${PROGRAM_DASHBOARD_PATH}#${id}`);
         return;
@@ -115,8 +112,12 @@ export default function ProgramDashboardPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  if (!activeProgram || readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
-    return null;
+  if (activeRole === 'family') {
+    return <PortalAccessRequired message={PORTAL_ROLE_MISMATCH_MESSAGE} />;
+  }
+
+  if (!sessionOk || !activeProgram) {
+    return <PortalAccessRequired />;
   }
 
   return (

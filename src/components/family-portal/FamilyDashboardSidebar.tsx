@@ -1,19 +1,19 @@
 import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   FAMILY_PORTAL_BRAND,
   FAMILY_PORTAL_SUBBRAND,
   FAMILY_SIDEBAR_NAV,
-  type FamilySidebarNavId,
   type FamilySidebarNavItem,
 } from '../../data/familyPortalContent';
 import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
+import { isCharacterHubRoute, resolveFamilyBasePath } from '../../lib/familyPortalNav';
+import { resetPortalScroll } from '../../lib/portalScroll';
 import FamilyNavIcon from './FamilyNavIcon';
 import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
 type FamilyDashboardSidebarProps = {
-  activeId: FamilySidebarNavId;
-  onSelect: (id: FamilySidebarNavId) => void;
   navItems?: FamilySidebarNavItem[];
   brandTitle?: string;
   brandSubtitle?: string;
@@ -22,8 +22,6 @@ type FamilyDashboardSidebarProps = {
 };
 
 export default function FamilyDashboardSidebar({
-  activeId,
-  onSelect,
   navItems = FAMILY_SIDEBAR_NAV,
   brandTitle = FAMILY_PORTAL_BRAND,
   brandSubtitle = FAMILY_PORTAL_SUBBRAND,
@@ -31,6 +29,9 @@ export default function FamilyDashboardSidebar({
   showUpgradeCard = true,
 }: FamilyDashboardSidebarProps) {
   const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
+  const location = useLocation();
+  const basePath = resolveFamilyBasePath(location.pathname);
+  const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath);
 
   return (
     <aside className="family-rail" aria-label="Family portal navigation">
@@ -39,16 +40,18 @@ export default function FamilyDashboardSidebar({
         <p className="family-railBrandSub">{brandSubtitle}</p>
       </div>
 
-      <nav className="family-railNav" role="tablist" aria-label="Dashboard sections">
+      <nav className="family-railNav" aria-label="Dashboard sections">
         <ul className="family-railNavList">
           {navItems.map((item) => (
             <li key={item.id}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeId === item.id}
-                className={`family-railNavLink${activeId === item.id ? ' family-railNavLink--active' : ''}`}
-                onClick={() => onSelect(item.id)}
+              <NavLink
+                to={item.path}
+                end={item.id === 'overview'}
+                onClick={resetPortalScroll}
+                className={({ isActive }) => {
+                  const active = isActive || (item.id === 'character-hub' && onCharacterRoute);
+                  return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
+                }}
               >
                 <span className="family-railIcon">
                   <FamilyNavIcon name={item.icon} />
@@ -58,7 +61,7 @@ export default function FamilyDashboardSidebar({
                     ? formatGalleryNavLabel(item.label, galleryNewCount)
                     : item.label}
                 </span>
-              </button>
+              </NavLink>
             </li>
           ))}
         </ul>
