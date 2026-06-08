@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { afterIdle } from '../lib/defer';
 import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import { computePilotTrackingMetrics, type PilotTrackingMetrics } from '../lib/pilotTrackingMetrics';
 import { loadPilotTrackingData } from '../lib/pilotTrackingService';
 
-export function usePilotTrackingResults(refreshKey = 0, programCode?: string) {
-  const [loading, setLoading] = useState(true);
+export function usePilotTrackingResults(
+  refreshKey = 0,
+  programCode?: string,
+  enabled = true,
+) {
+  const [loading, setLoading] = useState(enabled);
   const [legacySource, setLegacySource] = useState<'supabase' | 'local'>('local');
   const [trackingSource, setTrackingSource] = useState<'supabase' | 'local' | 'hybrid'>('local');
   const [warning, setWarning] = useState<string | undefined>();
@@ -33,8 +38,14 @@ export function usePilotTrackingResults(refreshKey = 0, programCode?: string) {
   }, [programCode]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh, refreshKey]);
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+    afterIdle(() => {
+      void refresh();
+    });
+  }, [enabled, refresh, refreshKey]);
 
   const metrics = useMemo(
     (): PilotTrackingMetrics =>

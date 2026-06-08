@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { afterIdle } from '../lib/defer';
 import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import {
   computeFamilyProgressSnapshot,
@@ -39,7 +40,9 @@ export function useFamilyProgressMetrics(programCode?: string) {
   }, [resolvedCode]);
 
   useEffect(() => {
-    void refresh();
+    afterIdle(() => {
+      void refresh();
+    });
   }, [refresh]);
 
   const metrics = useMemo(() => snapshot, [snapshot]);

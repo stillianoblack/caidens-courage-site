@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { afterIdle } from '../lib/defer';
 import {
   GALLERY_COUNTS_REFRESH_EVENT,
   readLastGalleryViewedAt,
@@ -26,7 +27,7 @@ export function useFacilitatorGalleryPendingCount(programCode?: string): number 
   }, [resolvedCode]);
 
   useEffect(() => {
-    refresh();
+    afterIdle(refresh);
   }, [refresh]);
 
   useGalleryCountRefresh(refresh);
@@ -44,7 +45,7 @@ export function useFamilyGalleryNewApprovedCount(programCode?: string): number {
   }, [resolvedCode]);
 
   useEffect(() => {
-    refresh();
+    afterIdle(refresh);
   }, [refresh]);
 
   useGalleryCountRefresh(refresh);

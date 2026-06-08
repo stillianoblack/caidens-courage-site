@@ -4,7 +4,6 @@ import { lazy } from 'react';
 /* Heavy routes — loaded on demand to shrink the initial bundle. */
 
 export const PilotDashboardPage = lazy(() => import('../pages/PilotDashboardPage'));
-export const ProgramDashboardPage = lazy(() => import('../pages/ProgramDashboardPage'));
 export const PilotTermsPage = lazy(() => import('../pages/PilotTermsPage'));
 
 export const FacilitatorBaselineCheckPage = lazy(

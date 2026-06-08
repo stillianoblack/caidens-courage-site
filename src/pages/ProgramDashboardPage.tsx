@@ -17,7 +17,7 @@ import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { forcePortalRoleForRoute, logActivePortalDev, readActivePortalRole } from '../config/portalContext';
+import { readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
   PILOT_PROGRAM_SIGNUP_PATH,
@@ -32,8 +32,10 @@ import {
   type PilotSidebarNavId,
 } from '../data/pilotDashboardContent';
 import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
+import { afterIdle } from '../lib/defer';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { resetPortalScroll } from '../lib/portalScroll';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
@@ -41,6 +43,63 @@ const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
 ) as Record<PilotSidebarNavId, string>;
 
 const VALID_NAV_IDS = new Set(PROGRAM_SIDEBAR_NAV.map((item) => item.id));
+
+type TrackingPanelProps = {
+  metrics: ReturnType<typeof usePilotTrackingResults>['metrics'];
+  loading: boolean;
+  source: ReturnType<typeof usePilotTrackingResults>['source'];
+  warning?: string;
+  results: ReturnType<typeof usePilotTrackingResults>['legacyResults'];
+  resultsVersion: number;
+  onSelectNav: (id: PilotSidebarNavId) => void;
+  activeProgram: NonNullable<ReturnType<typeof readActivePilotProgram>>;
+};
+
+function renderFacilitatorPanel(
+  activeNav: PilotSidebarNavId,
+  tracking: TrackingPanelProps,
+  programCode: string | undefined,
+): React.ReactNode {
+  switch (activeNav) {
+    case 'weekly-modules':
+      return <PilotWeeklyModulesPanel />;
+    case 'activities-library':
+      return <PilotActivitiesPanel />;
+    case 'assessments':
+      return <PilotAssessmentsPanel baselineHref={PROGRAM_BASELINE_CHECK_PATH} />;
+    case 'results':
+      return (
+        <PilotResultsPanel
+          refreshKey={tracking.resultsVersion}
+          results={tracking.results}
+          metrics={tracking.metrics}
+          source={tracking.source}
+          warning={tracking.warning}
+          loading={tracking.loading}
+        />
+      );
+    case 'certificates':
+      return <PilotCertificatesPanel />;
+    case 'student-gallery':
+      return (
+        <PilotGalleryPanel programCode={programCode} groupName={tracking.activeProgram.groupName} />
+      );
+    case 'facilitator-center':
+      return <PilotFacilitatorPanel />;
+    case 'overview':
+    default:
+      return (
+        <PilotOverviewPanel
+          metrics={tracking.metrics}
+          loading={tracking.loading}
+          source={tracking.source}
+          warning={tracking.warning}
+          onSelectNav={tracking.onSelectNav}
+          activeProgram={tracking.activeProgram}
+        />
+      );
+  }
+}
 
 export default function ProgramDashboardPage() {
   const navigate = useNavigate();
@@ -61,25 +120,23 @@ export default function ProgramDashboardPage() {
     ? resolvePortalPageTitle(location.pathname, PROGRAM_DASHBOARD_PATH)
     : NAV_TITLE[activeNav];
 
+  const needsTracking = activeNav === 'overview' || activeNav === 'results';
   const { metrics, legacyResults: results, source, warning, loading } = usePilotTrackingResults(
     resultsVersion,
     programCode,
+    needsTracking,
   );
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
-    forcePortalRoleForRoute(location.pathname);
-    logActivePortalDev();
-  }, [location.pathname]);
+  }, []);
 
   useEffect(() => {
-    requestGalleryCountsRefresh();
+    afterIdle(() => requestGalleryCountsRefresh());
   }, []);
 
   const didMountRef = useRef(false);
   useEffect(() => {
-    // Refresh results when user switches to overview/results tab.
-    // Skip the initial mount (resultsVersion starts at 0).
     if (!didMountRef.current) {
       didMountRef.current = true;
       return;
@@ -101,6 +158,7 @@ export default function ProgramDashboardPage() {
 
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
+      resetPortalScroll();
       if (isKidsRoute) {
         navigate(`${PROGRAM_DASHBOARD_PATH}#${id}`);
         return;
@@ -118,6 +176,17 @@ export default function ProgramDashboardPage() {
   if (!activeProgram || readActivePortalRole() !== 'facilitator' || !readPortalSessionUnlock()) {
     return null;
   }
+
+  const trackingProps: TrackingPanelProps = {
+    metrics,
+    loading,
+    source,
+    warning,
+    results,
+    resultsVersion,
+    onSelectNav: handleSelectNav,
+    activeProgram,
+  };
 
   return (
     <PortalShell
@@ -146,57 +215,12 @@ export default function ProgramDashboardPage() {
       {isKidsRoute ? (
         <Outlet />
       ) : (
-        <>
+        <div className="pilot-tabPanel" role="tabpanel">
           {showWelcome ? (
             <PilotProgramWelcomeCard program={activeProgram} onDismiss={dismissWelcome} />
           ) : null}
-
-          <div role="tabpanel" hidden={activeNav !== 'overview'} className="pilot-tabPanel">
-            <PilotOverviewPanel
-              metrics={metrics}
-              loading={loading}
-              source={source}
-              warning={warning}
-              onSelectNav={handleSelectNav}
-              activeProgram={activeProgram}
-            />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'weekly-modules'} className="pilot-tabPanel">
-            <PilotWeeklyModulesPanel />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'activities-library'} className="pilot-tabPanel">
-            <PilotActivitiesPanel />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'assessments'} className="pilot-tabPanel">
-            <PilotAssessmentsPanel baselineHref={PROGRAM_BASELINE_CHECK_PATH} />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'results'} className="pilot-tabPanel">
-            <PilotResultsPanel
-              refreshKey={resultsVersion}
-              results={results}
-              metrics={metrics}
-              source={source}
-              warning={warning}
-              loading={loading}
-            />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'certificates'} className="pilot-tabPanel">
-            <PilotCertificatesPanel />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'student-gallery'} className="pilot-tabPanel">
-            <PilotGalleryPanel programCode={programCode} groupName={activeProgram.groupName} />
-          </div>
-
-          <div role="tabpanel" hidden={activeNav !== 'facilitator-center'} className="pilot-tabPanel">
-            <PilotFacilitatorPanel />
-          </div>
-        </>
+          {renderFacilitatorPanel(activeNav, trackingProps, programCode)}
+        </div>
       )}
     </PortalShell>
   );

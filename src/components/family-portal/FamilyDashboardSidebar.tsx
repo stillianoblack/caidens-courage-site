@@ -12,6 +12,7 @@ import {
 } from '../../lib/familyPortalNav';
 import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
+import { resetPortalScroll } from '../../lib/portalScroll';
 import FamilyNavIcon from './FamilyNavIcon';
 import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
@@ -52,6 +53,7 @@ export default function FamilyDashboardSidebar({
                 <NavLink
                   to={item.path}
                   end={item.id === 'overview'}
+                  onClick={resetPortalScroll}
                   className={({ isActive }) => {
                     const active = isActive || characterHubActive;
                     return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;

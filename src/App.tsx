@@ -68,7 +68,6 @@ import {
   MirandaPortalMissionPage,
   PilotDashboardPage,
   PilotTermsPage,
-  ProgramDashboardPage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
   Week0AssessmentPage,
@@ -90,6 +89,7 @@ import {
   FamilyAdultGuideMissionPage,
 } from './routes/familyLazyPanels';
 import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
+import ProgramDashboardPage from './pages/ProgramDashboardPage';
 import FamilyHubLayout from './pages/FamilyHubLayout';
 import FamilyPortalLayout from './pages/FamilyPortalLayout';
 import {
@@ -400,12 +400,20 @@ const AppFrame: React.FC = () => {
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
+  const isPortalShellRoute =
+    location.pathname === '/portal' ||
+    location.pathname.startsWith(`${FAMILY_HUB_PATH}/`) ||
+    location.pathname === FAMILY_HUB_PATH ||
+    location.pathname.startsWith(`${PROGRAM_DASHBOARD_PATH}/`) ||
+    location.pathname === PROGRAM_DASHBOARD_PATH ||
+    location.pathname.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
+    location.pathname === FAMILY_PORTAL_PATH;
   return (
     <>
       <ScrollToTop />
-      <PortalDebugTracker />
+      {process.env.NODE_ENV === 'development' ? <PortalDebugTracker /> : null}
       <AnalyticsRouteTracker />
-      <Suspense fallback={<NavigationLoader />}>
+      <Suspense fallback={isPortalShellRoute ? null : <NavigationLoader />}>
         <AppRoutes />
       </Suspense>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
