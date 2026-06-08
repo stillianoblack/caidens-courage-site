@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import GameBackgroundDecor from '../components/game-assessment/shared/GameBackgroundDecor';
 import '../components/b4-baseline-check/b4-baseline-check.css';
-import '../components/game-assessment/miranda-game.css';
-import '../components/mission-board/mission-board.css';
 import MirandaMysteryFilesHub from '../components/miranda/MirandaMysteryFilesHub';
 import { MIRANDA_HUB } from '../data/miranda';
 

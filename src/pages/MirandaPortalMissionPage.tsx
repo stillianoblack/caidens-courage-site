@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
-import '../components/game-assessment/miranda-game.css';
 import '../components/miranda/miranda-portal-hub.css';
 import { getMirandaMissionById } from '../data/miranda';
 import { resolveMirandaHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';

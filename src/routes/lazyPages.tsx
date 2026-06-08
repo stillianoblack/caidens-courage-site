@@ -1,3 +1,4 @@
+import './lazyRouteStyles';
 import { lazy } from 'react';
 
 /* Heavy routes — loaded on demand to shrink the initial bundle. */
