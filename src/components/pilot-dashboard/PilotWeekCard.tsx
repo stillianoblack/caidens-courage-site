@@ -30,6 +30,7 @@ export default function PilotWeekCard({ week }: PilotWeekCardProps) {
   const pillTone =
     status === 'available' ? 'available' : week.status === 'complete' ? 'complete' : 'locked';
   const pillLabel = isLocked ? unlockLabel : status === 'available' ? 'Available now' : 'Complete';
+  const shouldDownloadKit = week.kitHref.startsWith('/downloads/');
 
   return (
     <article className={`pilot-dash-weekCard${isLocked ? ' pilot-dash-weekCard--locked' : ''}`}>
@@ -51,6 +52,7 @@ export default function PilotWeekCard({ week }: PilotWeekCardProps) {
       ) : (
         <a
           href={week.kitHref}
+          download={shouldDownloadKit ? '' : undefined}
           className="pilot-dash-cta pilot-weekCta"
           onClick={() =>
             trackWeeklyModuleDownloaded({

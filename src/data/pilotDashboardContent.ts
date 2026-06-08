@@ -112,7 +112,7 @@ export const PILOT_WEEKLY_JOURNEY: PilotWeek[] = [
     selFocus: 'Facing Uncertainty',
     status: 'available',
     kitCta: 'Download Week 1 Kit',
-    kitHref: '#week-1-kit-download',
+    kitHref: '/downloads/Weekly%20Module/CaidensCourage_Weekly%201_CourageInTheDark.pdf',
   },
   {
     week: 2,

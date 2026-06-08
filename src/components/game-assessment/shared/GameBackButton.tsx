@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { assignPortalRoute } from '../../../lib/portalHardNavigation';
 import { resolveCharacterThemeColor } from './characterThemeColors';
 import './game-back-button.css';
 
@@ -11,6 +11,19 @@ type GameBackButtonProps = {
   variant?: 'inline' | 'floating';
   className?: string;
 };
+
+function isPlainLeftClick(event: React.MouseEvent<HTMLAnchorElement>) {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
+
+function isSameSiteRoute(to: string) {
+  try {
+    const url = new URL(to, window.location.href);
+    return url.origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
 
 export default function GameBackButton({
   to,
@@ -24,9 +37,18 @@ export default function GameBackButton({
   const label = `Back to ${hubName}`;
 
   return (
-    <Link
-      to={to}
-      onClick={onClick}
+    <a
+      href={to}
+      onClick={(event) => {
+        onClick?.();
+
+        if (!isPlainLeftClick(event) || !isSameSiteRoute(to)) {
+          return;
+        }
+
+        event.preventDefault();
+        assignPortalRoute(to);
+      }}
       className={['game-backBtn', variant === 'floating' ? 'game-backBtn--floating' : '', className]
         .filter(Boolean)
         .join(' ')}
@@ -43,6 +65,6 @@ export default function GameBackButton({
         </svg>
       </span>
       <span className="game-backBtn-label">{label}</span>
-    </Link>
+    </a>
   );
 }
