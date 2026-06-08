@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import PilotProgramSignupForm from '../components/pilot-program/PilotProgramSignupForm';
@@ -9,10 +9,10 @@ import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
+import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
 
 export default function PilotProgramSignupPage() {
-  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +36,7 @@ export default function PilotProgramSignupPage() {
     writeLastPilotProgram(result.program, 'facilitator', input.adminEmail);
     refreshAnalyticsIdentity();
     trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
-    navigate(`${PROGRAM_DASHBOARD_PATH}?welcome=1`, { replace: true });
+    replaceWithPortalRoute(`${PROGRAM_DASHBOARD_PATH}?welcome=1`);
   };
 
   return (

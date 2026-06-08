@@ -161,6 +161,8 @@ export type PilotProgramSignupResult =
   | { success: true; program: ActivePilotProgram }
   | { success: false; message: string };
 
+const PILOT_SIGNUP_TIMEOUT_MS = 15000;
+
 const PROGRAM_TYPE_PREFIX: Record<PilotProgramType, string> = {
   'Camp / Youth Program': 'CAMP',
   'Teacher / Classroom': 'TEACHER',
@@ -239,6 +241,16 @@ function buildProgramRecord(input: PilotProgramSignupInput): PilotProgramRecord 
   };
 }
 
+function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeout = globalThis.setTimeout(() => reject(new Error(message)), timeoutMs);
+    Promise.resolve(promise)
+      .then(resolve)
+      .catch(reject)
+      .finally(() => globalThis.clearTimeout(timeout));
+  });
+}
+
 export async function submitPilotProgramSignup(
   input: PilotProgramSignupInput,
 ): Promise<PilotProgramSignupResult> {
@@ -258,11 +270,14 @@ export async function submitPilotProgramSignup(
   }
 
   try {
-    const { data, error } = await supabase
-      .from('pilot_programs')
-      .insert(record)
-      .select('*')
-      .single();
+    const { data, error } = await withTimeout<{
+      data: PilotProgramRecord | null;
+      error: { code?: string; message: string } | null;
+    }>(
+      supabase.from('pilot_programs').insert(record).select('*').single(),
+      PILOT_SIGNUP_TIMEOUT_MS,
+      'Pilot signup request timed out.',
+    );
 
     if (error) {
       console.warn('[pilot_programs] insert failed:', error.message);
@@ -289,7 +304,7 @@ export async function submitPilotProgramSignup(
     console.warn('[pilot_programs] insert error:', err);
     return {
       success: false,
-      message: 'Could not save your pilot signup right now. Please try again in a moment.',
+      message: 'Creating your program is taking too long. Please refresh and try again.',
     };
   }
 }
