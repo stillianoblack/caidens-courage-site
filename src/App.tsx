@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import {
   MissionGamePhaseProvider,
   useMissionGamePhase,
@@ -147,9 +147,8 @@ const RootRoute: React.FC = () => {
   return <Home />;
 };
 
-const AppRoutes: React.FC = () => {
-  return (
-    <Routes>
+const appRouteChildren = (
+  <>
       <Route path="/" element={<RootRoute />} />
 
       {/* Story world */}
@@ -366,11 +365,10 @@ const AppRoutes: React.FC = () => {
       <Route path="/journey" element={<Journey />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/chat" element={<ChatWithB4 />} />
-    </Routes>
-  );
-};
+  </>
+);
 
-const AppFrame: React.FC = () => {
+const AppLayout: React.FC = () => {
   const location = useLocation();
   const missionPhase = useMissionGamePhase();
   const isMirandaExperience =
@@ -416,7 +414,7 @@ const AppFrame: React.FC = () => {
       <AnalyticsRouteTracker />
       <ChunkErrorBoundary>
         <Suspense fallback={isPortalShellRoute ? null : <NavigationLoader />}>
-          <AppRoutes />
+          <Outlet key={`${location.pathname}${location.search}`} />
         </Suspense>
       </ChunkErrorBoundary>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
@@ -427,11 +425,11 @@ const AppFrame: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <MissionGamePhaseProvider>
-        <AppFrame />
-      </MissionGamePhaseProvider>
-    </BrowserRouter>
+    <MissionGamePhaseProvider>
+      <Routes>
+        <Route element={<AppLayout />}>{appRouteChildren}</Route>
+      </Routes>
+    </MissionGamePhaseProvider>
   );
 };
 
