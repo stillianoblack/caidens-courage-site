@@ -32,8 +32,15 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
 
-# Cache static assets aggressively (1 year)
+# Cache hashed static assets aggressively (1 year)
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/*.js"
   [headers.values]
@@ -90,15 +97,17 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Cache HTML for shorter duration (1 hour) to allow updates
+# HTML and SPA routes: always revalidate so new deploys are picked up quickly.
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
 
 [[headers]]
   for = "/"
   [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
 
 # All redirects live in public/_redirects (success pages, Vale root, SPA fallback).

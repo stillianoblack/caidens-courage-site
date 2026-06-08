@@ -69,27 +69,6 @@
     <title>Caiden's Courage</title>
   </head>
   <body>
-    <!-- Defer SW/cache cleanup until after first paint to avoid blocking -->
-    <script>
-      (function() {
-        if (typeof navigator === 'undefined' || !navigator.serviceWorker) return;
-        var run = function() {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          }).catch(function() {});
-          if (typeof caches !== 'undefined' && caches.keys) {
-            caches.keys().then(function(keys) {
-              keys.forEach(function(k) { caches.delete(k); });
-            }).catch(function() {});
-          }
-        };
-        if (window.requestIdleCallback) {
-          requestIdleCallback(run, { timeout: 2000 });
-        } else {
-          setTimeout(run, 500);
-        }
-      })();
-    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <form name="courage_toolkit" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
       <input type="hidden" name="form-name" value="courage_toolkit" />
