@@ -2,6 +2,8 @@
 -- Run in Supabase SQL editor if participants/module_results/assessment_results_v2 are not
 -- accepting app writes from the published site. Safe to re-run.
 
+alter table public.participants add column if not exists adult_role text;
+
 alter table public.participants enable row level security;
 alter table public.module_results enable row level security;
 alter table public.assessment_results_v2 enable row level security;

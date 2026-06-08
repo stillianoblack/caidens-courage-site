@@ -103,6 +103,7 @@ import {
   FamilyAdultGuideMissionPage,
 } from './routes/familyLazyPanels';
 import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
+import AdminPortalPage from './pages/AdminPortalPage';
 import ProgramDashboardPage from './pages/ProgramDashboardPage';
 import FamilyHubLayout from './pages/FamilyHubLayout';
 import FamilyPortalLayout from './pages/FamilyPortalLayout';
@@ -132,6 +133,7 @@ import {
   PROGRAM_DASHBOARD_PATH,
   PILOT_PROGRAM_SIGNUP_PATH,
   PILOT_TERMS_PATH,
+  ADMIN_PORTAL_PATH,
   FAMILY_PORTAL_PATH,
   FAMILY_HUB_PATH,
   FAMILY_HUB_KIDS_BASE,
@@ -346,6 +348,9 @@ const appRouteChildren = (
       <Route path="/teachers" element={<TeachersPage />} />
       <Route path="/camps" element={<CampsPage />} />
       <Route path="/schools" element={<SchoolsPage />} />
+
+      {/* Private admin — not linked in public navigation */}
+      <Route path={ADMIN_PORTAL_PATH} element={<AdminPortalPage />} />
 
       {/* Portal */}
       <Route path="/portal" element={<Portal />} />

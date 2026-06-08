@@ -124,15 +124,14 @@ export default function AdultGrowthCheckFlow({
       });
 
       saveAdultAssessmentResult(record);
-      const submit = await insertAdultAssessmentResult(record);
       const v2Submit = await recordFormalAssessmentCompletion({
         assessmentType: phase === 'baseline' ? 'adult_pre' : 'adult_post',
-        role: familyPortal ? 'parent' : 'facilitator',
+        role: 'adult',
         participant: {
           first_name: profile.firstName,
           email: profile.email,
+          adult_role: profile.role,
           program_code: profile.programCode,
-          group_name: profile.organization,
           organization: profile.organization,
           child_age_range: profile.childAgeRange,
           email_opt_in: profile.emailOptIn,
@@ -144,6 +143,7 @@ export default function AdultGrowthCheckFlow({
         answers_json: finalAnswers,
         completed_at: record.completedAt,
       });
+      const submit = await insertAdultAssessmentResult(record);
       trackEvent('adult_assessment_completed', {
         role: familyPortal ? 'parent' : 'facilitator',
         assessment_type: phase === 'baseline' ? 'adult_pre' : 'adult_post',

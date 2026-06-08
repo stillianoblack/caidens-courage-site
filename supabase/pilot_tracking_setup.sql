@@ -19,6 +19,8 @@ create table if not exists public.participants (
 
 create index if not exists participants_program_code_idx on public.participants (program_code);
 create index if not exists participants_role_idx on public.participants (role);
+
+alter table public.participants add column if not exists adult_role text;
 create index if not exists participants_email_role_program_idx
   on public.participants (lower(email), role, program_code)
   where email is not null;

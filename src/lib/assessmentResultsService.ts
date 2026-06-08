@@ -7,6 +7,8 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { resolveTrackingProgramCode } from './activeProgramContext';
+import { findOrCreateParticipant } from './pilotTrackingService';
 
 export type AssessmentResultRow = {
   id?: string;
@@ -48,7 +50,6 @@ export type AssessmentResultsLoad = {
   warning?: string;
 };
 
-const DEFAULT_PROGRAM_CODE = 'BlueRibbon2026';
 const BASELINE_MODULES = 'feelings,reading,focus-moves';
 function isStudentBaselineRow(row: AssessmentResultRow): boolean {
   return row.assessment_type === 'baseline';
@@ -71,11 +72,12 @@ function resolveCompletedAt(row: AssessmentResultRow): string {
 
 export function recordToSupabaseRow(record: B4BaselineCheckRecord): Omit<AssessmentResultRow, 'id'> {
   const program = readActivePilotProgram();
+  const programCode = resolveTrackingProgramCode() || record.programCode.trim();
   const payload: Omit<AssessmentResultRow, 'id'> = {
     nickname: record.nickname,
     student_id: record.anonymousStudentId,
     assessment_type: 'baseline',
-    program_code: record.programCode.trim() || DEFAULT_PROGRAM_CODE,
+    program_code: programCode,
     group_name: record.groupName,
     feelings_score: record.feelingsScore,
     reading_score: record.readingScore,
@@ -124,7 +126,7 @@ export function adultRecordToSupabaseRow(
     email_opt_in: record.emailOptIn,
     assessment_type: record.assessmentType,
     adult_assessment_phase: record.phase,
-    program_code: record.programCode.trim() || DEFAULT_PROGRAM_CODE,
+    program_code: resolveTrackingProgramCode() || record.programCode.trim(),
     program_name: record.programName ?? program?.programName,
     understanding_score: record.understandingScore,
     support_score: record.supportScore,
@@ -150,12 +152,31 @@ export async function insertAdultAssessmentResult(
     };
   }
 
+  const programCode = resolveTrackingProgramCode() || record.programCode.trim();
+  if (!programCode) {
+    return {
+      success: false,
+      message: 'Missing active program context.',
+    };
+  }
+
   try {
+    await findOrCreateParticipant({
+      role: 'adult',
+      first_name: record.firstName,
+      email: record.email,
+      adult_role: record.role,
+      program_code: programCode,
+      organization: record.organization,
+      child_age_range: record.childAgeRange,
+      email_opt_in: record.emailOptIn,
+    });
+
     const payload = adultRecordToSupabaseRow(record);
     const { error } = await supabase.from('assessment_results').insert(payload);
 
     if (error) {
-      console.warn('[assessment_results] adult insert failed:', error.message);
+      console.warn('[TRACKING_SAVE_FAILED] assessment_results adult insert:', error.message);
       return {
         success: false,
         message: 'Local testing mode: results are saved on this device.',
@@ -170,7 +191,7 @@ export async function insertAdultAssessmentResult(
           : 'Adult growth check saved. Your certificate is ready.',
     };
   } catch (err) {
-    console.warn('[assessment_results] adult insert error:', err);
+    console.warn('[TRACKING_SAVE_FAILED] assessment_results adult insert:', err);
     return {
       success: false,
       message: 'Local testing mode: results are saved on this device.',
@@ -188,8 +209,29 @@ export async function insertAssessmentResult(
     };
   }
 
+  const programCode = resolveTrackingProgramCode() || record.programCode.trim();
+  if (!programCode) {
+    return {
+      success: false,
+      message: 'Missing active program context.',
+    };
+  }
+
   try {
+    await findOrCreateParticipant({
+      role: 'student',
+      nickname: record.nickname,
+      program_code: programCode,
+      group_name: record.groupName || undefined,
+    });
+
     const payload = recordToSupabaseRow(record);
+    if (!payload.program_code) {
+      return {
+        success: false,
+        message: 'Missing active program context.',
+      };
+    }
     console.log('[submitBaselineResults] payload:', payload);
 
     const { data, error } = await supabase.from('assessment_results').insert(payload);
@@ -198,7 +240,7 @@ export async function insertAssessmentResult(
     console.log('[submitBaselineResults] error:', error);
 
     if (error) {
-      console.warn('[assessment_results] insert failed:', error.message);
+      console.warn('[TRACKING_SAVE_FAILED] assessment_results insert:', error.message);
       return {
         success: false,
         message: 'Local testing mode: results are saved on this device.',
@@ -210,7 +252,7 @@ export async function insertAssessmentResult(
       message: 'B-4 Check-In saved. Your Weekly Adventures are ready.',
     };
   } catch (err) {
-    console.warn('[assessment_results] insert error:', err);
+    console.warn('[TRACKING_SAVE_FAILED] assessment_results insert:', err);
     return {
       success: false,
       message: 'Local testing mode: results are saved on this device.',

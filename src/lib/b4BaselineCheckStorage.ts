@@ -7,6 +7,8 @@ import {
   insertAssessmentResult,
   type BaselineSubmitResult,
 } from './assessmentResultsService';
+import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveTrackingProgramCode } from './activeProgramContext';
 import { recordFormalAssessmentCompletion } from './recordInteractiveCompletion';
 
 const STORAGE_KEY = 'caidens-courage-b4-baseline-check';
@@ -172,12 +174,15 @@ export function markBaselineModuleComplete(
   const allDone = completedModules.length >= 3;
   const prev = current.record;
 
+  const activeProgram = readActivePilotProgram();
+  const activeProgramCode = activeProgram?.programCode?.trim();
+
   const record: B4BaselineCheckRecord = {
     assessmentName: B4_BASELINE_ASSESSMENT_NAME,
     anonymousStudentId: profile?.anonymousStudentId ?? prev?.anonymousStudentId ?? generateAnonymousStudentId(),
     nickname: profile?.nickname ?? prev?.nickname ?? '',
-    programCode: profile?.programCode ?? prev?.programCode ?? '',
-    groupName: profile?.groupName ?? prev?.groupName ?? '',
+    programCode: activeProgramCode || profile?.programCode || prev?.programCode || '',
+    groupName: activeProgram?.groupName || profile?.groupName || prev?.groupName || '',
     completedModules,
     feelingsScore: scores.feelingsScore ?? prev?.feelingsScore ?? 0,
     readingScore: scores.readingScore ?? prev?.readingScore ?? 0,
@@ -253,29 +258,61 @@ export function resetB4BaselineState(): void {
 export async function submitBaselineResults(
   result: B4BaselineCheckRecord,
 ): Promise<BaselineSubmitResult> {
-  const legacyResult = await insertAssessmentResult(result);
+  const programCode = resolveTrackingProgramCode();
+  if (!programCode) {
+    return {
+      success: false,
+      message: 'Missing active program context.',
+    };
+  }
 
-  void recordFormalAssessmentCompletion({
+  const activeProgram = readActivePilotProgram();
+  const normalizedResult: B4BaselineCheckRecord = {
+    ...result,
+    programCode,
+    groupName: activeProgram?.groupName || result.groupName,
+  };
+
+  const trackingResult = await recordFormalAssessmentCompletion({
     assessmentType: 'baseline',
     role: 'student',
     participant: {
-      nickname: result.nickname,
-      program_code: result.programCode,
-      group_name: result.groupName,
+      nickname: normalizedResult.nickname,
+      program_code: programCode,
+      group_name: normalizedResult.groupName || undefined,
     },
-    reading_score: result.readingScore,
-    focus_score: result.focusMovesScore,
-    confidence_score: result.feelingsScore,
-    total_score: result.readingScore + result.focusMovesScore + result.feelingsScore,
+    reading_score: normalizedResult.readingScore,
+    focus_score: normalizedResult.focusMovesScore,
+    confidence_score: normalizedResult.feelingsScore,
+    total_score:
+      normalizedResult.readingScore +
+      normalizedResult.focusMovesScore +
+      normalizedResult.feelingsScore,
     max_score: 60,
     answers_json: {
-      completedModules: result.completedModules,
-      feelingsScore: result.feelingsScore,
-      readingScore: result.readingScore,
-      focusMovesScore: result.focusMovesScore,
+      completedModules: normalizedResult.completedModules,
+      feelingsScore: normalizedResult.feelingsScore,
+      readingScore: normalizedResult.readingScore,
+      focusMovesScore: normalizedResult.focusMovesScore,
     },
-    completed_at: result.completedAt,
+    completed_at: normalizedResult.completedAt,
   });
+
+  const legacyResult = await insertAssessmentResult(normalizedResult);
+
+  if (trackingResult.warning && !legacyResult.success) {
+    return {
+      success: false,
+      message: trackingResult.warning,
+    };
+  }
+
+  if (trackingResult.warning) {
+    return {
+      success: legacyResult.success,
+      message: `${legacyResult.message} ${trackingResult.warning}`.trim(),
+    };
+  }
 
   return legacyResult;
 }

@@ -10,6 +10,7 @@ export type LocalParticipantRecord = {
   first_name?: string;
   email?: string;
   role: string;
+  adult_role?: string;
   program_code: string;
   program_name?: string;
   group_name?: string;
@@ -120,7 +121,6 @@ export function findLocalStudentParticipant(input: {
 
 export function findLocalAdultParticipant(input: {
   email: string;
-  role: string;
   programCode: string;
 }): LocalParticipantRecord | null {
   const email = input.email.trim().toLowerCase();
@@ -129,7 +129,7 @@ export function findLocalAdultParticipant(input: {
   return (
     loadLocalParticipants().find(
       (row) =>
-        row.role === input.role &&
+        (row.role === 'adult' || row.role === 'facilitator' || row.role === 'parent') &&
         row.program_code.trim().toUpperCase() === programCode &&
         (row.email ?? '').trim().toLowerCase() === email,
     ) ?? null

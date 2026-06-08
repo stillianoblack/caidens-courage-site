@@ -1,10 +1,11 @@
 import { readActiveChildNickname } from '../config/activeChildNickname';
-import { resolveActiveProgramContext } from '../config/activePilotProgram';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveModuleTracking } from '../data/moduleTrackingRegistry';
 import type { GameAssessmentConfig } from '../types/gameAssessment';
 import type { GameAnswerValue } from '../types/gameAssessment';
 import type { ModuleCompletionAnswers, ModuleTrackingDefinition } from '../types/moduleTracking';
 import { loadAdultAssessmentSession } from './adultAssessmentStorage';
+import { logTrackingSaveBlocked, resolveTrackingProgramCode } from './activeProgramContext';
 import { loadB4BaselineState } from './b4BaselineCheckStorage';
 import {
   findOrCreateParticipant,
@@ -31,9 +32,10 @@ function answersToJson(answers?: Record<string, GameAnswerValue>): Record<string
   );
 }
 
-function resolveStudentParticipant(pathname?: string) {
+function resolveStudentParticipant() {
   const baselineState = loadB4BaselineState();
-  const program = resolveActiveProgramContext();
+  const program = readActivePilotProgram();
+  const programCode = resolveTrackingProgramCode();
   const nickname =
     baselineState.profile?.nickname?.trim() ||
     readActiveChildNickname()?.trim() ||
@@ -42,43 +44,43 @@ function resolveStudentParticipant(pathname?: string) {
   return {
     nickname,
     role: 'student',
-    program_code: baselineState.profile?.programCode || program?.programCode || '',
+    program_code: programCode ?? '',
     program_name: program?.programName,
-    group_name: baselineState.profile?.groupName || program?.groupName || '',
+    group_name: program?.groupName?.trim() || baselineState.profile?.groupName?.trim() || undefined,
   };
 }
 
-function resolveAdultParticipant(pathname: string) {
+function resolveAdultParticipant() {
   const session = loadAdultAssessmentSession();
-  const program = resolveActiveProgramContext();
-  const isFacilitator =
-    pathname.startsWith('/portal/facilitator') ||
-    pathname.startsWith('/program-dashboard');
-
+  const program = readActivePilotProgram();
   const profile = session.profile;
-  const role = isFacilitator ? 'facilitator' : 'parent';
+  const programCode = resolveTrackingProgramCode();
 
   return {
     first_name: profile?.firstName ?? 'Adult',
-    email: profile?.email ?? `${role}@local.focusflame`,
-    role,
-    program_code: profile?.programCode || program?.programCode || '',
+    email: profile?.email ?? '',
+    role: 'adult',
+    adult_role: profile?.role,
+    program_code: programCode ?? '',
     program_name: program?.programName,
-    group_name: program?.groupName,
     organization: profile?.organization,
     child_age_range: profile?.childAgeRange,
     email_opt_in: profile?.emailOptIn,
   };
 }
 
-async function resolveParticipantForTracking(
-  tracking: ModuleTrackingDefinition,
-  pathname: string,
-) {
+function resolveResultRole(tracking: ModuleTrackingDefinition): string {
+  return tracking.role === 'student' ? 'student' : 'adult';
+}
+
+async function resolveParticipantForTracking(tracking: ModuleTrackingDefinition) {
   const payload =
-    tracking.role === 'student'
-      ? resolveStudentParticipant(pathname)
-      : resolveAdultParticipant(pathname);
+    tracking.role === 'student' ? resolveStudentParticipant() : resolveAdultParticipant();
+
+  if (!payload.program_code) {
+    logTrackingSaveBlocked('participant save missing active program context');
+    throw new Error('Missing active program context');
+  }
 
   return findOrCreateParticipant(payload);
 }
@@ -100,18 +102,21 @@ export async function recordInteractiveModuleCompletion(
     return {};
   }
 
+  if (!resolveTrackingProgramCode()) {
+    return { warning: 'Missing active program context.' };
+  }
+
   try {
-    const { participantId } = await resolveParticipantForTracking(tracking, pathname);
+    const { participantId } = await resolveParticipantForTracking(tracking);
     const participant =
-      tracking.role === 'student'
-        ? resolveStudentParticipant(pathname)
-        : resolveAdultParticipant(pathname);
+      tracking.role === 'student' ? resolveStudentParticipant() : resolveAdultParticipant();
+    const groupName = 'group_name' in participant ? participant.group_name : undefined;
 
     const result = await saveModuleResult({
       participant_id: participantId,
-      role: tracking.role,
+      role: resolveResultRole(tracking),
       program_code: participant.program_code,
-      group_name: participant.group_name,
+      group_name: groupName,
       module_id: tracking.moduleId,
       module_title: tracking.moduleTitle,
       character: tracking.character,
@@ -122,14 +127,18 @@ export async function recordInteractiveModuleCompletion(
       answers_json: answersToJson(input.answers),
     });
 
-    if (result.source === 'local') {
-      return { warning: result.message ?? 'Saved on this device.' };
+    if (result.source === 'local' && result.message) {
+      return { warning: result.message };
+    }
+    if (!result.success && result.message) {
+      return { warning: result.message };
     }
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('TRACKING Supabase failed, local fallback used', err);
+    if (err instanceof Error && err.message === 'Missing active program context') {
+      return { warning: 'Missing active program context.' };
     }
-    return { warning: 'Saved on this device.' };
+    console.warn('[TRACKING_SAVE_FAILED] module completion', err);
+    return { warning: 'Saved on this device only.' };
   }
 
   return {};
@@ -142,6 +151,7 @@ export async function recordFormalAssessmentCompletion(input: {
     nickname?: string;
     first_name?: string;
     email?: string;
+    adult_role?: string;
     program_code?: string;
     program_name?: string;
     group_name?: string;
@@ -159,10 +169,21 @@ export async function recordFormalAssessmentCompletion(input: {
   answers_json?: ModuleCompletionAnswers;
   completed_at?: string;
 }): Promise<{ warning?: string }> {
+  const programCode = resolveTrackingProgramCode();
+  if (!programCode) {
+    return { warning: 'Missing active program context.' };
+  }
+
+  const activeProgram = readActivePilotProgram();
+
   try {
+    const participantRole = input.role === 'student' ? 'student' : 'adult';
     const { participantId } = await findOrCreateParticipant({
       ...input.participant,
-      role: input.role,
+      role: participantRole,
+      program_code: programCode,
+      program_name: activeProgram?.programName ?? input.participant.program_name,
+      group_name: activeProgram?.groupName ?? input.participant.group_name,
     });
 
     const percentScore =
@@ -172,9 +193,9 @@ export async function recordFormalAssessmentCompletion(input: {
 
     const result = await saveAssessmentResult({
       participant_id: participantId,
-      role: input.role,
-      program_code: input.participant.program_code ?? '',
-      group_name: input.participant.group_name,
+      role: participantRole,
+      program_code: programCode,
+      group_name: activeProgram?.groupName ?? input.participant.group_name,
       assessment_type: input.assessmentType,
       reading_score: input.reading_score,
       focus_score: input.focus_score,
@@ -188,14 +209,18 @@ export async function recordFormalAssessmentCompletion(input: {
       completed_at: input.completed_at,
     });
 
-    if (result.source === 'local') {
-      return { warning: result.message ?? 'Saved on this device.' };
+    if (result.source === 'local' && result.message) {
+      return { warning: result.message };
+    }
+    if (!result.success && result.message) {
+      return { warning: result.message };
     }
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('TRACKING Supabase failed, local fallback used', err);
+    if (err instanceof Error && err.message === 'Missing active program context') {
+      return { warning: 'Missing active program context.' };
     }
-    return { warning: 'Saved on this device.' };
+    console.warn('[TRACKING_SAVE_FAILED] assessment completion', err);
+    return { warning: 'Saved on this device only.' };
   }
 
   return {};

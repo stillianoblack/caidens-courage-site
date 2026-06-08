@@ -4,6 +4,9 @@ import type {
   Week0HubPersistedState,
   Week0ModuleId,
 } from '../data/week0AssessmentContent';
+import { readActiveChildNickname } from '../config/activeChildNickname';
+import { recordFormalAssessmentCompletion } from './recordInteractiveCompletion';
+import { resolveTrackingProgramCode } from './activeProgramContext';
 
 const STORAGE_KEY = 'caidens-courage-week0-assessment';
 
@@ -67,13 +70,42 @@ export function markWeek0ModuleComplete(
   return next;
 }
 
-/**
- * TODO: Persist Week 0 / Week Final results to Focus Flame Academy database when
- * student portal sync is available. Wire this from markWeek0ModuleComplete on full completion.
- */
-export async function persistWeek0ResultToDatabase(_result: Week0AssessmentResult): Promise<void> {
-  // Placeholder — no-op until backend reporting is ready.
-  return Promise.resolve();
+export async function persistWeek0ResultToDatabase(result: Week0AssessmentResult): Promise<void> {
+  const nickname = result.studentName?.trim() || readActiveChildNickname()?.trim() || 'Student';
+  const assessmentType = result.phase === 'growth' ? 'final' : 'baseline';
+  const totalScore = result.selScore + result.readingScore + result.focusStrategyScore;
+
+  const programCode = resolveTrackingProgramCode();
+  if (!programCode) {
+    console.warn('[TRACKING_SAVE_BLOCKED]', 'week0 assessment missing active program context');
+    return;
+  }
+
+  const saveResult = await recordFormalAssessmentCompletion({
+    assessmentType,
+    role: 'student',
+    participant: {
+      nickname,
+      program_code: programCode,
+    },
+    reading_score: result.readingScore,
+    focus_score: result.focusStrategyScore,
+    confidence_score: result.selScore,
+    total_score: totalScore,
+    max_score: 20,
+    answers_json: {
+      week: result.week,
+      phase: result.phase,
+      selScore: result.selScore,
+      readingScore: result.readingScore,
+      focusStrategyScore: result.focusStrategyScore,
+    },
+    completed_at: result.completedAt,
+  });
+
+  if (saveResult.warning) {
+    console.warn('[TRACKING_SAVE_FAILED]', 'week0 assessment', saveResult.warning);
+  }
 }
 
 export function isWeek0ModuleComplete(moduleId: Week0ModuleId, state = loadWeek0HubState()): boolean {

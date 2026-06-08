@@ -6,10 +6,8 @@ import SectionHero from '../components/courage/SectionHero';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import { PORTAL_PATH, PILOT_DASHBOARD_PATH } from '../config/courageRoutes';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
-import {
-  DEFAULT_GALLERY_PROGRAM_CODE,
-  uploadStudentGalleryItem,
-} from '../lib/studentGalleryService';
+import { readActivePilotProgram } from '../config/activePilotProgram';
+import { uploadStudentGalleryItem } from '../lib/studentGalleryService';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 
@@ -19,7 +17,7 @@ export default function StudentGallerySubmitPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [nickname, setNickname] = useState('');
-  const [programCode, setProgramCode] = useState(DEFAULT_GALLERY_PROGRAM_CODE);
+  const [programCode, setProgramCode] = useState(readActivePilotProgram()?.programCode?.trim() || '');
   const [groupName, setGroupName] = useState('');
   const [workTitle, setWorkTitle] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

@@ -1,3 +1,4 @@
+import { resolveGalleryProgramCode } from './activeProgramContext';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 function logGalleryDev(...args: unknown[]): void {
@@ -75,7 +76,7 @@ function safeFileName(name: string): string {
 }
 
 export function buildGalleryStoragePath(fileName: string, prefix?: string): string {
-  const folder = prefix ?? DEFAULT_GALLERY_PROGRAM_CODE;
+  const folder = prefix ?? 'gallery';
   return `${folder}/${Date.now()}-${safeFileName(fileName)}`;
 }
 
@@ -449,7 +450,10 @@ export async function uploadStudentGalleryItem(
     return { success: false, error: 'Please upload a JPG, PNG, or WEBP image.' };
   }
 
-  const programCode = input.programCode?.trim() || DEFAULT_GALLERY_PROGRAM_CODE;
+  const programCode = resolveGalleryProgramCode(input.programCode);
+  if (!programCode) {
+    return { success: false, error: 'Missing active program context.' };
+  }
   const uploadSource = input.uploadSource ?? 'submit';
   const status = initialStatusForUploadSource(uploadSource);
   const storagePrefix = programCode;

@@ -4,8 +4,8 @@ import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
 import { PILOT_STUDENT_GALLERY } from '../../../data/pilotDashboardContent';
 import { trackEvent } from '../../../lib/analytics';
 import { requestGalleryCountsRefresh } from '../../../lib/galleryNavCounts';
+import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import {
-  DEFAULT_GALLERY_PROGRAM_CODE,
   fetchFacilitatorApprovedGalleryItems,
   fetchFacilitatorPendingGalleryItems,
   updateStudentGalleryItemReview,
@@ -42,7 +42,7 @@ export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
   const [title, setTitle] = useState('');
   const [studentNickname, setStudentNickname] = useState('');
   const [programCode, setProgramCode] = useState(
-    programCodeProp?.trim() || DEFAULT_GALLERY_PROGRAM_CODE,
+    programCodeProp?.trim() || readActivePilotProgram()?.programCode?.trim() || '',
   );
   const [groupName, setGroupName] = useState(groupNameProp?.trim() || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -119,7 +119,7 @@ export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
     setTitle('');
     setStudentNickname('');
     setGroupName('');
-    setProgramCode(DEFAULT_GALLERY_PROGRAM_CODE);
+    setProgramCode(programCodeProp?.trim() || readActivePilotProgram()?.programCode?.trim() || '');
     setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';

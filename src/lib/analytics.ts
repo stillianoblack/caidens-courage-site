@@ -180,7 +180,6 @@ export function resolveCurrentParticipantForAnalytics(): AnalyticsUserData | nul
     const adultRole = portalRole === 'family' ? 'parent' : 'facilitator';
     const adult = findLocalAdultParticipant({
       email: adultSession.email,
-      role: adultRole,
       programCode,
     });
     if (adult) {

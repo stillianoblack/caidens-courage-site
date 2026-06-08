@@ -251,6 +251,41 @@ function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: str
   });
 }
 
+export type AdminPilotProgramsLoad = {
+  programs: PilotProgramRecord[];
+  error?: string;
+};
+
+/** Admin-only listing — Supabase only, no local/demo fallback. */
+export async function fetchAllPilotProgramsForAdmin(): Promise<AdminPilotProgramsLoad> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { programs: [], error: 'Supabase is not configured. Admin pilot data is unavailable.' };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('pilot_programs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('[pilot_programs] admin list failed:', error.message);
+      return {
+        programs: [],
+        error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
+      };
+    }
+
+    return { programs: (data ?? []) as PilotProgramRecord[] };
+  } catch (err) {
+    console.warn('[pilot_programs] admin list error:', err);
+    return {
+      programs: [],
+      error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
+    };
+  }
+}
+
 export async function submitPilotProgramSignup(
   input: PilotProgramSignupInput,
 ): Promise<PilotProgramSignupResult> {

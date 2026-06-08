@@ -25,6 +25,7 @@ export const CAMPS_PATH = '/camps';
 export const SCHOOLS_PATH = '/schools';
 
 export const PORTAL_PATH = '/portal';
+export const ADMIN_PORTAL_PATH = '/admin';
 
 export const FAMILY_PORTAL_PATH = '/portal/family';
 export const FAMILY_HUB_PATH = '/family-hub';

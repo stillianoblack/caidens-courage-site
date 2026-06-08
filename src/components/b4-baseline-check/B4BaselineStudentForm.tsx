@@ -67,7 +67,7 @@ export default function B4BaselineStudentForm({
           autoComplete="off"
           maxLength={48}
           placeholder="FFA-PILOT-2026"
-          readOnly={familyPortal && Boolean(initialProgramCode)}
+          readOnly={Boolean(initialProgramCode)}
         />
       </label>
 

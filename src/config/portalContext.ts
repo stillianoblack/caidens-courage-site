@@ -5,6 +5,7 @@ import {
   writeActivePilotProgram,
 } from './activePilotProgram';
 import { clearBlueRibbonUnlock } from './blueRibbonPortalAccess';
+import { syncPortalProgramContext } from '../lib/activeProgramContext';
 import { writeFamilyPortalSession, clearFamilyPortalSession } from './familyPortalAccess';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 
@@ -125,6 +126,7 @@ export function applyProgramPortalUnlock(
 ): void {
   clearStalePortalRouteState();
   writeActivePilotProgram(program);
+  syncPortalProgramContext(program);
   writeActivePortalRole(role);
   writeActiveAccessCode(accessCode);
 

@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
-import { resolveActiveProgramContext } from '../../../config/activePilotProgram';
+import { readActivePilotProgram, resolveActiveProgramContext } from '../../../config/activePilotProgram';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import {
-  DEFAULT_GALLERY_PROGRAM_CODE,
   fetchApprovedStudentGalleryItems,
   fetchFamilyGallerySubmissions,
   isAllowedGalleryImageType,
@@ -20,7 +19,7 @@ export default function FamilyGalleryPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const submitterKey = useMemo(() => getFamilyGallerySubmitterKey(), []);
   const programContext = useMemo(() => resolveActiveProgramContext(), []);
-  const programCode = programContext?.programCode ?? DEFAULT_GALLERY_PROGRAM_CODE;
+  const programCode = readActivePilotProgram()?.programCode ?? programContext?.programCode ?? '';
   const groupName = programContext?.groupName ?? '';
 
   const [studentName, setStudentName] = useState('');
