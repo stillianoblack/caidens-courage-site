@@ -332,8 +332,8 @@ export default function GameAssessmentFlow({
 
       setScore(finalScore);
       playModuleWin();
-      if (adultGuideId && adultMissionId) {
-        markAdultTrainingMissionComplete(adultGuideId, adultMissionId);
+      if (isTraining) {
+        markAdultTrainingMissionComplete(adultGuideId!, adultMissionId!);
         trackEvent('training_module_completed', {
           module_id: adultMissionId,
           module_title: config.landing.title,

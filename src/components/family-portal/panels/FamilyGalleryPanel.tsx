@@ -41,7 +41,8 @@ export default function FamilyGalleryPanel() {
 
   useEffect(() => {
     trackEvent('gallery_viewed');
-  }, []);
+    markGalleryViewed(programCode);
+  }, [programCode]);
 
   const refreshGallery = useCallback(async () => {
     setLoading(true);
