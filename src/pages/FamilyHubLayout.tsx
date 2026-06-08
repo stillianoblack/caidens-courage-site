@@ -18,6 +18,7 @@ import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyP
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import FamilyPortalOutlet from '../components/family-portal/FamilyPortalOutlet';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { logPortalRedirect } from '../lib/portalDebug';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -35,9 +36,10 @@ export default function FamilyHubLayout() {
 
   useEffect(() => {
     if (!activeProgram || readActivePortalRole() !== 'family' || !hasSession) {
+      logPortalRedirect(location.pathname, PORTAL_PATH, 'family-hub-gate-failed');
       navigate(PORTAL_PATH, { replace: true, state: { redirect: FAMILY_HUB_PATH } });
     }
-  }, [activeProgram, hasSession, navigate]);
+  }, [activeProgram, hasSession, location.pathname, navigate]);
 
   if (!activeProgram || !hasSession) {
     return null;

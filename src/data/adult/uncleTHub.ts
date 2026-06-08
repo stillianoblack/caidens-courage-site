@@ -1,7 +1,7 @@
 import {
   FACILITATOR_PORTAL_PATH,
   FACILITATOR_UNCLE_T_MISSION_BASE,
-  FAMILY_PORTAL_PATH,
+  FAMILY_HUB_PATH,
   FAMILY_UNCLE_T_MISSION_BASE,
 } from '../../config/courageRoutes';
 import type { AdultGuide } from '../../types/adultTraining';
@@ -32,7 +32,7 @@ export const UNCLE_T_COACHING_HUB: AdultGuide = {
     facilitatorHub: FACILITATOR_UNCLE_T_MISSION_BASE,
     familyHub: FAMILY_UNCLE_T_MISSION_BASE,
     facilitatorSection: `${FACILITATOR_PORTAL_PATH}#facilitator-center`,
-    familySection: `${FAMILY_PORTAL_PATH}/guide`,
+    familySection: `${FAMILY_HUB_PATH}/guide`,
   },
   missions: [
     {

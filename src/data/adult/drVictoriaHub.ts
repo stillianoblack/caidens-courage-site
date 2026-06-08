@@ -1,8 +1,8 @@
 import {
   FACILITATOR_DR_VICTORIA_MISSION_BASE,
   FACILITATOR_PORTAL_PATH,
+  FAMILY_HUB_PATH,
   FAMILY_DR_VICTORIA_MISSION_BASE,
-  FAMILY_PORTAL_PATH,
 } from '../../config/courageRoutes';
 import type { AdultGuide } from '../../types/adultTraining';
 import { DR_VICTORIA_GUIDE_SRC } from './sharedAssets';
@@ -33,7 +33,7 @@ export const DR_VICTORIA_LEARNING_HUB: AdultGuide = {
     facilitatorHub: FACILITATOR_DR_VICTORIA_MISSION_BASE,
     familyHub: FAMILY_DR_VICTORIA_MISSION_BASE,
     facilitatorSection: `${FACILITATOR_PORTAL_PATH}#facilitator-center`,
-    familySection: `${FAMILY_PORTAL_PATH}/guide`,
+    familySection: `${FAMILY_HUB_PATH}/guide`,
   },
   missions: [
     {

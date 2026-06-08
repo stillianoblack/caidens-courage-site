@@ -18,6 +18,7 @@ import {
 } from '../config/portalAccess';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
 import { looksLikeProgramAccessCode, PORTAL_DB_UNAVAILABLE_MESSAGE } from '../lib/portalAccessCodes';
+import { logPortalRedirect } from '../lib/portalDebug';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
@@ -61,6 +62,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       if (BASELINE_RESULTS_CODES.has(normalizedCode)) {
         setAccessCode('');
         onUnlock?.();
+        logPortalRedirect('/portal', B4_RESULTS_ADMIN_PATH, 'baseline-results-code');
         navigate(B4_RESULTS_ADMIN_PATH);
         return;
       }
@@ -70,6 +72,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         writeBlueRibbonUnlock();
         setAccessCode('');
         onUnlock?.();
+        logPortalRedirect('/portal', BLUE_RIBBON_PILOT_PATH, 'blueribbon-pilot-code');
         navigate(BLUE_RIBBON_PILOT_PATH);
         return;
       }
@@ -79,6 +82,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         writeBlueRibbonUnlock();
         setAccessCode('');
         onUnlock?.();
+        logPortalRedirect('/portal', FAMILY_PORTAL_PATH, 'blueribbon-family-code');
         navigate(FAMILY_PORTAL_PATH);
         return;
       }
@@ -104,7 +108,9 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
           writeLastPilotProgram(program, role, program.adminEmail);
           setAccessCode('');
           onUnlock?.();
-          navigate(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+          const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
+          logPortalRedirect('/portal', destination, `program-code-${role}`);
+          navigate(destination, { replace: true });
           return;
         }
 
@@ -121,7 +127,9 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       writePortalSessionUnlock(tier.type);
       setAccessCode('');
       onUnlock?.();
-      navigate(getDashboardPathForTier(tier));
+      const destination = getDashboardPathForTier(tier);
+      logPortalRedirect('/portal', destination, `tier-code-${tier.type}`);
+      navigate(destination);
     },
     [accessCode, navigate, onUnlock, variant],
   );

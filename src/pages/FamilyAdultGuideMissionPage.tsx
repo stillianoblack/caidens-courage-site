@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
 import { getAdultGuideById, getAdultGuideMissionById } from '../data/adult/adultGuideRegistry';
-import { FAMILY_PORTAL_PATH } from '../config/courageRoutes';
+import { FAMILY_HUB_PATH } from '../config/courageRoutes';
 
 export default function FamilyAdultGuideMissionPage() {
   const { guideId, missionId } = useParams<{ guideId: string; missionId: string }>();
@@ -10,7 +10,7 @@ export default function FamilyAdultGuideMissionPage() {
   const mission = getAdultGuideMissionById(guideId, missionId);
 
   if (!guide || !mission) {
-    return <Navigate to={guide?.routes.familyHub ?? `${FAMILY_PORTAL_PATH}/guide`} replace />;
+    return <Navigate to={guide?.routes.familyHub ?? `${FAMILY_HUB_PATH}/guide`} replace />;
   }
 
   const useVictoriaHeader = guide.theme.id === 'victoria';
@@ -27,7 +27,7 @@ export default function FamilyAdultGuideMissionPage() {
       useVictoriaHeader={useVictoriaHeader}
       useUncleTHeader={useUncleTHeader}
       embedded
-      familyPortalPath={FAMILY_PORTAL_PATH}
+      familyPortalPath={FAMILY_HUB_PATH}
       portalSectionPath={guide.routes.familySection}
       portalSectionLabel="Return to Parent Corner"
       adultHubContinueLabel={hubContinueLabel}

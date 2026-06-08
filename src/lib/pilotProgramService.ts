@@ -8,6 +8,7 @@ import type {
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
+import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type PilotProgramLookupResult = {
@@ -70,23 +71,29 @@ export async function lookupPilotProgramByAccessCodeDetailed(
       .limit(5);
 
     if (error || !data?.length) {
-      return { status: 'not_found', result: null };
+      const response = { status: 'not_found' as const, result: null };
+      logProgramCodeLookup(rawCode, response);
+      return response;
     }
 
     for (const row of data as PilotProgramRecord[]) {
       const role = resolveRoleFromCode(row, normalized);
       if (role) {
-        return {
-          status: 'found',
+        const response = {
+          status: 'found' as const,
           result: { role, program: recordToActivePilotProgram(row) },
         };
+        logProgramCodeLookup(rawCode, response);
+        return response;
       }
     }
   } catch (err) {
     console.warn('[pilot_programs] lookup error:', err);
   }
 
-  return { status: 'not_found', result: null };
+  const response = { status: 'not_found' as const, result: null };
+  logProgramCodeLookup(rawCode, response);
+  return response;
 }
 
 export type PilotProgramRecoveryResult = {

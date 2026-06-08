@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import AdultLearningHub from '../components/adult-learning/AdultLearningHub';
 import '../components/adult-learning/adult-learning-hub.css';
-import { FAMILY_PORTAL_PATH } from '../config/courageRoutes';
+import { FAMILY_HUB_PATH } from '../config/courageRoutes';
 import { getAdultGuideById } from '../data/adult/adultGuideRegistry';
 
 export default function FamilyAdultGuideHubPage() {
@@ -10,7 +10,7 @@ export default function FamilyAdultGuideHubPage() {
   const guide = getAdultGuideById(guideId);
 
   if (!guide) {
-    return <Navigate to={`${FAMILY_PORTAL_PATH}/guide`} replace />;
+    return <Navigate to={`${FAMILY_HUB_PATH}/guide`} replace />;
   }
 
   return (

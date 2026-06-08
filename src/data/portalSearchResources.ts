@@ -2,9 +2,9 @@ import {
   B4_BASELINE_CHECK_PATH,
   CAIDEN_QUEST_HUB_PATH,
   FACILITATOR_B4_RESULTS_PATH,
-  FACILITATOR_PORTAL_PATH,
-  FAMILY_PORTAL_PATH,
+  FAMILY_HUB_PATH,
   KIDS_PORTAL_PATH,
+  PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
 
 export type PortalSearchPortal = 'family' | 'facilitator';
@@ -22,7 +22,8 @@ export type PortalSearchResource = {
 };
 
 function facilitatorHash(section: string): string {
-  return `${FACILITATOR_PORTAL_PATH}#${section}`;
+  // Keep facilitator navigation inside the canonical facilitator route.
+  return `${PROGRAM_DASHBOARD_PATH}#${section}`;
 }
 
 export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
@@ -32,7 +33,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Family dashboard with progress and next steps',
     category: 'Navigation',
     tags: ['home', 'dashboard', 'family'],
-    href: FAMILY_PORTAL_PATH,
+    href: FAMILY_HUB_PATH,
   },
   {
     id: 'family-continue',
@@ -40,7 +41,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Pick up where your learner left off',
     category: 'Navigation',
     tags: ['learning', 'progress', 'family'],
-    href: `${FAMILY_PORTAL_PATH}/continue-learning`,
+    href: `${FAMILY_HUB_PATH}/continue-learning`,
   },
   {
     id: 'family-characters',
@@ -48,7 +49,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Meet Caiden, Miranda, B-4, and more brave guides',
     category: 'Navigation',
     tags: ['characters', 'hub', 'family'],
-    href: `${FAMILY_PORTAL_PATH}/characters`,
+    href: `${FAMILY_HUB_PATH}/characters`,
   },
   {
     id: 'family-games',
@@ -56,7 +57,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Interactive story games and focus missions',
     category: 'Character Hub',
     tags: ['games', 'play', 'activities', 'characters'],
-    href: `${FAMILY_PORTAL_PATH}/characters`,
+    href: `${FAMILY_HUB_PATH}/characters`,
   },
   {
     id: 'family-downloads',
@@ -64,7 +65,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Coloring pages, worksheets, and printable activities',
     category: 'Downloads',
     tags: ['downloads', 'print', 'resources'],
-    href: `${FAMILY_PORTAL_PATH}/downloads`,
+    href: `${FAMILY_HUB_PATH}/downloads`,
   },
   {
     id: 'family-gallery',
@@ -72,7 +73,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Share and view approved student artwork',
     category: 'Gallery',
     tags: ['gallery', 'upload', 'artwork', 'student'],
-    href: `${FAMILY_PORTAL_PATH}/gallery`,
+    href: `${FAMILY_HUB_PATH}/gallery`,
   },
   {
     id: 'family-certificates',
@@ -80,7 +81,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Printable courage and completion certificates',
     category: 'Downloads',
     tags: ['certificates', 'celebrate', 'print'],
-    href: `${FAMILY_PORTAL_PATH}/certificates`,
+    href: `${FAMILY_HUB_PATH}/certificates`,
   },
   {
     id: 'family-guide',
@@ -88,7 +89,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Adult learning activities and discussion tools for supporting kids at home',
     category: 'Parent Corner',
     tags: ['guide', 'parents', 'family', 'instructions', 'parent corner', 'training'],
-    href: `${FAMILY_PORTAL_PATH}/guide`,
+    href: `${FAMILY_HUB_PATH}/guide`,
   },
   {
     id: 'family-dr-victoria-hub',
@@ -96,7 +97,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Parent training missions for understanding, support, and focus-friendly environments',
     category: 'Parent Corner',
     tags: ['dr victoria', 'training', 'parents', 'hub', 'adult', 'learning track'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/dr-victoria`,
+    href: `${FAMILY_HUB_PATH}/guide/dr-victoria`,
   },
   {
     id: 'family-dr-victoria-m1',
@@ -104,7 +105,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Parent training on seeing behavior as communication',
     category: 'Parent Corner',
     tags: ['dr victoria', 'training', 'parents', 'behavior', 'adult', 'mission 1'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/dr-victoria/mission-1`,
+    href: `${FAMILY_HUB_PATH}/guide/dr-victoria/mission-1`,
   },
   {
     id: 'family-dr-victoria-m2',
@@ -112,7 +113,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Parent training on calm, helpful responses for overwhelmed or stuck kids',
     category: 'Parent Corner',
     tags: ['dr victoria', 'training', 'parents', 'support', 'adult', 'mission 2'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/dr-victoria/mission-2`,
+    href: `${FAMILY_HUB_PATH}/guide/dr-victoria/mission-2`,
   },
   {
     id: 'family-dr-victoria-m3',
@@ -120,7 +121,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Parent training on routines, spaces, and systems that support focus',
     category: 'Parent Corner',
     tags: ['dr victoria', 'training', 'parents', 'focus', 'adult', 'mission 3'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/dr-victoria/mission-3`,
+    href: `${FAMILY_HUB_PATH}/guide/dr-victoria/mission-3`,
   },
   {
     id: 'family-dr-victoria-m4',
@@ -128,7 +129,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Parent training on supporting frustration, anxiety, shutdown, and emotional overwhelm',
     category: 'Parent Corner',
     tags: ['dr victoria', 'training', 'parents', 'emotions', 'adult', 'mission 4'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/dr-victoria/mission-4`,
+    href: `${FAMILY_HUB_PATH}/guide/dr-victoria/mission-4`,
   },
   {
     id: 'family-uncle-t-hub',
@@ -136,7 +137,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Short coaching lessons for encouraging kids through everyday challenges',
     category: 'Parent Corner',
     tags: ['uncle t', 'coaching', 'parents', 'hub', 'adult', 'training'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/uncle-t`,
+    href: `${FAMILY_HUB_PATH}/guide/uncle-t`,
   },
   {
     id: 'family-uncle-t-m1',
@@ -144,7 +145,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Practice what to say when kids mess up, shut down, or feel embarrassed',
     category: 'Parent Corner',
     tags: ['uncle t', 'coaching', 'parents', 'mistakes', 'adult', 'mission 1'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/uncle-t/mission-1`,
+    href: `${FAMILY_HUB_PATH}/guide/uncle-t/mission-1`,
   },
   {
     id: 'family-uncle-t-m2',
@@ -152,7 +153,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Practice helping kids believe they can try, improve, and keep going',
     category: 'Parent Corner',
     tags: ['uncle t', 'coaching', 'parents', 'confidence', 'adult', 'mission 2'],
-    href: `${FAMILY_PORTAL_PATH}/parent-corner/uncle-t/mission-2`,
+    href: `${FAMILY_HUB_PATH}/guide/uncle-t/mission-2`,
   },
   {
     id: 'family-caiden',
@@ -196,7 +197,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Print and color brave characters and story scenes',
     category: 'Downloads',
     tags: ['coloring', 'print', 'art', 'downloads'],
-    href: `${FAMILY_PORTAL_PATH}/downloads`,
+    href: `${FAMILY_HUB_PATH}/downloads`,
   },
   {
     id: 'family-printable',
@@ -204,7 +205,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Hands-on worksheets and creative activities for families',
     category: 'Downloads',
     tags: ['printable', 'worksheet', 'activities', 'downloads'],
-    href: `${FAMILY_PORTAL_PATH}/downloads`,
+    href: `${FAMILY_HUB_PATH}/downloads`,
   },
   {
     id: 'family-sel-worksheet',
@@ -213,7 +214,7 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     category: 'Downloads',
     tags: ['worksheet', 'sel', 'b-4', 'b4', 'printable', 'scan'],
     character: 'B-4',
-    href: `${FAMILY_PORTAL_PATH}/downloads`,
+    href: `${FAMILY_HUB_PATH}/downloads`,
   },
 ];
 

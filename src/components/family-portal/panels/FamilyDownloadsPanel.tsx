@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FAMILY_PORTAL_PATH } from '../../../config/courageRoutes';
+import { FAMILY_HUB_PATH } from '../../../config/courageRoutes';
 import {
   PORTAL_COLORING_PAGES,
   PORTAL_PRINTABLE_ACTIVITIES,
@@ -110,7 +110,7 @@ export default function FamilyDownloadsPanel() {
       <section className="family-downloadSection">
         <h2 className="family-panelBlockTitle">More Resources</h2>
         <div className="family-dash-grid family-dash-grid--2">
-          <Link to={`${FAMILY_PORTAL_PATH}/guide`} className="family-dash-card">
+          <Link to={`${FAMILY_HUB_PATH}/guide`} className="family-dash-card">
             <h3 className="family-dash-cardTitle">Parent Corner</h3>
             <p className="family-dash-cardDesc">
               Discussion prompts and activity instructions for home learning.
@@ -120,7 +120,7 @@ export default function FamilyDownloadsPanel() {
               <span className="family-dash-cta">Open Guide</span>
             </div>
           </Link>
-          <Link to={`${FAMILY_PORTAL_PATH}/certificates`} className="family-dash-card">
+          <Link to={`${FAMILY_HUB_PATH}/certificates`} className="family-dash-card">
             <h3 className="family-dash-cardTitle">Certificates</h3>
             <p className="family-dash-cardDesc">
               Celebrate progress with printable courage certificates.

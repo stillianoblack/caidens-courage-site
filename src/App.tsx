@@ -42,6 +42,7 @@ import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
 import ScrollToTop from './components/ScrollToTop';
+import PortalDebugTracker from './components/PortalDebugTracker';
 import {
   AdultAssessmentPage,
   B4BaselineCheckPage,
@@ -90,6 +91,7 @@ import {
   FamilyAdultGuideHubPage,
   FamilyAdultGuideMissionPage,
 } from './routes/familyLazyPanels';
+import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
 import {
   BMC_ACTIVITIES_PATH,
   BMC_COLORING_PATH,
@@ -176,7 +178,7 @@ const AppRoutes: React.FC = () => {
         path={`${FACILITATOR_ADULT_TRAINING_PATH}/:guideId/:missionId`}
         element={<FacilitatorAdultGuideMissionPage />}
       />
-      <Route path={FACILITATOR_PORTAL_PATH} element={<PilotDashboardPage />} />
+      <Route path={FACILITATOR_PORTAL_PATH} element={<FacilitatorPortalEntry />} />
       <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
       <Route
         path={FACILITATOR_B4_BASELINE_RESULTS_PATH}
@@ -399,6 +401,7 @@ const AppFrame: React.FC = () => {
   return (
     <>
       <ScrollToTop />
+      <PortalDebugTracker />
       <AnalyticsRouteTracker />
       <Suspense fallback={<NavigationLoader />}>
         <AppRoutes />

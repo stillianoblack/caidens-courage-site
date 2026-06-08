@@ -385,7 +385,7 @@ export const FAMILY_DOWNLOADS: FamilyDownloadCard[] = [
     title: 'Parent Corner',
     description: 'Adult learning activities and discussion tools for supporting kids at home.',
     cta: 'Open Parent Corner',
-    href: `${FAMILY_PORTAL_PATH}/guide`,
+    href: `${FAMILY_HUB_PATH}/guide`,
   },
   {
     title: 'Coloring Pages',
@@ -397,14 +397,14 @@ export const FAMILY_DOWNLOADS: FamilyDownloadCard[] = [
     title: 'Printable Activities',
     description: 'Hands-on worksheets and creative activities for families.',
     cta: 'Browse Activities',
-    href: `${FAMILY_PORTAL_PATH}/downloads`,
+    href: `${FAMILY_HUB_PATH}/downloads`,
     comingSoon: true,
   },
   {
     title: 'Certificates',
     description: 'Celebrate progress with printable courage certificates.',
     cta: 'View Certificates',
-    href: `${FAMILY_PORTAL_PATH}/certificates`,
+    href: `${FAMILY_HUB_PATH}/certificates`,
   },
 ];
 
