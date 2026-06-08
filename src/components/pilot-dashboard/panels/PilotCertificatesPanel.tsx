@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PILOT_CERTIFICATES } from '../../../data/pilotDashboardContent';
+import { trackDownload, trackEvent } from '../../../lib/analytics';
 
 export default function PilotCertificatesPanel() {
+  useEffect(() => {
+    trackEvent('certificate_viewed');
+  }, []);
+
   return (
     <div className="pilot-panel">
       <p className="pilot-panelIntro">Download printable celebration templates for students and facilitators.</p>
@@ -13,6 +18,7 @@ export default function PilotCertificatesPanel() {
             className="pilot-dash-card"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackDownload('certificate_downloaded', cert.title, 'certificate')}
           >
             <h3 className="pilot-dash-cardTitle">{cert.title}</h3>
             <p className="pilot-dash-cardDesc">Download a printable template for your pilot celebration.</p>

@@ -65,7 +65,7 @@ export default function KidsCharacterPage({ character }: KidsCharacterPageProps)
 
   return (
     <main className="family-kidsHub">
-      <PortalSmartBackButton variant="inline" />
+      <PortalSmartBackButton />
       <h1 className="family-kidsHubTitle">{content.title}</h1>
       <p className="family-kidsHubIntro">{content.description}</p>
       {content.comingSoon ? (

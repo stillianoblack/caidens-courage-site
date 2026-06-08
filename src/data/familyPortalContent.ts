@@ -1,12 +1,18 @@
 import {
   BMC_COLORING_PATH,
-  FAMILY_DR_VICTORIA_MISSION_1_PATH,
+  FAMILY_DR_VICTORIA_MISSION_BASE,
+  FAMILY_HUB_PATH,
   FAMILY_PORTAL_PATH,
   KIDS_PORTAL_PATH,
-  CAIDEN_QUEST_HUB_PATH,
 } from '../config/courageRoutes';
-import { DR_VICTORIA_GUIDE_SRC } from './adult/sharedAssets';
+import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from './adult/sharedAssets';
+import { FAMILY_UNCLE_T_MISSION_BASE } from '../config/courageRoutes';
 import type { AdultTrainingCard } from './pilotDashboardContent';
+import { countAvailableCharlieMissions } from './charlie';
+import { CAIDEN_QUEST_RANK } from './caiden/missionBoardData';
+import { B4_PORTAL_MISSIONS } from './b4/portalAssets';
+import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
+import type { CharacterProfileId } from './characterProfiles';
 
 export const FAMILY_PORTAL_BRAND = 'Family Portal';
 export const FAMILY_PORTAL_SUBBRAND = 'FOCUS FLAME ACADEMY';
@@ -16,51 +22,82 @@ export const FAMILY_PORTAL_TITLE = 'Family Portal';
 export type FamilySidebarNavId =
   | 'overview'
   | 'continue-learning'
-  | 'characters'
-  | 'games'
+  | 'character-hub'
   | 'downloads'
   | 'gallery'
   | 'certificates'
   | 'guide';
 
-export const FAMILY_SIDEBAR_NAV: Array<{
+export type FamilySidebarNavItem = {
   id: FamilySidebarNavId;
   label: string;
   path: string;
   icon: FamilySidebarNavId;
-}> = [
-  { id: 'overview', label: 'Overview', path: FAMILY_PORTAL_PATH, icon: 'overview' },
-  {
-    id: 'continue-learning',
-    label: 'Continue Learning',
-    path: `${FAMILY_PORTAL_PATH}/continue-learning`,
-    icon: 'continue-learning',
-  },
-  {
-    id: 'characters',
-    label: 'Character Hub',
-    path: `${FAMILY_PORTAL_PATH}/characters`,
-    icon: 'characters',
-  },
-  { id: 'games', label: 'Game Hub', path: `${FAMILY_PORTAL_PATH}/games`, icon: 'games' },
-  { id: 'downloads', label: 'Downloads', path: `${FAMILY_PORTAL_PATH}/downloads`, icon: 'downloads' },
-  { id: 'gallery', label: 'Gallery', path: `${FAMILY_PORTAL_PATH}/gallery`, icon: 'gallery' },
-  {
-    id: 'certificates',
-    label: 'Certificates',
-    path: `${FAMILY_PORTAL_PATH}/certificates`,
-    icon: 'certificates',
-  },
-  { id: 'guide', label: 'Parent Corner', path: `${FAMILY_PORTAL_PATH}/guide`, icon: 'guide' },
-];
+};
+
+function buildFamilySidebarNav(basePath: string): FamilySidebarNavItem[] {
+  return [
+    { id: 'overview', label: 'Home', path: basePath, icon: 'overview' },
+    {
+      id: 'continue-learning',
+      label: 'Weekly Adventures',
+      path: `${basePath}/continue-learning`,
+      icon: 'continue-learning',
+    },
+    {
+      id: 'character-hub',
+      label: 'Character Hub',
+      path: `${basePath}/characters`,
+      icon: 'character-hub',
+    },
+    { id: 'downloads', label: 'Downloads', path: `${basePath}/downloads`, icon: 'downloads' },
+    { id: 'guide', label: 'Parent Corner', path: `${basePath}/guide`, icon: 'guide' },
+    { id: 'gallery', label: 'Gallery', path: `${basePath}/gallery`, icon: 'gallery' },
+    {
+      id: 'certificates',
+      label: 'Certificates',
+      path: `${basePath}/certificates`,
+      icon: 'certificates',
+    },
+  ];
+}
+
+/** Blue Ribbon backup family portal navigation. */
+export const FAMILY_SIDEBAR_NAV = buildFamilySidebarNav(FAMILY_PORTAL_PATH);
+
+/** Program family hub navigation (/family-hub). */
+export const PROGRAM_FAMILY_SIDEBAR_NAV = buildFamilySidebarNav(FAMILY_HUB_PATH);
+
+export function resolveFamilyPortalBrand(isProgramHub: boolean): { title: string; subtitle: string } {
+  const program = readActivePilotProgram();
+  if (program?.programName) {
+    return {
+      title: program.programName,
+      subtitle: 'Focus Flame Academy',
+    };
+  }
+  if (isProgramHub) {
+    return resolveProgramDashboardBrand(null);
+  }
+  return {
+    title: FAMILY_PORTAL_BRAND,
+    subtitle: FAMILY_PORTAL_SUBBRAND,
+  };
+}
 
 export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> = {
   guide: 'Guides, discussion tools, and adult learning activities for supporting kids at home.',
 };
 
-export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = Object.fromEntries(
-  FAMILY_SIDEBAR_NAV.map((item) => [item.id, item.label]),
-) as Record<FamilySidebarNavId, string>;
+export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
+  overview: 'Home',
+  'continue-learning': 'Weekly Adventures',
+  'character-hub': 'Character Hub',
+  downloads: 'Downloads',
+  gallery: 'Gallery',
+  certificates: 'Certificates',
+  guide: 'Parent Corner',
+};
 
 export const FAMILY_OVERVIEW_KPIS = [
   { label: 'Current Week', value: 'Week 1' },
@@ -97,14 +134,30 @@ export const FAMILY_PARENT_CORNER_INTRO = {
 
 export const FAMILY_PARENT_CORNER_CARDS: AdultTrainingCard[] = [
   {
-    title: "Dr. Victoria\u2019s Understanding Different Minds",
-    mission: 'Looking Beyond the Behavior',
+    title: 'Dr. Victoria Learning Hub',
+    mission: 'Adult Learning Track',
+    description:
+      'Short parent-friendly training missions for supporting focus, feelings, and different learning needs at home.',
     audience: 'Parents, Teachers, Counselors, Camp Staff',
-    badge: 'Understanding Guide Badge',
-    cta: 'Start Parent Training',
-    href: FAMILY_DR_VICTORIA_MISSION_1_PATH,
+    badge: '5 Missions Available',
+    cta: 'Open Parent Training',
+    href: FAMILY_DR_VICTORIA_MISSION_BASE,
     imageSrc: DR_VICTORIA_GUIDE_SRC,
     available: true,
+    theme: 'victoria',
+  },
+  {
+    title: 'Uncle T Coaching Hub',
+    mission: 'Adult Learning Track',
+    description:
+      'Short coaching lessons for encouraging kids through everyday challenges.',
+    audience: 'Parents, Teachers, Counselors, Camp Staff',
+    badge: '3 Missions Available',
+    cta: 'Open Coaching Hub',
+    href: FAMILY_UNCLE_T_MISSION_BASE,
+    imageSrc: UNCLE_T_GUIDE_SRC,
+    available: true,
+    theme: 'uncle-t',
   },
 ];
 
@@ -112,56 +165,19 @@ export const FAMILY_NEXT_STEP = {
   headline: "Start with Caiden's Focus Flame Journey",
   body: "Begin with Caiden's story, then explore Miranda's Mystery Files and B-4's focus activities.",
   cta: 'Continue Learning',
-  href: CAIDEN_QUEST_HUB_PATH,
+  hrefPath: '/caiden',
 };
 
-export type FamilyCharacterId = 'caiden' | 'miranda' | 'b4' | 'zeke';
+export type FamilyCharacterId = CharacterProfileId;
 
 export const CHARACTER_IMAGE_PATHS: Record<FamilyCharacterId, string | null> = {
   caiden: '/images/characters/caiden_photo_icon_game.webp',
   miranda: '/images/characters/miranda_photo_icon_game.webp',
   b4: '/images/characters/b-4_photo_icon_game.webp',
+  charlie: '/images/characters/charlieperk_photo_icon_game.webp',
   zeke: null,
-};
-
-export const FAMILY_VALUE_CARDS = [
-  {
-    id: 'caiden-journey',
-    characterId: 'caiden' as const,
-    title: 'Help Caiden Build Focus',
-    body: 'Practice planning, prioritizing, and bringing attention back.',
-    imageSrc: CHARACTER_IMAGE_PATHS.caiden!,
-    cta: "Start Caiden's Journey",
-    href: CAIDEN_QUEST_HUB_PATH,
-  },
-  {
-    id: 'miranda-reading',
-    characterId: 'miranda' as const,
-    title: 'Practice Reading with Miranda',
-    body: 'Solve mysteries while building vocabulary, comprehension, and inference skills.',
-    imageSrc: CHARACTER_IMAGE_PATHS.miranda!,
-    cta: 'Open Mystery Files',
-    href: `${KIDS_PORTAL_PATH}/miranda`,
-  },
-  {
-    id: 'b4-checkin',
-    characterId: 'b4' as const,
-    title: 'Check In with B-4',
-    body: 'Explore feelings, focus moves, and brave choices with B-4.',
-    imageSrc: CHARACTER_IMAGE_PATHS.b4!,
-    cta: 'Start B-4 Check-In',
-    href: `${KIDS_PORTAL_PATH}/b4/check-in`,
-  },
-] as const;
-
-export const CHARACTER_ASSETS: Record<
-  FamilyCharacterId,
-  { imageSrc: string | null; theme: FamilyCharacterId }
-> = {
-  caiden: { imageSrc: CHARACTER_IMAGE_PATHS.caiden, theme: 'caiden' },
-  miranda: { imageSrc: CHARACTER_IMAGE_PATHS.miranda, theme: 'miranda' },
-  b4: { imageSrc: CHARACTER_IMAGE_PATHS.b4, theme: 'b4' },
-  zeke: { imageSrc: null, theme: 'zeke' },
+  'dr-victoria': DR_VICTORIA_GUIDE_SRC,
+  'uncle-t': UNCLE_T_GUIDE_SRC,
 };
 
 export type FamilyCharacterCard = {
@@ -172,85 +188,201 @@ export type FamilyCharacterCard = {
   statusTone: 'available' | 'locked' | 'complete' | 'review';
   cta: string;
   href: string;
+  skillTags: string;
 };
 
-export const FAMILY_CHARACTERS: FamilyCharacterCard[] = [
-  {
-    id: 'caiden',
-    title: "Caiden's Focus Flame Journey",
-    description: 'Follow Caiden\'s story and discover how focus becomes power.',
-    status: 'Main Character',
-    statusTone: 'complete',
-    cta: 'Start Journey',
-    href: CAIDEN_QUEST_HUB_PATH,
-  },
-  {
-    id: 'miranda',
-    title: "Miranda's Mystery Files",
-    description: 'Read clues, solve mysteries, and build vocabulary and comprehension skills.',
-    status: '5 Cases Available',
-    statusTone: 'available',
-    cta: 'Open Mystery Files',
-    href: `${KIDS_PORTAL_PATH}/miranda`,
-  },
-  {
-    id: 'b4',
-    title: 'B-4 Focus Missions',
-    description: 'Practice focus moves, feelings check-ins, and brave choices.',
-    status: 'Available',
-    statusTone: 'available',
-    cta: 'Start Mission',
-    href: `${KIDS_PORTAL_PATH}/b4`,
-  },
-  {
-    id: 'zeke',
-    title: "Zeke's Logic Lab",
-    description: 'Solve patterns, puzzles, and critical-thinking challenges.',
-    status: 'Coming Soon',
-    statusTone: 'locked',
-    cta: 'Preview',
-    href: `${KIDS_PORTAL_PATH}/zeke`,
-  },
-];
+export const CHARACTER_HUB_PAGE = {
+  title: 'Meet the Characters',
+  subtitle:
+    'Discover the heroes, guides, and friends who help kids build focus, courage, curiosity, and confidence throughout Focus Flame Academy.',
+} as const;
 
-export type FamilyGameCard = {
-  characterId: FamilyCharacterId;
-  title: string;
-  description: string;
-  cta: string;
-  href: string;
+export const CHARACTER_HUB_KIDS_SECTION = {
+  title: "Kids' Characters",
+  description:
+    'Characters kids will meet through stories, games, adventures, and missions.',
+} as const;
+
+export const CHARACTER_HUB_ADULT_SECTION = {
+  title: 'Adult Guides',
+  description:
+    'Trusted mentors who help families, educators, and caregivers support children along the journey.',
+} as const;
+
+function buildCharacterHubCard(
+  shellBasePath: string,
+  card: Omit<FamilyCharacterCard, 'href'>,
+): FamilyCharacterCard {
+  return {
+    ...card,
+    href: `${shellBasePath}/characters/${card.id}`,
+  };
+}
+
+function buildKidsCharacterCards(shellBasePath: string): FamilyCharacterCard[] {
+  return [
+    buildCharacterHubCard(shellBasePath, {
+      id: 'caiden',
+      title: 'Caiden',
+      description: 'Follow Caiden\'s story and discover how focus becomes power.',
+      status: CAIDEN_QUEST_RANK.statusLine,
+      statusTone: 'available',
+      cta: 'Meet Caiden',
+      skillTags: 'Focus • Courage • Executive Function',
+    }),
+    buildCharacterHubCard(shellBasePath, {
+      id: 'miranda',
+      title: 'Miranda',
+      description: 'Read clues, solve mysteries, and build vocabulary and comprehension skills.',
+      status: '5 Cases Available',
+      statusTone: 'available',
+      cta: 'Meet Miranda',
+      skillTags: 'Reading • Vocabulary • Problem Solving',
+    }),
+    buildCharacterHubCard(shellBasePath, {
+      id: 'b4',
+      title: 'B-4',
+      description: 'Practice focus moves, feelings check-ins, and brave choices.',
+      status: `${B4_PORTAL_MISSIONS.filter((m) => m.id !== 'check-in').length} Missions Available`,
+      statusTone: 'available',
+      cta: 'Meet B-4',
+      skillTags: 'Feelings • SEL • Self-Regulation',
+    }),
+    buildCharacterHubCard(shellBasePath, {
+      id: 'charlie',
+      title: 'Charlie Perk',
+      description: 'Explore outdoor clues, animal facts, camp safety, and funny SEL moments with Charlie.',
+      status: `${countAvailableCharlieMissions()} Missions Available`,
+      statusTone: 'available',
+      cta: 'Meet Charlie',
+      skillTags: 'Nature • Safety • Curiosity',
+    }),
+    buildCharacterHubCard(shellBasePath, {
+      id: 'zeke',
+      title: 'Zeke',
+      description: 'Solve patterns, puzzles, and critical-thinking challenges.',
+      status: 'Coming Soon',
+      statusTone: 'locked',
+      cta: 'Meet Zeke',
+      skillTags: 'Logic • Math • Critical Thinking',
+    }),
+  ];
+}
+
+function buildAdultGuideCards(shellBasePath: string): FamilyCharacterCard[] {
+  return [
+    buildCharacterHubCard(shellBasePath, {
+      id: 'dr-victoria',
+      title: 'Dr. Victoria',
+      description: 'Adult learning missions for understanding different minds and supporting kids at home.',
+      status: '5 Missions Available',
+      statusTone: 'available',
+      cta: 'Meet Dr. Victoria',
+      skillTags: 'Educator Support • ADHD Awareness • Family Learning',
+    }),
+    buildCharacterHubCard(shellBasePath, {
+      id: 'uncle-t',
+      title: 'Uncle T',
+      description: 'Coaching lessons for encouragement, resilience, and brave choices at home.',
+      status: '3 Missions Available',
+      statusTone: 'available',
+      cta: 'Meet Uncle T',
+      skillTags: 'Confidence • Resilience • Coaching',
+    }),
+  ];
+}
+
+export function buildFamilyKidsCharacters(shellBasePath: string): FamilyCharacterCard[] {
+  return buildKidsCharacterCards(shellBasePath);
+}
+
+export function buildFamilyAdultGuides(shellBasePath: string): FamilyCharacterCard[] {
+  return buildAdultGuideCards(shellBasePath);
+}
+
+/** @deprecated Use buildFamilyKidsCharacters + buildFamilyAdultGuides */
+export function buildFamilyCharacters(shellBasePath: string): FamilyCharacterCard[] {
+  return [...buildKidsCharacterCards(shellBasePath), ...buildAdultGuideCards(shellBasePath)];
+}
+
+export const FAMILY_CHARACTERS = buildFamilyCharacters(FAMILY_PORTAL_PATH);
+
+export function buildFamilyValueCards(kidsBasePath: string) {
+  return [
+    {
+      id: 'caiden-journey',
+      characterId: 'caiden' as const,
+      title: 'Help Caiden Build Focus',
+      body: 'Practice planning, prioritizing, and bringing attention back.',
+      imageSrc: CHARACTER_IMAGE_PATHS.caiden!,
+      cta: "Start Caiden's Journey",
+      href: `${kidsBasePath}/caiden`,
+    },
+    {
+      id: 'miranda-reading',
+      characterId: 'miranda' as const,
+      title: 'Practice Reading with Miranda',
+      body: 'Solve mysteries while building vocabulary, comprehension, and inference skills.',
+      imageSrc: CHARACTER_IMAGE_PATHS.miranda!,
+      cta: 'Open Mystery Files',
+      href: `${kidsBasePath}/miranda`,
+    },
+    {
+      id: 'b4-checkin',
+      characterId: 'b4' as const,
+      title: 'Check In with B-4',
+      body: 'Explore feelings, focus moves, and brave choices with B-4.',
+      imageSrc: CHARACTER_IMAGE_PATHS.b4!,
+      cta: 'Start B-4 Check-In',
+      href: `${kidsBasePath}/b4/check-in`,
+    },
+  ] as const;
+}
+
+export function buildFamilyContinueLearning(kidsBasePath: string) {
+  return [
+    {
+      characterId: 'caiden' as const,
+      title: "Caiden's Focus Flame Journey",
+      description: 'Start with Caiden\'s story and discover how focus becomes power.',
+      cta: 'Start Journey',
+      href: `${kidsBasePath}/caiden`,
+      status: 'Main Character',
+      statusTone: 'complete' as const,
+    },
+    {
+      characterId: 'miranda' as const,
+      title: "Miranda's Mystery Files",
+      description: 'Pick a case and practice reading clues together.',
+      cta: 'Open Mystery Files',
+      href: `${kidsBasePath}/miranda`,
+      status: '5 Cases Available',
+      statusTone: 'available' as const,
+    },
+    {
+      characterId: 'b4' as const,
+      title: 'B-4 Focus Missions',
+      description: 'Try focus moves and feelings check-ins with B-4.',
+      cta: 'Start Mission',
+      href: `${kidsBasePath}/b4`,
+      status: 'Available',
+      statusTone: 'available' as const,
+    },
+  ];
+}
+
+export const CHARACTER_ASSETS: Record<
+  FamilyCharacterId,
+  { imageSrc: string | null; theme: FamilyCharacterId }
+> = {
+  caiden: { imageSrc: CHARACTER_IMAGE_PATHS.caiden, theme: 'caiden' },
+  miranda: { imageSrc: CHARACTER_IMAGE_PATHS.miranda, theme: 'miranda' },
+  b4: { imageSrc: CHARACTER_IMAGE_PATHS.b4, theme: 'b4' },
+  charlie: { imageSrc: CHARACTER_IMAGE_PATHS.charlie, theme: 'charlie' },
+  zeke: { imageSrc: null, theme: 'zeke' },
+  'dr-victoria': { imageSrc: CHARACTER_IMAGE_PATHS['dr-victoria'], theme: 'dr-victoria' },
+  'uncle-t': { imageSrc: CHARACTER_IMAGE_PATHS['uncle-t'], theme: 'uncle-t' },
 };
-
-export const FAMILY_GAMES: FamilyGameCard[] = [
-  {
-    characterId: 'caiden',
-    title: 'Focus Flame Lab',
-    description: "Caiden's Focus Flame Journey — interactive story moments to practice focus and courage.",
-    cta: 'Open Journey',
-    href: CAIDEN_QUEST_HUB_PATH,
-  },
-  {
-    characterId: 'miranda',
-    title: "Miranda's Mystery Files",
-    description: 'Detective reading games with clues, cases, and vocabulary challenges.',
-    cta: 'Open Mystery Files',
-    href: `${KIDS_PORTAL_PATH}/miranda`,
-  },
-  {
-    characterId: 'b4',
-    title: 'B-4 Focus Missions',
-    description: 'Focus moves, feelings check-ins, and brave choices with B-4.',
-    cta: 'Start Mission',
-    href: `${KIDS_PORTAL_PATH}/b4`,
-  },
-  {
-    characterId: 'zeke',
-    title: "Zeke's Logic Lab",
-    description: 'Patterns, puzzles, and critical-thinking challenges.',
-    cta: 'Preview',
-    href: `${KIDS_PORTAL_PATH}/zeke`,
-  },
-];
 
 export type FamilyDownloadCard = {
   title: string;
@@ -288,40 +420,4 @@ export const FAMILY_DOWNLOADS: FamilyDownloadCard[] = [
   },
 ];
 
-export const FAMILY_CONTINUE_LEARNING: Array<{
-  characterId: FamilyCharacterId;
-  title: string;
-  description: string;
-  cta: string;
-  href: string;
-  status?: string;
-  statusTone?: 'available' | 'locked' | 'complete' | 'review';
-}> = [
-  {
-    characterId: 'caiden',
-    title: "Caiden's Focus Flame Journey",
-    description: 'Start with Caiden\'s story and discover how focus becomes power.',
-    cta: 'Start Journey',
-    href: CAIDEN_QUEST_HUB_PATH,
-    status: 'Main Character',
-    statusTone: 'complete',
-  },
-  {
-    characterId: 'miranda',
-    title: "Miranda's Mystery Files",
-    description: 'Pick a case and practice reading clues together.',
-    cta: 'Open Mystery Files',
-    href: `${KIDS_PORTAL_PATH}/miranda`,
-    status: '5 Cases Available',
-    statusTone: 'available',
-  },
-  {
-    characterId: 'b4',
-    title: 'B-4 Focus Missions',
-    description: 'Try focus moves and feelings check-ins with B-4.',
-    cta: 'Start Mission',
-    href: `${KIDS_PORTAL_PATH}/b4`,
-    status: 'Available',
-    statusTone: 'available',
-  },
-];
+export const FAMILY_CONTINUE_LEARNING = buildFamilyContinueLearning(KIDS_PORTAL_PATH);

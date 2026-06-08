@@ -6,6 +6,7 @@ import {
   PILOT_FOCUS_FLAME_LAB_CARD,
   type ActivityCategoryId,
 } from '../../../data/pilotDashboardContent';
+import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
 import PilotStatusPill from '../PilotStatusPill';
 
@@ -17,6 +18,7 @@ export default function PilotActivitiesPanel() {
     if (downloadingAll) return;
     setDownloadingAll(true);
     try {
+      trackDownload('coloring_page_downloaded', 'All Coloring Pages', 'coloring');
       await downloadAllColoringPages();
     } finally {
       setDownloadingAll(false);
@@ -72,7 +74,21 @@ export default function PilotActivitiesPanel() {
                       />
                     </div>
                     {asset.status === 'available' ? (
-                      <a href={asset.href} className="pilot-assetDownload" download>
+                      <a
+                        href={asset.href}
+                        className="pilot-assetDownload"
+                        download
+                        onClick={() => {
+                          const eventName =
+                            category === 'coloring-pages'
+                              ? 'coloring_page_downloaded'
+                              : category === 'printable-activities' ||
+                                  category === 'reflection-journals'
+                                ? 'worksheet_downloaded'
+                                : 'activity_downloaded';
+                          trackDownload(eventName, asset.title, category);
+                        }}
+                      >
                         Download
                       </a>
                     ) : (
@@ -97,7 +113,19 @@ export default function PilotActivitiesPanel() {
                     />
                   </div>
                   {asset.status === 'available' ? (
-                    <a href={asset.href} className="pilot-assetDownload" download>
+                    <a
+                      href={asset.href}
+                      className="pilot-assetDownload"
+                      download
+                      onClick={() => {
+                        const eventName =
+                          category === 'printable-activities' ||
+                          category === 'reflection-journals'
+                            ? 'worksheet_downloaded'
+                            : 'activity_downloaded';
+                        trackDownload(eventName, asset.title, category);
+                      }}
+                    >
                       Download
                     </a>
                   ) : (

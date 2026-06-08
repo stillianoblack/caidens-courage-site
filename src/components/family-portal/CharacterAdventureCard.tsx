@@ -12,6 +12,9 @@ export type CharacterAdventureCardProps = {
   status?: string;
   statusTone?: 'available' | 'locked' | 'complete' | 'review';
   layout?: 'vertical' | 'horizontal';
+  locked?: boolean;
+  lockedLabel?: string;
+  skillTags?: string;
 };
 
 function ZekePlaceholderIcon() {
@@ -56,6 +59,9 @@ export default function CharacterAdventureCard({
   href,
   status,
   layout = 'vertical',
+  locked = false,
+  lockedLabel = 'Complete B-4 Check-In to unlock',
+  skillTags,
 }: CharacterAdventureCardProps) {
   const themeClass = `family-charCard--${characterId}`;
   const layoutClass = layout === 'horizontal' ? 'family-charCard--horizontal' : 'family-charCard--vertical';
@@ -69,16 +75,21 @@ export default function CharacterAdventureCard({
         <div className="family-charCardText">
           <h3 className="family-charCardTitle">{title}</h3>
           <p className="family-charCardDesc">{description}</p>
+          {skillTags ? <p className="family-charCardTags">{skillTags}</p> : null}
         </div>
       </div>
       <div className="family-charCardFoot">
         {status ? (
-          <span className={`family-charPill family-charPill--${pillClass}`}>{status}</span>
+          <span className={`family-charPill family-charPill--${pillClass}`}>
+            {locked ? lockedLabel : status}
+          </span>
+        ) : locked ? (
+          <span className={`family-charPill family-charPill--${pillClass}`}>{lockedLabel}</span>
         ) : (
           <span />
         )}
         <span className="family-charCta">
-          {cta}
+          {locked ? lockedLabel : cta}
           <span className="family-charCtaArrow" aria-hidden="true">
             →
           </span>
@@ -87,7 +98,14 @@ export default function CharacterAdventureCard({
     </>
   );
 
-  return (
+  return locked ? (
+    <div
+      className={['family-charCard', themeClass, layoutClass, 'family-charCard--locked'].join(' ')}
+      aria-disabled="true"
+    >
+      {content}
+    </div>
+  ) : (
     <Link to={href} className={['family-charCard', themeClass, layoutClass].join(' ')}>
       {content}
     </Link>

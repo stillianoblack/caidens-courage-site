@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import CompletionCard from '../b4-guide/CompletionCard';
 import ModeSelectCard from '../b4-guide/ModeSelectCard';
 import ModuleStepCard from '../b4-guide/ModuleStepCard';
@@ -17,6 +18,7 @@ import {
   type B4GuideResultType,
 } from '../../data/b4GuideContent';
 import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
+import CharacterAvatar from '../game-assessment/shared/CharacterAvatar';
 import SoundToggleButton from '../game-assessment/shared/SoundToggleButton';
 import { B4_GAME_AVATAR_SRC } from '../../data/b4/portalAssets';
 
@@ -50,6 +52,14 @@ export default function B4GuideFlow({
 }: B4GuideFlowProps) {
   const { soundEnabled, toggleSound, playSelect, playModuleWin } = useBaselineCheckSounds();
   const [screen, setScreen] = useState<Screen>(initialScreen);
+
+  const missionPhase: MissionGamePhase = useMemo(() => {
+    if (screen === 'assessment' || screen === 'module') return 'quiz';
+    if (screen === 'assessment-result' || screen === 'completion') return 'complete';
+    if (screen === 'select') return 'landing';
+    return 'off';
+  }, [screen]);
+  useSetMissionGamePhase(missionPhase);
   const [assessmentAnswers, setAssessmentAnswers] = useState(INITIAL_STATE.assessmentAnswers);
   const [assessmentIndex, setAssessmentIndex] = useState(INITIAL_STATE.assessmentIndex);
   const [assessmentResult, setAssessmentResult] = useState<B4GuideResultType | null>(
@@ -140,7 +150,9 @@ export default function B4GuideFlow({
 
   return (
     <main
-      className={['b4g-app', embedded ? 'b4-guide--embedded' : ''].filter(Boolean).join(' ')}
+      className={['b4g-app', embedded ? 'b4-guide--embedded' : '', embedded ? 'portal-gameFrame' : '']
+        .filter(Boolean)
+        .join(' ')}
       aria-label={B4_GUIDE_PAGE_TITLE}
     >
       <div className="b4g-shell">
@@ -163,7 +175,13 @@ export default function B4GuideFlow({
 
         {embedded ? (
           <div className="b4g-portalHero">
-            <img src={B4_GAME_AVATAR_SRC} alt="B-4" className="b4g-portalAvatar" width={72} height={72} />
+            <CharacterAvatar
+              src={B4_GAME_AVATAR_SRC}
+              alt="B-4"
+              size="medium"
+              theme="b4"
+              className="b4g-portalAvatar"
+            />
           </div>
         ) : null}
 

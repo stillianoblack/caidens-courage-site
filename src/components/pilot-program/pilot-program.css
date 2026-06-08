@@ -1,0 +1,272 @@
+.pilotSignup-page {
+  min-height: 100dvh;
+  background: linear-gradient(180deg, #faf9f7 0%, #f0f4fa 100%);
+}
+
+.pilotSignup-hero {
+  padding: 6.5rem 1.5rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #243e70 0%, #1a2f52 100%);
+  color: #fff;
+}
+
+.pilotSignup-heroTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+}
+
+.pilotSignup-heroSub {
+  margin: 0.75rem auto 0;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.pilotSignup-main {
+  max-width: 32rem;
+  margin: -2rem auto 3rem;
+  padding: 0 1.25rem;
+}
+
+.pilotSignup-card {
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 1.25rem;
+  padding: 1.75rem 1.5rem 2rem;
+  box-shadow: 0 18px 40px -24px rgba(36, 62, 112, 0.35);
+}
+
+.pilotSignup-cardTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.pilotSignup-cardSub {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilotSignup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pilotSignup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pilotSignup-field label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.pilotSignup-field input,
+.pilotSignup-field select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  font-size: 0.9375rem;
+  color: #1a2f52;
+  background: #fff;
+}
+
+.pilotSignup-field input:focus,
+.pilotSignup-field select:focus {
+  outline: 2px solid rgba(36, 62, 112, 0.25);
+  outline-offset: 1px;
+}
+
+.pilotSignup-terms {
+  margin-top: 0.25rem;
+}
+
+.pilotSignup-termsLabel {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.85);
+}
+
+.pilotSignup-termsLabel input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.pilotSignup-termsLabel a {
+  color: #243e70;
+  font-weight: 700;
+}
+
+.pilotSignup-error {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.pilotSignup-submit {
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #243e70 0%, #1a2f52 100%);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pilotSignup-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pilotWelcome-card {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(90, 154, 110, 0.35);
+  background: linear-gradient(180deg, #f8fdf9 0%, #eef8f0 100%);
+}
+
+.pilotWelcome-title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.pilotWelcome-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.875rem;
+}
+
+.pilotWelcome-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.pilotWelcome-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #243e70;
+  word-break: break-all;
+}
+
+.pilotWelcome-copy {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.pilotWelcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.pilotWelcome-btn {
+  padding: 0.55rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(36, 62, 112, 0.2);
+  background: #fff;
+  color: #243e70;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pilotWelcome-btn--primary {
+  background: #243e70;
+  border-color: #243e70;
+  color: #fff;
+}
+
+.pilotWelcome-btn--primary:hover {
+  background: #1a2f52;
+}
+
+.pilotTerms-page {
+  min-height: 100dvh;
+  background: #faf9f7;
+}
+
+.pilotTerms-main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 6.5rem 1.5rem 3rem;
+}
+
+.pilotTerms-main h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.pilotTerms-intro {
+  margin: 0 0 2rem;
+  color: rgba(36, 62, 112, 0.75);
+  line-height: 1.55;
+}
+
+.pilotTerms-main section {
+  margin-bottom: 1.5rem;
+}
+
+.pilotTerms-main h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #243e70;
+}
+
+.pilotTerms-main p,
+.pilotTerms-main li {
+  margin: 0;
+  line-height: 1.6;
+  color: rgba(36, 62, 112, 0.85);
+}
+
+.pilotTerms-main ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pilotTerms-back {
+  display: inline-block;
+  margin-top: 2rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+@media (max-width: 767px) {
+  .pilotSignup-main {
+    margin-top: -1.5rem;
+  }
+}

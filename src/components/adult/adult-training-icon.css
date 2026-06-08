@@ -1,0 +1,74 @@
+.adultTraining-icon {
+  --icon-fill: #b784d7;
+  --icon-bg: rgba(183, 132, 215, 0.18);
+  --icon-ring: rgba(183, 132, 215, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 7.5rem;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 1.125rem;
+  background: var(--icon-bg);
+  border: 2px solid var(--icon-ring);
+  box-shadow: 0 10px 24px -16px rgba(35, 59, 110, 0.28);
+}
+
+.adultTraining-icon--uncle-t {
+  --icon-fill: #d97a35;
+  --icon-bg: rgba(232, 146, 79, 0.16);
+  --icon-ring: rgba(217, 122, 53, 0.38);
+}
+
+.adultTraining-icon--victoria {
+  --icon-fill: #9a6bb8;
+  --icon-bg: rgba(217, 155, 199, 0.18);
+  --icon-ring: rgba(183, 132, 215, 0.38);
+}
+
+.adultTraining-icon--charlie {
+  --icon-fill: #5a9a6e;
+  --icon-bg: rgba(139, 196, 138, 0.18);
+  --icon-ring: rgba(90, 154, 110, 0.38);
+}
+
+.adultTraining-iconSvg {
+  width: 58%;
+  height: 58%;
+  display: block;
+  color: var(--icon-fill);
+}
+
+.adultTraining-iconSvg path,
+.adultTraining-iconSvg circle,
+.adultTraining-iconSvg rect,
+.adultTraining-iconSvg polyline {
+  fill: currentColor;
+  stroke: none;
+}
+
+.adultTraining-iconSvg [data-stroke] {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mission-scenarioIllustration .adultTraining-icon {
+  max-width: none;
+  width: clamp(5.5rem, 22vw, 7.5rem);
+  min-height: clamp(5.5rem, 22vw, 7.5rem);
+}
+
+.victoria-reflectionGraphic .adultTraining-icon,
+.victoria-focusLabGraphic .adultTraining-icon,
+.uncleT-scenarioIllustration .adultTraining-icon {
+  max-width: none;
+  width: 100%;
+  min-height: 6.5rem;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}

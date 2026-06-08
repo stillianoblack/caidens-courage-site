@@ -1,4 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { resolveActiveProgramContext } from '../../config/activePilotProgram';
+import { readActiveChildNickname } from '../../config/activeChildNickname';
+import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import B4BaselineHub from '../b4-baseline-check/B4BaselineHub';
 import B4BaselineResults from '../b4-baseline-check/B4BaselineResults';
@@ -8,6 +11,7 @@ import '../b4-baseline-check/b4-baseline-check.css';
 import {
   B4_BASELINE_FEELINGS_FEEDBACK,
   B4_BASELINE_FEELINGS_QUESTIONS,
+  B4_BASELINE_FAMILY_LANDING,
   B4_BASELINE_FOCUS_MOVES_QUESTIONS,
   B4_BASELINE_LANDING,
   B4_BASELINE_MODULE_COMPLETE,
@@ -29,6 +33,7 @@ import {
   submitBaselineResults,
 } from '../../lib/b4BaselineCheckStorage';
 import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
+import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
 
@@ -36,10 +41,15 @@ type View = 'landing' | 'hub' | 'quiz' | 'module-complete' | 'final';
 
 type B4BaselineCheckFlowProps = {
   embedded?: boolean;
+  familyPortal?: boolean;
   onExit?: () => void;
 };
 
-export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4BaselineCheckFlowProps) {
+export default function B4BaselineCheckFlow({
+  embedded = false,
+  familyPortal = false,
+  onExit,
+}: B4BaselineCheckFlowProps) {
   const {
     soundEnabled,
     toggleSound,
@@ -54,6 +64,14 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
 
   const [hubState, setHubState] = useState(loadB4BaselineState);
   const [view, setView] = useState<View>('landing');
+
+  const missionPhase: MissionGamePhase = useMemo(() => {
+    if (view === 'quiz') return 'quiz';
+    if (view === 'module-complete' || view === 'final') return 'complete';
+    if (view === 'landing' || view === 'hub') return 'landing';
+    return 'off';
+  }, [view]);
+  useSetMissionGamePhase(missionPhase);
   const [activeModule, setActiveModule] = useState<BaselineModuleId | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [feelingsAnswers, setFeelingsAnswers] = useState<Record<string, number>>({});
@@ -63,6 +81,8 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
+  const programContext = resolveActiveProgramContext();
 
   const refreshHub = useCallback(() => setHubState(loadB4BaselineState()), []);
 
@@ -118,6 +138,11 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
     playSelect();
     const next = saveB4BaselineStudentProfile(values);
     setHubState(next);
+    refreshAnalyticsIdentity();
+    trackEvent('student_assessment_started', {
+      role: 'student',
+      assessment_type: 'baseline',
+    });
     setView('hub');
   };
 
@@ -167,6 +192,21 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
 
     if (isBaselineFullyComplete(next) && next.record) {
       const submitResult = await submitBaselineResults(next.record);
+      const record = next.record;
+      const maxScore = (['feelings', 'reading', 'focus-moves'] as BaselineModuleId[]).reduce(
+        (sum, moduleId) => sum + getBaselineModuleQuestionCount(moduleId),
+        0,
+      );
+      const totalScore = record.feelingsScore + record.readingScore + record.focusMovesScore;
+      trackEvent('student_assessment_completed', {
+        role: 'student',
+        assessment_type: 'baseline',
+        score: totalScore,
+        max_score: maxScore,
+        percent_score: maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0,
+        understanding_score: record.readingScore,
+        support_score: record.focusMovesScore,
+      });
       setSyncMessage(submitResult.message);
       setView('final');
     } else {
@@ -286,7 +326,16 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
   const avatarSrc = B4_AVATAR_SRC;
 
   return (
-    <div className={['bbc-app', embedded ? 'b4-game--embedded' : ''].filter(Boolean).join(' ')}>
+    <div
+      className={[
+        'bbc-app',
+        embedded ? 'b4-game--embedded' : '',
+        embedded ? 'portal-gameFrame' : '',
+        view === 'quiz' ? 'bbc-app--game-active' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <B4BaselineDecor />
 
       {showTopBar ? (
@@ -304,18 +353,25 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
           <div className="bbc-landing">
             {embedded && onExit ? (
               <button type="button" className="bbc-embeddedBack" onClick={onExit}>
-                ← Back to B-4 Missions
+                {familyPortal ? '← Back to Weekly Adventures' : '← Back to B-4 Missions'}
               </button>
             ) : null}
-            <p className="bbc-eyebrow">{B4_BASELINE_LANDING.eyebrow}</p>
-            <h1 className="bbc-title">{B4_BASELINE_LANDING.title}</h1>
-            <p className="bbc-subtitle">{B4_BASELINE_LANDING.subtitle}</p>
+            <p className="bbc-eyebrow">{landingCopy.eyebrow}</p>
+            <h1 className="bbc-title">{landingCopy.title}</h1>
+            <p className="bbc-subtitle">{landingCopy.subtitle}</p>
             <B4Avatar size="hero" src={avatarSrc} />
-            <p className="bbc-body">{B4_BASELINE_LANDING.body}</p>
+            <p className="bbc-body">{landingCopy.body}</p>
             <B4BaselineStudentForm
-              initialNickname={hubState.profile?.nickname ?? ''}
-              initialProgramCode={hubState.profile?.programCode ?? ''}
-              initialGroupName={hubState.profile?.groupName ?? ''}
+              familyPortal={familyPortal}
+              initialNickname={
+                hubState.profile?.nickname ?? readActiveChildNickname() ?? ''
+              }
+              initialProgramCode={
+                hubState.profile?.programCode ?? programContext?.programCode ?? ''
+              }
+              initialGroupName={
+                hubState.profile?.groupName ?? programContext?.groupName ?? ''
+              }
               onSubmit={handleStudentSubmit}
             />
           </div>
@@ -379,7 +435,7 @@ export default function B4BaselineCheckFlow({ embedded = false, onExit }: B4Base
                       aria-pressed={isSelected}
                     >
                       <span className="bbc-scaleNum">{value}</span>
-                      {label}
+                      <span className="bbc-scaleLabel">{label}</span>
                     </button>
                   );
                 })}

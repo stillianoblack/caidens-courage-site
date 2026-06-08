@@ -16,16 +16,19 @@ import {
   FACILITATOR_B4_BASELINE_RESULTS_PATH,
   FACILITATOR_B4_RESULTS_PATH,
   FACILITATOR_PORTAL_PATH,
+  FACILITATOR_BASELINE_CHECK_PATH,
   PORTAL_PATH,
 } from '../config/courageRoutes';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
   PILOT_DASHBOARD_TITLE,
-  PILOT_PAGE_SUBTITLES,
   PILOT_SIDEBAR_NAV,
   type PilotSidebarNavId,
 } from '../data/pilotDashboardContent';
-import { useAssessmentResults } from '../hooks/useAssessmentResults';
+import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
+import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
+import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PILOT_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -51,13 +54,20 @@ export default function PilotDashboardPage() {
   const [resultsVersion, setResultsVersion] = useState(0);
 
   const isB4Results = useMemo(() => isB4ResultsRoute(location.pathname), [location.pathname]);
+  const brand = resolvePortalRailBrand();
+  const activeProgram = readActivePilotProgram();
+  const programCode = activeProgram?.programCode;
   const pageTitle = isB4Results ? 'B-4 Baseline Check Results' : NAV_TITLE[activeNav];
-  const pageSubtitle = isB4Results ? undefined : PILOT_PAGE_SUBTITLES[activeNav];
 
-  const { metrics, results, source, warning, loading } = useAssessmentResults(resultsVersion);
+  const { metrics, legacyResults: results, source, warning, loading } =
+    usePilotTrackingResults(resultsVersion);
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
+  }, []);
+
+  useEffect(() => {
+    requestGalleryCountsRefresh();
   }, []);
 
   useEffect(() => {
@@ -80,8 +90,10 @@ export default function PilotDashboardPage() {
         setResultsVersion((v) => v + 1);
       }
       if (isB4Results) {
-        navigate(FACILITATOR_PORTAL_PATH);
+        navigate(`${FACILITATOR_PORTAL_PATH}#${id}`);
+        return;
       }
+      navigate({ hash: `#${id}` }, { replace: true });
     },
     [isB4Results, navigate],
   );
@@ -95,10 +107,17 @@ export default function PilotDashboardPage() {
       <PilotDashboardSidebar
         activeId={isB4Results ? 'results' : activeNav}
         onSelect={handleSelectNav}
+        brandTitle={brand.title}
+        brandSubtitle={brand.subtitle}
+        programCode={programCode}
       />
 
       <div className="pilot-main">
-        <PilotDashboardTopBar pageTitle={pageTitle} pageSubtitle={pageSubtitle} />
+        <PilotDashboardTopBar
+          pageTitle={pageTitle}
+          contextTitle={brand.title}
+          contextSubtitle="Facilitator Portal"
+        />
 
         <div className="pilot-content">
           {isB4Results ? (
@@ -124,7 +143,7 @@ export default function PilotDashboardPage() {
               </div>
 
               <div role="tabpanel" hidden={activeNav !== 'assessments'} className="pilot-tabPanel">
-                <PilotAssessmentsPanel />
+                <PilotAssessmentsPanel baselineHref={FACILITATOR_BASELINE_CHECK_PATH} />
               </div>
 
               <div role="tabpanel" hidden={activeNav !== 'results'} className="pilot-tabPanel">
@@ -143,7 +162,10 @@ export default function PilotDashboardPage() {
               </div>
 
               <div role="tabpanel" hidden={activeNav !== 'student-gallery'} className="pilot-tabPanel">
-                <PilotGalleryPanel />
+                <PilotGalleryPanel
+                  programCode={programCode}
+                  groupName={activeProgram?.groupName}
+                />
               </div>
 
               <div role="tabpanel" hidden={activeNav !== 'facilitator-center'} className="pilot-tabPanel">

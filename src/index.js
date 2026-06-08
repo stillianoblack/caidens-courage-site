@@ -2,8 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import './lib/supabaseClient';
+import { initAnalytics } from './lib/analytics';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+
+initAnalytics();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -1,0 +1,449 @@
+@import '../adult-learning/adult-training-tokens.css';
+
+/* Shared mission game layout — avatar + speech card + scenario + feedback */
+
+.mission-quizLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Speech row: avatar left, mission card right with caret */
+.mission-speechRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.mission-speechAvatar {
+  flex-shrink: 0;
+}
+
+.mission-speechAvatar.character-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.mission-speechAvatar img,
+.mission-speechAvatar .character-avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mission-speechCard {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.mission-speechCaret {
+  position: absolute;
+  left: -0.5rem;
+  top: 1.25rem;
+  width: 0;
+  height: 0;
+  border-top: 0.5rem solid transparent;
+  border-bottom: 0.5rem solid transparent;
+  border-right: 0.625rem solid #fff;
+  filter: drop-shadow(-1px 0 0 rgba(36, 62, 112, 0.08));
+}
+
+.mission-speechContent {
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 10px 28px -20px rgba(36, 62, 112, 0.22);
+}
+
+.mission-speechContent .caiden-questCard,
+.mission-speechContent .victoria-reflectionCard {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mission-speechContent .victoria-reflectionCard .mission-scenarioCardHead,
+.mission-speechContent .victoria-focusLabCard .mission-scenarioCardHead {
+  padding-top: 0.25rem;
+}
+
+.mission-scenarioIllustration .caiden-questGraphic {
+  min-height: auto;
+  margin-bottom: 0;
+  width: 100%;
+  padding: 0.25rem;
+}
+
+/* Theme accents for speech row */
+.mission-speechRow--caiden .mission-speechAvatar {
+  border: 3px solid #e5c06a;
+  box-shadow: 0 0 12px rgba(229, 192, 106, 0.35);
+}
+
+.mission-speechRow--caiden .mission-speechContent {
+  border: 2px solid rgba(229, 192, 106, 0.4);
+}
+
+.mission-speechRow--caiden .mission-speechCaret {
+  border-right-color: #fffbeb;
+}
+
+.mission-speechRow--miranda .mission-speechAvatar {
+  border: 3px solid rgba(124, 106, 173, 0.45);
+  box-shadow: 0 8px 20px -12px rgba(36, 62, 112, 0.3);
+}
+
+.mission-speechRow--miranda .mission-speechContent {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.mission-speechRow--miranda .mission-speechCaret {
+  border-right-color: #faf8ff;
+  filter: drop-shadow(-1px 0 0 rgba(124, 106, 173, 0.12));
+}
+
+.mission-speechRow--victoria .mission-speechAvatar {
+  border: 3px solid rgba(217, 155, 199, 0.65);
+  box-shadow: 0 8px 20px -12px rgba(35, 59, 110, 0.2);
+}
+
+/* Victoria speech content styling in adult-game.css */
+
+.mission-speechRow--victoria .mission-speechCaret {
+  border-right-color: #fff;
+}
+
+.mission-speechRow--uncle-t .mission-speechAvatar {
+  border: 3px solid rgba(232, 146, 79, 0.65);
+  box-shadow: 0 8px 20px -12px rgba(35, 59, 110, 0.2);
+}
+
+/* Uncle T speech content styling in uncle-t-game.css */
+
+.mission-speechRow--uncle-t .mission-speechCaret {
+  border-right-color: #fff;
+}
+
+/* Uncle T coaching card padding in uncle-t-game.css */
+
+/* Scenario card: illustration left, text right */
+.mission-scenarioCard {
+  padding: 0.875rem 1rem;
+}
+
+.mission-scenarioCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mission-scenarioCardLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mission-scenarioCardTag {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+}
+
+.mission-scenarioCardBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.mission-scenarioIllustration {
+  flex-shrink: 0;
+  width: clamp(7.5rem, 28vw, 11.25rem);
+  min-height: 7.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mission-scenarioIllustration svg {
+  width: 100%;
+  height: auto;
+  max-height: 11.25rem;
+}
+
+.mission-scenarioText {
+  margin: 0;
+  flex: 1;
+  font-size: var(--adult-body-size, 1.125rem);
+  line-height: var(--adult-body-lh, 1.6);
+  font-weight: 600;
+  color: var(--adult-body, #34466f);
+}
+
+.mission-storyPassage {
+  padding: 0.875rem 1rem;
+  margin: 0;
+}
+
+.mission-questionText {
+  margin-top: 0.25rem;
+}
+
+/* Feedback card */
+.mission-feedbackCard {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+}
+
+.mission-feedbackAvatar {
+  flex-shrink: 0;
+}
+
+.mission-feedbackAvatar.character-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.mission-feedbackAvatar .character-avatarImg {
+  object-fit: cover;
+  object-position: center 10%;
+}
+
+.mission-feedbackBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.mission-feedbackLabel {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mission-feedbackText {
+  margin: 0;
+  font-size: var(--adult-body-size, 1.0625rem);
+  line-height: var(--adult-body-lh, 1.55);
+  color: var(--adult-body, #34466f);
+}
+
+.mission-feedbackDetail {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(35, 59, 110, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mission-feedbackSectionTitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mission-feedbackSectionText {
+  margin: 0;
+  font-size: var(--adult-body-size, 1.0625rem);
+  line-height: var(--adult-body-lh, 1.55);
+  color: var(--adult-muted, #506189);
+}
+
+.mission-feedbackTips {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.mission-feedbackTips li + li {
+  margin-top: 0.25rem;
+}
+
+/* Caiden feedback theme */
+.mission-feedbackCard--caiden {
+  border-color: rgba(229, 192, 106, 0.35);
+}
+
+.mission-feedbackCard--caiden.mission-feedbackCard--success {
+  border-color: rgba(249, 115, 22, 0.4);
+  background: linear-gradient(180deg, #fffdf8 0%, #fff 100%);
+}
+
+.mission-feedbackCard--caiden .mission-feedbackAvatar {
+  background: #fffbeb;
+}
+
+.mission-feedbackCard--caiden .mission-feedbackLabel {
+  color: #f97316;
+}
+
+.mission-feedbackCard--caiden .mission-feedbackText {
+  color: #1a2f52;
+}
+
+/* Miranda feedback theme */
+.mission-feedbackCard--miranda {
+  border-color: rgba(124, 106, 173, 0.25);
+}
+
+.mission-feedbackCard--miranda.mission-feedbackCard--success {
+  border-color: rgba(201, 164, 74, 0.45);
+  background: linear-gradient(180deg, #fffdf8 0%, #fff 100%);
+}
+
+.mission-feedbackCard--miranda .mission-feedbackAvatar {
+  background: #f3eef9;
+}
+
+.mission-feedbackCard--miranda .mission-feedbackLabel {
+  color: #7c6aad;
+}
+
+.mission-feedbackCard--miranda .mission-feedbackText {
+  color: rgba(36, 62, 112, 0.9);
+}
+
+/* Victoria feedback theme */
+.mission-feedbackCard--victoria {
+  border-color: rgba(217, 155, 199, 0.3);
+}
+
+.mission-feedbackCard--victoria.mission-feedbackCard--success {
+  border-color: rgba(183, 132, 215, 0.45);
+  background: linear-gradient(180deg, #fff9fc 0%, #fff 100%);
+}
+
+.mission-feedbackCard--victoria .mission-feedbackAvatar {
+  background: #fff;
+}
+
+.mission-feedbackCard--victoria .mission-feedbackLabel {
+  color: #b784d7;
+}
+
+.mission-feedbackCard--victoria .mission-feedbackText,
+.mission-feedbackCard--victoria .mission-feedbackSectionText,
+.mission-feedbackCard--victoria .mission-feedbackTips {
+  color: rgba(35, 59, 110, 0.9);
+}
+
+.mission-feedbackCard--victoria .mission-feedbackSectionTitle {
+  color: #d99bc7;
+}
+
+/* Uncle T feedback theme */
+.mission-feedbackCard--uncle-t {
+  border-color: rgba(232, 146, 79, 0.3);
+}
+
+.mission-feedbackCard--uncle-t.mission-feedbackCard--success {
+  border-color: rgba(217, 122, 53, 0.45);
+  background: linear-gradient(180deg, #fffaf4 0%, #fff 100%);
+}
+
+.mission-feedbackCard--uncle-t .mission-feedbackAvatar {
+  background: #fff;
+}
+
+.mission-feedbackCard--uncle-t .mission-feedbackLabel {
+  color: #d97a35;
+}
+
+.mission-feedbackCard--uncle-t .mission-feedbackText,
+.mission-feedbackCard--uncle-t .mission-feedbackSectionText,
+.mission-feedbackCard--uncle-t .mission-feedbackTips {
+  color: rgba(35, 59, 110, 0.9);
+}
+
+.mission-feedbackCard--uncle-t .mission-feedbackSectionTitle {
+  color: #e8924f;
+}
+
+.mission-feedbackCard--charlie {
+  border-color: rgba(90, 154, 110, 0.3);
+}
+
+.mission-feedbackCard--charlie.mission-feedbackCard--success {
+  border-color: rgba(61, 122, 82, 0.45);
+  background: linear-gradient(180deg, #f8fdf9 0%, #fff 100%);
+}
+
+.mission-feedbackCard--charlie .mission-feedbackLabel {
+  color: #5a9a6e;
+}
+
+.mission-feedbackCard--charlie .mission-feedbackText,
+.mission-feedbackCard--charlie .mission-feedbackSectionText,
+.mission-feedbackCard--charlie .mission-feedbackTips {
+  color: var(--adult-body, #34466f);
+}
+
+.mission-feedbackCard--b4 {
+  border-color: rgba(36, 62, 112, 0.18);
+}
+
+.mission-feedbackCard--b4 .mission-feedbackLabel {
+  color: #243e70;
+}
+
+.game-quizWrap--natureCard .mission-scenarioIllustration {
+  min-height: auto;
+}
+
+/* Landing intro instruction bubble */
+.mission-landingPrompt {
+  margin: 1rem auto 0.5rem;
+  max-width: 28rem;
+}
+
+@media (max-width: 767px) {
+  .mission-quizLayout {
+    padding-bottom: 5.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mission-speechRow {
+    gap: 0.5rem;
+  }
+
+  .mission-speechAvatar {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .mission-scenarioCardBody {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mission-scenarioIllustration {
+    width: 100%;
+    max-width: 11.25rem;
+    margin: 0 auto;
+  }
+
+  .mission-scenarioText {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+}

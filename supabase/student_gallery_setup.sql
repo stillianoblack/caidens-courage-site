@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS student_gallery_items (
   upload_source text DEFAULT 'submit',
   submitter_key text,
   reviewed_at timestamptz,
-  reviewed_by text
+  reviewed_by text,
+  approved_at timestamptz,
+  rejected_at timestamptz
 );
 
 ALTER TABLE student_gallery_items ENABLE ROW LEVEL SECURITY;

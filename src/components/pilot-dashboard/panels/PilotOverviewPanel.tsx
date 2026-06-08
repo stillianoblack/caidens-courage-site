@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { PilotDashboardMetrics } from '../../../lib/pilotDashboardMetrics';
 import { formatAdminPct } from '../../../lib/b4BaselineAdminStats';
+import { remapPortalKidsRoute } from '../../../lib/portalGamePaths';
 import {
   PILOT_CHARACTER_TRACKS,
   PILOT_CHARACTER_TRACKS_NOTE,
@@ -10,6 +11,9 @@ import {
 } from '../../../data/pilotDashboardContent';
 import CharacterLearningTrackCard from '../CharacterLearningTrackCard';
 import PilotLocalNote from '../PilotLocalNote';
+import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
+import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import type { ActivePilotProgram } from '../../../types/pilotProgram';
 
 type PilotOverviewPanelProps = {
   metrics: PilotDashboardMetrics;
@@ -17,6 +21,7 @@ type PilotOverviewPanelProps = {
   source?: 'supabase' | 'local';
   warning?: string | null;
   onSelectNav?: (id: PilotSidebarNavId) => void;
+  activeProgram?: ActivePilotProgram | null;
 };
 
 const GROWTH_BARS: Array<{
@@ -55,7 +60,9 @@ export default function PilotOverviewPanel({
   source = 'local',
   warning = null,
   onSelectNav,
+  activeProgram = readActivePilotProgram(),
 }: PilotOverviewPanelProps) {
+  const location = useLocation();
   const hasData = metrics.baselineChecksCompleted > 0;
   const stepIndex = useMemo(
     () => recommendedStepIndex(metrics.baselineChecksCompleted),
@@ -76,6 +83,7 @@ export default function PilotOverviewPanel({
 
   return (
     <div className="pilot-panel pilot-panel--overview">
+      {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
       {loading ? <p className="pilot-panelIntro">Loading pilot results…</p> : null}
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
       <div className="pilot-kpiRow">
@@ -110,7 +118,7 @@ export default function PilotOverviewPanel({
               name={track.name}
               track={track.track}
               imageSrc={track.imageSrc}
-              previewHref={track.previewHref}
+              previewHref={remapPortalKidsRoute(track.previewHref, location.pathname)}
               metrics={track.metrics}
               baselineChecksCompleted={metrics.baselineChecksCompleted}
             />

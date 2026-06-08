@@ -11,13 +11,17 @@ type CaidenQuestCardProps = {
 
 export default function CaidenQuestCard({ label, tag, text, accent }: CaidenQuestCardProps) {
   return (
-    <article className="caiden-questCard">
-      <div className="caiden-questCardHead">
-        <span className="caiden-questCardLabel">{label}</span>
-        <span className="caiden-questCardTag">{tag}</span>
+    <article className="caiden-questCard mission-scenarioCard">
+      <div className="mission-scenarioCardHead caiden-questCardHead">
+        <span className="mission-scenarioCardLabel caiden-questCardLabel">{label}</span>
+        <span className="mission-scenarioCardTag caiden-questCardTag">{tag}</span>
       </div>
-      <CaidenQuestGraphic accent={accent} />
-      <p className="caiden-questCardText">{text}</p>
+      <div className="mission-scenarioCardBody">
+        <div className="mission-scenarioIllustration">
+          <CaidenQuestGraphic accent={accent} />
+        </div>
+        <p className="mission-scenarioText caiden-questCardText">{text}</p>
+      </div>
     </article>
   );
 }

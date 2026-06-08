@@ -22,4 +22,11 @@ export const B4_PORTAL_MISSIONS = [
     cta: 'Start Week 1',
     route: '/portal/kids/b4/week-1',
   },
+  {
+    id: 'feeling-finder',
+    title: 'Name That Feeling',
+    description: 'Practice naming feelings, reading body signals, and choosing calming next steps.',
+    cta: 'Start Mission',
+    route: '/portal/kids/b4/feeling-finder',
+  },
 ] as const;

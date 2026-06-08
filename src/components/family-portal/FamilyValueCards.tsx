@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FAMILY_VALUE_CARDS } from '../../data/familyPortalContent';
+import { buildFamilyValueCards } from '../../data/familyPortalContent';
+import { resolvePortalKidsBasePath } from '../../lib/portalGamePaths';
 
 export default function FamilyValueCards() {
   const location = useLocation();
+  const kidsBase = resolvePortalKidsBasePath(location.pathname);
+  const cards = useMemo(() => buildFamilyValueCards(kidsBase), [kidsBase]);
 
   return (
     <section className="family-valueCards" aria-label="Start learning">
-      {FAMILY_VALUE_CARDS.map((card) => (
+      {cards.map((card) => (
         <Link
           key={card.id}
           to={card.href}

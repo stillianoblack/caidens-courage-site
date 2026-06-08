@@ -12,6 +12,7 @@ import {
   getAskB4Welcome,
   type AskB4Mode,
 } from '../lib/askB4Mode';
+import { trackEvent } from '../lib/analytics';
 import B4LauncherButton from './B4LauncherButton';
 import './ask-b4-chat.css';
 
@@ -162,6 +163,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     if (!text || isLoading) return;
 
     setIsLoading(true);
+    trackEvent('ask_b4_question_submitted', { question_length: text.length });
     setMessages((prev) => [...prev, { role: 'user', content: text }]);
     setInputValue('');
 
@@ -197,7 +199,14 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
   return (
     <>
-      {!isOpen ? <B4LauncherButton onClick={() => setIsOpen(true)} /> : null}
+      {!isOpen ? (
+        <B4LauncherButton
+          onClick={() => {
+            trackEvent('ask_b4_opened');
+            setIsOpen(true);
+          }}
+        />
+      ) : null}
 
       {isOpen ? (
         <>

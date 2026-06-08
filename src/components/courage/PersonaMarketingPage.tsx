@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import CourageHeader from './CourageHeader';
 import CourageFooter from './CourageFooter';
@@ -7,6 +7,7 @@ import RelatedPathCards from './RelatedPathCards';
 import Button from '../ui/Button';
 import useHashScroll from '../../hooks/useHashScroll';
 import type { PersonaPageConfig } from '../../config/personaPages';
+import { trackCtaClick, trackSalesFunnel } from '../../lib/analytics';
 
 type PersonaMarketingPageProps = {
   config: PersonaPageConfig;
@@ -127,11 +128,20 @@ function PricingTierCard({ tier }: { tier: PersonaPageConfig['pricing'][number] 
               rel="noopener noreferrer"
               leftIconSrc={null}
               className="w-full"
+              onClick={() => trackCtaClick(tier.cta!.label, tier.cta!.href)}
             >
               {tier.cta.label}
             </Button>
           ) : (
-            <Button variant="primary" size="lg" as={Link} to={tier.cta.href} leftIconSrc={null} className="w-full">
+            <Button
+              variant="primary"
+              size="lg"
+              as={Link}
+              to={tier.cta.href}
+              leftIconSrc={null}
+              className="w-full"
+              onClick={() => trackCtaClick(tier.cta!.label, tier.cta!.href)}
+            >
               {tier.cta.label}
             </Button>
           )}
@@ -143,10 +153,31 @@ function PricingTierCard({ tier }: { tier: PersonaPageConfig['pricing'][number] 
 
 export default function PersonaMarketingPage({ config, children }: PersonaMarketingPageProps) {
   useHashScroll();
+  const pricingViewedRef = useRef(false);
 
   useEffect(() => {
     document.title = config.documentTitle;
   }, [config.documentTitle]);
+
+  useEffect(() => {
+    const pricingSection = document.getElementById('pricing');
+    if (!pricingSection || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (pricingViewedRef.current) return;
+        if (entries.some((entry) => entry.isIntersecting)) {
+          pricingViewedRef.current = true;
+          trackSalesFunnel('pricing_viewed');
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(pricingSection);
+    return () => observer.disconnect();
+  }, []);
 
   const howItWorksItems = config.howItWorks ?? config.faq ?? [];
 
@@ -161,7 +192,15 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
         supportingText={config.intro}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Button variant="primary" size="lg" as={Link} to={config.primaryCta.href} leftIconSrc={null} className="w-full sm:w-auto">
+          <Button
+            variant="primary"
+            size="lg"
+            as={Link}
+            to={config.primaryCta.href}
+            leftIconSrc={null}
+            className="w-full sm:w-auto"
+            onClick={() => trackCtaClick(config.primaryCta.label, config.primaryCta.href)}
+          >
             {config.primaryCta.label}
           </Button>
           <Button
@@ -170,6 +209,7 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
             as={Link}
             to={config.secondaryCta.href}
             className="cc-schools-hero-secondary w-full border-white/40 text-white hover:bg-white/10 hover:text-white sm:w-auto"
+            onClick={() => trackCtaClick(config.secondaryCta.label, config.secondaryCta.href)}
           >
             {config.secondaryCta.label}
           </Button>
@@ -261,7 +301,15 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
             <h2 className="font-display text-2xl font-extrabold sm:text-3xl">Ready to get started?</h2>
             <p className="mt-4 text-base text-white/85 sm:text-lg">{config.intro}</p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap">
-              <Button variant="primary" size="lg" as={Link} to={config.primaryCta.href} leftIconSrc={null} className="w-full sm:w-auto">
+              <Button
+                variant="primary"
+                size="lg"
+                as={Link}
+                to={config.primaryCta.href}
+                leftIconSrc={null}
+                className="w-full sm:w-auto"
+                onClick={() => trackCtaClick(config.primaryCta.label, config.primaryCta.href)}
+              >
                 {config.primaryCta.label}
               </Button>
               <Button
@@ -270,6 +318,7 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
                 as={Link}
                 to={config.secondaryCta.href}
                 className="cc-schools-final-portal-cta w-full border-white/40 text-white hover:bg-white/10 hover:text-white sm:w-auto"
+                onClick={() => trackCtaClick(config.secondaryCta.label, config.secondaryCta.href)}
               >
                 {config.secondaryCta.label}
               </Button>

@@ -1,3 +1,5 @@
+@import '../mission-game/shared-mission-game-layout.css';
+
 .bbc-app {
   --bbc-navy: #243e70;
   --bbc-navy-deep: #1a2f52;
@@ -18,7 +20,7 @@
   font-family: inherit;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 /* Subtle decorative background */
@@ -94,13 +96,13 @@
   grid-template-columns: 2.75rem 1fr auto;
   align-items: center;
   gap: 1rem;
-  max-width: var(--bbc-container);
+  max-width: min(42rem, calc(100vw - 2.5rem));
   width: 100%;
   margin: 0 auto;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid var(--bbc-border);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  border-bottom: none;
+  backdrop-filter: none;
   position: sticky;
   top: 0;
   z-index: 30;
@@ -142,7 +144,7 @@
 .bbc-progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--bbc-gold-dark), var(--bbc-gold));
+  background: linear-gradient(90deg, #3b6cb5, var(--bbc-navy));
   transition: width 0.35s ease;
 }
 
@@ -709,9 +711,9 @@
 .bbc-speechBubble {
   flex: 1;
   padding: 1rem 1.125rem;
-  border: 2px solid var(--bbc-border);
+  border: 2px solid rgba(36, 62, 112, 0.18);
   border-radius: 1.125rem;
-  background: #f9fafb;
+  background: linear-gradient(180deg, #fff 0%, #f0f7ff 100%);
   font-size: clamp(0.9375rem, 2vw, 1.0625rem);
   line-height: 1.55;
   font-weight: 600;
@@ -777,6 +779,12 @@
   box-shadow: 0 3px 0 var(--bbc-navy);
 }
 
+.bbc-app:not(.bbc-app--adult-victoria):not(.bbc-app--adult-uncleT) .bbc-answerCard--selected {
+  border-color: #3b6cb5;
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+  box-shadow: 0 3px 0 #243e70;
+}
+
 .bbc-answerCard--correct {
   border-color: var(--bbc-success);
   background: var(--bbc-success-bg);
@@ -798,25 +806,48 @@
 .bbc-scaleGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.625rem;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 43.75rem;
+  margin: 0 auto;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 480px) {
   .bbc-scaleGrid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
 }
 
 .bbc-scaleCard {
-  min-height: 4.75rem;
-  padding: 0.75rem 0.5rem;
+  min-width: 140px;
+  min-height: 96px;
+  padding: 0.875rem 1rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 479px) {
+  .bbc-scaleCard {
+    min-width: 100%;
+    white-space: normal;
+  }
 }
 
 .bbc-scaleNum {
   display: block;
   font-size: 1.375rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.1rem;
+  line-height: 1;
+}
+
+.bbc-scaleLabel {
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  line-height: 1.2;
 }
 
 .bbc-bottomBar {
@@ -848,8 +879,6 @@
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  max-width: var(--bbc-container);
-  margin: 0 auto;
 }
 
 .bbc-bottomBar--success {
@@ -1029,4 +1058,141 @@
 .bbc-hubActions {
   display: flex;
   justify-content: center;
+}
+
+.bbc-checkboxField {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.bbc-checkboxField input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.bbc-quizWrap--adult {
+  max-width: 43.75rem;
+}
+
+.bbc-quizGuide {
+  border-color: transparent;
+  background: #fff;
+}
+
+.bbc-quizGuide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.bbc-answers--centered {
+  width: 100%;
+  max-width: 43.75rem;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+.bbc-answerCard--assessment {
+  width: 100%;
+  max-width: 43.75rem;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.bbc-answerLabel {
+  display: block;
+  width: 100%;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.bbc-questionText--centered {
+  max-width: 43.75rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.bbc-speechBubble--adult {
+  font-weight: 700;
+}
+
+/* Dr. Victoria — purple assessment theme */
+.bbc-app--adult-victoria {
+  --ffa-theme-accent: #b784d7;
+  --ffa-theme-accent-deep: #9b6bc4;
+  --ffa-theme-surface: #fdf4fb;
+  --ffa-theme-border: #e9d4f0;
+}
+
+.bbc-app--adult-victoria .bbc-progressFill {
+  background: linear-gradient(90deg, #d99bc7, #b784d7);
+}
+
+.bbc-app--adult-victoria .bbc-speechBubble--victoria {
+  border-color: var(--ffa-theme-border);
+  background: var(--ffa-theme-surface);
+}
+
+.bbc-app--adult-victoria .bbc-quizGuide {
+  border: 3px solid var(--ffa-theme-accent);
+  box-shadow: 0 10px 28px -14px rgba(155, 107, 196, 0.35);
+}
+
+.bbc-app--adult-victoria .bbc-answerCard--selected {
+  border-color: var(--ffa-theme-accent-deep);
+  background: var(--ffa-theme-surface);
+  box-shadow: 0 3px 0 var(--ffa-theme-accent-deep);
+}
+
+.bbc-app--adult-victoria .bbc-answerCard:focus-visible {
+  outline-color: var(--ffa-theme-accent);
+}
+
+/* Uncle T — gold assessment theme */
+.bbc-app--adult-uncleT {
+  --ffa-theme-accent: #e8924f;
+  --ffa-theme-accent-deep: #c9a44a;
+  --ffa-theme-surface: #fff8f0;
+  --ffa-theme-border: #f0dcc4;
+}
+
+.bbc-app--adult-uncleT .bbc-progressFill {
+  background: linear-gradient(90deg, #e8924f, #c9a44a);
+}
+
+.bbc-app--adult-uncleT .bbc-speechBubble--uncleT {
+  border-color: var(--ffa-theme-border);
+  background: var(--ffa-theme-surface);
+}
+
+.bbc-app--adult-uncleT .bbc-quizGuide {
+  border: 3px solid var(--ffa-theme-accent);
+  box-shadow: 0 10px 28px -14px rgba(201, 164, 74, 0.35);
+}
+
+.bbc-app--adult-uncleT .bbc-answerCard--selected {
+  border-color: var(--ffa-theme-accent-deep);
+  background: var(--ffa-theme-surface);
+  box-shadow: 0 3px 0 var(--ffa-theme-accent-deep);
+}
+
+.bbc-app--adult-uncleT .bbc-answerCard:focus-visible {
+  outline-color: var(--ffa-theme-accent);
+}
+
+.bbc-growthDeltaGrid {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }

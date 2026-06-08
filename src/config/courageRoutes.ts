@@ -27,18 +27,66 @@ export const SCHOOLS_PATH = '/schools';
 export const PORTAL_PATH = '/portal';
 
 export const FAMILY_PORTAL_PATH = '/portal/family';
+export const FAMILY_HUB_PATH = '/family-hub';
+export const FAMILY_HUB_KIDS_BASE = `${FAMILY_HUB_PATH}/kids`;
 export const FAMILY_PARENT_CORNER_PATH = `${FAMILY_PORTAL_PATH}/parent-corner`;
-export const FAMILY_DR_VICTORIA_MISSION_1_PATH = `${FAMILY_PARENT_CORNER_PATH}/dr-victoria/mission-1`;
+export const FAMILY_DR_VICTORIA_MISSION_BASE = `${FAMILY_PARENT_CORNER_PATH}/dr-victoria`;
+export const FAMILY_DR_VICTORIA_MISSION_1_PATH = `${FAMILY_DR_VICTORIA_MISSION_BASE}/mission-1`;
+export const FAMILY_DR_VICTORIA_MISSION_2_PATH = `${FAMILY_DR_VICTORIA_MISSION_BASE}/mission-2`;
+export const FAMILY_DR_VICTORIA_MISSION_3_PATH = `${FAMILY_DR_VICTORIA_MISSION_BASE}/mission-3`;
+export const FAMILY_DR_VICTORIA_HUB_PATH = FAMILY_DR_VICTORIA_MISSION_BASE;
+
+export function familyDrVictoriaMissionPath(missionId: string): string {
+  return `${FAMILY_DR_VICTORIA_MISSION_BASE}/${missionId}`;
+}
 export const KIDS_PORTAL_PATH = '/portal/kids';
 export const CAIDEN_QUEST_HUB_PATH = `${KIDS_PORTAL_PATH}/caiden`;
 export const CAIDEN_QUEST_1_PATH = `${CAIDEN_QUEST_HUB_PATH}/quest-1`;
 
 export const FACILITATOR_PORTAL_PATH = '/portal/facilitator';
 export const FACILITATOR_ADULT_TRAINING_PATH = `${FACILITATOR_PORTAL_PATH}/adult-training`;
-export const FACILITATOR_DR_VICTORIA_MISSION_1_PATH = `${FACILITATOR_ADULT_TRAINING_PATH}/dr-victoria/mission-1`;
+export const FACILITATOR_DR_VICTORIA_MISSION_BASE = `${FACILITATOR_ADULT_TRAINING_PATH}/dr-victoria`;
+export const FACILITATOR_DR_VICTORIA_MISSION_1_PATH = `${FACILITATOR_DR_VICTORIA_MISSION_BASE}/mission-1`;
+export const FACILITATOR_DR_VICTORIA_MISSION_2_PATH = `${FACILITATOR_DR_VICTORIA_MISSION_BASE}/mission-2`;
+export const FACILITATOR_DR_VICTORIA_MISSION_3_PATH = `${FACILITATOR_DR_VICTORIA_MISSION_BASE}/mission-3`;
+export const FACILITATOR_DR_VICTORIA_HUB_PATH = FACILITATOR_DR_VICTORIA_MISSION_BASE;
+
+export function facilitatorDrVictoriaMissionPath(missionId: string): string {
+  return `${FACILITATOR_DR_VICTORIA_MISSION_BASE}/${missionId}`;
+}
+
+export const FACILITATOR_UNCLE_T_MISSION_BASE = `${FACILITATOR_ADULT_TRAINING_PATH}/uncle-t`;
+export const FAMILY_UNCLE_T_MISSION_BASE = `${FAMILY_PARENT_CORNER_PATH}/uncle-t`;
+export const FAMILY_UNCLE_T_MISSION_1_PATH = `${FAMILY_UNCLE_T_MISSION_BASE}/mission-1`;
+export const FACILITATOR_UNCLE_T_MISSION_1_PATH = `${FACILITATOR_UNCLE_T_MISSION_BASE}/mission-1`;
+
+export function facilitatorUncleTMissionPath(missionId: string): string {
+  return `${FACILITATOR_UNCLE_T_MISSION_BASE}/${missionId}`;
+}
+
+export function familyUncleTMissionPath(missionId: string): string {
+  return `${FAMILY_UNCLE_T_MISSION_BASE}/${missionId}`;
+}
 export const FACILITATOR_B4_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b4`;
 /** @deprecated Use FACILITATOR_B4_RESULTS_PATH */
 export const FACILITATOR_B4_BASELINE_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b4-baseline`;
+
+export const PROGRAM_DASHBOARD_PATH = '/program-dashboard';
+export const PROGRAM_DASHBOARD_KIDS_BASE = `${PROGRAM_DASHBOARD_PATH}/kids`;
+export const FACILITATOR_BASELINE_CHECK_PATH = `${FACILITATOR_PORTAL_PATH}/baseline-check`;
+export const PROGRAM_BASELINE_CHECK_PATH = `${PROGRAM_DASHBOARD_PATH}/baseline-check`;
+export const FAMILY_HUB_BASELINE_CHECK_PATH = `${FAMILY_HUB_PATH}/baseline-check`;
+export const FAMILY_PORTAL_BASELINE_CHECK_PATH = `${FAMILY_PORTAL_PATH}/baseline-check`;
+
+export const FACILITATOR_ADULT_ASSESSMENT_BASE = `${FACILITATOR_PORTAL_PATH}/adult-assessment`;
+export const FACILITATOR_ADULT_BASELINE_PATH = `${FACILITATOR_ADULT_ASSESSMENT_BASE}/baseline`;
+export const FACILITATOR_ADULT_GROWTH_PATH = `${FACILITATOR_ADULT_ASSESSMENT_BASE}/growth`;
+export const PROGRAM_ADULT_ASSESSMENT_BASE = `${PROGRAM_DASHBOARD_PATH}/adult-assessment`;
+export const PROGRAM_ADULT_BASELINE_PATH = `${PROGRAM_ADULT_ASSESSMENT_BASE}/baseline`;
+export const PROGRAM_ADULT_GROWTH_PATH = `${PROGRAM_ADULT_ASSESSMENT_BASE}/growth`;
+
+export const PILOT_PROGRAM_SIGNUP_PATH = '/pilot-program-signup';
+export const PILOT_TERMS_PATH = '/pilot-terms';
 
 export const PILOT_DASHBOARD_PATH = '/pilot-dashboard';
 export const BLUE_RIBBON_PILOT_PATH = '/portal/blueribbon2026';

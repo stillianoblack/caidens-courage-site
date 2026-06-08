@@ -74,14 +74,27 @@ export const PARENTS_PAGE: PersonaPageConfig = {
   pricing: [
     {
       title: 'Family Portal',
-      price: '$49/year',
-      includes: ['Family activities', 'Coloring pages', 'Printable tools', 'B-4 focus exercises'],
+      price: '$79/year',
+      includes: [
+        'Family activities',
+        'Coloring pages',
+        'Printable tools',
+        'B-4 focus exercises',
+        'Character games',
+        'Parent Corner',
+      ],
       cta: { label: 'Request Family Access', href: '/contact?subject=Family%20Portal%20Access' },
     },
     {
-      title: 'Digital book + Family Portal',
-      price: '$79/year',
-      includes: ['Digital graphic novel access', 'One year of Family Portal resources'],
+      title: 'Digital Book + Family Portal',
+      price: '$129/year',
+      includes: [
+        'Digital graphic novel access',
+        'One year of Family Portal resources',
+        'Character missions',
+        'Parent training tools',
+        'Premium downloads',
+      ],
       notes: ['Physical books sold separately'],
       featured: true,
       cta: { label: 'Join Family Waitlist', href: '/contact?subject=Family%20Portal%20Waitlist' },

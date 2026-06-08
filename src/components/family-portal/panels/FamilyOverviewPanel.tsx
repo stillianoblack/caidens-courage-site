@@ -7,12 +7,14 @@ import {
   FAMILY_PROGRESS_ROWS,
   FAMILY_RECENT_ACTIVITY,
 } from '../../../data/familyPortalContent';
+import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import FamilyValueCards from '../FamilyValueCards';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
 import '../../focus-skills/focus-skills-snapshot.css';
 
 export default function FamilyOverviewPanel() {
   const location = useLocation();
+  const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
 
   return (
     <div className="family-panel family-panel--overview">
@@ -88,7 +90,7 @@ export default function FamilyOverviewPanel() {
                 <p className="family-nextCopy">{FAMILY_NEXT_STEP.body}</p>
               </div>
             </div>
-            <Link to={FAMILY_NEXT_STEP.href} state={{ from: location.pathname }} className="family-nextCta">
+            <Link to={nextStepHref} state={{ from: location.pathname }} className="family-nextCta">
               {FAMILY_NEXT_STEP.cta}
             </Link>
           </div>

@@ -2,21 +2,37 @@ import type { BaselineModuleId } from '../data/b4BaselineCheckContent';
 import { B4_BASELINE_ASSESSMENT_NAME } from '../data/b4BaselineCheckContent';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import { loadAllBaselineResults } from './b4BaselineCheckStorage';
+import type { AdultAssessmentRecord } from './adultAssessmentStorage';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type AssessmentResultRow = {
   id?: string;
   nickname: string;
-  student_id: string;
+  child_nickname?: string;
+  student_id?: string;
   assessment_type: string;
   program_code: string;
-  group_name: string;
-  feelings_score: number;
-  reading_score: number;
-  focus_moves_score: number;
-  modules_completed: string;
+  program_name?: string;
+  family_code?: string;
+  group_name?: string;
+  feelings_score?: number;
+  reading_score?: number;
+  focus_moves_score?: number;
+  modules_completed?: string;
   completed_at?: string | null;
   created_at?: string | null;
+  first_name?: string;
+  email?: string;
+  role?: string;
+  child_age_range?: string;
+  organization?: string;
+  email_opt_in?: boolean;
+  understanding_score?: number;
+  support_score?: number;
+  total_score?: number;
+  total_questions?: number;
+  adult_assessment_phase?: string;
 };
 
 export type BaselineSubmitResult = {
@@ -32,6 +48,9 @@ export type AssessmentResultsLoad = {
 
 const DEFAULT_PROGRAM_CODE = 'BlueRibbon2026';
 const BASELINE_MODULES = 'feelings,reading,focus-moves';
+function isStudentBaselineRow(row: AssessmentResultRow): boolean {
+  return row.assessment_type === 'baseline';
+}
 
 export const SUPABASE_SELECT_POLICY_HINT =
   'Supabase sync is connected, but results reading may need a SELECT policy or admin endpoint.';
@@ -49,7 +68,8 @@ function resolveCompletedAt(row: AssessmentResultRow): string {
 }
 
 export function recordToSupabaseRow(record: B4BaselineCheckRecord): Omit<AssessmentResultRow, 'id'> {
-  return {
+  const program = readActivePilotProgram();
+  const payload: Omit<AssessmentResultRow, 'id'> = {
     nickname: record.nickname,
     student_id: record.anonymousStudentId,
     assessment_type: 'baseline',
@@ -61,13 +81,23 @@ export function recordToSupabaseRow(record: B4BaselineCheckRecord): Omit<Assessm
     modules_completed: BASELINE_MODULES,
     completed_at: record.completedAt || new Date().toISOString(),
   };
+
+  payload.child_nickname = record.nickname;
+  if (program?.programName) {
+    payload.program_name = program.programName;
+  }
+  if (program?.familyAccessCode) {
+    payload.family_code = program.familyAccessCode;
+  }
+
+  return payload;
 }
 
 export function supabaseRowToRecord(row: AssessmentResultRow): B4BaselineCheckRecord {
   return {
     assessmentName: B4_BASELINE_ASSESSMENT_NAME,
-    anonymousStudentId: row.student_id,
-    nickname: row.nickname ?? '',
+    anonymousStudentId: row.student_id ?? '',
+    nickname: row.nickname ?? row.first_name ?? '',
     programCode: row.program_code ?? '',
     groupName: row.group_name ?? '',
     completedModules: parseModulesCompleted(row.modules_completed),
@@ -78,13 +108,81 @@ export function supabaseRowToRecord(row: AssessmentResultRow): B4BaselineCheckRe
   };
 }
 
+export function adultRecordToSupabaseRow(
+  record: AdultAssessmentRecord,
+): Omit<AssessmentResultRow, 'id'> {
+  const program = readActivePilotProgram();
+  const payload: Omit<AssessmentResultRow, 'id'> = {
+    nickname: record.firstName,
+    first_name: record.firstName,
+    email: record.email,
+    role: record.role,
+    child_age_range: record.childAgeRange,
+    organization: record.organization,
+    email_opt_in: record.emailOptIn,
+    assessment_type: record.assessmentType,
+    adult_assessment_phase: record.phase,
+    program_code: record.programCode.trim() || DEFAULT_PROGRAM_CODE,
+    program_name: record.programName ?? program?.programName,
+    understanding_score: record.understandingScore,
+    support_score: record.supportScore,
+    total_score: record.totalScore,
+    total_questions: record.totalQuestions,
+    completed_at: record.completedAt,
+  };
+
+  if (program?.familyAccessCode) {
+    payload.family_code = program.familyAccessCode;
+  }
+
+  return payload;
+}
+
+export async function insertAdultAssessmentResult(
+  record: AdultAssessmentRecord,
+): Promise<BaselineSubmitResult> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return {
+      success: false,
+      message: 'Local testing mode: results are saved on this device.',
+    };
+  }
+
+  try {
+    const payload = adultRecordToSupabaseRow(record);
+    const { error } = await supabase.from('assessment_results').insert(payload);
+
+    if (error) {
+      console.warn('[assessment_results] adult insert failed:', error.message);
+      return {
+        success: false,
+        message: 'Local testing mode: results are saved on this device.',
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        record.phase === 'baseline'
+          ? 'Adult baseline saved. Training missions are now unlocked.'
+          : 'Adult growth check saved. Your certificate is ready.',
+    };
+  } catch (err) {
+    console.warn('[assessment_results] adult insert error:', err);
+    return {
+      success: false,
+      message: 'Local testing mode: results are saved on this device.',
+    };
+  }
+}
+
 export async function insertAssessmentResult(
   record: B4BaselineCheckRecord,
 ): Promise<BaselineSubmitResult> {
   if (!isSupabaseConfigured() || !supabase) {
     return {
       success: false,
-      message: 'Saved on this device. Online pilot sync is unavailable right now.',
+      message: 'Local testing mode: results are saved on this device.',
     };
   }
 
@@ -101,24 +199,24 @@ export async function insertAssessmentResult(
       console.warn('[assessment_results] insert failed:', error.message);
       return {
         success: false,
-        message: 'Saved on this device. Online pilot sync is unavailable right now.',
+        message: 'Local testing mode: results are saved on this device.',
       };
     }
 
     return {
       success: true,
-      message: "Baseline saved. You're ready to begin your Focus Flame journey.",
+      message: 'B-4 Check-In saved. Your Weekly Adventures are ready.',
     };
   } catch (err) {
     console.warn('[assessment_results] insert error:', err);
     return {
       success: false,
-      message: 'Saved on this device. Online pilot sync is unavailable right now.',
+      message: 'Local testing mode: results are saved on this device.',
     };
   }
 }
 
-export async function fetchAssessmentResultsFromSupabase(): Promise<{
+export async function fetchAssessmentResultsFromSupabase(programCode?: string): Promise<{
   results: B4BaselineCheckRecord[];
   error?: string;
 }> {
@@ -127,10 +225,13 @@ export async function fetchAssessmentResultsFromSupabase(): Promise<{
   }
 
   try {
-    const { data, error } = await supabase
-      .from('assessment_results')
-      .select('*')
-      .order('completed_at', { ascending: false });
+    let query = supabase.from('assessment_results').select('*').order('completed_at', { ascending: false });
+
+    if (programCode?.trim()) {
+      query = query.eq('program_code', programCode.trim());
+    }
+
+    const { data, error } = await query;
 
     console.log('[DASHBOARD] Supabase query response:', { data, error });
 
@@ -140,7 +241,8 @@ export async function fetchAssessmentResultsFromSupabase(): Promise<{
     }
 
     const rows = (data ?? []) as AssessmentResultRow[];
-    const results = rows.map(supabaseRowToRecord);
+    const studentRows = rows.filter(isStudentBaselineRow);
+    const results = studentRows.map(supabaseRowToRecord);
 
     console.log('[DASHBOARD] Supabase raw row count:', rows.length);
     console.log('[DASHBOARD] Supabase rows after completedAt filter:', results.length);
@@ -152,17 +254,23 @@ export async function fetchAssessmentResultsFromSupabase(): Promise<{
   }
 }
 
-export async function loadAssessmentResults(): Promise<AssessmentResultsLoad> {
+export async function loadAssessmentResults(programCode?: string): Promise<AssessmentResultsLoad> {
   const localResults = loadAllBaselineResults();
-  console.log('[DASHBOARD] Local rows:', localResults.length, localResults);
+  const normalizedCode = programCode?.trim();
+  const filteredLocal = normalizedCode
+    ? localResults.filter(
+        (row) => row.programCode.trim().toUpperCase() === normalizedCode.toUpperCase(),
+      )
+    : localResults;
+  console.log('[DASHBOARD] Local rows:', filteredLocal.length, filteredLocal);
 
   if (!isSupabaseConfigured()) {
     console.log('[DASHBOARD] Selected source:', 'local');
     console.log('[DASHBOARD] Reason:', 'Supabase env vars not configured');
-    return { results: localResults, source: 'local' };
+    return { results: filteredLocal, source: 'local' };
   }
 
-  const { results: remoteResults, error } = await fetchAssessmentResultsFromSupabase();
+  const { results: remoteResults, error } = await fetchAssessmentResultsFromSupabase(normalizedCode);
   console.log('[DASHBOARD] Supabase rows:', remoteResults.length, remoteResults);
 
   if (error) {
@@ -172,7 +280,7 @@ export async function loadAssessmentResults(): Promise<AssessmentResultsLoad> {
       `Supabase SELECT failed (${error}); falling back to localStorage`,
     );
     return {
-      results: localResults,
+      results: filteredLocal,
       source: 'local',
       warning: SUPABASE_SELECT_POLICY_HINT,
     };
@@ -184,9 +292,9 @@ export async function loadAssessmentResults(): Promise<AssessmentResultsLoad> {
     return { results: remoteResults, source: 'supabase' };
   }
 
-  const source = localResults.length > 0 ? 'local' : 'supabase';
+  const source = filteredLocal.length > 0 ? 'local' : 'supabase';
   const reason =
-    localResults.length > 0
+    filteredLocal.length > 0
       ? 'Supabase returned zero rows; localStorage has data — hybrid fallback to local'
       : 'Supabase returned zero rows; no local data — source marked supabase with empty results';
 
@@ -194,7 +302,7 @@ export async function loadAssessmentResults(): Promise<AssessmentResultsLoad> {
   console.log('[DASHBOARD] Reason:', reason);
 
   return {
-    results: localResults,
+    results: filteredLocal,
     source,
   };
 }

@@ -1,26 +1,99 @@
-/* Dr. Victoria adult training — calm lavender, cream, gold, soft navy */
+@import '../adult-learning/adult-training-tokens.css';
+
+/* Dr. Victoria adult training — soft pink, rose accent, soft navy */
 
 .victoria-game.bbc-app {
-  --victoria-navy: #243e70;
-  --victoria-lavender: #e9e0f5;
-  --victoria-lavender-deep: #d8c9ef;
-  --victoria-cream: #faf8f4;
-  --victoria-gold: #c9a44a;
-  background: linear-gradient(180deg, #faf8f4 0%, #f3eef9 48%, #ebe4f7 100%);
+  --victoria-navy: #233b6e;
+  --victoria-accent: #d99bc7;
+  --victoria-secondary: #b784d7;
+  --victoria-bg: #fff7fa;
+  background: var(--victoria-bg);
   color: var(--victoria-navy);
 }
 
-.victoria-game--embedded.bbc-app {
-  min-height: 32rem;
+.victoria-game--embedded.bbc-app,
+.victoria-game.adult-guide-game--embedded.bbc-app {
+  min-height: calc(100dvh - 7.5rem);
   border-radius: 1.25rem;
   border: 1px solid rgba(201, 164, 74, 0.22);
-  overflow: hidden;
+  overflow: visible;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.victoria-game--embedded .bbc-main {
+.victoria-game--embedded .bbc-main,
+.victoria-game.adult-guide-game--embedded .bbc-main {
+  flex: 1;
   min-height: 28rem;
+  display: flex;
+  flex-direction: column;
 }
+
+.victoria-game.adult-guide-game--embedded .bbc-main--landing,
+.victoria-game.adult-guide-game--embedded .bbc-main--quiz,
+.victoria-game.adult-guide-game--embedded .bbc-landing,
+.victoria-game.adult-guide-game--embedded .mission-quizLayout {
+  flex: 1;
+}
+
+.victoria-game .bbc-main--victoriaHubBack,
+.victoria-game .bbc-main--guideHubBack,
+.uncle-t-game .bbc-main--guideHubBack {
+  position: relative;
+  padding-top: 0.25rem;
+}
+
+.victoria-hubBackLink {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  color: var(--victoria-navy);
+  max-width: calc(100% - 1.5rem);
+}
+
+.victoria-hubBackLink:hover .victoria-hubBackLabel {
+  text-decoration: underline;
+}
+
+.victoria-hubBackIcon {
+  flex-shrink: 0;
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--victoria-accent) 0%, var(--victoria-secondary) 100%);
+  box-shadow: 0 8px 20px -10px rgba(183, 132, 215, 0.65);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.victoria-hubBackIcon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.victoria-hubBackLabel {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--victoria-navy);
+}
+
+.victoria-game .bbc-main--victoriaHubBack .bbc-landing,
+.victoria-game .bbc-main--guideHubBack .bbc-landing,
+.uncle-t-game .bbc-main--guideHubBack .bbc-landing {
+  padding-top: 2.75rem;
+}
+
+/* Back button positioning handled by adult-training-back-button.css */
 
 .victoria-topBar {
   display: grid;
@@ -51,7 +124,7 @@
 .victoria-progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #7c6aad, #c9a44a);
+  background: linear-gradient(90deg, var(--victoria-accent), var(--victoria-secondary));
   transition: width 0.35s ease;
 }
 
@@ -65,10 +138,10 @@
   width: 7.5rem;
   height: 7.5rem;
   border-radius: 9999px;
-  border: 3px solid rgba(201, 164, 74, 0.55);
+  border: 3px solid rgba(217, 155, 199, 0.55);
   overflow: hidden;
-  background: linear-gradient(180deg, #fff 0%, #f3eef9 100%);
-  box-shadow: 0 14px 36px -18px rgba(36, 62, 112, 0.28);
+  background: #fff;
+  box-shadow: 0 14px 36px -18px rgba(35, 59, 110, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,114 +149,108 @@
 }
 
 .victoria-game .game-avatarHero img {
-  width: 92%;
-  height: 92%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 10%;
+  transform: scale(1.15);
+  background: #fff;
 }
 
-.victoria-reflectionCard {
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.125rem;
-  border-radius: 1rem;
-  border: 2px solid rgba(124, 106, 173, 0.22);
-  background: linear-gradient(180deg, #fff 0%, #f8f4fc 100%);
-  box-shadow: 0 10px 28px -20px rgba(36, 62, 112, 0.28);
+.victoria-game .mission-speechAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 10%;
+  transform: scale(1.15);
+  background: #fff;
 }
 
-.victoria-reflectionCardHead {
+.victoria-game .bbc-quizB4 {
+  background: #fff;
+  border-color: rgba(217, 155, 199, 0.65);
+}
+
+.victoria-game .bbc-quizB4 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 10%;
+  transform: scale(1.15);
+  background: #fff;
+}
+
+.victoria-game .mission-feedbackCard--victoria .mission-feedbackAvatar {
+  object-fit: cover;
+  object-position: center 10%;
+}
+
+.victoria-reflectionCard,
+.victoria-focusLabCard {
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.victoria-reflectionCardHead,
+.victoria-focusLabCardHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  padding-top: 0.25rem;
 }
 
-.victoria-reflectionCardLabel {
+.victoria-reflectionCardLabel,
+.victoria-focusLabCardLabel {
+  color: var(--victoria-secondary);
   font-size: 0.6875rem;
-  font-weight: 800;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(36, 62, 112, 0.72);
 }
 
-.victoria-reflectionCardTag {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #7c6aad;
-  background: rgba(124, 106, 173, 0.12);
-  padding: 0.25rem 0.5rem;
+.victoria-reflectionCardTag,
+.victoria-focusLabCardTag {
+  color: #8a6b1d;
+  background: rgba(201, 164, 74, 0.16);
+  border: 1px solid rgba(201, 164, 74, 0.3);
+  padding: 0.3rem 0.625rem;
   border-radius: 999px;
 }
 
-.victoria-reflectionGraphic {
+.victoria-reflectionGraphic,
+.victoria-focusLabGraphic {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 5.5rem;
-  margin-bottom: 0.75rem;
+  width: 100%;
   border-radius: 0.875rem;
-  background: linear-gradient(135deg, rgba(233, 224, 245, 0.65) 0%, rgba(250, 248, 244, 0.95) 100%);
+  background: linear-gradient(180deg, #fff 0%, #fceff5 100%);
+  border: 1px solid rgba(217, 155, 199, 0.24);
+  padding: 0.5rem;
 }
 
-.victoria-reflectionGraphicIcon {
-  font-size: 2.5rem;
-  line-height: 1;
+.victoria-reflectionCardText,
+.victoria-focusLabCardText {
+  color: var(--adult-body);
+  font-size: var(--adult-body-size);
+  line-height: var(--adult-body-lh);
+  font-weight: 600;
 }
 
-.victoria-reflectionCardText {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: rgba(36, 62, 112, 0.88);
+.mission-speechRow--victoria .mission-speechContent {
+  border: 2px solid rgba(217, 155, 199, 0.36);
+  background: linear-gradient(180deg, #fff 0%, #fff7fa 100%);
+  box-shadow: 0 12px 30px -20px rgba(35, 59, 110, 0.22);
 }
 
-.victoria-feedbackCard {
-  display: flex;
-  gap: 0.875rem;
-  align-items: flex-start;
-  margin: 1rem 0 0.5rem;
-  padding: 0.875rem 1rem;
-  border-radius: 1rem;
-  border: 2px solid rgba(124, 106, 173, 0.2);
-  background: #fff;
+.mission-speechContent .victoria-reflectionCard.mission-scenarioCard,
+.mission-speechContent .victoria-focusLabCard.mission-scenarioCard {
+  padding: 1.125rem 1.25rem 1.25rem;
 }
 
-.victoria-feedbackCard--success {
-  border-color: rgba(201, 164, 74, 0.45);
-  background: linear-gradient(180deg, #fffdf8 0%, #fff 100%);
-}
-
-.victoria-feedbackCard--try {
-  border-color: rgba(124, 106, 173, 0.35);
-}
-
-.victoria-feedbackAvatar {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 9999px;
-  object-fit: contain;
-  background: #f3eef9;
-  border: 2px solid rgba(201, 164, 74, 0.35);
-  flex-shrink: 0;
-}
-
-.victoria-feedbackLabel {
-  margin: 0 0 0.25rem;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #7c6aad;
-}
-
-.victoria-feedbackText {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: rgba(36, 62, 112, 0.9);
-}
+/* Victoria feedback uses shared .mission-feedbackCard--victoria */
 
 .game-quizWrap--reflectionCard .bbc-questionText {
   color: var(--victoria-navy);
@@ -195,15 +262,22 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-}
-
-.victoria-completeAvatar {
   width: 5.5rem;
   height: 5.5rem;
   border-radius: 9999px;
-  object-fit: contain;
-  border: 3px solid rgba(201, 164, 74, 0.45);
-  background: #f3eef9;
+  overflow: hidden;
+  border: 3px solid rgba(217, 155, 199, 0.45);
+  background: #fff;
+}
+
+.victoria-completeAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 10%;
+  transform: scale(1.15);
+  border: none;
+  background: #fff;
 }
 
 .victoria-rewardPill {
@@ -212,45 +286,219 @@
   gap: 0.35rem;
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(124, 106, 173, 0.14), rgba(201, 164, 74, 0.18));
-  border: 1px solid rgba(201, 164, 74, 0.35);
+  background: rgba(217, 155, 199, 0.14);
+  border: 1px solid rgba(183, 132, 215, 0.35);
   color: var(--victoria-navy);
   font-size: 0.75rem;
   font-weight: 700;
 }
 
 .game-complete--victoria .game-completeScore {
-  color: rgba(36, 62, 112, 0.82);
+  color: rgba(35, 59, 110, 0.82);
 }
 
-.game-deco--victoria-glow {
+.victoria-game .game-deco {
   position: absolute;
-  border-radius: 9999px;
   pointer-events: none;
-  opacity: 0.45;
+  color: var(--victoria-navy);
 }
 
-.game-deco--victoria-glow-a {
+.victoria-game .game-deco--victoria-piece {
+  opacity: 0.04;
+}
+
+.victoria-game .game-deco--victoria-piece-a {
+  top: 6%;
+  right: 8%;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.victoria-game .game-deco--victoria-piece-b {
+  bottom: 18%;
+  left: 6%;
+  width: 3.5rem;
+  height: 3.5rem;
+  transform: rotate(18deg);
+}
+
+.victoria-game .game-deco--victoria-thought {
+  opacity: 0.035;
+}
+
+.victoria-game .game-deco--victoria-thought-a {
+  top: 22%;
+  left: 10%;
+  width: 5rem;
+  height: 4rem;
+}
+
+.victoria-game .game-deco--victoria-thought-b {
+  bottom: 8%;
+  right: 14%;
+  width: 4rem;
+  height: 3.25rem;
+}
+
+.victoria-game .game-deco--victoria-star {
+  opacity: 0.045;
+}
+
+.victoria-game .game-deco--victoria-star-a {
+  top: 14%;
+  right: 22%;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.victoria-game .game-deco--victoria-star-b {
+  bottom: 32%;
+  left: 18%;
+  width: 2rem;
+  height: 2rem;
+}
+
+.victoria-game .game-deco--victoria-checklist {
+  opacity: 0.04;
+}
+
+.victoria-game .game-deco--victoria-checklist-a {
+  top: 42%;
+  right: 5%;
+  width: 4rem;
+  height: 5rem;
+}
+
+.victoria-game .game-deco--victoria-speech {
+  opacity: 0.03;
+}
+
+.victoria-game .game-deco--victoria-speech-a {
+  bottom: 24%;
+  left: 4%;
+  width: 5.5rem;
+  height: 4rem;
+}
+
+.victoria-game .game-deco svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mission 3 — Focus Lab visual direction */
+.victoria-game--focusLab.bbc-app {
+  background: linear-gradient(180deg, #fffaf7 0%, #fff7fa 45%, #fdf2f8 100%);
+}
+
+.victoria-game--focusLab .victoria-progressFill {
+  background: linear-gradient(90deg, #c9a44a 0%, var(--victoria-accent) 55%, var(--victoria-secondary) 100%);
+}
+
+.victoria-focusLabCardLabel {
+  color: #8a6b1d;
+}
+
+.victoria-focusLabGraphic {
+  background: linear-gradient(135deg, #fff 0%, rgba(201, 164, 74, 0.1) 100%);
+}
+
+.game-quizWrap--focusLab .bbc-questionText {
+  color: var(--victoria-navy);
+  font-size: clamp(1.375rem, 3.2vw, 1.875rem);
+}
+
+.victoria-game--focusLab .game-deco--focusLab {
+  position: absolute;
+  pointer-events: none;
+  color: var(--victoria-navy);
+  opacity: 0.04;
+}
+
+.victoria-game--focusLab .game-deco--focusLab-checklist-a {
   top: 8%;
   right: 6%;
-  width: 10rem;
-  height: 10rem;
-  background: radial-gradient(circle, rgba(124, 106, 173, 0.22) 0%, transparent 70%);
+  width: 3.5rem;
+  height: 4.5rem;
 }
 
-.game-deco--victoria-glow-b {
-  bottom: 12%;
-  left: 4%;
-  width: 12rem;
-  height: 12rem;
-  background: radial-gradient(circle, rgba(201, 164, 74, 0.16) 0%, transparent 70%);
+.victoria-game--focusLab .game-deco--focusLab-timer-a {
+  top: 20%;
+  left: 8%;
+  width: 3rem;
+  height: 3rem;
 }
 
-.game-deco--victoria-dots {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.12;
-  background-image: radial-gradient(circle, rgba(124, 106, 173, 0.55) 1px, transparent 1px);
-  background-size: 18px 18px;
+.victoria-game--focusLab .game-deco--focusLab-folder-a {
+  bottom: 22%;
+  right: 10%;
+  width: 3.5rem;
+  height: 2.75rem;
+}
+
+.victoria-game--focusLab .game-deco--focusLab-desk-a {
+  bottom: 10%;
+  left: 5%;
+  width: 5rem;
+  height: 3rem;
+}
+
+.victoria-game--focusLab .game-deco--focusLab-sticky-a {
+  top: 42%;
+  right: 4%;
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0.035;
+}
+
+.victoria-game--focusLab .game-deco--focusLab-heart-a {
+  bottom: 34%;
+  left: 16%;
+  width: 2rem;
+  height: 2rem;
+  opacity: 0.03;
+}
+
+.victoria-game--focusLab .game-deco--focusLab-bulb-a {
+  top: 12%;
+  right: 24%;
+  width: 2.25rem;
+  height: 2.75rem;
+  opacity: 0.045;
+}
+
+.victoria-game--focusLab .game-deco svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .victoria-game.adult-guide-game--embedded.bbc-app {
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .victoria-game.adult-guide-game--embedded .bbc-main {
+    min-height: calc(100dvh - 5rem);
+    padding-bottom: 5.5rem;
+  }
+
+  .victoria-topBar {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .victoria-progressTrack {
+    max-width: none;
+  }
+
+  .victoria-game .bbc-answerCard {
+    min-height: 3.75rem;
+    padding: 1.125rem 1.25rem;
+    font-size: 1.0625rem;
+  }
+
+  .victoria-reflectionCardText,
+  .victoria-focusLabCardText {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
 }

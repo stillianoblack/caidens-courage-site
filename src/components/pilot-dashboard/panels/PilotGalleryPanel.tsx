@@ -1,20 +1,33 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
 import { PILOT_STUDENT_GALLERY } from '../../../data/pilotDashboardContent';
+import { trackEvent } from '../../../lib/analytics';
+import { requestGalleryCountsRefresh } from '../../../lib/galleryNavCounts';
 import {
   DEFAULT_GALLERY_PROGRAM_CODE,
-  fetchStudentGalleryItems,
-  normalizeGalleryStatus,
+  fetchFacilitatorApprovedGalleryItems,
+  fetchFacilitatorPendingGalleryItems,
   updateStudentGalleryItemReview,
   uploadStudentGalleryItem,
 } from '../../../lib/studentGalleryService';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 
-export default function PilotGalleryPanel() {
+type PilotGalleryPanelProps = {
+  programCode?: string;
+  groupName?: string;
+};
+
+export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
+  const { programCode: programCodeProp, groupName: groupNameProp } = props;
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<Awaited<ReturnType<typeof fetchStudentGalleryItems>>>([]);
+  const [pendingItems, setPendingItems] = useState<
+    Awaited<ReturnType<typeof fetchFacilitatorPendingGalleryItems>>
+  >([]);
+  const [approvedItems, setApprovedItems] = useState<
+    Awaited<ReturnType<typeof fetchFacilitatorApprovedGalleryItems>>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
@@ -22,32 +35,44 @@ export default function PilotGalleryPanel() {
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
   const [reviewMessageTone, setReviewMessageTone] = useState<'success' | 'error'>('success');
   const [reviewNote, setReviewNote] = useState('');
+
+  useEffect(() => {
+    trackEvent('gallery_viewed');
+  }, []);
   const [title, setTitle] = useState('');
   const [studentNickname, setStudentNickname] = useState('');
-  const [groupName, setGroupName] = useState('');
-  const [programCode, setProgramCode] = useState(DEFAULT_GALLERY_PROGRAM_CODE);
+  const [programCode, setProgramCode] = useState(
+    programCodeProp?.trim() || DEFAULT_GALLERY_PROGRAM_CODE,
+  );
+  const [groupName, setGroupName] = useState(groupNameProp?.trim() || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (programCodeProp?.trim()) {
+      setProgramCode(programCodeProp.trim());
+    }
+  }, [programCodeProp]);
+
+  useEffect(() => {
+    if (groupNameProp?.trim()) {
+      setGroupName(groupNameProp.trim());
+    }
+  }, [groupNameProp]);
 
   const refreshGallery = useCallback(async () => {
     setLoading(true);
-    const next = await fetchStudentGalleryItems();
-    setItems(next);
+    const [pending, approved] = await Promise.all([
+      fetchFacilitatorPendingGalleryItems(programCodeProp),
+      fetchFacilitatorApprovedGalleryItems(programCodeProp),
+    ]);
+    setPendingItems(pending);
+    setApprovedItems(approved);
     setLoading(false);
-  }, []);
+  }, [programCodeProp]);
 
   useEffect(() => {
     void refreshGallery();
   }, [refreshGallery]);
-
-  const pendingItems = useMemo(
-    () => items.filter((item) => normalizeGalleryStatus(item.status) === 'pending'),
-    [items],
-  );
-
-  const approvedItems = useMemo(
-    () => items.filter((item) => normalizeGalleryStatus(item.status) === 'approved'),
-    [items],
-  );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -100,6 +125,7 @@ export default function PilotGalleryPanel() {
       fileInputRef.current.value = '';
     }
     await refreshGallery();
+    requestGalleryCountsRefresh();
   };
 
   const runReview = async (
@@ -126,6 +152,7 @@ export default function PilotGalleryPanel() {
     setReviewMessage(successMessage);
     setReviewNote('');
     await refreshGallery();
+    requestGalleryCountsRefresh();
   };
 
   const handleApprove = (id: string) =>
@@ -143,7 +170,6 @@ export default function PilotGalleryPanel() {
 
   return (
     <div className="pilot-panel pilot-panel--gallery">
-      <h2 className="pilot-sectionTitle">{PILOT_STUDENT_GALLERY.title}</h2>
       <p className="pilot-panelIntro">{PILOT_STUDENT_GALLERY.description}</p>
 
       <form className="pilot-galleryUploadCard" onSubmit={handleUpload}>

@@ -1,8 +1,10 @@
 import React from 'react';
 import type { GameAssessmentComplete as CompleteConfig, GameScoreMessage } from '../../types/gameAssessment';
+import CharacterAvatar from './shared/CharacterAvatar';
 import MirandaAvatar from '../miranda/MirandaAvatar';
 import MirandaNavButton from '../miranda/MirandaNavButton';
 import { MIRANDA_RETURN_HUB_LABEL } from '../../data/miranda/progression';
+import type { MissionGameTheme } from '../mission-game/MissionSpeechRow';
 
 type GameAssessmentCompleteProps = {
   config: CompleteConfig;
@@ -15,6 +17,8 @@ type GameAssessmentCompleteProps = {
   showMirandaAvatar?: boolean;
   showCaidenAvatar?: boolean;
   showVictoriaAvatar?: boolean;
+  showUncleTAvatar?: boolean;
+  showCharlieAvatar?: boolean;
   hubPath?: string;
   nextCasePath?: string | null;
   nextCaseLabel?: string | null;
@@ -45,6 +49,8 @@ export default function GameAssessmentComplete({
   showMirandaAvatar = false,
   showCaidenAvatar = false,
   showVictoriaAvatar = false,
+  showUncleTAvatar = false,
+  showCharlieAvatar = false,
   hubPath,
   nextCasePath,
   nextCaseLabel,
@@ -58,7 +64,22 @@ export default function GameAssessmentComplete({
   const isMirandaProgression = showMirandaAvatar && hubPath;
   const isCaidenProgression = showCaidenAvatar && hubPath;
   const isVictoriaProgression = showVictoriaAvatar && hubPath;
+  const isUncleTProgression = showUncleTAvatar && hubPath;
+  const isCharlieProgression = showCharlieAvatar && hubPath;
+  const isAdultGuideProgression = isVictoriaProgression || isUncleTProgression;
   const hasNextCase = Boolean(nextCasePath && nextCaseLabel);
+
+  const completeTheme: MissionGameTheme | null = showMirandaAvatar
+    ? 'miranda'
+    : isCaidenProgression
+      ? 'caiden'
+      : isVictoriaProgression
+        ? 'victoria'
+        : isUncleTProgression
+          ? 'uncle-t'
+          : isCharlieProgression
+            ? 'charlie'
+            : null;
 
   const panelClass = [
     'bbc-resultPanel',
@@ -66,6 +87,8 @@ export default function GameAssessmentComplete({
     'game-complete',
     isCaidenProgression ? 'game-complete--caiden' : '',
     isVictoriaProgression ? 'game-complete--victoria' : '',
+    isUncleTProgression ? 'game-complete--uncle-t' : '',
+    isCharlieProgression ? 'game-complete--charlie' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -74,28 +97,24 @@ export default function GameAssessmentComplete({
     <div className={panelClass}>
       {showMirandaAvatar ? (
         <MirandaAvatar variant="complete" src={avatarSrc} alt={avatarAlt} />
-      ) : null}
-
-      {isCaidenProgression ? (
-        <div className="caiden-completeHero">
-          {avatarSrc ? (
-            <img src={avatarSrc} alt={avatarAlt ?? 'Caiden'} className="caiden-completeAvatar" />
-          ) : null}
-          <div className="caiden-completeFlame" aria-hidden="true">
-            🔥
-          </div>
-        </div>
-      ) : null}
-
-      {isVictoriaProgression ? (
-        <div className="victoria-completeHero">
-          {avatarSrc ? (
-            <img src={avatarSrc} alt={avatarAlt ?? 'Dr. Victoria'} className="victoria-completeAvatar" />
+      ) : completeTheme && avatarSrc ? (
+        <div className={`game-completeHero game-completeHero--${completeTheme}`}>
+          <CharacterAvatar
+            src={avatarSrc}
+            alt={avatarAlt ?? completeTheme}
+            size="large"
+            theme={completeTheme}
+            className="game-completeAvatar"
+          />
+          {isCaidenProgression ? (
+            <div className="caiden-completeFlame" aria-hidden="true">
+              🔥
+            </div>
           ) : null}
         </div>
       ) : null}
 
-      {!isCaidenProgression && !isVictoriaProgression ? (
+      {!isCaidenProgression && !isAdultGuideProgression && !isCharlieProgression && !showMirandaAvatar ? (
         <div className="game-completeBadge" aria-hidden="true">
           🔍
         </div>
@@ -107,7 +126,7 @@ export default function GameAssessmentComplete({
       <p
         className={`game-completeScore${isCaidenProgression ? ' game-completeScore--caiden' : ''}${
           isVictoriaProgression ? ' game-completeScore--victoria' : ''
-        }`}
+        }${isUncleTProgression ? ' game-completeScore--uncle-t' : ''}`}
       >
         You completed <strong>{score}</strong> of <strong>{total}</strong> {scoreLabel}.
       </p>
@@ -115,7 +134,7 @@ export default function GameAssessmentComplete({
       <div
         className={`game-badgeRow${isCaidenProgression ? ' game-badgeRow--caiden' : ''}${
           isVictoriaProgression ? ' game-badgeRow--victoria' : ''
-        }`}
+        }${isUncleTProgression ? ' game-badgeRow--uncle-t' : ''}`}
         role="list"
         aria-label="Rewards earned"
       >
@@ -123,7 +142,13 @@ export default function GameAssessmentComplete({
           <span
             key={badge}
             className={
-              isCaidenProgression ? 'caiden-rewardPill' : isVictoriaProgression ? 'victoria-rewardPill' : 'game-badge'
+              isCaidenProgression
+                ? 'caiden-rewardPill'
+                : isVictoriaProgression
+                  ? 'victoria-rewardPill'
+                  : isUncleTProgression
+                    ? 'uncleT-rewardPill'
+                    : 'game-badge'
             }
             role="listitem"
           >
@@ -134,7 +159,7 @@ export default function GameAssessmentComplete({
 
       <div
         className={`bbc-resultActions${
-          isMirandaProgression || isCaidenProgression || isVictoriaProgression ? ' miranda-completeActions' : ''
+          isMirandaProgression || isCaidenProgression || isAdultGuideProgression ? ' miranda-completeActions' : ''
         }`}
       >
         {isMirandaProgression ? (
@@ -167,10 +192,10 @@ export default function GameAssessmentComplete({
               </button>
             )}
           </>
-        ) : isVictoriaProgression ? (
+        ) : isAdultGuideProgression ? (
           <>
             <MirandaNavButton
-              to={hubPath}
+              to={hubPath!}
               label={continueLabel ?? exitLabel}
               variant="next-case"
               onClick={onNavClick}

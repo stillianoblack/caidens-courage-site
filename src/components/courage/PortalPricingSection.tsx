@@ -30,20 +30,20 @@ const FAMILY_PORTAL_CARD: PathCard = {
   title: 'Family Portal',
   description:
     'At-home Focus Flame tools, coloring pages, B-4 reset activities, and family conversation guides.',
-  price: '$49/year',
+  price: '$79/year',
   cta: 'Join the Family Portal',
   ctaTo: PORTAL_PATH,
   badges: ['Best for Families'],
 };
 
 const FAMILY_BUNDLE_CARD: PathCard = {
-  title: 'Digital Novel + Family Portal',
+  title: 'Digital Book + Family Portal',
   description:
     'Includes digital access to the 139-page graphic novel plus one year of Family Portal resources.',
-  price: '$79',
-  cta: 'Get the Family Bundle',
+  price: '$129/year',
+  cta: 'Get Digital Book + Family Portal',
   ctaTo: PORTAL_PATH,
-  badges: ['Digital Access', 'Best for Families'],
+  badges: ['Recommended', 'Best for Families'],
   note: 'Physical books are sold separately.',
   featured: true,
 };

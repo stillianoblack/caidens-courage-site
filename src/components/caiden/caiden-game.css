@@ -13,7 +13,7 @@
   min-height: 32rem;
   border-radius: 1.25rem;
   border: 1px solid rgba(229, 192, 106, 0.25);
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -114,21 +114,18 @@
   text-align: center;
 }
 
-.caiden-completeHero {
+.caiden-completeHero,
+.game-completeHero {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin: 0 auto 0.75rem;
 }
 
-.caiden-completeAvatar {
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 9999px;
-  object-fit: cover;
-  border: 3px solid #e5c06a;
-  box-shadow: 0 0 12px rgba(229, 192, 106, 0.35);
+.caiden-completeAvatar,
+.game-completeAvatar.character-avatar {
+  box-shadow: 0 12px 28px -14px rgba(36, 62, 112, 0.22);
 }
 
 .caiden-completeFlame {

@@ -3,19 +3,33 @@
 }
 
 .portal-searchField {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.75rem;
   border-radius: 9999px;
   border: 1px solid rgba(36, 62, 112, 0.14);
   background: #fff;
-  min-width: 12rem;
+  min-width: 0;
+  flex: 1 1 10rem;
+  max-width: 16rem;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 767px) {
+  .portal-search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
   .portal-searchField {
-    display: inline-flex;
+    max-width: none;
+    width: 100%;
+  }
+
+  .portal-searchMenu {
+    left: 0;
+    right: 0;
+    width: auto;
   }
 }
 

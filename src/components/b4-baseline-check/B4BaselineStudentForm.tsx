@@ -5,6 +5,7 @@ type B4BaselineStudentFormProps = {
   initialNickname?: string;
   initialProgramCode?: string;
   initialGroupName?: string;
+  familyPortal?: boolean;
   onSubmit: (values: { nickname: string; programCode: string; groupName: string }) => void;
 };
 
@@ -12,6 +13,7 @@ export default function B4BaselineStudentForm({
   initialNickname = '',
   initialProgramCode = '',
   initialGroupName = '',
+  familyPortal = false,
   onSubmit,
 }: B4BaselineStudentFormProps) {
   const [nickname, setNickname] = useState(initialNickname);
@@ -19,6 +21,9 @@ export default function B4BaselineStudentForm({
   const [groupName, setGroupName] = useState(initialGroupName);
 
   const canStart = nickname.trim().length > 0;
+  const nicknameLabel = familyPortal ? 'Child nickname' : 'Nickname or first name';
+  const groupLabel = familyPortal ? 'Group or classroom (optional)' : 'Group or Classroom Name';
+  const startLabel = familyPortal ? 'Start B-4 Check-In' : 'Start Check';
 
   return (
     <form
@@ -38,7 +43,7 @@ export default function B4BaselineStudentForm({
       </p>
 
       <label className="bbc-field">
-        <span className="bbc-fieldLabel">Nickname or first name</span>
+        <span className="bbc-fieldLabel">{nicknameLabel}</span>
         <input
           type="text"
           className="bbc-fieldInput"
@@ -62,11 +67,12 @@ export default function B4BaselineStudentForm({
           autoComplete="off"
           maxLength={48}
           placeholder="FFA-PILOT-2026"
+          readOnly={familyPortal && Boolean(initialProgramCode)}
         />
       </label>
 
       <label className="bbc-field">
-        <span className="bbc-fieldLabel">Group or Classroom Name</span>
+        <span className="bbc-fieldLabel">{groupLabel}</span>
         <input
           type="text"
           className="bbc-fieldInput"
@@ -79,7 +85,7 @@ export default function B4BaselineStudentForm({
       </label>
 
       <button type="submit" className="bbc-primaryBtn bbc-landingCta" disabled={!canStart}>
-        Start Check
+        {startLabel}
       </button>
     </form>
   );

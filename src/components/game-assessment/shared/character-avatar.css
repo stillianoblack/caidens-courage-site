@@ -1,0 +1,41 @@
+.character-avatar {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.character-avatar--bordered {
+  border-style: solid;
+  border-width: 3px;
+}
+
+.character-avatar--small {
+  width: 3rem;
+  height: 3rem;
+}
+
+.character-avatar--medium {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.character-avatar--large {
+  width: 7rem;
+  height: 7rem;
+}
+
+.character-avatar--hero {
+  width: 10rem;
+  height: 10rem;
+}
+
+.character-avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

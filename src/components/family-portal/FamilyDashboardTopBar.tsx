@@ -1,25 +1,23 @@
 import React from 'react';
-import { FAMILY_PORTAL_TAG } from '../../data/familyPortalContent';
-import PortalResourceSearch from '../shared/PortalResourceSearch';
-import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
+import PortalHeader from '../portal/PortalHeader';
 
 type FamilyDashboardTopBarProps = {
   pageTitle: string;
-  pageSubtitle?: string;
+  contextTitle?: string;
+  contextSubtitle?: string;
 };
 
-export default function FamilyDashboardTopBar({ pageTitle, pageSubtitle }: FamilyDashboardTopBarProps) {
+export default function FamilyDashboardTopBar({
+  pageTitle,
+  contextTitle,
+  contextSubtitle,
+}: FamilyDashboardTopBarProps) {
   return (
-    <header className="family-topbar">
-      <div>
-        <h1 className="family-topbarTitle">{pageTitle}</h1>
-        {pageSubtitle ? <p className="family-topbarSubtitle">{pageSubtitle}</p> : null}
-        <p className="family-topbarTag">{FAMILY_PORTAL_TAG}</p>
-      </div>
-      <div className="family-topbarRight">
-        <PortalResourceSearch portal="family" />
-        <PortalSwitcherDropdown />
-      </div>
-    </header>
+    <PortalHeader
+      pageTitle={pageTitle}
+      contextTitle={contextTitle}
+      contextSubtitle={contextSubtitle}
+      portal="family"
+    />
   );
 }

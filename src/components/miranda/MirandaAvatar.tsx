@@ -1,4 +1,5 @@
 import React from 'react';
+import CharacterAvatar, { type CharacterAvatarSize } from '../game-assessment/shared/CharacterAvatar';
 import { MIRANDA_AVATAR_ALT, MIRANDA_AVATAR_SRC } from '../../data/miranda/sharedAssets';
 
 type MirandaAvatarProps = {
@@ -7,6 +8,13 @@ type MirandaAvatarProps = {
   /** hub | hero (landing) | complete | quiz */
   variant?: 'hub' | 'hero' | 'complete' | 'quiz';
   className?: string;
+};
+
+const VARIANT_SIZE: Record<NonNullable<MirandaAvatarProps['variant']>, CharacterAvatarSize> = {
+  hub: 'large',
+  hero: 'hero',
+  complete: 'large',
+  quiz: 'medium',
 };
 
 export default function MirandaAvatar({
@@ -25,7 +33,13 @@ export default function MirandaAvatar({
           ✦
         </span>
       ) : null}
-      <img src={src} alt={alt} decoding="async" className="miranda-avatarImg" />
+      <CharacterAvatar
+        src={src}
+        alt={alt}
+        size={VARIANT_SIZE[variant]}
+        theme="miranda"
+        className="miranda-avatarCharacter"
+      />
     </div>
   );
 }

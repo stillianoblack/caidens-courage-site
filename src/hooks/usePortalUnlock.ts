@@ -1,13 +1,22 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { B4_RESULTS_ADMIN_PATH, BLUE_RIBBON_PILOT_PATH, FAMILY_PORTAL_PATH } from '../config/courageRoutes';
+import {
+  B4_RESULTS_ADMIN_PATH,
+  BLUE_RIBBON_PILOT_PATH,
+  FAMILY_HUB_PATH,
+  FAMILY_PORTAL_PATH,
+  PROGRAM_DASHBOARD_PATH,
+} from '../config/courageRoutes';
 import { writeBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
+import { applyProgramPortalUnlock } from '../config/portalContext';
+import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import {
   getDashboardPathForTier,
   resolvePortalAccessCode,
   writePortalSessionUnlock,
 } from '../config/portalAccess';
+import { lookupPilotProgramByAccessCode } from '../lib/pilotProgramService';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
 
@@ -41,9 +50,10 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
   const navigate = useNavigate();
   const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
+    async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setError(null);
 
@@ -73,6 +83,19 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
         return;
       }
 
+      setSubmitting(true);
+      const programMatch = await lookupPilotProgramByAccessCode(accessCode);
+      setSubmitting(false);
+
+      if (programMatch) {
+        applyProgramPortalUnlock(programMatch.program, programMatch.role);
+        writeLastPilotProgram(programMatch.program, programMatch.role, programMatch.program.adminEmail);
+        setAccessCode('');
+        onUnlock?.();
+        navigate(programMatch.role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+        return;
+      }
+
       const tier = resolvePortalAccessCode(accessCode);
       if (!tier) {
         setError(ERROR_BY_VARIANT[variant]);
@@ -84,7 +107,7 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       onUnlock?.();
       navigate(getDashboardPathForTier(tier));
     },
-    [accessCode, navigate, onUnlock, variant]
+    [accessCode, navigate, onUnlock, variant],
   );
 
   const handleAccessCodeChange = useCallback(
@@ -92,13 +115,15 @@ export function usePortalUnlock(variant: PortalUnlockVariant, onUnlock?: () => v
       setAccessCode(value);
       if (error) setError(null);
     },
-    [error]
+    [error],
   );
 
   return {
     accessCode,
     error,
+    submitting,
     handleSubmit,
     onAccessCodeChange: handleAccessCodeChange,
+    clearAccessCode: () => setAccessCode(''),
   };
 }

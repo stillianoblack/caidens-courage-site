@@ -1,14 +1,26 @@
 import React from 'react';
-import { PILOT_CONNECTED_NOTE, PILOT_LOCAL_TESTING_NOTE } from '../../data/pilotDashboardContent';
+import {
+  PILOT_RESULTS_HEADLINE,
+  PILOT_RESULTS_STATUS_COPY,
+} from '../../data/pilotDashboardContent';
 
 type PilotLocalNoteProps = {
   source?: 'supabase' | 'local';
 };
 
-export default function PilotLocalNote({ source = 'local' }: PilotLocalNoteProps) {
+export default function PilotLocalNote(_props: PilotLocalNoteProps) {
   return (
     <p className="pilot-localNote" role="note">
-      {source === 'supabase' ? PILOT_CONNECTED_NOTE : PILOT_LOCAL_TESTING_NOTE}
+      {PILOT_RESULTS_STATUS_COPY}
     </p>
+  );
+}
+
+export function PilotResultsStatusCopy(_props: PilotLocalNoteProps) {
+  return (
+    <div className="pilot-resultsIntro">
+      <p className="pilot-panelIntroTitle">{PILOT_RESULTS_HEADLINE}</p>
+      <p className="pilot-panelIntroSubtitle">{PILOT_RESULTS_STATUS_COPY}</p>
+    </div>
   );
 }

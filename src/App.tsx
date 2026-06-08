@@ -1,5 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import {
+  MissionGamePhaseProvider,
+  useMissionGamePhase,
+} from './context/MissionGamePhaseContext';
 import Home from './pages/Home';
 import ClassicHome from './pages/ClassicHome';
 import KidsHub from './pages/KidsHub';
@@ -38,30 +42,44 @@ import B4BaselineCheckPage from './pages/B4BaselineCheckPage';
 import B4ResultsAdminPage from './pages/B4ResultsAdminPage';
 import B4GuidePage from './pages/B4GuidePage';
 import PilotDashboardPage from './pages/PilotDashboardPage';
+import ProgramDashboardPage from './pages/ProgramDashboardPage';
+import PilotProgramSignupPage from './pages/PilotProgramSignupPage';
+import PilotTermsPage from './pages/PilotTermsPage';
 import FamilyPortalLayout from './pages/FamilyPortalLayout';
 import KidsPortalPage from './pages/KidsPortalPage';
 import KidsCharacterPage from './pages/KidsCharacterPage';
 import FamilyOverviewPanel from './components/family-portal/panels/FamilyOverviewPanel';
 import FamilyContinueLearningPanel from './components/family-portal/panels/FamilyContinueLearningPanel';
 import FamilyCharactersPanel from './components/family-portal/panels/FamilyCharactersPanel';
-import FamilyGamesPanel from './components/family-portal/panels/FamilyGamesPanel';
+import FamilyCharacterProfilePage from './components/family-portal/panels/FamilyCharacterProfilePage';
 import FamilyDownloadsPanel from './components/family-portal/panels/FamilyDownloadsPanel';
 import FamilyGalleryPanel from './components/family-portal/panels/FamilyGalleryPanel';
 import FamilyCertificatesPanel from './components/family-portal/panels/FamilyCertificatesPanel';
 import FamilyGuidePanel from './components/family-portal/panels/FamilyGuidePanel';
+import FamilyHubLayout from './pages/FamilyHubLayout';
+import FacilitatorBaselineCheckPage from './pages/FacilitatorBaselineCheckPage';
+import AdultAssessmentPage from './pages/AdultAssessmentPage';
+import FamilyBaselineCheckPanel from './components/family-portal/panels/FamilyBaselineCheckPanel';
+import FamilyAdultAssessmentPanel from './components/family-portal/panels/FamilyAdultAssessmentPanel';
 import CaidenQuestHubPage from './pages/CaidenQuestHubPage';
 import CaidenQuestPage from './pages/CaidenQuestPage';
 import B4PortalPage from './pages/B4PortalPage';
 import B4PortalCheckInPage from './pages/B4PortalCheckInPage';
 import B4PortalWeek1Page from './pages/B4PortalWeek1Page';
+import B4PortalFeelingFinderPage from './pages/B4PortalFeelingFinderPage';
+import CharliePortalHubPage from './pages/CharliePortalHubPage';
+import CharliePortalMissionPage from './pages/CharliePortalMissionPage';
 import MirandaPortalHubPage from './pages/MirandaPortalHubPage';
 import MirandaPortalMissionPage from './pages/MirandaPortalMissionPage';
 import StudentGallerySubmitPage from './pages/StudentGallerySubmitPage';
 import StudentGalleryPublicPage from './pages/StudentGalleryPublicPage';
 import MirandaMysteryFilesHubPage from './pages/MirandaMysteryFilesHubPage';
 import MirandaMissionPage from './pages/MirandaMissionPage';
-import FacilitatorDrVictoriaMissionPage from './pages/FacilitatorDrVictoriaMissionPage';
-import FamilyDrVictoriaMissionPage from './pages/FamilyDrVictoriaMissionPage';
+import FacilitatorAdultGuideHubPage from './pages/FacilitatorAdultGuideHubPage';
+import FacilitatorAdultGuideMissionPage from './pages/FacilitatorAdultGuideMissionPage';
+import FamilyAdultGuideHubPage from './pages/FamilyAdultGuideHubPage';
+import FamilyAdultGuideMissionPage from './pages/FamilyAdultGuideMissionPage';
+import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import {
@@ -77,8 +95,9 @@ import {
   B4_RESULTS_ADMIN_PATH,
   FACILITATOR_B4_BASELINE_RESULTS_PATH,
   FACILITATOR_B4_RESULTS_PATH,
-  FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
+  FACILITATOR_ADULT_TRAINING_PATH,
   FACILITATOR_PORTAL_PATH,
+  FAMILY_DR_VICTORIA_MISSION_BASE,
   FAMILY_DR_VICTORIA_MISSION_1_PATH,
   FAMILY_PARENT_CORNER_PATH,
   WEEK_0_ASSESSMENT_ALIAS_PATH,
@@ -86,7 +105,14 @@ import {
   FOCUS_FLAME_LAB_PATH,
   PILOT_DASHBOARD_PATH,
   BLUE_RIBBON_PILOT_PATH,
+  PROGRAM_DASHBOARD_PATH,
+  PILOT_PROGRAM_SIGNUP_PATH,
+  PILOT_TERMS_PATH,
   FAMILY_PORTAL_PATH,
+  FAMILY_HUB_PATH,
+  FAMILY_HUB_KIDS_BASE,
+  FACILITATOR_BASELINE_CHECK_PATH,
+  PROGRAM_BASELINE_CHECK_PATH,
   KIDS_PORTAL_PATH,
   CAIDEN_QUEST_HUB_PATH,
   ACADEMY_DASHBOARD_ALIAS_PATH,
@@ -134,7 +160,14 @@ const AppRoutes: React.FC = () => {
       <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
 
       {/* Focus Flame Academy */}
-      <Route path={FACILITATOR_DR_VICTORIA_MISSION_1_PATH} element={<FacilitatorDrVictoriaMissionPage />} />
+      <Route
+        path={`${FACILITATOR_ADULT_TRAINING_PATH}/:guideId`}
+        element={<FacilitatorAdultGuideHubPage />}
+      />
+      <Route
+        path={`${FACILITATOR_ADULT_TRAINING_PATH}/:guideId/:missionId`}
+        element={<FacilitatorAdultGuideMissionPage />}
+      />
       <Route path={FACILITATOR_PORTAL_PATH} element={<PilotDashboardPage />} />
       <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
       <Route
@@ -143,29 +176,77 @@ const AppRoutes: React.FC = () => {
       />
       <Route path={PILOT_DASHBOARD_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={BLUE_RIBBON_PILOT_PATH} element={<PilotDashboardPage />} />
+      <Route path={PROGRAM_DASHBOARD_PATH} element={<ProgramDashboardPage />}>
+        <Route path="kids/caiden" element={<CaidenQuestHubPage />} />
+        <Route path="kids/caiden/:questId" element={<CaidenQuestPage />} />
+        <Route path="kids/miranda" element={<MirandaPortalHubPage />} />
+        <Route path="kids/miranda/:missionId" element={<MirandaPortalMissionPage />} />
+        <Route path="kids/b4" element={<B4PortalPage />} />
+        <Route path="kids/b4/check-in" element={<B4PortalCheckInPage />} />
+        <Route path="kids/b4/week-1" element={<B4PortalWeek1Page />} />
+        <Route path="kids/b4/feeling-finder" element={<B4PortalFeelingFinderPage />} />
+        <Route path="kids/charlie" element={<CharliePortalHubPage />} />
+        <Route path="kids/charlie/:missionId" element={<CharliePortalMissionPage />} />
+        <Route path="kids/zeke" element={<KidsCharacterPage character="zeke" />} />
+      </Route>
+      <Route
+        path={PROGRAM_BASELINE_CHECK_PATH}
+        element={<FacilitatorBaselineCheckPage variant="program" />}
+      />
+      <Route
+        path={FACILITATOR_BASELINE_CHECK_PATH}
+        element={<FacilitatorBaselineCheckPage variant="blueribbon" />}
+      />
+      <Route
+        path={`${FACILITATOR_PORTAL_PATH}/adult-assessment/:phase`}
+        element={<AdultAssessmentPage variant="blueribbon" />}
+      />
+      <Route
+        path={`${PROGRAM_DASHBOARD_PATH}/adult-assessment/:phase`}
+        element={<AdultAssessmentPage variant="program" />}
+      />
+      <Route path={PILOT_PROGRAM_SIGNUP_PATH} element={<PilotProgramSignupPage />} />
+      <Route path={PILOT_TERMS_PATH} element={<PilotTermsPage />} />
       <Route path={ACADEMY_DASHBOARD_ALIAS_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={B4_RESULTS_ADMIN_PATH} element={<B4ResultsAdminPage />} />
 
-      {/* Family Portal shell — includes Caiden quest hub inside portal */}
+      {/* Blue Ribbon family portal backup */}
       <Route element={<FamilyPortalLayout />}>
         <Route path={FAMILY_PORTAL_PATH}>
           <Route index element={<FamilyOverviewPanel />} />
+          <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
-          <Route path="characters" element={<FamilyCharactersPanel />} />
-          <Route path="games" element={<FamilyGamesPanel />} />
+          <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
+          <Route path="characters">
+            <Route index element={<FamilyCharactersPanel />} />
+            <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
+          </Route>
+          <Route path="games" element={<Navigate to="characters" replace />} />
           <Route path="downloads" element={<FamilyDownloadsPanel />} />
           <Route path="gallery" element={<FamilyGalleryPanel />} />
           <Route path="certificates" element={<FamilyCertificatesPanel />} />
           <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route
           path={FAMILY_PARENT_CORNER_PATH}
           element={<Navigate to={`${FAMILY_PORTAL_PATH}/guide`} replace />}
         />
-        <Route path={FAMILY_DR_VICTORIA_MISSION_1_PATH} element={<FamilyDrVictoriaMissionPage />} />
+        <Route
+          path={`${FAMILY_PARENT_CORNER_PATH}/:guideId`}
+          element={<FamilyAdultGuideHubPage />}
+        />
+        <Route
+          path={`${FAMILY_PARENT_CORNER_PATH}/:guideId/:missionId`}
+          element={<FamilyAdultGuideMissionPage />}
+        />
         <Route
           path={`${FAMILY_PORTAL_PATH}/guide/dr-victoria/mission-1`}
           element={<Navigate to={FAMILY_DR_VICTORIA_MISSION_1_PATH} replace />}
+        />
+        <Route
+          path={`${FAMILY_PORTAL_PATH}/guide/dr-victoria/mission-2`}
+          element={<Navigate to={`${FAMILY_DR_VICTORIA_MISSION_BASE}/mission-2`} replace />}
         />
         <Route path={CAIDEN_QUEST_HUB_PATH} element={<CaidenQuestHubPage />} />
         <Route path={`${CAIDEN_QUEST_HUB_PATH}/:questId`} element={<CaidenQuestPage />} />
@@ -174,6 +255,45 @@ const AppRoutes: React.FC = () => {
         <Route path={`${KIDS_PORTAL_PATH}/b4`} element={<B4PortalPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/b4/check-in`} element={<B4PortalCheckInPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/b4/week-1`} element={<B4PortalWeek1Page />} />
+        <Route path={`${KIDS_PORTAL_PATH}/b4/feeling-finder`} element={<B4PortalFeelingFinderPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/charlie`} element={<CharliePortalHubPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/charlie/:missionId`} element={<CharliePortalMissionPage />} />
+      </Route>
+
+      {/* Program family hub (/family-hub) */}
+      <Route element={<FamilyHubLayout />}>
+        <Route path={FAMILY_HUB_PATH}>
+          <Route index element={<FamilyOverviewPanel />} />
+          <Route path="children" element={<Navigate to="characters" replace />} />
+          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
+          <Route path="characters">
+            <Route index element={<FamilyCharactersPanel />} />
+            <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
+          </Route>
+          <Route path="games" element={<Navigate to="characters" replace />} />
+          <Route path="downloads" element={<FamilyDownloadsPanel />} />
+          <Route path="gallery" element={<FamilyGalleryPanel />} />
+          <Route path="certificates" element={<FamilyCertificatesPanel />} />
+          <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
+        </Route>
+        <Route path={`${FAMILY_HUB_PATH}/guide/:guideId`} element={<FamilyAdultGuideHubPage />} />
+        <Route
+          path={`${FAMILY_HUB_PATH}/guide/:guideId/:missionId`}
+          element={<FamilyAdultGuideMissionPage />}
+        />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/caiden`} element={<CaidenQuestHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/caiden/:questId`} element={<CaidenQuestPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/miranda`} element={<MirandaPortalHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/miranda/:missionId`} element={<MirandaPortalMissionPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4`} element={<B4PortalPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/check-in`} element={<B4PortalCheckInPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/week-1`} element={<B4PortalWeek1Page />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/feeling-finder`} element={<B4PortalFeelingFinderPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie`} element={<CharliePortalHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie/:missionId`} element={<CharliePortalMissionPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/zeke`} element={<KidsCharacterPage character="zeke" />} />
       </Route>
 
       {/* Legacy kids hub (non-portal shell) */}
@@ -239,6 +359,7 @@ const AppRoutes: React.FC = () => {
 
 const AppFrame: React.FC = () => {
   const location = useLocation();
+  const missionPhase = useMissionGamePhase();
   const isMirandaExperience =
     location.pathname === MIRANDA_MYSTERY_FILES_PATH ||
     location.pathname.startsWith(`${MIRANDA_MYSTERY_FILES_PATH}/`) ||
@@ -252,19 +373,24 @@ const AppFrame: React.FC = () => {
     isMirandaExperience ||
     location.pathname === PILOT_DASHBOARD_PATH ||
     location.pathname === BLUE_RIBBON_PILOT_PATH ||
+    location.pathname === PROGRAM_DASHBOARD_PATH ||
+    location.pathname.startsWith(`${PROGRAM_DASHBOARD_PATH}/`) ||
+    location.pathname === FAMILY_HUB_PATH ||
+    location.pathname.startsWith(`${FAMILY_HUB_PATH}/`) ||
+    location.pathname === PILOT_PROGRAM_SIGNUP_PATH ||
     location.pathname === FAMILY_PORTAL_PATH ||
     location.pathname.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
     location.pathname.startsWith(`${CAIDEN_QUEST_HUB_PATH}`) ||
     location.pathname === KIDS_PORTAL_PATH ||
     location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);
-  /** Full-screen flows where Ask B-4 would obstruct play — portals keep the floating button. */
+  /** Hide Ask B-4 during active gameplay; intro, portals, and completion keep the button. */
   const hideAskB4Chat =
+    missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
-    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
-    location.pathname === B4_GUIDE_PATH ||
-    location.pathname === B4_BASELINE_CHECK_PATH;
+    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
   return (
     <>
+      <AnalyticsRouteTracker />
       <AppRoutes />
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
       {!hideAskB4Chat ? <DeferredB4ChatWidget /> : null}
@@ -275,7 +401,9 @@ const AppFrame: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppFrame />
+      <MissionGamePhaseProvider>
+        <AppFrame />
+      </MissionGamePhaseProvider>
     </Router>
   );
 };

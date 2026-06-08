@@ -1,13 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { readActivePilotProgram } from '../../config/activePilotProgram';
+import { applyProgramPortalUnlock, signOutPortal } from '../../config/portalContext';
 import {
   ensureFacilitatorPortalAccess,
   ensureFamilyPortalAccess,
 } from '../../config/blueRibbonPortalAccess';
 import {
   FACILITATOR_PORTAL_PATH,
+  FAMILY_HUB_PATH,
   FAMILY_PORTAL_PATH,
   PILOT_DASHBOARD_PATH,
+  PORTAL_PATH,
+  PROGRAM_DASHBOARD_PATH,
 } from '../../config/courageRoutes';
 import './portal-switcher.css';
 
@@ -17,18 +22,29 @@ type PortalOption = {
   id: PortalRole;
   label: string;
   href: string;
+  isProgram?: boolean;
 };
 
-const PORTAL_OPTIONS: PortalOption[] = [
-  { id: 'facilitator', label: 'Facilitator Portal', href: FACILITATOR_PORTAL_PATH },
-  { id: 'family', label: 'Family Portal', href: FAMILY_PORTAL_PATH },
-];
+function buildPortalOptions(): PortalOption[] {
+  const program = readActivePilotProgram();
+  if (program) {
+    return [
+      { id: 'facilitator', label: 'Facilitator Portal', href: PROGRAM_DASHBOARD_PATH, isProgram: true },
+      { id: 'family', label: 'Family Portal', href: FAMILY_HUB_PATH, isProgram: true },
+    ];
+  }
+  return [
+    { id: 'facilitator', label: 'Facilitator Portal', href: FACILITATOR_PORTAL_PATH },
+    { id: 'family', label: 'Family Portal', href: FAMILY_PORTAL_PATH },
+  ];
+}
 
 function resolveCurrentPortal(pathname: string): PortalRole {
   if (
     pathname.startsWith(FACILITATOR_PORTAL_PATH) ||
     pathname.startsWith(PILOT_DASHBOARD_PATH) ||
-    pathname.startsWith('/portal/blueribbon2026')
+    pathname.startsWith('/portal/blueribbon2026') ||
+    pathname.startsWith(PROGRAM_DASHBOARD_PATH)
   ) {
     return 'facilitator';
   }
@@ -44,9 +60,10 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const portalOptions = buildPortalOptions();
 
   const current = resolveCurrentPortal(location.pathname);
-  const currentLabel = PORTAL_OPTIONS.find((o) => o.id === current)?.label ?? 'Portal';
+  const currentLabel = portalOptions.find((o) => o.id === current)?.label ?? 'Portal';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,6 +79,13 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
     setOpen(false);
     if (option.id === current) return;
 
+    const program = readActivePilotProgram();
+    if (option.isProgram && program) {
+      applyProgramPortalUnlock(program, option.id);
+      navigate(option.href);
+      return;
+    }
+
     if (option.id === 'facilitator') {
       ensureFacilitatorPortalAccess();
     } else {
@@ -69,6 +93,12 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
     }
 
     navigate(option.href);
+  };
+
+  const handleSignOut = () => {
+    setOpen(false);
+    signOutPortal();
+    navigate(PORTAL_PATH);
   };
 
   return (
@@ -91,7 +121,7 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
       </button>
       {open ? (
         <ul className="portal-switcherMenu" role="listbox" aria-label="Switch portal">
-          {PORTAL_OPTIONS.map((option) => (
+          {portalOptions.map((option) => (
             <li key={option.id} role="option" aria-selected={option.id === current}>
               <button
                 type="button"
@@ -102,6 +132,12 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
               </button>
             </li>
           ))}
+          <li role="separator" className="portal-switcherDivider" />
+          <li>
+            <button type="button" className="portal-switcherOption portal-switcherOption--signOut" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          </li>
         </ul>
       ) : null}
     </div>

@@ -1,3 +1,4 @@
+import { writeActiveChildNickname } from '../config/activeChildNickname';
 import {
   B4_BASELINE_ASSESSMENT_NAME,
   type BaselineModuleId,
@@ -6,6 +7,7 @@ import {
   insertAssessmentResult,
   type BaselineSubmitResult,
 } from './assessmentResultsService';
+import { recordFormalAssessmentCompletion } from './recordInteractiveCompletion';
 
 const STORAGE_KEY = 'caidens-courage-b4-baseline-check';
 const RESULTS_ARCHIVE_KEY = 'caidens-courage-b4-baseline-results-archive';
@@ -153,6 +155,7 @@ export function saveB4BaselineStudentProfile(
   };
   const next: B4BaselinePersistedState = { ...current, profile };
   saveB4BaselineState(next);
+  writeActiveChildNickname(profile.nickname);
   return next;
 }
 
@@ -187,6 +190,9 @@ export function markBaselineModuleComplete(
 
   if (allDone && record.completedAt) {
     appendBaselineResultToArchive(record);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cc-baseline-complete'));
+    }
   }
 
   return next;
@@ -247,7 +253,31 @@ export function resetB4BaselineState(): void {
 export async function submitBaselineResults(
   result: B4BaselineCheckRecord,
 ): Promise<BaselineSubmitResult> {
-  return insertAssessmentResult(result);
+  const legacyResult = await insertAssessmentResult(result);
+
+  void recordFormalAssessmentCompletion({
+    assessmentType: 'baseline',
+    role: 'student',
+    participant: {
+      nickname: result.nickname,
+      program_code: result.programCode,
+      group_name: result.groupName,
+    },
+    reading_score: result.readingScore,
+    focus_score: result.focusMovesScore,
+    confidence_score: result.feelingsScore,
+    total_score: result.readingScore + result.focusMovesScore + result.feelingsScore,
+    max_score: 60,
+    answers_json: {
+      completedModules: result.completedModules,
+      feelingsScore: result.feelingsScore,
+      readingScore: result.readingScore,
+      focusMovesScore: result.focusMovesScore,
+    },
+    completed_at: result.completedAt,
+  });
+
+  return legacyResult;
 }
 
 export async function persistB4BaselineToDatabase(

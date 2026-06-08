@@ -34,21 +34,6 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
           />
         </svg>
       );
-    case 'characters':
-      return (
-        <svg {...common}>
-          <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.75" />
-          <circle cx="17" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.75" />
-          <path d="M4 20c0-3 2.5-5 5-5s5 2 5 5M14 20c0-2 1.5-3.5 3-3.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-        </svg>
-      );
-    case 'games':
-      return (
-        <svg {...common}>
-          <rect x="4" y="8" width="16" height="10" rx="3" stroke="currentColor" strokeWidth="1.75" />
-          <path d="M8 13h2M9 12v2M15 12.5l1.5 1.5M16.5 12.5L15 14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-        </svg>
-      );
     case 'downloads':
       return (
         <svg {...common}>
@@ -75,6 +60,13 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
       return (
         <svg {...common}>
           <path d="M7 5h10a2 2 0 012 2v12a1 1 0 01-1.4.9L12 18.2l-5.6 1.7A1 1 0 015 19V7a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+        </svg>
+      );
+    case 'character-hub':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.75" />
+          <path d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
         </svg>
       );
     default:

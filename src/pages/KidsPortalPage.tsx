@@ -11,7 +11,7 @@ export default function KidsPortalPage() {
 
   return (
     <main className="family-kidsHub">
-      <PortalSmartBackButton variant="inline" />
+      <PortalSmartBackButton />
       <h1 className="family-kidsHubTitle">Continue Learning</h1>
       <p className="family-kidsHubIntro">
         Choose a character adventure to explore story, reading, and focus activities.

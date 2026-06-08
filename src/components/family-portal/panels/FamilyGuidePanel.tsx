@@ -1,9 +1,6 @@
 import React from 'react';
-import {
-  FAMILY_PARENT_CORNER_CARDS,
-  FAMILY_PARENT_CORNER_INTRO,
-} from '../../../data/familyPortalContent';
-import AdultTrainingCard from '../../shared/AdultTrainingCard';
+import { FAMILY_PARENT_CORNER_INTRO } from '../../../data/familyPortalContent';
+import AdultLearningFlowSection from '../../shared/AdultLearningFlowSection';
 
 export default function FamilyGuidePanel() {
   return (
@@ -13,11 +10,7 @@ export default function FamilyGuidePanel() {
         <p className="family-panelIntroSubtitle">{FAMILY_PARENT_CORNER_INTRO.subtitle}</p>
       </div>
 
-      <div className="adultTraining-grid">
-        {FAMILY_PARENT_CORNER_CARDS.map((card) => (
-          <AdultTrainingCard key={card.title} card={card} />
-        ))}
-      </div>
+      <AdultLearningFlowSection placement="parent" showStatusBanner />
     </div>
   );
 }

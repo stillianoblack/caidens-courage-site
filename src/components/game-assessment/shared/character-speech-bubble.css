@@ -1,0 +1,76 @@
+.character-speechBubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.character-speechBubble-card {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.character-speechBubble-caret {
+  position: absolute;
+  left: -0.5rem;
+  top: 1.25rem;
+  width: 0;
+  height: 0;
+  border-top: 0.5rem solid transparent;
+  border-bottom: 0.5rem solid transparent;
+  border-right: 0.625rem solid #fff;
+  filter: drop-shadow(-1px 0 0 rgba(36, 62, 112, 0.08));
+}
+
+.character-speechBubble-content {
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 10px 28px -20px rgba(36, 62, 112, 0.22);
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #243e70;
+}
+
+.character-speechBubble--caiden .character-speechBubble-content {
+  border: 2px solid rgba(229, 192, 106, 0.4);
+  background: #fffbeb;
+}
+
+.character-speechBubble--caiden .character-speechBubble-caret {
+  border-right-color: #fffbeb;
+}
+
+.character-speechBubble--miranda .character-speechBubble-content {
+  background: #faf8ff;
+  border: 2px solid rgba(124, 106, 173, 0.2);
+}
+
+.character-speechBubble--miranda .character-speechBubble-caret {
+  border-right-color: #faf8ff;
+}
+
+.character-speechBubble--victoria .character-speechBubble-content {
+  background: #fff;
+  border: 2px solid rgba(217, 155, 199, 0.35);
+}
+
+.character-speechBubble--uncle-t .character-speechBubble-content {
+  background: #fffaf5;
+  border: 2px solid rgba(201, 115, 45, 0.3);
+}
+
+.character-speechBubble--charlie .character-speechBubble-content {
+  background: #f0fdf4;
+  border: 2px solid rgba(92, 184, 92, 0.35);
+}
+
+.character-speechBubble--b4 .character-speechBubble-content {
+  background: #eff6ff;
+  border: 2px solid rgba(74, 144, 196, 0.35);
+}
+
+.character-speechBubble-message {
+  margin: 0;
+}

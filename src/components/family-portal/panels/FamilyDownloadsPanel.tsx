@@ -5,6 +5,7 @@ import {
   PORTAL_COLORING_PAGES,
   PORTAL_PRINTABLE_ACTIVITIES,
 } from '../../../data/portalDownloadAssets';
+import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
 
 export default function FamilyDownloadsPanel() {
@@ -14,6 +15,7 @@ export default function FamilyDownloadsPanel() {
     if (downloadingAll) return;
     setDownloadingAll(true);
     try {
+      trackDownload('coloring_page_downloaded', 'All Coloring Pages', 'coloring');
       await downloadAllColoringPages();
     } finally {
       setDownloadingAll(false);
@@ -49,7 +51,14 @@ export default function FamilyDownloadsPanel() {
                 </span>
               </div>
               {page.status === 'available' ? (
-                <a href={page.href} className="family-downloadBtn" download>
+                <a
+                  href={page.href}
+                  className="family-downloadBtn"
+                  download
+                  onClick={() =>
+                    trackDownload('coloring_page_downloaded', page.title, 'coloring')
+                  }
+                >
                   Download
                 </a>
               ) : (
@@ -77,7 +86,17 @@ export default function FamilyDownloadsPanel() {
                 </span>
               </div>
               {activity.status === 'available' ? (
-                <a href={activity.href} className="family-downloadBtn" download>
+                <a
+                  href={activity.href}
+                  className="family-downloadBtn"
+                  download
+                  onClick={() => {
+                    const eventName = activity.title.toLowerCase().includes('worksheet')
+                      ? 'worksheet_downloaded'
+                      : 'activity_downloaded';
+                    trackDownload(eventName, activity.title, 'activity');
+                  }}
+                >
                   Download
                 </a>
               ) : (

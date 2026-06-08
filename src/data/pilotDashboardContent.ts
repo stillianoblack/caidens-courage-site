@@ -3,13 +3,16 @@ import {
   BMC_COLORING_PATH,
   CAIDEN_QUEST_HUB_PATH,
   FACILITATOR_B4_RESULTS_PATH,
-  FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
+  FACILITATOR_BASELINE_CHECK_PATH,
+  FACILITATOR_DR_VICTORIA_MISSION_BASE,
   FACILITATOR_PORTAL_PATH,
   FOCUS_FLAME_LAB_PATH,
   KIDS_PORTAL_PATH,
+  PROGRAM_BASELINE_CHECK_PATH,
   STUDENT_GALLERY_SUBMIT_PATH,
 } from '../config/courageRoutes';
-import { DR_VICTORIA_GUIDE_SRC } from './adult/sharedAssets';
+import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from './adult/sharedAssets';
+import { FACILITATOR_UNCLE_T_MISSION_BASE } from '../config/courageRoutes';
 import {
   PORTAL_COLORING_PAGES,
   PORTAL_PRINTABLE_ACTIVITIES,
@@ -58,10 +61,18 @@ export const BLUE_RIBBON_PILOT_TAG = 'Blue Ribbon 2026 Pilot';
 
 export const PILOT_DASHBOARD_TITLE = 'Focus Flame Academy Pilot Dashboard';
 
-export const PILOT_LOCAL_TESTING_NOTE =
-  'Local testing mode: results are saved on this device only.';
+export const PILOT_RESULTS_HEADLINE = 'Here are the results for your organization.';
 
-export const PILOT_CONNECTED_NOTE = 'Connected to Pilot Database';
+export const PILOT_RESULTS_STATUS_COPY =
+  'Results are updated from completed assessments and activities.';
+
+export const PILOT_RESULTS_LOCAL_COPY = PILOT_RESULTS_STATUS_COPY;
+
+export const PILOT_LOCAL_TESTING_NOTE = PILOT_RESULTS_STATUS_COPY;
+
+export const PILOT_CONNECTED_NOTE = PILOT_RESULTS_STATUS_COPY;
+
+export const PILOT_RESULTS_CONNECTED_COPY = PILOT_RESULTS_STATUS_COPY;
 
 export const PILOT_WEEKLY_KIT_NOTE =
   'Each weekly kit includes the story pages, discussion guide, activity, reflection journal, coloring page, and facilitator notes.';
@@ -81,8 +92,11 @@ export const PILOT_SIDEBAR_NAV: Array<{
   { id: 'facilitator-center', label: 'Adult Training', icon: 'facilitator-center' },
 ];
 
+export const PROGRAM_SIDEBAR_NAV = PILOT_SIDEBAR_NAV.map((item) =>
+  item.id === 'facilitator-center' ? { ...item, label: 'Training & Resources' } : item,
+);
+
 export const PILOT_PAGE_SUBTITLES: Partial<Record<PilotSidebarNavId, string>> = {
-  assessments: 'Student and adult reflection checks in one place.',
   'facilitator-center':
     'Training games and guides for parents, teachers, counselors, and camp staff.',
 };
@@ -219,73 +233,87 @@ export const PILOT_FOCUS_FLAME_LAB_CARD = {
   href: FOCUS_FLAME_LAB_PATH,
 };
 
+export const PILOT_ASSESSMENTS_PAGE = {
+  title: 'Assessments',
+  subtitle: 'Student and adult reflection checks in one place.',
+} as const;
+
+export function resolveFacilitatorBaselinePath(useProgramDashboard: boolean): string {
+  return useProgramDashboard ? PROGRAM_BASELINE_CHECK_PATH : FACILITATOR_BASELINE_CHECK_PATH;
+}
+
+export function buildPilotStudentAssessmentCards(baselineHref: string) {
+  return [
+    {
+      title: 'B-4 Baseline Check',
+      status: 'Available' as const,
+      statusTone: 'available' as const,
+      description: 'Complete before Week 1 to capture starting data.',
+      cta: 'Start Baseline',
+      href: baselineHref,
+      locked: false,
+    },
+    {
+      title: 'Final Growth Check',
+      status: 'Locked until Week 9',
+      statusTone: 'locked' as const,
+      description: 'Repeat the same check at the end to measure growth.',
+      cta: 'Coming Soon',
+      href: '#',
+      locked: true,
+    },
+    {
+      title: 'Reading + Focus Review',
+      status: 'Coming Soon',
+      statusTone: 'locked' as const,
+      description: 'Optional follow-up check for comprehension and strategy growth.',
+      cta: 'Coming Soon',
+      href: '#',
+      locked: true,
+    },
+  ];
+}
+
 export const PILOT_STUDENT_ASSESSMENT_SECTION = {
   title: 'Student Assessments',
   subtitle: 'Checks for students before, during, and after the program.',
 } as const;
 
 export const PILOT_ADULT_ASSESSMENT_SECTION = {
-  title: 'Adult Assessments',
-  subtitle: 'Short reflection checks for parents, teachers, counselors, and camp staff.',
+  title: 'Family & Facilitator Learning',
+  subtitle:
+    'Take a baseline check, complete adult training, then retake the assessment to measure growth.',
 } as const;
 
-export const PILOT_STUDENT_ASSESSMENT_CARDS = [
-  {
-    title: 'B-4 Baseline Check',
-    status: 'Available' as const,
-    statusTone: 'available' as const,
-    description: 'Complete before Week 1 to capture starting data.',
-    cta: 'Start Baseline',
-    href: B4_BASELINE_CHECK_PATH,
-    locked: false,
-  },
-  {
-    title: 'Final Growth Check',
-    status: 'Locked until Week 9',
-    statusTone: 'locked' as const,
-    description: 'Repeat the same check at the end to measure growth.',
-    cta: 'Coming Soon',
-    href: '#',
-    locked: true,
-  },
-  {
-    title: 'Reading + Focus Review',
-    status: 'Coming Soon',
-    statusTone: 'locked' as const,
-    description: 'Optional follow-up check for comprehension and strategy growth.',
-    cta: 'Coming Soon',
-    href: '#',
-    locked: true,
-  },
-];
+export const PILOT_STUDENT_ASSESSMENT_CARDS = buildPilotStudentAssessmentCards(B4_BASELINE_CHECK_PATH);
 
 /** @deprecated Use PILOT_STUDENT_ASSESSMENT_CARDS */
 export const PILOT_ASSESSMENT_CARDS = PILOT_STUDENT_ASSESSMENT_CARDS;
 
 export const PILOT_ADULT_ASSESSMENT_CARDS = [
   {
-    title: 'Adult Understanding Check',
-    status: 'Coming Soon' as const,
-    statusTone: 'locked' as const,
-    description: 'A quick reflection on how adults understand student behavior and needs.',
-    cta: 'Coming Soon',
-    href: '#',
-    locked: true,
+    title: 'Dr. Victoria: Understanding Different Minds',
+    status: 'Available' as const,
+    statusTone: 'available' as const,
+    description: 'Parent-friendly training on focus, feelings, and different learning needs.',
+    cta: 'Open Training',
+    href: FACILITATOR_DR_VICTORIA_MISSION_BASE,
+    locked: false,
   },
   {
-    title: 'Adult Growth Reflection',
-    status: 'Coming Soon' as const,
-    statusTone: 'locked' as const,
-    description: 'Track how your perspective and support strategies evolve over time.',
-    cta: 'Coming Soon',
-    href: '#',
-    locked: true,
+    title: 'Uncle T: Supporting Growth and Confidence',
+    status: 'Available' as const,
+    statusTone: 'available' as const,
+    description: 'Coaching lessons for encouraging kids through everyday challenges.',
+    cta: 'Open Training',
+    href: FACILITATOR_UNCLE_T_MISSION_BASE,
+    locked: false,
   },
   {
-    title: 'Support Strategy Review',
-    status: 'Coming Soon' as const,
+    title: 'Adult Post-Assessment',
+    status: 'Locked until training complete',
     statusTone: 'locked' as const,
-    description: 'Review the support strategies you use most with learners.',
+    description: 'Complete adult training missions to unlock this reflection check.',
     cta: 'Coming Soon',
     href: '#',
     locked: true,
@@ -295,12 +323,14 @@ export const PILOT_ADULT_ASSESSMENT_CARDS = [
 export type AdultTrainingCard = {
   title: string;
   mission: string;
+  description?: string;
   audience: string;
   badge: string;
   cta: string;
   href: string;
   imageSrc: string;
   available: boolean;
+  theme?: 'victoria' | 'uncle-t';
 };
 
 export const PILOT_ADULT_TRAINING_INTRO = {
@@ -311,14 +341,30 @@ export const PILOT_ADULT_TRAINING_INTRO = {
 
 export const PILOT_ADULT_TRAINING_CARDS: AdultTrainingCard[] = [
   {
-    title: "Dr. Victoria\u2019s Understanding Different Minds",
-    mission: 'Looking Beyond the Behavior',
+    title: 'Dr. Victoria Learning Hub',
+    mission: 'Adult Learning Track',
+    description:
+      'Training missions for parents, teachers, counselors, and camp staff to better understand, support, and encourage different minds.',
     audience: 'Parents, Teachers, Counselors, Camp Staff',
-    badge: 'Understanding Guide Badge',
-    cta: 'Start Training',
-    href: FACILITATOR_DR_VICTORIA_MISSION_1_PATH,
+    badge: '5 Missions Available',
+    cta: 'Open Learning Hub',
+    href: FACILITATOR_DR_VICTORIA_MISSION_BASE,
     imageSrc: DR_VICTORIA_GUIDE_SRC,
     available: true,
+    theme: 'victoria',
+  },
+  {
+    title: 'Uncle T Coaching Hub',
+    mission: 'Adult Learning Track',
+    description:
+      'Coaching scenarios for helping kids build courage, confidence, and resilience.',
+    audience: 'Parents, Teachers, Counselors, Camp Staff',
+    badge: '3 Missions Available',
+    cta: 'Open Coaching Hub',
+    href: FACILITATOR_UNCLE_T_MISSION_BASE,
+    imageSrc: UNCLE_T_GUIDE_SRC,
+    available: true,
+    theme: 'uncle-t',
   },
 ];
 
@@ -447,7 +493,7 @@ export const PILOT_RECOMMENDED_STEPS = [
     title: 'Start with the B-4 Baseline Check',
     copy: 'Have students complete the baseline before beginning Week 1.',
     cta: 'Open Baseline Check',
-    href: B4_BASELINE_CHECK_PATH,
+    href: FACILITATOR_BASELINE_CHECK_PATH,
     internalNav: null as PilotSidebarNavId | null,
   },
   {
@@ -484,5 +530,4 @@ export const PILOT_RECOMMENDED_STEPS = [
   },
 ] as const;
 
-export const PILOT_RESULTS_COPY =
-  'Baseline results sync to Supabase when configured. This dashboard reads Supabase first, then falls back to local device data.';
+export const PILOT_RESULTS_COPY = PILOT_RESULTS_CONNECTED_COPY;

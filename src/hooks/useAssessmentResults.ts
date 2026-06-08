@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { loadAssessmentResults, type AssessmentResultsLoad } from '../lib/assessmentResultsService';
 import { computePilotDashboardMetrics } from '../lib/pilotDashboardMetrics';
 
-export function useAssessmentResults(refreshKey = 0) {
+export function useAssessmentResults(refreshKey = 0, programCode?: string) {
   const [payload, setPayload] = useState<AssessmentResultsLoad>({
     results: [],
     source: 'local',
@@ -11,11 +11,11 @@ export function useAssessmentResults(refreshKey = 0) {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const next = await loadAssessmentResults();
+    const next = await loadAssessmentResults(programCode);
     console.log('[DASHBOARD] Final source passed to PilotLocalNote:', next.source);
     setPayload(next);
     setLoading(false);
-  }, []);
+  }, [programCode]);
 
   useEffect(() => {
     void refresh();

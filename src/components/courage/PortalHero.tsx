@@ -6,16 +6,20 @@ type PortalHeroProps = {
   audience: PortalAudienceTab | null;
   accessCode: string;
   error: string | null;
+  submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onUseDifferentCode?: () => void;
 };
 
 export default function PortalHero({
   audience,
   accessCode,
   error,
+  submitting = false,
   onAccessCodeChange,
   onSubmit,
+  onUseDifferentCode,
 }: PortalHeroProps) {
   const identity = getPortalAudienceIdentity(audience);
 
@@ -50,8 +54,10 @@ export default function PortalHero({
               cardAudienceLabel={identity.cardAudienceLabel}
               accessCode={accessCode}
               error={error}
+              submitting={submitting}
               onAccessCodeChange={onAccessCodeChange}
               onSubmit={onSubmit}
+              onUseDifferentCode={onUseDifferentCode}
             />
           </div>
         </div>

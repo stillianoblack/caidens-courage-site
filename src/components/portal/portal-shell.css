@@ -1,0 +1,18 @@
+.portal-contentFrame {
+  max-width: 70rem;
+  margin-left: 0;
+  margin-right: auto;
+  width: 100%;
+}
+
+.portal-backBtn {
+  align-self: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .portal-contentFrame.family-content,
+  .portal-contentFrame.pilot-content {
+    padding: 1.25rem 1.25rem 2rem;
+  }
+}

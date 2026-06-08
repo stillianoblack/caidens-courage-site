@@ -2,6 +2,7 @@ import { CAIDEN_QUEST_HUB_PATH } from '../../config/courageRoutes';
 import type { MissionBoardItem } from '../../types/missionBoard';
 import { CAIDEN_QUEST_1_ID } from './quest1WhatComesFirst';
 import { CAIDEN_QUEST_2_ID } from './quest2ChooseYourNextMove';
+import { CAIDEN_QUEST_3_ID } from './quest3ResetAndReturn';
 
 export const CAIDEN_QUEST_BOARD_ITEMS: MissionBoardItem[] = [
   {
@@ -36,16 +37,19 @@ export const CAIDEN_QUEST_BOARD_ITEMS: MissionBoardItem[] = [
     skills: ['Self-Regulation', 'Decision Making', 'Growth Mindset'],
   },
   {
-    id: 'quest-3',
+    id: CAIDEN_QUEST_3_ID,
     fileNumber: 3,
-    title: 'Distraction Shield',
-    description: 'Spot what pulls your focus away and protect your attention.',
-    route: '#',
-    artworkType: 'focus-locked',
+    title: 'Reset and Return',
+    subtitle: "Caiden's Focus Quest: Reset and Return",
+    description: 'Practice focus recovery, self-regulation, and flexible thinking when attention slips.',
+    route: `${CAIDEN_QUEST_HUB_PATH}/${CAIDEN_QUEST_3_ID}`,
+    iconType: 'focus-flame',
+    artworkType: 'focus-quest',
     folderLabel: 'QUEST CHECKPOINT',
-    status: 'locked',
+    status: 'available',
     desktopPosition: 'grid-r1c3',
     mobileOrder: 3,
+    skills: ['Focus Recovery', 'Self-regulation', 'Flexible thinking'],
   },
   {
     id: 'quest-4',
@@ -87,5 +91,5 @@ export const CAIDEN_QUEST_BOARD_ITEMS: MissionBoardItem[] = [
 
 export const CAIDEN_QUEST_RANK = {
   rankTitle: 'Focus Starter',
-  statusLine: '2 Quests Available',
+  statusLine: '3 Quests Available',
 };

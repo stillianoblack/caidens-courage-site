@@ -1,26 +1,28 @@
 import React from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
-import { CAIDEN_QUEST_HUB_PATH } from '../config/courageRoutes';
 import { getCaidenQuestById } from '../data/caiden';
+import { resolveCaidenHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';
 
 export default function CaidenQuestPage() {
   const { questId } = useParams<{ questId: string }>();
+  const location = useLocation();
+  const hubPath = resolveCaidenHubPath(location.pathname);
   const quest = getCaidenQuestById(questId);
 
   if (!quest) {
-    return <Navigate to={CAIDEN_QUEST_HUB_PATH} replace />;
+    return <Navigate to={hubPath} replace />;
   }
 
   return (
     <GameAssessmentFlow
       config={quest.config}
       themeClassName="caiden-game"
-      exitPath={CAIDEN_QUEST_HUB_PATH}
+      exitPath={hubPath}
       useCaidenHeader
       embedded
       skipLanding
-      familyPortalPath="/portal/family"
+      familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}
     />
   );
 }

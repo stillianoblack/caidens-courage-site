@@ -1,0 +1,329 @@
+@import '../adult-learning/adult-training-tokens.css';
+
+/* Uncle T adult coaching — soft orange, warm gold accents, navy text */
+
+.uncle-t-game.bbc-app {
+  --uncleT-navy: #233b6e;
+  --uncleT-accent: #e8924f;
+  --uncleT-secondary: #d97a35;
+  --uncleT-bg: #fff8f0;
+  --uncleT-gold: #c9a44a;
+  background: var(--uncleT-bg);
+  color: var(--uncleT-navy);
+}
+
+.uncle-t-game--embedded.bbc-app,
+.uncle-t-game.adult-guide-game--embedded.bbc-app {
+  min-height: calc(100dvh - 7.5rem);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(201, 164, 74, 0.28);
+  overflow: visible;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.uncle-t-game--embedded .bbc-main,
+.uncle-t-game.adult-guide-game--embedded .bbc-main {
+  flex: 1;
+  min-height: 28rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.uncle-t-game.adult-guide-game--embedded .bbc-main--landing,
+.uncle-t-game.adult-guide-game--embedded .bbc-main--quiz,
+.uncle-t-game.adult-guide-game--embedded .bbc-landing,
+.uncle-t-game.adult-guide-game--embedded .mission-quizLayout {
+  flex: 1;
+}
+
+.uncle-t-game .bbc-main--guideHubBack {
+  position: relative;
+  padding-top: 0.25rem;
+}
+
+.uncle-t-game .bbc-main--guideHubBack .bbc-landing {
+  padding-top: 3rem;
+}
+
+.uncleT-topBar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.uncleT-exitBtn {
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(36, 62, 112, 0.12);
+}
+
+.uncleT-progressTrack {
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+}
+
+.uncleT-progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--uncleT-accent) 0%, var(--uncleT-gold) 100%);
+  transition: width 0.3s ease;
+}
+
+.uncle-t-game .bbc-primaryBtn,
+.uncle-t-game .game-startBtn {
+  background: linear-gradient(135deg, var(--uncleT-accent) 0%, var(--uncleT-secondary) 100%);
+  border-color: rgba(217, 122, 53, 0.35);
+  color: #fff;
+}
+
+.uncle-t-game .bbc-primaryBtn:hover,
+.uncle-t-game .game-startBtn:hover {
+  filter: brightness(1.04);
+}
+
+.uncle-t-game .bbc-eyebrow {
+  color: var(--uncleT-gold);
+}
+
+.uncle-t-game .bbc-subtitle {
+  color: var(--uncleT-secondary);
+}
+
+/* Landing hero — circular portrait */
+.uncle-t-game .game-avatarHero {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 9999px;
+  border: 3px solid rgba(232, 146, 79, 0.6);
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 14px 36px -18px rgba(35, 59, 110, 0.24),
+    0 0 0 6px rgba(232, 146, 79, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem auto;
+}
+
+.uncle-t-game .game-avatarHero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  transform: scale(1.12);
+  background: #fff;
+}
+
+/* Intro prompt avatar — fill circle */
+.uncle-t-game .uncleT-quizPrompt.bbc-quizPrompt {
+  margin-top: 0.5rem;
+}
+
+.uncle-t-game .uncleT-quizPrompt .bbc-quizB4 {
+  border: 3px solid rgba(232, 146, 79, 0.65);
+  background: #fff;
+  box-shadow: 0 8px 20px -12px rgba(35, 59, 110, 0.2);
+}
+
+.uncle-t-game .uncleT-quizPrompt .bbc-quizB4 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  transform: scale(1.12);
+}
+
+.uncle-t-game .uncleT-quizPrompt .bbc-speechBubble {
+  border-color: rgba(232, 146, 79, 0.35);
+  background: linear-gradient(180deg, #fff 0%, #fff4e8 100%);
+}
+
+/* Quiz speech row avatar */
+.uncle-t-game .mission-speechAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  transform: scale(1.12);
+  background: #fff;
+}
+
+.uncle-t-game .mission-feedbackCard--uncle-t .mission-feedbackAvatar {
+  object-fit: cover;
+  object-position: center 12%;
+}
+
+/* Coaching scenario card */
+.uncleT-coachingCard {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.uncleT-coachingCardHead {
+  padding: 0.25rem 0 0;
+  margin-bottom: 1rem;
+}
+
+.uncleT-coachingCardLabel {
+  color: var(--uncleT-secondary);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.uncleT-coachingCardTag {
+  color: #8a6b1d;
+  background: rgba(201, 164, 74, 0.18);
+  border: 1px solid rgba(201, 164, 74, 0.32);
+  padding: 0.3rem 0.625rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.uncleT-coachingCardText {
+  color: var(--adult-body);
+  font-size: var(--adult-body-size);
+  line-height: var(--adult-body-lh);
+  font-weight: 600;
+}
+
+.uncleT-scenarioIllustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 0.875rem;
+  background: linear-gradient(180deg, #fff 0%, #fff4e8 100%);
+  border: 1px solid rgba(232, 146, 79, 0.22);
+  padding: 0.5rem;
+}
+
+.uncleT-scenarioSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.uncleT-completeHero {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 3px solid rgba(232, 146, 79, 0.55);
+  background: #fff;
+  box-shadow: 0 12px 28px -18px rgba(35, 59, 110, 0.22);
+}
+
+.uncleT-completeAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  transform: scale(1.12);
+  border: none;
+}
+
+.uncleT-rewardPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(201, 164, 74, 0.14);
+  border: 1px solid rgba(201, 164, 74, 0.32);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #8a6b1d;
+}
+
+.game-complete--uncle-t .game-completeScore--uncle-t {
+  color: var(--uncleT-secondary);
+}
+
+.game-deco--uncle-t-clipboard,
+.game-deco--uncle-t-whistle,
+.game-deco--uncle-t-flame {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.14;
+  color: var(--uncleT-accent, #e8924f);
+}
+
+.game-deco--uncle-t-clipboard {
+  top: 8%;
+  right: 6%;
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.game-deco--uncle-t-whistle {
+  bottom: 12%;
+  left: 5%;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.game-deco--uncle-t-flame {
+  top: 18%;
+  left: 8%;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.game-deco--uncle-t-flame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.game-quizWrap--coachingCard .mission-scenarioIllustration {
+  min-height: 8.5rem;
+}
+
+.mission-speechContent .uncleT-coachingCard.mission-scenarioCard {
+  padding: 1.125rem 1.25rem 1.25rem;
+}
+
+.mission-speechRow--uncle-t .mission-speechContent {
+  border: 2px solid rgba(232, 146, 79, 0.34);
+  background: linear-gradient(180deg, #fff 0%, #fff8f0 100%);
+  box-shadow: 0 12px 30px -20px rgba(35, 59, 110, 0.22);
+}
+
+@media (max-width: 767px) {
+  .uncle-t-game.adult-guide-game--embedded.bbc-app {
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .uncle-t-game.adult-guide-game--embedded .bbc-main {
+    min-height: calc(100dvh - 5rem);
+    padding-bottom: 5.5rem;
+  }
+
+  .uncleT-topBar {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .uncle-t-game .bbc-answerCard {
+    min-height: 3.75rem;
+    padding: 1.125rem 1.25rem;
+    font-size: 1.0625rem;
+  }
+
+  .uncleT-coachingCardText {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+}

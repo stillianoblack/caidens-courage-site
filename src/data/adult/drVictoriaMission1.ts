@@ -1,7 +1,82 @@
-import type { GameAssessmentConfig } from '../../types/gameAssessment';
+import type { GameAssessmentConfig, GameFeedbackDetail } from '../../types/gameAssessment';
 import { DR_VICTORIA_MISSION_AVATAR } from './sharedAssets';
 
 export const DR_VICTORIA_MISSION_1_ID = 'mission-1';
+
+const DV_FEEDBACK_DETAILS: Record<string, GameFeedbackDetail> = {
+  'dv-q1': {
+    whyItMatters: 'Your first assumption shapes whether a child feels supported or judged.',
+    tryThis: [
+      'Pause before reacting to disengagement',
+      'Offer a small re-engagement cue or choice',
+      'Check in privately after the lesson',
+    ],
+    watchFor: 'Labeling disengagement as laziness or defiance',
+  },
+  'dv-q2': {
+    whyItMatters: 'Systems build habits better than criticism or shame.',
+    tryThis: [
+      'Ask what gets in the way of remembering',
+      'Co-create a simple reminder routine',
+      'Celebrate small wins when they remember',
+    ],
+    watchFor: 'Assuming the child simply does not care',
+  },
+  'dv-q3': {
+    whyItMatters: 'Addressing the cause prevents repeated emotional escalations.',
+    tryThis: [
+      'Name the emotion without judgment',
+      'Ask what felt hard about the task',
+      'Offer a brief reset before trying again',
+    ],
+    watchFor: 'Focusing only on the torn paper, not the frustration',
+  },
+  'dv-q4': {
+    whyItMatters: 'Task initiation is a real executive function skill—not willpower.',
+    tryThis: [
+      'Break the assignment into one small first step',
+      'Offer a visual checklist or timer',
+      'Reduce competing distractions nearby',
+    ],
+    watchFor: 'Interpreting hesitation as defiance or avoidance',
+  },
+  'dv-q5': {
+    whyItMatters: 'Processing speed varies; rushing often increases errors and anxiety.',
+    tryThis: [
+      'Repeat directions calmly and clearly',
+      'Offer written or visual supports',
+      'Check for understanding before moving on',
+    ],
+    watchFor: 'Embarrassing a child for needing more time',
+  },
+  'dv-q6': {
+    whyItMatters: 'Participation barriers are often emotional or sensory, not attitude.',
+    tryThis: [
+      'Offer a low-pressure way to join',
+      'Ask what would make the activity feel safer',
+      'Pair with a supportive peer when appropriate',
+    ],
+    watchFor: 'Forcing immediate participation in front of peers',
+  },
+  'dv-q7': {
+    whyItMatters: 'Repeated mistakes are part of learning—not proof of failure.',
+    tryThis: [
+      'Review the skill with calm guidance',
+      'Practice in a low-stakes setting',
+      'Highlight progress, not just the error',
+    ],
+    watchFor: 'Using shame or public correction after a mistake',
+  },
+  'dv-q8': {
+    whyItMatters: 'Respecting differences builds trust and long-term growth.',
+    tryThis: [
+      'Lead with curiosity about each child\u2019s strengths',
+      'Adapt supports to fit the child\u2019s needs',
+      'Model patience when progress looks different',
+    ],
+    watchFor: 'Expecting every child to develop on the same timeline',
+  },
+};
 
 export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
   id: DR_VICTORIA_MISSION_1_ID,
@@ -48,6 +123,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'b',
       feedbackCorrect: 'Attention challenges are not always motivation challenges. Curiosity first. Assumptions second.',
       feedbackIncorrect: 'Attention challenges are not always motivation challenges. Curiosity first. Assumptions second.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q1'],
     },
     {
       id: 'dv-q2',
@@ -70,6 +146,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'b',
       feedbackCorrect: 'Many children know what to do. They may need support building systems to do it consistently.',
       feedbackIncorrect: 'Many children know what to do. They may need support building systems to do it consistently.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q2'],
     },
     {
       id: 'dv-q3',
@@ -92,6 +169,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'b',
       feedbackCorrect: 'Strong emotions often signal an unmet need, challenge, or skill that is still developing.',
       feedbackIncorrect: 'Strong emotions often signal an unmet need, challenge, or skill that is still developing.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q3'],
     },
     {
       id: 'dv-q4',
@@ -114,6 +192,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'a',
       feedbackCorrect: 'Starting can be one of the hardest parts of executive functioning.',
       feedbackIncorrect: 'Starting can be one of the hardest parts of executive functioning.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q4'],
     },
     {
       id: 'dv-q5',
@@ -136,6 +215,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'a',
       feedbackCorrect: 'Different minds process information in different ways.',
       feedbackIncorrect: 'Different minds process information in different ways.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q5'],
     },
     {
       id: 'dv-q6',
@@ -158,6 +238,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'a',
       feedbackCorrect: 'Understanding the reason behind a behavior often leads to better solutions.',
       feedbackIncorrect: 'Understanding the reason behind a behavior often leads to better solutions.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q6'],
     },
     {
       id: 'dv-q7',
@@ -180,6 +261,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'a',
       feedbackCorrect: 'Growth comes from support, repetition, and learning—not perfection.',
       feedbackIncorrect: 'Growth comes from support, repetition, and learning—not perfection.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q7'],
     },
     {
       id: 'dv-q8',
@@ -202,6 +284,7 @@ export const DR_VICTORIA_MISSION_1_CONFIG: GameAssessmentConfig = {
       correctId: 'a',
       feedbackCorrect: 'Every child develops differently. Support begins with curiosity, patience, and respect.',
       feedbackIncorrect: 'Every child develops differently. Support begins with curiosity, patience, and respect.',
+      feedbackDetail: DV_FEEDBACK_DETAILS['dv-q8'],
     },
   ],
 };

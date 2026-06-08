@@ -1,4 +1,20 @@
-export const B4_BASELINE_ASSESSMENT_NAME = "B-4 Baseline Check";
+export const B4_BASELINE_ASSESSMENT_NAME = 'B-4 Check-In';
+
+export const B4_BASELINE_FAMILY_LANDING = {
+  eyebrow: 'FOCUS FLAME STARTER',
+  title: 'B-4 Check-In',
+  subtitle: 'Unlock your Weekly Adventures.',
+  body: 'This is a friendly check-in — not a test. Your answers help B-4 understand how you focus, read, and grow.',
+  cta: 'Start B-4 Check-In',
+} as const;
+
+export const B4_BASELINE_LANDING = {
+  eyebrow: 'B-4 GUIDE',
+  title: B4_BASELINE_ASSESSMENT_NAME,
+  subtitle: 'Let\u2019s see where your Focus Flame starts.',
+  body: 'This is not a test. There are no bad answers. Your answers help B-4 understand how you focus, read, and handle big feelings.',
+  cta: 'Start Check',
+} as const;
 
 export type BaselineModuleId = 'feelings' | 'reading' | 'focus-moves';
 
@@ -10,14 +26,6 @@ export type BaselineMcQuestion = {
   choices: BaselineMcChoice[];
   correctId: string;
 };
-
-export const B4_BASELINE_LANDING = {
-  eyebrow: 'B-4 GUIDE',
-  title: B4_BASELINE_ASSESSMENT_NAME,
-  subtitle: 'Let\u2019s see where your Focus Flame starts.',
-  body: 'This is not a test. There are no bad answers. Your answers help B-4 understand how you focus, read, and handle big feelings.',
-  cta: 'Start Check',
-} as const;
 
 export const B4_BASELINE_PRIVACY_NOTE =
   'We only need a first name or nickname. Do not enter full names.';

@@ -1,15 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import {
   PILOT_ADULT_TRAINING_CARDS,
   PILOT_ADULT_TRAINING_INTRO,
   PILOT_FACILITATOR_CENTER,
 } from '../../../data/pilotDashboardContent';
+import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import AdultTrainingCard from '../../shared/AdultTrainingCard';
+import { trackDownload } from '../../../lib/analytics';
 
 export default function PilotFacilitatorPanel() {
+  const activeProgram = readActivePilotProgram();
+
   return (
     <div className="pilot-panel">
+      {activeProgram ? <ProgramAccessCodesCard program={activeProgram} /> : null}
+
       <div className="pilot-panelIntro">
         <h2 className="pilot-panelIntroTitle">{PILOT_ADULT_TRAINING_INTRO.title}</h2>
         <p className="pilot-panelIntroSubtitle">{PILOT_ADULT_TRAINING_INTRO.subtitle}</p>
@@ -35,6 +42,12 @@ export default function PilotFacilitatorPanel() {
                   className="pilot-dash-card pilot-facilitatorCard"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    const eventName = item.title.toLowerCase().includes('guide')
+                      ? 'facilitator_guide_downloaded'
+                      : 'activity_downloaded';
+                    trackDownload(eventName, item.title, 'facilitator_resource');
+                  }}
                 >
                   <h3 className="pilot-dash-cardTitle">{item.title}</h3>
                   <span className="pilot-dash-cta">Download Template</span>

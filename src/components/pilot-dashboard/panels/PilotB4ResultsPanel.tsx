@@ -2,6 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import B4ResultsAdminDashboard from '../../b4-baseline-check/B4ResultsAdminDashboard';
 import { FACILITATOR_PORTAL_PATH } from '../../../config/courageRoutes';
+import {
+  PILOT_RESULTS_HEADLINE,
+  PILOT_RESULTS_STATUS_COPY,
+} from '../../../data/pilotDashboardContent';
 import { loadAssessmentResults } from '../../../lib/assessmentResultsService';
 import {
   clearAllBaselineResults,
@@ -12,7 +16,7 @@ import '../../b4-baseline-check/b4-results-admin.css';
 
 export default function PilotB4ResultsPanel() {
   const [results, setResults] = useState<B4BaselineCheckRecord[]>([]);
-  const [source, setSource] = useState<'supabase' | 'local'>('local');
+  const [, setSource] = useState<'supabase' | 'local'>('local');
   const [warning, setWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +46,7 @@ export default function PilotB4ResultsPanel() {
 
   const handleClear = () => {
     const confirmed = window.confirm(
-      'Clear all B-4 Baseline Check results stored on this device? Supabase records will not be deleted.',
+      'Clear all B-4 Baseline Check results stored on this device?',
     );
     if (!confirmed) return;
     clearAllBaselineResults();
@@ -53,15 +57,9 @@ export default function PilotB4ResultsPanel() {
     <div className="pilot-panel pilot-panel--b4Results">
       <div className="pilot-resultsHead">
         <div>
-          <p className="pilot-panelIntro">
-            {source === 'supabase'
-              ? 'Showing baseline results synced from Supabase, ordered by most recent completion.'
-              : 'Showing baseline results from this device. Supabase sync will be used when available.'}
-          </p>
+          <p className="pilot-panelIntroTitle">{PILOT_RESULTS_HEADLINE}</p>
+          <p className="pilot-panelIntroSubtitle">{PILOT_RESULTS_STATUS_COPY}</p>
           {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
-          <p className="pilot-emptyNote">
-            Clearing local data does not delete Supabase records.
-          </p>
         </div>
         <div className="pilot-resultsActions">
           <button type="button" className="pilot-resultsBtn pilot-resultsBtn--primary" onClick={handleExport}>

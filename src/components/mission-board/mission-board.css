@@ -490,6 +490,10 @@
   opacity: 0.65;
 }
 
+.mission-boardTopBack {
+  margin-bottom: 0.75rem;
+}
+
 .mission-boardFoot {
   margin-top: 2rem;
   display: flex;

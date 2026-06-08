@@ -41,7 +41,7 @@
   min-height: 32rem;
   border-radius: 1.25rem;
   border: 1px solid rgba(124, 92, 191, 0.18);
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
 }

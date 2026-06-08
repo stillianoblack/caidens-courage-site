@@ -1,0 +1,23 @@
+/* Shared adult training typography — accessible contrast and sizing */
+
+.adultLearningHub,
+.adultTraining-card,
+.adultTraining-grid,
+.victoria-game,
+.uncle-t-game {
+  --adult-body: #34466f;
+  --adult-muted: #506189;
+  --adult-body-size: 1.0625rem;
+  --adult-body-lh: 1.55;
+}
+
+@media (min-width: 768px) {
+  .adultLearningHub,
+  .adultTraining-card,
+  .adultTraining-grid,
+  .victoria-game,
+  .uncle-t-game {
+    --adult-body-size: 1.125rem;
+    --adult-body-lh: 1.6;
+  }
+}

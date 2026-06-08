@@ -2,24 +2,23 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   PILOT_RESULTS_ADMIN_PATH,
-  PILOT_RESULTS_COPY,
 } from '../../../data/pilotDashboardContent';
 import { formatAdminPct } from '../../../lib/b4BaselineAdminStats';
 import type { B4BaselineCheckRecord } from '../../../lib/b4BaselineCheckStorage';
-import type { PilotDashboardMetrics } from '../../../lib/pilotDashboardMetrics';
-import PilotLocalNote from '../PilotLocalNote';
+import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
+import PilotLocalNote, { PilotResultsStatusCopy } from '../PilotLocalNote';
 
 type PilotResultsPanelProps = {
   refreshKey?: number;
   results: B4BaselineCheckRecord[];
-  metrics: PilotDashboardMetrics;
+  metrics: PilotTrackingMetrics;
   source?: 'supabase' | 'local';
   warning?: string | null;
   loading?: boolean;
 };
 
 const GROWTH_BARS: Array<{
-  key: keyof PilotDashboardMetrics['growth'];
+  key: keyof PilotTrackingMetrics['growth'];
   label: string;
   tone: 'confidence' | 'reading' | 'focus' | 'overall';
 }> = [
@@ -42,7 +41,7 @@ export default function PilotResultsPanel({
 
   return (
     <div className="pilot-panel pilot-panel--results">
-      <p className="pilot-panelIntro">{PILOT_RESULTS_COPY}</p>
+      <PilotResultsStatusCopy source={source} />
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
       <PilotLocalNote source={source} />
 
@@ -72,6 +71,36 @@ export default function PilotResultsPanel({
         <article className="pilot-kpiCard pilot-kpiCard--highlight">
           <p className="pilot-kpiLabel">Overall</p>
           <p className="pilot-kpiValue">{formatAdminPct(metrics.growth.overall)}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Module Completions</p>
+          <p className="pilot-kpiValue">{metrics.moduleCompletions}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Unique Modules</p>
+          <p className="pilot-kpiValue">{metrics.uniqueModulesCompleted}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Avg Module Score</p>
+          <p className="pilot-kpiValue">{formatAdminPct(metrics.averageModuleScorePct)}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Adult Pre-Assessments</p>
+          <p className="pilot-kpiValue">{metrics.adultPreAssessments}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Adult Post-Assessments</p>
+          <p className="pilot-kpiValue">{metrics.adultPostAssessments}</p>
+        </article>
+        <article className="pilot-kpiCard">
+          <p className="pilot-kpiLabel">Adult Growth Delta</p>
+          <p className="pilot-kpiValue">
+            {metrics.adultGrowthDeltaAvg == null
+              ? '—'
+              : metrics.adultGrowthDeltaAvg >= 0
+                ? `+${metrics.adultGrowthDeltaAvg}`
+                : metrics.adultGrowthDeltaAvg}
+          </p>
         </article>
       </div>
 

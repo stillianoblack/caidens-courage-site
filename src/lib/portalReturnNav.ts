@@ -1,47 +1,64 @@
-import { FAMILY_PORTAL_PATH, CAIDEN_QUEST_HUB_PATH, KIDS_PORTAL_PATH } from '../config/courageRoutes';
+import {
+  FAMILY_HUB_PATH,
+  FAMILY_PORTAL_PATH,
+  CAIDEN_QUEST_HUB_PATH,
+  KIDS_PORTAL_PATH,
+  PROGRAM_DASHBOARD_PATH,
+} from '../config/courageRoutes';
+import {
+  getPortalRoute,
+  resolvePortalCharacterHubPath,
+} from './portalGamePaths';
 
 export const PORTAL_RETURN_KEY = 'cc-portal-return';
 
 const PORTAL_RETURN_LABELS: Array<{ match: (path: string) => boolean; label: string }> = [
   {
-    match: (path) => path.startsWith(`${FAMILY_PORTAL_PATH}/characters`),
+    match: (path) => path.includes('/miranda') || path.includes('/caiden') || path.includes('/charlie') || path.includes('/zeke'),
     label: '← Back to Character Hub',
   },
   {
-    match: (path) => path.startsWith(`${FAMILY_PORTAL_PATH}/games`),
-    label: '← Back to Game Hub',
+    match: (path) => path.includes('/b4'),
+    label: '← Back to Character Hub',
   },
   {
-    match: (path) => path.startsWith(`${FAMILY_PORTAL_PATH}/continue-learning`),
-    label: '← Back to Continue Learning',
+    match: (path) =>
+      path.startsWith(`${FAMILY_PORTAL_PATH}/continue-learning`) ||
+      path.startsWith(`${FAMILY_HUB_PATH}/continue-learning`),
+    label: '← Back to Weekly Adventures',
   },
   {
-    match: (path) => path.startsWith(`${KIDS_PORTAL_PATH}/miranda`),
-    label: '← Back to Mystery Files',
+    match: (path) =>
+      path.startsWith(`${FAMILY_PORTAL_PATH}/games`) || path.startsWith(`${FAMILY_HUB_PATH}/games`),
+    label: '← Back to Character Hub',
   },
   {
-    match: (path) => path.startsWith(`${KIDS_PORTAL_PATH}/b4/check-in`),
-    label: '← Back to B-4 Missions',
+    match: (path) =>
+      path.startsWith(`${FAMILY_PORTAL_PATH}/characters`) ||
+      path.startsWith(`${FAMILY_HUB_PATH}/characters`) ||
+      path.startsWith(`${FAMILY_PORTAL_PATH}/children`) ||
+      path.startsWith(`${FAMILY_HUB_PATH}/children`),
+    label: '← Back to Character Hub',
   },
   {
-    match: (path) => path.startsWith(`${KIDS_PORTAL_PATH}/b4/week-1`),
-    label: '← Back to B-4 Missions',
-  },
-  {
-    match: (path) => path.startsWith(`${KIDS_PORTAL_PATH}/b4`),
-    label: '← Back to B-4 Missions',
-  },
-  {
-    match: (path) => path.startsWith(CAIDEN_QUEST_HUB_PATH),
-    label: '← Back to Focus Quest Map',
+    match: (path) => path.startsWith(`${FAMILY_HUB_PATH}/kids`) || path.startsWith(`${PROGRAM_DASHBOARD_PATH}/kids`),
+    label: '← Back to Character Hub',
   },
   {
     match: (path) => path === '/portal/kids' || path.startsWith('/portal/kids/'),
-    label: '← Back to Kids Hub',
+    label: '← Back to Character Hub',
   },
   {
     match: (path) => path === FAMILY_PORTAL_PATH || path.startsWith(`${FAMILY_PORTAL_PATH}/`),
-    label: '← Back to Family Portal',
+    label: '← Back to Home',
+  },
+  {
+    match: (path) => path === FAMILY_HUB_PATH || path.startsWith(`${FAMILY_HUB_PATH}/`),
+    label: '← Back to Home',
+  },
+  {
+    match: (path) => path === PROGRAM_DASHBOARD_PATH || path.startsWith(`${PROGRAM_DASHBOARD_PATH}`),
+    label: '← Back to Overview',
   },
 ];
 
@@ -49,10 +66,14 @@ export function isValidPortalReturnPath(path: string): boolean {
   return (
     path === FAMILY_PORTAL_PATH ||
     path.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
+    path === FAMILY_HUB_PATH ||
+    path.startsWith(`${FAMILY_HUB_PATH}/`) ||
+    path === PROGRAM_DASHBOARD_PATH ||
+    path.startsWith(`${PROGRAM_DASHBOARD_PATH}`) ||
     path === CAIDEN_QUEST_HUB_PATH ||
     path.startsWith(`${CAIDEN_QUEST_HUB_PATH}/`) ||
-    path === '/portal/kids' ||
-    path.startsWith('/portal/kids/')
+    path === KIDS_PORTAL_PATH ||
+    path.startsWith(`${KIDS_PORTAL_PATH}/`)
   );
 }
 
@@ -88,13 +109,41 @@ export function getPortalReturnFromQuery(search: string): string | null {
 
 export function resolvePortalReturnLabel(path: string): string {
   const match = PORTAL_RETURN_LABELS.find((entry) => entry.match(path));
-  return match?.label ?? '← Back to Family Portal';
+  return match?.label ?? '← Back to Character Hub';
 }
 
-export function resolvePortalBackTarget(search: string): { path: string; label: string } {
+export function resolvePortalBackTarget(pathname: string): { path: string; hubName: string } {
+  if (pathname.includes('/guide') || pathname.includes('/parent-corner')) {
+    return { path: getPortalRoute('guide', pathname), hubName: 'Parent Corner' };
+  }
+  if (pathname.includes('/games')) {
+    return { path: resolvePortalCharacterHubPath(pathname), hubName: 'Character Hub' };
+  }
+  if (
+    pathname.includes('/miranda') ||
+    pathname.includes('/caiden') ||
+    pathname.includes('/b4') ||
+    pathname.includes('/charlie') ||
+    pathname.includes('/zeke') ||
+    pathname.includes('/kids/')
+  ) {
+    return { path: resolvePortalCharacterHubPath(pathname), hubName: 'Character Hub' };
+  }
+  if (pathname.includes('/continue-learning')) {
+    return { path: getPortalRoute('continue-learning', pathname), hubName: 'Weekly Adventures' };
+  }
+  return { path: resolvePortalCharacterHubPath(pathname), hubName: 'Character Hub' };
+}
+
+export function resolvePortalBackTargetFromPath(path: string): { path: string; hubName: string } {
+  const label = resolvePortalReturnLabel(path).replace(/^← Back to /, '').trim();
+  return { path, hubName: label };
+}
+
+export function resolvePortalBackTargetLegacy(search: string): { path: string; label: string } {
   const fromQuery = getPortalReturnFromQuery(search);
   const stored = getPortalReturnPath();
-  const path = fromQuery ?? stored ?? FAMILY_PORTAL_PATH;
+  const path = fromQuery ?? stored ?? resolvePortalCharacterHubPath();
   return {
     path,
     label: resolvePortalReturnLabel(path),
@@ -118,9 +167,27 @@ export function shouldUseHistoryBack(returnPath: string | null): boolean {
 export function isFamilyPortalGameHref(href: string): boolean {
   return (
     href.startsWith('/portal/kids') ||
+    href.startsWith('/family-hub/kids') ||
+    href.startsWith(`${PROGRAM_DASHBOARD_PATH}/kids`) ||
     href.startsWith('/miranda-mystery-files') ||
     href.startsWith('/focus-flame-lab') ||
     href.startsWith('/b4-guide') ||
     href.startsWith('/b4-baseline-check')
   );
 }
+
+/** @deprecated Use resolvePortalBackTargetLegacy */
+export function resolvePortalBackTargetFromQuery(search: string): { path: string; label: string } {
+  return resolvePortalBackTargetLegacy(search);
+}
+
+/** @deprecated Use resolvePortalBackTargetLegacy */
+export function resolvePortalBackTargetOld(search: string): { path: string; label: string } {
+  return resolvePortalBackTargetLegacy(search);
+}
+
+export function resolvePortalBackTargetQuery(search: string): { path: string; label: string } {
+  return resolvePortalBackTargetLegacy(search);
+}
+
+export { resolvePortalBackTargetLegacy as resolvePortalBackTargetFromSearch };

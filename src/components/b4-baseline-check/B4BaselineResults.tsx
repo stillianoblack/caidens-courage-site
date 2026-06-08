@@ -91,7 +91,7 @@ export default function B4BaselineResults({
         </p>
       ) : null}
       <p className="bbc-deviceNote" role="status">
-        {syncMessage ?? 'Saved on this device. Online pilot sync is unavailable right now.'}
+        {syncMessage ?? 'Local testing mode: results are saved on this device.'}
       </p>
 
       <div className="bbc-finalBadge" role="status">

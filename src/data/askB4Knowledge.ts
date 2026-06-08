@@ -441,7 +441,7 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     tags: ['first', 'start', 'family', 'what should we try'],
     recommendedResources: [
       { label: 'Continue Learning', href: `${FAMILY_PORTAL_PATH}/continue-learning` },
-      { label: 'Game Hub', href: `${FAMILY_PORTAL_PATH}/games` },
+      { label: 'Character Hub', href: `${FAMILY_PORTAL_PATH}/characters` },
     ],
     familyAnswer:
       'Try B-4 Check-In first for a quick feelings warm-up, then pick Caiden Quest 1 for planning or Miranda File #1 for reading.',
@@ -471,7 +471,7 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     kidAnswer:
       'Want a story quest? Try Caiden! Want reading mysteries? Try Miranda! Want focus moves and feelings? Try B-4!',
     recommendedResources: [
-      { label: 'Game Hub', href: `${FAMILY_PORTAL_PATH}/games` },
+      { label: 'Character Hub', href: `${FAMILY_PORTAL_PATH}/characters` },
     ],
   },
 ];

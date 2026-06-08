@@ -1,6 +1,7 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import { CAIDEN_QUEST_1_CONFIG, CAIDEN_QUEST_1_ID } from './quest1WhatComesFirst';
 import { CAIDEN_QUEST_2_CONFIG, CAIDEN_QUEST_2_ID } from './quest2ChooseYourNextMove';
+import { CAIDEN_QUEST_3_CONFIG, CAIDEN_QUEST_3_ID } from './quest3ResetAndReturn';
 
 export type CaidenQuestMeta = {
   id: string;
@@ -42,6 +43,16 @@ export const CAIDEN_QUESTS: CaidenQuestMeta[] = [
     reward: 'Focus Navigator Badge',
     config: CAIDEN_QUEST_2_CONFIG,
   },
+  {
+    id: CAIDEN_QUEST_3_ID,
+    questNumber: 3,
+    title: "Caiden's Focus Quest: Reset and Return",
+    subtitle: 'Reset and Return',
+    description: 'Practice focus recovery, self-regulation, and flexible thinking when attention slips.',
+    skills: ['Focus Recovery', 'Self-regulation', 'Flexible thinking'],
+    reward: 'Focus Recovery Badge',
+    config: CAIDEN_QUEST_3_CONFIG,
+  },
 ];
 
 export function getCaidenQuestById(id: string | undefined): CaidenQuestMeta | undefined {
@@ -49,4 +60,4 @@ export function getCaidenQuestById(id: string | undefined): CaidenQuestMeta | un
   return CAIDEN_QUESTS.find((quest) => quest.id === id);
 }
 
-export { CAIDEN_QUEST_1_ID, CAIDEN_QUEST_2_ID };
+export { CAIDEN_QUEST_1_ID, CAIDEN_QUEST_2_ID, CAIDEN_QUEST_3_ID };

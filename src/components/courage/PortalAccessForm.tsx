@@ -1,16 +1,19 @@
-import React, { useId } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
+import { readLastPilotProgram } from '../../config/lastPilotProgram';
+import PortalWelcomeBackCard from './PortalWelcomeBackCard';
+import PortalCodeRecovery from './PortalCodeRecovery';
 
 type PortalAccessFormProps = {
   variant: PortalUnlockVariant;
   accessCode: string;
   error: string | null;
+  submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
-  /** Optional id for scroll anchors on the hero card */
+  onUseDifferentCode?: () => void;
   id?: string;
-  /** Subtle audience label shown under the icon on hero variant */
   cardAudienceLabel?: string;
 };
 
@@ -18,8 +21,10 @@ export default function PortalAccessForm({
   variant,
   accessCode,
   error,
+  submitting = false,
   onAccessCodeChange,
   onSubmit,
+  onUseDifferentCode,
   id,
   cardAudienceLabel,
 }: PortalAccessFormProps) {
@@ -27,12 +32,21 @@ export default function PortalAccessForm({
   const codeInputId = `${formId}-code`;
   const errorId = `${formId}-error`;
   const isHero = variant === 'hero';
+  const savedProgram = useMemo(() => readLastPilotProgram(), []);
+  const [hideWelcomeBack, setHideWelcomeBack] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
 
   const cardClass = isHero
     ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
     : 'cc-portal-access-form--nav';
 
   const portalIconSrc = '/images/icons/FocusFlame_Icon.svg';
+
+  const handleUseDifferentCode = () => {
+    setHideWelcomeBack(true);
+    onAccessCodeChange('');
+    onUseDifferentCode?.();
+  };
 
   return (
     <div id={id} className={cardClass}>
@@ -104,10 +118,27 @@ export default function PortalAccessForm({
           leftIconSrc={null}
           fullWidth
           className="!w-full"
+          disabled={submitting}
         >
-          {isHero ? 'Unlock Portal' : 'Unlock'}
+          {submitting ? 'Unlocking…' : isHero ? 'Unlock Portal' : 'Unlock'}
         </Button>
       </form>
+
+      {isHero ? (
+        <button
+          type="button"
+          className="portal-forgotCodeLink"
+          onClick={() => setShowRecovery((open) => !open)}
+        >
+          Forgot your code?
+        </button>
+      ) : null}
+
+      {isHero && showRecovery ? <PortalCodeRecovery onClose={() => setShowRecovery(false)} /> : null}
+
+      {isHero && savedProgram && !hideWelcomeBack ? (
+        <PortalWelcomeBackCard saved={savedProgram} onUseDifferentCode={handleUseDifferentCode} />
+      ) : null}
 
       {isHero ? (
         <p className="mt-4 text-xs leading-relaxed text-navy-500/80">

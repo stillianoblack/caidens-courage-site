@@ -1,0 +1,214 @@
+.characterProfile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.characterProfileHero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.characterProfileAvatar {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 4px solid rgba(36, 62, 112, 0.1);
+  box-shadow: 0 12px 32px rgba(36, 62, 112, 0.12);
+}
+
+.characterProfileAvatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.55);
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.characterProfileHeroText {
+  min-width: 0;
+}
+
+.characterProfileName {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+  line-height: 1.1;
+}
+
+.characterProfileTagline {
+  margin: 0.5rem 0 0;
+  max-width: 36rem;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.78);
+  font-weight: 600;
+}
+
+.characterProfileBio {
+  margin: 0;
+  max-width: 48rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.characterProfileGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.characterProfileSection {
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.characterProfileSectionTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.characterProfileSectionBody {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.characterProfileList {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.characterProfileActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.characterProfileActionsSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.characterProfileActionsPrimary {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 1 auto;
+  margin-left: auto;
+}
+
+.characterProfileBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.characterProfileBtn--primary {
+  background: var(--family-gold, #f4b400);
+  color: var(--family-navy, #243e70);
+  box-shadow: 0 8px 20px rgba(244, 180, 0, 0.24);
+}
+
+.characterProfileBtn--primary:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.characterProfile--caiden .characterProfileBtn--primary {
+  background: linear-gradient(135deg, #e5c06a, #f4b400);
+  color: #1a2f52;
+  box-shadow: 0 8px 20px rgba(229, 192, 106, 0.35);
+}
+
+.characterProfile--miranda .characterProfileBtn--primary {
+  background: #7c3aed;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.28);
+}
+
+.characterProfile--b4 .characterProfileBtn--primary {
+  background: #243e70;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(36, 62, 112, 0.28);
+}
+
+.characterProfile--charlie .characterProfileBtn--primary {
+  background: #3d7a52;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(61, 122, 82, 0.28);
+}
+
+.characterProfile--zeke .characterProfileBtn--primary {
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.28);
+}
+
+.characterProfile--dr-victoria .characterProfileBtn--primary {
+  background: #a78bfa;
+  color: #4c1d95;
+  box-shadow: 0 8px 20px rgba(167, 139, 250, 0.35);
+}
+
+.characterProfile--uncle-t .characterProfileBtn--primary {
+  background: #d97706;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.28);
+}
+
+.characterProfileBtn--secondary {
+  background: #fff;
+  color: var(--family-navy, #243e70);
+  border: 1px solid rgba(36, 62, 112, 0.16);
+}
+
+.characterProfileBtn--secondary:hover {
+  background: rgba(36, 62, 112, 0.04);
+}
+
+.characterProfileBtn--disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: default;
+}
+
+@media (max-width: 767px) {
+  .characterProfileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .characterProfileName {
+    font-size: 1.625rem;
+  }
+}

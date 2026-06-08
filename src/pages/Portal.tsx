@@ -12,7 +12,8 @@ import { usePortalUnlock } from '../hooks/usePortalUnlock';
  */
 const Portal: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const { accessCode, error, handleSubmit, onAccessCodeChange } = usePortalUnlock('hero');
+  const { accessCode, error, submitting, handleSubmit, onAccessCodeChange, clearAccessCode } =
+    usePortalUnlock('hero');
 
   const audienceParam = searchParams.get('audience');
   const audience: PortalAudienceTab | null = audienceParam
@@ -31,8 +32,10 @@ const Portal: React.FC = () => {
         audience={audience}
         accessCode={accessCode}
         error={error}
+        submitting={submitting}
         onAccessCodeChange={onAccessCodeChange}
         onSubmit={handleSubmit}
+        onUseDifferentCode={clearAccessCode}
       />
 
       <CourageFooter />

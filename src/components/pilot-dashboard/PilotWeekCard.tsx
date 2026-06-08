@@ -1,21 +1,35 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { PilotWeek } from '../../data/pilotDashboardContent';
+import {
+  formatWeekUnlockStatus,
+  getUnlockedWeek,
+  resolvePilotStartDate,
+  resolveWeekStatus,
+} from '../../lib/pilotWeekUnlock';
+import { readActivePilotProgram } from '../../config/activePilotProgram';
+import { readActivePortalRole } from '../../config/portalContext';
+import { trackWeeklyModuleDownloaded } from '../../lib/analytics';
 import PilotStatusPill from './PilotStatusPill';
 
 type PilotWeekCardProps = {
   week: PilotWeek;
 };
 
-const STATUS_LABELS: Record<PilotWeek['status'], string> = {
-  available: 'Available',
-  locked: 'Locked',
-  complete: 'Complete',
-};
-
 export default function PilotWeekCard({ week }: PilotWeekCardProps) {
-  const isLocked = week.status === 'locked';
+  const activeProgram = readActivePilotProgram();
+  const pilotStartDate = resolvePilotStartDate(activeProgram);
+  const unlockedWeek = getUnlockedWeek(pilotStartDate);
+
+  const status = useMemo(
+    () => resolveWeekStatus(week.week, pilotStartDate),
+    [week.week, pilotStartDate],
+  );
+
+  const isLocked = status === 'locked';
+  const unlockLabel = formatWeekUnlockStatus(week.week, pilotStartDate);
   const pillTone =
-    week.status === 'available' ? 'available' : week.status === 'complete' ? 'complete' : 'locked';
+    status === 'available' ? 'available' : week.status === 'complete' ? 'complete' : 'locked';
+  const pillLabel = isLocked ? unlockLabel : status === 'available' ? 'Available now' : 'Complete';
 
   return (
     <article className={`pilot-dash-weekCard${isLocked ? ' pilot-dash-weekCard--locked' : ''}`}>
@@ -25,13 +39,27 @@ export default function PilotWeekCard({ week }: PilotWeekCardProps) {
           <h3 className="pilot-dash-weekTitle">{week.title}</h3>
           <p className="pilot-dash-weekSel">SEL Focus: {week.selFocus}</p>
         </div>
-        <PilotStatusPill status={STATUS_LABELS[week.status]} tone={pillTone} showLock={isLocked} />
+        <PilotStatusPill status={pillLabel} tone={pillTone} showLock={isLocked} />
       </div>
+
+      {isLocked && week.week === unlockedWeek + 1 ? (
+        <p className="pilot-dash-weekUnlockHint">{unlockLabel}</p>
+      ) : null}
 
       {isLocked ? (
         <span className="pilot-dash-cta pilot-dash-cta--disabled pilot-weekCta">{week.kitCta}</span>
       ) : (
-        <a href={week.kitHref} className="pilot-dash-cta pilot-weekCta">
+        <a
+          href={week.kitHref}
+          className="pilot-dash-cta pilot-weekCta"
+          onClick={() =>
+            trackWeeklyModuleDownloaded({
+              week: week.week,
+              title: week.title,
+              role: readActivePortalRole() ?? 'facilitator',
+            })
+          }
+        >
           {week.kitCta}
         </a>
       )}

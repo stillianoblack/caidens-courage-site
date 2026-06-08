@@ -1,4 +1,5 @@
 import React from 'react';
+import GameInteractionShell from '../game-assessment/shared/GameInteractionShell';
 
 type B4BaselineBottomBarProps = {
   canCheck: boolean;
@@ -29,35 +30,37 @@ export default function B4BaselineBottomBar({
 
   return (
     <footer className={barClass}>
-      <div className="bbc-bottomBarInner">
-        {!checked ? (
-          <>
-            <button type="button" className="bbc-skipBtn" onClick={onSkip}>
-              Skip
-            </button>
-            <button type="button" className="bbc-checkBtn" disabled={!canCheck} onClick={onCheck}>
-              Check
-            </button>
-          </>
-        ) : (
-          <>
-            {feedback ? (
-              <p className="bbc-feedbackBanner" role="status">
-                {feedback}
-              </p>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              className="bbc-checkBtn bbc-checkBtn--continue"
-              onClick={onContinue}
-            >
-              Continue
-            </button>
-          </>
-        )}
-      </div>
+      <GameInteractionShell>
+        <div className="bbc-bottomBarInner">
+          {!checked ? (
+            <>
+              <button type="button" className="bbc-skipBtn" onClick={onSkip}>
+                Skip
+              </button>
+              <button type="button" className="bbc-checkBtn" disabled={!canCheck} onClick={onCheck}>
+                Check
+              </button>
+            </>
+          ) : (
+            <>
+              {feedback ? (
+                <p className="bbc-feedbackBanner" role="status">
+                  {feedback}
+                </p>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                className="bbc-checkBtn bbc-checkBtn--continue"
+                onClick={onContinue}
+              >
+                Continue
+              </button>
+            </>
+          )}
+        </div>
+      </GameInteractionShell>
     </footer>
   );
 }

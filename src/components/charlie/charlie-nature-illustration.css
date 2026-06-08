@@ -1,0 +1,33 @@
+.charlie-natureIllustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 6.5rem;
+  padding: 0.5rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(180deg, #fff 0%, #e8f5ea 100%);
+  border: 2px solid rgba(90, 154, 110, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.charlie-natureSvg {
+  width: 100%;
+  height: auto;
+  max-height: 7.5rem;
+  display: block;
+}
+
+.mission-scenarioIllustration .charlie-natureIllustration {
+  min-height: 5.5rem;
+}
+
+@media (min-width: 768px) {
+  .charlie-natureIllustration {
+    min-height: 7.5rem;
+  }
+
+  .charlie-natureSvg {
+    max-height: 8.5rem;
+  }
+}

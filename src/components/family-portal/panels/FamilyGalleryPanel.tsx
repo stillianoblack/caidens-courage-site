@@ -1,14 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
+import { resolveActiveProgramContext } from '../../../config/activePilotProgram';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import {
-  FAMILY_GALLERY_PROGRAM_CODE,
+  DEFAULT_GALLERY_PROGRAM_CODE,
   fetchApprovedStudentGalleryItems,
   fetchFamilyGallerySubmissions,
   isAllowedGalleryImageType,
   normalizeGalleryStatus,
   uploadStudentGalleryItem,
 } from '../../../lib/studentGalleryService';
+import { trackEvent } from '../../../lib/analytics';
+import { markGalleryViewed, requestGalleryCountsRefresh } from '../../../lib/galleryNavCounts';
 import './family-gallery.css';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
@@ -16,6 +19,9 @@ type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 export default function FamilyGalleryPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const submitterKey = useMemo(() => getFamilyGallerySubmitterKey(), []);
+  const programContext = useMemo(() => resolveActiveProgramContext(), []);
+  const programCode = programContext?.programCode ?? DEFAULT_GALLERY_PROGRAM_CODE;
+  const groupName = programContext?.groupName ?? '';
 
   const [studentName, setStudentName] = useState('');
   const [activityName, setActivityName] = useState('');
@@ -32,6 +38,10 @@ export default function FamilyGalleryPanel() {
     Awaited<ReturnType<typeof fetchApprovedStudentGalleryItems>>
   >([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    trackEvent('gallery_viewed');
+  }, []);
 
   const refreshGallery = useCallback(async () => {
     setLoading(true);
@@ -103,7 +113,8 @@ export default function FamilyGalleryPanel() {
       title: activityName,
       studentNickname: studentName,
       caption,
-      programCode: FAMILY_GALLERY_PROGRAM_CODE,
+      programCode,
+      groupName,
       uploadSource: 'family',
       submitterKey,
     });
@@ -124,6 +135,7 @@ export default function FamilyGalleryPanel() {
       fileInputRef.current.value = '';
     }
     await refreshGallery();
+    requestGalleryCountsRefresh();
   };
 
   return (

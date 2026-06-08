@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { MissionBoardItem } from '../../types/missionBoard';
+import { remapPortalKidsRoute } from '../../lib/portalGamePaths';
 import MissionPathConnector, { MissionStackConnector, positionClass } from './MissionPathConnector';
 import MissionFolderCard from './MissionFolderCard';
 
@@ -16,9 +18,19 @@ export default function MissionPath({
   className = '',
   pathVariant = 'miranda',
 }: MissionPathProps) {
+  const location = useLocation();
+  const remappedMissions = useMemo(
+    () =>
+      missions.map((mission) => ({
+        ...mission,
+        route: remapPortalKidsRoute(mission.route, location.pathname),
+      })),
+    [location.pathname, missions],
+  );
+
   const sortedMobile = useMemo(
-    () => [...missions].sort((a, b) => a.mobileOrder - b.mobileOrder),
-    [missions],
+    () => [...remappedMissions].sort((a, b) => a.mobileOrder - b.mobileOrder),
+    [remappedMissions],
   );
 
   return (
@@ -50,7 +62,7 @@ export default function MissionPath({
           )}
         </div>
         <MissionPathConnector variant={pathVariant} />
-        {missions.map((mission) => (
+        {remappedMissions.map((mission) => (
           <div
             key={mission.id}
             className={['mission-pathNode', positionClass(mission.desktopPosition)]

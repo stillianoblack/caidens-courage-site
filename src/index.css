@@ -8381,6 +8381,234 @@ a.ffl-ctaSecondary {
   }
 }
 
+.portal-forgotCodeLink {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  border: none;
+  background: transparent;
+  color: #243e70;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.portal-welcomeBack {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.12);
+  text-align: left;
+}
+
+.portal-welcomeBackTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.portal-welcomeBackCopy {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(36, 62, 112, 0.75);
+}
+
+.portal-welcomeBackProgram {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #243e70;
+}
+
+.portal-welcomeBackCodes {
+  margin-top: 0.65rem;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.85);
+}
+
+.portal-welcomeBackLabel {
+  font-weight: 700;
+}
+
+.portal-welcomeBackActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.portal-welcomeBackBtn {
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: #243e70;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.portal-welcomeBackLink {
+  border: none;
+  background: transparent;
+  color: #243e70;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.portal-recovery {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.875rem;
+  background: #faf9f7;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  text-align: left;
+}
+
+.portal-recoveryHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.portal-recoveryTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.portal-recoveryClose {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(36, 62, 112, 0.65);
+}
+
+.portal-recoveryForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.portal-recoveryField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #243e70;
+}
+
+.portal-recoveryField input {
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.875rem;
+}
+
+.portal-recoverySubmit {
+  min-height: 2.5rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: #243e70;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.portal-recoverySubmit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.portal-recoveryResult {
+  margin-top: 0.875rem;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.9);
+}
+
+.portal-recoveryProgram {
+  margin: 0 0 0.35rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.portal-recoveryLabel {
+  font-weight: 700;
+}
+
+.portal-recoveryCodeRow {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.portal-recoveryCodeValue {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.portal-recoveryCopyBtn {
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #243e70;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.625rem;
+  cursor: pointer;
+}
+
+.portal-recoveryActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.portal-recoveryContinueBtn {
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: #243e70;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.portal-recoveryDisabled {
+  margin-top: 0.65rem;
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px dashed rgba(36, 62, 112, 0.25);
+  border-radius: 0.625rem;
+  background: #fff;
+  color: rgba(36, 62, 112, 0.55);
+  font-weight: 700;
+  cursor: not-allowed;
+}
+
+.portal-recoveryNote {
+  margin: 0.65rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
 /* Courage homepage — brand-led hero (static) */
 .cc-hero-mask {
   overflow: hidden;

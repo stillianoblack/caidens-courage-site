@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import type { DetectiveRankConfig, MissionBoardItem, MissionDashboardHeaderConfig } from '../../types/missionBoard';
 import MissionDashboardHeader from './MissionDashboardHeader';
 import MissionPath from './MissionPath';
-import PortalSmartBackButton from '../family-portal/PortalSmartBackButton';
+import PortalBackButton from '../portal/PortalBackButton';
+import { getPortalRoute } from '../../lib/portalGamePaths';
 import './mission-board.css';
 
 type CharacterMissionBoardProps = {
@@ -35,17 +36,19 @@ export default function CharacterMissionBoard({
 }: CharacterMissionBoardProps) {
   return (
     <div className={['characterMissionBoard', className].filter(Boolean).join(' ')}>
+      {smartBack ? (
+        <div className="mission-boardTopBack">
+          <PortalBackButton hubName="Character Hub" to={getPortalRoute('characters')} />
+        </div>
+      ) : null}
+
       <MissionDashboardHeader {...header} avatar={avatar} rank={rank} statusPill={statusPill} />
 
       {progressionHint ? <p className="mission-boardProgressHint">{progressionHint}</p> : null}
 
       <MissionPath missions={missions} onSelectMission={onSelectMission} pathVariant={pathVariant} />
 
-      {smartBack ? (
-        <div className="mission-boardFoot">
-          <PortalSmartBackButton />
-        </div>
-      ) : backLink ? (
+      {backLink ? (
         <div className="mission-boardFoot">
           <Link to={backLink.to} className="mission-boardBackBtn">
             {backLink.label}

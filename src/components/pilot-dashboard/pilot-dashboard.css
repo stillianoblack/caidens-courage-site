@@ -167,7 +167,35 @@
 .pilot-topbarRight {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.pilot-topbarContext {
+  display: none;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.pilot-topbarContextTitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-topbarContextSubtitle {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.65);
+}
+
+@media (min-width: 768px) {
+  .pilot-topbarContext {
+    display: block;
+  }
 }
 
 .pilot-topbarSearch {
@@ -217,8 +245,11 @@
 
 .pilot-content {
   flex: 1;
-  padding: 2rem 2.5rem 3rem;
-  max-width: 56rem;
+  max-width: 70rem;
+  margin-left: 0;
+  margin-right: auto;
+  width: 100%;
+  padding: 2rem 2rem 3rem;
 }
 
 .pilot-tabPanel[hidden] {
@@ -229,6 +260,34 @@
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+}
+
+.pilot-resultsIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pilot-panelIntroTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-panelIntroSubtitle {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-dash-weekUnlockHint {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.65);
 }
 
 .pilot-panelIntro {
@@ -796,9 +855,11 @@
 }
 
 .pilot-content--wide {
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
+  max-width: 72rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.5rem 2.5rem 3rem;
 }
 
 .pilot-assessGrid {
@@ -817,9 +878,28 @@
   gap: 0.75rem;
 }
 
+.pilot-assessCard--locked {
+  opacity: 0.92;
+}
+
+.pilot-assessCardLockedFoot {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.62);
+}
+
 .pilot-assessCard .pilot-dash-cta {
   margin-top: auto;
   align-self: flex-start;
+}
+
+.adultLearningFlowSection .weeklyAdventuresUnlockCard {
+  margin-bottom: 1.25rem;
+}
+
+.pilot-weeklyModulesBanner {
+  margin-bottom: 1.5rem;
 }
 
 /* Results embedded */
@@ -1890,7 +1970,7 @@ button.pilot-dash-card:hover {
   max-width: 28rem;
 }
 
-/* Mobile: collapsible rail could be added later */
+/* Mobile: full nav labels + search + portal switcher */
 @media (max-width: 767px) {
   .pilot-shell {
     flex-direction: column;
@@ -1899,28 +1979,44 @@ button.pilot-dash-card:hover {
   .pilot-rail {
     width: 100%;
     height: auto;
+    max-height: none;
     position: relative;
     border-right: none;
     border-bottom: 1px solid var(--pilot-border);
   }
 
+  .pilot-railBrand {
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .pilot-railNav {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
   .pilot-railNavList {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.35rem;
-    padding-bottom: 0.25rem;
   }
 
   .pilot-railNavBtn {
-    flex-shrink: 0;
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    padding: 0.5rem 0.625rem;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.5rem;
+    gap: 0.4rem;
   }
 
   .pilot-railNavBtn span:last-child {
-    display: none;
+    display: inline;
+    line-height: 1.2;
+  }
+
+  .pilot-topbar {
+    padding: 0.875rem 1rem;
+  }
+
+  .pilot-topbarRight {
+    width: 100%;
+    justify-content: stretch;
   }
 
   .pilot-content {
@@ -1966,4 +2062,260 @@ button.pilot-dash-card:hover {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(36, 62, 112, 0.65);
+}
+
+.pilot-railSupport {
+  margin-top: auto;
+  margin-bottom: 0.75rem;
+  padding: 1rem 0.875rem;
+  border-top: 1px solid var(--pilot-border);
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.pilot-railSupportTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-railSupportCopy {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-railSupportBtn {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  background: #fff;
+  color: var(--pilot-navy);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pilot-railSupportBtn:hover {
+  border-color: rgba(36, 62, 112, 0.35);
+}
+
+.pilot-supportModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(26, 47, 82, 0.45);
+}
+
+.pilot-supportModal {
+  width: min(100%, 24rem);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 48px -24px rgba(26, 47, 82, 0.45);
+}
+
+.pilot-supportModalTitle {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-supportModalCopy {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.pilot-supportModalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.pilot-supportModalPrimary,
+.pilot-supportModalSecondary {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.875rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pilot-supportModalPrimary {
+  background: var(--pilot-navy);
+  border: 1px solid var(--pilot-navy);
+  color: #fff;
+  text-decoration: none;
+}
+
+.pilot-supportModalSecondary {
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  background: #fff;
+  color: var(--pilot-navy);
+}
+
+.pilot-supportModal--pricing {
+  width: min(100%, 42rem);
+}
+
+.pilot-pricingGrid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .pilot-pricingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pilot-pricingCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.pilot-pricingCard--featured {
+  border-color: rgba(229, 192, 106, 0.55);
+  box-shadow: 0 12px 28px -18px rgba(36, 62, 112, 0.25);
+}
+
+.pilot-pricingBadge {
+  align-self: flex-start;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pilot-pricingCardTitle {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-pricingCardPrice {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--pilot-navy);
+}
+
+.pilot-pricingIncludes {
+  margin: 0;
+  padding-left: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.pilot-pricingCardCta {
+  margin-top: auto;
+  display: block;
+  padding: 0.65rem 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--pilot-navy);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.pilotAccessCodes {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(90, 154, 110, 0.28);
+  background: linear-gradient(180deg, #f8fdf9 0%, #eef8f0 100%);
+}
+
+.pilotAccessCodes--compact {
+  margin-bottom: 1rem;
+}
+
+.pilotAccessCodesTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilotAccessCodesCopy {
+  margin: 0 0 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.pilotAccessCodesGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.pilotAccessCodesRow {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pilotAccessCodesLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.pilotAccessCodesValue {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--pilot-navy);
+  word-break: break-all;
+}
+
+.pilotAccessCodesBtn {
+  padding: 0.35rem 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  background: #fff;
+  color: var(--pilot-navy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .pilotAccessCodesRow {
+    grid-template-columns: 1fr;
+  }
 }

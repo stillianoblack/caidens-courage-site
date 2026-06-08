@@ -2,22 +2,32 @@ import React, { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
+import PortalShell from '../components/portal/PortalShell';
+import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
+import '../components/portal/portal-shell.css';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 import { FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
+import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
-import { FAMILY_PAGE_SUBTITLES, FAMILY_PORTAL_TITLE } from '../data/familyPortalContent';
-import { isWidePortalContentRoute, resolvePortalNavId, resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
+import { resolvePortalRailBrand } from '../lib/portalGamePaths';
+import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const hasSession = readFamilyPortalSession();
+  const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname);
-  const pageSubtitle = FAMILY_PAGE_SUBTITLES[resolvePortalNavId(location.pathname)];
-  const isWideContent = isWidePortalContentRoute(location.pathname);
+  const programCode = readActivePilotProgram()?.programCode;
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
+  }, []);
+
+  useEffect(() => {
+    requestGalleryCountsRefresh();
   }, []);
 
   useEffect(() => {
@@ -31,20 +41,28 @@ export default function FamilyPortalLayout() {
   }
 
   return (
-    <div className="family-shell">
-      <FamilyDashboardSidebar />
-
-      <div className="family-main">
-        <FamilyDashboardTopBar pageTitle={pageTitle} pageSubtitle={pageSubtitle} />
-
-        <div className={`family-content${isWideContent ? ' family-content--wide' : ''}`}>
-          <Outlet />
-        </div>
-
-        <footer className="family-miniFooter">
-          © 2026 Caiden&apos;s Courage™ Family Portal
-        </footer>
-      </div>
-    </div>
+    <PortalShell
+      variant="family"
+      sidebar={
+        <FamilyDashboardSidebar
+          navItems={FAMILY_SIDEBAR_NAV}
+          brandTitle={brand.title}
+          brandSubtitle={brand.subtitle}
+          programCode={programCode}
+        />
+      }
+      topBar={
+        <FamilyDashboardTopBar
+          pageTitle={pageTitle}
+          contextTitle={brand.title}
+          contextSubtitle="Family Portal"
+        />
+      }
+      footer={
+        <footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>
+      }
+    >
+      <Outlet />
+    </PortalShell>
   );
 }

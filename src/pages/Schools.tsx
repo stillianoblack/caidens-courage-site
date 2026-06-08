@@ -4,6 +4,11 @@ import PersonaMarketingPage from '../components/courage/PersonaMarketingPage';
 import Button from '../components/ui/Button';
 import { SCHOOLS_PAGE } from '../config/personaPages';
 import { BRAVE_MIND_CLUB_PATH, BMC_RESET_TOOLS_PATH } from '../config/courageRoutes';
+import {
+  trackContactFormStarted,
+  trackContactFormSubmitted,
+  trackSalesFunnel,
+} from '../lib/analytics';
 
 const PILOT_IMAGE = '/images/camp-courage/stackworksheets.webp';
 
@@ -36,6 +41,8 @@ function PilotRequestForm({ idPrefix = 'schools-pilot' }: { idPrefix?: string })
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
+        trackContactFormSubmitted('/schools#pilot');
+        trackSalesFunnel('pilot_interest_clicked', { source_page: '/schools#pilot' });
         window.location.href = '/contact?subject=Caiden%27s%20Courage%20for%20Schools%20Pilot';
       }}
     >
@@ -50,6 +57,7 @@ function PilotRequestForm({ idPrefix = 'schools-pilot' }: { idPrefix?: string })
             name={label.toLowerCase()}
             className="mt-1.5 h-12 w-full rounded-xl border border-navy-200 px-4 text-navy-600 focus:border-golden-500 focus:outline-none focus:ring-2 focus:ring-golden-500/30"
             placeholder={label === 'Email' ? 'you@school.org' : undefined}
+            onFocus={() => trackContactFormStarted('/schools#pilot')}
           />
         </div>
       ))}

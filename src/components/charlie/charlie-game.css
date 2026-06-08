@@ -1,0 +1,153 @@
+@import '../adult-learning/adult-training-tokens.css';
+
+.charlie-game.bbc-app {
+  --charlie-green: #5a9a6e;
+  --charlie-green-dark: #3d7a52;
+  --charlie-leaf: #8bc48a;
+  --charlie-shell: #c4a574;
+  --charlie-navy: #243e70;
+  --charlie-bg: #f2faf4;
+  background: linear-gradient(180deg, #f8fdf9 0%, var(--charlie-bg) 45%, #e8f5ea 100%);
+  color: var(--charlie-navy);
+}
+
+.charlie-game--embedded.bbc-app,
+.charlie-game.adult-guide-game--embedded.bbc-app {
+  min-height: calc(100dvh - 7.5rem);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(90, 154, 110, 0.28);
+  overflow: visible;
+}
+
+.charlie-topBar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(42rem, calc(100vw - 2.5rem));
+  width: 100%;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: transparent;
+  border-bottom: none;
+}
+
+.charlie-progressTrack {
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+}
+
+.charlie-progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--charlie-green) 0%, var(--charlie-leaf) 100%);
+  transition: width 0.35s ease;
+}
+
+.charlie-natureCardText {
+  color: var(--adult-body);
+  font-size: var(--adult-body-size);
+  line-height: var(--adult-body-lh);
+  font-weight: 600;
+}
+
+.charlie-natureCardLabel {
+  color: var(--charlie-green-dark);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.charlie-natureCardTag {
+  color: #4a6b3a;
+  background: rgba(139, 196, 138, 0.2);
+  border: 1px solid rgba(90, 154, 110, 0.32);
+  padding: 0.3rem 0.625rem;
+  border-radius: 999px;
+}
+
+.mission-speechRow--charlie .mission-speechAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  border-radius: 9999px;
+}
+
+.charlie-completeHero {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 3px solid rgba(90, 154, 110, 0.55);
+  background: #fff;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.charlie-completeAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+}
+
+.mission-speechRow--charlie .mission-speechContent {
+  border: 2px solid rgba(90, 154, 110, 0.32);
+  background: linear-gradient(180deg, #fff 0%, #f2faf4 100%);
+  box-shadow: 0 12px 30px -20px rgba(35, 59, 110, 0.18);
+}
+
+.adultTraining-icon--charlie {
+  --icon-fill: #5a9a6e;
+  --icon-bg: rgba(139, 196, 138, 0.18);
+  --icon-ring: rgba(90, 154, 110, 0.38);
+}
+
+.game-deco--charlie-leaf-a,
+.game-deco--charlie-leaf-b,
+.game-deco--charlie-shell-a,
+.game-deco--charlie-rain-a,
+.game-deco--charlie-vine-a {
+  position: absolute;
+  pointer-events: none;
+  color: var(--charlie-green-dark);
+  opacity: 0.06;
+}
+
+.game-deco--charlie-leaf-a { top: 8%; right: 6%; width: 4rem; height: 4rem; }
+.game-deco--charlie-leaf-b { bottom: 14%; left: 5%; width: 3.5rem; height: 3.5rem; transform: rotate(-18deg); }
+.game-deco--charlie-shell-a { top: 22%; left: 10%; width: 3.25rem; height: 3.25rem; opacity: 0.05; }
+.game-deco--charlie-rain-a { top: 12%; right: 22%; width: 3rem; height: 3rem; opacity: 0.04; }
+.game-deco--charlie-vine-a { bottom: 8%; right: 8%; width: 5rem; height: 4rem; opacity: 0.045; }
+
+.game-deco--charlie-leaf-a svg,
+.game-deco--charlie-leaf-b svg,
+.game-deco--charlie-shell-a svg,
+.game-deco--charlie-rain-a svg,
+.game-deco--charlie-vine-a svg {
+  width: 100%;
+  height: 100%;
+}
+
+.game-complete--charlie .game-completeScore {
+  color: var(--adult-body);
+}
+
+@media (max-width: 767px) {
+  .charlie-game.bbc-app {
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .charlie-game .bbc-main--quiz {
+    padding-bottom: 5.5rem;
+  }
+}

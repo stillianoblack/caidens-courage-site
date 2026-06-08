@@ -1,3 +1,5 @@
+@import '../mission-game/shared-mission-game-layout.css';
+
 .b4g-app {
   --b4g-bg-deep: #0b1e3a;
   --b4g-bg-mid: #102c63;

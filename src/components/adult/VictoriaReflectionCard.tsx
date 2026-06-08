@@ -11,13 +11,17 @@ type VictoriaReflectionCardProps = {
 
 export default function VictoriaReflectionCard({ label, tag, text, accent }: VictoriaReflectionCardProps) {
   return (
-    <article className="victoria-reflectionCard">
-      <div className="victoria-reflectionCardHead">
-        <span className="victoria-reflectionCardLabel">{label}</span>
-        <span className="victoria-reflectionCardTag">{tag}</span>
+    <article className="victoria-reflectionCard mission-scenarioCard">
+      <div className="mission-scenarioCardHead victoria-reflectionCardHead">
+        <span className="mission-scenarioCardLabel victoria-reflectionCardLabel">{label}</span>
+        <span className="mission-scenarioCardTag victoria-reflectionCardTag">{tag}</span>
       </div>
-      <VictoriaReflectionGraphic accent={accent} />
-      <p className="victoria-reflectionCardText">{text}</p>
+      <div className="mission-scenarioCardBody">
+        <div className="mission-scenarioIllustration">
+          <VictoriaReflectionGraphic accent={accent} />
+        </div>
+        <p className="mission-scenarioText victoria-reflectionCardText">{text}</p>
+      </div>
     </article>
   );
 }
