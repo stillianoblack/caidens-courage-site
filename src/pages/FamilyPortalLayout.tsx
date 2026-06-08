@@ -15,7 +15,7 @@ import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalCon
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
-import { resolveFamilyOutletKey } from '../lib/portalOutletKey';
+import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export default function FamilyPortalLayout() {
       }
     >
       <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-        <Outlet key={resolveFamilyOutletKey(location.pathname, location.search)} />
+        <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
       </Suspense>
     </PortalShell>
   );

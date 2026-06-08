@@ -196,7 +196,7 @@ export default function PilotDashboardPage() {
           {isB4Results ? (
             <PilotB4ResultsPanel />
           ) : (
-            <div className="pilot-tabPanel" role="tabpanel" key={location.hash || '#overview'}>
+            <div className="pilot-tabPanel" role="tabpanel">
               {renderFacilitatorPanel(activeNav, trackingProps, programCode, activeProgram?.groupName)}
             </div>
           )}

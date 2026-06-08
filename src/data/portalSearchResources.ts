@@ -4,8 +4,9 @@ import {
   FACILITATOR_B4_RESULTS_PATH,
   FAMILY_HUB_PATH,
   KIDS_PORTAL_PATH,
-  PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
+import { programDashboardTabPath } from '../lib/programDashboardNav';
+import type { PilotSidebarNavId } from './pilotDashboardContent';
 
 export type PortalSearchPortal = 'family' | 'facilitator';
 
@@ -21,9 +22,8 @@ export type PortalSearchResource = {
   grantFamilyAccess?: boolean;
 };
 
-function facilitatorHash(section: string): string {
-  // Keep facilitator navigation inside the canonical facilitator route.
-  return `${PROGRAM_DASHBOARD_PATH}#${section}`;
+function facilitatorTabPath(section: PilotSidebarNavId): string {
+  return programDashboardTabPath(section);
 }
 
 export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
@@ -225,7 +225,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Pilot dashboard with character tracks and progress',
     category: 'Navigation',
     tags: ['home', 'dashboard', 'facilitator'],
-    href: facilitatorHash('overview'),
+    href: facilitatorTabPath('overview'),
   },
   {
     id: 'facilitator-weekly',
@@ -233,7 +233,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Weekly kits, story pages, and facilitator notes',
     category: 'Navigation',
     tags: ['weekly', 'modules', 'curriculum'],
-    href: facilitatorHash('weekly-modules'),
+    href: facilitatorTabPath('weekly-modules'),
   },
   {
     id: 'facilitator-activities',
@@ -241,7 +241,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Coloring pages, printables, journals, and reset tools',
     category: 'Activities Library',
     tags: ['activities', 'downloads', 'library'],
-    href: facilitatorHash('activities-library'),
+    href: facilitatorTabPath('activities-library'),
   },
   {
     id: 'facilitator-assessments',
@@ -249,7 +249,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Baseline and growth checks for pilot data',
     category: 'Assessments',
     tags: ['assessments', 'baseline', 'check'],
-    href: facilitatorHash('assessments'),
+    href: facilitatorTabPath('assessments'),
   },
   {
     id: 'facilitator-results',
@@ -257,7 +257,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Pilot progress charts and baseline submissions',
     category: 'Results',
     tags: ['results', 'data', 'progress'],
-    href: facilitatorHash('results'),
+    href: facilitatorTabPath('results'),
   },
   {
     id: 'facilitator-certificates',
@@ -265,7 +265,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Student and camp completion certificate templates',
     category: 'Downloads',
     tags: ['certificates', 'templates'],
-    href: facilitatorHash('certificates'),
+    href: facilitatorTabPath('certificates'),
   },
   {
     id: 'facilitator-gallery',
@@ -273,7 +273,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Upload, review, and approve student artwork',
     category: 'Gallery',
     tags: ['gallery', 'student', 'upload'],
-    href: facilitatorHash('student-gallery'),
+    href: facilitatorTabPath('student-gallery'),
   },
   {
     id: 'facilitator-gallery-approval',
@@ -281,7 +281,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Approve, reject, or request changes on family uploads',
     category: 'Gallery',
     tags: ['gallery', 'approval', 'review', 'pending'],
-    href: facilitatorHash('student-gallery'),
+    href: facilitatorTabPath('student-gallery'),
   },
   {
     id: 'facilitator-center',
@@ -289,7 +289,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Training games and guides for parents, teachers, counselors, and camp staff',
     category: 'Adult Training',
     tags: ['facilitator', 'guide', 'training', 'adult training', 'dr victoria'],
-    href: facilitatorHash('facilitator-center'),
+    href: facilitatorTabPath('facilitator-center'),
   },
   {
     id: 'facilitator-dr-victoria-hub',
@@ -379,7 +379,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Character coloring pages for camp and classroom',
     category: 'Activities Library',
     tags: ['coloring', 'print', 'downloads'],
-    href: facilitatorHash('activities-library'),
+    href: facilitatorTabPath('activities-library'),
   },
   {
     id: 'facilitator-printable',
@@ -387,7 +387,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Worksheets and hands-on printable adventures',
     category: 'Activities Library',
     tags: ['printable', 'worksheet', 'activities'],
-    href: facilitatorHash('activities-library'),
+    href: facilitatorTabPath('activities-library'),
   },
   {
     id: 'facilitator-sel-worksheet',
@@ -396,7 +396,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     category: 'Activities Library',
     tags: ['worksheet', 'sel', 'b-4', 'b4', 'printable', 'scan'],
     character: 'B-4',
-    href: facilitatorHash('activities-library'),
+    href: facilitatorTabPath('activities-library'),
   },
   {
     id: 'facilitator-caiden-preview',

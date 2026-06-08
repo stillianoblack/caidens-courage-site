@@ -13,6 +13,7 @@ import {
   PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
+import { programDashboardTabPath } from '../lib/programDashboardNav';
 import type { AdultAssessmentPhase } from '../data/adultGrowthCheckContent';
 import { canAccessAdultAssessmentPhase } from '../lib/adultAssessmentAccess';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
@@ -44,8 +45,12 @@ export default function AdultAssessmentPage({ variant }: AdultAssessmentPageProp
     ? resolveProgramDashboardBrand(activeProgram)
     : { title: BLUE_RIBBON_PILOT_BRAND, subtitle: BLUE_RIBBON_PILOT_SUBBRAND };
   const basePath = isProgram ? PROGRAM_DASHBOARD_PATH : FACILITATOR_PORTAL_PATH;
-  const returnHref = `${basePath}#assessments`;
-  const continueLearningHref = `${basePath}#facilitator-center`;
+  const returnHref = isProgram
+    ? programDashboardTabPath('assessments')
+    : `${basePath}#assessments`;
+  const continueLearningHref = isProgram
+    ? programDashboardTabPath('facilitator-center')
+    : `${basePath}#facilitator-center`;
 
   useEffect(() => {
     if (isProgram) {
@@ -59,6 +64,10 @@ export default function AdultAssessmentPage({ variant }: AdultAssessmentPageProp
   }, [activeProgram, isProgram, navigate, sessionType]);
 
   const handleSelectNav = (id: PilotSidebarNavId) => {
+    if (isProgram) {
+      navigate(programDashboardTabPath(id));
+      return;
+    }
     navigate(`${basePath}#${id}`);
   };
 

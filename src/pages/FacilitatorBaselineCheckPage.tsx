@@ -12,6 +12,7 @@ import {
   PILOT_PROGRAM_SIGNUP_PATH,
   PORTAL_PATH,
 } from '../config/courageRoutes';
+import { programDashboardTabPath } from '../lib/programDashboardNav';
 
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
@@ -34,7 +35,9 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
   const brand = isProgram
     ? resolveProgramDashboardBrand(activeProgram)
     : { title: BLUE_RIBBON_PILOT_BRAND, subtitle: BLUE_RIBBON_PILOT_SUBBRAND };
-  const exitPath = isProgram ? `${PROGRAM_DASHBOARD_PATH}#assessments` : `${FACILITATOR_PORTAL_PATH}#assessments`;
+  const exitPath = isProgram
+    ? programDashboardTabPath('assessments')
+    : `${FACILITATOR_PORTAL_PATH}#assessments`;
 
   useEffect(() => {
     if (isProgram) {
@@ -48,8 +51,11 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
   }, [activeProgram, isProgram, navigate, sessionType]);
 
   const handleSelectNav = (id: PilotSidebarNavId) => {
-    const base = isProgram ? PROGRAM_DASHBOARD_PATH : FACILITATOR_PORTAL_PATH;
-    navigate(`${base}#${id}`);
+    if (isProgram) {
+      navigate(programDashboardTabPath(id));
+      return;
+    }
+    navigate(`${FACILITATOR_PORTAL_PATH}#${id}`);
   };
 
   if (isProgram && !activeProgram) return null;

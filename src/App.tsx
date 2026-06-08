@@ -47,6 +47,16 @@ import PortalRouteLoader from './components/portal/PortalRouteLoader';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { resolveAppOutletKey } from './lib/portalOutletKey';
 import { resolvePortalRouteLoaderMessage } from './lib/portalRouteLoaderMessage';
+import {
+  ProgramActivitiesTabRoute,
+  ProgramAssessmentsTabRoute,
+  ProgramCertificatesTabRoute,
+  ProgramFacilitatorCenterTabRoute,
+  ProgramGalleryTabRoute,
+  ProgramOverviewTabRoute,
+  ProgramResultsTabRoute,
+  ProgramWeeklyModulesTabRoute,
+} from './routes/programDashboardTabRoutes';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import {
@@ -190,6 +200,14 @@ const appRouteChildren = (
       <Route path={PILOT_DASHBOARD_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={BLUE_RIBBON_PILOT_PATH} element={<PilotDashboardPage />} />
       <Route path={PROGRAM_DASHBOARD_PATH} element={<ProgramDashboardPage />}>
+        <Route index element={<ProgramOverviewTabRoute />} />
+        <Route path="weekly-modules" element={<ProgramWeeklyModulesTabRoute />} />
+        <Route path="activities-library" element={<ProgramActivitiesTabRoute />} />
+        <Route path="assessments" element={<ProgramAssessmentsTabRoute />} />
+        <Route path="results" element={<ProgramResultsTabRoute />} />
+        <Route path="certificates" element={<ProgramCertificatesTabRoute />} />
+        <Route path="student-gallery" element={<ProgramGalleryTabRoute />} />
+        <Route path="facilitator-center" element={<ProgramFacilitatorCenterTabRoute />} />
         <Route path="kids/caiden" element={<CaidenQuestHubPage />} />
         <Route path="kids/caiden/:questId" element={<CaidenQuestPage />} />
         <Route path="kids/miranda" element={<MirandaPortalHubPage />} />
@@ -425,9 +443,7 @@ const AppLayout: React.FC = () => {
             )
           }
         >
-          <Outlet
-            key={resolveAppOutletKey(location.pathname, location.search, location.hash)}
-          />
+          <Outlet key={resolveAppOutletKey(location.pathname, location.search, location.hash)} />
         </Suspense>
       </ChunkErrorBoundary>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
