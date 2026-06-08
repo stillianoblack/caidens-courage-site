@@ -6,10 +6,12 @@ import {
   FAMILY_SIDEBAR_NAV,
   type FamilySidebarNavItem,
 } from '../../data/familyPortalContent';
+import {
+  isCharacterHubRoute,
+  resolveFamilyBasePath,
+} from '../../lib/familyPortalNav';
 import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
-import { isCharacterHubRoute, resolveFamilyBasePath } from '../../lib/familyPortalNav';
-import { resetPortalScroll } from '../../lib/portalScroll';
 import FamilyNavIcon from './FamilyNavIcon';
 import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
@@ -42,28 +44,31 @@ export default function FamilyDashboardSidebar({
 
       <nav className="family-railNav" aria-label="Dashboard sections">
         <ul className="family-railNavList">
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <NavLink
-                to={item.path}
-                end={item.id === 'overview'}
-                onClick={resetPortalScroll}
-                className={({ isActive }) => {
-                  const active = isActive || (item.id === 'character-hub' && onCharacterRoute);
-                  return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
-                }}
-              >
-                <span className="family-railIcon">
-                  <FamilyNavIcon name={item.icon} />
-                </span>
-                <span className="family-railNavLabel">
-                  {item.id === 'gallery'
-                    ? formatGalleryNavLabel(item.label, galleryNewCount)
-                    : item.label}
-                </span>
-              </NavLink>
-            </li>
-          ))}
+          {navItems.map((item) => {
+            const characterHubActive = item.id === 'character-hub' && onCharacterRoute;
+
+            return (
+              <li key={item.id}>
+                <NavLink
+                  to={item.path}
+                  end={item.id === 'overview'}
+                  className={({ isActive }) => {
+                    const active = isActive || characterHubActive;
+                    return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
+                  }}
+                >
+                  <span className="family-railIcon">
+                    <FamilyNavIcon name={item.icon} />
+                  </span>
+                  <span className="family-railNavLabel">
+                    {item.id === 'gallery'
+                      ? formatGalleryNavLabel(item.label, galleryNewCount)
+                      : item.label}
+                  </span>
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 

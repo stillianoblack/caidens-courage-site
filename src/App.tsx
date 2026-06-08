@@ -43,7 +43,6 @@ import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
-import PortalErrorBoundary from './components/portal/PortalErrorBoundary';
 import {
   AdultAssessmentPage,
   B4BaselineCheckPage,
@@ -77,14 +76,20 @@ import {
 import {
   FamilyAdultAssessmentPanel,
   FamilyBaselineCheckPanel,
+  FamilyCertificatesPanel,
   FamilyCharacterProfilePage,
+  FamilyCharactersPanel,
+  FamilyContinueLearningPanel,
+  FamilyDownloadsPanel,
+  FamilyGalleryPanel,
+  FamilyGuidePanel,
+  FamilyOverviewPanel,
 } from './routes/familyPanels';
 import {
   FamilyAdultGuideHubPage,
   FamilyAdultGuideMissionPage,
 } from './routes/familyLazyPanels';
 import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
-import FamilyHubPanelRoute from './components/family-portal/FamilyHubPanelRoute';
 import FamilyHubLayout from './pages/FamilyHubLayout';
 import FamilyPortalLayout from './pages/FamilyPortalLayout';
 import {
@@ -115,6 +120,7 @@ import {
   PILOT_TERMS_PATH,
   FAMILY_PORTAL_PATH,
   FAMILY_HUB_PATH,
+  FAMILY_HUB_KIDS_BASE,
   FACILITATOR_BASELINE_CHECK_PATH,
   PROGRAM_BASELINE_CHECK_PATH,
   KIDS_PORTAL_PATH,
@@ -172,14 +178,7 @@ const AppRoutes: React.FC = () => {
         path={`${FACILITATOR_ADULT_TRAINING_PATH}/:guideId/:missionId`}
         element={<FacilitatorAdultGuideMissionPage />}
       />
-      <Route
-        path={FACILITATOR_PORTAL_PATH}
-        element={
-          <PortalErrorBoundary label="Facilitator Portal">
-            <FacilitatorPortalEntry />
-          </PortalErrorBoundary>
-        }
-      />
+      <Route path={FACILITATOR_PORTAL_PATH} element={<FacilitatorPortalEntry />} />
       <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
       <Route
         path={FACILITATOR_B4_BASELINE_RESULTS_PATH}
@@ -187,14 +186,7 @@ const AppRoutes: React.FC = () => {
       />
       <Route path={PILOT_DASHBOARD_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={BLUE_RIBBON_PILOT_PATH} element={<PilotDashboardPage />} />
-      <Route
-        path={PROGRAM_DASHBOARD_PATH}
-        element={
-          <PortalErrorBoundary label="Facilitator Portal">
-            <ProgramDashboardPage />
-          </PortalErrorBoundary>
-        }
-      >
+      <Route path={PROGRAM_DASHBOARD_PATH} element={<ProgramDashboardPage />}>
         <Route path="kids/caiden" element={<CaidenQuestHubPage />} />
         <Route path="kids/caiden/:questId" element={<CaidenQuestPage />} />
         <Route path="kids/miranda" element={<MirandaPortalHubPage />} />
@@ -229,30 +221,22 @@ const AppRoutes: React.FC = () => {
       <Route path={B4_RESULTS_ADMIN_PATH} element={<B4ResultsAdminPage />} />
 
       {/* Blue Ribbon family portal backup */}
-      <Route
-        element={
-          <PortalErrorBoundary label="Family Portal">
-            <FamilyPortalLayout />
-          </PortalErrorBoundary>
-        }
-      >
+      <Route element={<FamilyPortalLayout />}>
         <Route path={FAMILY_PORTAL_PATH}>
-          <Route index element={<FamilyHubPanelRoute />} />
-          <Route path="continue-learning" element={<FamilyHubPanelRoute />} />
-          <Route path="weekly-adventures" element={<FamilyHubPanelRoute />} />
-          <Route path="characters" element={<FamilyHubPanelRoute />} />
-          <Route path="downloads" element={<FamilyHubPanelRoute />} />
-          <Route path="gallery" element={<FamilyHubPanelRoute />} />
-          <Route path="certificates" element={<FamilyHubPanelRoute />} />
-          <Route path="guide" element={<FamilyHubPanelRoute />} />
-          <Route path="parent-corner" element={<FamilyHubPanelRoute />} />
-          <Route path="characters/:characterId" element={<FamilyCharacterProfilePage />} />
-          <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
-          <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
-          <Route path="guide/:guideId" element={<FamilyAdultGuideHubPage />} />
-          <Route path="guide/:guideId/:missionId" element={<FamilyAdultGuideMissionPage />} />
+          <Route index element={<FamilyOverviewPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
+          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
+          <Route path="characters">
+            <Route index element={<FamilyCharactersPanel />} />
+            <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
+          </Route>
           <Route path="games" element={<Navigate to="characters" replace />} />
+          <Route path="downloads" element={<FamilyDownloadsPanel />} />
+          <Route path="gallery" element={<FamilyGalleryPanel />} />
+          <Route path="certificates" element={<FamilyCertificatesPanel />} />
+          <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route
           path={FAMILY_PARENT_CORNER_PATH}
@@ -287,41 +271,41 @@ const AppRoutes: React.FC = () => {
       </Route>
 
       {/* Program family hub (/family-hub) */}
-      <Route
-        path={FAMILY_HUB_PATH}
-        element={
-          <PortalErrorBoundary label="Family Portal">
-            <FamilyHubLayout />
-          </PortalErrorBoundary>
-        }
-      >
-        <Route index element={<FamilyHubPanelRoute />} />
-        <Route path="continue-learning" element={<FamilyHubPanelRoute />} />
-        <Route path="weekly-adventures" element={<FamilyHubPanelRoute />} />
-        <Route path="characters" element={<FamilyHubPanelRoute />} />
-        <Route path="downloads" element={<FamilyHubPanelRoute />} />
-        <Route path="gallery" element={<FamilyHubPanelRoute />} />
-        <Route path="certificates" element={<FamilyHubPanelRoute />} />
-        <Route path="guide" element={<FamilyHubPanelRoute />} />
-        <Route path="parent-corner" element={<FamilyHubPanelRoute />} />
-        <Route path="characters/:characterId" element={<FamilyCharacterProfilePage />} />
-        <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
-        <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
-        <Route path="guide/:guideId" element={<FamilyAdultGuideHubPage />} />
-        <Route path="guide/:guideId/:missionId" element={<FamilyAdultGuideMissionPage />} />
-        <Route path="children" element={<Navigate to="characters" replace />} />
-        <Route path="games" element={<Navigate to="characters" replace />} />
-        <Route path="kids/caiden" element={<CaidenQuestHubPage />} />
-        <Route path="kids/caiden/:questId" element={<CaidenQuestPage />} />
-        <Route path="kids/miranda" element={<MirandaPortalHubPage />} />
-        <Route path="kids/miranda/:missionId" element={<MirandaPortalMissionPage />} />
-        <Route path="kids/b4" element={<B4PortalPage />} />
-        <Route path="kids/b4/check-in" element={<B4PortalCheckInPage />} />
-        <Route path="kids/b4/week-1" element={<B4PortalWeek1Page />} />
-        <Route path="kids/b4/feeling-finder" element={<B4PortalFeelingFinderPage />} />
-        <Route path="kids/charlie" element={<CharliePortalHubPage />} />
-        <Route path="kids/charlie/:missionId" element={<CharliePortalMissionPage />} />
-        <Route path="kids/zeke" element={<KidsCharacterPage character="zeke" />} />
+      <Route element={<FamilyHubLayout />}>
+        <Route path={FAMILY_HUB_PATH}>
+          <Route index element={<FamilyOverviewPanel />} />
+          <Route path="children" element={<Navigate to="characters" replace />} />
+          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
+          <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
+          <Route path="characters">
+            <Route index element={<FamilyCharactersPanel />} />
+            <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
+          </Route>
+          <Route path="games" element={<Navigate to="characters" replace />} />
+          <Route path="downloads" element={<FamilyDownloadsPanel />} />
+          <Route path="gallery" element={<FamilyGalleryPanel />} />
+          <Route path="certificates" element={<FamilyCertificatesPanel />} />
+          <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="parent-corner" element={<FamilyGuidePanel />} />
+          <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
+        </Route>
+        <Route path={`${FAMILY_HUB_PATH}/guide/:guideId`} element={<FamilyAdultGuideHubPage />} />
+        <Route
+          path={`${FAMILY_HUB_PATH}/guide/:guideId/:missionId`}
+          element={<FamilyAdultGuideMissionPage />}
+        />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/caiden`} element={<CaidenQuestHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/caiden/:questId`} element={<CaidenQuestPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/miranda`} element={<MirandaPortalHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/miranda/:missionId`} element={<MirandaPortalMissionPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4`} element={<B4PortalPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/check-in`} element={<B4PortalCheckInPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/week-1`} element={<B4PortalWeek1Page />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/feeling-finder`} element={<B4PortalFeelingFinderPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie`} element={<CharliePortalHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie/:missionId`} element={<CharliePortalMissionPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/zeke`} element={<KidsCharacterPage character="zeke" />} />
       </Route>
 
       {/* Legacy kids hub (non-portal shell) */}
@@ -343,14 +327,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/schools" element={<Schools />} />
 
       {/* Portal */}
-      <Route
-        path="/portal"
-        element={
-          <PortalErrorBoundary label="Portal">
-            <Portal />
-          </PortalErrorBoundary>
-        }
-      />
+      <Route path="/portal" element={<Portal />} />
       <Route path="/portal/dashboard" element={<PortalDashboard />} />
 
       {/* Legacy redirects — preserve bookmarks */}
