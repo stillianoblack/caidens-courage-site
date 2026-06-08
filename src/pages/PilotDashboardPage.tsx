@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
@@ -43,6 +43,60 @@ function isB4ResultsRoute(pathname: string): boolean {
   );
 }
 
+type TrackingPanelProps = {
+  metrics: ReturnType<typeof usePilotTrackingResults>['metrics'];
+  loading: boolean;
+  source: ReturnType<typeof usePilotTrackingResults>['source'];
+  warning?: string;
+  results: ReturnType<typeof usePilotTrackingResults>['legacyResults'];
+  resultsVersion: number;
+  onSelectNav: (id: PilotSidebarNavId) => void;
+};
+
+function renderFacilitatorPanel(
+  activeNav: PilotSidebarNavId,
+  tracking: TrackingPanelProps,
+  programCode: string | undefined,
+  groupName?: string,
+): React.ReactNode {
+  switch (activeNav) {
+    case 'weekly-modules':
+      return <PilotWeeklyModulesPanel />;
+    case 'activities-library':
+      return <PilotActivitiesPanel />;
+    case 'assessments':
+      return <PilotAssessmentsPanel baselineHref={FACILITATOR_BASELINE_CHECK_PATH} />;
+    case 'results':
+      return (
+        <PilotResultsPanel
+          refreshKey={tracking.resultsVersion}
+          results={tracking.results}
+          metrics={tracking.metrics}
+          source={tracking.source}
+          warning={tracking.warning}
+          loading={tracking.loading}
+        />
+      );
+    case 'certificates':
+      return <PilotCertificatesPanel />;
+    case 'student-gallery':
+      return <PilotGalleryPanel programCode={programCode} groupName={groupName} />;
+    case 'facilitator-center':
+      return <PilotFacilitatorPanel />;
+    case 'overview':
+    default:
+      return (
+        <PilotOverviewPanel
+          metrics={tracking.metrics}
+          loading={tracking.loading}
+          source={tracking.source}
+          warning={tracking.warning}
+          onSelectNav={tracking.onSelectNav}
+        />
+      );
+  }
+}
+
 /**
  * Focus Flame Academy paid pilot dashboard — Blue Ribbon camp command center.
  */
@@ -50,17 +104,26 @@ export default function PilotDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const sessionType = readPilotDashboardSession();
-  const [activeNav, setActiveNav] = useState<PilotSidebarNavId>('overview');
   const [resultsVersion, setResultsVersion] = useState(0);
 
   const isB4Results = useMemo(() => isB4ResultsRoute(location.pathname), [location.pathname]);
   const brand = resolvePortalRailBrand();
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode;
+
+  const activeNav = useMemo<PilotSidebarNavId>(() => {
+    const hash = location.hash.replace('#', '') as PilotSidebarNavId;
+    return hash && VALID_NAV_IDS.has(hash) ? hash : 'overview';
+  }, [location.hash]);
+
   const pageTitle = isB4Results ? 'B-4 Baseline Check Results' : NAV_TITLE[activeNav];
 
-  const { metrics, legacyResults: results, source, warning, loading } =
-    usePilotTrackingResults(resultsVersion);
+  const needsTracking = activeNav === 'overview' || activeNav === 'results';
+  const { metrics, legacyResults: results, source, warning, loading } = usePilotTrackingResults(
+    resultsVersion,
+    programCode,
+    needsTracking && Boolean(sessionType),
+  );
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
@@ -76,19 +139,19 @@ export default function PilotDashboardPage() {
     }
   }, [location.pathname, navigate, sessionType]);
 
+  const didMountRef = useRef(false);
   useEffect(() => {
-    const hash = location.hash.replace('#', '') as PilotSidebarNavId;
-    if (hash && VALID_NAV_IDS.has(hash)) {
-      setActiveNav(hash);
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
     }
-  }, [location.hash]);
+    if (activeNav === 'results' || activeNav === 'overview') {
+      setResultsVersion((v) => v + 1);
+    }
+  }, [activeNav]);
 
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
-      setActiveNav(id);
-      if (id === 'results' || id === 'overview') {
-        setResultsVersion((v) => v + 1);
-      }
       if (isB4Results) {
         navigate(`${FACILITATOR_PORTAL_PATH}#${id}`);
         return;
@@ -101,6 +164,16 @@ export default function PilotDashboardPage() {
   if (!sessionType) {
     return null;
   }
+
+  const trackingProps: TrackingPanelProps = {
+    metrics,
+    loading,
+    source,
+    warning,
+    results,
+    resultsVersion,
+    onSelectNav: handleSelectNav,
+  };
 
   return (
     <div className="pilot-shell">
@@ -123,55 +196,9 @@ export default function PilotDashboardPage() {
           {isB4Results ? (
             <PilotB4ResultsPanel />
           ) : (
-            <>
-              <div role="tabpanel" hidden={activeNav !== 'overview'} className="pilot-tabPanel">
-                <PilotOverviewPanel
-                  metrics={metrics}
-                  loading={loading}
-                  source={source}
-                  warning={warning}
-                  onSelectNav={handleSelectNav}
-                />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'weekly-modules'} className="pilot-tabPanel">
-                <PilotWeeklyModulesPanel />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'activities-library'} className="pilot-tabPanel">
-                <PilotActivitiesPanel />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'assessments'} className="pilot-tabPanel">
-                <PilotAssessmentsPanel baselineHref={FACILITATOR_BASELINE_CHECK_PATH} />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'results'} className="pilot-tabPanel">
-                <PilotResultsPanel
-                  refreshKey={resultsVersion}
-                  results={results}
-                  metrics={metrics}
-                  source={source}
-                  warning={warning}
-                  loading={loading}
-                />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'certificates'} className="pilot-tabPanel">
-                <PilotCertificatesPanel />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'student-gallery'} className="pilot-tabPanel">
-                <PilotGalleryPanel
-                  programCode={programCode}
-                  groupName={activeProgram?.groupName}
-                />
-              </div>
-
-              <div role="tabpanel" hidden={activeNav !== 'facilitator-center'} className="pilot-tabPanel">
-                <PilotFacilitatorPanel />
-              </div>
-            </>
+            <div className="pilot-tabPanel" role="tabpanel" key={location.hash || '#overview'}>
+              {renderFacilitatorPanel(activeNav, trackingProps, programCode, activeProgram?.groupName)}
+            </div>
           )}
         </div>
 

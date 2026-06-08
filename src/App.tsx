@@ -37,15 +37,19 @@ import TrainingGuides from './pages/TrainingGuides';
 import Journey from './pages/Journey';
 import Contact from './pages/Contact';
 import PilotProgramSignupPage from './pages/PilotProgramSignupPage';
+import AdultAssessmentPage from './pages/AdultAssessmentPage';
+import PilotDashboardPage from './pages/PilotDashboardPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
+import PortalRouteLoader from './components/portal/PortalRouteLoader';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
+import { resolveAppOutletKey } from './lib/portalOutletKey';
+import { resolvePortalRouteLoaderMessage } from './lib/portalRouteLoaderMessage';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import {
-  AdultAssessmentPage,
   B4BaselineCheckPage,
   B4GuidePage,
   B4PortalCheckInPage,
@@ -67,7 +71,6 @@ import {
   MirandaMysteryFilesHubPage,
   MirandaPortalHubPage,
   MirandaPortalMissionPage,
-  PilotDashboardPage,
   PilotTermsPage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
@@ -413,8 +416,18 @@ const AppLayout: React.FC = () => {
       {process.env.NODE_ENV === 'development' ? <PortalDebugTracker /> : null}
       <AnalyticsRouteTracker />
       <ChunkErrorBoundary>
-        <Suspense fallback={isPortalShellRoute ? null : <NavigationLoader />}>
-          <Outlet key={`${location.pathname}${location.search}`} />
+        <Suspense
+          fallback={
+            isPortalShellRoute ? (
+              <PortalRouteLoader message={resolvePortalRouteLoaderMessage(location.pathname)} />
+            ) : (
+              <NavigationLoader />
+            )
+          }
+        >
+          <Outlet
+            key={resolveAppOutletKey(location.pathname, location.search, location.hash)}
+          />
         </Suspense>
       </ChunkErrorBoundary>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}

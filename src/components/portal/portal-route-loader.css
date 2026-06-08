@@ -1,0 +1,52 @@
+.portal-routeLoader {
+  padding: 0.5rem 0 1.5rem;
+  min-height: 12rem;
+}
+
+.portal-routeLoaderMessage {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #4e6a86;
+}
+
+.portal-routeLoaderSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.portal-routeLoaderLine {
+  height: 0.875rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #e8eef5 0%, #f4f7fb 50%, #e8eef5 100%);
+  background-size: 200% 100%;
+  animation: portal-routeLoader-pulse 1.4s ease-in-out infinite;
+}
+
+.portal-routeLoaderLine--title {
+  height: 1.25rem;
+  width: 42%;
+}
+
+.portal-routeLoaderLine--short {
+  width: 68%;
+}
+
+.portal-routeLoaderBlock {
+  margin-top: 0.5rem;
+  height: 7rem;
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #e8eef5 0%, #f4f7fb 50%, #e8eef5 100%);
+  background-size: 200% 100%;
+  animation: portal-routeLoader-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes portal-routeLoader-pulse {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}

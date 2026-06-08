@@ -1,7 +1,6 @@
-import { lazy } from 'react';
-
-/** Lazy adult training routes only — main family nav panels load eagerly. */
-export const FamilyAdultGuideHubPage = lazy(() => import('../pages/FamilyAdultGuideHubPage'));
-export const FamilyAdultGuideMissionPage = lazy(
-  () => import('../pages/FamilyAdultGuideMissionPage'),
-);
+/**
+ * Adult training guide routes — eager so parent-corner navigation never suspends
+ * behind a null AppLayout fallback.
+ */
+export { default as FamilyAdultGuideHubPage } from '../pages/FamilyAdultGuideHubPage';
+export { default as FamilyAdultGuideMissionPage } from '../pages/FamilyAdultGuideMissionPage';

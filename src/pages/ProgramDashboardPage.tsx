@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
@@ -37,6 +37,8 @@ import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
+import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import { resolveAppOutletKey } from '../lib/portalOutletKey';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -222,9 +224,17 @@ export default function ProgramDashboardPage() {
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}
     >
       {isKidsRoute ? (
-        <Outlet key={location.pathname} />
+        <Suspense fallback={<PortalRouteLoader message="Loading game..." />}>
+          <Outlet
+            key={resolveAppOutletKey(location.pathname, location.search, location.hash)}
+          />
+        </Suspense>
       ) : (
-        <div className="pilot-tabPanel" role="tabpanel">
+        <div
+          className="pilot-tabPanel"
+          role="tabpanel"
+          key={location.hash || '#overview'}
+        >
           {showWelcome ? (
             <PilotProgramWelcomeCard program={activeProgram} onDismiss={dismissWelcome} />
           ) : null}

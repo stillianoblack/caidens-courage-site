@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { PilotDashboardPage } from '../routes/lazyPages';
+import PilotDashboardPage from './PilotDashboardPage';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';

@@ -3,13 +3,11 @@ import { lazy } from 'react';
 
 /* Heavy routes — loaded on demand to shrink the initial bundle. */
 
-export const PilotDashboardPage = lazy(() => import('../pages/PilotDashboardPage'));
 export const PilotTermsPage = lazy(() => import('../pages/PilotTermsPage'));
 
 export const FacilitatorBaselineCheckPage = lazy(
   () => import('../pages/FacilitatorBaselineCheckPage'),
 );
-export const AdultAssessmentPage = lazy(() => import('../pages/AdultAssessmentPage'));
 export const B4BaselineCheckPage = lazy(() => import('../pages/B4BaselineCheckPage'));
 export const B4ResultsAdminPage = lazy(() => import('../pages/B4ResultsAdminPage'));
 export const Week0AssessmentPage = lazy(() => import('../pages/Week0AssessmentPage'));

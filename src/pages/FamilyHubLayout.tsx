@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
@@ -15,6 +15,8 @@ import { afterIdle } from '../lib/defer';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
+import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import { resolveFamilyOutletKey } from '../lib/portalOutletKey';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -68,7 +70,9 @@ export default function FamilyHubLayout() {
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
     >
-      <Outlet key={`${location.pathname}${location.search}`} />
+      <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
+        <Outlet key={resolveFamilyOutletKey(location.pathname, location.search)} />
+      </Suspense>
     </PortalShell>
   );
 }
