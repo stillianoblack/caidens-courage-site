@@ -1,4 +1,5 @@
 import React from 'react';
+import AppLink from '../shared/AppLink';
 import {
   ADULT_BASELINE_RESULTS,
   ADULT_GROWTH_RESULTS,
@@ -79,13 +80,13 @@ export default function AdultGrowthCheckResults({
           </div>
           <div className="bbc-resultActions">
             {drVictoriaTrainingHref ? (
-              <a href={drVictoriaTrainingHref} className="bbc-primaryBtn" onClick={onContinueToTraining}>
+              <AppLink href={drVictoriaTrainingHref} className="bbc-primaryBtn" onClick={onContinueToTraining}>
                 Continue to Dr. Victoria Training
-              </a>
+              </AppLink>
             ) : null}
-            <a href={returnHref} className="bbc-secondaryBtn" onClick={onReturn}>
+            <AppLink href={returnHref} className="bbc-secondaryBtn" onClick={onReturn}>
               Return to Assessments
-            </a>
+            </AppLink>
           </div>
         </>
       ) : (
@@ -142,13 +143,13 @@ export default function AdultGrowthCheckResults({
               Download Certificate
             </a>
             {continueLearningHref ? (
-              <a href={continueLearningHref} className="bbc-secondaryBtn" onClick={onContinueLearning}>
+              <AppLink href={continueLearningHref} className="bbc-secondaryBtn" onClick={onContinueLearning}>
                 Continue Learning
-              </a>
+              </AppLink>
             ) : null}
-            <a href={returnHref} className="bbc-secondaryBtn" onClick={onReturn}>
+            <AppLink href={returnHref} className="bbc-secondaryBtn" onClick={onReturn}>
               Return to Assessments
-            </a>
+            </AppLink>
           </div>
         </>
       )}

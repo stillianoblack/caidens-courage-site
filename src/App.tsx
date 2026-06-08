@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import {
   MissionGamePhaseProvider,
   useMissionGamePhase,
@@ -41,6 +41,7 @@ import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker'
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
+import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import {
@@ -413,9 +414,11 @@ const AppFrame: React.FC = () => {
       <ScrollToTop />
       {process.env.NODE_ENV === 'development' ? <PortalDebugTracker /> : null}
       <AnalyticsRouteTracker />
-      <Suspense fallback={isPortalShellRoute ? null : <NavigationLoader />}>
-        <AppRoutes />
-      </Suspense>
+      <ChunkErrorBoundary>
+        <Suspense fallback={isPortalShellRoute ? null : <NavigationLoader />}>
+          <AppRoutes />
+        </Suspense>
+      </ChunkErrorBoundary>
       {!isImmersiveKidsGame ? <CourageToolsPopup /> : null}
       {!hideAskB4Chat ? <DeferredB4ChatWidget /> : null}
     </>
@@ -424,11 +427,11 @@ const AppFrame: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <BrowserRouter>
       <MissionGamePhaseProvider>
         <AppFrame />
       </MissionGamePhaseProvider>
-    </Router>
+    </BrowserRouter>
   );
 };
 

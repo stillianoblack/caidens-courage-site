@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { isInternalAppHref } from '../../lib/appNavigation';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
@@ -29,6 +30,7 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
+  const location = useLocation();
   const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantClasses = {
@@ -82,11 +84,15 @@ const Button: React.FC<ButtonProps> = ({
     }
   }
   
-  // Internal paths: use Link for SPA navigation (no full document reload)
-  if (href && href.startsWith('/')) {
+  // Internal paths and same-page hash links: use Link for SPA navigation (no full document reload)
+  if (href && isInternalAppHref(href)) {
+    const to = href.startsWith('#')
+      ? { pathname: location.pathname, search: location.search, hash: href }
+      : href;
+
     return (
       <Link
-        to={href}
+        to={to}
         className={classes}
         {...(props as any)}
       >

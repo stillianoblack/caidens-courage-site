@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 
 const TOOLKIT_SECTION_ID = 'camp-courage-toolkit';
@@ -29,16 +30,19 @@ const PILOT_CARDS = [
 ] as const;
 
 export default function CampPilotPartnershipsSection() {
-  const scrollToToolkit = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const scrollToToolkit = useCallback(() => {
     const target = document.getElementById(TOOLKIT_SECTION_ID);
     if (!target) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
-    if (window.history.replaceState) {
-      window.history.replaceState(null, '', `#${TOOLKIT_SECTION_ID}`);
-    }
-  }, []);
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: `#${TOOLKIT_SECTION_ID}` },
+      { replace: true },
+    );
+  }, [location.pathname, location.search, navigate]);
 
   return (
     <section
@@ -111,8 +115,6 @@ export default function CampPilotPartnershipsSection() {
           <Button
             variant="primary"
             size="md"
-            as="a"
-            href={`#${TOOLKIT_SECTION_ID}`}
             onClick={scrollToToolkit}
             leftIconSrc={null}
             className="w-full transition-all duration-200 hover:scale-100 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(27,42,68,0.22)] active:translate-y-0 active:scale-[0.99] sm:w-auto sm:min-w-[220px]"
@@ -122,8 +124,6 @@ export default function CampPilotPartnershipsSection() {
           <Button
             variant="secondary"
             size="md"
-            as="a"
-            href={`#${TOOLKIT_SECTION_ID}`}
             onClick={scrollToToolkit}
             className="w-full sm:w-auto sm:min-w-[220px]"
           >

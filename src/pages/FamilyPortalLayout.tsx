@@ -63,7 +63,7 @@ export default function FamilyPortalLayout() {
         <footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>
       }
     >
-      <Outlet />
+      <Outlet key={`${location.pathname}${location.search}`} />
     </PortalShell>
   );
 }

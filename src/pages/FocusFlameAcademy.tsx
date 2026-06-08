@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import SectionHero from '../components/courage/SectionHero';
@@ -39,6 +39,7 @@ const TESTIMONIALS = [
 ];
 
 const FocusFlameAcademy: React.FC = () => {
+  const navigate = useNavigate();
   useHashScroll();
 
   useEffect(() => {
@@ -177,7 +178,7 @@ const FocusFlameAcademy: React.FC = () => {
             className="mt-8 space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = '/contact?subject=Focus%20Flame%20Academy%20Pilot';
+              navigate('/contact?subject=Focus%20Flame%20Academy%20Pilot');
             }}
           >
             {(['Name', 'Email', 'Organization', 'Role'] as const).map((label) => (

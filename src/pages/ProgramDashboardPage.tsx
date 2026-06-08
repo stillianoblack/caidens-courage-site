@@ -222,7 +222,7 @@ export default function ProgramDashboardPage() {
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}
     >
       {isKidsRoute ? (
-        <Outlet />
+        <Outlet key={location.pathname} />
       ) : (
         <div className="pilot-tabPanel" role="tabpanel">
           {showWelcome ? (

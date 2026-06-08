@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PersonaMarketingPage from '../components/courage/PersonaMarketingPage';
 import Button from '../components/ui/Button';
 import { SCHOOLS_PAGE } from '../config/personaPages';
@@ -36,6 +36,8 @@ function PersonaContainer({ children, className = '' }: { children: React.ReactN
 }
 
 function PilotRequestForm({ idPrefix = 'schools-pilot' }: { idPrefix?: string }) {
+  const navigate = useNavigate();
+
   return (
     <form
       className="space-y-4"
@@ -43,7 +45,7 @@ function PilotRequestForm({ idPrefix = 'schools-pilot' }: { idPrefix?: string })
         e.preventDefault();
         trackContactFormSubmitted('/schools#pilot');
         trackSalesFunnel('pilot_interest_clicked', { source_page: '/schools#pilot' });
-        window.location.href = '/contact?subject=Caiden%27s%20Courage%20for%20Schools%20Pilot';
+        navigate('/contact?subject=Caiden%27s%20Courage%20for%20Schools%20Pilot');
       }}
     >
       {(['Name', 'Email', 'Organization', 'Role'] as const).map((label) => (
