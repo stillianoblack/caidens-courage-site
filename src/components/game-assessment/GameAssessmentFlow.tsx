@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import '../b4-baseline-check/b4-baseline-check.css';
 import './miranda-game.css';
@@ -37,6 +37,10 @@ import { readActivePortalRole } from '../../config/portalContext';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
+import {
+  navigateGameExit,
+  shouldGameplayExitImmediately,
+} from '../../lib/gameExitNavigation';
 import type { ModuleTrackingDefinition } from '../../types/moduleTracking';
 import '../caiden/caiden-game.css';
 import '../adult/adult-game.css';
@@ -175,6 +179,7 @@ export default function GameAssessmentFlow({
 }: GameAssessmentFlowProps) {
   const hubContinueLabel = adultHubContinueLabel ?? victoriaHubContinueLabel;
   const navigate = useNavigate();
+  const { pathname: currentPathname } = useLocation();
   const totalQuestions = config.questions.length;
   const {
     soundEnabled,
@@ -270,26 +275,34 @@ export default function GameAssessmentFlow({
     setFeedbackTone('neutral');
   }, []);
 
-  const handleExit = () => {
+  const handleExit = useCallback(() => {
+    playItemButton();
+    const exitImmediately = shouldGameplayExitImmediately(embedded, skipLanding);
+
+    if (exitImmediately || view === 'complete') {
+      navigateGameExit(navigate, exitPath, currentPathname);
+      return;
+    }
+
     if (view === 'quiz') {
-      playItemButton();
-      if (skipLanding) {
-        navigate(exitPath);
-        return;
-      }
       setView('landing');
       setQuestionIndex(0);
       setScore(0);
       resetQuestionState();
       return;
     }
-    if (view === 'complete') {
-      playItemButton();
-      navigate(exitPath);
-      return;
-    }
-    navigate(exitPath);
-  };
+
+    navigateGameExit(navigate, exitPath, currentPathname);
+  }, [
+    currentPathname,
+    embedded,
+    exitPath,
+    navigate,
+    playItemButton,
+    resetQuestionState,
+    skipLanding,
+    view,
+  ]);
 
   const persistModuleCompletion = useCallback(
     async (finalScore: number, answers: Record<string, GameAnswerValue>) => {
@@ -636,7 +649,7 @@ export default function GameAssessmentFlow({
             onPlayAgain={handlePlayAgain}
             onExit={() => {
               playItemButton();
-              navigate(exitPath);
+              navigateGameExit(navigate, exitPath, currentPathname);
             }}
             showMirandaAvatar={useMirandaHeader}
             showCaidenAvatar={useCaidenHeader}

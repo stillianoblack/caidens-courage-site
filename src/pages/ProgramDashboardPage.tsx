@@ -13,6 +13,7 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
+  FAMILY_HUB_PATH,
   PILOT_PROGRAM_SIGNUP_PATH,
   PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
@@ -33,6 +34,8 @@ import {
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { useProgramDashboardNav } from '../hooks/useProgramDashboardNav';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
+import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
+import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -53,7 +56,14 @@ export default function ProgramDashboardPage() {
   const programCode = activeProgram?.programCode;
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
-  const sessionValid = Boolean(activeProgram && role === 'facilitator' && hasUnlock);
+  const isIndependentFamily = isIndependentFamilyProgram(activeProgram);
+  const sessionValid = Boolean(
+    activeProgram &&
+      !isIndependentFamily &&
+      role === 'facilitator' &&
+      hasUnlock &&
+      isPortalRoleAllowed(location.pathname),
+  );
   const handleSelectNav = useProgramDashboardNav();
 
   const pageTitle = isKidsRoute
@@ -83,11 +93,15 @@ export default function ProgramDashboardPage() {
       navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
       return;
     }
+    if (isIndependentFamily) {
+      navigate(FAMILY_HUB_PATH, { replace: true });
+      return;
+    }
     if (!sessionValid) {
       clearProgramPortalContext();
       navigate(PORTAL_PATH, { replace: true, state: { redirect: PROGRAM_DASHBOARD_PATH } });
     }
-  }, [activeProgram, navigate, sessionValid]);
+  }, [activeProgram, isIndependentFamily, navigate, sessionValid]);
 
   const dismissWelcome = useCallback(() => {
     searchParams.delete('welcome');

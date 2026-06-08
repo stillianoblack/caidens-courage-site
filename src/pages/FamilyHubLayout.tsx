@@ -17,6 +17,7 @@ import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
+import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ export default function FamilyHubLayout() {
   const role = readActivePortalRole();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
-  const sessionValid = Boolean(activeProgram && hasSession && role === 'family');
+  const sessionValid = Boolean(
+    activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
+  );
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;

@@ -7,6 +7,14 @@ import type {
 } from '../types/pilotProgram';
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
+import {
+  INDEPENDENT_FAMILY_PRICING_TIER,
+  INDEPENDENT_FAMILY_PROGRAM_TYPE,
+  hasFacilitatorAccessCode,
+  isIndependentFamilyType,
+  resolveIndependentFamilyProgramName,
+  toDbProgramType,
+} from './independentFamilyProgram';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
@@ -26,10 +34,18 @@ function quotePostgrestValue(value: string): string {
 
 function resolveRoleFromCode(record: PilotProgramRecord, normalized: string): 'facilitator' | 'family' | null {
   const family = normalizePilotAccessCode(record.family_access_code);
-  const facilitator = normalizePilotAccessCode(record.facilitator_access_code);
   const program = normalizePilotAccessCode(record.program_code);
+
+  if (isIndependentFamilyType(record.program_type)) {
+    if (normalized === family || normalized === program) return 'family';
+    return null;
+  }
+
+  const facilitator = hasFacilitatorAccessCode(record.facilitator_access_code)
+    ? normalizePilotAccessCode(record.facilitator_access_code!)
+    : '';
   if (normalized === family) return 'family';
-  if (normalized === facilitator || normalized === program) return 'facilitator';
+  if ((facilitator && normalized === facilitator) || normalized === program) return 'facilitator';
   return null;
 }
 
@@ -145,9 +161,14 @@ export async function lookupPilotProgramByAdmin(
 
     const program = recordToActivePilotProgram(match);
 
+    const isIndependentFamily = isIndependentFamilyType(match.program_type);
+
     return {
       program_name: program.programName,
-      masked_facilitator_code: maskAccessCode(program.facilitatorAccessCode),
+      masked_facilitator_code:
+        isIndependentFamily || !hasFacilitatorAccessCode(program.facilitatorAccessCode)
+          ? ''
+          : maskAccessCode(program.facilitatorAccessCode!),
       masked_family_code: maskAccessCode(program.familyAccessCode),
       program,
     };
@@ -170,6 +191,7 @@ const PROGRAM_TYPE_PREFIX: Record<PilotProgramType, string> = {
   School: 'SCHOOL',
   District: 'DISTRICT',
   'Homeschool Group': 'HOMESCHOOL',
+  'Independent Family': 'FAMILY',
 };
 
 function resolvePricingTier(programType: PilotProgramType): PilotPricingTier {
@@ -185,6 +207,8 @@ function resolvePricingTier(programType: PilotProgramType): PilotPricingTier {
       return 'district';
     case 'Homeschool Group':
       return 'family_group';
+    case 'Independent Family':
+      return INDEPENDENT_FAMILY_PRICING_TIER;
     default:
       return 'camp_pilot';
   }
@@ -195,7 +219,13 @@ function slugifyProgramName(name: string, programType: PilotProgramType): string
   if (programType === 'Camp / Youth Program' || programType === 'After-School Program') {
     base = base.replace(/\bcamp\b/gi, '').replace(/\bprogram\b/gi, '').trim();
   }
+  if (programType === 'Independent Family') {
+    base = base.replace(/\bfamily\b/gi, '').trim();
+  }
   const slug = base.toUpperCase().replace(/[^A-Z0-9]+/g, '');
+  if (programType === 'Independent Family') {
+    return slug || 'HOME';
+  }
   return slug || 'PROGRAM';
 }
 
@@ -206,11 +236,20 @@ export function generateProgramCodes(
 ): {
   program_code: string;
   family_access_code: string;
-  facilitator_access_code: string;
+  facilitator_access_code: string | null;
 } {
   const prefix = PROGRAM_TYPE_PREFIX[programType];
   const slug = slugifyProgramName(programName, programType);
   const program_code = `${prefix}-${slug}-${year}`;
+
+  if (programType === INDEPENDENT_FAMILY_PROGRAM_TYPE) {
+    return {
+      program_code,
+      family_access_code: `${program_code}-FAMILY`,
+      facilitator_access_code: null,
+    };
+  }
+
   return {
     program_code,
     family_access_code: `${program_code}-FAMILY`,
@@ -219,18 +258,24 @@ export function generateProgramCodes(
 }
 
 function buildProgramRecord(input: PilotProgramSignupInput): PilotProgramRecord {
-  const codes = generateProgramCodes(input.programType, input.programName);
+  const isIndependentFamily = input.programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
+  const resolvedProgramName = isIndependentFamily
+    ? resolveIndependentFamilyProgramName(input.programName, input.adminFirstName)
+    : input.programName.trim();
+  const codes = generateProgramCodes(input.programType, resolvedProgramName);
   const agreedAt = new Date().toISOString();
 
   return {
-    program_name: input.programName.trim(),
+    program_name: resolvedProgramName,
     program_code: codes.program_code,
-    program_type: input.programType,
+    program_type: toDbProgramType(input.programType) as PilotProgramRecord['program_type'],
     admin_first_name: input.adminFirstName.trim(),
     admin_email: input.adminEmail.trim(),
-    estimated_students: input.estimatedStudents,
+    estimated_students: isIndependentFamily ? 1 : input.estimatedStudents,
     age_range: input.ageRange,
-    group_name: input.groupName.trim(),
+    group_name: isIndependentFamily
+      ? input.groupName.trim() || resolvedProgramName
+      : input.groupName.trim(),
     family_access_code: codes.family_access_code,
     facilitator_access_code: codes.facilitator_access_code,
     pricing_tier: resolvePricingTier(input.programType),

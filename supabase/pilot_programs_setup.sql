@@ -12,7 +12,7 @@ create table if not exists public.pilot_programs (
   age_range text,
   group_name text,
   family_access_code text not null unique,
-  facilitator_access_code text not null unique,
+  facilitator_access_code text unique,
   pricing_tier text not null,
   payment_status text not null default 'pending',
   pilot_status text not null default 'active',

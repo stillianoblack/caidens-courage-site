@@ -52,7 +52,7 @@ export default function PilotProgramWelcomeCard({ program, onDismiss }: PilotPro
           <button
             type="button"
             className="pilotWelcome-btn"
-            onClick={() => void copyWithToast(program.facilitatorAccessCode)}
+            onClick={() => void copyWithToast(program.facilitatorAccessCode!)}
           >
             Copy Facilitator Code
           </button>

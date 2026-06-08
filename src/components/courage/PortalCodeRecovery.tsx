@@ -3,6 +3,7 @@ import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { writeLastPilotProgram } from '../../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../../types/pilotProgram';
+import { isIndependentFamilyProgram } from '../../lib/independentFamilyProgram';
 import { lookupPilotProgramByAdmin } from '../../lib/pilotProgramService';
 import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
 import { useCopyToast } from '../shared/useCopyToast';
@@ -39,12 +40,13 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
     setProgram(match.program);
   };
 
-  const continueAs = (role: 'facilitator' | 'family') => {
+  const isIndependentFamily = isIndependentFamilyProgram(program);
+
+  const continueAsFamily = () => {
     if (!program) return;
-    const code = role === 'family' ? program.familyAccessCode : program.facilitatorAccessCode;
-    applyProgramPortalUnlock(program, role, code);
-    writeLastPilotProgram(program, role, adminEmail.trim());
-    replaceWithPortalRoute(role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
+    applyProgramPortalUnlock(program, 'family', program.familyAccessCode);
+    writeLastPilotProgram(program, 'family', adminEmail.trim(), program.familyAccessCode);
+    replaceWithPortalRoute(FAMILY_HUB_PATH);
   };
 
   return (
@@ -68,7 +70,7 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
           />
         </label>
         <label className="portal-recoveryField">
-          <span>Admin Email</span>
+          <span>{isIndependentFamily ? 'Parent / Guardian Email' : 'Admin Email'}</span>
           <input
             type="email"
             value={adminEmail}
@@ -103,17 +105,19 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
               Copy
             </button>
           </div>
-          <div className="portal-recoveryCodeRow">
-            <span className="portal-recoveryLabel">Facilitator Code</span>
-            <span className="portal-recoveryCodeValue">{program.facilitatorAccessCode}</span>
-            <button
-              type="button"
-              className="portal-recoveryCopyBtn"
-              onClick={() => void copyWithToast(program.facilitatorAccessCode)}
-            >
-              Copy
-            </button>
-          </div>
+          {isIndependentFamily ? null : (
+            <div className="portal-recoveryCodeRow">
+              <span className="portal-recoveryLabel">Facilitator Code</span>
+              <span className="portal-recoveryCodeValue">{program.facilitatorAccessCode}</span>
+              <button
+                type="button"
+                className="portal-recoveryCopyBtn"
+                onClick={() => void copyWithToast(program.facilitatorAccessCode!)}
+              >
+                Copy
+              </button>
+            </div>
+          )}
           <div className="portal-recoveryCodeRow">
             <span className="portal-recoveryLabel">Family Code</span>
             <span className="portal-recoveryCodeValue">{program.familyAccessCode}</span>
@@ -132,12 +136,34 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
           {/* TODO: Email recovery link when admin requests forgotten codes via Supabase Edge Function or external email service. */}
 
           <div className="portal-recoveryActions">
-            <button type="button" className="portal-recoveryContinueBtn" onClick={() => continueAs('facilitator')}>
-              Continue as Facilitator
-            </button>
-            <button type="button" className="portal-recoveryContinueBtn" onClick={() => continueAs('family')}>
-              Continue as Family
-            </button>
+            {isIndependentFamily ? (
+              <button type="button" className="portal-recoveryContinueBtn" onClick={continueAsFamily}>
+                Continue as Family
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="portal-recoveryContinueBtn"
+                  onClick={() => {
+                    if (!program?.facilitatorAccessCode) return;
+                    applyProgramPortalUnlock(program, 'facilitator', program.facilitatorAccessCode);
+                    writeLastPilotProgram(
+                      program,
+                      'facilitator',
+                      adminEmail.trim(),
+                      program.facilitatorAccessCode,
+                    );
+                    replaceWithPortalRoute(PROGRAM_DASHBOARD_PATH);
+                  }}
+                >
+                  Continue as Facilitator
+                </button>
+                <button type="button" className="portal-recoveryContinueBtn" onClick={continueAsFamily}>
+                  Continue as Family
+                </button>
+              </>
+            )}
           </div>
         </div>
       ) : null}

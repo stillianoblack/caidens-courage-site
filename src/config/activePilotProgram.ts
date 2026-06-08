@@ -1,4 +1,5 @@
 import type { ActivePilotProgram, PilotProgramRecord } from '../types/pilotProgram';
+import { fromDbProgramType } from '../lib/independentFamilyProgram';
 
 export const ACTIVE_PILOT_PROGRAM_KEY = 'activePilotProgram';
 
@@ -7,14 +8,14 @@ export function recordToActivePilotProgram(record: PilotProgramRecord): ActivePi
     id: record.id,
     programName: record.program_name,
     programCode: record.program_code,
-    programType: record.program_type,
+    programType: fromDbProgramType(record.program_type),
     adminFirstName: record.admin_first_name,
     adminEmail: record.admin_email,
     estimatedStudents: record.estimated_students,
     ageRange: record.age_range,
     groupName: record.group_name,
     familyAccessCode: record.family_access_code,
-    facilitatorAccessCode: record.facilitator_access_code,
+    facilitatorAccessCode: record.facilitator_access_code ?? null,
     pricingTier: record.pricing_tier,
     paymentStatus: record.payment_status,
     pilotStatus: record.pilot_status,

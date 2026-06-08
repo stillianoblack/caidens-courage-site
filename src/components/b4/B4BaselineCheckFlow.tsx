@@ -309,21 +309,19 @@ export default function B4BaselineCheckFlow({
   };
 
   const handleExit = () => {
+    if (embedded && onExit && view !== 'landing') {
+      onExit();
+      return;
+    }
     if (view === 'quiz') {
       goHub();
       return;
     }
     if (view === 'hub' || view === 'module-complete' || view === 'final') {
-      if (embedded && onExit) {
-        onExit();
-        return;
-      }
       goLanding();
       return;
     }
-    if (onExit) {
-      onExit();
-    }
+    onExit?.();
   };
 
   const allComplete = isBaselineFullyComplete(hubState);

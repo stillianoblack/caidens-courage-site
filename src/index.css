@@ -8395,10 +8395,48 @@ a.ffl-ctaSecondary {
   cursor: pointer;
 }
 
+.portal-restoreSaved {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.portal-restoreSavedLead {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.portal-restoreSavedLink {
+  display: inline-block;
+  margin-top: 0.2rem;
+  border: none;
+  background: transparent;
+  color: #243e70;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
 .portal-welcomeBack {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid rgba(36, 62, 112, 0.12);
+  text-align: left;
+}
+
+.portal-welcomeBack--standalone {
+  margin-top: 1rem;
+  padding-top: 0;
+  border-top: none;
+  text-align: center;
+  width: 100%;
+}
+
+.portal-welcomeBack--standalone .portal-welcomeBackCodes {
   text-align: left;
 }
 

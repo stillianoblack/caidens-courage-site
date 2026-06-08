@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   PILOT_AGE_RANGE_OPTIONS,
@@ -7,6 +7,7 @@ import {
   type PilotProgramSignupInput,
   type PilotProgramType,
 } from '../../types/pilotProgram';
+import { INDEPENDENT_FAMILY_PROGRAM_TYPE } from '../../lib/independentFamilyProgram';
 import { PILOT_TERMS_PATH } from '../../config/courageRoutes';
 import { trackContactFormStarted } from '../../lib/analytics';
 
@@ -30,12 +31,39 @@ export default function PilotProgramSignupForm({
   const [groupName, setGroupName] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  const isIndependentFamily = programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
+
+  const orderedProgramTypes = useMemo(() => {
+    const options = [...PILOT_PROGRAM_TYPE_OPTIONS];
+    const homeschoolIndex = options.indexOf('Homeschool Group');
+    const independentIndex = options.indexOf(INDEPENDENT_FAMILY_PROGRAM_TYPE);
+    if (
+      homeschoolIndex >= 0 &&
+      independentIndex >= 0 &&
+      independentIndex !== homeschoolIndex + 1
+    ) {
+      options.splice(independentIndex, 1);
+      options.splice(homeschoolIndex + 1, 0, INDEPENDENT_FAMILY_PROGRAM_TYPE);
+    }
+    return options;
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const students = Number.parseInt(estimatedStudents, 10);
-    if (!Number.isFinite(students) || students < 1) {
-      return;
+
+    if (!isIndependentFamily) {
+      const students = Number.parseInt(estimatedStudents, 10);
+      if (!Number.isFinite(students) || students < 1) {
+        return;
+      }
+      if (!programName.trim() || !groupName.trim()) {
+        return;
+      }
     }
+
+    const students = isIndependentFamily
+      ? 1
+      : Number.parseInt(estimatedStudents, 10);
 
     await onSubmit({
       programType,
@@ -44,7 +72,7 @@ export default function PilotProgramSignupForm({
       adminEmail,
       estimatedStudents: students,
       ageRange,
-      groupName,
+      groupName: isIndependentFamily ? '' : groupName,
       agreedToTerms,
     });
   };
@@ -59,7 +87,7 @@ export default function PilotProgramSignupForm({
           onChange={(event) => setProgramType(event.target.value as PilotProgramType)}
           required
         >
-          {PILOT_PROGRAM_TYPE_OPTIONS.map((option) => (
+          {orderedProgramTypes.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>
@@ -68,20 +96,24 @@ export default function PilotProgramSignupForm({
       </div>
 
       <div className="pilotSignup-field">
-        <label htmlFor="pilot-program-name">Program Name</label>
+        <label htmlFor="pilot-program-name">
+          {isIndependentFamily ? 'Family Name (Optional)' : 'Program Name'}
+        </label>
         <input
           id="pilot-program-name"
           type="text"
           value={programName}
           onChange={(event) => setProgramName(event.target.value)}
           onFocus={() => trackContactFormStarted('/pilot-program-signup')}
-          placeholder="Blue Ribbon Camp"
-          required
+          placeholder={isIndependentFamily ? 'The Martinez Family' : 'Blue Ribbon Camp'}
+          required={!isIndependentFamily}
         />
       </div>
 
       <div className="pilotSignup-field">
-        <label htmlFor="pilot-admin-first">Admin First Name</label>
+        <label htmlFor="pilot-admin-first">
+          {isIndependentFamily ? 'Parent / Guardian First Name' : 'Admin First Name'}
+        </label>
         <input
           id="pilot-admin-first"
           type="text"
@@ -92,7 +124,9 @@ export default function PilotProgramSignupForm({
       </div>
 
       <div className="pilotSignup-field">
-        <label htmlFor="pilot-admin-email">Admin Email</label>
+        <label htmlFor="pilot-admin-email">
+          {isIndependentFamily ? 'Parent / Guardian Email' : 'Admin Email'}
+        </label>
         <input
           id="pilot-admin-email"
           type="email"
@@ -102,17 +136,19 @@ export default function PilotProgramSignupForm({
         />
       </div>
 
-      <div className="pilotSignup-field">
-        <label htmlFor="pilot-estimated-students">Estimated Number of Students</label>
-        <input
-          id="pilot-estimated-students"
-          type="number"
-          min={1}
-          value={estimatedStudents}
-          onChange={(event) => setEstimatedStudents(event.target.value)}
-          required
-        />
-      </div>
+      {isIndependentFamily ? null : (
+        <div className="pilotSignup-field">
+          <label htmlFor="pilot-estimated-students">Estimated Number of Students</label>
+          <input
+            id="pilot-estimated-students"
+            type="number"
+            min={1}
+            value={estimatedStudents}
+            onChange={(event) => setEstimatedStudents(event.target.value)}
+            required
+          />
+        </div>
+      )}
 
       <div className="pilotSignup-field">
         <label htmlFor="pilot-age-range">Age Range</label>
@@ -130,17 +166,19 @@ export default function PilotProgramSignupForm({
         </select>
       </div>
 
-      <div className="pilotSignup-field">
-        <label htmlFor="pilot-group-name">Group / Classroom Name</label>
-        <input
-          id="pilot-group-name"
-          type="text"
-          value={groupName}
-          onChange={(event) => setGroupName(event.target.value)}
-          placeholder="Morning Group, Room 12, Blue Group"
-          required
-        />
-      </div>
+      {isIndependentFamily ? null : (
+        <div className="pilotSignup-field">
+          <label htmlFor="pilot-group-name">Group / Classroom Name</label>
+          <input
+            id="pilot-group-name"
+            type="text"
+            value={groupName}
+            onChange={(event) => setGroupName(event.target.value)}
+            placeholder="Morning Group, Room 12, Blue Group"
+            required
+          />
+        </div>
+      )}
 
       <div className="pilotSignup-terms">
         <label className="pilotSignup-termsLabel">
@@ -167,7 +205,13 @@ export default function PilotProgramSignupForm({
       ) : null}
 
       <button type="submit" className="pilotSignup-submit" disabled={submitting || !agreedToTerms}>
-        {submitting ? 'Creating Program…' : 'Create Pilot Program'}
+        {submitting
+          ? isIndependentFamily
+            ? 'Creating Family Access…'
+            : 'Creating Program…'
+          : isIndependentFamily
+            ? 'Create Family Access'
+            : 'Create Pilot Program'}
       </button>
     </form>
   );

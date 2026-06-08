@@ -5,6 +5,10 @@ import { writeLastPilotProgram } from '../../config/lastPilotProgram';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { copyToClipboard } from '../../lib/copyToClipboard';
+import {
+  fromDbProgramType,
+  isIndependentFamilyType,
+} from '../../lib/independentFamilyProgram';
 import type { PilotProgramRecord } from '../../types/pilotProgram';
 import AdminCopyField from './AdminCopyField';
 
@@ -34,19 +38,26 @@ function statusClass(status: string): string {
   return 'adminPortal-status';
 }
 
+function formatProgramTypeLabel(programType: PilotProgramRecord['program_type']): string {
+  return fromDbProgramType(programType);
+}
+
 export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotProgramCardProps) {
   const navigate = useNavigate();
   const activeProgram = recordToActivePilotProgram(program);
+  const isIndependentFamily = isIndependentFamilyType(program.program_type);
 
   const openFacilitatorDashboard = () => {
-    applyProgramPortalUnlock(activeProgram, 'facilitator', program.facilitator_access_code);
-    writeLastPilotProgram(activeProgram, 'facilitator', program.admin_email);
+    const facilitatorCode = program.facilitator_access_code;
+    if (!facilitatorCode) return;
+    applyProgramPortalUnlock(activeProgram, 'facilitator', facilitatorCode);
+    writeLastPilotProgram(activeProgram, 'facilitator', program.admin_email, facilitatorCode);
     navigate(PROGRAM_DASHBOARD_PATH);
   };
 
   const openFamilyPortal = () => {
     applyProgramPortalUnlock(activeProgram, 'family', program.family_access_code);
-    writeLastPilotProgram(activeProgram, 'family', program.admin_email);
+    writeLastPilotProgram(activeProgram, 'family', program.admin_email, program.family_access_code);
     navigate(FAMILY_HUB_PATH);
   };
 
@@ -59,18 +70,20 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
       <div className="adminPortal-programHeader">
         <div>
           <h2 className="adminPortal-programName">{program.program_name}</h2>
-          <p className="adminPortal-programMeta">{program.program_type}</p>
+          <p className="adminPortal-programMeta">{formatProgramTypeLabel(program.program_type)}</p>
         </div>
         <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
       </div>
 
       <div className="adminPortal-detailGrid">
         <AdminCopyField label="Program Code" value={program.program_code} onCopied={onCopied} />
-        <AdminCopyField
-          label="Facilitator Access Code"
-          value={program.facilitator_access_code}
-          onCopied={onCopied}
-        />
+        {isIndependentFamily || !program.facilitator_access_code ? null : (
+          <AdminCopyField
+            label="Facilitator Access Code"
+            value={program.facilitator_access_code}
+            onCopied={onCopied}
+          />
+        )}
         <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
         <div className="adminPortal-detailItem">
           <span className="adminPortal-detailLabel">Estimated Students</span>
@@ -81,11 +94,15 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
           <span className="adminPortal-detailValue">{program.age_range || '—'}</span>
         </div>
         <div className="adminPortal-detailItem">
-          <span className="adminPortal-detailLabel">Admin First Name</span>
+          <span className="adminPortal-detailLabel">
+            {isIndependentFamily ? 'Parent / Guardian First Name' : 'Admin First Name'}
+          </span>
           <span className="adminPortal-detailValue">{program.admin_first_name}</span>
         </div>
         <div className="adminPortal-detailItem">
-          <span className="adminPortal-detailLabel">Admin Email</span>
+          <span className="adminPortal-detailLabel">
+            {isIndependentFamily ? 'Parent / Guardian Email' : 'Admin Email'}
+          </span>
           <span className="adminPortal-detailValue">{program.admin_email}</span>
         </div>
         <div className="adminPortal-detailItem">
@@ -94,26 +111,36 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
         </div>
         {program.group_name ? (
           <div className="adminPortal-detailItem">
-            <span className="adminPortal-detailLabel">Group Name</span>
+            <span className="adminPortal-detailLabel">
+              {isIndependentFamily ? 'Family Name' : 'Group Name'}
+            </span>
             <span className="adminPortal-detailValue">{program.group_name}</span>
           </div>
         ) : null}
       </div>
 
       <div className="adminPortal-actions">
-        <button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={openFacilitatorDashboard}>
-          Open Facilitator Dashboard
-        </button>
+        {isIndependentFamily ? null : (
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--primary"
+            onClick={openFacilitatorDashboard}
+          >
+            Open Facilitator Dashboard
+          </button>
+        )}
         <button type="button" className="adminPortal-btn adminPortal-btn--gold" onClick={openFamilyPortal}>
           Open Family Portal
         </button>
-        <button
-          type="button"
-          className="adminPortal-btn adminPortal-btn--ghost"
-          onClick={() => copyCode(program.facilitator_access_code)}
-        >
-          Copy Facilitator Code
-        </button>
+        {isIndependentFamily || !program.facilitator_access_code ? null : (
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--ghost"
+            onClick={() => copyCode(program.facilitator_access_code!)}
+          >
+            Copy Facilitator Code
+          </button>
+        )}
         <button
           type="button"
           className="adminPortal-btn adminPortal-btn--ghost"

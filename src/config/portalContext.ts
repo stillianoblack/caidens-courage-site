@@ -6,7 +6,9 @@ import {
 } from './activePilotProgram';
 import { clearBlueRibbonUnlock } from './blueRibbonPortalAccess';
 import { syncPortalProgramContext } from '../lib/activeProgramContext';
+import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { writeFamilyPortalSession, clearFamilyPortalSession } from './familyPortalAccess';
+import { clearLastPilotProgram } from './lastPilotProgram';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 
 export type PortalRole = 'facilitator' | 'family';
@@ -124,13 +126,18 @@ export function applyProgramPortalUnlock(
   role: PortalRole,
   accessCode: string,
 ): void {
+  const resolvedRole: PortalRole =
+    isIndependentFamilyProgram(program) && role === 'facilitator' ? 'family' : role;
+  const resolvedCode =
+    resolvedRole === 'family' ? program.familyAccessCode : accessCode.trim() || accessCode;
+
   clearStalePortalRouteState();
   writeActivePilotProgram(program);
   syncPortalProgramContext(program);
-  writeActivePortalRole(role);
-  writeActiveAccessCode(accessCode);
+  writeActivePortalRole(resolvedRole);
+  writeActiveAccessCode(resolvedCode);
 
-  if (role === 'family') {
+  if (resolvedRole === 'family') {
     writeActiveFamilyContext({
       programCode: program.programCode,
       programName: program.programName,
@@ -158,6 +165,17 @@ export function clearProgramPortalContext(): void {
     /* localStorage unavailable */
   }
   clearActiveFamilyContext();
+}
+
+/** Clear cached return session on portal login without signing out of an active dashboard. */
+export function clearPortalReturnSession(): void {
+  clearLastPilotProgram();
+  clearActiveAccessCode();
+  try {
+    localStorage.removeItem(ACTIVE_PORTAL_ROLE_KEY);
+  } catch {
+    /* localStorage unavailable */
+  }
 }
 
 /** Sign out — clear portal session; user must re-enter access code at /portal. */

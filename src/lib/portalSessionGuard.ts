@@ -1,5 +1,6 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActivePortalRole, type PortalRole } from '../config/portalContext';
+import { isIndependentFamilyProgram } from './independentFamilyProgram';
 
 export { PORTAL_ROLE_MISMATCH_MESSAGE } from '../config/portalContext';
 
@@ -17,7 +18,12 @@ export function hasFacilitatorPortalSession(): boolean {
 
 export function isPortalRoleAllowed(pathname: string): boolean {
   const role = readActivePortalRole();
+  const program = readActivePilotProgram();
   if (!role || !hasActiveProgramSession()) return false;
+
+  if (isIndependentFamilyProgram(program)) {
+    return pathname.startsWith('/family-hub');
+  }
 
   if (pathname.startsWith('/family-hub')) {
     return role === 'family';

@@ -223,6 +223,10 @@ export default function AdultGrowthCheckFlow({
 
   const handleExit = () => {
     playItemButton();
+    if (embedded && onExit && view === 'quiz') {
+      onExit();
+      return;
+    }
     if (view === 'quiz') {
       setView('form');
       resetQuiz();

@@ -6,7 +6,8 @@ import PilotProgramSignupForm from '../components/pilot-program/PilotProgramSign
 import '../components/pilot-program/pilot-program.css';
 import { applyProgramPortalUnlock } from '../config/portalContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
-import { PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { FAMILY_HUB_PATH, PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
@@ -32,8 +33,30 @@ export default function PilotProgramSignupPage() {
       return;
     }
 
-    applyProgramPortalUnlock(result.program, 'facilitator', result.program.facilitatorAccessCode);
-    writeLastPilotProgram(result.program, 'facilitator', input.adminEmail);
+    const isIndependentFamily = isIndependentFamilyProgram(result.program);
+
+    if (isIndependentFamily) {
+      applyProgramPortalUnlock(result.program, 'family', result.program.familyAccessCode);
+      writeLastPilotProgram(
+        result.program,
+        'family',
+        input.adminEmail,
+        result.program.familyAccessCode,
+      );
+      refreshAnalyticsIdentity();
+      trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
+      replaceWithPortalRoute(FAMILY_HUB_PATH);
+      return;
+    }
+
+    const facilitatorCode = result.program.facilitatorAccessCode;
+    if (!facilitatorCode) {
+      setError('Facilitator access code is missing for this program. Please contact support.');
+      setSubmitting(false);
+      return;
+    }
+    applyProgramPortalUnlock(result.program, 'facilitator', facilitatorCode);
+    writeLastPilotProgram(result.program, 'facilitator', input.adminEmail, facilitatorCode);
     refreshAnalyticsIdentity();
     trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
     replaceWithPortalRoute(`${PROGRAM_DASHBOARD_PATH}?welcome=1`);
@@ -46,8 +69,8 @@ export default function PilotProgramSignupPage() {
       <header className="pilotSignup-hero">
         <h1 className="pilotSignup-heroTitle">Focus Flame Academy Pilot Signup</h1>
         <p className="pilotSignup-heroSub">
-          Create your program dashboard, get family and facilitator access codes, and start using
-          games, assessments, and camp-ready resources.
+          Create a camp, classroom, or independent family account. Get your access codes and start
+          using games, assessments, and family-ready resources.
         </p>
       </header>
 
@@ -55,8 +78,8 @@ export default function PilotProgramSignupPage() {
         <div className="pilotSignup-card">
           <h2 className="pilotSignup-cardTitle">Start Your Pilot Program</h2>
           <p className="pilotSignup-cardSub">
-            Tell us about your camp, classroom, or program. We&apos;ll generate your codes and open
-            your dashboard right away.
+            Tell us about your camp, classroom, homeschool group, or family. We&apos;ll generate your
+            codes and open your portal right away.
           </p>
 
           <PilotProgramSignupForm onSubmit={handleSubmit} submitting={submitting} error={error} />

@@ -31,14 +31,42 @@
   overflow: visible;
 }
 
-.bbc-app--game-active .bbc-topBar,
-.bbc-app--game-active .caiden-topBar,
-.bbc-app--game-active .victoria-topBar,
-.bbc-app--game-active .uncleT-topBar,
-.bbc-app--game-active .charlie-topBar {
+/* Portal-embedded gameplay headers stay inside the card — never sticky over portal nav */
+.portal-gameFrame .bbc-topBar,
+.portal-gameFrame .caiden-topBar,
+.portal-gameFrame .miranda-topBar,
+.portal-gameFrame .victoria-topBar,
+.portal-gameFrame .uncleT-topBar,
+.portal-gameFrame .charlie-topBar,
+.portal-gameFrame.miranda-game .miranda-topBar {
+  position: relative;
+  top: auto;
+  z-index: 1;
+}
+
+.portal-gameFrame.bbc-app--game-active .bbc-topBar,
+.portal-gameFrame.bbc-app--game-active .caiden-topBar,
+.portal-gameFrame.bbc-app--game-active .miranda-topBar,
+.portal-gameFrame.bbc-app--game-active .victoria-topBar,
+.portal-gameFrame.bbc-app--game-active .uncleT-topBar,
+.portal-gameFrame.bbc-app--game-active .charlie-topBar {
+  position: relative;
+  top: auto;
+  z-index: 1;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}
+
+/* Standalone (non-portal) gameplay may keep a sticky in-card header */
+.bbc-app--game-active:not(.portal-gameFrame) .bbc-topBar,
+.bbc-app--game-active:not(.portal-gameFrame) .caiden-topBar,
+.bbc-app--game-active:not(.portal-gameFrame) .victoria-topBar,
+.bbc-app--game-active:not(.portal-gameFrame) .uncleT-topBar,
+.bbc-app--game-active:not(.portal-gameFrame) .charlie-topBar,
+.bbc-app--game-active:not(.portal-gameFrame) .miranda-topBar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 5;
   flex-shrink: 0;
   padding-top: max(0.5rem, env(safe-area-inset-top));
 }
@@ -62,8 +90,18 @@
   padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
 }
 
-.bbc-app--game-active .bbc-bottomBar {
-  z-index: 55;
+.portal-gameFrame.bbc-app--game-active .bbc-bottomBar {
+  position: sticky;
+  bottom: 0;
+  left: auto;
+  right: auto;
+  width: 100%;
+  z-index: 2;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.bbc-app--game-active:not(.portal-gameFrame) .bbc-bottomBar {
+  z-index: 5;
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
@@ -178,5 +216,14 @@
   .portal-contentFrame.family-content,
   .portal-contentFrame.pilot-content {
     padding: 1.25rem 1.25rem 2rem;
+  }
+
+  .portal-gameFrame.bbc-app--game-active {
+    margin-top: 0;
+    padding-top: 0.125rem;
+  }
+
+  .portal-gameFrame.bbc-app--game-active .bbc-main--quiz {
+    padding-top: 0.25rem;
   }
 }

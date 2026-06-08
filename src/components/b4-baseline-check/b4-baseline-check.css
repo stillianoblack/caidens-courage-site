@@ -105,7 +105,13 @@
   backdrop-filter: none;
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 5;
+}
+
+.portal-gameFrame .bbc-topBar {
+  position: relative;
+  top: auto;
+  z-index: 1;
 }
 
 .bbc-exitBtn {
@@ -122,6 +128,9 @@
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
   transition: background 0.15s;
 }
 

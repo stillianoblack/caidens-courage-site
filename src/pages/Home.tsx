@@ -329,9 +329,10 @@ const Home: React.FC = () => {
                 <div className="cc-hero-brand-visual cc-hero-brand-visual--video">
                   <HeroVideoPreview />
                   <div className="cc-hero-flyer-caption">
-                    <p className="cc-hero-flyer-caption-title">Volume 1: The Graphic Novel</p>
+                    <p className="cc-hero-flyer-caption-title">See the Adventure in Action</p>
                     <p className="cc-hero-flyer-caption-body">
-                      139 pages — meet Caiden, B-4, and the Focus Flame.
+                      Learn how Caiden&apos;s Courage combines storytelling, SEL, reading, and interactive
+                      activities for kids ages 7–12.
                     </p>
                   </div>
                 </div>

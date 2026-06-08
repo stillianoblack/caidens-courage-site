@@ -86,7 +86,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
           applyProgramPortalUnlock(program, role, trimmedCode);
-          writeLastPilotProgram(program, role, program.adminEmail);
+          writeLastPilotProgram(program, role, program.adminEmail, trimmedCode);
           setAccessCode('');
           const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
           navigateToPortal(destination, `program-code-${role}`);

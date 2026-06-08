@@ -79,7 +79,7 @@ export default function CourageFooter() {
   return (
     <footer className="border-t border-navy-100 bg-[#050B18] py-12 text-white sm:py-14">
       <div className="cc-site-container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center sm:text-left">
+        <div className="mb-10 text-left">
           <Link to="/" className="font-display text-lg font-extrabold text-white transition-colors hover:text-golden-400">
             Caiden&apos;s Courage™
           </Link>
@@ -100,7 +100,7 @@ export default function CourageFooter() {
           ))}
         </div>
 
-        <p className="mt-10 border-t border-white/10 pt-8 text-center text-sm text-white/50">
+        <p className="mt-10 border-t border-white/10 pt-8 text-left text-sm text-white/50">
           © {new Date().getFullYear()} The Focus Engine, LLC. All rights reserved.
         </p>
       </div>
