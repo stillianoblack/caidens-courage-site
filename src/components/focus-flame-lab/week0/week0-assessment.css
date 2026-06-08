@@ -300,3 +300,14 @@
   flex-direction: column;
   gap: 0.875rem;
 }
+
+.ffl-week0-saveWarning {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(220, 80, 80, 0.45);
+  background: rgba(220, 80, 80, 0.12);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffd4d4;
+}

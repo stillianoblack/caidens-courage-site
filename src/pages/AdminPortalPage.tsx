@@ -8,6 +8,7 @@ import {
 } from '../config/adminAccess';
 import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
 import type { PilotProgramRecord } from '../types/pilotProgram';
+import AdminParticipantReassignment from '../components/admin/AdminParticipantReassignment';
 import AdminPilotProgramCard from '../components/admin/AdminPilotProgramCard';
 import '../components/admin/admin-portal.css';
 
@@ -132,32 +133,35 @@ export default function AdminPortalPage() {
             </form>
           </section>
         ) : (
-          <section className="adminPortal-card">
-            <div className="adminPortal-toolbar">
-              <p className="adminPortal-count">
-                {loading ? 'Loading pilot programs…' : `${programs.length} pilot program${programs.length === 1 ? '' : 's'}`}
-              </p>
-              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
-                Sign out
-              </button>
-            </div>
+          <>
+            <AdminParticipantReassignment onCopied={handleCopied} />
+            <section className="adminPortal-card">
+              <div className="adminPortal-toolbar">
+                <p className="adminPortal-count">
+                  {loading ? 'Loading pilot programs…' : `${programs.length} pilot program${programs.length === 1 ? '' : 's'}`}
+                </p>
+                <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
+                  Sign out
+                </button>
+              </div>
 
-            {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
+              {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
 
-            {!loading && !loadError && programs.length === 0 ? (
-              <p className="adminPortal-empty">No pilot programs found in Supabase.</p>
-            ) : null}
+              {!loading && !loadError && programs.length === 0 ? (
+                <p className="adminPortal-empty">No pilot programs found in Supabase.</p>
+              ) : null}
 
-            <div className="adminPortal-programList">
-              {programs.map((program) => (
-                <AdminPilotProgramCard
-                  key={program.id ?? program.program_code}
-                  program={program}
-                  onCopied={handleCopied}
-                />
-              ))}
-            </div>
-          </section>
+              <div className="adminPortal-programList">
+                {programs.map((program) => (
+                  <AdminPilotProgramCard
+                    key={program.id ?? program.program_code}
+                    program={program}
+                    onCopied={handleCopied}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
         )}
       </main>
 

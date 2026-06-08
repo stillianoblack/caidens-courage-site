@@ -43,6 +43,7 @@ function resolveStudentParticipant() {
 
   return {
     nickname,
+    first_name: nickname,
     role: 'student',
     program_code: programCode ?? '',
     program_name: program?.programName,

@@ -20,9 +20,9 @@ import {
   type AdultAssessmentProfile,
   type AdultAssessmentRecord,
 } from '../../lib/adultAssessmentStorage';
-import { insertAdultAssessmentResult } from '../../lib/assessmentResultsService';
+import { saveAdultAssessmentToSupabase } from '../../lib/assessmentResultsService';
+import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
-import { recordFormalAssessmentCompletion } from '../../lib/recordInteractiveCompletion';
 import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from '../../data/adult/sharedAssets';
 import AdultInfoForm from './AdultInfoForm';
 import AdultGrowthCheckResults from './AdultGrowthCheckResults';
@@ -111,39 +111,21 @@ export default function AdultGrowthCheckFlow({
       if (!profile) return;
 
       const scores = scoreAdultAssessment(finalAnswers);
+      const trackingProgramCode = resolveTrackingProgramCode() ?? profile.programCode;
       const baseline =
         phase === 'growth'
-          ? findLatestAdultBaseline(profile.email, profile.programCode)
+          ? findLatestAdultBaseline(profile.email, trackingProgramCode)
           : null;
 
       const record = buildAdultAssessmentRecord({
         phase,
-        profile,
+        profile: { ...profile, programCode: trackingProgramCode },
         ...scores,
         baseline,
       });
 
       saveAdultAssessmentResult(record);
-      const v2Submit = await recordFormalAssessmentCompletion({
-        assessmentType: phase === 'baseline' ? 'adult_pre' : 'adult_post',
-        role: 'adult',
-        participant: {
-          first_name: profile.firstName,
-          email: profile.email,
-          adult_role: profile.role,
-          program_code: profile.programCode,
-          organization: profile.organization,
-          child_age_range: profile.childAgeRange,
-          email_opt_in: profile.emailOptIn,
-        },
-        understanding_score: scores.understandingScore,
-        support_score: scores.supportScore,
-        total_score: scores.totalScore,
-        max_score: record.totalQuestions,
-        answers_json: finalAnswers,
-        completed_at: record.completedAt,
-      });
-      const submit = await insertAdultAssessmentResult(record);
+      const submit = await saveAdultAssessmentToSupabase(record);
       trackEvent('adult_assessment_completed', {
         role: familyPortal ? 'parent' : 'facilitator',
         assessment_type: phase === 'baseline' ? 'adult_pre' : 'adult_post',
@@ -157,8 +139,7 @@ export default function AdultGrowthCheckFlow({
         support_score: scores.supportScore,
       });
 
-      const syncParts = [submit.message, v2Submit.warning].filter(Boolean);
-      setSyncMessage(syncParts.join(' ') || submit.message);
+      setSyncMessage(submit.message);
       setResultRecord(record);
       setView('results');
       playModuleWin();

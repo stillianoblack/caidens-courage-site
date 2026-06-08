@@ -36,6 +36,14 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     href: FAMILY_HUB_PATH,
   },
   {
+    id: 'family-results',
+    title: 'Results',
+    description: 'Family assessment scores and parent reflections',
+    category: 'Navigation',
+    tags: ['results', 'assessments', 'progress', 'family', 'baseline'],
+    href: `${FAMILY_HUB_PATH}/results`,
+  },
+  {
     id: 'family-continue',
     title: 'Continue Learning',
     description: 'Pick up where your learner left off',

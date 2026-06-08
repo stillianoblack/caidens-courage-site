@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { readActivePortalRole, signOutPortal } from '../../config/portalContext';
 import { PORTAL_PATH } from '../../config/courageRoutes';
 import { assignPortalRoute } from '../../lib/portalHardNavigation';
+import { copyToClipboard } from '../../lib/copyToClipboard';
 import './portal-switcher.css';
 
 type PortalSwitcherDropdownProps = {
@@ -19,6 +21,8 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const currentLabel = resolvePortalLabel();
+  const role = readActivePortalRole();
+  const familyCode = readActivePilotProgram()?.familyAccessCode;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,6 +60,21 @@ export default function PortalSwitcherDropdown({ className = '' }: PortalSwitche
       </button>
       {open ? (
         <ul className="portal-switcherMenu" role="menu" aria-label="Portal menu">
+          {role === 'family' && familyCode ? (
+            <li className="portal-switcherCodeBlock">
+              <p className="portal-switcherCodeLabel">Family Access Code</p>
+              <div className="portal-switcherCodeRow">
+                <code className="portal-switcherCodeValue">{familyCode}</code>
+                <button
+                  type="button"
+                  className="portal-switcherCodeCopy"
+                  onClick={() => void copyToClipboard(familyCode, 'Copied')}
+                >
+                  Copy
+                </button>
+              </div>
+            </li>
+          ) : null}
           <li>
             <button type="button" className="portal-switcherOption portal-switcherOption--signOut" onClick={handleSignOut}>
               Sign Out

@@ -5,6 +5,7 @@ import type {
 } from '../data/adultGrowthCheckContent';
 import { ADULT_GROWTH_CHECK_NAME, ADULT_ASSESSMENT_TOTAL_QUESTIONS } from '../data/adultGrowthCheckContent';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveTrackingProgramCode } from './activeProgramContext';
 
 export const ADULT_BASELINE_COMPLETE_KEY = 'adultBaselineComplete';
 export const ADULT_GROWTH_COMPLETE_KEY = 'adultGrowthComplete';
@@ -174,6 +175,7 @@ export function buildAdultAssessmentRecord(input: {
   baseline?: AdultAssessmentRecord | null;
 }): AdultAssessmentRecord {
   const program = readActivePilotProgram();
+  const programCode = resolveTrackingProgramCode() ?? input.profile.programCode;
   const assessmentType: AdultAssessmentType =
     input.phase === 'baseline' ? 'adult_baseline' : 'adult_growth';
 
@@ -187,7 +189,7 @@ export function buildAdultAssessmentRecord(input: {
     childAgeRange: input.profile.childAgeRange,
     organization: input.profile.organization,
     emailOptIn: input.profile.emailOptIn,
-    programCode: input.profile.programCode,
+    programCode,
     programName: program?.programName,
     understandingScore: input.understandingScore,
     supportScore: input.supportScore,

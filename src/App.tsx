@@ -97,6 +97,7 @@ import {
   FamilyGalleryPanel,
   FamilyGuidePanel,
   FamilyOverviewPanel,
+  FamilyResultsPanel,
 } from './routes/familyPanels';
 import {
   FamilyAdultGuideHubPage,
@@ -247,6 +248,7 @@ const appRouteChildren = (
       <Route element={<FamilyPortalLayout />}>
         <Route path={FAMILY_PORTAL_PATH}>
           <Route index element={<FamilyOverviewPanel />} />
+          <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
@@ -297,6 +299,7 @@ const appRouteChildren = (
       <Route element={<FamilyHubLayout />}>
         <Route path={FAMILY_HUB_PATH}>
           <Route index element={<FamilyOverviewPanel />} />
+          <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
           <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />

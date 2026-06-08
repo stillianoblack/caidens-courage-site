@@ -11,24 +11,54 @@ import './portal-resource-search.css';
 
 type PortalResourceSearchProps = {
   portal: PortalSearchPortal;
+  className?: string;
+  /** Collapse to icon + label on mobile; desktop always shows the input. */
+  collapsibleOnMobile?: boolean;
 };
 
 const SEARCH_DEBOUNCE_MS = 200;
+const MOBILE_MAX_WIDTH = 767;
 
-export default function PortalResourceSearch({ portal }: PortalResourceSearchProps) {
+function useMobileViewport(maxWidth = MOBILE_MAX_WIDTH): boolean {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(`(max-width: ${maxWidth}px)`).matches;
+  });
+
+  useEffect(() => {
+    const media = window.matchMedia(`(max-width: ${maxWidth}px)`);
+    const handleChange = () => setIsMobile(media.matches);
+    handleChange();
+    media.addEventListener('change', handleChange);
+    return () => media.removeEventListener('change', handleChange);
+  }, [maxWidth]);
+
+  return isMobile;
+}
+
+export default function PortalResourceSearch({
+  portal,
+  className = '',
+  collapsibleOnMobile = false,
+}: PortalResourceSearchProps) {
   const navigate = useNavigate();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const isMobile = useMobileViewport();
+  const mobileCollapsed = collapsibleOnMobile && isMobile;
+
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
   const resources = getPortalSearchResources(portal);
   const results = searchPortalResources(debouncedQuery, resources);
   const showDropdown = open && debouncedQuery.trim().length > 0;
+  const showCollapsedToggle = mobileCollapsed && !mobileExpanded;
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
@@ -40,14 +70,30 @@ export default function PortalResourceSearch({ portal }: PortalResourceSearchPro
   }, [debouncedQuery, results.length]);
 
   useEffect(() => {
+    if (!mobileCollapsed) {
+      setMobileExpanded(false);
+    }
+  }, [mobileCollapsed]);
+
+  const collapseMobile = useCallback(() => {
+    if (!mobileCollapsed) return;
+    setMobileExpanded(false);
+    setOpen(false);
+    inputRef.current?.blur();
+  }, [mobileCollapsed]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false);
+        if (mobileCollapsed && mobileExpanded && !query.trim()) {
+          collapseMobile();
+        }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [collapseMobile, mobileCollapsed, mobileExpanded, query]);
 
   const selectResult = useCallback(
     (item: PortalSearchResource) => {
@@ -64,12 +110,23 @@ export default function PortalResourceSearch({ portal }: PortalResourceSearchPro
       setQuery('');
       setDebouncedQuery('');
       setOpen(false);
+      collapseMobile();
       inputRef.current?.blur();
     },
-    [navigate, portal],
+    [collapseMobile, navigate, portal],
   );
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      setOpen(false);
+      if (mobileCollapsed) {
+        setQuery('');
+        setDebouncedQuery('');
+        collapseMobile();
+      }
+      return;
+    }
+
     if (!showDropdown) {
       if (event.key === 'ArrowDown' && query.trim()) {
         setOpen(true);
@@ -88,16 +145,46 @@ export default function PortalResourceSearch({ portal }: PortalResourceSearchPro
       if (activeIndex >= 0 && results[activeIndex]) {
         selectResult(results[activeIndex]);
       }
-    } else if (event.key === 'Escape') {
-      setOpen(false);
     }
   };
 
+  const openMobileSearch = () => {
+    setMobileExpanded(true);
+    window.requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
   const variantClass = portal === 'facilitator' ? 'portal-search--pilot' : 'portal-search--family';
+  const expandedClass = mobileCollapsed && mobileExpanded ? ' portal-search--mobileExpanded' : '';
 
   return (
-    <div className={`portal-search ${variantClass}`} ref={rootRef}>
-      <label className="portal-searchField">
+    <div
+      className={`portal-search ${variantClass}${expandedClass}${className ? ` ${className}` : ''}`}
+      ref={rootRef}
+    >
+      {showCollapsedToggle ? (
+        <button
+          type="button"
+          className="portal-searchToggle"
+          aria-expanded={false}
+          aria-controls={`${listboxId}-field`}
+          onClick={openMobileSearch}
+        >
+          <svg className="portal-searchIcon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path
+              fillRule="evenodd"
+              d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="portal-searchToggleLabel">Search Resources</span>
+        </button>
+      ) : null}
+
+      <label
+        className="portal-searchField"
+        id={`${listboxId}-field`}
+        hidden={showCollapsedToggle}
+      >
         <span className="sr-only">Search portal resources</span>
         <svg className="portal-searchIcon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path
@@ -125,6 +212,21 @@ export default function PortalResourceSearch({ portal }: PortalResourceSearchPro
           }}
           onKeyDown={handleKeyDown}
         />
+        {mobileCollapsed && mobileExpanded ? (
+          <button
+            type="button"
+            className="portal-searchClose"
+            aria-label="Close search"
+            onClick={() => {
+              setQuery('');
+              setDebouncedQuery('');
+              setOpen(false);
+              collapseMobile();
+            }}
+          >
+            ×
+          </button>
+        ) : null}
       </label>
 
       {showDropdown ? (

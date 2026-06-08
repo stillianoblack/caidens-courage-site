@@ -52,6 +52,7 @@ export default function Week0AssessmentExperience() {
   const [feedbackHeadline, setFeedbackHeadline] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [b4Message, setB4Message] = useState('Let\u2019s see where your Focus Flame starts.');
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [soundMenuOpen, setSoundMenuOpen] = useState(false);
 
   const {
@@ -140,7 +141,7 @@ export default function Week0AssessmentExperience() {
     }
   };
 
-  const finishModule = (overrides?: {
+  const finishModule = async (overrides?: {
     sel?: Record<string, number>;
     mc?: Record<string, string>;
   }) => {
@@ -171,7 +172,8 @@ export default function Week0AssessmentExperience() {
     setHubState(next);
 
     if (isWeek0FullyComplete(next) && next.result) {
-      void persistWeek0ResultToDatabase(next.result);
+      const saveResult = await persistWeek0ResultToDatabase(next.result);
+      setSyncMessage(saveResult.success ? null : saveResult.message);
     }
 
     setView('module-result');
@@ -391,6 +393,11 @@ export default function Week0AssessmentExperience() {
             <p className="ffl-sceneSelectSubtitle" style={{ marginTop: '0.75rem' }}>
               {WEEK_0_MODULE_RESULT.copy}
             </p>
+            {syncMessage ? (
+              <p className="ffl-week0-saveWarning" role="alert">
+                {syncMessage}
+              </p>
+            ) : null}
           </div>
           <div className="ffl-stepActions">
             <button type="button" className="ffl-ctaPrimary" onClick={goHub}>
@@ -411,6 +418,11 @@ export default function Week0AssessmentExperience() {
             <div className="ffl-week0-finalBadge" role="status">
               ✦ Focus Flame Baseline Saved
             </div>
+            {syncMessage ? (
+              <p className="ffl-week0-saveWarning" role="alert">
+                {syncMessage}
+              </p>
+            ) : null}
           </div>
           <div className="ffl-stepActions">
             <button

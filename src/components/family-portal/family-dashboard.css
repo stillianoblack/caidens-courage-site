@@ -157,6 +157,184 @@
   border-color: rgba(36, 62, 112, 0.35);
 }
 
+.family-accessCodeCard {
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 192, 106, 0.45);
+  background: linear-gradient(180deg, #fff 0%, #fffaf5 100%);
+}
+
+.family-accessCodeCard--compact {
+  padding: 0.875rem 1rem;
+}
+
+.family-accessCodeTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-accessCodeCopy {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.family-accessCodeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.family-accessCodeValue {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--family-navy-deep);
+  word-break: break-all;
+}
+
+.family-accessCodeBtn {
+  flex-shrink: 0;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  background: var(--family-navy);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-accessCodeBtn:hover {
+  background: var(--family-navy-deep);
+}
+
+.family-childrenList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.family-childCard {
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--family-border);
+  background: #fff;
+}
+
+.family-childCardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.family-childName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-childStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.family-childStatus--complete {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.family-childStatus--progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.family-childStatus--pending {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.family-childMeta {
+  margin: 0;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.family-childMetaRow {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.family-childMetaRow dt {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.family-childMetaRow dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.family-childProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.family-childProgressTrack {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+}
+
+.family-childProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--family-gold) 0%, var(--family-gold-dark) 100%);
+}
+
+.family-childProgressPct {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.family-childrenSkeleton {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .family-railActiveDot {
   display: inline-flex;
   align-items: center;
@@ -1399,7 +1577,40 @@ a.family-dash-card:hover {
     width: 4rem;
     height: 4rem;
   }
+}
 
+/* Family Results */
+.family-resultsTableWrap {
+  overflow-x: auto;
+}
+
+.family-resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.family-resultsTable th,
+.family-resultsTable td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--family-border, rgba(36, 62, 112, 0.12));
+}
+
+.family-resultsTable th {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.family-resultsName {
+  font-weight: 700;
+  color: var(--family-navy-deep);
+}
+
+@media (max-width: 767px) {
   .family-nextStepHero {
     flex-direction: column;
     align-items: center;

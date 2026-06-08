@@ -21,6 +21,7 @@ export const FAMILY_PORTAL_TITLE = 'Family Portal';
 
 export type FamilySidebarNavId =
   | 'overview'
+  | 'results'
   | 'continue-learning'
   | 'character-hub'
   | 'downloads'
@@ -91,6 +92,7 @@ export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> 
 
 export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
   overview: 'Home',
+  results: 'Results',
   'continue-learning': 'Weekly Adventures',
   'character-hub': 'Character Hub',
   downloads: 'Downloads',

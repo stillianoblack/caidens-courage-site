@@ -23,6 +23,13 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
           <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.75" />
         </svg>
       );
+    case 'results':
+      return (
+        <svg {...common}>
+          <path d="M5 19V5M12 19V9M19 19V13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <path d="M4 5h16" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      );
     case 'continue-learning':
       return (
         <svg {...common}>

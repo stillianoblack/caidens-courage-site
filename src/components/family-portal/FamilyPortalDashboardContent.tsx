@@ -7,6 +7,7 @@ import FamilyDownloadsPanel from './panels/FamilyDownloadsPanel';
 import FamilyGalleryPanel from './panels/FamilyGalleryPanel';
 import FamilyGuidePanel from './panels/FamilyGuidePanel';
 import FamilyOverviewPanel from './panels/FamilyOverviewPanel';
+import FamilyResultsPanel from './panels/FamilyResultsPanel';
 import type { FamilySidebarNavId } from '../../data/familyPortalContent';
 import { resolvePortalNavId } from '../../lib/familyPortalNav';
 
@@ -28,6 +29,8 @@ function renderActivePanel(activeNav: FamilySidebarNavId): React.ReactNode {
       return <FamilyCertificatesPanel />;
     case 'guide':
       return <FamilyGuidePanel />;
+    case 'results':
+      return <FamilyResultsPanel />;
     case 'overview':
     default:
       return <FamilyOverviewPanel />;

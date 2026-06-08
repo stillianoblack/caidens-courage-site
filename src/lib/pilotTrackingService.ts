@@ -21,6 +21,10 @@ import {
   type LocalModuleResultRecord,
   type LocalParticipantRecord,
 } from './pilotTrackingLocalStorage';
+import {
+  logTrackingSave,
+  logTrackingSaveError,
+} from './trackingSaveLog';
 
 export type TrackingSubmitResult = {
   success: boolean;
@@ -79,14 +83,6 @@ export type AssessmentResultV2Payload = {
   answers_json?: Record<string, unknown>;
   completed_at?: string;
 };
-
-function logParticipantSaved(participantId: string, programCode: string): void {
-  console.log('[PARTICIPANT_SAVED]', participantId, programCode);
-}
-
-function logTrackingSaveFailed(context: string, detail?: unknown): void {
-  console.warn('[TRACKING_SAVE_FAILED]', context, detail ?? '');
-}
 
 function resolveProgramName(name?: string): string | undefined {
   const program = readActivePilotProgram();
@@ -158,8 +154,8 @@ export async function findOrCreateParticipant(
   };
 
   if (isStudentRole(payload.role)) {
-    if (!payload.nickname?.trim()) {
-      throw new Error('Student participants require nickname.');
+    if (!payload.nickname?.trim() && !payload.first_name?.trim()) {
+      throw new Error('Student participants require nickname or first_name.');
     }
   } else if (!payload.first_name?.trim() || !payload.email?.trim()) {
     throw new Error('Adult participants require first_name and email.');
@@ -168,6 +164,7 @@ export async function findOrCreateParticipant(
   const existingLocal = isStudentRole(payload.role)
     ? findLocalStudentParticipant({
         nickname: payload.nickname ?? '',
+        firstName: payload.first_name,
         role: payload.role,
         programCode,
         groupName: payload.group_name,
@@ -186,9 +183,14 @@ export async function findOrCreateParticipant(
       let query = supabase.from('participants').select('id').eq('program_code', programCode);
 
       if (isStudentRole(payload.role)) {
-        query = query
-          .eq('role', 'student')
-          .eq('nickname', payload.nickname?.trim() ?? '');
+        query = query.eq('role', 'student');
+        const nickname = payload.nickname?.trim();
+        const firstName = payload.first_name?.trim();
+        if (nickname) {
+          query = query.eq('nickname', nickname);
+        } else if (firstName) {
+          query = query.eq('first_name', firstName);
+        }
         query = applyStudentGroupFilter(query, payload.group_name);
       } else {
         query = query
@@ -203,11 +205,53 @@ export async function findOrCreateParticipant(
       );
 
       if (selectError) {
-        logTrackingSaveFailed('participants lookup', selectError.message);
+        logTrackingSaveError({
+          table: 'participants',
+          operation: 'select',
+          participantName: payload.nickname || payload.first_name,
+          role: payload.role,
+          programCode,
+          error: selectError,
+        });
       } else if (existingRows && existingRows.length > 0) {
         const participantId = existingRows[0].id as string;
+        const updatePayload: Record<string, unknown> = {
+          updated_at: new Date().toISOString(),
+        };
+        if (payload.nickname?.trim()) updatePayload.nickname = payload.nickname.trim();
+        if (payload.first_name?.trim()) updatePayload.first_name = payload.first_name.trim();
+        if (programName) updatePayload.program_name = programName;
+        if (payload.group_name?.trim()) updatePayload.group_name = payload.group_name.trim();
+
+        const { error: updateError } = await withTimeout(
+          supabase.from('participants').update(updatePayload).eq('id', participantId),
+          DASHBOARD_FETCH_TIMEOUT_MS,
+          'participant_update',
+        );
+
+        if (updateError) {
+          logTrackingSaveError({
+            table: 'participants',
+            operation: 'update',
+            participantId,
+            participantName: payload.nickname || payload.first_name,
+            role: payload.role,
+            programCode,
+            error: updateError,
+          });
+        } else {
+          logTrackingSave({
+            table: 'participants',
+            operation: 'update',
+            participantId,
+            participantName: payload.nickname || payload.first_name,
+            role: payload.role,
+            programCode,
+            response: { updated: true },
+          });
+        }
+
         saveLocalParticipant(participantToLocalRow(normalizedPayload, participantId, programCode));
-        logParticipantSaved(participantId, programCode);
         return { participantId, source: 'supabase' };
       }
 
@@ -238,18 +282,48 @@ export async function findOrCreateParticipant(
       if (!error && data?.id) {
         const participantId = data.id as string;
         saveLocalParticipant(participantToLocalRow(normalizedPayload, participantId, programCode));
-        logParticipantSaved(participantId, programCode);
+        logTrackingSave({
+          table: 'participants',
+          operation: 'insert',
+          participantId,
+          participantName: payload.nickname || payload.first_name,
+          role: payload.role,
+          programCode,
+          response: data,
+        });
         return { participantId, source: 'supabase' };
       }
 
-      logTrackingSaveFailed('participants insert', error?.message ?? error);
+      logTrackingSaveError({
+        table: 'participants',
+        operation: 'insert',
+        participantName: payload.nickname || payload.first_name,
+        role: payload.role,
+        programCode,
+        error,
+      });
     } catch (err) {
-      logTrackingSaveFailed('participants', err);
+      logTrackingSaveError({
+        table: 'participants',
+        operation: 'insert',
+        participantName: payload.nickname || payload.first_name,
+        role: payload.role,
+        programCode,
+        error: err,
+      });
     }
   }
 
   if (existingLocal) {
-    logTrackingSaveFailed('participants using cached local id', existingLocal.id);
+    logTrackingSaveError({
+      table: 'participants',
+      operation: 'insert',
+      participantId: existingLocal.id,
+      participantName: payload.nickname || payload.first_name,
+      role: payload.role,
+      programCode,
+      error: 'using cached local participant id',
+    });
     return { participantId: existingLocal.id, source: 'local' };
   }
 
@@ -267,7 +341,15 @@ export async function findOrCreateParticipant(
     email_opt_in: payload.email_opt_in,
   });
 
-  logTrackingSaveFailed('participants saved locally only', localParticipant.id);
+  logTrackingSaveError({
+    table: 'participants',
+    operation: 'insert',
+    participantId: localParticipant.id,
+    participantName: payload.nickname || payload.first_name,
+    role: payload.role,
+    programCode,
+    error: 'saved locally only',
+  });
   return { participantId: localParticipant.id, source: 'local' };
 }
 
@@ -307,10 +389,15 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 
   if (isSupabaseConfigured() && supabase) {
     if (!isSupabaseParticipantId(payload.participant_id)) {
-      logTrackingSaveFailed(
-        'module_results skipped: participant not synced to Supabase',
-        payload.participant_id,
-      );
+      logTrackingSaveError({
+        table: 'module_results',
+        operation: 'insert',
+        participantId: payload.participant_id,
+        role: payload.role,
+        programCode,
+        assessmentType: payload.module_id,
+        error: 'participant not synced to Supabase',
+      });
     } else {
       try {
         const insertPayload = {
@@ -339,6 +426,15 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 
         if (!error && data?.id) {
           const localRecord = appendLocalModuleResult(localPayload);
+          logTrackingSave({
+            table: 'module_results',
+            operation: 'insert',
+            participantId: payload.participant_id,
+            role: payload.role,
+            programCode,
+            assessmentType: payload.module_id,
+            response: data,
+          });
           return {
             success: true,
             source: 'supabase',
@@ -347,9 +443,26 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
           };
         }
 
-        logTrackingSaveFailed('module_results insert', error?.message ?? error);
+        logTrackingSaveError({
+          table: 'module_results',
+          operation: 'insert',
+          participantId: payload.participant_id,
+          role: payload.role,
+          programCode,
+          assessmentType: payload.module_id,
+          response: data,
+          error,
+        });
       } catch (err) {
-        logTrackingSaveFailed('module_results', err);
+        logTrackingSaveError({
+          table: 'module_results',
+          operation: 'insert',
+          participantId: payload.participant_id,
+          role: payload.role,
+          programCode,
+          assessmentType: payload.module_id,
+          error: err,
+        });
       }
     }
   }
@@ -403,10 +516,15 @@ export async function saveAssessmentResult(
 
   if (isSupabaseConfigured() && supabase) {
     if (!isSupabaseParticipantId(payload.participant_id)) {
-      logTrackingSaveFailed(
-        'assessment_results_v2 skipped: participant not synced to Supabase',
-        payload.participant_id,
-      );
+      logTrackingSaveError({
+        table: 'assessment_results_v2',
+        operation: 'insert',
+        participantId: payload.participant_id,
+        role: payload.role,
+        programCode,
+        assessmentType: payload.assessment_type,
+        error: 'participant not synced to Supabase',
+      });
     } else {
       try {
         const insertPayload = {
@@ -435,6 +553,15 @@ export async function saveAssessmentResult(
 
         if (!error && data?.id) {
           const localRecord = appendLocalAssessmentV2Result(localPayload);
+          logTrackingSave({
+            table: 'assessment_results_v2',
+            operation: 'insert',
+            participantId: payload.participant_id,
+            role: payload.role,
+            programCode,
+            assessmentType: payload.assessment_type,
+            response: data,
+          });
           return {
             success: true,
             source: 'supabase',
@@ -443,9 +570,26 @@ export async function saveAssessmentResult(
           };
         }
 
-        logTrackingSaveFailed('assessment_results_v2 insert', error?.message ?? error);
+        logTrackingSaveError({
+          table: 'assessment_results_v2',
+          operation: 'insert',
+          participantId: payload.participant_id,
+          role: payload.role,
+          programCode,
+          assessmentType: payload.assessment_type,
+          response: data,
+          error,
+        });
       } catch (err) {
-        logTrackingSaveFailed('assessment_results_v2', err);
+        logTrackingSaveError({
+          table: 'assessment_results_v2',
+          operation: 'insert',
+          participantId: payload.participant_id,
+          role: payload.role,
+          programCode,
+          assessmentType: payload.assessment_type,
+          error: err,
+        });
       }
     }
   }
@@ -486,6 +630,45 @@ export async function fetchModuleResultsFromSupabase(programCode?: string): Prom
     return { results: (data ?? []) as LocalModuleResultRecord[] };
   } catch {
     return { results: loadLocalModuleResults(), error: 'fetch_failed' };
+  }
+}
+
+export type StudentParticipantRecord = {
+  id: string;
+  nickname: string | null;
+  first_name: string | null;
+  role: string;
+  program_code: string;
+  created_at: string;
+};
+
+export async function fetchStudentParticipantsFromSupabase(programCode: string): Promise<{
+  participants: StudentParticipantRecord[];
+  error?: string;
+}> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { participants: [], error: 'missing_env' };
+  }
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('participants')
+        .select('id, nickname, first_name, role, program_code, created_at')
+        .eq('program_code', programCode.trim())
+        .eq('role', 'student')
+        .order('created_at', { ascending: true }),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'student_participants',
+    );
+
+    if (error) {
+      return { participants: [], error: error.message };
+    }
+
+    return { participants: (data ?? []) as StudentParticipantRecord[] };
+  } catch {
+    return { participants: [], error: 'fetch_failed' };
   }
 }
 

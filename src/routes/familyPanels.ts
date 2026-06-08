@@ -10,5 +10,6 @@ export { default as FamilyDownloadsPanel } from '../components/family-portal/pan
 export { default as FamilyGalleryPanel } from '../components/family-portal/panels/FamilyGalleryPanel';
 export { default as FamilyCertificatesPanel } from '../components/family-portal/panels/FamilyCertificatesPanel';
 export { default as FamilyGuidePanel } from '../components/family-portal/panels/FamilyGuidePanel';
+export { default as FamilyResultsPanel } from '../components/family-portal/panels/FamilyResultsPanel';
 export { default as FamilyBaselineCheckPanel } from '../components/family-portal/panels/FamilyBaselineCheckPanel';
 export { default as FamilyAdultAssessmentPanel } from '../components/family-portal/panels/FamilyAdultAssessmentPanel';

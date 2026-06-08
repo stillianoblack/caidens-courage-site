@@ -18,10 +18,8 @@ export default function PortalHeader({
 }: PortalHeaderProps) {
   return (
     <header className="portal-header">
-      <div className="portal-headerLeft">
+      <div className="portal-headerLead">
         <h1 className="portal-headerTitle">{pageTitle}</h1>
-      </div>
-      <div className="portal-headerRight">
         {contextTitle || contextSubtitle ? (
           <div className="portal-headerContext">
             {contextTitle ? <p className="portal-headerContextTitle">{contextTitle}</p> : null}
@@ -30,9 +28,9 @@ export default function PortalHeader({
             ) : null}
           </div>
         ) : null}
-        <PortalResourceSearch portal={portal} />
-        <PortalSwitcherDropdown />
       </div>
+      <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
+      <PortalSwitcherDropdown className="portal-headerSwitcher" />
     </header>
   );
 }

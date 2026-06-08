@@ -90,9 +90,11 @@ export default function B4BaselineResults({
           <strong>Saved for:</strong> {record.nickname}
         </p>
       ) : null}
-      <p className="bbc-deviceNote" role="status">
-        {syncMessage ?? 'Local testing mode: results are saved on this device.'}
-      </p>
+      {syncMessage ? (
+        <p className="bbc-deviceNote" role="status">
+          {syncMessage}
+        </p>
+      ) : null}
 
       <div className="bbc-finalBadge" role="status">
         ✦ Focus Flame Baseline Saved

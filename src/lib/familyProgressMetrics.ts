@@ -121,6 +121,7 @@ function categoryPct(
 function buildRecentActivity(
   modules: LocalModuleResultRecord[],
   baselines: B4BaselineCheckRecord[],
+  assessments: LocalAssessmentV2Record[] = [],
 ): string[] {
   const moduleItems = modules
     .slice()
@@ -128,9 +129,37 @@ function buildRecentActivity(
     .slice(0, 5)
     .map((row) => `${row.module_title} completed`);
 
+  const v2Items = assessments
+    .filter((row) => row.role === 'student')
+    .slice()
+    .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+    .slice(0, 3)
+    .map((row) => {
+      const answers = row.answers_json as { nickname?: string } | undefined;
+      const name = answers?.nickname?.trim();
+      const label =
+        row.assessment_type === 'baseline'
+          ? 'B-4 Check-In'
+          : row.assessment_type === 'final'
+            ? 'Growth Check'
+            : row.assessment_type.replace(/_/g, ' ');
+      return name ? `${name} completed ${label}` : `${label} completed`;
+    });
+
+  const coveredNames = new Set(
+    assessments
+      .filter((row) => row.role === 'student' && row.assessment_type === 'baseline')
+      .map((row) => {
+        const answers = row.answers_json as { nickname?: string } | undefined;
+        return answers?.nickname?.trim().toLowerCase() ?? '';
+      })
+      .filter(Boolean),
+  );
+
   const baselineItems = baselines
     .slice()
     .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
+    .filter((row) => !coveredNames.has(row.nickname.trim().toLowerCase()))
     .slice(0, 3)
     .map((row) =>
       row.nickname
@@ -138,7 +167,7 @@ function buildRecentActivity(
         : 'B-4 Check-In completed',
     );
 
-  return [...moduleItems, ...baselineItems].slice(0, 6);
+  return [...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);
 }
 
 function buildFocusSkills(
@@ -146,17 +175,6 @@ function buildFocusSkills(
   baselines: B4BaselineCheckRecord[],
   assessments: LocalAssessmentV2Record[],
 ): FamilyFocusSkill[] {
-  const latestBaseline = baselines[0];
-  if (latestBaseline) {
-    const growth = formatGrowthFromRecord(latestBaseline);
-    return [
-      { label: 'Executive Function', value: growth.focus },
-      { label: 'Self-Regulation', value: growth.confidence },
-      { label: 'Focus Recovery', value: growth.reading },
-      { label: 'Overall', value: growth.overall },
-    ];
-  }
-
   const studentAssessments = assessments.filter((row) => row.role === 'student');
   if (studentAssessments.length > 0) {
     const avg = (pick: (row: LocalAssessmentV2Record) => number | undefined) => {
@@ -177,6 +195,17 @@ function buildFocusSkills(
       { label: 'Self-Regulation', value: confidence },
       { label: 'Focus Recovery', value: reading },
       { label: 'Overall', value: overall },
+    ];
+  }
+
+  const latestBaseline = baselines[0];
+  if (latestBaseline) {
+    const growth = formatGrowthFromRecord(latestBaseline);
+    return [
+      { label: 'Executive Function', value: growth.focus },
+      { label: 'Self-Regulation', value: growth.confidence },
+      { label: 'Focus Recovery', value: growth.reading },
+      { label: 'Overall', value: growth.overall },
     ];
   }
 
@@ -214,9 +243,12 @@ export function computeFamilyProgressSnapshot(input: {
   const assessments = filterAssessmentsForProgram(input.assessmentResults ?? [], input.programCode);
   const baselines = filterBaselinesForProgram(input.legacyBaselines ?? [], input.programCode);
 
-  const hasBaselineFocusMoves = baselines.some((row) =>
-    row.completedModules.includes('focus-moves'),
+  const hasV2StudentBaseline = assessments.some(
+    (row) => row.role === 'student' && row.assessment_type === 'baseline',
   );
+  const hasBaselineFocusMoves =
+    hasV2StudentBaseline ||
+    baselines.some((row) => row.completedModules.includes('focus-moves'));
   const baselineBoost = hasBaselineFocusMoves ? 1 : 0;
 
   const hasActivity =
@@ -261,7 +293,7 @@ export function computeFamilyProgressSnapshot(input: {
       tone,
     })),
     focusSkills: buildFocusSkills(modules, baselines, assessments),
-    recentActivity: buildRecentActivity(modules, baselines),
+    recentActivity: buildRecentActivity(modules, baselines, assessments),
     hasActivity: true,
     overallLabel: overall >= 75 ? 'Strong Progress' : overall >= 25 ? 'Building Momentum' : 'Getting Started',
   };

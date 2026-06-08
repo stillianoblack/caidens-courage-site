@@ -15,22 +15,8 @@
   max-width: 16rem;
 }
 
-@media (max-width: 767px) {
-  .portal-search {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
-  .portal-searchField {
-    max-width: none;
-    width: 100%;
-  }
-
-  .portal-searchMenu {
-    left: 0;
-    right: 0;
-    width: auto;
-  }
+.portal-searchField[hidden] {
+  display: none;
 }
 
 .portal-search--pilot .portal-searchField {
@@ -56,6 +42,100 @@
   color: #243e70;
   width: 100%;
   min-width: 0;
+}
+
+.portal-searchClose {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.72);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.portal-searchToggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: #fff;
+  color: rgba(36, 62, 112, 0.72);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.portal-searchToggleLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portal-search--mobileExpanded .portal-searchField {
+  animation: portalSearchSlideIn 0.2s ease;
+}
+
+@keyframes portalSearchSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .portal-search--family .portal-searchToggle,
+  .portal-search--pilot .portal-searchToggle {
+    display: inline-flex;
+  }
+
+  .portal-search.portal-headerSearch {
+    flex: none;
+    width: 100%;
+    max-width: none;
+  }
+
+  .portal-search--mobileExpanded .portal-searchField,
+  .portal-searchField:not([hidden]) {
+    display: flex;
+    max-width: none;
+    width: 100%;
+  }
+
+  .portal-searchMenu {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .portal-searchToggle {
+    display: none !important;
+  }
+
+  .portal-searchField[hidden] {
+    display: flex;
+  }
+
+  .portal-searchClose {
+    display: none;
+  }
 }
 
 .portal-searchMenu {

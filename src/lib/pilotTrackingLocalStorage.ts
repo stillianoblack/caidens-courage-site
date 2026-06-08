@@ -100,22 +100,29 @@ export function saveLocalParticipant(record: LocalParticipantRecord): LocalParti
 
 export function findLocalStudentParticipant(input: {
   nickname: string;
+  firstName?: string;
   role: string;
   programCode: string;
   groupName?: string;
 }): LocalParticipantRecord | null {
   const nickname = input.nickname.trim().toLowerCase();
+  const firstName = (input.firstName ?? '').trim().toLowerCase();
   const programCode = input.programCode.trim().toUpperCase();
   const groupName = (input.groupName ?? '').trim().toLowerCase();
 
   return (
-    loadLocalParticipants().find(
-      (row) =>
-        row.role === input.role &&
-        row.program_code.trim().toUpperCase() === programCode &&
-        (row.nickname ?? '').trim().toLowerCase() === nickname &&
-        (row.group_name ?? '').trim().toLowerCase() === groupName,
-    ) ?? null
+    loadLocalParticipants().find((row) => {
+      if (row.role !== input.role) return false;
+      if (row.program_code.trim().toUpperCase() !== programCode) return false;
+      if ((row.group_name ?? '').trim().toLowerCase() !== groupName) return false;
+      if (nickname) {
+        return (row.nickname ?? '').trim().toLowerCase() === nickname;
+      }
+      if (firstName) {
+        return (row.first_name ?? '').trim().toLowerCase() === firstName;
+      }
+      return false;
+    }) ?? null
   );
 }
 

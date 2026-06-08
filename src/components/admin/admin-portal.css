@@ -325,7 +325,79 @@
   }
 }
 
+.adminPortal-reassignCard {
+  margin-bottom: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 1.25rem;
+  padding: 1.75rem 1.5rem 2rem;
+  box-shadow: 0 18px 40px -24px rgba(36, 62, 112, 0.35);
+}
+
+.adminPortal-reassignGrid {
+  display: grid;
+  gap: 0.875rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.adminPortal-reassignActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.adminPortal-reassignPreview,
+.adminPortal-reassignSqlWrap {
+  margin-top: 1rem;
+}
+
+.adminPortal-reassignPreviewTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.adminPortal-reassignLog {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.adminPortal-reassignTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.adminPortal-reassignTable th,
+.adminPortal-reassignTable td {
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  text-align: left;
+}
+
+.adminPortal-reassignSql {
+  width: 100%;
+  min-height: 12rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  border-radius: 0.625rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #1a2f52;
+  background: #f8fafc;
+}
+
 @media (max-width: 640px) {
+  .adminPortal-reassignGrid {
+    grid-template-columns: 1fr;
+  }
   .adminPortal-main {
     margin-top: -1rem;
   }

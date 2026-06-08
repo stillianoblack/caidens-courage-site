@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   CHARACTER_IMAGE_PATHS,
   FAMILY_NEXT_STEP,
-  FAMILY_OVERVIEW_KPIS,
 } from '../../../data/familyPortalContent';
+import { useFamilyChildrenMetrics } from '../../../hooks/useFamilyChildrenMetrics';
 import { useFamilyProgressMetrics } from '../../../hooks/useFamilyProgressMetrics';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
+import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
+import FamilyChildrenSection from '../FamilyChildrenSection';
 import FamilyValueCards from '../FamilyValueCards';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
 import '../../focus-skills/focus-skills-snapshot.css';
@@ -16,10 +18,33 @@ export default function FamilyOverviewPanel() {
   const location = useLocation();
   const programCode = readActivePilotProgram()?.programCode;
   const { metrics, loading } = useFamilyProgressMetrics(programCode);
+  const { children, loading: childrenLoading } = useFamilyChildrenMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
 
-  const kpis = FAMILY_OVERVIEW_KPIS.map((kpi) =>
-    kpi.label === 'Progress' ? { ...kpi, value: metrics.overallLabel } : kpi,
+  const overallPct = metrics.rows.find((row) => row.tone === 'overall')?.pct ?? 0;
+  const assessmentsComplete = children.filter((child) => child.baselineStatus === 'Complete').length;
+
+  const kpis = useMemo(
+    () => [
+      {
+        label: 'Children',
+        value: childrenLoading ? '—' : String(children.length),
+      },
+      {
+        label: 'Assessments',
+        value: loading || childrenLoading ? '—' : metrics.hasActivity ? String(assessmentsComplete) : '0',
+      },
+      {
+        label: 'Overall Progress',
+        value: loading ? '—' : metrics.hasActivity ? `${overallPct}%` : '0%',
+      },
+      {
+        label: 'Status',
+        value: loading ? '—' : metrics.overallLabel,
+        highlight: true as const,
+      },
+    ],
+    [assessmentsComplete, children.length, childrenLoading, loading, metrics.hasActivity, metrics.overallLabel, overallPct],
   );
 
   return (
@@ -36,7 +61,11 @@ export default function FamilyOverviewPanel() {
         ))}
       </div>
 
+      <FamilyAccessCodeCard />
+
       <FamilyValueCards />
+
+      <FamilyChildrenSection childSummaries={children} loading={childrenLoading} />
 
       <section className="family-panelBlock">
         <div className="family-panelBlockHead">

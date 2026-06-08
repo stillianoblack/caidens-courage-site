@@ -4,12 +4,11 @@ import {
   type BaselineModuleId,
 } from '../data/b4BaselineCheckContent';
 import {
-  insertAssessmentResult,
+  saveStudentBaselineToSupabase,
   type BaselineSubmitResult,
 } from './assessmentResultsService';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveTrackingProgramCode } from './activeProgramContext';
-import { recordFormalAssessmentCompletion } from './recordInteractiveCompletion';
 
 const STORAGE_KEY = 'caidens-courage-b4-baseline-check';
 const RESULTS_ARCHIVE_KEY = 'caidens-courage-b4-baseline-results-archive';
@@ -273,48 +272,7 @@ export async function submitBaselineResults(
     groupName: activeProgram?.groupName || result.groupName,
   };
 
-  const trackingResult = await recordFormalAssessmentCompletion({
-    assessmentType: 'baseline',
-    role: 'student',
-    participant: {
-      nickname: normalizedResult.nickname,
-      program_code: programCode,
-      group_name: normalizedResult.groupName || undefined,
-    },
-    reading_score: normalizedResult.readingScore,
-    focus_score: normalizedResult.focusMovesScore,
-    confidence_score: normalizedResult.feelingsScore,
-    total_score:
-      normalizedResult.readingScore +
-      normalizedResult.focusMovesScore +
-      normalizedResult.feelingsScore,
-    max_score: 60,
-    answers_json: {
-      completedModules: normalizedResult.completedModules,
-      feelingsScore: normalizedResult.feelingsScore,
-      readingScore: normalizedResult.readingScore,
-      focusMovesScore: normalizedResult.focusMovesScore,
-    },
-    completed_at: normalizedResult.completedAt,
-  });
-
-  const legacyResult = await insertAssessmentResult(normalizedResult);
-
-  if (trackingResult.warning && !legacyResult.success) {
-    return {
-      success: false,
-      message: trackingResult.warning,
-    };
-  }
-
-  if (trackingResult.warning) {
-    return {
-      success: legacyResult.success,
-      message: `${legacyResult.message} ${trackingResult.warning}`.trim(),
-    };
-  }
-
-  return legacyResult;
+  return saveStudentBaselineToSupabase(normalizedResult);
 }
 
 export async function persistB4BaselineToDatabase(

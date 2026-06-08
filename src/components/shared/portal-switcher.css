@@ -78,3 +78,45 @@
 .portal-switcherOption--signOut {
   color: #9a3412;
 }
+
+.portal-switcherCodeBlock {
+  padding: 0.5rem 0.625rem 0.625rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  margin-bottom: 0.25rem;
+}
+
+.portal-switcherCodeLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.portal-switcherCodeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.portal-switcherCodeValue {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--pilot-navy-deep, #243e70);
+  word-break: break-all;
+}
+
+.portal-switcherCodeCopy {
+  flex-shrink: 0;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  border-radius: 0.375rem;
+  background: #fff;
+  color: var(--pilot-navy-deep, #243e70);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}

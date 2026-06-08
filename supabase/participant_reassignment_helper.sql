@@ -1,0 +1,20 @@
+-- Participant reassignment helper (manual execution only)
+-- Use the Pilot Admin portal to preview counts and generate SQL, then run here.
+--
+-- Updates program_code across:
+--   participants
+--   module_results
+--   assessment_results_v2
+--   assessment_results
+--   student_gallery_items
+--
+-- Example:
+--   old_program_code = 'CAMP-EXAMPLE-2026'
+--   new_program_code = 'FAMILY-SMITH-2026'
+--   participant_id   = 'uuid-here' (preferred)
+--
+-- Safety: always preview row counts in a transaction before COMMIT.
+
+-- Optional: allow service-role updates (run only if you need server-side reassignment later).
+-- alter table public.participants enable row level security;
+-- create policy "participants_service_update" on public.participants for update to service_role using (true);

@@ -1,0 +1,175 @@
+.family-pricingModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(26, 47, 82, 0.55);
+}
+
+.family-pricingModal {
+  position: relative;
+  width: min(100%, 42rem);
+  max-height: min(92dvh, 48rem);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.25rem 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 48px -24px rgba(26, 47, 82, 0.5);
+  overflow: hidden;
+}
+
+.family-pricingModalClose {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--family-navy-deep, #1a2f52);
+  cursor: pointer;
+}
+
+.family-pricingModalClose:hover {
+  border-color: rgba(36, 62, 112, 0.3);
+  background: #f8fafc;
+}
+
+.family-pricingModalClose svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.family-pricingModalBody {
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.family-pricingModalTitle {
+  margin: 0 2.5rem 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.family-pricingModalCopy {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.family-pricingGrid {
+  display: grid;
+  gap: 0.875rem;
+  margin-bottom: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .family-pricingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.family-pricingCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.family-pricingCard--featured {
+  border-color: rgba(229, 192, 106, 0.55);
+  box-shadow: 0 12px 28px -18px rgba(36, 62, 112, 0.25);
+}
+
+.family-pricingBadge {
+  align-self: flex-start;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.family-pricingCardTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.family-pricingCardPrice {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--family-navy, #243e70);
+}
+
+.family-pricingIncludes {
+  margin: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.family-pricingCardCta {
+  margin-top: auto;
+  display: block;
+  padding: 0.65rem 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--family-navy, #243e70);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.family-pricingModalSecondary {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  background: #fff;
+  color: var(--family-navy, #243e70);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+@media (max-width: 639px) {
+  .family-pricingModalBackdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .family-pricingModal {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 1rem 1rem 0 0;
+    padding: 1rem 1rem 0.875rem;
+  }
+}
