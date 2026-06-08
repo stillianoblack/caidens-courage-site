@@ -9,13 +9,13 @@ export class FetchTimeoutError extends Error {
 }
 
 export function withTimeout<T>(
-  promise: Promise<T>,
+  promise: PromiseLike<T>,
   ms: number = DASHBOARD_FETCH_TIMEOUT_MS,
   label = 'fetch',
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new FetchTimeoutError(label)), ms);
-    promise.then(
+    Promise.resolve(promise).then(
       (value) => {
         clearTimeout(timer);
         resolve(value);

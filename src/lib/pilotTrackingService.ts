@@ -166,7 +166,7 @@ export async function findOrCreateParticipant(
         programCode,
       });
 
-  if (existingLocal) {
+  if (existingLocal && (!isSupabaseConfigured() || !supabase)) {
     return { participantId: existingLocal.id, source: 'local' };
   }
 
@@ -187,7 +187,11 @@ export async function findOrCreateParticipant(
           .eq('first_name', payload.first_name?.trim() ?? '');
       }
 
-      const { data: existingRows, error: selectError } = await query.limit(1);
+      const { data: existingRows, error: selectError } = await withTimeout(
+        query.limit(1),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'participant_lookup',
+      );
 
       if (!selectError && existingRows && existingRows.length > 0) {
         const participantId = existingRows[0].id as string;
@@ -211,11 +215,11 @@ export async function findOrCreateParticipant(
         updated_at: new Date().toISOString(),
       };
 
-      const { data, error } = await supabase
-        .from('participants')
-        .insert(insertPayload)
-        .select('id')
-        .single();
+      const { data, error } = await withTimeout(
+        supabase.from('participants').insert(insertPayload).select('id').single(),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'participant_insert',
+      );
 
       if (!error && data?.id) {
         const participantId = data.id as string;
@@ -293,11 +297,11 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
         completed_at: completedAt,
       };
 
-      const { data, error } = await supabase
-        .from('module_results')
-        .insert(insertPayload)
-        .select('id')
-        .single();
+      const { data, error } = await withTimeout(
+        supabase.from('module_results').insert(insertPayload).select('id').single(),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'module_result_insert',
+      );
 
       if (!error) {
         devLog('TRACKING module result saved');
@@ -374,11 +378,11 @@ export async function saveAssessmentResult(
         completed_at: completedAt,
       };
 
-      const { data, error } = await supabase
-        .from('assessment_results_v2')
-        .insert(insertPayload)
-        .select('id')
-        .single();
+      const { data, error } = await withTimeout(
+        supabase.from('assessment_results_v2').insert(insertPayload).select('id').single(),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'assessment_result_insert',
+      );
 
       if (!error) {
         devLog('TRACKING assessment result saved');

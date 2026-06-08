@@ -80,3 +80,43 @@ create index if not exists assessment_results_v2_participant_id_idx
   on public.assessment_results_v2 (participant_id);
 create index if not exists assessment_results_v2_completed_at_idx
   on public.assessment_results_v2 (completed_at desc);
+
+alter table public.participants enable row level security;
+alter table public.module_results enable row level security;
+alter table public.assessment_results_v2 enable row level security;
+
+drop policy if exists "participants_anon_insert" on public.participants;
+create policy "participants_anon_insert"
+  on public.participants for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "participants_anon_select" on public.participants;
+create policy "participants_anon_select"
+  on public.participants for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "module_results_anon_insert" on public.module_results;
+create policy "module_results_anon_insert"
+  on public.module_results for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "module_results_anon_select" on public.module_results;
+create policy "module_results_anon_select"
+  on public.module_results for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "assessment_results_v2_anon_insert" on public.assessment_results_v2;
+create policy "assessment_results_v2_anon_insert"
+  on public.assessment_results_v2 for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "assessment_results_v2_anon_select" on public.assessment_results_v2;
+create policy "assessment_results_v2_anon_select"
+  on public.assessment_results_v2 for select
+  to anon, authenticated
+  using (true);
