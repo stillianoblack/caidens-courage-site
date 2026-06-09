@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
+import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildNickname } from '../../config/activeChildNickname';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
@@ -137,9 +138,10 @@ export default function B4BaselineCheckFlow({
   const handleStudentSubmit = (values: { nickname: string; programCode: string; groupName: string }) => {
     playSelect();
     const activeProgram = readActivePilotProgram();
+    const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
     const next = saveB4BaselineStudentProfile({
       nickname: values.nickname,
-      programCode: activeProgram?.programCode || values.programCode,
+      programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
       groupName: activeProgram?.groupName || values.groupName,
     });
     setHubState(next);

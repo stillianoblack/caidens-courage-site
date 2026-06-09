@@ -13,11 +13,12 @@ import {
   writeActiveFamilyContext,
   writeActivePortalRole,
 } from '../config/portalContext';
-import { readLastPilotProgram, type LastPilotProgram } from '../config/lastPilotProgram';
+import type { LastPilotProgram } from '../config/lastPilotProgram';
+import { readLastPilotProgramForRestore } from './portalProgramAssignment';
 
 /** True when a prior portal return snapshot exists in localStorage. */
 export function hasSavedPortalReturnSession(): boolean {
-  return Boolean(readLastPilotProgram());
+  return Boolean(readLastPilotProgramForRestore());
 }
 
 /** True when an unlocked program + role is already loaded in localStorage. */
@@ -40,7 +41,7 @@ export function dismissPortalWelcomeBack(): void {
 
 /** Reload saved program + role from the return snapshot and surface welcome-back UI. */
 export function restoreSavedPortalReturnSession(): LastPilotProgram | null {
-  const saved = readLastPilotProgram();
+  const saved = readLastPilotProgramForRestore();
   if (!saved) return null;
 
   writeActivePilotProgram(saved.program);

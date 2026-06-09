@@ -1,6 +1,10 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { loadB4BaselineState, saveB4BaselineStudentProfile } from './b4BaselineCheckStorage';
+import {
+  logProgramAssignmentAudit,
+  resolveCanonicalProgramCode,
+} from './portalProgramAssignment';
 
 const LEGACY_PROGRAM_CODES = new Set([
   'blueribbon2026',
@@ -22,20 +26,27 @@ function isLegacyProgramCode(code: string): boolean {
 }
 
 /** Active portal session is the only source of truth for program-scoped saves. */
-export function resolveTrackingProgramCode(): string | null {
-  const activeCode = readActivePilotProgram()?.programCode?.trim();
-  if (!activeCode || isLegacyProgramCode(activeCode)) {
+export function resolveTrackingProgramCode(saveContext?: string): string | null {
+  const { code, source } = resolveCanonicalProgramCode();
+  if (!code || isLegacyProgramCode(code)) {
     logTrackingSaveBlocked('Missing active program context');
+    if (saveContext) {
+      logProgramAssignmentAudit({ saveContext });
+    }
     return null;
   }
 
-  logActiveProgramContext(activeCode);
-  return activeCode;
+  logActiveProgramContext(code);
+  if (saveContext) {
+    logProgramAssignmentAudit({ saveContext });
+  } else if (source !== 'active_pilot_program') {
+    console.info('[PROGRAM_ASSIGNMENT_SYNC]', { resolved_code: code, source });
+  }
+  return code;
 }
 
 export function requireActivePilotProgram(): ActivePilotProgram | null {
-  const program = readActivePilotProgram();
-  const code = program?.programCode?.trim();
+  const { code, program } = resolveCanonicalProgramCode();
   if (!program || !code || isLegacyProgramCode(code)) {
     logTrackingSaveBlocked('Missing active program context');
     return null;
@@ -70,8 +81,8 @@ export function syncPortalProgramContext(program: ActivePilotProgram): void {
 }
 
 export function resolveGalleryProgramCode(explicit?: string): string | null {
-  const activeCode = readActivePilotProgram()?.programCode?.trim();
-  const code = activeCode || explicit?.trim() || null;
+  const { code: canonicalCode } = resolveCanonicalProgramCode();
+  const code = canonicalCode || explicit?.trim() || null;
   if (!code || isLegacyProgramCode(code)) {
     logTrackingSaveBlocked('Missing active program context for gallery save');
     return null;

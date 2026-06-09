@@ -18,6 +18,7 @@ import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
+import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -34,6 +35,12 @@ export default function FamilyHubLayout() {
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
   }, []);
+
+  useEffect(() => {
+    if (sessionValid) {
+      ensureFamilyPortalProgramSync();
+    }
+  }, [sessionValid]);
 
   useEffect(() => {
     if (sessionValid) {

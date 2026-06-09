@@ -1,14 +1,21 @@
 import { readActivePilotProgram, writeActivePilotProgram } from '../config/activePilotProgram';
-import { readActiveFamilyContext } from '../config/portalContext';
-import { readLastPilotProgram } from '../config/lastPilotProgram';
+import { readActiveFamilyContext, readActivePortalRole } from '../config/portalContext';
+import { readLastPilotProgramForRole } from '../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../types/pilotProgram';
+import { resolveCanonicalProgramCode } from './portalProgramAssignment';
 
 /** Safely restore activePilotProgram from localStorage when the primary key is missing. */
 export function resolveActivePilotProgram(): ActivePilotProgram | null {
+  const canonical = resolveCanonicalProgramCode();
+  if (canonical.program) {
+    return canonical.program;
+  }
+
   const current = readActivePilotProgram();
   if (current) return current;
 
-  const last = readLastPilotProgram();
+  const role = readActivePortalRole();
+  const last = role ? readLastPilotProgramForRole(role) : null;
   if (last?.program?.programCode && last.program.programName) {
     writeActivePilotProgram(last.program);
     return last.program;

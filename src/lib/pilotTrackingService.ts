@@ -3,6 +3,7 @@ import {
   logTrackingSaveBlocked,
   resolveTrackingProgramCode,
 } from './activeProgramContext';
+import { logProgramAssignmentAudit } from './portalProgramAssignment';
 import type { FormalAssessmentType } from '../types/moduleTracking';
 import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
@@ -152,6 +153,12 @@ export async function findOrCreateParticipant(
     program_code: programCode,
     program_name: programName,
   };
+
+  logProgramAssignmentAudit({
+    saveContext: 'participant_upsert',
+    participantName: payload.nickname || payload.first_name || payload.email,
+    payloadProgramCode: payload.program_code,
+  });
 
   if (isStudentRole(payload.role)) {
     if (!payload.nickname?.trim() && !payload.first_name?.trim()) {
@@ -354,7 +361,7 @@ export async function findOrCreateParticipant(
 }
 
 export async function saveModuleResult(payload: ModuleResultPayload): Promise<TrackingSubmitResult> {
-  const programCode = resolveTrackingProgramCode();
+  const programCode = resolveTrackingProgramCode('module_result_insert');
   if (!programCode) {
     return {
       success: false,
@@ -368,6 +375,12 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
   const attemptNumber =
     payload.attempt_number ??
     countLocalModuleAttempts(payload.participant_id, payload.module_id) + 1;
+
+  logProgramAssignmentAudit({
+    saveContext: 'module_result_insert',
+    participantId: payload.participant_id,
+    payloadProgramCode: payload.program_code,
+  });
 
   const localPayload: Omit<LocalModuleResultRecord, 'id'> = {
     participant_id: payload.participant_id,
@@ -480,7 +493,7 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 export async function saveAssessmentResult(
   payload: AssessmentResultV2Payload,
 ): Promise<TrackingSubmitResult> {
-  const programCode = resolveTrackingProgramCode();
+  const programCode = resolveTrackingProgramCode('assessment_result_v2_insert');
   if (!programCode) {
     return {
       success: false,
@@ -495,6 +508,12 @@ export async function saveAssessmentResult(
     (payload.total_score != null && payload.max_score
       ? computePercent(payload.total_score, payload.max_score)
       : undefined);
+
+  logProgramAssignmentAudit({
+    saveContext: 'assessment_result_v2_insert',
+    participantId: payload.participant_id,
+    payloadProgramCode: payload.program_code,
+  });
 
   const localPayload: Omit<LocalAssessmentV2Record, 'id'> = {
     participant_id: payload.participant_id,
