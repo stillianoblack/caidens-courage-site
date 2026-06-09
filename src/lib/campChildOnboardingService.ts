@@ -1,4 +1,3 @@
-import { readActivePilotProgram } from '../config/activePilotProgram';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isValidSupabaseParticipantId } from './pilotTrackingService';
 import { createCampStudentFamilyLink } from './studentFamilyLinkService';
@@ -44,7 +43,6 @@ async function insertCampChildParticipant(input: {
   const firstName = input.firstName.trim();
   const nickname = input.nickname.trim();
   const campProgramCode = input.campProgramCode.trim();
-  const programName = readActivePilotProgram()?.programName?.trim() || null;
 
   console.info('[CAMP_CHILD_INSERT_START]', {
     first_name: firstName,
@@ -85,12 +83,10 @@ async function insertCampChildParticipant(input: {
         return { error: 'Existing participant id is not a valid UUID.' };
       }
 
-      const updatePayload: Record<string, unknown> = {
-        updated_at: new Date().toISOString(),
+      const updatePayload = {
         nickname,
         first_name: firstName,
       };
-      if (programName) updatePayload.program_name = programName;
 
       const { error: updateError } = await withTimeout(
         supabase.from('participants').update(updatePayload).eq('id', participantId),
@@ -111,13 +107,11 @@ async function insertCampChildParticipant(input: {
     }
 
     const insertPayload = {
+      role: 'student',
       nickname,
       first_name: firstName,
-      role: 'student',
       program_code: campProgramCode,
-      program_name: programName,
       group_name: null,
-      updated_at: new Date().toISOString(),
     };
 
     const { data, error: insertError } = await withTimeout(
