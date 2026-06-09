@@ -19,6 +19,7 @@ import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
+import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function FamilyHubLayout() {
   useEffect(() => {
     if (sessionValid) {
       ensureFamilyPortalProgramSync();
+      prefetchFamilyPortalRoutes();
     }
   }, [sessionValid]);
 

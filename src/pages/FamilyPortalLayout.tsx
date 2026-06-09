@@ -16,6 +16,7 @@ import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { resolvePortalPageTitle } from '../lib/familyPortalNav';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
+import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function FamilyPortalLayout() {
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
+    prefetchFamilyPortalRoutes();
   }, []);
 
   useEffect(() => {

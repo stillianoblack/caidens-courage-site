@@ -145,15 +145,25 @@ export function resolveCanonicalProgramCode(): CanonicalProgramResolution {
   const familyContext = readFamilyContextFromStorage();
   const lastFamily = readLastPilotProgramForRole('family');
   const lastFacilitator = readLastPilotProgramForRole('facilitator');
+  const familyContextProgram = familyContext
+    ? buildProgramFromFamilyContext(
+        familyContext,
+        active?.programCode === familyContext.programCode ? active : null,
+      )
+    : null;
+
+  if (familyContextProgram) {
+    const resolved = firstValidCandidate([
+      { code: familyContext?.programCode, program: familyContextProgram, source: 'family_context' },
+    ]);
+
+    if (resolved?.program) {
+      syncActivePilotProgram(resolved.program);
+      return resolved;
+    }
+  }
 
   if (role === 'family') {
-    const familyContextProgram = familyContext
-      ? buildProgramFromFamilyContext(
-          familyContext,
-          active?.programCode === familyContext.programCode ? active : null,
-        )
-      : null;
-
     const resolved =
       firstValidCandidate([
         { code: familyContext?.programCode, program: familyContextProgram, source: 'family_context' },
@@ -196,10 +206,16 @@ export function logProgramAssignmentAudit(input: {
   saveContext?: string;
   participantId?: string | null;
   participantName?: string | null;
+  participantRole?: string | null;
+  participantNickname?: string | null;
+  participantFirstName?: string | null;
+  participantEmail?: string | null;
   payloadProgramCode?: string | null;
 }): CanonicalProgramResolution & {
   portalRole: PortalRole | null;
   activeProgramCode: string | null;
+  activePilotProgram: ActivePilotProgram | null;
+  activeFamilyContext: ActiveFamilyContext | null;
   familyProgramCode: string | null;
   lastFamilyProgramCode: string | null;
   lastFacilitatorProgramCode: string | null;
@@ -207,6 +223,10 @@ export function logProgramAssignmentAudit(input: {
   payloadProgramCode: string | null;
   participantId: string | null;
   participantName: string | null;
+  participantRole: string | null;
+  participantNickname: string | null;
+  participantFirstName: string | null;
+  participantEmail: string | null;
   saveContext: string | null;
 } {
   const resolved = resolveCanonicalProgramCode();
@@ -219,6 +239,8 @@ export function logProgramAssignmentAudit(input: {
     saveContext: input.saveContext ?? null,
     portalRole: readPortalRoleFromStorage(),
     activeProgramCode: active?.programCode ?? null,
+    activePilotProgram: active,
+    activeFamilyContext: familyContext,
     familyProgramCode: familyContext?.programCode ?? null,
     lastFamilyProgramCode: lastFamily?.program_code ?? null,
     lastFacilitatorProgramCode: lastFacilitator?.program_code ?? null,
@@ -227,6 +249,10 @@ export function logProgramAssignmentAudit(input: {
     payloadProgramCode: input.payloadProgramCode ?? null,
     participantId: input.participantId ?? null,
     participantName: input.participantName ?? null,
+    participantRole: input.participantRole ?? null,
+    participantNickname: input.participantNickname ?? null,
+    participantFirstName: input.participantFirstName ?? null,
+    participantEmail: input.participantEmail ?? null,
     source: resolved.source,
     code: resolved.code,
     program: resolved.program,

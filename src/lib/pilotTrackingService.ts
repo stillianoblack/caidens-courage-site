@@ -103,6 +103,39 @@ function isSupabaseParticipantId(participantId: string): boolean {
   return !participantId.startsWith('local-');
 }
 
+function normalizeProgramCode(code?: string | null): string | null {
+  const normalized = code?.trim();
+  return normalized ? normalized : null;
+}
+
+function resolveResultProgramCode(payloadProgramCode: string, saveContext: string): string | null {
+  const resolvedProgramCode = resolveTrackingProgramCode(saveContext);
+  const payloadCode = normalizeProgramCode(payloadProgramCode);
+  if (payloadCode && resolvedProgramCode && payloadCode !== resolvedProgramCode) {
+    const familyCode =
+      payloadCode.toUpperCase().startsWith('FAMILY-')
+        ? payloadCode
+        : resolvedProgramCode.toUpperCase().startsWith('FAMILY-')
+          ? resolvedProgramCode
+          : null;
+    console.warn('[PROGRAM_ASSIGNMENT_MISMATCH]', {
+      save_context: saveContext,
+      resolved_program_code: resolvedProgramCode,
+      payload_program_code: payloadCode,
+      saved_program_code: familyCode ?? resolvedProgramCode,
+    });
+    return familyCode ?? resolvedProgramCode;
+  }
+  return resolvedProgramCode || payloadCode;
+}
+
+function isMissingAdultRoleColumnError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const record = error as { message?: string; details?: string; hint?: string; code?: string };
+  const text = `${record.message ?? ''} ${record.details ?? ''} ${record.hint ?? ''}`.toLowerCase();
+  return text.includes('adult_role') || text.includes('schema cache');
+}
+
 function participantToLocalRow(
   participant: ParticipantPayload,
   id: string,
@@ -157,6 +190,10 @@ export async function findOrCreateParticipant(
   logProgramAssignmentAudit({
     saveContext: 'participant_upsert',
     participantName: payload.nickname || payload.first_name || payload.email,
+    participantRole: payload.role,
+    participantNickname: payload.nickname,
+    participantFirstName: payload.first_name,
+    participantEmail: payload.email,
     payloadProgramCode: payload.program_code,
   });
 
@@ -280,11 +317,23 @@ export async function findOrCreateParticipant(
         insertPayload.adult_role = payload.adult_role.trim();
       }
 
-      const { data, error } = await withTimeout(
+      let { data, error } = await withTimeout(
         supabase.from('participants').insert(insertPayload).select('id').single(),
         DASHBOARD_FETCH_TIMEOUT_MS,
         'participant_insert',
       );
+
+      if (error && 'adult_role' in insertPayload && isMissingAdultRoleColumnError(error)) {
+        const retryPayload = { ...insertPayload };
+        delete retryPayload.adult_role;
+        const retry = await withTimeout(
+          supabase.from('participants').insert(retryPayload).select('id').single(),
+          DASHBOARD_FETCH_TIMEOUT_MS,
+          'participant_insert_without_adult_role',
+        );
+        data = retry.data;
+        error = retry.error;
+      }
 
       if (!error && data?.id) {
         const participantId = data.id as string;
@@ -361,7 +410,7 @@ export async function findOrCreateParticipant(
 }
 
 export async function saveModuleResult(payload: ModuleResultPayload): Promise<TrackingSubmitResult> {
-  const programCode = resolveTrackingProgramCode('module_result_insert');
+  const programCode = resolveResultProgramCode(payload.program_code, 'module_result_insert');
   if (!programCode) {
     return {
       success: false,
@@ -379,6 +428,7 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
   logProgramAssignmentAudit({
     saveContext: 'module_result_insert',
     participantId: payload.participant_id,
+    participantRole: payload.role,
     payloadProgramCode: payload.program_code,
   });
 
@@ -493,7 +543,7 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 export async function saveAssessmentResult(
   payload: AssessmentResultV2Payload,
 ): Promise<TrackingSubmitResult> {
-  const programCode = resolveTrackingProgramCode('assessment_result_v2_insert');
+  const programCode = resolveResultProgramCode(payload.program_code, 'assessment_result_v2_insert');
   if (!programCode) {
     return {
       success: false,
@@ -512,6 +562,7 @@ export async function saveAssessmentResult(
   logProgramAssignmentAudit({
     saveContext: 'assessment_result_v2_insert',
     participantId: payload.participant_id,
+    participantRole: payload.role,
     payloadProgramCode: payload.program_code,
   });
 

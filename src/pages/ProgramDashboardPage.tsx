@@ -36,6 +36,7 @@ import { useProgramDashboardNav } from '../hooks/useProgramDashboardNav';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
+import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -72,7 +73,10 @@ export default function ProgramDashboardPage() {
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
-  }, []);
+    if (sessionValid) {
+      prefetchFacilitatorPortalRoutes();
+    }
+  }, [sessionValid]);
 
   useEffect(() => {
     if (sessionValid) {
