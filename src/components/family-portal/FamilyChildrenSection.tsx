@@ -4,6 +4,7 @@ import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
 type FamilyChildrenSectionProps = {
   childSummaries: FamilyChildSummary[];
   loading?: boolean;
+  adultBaselineComplete?: boolean;
 };
 
 function baselineStatusClass(status: FamilyChildSummary['baselineStatus']): string {
@@ -15,6 +16,7 @@ function baselineStatusClass(status: FamilyChildSummary['baselineStatus']): stri
 export default function FamilyChildrenSection({
   childSummaries,
   loading = false,
+  adultBaselineComplete = false,
 }: FamilyChildrenSectionProps) {
   return (
     <section className="family-panelBlock" aria-labelledby="family-children-title">
@@ -34,7 +36,9 @@ export default function FamilyChildrenSection({
 
       {!loading && childSummaries.length === 0 ? (
         <p className="family-panelHelper">
-          Child profiles will appear here after a student completes a B-4 Check-In or game activity.
+          {adultBaselineComplete
+            ? 'Adult baseline complete. Child profiles will appear after your child completes a B-4 Check-In or mission.'
+            : 'Child profiles will appear here after a student completes a B-4 Check-In or game activity.'}
         </p>
       ) : null}
 
@@ -65,6 +69,7 @@ export default function FamilyChildrenSection({
                       </div>
                       <span className="family-childProgressPct">{child.progressPct}%</span>
                     </div>
+                    <p className="family-childProgressDetail">{child.progressLabel}</p>
                   </dd>
                 </div>
               </dl>

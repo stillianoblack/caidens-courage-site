@@ -5,7 +5,7 @@ import {
   FAMILY_NEXT_STEP,
 } from '../../../data/familyPortalContent';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
-import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
@@ -15,34 +15,55 @@ import '../../focus-skills/focus-skills-snapshot.css';
 
 export default function FamilyOverviewPanel() {
   const location = useLocation();
-  const programCode = readActivePilotProgram()?.programCode;
-  const { children, metrics, assessmentCount, loading } = useFamilyDashboardMetrics(programCode);
+  const programCode = resolveTrackingProgramCode() ?? undefined;
+  const {
+    children,
+    metrics,
+    assessmentProgress,
+    overallProgress,
+    adultBaselineComplete,
+    loading,
+  } = useFamilyDashboardMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
-
-  const overallPct = metrics.rows.find((row) => row.tone === 'overall')?.pct ?? 0;
 
   const kpis = useMemo(
     () => [
       {
         label: 'Children',
         value: loading ? '—' : String(children.length),
+        detail: null as string | null,
       },
       {
         label: 'Assessments',
-        value: loading ? '—' : String(assessmentCount),
+        value: loading ? '—' : `${assessmentProgress.percent}%`,
+        detail: loading ? null : assessmentProgress.label,
       },
       {
         label: 'Overall Progress',
-        value: loading ? '—' : metrics.hasActivity ? `${overallPct}%` : '0%',
+        value: loading ? '—' : metrics.hasActivity ? `${overallProgress.percent}%` : '0%',
+        detail: loading ? null : metrics.hasActivity ? overallProgress.label : '0 of 0 completed',
       },
       {
         label: 'Status',
         value: loading ? '—' : metrics.overallLabel,
+        detail: null as string | null,
         highlight: true as const,
       },
     ],
-    [assessmentCount, children.length, loading, metrics.hasActivity, metrics.overallLabel, overallPct],
+    [
+      assessmentProgress.label,
+      assessmentProgress.percent,
+      children.length,
+      loading,
+      metrics.hasActivity,
+      metrics.overallLabel,
+      overallProgress.label,
+      overallProgress.percent,
+    ],
   );
+
+  const showProgressBars = !loading && metrics.hasActivity;
+  const showEmptyHelper = !loading && !metrics.hasChildActivity && metrics.emptyStateMessage;
 
   return (
     <div className="family-panel family-panel--overview">
@@ -54,6 +75,7 @@ export default function FamilyOverviewPanel() {
           >
             <p className="family-kpiLabel">{kpi.label}</p>
             <p className="family-kpiValue">{kpi.value}</p>
+            {kpi.detail ? <p className="family-kpiDetail">{kpi.detail}</p> : null}
           </article>
         ))}
       </div>
@@ -62,7 +84,15 @@ export default function FamilyOverviewPanel() {
 
       <FamilyValueCards />
 
-      <FamilyChildrenSection childSummaries={children} loading={loading} />
+      {showEmptyHelper ? (
+        <p className="family-panelHelper family-panelHelper--prominent">{metrics.emptyStateMessage}</p>
+      ) : null}
+
+      <FamilyChildrenSection
+        childSummaries={children}
+        loading={loading}
+        adultBaselineComplete={adultBaselineComplete}
+      />
 
       <section className="family-panelBlock">
         <div className="family-panelBlockHead">
@@ -80,23 +110,24 @@ export default function FamilyOverviewPanel() {
             Progress will appear here after your family completes activities.
           </p>
         ) : null}
-        {!loading ? (
-        <div className="family-growthChart">
-          {metrics.rows.map(({ key, label, pct, tone }) => (
-            <div key={key} className="family-growthRow">
-              <div className="family-growthMeta">
-                <span className="family-growthLabel">{label}</span>
-                <span className="family-growthPct">{pct}%</span>
+        {showProgressBars ? (
+          <div className="family-growthChart">
+            {metrics.rows.map(({ key, label, pct, tone, labelDetail }) => (
+              <div key={key} className="family-growthRow">
+                <div className="family-growthMeta">
+                  <span className="family-growthLabel">{label}</span>
+                  <span className="family-growthPct">{pct}%</span>
+                </div>
+                <p className="family-growthDetail">{labelDetail}</p>
+                <div className="family-growthTrack" aria-hidden="true">
+                  <div
+                    className={`family-growthFill family-growthFill--${tone}`}
+                    style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+                  />
+                </div>
               </div>
-              <div className="family-growthTrack" aria-hidden="true">
-                <div
-                  className={`family-growthFill family-growthFill--${tone}`}
-                  style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         ) : null}
       </section>
 
@@ -104,6 +135,8 @@ export default function FamilyOverviewPanel() {
         className="family-overviewSkills"
         skills={metrics.focusSkills}
         hasActivity={metrics.hasActivity}
+        hasChildActivity={metrics.hasChildActivity}
+        adultBaselineComplete={adultBaselineComplete}
       />
 
       <div className="family-overviewSplit">
@@ -122,7 +155,8 @@ export default function FamilyOverviewPanel() {
             </ul>
           ) : (
             <p className="family-panelHelper">
-              Completed games and check-ins will show up here.
+              {metrics.emptyStateMessage ??
+                'Completed games and check-ins will show up here.'}
             </p>
           )}
         </section>

@@ -1,6 +1,14 @@
-import { listTrackedStudentModules } from '../data/moduleTrackingRegistry';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
-import { formatGrowthFromRecord } from './pilotDashboardMetrics';
+import type { FamilyChildSummary } from './familyChildrenMetrics';
+import {
+  getAssessmentProgress,
+  getCategoryProgressRows,
+  getFamilyOverallProgress,
+  groupProgressBySkillArea,
+  partitionAdultAssessments,
+  partitionChildAssessments,
+  type ProgressCounts,
+} from './familyProgressHelpers';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 
 export type FamilyProgressTone = 'story' | 'reading' | 'focus' | 'creative' | 'overall';
@@ -10,6 +18,9 @@ export type FamilyProgressRow = {
   label: string;
   pct: number;
   tone: FamilyProgressTone;
+  completed: number;
+  total: number;
+  labelDetail: string;
 };
 
 export type FamilyFocusSkill = {
@@ -22,101 +33,12 @@ export type FamilyProgressSnapshot = {
   focusSkills: FamilyFocusSkill[];
   recentActivity: string[];
   hasActivity: boolean;
+  hasChildActivity: boolean;
   overallLabel: string;
+  overall: ProgressCounts;
+  assessments: ProgressCounts;
+  emptyStateMessage: string | null;
 };
-
-const PROGRESS_LABELS: Array<{ key: string; label: string; tone: FamilyProgressTone }> = [
-  { key: 'story', label: 'Story Activities', tone: 'story' },
-  { key: 'reading', label: 'Reading Games', tone: 'reading' },
-  { key: 'focus', label: 'Focus Moves', tone: 'focus' },
-  { key: 'creative', label: 'Creative Activities', tone: 'creative' },
-  { key: 'overall', label: 'Overall', tone: 'overall' },
-];
-
-const CATEGORY_CHARACTERS: Record<Exclude<FamilyProgressTone, 'overall'>, string[]> = {
-  story: ['caiden'],
-  reading: ['miranda'],
-  focus: ['b4'],
-  creative: ['charlie'],
-};
-
-function normalizeProgramCode(programCode?: string): string {
-  return programCode?.trim().toUpperCase() ?? '';
-}
-
-function countModulesForCharacter(character: string): number {
-  return listTrackedStudentModules().filter((row) => row.character === character).length;
-}
-
-function categoryTotals(): Record<Exclude<FamilyProgressTone, 'overall'>, number> {
-  return {
-    story: countModulesForCharacter('caiden') || 1,
-    reading: countModulesForCharacter('miranda') || 1,
-    focus: countModulesForCharacter('b4') || 1,
-    creative: countModulesForCharacter('charlie') || 1,
-  };
-}
-
-function filterModulesForProgram(
-  rows: LocalModuleResultRecord[],
-  programCode?: string,
-): LocalModuleResultRecord[] {
-  const code = normalizeProgramCode(programCode);
-  if (!code) return [];
-  return rows.filter((row) => normalizeProgramCode(row.program_code) === code);
-}
-
-function filterAssessmentsForProgram(
-  rows: LocalAssessmentV2Record[],
-  programCode?: string,
-): LocalAssessmentV2Record[] {
-  const code = normalizeProgramCode(programCode);
-  if (!code) return [];
-  return rows.filter((row) => normalizeProgramCode(row.program_code) === code);
-}
-
-function filterBaselinesForProgram(
-  rows: B4BaselineCheckRecord[],
-  programCode?: string,
-): B4BaselineCheckRecord[] {
-  const code = normalizeProgramCode(programCode);
-  if (!code) return [];
-  return rows.filter((row) => normalizeProgramCode(row.programCode) === code && Boolean(row.completedAt));
-}
-
-function completedModulesByCharacter(
-  modules: LocalModuleResultRecord[],
-): Record<string, Set<string>> {
-  const map: Record<string, Set<string>> = {};
-  modules.forEach((row) => {
-    const character = row.character?.trim().toLowerCase();
-    if (!character) return;
-    if (!map[character]) map[character] = new Set();
-    map[character].add(row.module_id);
-  });
-  return map;
-}
-
-function categoryPct(
-  completedByCharacter: Record<string, Set<string>>,
-  tone: Exclude<FamilyProgressTone, 'overall'>,
-  baselineBoost = 0,
-): number {
-  const totals = categoryTotals();
-  const total = totals[tone] + (tone === 'focus' ? baselineBoost : 0);
-  if (total <= 0) return 0;
-
-  let completed = 0;
-  CATEGORY_CHARACTERS[tone].forEach((character) => {
-    completed += completedByCharacter[character]?.size ?? 0;
-  });
-
-  if (tone === 'focus') {
-    completed += baselineBoost;
-  }
-
-  return Math.min(100, Math.round((completed / total) * 100));
-}
 
 function buildRecentActivity(
   modules: LocalModuleResultRecord[],
@@ -131,19 +53,23 @@ function buildRecentActivity(
     .map((row) => `${row.module_title} completed`);
 
   const v2Items = assessments
-    .filter((row) => row.role === 'student')
     .slice()
     .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
-    .slice(0, 3)
+    .slice(0, 4)
     .map((row) => {
-      const answers = row.answers_json as { nickname?: string } | undefined;
-      const name = answers?.nickname?.trim();
+      const answers = row.answers_json as { nickname?: string; firstName?: string } | undefined;
+      const name = answers?.nickname?.trim() || answers?.firstName?.trim();
+      const assessmentType = String(row.assessment_type);
       const label =
-        row.assessment_type === 'baseline'
+        assessmentType === 'baseline'
           ? 'B-4 Check-In'
-          : row.assessment_type === 'final'
+          : assessmentType === 'final'
             ? 'Growth Check'
-            : row.assessment_type.replace(/_/g, ' ');
+            : assessmentType === 'adult_pre'
+              ? 'Adult Baseline'
+              : assessmentType === 'adult_post'
+                ? 'Adult Growth Check'
+                : assessmentType.replace(/_/g, ' ');
       return name ? `${name} completed ${label}` : `${label} completed`;
     });
 
@@ -163,75 +89,25 @@ function buildRecentActivity(
     .filter((row) => !coveredNames.has(row.nickname.trim().toLowerCase()))
     .slice(0, 3)
     .map((row) =>
-      row.nickname
-        ? `${row.nickname} completed B-4 Check-In`
-        : 'B-4 Check-In completed',
+      row.nickname ? `${row.nickname} completed B-4 Check-In` : 'B-4 Check-In completed',
     );
 
   return [...adultEvents, ...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);
 }
 
-function buildFocusSkills(
-  modules: LocalModuleResultRecord[],
-  baselines: B4BaselineCheckRecord[],
-  assessments: LocalAssessmentV2Record[],
-): FamilyFocusSkill[] {
-  const studentAssessments = assessments.filter((row) => row.role === 'student');
-  if (studentAssessments.length > 0) {
-    const avg = (pick: (row: LocalAssessmentV2Record) => number | undefined) => {
-      const values = studentAssessments
-        .map(pick)
-        .filter((value): value is number => typeof value === 'number');
-      if (!values.length) return 0;
-      return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
-    };
-
-    const focus = avg((row) => row.focus_score);
-    const confidence = avg((row) => row.confidence_score);
-    const reading = avg((row) => row.reading_score);
-    const overall = avg((row) => row.percent_score) || Math.round((focus + confidence + reading) / 3);
-
-    return [
-      { label: 'Executive Function', value: focus },
-      { label: 'Self-Regulation', value: confidence },
-      { label: 'Focus Recovery', value: reading },
-      { label: 'Overall', value: overall },
-    ];
+function resolveEmptyStateMessage(input: {
+  adultBaselineComplete: boolean;
+  adultGrowthComplete: boolean;
+  hasChildActivity: boolean;
+}): string | null {
+  if (input.hasChildActivity) return null;
+  if (input.adultBaselineComplete && !input.adultGrowthComplete) {
+    return 'Adult baseline complete. Child activities will appear after your child completes a mission.';
   }
-
-  const latestBaseline = baselines[0];
-  if (latestBaseline) {
-    const growth = formatGrowthFromRecord(latestBaseline);
-    return [
-      { label: 'Executive Function', value: growth.focus },
-      { label: 'Self-Regulation', value: growth.confidence },
-      { label: 'Focus Recovery', value: growth.reading },
-      { label: 'Overall', value: growth.overall },
-    ];
+  if (input.adultBaselineComplete && input.adultGrowthComplete) {
+    return 'Adult learning complete. Child activities will appear after your child completes a mission.';
   }
-
-  if (modules.length > 0) {
-    const scores = modules
-      .map((row) => row.percent_score)
-      .filter((value): value is number => typeof value === 'number');
-    const average =
-      scores.length > 0
-        ? Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length)
-        : 0;
-    return [
-      { label: 'Executive Function', value: average },
-      { label: 'Self-Regulation', value: average },
-      { label: 'Focus Recovery', value: average },
-      { label: 'Overall', value: average },
-    ];
-  }
-
-  return [
-    { label: 'Executive Function', value: 0 },
-    { label: 'Self-Regulation', value: 0 },
-    { label: 'Focus Recovery', value: 0 },
-    { label: 'Overall', value: 0 },
-  ];
+  return null;
 }
 
 export function computeFamilyProgressSnapshot(input: {
@@ -241,75 +117,112 @@ export function computeFamilyProgressSnapshot(input: {
   legacyBaselines?: B4BaselineCheckRecord[];
   adultBaselineComplete?: boolean;
   adultGrowthComplete?: boolean;
+  children?: FamilyChildSummary[];
 }): FamilyProgressSnapshot {
-  const modules = filterModulesForProgram(input.moduleResults ?? [], input.programCode);
-  const assessments = filterAssessmentsForProgram(input.assessmentResults ?? [], input.programCode);
-  const baselines = filterBaselinesForProgram(input.legacyBaselines ?? [], input.programCode);
+  const programCode = input.programCode?.trim() ?? '';
+  const modules = input.moduleResults ?? [];
+  const assessments = input.assessmentResults ?? [];
+  const baselines = (input.legacyBaselines ?? []).filter((row) => Boolean(row.completedAt));
+  const children = input.children ?? [];
+  const childCount = children.length;
+  const childBaselinesComplete = children.filter((child) => child.baselineStatus === 'Complete').length;
 
-  const hasV2StudentBaseline = assessments.some(
-    (row) => row.role === 'student' && row.assessment_type === 'baseline',
+  const studentModules = modules.filter((row) => row.role === 'student');
+  const adultModules = modules.filter(
+    (row) => row.role === 'adult' || row.role === 'parent' || row.role === 'facilitator',
   );
-  const hasBaselineFocusMoves =
-    hasV2StudentBaseline ||
-    baselines.some((row) => row.completedModules.includes('focus-moves') || Boolean(row.completedAt));
-  const baselineBoost = hasBaselineFocusMoves ? 1 : 0;
+
+  const adultBaselineComplete = Boolean(input.adultBaselineComplete);
+  const adultGrowthComplete = Boolean(input.adultGrowthComplete);
+
+  const hasChildActivity =
+    studentModules.length > 0 ||
+    childBaselinesComplete > 0 ||
+    baselines.length > 0 ||
+    partitionChildAssessments(assessments).length > 0;
 
   const hasActivity =
-    modules.length > 0 ||
-    assessments.length > 0 ||
-    baselines.length > 0 ||
-    Boolean(input.adultBaselineComplete) ||
-    Boolean(input.adultGrowthComplete);
+    hasChildActivity ||
+    adultBaselineComplete ||
+    adultGrowthComplete ||
+    adultModules.length > 0 ||
+    partitionAdultAssessments(assessments).length > 0;
+
+  const assessmentsProgress = getAssessmentProgress({
+    adultBaselineComplete,
+    adultGrowthComplete,
+    children,
+  });
+
+  const overall = getFamilyOverallProgress({
+    childCount,
+    adultBaselineComplete,
+    adultGrowthComplete,
+    childBaselinesComplete,
+    studentModules,
+    adultModules,
+  });
+
+  const categoryRows = getCategoryProgressRows({
+    programCode,
+    studentModules,
+    adultModules,
+    childCount,
+    childBaselinesComplete,
+    adultBaselineComplete,
+    adultGrowthComplete,
+    overall,
+  });
+
+  const skillAreas = groupProgressBySkillArea({
+    programCode,
+    studentAssessments: partitionChildAssessments(assessments),
+    adultAssessments: partitionAdultAssessments(assessments),
+    studentModules,
+    adultModules,
+    legacyBaselines: baselines,
+  });
 
   const adultEvents: string[] = [];
-  if (input.adultBaselineComplete) {
-    adultEvents.push('Parent completed Adult Baseline');
-  }
-  if (input.adultGrowthComplete) {
-    adultEvents.push('Parent completed Growth Check');
-  }
+  if (adultBaselineComplete) adultEvents.push('Parent completed Adult Baseline');
+  if (adultGrowthComplete) adultEvents.push('Parent completed Growth Check');
+
+  const focusSkills: FamilyFocusSkill[] = skillAreas.map((row) => ({
+    label: row.label,
+    value: row.sampleCount > 0 ? row.value : 0,
+  }));
+
+  const overallPct = overall.percent;
+  const emptyStateMessage = resolveEmptyStateMessage({
+    adultBaselineComplete,
+    adultGrowthComplete,
+    hasChildActivity,
+  });
 
   if (!hasActivity) {
     return {
-      rows: PROGRESS_LABELS.map(({ key, label, tone }) => ({
-        key,
-        label,
-        pct: 0,
-        tone,
-      })),
-      focusSkills: buildFocusSkills([], [], []),
+      rows: categoryRows,
+      focusSkills,
       recentActivity: [],
       hasActivity: false,
+      hasChildActivity: false,
       overallLabel: 'Getting Started',
+      overall,
+      assessments: assessmentsProgress,
+      emptyStateMessage: null,
     };
   }
 
-  const completedByCharacter = completedModulesByCharacter(modules);
-  const story = categoryPct(completedByCharacter, 'story');
-  const reading = categoryPct(completedByCharacter, 'reading');
-  const focus = categoryPct(completedByCharacter, 'focus', baselineBoost);
-  const creative = categoryPct(completedByCharacter, 'creative');
-  const overall = Math.round((story + reading + focus + creative) / 4);
-
   return {
-    rows: PROGRESS_LABELS.map(({ key, label, tone }) => ({
-      key,
-      label,
-      pct:
-        tone === 'story'
-          ? story
-          : tone === 'reading'
-            ? reading
-            : tone === 'focus'
-              ? focus
-              : tone === 'creative'
-                ? creative
-                : overall,
-      tone,
-    })),
-    focusSkills: buildFocusSkills(modules, baselines, assessments),
-    recentActivity: buildRecentActivity(modules, baselines, assessments, adultEvents),
+    rows: categoryRows,
+    focusSkills,
+    recentActivity: buildRecentActivity(studentModules, baselines, assessments, adultEvents),
     hasActivity: true,
-    overallLabel: overall >= 75 ? 'Strong Progress' : overall >= 25 ? 'Building Momentum' : 'Getting Started',
+    hasChildActivity,
+    overallLabel:
+      overallPct >= 75 ? 'Strong Progress' : overallPct >= 25 ? 'Building Momentum' : 'Getting Started',
+    overall,
+    assessments: assessmentsProgress,
+    emptyStateMessage,
   };
 }

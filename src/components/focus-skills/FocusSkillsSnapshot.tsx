@@ -14,6 +14,8 @@ type FocusSkillsSnapshotProps = {
   compact?: boolean;
   skills?: FamilyFocusSkill[];
   hasActivity?: boolean;
+  hasChildActivity?: boolean;
+  adultBaselineComplete?: boolean;
 };
 
 export default function FocusSkillsSnapshot({
@@ -21,7 +23,19 @@ export default function FocusSkillsSnapshot({
   compact = false,
   skills = EMPTY_SKILLS,
   hasActivity = false,
+  hasChildActivity = false,
+  adultBaselineComplete = false,
 }: FocusSkillsSnapshotProps) {
+  const helperText = (() => {
+    if (!hasActivity) {
+      return 'Progress will appear here after your family completes activities.';
+    }
+    if (!hasChildActivity && adultBaselineComplete) {
+      return 'Parent learning scores are shown below. Child skill bars will grow after your child completes missions.';
+    }
+    return 'These practice areas combine parent and child activity from your active family program.';
+  })();
+
   return (
     <section
       className={['focusSkillsSnapshot', compact ? 'focusSkillsSnapshot--compact' : '', className]
@@ -30,11 +44,7 @@ export default function FocusSkillsSnapshot({
       aria-label="Focus Skills Snapshot"
     >
       <h2 className="focusSkillsSnapshotTitle">Focus Skills Snapshot</h2>
-      <p className="focusSkillsSnapshotHelper">
-        {hasActivity
-          ? 'These are practice areas from completed activities. They will grow as your child plays.'
-          : 'Progress will appear here after your family completes activities.'}
-      </p>
+      <p className="focusSkillsSnapshotHelper">{helperText}</p>
 
       <div className="focusSkillsSnapshotGrid">
         {skills.map((skill) => (
@@ -43,7 +53,7 @@ export default function FocusSkillsSnapshot({
             <div className="focusSkillsSnapshotBar" aria-hidden="true">
               <div className="focusSkillsSnapshotFill" style={{ width: `${skill.value}%` }} />
             </div>
-            <span className="focusSkillsSnapshotValue">{skill.value}%</span>
+            <span className="focusSkillsSnapshotValue">{hasActivity ? `${skill.value}%` : '0%'}</span>
           </div>
         ))}
       </div>

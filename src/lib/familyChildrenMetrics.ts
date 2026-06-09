@@ -1,7 +1,7 @@
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
-import { listTrackedStudentModules } from '../data/moduleTrackingRegistry';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
+import { getChildActivityProgress } from './familyProgressHelpers';
 
 export type FamilyChildBaselineStatus = 'Complete' | 'In Progress' | 'Not Started';
 
@@ -12,10 +12,11 @@ export type FamilyChildSummary = {
   baselineStatus: FamilyChildBaselineStatus;
   latestActivity: string | null;
   progressPct: number;
+  completedCount: number;
+  totalCount: number;
+  progressLabel: string;
   createdAt: string | null;
 };
-
-const TRACKED_MODULE_COUNT = Math.max(listTrackedStudentModules().length, 1);
 
 function normalizeCode(programCode?: string): string {
   return programCode?.trim().toUpperCase() ?? '';
@@ -153,53 +154,6 @@ function resolveLatestActivity(input: {
   return events[0]?.label ?? null;
 }
 
-function resolveProgressPct(input: {
-  participantId: string | null;
-  displayName: string;
-  baselineStatus: FamilyChildBaselineStatus;
-  modules: LocalModuleResultRecord[];
-  assessments: LocalAssessmentV2Record[];
-  legacyBaselines: B4BaselineCheckRecord[];
-}): number {
-  if (input.participantId) {
-    const completed = new Set(
-      input.modules
-        .filter((row) => row.participant_id === input.participantId)
-        .map((row) => row.module_id),
-    );
-    if (completed.size > 0) {
-      return Math.min(100, Math.round((completed.size / TRACKED_MODULE_COUNT) * 100));
-    }
-  }
-
-  if (input.baselineStatus === 'Complete') {
-    const v2Baseline = input.assessments.find(
-      (row) =>
-        matchesV2StudentRow(input.participantId, input.displayName, row) &&
-        row.assessment_type === 'baseline',
-    );
-    if (v2Baseline?.percent_score != null) {
-      return Math.min(100, Math.round(Number(v2Baseline.percent_score)));
-    }
-
-    const legacy = input.legacyBaselines.find((row) =>
-      matchesLegacyBaseline(input.participantId, input.displayName, row),
-    );
-    if (legacy) {
-      const total = legacy.feelingsScore + legacy.readingScore + legacy.focusMovesScore;
-      return Math.min(100, Math.round((total / 60) * 100));
-    }
-
-    return 15;
-  }
-
-  if (input.baselineStatus === 'In Progress') {
-    return 5;
-  }
-
-  return 0;
-}
-
 function buildChildSummary(input: {
   key: string;
   participantId: string | null;
@@ -216,6 +170,12 @@ function buildChildSummary(input: {
     assessments: input.assessments,
   });
 
+  const progress = getChildActivityProgress({
+    participantId: input.participantId,
+    baselineComplete: baselineStatus === 'Complete',
+    modules: input.modules,
+  });
+
   return {
     key: input.key,
     participantId: input.participantId,
@@ -229,14 +189,10 @@ function buildChildSummary(input: {
       legacyBaselines: input.legacyBaselines,
       assessments: input.assessments,
     }),
-    progressPct: resolveProgressPct({
-      participantId: input.participantId,
-      displayName: input.displayName,
-      baselineStatus,
-      modules: input.modules,
-      assessments: input.assessments,
-      legacyBaselines: input.legacyBaselines,
-    }),
+    progressPct: progress.percent,
+    completedCount: progress.completed,
+    totalCount: progress.total,
+    progressLabel: progress.label,
   };
 }
 

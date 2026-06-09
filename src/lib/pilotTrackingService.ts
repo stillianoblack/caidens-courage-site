@@ -3,7 +3,11 @@ import {
   logTrackingSaveBlocked,
   resolveTrackingProgramCode,
 } from './activeProgramContext';
-import { logProgramAssignmentAudit } from './portalProgramAssignment';
+import {
+  logProgramAssignmentAudit,
+  logProgramAssignmentSave,
+  shouldForceFamilyProgramResolution,
+} from './portalProgramAssignment';
 import type { FormalAssessmentType } from '../types/moduleTracking';
 import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
@@ -108,9 +112,20 @@ function normalizeProgramCode(code?: string | null): string | null {
   return normalized ? normalized : null;
 }
 
-function resolveResultProgramCode(payloadProgramCode: string, saveContext: string): string | null {
+function resolveResultProgramCode(
+  payloadProgramCode: string,
+  saveContext: string,
+  table: 'module_results' | 'assessment_results_v2',
+): string | null {
   const resolvedProgramCode = resolveTrackingProgramCode(saveContext);
   const payloadCode = normalizeProgramCode(payloadProgramCode);
+
+  if (shouldForceFamilyProgramResolution()) {
+    const finalProgramCode = resolvedProgramCode || payloadCode;
+    logProgramAssignmentSave({ table, saveContext, finalProgramCode });
+    return finalProgramCode;
+  }
+
   if (payloadCode && resolvedProgramCode && payloadCode !== resolvedProgramCode) {
     const familyCode =
       payloadCode.toUpperCase().startsWith('FAMILY-')
@@ -124,9 +139,14 @@ function resolveResultProgramCode(payloadProgramCode: string, saveContext: strin
       payload_program_code: payloadCode,
       saved_program_code: familyCode ?? resolvedProgramCode,
     });
-    return familyCode ?? resolvedProgramCode;
+    const finalProgramCode = familyCode ?? resolvedProgramCode;
+    logProgramAssignmentSave({ table, saveContext, finalProgramCode });
+    return finalProgramCode;
   }
-  return resolvedProgramCode || payloadCode;
+
+  const finalProgramCode = resolvedProgramCode || payloadCode;
+  logProgramAssignmentSave({ table, saveContext, finalProgramCode });
+  return finalProgramCode;
 }
 
 function isMissingAdultRoleColumnError(error: unknown): boolean {
@@ -174,11 +194,17 @@ function applyStudentGroupFilter<T extends { eq: (col: string, val: string) => T
 export async function findOrCreateParticipant(
   payload: ParticipantPayload,
 ): Promise<{ participantId: string; source: 'supabase' | 'local' }> {
-  const programCode = resolveTrackingProgramCode();
+  const programCode = resolveTrackingProgramCode('participant_upsert');
   if (!programCode) {
     logTrackingSaveBlocked('findOrCreateParticipant requires active program context');
     throw new Error('Missing active program context');
   }
+
+  logProgramAssignmentSave({
+    table: 'participants',
+    saveContext: 'participant_upsert',
+    finalProgramCode: programCode,
+  });
 
   const programName = resolveProgramName(payload.program_name);
   const normalizedPayload: ParticipantPayload = {
@@ -410,7 +436,11 @@ export async function findOrCreateParticipant(
 }
 
 export async function saveModuleResult(payload: ModuleResultPayload): Promise<TrackingSubmitResult> {
-  const programCode = resolveResultProgramCode(payload.program_code, 'module_result_insert');
+  const programCode = resolveResultProgramCode(
+    payload.program_code,
+    'module_result_insert',
+    'module_results',
+  );
   if (!programCode) {
     return {
       success: false,
@@ -543,7 +573,11 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 export async function saveAssessmentResult(
   payload: AssessmentResultV2Payload,
 ): Promise<TrackingSubmitResult> {
-  const programCode = resolveResultProgramCode(payload.program_code, 'assessment_result_v2_insert');
+  const programCode = resolveResultProgramCode(
+    payload.program_code,
+    'assessment_result_v2_insert',
+    'assessment_results_v2',
+  );
   if (!programCode) {
     return {
       success: false,

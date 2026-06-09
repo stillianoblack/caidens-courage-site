@@ -2,6 +2,8 @@ import {
   readActivePilotProgram,
   writeActivePilotProgram,
 } from '../config/activePilotProgram';
+import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH } from '../config/courageRoutes';
+import { readFamilyPortalSession } from '../config/familyPortalAccess';
 import {
   LAST_PORTAL_RETURN_ROLE_KEY,
   readLastPilotProgramForRole,
@@ -31,9 +33,30 @@ type ActiveFamilyContext = {
 export type ProgramCodeSource =
   | 'active_pilot_program'
   | 'family_context'
+  | 'family_session'
   | 'last_pilot_family'
   | 'last_pilot_facilitator'
   | 'none';
+
+function getCurrentRoute(): string {
+  if (typeof window === 'undefined') return '';
+  return window.location.pathname;
+}
+
+/** True on /family-hub and /portal/family routes (and nested paths). */
+export function isFamilyPortalRoute(pathname = getCurrentRoute()): boolean {
+  return (
+    pathname === FAMILY_HUB_PATH ||
+    pathname.startsWith(`${FAMILY_HUB_PATH}/`) ||
+    pathname === FAMILY_PORTAL_PATH ||
+    pathname.startsWith(`${FAMILY_PORTAL_PATH}/`)
+  );
+}
+
+/** Family session flag or family route — facilitator role must not win. */
+export function shouldForceFamilyProgramResolution(pathname = getCurrentRoute()): boolean {
+  return readFamilyPortalSession() || isFamilyPortalRoute(pathname);
+}
 
 export type CanonicalProgramResolution = {
   code: string | null;
@@ -138,6 +161,63 @@ function firstValidCandidate(
   return null;
 }
 
+function resolveFamilySessionProgramCode(
+  active: ActivePilotProgram | null,
+  familyContext: ActiveFamilyContext | null,
+  lastFamily: ReturnType<typeof readLastPilotProgramForRole>,
+): CanonicalProgramResolution {
+  const familyContextProgram = familyContext
+    ? buildProgramFromFamilyContext(
+        familyContext,
+        active?.programCode === familyContext.programCode ? active : null,
+      )
+    : null;
+
+  const resolved =
+    firstValidCandidate([
+      {
+        code: familyContext?.programCode,
+        program: familyContextProgram,
+        source: 'family_context',
+      },
+      {
+        code: lastFamily?.program_code,
+        program: lastFamily?.program,
+        source: 'last_pilot_family',
+      },
+      ...(active?.programCode?.toUpperCase().startsWith('FAMILY-')
+        ? [{ code: active.programCode, program: active, source: 'active_pilot_program' as const }]
+        : []),
+    ]) ?? { code: null, program: null, source: 'none' as const };
+
+  if (resolved.program) {
+    syncActivePilotProgram(resolved.program);
+  }
+
+  return resolved;
+}
+
+export function logProgramAssignmentSave(input: {
+  table: string;
+  saveContext?: string;
+  finalProgramCode?: string | null;
+}): void {
+  const familyContext = readFamilyContextFromStorage();
+  const lastFamily = readLastPilotProgramForRole('family');
+  const active = readActivePilotProgram();
+
+  console.log('[PROGRAM_ASSIGNMENT_SAVE]', {
+    route: getCurrentRoute(),
+    activePortalRole: readPortalRoleFromStorage(),
+    hasFamilySession: readFamilyPortalSession(),
+    familyProgramCode: familyContext?.programCode ?? lastFamily?.program_code ?? null,
+    activePilotProgramCode: active?.programCode ?? null,
+    finalProgramCode: input.finalProgramCode ?? null,
+    table: input.table,
+    saveContext: input.saveContext ?? null,
+  });
+}
+
 /** Role-aware program code — family and facilitator snapshots never bleed across portals. */
 export function resolveCanonicalProgramCode(): CanonicalProgramResolution {
   const role = readPortalRoleFromStorage();
@@ -145,6 +225,11 @@ export function resolveCanonicalProgramCode(): CanonicalProgramResolution {
   const familyContext = readFamilyContextFromStorage();
   const lastFamily = readLastPilotProgramForRole('family');
   const lastFacilitator = readLastPilotProgramForRole('facilitator');
+
+  if (shouldForceFamilyProgramResolution()) {
+    return resolveFamilySessionProgramCode(active, familyContext, lastFamily);
+  }
+
   const familyContextProgram = familyContext
     ? buildProgramFromFamilyContext(
         familyContext,
@@ -264,13 +349,17 @@ export function logProgramAssignmentAudit(input: {
 
 /** Align activePilotProgram with the family portal session on layout mount. */
 export function ensureFamilyPortalProgramSync(): CanonicalProgramResolution {
-  const role = readPortalRoleFromStorage();
-  if (role !== 'family') {
+  if (!shouldForceFamilyProgramResolution()) {
     return { code: null, program: null, source: 'none' };
   }
 
   const resolved = resolveCanonicalProgramCode();
   logProgramAssignmentAudit({ saveContext: 'family_portal_mount' });
+  logProgramAssignmentSave({
+    table: 'session_sync',
+    saveContext: 'family_portal_mount',
+    finalProgramCode: resolved.code,
+  });
   return resolved;
 }
 

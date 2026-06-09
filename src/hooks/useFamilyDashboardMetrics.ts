@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
 import {
@@ -12,6 +12,12 @@ import {
   loadFamilyDashboardData,
   type FamilyDashboardData,
 } from '../lib/familyDashboardDataService';
+import {
+  logFamilyProgressMetrics,
+  partitionAdultAssessments,
+  partitionChildAssessments,
+  type ProgressCounts,
+} from '../lib/familyProgressHelpers';
 
 const EMPTY_DATA: FamilyDashboardData = {
   programCode: '',
@@ -32,17 +38,19 @@ export type FamilyDashboardMetrics = {
   adultBaselineComplete: boolean;
   adultGrowthComplete: boolean;
   assessmentCount: number;
+  assessmentProgress: ProgressCounts;
+  overallProgress: ProgressCounts;
   loading: boolean;
   refresh: () => Promise<void>;
 };
 
 export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboardMetrics {
-  const resolvedCode = programCode ?? readActivePilotProgram()?.programCode;
+  const resolvedCode = programCode?.trim() || resolveTrackingProgramCode() || '';
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<FamilyDashboardData>(EMPTY_DATA);
 
   const refresh = useCallback(async () => {
-    if (!resolvedCode?.trim()) {
+    if (!resolvedCode) {
       setData(EMPTY_DATA);
       setLoading(false);
       return;
@@ -100,12 +108,6 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       legacyBaselines: data.studentLegacyBaselines,
     });
 
-    const childAssessmentsComplete = children.filter(
-      (child) => child.baselineStatus === 'Complete',
-    ).length;
-    const assessmentCount =
-      childAssessmentsComplete + (adultBaselineComplete ? 1 : 0) + (adultGrowthComplete ? 1 : 0);
-
     const metrics = data.programCode
       ? computeFamilyProgressSnapshot({
           programCode: data.programCode,
@@ -114,8 +116,20 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
           legacyBaselines: data.studentLegacyBaselines,
           adultBaselineComplete,
           adultGrowthComplete,
+          children,
         })
       : EMPTY_SNAPSHOT;
+
+    logFamilyProgressMetrics({
+      activeProgramCode: data.programCode,
+      children,
+      adultAssessments: partitionAdultAssessments(data.v2Assessments),
+      childAssessments: partitionChildAssessments(data.v2Assessments),
+      moduleResults: data.moduleResults,
+      completedCount: metrics.overall.completed,
+      totalCount: metrics.overall.total,
+      overallPercent: metrics.overall.percent,
+    });
 
     return {
       programCode: data.programCode,
@@ -123,7 +137,9 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       metrics,
       adultBaselineComplete,
       adultGrowthComplete,
-      assessmentCount,
+      assessmentCount: metrics.assessments.completed,
+      assessmentProgress: metrics.assessments,
+      overallProgress: metrics.overall,
       loading,
       refresh,
     };
