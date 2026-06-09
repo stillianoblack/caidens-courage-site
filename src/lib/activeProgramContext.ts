@@ -1,4 +1,3 @@
-import { readActivePilotProgram } from '../config/activePilotProgram';
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { loadB4BaselineState, saveB4BaselineStudentProfile } from './b4BaselineCheckStorage';
 import {
