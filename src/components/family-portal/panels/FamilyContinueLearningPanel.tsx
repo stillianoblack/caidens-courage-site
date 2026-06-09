@@ -31,23 +31,18 @@ export default function FamilyContinueLearningPanel() {
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const pilotStartDate = resolvePilotStartDate(activeProgram);
   const unlockedWeek = getUnlockedWeek(pilotStartDate);
-  const { children, visibleChildren, loading: childrenLoading } = useFamilyDashboardMetrics(programCode);
+  const { visibleChildren, claimRequired, loading: childrenLoading } = useFamilyDashboardMetrics(programCode);
 
   const selectableChildren = useMemo(
     () =>
-      (visibleChildren.length > 0
-        ? visibleChildren.map((child) => ({
-            participantId: child.studentId,
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-        : children.map((child) => ({
-            participantId: child.participantId ?? '',
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-      ).filter((child) => Boolean(child.participantId)),
-    [children, visibleChildren],
+      visibleChildren
+        .map((child) => ({
+          participantId: child.studentId,
+          displayName: child.displayName,
+          firstName: child.displayName,
+        }))
+        .filter((child) => Boolean(child.participantId)),
+    [visibleChildren],
   );
 
   const { activeChild, hasActiveChild, needsChildSelection, selectChild } =
@@ -71,7 +66,8 @@ export default function FamilyContinueLearningPanel() {
   }, [location.pathname, refresh, activeChild?.participantId]);
 
   const hasChildren = selectableChildren.length > 0;
-  const showAddChildPrompt = !childrenLoading && !hasChildren;
+  const showClaimPrompt = !childrenLoading && claimRequired;
+  const showAddChildPrompt = !childrenLoading && !claimRequired && !hasChildren;
   const showUnlockCard =
     hasChildren && hasActiveChild && !baselineLoading && !baselineComplete;
   const adventuresLocked = !hasActiveChild || !baselineComplete;
@@ -85,6 +81,12 @@ export default function FamilyContinueLearningPanel() {
           child completes B-4 Check-In.
         </p>
       </div>
+
+      {showClaimPrompt ? (
+        <p className="family-panelHelper family-panelHelper--prominent" role="status">
+          Enter Parent/Guardian Email to Find Your Child.
+        </p>
+      ) : null}
 
       {showAddChildPrompt ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">

@@ -135,6 +135,63 @@ function isSupabaseParticipantId(participantId: string): boolean {
   return isValidSupabaseParticipantId(participantId);
 }
 
+function logResultSaveDebug(input: {
+  table: 'module_results' | 'assessment_results_v2';
+  activeParticipantId?: string | null;
+  participantId?: string | null;
+  programCode?: string | null;
+  moduleId?: string | null;
+  assessmentType?: string | null;
+}): void {
+  console.info('[RESULT_SAVE_DEBUG]', {
+    table: input.table,
+    active_participant_id: input.activeParticipantId ?? readActiveChildParticipantId() ?? null,
+    participant_id: input.participantId ?? null,
+    program_code: input.programCode ?? null,
+    module_id: input.moduleId ?? null,
+    assessment_type: input.assessmentType ?? null,
+  });
+}
+
+function blockOrphanedParticipantSave(input: {
+  table: 'module_results' | 'assessment_results_v2';
+  participantId?: string | null;
+  programCode?: string | null;
+  moduleId?: string | null;
+  assessmentType?: string | null;
+}): TrackingSubmitResult | null {
+  const participantId = input.participantId?.trim() ?? '';
+  logResultSaveDebug({
+    table: input.table,
+    participantId,
+    programCode: input.programCode,
+    moduleId: input.moduleId,
+    assessmentType: input.assessmentType,
+  });
+
+  if (!isSupabaseConfigured() || !supabase) {
+    return null;
+  }
+
+  if (!isValidSupabaseParticipantId(participantId)) {
+    logTrackingSaveError({
+      table: input.table,
+      operation: 'insert',
+      participantId: participantId || undefined,
+      programCode: input.programCode ?? undefined,
+      assessmentType: input.assessmentType ?? input.moduleId ?? undefined,
+      error: 'participant_id must be a valid Supabase UUID before saving results',
+    });
+    return {
+      success: false,
+      source: 'local',
+      message: 'Could not save result without a linked participant. Please select your child and try again.',
+    };
+  }
+
+  return null;
+}
+
 /** Family portal students are not grouped by classroom — keep group_name null for lookups. */
 export function resolveStudentGroupNameForSave(groupName?: string): string | undefined {
   if (shouldForceFamilyProgramResolution()) {
@@ -657,18 +714,18 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
     completed_at: completedAt,
   };
 
+  const blockedModuleSave = blockOrphanedParticipantSave({
+    table: 'module_results',
+    participantId: resolvedPayload.participant_id,
+    programCode,
+    moduleId: resolvedPayload.module_id,
+  });
+  if (blockedModuleSave) {
+    return blockedModuleSave;
+  }
+
   if (isSupabaseConfigured() && supabase) {
-    if (!isSupabaseParticipantId(resolvedPayload.participant_id)) {
-      logTrackingSaveError({
-        table: 'module_results',
-        operation: 'insert',
-        participantId: resolvedPayload.participant_id,
-        role: resolvedPayload.role,
-        programCode,
-        assessmentType: resolvedPayload.module_id,
-        error: 'participant not synced to Supabase',
-      });
-    } else {
+    if (isSupabaseParticipantId(resolvedPayload.participant_id)) {
       try {
         const insertPayload = {
           participant_id: resolvedPayload.participant_id,
@@ -742,13 +799,22 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
     }
   }
 
+  if (isSupabaseConfigured()) {
+    return {
+      success: false,
+      source: 'local',
+      participantId: resolvedPayload.participant_id,
+      message: 'Could not save module result without a linked participant.',
+    };
+  }
+
   const localRecord = appendLocalModuleResult(localPayload);
   return {
-    success: !isSupabaseConfigured(),
+    success: true,
     source: 'local',
     participantId: resolvedPayload.participant_id,
     recordId: localRecord.id,
-    message: isSupabaseConfigured() ? 'Saved on this device only.' : 'Saved on this device.',
+    message: 'Saved on this device.',
   };
 }
 
@@ -843,18 +909,18 @@ export async function saveAssessmentResult(
     completed_at: completedAt,
   };
 
+  const blockedAssessmentSave = blockOrphanedParticipantSave({
+    table: 'assessment_results_v2',
+    participantId: resolvedPayload.participant_id,
+    programCode,
+    assessmentType: resolvedPayload.assessment_type,
+  });
+  if (blockedAssessmentSave) {
+    return blockedAssessmentSave;
+  }
+
   if (isSupabaseConfigured() && supabase) {
-    if (!isSupabaseParticipantId(resolvedPayload.participant_id)) {
-      logTrackingSaveError({
-        table: 'assessment_results_v2',
-        operation: 'insert',
-        participantId: resolvedPayload.participant_id,
-        role: resolvedPayload.role,
-        programCode,
-        assessmentType: resolvedPayload.assessment_type,
-        error: 'participant not synced to Supabase',
-      });
-    } else {
+    if (isSupabaseParticipantId(resolvedPayload.participant_id)) {
       try {
         const insertPayload = {
           participant_id: resolvedPayload.participant_id,
@@ -891,6 +957,11 @@ export async function saveAssessmentResult(
             assessmentType: resolvedPayload.assessment_type,
             response: data,
           });
+          console.info('[CHILD_ASSESSMENT_SAVE]', {
+            participant_id: resolvedPayload.participant_id,
+            program_code: programCode,
+            assessment_type: resolvedPayload.assessment_type,
+          });
           return {
             success: true,
             source: 'supabase',
@@ -923,13 +994,22 @@ export async function saveAssessmentResult(
     }
   }
 
+  if (isSupabaseConfigured()) {
+    return {
+      success: false,
+      source: 'local',
+      participantId: resolvedPayload.participant_id,
+      message: 'Could not save assessment result without a linked participant.',
+    };
+  }
+
   const localRecord = appendLocalAssessmentV2Result(localPayload);
   return {
-    success: !isSupabaseConfigured(),
+    success: true,
     source: 'local',
     participantId: resolvedPayload.participant_id,
     recordId: localRecord.id,
-    message: isSupabaseConfigured() ? 'Saved on this device only.' : 'Saved on this device.',
+    message: 'Saved on this device.',
   };
 }
 

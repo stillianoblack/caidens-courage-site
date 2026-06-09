@@ -5,13 +5,23 @@ import {
 } from '../../../data/pilotDashboardContent';
 import { formatAdminPct } from '../../../lib/b4BaselineAdminStats';
 import type { B4BaselineCheckRecord } from '../../../lib/b4BaselineCheckStorage';
+import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../../../lib/pilotTrackingLocalStorage';
 import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
+import {
+  formatAssessmentScore,
+  formatModuleScore,
+  resolveParticipantDisplayName,
+  type ParticipantNameLookup,
+} from '../../../lib/pilotResultsDisplay';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import PilotLocalNote, { PilotResultsStatusCopy } from '../PilotLocalNote';
 
 type PilotResultsPanelProps = {
   refreshKey?: number;
   results: B4BaselineCheckRecord[];
+  moduleResults?: LocalModuleResultRecord[];
+  assessmentResults?: LocalAssessmentV2Record[];
+  participantLookup?: ParticipantNameLookup;
   metrics: PilotTrackingMetrics;
   source?: 'supabase' | 'local';
   warning?: string | null;
@@ -32,6 +42,9 @@ const GROWTH_BARS: Array<{
 export default function PilotResultsPanel({
   refreshKey = 0,
   results,
+  moduleResults = [],
+  assessmentResults = [],
+  participantLookup = new Map(),
   metrics,
   source = 'local',
   warning = null,
@@ -39,6 +52,7 @@ export default function PilotResultsPanel({
 }: PilotResultsPanelProps) {
   void refreshKey;
   const hasData = metrics.baselineChecksCompleted > 0;
+  const hasTrackingRows = assessmentResults.length > 0 || moduleResults.length > 0;
 
   if (loading) {
     return (
@@ -141,9 +155,72 @@ export default function PilotResultsPanel({
         </div>
       </section>
 
+      {!loading && assessmentResults.length > 0 ? (
+        <section className="pilot-panelBlock pilot-resultsTableSection">
+          <h2 className="pilot-panelBlockTitle">Student Assessments</h2>
+          <div className="pilot-resultsTableWrap">
+            <table className="pilot-resultsTable">
+              <thead>
+                <tr>
+                  <th scope="col">Child</th>
+                  <th scope="col">Program Code</th>
+                  <th scope="col">Assessment</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Completed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assessmentResults.map((row) => (
+                  <tr key={row.id}>
+                    <td>{resolveParticipantDisplayName(row.participant_id, participantLookup)}</td>
+                    <td>{row.program_code || '—'}</td>
+                    <td>{row.assessment_type}</td>
+                    <td>{formatAssessmentScore(row)}</td>
+                    <td>{row.completed_at ? new Date(row.completed_at).toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && moduleResults.length > 0 ? (
+        <section className="pilot-panelBlock pilot-resultsTableSection">
+          <h2 className="pilot-panelBlockTitle">Module Completions</h2>
+          <div className="pilot-resultsTableWrap">
+            <table className="pilot-resultsTable">
+              <thead>
+                <tr>
+                  <th scope="col">Child</th>
+                  <th scope="col">Program Code</th>
+                  <th scope="col">Module</th>
+                  <th scope="col">Score</th>
+                  <th scope="col">Completed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moduleResults.map((row) => (
+                  <tr key={row.id}>
+                    <td>{resolveParticipantDisplayName(row.participant_id, participantLookup)}</td>
+                    <td>{row.program_code || '—'}</td>
+                    <td>
+                      {row.module_title || row.module_id}
+                      {row.character ? ` · ${row.character}` : ''}
+                    </td>
+                    <td>{formatModuleScore(row)}</td>
+                    <td>{row.completed_at ? new Date(row.completed_at).toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
       {!loading && results.length > 0 ? (
         <section className="pilot-panelBlock pilot-resultsTableSection">
-          <h2 className="pilot-panelBlockTitle">Baseline Submissions</h2>
+          <h2 className="pilot-panelBlockTitle">Legacy Baseline Submissions</h2>
           <div className="pilot-resultsTableWrap">
           <table className="pilot-resultsTable">
             <thead>
@@ -171,6 +248,12 @@ export default function PilotResultsPanel({
           </table>
           </div>
         </section>
+      ) : null}
+
+      {!loading && !hasData && !hasTrackingRows ? (
+        <p className="pilot-panelHelper">
+          Results will appear here after students complete B-4 Check-In and character modules.
+        </p>
       ) : null}
 
       <div className="pilot-resultsAdminCta">

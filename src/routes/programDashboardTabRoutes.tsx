@@ -37,16 +37,24 @@ export function ProgramOverviewTabRoute() {
 export function ProgramResultsTabRoute() {
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode;
-  const { metrics, legacyResults: results, source, warning, loading } = usePilotTrackingResults(
-    0,
-    programCode,
-    true,
-  );
+  const {
+    metrics,
+    legacyResults: results,
+    moduleResults,
+    assessmentResults,
+    participantLookup,
+    source,
+    warning,
+    loading,
+  } = usePilotTrackingResults(0, programCode, true);
 
   return (
     <PilotResultsPanel
       refreshKey={0}
       results={results}
+      moduleResults={moduleResults}
+      assessmentResults={assessmentResults}
+      participantLookup={participantLookup}
       metrics={metrics}
       source={source}
       warning={warning}

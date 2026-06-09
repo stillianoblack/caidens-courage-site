@@ -5,6 +5,7 @@ import {
 } from '../config/activeChildParticipant';
 import {
   B4_BASELINE_ASSESSMENT_NAME,
+  hasAllBaselineModules,
   type BaselineModuleId,
 } from '../data/b4BaselineCheckContent';
 import {
@@ -211,18 +212,20 @@ export function saveB4BaselineStudentProfile(
 export function markBaselineModuleComplete(
   moduleId: BaselineModuleId,
   scores: Pick<B4BaselineCheckRecord, 'feelingsScore' | 'readingScore' | 'focusMovesScore'>,
+  explicitParticipantId?: string,
 ): B4BaselinePersistedState {
   const participantKey =
-    readActiveChildParticipantId() ||
-    loadB4BaselineState().profile?.participantId ||
-    loadB4BaselineState().record?.participantId;
-  const current = loadB4BaselineState(participantKey);
+    explicitParticipantId?.trim() ||
+    readActiveChildParticipantId()?.trim() ||
+    loadB4BaselineState(explicitParticipantId).profile?.participantId?.trim() ||
+    '';
+  const current = loadB4BaselineState(participantKey || undefined);
   const profile = current.profile;
   const completedModules = current.completedModules.includes(moduleId)
     ? current.completedModules
     : [...current.completedModules, moduleId];
 
-  const allDone = completedModules.length >= 3;
+  const allDone = hasAllBaselineModules(completedModules);
   const prev = current.record;
 
   const activeProgramCode = resolveTrackingProgramCode('baseline_module_complete');
@@ -244,9 +247,22 @@ export function markBaselineModuleComplete(
   };
 
   const next: B4BaselinePersistedState = { ...current, completedModules, record };
-  saveB4BaselineState(next, participantKey);
+  saveB4BaselineState(next, participantKey || undefined);
+
+  console.info('[BASELINE_SECTION_COMPLETE]', {
+    participant_id: participantKey || record.participantId || null,
+    program_code: record.programCode,
+    section: moduleId,
+    completed_modules: completedModules,
+    all_sections_complete: allDone,
+  });
 
   if (allDone && record.completedAt) {
+    console.info('[BASELINE_FULL_COMPLETE]', {
+      participant_id: participantKey || record.participantId || null,
+      program_code: record.programCode,
+      completed_modules: completedModules,
+    });
     appendBaselineResultToArchive(record);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('cc-baseline-complete'));
@@ -262,9 +278,9 @@ export function isBaselineFullyComplete(
 ): boolean {
   if (participantId) {
     const scoped = loadB4BaselineState(participantId);
-    return scoped.completedModules.length >= 3;
+    return hasAllBaselineModules(scoped.completedModules);
   }
-  return state.completedModules.length >= 3;
+  return hasAllBaselineModules(state.completedModules);
 }
 
 export function loadAllBaselineResults(): B4BaselineCheckRecord[] {

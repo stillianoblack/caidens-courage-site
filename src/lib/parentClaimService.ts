@@ -146,7 +146,7 @@ export async function claimParentFamilyPortal(input: {
 }> {
   const email = input.parentEmail.trim();
   if (!email) {
-    return { success: false, message: 'Parent email is required.' };
+    return { success: false, message: 'Parent/Guardian email is required.' };
   }
 
   const isCampFamilyEntry = !isIndependentFamilyProgram(input.program);

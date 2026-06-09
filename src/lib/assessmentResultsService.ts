@@ -245,7 +245,7 @@ export const SUPABASE_SELECT_POLICY_HINT =
   'Supabase sync is connected, but results reading may need a SELECT policy or admin endpoint.';
 
 function parseModulesCompleted(raw: string | null | undefined): BaselineModuleId[] {
-  if (!raw) return ['feelings', 'reading', 'focus-moves'];
+  if (!raw) return [];
   return raw
     .split(',')
     .map((part) => part.trim())

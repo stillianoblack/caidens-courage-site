@@ -162,7 +162,7 @@ export default function PortalAccessForm({
               htmlFor={`${formId}-parent-email`}
               className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
             >
-              Parent email
+              Parent/Guardian email
             </label>
             <input
               id={`${formId}-parent-email`}
@@ -187,7 +187,7 @@ export default function PortalAccessForm({
                 htmlFor={`${formId}-parent-last-name`}
                 className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
               >
-                Parent last name
+                Parent/Guardian last name
               </label>
               <input
                 id={`${formId}-parent-last-name`}

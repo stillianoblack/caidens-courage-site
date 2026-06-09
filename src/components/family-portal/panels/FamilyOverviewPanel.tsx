@@ -23,6 +23,7 @@ export default function FamilyOverviewPanel() {
   const {
     children,
     visibleChildren,
+    claimRequired,
     metrics,
     assessmentProgress,
     overallProgress,
@@ -35,19 +36,14 @@ export default function FamilyOverviewPanel() {
 
   const selectableChildren = useMemo(
     () =>
-      (visibleChildren.length > 0
-        ? visibleChildren.map((child) => ({
-            participantId: child.studentId,
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-        : children.map((child) => ({
-            participantId: child.participantId ?? '',
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-      ).filter((child) => Boolean(child.participantId)),
-    [children, visibleChildren],
+      visibleChildren
+        .map((child) => ({
+          participantId: child.studentId,
+          displayName: child.displayName,
+          firstName: child.displayName,
+        }))
+        .filter((child) => Boolean(child.participantId)),
+    [visibleChildren],
   );
 
   const { activeChild, needsChildSelection, selectChild } = useActiveChild(selectableChildren);
@@ -109,6 +105,12 @@ export default function FamilyOverviewPanel() {
       <FamilyAccessCodeCard />
 
       <FamilyValueCards />
+
+      {claimRequired ? (
+        <p className="family-panelHelper family-panelHelper--prominent" role="status">
+          Enter Parent/Guardian Email to Find Your Child.
+        </p>
+      ) : null}
 
       {showEmptyHelper ? (
         <p className="family-panelHelper family-panelHelper--prominent">{metrics.emptyStateMessage}</p>

@@ -47,6 +47,7 @@ export type FamilyDashboardData = {
   v2Assessments: LocalAssessmentV2Record[];
   moduleResults: LocalModuleResultRecord[];
   errors: string[];
+  claimRequired: boolean;
 };
 
 function filterStudentRowsByAllowedIds<T extends { participant_id?: string | null; role?: string }>(
@@ -235,6 +236,7 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
       v2Assessments: [],
       moduleResults: [],
       errors: ['Missing active program context.'],
+      claimRequired: true,
     };
     logFamilyDashboardDebug(empty);
     return empty;
@@ -316,6 +318,7 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
     v2Assessments,
     moduleResults,
     errors,
+    claimRequired: visibility.claimRequired,
   };
 
   logFamilyDashboardDebug(data);

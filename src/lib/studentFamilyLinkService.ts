@@ -1,4 +1,4 @@
-import { readParentClaimContext } from '../config/parentClaimContext';
+import { hasConfirmedParentClaim, readParentClaimContext } from '../config/parentClaimContext';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
@@ -41,13 +41,13 @@ function normalizeLastName(value?: string | null): string {
 }
 
 export function linkMatchesParentScope(link: StudentFamilyLink, scope?: ParentLinkScope): boolean {
-  if (!scope) return true;
+  if (!scope) return false;
 
   const email = normalizeEmail(scope.email);
   const phone = normalizePhone(scope.phone);
   const lastName = normalizeLastName(scope.lastName);
 
-  if (!email && !phone) return true;
+  if (!email && !phone) return false;
 
   const emailMatch = email && normalizeEmail(link.parent_email) === email;
   const phoneMatch = phone && normalizePhone(link.parent_phone) === phone;
@@ -75,7 +75,12 @@ export type FamilyVisibleChildrenResult = {
   children: FamilyVisibleChild[];
   allowedStudentIds: string[];
   errors: string[];
+  claimRequired: boolean;
 };
+
+function isPrivateFamilyProgramCode(programCode: string): boolean {
+  return programCode.trim().toUpperCase().startsWith('FAMILY-');
+}
 
 function childDisplayName(participant: Pick<StudentParticipantRecord, 'nickname' | 'first_name'>): string {
   return participant.nickname?.trim() || participant.first_name?.trim() || 'Child';
@@ -352,63 +357,79 @@ export async function createStudentFamilyLink(input: {
   }
 }
 
-/** Family portal children: direct family participants + camp students linked to this family program. */
+/** Family portal children: only parent/guardian-claimed links, never a full camp roster. */
 export async function resolveFamilyVisibleChildren(
   familyProgramCode: string,
   parentScope?: ParentLinkScope,
 ): Promise<FamilyVisibleChildrenResult> {
   const code = familyProgramCode.trim();
-  const scope = parentScope ?? readParentClaimContext() ?? undefined;
+  const claimContext = readParentClaimContext();
+  const scope = parentScope ?? claimContext ?? undefined;
   const errors: string[] = [];
+  const emptyResult = (claimRequired: boolean): FamilyVisibleChildrenResult => ({
+    familyProgramCode: code,
+    participants: [],
+    links: [],
+    children: [],
+    allowedStudentIds: [],
+    errors,
+    claimRequired,
+  });
 
   if (!code) {
     return {
+      ...emptyResult(true),
       familyProgramCode: '',
-      participants: [],
-      links: [],
-      children: [],
-      allowedStudentIds: [],
       errors: ['Missing active program context.'],
     };
   }
 
-  const [familyParticipantsPayload, linksPayload] = await Promise.all([
-    fetchStudentParticipantsFromSupabase(code),
-    fetchStudentFamilyLinksByFamilyProgram(code),
-  ]);
+  if (!hasConfirmedParentClaim(claimContext)) {
+    console.info('[FAMILY_CLAIM_REQUIRED]', {
+      family_program_code: code,
+      reason: 'missing_or_unconfirmed_parent_claim',
+    });
+    return {
+      ...emptyResult(true),
+      errors: ['Enter Parent/Guardian Email to Find Your Child.'],
+    };
+  }
 
-  if (familyParticipantsPayload.error) errors.push(familyParticipantsPayload.error);
+  const isPrivateFamily = isPrivateFamilyProgramCode(code);
+  const linksPayload = await fetchStudentFamilyLinksByFamilyProgram(code);
   if (linksPayload.error) errors.push(linksPayload.error);
 
-  const familyParticipants = familyParticipantsPayload.participants;
   const scopedLinks = linksPayload.links.filter((link) => linkMatchesParentScope(link, scope));
+
+  console.info('[FAMILY_CLAIM_MATCH]', {
+    family_program_code: code,
+    parent_scope: {
+      email: scope?.email ?? null,
+      phone: scope?.phone ? '***' : null,
+      last_name: scope?.lastName ?? null,
+    },
+    matched_link_count: scopedLinks.length,
+    student_ids: scopedLinks.map((row) => row.student_id),
+  });
+
+  const familyParticipantsPayload = isPrivateFamily
+    ? await fetchStudentParticipantsFromSupabase(code)
+    : { participants: [] as StudentParticipantRecord[], error: undefined };
+  if (familyParticipantsPayload.error) errors.push(familyParticipantsPayload.error);
+
+  const familyParticipants = familyParticipantsPayload.participants;
   const links = scopedLinks;
-
-  console.info('[FAMILY_PORTAL_CHILDREN]', {
-    family_program_code: code,
-    parent_scope: scope
-      ? {
-          email: scope.email ?? null,
-          phone: scope.phone ? '***' : null,
-          last_name: scope.lastName ?? null,
-        }
-      : null,
-    link_count: links.length,
-    student_ids: links.map((row) => row.student_id),
-  });
-
-  console.info('[FAMILY_CHILD_LINKS]', {
-    family_program_code: code,
-    link_count: links.length,
-    links: links.map((row) => ({
-      student_id: row.student_id,
-      camp_program_code: row.camp_program_code,
-      parent_last_name: row.parent_last_name,
-    })),
-  });
-
   const linkedIds = links.map((row) => row.student_id).filter(Boolean);
-  const missingLinkedIds = linkedIds.filter(
+  const useLinkOnlyVisibility = !isPrivateFamily || links.length > 0;
+
+  const participantIdsToFetch = new Set<string>(linkedIds);
+  if (!useLinkOnlyVisibility) {
+    for (const participant of familyParticipants) {
+      participantIdsToFetch.add(participant.id);
+    }
+  }
+
+  const missingLinkedIds = Array.from(participantIdsToFetch).filter(
     (id) => !familyParticipants.some((participant) => participant.id === id),
   );
 
@@ -425,13 +446,15 @@ export async function resolveFamilyVisibleChildren(
   const children: FamilyVisibleChild[] = [];
   const allowed = new Set<string>();
 
-  for (const participant of familyParticipants) {
-    allowed.add(participant.id);
-    children.push({
-      studentId: participant.id,
-      displayName: childDisplayName(participant),
-      source: 'family_participant',
-    });
+  if (!useLinkOnlyVisibility) {
+    for (const participant of familyParticipants) {
+      allowed.add(participant.id);
+      children.push({
+        studentId: participant.id,
+        displayName: childDisplayName(participant),
+        source: 'family_participant',
+      });
+    }
   }
 
   for (const link of links) {
@@ -453,6 +476,7 @@ export async function resolveFamilyVisibleChildren(
 
   console.info('[FAMILY_VISIBLE_CHILDREN]', {
     family_program_code: code,
+    claim_required: false,
     allowed_student_ids: allowedStudentIds,
     children: sortedChildren.map((child) => ({
       student_id: child.studentId,
@@ -468,6 +492,7 @@ export async function resolveFamilyVisibleChildren(
     children: sortedChildren,
     allowedStudentIds,
     errors,
+    claimRequired: false,
   };
 }
 

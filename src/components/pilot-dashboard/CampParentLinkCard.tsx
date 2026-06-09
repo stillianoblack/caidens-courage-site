@@ -111,11 +111,11 @@ export default function CampParentLinkCard() {
     <section className="pilot-parentLinkCard" aria-labelledby="pilot-parent-link-title">
       <div className="pilot-parentLinkHead">
         <h3 id="pilot-parent-link-title" className="pilot-parentLinkTitle">
-          Invite Parent / Link Family
+          Invite Parent/Guardian / Link Family
         </h3>
         <p className="pilot-parentLinkCopy">
           Connect a camp student to a family program so parents only see their own child&apos;s
-          results. Parent last name is optional verification only — not used for permissions.
+          results. Parent/Guardian last name is optional verification only — not used for permissions.
         </p>
       </div>
 
@@ -158,7 +158,7 @@ export default function CampParentLinkCard() {
           </label>
 
           <label className="pilot-parentLinkField">
-            <span className="pilot-parentLinkLabel">Parent email (optional)</span>
+            <span className="pilot-parentLinkLabel">Parent/Guardian email (optional)</span>
             <input
               type="email"
               className="pilot-parentLinkInput"
@@ -169,7 +169,7 @@ export default function CampParentLinkCard() {
           </label>
 
           <label className="pilot-parentLinkField">
-            <span className="pilot-parentLinkLabel">Parent last name (optional)</span>
+            <span className="pilot-parentLinkLabel">Parent/Guardian last name (optional)</span>
             <input
               className="pilot-parentLinkInput"
               value={parentLastName}

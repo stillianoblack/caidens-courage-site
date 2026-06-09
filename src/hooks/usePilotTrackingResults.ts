@@ -2,7 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { afterIdle } from '../lib/defer';
 import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import { computePilotTrackingMetrics, type PilotTrackingMetrics } from '../lib/pilotTrackingMetrics';
-import { loadPilotTrackingData } from '../lib/pilotTrackingService';
+import {
+  buildParticipantNameLookup,
+  collectParticipantIdsFromResults,
+} from '../lib/pilotResultsDisplay';
+import { fetchParticipantsByIds } from '../lib/studentFamilyLinkService';
+import {
+  fetchStudentParticipantsFromSupabase,
+  loadPilotTrackingData,
+  type StudentParticipantRecord,
+} from '../lib/pilotTrackingService';
 
 const EMPTY_METRICS = computePilotTrackingMetrics({
   legacyBaselines: [],
@@ -28,19 +37,36 @@ export function usePilotTrackingResults(
   const [assessmentResults, setAssessmentResults] = useState<
     Awaited<ReturnType<typeof loadPilotTrackingData>>['assessmentResults']
   >([]);
+  const [participants, setParticipants] = useState<StudentParticipantRecord[]>([]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [legacyPayload, trackingPayload] = await Promise.all([
+      const [legacyPayload, trackingPayload, programParticipantsPayload] = await Promise.all([
         loadAssessmentResults(programCode),
         loadPilotTrackingData(programCode),
+        programCode ? fetchStudentParticipantsFromSupabase(programCode) : Promise.resolve({ participants: [] }),
       ]);
+
+      const orphanIds = collectParticipantIdsFromResults({
+        moduleResults: trackingPayload.moduleResults,
+        assessmentResults: trackingPayload.assessmentResults,
+      }).filter(
+        (id) => !programParticipantsPayload.participants.some((participant) => participant.id === id),
+      );
+      const orphanParticipantsPayload =
+        orphanIds.length > 0
+          ? await fetchParticipantsByIds(orphanIds)
+          : { participants: [] as StudentParticipantRecord[] };
 
       setLegacyResults(legacyPayload.results);
       setLegacySource(legacyPayload.source);
       setModuleResults(trackingPayload.moduleResults);
       setAssessmentResults(trackingPayload.assessmentResults);
+      setParticipants([
+        ...programParticipantsPayload.participants,
+        ...orphanParticipantsPayload.participants,
+      ]);
       setTrackingSource(trackingPayload.source);
       setWarning(legacyPayload.warning ?? trackingPayload.warning);
     } finally {
@@ -69,10 +95,17 @@ export function usePilotTrackingResults(
     [assessmentResults, enabled, legacyResults, moduleResults],
   );
 
+  const participantLookup = useMemo(
+    () => buildParticipantNameLookup(participants),
+    [participants],
+  );
+
   return {
     legacyResults,
     moduleResults,
     assessmentResults,
+    participants,
+    participantLookup,
     metrics,
     legacySource,
     trackingSource,

@@ -93,7 +93,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
           if (role === 'family') {
             const email = parentEmail.trim();
             if (!email) {
-              setError('Enter the parent email used at camp registration.');
+              setError('Enter the parent/guardian email used at camp registration.');
               setSubmitting(false);
               return;
             }

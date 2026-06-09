@@ -25,6 +25,7 @@ import {
   B4_BASELINE_READING_QUESTIONS,
   B4_BASELINE_SCALE,
   getBaselineModuleQuestionCount,
+  getNextBaselineModule,
   scoreBaselineFeelings,
   scoreBaselineMc,
   type BaselineMcQuestion,
@@ -257,11 +258,12 @@ export default function B4BaselineCheckFlow({
       );
     }
 
-    const next = markBaselineModuleComplete(activeModule, scores);
+    const participantId = readActiveChildParticipantId();
+    const next = markBaselineModuleComplete(activeModule, scores, participantId);
     setHubState(next);
     playModuleWin();
 
-    if (isBaselineFullyComplete(next) && next.record) {
+    if (isBaselineFullyComplete(next, participantId) && next.record) {
       const submitResult = await submitBaselineResults(next.record);
       const record = next.record;
       const maxScore = (['feelings', 'reading', 'focus-moves'] as BaselineModuleId[]).reduce(
@@ -281,9 +283,18 @@ export default function B4BaselineCheckFlow({
       });
       setSyncMessage(submitResult.message);
       setView('final');
-    } else {
-      setView('module-complete');
+      return;
     }
+
+    const nextModule = getNextBaselineModule(next.completedModules);
+    if (nextModule) {
+      setActiveModule(nextModule);
+      resetQuiz();
+      setView('quiz');
+      return;
+    }
+
+    setView('module-complete');
   };
 
   const handleCheck = () => {

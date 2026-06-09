@@ -33,6 +33,7 @@ const EMPTY_DATA: FamilyDashboardData = {
   v2Assessments: [],
   moduleResults: [],
   errors: [],
+  claimRequired: false,
 };
 
 const EMPTY_SNAPSHOT = computeFamilyProgressSnapshot({ programCode: '' });
@@ -41,6 +42,7 @@ export type FamilyDashboardMetrics = {
   programCode: string;
   children: FamilyChildSummary[];
   visibleChildren: FamilyVisibleChild[];
+  claimRequired: boolean;
   metrics: FamilyProgressSnapshot;
   adultBaselineComplete: boolean;
   adultGrowthComplete: boolean;
@@ -154,6 +156,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       programCode: data.programCode,
       children,
       visibleChildren: data.visibleChildren,
+      claimRequired: data.claimRequired,
       metrics,
       adultBaselineComplete,
       adultGrowthComplete,

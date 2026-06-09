@@ -106,12 +106,12 @@ export default function FamilyResultsPanel() {
           <section className="family-panelBlock" aria-labelledby="family-results-adults">
             <div className="family-panelBlockHead">
               <h2 id="family-results-adults" className="family-panelBlockTitle">
-                Adult / Parent Reflections
+                Adult / Parent/Guardian Reflections
               </h2>
             </div>
             <ResultsTable
               entries={data.adults}
-              emptyMessage="No adult reflections yet. Complete a Parent Baseline or Growth Check to see results here."
+              emptyMessage="No adult reflections yet. Complete a Parent/Guardian Baseline or Growth Check to see results here."
             />
           </section>
         </>

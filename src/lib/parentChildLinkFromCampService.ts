@@ -11,6 +11,7 @@ import {
 } from '../config/portalContext';
 import { setActiveChild } from './activeChildContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
+import { writeParentClaimContext } from '../config/parentClaimContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { syncPortalProgramContext } from './activeProgramContext';
 import {
@@ -387,6 +388,11 @@ export async function linkParentChildFromCampAssessment(
   }
 
   activatePrivateFamilyPortal(familyProgramResult.program);
+  writeParentClaimContext({
+    email: input.parentEmail.trim(),
+    lastName: input.parentLastName.trim(),
+    confirmed: true,
+  });
   setActiveChild({
     participantId: studentId,
     displayName,

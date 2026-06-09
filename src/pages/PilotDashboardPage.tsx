@@ -49,6 +49,9 @@ type TrackingPanelProps = {
   source: ReturnType<typeof usePilotTrackingResults>['source'];
   warning?: string;
   results: ReturnType<typeof usePilotTrackingResults>['legacyResults'];
+  moduleResults: ReturnType<typeof usePilotTrackingResults>['moduleResults'];
+  assessmentResults: ReturnType<typeof usePilotTrackingResults>['assessmentResults'];
+  participantLookup: ReturnType<typeof usePilotTrackingResults>['participantLookup'];
   resultsVersion: number;
   onSelectNav: (id: PilotSidebarNavId) => void;
 };
@@ -119,11 +122,16 @@ export default function PilotDashboardPage() {
   const pageTitle = isB4Results ? 'B-4 Baseline Check Results' : NAV_TITLE[activeNav];
 
   const needsTracking = activeNav === 'overview' || activeNav === 'results';
-  const { metrics, legacyResults: results, source, warning, loading } = usePilotTrackingResults(
-    resultsVersion,
-    programCode,
-    needsTracking && Boolean(sessionType),
-  );
+  const {
+    metrics,
+    legacyResults: results,
+    moduleResults,
+    assessmentResults,
+    participantLookup,
+    source,
+    warning,
+    loading,
+  } = usePilotTrackingResults(resultsVersion, programCode, needsTracking && Boolean(sessionType));
 
   useEffect(() => {
     document.title = `${PILOT_DASHBOARD_TITLE} | Caiden's Courage`;
@@ -171,6 +179,9 @@ export default function PilotDashboardPage() {
     source,
     warning,
     results,
+    moduleResults,
+    assessmentResults,
+    participantLookup,
     resultsVersion,
     onSelectNav: handleSelectNav,
   };

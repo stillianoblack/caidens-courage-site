@@ -1,9 +1,11 @@
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../config/assessmentTypeConstants';
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
+import { hasAllBaselineModules } from '../data/b4BaselineCheckContent';
 import {
   isBaselineFullyComplete,
   loadAllBaselineResults,
   loadB4BaselineState,
+  type B4BaselineCheckRecord,
 } from './b4BaselineCheckStorage';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -20,6 +22,18 @@ function resolveParticipantId(participantId?: string): string {
   return (participantId ?? readActiveChildParticipantId()).trim();
 }
 
+function archiveRowIsFullyComplete(
+  row: B4BaselineCheckRecord,
+  participantId: string,
+  code?: string,
+): boolean {
+  if (!row.completedAt) return false;
+  const rowParticipant = row.participantId?.trim() ?? '';
+  if (!rowParticipant || rowParticipant !== participantId) return false;
+  if (code && normalizeCode(row.programCode ?? '') !== normalizeCode(code)) return false;
+  return hasAllBaselineModules(row.completedModules ?? []);
+}
+
 export function isBaselineCompleteLocal(input: BaselineCompletionInput = {}): boolean {
   const code = input.programCode?.trim();
   const participantId = resolveParticipantId(input.participantId);
@@ -29,7 +43,7 @@ export function isBaselineCompleteLocal(input: BaselineCompletionInput = {}): bo
   }
 
   const session = loadB4BaselineState(participantId);
-  if (isBaselineFullyComplete(session)) {
+  if (isBaselineFullyComplete(session, participantId)) {
     const sessionCode = session.profile?.programCode ?? session.record?.programCode ?? '';
     const sessionParticipant =
       session.profile?.participantId ?? session.record?.participantId ?? '';
@@ -47,13 +61,7 @@ export function isBaselineCompleteLocal(input: BaselineCompletionInput = {}): bo
   }
 
   const archive = loadAllBaselineResults();
-  const matched = archive.some((row) => {
-    if (!row.completedAt) return false;
-    const rowParticipant = row.participantId?.trim() ?? '';
-    if (!rowParticipant || rowParticipant !== participantId) return false;
-    if (code && normalizeCode(row.programCode) !== normalizeCode(code)) return false;
-    return true;
-  });
+  const matched = archive.some((row) => archiveRowIsFullyComplete(row, participantId, code));
 
   if (matched) {
     console.info('[BASELINE_MATCH]', {
@@ -80,20 +88,26 @@ export async function isBaselineCompleteRemote(
   try {
     const { data: v2Data, error: v2Error } = await supabase
       .from('assessment_results_v2')
-      .select('participant_id, program_code, assessment_type, completed_at')
+      .select('participant_id, program_code, assessment_type, completed_at, answers_json')
       .eq('assessment_type', CHILD_BASELINE_ASSESSMENT_TYPE)
       .eq('program_code', code)
       .eq('participant_id', participantId)
+      .order('completed_at', { ascending: false })
       .limit(1);
 
     if (!v2Error && v2Data?.length) {
-      const row = v2Data[0] as { completed_at?: string | null };
-      if (row.completed_at) {
+      const row = v2Data[0] as {
+        participant_id?: string | null;
+        completed_at?: string | null;
+        answers_json?: Record<string, unknown> | null;
+      };
+      if (row.participant_id?.trim()) {
         console.info('[BASELINE_MATCH]', {
           source: 'assessment_results_v2',
           participant_id: participantId,
           program_code: code,
           matched: true,
+          preserve_existing_progress: true,
         });
         return true;
       }
@@ -101,24 +115,30 @@ export async function isBaselineCompleteRemote(
 
     const { data, error } = await supabase
       .from('assessment_results')
-      .select('student_id, program_code, assessment_type, completed_at')
+      .select('student_id, program_code, assessment_type, completed_at, modules_completed')
       .eq('assessment_type', CHILD_BASELINE_ASSESSMENT_TYPE)
       .eq('program_code', code)
       .eq('student_id', participantId)
+      .order('completed_at', { ascending: false })
       .limit(1);
 
     if (error || !data?.length) {
       return false;
     }
 
-    const row = data[0] as { completed_at?: string | null };
-    const matched = Boolean(row.completed_at);
+    const row = data[0] as {
+      student_id?: string | null;
+      completed_at?: string | null;
+      modules_completed?: string | null;
+    };
+    const matched = Boolean(row.student_id?.trim());
     if (matched) {
       console.info('[BASELINE_MATCH]', {
         source: 'assessment_results',
         participant_id: participantId,
         program_code: code,
         matched: true,
+        preserve_existing_progress: true,
       });
     }
     return matched;
@@ -135,10 +155,9 @@ export async function checkBaselineCompletion(
   const input = { programCode, participantId: resolvedParticipantId };
 
   if (!resolvedParticipantId) {
-    console.info('[BASELINE_GATE]', {
+    console.info('[BASELINE_GATE_LOCKED]', {
       program_code: programCode ?? null,
       participant_id: null,
-      complete: false,
       reason: 'no_active_child',
     });
     return false;
@@ -148,13 +167,22 @@ export async function checkBaselineCompletion(
   const remoteComplete = localComplete ? true : await isBaselineCompleteRemote(input);
   const complete = localComplete || remoteComplete;
 
-  console.info('[BASELINE_GATE]', {
-    program_code: programCode ?? null,
-    participant_id: resolvedParticipantId,
-    complete,
-    local_complete: localComplete,
-    remote_complete: remoteComplete,
-  });
+  if (complete) {
+    console.info('[BASELINE_GATE_UNLOCKED]', {
+      program_code: programCode ?? null,
+      participant_id: resolvedParticipantId,
+      local_complete: localComplete,
+      remote_complete: remoteComplete,
+    });
+  } else {
+    console.info('[BASELINE_GATE_LOCKED]', {
+      program_code: programCode ?? null,
+      participant_id: resolvedParticipantId,
+      local_complete: localComplete,
+      remote_complete: remoteComplete,
+    });
+  }
+
   console.info('[BASELINE_CHECK]', {
     program_code: programCode ?? null,
     participant_id: resolvedParticipantId,

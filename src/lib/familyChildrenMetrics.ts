@@ -2,6 +2,7 @@ import {
   CHILD_BEFORE_CHECK_IN_LABEL,
   isChildBaselineAssessmentType,
 } from '../config/assessmentTypeConstants';
+import { hasAllBaselineModules } from '../data/b4BaselineCheckContent';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
@@ -105,24 +106,29 @@ function resolveBaselineStatus(input: {
   );
 
   const baselineV2 = v2Rows.filter((row) => isChildBaselineAssessmentType(row.assessment_type));
-  if (baselineV2.length > 0) {
+  const completeBaselineV2 = baselineV2.find((row) => Boolean(row.participant_id?.trim()));
+  if (completeBaselineV2) {
     console.info('[CHILD_BASELINE_MATCH]', {
       display_name: input.displayName,
       participant_id: input.participantId,
       match_source: 'assessment_results_v2',
-      assessment_type: baselineV2[0]?.assessment_type,
+      assessment_type: completeBaselineV2.assessment_type,
       matched_rows: baselineV2.length,
     });
     return 'Complete';
   }
 
-  if (v2Rows.length > 0) return 'In Progress';
+  if (baselineV2.length > 0) return 'In Progress';
 
   const legacyMatch = input.legacyBaselines.filter((row) =>
     matchesLegacyBaseline(input.participantId, input.displayName, row),
   );
 
-  if (legacyMatch.some((row) => Boolean(row.completedAt))) {
+  if (
+    legacyMatch.some(
+      (row) => Boolean(row.completedAt) && hasAllBaselineModules(row.completedModules),
+    )
+  ) {
     console.info('[CHILD_BASELINE_MATCH]', {
       display_name: input.displayName,
       participant_id: input.participantId,

@@ -43,9 +43,9 @@ function CharacterCardGrid({
         const gamesLocked = !hasActiveChild || (!baselineComplete && !isB4CheckIn);
         const status =
           isB4CheckIn && !baselineComplete
-            ? 'Start B-4 Check-In'
+            ? 'Start B-4 Baseline First'
             : gamesLocked
-              ? 'Complete B-4 Check-In to unlock'
+              ? 'Start B-4 Baseline First'
               : progress?.statusLine || character.status;
 
         return (
@@ -54,14 +54,14 @@ function CharacterCardGrid({
             characterId={character.id}
             title={character.title}
             description={character.description}
-            cta={isB4CheckIn && !baselineComplete ? 'Start B-4 Check-In' : character.cta}
+            cta={isB4CheckIn && !baselineComplete ? 'Start B-4 Baseline First' : character.cta}
             href={isB4CheckIn && !baselineComplete ? baselinePath : character.href}
             status={status}
             statusTone={gamesLocked ? 'locked' : progress?.statusTone || character.statusTone}
             skillTags={character.skillTags}
             locked={gamesLocked}
             lockedLabel={
-              !hasActiveChild ? 'Select your child to begin' : 'Complete B-4 Check-In to unlock'
+              !hasActiveChild ? 'Select your child to begin' : 'Start B-4 Baseline First'
             }
           />
         );
@@ -74,23 +74,18 @@ export default function FamilyCharactersPanel() {
   const location = useLocation();
   const shellBase = resolveFamilyBasePath(location.pathname);
   const programCode = resolveTrackingProgramCode() ?? undefined;
-  const { children, visibleChildren, loading } = useFamilyDashboardMetrics(programCode);
+  const { visibleChildren, claimRequired, loading } = useFamilyDashboardMetrics(programCode);
 
   const selectableChildren = useMemo(
     () =>
-      (visibleChildren.length > 0
-        ? visibleChildren.map((child) => ({
-            participantId: child.studentId,
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-        : children.map((child) => ({
-            participantId: child.participantId ?? '',
-            displayName: child.displayName,
-            firstName: child.displayName,
-          }))
-      ).filter((child) => Boolean(child.participantId)),
-    [children, visibleChildren],
+      visibleChildren
+        .map((child) => ({
+          participantId: child.studentId,
+          displayName: child.displayName,
+          firstName: child.displayName,
+        }))
+        .filter((child) => Boolean(child.participantId)),
+    [visibleChildren],
   );
 
   const { activeChild, hasActiveChild, needsChildSelection, selectChild } =
@@ -112,7 +107,13 @@ export default function FamilyCharactersPanel() {
         <p className="family-panelIntroSubtitle">{CHARACTER_HUB_PAGE.subtitle}</p>
       </div>
 
-      {!loading && !hasChildren ? (
+      {!loading && claimRequired ? (
+        <p className="family-panelHelper family-panelHelper--prominent" role="status">
+          Enter Parent/Guardian Email to Find Your Child.
+        </p>
+      ) : null}
+
+      {!loading && !claimRequired && !hasChildren ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
           Add your child to begin.
         </p>

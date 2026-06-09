@@ -65,7 +65,7 @@ export default function CampChildOnboardingCard() {
     <section className="pilot-parentLinkCard" aria-labelledby="pilot-camp-onboard-title">
       <div className="pilot-parentLinkHead">
         <h3 id="pilot-camp-onboard-title" className="pilot-parentLinkTitle">
-          Add Camp Child + Parent Contact
+          Add Camp Child + Parent/Guardian Contact
         </h3>
         <p className="pilot-parentLinkCopy">
           Onboard a child under your camp program and store parent contact for later Family Portal
@@ -97,7 +97,7 @@ export default function CampChildOnboardingCard() {
         </label>
 
         <label className="pilot-parentLinkField">
-          <span className="pilot-parentLinkLabel">Parent first name</span>
+          <span className="pilot-parentLinkLabel">Parent/Guardian first name</span>
           <input
             className="pilot-parentLinkInput"
             value={parentFirstName}
@@ -107,7 +107,7 @@ export default function CampChildOnboardingCard() {
         </label>
 
         <label className="pilot-parentLinkField">
-          <span className="pilot-parentLinkLabel">Parent last name</span>
+          <span className="pilot-parentLinkLabel">Parent/Guardian last name</span>
           <input
             className="pilot-parentLinkInput"
             value={parentLastName}
@@ -118,7 +118,7 @@ export default function CampChildOnboardingCard() {
         </label>
 
         <label className="pilot-parentLinkField">
-          <span className="pilot-parentLinkLabel">Parent email</span>
+          <span className="pilot-parentLinkLabel">Parent/Guardian email</span>
           <input
             type="email"
             className="pilot-parentLinkInput"
@@ -130,7 +130,7 @@ export default function CampChildOnboardingCard() {
         </label>
 
         <label className="pilot-parentLinkField">
-          <span className="pilot-parentLinkLabel">Parent phone (optional)</span>
+          <span className="pilot-parentLinkLabel">Parent/Guardian phone (optional)</span>
           <input
             type="tel"
             className="pilot-parentLinkInput"
@@ -152,7 +152,7 @@ export default function CampChildOnboardingCard() {
         ) : null}
 
         <button type="submit" className="pilot-parentLinkBtn" disabled={!canSubmit}>
-          {submitting ? 'Saving…' : 'Add Child + Parent Contact'}
+          {submitting ? 'Saving…' : 'Add Child + Parent/Guardian Contact'}
         </button>
       </form>
     </section>

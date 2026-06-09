@@ -32,6 +32,20 @@ export const B4_BASELINE_PRIVACY_NOTE =
 
 export const B4_BASELINE_STUDENT_HINT = 'Use first name or nickname only.';
 
+export const REQUIRED_BASELINE_MODULE_IDS: BaselineModuleId[] = [
+  'feelings',
+  'reading',
+  'focus-moves',
+];
+
+export function hasAllBaselineModules(completedModules: BaselineModuleId[]): boolean {
+  return REQUIRED_BASELINE_MODULE_IDS.every((moduleId) => completedModules.includes(moduleId));
+}
+
+export function getNextBaselineModule(completedModules: BaselineModuleId[]): BaselineModuleId | null {
+  return REQUIRED_BASELINE_MODULE_IDS.find((moduleId) => !completedModules.includes(moduleId)) ?? null;
+}
+
 export const B4_BASELINE_MODULES = [
   {
     id: 'feelings' as const,

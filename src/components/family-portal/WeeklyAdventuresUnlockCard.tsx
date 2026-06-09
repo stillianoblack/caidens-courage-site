@@ -12,14 +12,15 @@ export default function WeeklyAdventuresUnlockCard({ baselinePath }: WeeklyAdven
       <div className="weeklyAdventuresUnlockCardBody">
         <p className="weeklyAdventuresUnlockCardEyebrow">Focus Flame Starter</p>
         <h2 id="weekly-adventures-unlock-title" className="weeklyAdventuresUnlockCardTitle">
-          Unlock Your Weekly Adventures
+          Start B-4 Baseline First
         </h2>
         <p className="weeklyAdventuresUnlockCardCopy">
-          Complete a quick B-4 Check-In to unlock games, coloring pages, and weekly activities. This
-          helps B-4 understand how you focus, read, and grow.
+          Weekly Adventures stay locked until your child completes the full B-4 Check-In (Feelings,
+          Reading, and Focus Moves). Start here to unlock games, coloring pages, and weekly
+          activities.
         </p>
         <Link to={baselinePath} className="weeklyAdventuresUnlockCardBtn">
-          Start B-4 Check-In
+          Start B-4 Baseline First
         </Link>
         <p className="weeklyAdventuresUnlockCardNote">Takes about 5 minutes. No bad answers.</p>
       </div>
