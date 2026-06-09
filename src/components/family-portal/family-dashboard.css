@@ -583,6 +583,94 @@
   color: var(--family-slate, #5a6478);
 }
 
+.family-addChild {
+  margin-bottom: 1.25rem;
+}
+
+.family-addChild--compact .family-panelBlockHead {
+  margin-bottom: 0.5rem;
+}
+
+.family-addChildForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .family-addChildForm {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .family-addChildBtn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+.family-addChildField {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.family-addChildLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.family-addChildInput {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--family-border);
+  border-radius: 0.625rem;
+  font-size: 0.9375rem;
+  color: var(--family-navy-deep);
+  background: #fff;
+}
+
+.family-addChildInput:focus {
+  outline: 2px solid rgba(47, 111, 176, 0.35);
+  outline-offset: 1px;
+}
+
+.family-addChildBtn {
+  padding: 0.625rem 1.125rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: var(--family-navy);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-addChildBtn:hover:not(:disabled) {
+  background: var(--family-navy-deep);
+}
+
+.family-addChildBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.family-addChildMessage {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  grid-column: 1 / -1;
+}
+
+.family-addChildMessage--success {
+  color: #166534;
+}
+
+.family-addChildMessage--error {
+  color: #b91c1c;
+}
+
 /* Overview value cards */
 .family-valueCards {
   display: grid;

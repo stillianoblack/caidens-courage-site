@@ -1,3 +1,7 @@
+import {
+  CHILD_BEFORE_CHECK_IN_LABEL,
+  isChildBaselineAssessmentType,
+} from '../config/assessmentTypeConstants';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
@@ -35,11 +39,23 @@ function matchesLegacyBaseline(
   displayName: string,
   row: B4BaselineCheckRecord,
 ): boolean {
-  const nameKey = normalizeName(displayName);
-  if (participantId && row.anonymousStudentId === participantId) {
-    return true;
+  if (participantId) {
+    if (row.participantId === participantId) return true;
+    if (row.anonymousStudentId === participantId) return true;
   }
-  return normalizeName(row.nickname) === nameKey;
+
+  const nameKey = normalizeName(displayName);
+  if (!nameKey) return false;
+  return (
+    normalizeName(row.nickname) === nameKey || normalizeName(row.firstName) === nameKey
+  );
+}
+
+function resolveAssessmentParticipantId(row: LocalAssessmentV2Record): string {
+  if (row.participant_id?.trim()) return row.participant_id.trim();
+
+  const answers = row.answers_json as { participant_id?: string; student_id?: string } | undefined;
+  return answers?.participant_id?.trim() || answers?.student_id?.trim() || '';
 }
 
 function matchesV2StudentRow(
@@ -48,7 +64,17 @@ function matchesV2StudentRow(
   row: LocalAssessmentV2Record,
 ): boolean {
   if (row.role !== 'student') return false;
-  if (participantId && row.participant_id === participantId) return true;
+
+  const rowParticipantId = resolveAssessmentParticipantId(row);
+  if (participantId && rowParticipantId && rowParticipantId === participantId) {
+    return true;
+  }
+  if (participantId && row.participant_id === participantId) {
+    return true;
+  }
+
+  if (participantId) return false;
+
   return normalizeName(resolveAssessmentStudentName(row)) === normalizeName(displayName);
 }
 
@@ -83,7 +109,15 @@ function resolveBaselineStatus(input: {
     matchesV2StudentRow(input.participantId, input.displayName, row),
   );
 
-  if (v2Rows.some((row) => row.assessment_type === 'baseline')) {
+  const baselineV2 = v2Rows.filter((row) => isChildBaselineAssessmentType(row.assessment_type));
+  if (baselineV2.length > 0) {
+    console.info('[CHILD_BASELINE_MATCH]', {
+      display_name: input.displayName,
+      participant_id: input.participantId,
+      match_source: 'assessment_results_v2',
+      assessment_type: baselineV2[0]?.assessment_type,
+      matched_rows: baselineV2.length,
+    });
     return 'Complete';
   }
 
@@ -94,10 +128,23 @@ function resolveBaselineStatus(input: {
   );
 
   if (legacyMatch.some((row) => Boolean(row.completedAt))) {
+    console.info('[CHILD_BASELINE_MATCH]', {
+      display_name: input.displayName,
+      participant_id: input.participantId,
+      match_source: 'legacy_local_baseline',
+      matched_rows: legacyMatch.length,
+    });
     return 'Complete';
   }
 
   if (legacyMatch.length > 0) return 'In Progress';
+
+  console.info('[CHILD_BASELINE_MATCH]', {
+    display_name: input.displayName,
+    participant_id: input.participantId,
+    match_source: 'none',
+    status: 'Not Started',
+  });
 
   return 'Not Started';
 }
@@ -125,17 +172,16 @@ function resolveLatestActivity(input: {
     .forEach((row) => {
       events.push({
         at: new Date(row.completed_at).getTime(),
-        label:
-          row.assessment_type === 'baseline'
-            ? `${input.displayName} completed B-4 Check-In`
-            : `${input.displayName} completed ${row.assessment_type.replace(/_/g, ' ')}`,
+        label: isChildBaselineAssessmentType(row.assessment_type)
+          ? `${input.displayName} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
+          : `${input.displayName} completed ${row.assessment_type.replace(/_/g, ' ')}`,
       });
     });
 
   const hasV2Baseline = input.assessments.some(
     (row) =>
       matchesV2StudentRow(input.participantId, input.displayName, row) &&
-      row.assessment_type === 'baseline',
+      isChildBaselineAssessmentType(row.assessment_type),
   );
 
   if (!hasV2Baseline) {
@@ -144,7 +190,7 @@ function resolveLatestActivity(input: {
       .forEach((row) => {
         events.push({
           at: new Date(row.completedAt).getTime(),
-          label: `${input.displayName} completed B-4 Check-In`,
+          label: `${input.displayName} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`,
         });
       });
   }

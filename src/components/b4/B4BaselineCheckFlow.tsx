@@ -2,6 +2,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildNickname } from '../../config/activeChildNickname';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
+import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
+import { ensureParticipantForBaseline } from '../../lib/childProfileService';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import B4BaselineHub from '../b4-baseline-check/B4BaselineHub';
@@ -82,6 +85,8 @@ export default function B4BaselineCheckFlow({
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
   const programContext = resolveActiveProgramContext();
 
@@ -135,22 +140,49 @@ export default function B4BaselineCheckFlow({
     refreshHub();
   };
 
-  const handleStudentSubmit = (values: { nickname: string; programCode: string; groupName: string }) => {
+  const handleStudentSubmit = async (values: {
+    firstName?: string;
+    nickname: string;
+    programCode: string;
+    groupName: string;
+  }) => {
     playSelect();
+    setProfileError(null);
+    setProfileSubmitting(true);
+
     const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
     const activeProgram = readActivePilotProgram();
-    const next = saveB4BaselineStudentProfile({
-      nickname: values.nickname,
-      programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
-      groupName: activeProgram?.groupName || values.groupName,
-    });
-    setHubState(next);
-    refreshAnalyticsIdentity();
-    trackEvent('student_assessment_started', {
-      role: 'student',
-      assessment_type: 'baseline',
-    });
-    setView('hub');
+    const nickname = values.nickname.trim();
+    const firstName = values.firstName?.trim() || nickname;
+
+    try {
+      const participant = await ensureParticipantForBaseline({
+        firstName,
+        nickname,
+        participantId: readActiveChildParticipantId() || hubState.profile?.participantId,
+        groupName: activeProgram?.groupName || values.groupName,
+      });
+
+      const next = saveB4BaselineStudentProfile({
+        firstName: participant.firstName,
+        nickname: participant.nickname,
+        participantId: participant.participantId,
+        programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
+        groupName: activeProgram?.groupName || values.groupName,
+      });
+      setHubState(next);
+      refreshAnalyticsIdentity();
+      trackEvent('student_assessment_started', {
+        role: 'student',
+        assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+        participant_id: participant.participantId,
+      });
+      setView('hub');
+    } catch {
+      setProfileError('Could not start Before Check-In. Please try again.');
+    } finally {
+      setProfileSubmitting(false);
+    }
   };
 
   const handleRetake = () => {
@@ -207,7 +239,8 @@ export default function B4BaselineCheckFlow({
       const totalScore = record.feelingsScore + record.readingScore + record.focusMovesScore;
       trackEvent('student_assessment_completed', {
         role: 'student',
-        assessment_type: 'baseline',
+        assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+        participant_id: record.participantId,
         score: totalScore,
         max_score: maxScore,
         percent_score: maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0,
@@ -366,8 +399,14 @@ export default function B4BaselineCheckFlow({
             <p className="bbc-subtitle">{landingCopy.subtitle}</p>
             <B4Avatar size="hero" src={avatarSrc} />
             <p className="bbc-body">{landingCopy.body}</p>
+            {profileError ? (
+              <p className="bbc-profileError" role="alert">
+                {profileError}
+              </p>
+            ) : null}
             <B4BaselineStudentForm
               familyPortal={familyPortal}
+              initialFirstName={hubState.profile?.firstName ?? ''}
               initialNickname={
                 hubState.profile?.nickname ?? readActiveChildNickname() ?? ''
               }
@@ -377,7 +416,8 @@ export default function B4BaselineCheckFlow({
               initialGroupName={
                 programContext?.groupName ?? hubState.profile?.groupName ?? ''
               }
-              onSubmit={handleStudentSubmit}
+              submitting={profileSubmitting}
+              onSubmit={(values) => void handleStudentSubmit(values)}
             />
           </div>
         ) : null}

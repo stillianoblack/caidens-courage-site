@@ -1,4 +1,9 @@
 import {
+  ADULT_POST_ASSESSMENT_TYPE,
+  ADULT_PRE_ASSESSMENT_TYPE,
+  isChildBaselineAssessmentType,
+} from '../config/assessmentTypeConstants';
+import {
   fetchAssessmentResultsFromSupabase,
   supabaseRowToRecord,
   type AssessmentResultRow,
@@ -16,12 +21,12 @@ import {
 } from './pilotTrackingService';
 
 export const ADULT_BASELINE_ASSESSMENT_TYPES = new Set([
-  'adult_pre',
+  ADULT_PRE_ASSESSMENT_TYPE,
   'adult_baseline',
 ]);
 
 export const ADULT_GROWTH_ASSESSMENT_TYPES = new Set([
-  'adult_post',
+  ADULT_POST_ASSESSMENT_TYPE,
   'adult_growth',
 ]);
 
@@ -42,7 +47,7 @@ function isStudentBaselineLegacyRow(row: AssessmentResultRow): boolean {
   }
   if (type.startsWith('adult')) return false;
   if (row.role === 'adult') return false;
-  return type === 'baseline';
+  return isChildBaselineAssessmentType(type);
 }
 
 function isAdultLegacyRow(row: AssessmentResultRow): boolean {
@@ -134,7 +139,7 @@ export function logFamilyDashboardDebug(payload: {
       legacy_adult: payload.adultLegacyAssessments.length,
       v2: payload.v2Assessments.length,
       v2_student_baselines: payload.v2Assessments.filter(
-        (row) => row.role === 'student' && row.assessment_type === 'baseline',
+        (row) => row.role === 'student' && isChildBaselineAssessmentType(row.assessment_type),
       ).length,
       v2_adult_baselines: payload.v2Assessments.filter(
         (row) => row.role === 'adult' && ADULT_BASELINE_ASSESSMENT_TYPES.has(row.assessment_type),

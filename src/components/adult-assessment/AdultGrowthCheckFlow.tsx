@@ -1,4 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import {
+  ADULT_POST_ASSESSMENT_TYPE,
+  ADULT_PRE_ASSESSMENT_TYPE,
+} from '../../config/assessmentTypeConstants';
 import { resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { useSetMissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
@@ -100,7 +104,7 @@ export default function AdultGrowthCheckFlow({
     refreshAnalyticsIdentity();
     trackEvent('adult_assessment_started', {
       role: familyPortal ? 'parent' : 'facilitator',
-      assessment_type: phase === 'baseline' ? 'adult_pre' : 'adult_post',
+      assessment_type: phase === 'baseline' ? ADULT_PRE_ASSESSMENT_TYPE : ADULT_POST_ASSESSMENT_TYPE,
     });
     resetQuiz();
     setView('quiz');
@@ -128,7 +132,7 @@ export default function AdultGrowthCheckFlow({
       const submit = await saveAdultAssessmentToSupabase(record);
       trackEvent('adult_assessment_completed', {
         role: familyPortal ? 'parent' : 'facilitator',
-        assessment_type: phase === 'baseline' ? 'adult_pre' : 'adult_post',
+        assessment_type: phase === 'baseline' ? ADULT_PRE_ASSESSMENT_TYPE : ADULT_POST_ASSESSMENT_TYPE,
         score: scores.totalScore,
         max_score: record.totalQuestions,
         percent_score:

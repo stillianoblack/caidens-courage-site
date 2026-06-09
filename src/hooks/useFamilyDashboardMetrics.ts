@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
@@ -78,12 +79,14 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     };
 
     window.addEventListener('cc-baseline-complete', handleRefresh);
+    window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
     window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
     window.addEventListener('focus', handleRefresh);
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('cc-baseline-complete', handleRefresh);
+      window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
       window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
       window.removeEventListener('focus', handleRefresh);
       document.removeEventListener('visibilitychange', handleVisibility);

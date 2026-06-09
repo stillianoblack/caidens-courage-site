@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatChildBaselineStatusLabel } from '../../config/assessmentTypeConstants';
 import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
 
 type FamilyChildrenSectionProps = {
@@ -49,7 +50,7 @@ export default function FamilyChildrenSection({
               <div className="family-childCardHead">
                 <h3 className="family-childName">{child.displayName}</h3>
                 <span className={baselineStatusClass(child.baselineStatus)}>
-                  Baseline: {child.baselineStatus}
+                  {formatChildBaselineStatusLabel(child.baselineStatus)}
                 </span>
               </div>
               <dl className="family-childMeta">

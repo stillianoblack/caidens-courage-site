@@ -1,3 +1,9 @@
+import {
+  ADULT_POST_ASSESSMENT_TYPE,
+  ADULT_PRE_ASSESSMENT_TYPE,
+  CHILD_BEFORE_CHECK_IN_LABEL,
+  isChildBaselineAssessmentType,
+} from '../config/assessmentTypeConstants';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import type { FamilyChildSummary } from './familyChildrenMetrics';
 import {
@@ -60,22 +66,21 @@ function buildRecentActivity(
       const answers = row.answers_json as { nickname?: string; firstName?: string } | undefined;
       const name = answers?.nickname?.trim() || answers?.firstName?.trim();
       const assessmentType = String(row.assessment_type);
-      const label =
-        assessmentType === 'baseline'
-          ? 'B-4 Check-In'
-          : assessmentType === 'final'
-            ? 'Growth Check'
-            : assessmentType === 'adult_pre'
-              ? 'Adult Baseline'
-              : assessmentType === 'adult_post'
-                ? 'Adult Growth Check'
-                : assessmentType.replace(/_/g, ' ');
+      const label = isChildBaselineAssessmentType(assessmentType)
+        ? CHILD_BEFORE_CHECK_IN_LABEL
+        : assessmentType === 'final'
+          ? 'Growth Check'
+          : assessmentType === ADULT_PRE_ASSESSMENT_TYPE
+            ? 'Adult Baseline'
+            : assessmentType === ADULT_POST_ASSESSMENT_TYPE
+              ? 'Adult Growth Check'
+              : assessmentType.replace(/_/g, ' ');
       return name ? `${name} completed ${label}` : `${label} completed`;
     });
 
   const coveredNames = new Set(
     assessments
-      .filter((row) => row.role === 'student' && row.assessment_type === 'baseline')
+      .filter((row) => row.role === 'student' && isChildBaselineAssessmentType(row.assessment_type))
       .map((row) => {
         const answers = row.answers_json as { nickname?: string } | undefined;
         return answers?.nickname?.trim().toLowerCase() ?? '';
@@ -89,7 +94,9 @@ function buildRecentActivity(
     .filter((row) => !coveredNames.has(row.nickname.trim().toLowerCase()))
     .slice(0, 3)
     .map((row) =>
-      row.nickname ? `${row.nickname} completed B-4 Check-In` : 'B-4 Check-In completed',
+      row.nickname
+        ? `${row.nickname} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
+        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
     );
 
   return [...adultEvents, ...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);

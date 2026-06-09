@@ -1,4 +1,6 @@
 import { readActiveChildNickname } from '../config/activeChildNickname';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
+import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../config/assessmentTypeConstants';
 import {
   isBaselineFullyComplete,
   loadAllBaselineResults,
@@ -68,8 +70,13 @@ export async function isBaselineCompleteRemote(
     let query = supabase
       .from('assessment_results')
       .select('nickname, child_nickname, program_code, assessment_type, completed_at')
-      .eq('assessment_type', 'baseline')
+      .eq('assessment_type', CHILD_BASELINE_ASSESSMENT_TYPE)
       .eq('program_code', code);
+
+    const participantId = readActiveChildParticipantId();
+    if (participantId) {
+      query = query.eq('student_id', participantId);
+    }
 
     const { data, error } = await query;
 

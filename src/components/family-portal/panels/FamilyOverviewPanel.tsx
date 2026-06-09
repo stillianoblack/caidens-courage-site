@@ -7,6 +7,7 @@ import {
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
+import AddChildForm from '../AddChildForm';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
 import FamilyValueCards from '../FamilyValueCards';
@@ -23,6 +24,7 @@ export default function FamilyOverviewPanel() {
     overallProgress,
     adultBaselineComplete,
     loading,
+    refresh,
   } = useFamilyDashboardMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
 
@@ -87,6 +89,8 @@ export default function FamilyOverviewPanel() {
       {showEmptyHelper ? (
         <p className="family-panelHelper family-panelHelper--prominent">{metrics.emptyStateMessage}</p>
       ) : null}
+
+      <AddChildForm onAdded={() => void refresh()} />
 
       <FamilyChildrenSection
         childSummaries={children}

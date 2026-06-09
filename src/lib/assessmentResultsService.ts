@@ -7,6 +7,10 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { PORTAL_CONNECTION_ERROR_MESSAGE } from './portalAccessCodes';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import {
+  CHILD_BASELINE_ASSESSMENT_TYPE,
+  isChildBaselineAssessmentType,
+} from '../config/assessmentTypeConstants';
 import { resolveTrackingProgramCode } from './activeProgramContext';
 import { findOrCreateParticipant, saveAssessmentResult } from './pilotTrackingService';
 import {
@@ -59,6 +63,8 @@ const BASELINE_MODULES = 'feelings,reading,focus-moves';
 
 export type StudentAssessmentSaveInput = {
   nickname: string;
+  firstName?: string;
+  participantId?: string;
   assessmentType: 'baseline' | 'final';
   groupName?: string;
   feelingsScore: number;
@@ -118,13 +124,38 @@ export async function saveStudentAssessmentToSupabase(
   const totalScore = input.feelingsScore + input.readingScore + input.focusScore;
 
   try {
-    const { participantId, source: participantSource } = await findOrCreateParticipant({
-      role: 'student',
+    let participantId = input.participantId?.trim() ?? '';
+    let participantSource: 'supabase' | 'local' = 'supabase';
+
+    if (!participantId) {
+      const participant = await findOrCreateParticipant({
+        role: 'student',
+        nickname: input.nickname,
+        first_name: input.firstName?.trim() || input.nickname,
+        program_code: programCode,
+        group_name: input.groupName || undefined,
+      });
+      participantId = participant.participantId;
+      participantSource = participant.source;
+    }
+
+    const answersJson = {
+      ...(input.answersJson ?? {}),
+      participant_id: participantId,
       nickname: input.nickname,
-      first_name: input.nickname,
-      program_code: programCode,
-      group_name: input.groupName || undefined,
-    });
+      first_name: input.firstName?.trim() || input.nickname,
+    };
+
+    if (isChildBaselineAssessmentType(input.assessmentType)) {
+      console.info('[CHILD_BASELINE_SAVE]', {
+        participant_id: participantId,
+        student_id: participantId,
+        assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+        program_code: programCode,
+        nickname: input.nickname,
+        participant_source: participantSource,
+      });
+    }
 
     const v2Result = await saveAssessmentResult({
       participant_id: participantId,
@@ -137,7 +168,7 @@ export async function saveStudentAssessmentToSupabase(
       confidence_score: input.feelingsScore,
       total_score: totalScore,
       max_score: input.maxScore,
-      answers_json: input.answersJson,
+      answers_json: answersJson,
       completed_at: input.completedAt,
     });
 
@@ -188,10 +219,9 @@ export async function saveStudentAssessmentToSupabase(
 
     return {
       success: true,
-      message:
-        input.assessmentType === 'baseline'
-          ? 'B-4 Check-In saved. Your Weekly Adventures are ready.'
-          : 'Growth check saved.',
+      message: isChildBaselineAssessmentType(input.assessmentType)
+        ? 'Before Check-In saved. Your Weekly Adventures are ready.'
+        : 'Growth check saved.',
     };
   } catch (err) {
     logTrackingSaveError({
@@ -431,7 +461,9 @@ export async function saveStudentBaselineToSupabase(
 
   return saveStudentAssessmentToSupabase({
     nickname: record.nickname,
-    assessmentType: 'baseline',
+    firstName: record.firstName,
+    participantId: record.participantId,
+    assessmentType: CHILD_BASELINE_ASSESSMENT_TYPE,
     groupName: record.groupName || undefined,
     feelingsScore: record.feelingsScore,
     readingScore: record.readingScore,
@@ -445,6 +477,9 @@ export async function saveStudentBaselineToSupabase(
       readingScore: record.readingScore,
       focusMovesScore: record.focusMovesScore,
       nickname: record.nickname,
+      first_name: record.firstName,
+      participant_id: record.participantId,
+      anonymous_student_id: record.anonymousStudentId,
     },
   });
 }

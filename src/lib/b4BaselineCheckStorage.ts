@@ -16,6 +16,9 @@ const RESULTS_ARCHIVE_KEY = 'caidens-courage-b4-baseline-results-archive';
 export type B4BaselineCheckRecord = {
   assessmentName: typeof B4_BASELINE_ASSESSMENT_NAME;
   anonymousStudentId: string;
+  /** Supabase participants.id when linked before save. */
+  participantId?: string;
+  firstName?: string;
   nickname: string;
   programCode: string;
   groupName: string;
@@ -28,6 +31,8 @@ export type B4BaselineCheckRecord = {
 
 export type B4BaselineStudentProfile = {
   anonymousStudentId: string;
+  participantId?: string;
+  firstName?: string;
   nickname: string;
   programCode: string;
   groupName: string;
@@ -69,6 +74,9 @@ function normalizeProfile(raw: unknown): B4BaselineStudentProfile | null {
 
   return {
     anonymousStudentId,
+    participantId:
+      typeof p.participantId === 'string' && p.participantId.trim() ? p.participantId.trim() : undefined,
+    firstName: typeof p.firstName === 'string' && p.firstName.trim() ? p.firstName.trim() : undefined,
     nickname,
     programCode: typeof p.programCode === 'string' ? p.programCode.trim() : '',
     groupName: typeof p.groupName === 'string' ? p.groupName.trim() : '',
@@ -94,6 +102,14 @@ function normalizeRecord(raw: unknown, profile: B4BaselineStudentProfile | null)
       typeof r.anonymousStudentId === 'string' && r.anonymousStudentId
         ? r.anonymousStudentId
         : profile?.anonymousStudentId ?? generateAnonymousStudentId(),
+    participantId:
+      typeof r.participantId === 'string' && r.participantId.trim()
+        ? r.participantId.trim()
+        : profile?.participantId,
+    firstName:
+      typeof r.firstName === 'string' && r.firstName.trim()
+        ? r.firstName.trim()
+        : profile?.firstName,
     nickname,
     programCode:
       typeof r.programCode === 'string'
@@ -145,11 +161,16 @@ export function saveB4BaselineState(state: B4BaselinePersistedState): void {
 }
 
 export function saveB4BaselineStudentProfile(
-  input: Pick<B4BaselineStudentProfile, 'nickname' | 'programCode' | 'groupName'>,
+  input: Pick<
+    B4BaselineStudentProfile,
+    'nickname' | 'programCode' | 'groupName' | 'participantId' | 'firstName'
+  >,
 ): B4BaselinePersistedState {
   const current = loadB4BaselineState();
   const profile: B4BaselineStudentProfile = {
     anonymousStudentId: current.profile?.anonymousStudentId ?? generateAnonymousStudentId(),
+    participantId: input.participantId?.trim() || current.profile?.participantId,
+    firstName: input.firstName?.trim() || current.profile?.firstName,
     nickname: input.nickname.trim(),
     programCode: input.programCode.trim(),
     groupName: input.groupName.trim(),
@@ -179,6 +200,8 @@ export function markBaselineModuleComplete(
   const record: B4BaselineCheckRecord = {
     assessmentName: B4_BASELINE_ASSESSMENT_NAME,
     anonymousStudentId: profile?.anonymousStudentId ?? prev?.anonymousStudentId ?? generateAnonymousStudentId(),
+    participantId: profile?.participantId ?? prev?.participantId,
+    firstName: profile?.firstName ?? prev?.firstName,
     nickname: profile?.nickname ?? prev?.nickname ?? '',
     programCode: activeProgramCode || profile?.programCode || prev?.programCode || '',
     groupName: activeProgram?.groupName || profile?.groupName || prev?.groupName || '',
