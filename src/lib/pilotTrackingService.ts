@@ -126,7 +126,7 @@ function computePercent(score: number, maxScore: number): number {
 const SUPABASE_UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function isValidSupabaseParticipantId(participantId?: string | null): boolean {
+export function isValidSupabaseParticipantId(participantId?: string | null): boolean {
   const trimmed = participantId?.trim() ?? '';
   return Boolean(trimmed) && !trimmed.startsWith('local-') && SUPABASE_UUID_PATTERN.test(trimmed);
 }

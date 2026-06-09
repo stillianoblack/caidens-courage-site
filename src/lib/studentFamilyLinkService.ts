@@ -3,6 +3,7 @@ import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
   fetchStudentParticipantsFromSupabase,
+  isValidSupabaseParticipantId,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
 
@@ -197,8 +198,27 @@ export async function createCampStudentFamilyLink(input: {
     return { success: false, error: 'Supabase is not configured.' };
   }
 
+  const studentId = input.studentId.trim();
+  if (!isValidSupabaseParticipantId(studentId)) {
+    console.warn('[CAMP_CHILD_LINK_INSERT_START]', {
+      blocked: true,
+      student_id: studentId,
+      reason: 'invalid_participant_id',
+    });
+    return {
+      success: false,
+      error: 'Invalid participant id. Camp child must be saved to Supabase before linking.',
+    };
+  }
+
+  console.info('[CAMP_CHILD_LINK_INSERT_START]', {
+    student_id: studentId,
+    camp_program_code: input.campProgramCode.trim(),
+    parent_email: input.parentEmail.trim(),
+  });
+
   const payload = {
-    student_id: input.studentId.trim(),
+    student_id: studentId,
     camp_program_code: input.campProgramCode.trim(),
     family_program_code: null,
     parent_first_name: input.parentFirstName?.trim() || null,
@@ -221,8 +241,8 @@ export async function createCampStudentFamilyLink(input: {
     }
 
     const link = data as StudentFamilyLink;
-    console.info('[CHILD_LINK_FOUND]', {
-      action: 'camp_onboard_created',
+    console.info('[CAMP_CHILD_LINK_INSERT_SUCCESS]', {
+      link_id: link.id,
       student_id: link.student_id,
       camp_program_code: link.camp_program_code,
       parent_email: link.parent_email,
