@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createFamilyChildParticipant } from '../../lib/childProfileService';
 
 type AddChildFormProps = {
-  onAdded?: () => void;
+  onAdded?: (result: { participantId?: string; displayName: string }) => void;
   compact?: boolean;
+  baselinePath?: string;
+  routeToBaseline?: boolean;
 };
 
-export default function AddChildForm({ onAdded, compact = false }: AddChildFormProps) {
+export default function AddChildForm({
+  onAdded,
+  compact = false,
+  baselinePath,
+  routeToBaseline = false,
+}: AddChildFormProps) {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [nickname, setNickname] = useState('');
   const [ageGrade, setAgeGrade] = useState('');
@@ -33,11 +42,18 @@ export default function AddChildForm({ onAdded, compact = false }: AddChildFormP
     setSubmitting(false);
 
     if (result.success) {
-      setMessage(result.message);
+      setMessage(
+        routeToBaseline && baselinePath
+          ? `${result.message} Starting B-4 Check-In…`
+          : result.message,
+      );
       setFirstName('');
       setNickname('');
       setAgeGrade('');
-      onAdded?.();
+      onAdded?.({ participantId: result.participantId, displayName: result.displayName });
+      if (routeToBaseline && baselinePath) {
+        navigate(baselinePath);
+      }
       return;
     }
 

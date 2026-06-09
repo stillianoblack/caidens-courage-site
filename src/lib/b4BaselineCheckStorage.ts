@@ -1,5 +1,9 @@
 import { writeActiveChildNickname } from '../config/activeChildNickname';
 import {
+  readActiveChildParticipantId,
+  writeActiveChildParticipantId,
+} from '../config/activeChildParticipant';
+import {
   B4_BASELINE_ASSESSMENT_NAME,
   type BaselineModuleId,
 } from '../data/b4BaselineCheckContent';
@@ -10,8 +14,17 @@ import {
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveTrackingProgramCode } from './activeProgramContext';
 
-const STORAGE_KEY = 'caidens-courage-b4-baseline-check';
+const STORAGE_KEY_PREFIX = 'caidens-courage-b4-baseline-check';
 const RESULTS_ARCHIVE_KEY = 'caidens-courage-b4-baseline-results-archive';
+
+function resolveBaselineStorageKey(participantId?: string): string {
+  const id = participantId?.trim();
+  return id ? `${STORAGE_KEY_PREFIX}:${id}` : STORAGE_KEY_PREFIX;
+}
+
+export function resolveBaselineParticipantId(explicitId?: string): string {
+  return explicitId?.trim() || '';
+}
 
 export type B4BaselineCheckRecord = {
   assessmentName: typeof B4_BASELINE_ASSESSMENT_NAME;
@@ -125,10 +138,10 @@ function normalizeRecord(raw: unknown, profile: B4BaselineStudentProfile | null)
   };
 }
 
-export function loadB4BaselineState(): B4BaselinePersistedState {
+export function loadB4BaselineState(participantId?: string): B4BaselinePersistedState {
   if (typeof window === 'undefined') return { ...EMPTY };
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(resolveBaselineStorageKey(participantId));
     if (!raw) return { ...EMPTY };
     const parsed = JSON.parse(raw) as Record<string, unknown>;
 
@@ -155,9 +168,20 @@ export function loadB4BaselineState(): B4BaselinePersistedState {
   }
 }
 
-export function saveB4BaselineState(state: B4BaselinePersistedState): void {
+export function saveB4BaselineState(
+  state: B4BaselinePersistedState,
+  participantId?: string,
+): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const keyParticipant =
+    participantId?.trim() ||
+    state.profile?.participantId?.trim() ||
+    state.record?.participantId?.trim() ||
+    '';
+  window.localStorage.setItem(
+    resolveBaselineStorageKey(keyParticipant || undefined),
+    JSON.stringify(state),
+  );
 }
 
 export function saveB4BaselineStudentProfile(
@@ -166,7 +190,7 @@ export function saveB4BaselineStudentProfile(
     'nickname' | 'programCode' | 'groupName' | 'participantId' | 'firstName'
   >,
 ): B4BaselinePersistedState {
-  const current = loadB4BaselineState();
+  const current = loadB4BaselineState(input.participantId);
   const profile: B4BaselineStudentProfile = {
     anonymousStudentId: current.profile?.anonymousStudentId ?? generateAnonymousStudentId(),
     participantId: input.participantId?.trim() || current.profile?.participantId,
@@ -176,8 +200,11 @@ export function saveB4BaselineStudentProfile(
     groupName: input.groupName.trim(),
   };
   const next: B4BaselinePersistedState = { ...current, profile };
-  saveB4BaselineState(next);
+  saveB4BaselineState(next, profile.participantId);
   writeActiveChildNickname(profile.nickname);
+  if (profile.participantId) {
+    writeActiveChildParticipantId(profile.participantId);
+  }
   return next;
 }
 
@@ -185,7 +212,11 @@ export function markBaselineModuleComplete(
   moduleId: BaselineModuleId,
   scores: Pick<B4BaselineCheckRecord, 'feelingsScore' | 'readingScore' | 'focusMovesScore'>,
 ): B4BaselinePersistedState {
-  const current = loadB4BaselineState();
+  const participantKey =
+    readActiveChildParticipantId() ||
+    loadB4BaselineState().profile?.participantId ||
+    loadB4BaselineState().record?.participantId;
+  const current = loadB4BaselineState(participantKey);
   const profile = current.profile;
   const completedModules = current.completedModules.includes(moduleId)
     ? current.completedModules
@@ -213,7 +244,7 @@ export function markBaselineModuleComplete(
   };
 
   const next: B4BaselinePersistedState = { ...current, completedModules, record };
-  saveB4BaselineState(next);
+  saveB4BaselineState(next, participantKey);
 
   if (allDone && record.completedAt) {
     appendBaselineResultToArchive(record);
@@ -225,7 +256,14 @@ export function markBaselineModuleComplete(
   return next;
 }
 
-export function isBaselineFullyComplete(state = loadB4BaselineState()): boolean {
+export function isBaselineFullyComplete(
+  state = loadB4BaselineState(),
+  participantId?: string,
+): boolean {
+  if (participantId) {
+    const scoped = loadB4BaselineState(participantId);
+    return scoped.completedModules.length >= 3;
+  }
   return state.completedModules.length >= 3;
 }
 
@@ -260,18 +298,21 @@ export function clearAllBaselineResults(): void {
 }
 
 /** Clears module progress for retake; keeps student profile. */
-export function resetB4BaselineSession(): void {
-  const current = loadB4BaselineState();
-  saveB4BaselineState({
-    profile: current.profile,
-    completedModules: [],
-    record: null,
-  });
+export function resetB4BaselineSession(participantId?: string): void {
+  const current = loadB4BaselineState(participantId);
+  saveB4BaselineState(
+    {
+      profile: current.profile,
+      completedModules: [],
+      record: null,
+    },
+    participantId ?? current.profile?.participantId,
+  );
 }
 
-export function resetB4BaselineState(): void {
+export function resetB4BaselineState(participantId?: string): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(resolveBaselineStorageKey(participantId));
 }
 
 /**

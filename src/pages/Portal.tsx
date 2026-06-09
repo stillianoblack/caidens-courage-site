@@ -27,10 +27,15 @@ const Portal: React.FC = () => {
 
   const {
     accessCode,
+    parentEmail,
+    parentLastName,
+    needsLastNameConfirm,
     error,
     submitting,
     handleSubmit,
     onAccessCodeChange,
+    onParentEmailChange,
+    onParentLastNameChange,
     clearAccessCode,
     setError,
   } = usePortalUnlock('hero');
@@ -69,9 +74,14 @@ const Portal: React.FC = () => {
       <PortalHero
         audience={audience}
         accessCode={accessCode}
+        parentEmail={parentEmail}
+        parentLastName={parentLastName}
+        needsLastNameConfirm={needsLastNameConfirm}
         error={error}
         submitting={submitting}
         onAccessCodeChange={onAccessCodeChange}
+        onParentEmailChange={onParentEmailChange}
+        onParentLastNameChange={onParentLastNameChange}
         onSubmit={handleSubmit}
         onUseDifferentCode={clearAccessCode}
       />

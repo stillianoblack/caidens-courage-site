@@ -1,11 +1,14 @@
 import React from 'react';
 import { formatChildBaselineStatusLabel } from '../../config/assessmentTypeConstants';
 import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
+import type { SelectableChild } from '../../hooks/useActiveChild';
 
 type FamilyChildrenSectionProps = {
   childSummaries: FamilyChildSummary[];
   loading?: boolean;
   adultBaselineComplete?: boolean;
+  activeParticipantId?: string;
+  onSelectChild?: (child: SelectableChild) => void;
 };
 
 function baselineStatusClass(status: FamilyChildSummary['baselineStatus']): string {
@@ -18,6 +21,8 @@ export default function FamilyChildrenSection({
   childSummaries,
   loading = false,
   adultBaselineComplete = false,
+  activeParticipantId = '',
+  onSelectChild,
 }: FamilyChildrenSectionProps) {
   return (
     <section className="family-panelBlock" aria-labelledby="family-children-title">
@@ -45,8 +50,27 @@ export default function FamilyChildrenSection({
 
       {!loading && childSummaries.length > 0 ? (
         <ul className="family-childrenList">
-          {childSummaries.map((child) => (
-            <li key={child.key} className="family-childCard">
+          {childSummaries.map((child) => {
+            const isActive = Boolean(
+              activeParticipantId && child.participantId === activeParticipantId,
+            );
+            return (
+            <li key={child.key} className={`family-childCard${isActive ? ' family-childCard--active' : ''}`}>
+              {onSelectChild && child.participantId ? (
+                <button
+                  type="button"
+                  className="family-childSelectBtn"
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    onSelectChild({
+                      participantId: child.participantId!,
+                      displayName: child.displayName,
+                    })
+                  }
+                >
+                  {isActive ? 'Active player' : 'Set as active player'}
+                </button>
+              ) : null}
               <div className="family-childCardHead">
                 <h3 className="family-childName">{child.displayName}</h3>
                 <span className={baselineStatusClass(child.baselineStatus)}>
@@ -75,7 +99,8 @@ export default function FamilyChildrenSection({
                 </div>
               </dl>
             </li>
-          ))}
+          );
+          })}
         </ul>
       ) : null}
     </section>

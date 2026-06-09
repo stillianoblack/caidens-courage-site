@@ -1,5 +1,6 @@
 import React from 'react';
 import SoundToggleButton from './shared/SoundToggleButton';
+import GamePlayerPill from './shared/GamePlayerPill';
 
 const FLAME_SRC = '/images/icons/focus-flame-mark.svg';
 
@@ -10,6 +11,8 @@ type MirandaGameHeaderProps = {
   showProgress?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  playerName?: string;
+  playerIndex?: number;
 };
 
 /** Floating Miranda header — no white bar; rounded progress pill on the page. */
@@ -20,6 +23,8 @@ export default function MirandaGameHeader({
   showProgress = true,
   soundEnabled = true,
   onToggleSound,
+  playerName,
+  playerIndex = 1,
 }: MirandaGameHeaderProps) {
   return (
     <header className="miranda-topBar">
@@ -40,6 +45,7 @@ export default function MirandaGameHeader({
         <div aria-hidden="true" />
       )}
       <div className="bbc-topBarRight miranda-topBarRight">
+        <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
         <div className="bbc-flames" aria-label={`${flames} focus flames`}>
           {[1, 2, 3, 4, 5].map((i) => (
             <img

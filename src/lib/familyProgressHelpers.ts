@@ -362,7 +362,7 @@ export function logFamilyProgressMetrics(payload: {
   totalCount: number;
   overallPercent: number;
 }): void {
-  console.log('[FAMILY_PROGRESS_METRICS]', payload);
+  console.info('[FAMILY_HOME_PROGRESS]', payload);
 }
 
 export function partitionAdultAssessments(rows: LocalAssessmentV2Record[]): LocalAssessmentV2Record[] {

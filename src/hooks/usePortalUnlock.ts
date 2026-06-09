@@ -15,6 +15,7 @@ import {
   resolvePortalAccessCode,
   writePortalSessionUnlock,
 } from '../config/portalAccess';
+import { claimParentFamilyPortal } from '../lib/parentClaimService';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
 import {
   isLegacyDemoAccessCode,
@@ -54,6 +55,9 @@ function navigateToPortal(destination: string, reason: string): void {
 
 export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
   const [accessCode, setAccessCode] = useState('');
+  const [parentEmail, setParentEmail] = useState('');
+  const [parentLastName, setParentLastName] = useState('');
+  const [needsLastNameConfirm, setNeedsLastNameConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -85,10 +89,47 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
+
+          if (role === 'family') {
+            const email = parentEmail.trim();
+            if (!email) {
+              setError('Enter the parent email used at camp registration.');
+              setSubmitting(false);
+              return;
+            }
+
+            const claim = await claimParentFamilyPortal({
+              program,
+              parentEmail: email,
+              parentLastName: parentLastName.trim() || undefined,
+              accessCode: trimmedCode,
+            });
+
+            if (!claim.success) {
+              setNeedsLastNameConfirm(Boolean(claim.needsLastNameConfirm));
+              setError(claim.message ?? 'Could not verify parent access.');
+              setSubmitting(false);
+              return;
+            }
+
+            if (claim.familyProgram) {
+              writeLastPilotProgram(claim.familyProgram, 'family', email, trimmedCode);
+            }
+
+            setAccessCode('');
+            setParentEmail('');
+            setParentLastName('');
+            setNeedsLastNameConfirm(false);
+            navigateToPortal(FAMILY_HUB_PATH, 'parent-claim-family');
+            setSubmitting(false);
+            onUnlock?.();
+            return;
+          }
+
           applyProgramPortalUnlock(program, role, trimmedCode);
           writeLastPilotProgram(program, role, program.adminEmail, trimmedCode);
           setAccessCode('');
-          const destination = role === 'family' ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH;
+          const destination = PROGRAM_DASHBOARD_PATH;
           navigateToPortal(destination, `program-code-${role}`);
           setSubmitting(false);
           onUnlock?.();
@@ -151,7 +192,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       onUnlock?.();
       navigateToPortal(getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, onUnlock],
+    [accessCode, onUnlock, parentEmail, parentLastName],
   );
 
   const handleAccessCodeChange = useCallback(
@@ -164,10 +205,21 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
 
   return {
     accessCode,
+    parentEmail,
+    parentLastName,
+    needsLastNameConfirm,
     error,
     submitting,
     handleSubmit,
     onAccessCodeChange: handleAccessCodeChange,
+    onParentEmailChange: (value: string) => {
+      setParentEmail(value);
+      if (error) setError(null);
+    },
+    onParentLastNameChange: (value: string) => {
+      setParentLastName(value);
+      if (error) setError(null);
+    },
     clearAccessCode: () => setAccessCode(''),
     setError,
   };

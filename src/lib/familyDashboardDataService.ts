@@ -319,5 +319,16 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
   };
 
   logFamilyDashboardDebug(data);
+
+  console.info('[PROGRESS_SYNC]', {
+    program_code: data.programCode,
+    allowed_student_ids: data.allowedStudentIds,
+    child_count: data.visibleChildren.length,
+    baseline_rows: data.v2Assessments.filter((row) => isChildBaselineAssessmentType(row.assessment_type))
+      .length,
+    module_rows: data.moduleResults.length,
+    overall_child_sources: data.visibleChildren.map((child) => child.source),
+  });
+
   return data;
 }

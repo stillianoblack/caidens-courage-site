@@ -34,6 +34,7 @@ import { getCaidenNextQuest } from '../../data/caiden/progression';
 import { getMirandaNextCase } from '../../data/miranda/progression';
 import { markAdultTrainingMissionComplete } from '../../lib/adultTrainingCompletion';
 import { readActivePortalRole } from '../../config/portalContext';
+import { readActiveChildNickname } from '../../config/activeChildNickname';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
@@ -531,6 +532,7 @@ export default function GameAssessmentFlow({
     useB4Header,
   });
   const feedbackSpeakerLabel = getFeedbackSpeakerLabel(missionTheme);
+  const playerName = readActiveChildNickname();
 
   return (
     <div className={shellClass}>
@@ -543,6 +545,7 @@ export default function GameAssessmentFlow({
           showProgress={view === 'quiz' || view === 'complete'}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
+          playerName={playerName}
         />
       ) : null}
 

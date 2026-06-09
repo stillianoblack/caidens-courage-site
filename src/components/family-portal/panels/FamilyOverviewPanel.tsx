@@ -7,7 +7,10 @@ import {
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
+import { getPortalRoute } from '../../../lib/portalGamePaths';
 import AddChildForm from '../AddChildForm';
+import ActiveChildSelector from '../ActiveChildSelector';
+import { useActiveChild } from '../../../hooks/useActiveChild';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
 import FamilyValueCards from '../FamilyValueCards';
@@ -19,6 +22,7 @@ export default function FamilyOverviewPanel() {
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const {
     children,
+    visibleChildren,
     metrics,
     assessmentProgress,
     overallProgress,
@@ -27,6 +31,26 @@ export default function FamilyOverviewPanel() {
     refresh,
   } = useFamilyDashboardMetrics(programCode);
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
+  const baselinePath = getPortalRoute('baseline-check', location.pathname);
+
+  const selectableChildren = useMemo(
+    () =>
+      (visibleChildren.length > 0
+        ? visibleChildren.map((child) => ({
+            participantId: child.studentId,
+            displayName: child.displayName,
+            firstName: child.displayName,
+          }))
+        : children.map((child) => ({
+            participantId: child.participantId ?? '',
+            displayName: child.displayName,
+            firstName: child.displayName,
+          }))
+      ).filter((child) => Boolean(child.participantId)),
+    [children, visibleChildren],
+  );
+
+  const { activeChild, needsChildSelection, selectChild } = useActiveChild(selectableChildren);
 
   const kpis = useMemo(
     () => [
@@ -90,12 +114,26 @@ export default function FamilyOverviewPanel() {
         <p className="family-panelHelper family-panelHelper--prominent">{metrics.emptyStateMessage}</p>
       ) : null}
 
-      <AddChildForm onAdded={() => void refresh()} />
+      <AddChildForm
+        routeToBaseline
+        baselinePath={baselinePath}
+        onAdded={() => void refresh()}
+      />
+
+      {needsChildSelection ? (
+        <ActiveChildSelector
+          children={selectableChildren}
+          activeParticipantId={activeChild?.participantId}
+          onSelect={selectChild}
+        />
+      ) : null}
 
       <FamilyChildrenSection
         childSummaries={children}
         loading={loading}
         adultBaselineComplete={adultBaselineComplete}
+        activeParticipantId={activeChild?.participantId}
+        onSelectChild={selectChild}
       />
 
       <section className="family-panelBlock">

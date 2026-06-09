@@ -1,6 +1,5 @@
-import { readActiveChildNickname } from '../config/activeChildNickname';
-import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../config/assessmentTypeConstants';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import {
   isBaselineFullyComplete,
   loadAllBaselineResults,
@@ -12,93 +11,117 @@ function normalizeCode(code: string): string {
   return code.trim().toUpperCase();
 }
 
-function normalizeNickname(name: string): string {
-  return name.trim().toLowerCase();
+export type BaselineCompletionInput = {
+  programCode?: string;
+  participantId?: string;
+};
+
+function resolveParticipantId(participantId?: string): string {
+  return (participantId ?? readActiveChildParticipantId()).trim();
 }
 
-function matchesChild(
-  rowNickname: string | undefined | null,
-  childNickname: string | undefined | null,
-  target: string,
-): boolean {
-  const normalized = normalizeNickname(target);
-  if (!normalized) return false;
-  const nick = rowNickname ? normalizeNickname(rowNickname) : '';
-  const child = childNickname ? normalizeNickname(childNickname) : '';
-  return nick === normalized || child === normalized;
-}
+export function isBaselineCompleteLocal(input: BaselineCompletionInput = {}): boolean {
+  const code = input.programCode?.trim();
+  const participantId = resolveParticipantId(input.participantId);
 
-export function isBaselineCompleteLocal(
-  programCode?: string,
-  nickname?: string,
-): boolean {
-  const code = programCode?.trim();
-  const child = (nickname ?? readActiveChildNickname()).trim();
+  if (!participantId) {
+    return false;
+  }
 
-  const session = loadB4BaselineState();
+  const session = loadB4BaselineState(participantId);
   if (isBaselineFullyComplete(session)) {
     const sessionCode = session.profile?.programCode ?? session.record?.programCode ?? '';
-    const sessionNick = session.profile?.nickname ?? session.record?.nickname ?? '';
+    const sessionParticipant =
+      session.profile?.participantId ?? session.record?.participantId ?? '';
     const codeMatches = !code || normalizeCode(sessionCode) === normalizeCode(code);
-    const nickMatches = !child || normalizeNickname(sessionNick) === normalizeNickname(child);
-    if (codeMatches && nickMatches) {
+    const participantMatches = sessionParticipant === participantId;
+    if (codeMatches && participantMatches) {
+      console.info('[BASELINE_MATCH]', {
+        source: 'local_session',
+        participant_id: participantId,
+        program_code: code ?? sessionCode,
+        matched: true,
+      });
       return true;
     }
   }
 
   const archive = loadAllBaselineResults();
-  return archive.some((row) => {
+  const matched = archive.some((row) => {
     if (!row.completedAt) return false;
+    const rowParticipant = row.participantId?.trim() ?? '';
+    if (!rowParticipant || rowParticipant !== participantId) return false;
     if (code && normalizeCode(row.programCode) !== normalizeCode(code)) return false;
-    if (child && normalizeNickname(row.nickname) !== normalizeNickname(child)) return false;
     return true;
   });
+
+  if (matched) {
+    console.info('[BASELINE_MATCH]', {
+      source: 'local_archive',
+      participant_id: participantId,
+      program_code: code ?? null,
+      matched: true,
+    });
+  }
+
+  return matched;
 }
 
 export async function isBaselineCompleteRemote(
-  programCode?: string,
-  nickname?: string,
+  input: BaselineCompletionInput = {},
 ): Promise<boolean> {
-  const code = programCode?.trim();
-  const child = (nickname ?? readActiveChildNickname()).trim();
+  const code = input.programCode?.trim();
+  const participantId = resolveParticipantId(input.participantId);
 
-  if (!isSupabaseConfigured() || !supabase || !code) {
+  if (!isSupabaseConfigured() || !supabase || !code || !participantId) {
     return false;
   }
 
   try {
-    let query = supabase
-      .from('assessment_results')
-      .select('nickname, child_nickname, program_code, assessment_type, completed_at')
+    const { data: v2Data, error: v2Error } = await supabase
+      .from('assessment_results_v2')
+      .select('participant_id, program_code, assessment_type, completed_at')
       .eq('assessment_type', CHILD_BASELINE_ASSESSMENT_TYPE)
-      .eq('program_code', code);
+      .eq('program_code', code)
+      .eq('participant_id', participantId)
+      .limit(1);
 
-    const participantId = readActiveChildParticipantId();
-    if (participantId) {
-      query = query.eq('student_id', participantId);
+    if (!v2Error && v2Data?.length) {
+      const row = v2Data[0] as { completed_at?: string | null };
+      if (row.completed_at) {
+        console.info('[BASELINE_MATCH]', {
+          source: 'assessment_results_v2',
+          participant_id: participantId,
+          program_code: code,
+          matched: true,
+        });
+        return true;
+      }
     }
 
-    const { data, error } = await query;
+    const { data, error } = await supabase
+      .from('assessment_results')
+      .select('student_id, program_code, assessment_type, completed_at')
+      .eq('assessment_type', CHILD_BASELINE_ASSESSMENT_TYPE)
+      .eq('program_code', code)
+      .eq('student_id', participantId)
+      .limit(1);
 
     if (error || !data?.length) {
       return false;
     }
 
-    const rows = data as Array<{
-      nickname?: string | null;
-      child_nickname?: string | null;
-      program_code?: string | null;
-      assessment_type?: string | null;
-      completed_at?: string | null;
-    }>;
-
-    return rows.some((row) => {
-      if (!row.completed_at) return false;
-      if (child) {
-        return matchesChild(row.nickname, row.child_nickname, child);
-      }
-      return true;
-    });
+    const row = data[0] as { completed_at?: string | null };
+    const matched = Boolean(row.completed_at);
+    if (matched) {
+      console.info('[BASELINE_MATCH]', {
+        source: 'assessment_results',
+        participant_id: participantId,
+        program_code: code,
+        matched: true,
+      });
+    }
+    return matched;
   } catch {
     return false;
   }
@@ -106,10 +129,38 @@ export async function isBaselineCompleteRemote(
 
 export async function checkBaselineCompletion(
   programCode?: string,
-  nickname?: string,
+  participantId?: string,
 ): Promise<boolean> {
-  if (isBaselineCompleteLocal(programCode, nickname)) {
-    return true;
+  const resolvedParticipantId = resolveParticipantId(participantId);
+  const input = { programCode, participantId: resolvedParticipantId };
+
+  if (!resolvedParticipantId) {
+    console.info('[BASELINE_GATE]', {
+      program_code: programCode ?? null,
+      participant_id: null,
+      complete: false,
+      reason: 'no_active_child',
+    });
+    return false;
   }
-  return isBaselineCompleteRemote(programCode, nickname);
+
+  const localComplete = isBaselineCompleteLocal(input);
+  const remoteComplete = localComplete ? true : await isBaselineCompleteRemote(input);
+  const complete = localComplete || remoteComplete;
+
+  console.info('[BASELINE_GATE]', {
+    program_code: programCode ?? null,
+    participant_id: resolvedParticipantId,
+    complete,
+    local_complete: localComplete,
+    remote_complete: remoteComplete,
+  });
+  console.info('[BASELINE_CHECK]', {
+    program_code: programCode ?? null,
+    participant_id: resolvedParticipantId,
+    assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+    complete,
+  });
+
+  return complete;
 }

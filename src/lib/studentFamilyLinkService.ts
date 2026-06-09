@@ -1,3 +1,4 @@
+import { readParentClaimContext } from '../config/parentClaimContext';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
@@ -9,12 +10,55 @@ export type StudentFamilyLink = {
   id: string;
   student_id: string;
   camp_program_code: string;
-  family_program_code: string;
+  family_program_code: string | null;
+  parent_first_name: string | null;
   parent_email: string | null;
   parent_last_name: string | null;
+  parent_phone: string | null;
   relationship: string | null;
+  parent_claimed: boolean;
+  claimed_at: string | null;
   created_at: string;
 };
+
+export type ParentLinkScope = {
+  email?: string;
+  phone?: string;
+  lastName?: string;
+};
+
+function normalizeEmail(value?: string | null): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
+function normalizePhone(value?: string | null): string {
+  return value?.replace(/\D/g, '') ?? '';
+}
+
+function normalizeLastName(value?: string | null): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
+export function linkMatchesParentScope(link: StudentFamilyLink, scope?: ParentLinkScope): boolean {
+  if (!scope) return true;
+
+  const email = normalizeEmail(scope.email);
+  const phone = normalizePhone(scope.phone);
+  const lastName = normalizeLastName(scope.lastName);
+
+  if (!email && !phone) return true;
+
+  const emailMatch = email && normalizeEmail(link.parent_email) === email;
+  const phoneMatch = phone && normalizePhone(link.parent_phone) === phone;
+
+  if (!emailMatch && !phoneMatch) return false;
+
+  if (lastName && link.parent_last_name) {
+    return normalizeLastName(link.parent_last_name) === lastName;
+  }
+
+  return true;
+}
 
 export type FamilyVisibleChild = {
   studentId: string;
@@ -140,12 +184,108 @@ export async function fetchParticipantsByIds(
   }
 }
 
+export async function createCampStudentFamilyLink(input: {
+  studentId: string;
+  campProgramCode: string;
+  parentFirstName?: string;
+  parentLastName: string;
+  parentEmail: string;
+  parentPhone?: string;
+  relationship?: string;
+}): Promise<{ success: boolean; link?: StudentFamilyLink; error?: string }> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, error: 'Supabase is not configured.' };
+  }
+
+  const payload = {
+    student_id: input.studentId.trim(),
+    camp_program_code: input.campProgramCode.trim(),
+    family_program_code: null,
+    parent_first_name: input.parentFirstName?.trim() || null,
+    parent_email: input.parentEmail.trim(),
+    parent_last_name: input.parentLastName.trim(),
+    parent_phone: input.parentPhone?.trim() || null,
+    relationship: input.relationship?.trim() || 'parent',
+    parent_claimed: false,
+  };
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase.from('student_family_links').insert(payload).select('*').single(),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'camp_student_family_link_insert',
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    const link = data as StudentFamilyLink;
+    console.info('[CHILD_LINK_FOUND]', {
+      action: 'camp_onboard_created',
+      student_id: link.student_id,
+      camp_program_code: link.camp_program_code,
+      parent_email: link.parent_email,
+      parent_claimed: link.parent_claimed,
+    });
+    return { success: true, link };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not create camp parent link.';
+    return { success: false, error: message };
+  }
+}
+
+export async function markStudentFamilyLinksClaimed(input: {
+  linkIds: string[];
+  familyProgramCode: string;
+  parentEmail: string;
+  parentPhone?: string;
+  parentLastName?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  if (!input.linkIds.length) {
+    return { success: false, error: 'No links to claim.' };
+  }
+
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, error: 'Supabase is not configured.' };
+  }
+
+  const claimedAt = new Date().toISOString();
+  const payload = {
+    family_program_code: input.familyProgramCode.trim(),
+    parent_email: input.parentEmail.trim(),
+    parent_phone: input.parentPhone?.trim() || null,
+    parent_last_name: input.parentLastName?.trim() || null,
+    parent_claimed: true,
+    claimed_at: claimedAt,
+  };
+
+  try {
+    const { error } = await withTimeout(
+      supabase.from('student_family_links').update(payload).in('id', input.linkIds),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'student_family_links_claim',
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not mark links claimed.';
+    return { success: false, error: message };
+  }
+}
+
 export async function createStudentFamilyLink(input: {
   studentId: string;
   campProgramCode: string;
   familyProgramCode: string;
+  parentFirstName?: string;
   parentEmail?: string;
   parentLastName?: string;
+  parentPhone?: string;
   relationship?: string;
 }): Promise<{ success: boolean; link?: StudentFamilyLink; error?: string }> {
   if (!isSupabaseConfigured() || !supabase) {
@@ -156,9 +296,12 @@ export async function createStudentFamilyLink(input: {
     student_id: input.studentId.trim(),
     camp_program_code: input.campProgramCode.trim(),
     family_program_code: input.familyProgramCode.trim(),
+    parent_first_name: input.parentFirstName?.trim() || null,
     parent_email: input.parentEmail?.trim() || null,
     parent_last_name: input.parentLastName?.trim() || null,
+    parent_phone: input.parentPhone?.trim() || null,
     relationship: input.relationship?.trim() || null,
+    parent_claimed: false,
   };
 
   try {
@@ -192,8 +335,10 @@ export async function createStudentFamilyLink(input: {
 /** Family portal children: direct family participants + camp students linked to this family program. */
 export async function resolveFamilyVisibleChildren(
   familyProgramCode: string,
+  parentScope?: ParentLinkScope,
 ): Promise<FamilyVisibleChildrenResult> {
   const code = familyProgramCode.trim();
+  const scope = parentScope ?? readParentClaimContext() ?? undefined;
   const errors: string[] = [];
 
   if (!code) {
@@ -216,7 +361,21 @@ export async function resolveFamilyVisibleChildren(
   if (linksPayload.error) errors.push(linksPayload.error);
 
   const familyParticipants = familyParticipantsPayload.participants;
-  const links = linksPayload.links;
+  const scopedLinks = linksPayload.links.filter((link) => linkMatchesParentScope(link, scope));
+  const links = scopedLinks;
+
+  console.info('[FAMILY_PORTAL_CHILDREN]', {
+    family_program_code: code,
+    parent_scope: scope
+      ? {
+          email: scope.email ?? null,
+          phone: scope.phone ? '***' : null,
+          last_name: scope.lastName ?? null,
+        }
+      : null,
+    link_count: links.length,
+    student_ids: links.map((row) => row.student_id),
+  });
 
   console.info('[FAMILY_CHILD_LINKS]', {
     family_program_code: code,

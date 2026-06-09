@@ -1,5 +1,6 @@
 import React from 'react';
 import SoundToggleButton from '../game-assessment/shared/SoundToggleButton';
+import GamePlayerPill from '../game-assessment/shared/GamePlayerPill';
 
 const FLAME_SRC = '/images/icons/focus-flame-mark.svg';
 
@@ -9,6 +10,8 @@ type CaidenGameHeaderProps = {
   showProgress?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  playerName?: string;
+  playerIndex?: number;
 };
 
 export default function CaidenGameHeader({
@@ -17,6 +20,8 @@ export default function CaidenGameHeader({
   showProgress = true,
   soundEnabled = true,
   onToggleSound,
+  playerName,
+  playerIndex = 1,
 }: CaidenGameHeaderProps) {
   return (
     <header className="caiden-topBar">
@@ -37,6 +42,7 @@ export default function CaidenGameHeader({
         <div aria-hidden="true" />
       )}
       <div className="bbc-topBarRight caiden-topBarRight">
+        <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
         <div className="caiden-topFlames" aria-hidden="true">
           <img src={FLAME_SRC} alt="" className="caiden-topFlameIcon caiden-topFlameIcon--lit" />
         </div>

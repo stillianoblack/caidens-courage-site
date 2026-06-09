@@ -1,5 +1,6 @@
 import React from 'react';
 import SoundToggleButton from '../game-assessment/shared/SoundToggleButton';
+import GamePlayerPill from '../game-assessment/shared/GamePlayerPill';
 
 type CharlieGameHeaderProps = {
   progressPct: number;
@@ -7,6 +8,8 @@ type CharlieGameHeaderProps = {
   showProgress?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  playerName?: string;
+  playerIndex?: number;
 };
 
 export default function CharlieGameHeader({
@@ -15,6 +18,8 @@ export default function CharlieGameHeader({
   showProgress = true,
   soundEnabled = true,
   onToggleSound,
+  playerName,
+  playerIndex = 1,
 }: CharlieGameHeaderProps) {
   return (
     <header className="charlie-topBar">
@@ -35,6 +40,7 @@ export default function CharlieGameHeader({
         <div aria-hidden="true" />
       )}
       <div className="bbc-topBarRight charlie-topBarRight">
+        <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
         {onToggleSound ? (
           <SoundToggleButton soundEnabled={soundEnabled} onToggle={onToggleSound} />
         ) : null}

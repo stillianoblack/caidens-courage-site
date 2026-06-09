@@ -14,9 +14,14 @@ import PortalCodeRecovery from './PortalCodeRecovery';
 type PortalAccessFormProps = {
   variant: PortalUnlockVariant;
   accessCode: string;
+  parentEmail?: string;
+  parentLastName?: string;
+  needsLastNameConfirm?: boolean;
   error: string | null;
   submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
+  onParentEmailChange?: (value: string) => void;
+  onParentLastNameChange?: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   onUseDifferentCode?: () => void;
   id?: string;
@@ -26,9 +31,14 @@ type PortalAccessFormProps = {
 export default function PortalAccessForm({
   variant,
   accessCode,
+  parentEmail = '',
+  parentLastName = '',
+  needsLastNameConfirm = false,
   error,
   submitting = false,
   onAccessCodeChange,
+  onParentEmailChange,
+  onParentLastNameChange,
   onSubmit,
   onUseDifferentCode,
   id,
@@ -146,6 +156,53 @@ export default function PortalAccessForm({
               }`}
             />
           </div>
+
+          <div>
+            <label
+              htmlFor={`${formId}-parent-email`}
+              className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
+            >
+              Parent email
+            </label>
+            <input
+              id={`${formId}-parent-email`}
+              name="parentEmail"
+              type="email"
+              autoComplete="email"
+              value={parentEmail}
+              onChange={(event) => onParentEmailChange?.(event.target.value)}
+              placeholder="parent@email.com"
+              className={`cc-portal-code-input mt-1.5 w-full rounded-xl border border-navy-200/80 bg-[#FAF9F7] font-medium text-navy-600 placeholder:text-navy-400/70 focus:border-golden-500 focus:outline-none focus:ring-2 focus:ring-golden-500/30 ${
+                isHero ? 'px-4 py-3.5 text-base' : 'px-3 py-2.5 text-sm'
+              }`}
+            />
+            <p className="mt-1 text-xs text-navy-500/80">
+              Required for family access codes so we can show only your linked children.
+            </p>
+          </div>
+
+          {needsLastNameConfirm ? (
+            <div>
+              <label
+                htmlFor={`${formId}-parent-last-name`}
+                className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
+              >
+                Parent last name
+              </label>
+              <input
+                id={`${formId}-parent-last-name`}
+                name="parentLastName"
+                type="text"
+                autoComplete="family-name"
+                value={parentLastName}
+                onChange={(event) => onParentLastNameChange?.(event.target.value)}
+                placeholder="Confirm your last name"
+                className={`cc-portal-code-input mt-1.5 w-full rounded-xl border border-navy-200/80 bg-[#FAF9F7] font-medium text-navy-600 placeholder:text-navy-400/70 focus:border-golden-500 focus:outline-none focus:ring-2 focus:ring-golden-500/30 ${
+                  isHero ? 'px-4 py-3.5 text-base' : 'px-3 py-2.5 text-sm'
+                }`}
+              />
+            </div>
+          ) : null}
 
           {error ? (
             <p

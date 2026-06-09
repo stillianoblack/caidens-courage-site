@@ -1,5 +1,6 @@
 import React from 'react';
 import SoundToggleButton from '../game-assessment/shared/SoundToggleButton';
+import GamePlayerPill from '../game-assessment/shared/GamePlayerPill';
 
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 
@@ -13,6 +14,8 @@ type B4BaselineTopBarProps = {
   showProgress?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  playerName?: string;
+  playerIndex?: number;
 };
 
 export default function B4BaselineTopBar({
@@ -22,6 +25,8 @@ export default function B4BaselineTopBar({
   showProgress = true,
   soundEnabled = true,
   onToggleSound,
+  playerName,
+  playerIndex = 1,
 }: B4BaselineTopBarProps) {
   return (
     <header className="bbc-topBar">
@@ -42,6 +47,7 @@ export default function B4BaselineTopBar({
         <div aria-hidden="true" />
       )}
       <div className="bbc-topBarRight">
+        <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
         <div className="bbc-flames" aria-label={`${flames} focus flames`}>
           {[1, 2, 3, 4, 5].map((i) => (
             <img

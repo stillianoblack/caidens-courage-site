@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
+import { MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
@@ -84,6 +85,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     };
 
     window.addEventListener('cc-baseline-complete', handleRefresh);
+    window.addEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
     window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
     window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
     window.addEventListener('focus', handleRefresh);
@@ -91,6 +93,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
 
     return () => {
       window.removeEventListener('cc-baseline-complete', handleRefresh);
+      window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
       window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
       window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
       window.removeEventListener('focus', handleRefresh);
@@ -128,6 +131,13 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
           children,
         })
       : EMPTY_SNAPSHOT;
+
+    console.info('[PROGRESS_SYNC]', {
+      program_code: data.programCode,
+      children_count: children.length,
+      overall_percent: metrics.overall.percent,
+      module_results: data.moduleResults.length,
+    });
 
     logFamilyProgressMetrics({
       activeProgramCode: data.programCode,

@@ -1,8 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildNickname } from '../../config/activeChildNickname';
 import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
+import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
+import { checkBaselineCompletion } from '../../lib/baselineCompletion';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
 import { ensureParticipantForBaseline } from '../../lib/childProfileService';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
@@ -66,8 +68,12 @@ export default function B4BaselineCheckFlow({
     playResultFocus,
   } = useBaselineCheckSounds();
 
-  const [hubState, setHubState] = useState(loadB4BaselineState);
+  const activeParticipantId = readActiveChildParticipantId();
+  const [hubState, setHubState] = useState(() => loadB4BaselineState(activeParticipantId));
   const [view, setView] = useState<View>('landing');
+  const [playerName, setPlayerName] = useState(
+    () => readActiveChildNickname() || loadB4BaselineState(activeParticipantId).profile?.nickname || '',
+  );
 
   const missionPhase: MissionGamePhase = useMemo(() => {
     if (view === 'quiz') return 'quiz';
@@ -90,7 +96,33 @@ export default function B4BaselineCheckFlow({
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
   const programContext = resolveActiveProgramContext();
 
-  const refreshHub = useCallback(() => setHubState(loadB4BaselineState()), []);
+  const refreshHub = useCallback(() => {
+    const participantId = readActiveChildParticipantId();
+    setHubState(loadB4BaselineState(participantId));
+    setPlayerName(readActiveChildNickname() || loadB4BaselineState(participantId).profile?.nickname || '');
+  }, []);
+
+  useEffect(() => {
+    const onActiveChild = () => {
+      refreshHub();
+      setView('landing');
+    };
+    window.addEventListener(ACTIVE_CHILD_EVENT, onActiveChild);
+    return () => window.removeEventListener(ACTIVE_CHILD_EVENT, onActiveChild);
+  }, [refreshHub]);
+
+  useEffect(() => {
+    if (!familyPortal || !activeParticipantId) return;
+    void checkBaselineCompletion(resolveTrackingProgramCode() ?? undefined, activeParticipantId).then(
+      (done) => {
+        if (!done) return;
+        const scoped = loadB4BaselineState(activeParticipantId);
+        if (isBaselineFullyComplete(scoped)) {
+          setHubState(scoped);
+        }
+      },
+    );
+  }, [activeParticipantId, familyPortal]);
 
   const handleRevealScore = useCallback(
     (index: 0 | 1 | 2) => {
@@ -187,7 +219,7 @@ export default function B4BaselineCheckFlow({
 
   const handleRetake = () => {
     playItemButton();
-    resetB4BaselineSession();
+    resetB4BaselineSession(readActiveChildParticipantId());
     refreshHub();
     setView('hub');
     setActiveModule(null);
@@ -207,7 +239,7 @@ export default function B4BaselineCheckFlow({
   }) => {
     if (!activeModule) return;
 
-    const existing = loadB4BaselineState();
+    const existing = loadB4BaselineState(readActiveChildParticipantId());
     const scores = {
       feelingsScore: existing.record?.feelingsScore ?? 0,
       readingScore: existing.record?.readingScore ?? 0,
@@ -359,7 +391,7 @@ export default function B4BaselineCheckFlow({
     onExit?.();
   };
 
-  const allComplete = isBaselineFullyComplete(hubState);
+  const allComplete = isBaselineFullyComplete(hubState, readActiveChildParticipantId());
   const showTopBar = embedded || view !== 'landing';
   const avatarSrc = B4_AVATAR_SRC;
 
@@ -383,6 +415,7 @@ export default function B4BaselineCheckFlow({
           showProgress={view === 'quiz' || view === 'hub'}
           soundEnabled={soundEnabled}
           onToggleSound={toggleSound}
+          playerName={playerName}
         />
       ) : null}
 

@@ -7,6 +7,7 @@ import type { GameAnswerValue } from '../types/gameAssessment';
 import type { ModuleCompletionAnswers, ModuleTrackingDefinition } from '../types/moduleTracking';
 import { loadAdultAssessmentSession } from './adultAssessmentStorage';
 import { logTrackingSaveBlocked, resolveTrackingProgramCode } from './activeProgramContext';
+import { notifyModuleComplete } from './activeChildContext';
 import { loadB4BaselineState } from './b4BaselineCheckStorage';
 import {
   ensureStudentParticipantForSave,
@@ -36,7 +37,8 @@ function answersToJson(answers?: Record<string, GameAnswerValue>): Record<string
 }
 
 function resolveStudentParticipant() {
-  const baselineState = loadB4BaselineState();
+  const activeParticipantId = readActiveChildParticipantId();
+  const baselineState = loadB4BaselineState(activeParticipantId);
   const programCode = resolveTrackingProgramCode();
   const program = readActivePilotProgram();
   const nickname =
@@ -155,6 +157,22 @@ export async function recordInteractiveModuleCompletion(
     if (!result.success && result.message) {
       return { warning: result.message };
     }
+
+    console.info('[MODULE_SAVE]', {
+      participant_id: participantId,
+      program_code: participant.program_code,
+      character: tracking.character,
+      module_id: tracking.moduleId,
+      skill_area: tracking.skillArea,
+      score: input.score,
+      max_score: input.maxScore,
+    });
+    notifyModuleComplete({
+      participant_id: participantId,
+      module_id: tracking.moduleId,
+      character: tracking.character,
+      program_code: participant.program_code,
+    });
   } catch (err) {
     if (err instanceof Error && err.message === 'Missing active program context') {
       return { warning: 'Missing active program context.' };

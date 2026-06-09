@@ -110,7 +110,7 @@ export default function WeeklyAdventureWeekCard({
   baselineLockedLabel = 'Complete B-4 Check-In to unlock',
 }: WeeklyAdventureWeekCardProps) {
   const isTimeLocked = status === 'locked';
-  const isBaselineGated = baselineLocked && weekNumber === 1;
+  const isBaselineGated = baselineLocked;
   const isLocked = isTimeLocked || isBaselineGated;
   const statusLabel = isBaselineGated
     ? baselineLockedLabel

@@ -9,11 +9,7 @@ import {
   writeActiveFamilyContext,
   writeActivePortalRole,
 } from '../config/portalContext';
-import { writeActiveChildNickname } from '../config/activeChildNickname';
-import {
-  notifyChildProfileUpdated,
-  writeActiveChildParticipantId,
-} from '../config/activeChildParticipant';
+import { setActiveChild } from './activeChildContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { syncPortalProgramContext } from './activeProgramContext';
@@ -391,9 +387,11 @@ export async function linkParentChildFromCampAssessment(
   }
 
   activatePrivateFamilyPortal(familyProgramResult.program);
-  writeActiveChildParticipantId(studentId);
-  writeActiveChildNickname(displayName);
-  notifyChildProfileUpdated();
+  setActiveChild({
+    participantId: studentId,
+    displayName,
+    firstName: input.childFirstName,
+  });
 
   return {
     success: true,

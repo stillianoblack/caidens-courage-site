@@ -5,9 +5,14 @@ import { getPortalAudienceIdentity, type PortalAudienceTab } from '../../config/
 type PortalHeroProps = {
   audience: PortalAudienceTab | null;
   accessCode: string;
+  parentEmail?: string;
+  parentLastName?: string;
+  needsLastNameConfirm?: boolean;
   error: string | null;
   submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
+  onParentEmailChange?: (value: string) => void;
+  onParentLastNameChange?: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   onUseDifferentCode?: () => void;
 };
@@ -15,9 +20,14 @@ type PortalHeroProps = {
 export default function PortalHero({
   audience,
   accessCode,
+  parentEmail,
+  parentLastName,
+  needsLastNameConfirm,
   error,
   submitting = false,
   onAccessCodeChange,
+  onParentEmailChange,
+  onParentLastNameChange,
   onSubmit,
   onUseDifferentCode,
 }: PortalHeroProps) {
@@ -53,9 +63,14 @@ export default function PortalHero({
               variant="hero"
               cardAudienceLabel={identity.cardAudienceLabel}
               accessCode={accessCode}
+              parentEmail={parentEmail}
+              parentLastName={parentLastName}
+              needsLastNameConfirm={needsLastNameConfirm}
               error={error}
               submitting={submitting}
               onAccessCodeChange={onAccessCodeChange}
+              onParentEmailChange={onParentEmailChange}
+              onParentLastNameChange={onParentLastNameChange}
               onSubmit={onSubmit}
               onUseDifferentCode={onUseDifferentCode}
             />

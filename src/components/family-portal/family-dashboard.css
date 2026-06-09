@@ -233,6 +233,67 @@
   background: #fff;
 }
 
+.family-childCard--active {
+  border-color: rgba(59, 108, 181, 0.45);
+  box-shadow: 0 0 0 1px rgba(59, 108, 181, 0.12);
+}
+
+.family-childSelectBtn {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(59, 108, 181, 0.25);
+  border-radius: 9999px;
+  background: #f8fafc;
+  color: var(--family-navy-deep);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-childSelectBtn[aria-pressed='true'] {
+  background: #dbeafe;
+  border-color: rgba(59, 108, 181, 0.45);
+}
+
+.family-activeChildSelector {
+  margin-bottom: 1rem;
+}
+
+.family-activeChildOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.family-activeChildBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--family-border);
+  background: #fff;
+  color: var(--family-navy-deep);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-activeChildBtn--active {
+  border-color: rgba(59, 108, 181, 0.45);
+  background: #eff6ff;
+}
+
+.family-activeChildBtnBadge {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+}
+
 .family-childCardHead {
   display: flex;
   flex-wrap: wrap;

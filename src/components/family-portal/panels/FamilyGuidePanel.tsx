@@ -1,15 +1,19 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { FAMILY_PARENT_CORNER_INTRO } from '../../../data/familyPortalContent';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import AdultLearningFlowSection from '../../shared/AdultLearningFlowSection';
+import { getPortalRoute } from '../../../lib/portalGamePaths';
 import AddChildForm from '../AddChildForm';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
 import FamilyAddedChildrenSection from '../FamilyAddedChildrenSection';
 
 export default function FamilyGuidePanel() {
+  const location = useLocation();
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const { refresh, visibleChildren, loading } = useFamilyDashboardMetrics(programCode);
+  const baselinePath = getPortalRoute('baseline-check', location.pathname);
 
   return (
     <div className="family-panel">
@@ -22,7 +26,12 @@ export default function FamilyGuidePanel() {
 
       <FamilyAddedChildrenSection children={visibleChildren} loading={loading} />
 
-      <AddChildForm compact onAdded={() => void refresh()} />
+      <AddChildForm
+        compact
+        routeToBaseline
+        baselinePath={baselinePath}
+        onAdded={() => void refresh()}
+      />
 
       <AdultLearningFlowSection placement="parent" showStatusBanner />
     </div>

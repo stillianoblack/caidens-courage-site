@@ -11,6 +11,7 @@ import {
 } from '../../../data/pilotDashboardContent';
 import CharacterLearningTrackCard from '../CharacterLearningTrackCard';
 import PilotLocalNote from '../PilotLocalNote';
+import CampChildOnboardingCard from '../CampChildOnboardingCard';
 import CampParentLinkCard from '../CampParentLinkCard';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
@@ -95,6 +96,7 @@ export default function PilotOverviewPanel({
   return (
     <div className="pilot-panel pilot-panel--overview">
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
+      <CampChildOnboardingCard />
       <CampParentLinkCard />
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
       <div className="pilot-kpiRow">

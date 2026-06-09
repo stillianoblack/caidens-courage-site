@@ -1,8 +1,4 @@
-import { writeActiveChildNickname } from '../config/activeChildNickname';
-import {
-  notifyChildProfileUpdated,
-  writeActiveChildParticipantId,
-} from '../config/activeChildParticipant';
+import { setActiveChild } from './activeChildContext';
 import { resolveTrackingProgramCode } from './activeProgramContext';
 import {
   ensureStudentParticipantForSave,
@@ -53,9 +49,11 @@ export async function createFamilyChildParticipant(
       child_age_range: input.ageGrade?.trim() || undefined,
     });
 
-    writeActiveChildParticipantId(participantId);
-    writeActiveChildNickname(displayName);
-    notifyChildProfileUpdated();
+    setActiveChild({
+      participantId,
+      displayName,
+      firstName,
+    });
 
     console.info('[CHILD_PROFILE]', {
       action: 'create',
@@ -120,8 +118,11 @@ export async function ensureParticipantForBaseline(
     groupName: resolveStudentGroupNameForSave(input.groupName),
   });
 
-  writeActiveChildParticipantId(ensured.participantId);
-  writeActiveChildNickname(ensured.nickname);
+  setActiveChild({
+    participantId: ensured.participantId,
+    displayName: ensured.nickname,
+    firstName: ensured.firstName,
+  });
 
   console.info('[CHILD_PROFILE]', {
     action: 'baseline_ensure',
