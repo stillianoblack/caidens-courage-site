@@ -91,11 +91,15 @@ export default function PilotStudentDetailDrawer({
           </div>
           <div>
             <dt>Parent/Guardian Email</dt>
-            <dd>{snapshot.parentEmail}</dd>
+            <dd>
+              <CopyableCompactValue value={snapshot.parentEmail} type="email" />
+            </dd>
           </div>
           <div>
             <dt>Parent/Guardian Phone</dt>
-            <dd>{snapshot.parentPhone}</dd>
+            <dd>
+              <CopyableCompactValue value={snapshot.parentPhone} type="phone" />
+            </dd>
           </div>
           <div>
             <dt>Baseline Score</dt>

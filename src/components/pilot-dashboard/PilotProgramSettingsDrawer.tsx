@@ -123,14 +123,6 @@ export default function PilotProgramSettingsDrawer({
     }
   };
 
-  const copyText = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      /* clipboard unavailable */
-    }
-  };
-
   const renderPanel = () => {
     if (!program) {
       return <p className="pilot-emptyNote">No active program context found.</p>;
