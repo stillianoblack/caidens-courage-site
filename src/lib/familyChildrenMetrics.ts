@@ -48,8 +48,28 @@ function matchesV2StudentRow(
 ): boolean {
   if (row.role !== 'student') return false;
   if (participantId && row.participant_id === participantId) return true;
-  const answers = row.answers_json as { nickname?: string } | undefined;
-  return normalizeName(answers?.nickname) === normalizeName(displayName);
+  return normalizeName(resolveAssessmentStudentName(row)) === normalizeName(displayName);
+}
+
+function resolveAssessmentStudentName(row: LocalAssessmentV2Record): string {
+  const answers = row.answers_json as
+    | {
+        nickname?: string;
+        childNickname?: string;
+        child_nickname?: string;
+        studentName?: string;
+        first_name?: string;
+      }
+    | undefined;
+
+  return (
+    answers?.nickname?.trim() ||
+    answers?.childNickname?.trim() ||
+    answers?.child_nickname?.trim() ||
+    answers?.studentName?.trim() ||
+    answers?.first_name?.trim() ||
+    ''
+  );
 }
 
 function resolveBaselineStatus(input: {
@@ -278,6 +298,34 @@ export function computeFamilyChildrenSummaries(input: {
         participantId: baseline.anonymousStudentId || null,
         displayName,
         createdAt: baseline.completedAt || null,
+        modules,
+        assessments,
+        legacyBaselines,
+      }),
+    );
+  }
+
+  for (const assessment of assessments) {
+    if (assessment.role !== 'student') continue;
+    const displayName = resolveAssessmentStudentName(assessment);
+    if (!displayName) continue;
+    const nameKey = normalizeName(displayName);
+    if (seenNames.has(nameKey)) continue;
+
+    const hasParticipantMatch = (input.participants ?? []).some(
+      (participant) =>
+        participant.id === assessment.participant_id ||
+        normalizeName(childDisplayName(participant)) === nameKey,
+    );
+    if (hasParticipantMatch) continue;
+
+    seenNames.add(nameKey);
+    summaries.push(
+      buildChildSummary({
+        key: `assessment-${assessment.participant_id || nameKey}`,
+        participantId: assessment.participant_id || null,
+        displayName,
+        createdAt: assessment.completed_at || null,
         modules,
         assessments,
         legacyBaselines,

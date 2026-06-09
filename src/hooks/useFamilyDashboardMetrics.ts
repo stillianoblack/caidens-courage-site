@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { afterIdle } from '../lib/defer';
+import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
 import {
   computeFamilyProgressSnapshot,
@@ -58,9 +58,28 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
   }, [resolvedCode]);
 
   useEffect(() => {
-    afterIdle(() => {
+    void refresh();
+
+    const handleRefresh = () => {
       void refresh();
-    });
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void refresh();
+      }
+    };
+
+    window.addEventListener('cc-baseline-complete', handleRefresh);
+    window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('cc-baseline-complete', handleRefresh);
+      window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [refresh]);
 
   return useMemo(() => {
