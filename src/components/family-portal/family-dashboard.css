@@ -671,6 +671,40 @@
   color: #b91c1c;
 }
 
+.family-addedChildrenList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.family-addedChildItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--family-border);
+  background: #fff;
+}
+
+.family-addedChildName {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-addedChildSource {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
 /* Overview value cards */
 .family-valueCards {
   display: grid;

@@ -3,6 +3,7 @@ import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
+import type { FamilyVisibleChild } from '../lib/studentFamilyLinkService';
 import {
   computeFamilyProgressSnapshot,
   type FamilyProgressSnapshot,
@@ -23,6 +24,9 @@ import {
 const EMPTY_DATA: FamilyDashboardData = {
   programCode: '',
   studentParticipants: [],
+  visibleChildren: [],
+  allowedStudentIds: [],
+  familyLinks: [],
   studentLegacyBaselines: [],
   adultLegacyAssessments: [],
   v2Assessments: [],
@@ -35,6 +39,7 @@ const EMPTY_SNAPSHOT = computeFamilyProgressSnapshot({ programCode: '' });
 export type FamilyDashboardMetrics = {
   programCode: string;
   children: FamilyChildSummary[];
+  visibleChildren: FamilyVisibleChild[];
   metrics: FamilyProgressSnapshot;
   adultBaselineComplete: boolean;
   adultGrowthComplete: boolean;
@@ -106,6 +111,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     const children = computeFamilyChildrenSummaries({
       programCode: data.programCode,
       participants: data.studentParticipants,
+      allowedStudentIds: data.allowedStudentIds,
       moduleResults: data.moduleResults,
       assessmentResults: data.v2Assessments,
       legacyBaselines: data.studentLegacyBaselines,
@@ -137,6 +143,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     return {
       programCode: data.programCode,
       children,
+      visibleChildren: data.visibleChildren,
       metrics,
       adultBaselineComplete,
       adultGrowthComplete,

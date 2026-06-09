@@ -2373,3 +2373,122 @@ button.pilot-dash-card:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.pilot-parentLinkCard {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--pilot-border);
+  background: #fff;
+}
+
+.pilot-parentLinkTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-parentLinkCopy,
+.pilot-parentLinkHelper {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-parentLinkForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .pilot-parentLinkForm {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pilot-parentLinkBtn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+.pilot-parentLinkField {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.pilot-parentLinkLabel {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.pilot-parentLinkInput {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--pilot-border);
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+}
+
+.pilot-parentLinkBtn {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: var(--pilot-navy);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pilot-parentLinkBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pilot-parentLinkMessage {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  grid-column: 1 / -1;
+}
+
+.pilot-parentLinkMessage--success {
+  color: #166534;
+}
+
+.pilot-parentLinkMessage--error {
+  color: #b91c1c;
+}
+
+.pilot-parentLinkExisting {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--pilot-border);
+}
+
+.pilot-parentLinkExistingTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-parentLinkExistingList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pilot-parentLinkExistingItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.8);
+}

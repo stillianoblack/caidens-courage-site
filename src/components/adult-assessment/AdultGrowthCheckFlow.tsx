@@ -26,6 +26,11 @@ import {
 } from '../../lib/adultAssessmentStorage';
 import { saveAdultAssessmentToSupabase } from '../../lib/assessmentResultsService';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
+import { readActivePilotProgram } from '../../config/activePilotProgram';
+import {
+  linkParentChildFromCampAssessment,
+  shouldMigrateFromCampProgram,
+} from '../../lib/parentChildLinkFromCampService';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from '../../data/adult/sharedAssets';
 import AdultInfoForm from './AdultInfoForm';
@@ -74,8 +79,12 @@ export default function AdultGrowthCheckFlow({
   const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
   const [resultRecord, setResultRecord] = useState<AdultAssessmentRecord | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [linkingPortal, setLinkingPortal] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   const programContext = resolveActiveProgramContext();
+  const collectChildLinking =
+    familyPortal && phase === 'baseline' && shouldMigrateFromCampProgram();
   const totalQuestions = ADULT_GROWTH_CHECK_QUESTIONS.length;
   const currentQuestion = ADULT_GROWTH_CHECK_QUESTIONS[questionIndex];
 
@@ -97,10 +106,57 @@ export default function AdultGrowthCheckFlow({
     setFeedbackTone('neutral');
   }, []);
 
-  const handleProfileSubmit = (values: AdultAssessmentProfile) => {
+  const handleProfileSubmit = async (values: AdultAssessmentProfile) => {
     playSelect();
-    saveAdultAssessmentProfile(values);
-    setProfile(values);
+    setLinkError(null);
+
+    let profileToSave = values;
+
+    if (collectChildLinking) {
+      const campProgram = readActivePilotProgram();
+      if (!campProgram) {
+        setLinkError('Camp program context is missing. Re-enter your family access code and try again.');
+        return;
+      }
+
+      const parentLastName = values.lastName?.trim();
+      const childFirstName = values.childFirstName?.trim();
+      if (!parentLastName || !childFirstName) {
+        setLinkError('Parent last name and child first name are required.');
+        return;
+      }
+
+      setLinkingPortal(true);
+      try {
+        const linkResult = await linkParentChildFromCampAssessment({
+          parentFirstName: values.firstName.trim(),
+          parentLastName,
+          parentEmail: values.email.trim(),
+          childFirstName,
+          childNickname: values.childNickname,
+          parentRole: values.role,
+          campProgram,
+        });
+
+        if (!linkResult.success || !linkResult.familyProgram) {
+          setLinkError(
+            linkResult.message ??
+              'Could not set up your private family portal. Please try again.',
+          );
+          return;
+        }
+
+        profileToSave = {
+          ...values,
+          programCode: linkResult.familyProgram.programCode,
+        };
+      } finally {
+        setLinkingPortal(false);
+      }
+    }
+
+    saveAdultAssessmentProfile(profileToSave);
+    setProfile(profileToSave);
     refreshAnalyticsIdentity();
     trackEvent('adult_assessment_started', {
       role: familyPortal ? 'parent' : 'facilitator',
@@ -279,12 +335,24 @@ export default function AdultGrowthCheckFlow({
                 ? 'Answer 12 reflection questions to capture your starting support strengths.'
                 : 'Retake the same 12 questions to measure your growth after training.'}
             </p>
+            {linkError ? (
+              <p className="bbc-feedback bbc-feedback--try" role="alert">
+                {linkError}
+              </p>
+            ) : null}
             <AdultInfoForm
               initialFirstName={profile?.firstName ?? ''}
+              initialLastName={profile?.lastName ?? ''}
               initialEmail={profile?.email ?? ''}
+              initialChildFirstName={profile?.childFirstName ?? ''}
+              initialChildNickname={profile?.childNickname ?? ''}
               initialProgramCode={programContext?.programCode ?? profile?.programCode ?? ''}
               programCodeReadOnly={familyPortal && Boolean(programContext?.programCode)}
-              onSubmit={handleProfileSubmit}
+              collectChildLinking={collectChildLinking}
+              submitting={linkingPortal}
+              onSubmit={(values) => {
+                void handleProfileSubmit(values);
+              }}
             />
           </div>
         ) : null}

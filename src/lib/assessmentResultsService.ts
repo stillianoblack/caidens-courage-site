@@ -12,7 +12,12 @@ import {
   isChildBaselineAssessmentType,
 } from '../config/assessmentTypeConstants';
 import { resolveTrackingProgramCode } from './activeProgramContext';
-import { findOrCreateParticipant, saveAssessmentResult } from './pilotTrackingService';
+import {
+  ensureStudentParticipantForSave,
+  findOrCreateParticipant,
+  resolveStudentGroupNameForSave,
+  saveAssessmentResult,
+} from './pilotTrackingService';
 import {
   logTrackingSave,
   logTrackingSaveError,
@@ -124,26 +129,21 @@ export async function saveStudentAssessmentToSupabase(
   const totalScore = input.feelingsScore + input.readingScore + input.focusScore;
 
   try {
-    let participantId = input.participantId?.trim() ?? '';
-    let participantSource: 'supabase' | 'local' = 'supabase';
-
-    if (!participantId) {
-      const participant = await findOrCreateParticipant({
-        role: 'student',
-        nickname: input.nickname,
-        first_name: input.firstName?.trim() || input.nickname,
-        program_code: programCode,
-        group_name: input.groupName || undefined,
-      });
-      participantId = participant.participantId;
-      participantSource = participant.source;
-    }
+    const ensured = await ensureStudentParticipantForSave({
+      participantId: input.participantId,
+      firstName: input.firstName,
+      nickname: input.nickname,
+      groupName: resolveStudentGroupNameForSave(input.groupName),
+    });
+    const participantId = ensured.participantId;
+    const participantSource = ensured.source;
+    const resolvedProgramCode = ensured.programCode || programCode;
 
     const answersJson = {
       ...(input.answersJson ?? {}),
       participant_id: participantId,
-      nickname: input.nickname,
-      first_name: input.firstName?.trim() || input.nickname,
+      nickname: ensured.nickname,
+      first_name: ensured.firstName,
     };
 
     if (isChildBaselineAssessmentType(input.assessmentType)) {
@@ -151,8 +151,8 @@ export async function saveStudentAssessmentToSupabase(
         participant_id: participantId,
         student_id: participantId,
         assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
-        program_code: programCode,
-        nickname: input.nickname,
+        program_code: resolvedProgramCode,
+        nickname: ensured.nickname,
         participant_source: participantSource,
       });
     }
@@ -160,8 +160,8 @@ export async function saveStudentAssessmentToSupabase(
     const v2Result = await saveAssessmentResult({
       participant_id: participantId,
       role: 'student',
-      program_code: programCode,
-      group_name: input.groupName || undefined,
+      program_code: resolvedProgramCode,
+      group_name: resolveStudentGroupNameForSave(input.groupName),
       assessment_type: input.assessmentType,
       reading_score: input.readingScore,
       focus_score: input.focusScore,
@@ -172,7 +172,7 @@ export async function saveStudentAssessmentToSupabase(
       completed_at: input.completedAt,
     });
 
-    const payload = buildLegacyStudentAssessmentRow(input, participantId, programCode);
+    const payload = buildLegacyStudentAssessmentRow(input, participantId, resolvedProgramCode);
     const { data, error } = await supabase.from('assessment_results').insert(payload).select('id').single();
 
     if (error) {
@@ -421,6 +421,18 @@ export async function saveAdultAssessmentToSupabase(
 
     if (participantSource === 'local' || (!v2Result.success && error)) {
       return { success: false, message: TRACKING_SAVE_WARNING };
+    }
+
+    if (programCode.trim().toUpperCase().startsWith('FAMILY-')) {
+      console.info('[PARENT_ASSESSMENT_SAVE]', {
+        program_code: programCode,
+        participant_id: participantId,
+        assessment_type: assessmentType,
+        parent_email: record.email,
+        parent_first_name: record.firstName,
+        total_score: record.totalScore,
+        completed_at: record.completedAt,
+      });
     }
 
     return {

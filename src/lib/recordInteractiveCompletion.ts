@@ -1,4 +1,5 @@
 import { readActiveChildNickname } from '../config/activeChildNickname';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveModuleTracking } from '../data/moduleTrackingRegistry';
 import type { GameAssessmentConfig } from '../types/gameAssessment';
@@ -8,7 +9,9 @@ import { loadAdultAssessmentSession } from './adultAssessmentStorage';
 import { logTrackingSaveBlocked, resolveTrackingProgramCode } from './activeProgramContext';
 import { loadB4BaselineState } from './b4BaselineCheckStorage';
 import {
+  ensureStudentParticipantForSave,
   findOrCreateParticipant,
+  resolveStudentGroupNameForSave,
   saveAssessmentResult,
   saveModuleResult,
 } from './pilotTrackingService';
@@ -40,14 +43,18 @@ function resolveStudentParticipant() {
     baselineState.profile?.nickname?.trim() ||
     readActiveChildNickname()?.trim() ||
     'Student';
+  const firstName = baselineState.profile?.firstName?.trim() || nickname;
 
   return {
+    participant_id: readActiveChildParticipantId() || baselineState.profile?.participantId,
     nickname,
-    first_name: nickname,
+    first_name: firstName,
     role: 'student',
     program_code: programCode ?? '',
     program_name: program?.programName,
-    group_name: program?.groupName?.trim() || baselineState.profile?.groupName?.trim() || undefined,
+    group_name: resolveStudentGroupNameForSave(
+      program?.groupName?.trim() || baselineState.profile?.groupName?.trim(),
+    ),
   };
 }
 
@@ -75,9 +82,22 @@ function resolveResultRole(tracking: ModuleTrackingDefinition): string {
 }
 
 async function resolveParticipantForTracking(tracking: ModuleTrackingDefinition) {
-  const payload =
-    tracking.role === 'student' ? resolveStudentParticipant() : resolveAdultParticipant();
+  if (tracking.role === 'student') {
+    const student = resolveStudentParticipant();
+    if (!student.program_code) {
+      logTrackingSaveBlocked('participant save missing active program context');
+      throw new Error('Missing active program context');
+    }
+    const ensured = await ensureStudentParticipantForSave({
+      participantId: student.participant_id,
+      firstName: student.first_name,
+      nickname: student.nickname,
+      groupName: student.group_name,
+    });
+    return { participantId: ensured.participantId, source: ensured.source };
+  }
 
+  const payload = resolveAdultParticipant();
   if (!payload.program_code) {
     logTrackingSaveBlocked('participant save missing active program context');
     throw new Error('Missing active program context');
@@ -117,7 +137,8 @@ export async function recordInteractiveModuleCompletion(
       participant_id: participantId,
       role: resolveResultRole(tracking),
       program_code: participant.program_code,
-      group_name: groupName,
+      group_name:
+        tracking.role === 'student' ? resolveStudentGroupNameForSave(groupName) : groupName,
       module_id: tracking.moduleId,
       module_title: tracking.moduleTitle,
       character: tracking.character,

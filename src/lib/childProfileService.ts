@@ -4,7 +4,11 @@ import {
   writeActiveChildParticipantId,
 } from '../config/activeChildParticipant';
 import { resolveTrackingProgramCode } from './activeProgramContext';
-import { findOrCreateParticipant } from './pilotTrackingService';
+import {
+  ensureStudentParticipantForSave,
+  findOrCreateParticipant,
+  resolveStudentGroupNameForSave,
+} from './pilotTrackingService';
 
 export type CreateFamilyChildInput = {
   firstName: string;
@@ -109,44 +113,29 @@ export async function ensureParticipantForBaseline(
     throw new Error('Missing active program context.');
   }
 
-  const existingId = input.participantId?.trim();
-  if (existingId && !existingId.startsWith('local-')) {
-    writeActiveChildParticipantId(existingId);
-    writeActiveChildNickname(nickname);
-    console.info('[CHILD_PROFILE]', {
-      action: 'baseline_reuse',
-      participant_id: existingId,
-      first_name: firstName,
-      nickname,
-      program_code: programCode,
-    });
-    return {
-      participantId: existingId,
-      firstName,
-      nickname,
-      source: 'supabase',
-    };
-  }
-
-  const { participantId, source } = await findOrCreateParticipant({
-    role: 'student',
-    first_name: firstName,
+  const ensured = await ensureStudentParticipantForSave({
+    participantId: input.participantId,
+    firstName,
     nickname,
-    program_code: programCode,
-    group_name: input.groupName?.trim() || undefined,
+    groupName: resolveStudentGroupNameForSave(input.groupName),
   });
 
-  writeActiveChildParticipantId(participantId);
-  writeActiveChildNickname(nickname);
+  writeActiveChildParticipantId(ensured.participantId);
+  writeActiveChildNickname(ensured.nickname);
 
   console.info('[CHILD_PROFILE]', {
     action: 'baseline_ensure',
-    participant_id: participantId,
-    first_name: firstName,
-    nickname,
-    program_code: programCode,
-    source,
+    participant_id: ensured.participantId,
+    first_name: ensured.firstName,
+    nickname: ensured.nickname,
+    program_code: ensured.programCode,
+    source: ensured.source,
   });
 
-  return { participantId, firstName, nickname, source };
+  return {
+    participantId: ensured.participantId,
+    firstName: ensured.firstName,
+    nickname: ensured.nickname,
+    source: ensured.source,
+  };
 }

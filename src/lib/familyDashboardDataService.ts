@@ -14,11 +14,17 @@ import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import {
+  fetchAssessmentV2ForParticipants,
   fetchAssessmentV2FromSupabase,
+  fetchModuleResultsForParticipants,
   fetchModuleResultsFromSupabase,
-  fetchStudentParticipantsFromSupabase,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import {
+  resolveFamilyVisibleChildren,
+  type FamilyVisibleChild,
+  type StudentFamilyLink,
+} from './studentFamilyLinkService';
 
 export const ADULT_BASELINE_ASSESSMENT_TYPES = new Set([
   ADULT_PRE_ASSESSMENT_TYPE,
@@ -33,12 +39,67 @@ export const ADULT_GROWTH_ASSESSMENT_TYPES = new Set([
 export type FamilyDashboardData = {
   programCode: string;
   studentParticipants: StudentParticipantRecord[];
+  visibleChildren: FamilyVisibleChild[];
+  allowedStudentIds: string[];
+  familyLinks: StudentFamilyLink[];
   studentLegacyBaselines: B4BaselineCheckRecord[];
   adultLegacyAssessments: AssessmentResultRow[];
   v2Assessments: LocalAssessmentV2Record[];
   moduleResults: LocalModuleResultRecord[];
   errors: string[];
 };
+
+function filterStudentRowsByAllowedIds<T extends { participant_id?: string | null; role?: string }>(
+  rows: T[],
+  allowedStudentIds: string[],
+): T[] {
+  const allowed = new Set(allowedStudentIds);
+  return rows.filter((row) => {
+    if (row.role !== 'student') return true;
+    if (!allowedStudentIds.length) return false;
+    return allowed.has(row.participant_id?.trim() ?? '');
+  });
+}
+
+function filterLegacyStudentBaselines(
+  rows: B4BaselineCheckRecord[],
+  allowedStudentIds: string[],
+): B4BaselineCheckRecord[] {
+  if (!allowedStudentIds.length) return [];
+  const allowed = new Set(allowedStudentIds);
+  return rows.filter((row) => {
+    const participantId = row.participantId?.trim() || row.anonymousStudentId?.trim() || '';
+    return participantId ? allowed.has(participantId) : false;
+  });
+}
+
+function filterLegacyStudentRows(
+  rows: AssessmentResultRow[],
+  allowedStudentIds: string[],
+): AssessmentResultRow[] {
+  if (!allowedStudentIds.length) return [];
+  const allowed = new Set(allowedStudentIds);
+  return rows.filter((row) => {
+    const studentId = row.student_id?.trim() ?? '';
+    return studentId ? allowed.has(studentId) : false;
+  });
+}
+
+function mergeUniqueById<T extends { id?: string; participant_id?: string; completed_at?: string }>(
+  primary: T[],
+  secondary: T[],
+  keyFn: (row: T) => string,
+): T[] {
+  const seen = new Set<string>();
+  const merged: T[] = [];
+  for (const row of [...primary, ...secondary]) {
+    const key = keyFn(row);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(row);
+  }
+  return merged;
+}
 
 function isStudentBaselineLegacyRow(row: AssessmentResultRow): boolean {
   const type = row.assessment_type?.toLowerCase() ?? '';
@@ -121,6 +182,9 @@ export function hasAdultGrowthAssessment(
 export function logFamilyDashboardDebug(payload: {
   programCode: string;
   studentParticipants: StudentParticipantRecord[];
+  visibleChildren: FamilyVisibleChild[];
+  allowedStudentIds: string[];
+  familyLinks: StudentFamilyLink[];
   studentLegacyBaselines: B4BaselineCheckRecord[];
   adultLegacyAssessments: AssessmentResultRow[];
   v2Assessments: LocalAssessmentV2Record[];
@@ -129,6 +193,13 @@ export function logFamilyDashboardDebug(payload: {
 }): void {
   console.info('[FAMILY_DASHBOARD]', {
     program_code: payload.programCode,
+    allowed_student_ids: payload.allowedStudentIds,
+    visible_children: payload.visibleChildren.map((child) => ({
+      student_id: child.studentId,
+      display_name: child.displayName,
+      source: child.source,
+    })),
+    family_links: payload.familyLinks.length,
     children_loaded: payload.studentParticipants.map((row) => ({
       id: row.id,
       nickname: row.nickname,
@@ -156,6 +227,9 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
     const empty: FamilyDashboardData = {
       programCode: '',
       studentParticipants: [],
+      visibleChildren: [],
+      allowedStudentIds: [],
+      familyLinks: [],
       studentLegacyBaselines: [],
       adultLegacyAssessments: [],
       v2Assessments: [],
@@ -167,39 +241,80 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
   }
 
   const errors: string[] = [];
+  const visibility = await resolveFamilyVisibleChildren(programCode);
+  errors.push(...visibility.errors);
 
-  const [participantsPayload, legacyAllPayload, v2Payload, modulePayload] = await Promise.all([
-    fetchStudentParticipantsFromSupabase(programCode),
-    fetchAllLegacyAssessmentRows(programCode),
-    fetchAssessmentV2FromSupabase(programCode),
-    fetchModuleResultsFromSupabase(programCode),
-  ]);
+  const allowedStudentIds = visibility.allowedStudentIds;
+  const visibleParticipants: StudentParticipantRecord[] = visibility.children.map((child) => {
+    const participant = visibility.participants.find((row) => row.id === child.studentId);
+    if (participant) return participant;
+    return {
+      id: child.studentId,
+      nickname: child.displayName,
+      first_name: child.displayName,
+      role: 'student',
+      program_code: child.source === 'camp_link' ? child.campProgramCode ?? programCode : programCode,
+      created_at: new Date().toISOString(),
+    };
+  });
 
-  if (participantsPayload.error) errors.push(participantsPayload.error);
+  const [legacyAllPayload, v2ByProgramPayload, moduleByProgramPayload, v2ByStudentsPayload, moduleByStudentsPayload] =
+    await Promise.all([
+      fetchAllLegacyAssessmentRows(programCode),
+      fetchAssessmentV2FromSupabase(programCode),
+      fetchModuleResultsFromSupabase(programCode),
+      fetchAssessmentV2ForParticipants(allowedStudentIds),
+      fetchModuleResultsForParticipants(allowedStudentIds),
+    ]);
+
   if (legacyAllPayload.error) errors.push(legacyAllPayload.error);
-  if (v2Payload.error) errors.push(v2Payload.error);
-  if (modulePayload.error) errors.push(modulePayload.error);
+  if (v2ByProgramPayload.error) errors.push(v2ByProgramPayload.error);
+  if (moduleByProgramPayload.error) errors.push(moduleByProgramPayload.error);
+  if (v2ByStudentsPayload.error) errors.push(v2ByStudentsPayload.error);
+  if (moduleByStudentsPayload.error) errors.push(moduleByStudentsPayload.error);
 
-  let studentLegacyBaselines = legacyAllPayload.rows
-    .filter(isStudentBaselineLegacyRow)
-    .map(supabaseRowToRecord);
+  let studentLegacyBaselines = filterLegacyStudentRows(
+    legacyAllPayload.rows.filter(isStudentBaselineLegacyRow),
+    allowedStudentIds,
+  ).map(supabaseRowToRecord);
 
   if (studentLegacyBaselines.length === 0 && legacyAllPayload.error) {
     const fallback = await fetchAssessmentResultsFromSupabase(programCode);
     if (fallback.error) {
       errors.push(fallback.error);
     } else {
-      studentLegacyBaselines = fallback.results;
+      studentLegacyBaselines = filterLegacyStudentBaselines(fallback.results, allowedStudentIds);
     }
   }
 
+  const v2Assessments = filterStudentRowsByAllowedIds(
+    mergeUniqueById(
+      v2ByProgramPayload.results,
+      v2ByStudentsPayload.results,
+      (row) => `${row.participant_id}-${row.assessment_type}-${row.completed_at}`,
+    ),
+    allowedStudentIds,
+  );
+
+  const moduleResults = filterStudentRowsByAllowedIds(
+    mergeUniqueById(
+      moduleByProgramPayload.results,
+      moduleByStudentsPayload.results,
+      (row) => `${row.participant_id}-${row.module_id}-${row.completed_at}`,
+    ),
+    allowedStudentIds,
+  );
+
   const data: FamilyDashboardData = {
     programCode,
-    studentParticipants: participantsPayload.participants,
+    studentParticipants: visibleParticipants,
+    visibleChildren: visibility.children,
+    allowedStudentIds,
+    familyLinks: visibility.links,
     studentLegacyBaselines,
     adultLegacyAssessments: legacyAllPayload.rows.filter(isAdultLegacyRow),
-    v2Assessments: v2Payload.results,
-    moduleResults: modulePayload.results,
+    v2Assessments,
+    moduleResults,
     errors,
   };
 

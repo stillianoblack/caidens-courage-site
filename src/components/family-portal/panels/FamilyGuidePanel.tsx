@@ -5,10 +5,11 @@ import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import AdultLearningFlowSection from '../../shared/AdultLearningFlowSection';
 import AddChildForm from '../AddChildForm';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
+import FamilyAddedChildrenSection from '../FamilyAddedChildrenSection';
 
 export default function FamilyGuidePanel() {
   const programCode = resolveTrackingProgramCode() ?? undefined;
-  const { refresh } = useFamilyDashboardMetrics(programCode);
+  const { refresh, visibleChildren, loading } = useFamilyDashboardMetrics(programCode);
 
   return (
     <div className="family-panel">
@@ -18,6 +19,8 @@ export default function FamilyGuidePanel() {
       </div>
 
       <FamilyAccessCodeCard />
+
+      <FamilyAddedChildrenSection children={visibleChildren} loading={loading} />
 
       <AddChildForm compact onAdded={() => void refresh()} />
 

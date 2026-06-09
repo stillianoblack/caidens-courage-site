@@ -4,9 +4,13 @@ import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { LocalAssessmentV2Record } from './pilotTrackingLocalStorage';
 import {
-  fetchStudentParticipantsFromSupabase,
+  fetchAssessmentV2ForParticipants,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import {
+  isStudentVisibleToFamily,
+  resolveFamilyVisibleChildren,
+} from './studentFamilyLinkService';
 
 export type FamilyResultEntry = {
   id: string;
@@ -177,21 +181,44 @@ export async function loadFamilyResults(programCode?: string): Promise<FamilyRes
   }
 
   try {
-    const [legacyRows, v2Rows, studentParticipantsPayload, adultParticipants] = await Promise.all([
+    const visibility = await resolveFamilyVisibleChildren(resolvedCode);
+    const allowedStudentIds = visibility.allowedStudentIds;
+
+    const [legacyRows, v2Rows, v2LinkedRows, adultParticipants] = await Promise.all([
       fetchLegacyRows(resolvedCode),
       fetchV2Rows(resolvedCode),
-      fetchStudentParticipantsFromSupabase(resolvedCode),
+      fetchAssessmentV2ForParticipants(allowedStudentIds),
       fetchAdultParticipants(resolvedCode),
     ]);
 
-    const studentParticipants = studentParticipantsPayload.participants;
+    const studentParticipants = visibility.children.map((child) => {
+      const participant = visibility.participants.find((row) => row.id === child.studentId);
+      return (
+        participant ?? {
+          id: child.studentId,
+          nickname: child.displayName,
+          first_name: child.displayName,
+          role: 'student',
+          program_code: resolvedCode,
+          created_at: new Date().toISOString(),
+        }
+      );
+    });
+
+    const mergedV2Rows = [...v2Rows, ...v2LinkedRows.results].filter((row, index, all) => {
+      const key = `${row.participant_id}-${row.assessment_type}-${row.completed_at}`;
+      return all.findIndex((entry) => `${entry.participant_id}-${entry.assessment_type}-${entry.completed_at}` === key) === index;
+    });
 
     const children: FamilyResultEntry[] = [];
     const adults: FamilyResultEntry[] = [];
     const coveredChild = new Set<string>();
     const coveredAdult = new Set<string>();
 
-    for (const row of v2Rows.filter((entry) => entry.role === 'student')) {
+    for (const row of mergedV2Rows.filter(
+      (entry) =>
+        entry.role === 'student' && isStudentVisibleToFamily(entry.participant_id, allowedStudentIds),
+    )) {
       const participant = studentParticipants.find((p) => p.id === row.participant_id);
       const answers = row.answers_json as { nickname?: string } | undefined;
       const name =
@@ -220,6 +247,9 @@ export async function loadFamilyResults(programCode?: string): Promise<FamilyRes
     }
 
     for (const row of legacyRows.filter(isStudentLegacyRow)) {
+      if (!isStudentVisibleToFamily(row.student_id, allowedStudentIds)) {
+        continue;
+      }
       const name = resolvePersonName(row);
       const personKey = row.student_id?.trim() || name;
       if (
@@ -245,7 +275,7 @@ export async function loadFamilyResults(programCode?: string): Promise<FamilyRes
       });
     }
 
-    for (const row of v2Rows.filter((entry) => entry.role === 'adult')) {
+    for (const row of mergedV2Rows.filter((entry) => entry.role === 'adult')) {
       const participant = adultParticipants.find((p) => p.id === row.participant_id);
       const name = participant?.first_name?.trim() || participant?.nickname?.trim() || 'Parent / Guardian';
       const personKey = row.participant_id || name;

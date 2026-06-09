@@ -19,8 +19,11 @@ const ARCHIVE_KEY = 'caidens-courage-adult-assessment-archive';
 
 export type AdultAssessmentProfile = {
   firstName: string;
+  lastName?: string;
   email: string;
   role: AdultRoleOption;
+  childFirstName?: string;
+  childNickname?: string;
   childAgeRange?: string;
   organization?: string;
   emailOptIn: boolean;

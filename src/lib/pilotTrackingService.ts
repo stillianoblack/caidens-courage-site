@@ -1,4 +1,7 @@
+import { readActiveChildNickname } from '../config/activeChildNickname';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { loadB4BaselineState } from './b4BaselineCheckStorage';
 import {
   logTrackingSaveBlocked,
   resolveTrackingProgramCode,
@@ -51,6 +54,23 @@ export type ParticipantPayload = {
   organization?: string;
   child_age_range?: string;
   email_opt_in?: boolean;
+  /** When known, look up this participant before nickname/first_name matching. */
+  participant_id?: string;
+};
+
+export type EnsureStudentParticipantInput = {
+  participantId?: string;
+  firstName?: string;
+  nickname?: string;
+  groupName?: string;
+};
+
+export type EnsureStudentParticipantResult = {
+  participantId: string;
+  firstName: string;
+  nickname: string;
+  programCode: string;
+  source: 'supabase' | 'local';
 };
 
 export type ModuleResultPayload = {
@@ -103,8 +123,98 @@ function computePercent(score: number, maxScore: number): number {
   return Math.round((score / maxScore) * 10000) / 100;
 }
 
+const SUPABASE_UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidSupabaseParticipantId(participantId?: string | null): boolean {
+  const trimmed = participantId?.trim() ?? '';
+  return Boolean(trimmed) && !trimmed.startsWith('local-') && SUPABASE_UUID_PATTERN.test(trimmed);
+}
+
 function isSupabaseParticipantId(participantId: string): boolean {
-  return !participantId.startsWith('local-');
+  return isValidSupabaseParticipantId(participantId);
+}
+
+/** Family portal students are not grouped by classroom — keep group_name null for lookups. */
+export function resolveStudentGroupNameForSave(groupName?: string): string | undefined {
+  if (shouldForceFamilyProgramResolution()) {
+    return undefined;
+  }
+  const trimmed = groupName?.trim();
+  return trimmed || undefined;
+}
+
+function buildStudentParticipantOrFilter(nickname?: string, firstName?: string): string | null {
+  const names = new Set<string>();
+  if (nickname?.trim()) names.add(nickname.trim());
+  if (firstName?.trim()) names.add(firstName.trim());
+  if (!names.size) return null;
+  return Array.from(names)
+    .flatMap((name) => [`nickname.eq.${name}`, `first_name.eq.${name}`])
+    .join(',');
+}
+
+/** Resolve a Supabase student participant before module/assessment saves. */
+export async function ensureStudentParticipantForSave(
+  input: EnsureStudentParticipantInput = {},
+): Promise<EnsureStudentParticipantResult> {
+  const baselineState = loadB4BaselineState();
+  const programCode = resolveTrackingProgramCode('student_participant_ensure');
+  if (!programCode) {
+    throw new Error('Missing active program context');
+  }
+
+  const nickname =
+    input.nickname?.trim() ||
+    baselineState.profile?.nickname?.trim() ||
+    readActiveChildNickname()?.trim() ||
+    '';
+  const firstName =
+    input.firstName?.trim() ||
+    baselineState.profile?.firstName?.trim() ||
+    nickname;
+  const participantId =
+    input.participantId?.trim() ||
+    readActiveChildParticipantId()?.trim() ||
+    baselineState.profile?.participantId?.trim() ||
+    '';
+  const groupName = resolveStudentGroupNameForSave(
+    input.groupName?.trim() || baselineState.profile?.groupName?.trim(),
+  );
+
+  if (!nickname && !firstName) {
+    throw new Error('Student participants require nickname or first_name.');
+  }
+
+  const resolvedNickname = nickname || firstName;
+  const resolvedFirstName = firstName || resolvedNickname;
+
+  const { participantId: ensuredId, source } = await findOrCreateParticipant({
+    role: 'student',
+    participant_id: isValidSupabaseParticipantId(participantId) ? participantId : undefined,
+    nickname: resolvedNickname,
+    first_name: resolvedFirstName,
+    program_code: programCode,
+    group_name: groupName,
+  });
+
+  console.info('[CHILD_PROFILE]', {
+    action: 'ensure_for_save',
+    participant_id: ensuredId,
+    first_name: resolvedFirstName,
+    nickname: resolvedNickname,
+    program_code: programCode,
+    source,
+    had_known_id: isValidSupabaseParticipantId(participantId),
+  });
+
+  return {
+    participantId: ensuredId,
+    firstName: resolvedFirstName,
+    nickname: resolvedNickname,
+    programCode,
+    source,
+  };
 }
 
 function normalizeProgramCode(code?: string | null): string | null {
@@ -250,16 +360,45 @@ export async function findOrCreateParticipant(
 
   if (isSupabaseConfigured() && supabase) {
     try {
+      if (isStudentRole(payload.role) && isValidSupabaseParticipantId(payload.participant_id)) {
+        const { data: byIdRows, error: byIdError } = await withTimeout(
+          supabase
+            .from('participants')
+            .select('id')
+            .eq('id', payload.participant_id!.trim())
+            .eq('program_code', programCode)
+            .eq('role', 'student')
+            .limit(1),
+          DASHBOARD_FETCH_TIMEOUT_MS,
+          'participant_lookup_by_id',
+        );
+
+        if (byIdError) {
+          logTrackingSaveError({
+            table: 'participants',
+            operation: 'select',
+            participantId: payload.participant_id,
+            participantName: payload.nickname || payload.first_name,
+            role: payload.role,
+            programCode,
+            error: byIdError,
+          });
+        } else if (byIdRows && byIdRows.length > 0) {
+          const participantId = byIdRows[0].id as string;
+          saveLocalParticipant(participantToLocalRow(normalizedPayload, participantId, programCode));
+          return { participantId, source: 'supabase' };
+        }
+      }
+
       let query = supabase.from('participants').select('id').eq('program_code', programCode);
 
       if (isStudentRole(payload.role)) {
         query = query.eq('role', 'student');
         const nickname = payload.nickname?.trim();
         const firstName = payload.first_name?.trim();
-        if (nickname) {
-          query = query.eq('nickname', nickname);
-        } else if (firstName) {
-          query = query.eq('first_name', firstName);
+        const orFilter = buildStudentParticipantOrFilter(nickname, firstName);
+        if (orFilter) {
+          query = query.or(orFilter);
         }
         query = applyStudentGroupFilter(query, payload.group_name);
       } else {
@@ -436,8 +575,40 @@ export async function findOrCreateParticipant(
 }
 
 export async function saveModuleResult(payload: ModuleResultPayload): Promise<TrackingSubmitResult> {
+  let resolvedPayload = payload;
+
+  if (payload.role === 'student') {
+    try {
+      const ensured = await ensureStudentParticipantForSave({
+        participantId: payload.participant_id,
+        groupName: payload.group_name,
+      });
+      resolvedPayload = {
+        ...payload,
+        participant_id: ensured.participantId,
+        program_code: ensured.programCode,
+        group_name: resolveStudentGroupNameForSave(payload.group_name),
+      };
+    } catch (err) {
+      logTrackingSaveError({
+        table: 'module_results',
+        operation: 'insert',
+        participantId: payload.participant_id,
+        role: payload.role,
+        programCode: payload.program_code,
+        assessmentType: payload.module_id,
+        error: err,
+      });
+      return {
+        success: false,
+        source: 'local',
+        message: 'Missing active program context.',
+      };
+    }
+  }
+
   const programCode = resolveResultProgramCode(
-    payload.program_code,
+    resolvedPayload.program_code,
     'module_result_insert',
     'module_results',
   );
@@ -449,65 +620,71 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
     };
   }
 
-  const completedAt = payload.completed_at ?? new Date().toISOString();
-  const percentScore = payload.percent_score ?? computePercent(payload.score, payload.max_score);
+  const completedAt = resolvedPayload.completed_at ?? new Date().toISOString();
+  const percentScore =
+    resolvedPayload.percent_score ?? computePercent(resolvedPayload.score, resolvedPayload.max_score);
   const attemptNumber =
-    payload.attempt_number ??
-    countLocalModuleAttempts(payload.participant_id, payload.module_id) + 1;
+    resolvedPayload.attempt_number ??
+    countLocalModuleAttempts(resolvedPayload.participant_id, resolvedPayload.module_id) + 1;
 
   logProgramAssignmentAudit({
     saveContext: 'module_result_insert',
-    participantId: payload.participant_id,
-    participantRole: payload.role,
-    payloadProgramCode: payload.program_code,
+    participantId: resolvedPayload.participant_id,
+    participantRole: resolvedPayload.role,
+    payloadProgramCode: resolvedPayload.program_code,
   });
 
+  const answersJson = {
+    ...(resolvedPayload.answers_json ?? {}),
+    participant_id: resolvedPayload.participant_id,
+  };
+
   const localPayload: Omit<LocalModuleResultRecord, 'id'> = {
-    participant_id: payload.participant_id,
-    role: payload.role,
+    participant_id: resolvedPayload.participant_id,
+    role: resolvedPayload.role,
     program_code: programCode,
-    group_name: payload.group_name,
-    module_id: payload.module_id,
-    module_title: payload.module_title,
-    character: payload.character,
-    skill_area: payload.skill_area,
-    score: payload.score,
-    max_score: payload.max_score,
+    group_name: resolvedPayload.group_name,
+    module_id: resolvedPayload.module_id,
+    module_title: resolvedPayload.module_title,
+    character: resolvedPayload.character,
+    skill_area: resolvedPayload.skill_area,
+    score: resolvedPayload.score,
+    max_score: resolvedPayload.max_score,
     percent_score: percentScore,
-    time_spent_seconds: payload.time_spent_seconds,
+    time_spent_seconds: resolvedPayload.time_spent_seconds,
     attempt_number: attemptNumber,
-    answers_json: payload.answers_json,
+    answers_json: answersJson,
     completed_at: completedAt,
   };
 
   if (isSupabaseConfigured() && supabase) {
-    if (!isSupabaseParticipantId(payload.participant_id)) {
+    if (!isSupabaseParticipantId(resolvedPayload.participant_id)) {
       logTrackingSaveError({
         table: 'module_results',
         operation: 'insert',
-        participantId: payload.participant_id,
-        role: payload.role,
+        participantId: resolvedPayload.participant_id,
+        role: resolvedPayload.role,
         programCode,
-        assessmentType: payload.module_id,
+        assessmentType: resolvedPayload.module_id,
         error: 'participant not synced to Supabase',
       });
     } else {
       try {
         const insertPayload = {
-          participant_id: payload.participant_id,
-          role: payload.role,
+          participant_id: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           program_code: programCode,
-          group_name: payload.group_name ?? null,
-          module_id: payload.module_id,
-          module_title: payload.module_title,
-          character: payload.character,
-          skill_area: payload.skill_area ?? null,
-          score: payload.score,
-          max_score: payload.max_score,
+          group_name: resolvedPayload.group_name ?? null,
+          module_id: resolvedPayload.module_id,
+          module_title: resolvedPayload.module_title,
+          character: resolvedPayload.character,
+          skill_area: resolvedPayload.skill_area ?? null,
+          score: resolvedPayload.score,
+          max_score: resolvedPayload.max_score,
           percent_score: percentScore,
-          time_spent_seconds: payload.time_spent_seconds ?? null,
+          time_spent_seconds: resolvedPayload.time_spent_seconds ?? null,
           attempt_number: attemptNumber,
-          answers_json: payload.answers_json ?? null,
+          answers_json: answersJson,
           completed_at: completedAt,
         };
 
@@ -522,16 +699,21 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
           logTrackingSave({
             table: 'module_results',
             operation: 'insert',
-            participantId: payload.participant_id,
-            role: payload.role,
+            participantId: resolvedPayload.participant_id,
+            role: resolvedPayload.role,
             programCode,
-            assessmentType: payload.module_id,
+            assessmentType: resolvedPayload.module_id,
             response: data,
+          });
+          console.info('[CHILD_MODULE_SAVE]', {
+            participant_id: resolvedPayload.participant_id,
+            program_code: programCode,
+            module_id: resolvedPayload.module_id,
           });
           return {
             success: true,
             source: 'supabase',
-            participantId: payload.participant_id,
+            participantId: resolvedPayload.participant_id,
             recordId: (data.id as string) ?? localRecord.id,
           };
         }
@@ -539,10 +721,10 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
         logTrackingSaveError({
           table: 'module_results',
           operation: 'insert',
-          participantId: payload.participant_id,
-          role: payload.role,
+          participantId: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           programCode,
-          assessmentType: payload.module_id,
+          assessmentType: resolvedPayload.module_id,
           response: data,
           error,
         });
@@ -550,10 +732,10 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
         logTrackingSaveError({
           table: 'module_results',
           operation: 'insert',
-          participantId: payload.participant_id,
-          role: payload.role,
+          participantId: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           programCode,
-          assessmentType: payload.module_id,
+          assessmentType: resolvedPayload.module_id,
           error: err,
         });
       }
@@ -564,7 +746,7 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
   return {
     success: !isSupabaseConfigured(),
     source: 'local',
-    participantId: payload.participant_id,
+    participantId: resolvedPayload.participant_id,
     recordId: localRecord.id,
     message: isSupabaseConfigured() ? 'Saved on this device only.' : 'Saved on this device.',
   };
@@ -573,8 +755,51 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
 export async function saveAssessmentResult(
   payload: AssessmentResultV2Payload,
 ): Promise<TrackingSubmitResult> {
+  let resolvedPayload = payload;
+
+  if (payload.role === 'student') {
+    try {
+      const answers = payload.answers_json as
+        | { nickname?: string; first_name?: string; participant_id?: string }
+        | undefined;
+      const ensured = await ensureStudentParticipantForSave({
+        participantId: payload.participant_id || answers?.participant_id,
+        firstName: answers?.first_name,
+        nickname: answers?.nickname,
+        groupName: payload.group_name,
+      });
+      resolvedPayload = {
+        ...payload,
+        participant_id: ensured.participantId,
+        program_code: ensured.programCode,
+        group_name: resolveStudentGroupNameForSave(payload.group_name),
+        answers_json: {
+          ...(payload.answers_json ?? {}),
+          participant_id: ensured.participantId,
+          first_name: ensured.firstName,
+          nickname: ensured.nickname,
+        },
+      };
+    } catch (err) {
+      logTrackingSaveError({
+        table: 'assessment_results_v2',
+        operation: 'insert',
+        participantId: payload.participant_id,
+        role: payload.role,
+        programCode: payload.program_code,
+        assessmentType: payload.assessment_type,
+        error: err,
+      });
+      return {
+        success: false,
+        source: 'local',
+        message: 'Missing active program context.',
+      };
+    }
+  }
+
   const programCode = resolveResultProgramCode(
-    payload.program_code,
+    resolvedPayload.program_code,
     'assessment_result_v2_insert',
     'assessment_results_v2',
   );
@@ -586,66 +811,66 @@ export async function saveAssessmentResult(
     };
   }
 
-  const completedAt = payload.completed_at ?? new Date().toISOString();
+  const completedAt = resolvedPayload.completed_at ?? new Date().toISOString();
   const percentScore =
-    payload.percent_score ??
-    (payload.total_score != null && payload.max_score
-      ? computePercent(payload.total_score, payload.max_score)
+    resolvedPayload.percent_score ??
+    (resolvedPayload.total_score != null && resolvedPayload.max_score
+      ? computePercent(resolvedPayload.total_score, resolvedPayload.max_score)
       : undefined);
 
   logProgramAssignmentAudit({
     saveContext: 'assessment_result_v2_insert',
-    participantId: payload.participant_id,
-    participantRole: payload.role,
-    payloadProgramCode: payload.program_code,
+    participantId: resolvedPayload.participant_id,
+    participantRole: resolvedPayload.role,
+    payloadProgramCode: resolvedPayload.program_code,
   });
 
   const localPayload: Omit<LocalAssessmentV2Record, 'id'> = {
-    participant_id: payload.participant_id,
-    role: payload.role,
+    participant_id: resolvedPayload.participant_id,
+    role: resolvedPayload.role,
     program_code: programCode,
-    group_name: payload.group_name,
-    assessment_type: payload.assessment_type,
-    reading_score: payload.reading_score,
-    focus_score: payload.focus_score,
-    confidence_score: payload.confidence_score,
-    understanding_score: payload.understanding_score,
-    support_score: payload.support_score,
-    total_score: payload.total_score,
-    max_score: payload.max_score,
+    group_name: resolvedPayload.group_name,
+    assessment_type: resolvedPayload.assessment_type,
+    reading_score: resolvedPayload.reading_score,
+    focus_score: resolvedPayload.focus_score,
+    confidence_score: resolvedPayload.confidence_score,
+    understanding_score: resolvedPayload.understanding_score,
+    support_score: resolvedPayload.support_score,
+    total_score: resolvedPayload.total_score,
+    max_score: resolvedPayload.max_score,
     percent_score: percentScore,
-    answers_json: payload.answers_json,
+    answers_json: resolvedPayload.answers_json,
     completed_at: completedAt,
   };
 
   if (isSupabaseConfigured() && supabase) {
-    if (!isSupabaseParticipantId(payload.participant_id)) {
+    if (!isSupabaseParticipantId(resolvedPayload.participant_id)) {
       logTrackingSaveError({
         table: 'assessment_results_v2',
         operation: 'insert',
-        participantId: payload.participant_id,
-        role: payload.role,
+        participantId: resolvedPayload.participant_id,
+        role: resolvedPayload.role,
         programCode,
-        assessmentType: payload.assessment_type,
+        assessmentType: resolvedPayload.assessment_type,
         error: 'participant not synced to Supabase',
       });
     } else {
       try {
         const insertPayload = {
-          participant_id: payload.participant_id,
-          role: payload.role,
+          participant_id: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           program_code: programCode,
-          group_name: payload.group_name ?? null,
-          assessment_type: payload.assessment_type,
-          reading_score: payload.reading_score ?? null,
-          focus_score: payload.focus_score ?? null,
-          confidence_score: payload.confidence_score ?? null,
-          understanding_score: payload.understanding_score ?? null,
-          support_score: payload.support_score ?? null,
-          total_score: payload.total_score ?? null,
-          max_score: payload.max_score ?? null,
+          group_name: resolvedPayload.group_name ?? null,
+          assessment_type: resolvedPayload.assessment_type,
+          reading_score: resolvedPayload.reading_score ?? null,
+          focus_score: resolvedPayload.focus_score ?? null,
+          confidence_score: resolvedPayload.confidence_score ?? null,
+          understanding_score: resolvedPayload.understanding_score ?? null,
+          support_score: resolvedPayload.support_score ?? null,
+          total_score: resolvedPayload.total_score ?? null,
+          max_score: resolvedPayload.max_score ?? null,
           percent_score: percentScore ?? null,
-          answers_json: payload.answers_json ?? null,
+          answers_json: resolvedPayload.answers_json ?? null,
           completed_at: completedAt,
         };
 
@@ -660,16 +885,16 @@ export async function saveAssessmentResult(
           logTrackingSave({
             table: 'assessment_results_v2',
             operation: 'insert',
-            participantId: payload.participant_id,
-            role: payload.role,
+            participantId: resolvedPayload.participant_id,
+            role: resolvedPayload.role,
             programCode,
-            assessmentType: payload.assessment_type,
+            assessmentType: resolvedPayload.assessment_type,
             response: data,
           });
           return {
             success: true,
             source: 'supabase',
-            participantId: payload.participant_id,
+            participantId: resolvedPayload.participant_id,
             recordId: (data?.id as string) ?? localRecord.id,
           };
         }
@@ -677,10 +902,10 @@ export async function saveAssessmentResult(
         logTrackingSaveError({
           table: 'assessment_results_v2',
           operation: 'insert',
-          participantId: payload.participant_id,
-          role: payload.role,
+          participantId: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           programCode,
-          assessmentType: payload.assessment_type,
+          assessmentType: resolvedPayload.assessment_type,
           response: data,
           error,
         });
@@ -688,10 +913,10 @@ export async function saveAssessmentResult(
         logTrackingSaveError({
           table: 'assessment_results_v2',
           operation: 'insert',
-          participantId: payload.participant_id,
-          role: payload.role,
+          participantId: resolvedPayload.participant_id,
+          role: resolvedPayload.role,
           programCode,
-          assessmentType: payload.assessment_type,
+          assessmentType: resolvedPayload.assessment_type,
           error: err,
         });
       }
@@ -702,7 +927,7 @@ export async function saveAssessmentResult(
   return {
     success: !isSupabaseConfigured(),
     source: 'local',
-    participantId: payload.participant_id,
+    participantId: resolvedPayload.participant_id,
     recordId: localRecord.id,
     message: isSupabaseConfigured() ? 'Saved on this device only.' : 'Saved on this device.',
   };
@@ -802,6 +1027,70 @@ export async function fetchAssessmentV2FromSupabase(programCode?: string): Promi
     return { results: (data ?? []) as LocalAssessmentV2Record[] };
   } catch {
     return { results: programCode?.trim() ? [] : loadLocalAssessmentV2Results(), error: 'fetch_failed' };
+  }
+}
+
+export async function fetchModuleResultsForParticipants(
+  participantIds: string[],
+): Promise<{ results: LocalModuleResultRecord[]; error?: string }> {
+  if (!participantIds.length) {
+    return { results: [] };
+  }
+
+  if (!isSupabaseConfigured() || !supabase) {
+    return { results: [], error: 'missing_env' };
+  }
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('module_results')
+        .select('*')
+        .in('participant_id', participantIds)
+        .order('completed_at', { ascending: false }),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'module_results_by_participants',
+    );
+
+    if (error) {
+      return { results: [], error: error.message };
+    }
+
+    return { results: (data ?? []) as LocalModuleResultRecord[] };
+  } catch {
+    return { results: [], error: 'fetch_failed' };
+  }
+}
+
+export async function fetchAssessmentV2ForParticipants(
+  participantIds: string[],
+): Promise<{ results: LocalAssessmentV2Record[]; error?: string }> {
+  if (!participantIds.length) {
+    return { results: [] };
+  }
+
+  if (!isSupabaseConfigured() || !supabase) {
+    return { results: [], error: 'missing_env' };
+  }
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('assessment_results_v2')
+        .select('*')
+        .in('participant_id', participantIds)
+        .order('completed_at', { ascending: false }),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'assessment_v2_by_participants',
+    );
+
+    if (error) {
+      return { results: [], error: error.message };
+    }
+
+    return { results: (data ?? []) as LocalAssessmentV2Record[] };
+  } catch {
+    return { results: [], error: 'fetch_failed' };
   }
 }
 

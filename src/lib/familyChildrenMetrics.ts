@@ -39,9 +39,9 @@ function matchesLegacyBaseline(
   displayName: string,
   row: B4BaselineCheckRecord,
 ): boolean {
-  if (participantId) {
-    if (row.participantId === participantId) return true;
-    if (row.anonymousStudentId === participantId) return true;
+  const rowParticipantId = row.participantId?.trim() || '';
+  if (rowParticipantId) {
+    return Boolean(participantId && rowParticipantId === participantId);
   }
 
   const nameKey = normalizeName(displayName);
@@ -66,14 +66,9 @@ function matchesV2StudentRow(
   if (row.role !== 'student') return false;
 
   const rowParticipantId = resolveAssessmentParticipantId(row);
-  if (participantId && rowParticipantId && rowParticipantId === participantId) {
-    return true;
+  if (rowParticipantId) {
+    return Boolean(participantId && rowParticipantId === participantId);
   }
-  if (participantId && row.participant_id === participantId) {
-    return true;
-  }
-
-  if (participantId) return false;
 
   return normalizeName(resolveAssessmentStudentName(row)) === normalizeName(displayName);
 }
@@ -242,23 +237,44 @@ function buildChildSummary(input: {
   };
 }
 
+function isAllowedStudentRow(
+  participantId: string | null | undefined,
+  allowedStudentIds?: string[],
+): boolean {
+  if (!allowedStudentIds?.length) return true;
+  const id = participantId?.trim();
+  return Boolean(id && allowedStudentIds.includes(id));
+}
+
 export function computeFamilyChildrenSummaries(input: {
   programCode?: string;
   participants?: StudentParticipantRecord[];
+  allowedStudentIds?: string[];
   moduleResults?: LocalModuleResultRecord[];
   assessmentResults?: LocalAssessmentV2Record[];
   legacyBaselines?: B4BaselineCheckRecord[];
 }): FamilyChildSummary[] {
   const code = normalizeCode(input.programCode);
-  const modules = (input.moduleResults ?? []).filter(
-    (row) => normalizeCode(row.program_code) === code,
-  );
-  const assessments = (input.assessmentResults ?? []).filter(
-    (row) => normalizeCode(row.program_code) === code,
-  );
-  const legacyBaselines = (input.legacyBaselines ?? []).filter(
-    (row) => normalizeCode(row.programCode) === code,
-  );
+  const scopedToAllowed = Boolean(input.allowedStudentIds?.length);
+  const modules = (input.moduleResults ?? []).filter((row) => {
+    if (row.role === 'student' && scopedToAllowed) {
+      return isAllowedStudentRow(row.participant_id, input.allowedStudentIds);
+    }
+    return normalizeCode(row.program_code) === code;
+  });
+  const assessments = (input.assessmentResults ?? []).filter((row) => {
+    if (row.role === 'student' && scopedToAllowed) {
+      return isAllowedStudentRow(row.participant_id, input.allowedStudentIds);
+    }
+    return normalizeCode(row.program_code) === code;
+  });
+  const legacyBaselines = (input.legacyBaselines ?? []).filter((row) => {
+    if (scopedToAllowed) {
+      const participantId = row.participantId?.trim() || row.anonymousStudentId?.trim() || '';
+      return isAllowedStudentRow(participantId, input.allowedStudentIds);
+    }
+    return normalizeCode(row.programCode) === code;
+  });
 
   const summaries: FamilyChildSummary[] = [];
   const seenNames = new Set<string>();
@@ -278,6 +294,10 @@ export function computeFamilyChildrenSummaries(input: {
         legacyBaselines,
       }),
     );
+  }
+
+  if (scopedToAllowed) {
+    return summaries.sort((a, b) => a.displayName.localeCompare(b.displayName));
   }
 
   for (const baseline of legacyBaselines) {
