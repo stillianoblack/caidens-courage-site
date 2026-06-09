@@ -4,21 +4,15 @@ import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardS
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import PilotActivitiesPanel from '../components/pilot-dashboard/panels/PilotActivitiesPanel';
 import PilotAssessmentsPanel from '../components/pilot-dashboard/panels/PilotAssessmentsPanel';
-import PilotB4ResultsPanel from '../components/pilot-dashboard/panels/PilotB4ResultsPanel';
 import PilotCertificatesPanel from '../components/pilot-dashboard/panels/PilotCertificatesPanel';
 import PilotFacilitatorPanel from '../components/pilot-dashboard/panels/PilotFacilitatorPanel';
 import PilotGalleryPanel from '../components/pilot-dashboard/panels/PilotGalleryPanel';
 import PilotOverviewPanel from '../components/pilot-dashboard/panels/PilotOverviewPanel';
+import PilotRosterPanel from '../components/pilot-dashboard/panels/PilotRosterPanel';
 import PilotResultsPanel from '../components/pilot-dashboard/panels/PilotResultsPanel';
 import PilotWeeklyModulesPanel from '../components/pilot-dashboard/panels/PilotWeeklyModulesPanel';
 import '../components/pilot-dashboard/pilot-dashboard.css';
-import {
-  FACILITATOR_B4_BASELINE_RESULTS_PATH,
-  FACILITATOR_B4_RESULTS_PATH,
-  FACILITATOR_PORTAL_PATH,
-  FACILITATOR_BASELINE_CHECK_PATH,
-  PORTAL_PATH,
-} from '../config/courageRoutes';
+import { FACILITATOR_BASELINE_CHECK_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
@@ -36,13 +30,6 @@ const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
 
 const VALID_NAV_IDS = new Set(PILOT_SIDEBAR_NAV.map((item) => item.id));
 
-function isB4ResultsRoute(pathname: string): boolean {
-  return (
-    pathname.startsWith(FACILITATOR_B4_RESULTS_PATH) ||
-    pathname.startsWith(FACILITATOR_B4_BASELINE_RESULTS_PATH)
-  );
-}
-
 type TrackingPanelProps = {
   metrics: ReturnType<typeof usePilotTrackingResults>['metrics'];
   loading: boolean;
@@ -52,6 +39,8 @@ type TrackingPanelProps = {
   moduleResults: ReturnType<typeof usePilotTrackingResults>['moduleResults'];
   assessmentResults: ReturnType<typeof usePilotTrackingResults>['assessmentResults'];
   participantLookup: ReturnType<typeof usePilotTrackingResults>['participantLookup'];
+  participants: ReturnType<typeof usePilotTrackingResults>['participants'];
+  familyLinks: ReturnType<typeof usePilotTrackingResults>['familyLinks'];
   resultsVersion: number;
   onSelectNav: (id: PilotSidebarNavId) => void;
 };
@@ -73,13 +62,18 @@ function renderFacilitatorPanel(
       return (
         <PilotResultsPanel
           refreshKey={tracking.resultsVersion}
-          results={tracking.results}
+          moduleResults={tracking.moduleResults}
+          assessmentResults={tracking.assessmentResults}
+          participantLookup={tracking.participantLookup}
+          participants={tracking.participants}
+          familyLinks={tracking.familyLinks}
           metrics={tracking.metrics}
-          source={tracking.source}
           warning={tracking.warning}
           loading={tracking.loading}
         />
       );
+    case 'roster':
+      return <PilotRosterPanel programCode={programCode} loading={tracking.loading} />;
     case 'certificates':
       return <PilotCertificatesPanel />;
     case 'student-gallery':
@@ -91,10 +85,15 @@ function renderFacilitatorPanel(
       return (
         <PilotOverviewPanel
           metrics={tracking.metrics}
+          moduleResults={tracking.moduleResults}
+          assessmentResults={tracking.assessmentResults}
+          participantLookup={tracking.participantLookup}
+          participants={tracking.participants}
+          familyLinks={tracking.familyLinks}
           loading={tracking.loading}
-          source={tracking.source}
           warning={tracking.warning}
           onSelectNav={tracking.onSelectNav}
+          activeProgram={readActivePilotProgram()}
         />
       );
   }
@@ -109,7 +108,6 @@ export default function PilotDashboardPage() {
   const sessionType = readPilotDashboardSession();
   const [resultsVersion, setResultsVersion] = useState(0);
 
-  const isB4Results = useMemo(() => isB4ResultsRoute(location.pathname), [location.pathname]);
   const brand = resolvePortalRailBrand();
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode;
@@ -119,7 +117,7 @@ export default function PilotDashboardPage() {
     return hash && VALID_NAV_IDS.has(hash) ? hash : 'overview';
   }, [location.hash]);
 
-  const pageTitle = isB4Results ? 'B-4 Baseline Check Results' : NAV_TITLE[activeNav];
+  const pageTitle = NAV_TITLE[activeNav];
 
   const needsTracking = activeNav === 'overview' || activeNav === 'results';
   const {
@@ -128,6 +126,8 @@ export default function PilotDashboardPage() {
     moduleResults,
     assessmentResults,
     participantLookup,
+    participants,
+    familyLinks,
     source,
     warning,
     loading,
@@ -160,13 +160,9 @@ export default function PilotDashboardPage() {
 
   const handleSelectNav = useCallback(
     (id: PilotSidebarNavId) => {
-      if (isB4Results) {
-        navigate(`${FACILITATOR_PORTAL_PATH}#${id}`);
-        return;
-      }
       navigate({ hash: `#${id}` }, { replace: true });
     },
-    [isB4Results, navigate],
+    [navigate],
   );
 
   if (!sessionType) {
@@ -182,6 +178,8 @@ export default function PilotDashboardPage() {
     moduleResults,
     assessmentResults,
     participantLookup,
+    participants,
+    familyLinks,
     resultsVersion,
     onSelectNav: handleSelectNav,
   };
@@ -189,7 +187,7 @@ export default function PilotDashboardPage() {
   return (
     <div className="pilot-shell">
       <PilotDashboardSidebar
-        activeId={isB4Results ? 'results' : activeNav}
+        activeId={activeNav}
         onSelect={handleSelectNav}
         brandTitle={brand.title}
         brandSubtitle={brand.subtitle}
@@ -197,20 +195,12 @@ export default function PilotDashboardPage() {
       />
 
       <div className="pilot-main">
-        <PilotDashboardTopBar
-          pageTitle={pageTitle}
-          contextTitle={brand.title}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle={pageTitle} />
 
         <div className="pilot-content">
-          {isB4Results ? (
-            <PilotB4ResultsPanel />
-          ) : (
-            <div className="pilot-tabPanel" role="tabpanel">
-              {renderFacilitatorPanel(activeNav, trackingProps, programCode, activeProgram?.groupName)}
-            </div>
-          )}
+          <div className="pilot-tabPanel" role="tabpanel">
+            {renderFacilitatorPanel(activeNav, trackingProps, programCode, activeProgram?.groupName)}
+          </div>
         </div>
 
         <footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>

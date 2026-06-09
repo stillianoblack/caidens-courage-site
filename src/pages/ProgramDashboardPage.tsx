@@ -128,15 +128,11 @@ export default function ProgramDashboardPage() {
           navItems={PROGRAM_SIDEBAR_NAV}
           programCode={programCode}
           pricingTier={activeProgram.pricingTier}
-          showSupportCard
+          showSupportCard={false}
         />
       }
       topBar={
-        <PilotDashboardTopBar
-          pageTitle={pageTitle}
-          contextTitle={brand.title}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle={pageTitle} />
       }
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}
     >

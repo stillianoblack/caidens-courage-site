@@ -9,6 +9,9 @@ import type { B4BaselineCheckRecord } from '../../lib/b4BaselineCheckStorage';
 
 type B4ResultsAdminDashboardProps = {
   results: B4BaselineCheckRecord[];
+  /** Hide duplicate KPI row when parent page already shows summary cards. */
+  showStatGrid?: boolean;
+  feelingsLabel?: string;
 };
 
 const CHART_BARS: Array<{
@@ -25,35 +28,44 @@ const CHART_BARS: Array<{
   { key: 'overallAvgPct', label: 'Overall', tone: 'overall' },
 ];
 
-export default function B4ResultsAdminDashboard({ results }: B4ResultsAdminDashboardProps) {
+export default function B4ResultsAdminDashboard({
+  results,
+  showStatGrid = true,
+  feelingsLabel = 'Feelings',
+}: B4ResultsAdminDashboardProps) {
   const stats = computeBaselineAdminStats(results);
   const comparisonRows = buildBaselineComparisonRows(stats);
   const hasPostProgramData = comparisonRows.some((row) => row.afterPct != null);
+  const chartBars = CHART_BARS.map((bar) =>
+    bar.key === 'avgFeelingsPct' ? { ...bar, label: feelingsLabel } : bar,
+  );
 
   return (
     <section className="bbc-adminDashboard" aria-label="Pilot summary dashboard">
-      <div className="bbc-adminStatGrid">
-        <article className="bbc-adminStatCard">
-          <p className="bbc-adminStatLabel">Total Completed</p>
-          <p className="bbc-adminStatValue">{stats.totalCompleted}</p>
-        </article>
-        <article className="bbc-adminStatCard">
-          <p className="bbc-adminStatLabel">Average Feelings Score</p>
-          <p className="bbc-adminStatValue">{formatAdminPct(stats.avgFeelingsPct)}</p>
-        </article>
-        <article className="bbc-adminStatCard">
-          <p className="bbc-adminStatLabel">Average Reading Score</p>
-          <p className="bbc-adminStatValue">{formatAdminPct(stats.avgReadingPct)}</p>
-        </article>
-        <article className="bbc-adminStatCard">
-          <p className="bbc-adminStatLabel">Average Focus Moves Score</p>
-          <p className="bbc-adminStatValue">{formatAdminPct(stats.avgFocusPct)}</p>
-        </article>
-        <article className="bbc-adminStatCard bbc-adminStatCard--highlight">
-          <p className="bbc-adminStatLabel">Overall Baseline Average</p>
-          <p className="bbc-adminStatValue">{formatAdminPct(stats.overallAvgPct)}</p>
-        </article>
-      </div>
+      {showStatGrid ? (
+        <div className="bbc-adminStatGrid">
+          <article className="bbc-adminStatCard">
+            <p className="bbc-adminStatLabel">Total Completed</p>
+            <p className="bbc-adminStatValue">{stats.totalCompleted}</p>
+          </article>
+          <article className="bbc-adminStatCard">
+            <p className="bbc-adminStatLabel">Average Feelings Score</p>
+            <p className="bbc-adminStatValue">{formatAdminPct(stats.avgFeelingsPct)}</p>
+          </article>
+          <article className="bbc-adminStatCard">
+            <p className="bbc-adminStatLabel">Average Reading Score</p>
+            <p className="bbc-adminStatValue">{formatAdminPct(stats.avgReadingPct)}</p>
+          </article>
+          <article className="bbc-adminStatCard">
+            <p className="bbc-adminStatLabel">Average Focus Moves Score</p>
+            <p className="bbc-adminStatValue">{formatAdminPct(stats.avgFocusPct)}</p>
+          </article>
+          <article className="bbc-adminStatCard bbc-adminStatCard--highlight">
+            <p className="bbc-adminStatLabel">Overall Baseline Average</p>
+            <p className="bbc-adminStatValue">{formatAdminPct(stats.overallAvgPct)}</p>
+          </article>
+        </div>
+      ) : null}
 
       <div className="bbc-adminChartPanel">
         <div className="bbc-adminChartHead">
@@ -62,7 +74,7 @@ export default function B4ResultsAdminDashboard({ results }: B4ResultsAdminDashb
         </div>
 
         <div className="bbc-adminBarList" role="list">
-          {CHART_BARS.map(({ key, label, tone }) => {
+          {chartBars.map(({ key, label, tone }) => {
             const pct = stats[key];
             return (
               <div key={key} className="bbc-adminBarRow" role="listitem">

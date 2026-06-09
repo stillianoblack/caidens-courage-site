@@ -6,7 +6,11 @@ import {
   buildParticipantNameLookup,
   collectParticipantIdsFromResults,
 } from '../lib/pilotResultsDisplay';
-import { fetchParticipantsByIds } from '../lib/studentFamilyLinkService';
+import {
+  fetchParticipantsByIds,
+  fetchStudentFamilyLinksByCampProgram,
+  type StudentFamilyLink,
+} from '../lib/studentFamilyLinkService';
 import {
   fetchStudentParticipantsFromSupabase,
   loadPilotTrackingData,
@@ -38,15 +42,22 @@ export function usePilotTrackingResults(
     Awaited<ReturnType<typeof loadPilotTrackingData>>['assessmentResults']
   >([]);
   const [participants, setParticipants] = useState<StudentParticipantRecord[]>([]);
+  const [familyLinks, setFamilyLinks] = useState<StudentFamilyLink[]>([]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [legacyPayload, trackingPayload, programParticipantsPayload] = await Promise.all([
-        loadAssessmentResults(programCode),
-        loadPilotTrackingData(programCode),
-        programCode ? fetchStudentParticipantsFromSupabase(programCode) : Promise.resolve({ participants: [] }),
-      ]);
+      const [legacyPayload, trackingPayload, programParticipantsPayload, familyLinksPayload] =
+        await Promise.all([
+          loadAssessmentResults(programCode),
+          loadPilotTrackingData(programCode),
+          programCode
+            ? fetchStudentParticipantsFromSupabase(programCode)
+            : Promise.resolve({ participants: [] }),
+          programCode
+            ? fetchStudentFamilyLinksByCampProgram(programCode)
+            : Promise.resolve({ links: [] as StudentFamilyLink[], error: undefined }),
+        ]);
 
       const orphanIds = collectParticipantIdsFromResults({
         moduleResults: trackingPayload.moduleResults,
@@ -67,8 +78,11 @@ export function usePilotTrackingResults(
         ...programParticipantsPayload.participants,
         ...orphanParticipantsPayload.participants,
       ]);
+      setFamilyLinks(familyLinksPayload.links);
       setTrackingSource(trackingPayload.source);
-      setWarning(legacyPayload.warning ?? trackingPayload.warning);
+      setWarning(
+        legacyPayload.warning ?? trackingPayload.warning ?? familyLinksPayload.error ?? undefined,
+      );
     } finally {
       setLoading(false);
     }
@@ -87,12 +101,13 @@ export function usePilotTrackingResults(
     (): PilotTrackingMetrics =>
       enabled
         ? computePilotTrackingMetrics({
-            legacyBaselines: legacyResults,
+            legacyBaselines: programCode?.trim() ? [] : legacyResults,
             moduleResults,
             assessmentV2: assessmentResults,
+            participants,
           })
         : EMPTY_METRICS,
-    [assessmentResults, enabled, legacyResults, moduleResults],
+    [assessmentResults, enabled, legacyResults, moduleResults, participants, programCode],
   );
 
   const participantLookup = useMemo(
@@ -105,6 +120,7 @@ export function usePilotTrackingResults(
     moduleResults,
     assessmentResults,
     participants,
+    familyLinks,
     participantLookup,
     metrics,
     legacySource,

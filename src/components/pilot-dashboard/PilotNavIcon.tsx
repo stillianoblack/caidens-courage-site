@@ -18,6 +18,14 @@ export default function PilotNavIcon({ name }: PilotNavIconProps) {
           <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="1.75" />
         </svg>
       );
+    case 'roster':
+      return (
+        <svg {...common}>
+          <path d="M8 11a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" strokeWidth="1.75" />
+          <path d="M4 19c0-2.8 2.7-5 6-5s6 2.2 6 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <path d="M16 8h5M18.5 5.5v5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      );
     case 'weekly-modules':
       return (
         <svg {...common}>

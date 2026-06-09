@@ -25,6 +25,7 @@ import {
   ProgramGalleryTabRoute,
   ProgramOverviewTabRoute,
   ProgramResultsTabRoute,
+  ProgramRosterTabRoute,
   ProgramWeeklyModulesTabRoute,
 } from './routes/programDashboardTabRoutes';
 import ScrollToTop from './components/ScrollToTop';
@@ -195,15 +196,19 @@ const appRouteChildren = (
         element={<FacilitatorAdultGuideMissionPage />}
       />
       <Route path={FACILITATOR_PORTAL_PATH} element={<FacilitatorPortalEntry />} />
-      <Route path={FACILITATOR_B4_RESULTS_PATH} element={<PilotDashboardPage />} />
+      <Route
+        path={FACILITATOR_B4_RESULTS_PATH}
+        element={<Navigate to={`${PROGRAM_DASHBOARD_PATH}/results`} replace />}
+      />
       <Route
         path={FACILITATOR_B4_BASELINE_RESULTS_PATH}
-        element={<Navigate to={FACILITATOR_B4_RESULTS_PATH} replace />}
+        element={<Navigate to={`${PROGRAM_DASHBOARD_PATH}/results`} replace />}
       />
       <Route path={PILOT_DASHBOARD_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={BLUE_RIBBON_PILOT_PATH} element={<PilotDashboardPage />} />
       <Route path={PROGRAM_DASHBOARD_PATH} element={<ProgramDashboardPage />}>
         <Route index element={<ProgramOverviewTabRoute />} />
+        <Route path="roster" element={<ProgramRosterTabRoute />} />
         <Route path="weekly-modules" element={<ProgramWeeklyModulesTabRoute />} />
         <Route path="activities-library" element={<ProgramActivitiesTabRoute />} />
         <Route path="assessments" element={<ProgramAssessmentsTabRoute />} />

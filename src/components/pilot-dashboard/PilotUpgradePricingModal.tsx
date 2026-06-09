@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 
 const CAMP_PILOT_STRIPE_LINK = 'https://buy.stripe.com/dRmfZg0rJ1dC4078Ry3Ru05';
 const CAMP_PLUS_STRIPE_LINK = 'https://buy.stripe.com/6oUcN45M33lK1RZ3xe3Ru06';
@@ -43,9 +45,25 @@ function PricingCard({
 }
 
 export default function PilotUpgradePricingModal({ open, onClose }: PilotUpgradePricingModalProps) {
+  useModalScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, open]);
+
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="pilot-supportModalBackdrop" role="presentation" onClick={onClose}>
       <div
         className="pilot-supportModal pilot-supportModal--pricing"
@@ -97,7 +115,8 @@ export default function PilotUpgradePricingModal({ open, onClose }: PilotUpgrade
           Continue Without Payment
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

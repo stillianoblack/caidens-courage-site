@@ -31,6 +31,7 @@ export type PilotWeek = {
 
 export type PilotSidebarNavId =
   | 'overview'
+  | 'roster'
   | 'weekly-modules'
   | 'activities-library'
   | 'assessments'
@@ -44,7 +45,8 @@ export type ActivityCategoryId =
   | 'printable-activities'
   | 'reflection-journals'
   | 'b4-reset-tools'
-  | 'focus-flame-lab';
+  | 'focus-flame-lab'
+  | 'weekly-activities';
 
 export type ActivityAssetStatus = 'available' | 'locked';
 
@@ -83,6 +85,7 @@ export const PILOT_SIDEBAR_NAV: Array<{
   icon: PilotSidebarNavId;
 }> = [
   { id: 'overview', label: 'Overview', icon: 'overview' },
+  { id: 'roster', label: 'Roster', icon: 'roster' },
   { id: 'weekly-modules', label: 'Weekly Modules', icon: 'weekly-modules' },
   { id: 'activities-library', label: 'Activities Library', icon: 'activities-library' },
   { id: 'assessments', label: 'Assessments', icon: 'assessments' },
@@ -189,7 +192,18 @@ export const PILOT_ACTIVITY_CATEGORIES: Array<{
   { id: 'reflection-journals', label: 'Reflection Journals' },
   { id: 'b4-reset-tools', label: 'B-4 Reset Tools' },
   { id: 'focus-flame-lab', label: 'Focus Flame Lab' },
+  { id: 'weekly-activities', label: 'Weekly Activities' },
 ];
+
+/** Weekly activity downloads — derived from PILOT_WEEKLY_JOURNEY kit links. */
+export function buildWeeklyActivityAssets(): ActivityAsset[] {
+  return PILOT_WEEKLY_JOURNEY.map((week) => ({
+    id: `week-${week.week}`,
+    title: `Week ${week.week}: ${week.title}`,
+    status: week.status === 'available' ? ('available' as const) : ('locked' as const),
+    href: week.kitHref,
+  }));
+}
 
 export const PILOT_ACTIVITY_ASSETS: Record<Exclude<ActivityCategoryId, 'focus-flame-lab'>, ActivityAsset[]> = {
   'coloring-pages': PORTAL_COLORING_PAGES.map((page) => ({
@@ -225,6 +239,7 @@ export const PILOT_ACTIVITY_ASSETS: Record<Exclude<ActivityCategoryId, 'focus-fl
     { id: 'cloud', title: 'The Cloud', status: 'available', href: '/downloads/pilot/reset/the-cloud.pdf' },
     { id: 'spark', title: 'The Spark', status: 'available', href: '/downloads/pilot/reset/the-spark.pdf' },
   ],
+  'weekly-activities': buildWeeklyActivityAssets(),
 };
 
 export const PILOT_FOCUS_FLAME_LAB_CARD = {

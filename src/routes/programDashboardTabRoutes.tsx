@@ -5,6 +5,7 @@ import PilotCertificatesPanel from '../components/pilot-dashboard/panels/PilotCe
 import PilotFacilitatorPanel from '../components/pilot-dashboard/panels/PilotFacilitatorPanel';
 import PilotGalleryPanel from '../components/pilot-dashboard/panels/PilotGalleryPanel';
 import PilotOverviewPanel from '../components/pilot-dashboard/panels/PilotOverviewPanel';
+import PilotRosterPanel from '../components/pilot-dashboard/panels/PilotRosterPanel';
 import PilotResultsPanel from '../components/pilot-dashboard/panels/PilotResultsPanel';
 import PilotWeeklyModulesPanel from '../components/pilot-dashboard/panels/PilotWeeklyModulesPanel';
 import { readActivePilotProgram } from '../config/activePilotProgram';
@@ -16,7 +17,16 @@ export function ProgramOverviewTabRoute() {
   const onSelectNav = useProgramDashboardNav();
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode;
-  const { metrics, loading, source, warning } = usePilotTrackingResults(0, programCode, true);
+  const {
+    metrics,
+    moduleResults,
+    assessmentResults,
+    participantLookup,
+    participants,
+    familyLinks,
+    loading,
+    warning,
+  } = usePilotTrackingResults(0, programCode, true);
 
   if (!activeProgram) {
     return null;
@@ -25,8 +35,12 @@ export function ProgramOverviewTabRoute() {
   return (
     <PilotOverviewPanel
       metrics={metrics}
+      moduleResults={moduleResults}
+      assessmentResults={assessmentResults}
+      participantLookup={participantLookup}
+      participants={participants}
+      familyLinks={familyLinks}
       loading={loading}
-      source={source}
       warning={warning}
       onSelectNav={onSelectNav}
       activeProgram={activeProgram}
@@ -34,16 +48,27 @@ export function ProgramOverviewTabRoute() {
   );
 }
 
+export function ProgramRosterTabRoute() {
+  const activeProgram = readActivePilotProgram();
+  const programCode = activeProgram?.programCode;
+
+  if (!activeProgram) {
+    return null;
+  }
+
+  return <PilotRosterPanel programCode={programCode} />;
+}
+
 export function ProgramResultsTabRoute() {
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode;
   const {
     metrics,
-    legacyResults: results,
     moduleResults,
     assessmentResults,
     participantLookup,
-    source,
+    participants,
+    familyLinks,
     warning,
     loading,
   } = usePilotTrackingResults(0, programCode, true);
@@ -51,12 +76,12 @@ export function ProgramResultsTabRoute() {
   return (
     <PilotResultsPanel
       refreshKey={0}
-      results={results}
       moduleResults={moduleResults}
       assessmentResults={assessmentResults}
       participantLookup={participantLookup}
+      participants={participants}
+      familyLinks={familyLinks}
       metrics={metrics}
-      source={source}
       warning={warning}
       loading={loading}
     />

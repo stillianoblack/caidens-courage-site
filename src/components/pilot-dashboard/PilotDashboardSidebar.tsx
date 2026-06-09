@@ -11,6 +11,7 @@ import { programDashboardTabPath } from '../../lib/programDashboardNav';
 import type { PilotPricingTier } from '../../types/pilotProgram';
 import PilotNavIcon from './PilotNavIcon';
 import PilotPartnerSupportCard from './PilotPartnerSupportCard';
+import PilotProgramSettingsCard from './PilotProgramSettingsCard';
 
 type PilotSidebarNavItem = {
   id: PilotSidebarNavId;
@@ -27,6 +28,7 @@ type PilotDashboardSidebarProps = {
   programCode?: string;
   pricingTier?: PilotPricingTier;
   showSupportCard?: boolean;
+  showProgramSettings?: boolean;
 };
 
 export default function PilotDashboardSidebar({
@@ -38,6 +40,7 @@ export default function PilotDashboardSidebar({
   programCode,
   pricingTier,
   showSupportCard = false,
+  showProgramSettings = true,
 }: PilotDashboardSidebarProps) {
   const galleryPendingCount = useFacilitatorGalleryPendingCount(programCode);
 
@@ -76,7 +79,11 @@ export default function PilotDashboardSidebar({
         </ul>
       </nav>
 
-      {showSupportCard ? <PilotPartnerSupportCard pricingTier={pricingTier} /> : null}
+      {showProgramSettings ? (
+        <PilotProgramSettingsCard programCode={programCode} pricingTier={pricingTier} />
+      ) : showSupportCard ? (
+        <PilotPartnerSupportCard pricingTier={pricingTier} />
+      ) : null}
     </aside>
   );
 }

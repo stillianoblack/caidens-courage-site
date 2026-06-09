@@ -20,7 +20,6 @@ export function PilotResultsStatusCopy(_props: PilotLocalNoteProps) {
   return (
     <div className="pilot-resultsIntro">
       <p className="pilot-panelIntroTitle">{PILOT_RESULTS_HEADLINE}</p>
-      <p className="pilot-panelIntroSubtitle">{PILOT_RESULTS_STATUS_COPY}</p>
     </div>
   );
 }

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import type { PilotDashboardMetrics } from '../../../lib/pilotDashboardMetrics';
-import { formatAdminPct } from '../../../lib/b4BaselineAdminStats';
+import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../../../lib/pilotTrackingLocalStorage';
+import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
+import type { ParticipantNameLookup } from '../../../lib/pilotResultsDisplay';
 import { remapPortalKidsRoute } from '../../../lib/portalGamePaths';
 import {
   PILOT_CHARACTER_TRACKS,
@@ -10,33 +11,31 @@ import {
   type PilotSidebarNavId,
 } from '../../../data/pilotDashboardContent';
 import CharacterLearningTrackCard from '../CharacterLearningTrackCard';
-import PilotLocalNote from '../PilotLocalNote';
-import CampChildOnboardingCard from '../CampChildOnboardingCard';
-import CampParentLinkCard from '../CampParentLinkCard';
+import PilotBaselineOverview from '../PilotBaselineOverview';
+import PilotTrackingDataTables from '../PilotTrackingDataTables';
+import PilotNeedsAttentionCard from '../PilotNeedsAttentionCard';
+import PilotResultsKpiGrid from '../PilotResultsKpiGrid';
+import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
+import { computeNeedsAttention } from '../../../lib/pilotStudentProgress';
+import type { StudentParticipantRecord } from '../../../lib/pilotTrackingService';
+import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
 
 type PilotOverviewPanelProps = {
-  metrics: PilotDashboardMetrics;
+  metrics: PilotTrackingMetrics;
+  moduleResults?: LocalModuleResultRecord[];
+  assessmentResults?: LocalAssessmentV2Record[];
+  participantLookup?: ParticipantNameLookup;
+  participants?: StudentParticipantRecord[];
+  familyLinks?: StudentFamilyLink[];
   loading?: boolean;
-  source?: 'supabase' | 'local';
   warning?: string | null;
   onSelectNav?: (id: PilotSidebarNavId) => void;
   activeProgram?: ActivePilotProgram | null;
 };
-
-const GROWTH_BARS: Array<{
-  key: keyof PilotDashboardMetrics['growth'];
-  label: string;
-  tone: 'confidence' | 'reading' | 'focus' | 'overall';
-}> = [
-  { key: 'confidence', label: 'Feelings / Confidence', tone: 'confidence' },
-  { key: 'reading', label: 'Reading', tone: 'reading' },
-  { key: 'focus', label: 'Focus Moves', tone: 'focus' },
-  { key: 'overall', label: 'Overall', tone: 'overall' },
-];
 
 function formatActivityTime(iso: string): string {
   try {
@@ -59,14 +58,27 @@ function recommendedStepIndex(baselineChecksCompleted: number): number {
 
 export default function PilotOverviewPanel({
   metrics,
+  moduleResults = [],
+  assessmentResults = [],
+  participantLookup = new Map(),
+  participants = [],
+  familyLinks = [],
   loading = false,
-  source = 'local',
   warning = null,
   onSelectNav,
   activeProgram = readActivePilotProgram(),
 }: PilotOverviewPanelProps) {
   const location = useLocation();
-  const hasData = metrics.baselineChecksCompleted > 0;
+  const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
+  const needsAttention = useMemo(
+    () =>
+      computeNeedsAttention({
+        participants,
+        assessments: assessmentResults,
+        modules: moduleResults,
+      }),
+    [assessmentResults, moduleResults, participants],
+  );
   const stepIndex = useMemo(
     () => recommendedStepIndex(metrics.baselineChecksCompleted),
     [metrics.baselineChecksCompleted],
@@ -80,7 +92,6 @@ export default function PilotOverviewPanel({
   const handleNextStepClick = () => {
     if (recommendedStep.internalNav) {
       onSelectNav?.(recommendedStep.internalNav);
-      return;
     }
   };
 
@@ -88,7 +99,7 @@ export default function PilotOverviewPanel({
     return (
       <div className="pilot-panel pilot-panel--overview">
         {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
-        <DashboardWidgetSkeleton kpiCount={4} showGrowth showActivity />
+        <DashboardWidgetSkeleton kpiCount={5} showGrowth showActivity />
       </div>
     );
   }
@@ -96,27 +107,11 @@ export default function PilotOverviewPanel({
   return (
     <div className="pilot-panel pilot-panel--overview">
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
-      <CampChildOnboardingCard />
-      <CampParentLinkCard />
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
-      <div className="pilot-kpiRow">
-        <article className="pilot-kpiCard">
-          <p className="pilot-kpiLabel">Students Enrolled</p>
-          <p className="pilot-kpiValue">{metrics.studentsEnrolled}</p>
-        </article>
-        <article className="pilot-kpiCard">
-          <p className="pilot-kpiLabel">Baseline Completed</p>
-          <p className="pilot-kpiValue">{metrics.baselineChecksCompleted}</p>
-        </article>
-        <article className="pilot-kpiCard">
-          <p className="pilot-kpiLabel">Current Week</p>
-          <p className="pilot-kpiValue">Week {metrics.currentWeek}</p>
-        </article>
-        <article className="pilot-kpiCard pilot-kpiCard--highlight">
-          <p className="pilot-kpiLabel">Completion Rate</p>
-          <p className="pilot-kpiValue">{metrics.completionRate}%</p>
-        </article>
-      </div>
+
+      <PilotResultsKpiGrid metrics={metrics} compact />
+
+      <PilotNeedsAttentionCard counts={needsAttention} />
 
       <section className="pilot-panelBlock pilot-characterTracks">
         <div className="pilot-panelBlockHead">
@@ -139,36 +134,37 @@ export default function PilotOverviewPanel({
         </div>
       </section>
 
-      <section className="pilot-panelBlock">
+      <section className="pilot-panelBlock pilot-panelBlock--baselineOverview pilot-panelBlock--compact">
         <div className="pilot-panelBlockHead">
-          <h2 className="pilot-panelBlockTitle">Pilot Progress</h2>
-          {!hasData ? (
-            <p className="pilot-panelBlockSub">
-              Results will appear after students complete the B-4 Baseline Check.
-            </p>
-          ) : null}
+          <h2 className="pilot-panelBlockTitle">Baseline Overview</h2>
+          <p className="pilot-panelBlockSub">Live baseline averages for this program.</p>
         </div>
-        <div className="pilot-growthChart">
-          {GROWTH_BARS.map(({ key, label, tone }) => {
-            const pct = metrics.growth[key];
-            return (
-              <div key={key} className="pilot-growthRow">
-                <div className="pilot-growthMeta">
-                  <span className="pilot-growthLabel">{label}</span>
-                  <span className="pilot-growthPct">{formatAdminPct(pct)}</span>
-                </div>
-                <div className="pilot-growthTrack" aria-hidden="true">
-                  <div
-                    className={`pilot-growthFill pilot-growthFill--${tone}`}
-                    style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <PilotLocalNote source={source} />
+        <PilotBaselineOverview
+          assessmentResults={assessmentResults}
+          participantLookup={participantLookup}
+        />
       </section>
+
+      <PilotTrackingDataTables
+        assessmentResults={assessmentResults}
+        moduleResults={moduleResults}
+        participantLookup={participantLookup}
+        onStudentClick={setDrawerParticipantId}
+        assessmentLimit={5}
+        moduleLimit={5}
+        showEmptyStates
+      />
+
+      <PilotStudentDetailDrawer
+        open={Boolean(drawerParticipantId)}
+        participantId={drawerParticipantId}
+        onClose={() => setDrawerParticipantId(null)}
+        participants={participants}
+        familyLinks={familyLinks}
+        assessmentResults={assessmentResults}
+        moduleResults={moduleResults}
+        programCode={activeProgram?.programCode}
+      />
 
       <div className="pilot-overviewSplit">
         <section className="pilot-panelBlock pilot-panelBlock--activity">
@@ -176,13 +172,10 @@ export default function PilotOverviewPanel({
             <h2 className="pilot-panelBlockTitle">Recent Activity</h2>
           </div>
           {metrics.recentActivity.length === 0 ? (
-            <p className="pilot-emptyNote">
-              No activity yet. Student progress will appear here after assessments and modules are
-              completed.
-            </p>
+            <p className="pilot-emptyNote">No activity yet.</p>
           ) : (
             <ul className="pilot-activityList">
-              {metrics.recentActivity.map((item) => (
+              {metrics.recentActivity.slice(0, 5).map((item) => (
                 <li key={item.id} className="pilot-activityItem">
                   <span className="pilot-activityDot" aria-hidden="true" />
                   <div className="pilot-activityBody">

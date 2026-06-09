@@ -31,7 +31,7 @@ export default function CampParentLinkCard() {
   const [familyProgramCode, setFamilyProgramCode] = useState('');
   const [parentEmail, setParentEmail] = useState('');
   const [parentLastName, setParentLastName] = useState('');
-  const [relationship, setRelationship] = useState('Parent');
+  const [relationship, setRelationship] = useState('Parent/Guardian');
 
   const selectedStudent = useMemo(
     () => students.find((row) => row.id === studentId) ?? null,
@@ -184,7 +184,7 @@ export default function CampParentLinkCard() {
               className="pilot-parentLinkInput"
               value={relationship}
               onChange={(event) => setRelationship(event.target.value)}
-              placeholder="Parent"
+              placeholder="Parent/Guardian"
             />
           </label>
 
@@ -213,7 +213,7 @@ export default function CampParentLinkCard() {
               const student = students.find((row) => row.id === link.student_id);
               return (
                 <li key={link.id} className="pilot-parentLinkExistingItem">
-                  <strong>{student ? childLabel(student) : link.student_id}</strong>
+                  <strong>{student ? childLabel(student) : 'Unknown Student'}</strong>
                   <span>
                     → {link.family_program_code}
                     {link.parent_last_name ? ` (${link.parent_last_name})` : ''}

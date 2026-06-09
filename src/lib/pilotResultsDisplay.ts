@@ -21,9 +21,13 @@ export function resolveParticipantDisplayName(
   lookup: ParticipantNameLookup,
 ): string {
   const id = participantId?.trim();
-  if (!id) return 'Unknown child';
+  if (!id) return 'Unknown Student';
   const participant = lookup.get(id);
-  return participant?.nickname?.trim() || participant?.first_name?.trim() || id.slice(0, 8);
+  return (
+    participant?.first_name?.trim() ||
+    participant?.nickname?.trim() ||
+    'Unknown Student'
+  );
 }
 
 export function formatAssessmentScore(row: LocalAssessmentV2Record): string {
