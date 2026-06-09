@@ -147,15 +147,17 @@ export function resolveCanonicalProgramCode(): CanonicalProgramResolution {
   const lastFacilitator = readLastPilotProgramForRole('facilitator');
 
   if (role === 'family') {
-    const familyProgram =
-      lastFamily?.program ??
-      (familyContext ? buildProgramFromFamilyContext(familyContext, active) : null) ??
-      (active?.programCode === familyContext?.programCode ? active : null);
+    const familyContextProgram = familyContext
+      ? buildProgramFromFamilyContext(
+          familyContext,
+          active?.programCode === familyContext.programCode ? active : null,
+        )
+      : null;
 
     const resolved =
       firstValidCandidate([
+        { code: familyContext?.programCode, program: familyContextProgram, source: 'family_context' },
         { code: lastFamily?.program_code, program: lastFamily?.program, source: 'last_pilot_family' },
-        { code: familyContext?.programCode, program: familyProgram, source: 'family_context' },
         { code: active?.programCode, program: active, source: 'active_pilot_program' },
       ]) ?? { code: null, program: null, source: 'none' as const };
 

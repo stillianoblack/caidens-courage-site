@@ -230,8 +230,8 @@ export function recordToSupabaseRow(
   record: B4BaselineCheckRecord,
   participantId?: string,
 ): Omit<AssessmentResultRow, 'id'> {
-  const program = readActivePilotProgram();
   const programCode = resolveTrackingProgramCode() ?? '';
+  const program = readActivePilotProgram();
   const payload: Omit<AssessmentResultRow, 'id'> = {
     nickname: record.nickname,
     student_id: participantId || record.anonymousStudentId,
@@ -275,6 +275,7 @@ export function supabaseRowToRecord(row: AssessmentResultRow): B4BaselineCheckRe
 export function adultRecordToSupabaseRow(
   record: AdultAssessmentRecord,
 ): Omit<AssessmentResultRow, 'id'> {
+  const programCode = resolveTrackingProgramCode() ?? '';
   const program = readActivePilotProgram();
   const payload: Omit<AssessmentResultRow, 'id'> = {
     nickname: record.firstName,
@@ -286,7 +287,7 @@ export function adultRecordToSupabaseRow(
     email_opt_in: record.emailOptIn,
     assessment_type: record.assessmentType,
     adult_assessment_phase: record.phase,
-    program_code: resolveTrackingProgramCode() ?? '',
+    program_code: programCode,
     program_name: record.programName ?? program?.programName,
     understanding_score: record.understandingScore,
     support_score: record.supportScore,

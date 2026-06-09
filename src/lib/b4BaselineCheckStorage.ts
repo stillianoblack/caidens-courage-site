@@ -173,8 +173,8 @@ export function markBaselineModuleComplete(
   const allDone = completedModules.length >= 3;
   const prev = current.record;
 
-  const activeProgram = readActivePilotProgram();
   const activeProgramCode = resolveTrackingProgramCode('baseline_module_complete');
+  const activeProgram = readActivePilotProgram();
 
   const record: B4BaselineCheckRecord = {
     assessmentName: B4_BASELINE_ASSESSMENT_NAME,

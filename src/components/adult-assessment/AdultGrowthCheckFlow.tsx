@@ -278,7 +278,7 @@ export default function AdultGrowthCheckFlow({
             <AdultInfoForm
               initialFirstName={profile?.firstName ?? ''}
               initialEmail={profile?.email ?? ''}
-              initialProgramCode={profile?.programCode ?? programContext?.programCode ?? ''}
+              initialProgramCode={programContext?.programCode ?? profile?.programCode ?? ''}
               programCodeReadOnly={familyPortal && Boolean(programContext?.programCode)}
               onSubmit={handleProfileSubmit}
             />

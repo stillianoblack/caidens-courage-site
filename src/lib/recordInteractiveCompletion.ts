@@ -34,8 +34,8 @@ function answersToJson(answers?: Record<string, GameAnswerValue>): Record<string
 
 function resolveStudentParticipant() {
   const baselineState = loadB4BaselineState();
-  const program = readActivePilotProgram();
   const programCode = resolveTrackingProgramCode();
+  const program = readActivePilotProgram();
   const nickname =
     baselineState.profile?.nickname?.trim() ||
     readActiveChildNickname()?.trim() ||
@@ -53,9 +53,9 @@ function resolveStudentParticipant() {
 
 function resolveAdultParticipant() {
   const session = loadAdultAssessmentSession();
-  const program = readActivePilotProgram();
   const profile = session.profile;
   const programCode = resolveTrackingProgramCode();
+  const program = readActivePilotProgram();
 
   return {
     first_name: profile?.firstName ?? 'Adult',

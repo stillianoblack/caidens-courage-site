@@ -137,8 +137,8 @@ export default function B4BaselineCheckFlow({
 
   const handleStudentSubmit = (values: { nickname: string; programCode: string; groupName: string }) => {
     playSelect();
-    const activeProgram = readActivePilotProgram();
     const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
+    const activeProgram = readActivePilotProgram();
     const next = saveB4BaselineStudentProfile({
       nickname: values.nickname,
       programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
@@ -372,10 +372,10 @@ export default function B4BaselineCheckFlow({
                 hubState.profile?.nickname ?? readActiveChildNickname() ?? ''
               }
               initialProgramCode={
-                hubState.profile?.programCode ?? programContext?.programCode ?? ''
+                programContext?.programCode ?? hubState.profile?.programCode ?? ''
               }
               initialGroupName={
-                hubState.profile?.groupName ?? programContext?.groupName ?? ''
+                programContext?.groupName ?? hubState.profile?.groupName ?? ''
               }
               onSubmit={handleStudentSubmit}
             />

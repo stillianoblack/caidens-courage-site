@@ -174,8 +174,8 @@ export function buildAdultAssessmentRecord(input: {
   totalScore: number;
   baseline?: AdultAssessmentRecord | null;
 }): AdultAssessmentRecord {
-  const program = readActivePilotProgram();
   const programCode = resolveTrackingProgramCode() ?? input.profile.programCode;
+  const program = readActivePilotProgram();
   const assessmentType: AdultAssessmentType =
     input.phase === 'baseline' ? 'adult_baseline' : 'adult_growth';
 
