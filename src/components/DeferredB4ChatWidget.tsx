@@ -15,10 +15,7 @@ function loadB4ChatWidgetModule(): Promise<{ default: B4ChatWidgetComponent }> {
   return widgetModulePromise;
 }
 
-/**
- * Loads B4ChatWidget once and keeps it mounted so open/close state survives
- * unlimited launcher clicks.
- */
+/** Loads the full B-4 chat only after someone opens it. */
 const DeferredB4ChatWidget: React.FC = () => {
   const [Widget, setWidget] = useState<B4ChatWidgetComponent | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -43,10 +40,6 @@ const DeferredB4ChatWidget: React.FC = () => {
         (window as Window & { __INIT_CHAT_RUNNING__?: boolean }).__INIT_CHAT_RUNNING__ = false;
       });
   }, []);
-
-  useEffect(() => {
-    void ensureWidgetLoaded();
-  }, [ensureWidgetLoaded]);
 
   useEffect(() => {
     const handleOpen = (event: Event) => {

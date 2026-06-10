@@ -95,6 +95,7 @@ function HowItWorksCard({
               ...(imageObjectPosition ? { objectPosition: imageObjectPosition } : {}),
               ...(imageTranslateY !== undefined ? { transform: `translateY(${imageTranslateY}px)` } : {}),
             }}
+            loading="lazy"
             decoding="async"
           />
         ) : (

@@ -36,6 +36,7 @@ export default function B4LauncherButton({
         alt=""
         aria-hidden="true"
         className="h-9 w-9 flex-shrink-0 object-contain sm:h-10 sm:w-10"
+        loading="lazy"
         decoding="async"
       />
       <span className="hidden leading-none sm:inline">Ask B-4</span>

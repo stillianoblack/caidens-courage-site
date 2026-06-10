@@ -145,6 +145,7 @@ export default function HeroVideoPreview() {
               src={HERO_VIDEO_POSTER}
               alt=""
               className="cc-hero-video-poster"
+              loading="eager"
               decoding="async"
               aria-hidden
             />

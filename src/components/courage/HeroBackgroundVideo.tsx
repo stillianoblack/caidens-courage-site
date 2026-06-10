@@ -54,7 +54,7 @@ export default function HeroBackgroundVideo() {
         autoPlay
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
       />
       <video
@@ -63,7 +63,7 @@ export default function HeroBackgroundVideo() {
         src={HERO_VIDEO}
         muted
         playsInline
-        preload="auto"
+        preload="none"
         aria-hidden="true"
       />
     </>

@@ -8,8 +8,19 @@ import { installInternalLinkReloadFallback } from './lib/internalLinkReloadFallb
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+function initAnalyticsAfterFirstPaint() {
+  const run = () => initAnalytics();
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(run, { timeout: 2500 });
+    return;
+  }
+
+  window.setTimeout(run, 1500);
+}
+
 installInternalLinkReloadFallback();
-initAnalytics();
+initAnalyticsAfterFirstPaint();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
