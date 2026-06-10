@@ -20,6 +20,7 @@ import {
   fetchModuleResultsFromSupabase,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import { auditFamilyPortalLinking } from './familyPortalLinkAudit';
 import {
   resolveFamilyVisibleChildren,
   type FamilyVisibleChild,
@@ -265,8 +266,17 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
   }
 
   const errors: string[] = [];
+  const linkAudit = await auditFamilyPortalLinking(programCode);
   const visibility = await resolveFamilyVisibleChildren(programCode);
   errors.push(...visibility.errors);
+
+  if (linkAudit.findings.length) {
+    console.info('[FAMILY_DASHBOARD_LINK_AUDIT]', {
+      program_code: programCode,
+      should_show_add_child: linkAudit.shouldShowAddChild,
+      findings: linkAudit.findings,
+    });
+  }
 
   const allowedStudentIds = visibility.allowedStudentIds;
   const visibleParticipants: StudentParticipantRecord[] = visibility.children.map((child) => {

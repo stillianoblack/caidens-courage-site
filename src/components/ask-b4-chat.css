@@ -1,5 +1,14 @@
 .askB4-launcher {
   z-index: 2050;
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+@media (min-width: 640px) {
+  .askB4-launcher {
+    bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+    right: max(1.5rem, env(safe-area-inset-right, 0px));
+  }
 }
 
 /* Mobile only — desktop uses floating assistant with no dim overlay */

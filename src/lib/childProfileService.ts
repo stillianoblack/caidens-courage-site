@@ -5,7 +5,12 @@ import {
   findOrCreateParticipant,
   resolveStudentGroupNameForSave,
 } from './pilotTrackingService';
-import { ensureFamilyChildLink } from './studentFamilyLinkService';
+import { resolveFamilyAddChildVisibility } from './familyPortalLinkAudit';
+import {
+  ensureFamilyChildLink,
+  fetchStudentFamilyLinksByFamilyProgram,
+  resolveFamilyVisibleChildren,
+} from './studentFamilyLinkService';
 
 export type CreateFamilyChildInput = {
   firstName: string;
@@ -38,6 +43,31 @@ export async function createFamilyChildParticipant(
 
   if (!programCode) {
     return { success: false, displayName, message: 'Missing active family program.' };
+  }
+
+  const visibility = await resolveFamilyVisibleChildren(programCode);
+  const { links } = await fetchStudentFamilyLinksByFamilyProgram(programCode);
+
+  const canAddChild = resolveFamilyAddChildVisibility({
+    claimRequired: visibility.claimRequired,
+    visibleChildrenCount: visibility.children.length,
+    childrenSummaryCount: visibility.children.length,
+    familyLinks: links,
+  });
+
+  if (!canAddChild) {
+    const message =
+      visibility.claimRequired || links.some((link) => link.student_id?.trim())
+        ? 'A child is already linked to this family program. Confirm your parent email to connect their profile — do not add a duplicate child.'
+        : 'Your linked child is already on this dashboard.';
+    console.warn('[CHILD_PROFILE]', {
+      action: 'create_blocked',
+      reason: 'existing_family_link_or_child',
+      program_code: programCode,
+      visible_children: visibility.children.length,
+      family_links: links.length,
+    });
+    return { success: false, displayName, message };
   }
 
   try {

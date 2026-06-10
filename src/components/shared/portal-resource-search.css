@@ -1,5 +1,6 @@
 .portal-search {
   position: relative;
+  box-sizing: border-box;
 }
 
 .portal-searchField {
@@ -13,6 +14,7 @@
   min-width: 0;
   flex: 1 1 10rem;
   max-width: 16rem;
+  box-sizing: border-box;
 }
 
 .portal-searchField[hidden] {
@@ -66,6 +68,7 @@
   align-items: center;
   gap: 0.5rem;
   width: 100%;
+  max-width: 100%;
   padding: 0.45rem 0.75rem;
   border-radius: 9999px;
   border: 1px solid rgba(36, 62, 112, 0.14);
@@ -75,6 +78,7 @@
   font-weight: 700;
   cursor: pointer;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .portal-searchToggleLabel {
@@ -105,16 +109,18 @@
   }
 
   .portal-search.portal-headerSearch {
-    flex: none;
+    flex: 1 1 100%;
     width: 100%;
-    max-width: none;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .portal-search--mobileExpanded .portal-searchField,
   .portal-searchField:not([hidden]) {
     display: flex;
-    max-width: none;
+    max-width: 100%;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .portal-searchMenu {

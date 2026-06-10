@@ -17,6 +17,7 @@ export type FamilyChildSummary = {
   nickname: string | null;
   baselineStatus: FamilyChildBaselineStatus;
   latestActivity: string | null;
+  lastActivityAt: string | null;
   progressPct: number;
   completedCount: number;
   totalCount: number;
@@ -151,13 +152,13 @@ function resolveBaselineStatus(input: {
   return 'Not Started';
 }
 
-function resolveLatestActivity(input: {
+function collectChildActivityEvents(input: {
   participantId: string | null;
   displayName: string;
   modules: LocalModuleResultRecord[];
   legacyBaselines: B4BaselineCheckRecord[];
   assessments: LocalAssessmentV2Record[];
-}): string | null {
+}): Array<{ at: number; label: string }> {
   const events: Array<{ at: number; label: string }> = [];
 
   input.modules
@@ -197,9 +198,34 @@ function resolveLatestActivity(input: {
       });
   }
 
+  return events;
+}
+
+function resolveLatestActivity(input: {
+  participantId: string | null;
+  displayName: string;
+  modules: LocalModuleResultRecord[];
+  legacyBaselines: B4BaselineCheckRecord[];
+  assessments: LocalAssessmentV2Record[];
+}): string | null {
+  const events = collectChildActivityEvents(input);
   if (!events.length) return null;
   events.sort((a, b) => b.at - a.at);
   return events[0]?.label ?? null;
+}
+
+function resolveLastActivityAt(input: {
+  participantId: string | null;
+  displayName: string;
+  modules: LocalModuleResultRecord[];
+  legacyBaselines: B4BaselineCheckRecord[];
+  assessments: LocalAssessmentV2Record[];
+}): string | null {
+  const events = collectChildActivityEvents(input);
+  if (!events.length) return null;
+  events.sort((a, b) => b.at - a.at);
+  const latestAt = events[0]?.at;
+  return latestAt ? new Date(latestAt).toISOString() : null;
 }
 
 function buildChildSummary(input: {
@@ -233,6 +259,13 @@ function buildChildSummary(input: {
     createdAt: input.createdAt,
     baselineStatus,
     latestActivity: resolveLatestActivity({
+      participantId: input.participantId,
+      displayName: input.displayName,
+      modules: input.modules,
+      legacyBaselines: input.legacyBaselines,
+      assessments: input.assessments,
+    }),
+    lastActivityAt: resolveLastActivityAt({
       participantId: input.participantId,
       displayName: input.displayName,
       modules: input.modules,

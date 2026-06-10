@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import {
   DEMO_FAMILY_CHILD_SUMMARY,
+  DEMO_FAMILY_CHILD_SUMMARY_SECOND,
   DEMO_FAMILY_LINKS,
   DEMO_FAMILY_RECENT_ACTIVITY,
+  DEMO_MODULES,
 } from '../../data/designSystemDemoData';
+import {
+  formatFamilyRelativeActivityDate,
+  resolveChildDisplayInitials,
+  resolveChildModuleCounts,
+  resolveFamilyChildAvatarSrc,
+} from '../../lib/familyChildSummaryCard';
 import FamilyB4QuickActions from '../family-portal/FamilyB4QuickActions';
 import FamilyCertificatePreviewCard from '../family-portal/FamilyCertificatePreviewCard';
 import FamilyChildProgressDrawer from '../family-portal/FamilyChildProgressDrawer';
+import FamilyChildSummaryCard from '../family-portal/FamilyChildSummaryCard';
 import FamilyGoalsSummaryCard from '../family-portal/FamilyGoalsSummaryCard';
 import FamilyRecommendedNextCard from '../family-portal/FamilyRecommendedNextCard';
 import {
@@ -42,12 +51,94 @@ export default function FamilyPortalDesignSystemSection() {
 
   return (
     <section id="family-portal" className="dsPageSection">
-      <h2 className="dsPageSectionTitle">15. Family Portal Polish</h2>
+      <h2 className="dsPageSectionTitle">15. Family Portal Components</h2>
       <p className="dsPageSectionSub">
-        High-value parent experience patterns — access codes, activity timeline, gallery marketing,
-        child drawer, goals summary, recommendations, certificates, and B-4 quick actions. Mock data
-        only.
+        Reusable Family Portal patterns — child summary card, access codes, activity timeline,
+        gallery marketing, child drawer, goals summary, recommendations, certificates, and B-4
+        quick actions. Mock data only.
       </p>
+
+      <h3 className="dsPageSectionSub">Family child summary card</h3>
+      <p className="dsPageSectionSub">
+        Reassurance strip at the top of Family Overview — answers &ldquo;Is my child connected and how
+        are they doing?&rdquo; before metrics.
+      </p>
+
+      <h4 className="dsPageSectionSub">Empty state</h4>
+      <FamilyChildSummaryCard
+        childName=""
+        programName=""
+        baselineStatus="Not Started"
+        modulesCompleted={0}
+        modulesTotal={0}
+        lastActivityLabel=""
+        avatarInitials="?"
+        previewEmpty
+      />
+
+      <h4 className="dsPageSectionSub">Connected child</h4>
+      <FamilyChildSummaryCard
+        childName={DEMO_FAMILY_CHILD_SUMMARY.displayName}
+        programName="Blue Ribbon Results Academy"
+        baselineStatus={DEMO_FAMILY_CHILD_SUMMARY.baselineStatus}
+        modulesCompleted={
+          resolveChildModuleCounts(
+            DEMO_FAMILY_CHILD_SUMMARY.participantId,
+            DEMO_MODULES,
+          ).completed
+        }
+        modulesTotal={
+          resolveChildModuleCounts(
+            DEMO_FAMILY_CHILD_SUMMARY.participantId,
+            DEMO_MODULES,
+          ).total
+        }
+        lastActivityLabel={formatFamilyRelativeActivityDate(DEMO_FAMILY_CHILD_SUMMARY.lastActivityAt)}
+        avatarSrc={resolveFamilyChildAvatarSrc({
+          participantId: DEMO_FAMILY_CHILD_SUMMARY.participantId,
+          moduleResults: DEMO_MODULES,
+        })}
+        avatarInitials={resolveChildDisplayInitials(DEMO_FAMILY_CHILD_SUMMARY.displayName)}
+        onViewProgress={() => setChildDrawerOpen(true)}
+      />
+
+      <h4 className="dsPageSectionSub">Multiple children (switcher ready)</h4>
+      <FamilyChildSummaryCard
+        childName={DEMO_FAMILY_CHILD_SUMMARY.displayName}
+        programName="Blue Ribbon Results Academy"
+        baselineStatus={DEMO_FAMILY_CHILD_SUMMARY.baselineStatus}
+        modulesCompleted={
+          resolveChildModuleCounts(
+            DEMO_FAMILY_CHILD_SUMMARY.participantId,
+            DEMO_MODULES,
+          ).completed
+        }
+        modulesTotal={
+          resolveChildModuleCounts(
+            DEMO_FAMILY_CHILD_SUMMARY.participantId,
+            DEMO_MODULES,
+          ).total
+        }
+        lastActivityLabel={formatFamilyRelativeActivityDate(DEMO_FAMILY_CHILD_SUMMARY.lastActivityAt)}
+        avatarSrc={resolveFamilyChildAvatarSrc({
+          participantId: DEMO_FAMILY_CHILD_SUMMARY.participantId,
+          moduleResults: DEMO_MODULES,
+        })}
+        avatarInitials={resolveChildDisplayInitials(DEMO_FAMILY_CHILD_SUMMARY.displayName)}
+        childOptions={[
+          {
+            participantId: DEMO_FAMILY_CHILD_SUMMARY.participantId!,
+            displayName: DEMO_FAMILY_CHILD_SUMMARY.displayName,
+          },
+          {
+            participantId: DEMO_FAMILY_CHILD_SUMMARY_SECOND.participantId!,
+            displayName: DEMO_FAMILY_CHILD_SUMMARY_SECOND.displayName,
+          },
+        ]}
+        activeParticipantId={DEMO_FAMILY_CHILD_SUMMARY.participantId}
+        onSelectChild={() => undefined}
+        onViewProgress={() => setChildDrawerOpen(true)}
+      />
 
       <h3 className="dsPageSectionSub">Family access collapsible card</h3>
       <CollapsibleCard

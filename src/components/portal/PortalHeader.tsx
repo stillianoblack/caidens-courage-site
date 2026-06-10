@@ -64,8 +64,8 @@ export default function PortalHeader({
           </button>
         ) : null}
         <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
+        <PortalSwitcherDropdown className="portal-headerSwitcher" />
       </div>
-      <PortalSwitcherDropdown className="portal-headerSwitcher" />
     </header>
   );
 }

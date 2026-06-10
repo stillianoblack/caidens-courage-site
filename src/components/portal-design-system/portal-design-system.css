@@ -564,11 +564,12 @@
   }
 
   .ds-toastViewport {
-    bottom: 20px;
-    right: 16px;
-    left: 16px;
+    bottom: max(88px, calc(80px + env(safe-area-inset-bottom, 0px)));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    left: max(16px, env(safe-area-inset-left, 0px));
     width: auto;
     max-width: none;
+    z-index: 2500;
   }
 
   body[data-ask-b4-open='desktop-float'] .ds-toastViewport {

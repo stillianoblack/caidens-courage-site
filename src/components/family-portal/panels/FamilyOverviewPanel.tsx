@@ -34,17 +34,24 @@ import FamilyB4QuickActions from '../FamilyB4QuickActions';
 import FamilyCertificatePreviewCard from '../FamilyCertificatePreviewCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
 import FamilyChildProgressDrawer from '../FamilyChildProgressDrawer';
+import FamilyChildSummaryCard from '../FamilyChildSummaryCard';
 import FamilyGoalsSummaryCard from '../FamilyGoalsSummaryCard';
 import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyRecommendedNextCard from '../FamilyRecommendedNextCard';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
+import { resolveFamilyAddChildVisibility } from '../../../lib/familyPortalLinkAudit';
+import {
+  formatFamilyRelativeActivityDate,
+  resolveChildModuleCounts,
+  resolveChildDisplayInitials,
+  resolveFamilyChildAvatarSrc,
+} from '../../../lib/familyChildSummaryCard';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
 import {
   BaselineOverviewBars,
   MetricCard,
   RecentActivityFeed,
-  StatusChip,
 } from '../../portal-design-system';
 import type { StudentGalleryItem } from '../../../lib/studentGalleryService';
 import '../../focus-skills/focus-skills-snapshot.css';
@@ -159,14 +166,6 @@ export default function FamilyOverviewPanel() {
     goalsRecord?.completed_at || (goalsRecord?.selected_goals?.length ?? 0) > 0
       ? `${goalsRecord?.selected_goals?.length ?? 0} selected`
       : 'Not set yet';
-
-  const guardianLabel =
-    parentGuardianName ||
-    parentClaim?.email ||
-    activeProgram?.adminFirstName ||
-    'Parent/Guardian';
-
-  const campLabel = campProgramName ?? campProgramCode ?? activeProgram?.groupName ?? null;
 
   const activeChildCertificates = useMemo(() => {
     if (!activeChildSummary?.participantId) return certificatesEarned;
@@ -387,48 +386,102 @@ export default function FamilyOverviewPanel() {
   const showProgressBars = !loading && metrics.hasActivity;
   const showEmptyHelper = !loading && !metrics.hasChildActivity && metrics.emptyStateMessage;
 
+  const showAddChildForm = useMemo(
+    () =>
+      resolveFamilyAddChildVisibility({
+        claimRequired,
+        visibleChildrenCount: visibleChildren.length,
+        childrenSummaryCount: children.length,
+        familyLinks,
+      }),
+    [children.length, claimRequired, familyLinks, visibleChildren.length],
+  );
+
+  const showChildSummaryCard = !showAddChildForm && Boolean(activeChildSummary);
+
+  const childSummaryProgramName =
+    campProgramName ?? campProgramCode ?? activeProgram?.groupName ?? programCode ?? 'Your Program';
+
+  const childSummaryModuleCounts = useMemo(
+    () =>
+      resolveChildModuleCounts(activeChildSummary?.participantId ?? null, moduleResults),
+    [activeChildSummary?.participantId, moduleResults],
+  );
+
+  const childSummaryAvatarSrc = useMemo(
+    () =>
+      resolveFamilyChildAvatarSrc({
+        participantId: activeChildSummary?.participantId ?? null,
+        moduleResults,
+      }),
+    [activeChildSummary?.participantId, moduleResults],
+  );
+
+  const childSummaryLastActivity = useMemo(
+    () => formatFamilyRelativeActivityDate(activeChildSummary?.lastActivityAt),
+    [activeChildSummary?.lastActivityAt],
+  );
+
+  const childSummaryOptions = useMemo(
+    () =>
+      children
+        .filter((child) => child.participantId)
+        .map((child) => ({
+          participantId: child.participantId as string,
+          displayName: child.displayName,
+        })),
+    [children],
+  );
+
+  useEffect(() => {
+    if (loading) return;
+    const linkedChildFound = familyLinks.some((link) => Boolean(link.student_id?.trim()));
+    console.info('[FAMILY_CHILD_SUMMARY]', {
+      family_user_id: parentClaim?.email?.trim() || parentClaim?.phone?.trim() || null,
+      participant_id: activeChildSummary?.participantId ?? null,
+      program_code: programCode ?? null,
+      linked_child_found: linkedChildFound || Boolean(activeChildSummary?.participantId),
+    });
+  }, [
+    activeChildSummary?.participantId,
+    familyLinks,
+    loading,
+    parentClaim?.email,
+    parentClaim?.phone,
+    programCode,
+  ]);
+
   return (
     <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />
 
-      {activeChildSummary ? (
-        <section className="family-overviewSummary">
-          <div className="family-overviewSummaryHead">
-            <button
-              type="button"
-              className="family-overviewSummaryNameBtn"
-              onClick={openChildDrawer}
-            >
-              <h2 className="family-overviewSummaryTitle">{activeChildSummary.displayName}</h2>
-            </button>
-            <StatusChip
-              label={activeChildSummary.baselineStatus}
-              variant={
-                activeChildSummary.baselineStatus === 'Complete'
-                  ? 'baseline-complete'
-                  : activeChildSummary.baselineStatus === 'In Progress'
-                    ? 'in-progress'
-                    : 'not-started'
-              }
-            />
-          </div>
-          <p className="family-overviewSummaryMeta">
-            {guardianLabel ? `Parent/Guardian: ${guardianLabel}` : null}
-            {guardianLabel && campLabel ? ' · ' : null}
-            {campLabel ? `Camp: ${campLabel}` : null}
-            {!campLabel && programCode ? `Program: ${programCode}` : null}
-            {' · '}
-            Last activity: {activeChildSummary.latestActivity ?? 'No activity yet'}
-          </p>
-        </section>
-      ) : !loading && !claimRequired ? (
-        <section className="family-overviewSummary">
-          <h2 className="family-overviewSummaryTitle">Family Overview</h2>
-          <p className="family-overviewSummaryMeta">
-            {guardianLabel ? `Parent/Guardian: ${guardianLabel}` : 'Welcome to your family portal'}
-            {campLabel ? ` · Camp: ${campLabel}` : programCode ? ` · Program: ${programCode}` : null}
-          </p>
-        </section>
+      {showChildSummaryCard && activeChildSummary ? (
+        <FamilyChildSummaryCard
+          childName={activeChildSummary.displayName}
+          programName={childSummaryProgramName}
+          baselineStatus={activeChildSummary.baselineStatus}
+          modulesCompleted={childSummaryModuleCounts.completed}
+          modulesTotal={childSummaryModuleCounts.total}
+          lastActivityLabel={childSummaryLastActivity}
+          avatarSrc={childSummaryAvatarSrc}
+          avatarInitials={resolveChildDisplayInitials(activeChildSummary.displayName)}
+          childOptions={childSummaryOptions}
+          activeParticipantId={activeChild?.participantId ?? activeChildSummary.participantId}
+          onSelectChild={(participantId) => {
+            const match = selectableChildren.find((child) => child.participantId === participantId);
+            if (match) selectChild(match);
+          }}
+          onViewProgress={openChildDrawer}
+          loading={loading}
+        />
+      ) : null}
+
+      {showAddChildForm ? (
+        <AddChildForm
+          routeToBaseline
+          baselinePath={baselinePath}
+          onAdded={() => void refresh()}
+        />
       ) : null}
 
       <div className="family-kpiRow family-kpiRow--ds">
@@ -468,12 +521,6 @@ export default function FamilyOverviewPanel() {
       {showEmptyHelper ? (
         <p className="family-panelHelper family-panelHelper--prominent">{metrics.emptyStateMessage}</p>
       ) : null}
-
-      <AddChildForm
-        routeToBaseline
-        baselinePath={baselinePath}
-        onAdded={() => void refresh()}
-      />
 
       {needsChildSelection ? (
         <ActiveChildSelector

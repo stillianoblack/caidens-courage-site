@@ -17,8 +17,8 @@ export default function B4LauncherButton({ onClick, className = '' }: B4Launcher
         'shadow-[0_0_0_1px_rgba(240,206,110,0.14),0_12px_28px_-14px_rgba(240,206,110,0.5)]',
         'transition-all duration-200',
         'hover:border-golden-500/80 hover:shadow-[0_0_0_1px_rgba(240,206,110,0.18),0_16px_36px_-14px_rgba(240,206,110,0.65)]',
-        'bottom-4 right-4 h-12 w-12 p-0',
-        'sm:bottom-6 sm:right-6 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5',
+        'h-12 w-12 p-0',
+        'sm:h-auto sm:w-auto sm:px-4 sm:py-2.5',
         className,
       ].join(' ')}
       aria-label="Ask B-4"

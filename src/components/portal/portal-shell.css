@@ -3,6 +3,8 @@
   margin-left: 0;
   margin-right: auto;
   width: 100%;
+  box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .portal-backBtn {

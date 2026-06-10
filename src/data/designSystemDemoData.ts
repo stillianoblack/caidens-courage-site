@@ -150,12 +150,28 @@ export const DEMO_FAMILY_CHILD_SUMMARY: FamilyChildSummary = {
   displayName: 'Alex Rivera',
   nickname: 'Al',
   baselineStatus: 'Complete',
-  latestActivity: 'Jun 8, 2026',
+  latestActivity: 'Alex completed Week 1 — Focus Moves',
+  lastActivityAt: '2026-06-08T14:22:00.000Z',
   progressPct: 68,
   completedCount: 4,
   totalCount: 6,
   progressLabel: '4 of 6 modules',
   createdAt: '2026-05-01T12:00:00.000Z',
+};
+
+export const DEMO_FAMILY_CHILD_SUMMARY_SECOND: FamilyChildSummary = {
+  key: 'demo-student-002',
+  participantId: 'demo-student-002',
+  displayName: 'Jordan Lee',
+  nickname: 'J',
+  baselineStatus: 'Not Started',
+  latestActivity: null,
+  lastActivityAt: null,
+  progressPct: 0,
+  completedCount: 0,
+  totalCount: 6,
+  progressLabel: '0 of 6 modules',
+  createdAt: '2026-05-10T12:00:00.000Z',
 };
 
 export const DEMO_FAMILY_RECENT_ACTIVITY: FamilyRecentActivityItem[] = [
