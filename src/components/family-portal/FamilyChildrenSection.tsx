@@ -58,6 +58,18 @@ export default function FamilyChildrenSection({
             );
             return (
             <li key={child.key} className={`family-childCard${isActive ? ' family-childCard--active' : ''}`}>
+              {onViewProgress && child.participantId ? (
+                <button
+                  type="button"
+                  className="family-childAvatarBtn"
+                  onClick={() => onViewProgress(child.participantId!)}
+                  aria-label={`View progress for ${child.displayName}`}
+                >
+                  <span className="family-childAvatar" aria-hidden="true">
+                    {child.displayName.trim().charAt(0).toUpperCase()}
+                  </span>
+                </button>
+              ) : null}
               {onSelectChild && child.participantId ? (
                 <button
                   type="button"
@@ -97,16 +109,37 @@ export default function FamilyChildrenSection({
                 <div className="family-childMetaRow">
                   <dt>Progress</dt>
                   <dd>
-                    <div className="family-childProgress">
-                      <div className="family-childProgressTrack" aria-hidden="true">
-                        <div
-                          className="family-childProgressFill"
-                          style={{ width: `${Math.min(100, Math.max(0, child.progressPct))}%` }}
-                        />
-                      </div>
-                      <span className="family-childProgressPct">{child.progressPct}%</span>
-                    </div>
-                    <p className="family-childProgressDetail">{child.progressLabel}</p>
+                    {onViewProgress && child.participantId ? (
+                      <button
+                        type="button"
+                        className="family-childProgressBtn"
+                        onClick={() => onViewProgress(child.participantId!)}
+                      >
+                        <div className="family-childProgress">
+                          <div className="family-childProgressTrack" aria-hidden="true">
+                            <div
+                              className="family-childProgressFill"
+                              style={{ width: `${Math.min(100, Math.max(0, child.progressPct))}%` }}
+                            />
+                          </div>
+                          <span className="family-childProgressPct">{child.progressPct}%</span>
+                        </div>
+                        <p className="family-childProgressDetail">{child.progressLabel}</p>
+                      </button>
+                    ) : (
+                      <>
+                        <div className="family-childProgress">
+                          <div className="family-childProgressTrack" aria-hidden="true">
+                            <div
+                              className="family-childProgressFill"
+                              style={{ width: `${Math.min(100, Math.max(0, child.progressPct))}%` }}
+                            />
+                          </div>
+                          <span className="family-childProgressPct">{child.progressPct}%</span>
+                        </div>
+                        <p className="family-childProgressDetail">{child.progressLabel}</p>
+                      </>
+                    )}
                   </dd>
                 </div>
               </dl>

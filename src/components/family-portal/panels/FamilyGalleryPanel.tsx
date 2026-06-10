@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
 import { MarketingShowcaseCard } from '../../portal-design-system';
-import { CHARACTER_IMAGE_PATHS } from '../../../data/familyPortalContent';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../../config/activePilotProgram';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import {
@@ -281,8 +280,16 @@ export default function FamilyGalleryPanel() {
       <MarketingShowcaseCard
         title="Share Your Child's Creativity"
         description="Upload coloring pages, reflections, and student wins. Submissions stay private to your program unless approved for community sharing."
-        imageSrc={CHARACTER_IMAGE_PATHS.caiden ?? '/images/characters/caiden_photo_icon_game.webp'}
-        actions={[{ label: 'Upload Artwork', onClick: scrollToUpload }]}
+        imageSrc="/images/gallery/B-4_Coloredpage.webp"
+        imageAlt="Coloring page example"
+        actions={[
+          { label: 'Upload Artwork', onClick: scrollToUpload },
+          {
+            label: 'Learn About Community Gallery',
+            onClick: () => setTab('community-gallery'),
+            variant: 'ghost',
+          },
+        ]}
       />
 
       <div className="family-galleryTabs" role="tablist" aria-label="Family gallery views">

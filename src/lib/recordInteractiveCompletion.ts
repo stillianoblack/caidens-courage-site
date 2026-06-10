@@ -129,6 +129,15 @@ export async function recordInteractiveModuleCompletion(
     return { warning: 'Missing active program context.' };
   }
 
+  if (tracking.role === 'student') {
+    const student = resolveStudentParticipant();
+    if (!student.participant_id?.trim()) {
+      return {
+        warning: 'Add or select your child profile before saving progress.',
+      };
+    }
+  }
+
   try {
     const { participantId } = await resolveParticipantForTracking(tracking);
     const participant =

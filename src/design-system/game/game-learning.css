@@ -1,6 +1,13 @@
 /* Focus Flame — shared game / learning design system */
 @import '../components/learning-moment.css';
 
+:root {
+  --game-shell-gap: 2rem;
+  --game-shell-rail-min: 17.5rem;
+  --game-shell-rail-max: 22.5rem;
+  --game-shell-max: 72rem;
+}
+
 .ds-gameShell {
   display: flex;
   flex-direction: column;
@@ -64,9 +71,9 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 720px) {
   .ds-gameShellBody--withInsight {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
     align-items: start;
   }
 }
@@ -325,51 +332,192 @@
   padding-left: 1.125rem;
 }
 
-/* Learning moment (flexible) */
-.ds-learningMoment {
-  border-radius: 0.875rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid rgba(36, 62, 112, 0.12);
-  background: #fff;
-}
-
-.ds-learningMoment--b4 {
-  border-color: rgba(240, 206, 110, 0.35);
-  background: #050b18;
-  color: #fff;
-}
-
-.ds-learningMoment--expert {
-  border-color: rgba(59, 130, 246, 0.25);
-  background: #eff6ff;
-}
-
-/* Mission quiz integration */
-.mission-quizLayout--lockIn {
+/* Mission quiz — Focus Flame coaching rail layout */
+.mission-quizLayout.mission-quizLayout--coachingRail {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  width: 100%;
 }
 
-@media (min-width: 900px) {
-  .mission-quizLayout--lockIn {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
-    align-items: start;
-  }
-}
-
-.mission-quizLayoutMain {
+.mission-quizLayoutMission,
+.mission-quizLayoutLearning,
+.mission-quizLayoutAside {
   min-width: 0;
+}
+
+.mission-quizLayoutLearning {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .mission-quizLayoutAside {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding-left: 0.625rem;
+}
+
+/* 720px fits facilitator content area beside sidebar (not full viewport) */
+@media (min-width: 720px) {
+  .mission-quizLayout.mission-quizLayout--coachingRail {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(var(--game-shell-rail-min), var(--game-shell-rail-max));
+    gap: var(--game-shell-gap);
+    align-items: start;
+    max-width: var(--game-shell-max);
+    width: 100%;
+  }
+
+  .mission-quizLayout--hasMission .mission-quizLayoutMission {
+    grid-column: 1 / -1;
+  }
+
+  .mission-quizLayoutLearning {
+    grid-column: 1;
+  }
+
+  .mission-quizLayoutAside {
+    grid-column: 2;
+    align-self: start;
+  }
+
+  .mission-quizLayout--hasMission .mission-quizLayoutAside {
+    grid-row: 2;
+  }
+
+  .mission-quizLayout--coachingRail:not(.mission-quizLayout--hasMission) .mission-quizLayoutAside {
+    grid-row: 1;
+  }
+
+  .mission-quizLayout--coachingRail .mission-quizLayoutAside {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+@media (max-width: 719px) {
+  .ds-coachingRailCaret {
+    display: none;
+  }
+}
+
+/* Warm facilitator game canvas */
+.portal-gameFrame.bbc-app--game-active .bbc-main--quiz,
+.bbc-app--coachingShell .bbc-main--quiz {
+  background: linear-gradient(180deg, #fffdf8 0%, #fffaf5 42%, #fff 100%);
+}
+
+.shared-mission-game--coachingRail .mission-quizLayoutLearning {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.shared-mission-game--coachingRail .mission-questionText,
+.shared-mission-game--coachingRail .bbc-questionText {
+  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--pilot-navy-deep, #1a2f52);
+  margin-bottom: 0.75rem;
+}
+
+.shared-mission-game--coachingRail .bbc-answerCard,
+.shared-mission-game--coachingRail .ds-answerChoice {
+  background: #fff;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  box-shadow: 0 4px 14px -12px rgba(26, 47, 82, 0.2);
+}
+
+.shared-mission-game--coachingRail .bbc-answerCard--correct,
+.shared-mission-game--coachingRail .ds-answerChoice--correct {
+  border-color: #22c55e;
+  background: #ecfdf5;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+}
+
+/* Focus Flame shell — landing + quiz left-aligned inside facilitator frame */
+.bbc-app--coachingShell .bbc-main--landing,
+.bbc-app--coachingShell .bbc-main--quiz {
+  justify-content: flex-start;
+  align-items: stretch;
+  min-height: auto;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
+.bbc-app--coachingShell .caiden-topBar,
+.bbc-app--coachingShell .miranda-topBar,
+.bbc-app--coachingShell .charlie-topBar,
+.bbc-app--coachingShell .victoria-topBar,
+.bbc-app--coachingShell .uncleT-topBar,
+.bbc-app--coachingShell .bbc-topBar {
+  max-width: var(--game-shell-max);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.bbc-app--coachingShell .bbc-landing.game-landing--focusFlameShell {
+  text-align: left;
+  max-width: none;
+  margin: 0;
+  padding: 1.25rem 1.125rem 1.5rem;
+}
+
+.bbc-app--coachingShell .game-landing--focusFlameShell .game-startBtn {
+  margin-left: 0;
+  margin-right: auto;
+  width: auto;
+  min-width: 12rem;
+}
+
+.bbc-app--coachingShell .adultMissionIntroGuide,
+.bbc-app--coachingShell .mission-landingPrompt {
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
+}
+
+.game-focusFlameLanding {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.game-focusFlameLandingMain {
+  min-width: 0;
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.08);
+  box-shadow: 0 12px 32px -24px rgba(26, 47, 82, 0.22);
+}
+
+.game-focusFlameLandingAside {
   min-width: 0;
 }
 
-@media (min-width: 900px) {
-  .mission-quizLayout--lockIn .mission-quizLayoutAside {
+@media (min-width: 720px) {
+  .game-focusFlameLanding {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(var(--game-shell-rail-min), var(--game-shell-rail-max));
+    gap: var(--game-shell-gap);
+    align-items: start;
+    max-width: var(--game-shell-max);
+    width: 100%;
+  }
+
+  .game-focusFlameLandingAside {
     position: sticky;
     top: 1rem;
   }

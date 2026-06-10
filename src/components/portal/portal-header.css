@@ -35,6 +35,17 @@
   gap: 1rem;
 }
 
+.portal-headerLeadText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.portal-headerCampBadge {
+  align-self: flex-start;
+}
+
 .portal-headerTitle {
   margin: 0;
   font-family: var(--font-display, Nunito, sans-serif);

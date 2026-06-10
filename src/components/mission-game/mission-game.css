@@ -3,7 +3,7 @@
 
 /* Shared mission game layout — avatar + speech card + scenario + feedback */
 
-.mission-quizLayout {
+.mission-quizLayout:not(.mission-quizLayout--coachingRail) {
   display: flex;
   flex-direction: column;
   gap: 1rem;

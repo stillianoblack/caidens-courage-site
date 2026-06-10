@@ -14,7 +14,7 @@ import {
   resultsNeedsAttentionPath,
   studentGalleryPendingPath,
 } from './askB4DeepLinks';
-import { familyPortalPath } from './familyPortalPaths';
+import { familyGoalsPath, familyPortalPath } from './familyPortalPaths';
 import { programDashboardTabPath } from './programDashboardNav';
 
 export type AskB4Mode = 'kid' | 'family' | 'facilitator';
@@ -38,6 +38,7 @@ export const ASK_B4_STARTER_PROMPTS: Record<AskB4Mode, AskB4StarterPrompt[]> = {
     { text: 'What does the B-4 Baseline mean?', href: familyPortalPath('baseline-check') },
     { text: "Where is my child's certificate?", href: familyPortalPath('certificates') },
     { text: 'How do I submit artwork?', href: familyPortalPath('gallery') },
+    { text: 'Help me choose family goals', href: familyGoalsPath() },
   ],
   facilitator: [
     { text: 'What should we do for Week 1?', href: programDashboardTabPath('weekly-modules') },

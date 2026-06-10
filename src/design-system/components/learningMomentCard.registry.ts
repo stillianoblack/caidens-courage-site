@@ -46,7 +46,7 @@ export const LEARNING_MOMENT_VARIANTS: Record<LearningMomentVariant, LearningMom
       'Learning paths — step reinforcement',
       'Mission completion — celebrate + next move',
     ],
-    sections: ['Headline', 'Tips (bullets)', 'Optional CTA'],
+    sections: ['Headline', 'Body', 'Tips (numbered)', 'Optional CTA'],
   },
   B4_PARENT_COACH: {
     id: 'B4_PARENT_COACH',
@@ -118,5 +118,6 @@ export const LEARNING_MOMENT_CARD_REGISTRY = {
     'Facilitator games: B4_LOCK_IN after each answer; FACILITATOR_INSIGHT every 2–3 questions.',
     'Family portal: use B4_PARENT_COACH — not Parent Mentor Says.',
     'One coaching card per screen region — avoid stacking duplicate messages.',
+    'B-4 Lock-In content comes from getB4LockInTip() — answer-aware, skill-aware, portal-toned.',
   ],
 } as const;

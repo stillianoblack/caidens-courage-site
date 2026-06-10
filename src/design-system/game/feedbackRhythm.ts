@@ -1,5 +1,6 @@
-import type { GameFeedbackDetail, GameQuestion } from '../../types/gameAssessment';
+import type { GameQuestion } from '../../types/gameAssessment';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
+import { getB4LockInTip, type B4LockInPortalType } from './getB4LockInTip';
 
 export type FeedbackRhythmMode = 'kid' | 'family' | 'facilitator';
 
@@ -18,40 +19,19 @@ export function shouldShowExpertInsight(
   return (questionIndex + 1) % interval === 0;
 }
 
+/** @deprecated Prefer getB4LockInTip — kept for legacy callers */
 export function resolveLockInTips(
   question: GameQuestion,
   tone: 'success' | 'try' | 'neutral',
+  portalType: B4LockInPortalType = 'kid',
 ): string[] {
-  const toneTips =
-    tone === 'success'
-      ? question.lockInTipsCorrect ?? question.lockInTips
-      : question.lockInTipsIncorrect ?? question.lockInTips;
-  if (Array.isArray(toneTips) && toneTips.length) {
-    return toneTips;
-  }
-
-  const detail: GameFeedbackDetail | undefined =
-    tone === 'success'
-      ? question.feedbackDetailCorrect ?? question.feedbackDetail
-      : question.feedbackDetailIncorrect ?? question.feedbackDetail;
-
-  if (detail?.tryThis?.length) {
-    return [...detail.tryThis];
-  }
-
-  if (tone === 'success') {
-    return [
-      'Name the first step out loud.',
-      'Set a short timer for one focus burst.',
-      'Celebrate the small win before moving on.',
-    ];
-  }
-
-  return [
-    'Pause and take one calm breath.',
-    'Ask: what needs to happen first?',
-    'Pick one small step and try again.',
-  ];
+  return getB4LockInTip({
+    portalType,
+    questionId: question.id,
+    selectedAnswer: null,
+    isCorrect: tone === 'success',
+    question,
+  }).tips;
 }
 
 export function portalTypeToRhythm(portalType: 'facilitator' | 'family' | 'kid'): FeedbackRhythmMode {

@@ -3,8 +3,15 @@
 .portal-gameFrame {
   width: 100%;
   max-width: 72rem;
-  margin-left: auto;
+  margin-left: 0;
   margin-right: auto;
+}
+
+.portal-gameFrame.bbc-app--coachingShell {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .family-content--wide > .portal-gameFrame,
@@ -42,6 +49,17 @@
   position: relative;
   top: auto;
   z-index: 1;
+}
+
+.portal-gameFrame.bbc-app--game-active .bbc-topBar,
+.portal-gameFrame.bbc-app--game-active .caiden-topBar,
+.portal-gameFrame.bbc-app--game-active .miranda-topBar,
+.portal-gameFrame.bbc-app--game-active .victoria-topBar,
+.portal-gameFrame.bbc-app--game-active .uncleT-topBar,
+.portal-gameFrame.bbc-app--game-active .charlie-topBar {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .portal-gameFrame.bbc-app--game-active .bbc-topBar,
@@ -109,14 +127,58 @@
   gap: 0.75rem;
 }
 
+/* Coaching rail: left-aligned two-column shell inside facilitator frame */
+.shared-mission-game--coachingRail .game-interactionShellInner {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.shared-mission-game--coachingRail .mission-quizLayout.mission-quizLayout--coachingRail {
+  display: grid;
+}
+
+@media (min-width: 720px) {
+  .shared-mission-game--coachingRail .mission-quizLayout.mission-quizLayout--coachingRail {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(var(--game-shell-rail-min), var(--game-shell-rail-max));
+    gap: var(--game-shell-gap);
+  }
+
+  .shared-mission-game--coachingRail .mission-quizLayout--hasMission .mission-quizLayoutMission {
+    grid-column: 1 / -1;
+  }
+}
+
+.shared-mission-game--coachingRail .mission-questionText,
+.shared-mission-game--coachingRail .bbc-questionText,
+.shared-mission-game--coachingRail .bbc-answers,
+.shared-mission-game--coachingRail .ds-answerList {
+  max-width: none;
+}
+
+.shared-mission-game--coachingRail .bbc-answerCard,
+.shared-mission-game--coachingRail .ds-answerChoice {
+  max-width: none;
+}
+
 /* Compact desktop gameplay — keep questions and answers above the fold */
 @media (min-width: 768px) {
-  .shared-mission-game .bbc-main--quiz,
-  .bbc-app--game-active .bbc-main--quiz {
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-main--quiz,
+  .bbc-app--game-active:not(.portal-gameFrame) .bbc-main--quiz {
     padding-top: 1.5rem;
     max-width: 47.5rem;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .shared-mission-game--coachingRail .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--game-active .bbc-main--quiz {
+    padding-top: 1rem;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .shared-mission-game .mission-quizLayout {
@@ -128,20 +190,20 @@
     margin-bottom: 0.25rem;
   }
 
-  .shared-mission-game .mission-questionText,
-  .shared-mission-game .bbc-questionText {
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .mission-questionText,
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-questionText {
     max-width: 47.5rem;
     margin-bottom: 1.5rem;
   }
 
-  .shared-mission-game .bbc-answers,
-  .shared-mission-game .bbc-answers--centered {
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-answers,
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-answers--centered {
     gap: 0.75rem;
     max-width: 47.5rem;
   }
 
-  .shared-mission-game .bbc-answerCard,
-  .shared-mission-game .bbc-answerCard--assessment {
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-answerCard,
+  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-answerCard--assessment {
     max-width: 43.75rem;
     min-height: 4rem;
   }

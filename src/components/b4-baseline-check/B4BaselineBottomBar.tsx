@@ -6,6 +6,10 @@ type B4BaselineBottomBarProps = {
   checked: boolean;
   feedback?: string | null;
   feedbackTone?: 'success' | 'try' | 'neutral';
+  /** Hide inline feedback — coaching rail shows headline instead */
+  hideInlineFeedback?: boolean;
+  /** Align footer actions with left game column (Focus Flame shell) */
+  coachingShell?: boolean;
   onSkip: () => void;
   onCheck: () => void;
   onContinue: () => void;
@@ -16,14 +20,26 @@ export default function B4BaselineBottomBar({
   checked,
   feedback,
   feedbackTone = 'neutral',
+  hideInlineFeedback = false,
+  coachingShell = false,
   onSkip,
   onCheck,
   onContinue,
 }: B4BaselineBottomBarProps) {
+  const showFeedback = Boolean(checked && feedback && !hideInlineFeedback);
   const barClass = [
     'bbc-bottomBar',
+    coachingShell ? 'bbc-bottomBar--coachingShell' : '',
     checked && feedbackTone === 'success' ? 'bbc-bottomBar--success' : '',
     checked && feedbackTone === 'try' ? 'bbc-bottomBar--try' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const innerClass = [
+    'bbc-bottomBarInner',
+    coachingShell ? 'bbc-bottomBarInner--coachingShell' : '',
+    showFeedback ? '' : 'bbc-bottomBarInner--continueOnly',
   ]
     .filter(Boolean)
     .join(' ');
@@ -31,7 +47,7 @@ export default function B4BaselineBottomBar({
   return (
     <footer className={barClass}>
       <GameInteractionShell>
-        <div className="bbc-bottomBarInner">
+        <div className={innerClass}>
           {!checked ? (
             <>
               <button type="button" className="bbc-skipBtn" onClick={onSkip}>
@@ -43,13 +59,11 @@ export default function B4BaselineBottomBar({
             </>
           ) : (
             <>
-              {feedback ? (
+              {showFeedback ? (
                 <p className="bbc-feedbackBanner" role="status">
                   {feedback}
                 </p>
-              ) : (
-                <span />
-              )}
+              ) : null}
               <button
                 type="button"
                 className="bbc-checkBtn bbc-checkBtn--continue"

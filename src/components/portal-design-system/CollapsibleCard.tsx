@@ -4,6 +4,8 @@ type CollapsibleCardProps = {
   title: string;
   storageKey?: string;
   defaultCollapsed?: boolean;
+  /** Shown under the title when collapsed */
+  collapsedSummary?: string;
   helperText?: string;
   className?: string;
   children: React.ReactNode;
@@ -34,6 +36,7 @@ export default function CollapsibleCard({
   title,
   storageKey,
   defaultCollapsed = false,
+  collapsedSummary,
   helperText,
   className = '',
   children,
@@ -60,8 +63,8 @@ export default function CollapsibleCard({
         <span className="ds-collapsibleCardAction">
           {collapsed ? 'Expand' : 'Collapse'}
           <svg
-            className={`ds-collapsibleCardChevron${collapsed ? '' : ' ds-collapsibleCardChevron--open'}`}
-            viewBox="0 0 20 20"
+            className={`ds-collapsibleCardChevron ds-collapsibleCardChevron--large${collapsed ? '' : ' ds-collapsibleCardChevron--open'}`}
+            viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
           >
@@ -73,6 +76,9 @@ export default function CollapsibleCard({
           </svg>
         </span>
       </button>
+      {collapsed && collapsedSummary ? (
+        <p className="ds-collapsibleCardCollapsedSummary">{collapsedSummary}</p>
+      ) : null}
       {helperText && !collapsed ? <p className="ds-collapsibleCardHelper">{helperText}</p> : null}
       {!collapsed ? <div className="ds-collapsibleCardBody">{children}</div> : null}
     </section>

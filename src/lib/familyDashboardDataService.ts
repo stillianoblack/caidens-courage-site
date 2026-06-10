@@ -36,6 +36,28 @@ export const ADULT_GROWTH_ASSESSMENT_TYPES = new Set([
   'adult_growth',
 ]);
 
+export async function fetchPilotProgramDisplayName(programCode: string): Promise<string | null> {
+  const code = programCode.trim();
+  if (!code || !isSupabaseConfigured() || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('pilot_programs')
+      .select('program_name, group_name')
+      .eq('program_code', code)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    const name =
+      (data as { program_name?: string; group_name?: string }).program_name?.trim() ||
+      (data as { program_name?: string; group_name?: string }).group_name?.trim();
+    return name || null;
+  } catch {
+    return null;
+  }
+}
+
 export type FamilyDashboardData = {
   programCode: string;
   studentParticipants: StudentParticipantRecord[];

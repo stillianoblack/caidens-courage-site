@@ -504,3 +504,54 @@ export function isStudentVisibleToFamily(
   if (!id || !allowedStudentIds.length) return false;
   return allowedStudentIds.includes(id);
 }
+
+/** Link a newly added family child to camp roster visibility when parent has claimed camp links. */
+export async function ensureFamilyChildLink(input: {
+  studentId: string;
+  familyProgramCode: string;
+}): Promise<{ linked: boolean; error?: string }> {
+  const studentId = input.studentId.trim();
+  const familyProgramCode = input.familyProgramCode.trim();
+  if (!studentId || !familyProgramCode) {
+    return { linked: false, error: 'Missing student or program code.' };
+  }
+
+  const { links, error: fetchError } = await fetchStudentFamilyLinksByFamilyProgram(familyProgramCode);
+  if (fetchError) {
+    return { linked: false, error: fetchError };
+  }
+
+  if (links.some((link) => link.student_id === studentId)) {
+    return { linked: true };
+  }
+
+  const template = links.find((link) => link.camp_program_code?.trim()) ?? links[0];
+  const campProgramCode = template?.camp_program_code?.trim() || familyProgramCode;
+  const parentClaim = readParentClaimContext();
+
+  const result = await createStudentFamilyLink({
+    studentId,
+    campProgramCode,
+    familyProgramCode,
+    parentEmail: parentClaim?.email || template?.parent_email || undefined,
+    parentLastName: parentClaim?.lastName || template?.parent_last_name || undefined,
+    parentFirstName: template?.parent_first_name || undefined,
+    relationship: 'parent',
+  });
+
+  if (!result.success || !result.link) {
+    return { linked: false, error: result.error };
+  }
+
+  if (hasConfirmedParentClaim(parentClaim)) {
+    await markStudentFamilyLinksClaimed({
+      linkIds: [result.link.id],
+      familyProgramCode,
+      parentEmail: parentClaim?.email || template?.parent_email || '',
+      parentPhone: parentClaim?.phone,
+      parentLastName: parentClaim?.lastName || template?.parent_last_name || undefined,
+    });
+  }
+
+  return { linked: true };
+}

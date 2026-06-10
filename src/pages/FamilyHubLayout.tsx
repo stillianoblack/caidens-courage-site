@@ -21,6 +21,7 @@ import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
+import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
@@ -37,6 +38,8 @@ export default function FamilyHubLayout() {
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
+
+  const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
 
   const {
     open: goalsOpen,
@@ -112,6 +115,8 @@ export default function FamilyHubLayout() {
           contextTitle={brand.title}
           contextSubtitle="Family Portal"
           onOpenProgramGoals={openGoalsDrawer}
+          linkedCampLabel={linkedCampLabel}
+          notifications={notifications}
         />
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}

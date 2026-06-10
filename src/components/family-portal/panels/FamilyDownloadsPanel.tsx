@@ -1,15 +1,55 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FAMILY_HUB_PATH } from '../../../config/courageRoutes';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import {
-  PORTAL_COLORING_PAGES,
-  PORTAL_PRINTABLE_ACTIVITIES,
-} from '../../../data/portalDownloadAssets';
+  FAMILY_PARENT_RESOURCE_CATEGORIES,
+  type FamilyParentResourceCategoryId,
+} from '../../../data/familyPortalContent';
+import {
+  PILOT_ACTIVITY_ASSETS,
+  PILOT_FOCUS_FLAME_LAB_CARD,
+} from '../../../data/pilotDashboardContent';
+import { familyPortalPath } from '../../../lib/familyPortalPaths';
 import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
+import FamilyLinkedCampBadge from '../FamilyLinkedCampBadge';
+import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
+
+const DEFAULT_CATEGORY: FamilyParentResourceCategoryId = 'try-at-home';
+
+function resolveResourceTab(value: string | null): FamilyParentResourceCategoryId {
+  const match = FAMILY_PARENT_RESOURCE_CATEGORIES.find((cat) => cat.id === value);
+  return match?.id ?? DEFAULT_CATEGORY;
+}
 
 export default function FamilyDownloadsPanel() {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [category, setCategory] = useState<FamilyParentResourceCategoryId>(
+    resolveResourceTab(tabParam),
+  );
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const { linkedCampLabel } = useFamilyPortalShell();
+
+  useEffect(() => {
+    if (tabParam) {
+      setCategory(resolveResourceTab(tabParam));
+    }
+  }, [tabParam]);
+
+  const selectCategory = useCallback(
+    (next: FamilyParentResourceCategoryId) => {
+      setCategory(next);
+      const nextParams = new URLSearchParams(searchParams);
+      if (next === DEFAULT_CATEGORY) {
+        nextParams.delete('tab');
+      } else {
+        nextParams.set('tab', next);
+      }
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   const handleDownloadAll = async () => {
     if (downloadingAll) return;
@@ -22,116 +62,107 @@ export default function FamilyDownloadsPanel() {
     }
   };
 
+  const activeCategory = FAMILY_PARENT_RESOURCE_CATEGORIES.find((cat) => cat.id === category);
+  const activityCategory = activeCategory?.activityCategory ?? 'weekly-activities';
+  const assets =
+    activityCategory === 'focus-flame-lab'
+      ? []
+      : PILOT_ACTIVITY_ASSETS[activityCategory as keyof typeof PILOT_ACTIVITY_ASSETS] ?? [];
+
   return (
     <div className="family-panel family-panel--downloads">
-      <section className="family-downloadSection">
-        <div className="family-downloadSectionHead">
-          <h2 className="family-panelBlockTitle">Coloring Pages</h2>
-          <button
-            type="button"
-            className="family-downloadAllBtn"
-            onClick={handleDownloadAll}
-            disabled={downloadingAll}
-          >
-            {downloadingAll ? 'Preparing…' : 'Download All Coloring Pages'}
-          </button>
-        </div>
-        <p className="family-downloadSectionDesc">
-          Print and color brave characters and story scenes.
-        </p>
-        <ul className="family-downloadList">
-          {PORTAL_COLORING_PAGES.map((page) => (
-            <li key={page.id} className="family-downloadRow">
-              <div className="family-downloadRowInfo">
-                <p className="family-downloadRowTitle">{page.title}</p>
-                <span
-                  className={`family-dash-pill family-dash-pill--${page.status === 'available' ? 'available' : 'locked'}`}
-                >
-                  {page.status === 'available' ? 'Available' : 'Coming Soon'}
-                </span>
-              </div>
-              {page.status === 'available' ? (
-                <a
-                  href={page.href}
-                  className="family-downloadBtn"
-                  download
-                  onClick={() =>
-                    trackDownload('coloring_page_downloaded', page.title, 'coloring')
-                  }
-                >
-                  Download
-                </a>
-              ) : (
-                <span className="family-downloadBtn family-downloadBtn--disabled">Coming Soon</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {linkedCampLabel ? (
+        <FamilyLinkedCampBadge label={linkedCampLabel} className="family-panelCampBadge" />
+      ) : null}
 
-      <section className="family-downloadSection">
-        <h2 className="family-panelBlockTitle">Printable Activities</h2>
-        <p className="family-downloadSectionDesc">
-          Hands-on worksheets and creative activities for families.
-        </p>
-        <ul className="family-downloadList">
-          {PORTAL_PRINTABLE_ACTIVITIES.map((activity) => (
-            <li key={activity.id} className="family-downloadRow">
-              <div className="family-downloadRowInfo">
-                <p className="family-downloadRowTitle">{activity.title}</p>
-                <span
-                  className={`family-dash-pill family-dash-pill--${activity.status === 'available' ? 'available' : 'locked'}`}
-                >
-                  {activity.status === 'available' ? 'Available' : 'Coming Soon'}
-                </span>
-              </div>
-              {activity.status === 'available' ? (
-                <a
-                  href={activity.href}
-                  className="family-downloadBtn"
-                  download
-                  onClick={() => {
-                    const eventName = activity.title.toLowerCase().includes('worksheet')
-                      ? 'worksheet_downloaded'
-                      : 'activity_downloaded';
-                    trackDownload(eventName, activity.title, 'activity');
-                  }}
-                >
-                  Download
-                </a>
-              ) : (
-                <span className="family-downloadBtn family-downloadBtn--disabled">Coming Soon</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <p className="family-panelIntro">
+        Parent Resource Library — activities and tools you can try at home with your child.
+      </p>
 
-      <section className="family-downloadSection">
-        <h2 className="family-panelBlockTitle">More Resources</h2>
-        <div className="family-dash-grid family-dash-grid--2">
-          <Link to={`${FAMILY_HUB_PATH}/guide`} className="family-dash-card">
-            <h3 className="family-dash-cardTitle">Parent Corner</h3>
-            <p className="family-dash-cardDesc">
-              Discussion prompts and activity instructions for home learning.
-            </p>
-            <div className="family-dash-cardFoot">
-              <span />
-              <span className="family-dash-cta">Open Guide</span>
-            </div>
-          </Link>
-          <Link to={`${FAMILY_HUB_PATH}/certificates`} className="family-dash-card">
-            <h3 className="family-dash-cardTitle">Certificates</h3>
-            <p className="family-dash-cardDesc">
-              Celebrate progress with printable courage certificates.
-            </p>
-            <div className="family-dash-cardFoot">
-              <span />
-              <span className="family-dash-cta">View Certificates</span>
-            </div>
-          </Link>
+      <div className="family-resourceLayout">
+        <div className="family-resourceCategories" role="tablist" aria-label="Parent resources">
+          {FAMILY_PARENT_RESOURCE_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={category === cat.id}
+              className={`family-resourceCatBtn${category === cat.id ? ' family-resourceCatBtn--active' : ''}`}
+              onClick={() => selectCategory(cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
-      </section>
+
+        <div className="family-resourceAssets">
+          {category === 'try-at-home' ? (
+            <>
+              <div className="family-resourceHeroCard">
+                <h2 className="family-panelBlockTitle">Weekly Adventures</h2>
+                <p className="family-panelHelper">
+                  Start with guided story activities and missions designed for families.
+                </p>
+                <Link
+                  to={familyPortalPath('continue-learning', location.pathname)}
+                  className="family-nextCta"
+                >
+                  Open Weekly Adventures
+                </Link>
+              </div>
+              <div className="family-resourceHeroCard">
+                <h2 className="family-panelBlockTitle">Focus Flame Lab</h2>
+                <p className="family-panelHelper">{PILOT_FOCUS_FLAME_LAB_CARD.description}</p>
+                <a href={PILOT_FOCUS_FLAME_LAB_CARD.href} className="family-nextCta family-nextCta--ghost">
+                  {PILOT_FOCUS_FLAME_LAB_CARD.cta}
+                </a>
+              </div>
+            </>
+          ) : null}
+
+          {category === 'coloring-pages' ? (
+            <div className="family-downloadSectionHead">
+              <button
+                type="button"
+                className="family-downloadAllBtn"
+                onClick={handleDownloadAll}
+                disabled={downloadingAll}
+              >
+                {downloadingAll ? 'Preparing…' : 'Download All Coloring Pages'}
+              </button>
+            </div>
+          ) : null}
+
+          {category !== 'try-at-home' ? (
+            <ul className="family-downloadList">
+              {assets.map((asset) => (
+                <li key={asset.id} className="family-downloadRow">
+                  <div className="family-downloadRowInfo">
+                    <p className="family-downloadRowTitle">{asset.title}</p>
+                    <span
+                      className={`family-dash-pill family-dash-pill--${asset.status === 'available' ? 'available' : 'locked'}`}
+                    >
+                      {asset.status === 'available' ? 'Available' : 'Coming Soon'}
+                    </span>
+                  </div>
+                  {asset.status === 'available' ? (
+                    <a
+                      href={asset.href}
+                      className="family-downloadBtn"
+                      download
+                      onClick={() => trackDownload('activity_downloaded', asset.title, category)}
+                    >
+                      Download
+                    </a>
+                  ) : (
+                    <span className="family-downloadBtn family-downloadBtn--disabled">Coming Soon</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

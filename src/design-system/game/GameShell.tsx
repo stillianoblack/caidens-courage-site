@@ -5,6 +5,13 @@ import './game-learning.css';
 
 export type GameShellPortalType = 'facilitator' | 'family' | 'kid';
 
+/**
+ * Focus Flame GameShell — standard wrapper for ALL question-based interactive modules.
+ * Kid games, facilitator training, family activities, baseline checks, and adult
+ * assessments should use this pattern (directly or via GameAssessmentFlow).
+ *
+ * @see interactiveModuleRegistry.ts for component naming and module examples
+ */
 export type GameShellProps = {
   portalType: GameShellPortalType;
   gameTitle: string;

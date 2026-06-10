@@ -1,4 +1,9 @@
 import type { GameChoiceOption } from '../types/gameAssessment';
+import { getB4LockInTip } from '../design-system/game/getB4LockInTip';
+import { CAIDEN_QUEST_1_CONFIG } from './caiden/quest1WhatComesFirst';
+
+const QUEST_Q1 = CAIDEN_QUEST_1_CONFIG.questions[0];
+const QUEST_Q2 = CAIDEN_QUEST_1_CONFIG.questions[1];
 
 export const DEMO_GAME_QUESTION = {
   sceneLabel: 'Mission Card',
@@ -15,13 +20,80 @@ export const DEMO_GAME_OPTIONS: GameChoiceOption[] = [
   { id: 'wait', label: 'Wait until later' },
 ];
 
-export const DEMO_LOCK_IN_TIP = {
-  message: 'Great choice. Caiden focused on what needed to happen first.',
-  tips: [
-    'Say the first step out loud before starting.',
-    'Clear one small area so packing feels easier.',
-    'Set a short timer for the prep burst.',
-  ],
+export const DEMO_LOCK_IN_TIP = getB4LockInTip({
+  portalType: 'kid',
+  gameId: 'quest-1',
+  moduleId: 'quest-1',
+  questionId: QUEST_Q1.id,
+  selectedAnswer: 'pack',
+  isCorrect: true,
+  skillArea: 'focus',
+  characterId: 'caiden',
+  learningGoal: QUEST_Q1.clueCard?.tag,
+  question: QUEST_Q1,
+});
+
+export const DEMO_B4_FEEDBACK_EXAMPLES = {
+  correctKid: DEMO_LOCK_IN_TIP,
+  incorrectKid: getB4LockInTip({
+    portalType: 'kid',
+    gameId: 'quest-1',
+    questionId: QUEST_Q2.id,
+    selectedAnswer: 'whole',
+    isCorrect: false,
+    skillArea: 'focus',
+    characterId: 'caiden',
+    learningGoal: QUEST_Q2.clueCard?.tag,
+    question: QUEST_Q2,
+  }),
+  correctFamily: getB4LockInTip({
+    portalType: 'family',
+    gameId: 'quest-1',
+    questionId: QUEST_Q2.id,
+    selectedAnswer: 'clothes',
+    isCorrect: true,
+    skillArea: 'focus',
+    characterId: 'caiden',
+    question: QUEST_Q2,
+  }),
+  incorrectFamily: getB4LockInTip({
+    portalType: 'family',
+    gameId: 'quest-1',
+    questionId: QUEST_Q2.id,
+    selectedAnswer: 'whole',
+    isCorrect: false,
+    skillArea: 'focus',
+    characterId: 'caiden',
+    question: QUEST_Q2,
+  }),
+  facilitatorFocus: getB4LockInTip({
+    portalType: 'facilitator',
+    gameId: 'quest-1',
+    questionId: QUEST_Q1.id,
+    selectedAnswer: 'pack',
+    isCorrect: true,
+    skillArea: 'focus',
+    characterId: 'caiden',
+    question: QUEST_Q1,
+  }),
+  emotionalRegulation: getB4LockInTip({
+    portalType: 'kid',
+    gameId: 'feeling-finder',
+    questionId: 'demo-feelings',
+    selectedAnswer: 'breathe',
+    isCorrect: true,
+    skillArea: 'emotional_regulation',
+    characterId: 'b4',
+  }),
+  readingConfidence: getB4LockInTip({
+    portalType: 'kid',
+    gameId: 'the-missing-clue',
+    questionId: 'demo-reading',
+    selectedAnswer: 'clue',
+    isCorrect: false,
+    skillArea: 'reading_confidence',
+    characterId: 'miranda',
+  }),
 };
 
 export const DEMO_FAMILY_LOCK_IN = {

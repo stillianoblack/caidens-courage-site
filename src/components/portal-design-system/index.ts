@@ -19,3 +19,5 @@ export type { BaselineBarRow, BaselineBarTone } from './BaselineOverviewBars';
 export { default as StatusChip } from './StatusChip';
 export type { StatusChipVariant } from './StatusChip';
 export { default as EmptyState } from './EmptyState';
+export { default as RecentActivityFeed } from './RecentActivityFeed';
+export type { RecentActivityItem, RecentActivityKind } from './RecentActivityFeed';

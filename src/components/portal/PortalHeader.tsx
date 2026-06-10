@@ -1,6 +1,9 @@
 import React from 'react';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
+import FamilyLinkedCampBadge from '../family-portal/FamilyLinkedCampBadge';
+import FamilyNotificationBell from '../family-portal/FamilyNotificationBell';
+import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifications';
 import '../portal-design-system/portal-design-system.css';
 import './portal-header.css';
 
@@ -10,6 +13,8 @@ type PortalHeaderProps = {
   contextSubtitle?: string;
   portal: 'family' | 'facilitator';
   onOpenProgramGoals?: () => void;
+  linkedCampLabel?: string | null;
+  notifications?: FamilyPortalNotification[];
 };
 
 export default function PortalHeader({
@@ -18,11 +23,18 @@ export default function PortalHeader({
   contextSubtitle,
   portal,
   onOpenProgramGoals,
+  linkedCampLabel = null,
+  notifications = [],
 }: PortalHeaderProps) {
   return (
     <header className="portal-header">
       <div className="portal-headerLead">
-        <h1 className="portal-headerTitle">{pageTitle}</h1>
+        <div className="portal-headerLeadText">
+          <h1 className="portal-headerTitle">{pageTitle}</h1>
+          {portal === 'family' && linkedCampLabel ? (
+            <FamilyLinkedCampBadge label={linkedCampLabel} className="portal-headerCampBadge" />
+          ) : null}
+        </div>
         {contextTitle || contextSubtitle ? (
           <div className="portal-headerContext">
             {contextTitle ? <p className="portal-headerContextTitle">{contextTitle}</p> : null}
@@ -33,6 +45,7 @@ export default function PortalHeader({
         ) : null}
       </div>
       <div className="portal-headerTools">
+        {portal === 'family' ? <FamilyNotificationBell items={notifications} /> : null}
         {onOpenProgramGoals ? (
           <button
             type="button"

@@ -13,6 +13,15 @@ export type ProgramGoalsRecord = {
 
 const REMIND_LATER_DAYS = 3;
 
+export const PROGRAM_GOALS_SAVED_EVENT = 'caidens:program-goals-saved';
+
+function notifyProgramGoalsSaved(record: ProgramGoalsRecord): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent(PROGRAM_GOALS_SAVED_EVENT, { detail: record }),
+  );
+}
+
 function storageKey(programCode: string, portalType: ProgramGoalsPortalType, suffix: string): string {
   return `${portalType}_program_goals_${suffix}_${programCode.trim()}`;
 }
@@ -108,45 +117,47 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
 
   writeProgramGoalsLocal(record);
 
-  if (!record.program_code.trim() || !isSupabaseConfigured() || !supabase) {
-    return record;
-  }
+  let saved = record;
 
-  try {
-    const row = {
-      program_code: record.program_code.trim(),
-      portal_type: record.portal_type,
-      selected_goals: record.selected_goals,
-      custom_goal: record.custom_goal?.trim() || null,
-      completed_at: record.completed_at ?? null,
-      dismissed_until: record.dismissed_until ?? null,
-      updated_at: now,
-    };
-
-    const { data, error } = await supabase
-      .from('program_goals')
-      .upsert(row, { onConflict: 'program_code,portal_type' })
-      .select('*')
-      .maybeSingle();
-
-    if (error && !/program_goals|relation/i.test(error.message)) {
-      console.warn('[program_goals] save failed:', error.message);
-    } else if (data) {
-      return {
-        id: data.id,
-        program_code: data.program_code,
-        portal_type: data.portal_type,
-        selected_goals: data.selected_goals ?? [],
-        custom_goal: data.custom_goal,
-        completed_at: data.completed_at,
-        dismissed_until: data.dismissed_until,
+  if (record.program_code.trim() && isSupabaseConfigured() && supabase) {
+    try {
+      const row = {
+        program_code: record.program_code.trim(),
+        portal_type: record.portal_type,
+        selected_goals: record.selected_goals,
+        custom_goal: record.custom_goal?.trim() || null,
+        completed_at: record.completed_at ?? null,
+        dismissed_until: record.dismissed_until ?? null,
+        updated_at: now,
       };
+
+      const { data, error } = await supabase
+        .from('program_goals')
+        .upsert(row, { onConflict: 'program_code,portal_type' })
+        .select('*')
+        .maybeSingle();
+
+      if (error && !/program_goals|relation/i.test(error.message)) {
+        console.warn('[program_goals] save failed:', error.message);
+      } else if (data) {
+        saved = {
+          id: data.id,
+          program_code: data.program_code,
+          portal_type: data.portal_type,
+          selected_goals: data.selected_goals ?? [],
+          custom_goal: data.custom_goal,
+          completed_at: data.completed_at,
+          dismissed_until: data.dismissed_until,
+        };
+        writeProgramGoalsLocal(saved);
+      }
+    } catch (err) {
+      console.warn('[program_goals] save error:', err);
     }
-  } catch (err) {
-    console.warn('[program_goals] save error:', err);
   }
 
-  return record;
+  notifyProgramGoalsSaved(saved);
+  return saved;
 }
 
 export function shouldShowGoalsOnboarding(record: ProgramGoalsRecord | null, skipped: boolean): boolean {

@@ -102,6 +102,7 @@ export default function GameQuestionRenderer({
             <button
               key={label}
               type="button"
+              data-answer-id={value ? 'true' : 'false'}
               disabled={checked}
               className={[
                 'bbc-answerCard',

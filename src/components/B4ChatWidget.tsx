@@ -161,8 +161,12 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  const pendingPromptRef = useRef<string | null>(null);
+
   useEffect(() => {
-    const handleOpen = () => {
+    const handleOpen = (event: Event) => {
+      const prompt = (event as CustomEvent<{ prompt?: string }>).detail?.prompt?.trim();
+      pendingPromptRef.current = prompt || null;
       trackEvent('ask_b4_opened');
       setIsOpen(true);
     };
@@ -209,6 +213,14 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     ]);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (!isOpen || !pendingPromptRef.current) return;
+    const prompt = pendingPromptRef.current;
+    pendingPromptRef.current = null;
+    void sendMessage(prompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fire queued prompt once when panel opens
+  }, [isOpen]);
 
   const handleStarterClick = (starter: AskB4StarterPrompt) => {
     if (starter.href) {

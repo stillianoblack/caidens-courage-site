@@ -5,6 +5,7 @@ import {
   findOrCreateParticipant,
   resolveStudentGroupNameForSave,
 } from './pilotTrackingService';
+import { ensureFamilyChildLink } from './studentFamilyLinkService';
 
 export type CreateFamilyChildInput = {
   firstName: string;
@@ -53,6 +54,11 @@ export async function createFamilyChildParticipant(
       participantId,
       displayName,
       firstName,
+    });
+
+    await ensureFamilyChildLink({
+      studentId: participantId,
+      familyProgramCode: programCode,
     });
 
     console.info('[CHILD_PROFILE]', {

@@ -4,6 +4,8 @@ import type { PilotNeedsAttentionCounts } from '../lib/pilotStudentProgress';
 import type { StudentGalleryItem } from '../lib/studentGalleryService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../lib/pilotTrackingLocalStorage';
 import type { StudentParticipantRecord } from '../lib/pilotTrackingService';
+import type { FamilyChildSummary } from '../lib/familyChildrenMetrics';
+import type { FamilyRecentActivityItem } from '../lib/familyProgressMetrics';
 import type { StudentFamilyLink } from '../lib/studentFamilyLinkService';
 
 export const DEMO_PROGRAM_CODE = 'DEMO-PROGRAM';
@@ -139,6 +141,53 @@ export const DEMO_MODULES: LocalModuleResultRecord[] = [
     percent_score: 88,
     attempt_number: 1,
     completed_at: '2026-06-05T16:00:00.000Z',
+  },
+];
+
+export const DEMO_FAMILY_CHILD_SUMMARY: FamilyChildSummary = {
+  key: 'demo-student-001',
+  participantId: 'demo-student-001',
+  displayName: 'Alex Rivera',
+  nickname: 'Al',
+  baselineStatus: 'Complete',
+  latestActivity: 'Jun 8, 2026',
+  progressPct: 68,
+  completedCount: 4,
+  totalCount: 6,
+  progressLabel: '4 of 6 modules',
+  createdAt: '2026-05-01T12:00:00.000Z',
+};
+
+export const DEMO_FAMILY_RECENT_ACTIVITY: FamilyRecentActivityItem[] = [
+  {
+    id: 'demo-activity-001',
+    label: 'Alex completed B-4 Check-In',
+    kind: 'baseline',
+    timestamp: '2026-06-08T10:00:00.000Z',
+  },
+  {
+    id: 'demo-activity-002',
+    label: 'Certificate earned — Week 1 Focus Moves',
+    kind: 'certificate',
+    timestamp: '2026-06-07T16:00:00.000Z',
+  },
+  {
+    id: 'demo-activity-003',
+    label: 'Gallery submission uploaded — Focus Flame coloring page',
+    kind: 'gallery',
+    timestamp: '2026-06-07T10:00:00.000Z',
+  },
+  {
+    id: 'demo-activity-004',
+    label: 'Family goals saved (3 selected)',
+    kind: 'goals',
+    timestamp: '2026-06-06T09:00:00.000Z',
+  },
+  {
+    id: 'demo-activity-005',
+    label: 'Alex linked to your family',
+    kind: 'linked',
+    timestamp: '2026-06-05T12:00:00.000Z',
   },
 ];
 

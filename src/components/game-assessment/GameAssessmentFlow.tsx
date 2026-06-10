@@ -27,6 +27,8 @@ import UncleTGameHeader from '../adult/UncleTGameHeader';
 import AdultMissionIntroGuide from '../adult-learning/AdultMissionIntroGuide';
 import '../adult-learning/adult-mission-intro.css';
 import type { AdultGuideThemeId } from '../../types/adultTraining';
+import GameCoachingRailPlaceholder from '../../design-system/game/GameCoachingRailPlaceholder';
+import { resolveB4PortalType } from '../../design-system/game/getB4LockInTip';
 import SharedMissionGameLayout from '../mission-game/SharedMissionGameLayout';
 import { getMissionIntroHint } from '../mission-game/missionIntroHints';
 import type { MissionGameTheme } from '../mission-game/MissionSpeechRow';
@@ -467,6 +469,44 @@ export default function GameAssessmentFlow({
   const isNotebookPresentation = presentationStyle === 'detective_notebook';
   const isTrailPresentation = presentationStyle === 'trail_notebook';
 
+  const trackingMeta = useMemo(
+    () =>
+      tracking ??
+      resolveModuleTracking(config, {
+        guideId: adultGuideId,
+        missionId: adultMissionId,
+        pathname: currentPathname,
+      }),
+    [tracking, config, adultGuideId, adultMissionId, currentPathname],
+  );
+
+  const b4PortalType = useMemo(
+    () => resolveB4PortalType(currentPathname, readActivePortalRole()),
+    [currentPathname],
+  );
+
+  const usesCoachingShell = useMemo(
+    () =>
+      useCaidenHeader ||
+      useMirandaHeader ||
+      useCharlieHeader ||
+      useB4Header ||
+      useVictoriaHeader ||
+      useUncleTHeader ||
+      themeClassName.includes('b4') ||
+      config.decorVariant === 'b4',
+    [
+      config.decorVariant,
+      themeClassName,
+      useB4Header,
+      useCaidenHeader,
+      useCharlieHeader,
+      useMirandaHeader,
+      useUncleTHeader,
+      useVictoriaHeader,
+    ],
+  );
+
   const quizWrapModifier = useMemo(() => {
     switch (presentationStyle) {
       case 'detective_notebook':
@@ -507,10 +547,12 @@ export default function GameAssessmentFlow({
     embeddedShellClass,
     adultGuideEmbeddedClass,
     embedded ? 'portal-gameFrame' : '',
+    usesCoachingShell ? 'bbc-app--coachingShell' : '',
     view === 'quiz' ? 'bbc-app--game-active' : '',
   ]
     .filter(Boolean)
     .join(' ');
+  const interactionShellClass = usesCoachingShell ? 'shared-mission-game--coachingRail' : '';
   const HeaderComponent = useVictoriaHeader
     ? VictoriaGameHeader
     : useUncleTHeader
@@ -559,7 +601,7 @@ export default function GameAssessmentFlow({
           .filter(Boolean)
           .join(' ')}
       >
-        <GameInteractionShell>
+        <GameInteractionShell className={interactionShellClass}>
           {showHubBackLink ? (
             <PortalBackButton
               to={exitPath}
@@ -571,43 +613,55 @@ export default function GameAssessmentFlow({
           ) : null}
 
         {view === 'landing' ? (
-          <div
-            className={`bbc-landing game-landing${
-              isNotebookPresentation
-                ? ' game-landing--notebook'
-                : isTrailPresentation
-                  ? ' game-landing--trailNotebook'
-                  : ''
-            }`}
-          >
-            <p className="bbc-eyebrow">{config.landing.eyebrow}</p>
-            <h1 className="bbc-title">{config.landing.title}</h1>
-            <p className="bbc-subtitle">{config.landing.subtitle}</p>
-            <p className="bbc-body">{config.landing.body}</p>
-            {introAvatarSrc ? (
-              useAdultGuideHeader && guideHubTheme ? (
-                <AdultMissionIntroGuide
-                  avatarSrc={introAvatarSrc}
-                  avatarAlt={config.avatarAlt}
-                  message={introHint}
-                  theme={guideHubTheme}
+          <div className={usesCoachingShell ? 'game-focusFlameLanding' : ''}>
+            <div className={usesCoachingShell ? 'game-focusFlameLandingMain' : ''}>
+              <div
+                className={`bbc-landing game-landing${
+                  isNotebookPresentation
+                    ? ' game-landing--notebook'
+                    : isTrailPresentation
+                      ? ' game-landing--trailNotebook'
+                      : ''
+                }${usesCoachingShell ? ' game-landing--focusFlameShell' : ''}`}
+              >
+                <p className="bbc-eyebrow">{config.landing.eyebrow}</p>
+                <h1 className="bbc-title">{config.landing.title}</h1>
+                <p className="bbc-subtitle">{config.landing.subtitle}</p>
+                <p className="bbc-body">{config.landing.body}</p>
+                {introAvatarSrc ? (
+                  useAdultGuideHeader && guideHubTheme ? (
+                    <AdultMissionIntroGuide
+                      avatarSrc={introAvatarSrc}
+                      avatarAlt={config.avatarAlt}
+                      message={introHint}
+                      theme={guideHubTheme}
+                    />
+                  ) : (
+                    <CharacterSpeechBubble
+                      avatarSrc={introAvatarSrc}
+                      avatarAlt={config.avatarAlt}
+                      theme={missionTheme}
+                      message={introHint}
+                      size="large"
+                      className={`mission-landingPrompt${
+                        useCaidenHeader ? ' caiden-quizPrompt' : ''
+                      }`}
+                    />
+                  )
+                ) : null}
+                <button type="button" className="bbc-primaryBtn game-startBtn" onClick={handleStart}>
+                  {config.landing.cta}
+                </button>
+              </div>
+            </div>
+            {usesCoachingShell ? (
+              <aside className="game-focusFlameLandingAside">
+                <GameCoachingRailPlaceholder
+                  variant={useAdultGuideHeader ? 'facilitator' : 'b4'}
+                  phase="landing"
                 />
-              ) : (
-                <CharacterSpeechBubble
-                  avatarSrc={introAvatarSrc}
-                  avatarAlt={config.avatarAlt}
-                  theme={missionTheme}
-                  message={introHint}
-                  size="large"
-                  className={`mission-landingPrompt${
-                    useCaidenHeader ? ' caiden-quizPrompt' : ''
-                  }`}
-                />
-              )
+              </aside>
             ) : null}
-            <button type="button" className="bbc-primaryBtn game-startBtn" onClick={handleStart}>
-              {config.landing.cta}
-            </button>
           </div>
         ) : null}
 
@@ -626,7 +680,15 @@ export default function GameAssessmentFlow({
             feedback={feedback}
             feedbackTone={feedbackTone}
             quizWrapModifier={quizWrapModifier}
-            useLockInFeedback={useCaidenHeader || useB4Header}
+            useCoachingRail={usesCoachingShell}
+            useLockInFeedback={
+              usesCoachingShell && !useAdultGuideHeader
+            }
+            useAdultLearningRhythm={useAdultGuideHeader}
+            coachingRailVariant={useVictoriaHeader || useUncleTHeader ? 'facilitator' : 'b4'}
+            gameId={config.id}
+            b4PortalType={b4PortalType}
+            tracking={trackingMeta}
             useVictoriaHeader={useVictoriaHeader}
             useUncleTHeader={useUncleTHeader}
             useCaidenHeader={useCaidenHeader}
@@ -720,8 +782,10 @@ export default function GameAssessmentFlow({
         <B4BaselineBottomBar
           canCheck={canCheck}
           checked={checked}
-          feedback={null}
+          feedback={feedback}
           feedbackTone={feedbackTone}
+          hideInlineFeedback={usesCoachingShell}
+          coachingShell={usesCoachingShell}
           onSkip={handleSkip}
           onCheck={handleCheck}
           onContinue={handleContinue}

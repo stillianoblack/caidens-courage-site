@@ -6,9 +6,16 @@ import { CollapsibleCard, CopyableCompactValue } from '../portal-design-system';
 type FamilyAccessCodeCardProps = {
   compact?: boolean;
   className?: string;
+  campProgramCode?: string | null;
+  studentAccessCode?: string | null;
 };
 
-export default function FamilyAccessCodeCard({ compact = false, className = '' }: FamilyAccessCodeCardProps) {
+export default function FamilyAccessCodeCard({
+  compact = false,
+  className = '',
+  campProgramCode = null,
+  studentAccessCode = null,
+}: FamilyAccessCodeCardProps) {
   const role = readActivePortalRole();
   const program = readActivePilotProgram();
   const familyCode = program?.familyAccessCode;
@@ -28,12 +35,16 @@ export default function FamilyAccessCodeCard({ compact = false, className = '' }
     );
   }
 
+  const linkedCampCode = campProgramCode?.trim() || null;
+  const childCode = studentAccessCode?.trim() || linkedCampCode;
+
   return (
     <CollapsibleCard
-      title="Family Access Codes"
+      title="Family Access"
       storageKey={storageKey}
-      defaultCollapsed={false}
-      helperText="Share this code with a parent, guardian, tutor, or family member helping your child."
+      defaultCollapsed
+      collapsedSummary="Codes available when needed."
+      helperText="Use these codes when enrolling or linking your child to a camp program."
       className={`family-accessCodeCollapsible${className ? ` ${className}` : ''}`}
     >
       <div className="family-accessCodeRows">
@@ -41,15 +52,22 @@ export default function FamilyAccessCodeCard({ compact = false, className = '' }
           <span className="family-accessCodeRowLabel">Family Access Code</span>
           <CopyableCompactValue value={familyCode} type="code" label="Family Code" truncateMiddle />
         </div>
-        {programCode ? (
+        {linkedCampCode ? (
           <div className="family-accessCodeRowItem">
-            <span className="family-accessCodeRowLabel">Program Code</span>
-            <CopyableCompactValue value={programCode} type="code" label="Program Code" truncateMiddle />
+            <span className="family-accessCodeRowLabel">Linked Camp Code</span>
+            <CopyableCompactValue value={linkedCampCode} type="code" label="Camp Code" truncateMiddle />
           </div>
         ) : null}
-        <p className="family-accessCodeChildNote">
-          Child access info appears after your child completes a B-4 Check-In or linked camp enrollment.
-        </p>
+        {childCode ? (
+          <div className="family-accessCodeRowItem">
+            <span className="family-accessCodeRowLabel">Child / Student Access Code</span>
+            <CopyableCompactValue value={childCode} type="code" label="Student Code" truncateMiddle />
+          </div>
+        ) : (
+          <p className="family-accessCodeChildNote">
+            Child access code appears after your child is linked to a camp program.
+          </p>
+        )}
       </div>
     </CollapsibleCard>
   );

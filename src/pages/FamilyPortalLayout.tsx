@@ -19,6 +19,7 @@ import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
+import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
@@ -31,6 +32,8 @@ export default function FamilyPortalLayout() {
   const pageTitle = resolvePortalPageTitle(location.pathname);
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode ?? '';
+
+  const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
 
   const {
     open: goalsOpen,
@@ -99,6 +102,8 @@ export default function FamilyPortalLayout() {
           contextTitle={brand.title}
           contextSubtitle="Family Portal"
           onOpenProgramGoals={openGoalsDrawer}
+          linkedCampLabel={linkedCampLabel}
+          notifications={notifications}
         />
       }
       footer={

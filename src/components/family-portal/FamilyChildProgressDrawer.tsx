@@ -1,8 +1,14 @@
 import React, { useMemo } from 'react';
-import { SlideOutDrawer } from '../portal-design-system';
+import {
+  BaselineOverviewBars,
+  CopyableCompactValue,
+  SlideOutDrawer,
+} from '../portal-design-system';
 import StatusChip from '../portal-design-system/StatusChip';
+import type { BaselineBarRow } from '../portal-design-system/BaselineOverviewBars';
 import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
 import type { ProgramGoalsRecord } from '../../lib/programGoalsService';
+import type { StudentFamilyLink } from '../../lib/studentFamilyLinkService';
 
 type FamilyChildProgressDrawerProps = {
   open: boolean;
@@ -11,6 +17,12 @@ type FamilyChildProgressDrawerProps = {
   goalsRecord?: ProgramGoalsRecord | null;
   gallerySubmissionCount?: number;
   certificateCount?: number;
+  campProgramCode?: string | null;
+  campProgramName?: string | null;
+  baselineScorePct?: number | null;
+  baselineRows?: BaselineBarRow[];
+  familyLink?: StudentFamilyLink | null;
+  parentGuardianName?: string | null;
 };
 
 function baselineVariant(status: FamilyChildSummary['baselineStatus']) {
@@ -26,10 +38,24 @@ export default function FamilyChildProgressDrawer({
   goalsRecord,
   gallerySubmissionCount = 0,
   certificateCount = 0,
+  campProgramCode = null,
+  campProgramName = null,
+  baselineScorePct = null,
+  baselineRows = [],
+  familyLink = null,
+  parentGuardianName = null,
 }: FamilyChildProgressDrawerProps) {
   const goals = useMemo(() => goalsRecord?.selected_goals ?? [], [goalsRecord?.selected_goals]);
 
   if (!child) return null;
+
+  const guardianName =
+    parentGuardianName ||
+    [familyLink?.parent_first_name, familyLink?.parent_last_name].filter(Boolean).join(' ').trim() ||
+    null;
+  const guardianEmail = familyLink?.parent_email?.trim() || null;
+  const guardianPhone = familyLink?.parent_phone?.trim() || null;
+  const campLabel = campProgramName ?? campProgramCode;
 
   return (
     <SlideOutDrawer
@@ -43,7 +69,13 @@ export default function FamilyChildProgressDrawer({
             <h2 id="family-child-progress-title" className="pilot-drawerTitle">
               {child.displayName}
             </h2>
-            <p className="pilot-drawerSubtitle">Child progress and family goals</p>
+            <p className="pilot-drawerSubtitle">
+              {child.nickname && child.nickname !== child.displayName
+                ? `Nickname: ${child.nickname}`
+                : campLabel
+                  ? `Linked program: ${campLabel}`
+                  : 'Child progress and family goals'}
+            </p>
           </div>
           <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
             ×
@@ -60,7 +92,57 @@ export default function FamilyChildProgressDrawer({
             <span className="pilot-drawerBadge">{child.progressPct}% overall</span>
           </div>
 
+          {campLabel ? (
+            <p className="family-panelHelper">
+              Linked camp/program: <strong>{campLabel}</strong>
+              {campProgramCode && campProgramCode !== campLabel ? (
+                <span className="family-childDrawerCodeWrap">
+                  <CopyableCompactValue
+                    value={campProgramCode}
+                    type="code"
+                    label="Camp Code"
+                    truncateMiddle
+                  />
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+
+          {guardianName || guardianEmail || guardianPhone ? (
+            <section className="family-childDrawerSection">
+              <h3 className="family-panelBlockTitle">Parent / Guardian</h3>
+              <dl className="pilot-drawerGrid">
+                {guardianName ? (
+                  <div>
+                    <dt>Name</dt>
+                    <dd>{guardianName}</dd>
+                  </div>
+                ) : null}
+                {guardianEmail ? (
+                  <div>
+                    <dt>Email</dt>
+                    <dd>
+                      <CopyableCompactValue value={guardianEmail} type="email" label="Email" />
+                    </dd>
+                  </div>
+                ) : null}
+                {guardianPhone ? (
+                  <div>
+                    <dt>Phone</dt>
+                    <dd>
+                      <CopyableCompactValue value={guardianPhone} type="phone" label="Phone" />
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </section>
+          ) : null}
+
           <dl className="pilot-drawerGrid">
+            <div>
+              <dt>Baseline score</dt>
+              <dd>{baselineScorePct != null ? `${baselineScorePct}%` : '—'}</dd>
+            </div>
             <div>
               <dt>Modules completed</dt>
               <dd>
@@ -76,10 +158,17 @@ export default function FamilyChildProgressDrawer({
               <dd>{gallerySubmissionCount}</dd>
             </div>
             <div>
-              <dt>Certificates</dt>
+              <dt>Certificates earned</dt>
               <dd>{certificateCount}</dd>
             </div>
           </dl>
+
+          {baselineRows.length > 0 ? (
+            <section className="family-childDrawerSection">
+              <h3 className="family-panelBlockTitle">Baseline scores</h3>
+              <BaselineOverviewBars rows={baselineRows} />
+            </section>
+          ) : null}
 
           {goals.length > 0 ? (
             <section className="family-childDrawerGoals">
@@ -94,6 +183,10 @@ export default function FamilyChildProgressDrawer({
             <p className="family-panelHelper">No family goals saved yet.</p>
           )}
 
+          <p className="family-childDrawerExportNote">
+            Progress export (summary, modules, certificates, goals) — coming soon.
+          </p>
+
           {child.participantId ? (
             <details className="pilot-drawerDebug pilot-drawerDebug--inline">
               <summary>Debug IDs</summary>
@@ -102,6 +195,18 @@ export default function FamilyChildProgressDrawer({
                   <dt>participant_id</dt>
                   <dd>{child.participantId}</dd>
                 </div>
+                {familyLink?.id ? (
+                  <div>
+                    <dt>family_link_id</dt>
+                    <dd>{familyLink.id}</dd>
+                  </div>
+                ) : null}
+                {campProgramCode ? (
+                  <div>
+                    <dt>camp_program_code</dt>
+                    <dd>{campProgramCode}</dd>
+                  </div>
+                ) : null}
               </dl>
             </details>
           ) : null}

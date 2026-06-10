@@ -55,6 +55,32 @@
   border-radius: 1rem;
   padding: 1rem 1.125rem;
   animation: ds-learningMomentIn 0.22s ease-out;
+  height: auto;
+  min-height: 0;
+}
+
+/* B-4 Lock-In — stacked rail layout */
+.ds-learningMomentB4Top {
+  display: flex;
+  align-items: center;
+  gap: var(--lm-avatar-gap);
+  margin-bottom: 0.75rem;
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentHeadline {
+  margin: 0;
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentBody {
+  margin-top: 0.625rem;
+}
+
+.ds-learningMomentTipsBlock {
+  margin-top: var(--lm-body-sections);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentTipsBlock {
+  margin-top: 0.875rem;
 }
 
 @keyframes ds-learningMomentIn {
@@ -127,6 +153,16 @@
   padding-left: 1.125rem;
 }
 
+.ds-learningMomentTips--numbered {
+  list-style: decimal;
+  padding-left: 1.35rem;
+}
+
+.ds-learningMomentTips--numbered li {
+  margin-bottom: 0.35rem;
+  padding-left: 0.15rem;
+}
+
 .ds-learningMomentAction {
   margin-top: var(--lm-section-gap);
 }
@@ -156,6 +192,15 @@
 .ds-learningMoment--B4_LOCK_IN .ds-learningMomentHeadline,
 .ds-learningMoment--B4_LOCK_IN .ds-learningMomentBody {
   color: rgba(255, 255, 255, 0.94);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentHeadline {
+  line-height: 1.45;
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentBody {
+  margin-top: var(--lm-headline-body);
+  color: rgba(255, 255, 255, 0.86);
 }
 
 .ds-learningMoment--B4_LOCK_IN .ds-learningMomentSectionTitle {
@@ -221,6 +266,133 @@
 
 .ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentSectionTitle {
   color: rgba(91, 33, 182, 0.62);
+}
+
+/* Coaching rail — chevron points toward question / answer zone */
+.ds-coachingRailShell {
+  position: relative;
+  width: 100%;
+}
+
+.ds-coachingRailBody {
+  position: relative;
+  z-index: 1;
+}
+
+.ds-coachingRailCaret {
+  position: absolute;
+  left: -0.625rem;
+  top: var(--coaching-caret-top, 1.25rem);
+  width: 0;
+  height: 0;
+  border-top: 0.5rem solid transparent;
+  border-bottom: 0.5rem solid transparent;
+  border-right: 0.75rem solid #fff;
+  filter: drop-shadow(-1px 0 0 rgba(36, 62, 112, 0.1));
+  z-index: 2;
+  transition: top 0.18s ease-out;
+}
+
+.ds-coachingRailShell--b4 .ds-coachingRailCaret {
+  border-right-color: #0f2d5c;
+  filter: drop-shadow(-1px 0 0 rgba(240, 206, 110, 0.35));
+}
+
+.ds-coachingRailShell--facilitator .ds-coachingRailCaret {
+  border-right-color: #f5f3ff;
+  filter: drop-shadow(-1px 0 0 rgba(167, 139, 250, 0.35));
+}
+
+.ds-coachingRailShell--placeholder .ds-coachingRailCaret {
+  border-right-color: rgba(255, 255, 255, 0.92);
+}
+
+/* Coaching rail placeholder (before answer) */
+.ds-coachingRailPlaceholder {
+  max-width: var(--lm-max-width);
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem 1.125rem;
+  border: 1px dashed rgba(36, 62, 112, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  height: auto;
+  min-height: 0;
+}
+
+.ds-coachingRailPlaceholder--compact {
+  padding: 0.875rem 1rem;
+}
+
+.ds-coachingRailPlaceholderBadge {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.ds-coachingRailPlaceholderText {
+  margin: var(--lm-badge-headline) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.ds-coachingRailPreviewBlock {
+  margin-top: var(--lm-body-sections);
+}
+
+.ds-coachingRailPreviewLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.ds-coachingRailPreviewTips {
+  margin: 0;
+  padding-left: 1.35rem;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.55);
+  list-style: decimal;
+}
+
+.ds-coachingRailPreviewTips li {
+  margin-bottom: 0.35rem;
+  padding-left: 0.15rem;
+}
+
+/* Coaching rail column — card fills aside, no max-width cap */
+.mission-quizLayoutAside .ds-coachingRailShell,
+.mission-quizLayoutAside .ds-learningMoment,
+.mission-quizLayoutAside .ds-coachingRailPlaceholder {
+  max-width: none;
+}
+
+.mission-quizLayoutAsideInner {
+  width: 100%;
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
+
+.ds-coachingRailShell,
+.ds-coachingRailBody {
+  height: auto;
+  min-height: 0;
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentTipsLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(240, 206, 110, 0.85);
 }
 
 @media (max-width: 767px) {

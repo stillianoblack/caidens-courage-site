@@ -13,8 +13,48 @@
   gap: 1rem;
 }
 
+.shared-mission-game--coachingRail .game-interactionShellInner {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .bbc-bottomBar .game-interactionShellInner {
   max-width: min(42rem, calc(100vw - 2.5rem));
+}
+
+.bbc-bottomBar--coachingShell .game-interactionShellInner {
+  max-width: var(--game-shell-max, 72rem);
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .bbc-bottomBar--coachingShell .game-interactionShellInner {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(var(--game-shell-rail-min, 17.5rem), var(--game-shell-rail-max, 22.5rem));
+    gap: var(--game-shell-gap, 2rem);
+    align-items: center;
+  }
+
+  .bbc-bottomBarInner--coachingShell {
+    grid-column: 1;
+    justify-content: flex-end;
+  }
+}
+
+.bbc-bottomBarInner--continueOnly {
+  justify-content: flex-end;
+}
+
+.bbc-app--coachingShell .game-interactionShellInner {
+  max-width: var(--game-shell-max, 72rem);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .bbc-app .caiden-topBar,

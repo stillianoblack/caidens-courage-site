@@ -6,6 +6,7 @@ import {
 } from '../config/assessmentTypeConstants';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import type { FamilyChildSummary } from './familyChildrenMetrics';
+import type { FamilyChildBaselineStatus } from './familyChildrenMetrics';
 import {
   getAssessmentProgress,
   getCategoryProgressRows,
@@ -15,6 +16,7 @@ import {
   partitionChildAssessments,
   type ProgressCounts,
 } from './familyProgressHelpers';
+import type { StudentFamilyLink } from './studentFamilyLinkService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 
 export type FamilyProgressTone = 'story' | 'reading' | 'focus' | 'creative' | 'overall';
@@ -32,6 +34,13 @@ export type FamilyProgressRow = {
 export type FamilyFocusSkill = {
   label: string;
   value: number;
+};
+
+export type FamilyRecentActivityItem = {
+  id: string;
+  label: string;
+  kind: 'baseline' | 'module' | 'certificate' | 'gallery' | 'goals' | 'activity' | 'linked';
+  timestamp?: string;
 };
 
 export type FamilyProgressSnapshot = {
@@ -232,4 +241,252 @@ export function computeFamilyProgressSnapshot(input: {
     assessments: assessmentsProgress,
     emptyStateMessage,
   };
+}
+
+export function computeFamilyBaselineAverage(input: {
+  v2Assessments: LocalAssessmentV2Record[];
+  legacyBaselines: B4BaselineCheckRecord[];
+  allowedStudentIds: string[];
+}): number | null {
+  const allowed = new Set(input.allowedStudentIds.filter(Boolean));
+  const scores: number[] = [];
+
+  for (const row of input.v2Assessments) {
+    if (row.role !== 'student') continue;
+    if (!isChildBaselineAssessmentType(row.assessment_type)) continue;
+    const participantId = row.participant_id?.trim() ?? '';
+    if (allowed.size && participantId && !allowed.has(participantId)) continue;
+    if (row.percent_score != null && Number.isFinite(row.percent_score)) {
+      scores.push(Number(row.percent_score));
+    } else if (row.max_score != null && row.max_score > 0 && row.total_score != null) {
+      scores.push((row.total_score / row.max_score) * 100);
+    }
+  }
+
+  for (const row of input.legacyBaselines) {
+    const participantId = row.participantId?.trim() ?? '';
+    if (allowed.size && participantId && !allowed.has(participantId)) continue;
+    if (!row.completedAt) continue;
+    const moduleScores = [row.feelingsScore, row.readingScore, row.focusMovesScore].filter(
+      (value) => Number.isFinite(value),
+    );
+    if (moduleScores.length) {
+      scores.push(
+        moduleScores.reduce((sum, value) => sum + value, 0) / moduleScores.length,
+      );
+    }
+  }
+
+  if (!scores.length) return null;
+  return Math.round(scores.reduce((sum, value) => sum + value, 0) / scores.length);
+}
+
+export function countFamilyCertificatesEarned(input: {
+  moduleResults: LocalModuleResultRecord[];
+  allowedStudentIds: string[];
+}): number {
+  const allowed = new Set(input.allowedStudentIds.filter(Boolean));
+  const earned = new Set<string>();
+
+  for (const row of input.moduleResults) {
+    if (row.role !== 'student') continue;
+    const participantId = row.participant_id?.trim() ?? '';
+    if (allowed.size && participantId && !allowed.has(participantId)) continue;
+    const pct =
+      row.percent_score ??
+      (row.max_score != null && row.max_score > 0
+        ? Math.round((row.score / row.max_score) * 100)
+        : 0);
+    if (pct >= 70 && row.module_id) {
+      earned.add(`${participantId}:${row.module_id}`);
+    }
+  }
+
+  return earned.size;
+}
+
+function modulePercent(row: LocalModuleResultRecord): number {
+  if (row.percent_score != null && Number.isFinite(row.percent_score)) {
+    return Number(row.percent_score);
+  }
+  if (row.max_score != null && row.max_score > 0) {
+    return Math.round((row.score / row.max_score) * 100);
+  }
+  return 0;
+}
+
+export function computeChildBaselinePct(input: {
+  participantId: string | null;
+  v2Assessments: LocalAssessmentV2Record[];
+  legacyBaselines: B4BaselineCheckRecord[];
+}): number | null {
+  if (!input.participantId?.trim()) return null;
+  return computeFamilyBaselineAverage({
+    v2Assessments: input.v2Assessments,
+    legacyBaselines: input.legacyBaselines,
+    allowedStudentIds: [input.participantId.trim()],
+  });
+}
+
+function matchesAllowedStudent(
+  participantId: string | null | undefined,
+  allowedStudentIds?: string[],
+): boolean {
+  if (!allowedStudentIds?.length) return true;
+  const id = participantId?.trim();
+  return Boolean(id && allowedStudentIds.includes(id));
+}
+
+export function computeChildProgressRows(input: {
+  participantId: string | null;
+  baselineStatus: FamilyChildBaselineStatus;
+  programCode?: string;
+  moduleResults: LocalModuleResultRecord[];
+}): FamilyProgressRow[] {
+  const studentModules = input.moduleResults.filter(
+    (row) =>
+      row.role === 'student' &&
+      input.participantId &&
+      row.participant_id === input.participantId,
+  );
+  const baselineComplete = input.baselineStatus === 'Complete';
+
+  const rows = getCategoryProgressRows({
+    programCode: input.programCode,
+    studentModules,
+    adultModules: [],
+    childCount: 1,
+    childBaselinesComplete: baselineComplete ? 1 : 0,
+    adultBaselineComplete: false,
+    adultGrowthComplete: false,
+    overall: getFamilyOverallProgress({
+      childCount: 1,
+      adultBaselineComplete: false,
+      adultGrowthComplete: false,
+      childBaselinesComplete: baselineComplete ? 1 : 0,
+      studentModules,
+      adultModules: [],
+    }),
+  });
+
+  return rows.map((row) => ({
+    key: row.key,
+    label: row.label,
+    pct: row.pct,
+    tone: row.tone,
+    completed: row.completed,
+    total: row.total,
+    labelDetail: row.labelDetail,
+  }));
+}
+
+export function buildFamilyRecentActivityTimeline(input: {
+  moduleResults?: LocalModuleResultRecord[];
+  v2Assessments?: LocalAssessmentV2Record[];
+  legacyBaselines?: B4BaselineCheckRecord[];
+  allowedStudentIds?: string[];
+  familyLinks?: StudentFamilyLink[];
+  childNames?: Record<string, string>;
+  adultBaselineComplete?: boolean;
+  adultGrowthComplete?: boolean;
+  goalsCompletedAt?: string | null;
+  goalsCount?: number;
+  gallerySubmissions?: { id: string; created_at?: string; title?: string }[];
+  limit?: number;
+}): FamilyRecentActivityItem[] {
+  const limit = input.limit ?? 5;
+  const items: FamilyRecentActivityItem[] = [];
+  const allowed = input.allowedStudentIds?.filter(Boolean);
+  const childNames = input.childNames ?? {};
+
+  for (const row of input.moduleResults ?? []) {
+    if (row.role !== 'student') continue;
+    if (!matchesAllowedStudent(row.participant_id, allowed)) continue;
+    const pct = modulePercent(row);
+    const timestamp = row.completed_at;
+    if (pct >= 70) {
+      items.push({
+        id: `cert-${row.id ?? `${row.participant_id}-${row.module_id}`}`,
+        label: `Certificate earned — ${row.module_title}`,
+        kind: 'certificate',
+        timestamp,
+      });
+    } else {
+      items.push({
+        id: `mod-${row.id ?? `${row.participant_id}-${row.module_id}-${row.completed_at}`}`,
+        label: `${row.module_title} completed`,
+        kind: 'module',
+        timestamp,
+      });
+    }
+  }
+
+  for (const row of input.v2Assessments ?? []) {
+    if (row.role !== 'student' || !isChildBaselineAssessmentType(row.assessment_type)) continue;
+    if (!matchesAllowedStudent(row.participant_id, allowed)) continue;
+    const answers = row.answers_json as { nickname?: string; firstName?: string } | undefined;
+    const name = answers?.nickname?.trim() || answers?.firstName?.trim();
+    items.push({
+      id: `v2-baseline-${row.id ?? row.completed_at}`,
+      label: name
+        ? `${name} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
+        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
+      kind: 'baseline',
+      timestamp: row.completed_at,
+    });
+  }
+
+  for (const row of input.legacyBaselines ?? []) {
+    if (!row.completedAt) continue;
+    if (!matchesAllowedStudent(row.participantId, allowed)) continue;
+    items.push({
+      id: `legacy-baseline-${row.participantId ?? row.nickname}-${row.completedAt}`,
+      label: row.nickname
+        ? `${row.nickname} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
+        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
+      kind: 'baseline',
+      timestamp: row.completedAt,
+    });
+  }
+
+  for (const link of input.familyLinks ?? []) {
+    if (!link.parent_claimed) continue;
+    if (allowed?.length && !allowed.includes(link.student_id)) continue;
+    const childName = childNames[link.student_id] ?? 'Child';
+    const timestamp = link.claimed_at ?? link.created_at;
+    items.push({
+      id: `linked-${link.id}`,
+      label: `${childName} linked to your family`,
+      kind: 'linked',
+      timestamp,
+    });
+  }
+
+  for (const submission of input.gallerySubmissions ?? []) {
+    items.push({
+      id: `gallery-${submission.id}`,
+      label: submission.title?.trim()
+        ? `Gallery submission uploaded — ${submission.title.trim()}`
+        : 'Gallery submission uploaded',
+      kind: 'gallery',
+      timestamp: submission.created_at,
+    });
+  }
+
+  if (input.goalsCompletedAt && (input.goalsCount ?? 0) > 0) {
+    items.push({
+      id: 'goals-saved',
+      label: `Family goals saved (${input.goalsCount} selected)`,
+      kind: 'goals',
+      timestamp: input.goalsCompletedAt,
+    });
+  }
+
+  return items
+    .sort((a, b) => {
+      const aTime = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const bTime = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return bTime - aTime;
+    })
+    .slice(0, limit);
 }

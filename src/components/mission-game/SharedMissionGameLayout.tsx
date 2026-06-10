@@ -4,12 +4,19 @@ import MissionQuizLayout from './MissionQuizLayout';
 import type { ComponentProps } from 'react';
 import './shared-mission-game-layout.css';
 
-export type SharedMissionGameLayoutProps = ComponentProps<typeof MissionQuizLayout>;
+export type SharedMissionGameLayoutProps = ComponentProps<typeof MissionQuizLayout> & {
+  useCoachingRail?: boolean;
+};
 
-/** Shared gameplay layout wrapper — centered column + scroll-safe quiz body. */
-export default function SharedMissionGameLayout(props: SharedMissionGameLayoutProps) {
+/** Shared gameplay layout wrapper — left-aligned game column + coaching rail. */
+export default function SharedMissionGameLayout({
+  useCoachingRail = false,
+  ...props
+}: SharedMissionGameLayoutProps) {
   return (
-    <GameInteractionShell className="shared-mission-game">
+    <GameInteractionShell
+      className={useCoachingRail ? 'shared-mission-game shared-mission-game--coachingRail' : 'shared-mission-game'}
+    >
       <MissionQuizLayout {...props} />
     </GameInteractionShell>
   );

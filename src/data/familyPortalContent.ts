@@ -7,7 +7,7 @@ import {
 } from '../config/courageRoutes';
 import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from './adult/sharedAssets';
 import { FAMILY_UNCLE_T_MISSION_BASE } from '../config/courageRoutes';
-import type { AdultTrainingCard } from './pilotDashboardContent';
+import type { ActivityCategoryId, AdultTrainingCard } from './pilotDashboardContent';
 import { countAvailableCharlieMissions } from './charlie';
 import { CAIDEN_QUEST_RANK } from './caiden/missionBoardData';
 import { B4_PORTAL_MISSIONS } from './b4/portalAssets';
@@ -51,7 +51,7 @@ function buildFamilySidebarNav(basePath: string): FamilySidebarNavItem[] {
       path: `${basePath}/characters`,
       icon: 'character-hub',
     },
-    { id: 'downloads', label: 'Downloads', path: `${basePath}/downloads`, icon: 'downloads' },
+    { id: 'downloads', label: 'Parent Resources', path: `${basePath}/downloads`, icon: 'downloads' },
     { id: 'guide', label: 'Parent Corner', path: `${basePath}/guide`, icon: 'guide' },
     { id: 'gallery', label: 'Gallery', path: `${basePath}/gallery`, icon: 'gallery' },
     {
@@ -88,14 +88,34 @@ export function resolveFamilyPortalBrand(isProgramHub: boolean): { title: string
 
 export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> = {
   guide: 'Guides, discussion tools, and adult learning activities for supporting kids at home.',
+  downloads: 'Parent-friendly activities, printables, and calm-down tools to try at home.',
 };
+
+export type FamilyParentResourceCategoryId =
+  | 'try-at-home'
+  | 'printable-activities'
+  | 'coloring-pages'
+  | 'reflection-journals'
+  | 'b4-reset-tools';
+
+export const FAMILY_PARENT_RESOURCE_CATEGORIES: Array<{
+  id: FamilyParentResourceCategoryId;
+  label: string;
+  activityCategory: ActivityCategoryId;
+}> = [
+  { id: 'try-at-home', label: 'Try at Home', activityCategory: 'weekly-activities' },
+  { id: 'printable-activities', label: 'Printables', activityCategory: 'printable-activities' },
+  { id: 'coloring-pages', label: 'Coloring Pages', activityCategory: 'coloring-pages' },
+  { id: 'reflection-journals', label: 'Reflection Prompts', activityCategory: 'reflection-journals' },
+  { id: 'b4-reset-tools', label: 'Calm-Down Tools', activityCategory: 'b4-reset-tools' },
+];
 
 export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
   overview: 'Home',
   results: 'Results',
   'continue-learning': 'Weekly Adventures',
   'character-hub': 'Character Hub',
-  downloads: 'Downloads',
+  downloads: 'Parent Resources',
   gallery: 'Gallery',
   certificates: 'Certificates',
   guide: 'Parent Corner',

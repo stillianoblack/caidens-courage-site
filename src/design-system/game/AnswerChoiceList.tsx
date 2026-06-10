@@ -41,6 +41,7 @@ export default function AnswerChoiceList({
           <li key={choice.id}>
             <button
               type="button"
+              data-answer-id={choice.id}
               disabled={disabled || checked}
               className={[
                 'ds-answerChoice',

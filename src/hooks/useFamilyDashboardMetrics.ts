@@ -4,12 +4,15 @@ import { MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
-import type { FamilyVisibleChild } from '../lib/studentFamilyLinkService';
+import type { FamilyVisibleChild, StudentFamilyLink } from '../lib/studentFamilyLinkService';
 import {
   computeFamilyProgressSnapshot,
+  computeFamilyBaselineAverage,
+  countFamilyCertificatesEarned,
   type FamilyProgressSnapshot,
 } from '../lib/familyProgressMetrics';
 import {
+  fetchPilotProgramDisplayName,
   hasAdultBaselineAssessment,
   hasAdultGrowthAssessment,
   loadFamilyDashboardData,
@@ -42,8 +45,17 @@ export type FamilyDashboardMetrics = {
   programCode: string;
   children: FamilyChildSummary[];
   visibleChildren: FamilyVisibleChild[];
+  familyLinks: StudentFamilyLink[];
+  campProgramCode: string | null;
+  campProgramName: string | null;
+  parentGuardianName: string | null;
+  baselineAveragePct: number | null;
+  certificatesEarned: number;
   claimRequired: boolean;
   metrics: FamilyProgressSnapshot;
+  moduleResults: FamilyDashboardData['moduleResults'];
+  v2Assessments: FamilyDashboardData['v2Assessments'];
+  studentLegacyBaselines: FamilyDashboardData['studentLegacyBaselines'];
   adultBaselineComplete: boolean;
   adultGrowthComplete: boolean;
   assessmentCount: number;
@@ -57,6 +69,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
   const resolvedCode = programCode?.trim() || resolveTrackingProgramCode() || '';
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<FamilyDashboardData>(EMPTY_DATA);
+  const [campProgramName, setCampProgramName] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!resolvedCode) {
@@ -102,6 +115,27 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [refresh]);
+
+  const campProgramCode = useMemo(() => {
+    const campLink = data.familyLinks.find((link) => link.camp_program_code?.trim());
+    return campLink?.camp_program_code?.trim() ?? null;
+  }, [data.familyLinks]);
+
+  useEffect(() => {
+    if (!campProgramCode) {
+      setCampProgramName(null);
+      return;
+    }
+    let cancelled = false;
+    void fetchPilotProgramDisplayName(campProgramCode).then((name) => {
+      if (!cancelled) {
+        setCampProgramName(name ?? campProgramCode);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [campProgramCode]);
 
   return useMemo(() => {
     const adultBaselineComplete = hasAdultBaselineAssessment(
@@ -152,12 +186,38 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       overallPercent: metrics.overall.percent,
     });
 
+    const baselineAveragePct = computeFamilyBaselineAverage({
+      v2Assessments: data.v2Assessments,
+      legacyBaselines: data.studentLegacyBaselines,
+      allowedStudentIds: data.allowedStudentIds,
+    });
+
+    const certificatesEarned = countFamilyCertificatesEarned({
+      moduleResults: data.moduleResults,
+      allowedStudentIds: data.allowedStudentIds,
+    });
+
+    const parentLink = data.familyLinks[0];
+    const parentGuardianName =
+      parentLink?.parent_first_name?.trim() ||
+      parentLink?.parent_last_name?.trim() ||
+      null;
+
     return {
       programCode: data.programCode,
       children,
       visibleChildren: data.visibleChildren,
+      familyLinks: data.familyLinks,
+      campProgramCode,
+      campProgramName,
+      parentGuardianName,
+      baselineAveragePct,
+      certificatesEarned,
       claimRequired: data.claimRequired,
       metrics,
+      moduleResults: data.moduleResults,
+      v2Assessments: data.v2Assessments,
+      studentLegacyBaselines: data.studentLegacyBaselines,
       adultBaselineComplete,
       adultGrowthComplete,
       assessmentCount: metrics.assessments.completed,
@@ -166,5 +226,5 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       loading,
       refresh,
     };
-  }, [data, loading, refresh]);
+  }, [campProgramCode, campProgramName, data, loading, refresh]);
 }

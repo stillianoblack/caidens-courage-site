@@ -14,6 +14,7 @@ export type FamilyChildSummary = {
   key: string;
   participantId: string | null;
   displayName: string;
+  nickname: string | null;
   baselineStatus: FamilyChildBaselineStatus;
   latestActivity: string | null;
   progressPct: number;
@@ -205,6 +206,7 @@ function buildChildSummary(input: {
   key: string;
   participantId: string | null;
   displayName: string;
+  nickname?: string | null;
   createdAt: string | null;
   modules: LocalModuleResultRecord[];
   assessments: LocalAssessmentV2Record[];
@@ -227,6 +229,7 @@ function buildChildSummary(input: {
     key: input.key,
     participantId: input.participantId,
     displayName: input.displayName,
+    nickname: input.nickname?.trim() || null,
     createdAt: input.createdAt,
     baselineStatus,
     latestActivity: resolveLatestActivity({
@@ -294,6 +297,7 @@ export function computeFamilyChildrenSummaries(input: {
         key: participant.id,
         participantId: participant.id,
         displayName,
+        nickname: participant.nickname,
         createdAt: participant.created_at ?? null,
         modules,
         assessments,

@@ -30,6 +30,8 @@ import {
 } from '../../data/designSystemDemoData';
 import FeaturedStudentWorkCard from './FeaturedStudentWorkCard';
 import GameLearningDesignSystemSection from './GameLearningDesignSystemSection';
+import FamilyPortalDesignSystemSection from './FamilyPortalDesignSystemSection';
+import InteractiveModuleSystemSection from './InteractiveModuleSystemSection';
 import '../portal-design-system/portal-design-system.css';
 import '../pilot-dashboard/pilot-dashboard.css';
 import './design-system-page.css';
@@ -48,6 +50,8 @@ const SECTIONS = [
   { id: 'b4', label: 'B-4' },
   { id: 'goals', label: 'Goals' },
   { id: 'game-learning', label: 'Game Learning' },
+  { id: 'interactive-modules', label: 'Interactive Modules' },
+  { id: 'family-portal', label: 'Family Portal' },
 ] as const;
 
 function ShellPreview({
@@ -498,6 +502,8 @@ export default function DesignSystemPageContent() {
         </section>
 
         <GameLearningDesignSystemSection />
+        <InteractiveModuleSystemSection />
+        <FamilyPortalDesignSystemSection />
       </main>
     </>
   );
