@@ -12,7 +12,15 @@
   z-index: 100;
   flex-shrink: 0;
   grid-template-columns: 1fr auto auto;
-  grid-template-areas: 'lead search switcher';
+  grid-template-areas: 'lead tools switcher';
+}
+
+.portal-headerTools {
+  grid-area: tools;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-self: end;
 }
 
 .pilot-shell .portal-header {
@@ -37,7 +45,6 @@
 }
 
 .portal-headerSearch {
-  grid-area: search;
   justify-self: end;
 }
 
@@ -92,7 +99,7 @@
     grid-template-rows: auto auto;
     grid-template-areas:
       'lead switcher'
-      'search search';
+      'tools tools';
     gap: 0.5rem 0.625rem;
   }
 
@@ -109,9 +116,15 @@
     white-space: nowrap;
   }
 
-  .portal-headerSearch {
+  .portal-headerTools {
     justify-self: stretch;
     width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .portal-headerSearch {
+    flex: 1;
+    min-width: 0;
   }
 
   .portal-headerSwitcher {

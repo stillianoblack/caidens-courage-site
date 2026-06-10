@@ -10,6 +10,8 @@ import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import AdminParticipantReassignment from '../components/admin/AdminParticipantReassignment';
 import AdminPilotProgramCard from '../components/admin/AdminPilotProgramCard';
+import { Link } from 'react-router-dom';
+import { DESIGN_SYSTEM_PATH } from '../config/courageRoutes';
 import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
@@ -140,9 +142,14 @@ export default function AdminPortalPage() {
                 <p className="adminPortal-count">
                   {loading ? 'Loading pilot programs…' : `${programs.length} pilot program${programs.length === 1 ? '' : 's'}`}
                 </p>
-                <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
-                  Sign out
-                </button>
+                <div className="adminPortal-toolbarActions">
+                  <Link to={DESIGN_SYSTEM_PATH} className="adminPortal-btn adminPortal-btn--ghost">
+                    Design System
+                  </Link>
+                  <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
+                    Sign out
+                  </button>
+                </div>
               </div>
 
               {loadError ? <p className="adminPortal-error">{loadError}</p> : null}

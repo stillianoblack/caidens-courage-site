@@ -1,7 +1,7 @@
 import React from 'react';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { readActivePortalRole } from '../../config/portalContext';
-import { useCopyToast } from '../shared/useCopyToast';
+import { CollapsibleCard, CopyableCompactValue } from '../portal-design-system';
 
 type FamilyAccessCodeCardProps = {
   compact?: boolean;
@@ -10,41 +10,47 @@ type FamilyAccessCodeCardProps = {
 
 export default function FamilyAccessCodeCard({ compact = false, className = '' }: FamilyAccessCodeCardProps) {
   const role = readActivePortalRole();
-  const familyCode = readActivePilotProgram()?.familyAccessCode;
-  const { copyWithToast, toast } = useCopyToast();
+  const program = readActivePilotProgram();
+  const familyCode = program?.familyAccessCode;
+  const programCode = program?.programCode ?? '';
 
   if (role !== 'family' || !familyCode?.trim()) {
     return null;
   }
 
-  return (
-    <>
-      <section
-        className={`family-accessCodeCard${compact ? ' family-accessCodeCard--compact' : ''}${className ? ` ${className}` : ''}`}
-        aria-labelledby="family-access-code-title"
-      >
-        <div className="family-accessCodeHead">
-          <h2 id="family-access-code-title" className="family-accessCodeTitle">
-            Family Access Code
-          </h2>
-          {!compact ? (
-            <p className="family-accessCodeCopy">
-              Share this code with a parent, guardian, tutor, or family member helping your child.
-            </p>
-          ) : null}
-        </div>
-        <div className="family-accessCodeRow">
-          <code className="family-accessCodeValue">{familyCode}</code>
-          <button
-            type="button"
-            className="family-accessCodeBtn"
-            onClick={() => void copyWithToast(familyCode)}
-          >
-            Copy
-          </button>
-        </div>
+  const storageKey = `family_access_codes_collapsed_${programCode.trim()}`;
+
+  if (compact) {
+    return (
+      <section className={`family-accessCodeCard family-accessCodeCard--compact${className ? ` ${className}` : ''}`}>
+        <CopyableCompactValue value={familyCode} type="code" label="Family Code" truncateMiddle />
       </section>
-      {toast}
-    </>
+    );
+  }
+
+  return (
+    <CollapsibleCard
+      title="Family Access Codes"
+      storageKey={storageKey}
+      defaultCollapsed={false}
+      helperText="Share this code with a parent, guardian, tutor, or family member helping your child."
+      className={`family-accessCodeCollapsible${className ? ` ${className}` : ''}`}
+    >
+      <div className="family-accessCodeRows">
+        <div className="family-accessCodeRowItem">
+          <span className="family-accessCodeRowLabel">Family Access Code</span>
+          <CopyableCompactValue value={familyCode} type="code" label="Family Code" truncateMiddle />
+        </div>
+        {programCode ? (
+          <div className="family-accessCodeRowItem">
+            <span className="family-accessCodeRowLabel">Program Code</span>
+            <CopyableCompactValue value={programCode} type="code" label="Program Code" truncateMiddle />
+          </div>
+        ) : null}
+        <p className="family-accessCodeChildNote">
+          Child access info appears after your child completes a B-4 Check-In or linked camp enrollment.
+        </p>
+      </div>
+    </CollapsibleCard>
   );
 }

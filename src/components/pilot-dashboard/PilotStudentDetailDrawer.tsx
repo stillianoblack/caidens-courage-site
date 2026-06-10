@@ -102,6 +102,30 @@ export default function PilotStudentDetailDrawer({
             </dd>
           </div>
           <div>
+            <dt>Emergency Contact Name</dt>
+            <dd>{snapshot.emergencyContactName}</dd>
+          </div>
+          <div>
+            <dt>Emergency Contact Phone</dt>
+            <dd>{snapshot.emergencyContactPhone}</dd>
+          </div>
+          <div>
+            <dt>Family Access Code</dt>
+            <dd>
+              <CopyableCompactValue value={snapshot.familyAccessCode} type="code" />
+            </dd>
+          </div>
+          <div>
+            <dt>Camp Program Code</dt>
+            <dd>
+              <CopyableCompactValue value={snapshot.campProgramCode} type="code" label="Program" />
+            </dd>
+          </div>
+          <div>
+            <dt>Baseline Status</dt>
+            <dd>{snapshot.baselineStatus}</dd>
+          </div>
+          <div>
             <dt>Baseline Score</dt>
             <dd>{snapshot.baselineScore}</dd>
           </div>
@@ -133,10 +157,6 @@ export default function PilotStudentDetailDrawer({
             <div>
               <dt>Participant ID</dt>
               <dd className="pilot-resultsMono">{snapshot.participantId}</dd>
-            </div>
-            <div>
-              <dt>Camp Program</dt>
-              <dd>{snapshot.campProgramCode}</dd>
             </div>
             <div>
               <dt>Family Program</dt>

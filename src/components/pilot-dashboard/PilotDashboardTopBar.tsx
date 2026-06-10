@@ -5,12 +5,14 @@ type PilotDashboardTopBarProps = {
   pageTitle: string;
   contextTitle?: string;
   contextSubtitle?: string;
+  onOpenProgramGoals?: () => void;
 };
 
 export default function PilotDashboardTopBar({
   pageTitle,
   contextTitle,
   contextSubtitle,
+  onOpenProgramGoals,
 }: PilotDashboardTopBarProps) {
   return (
     <PortalHeader
@@ -18,6 +20,7 @@ export default function PilotDashboardTopBar({
       contextTitle={contextTitle}
       contextSubtitle={contextSubtitle ?? 'Facilitator Portal'}
       portal="facilitator"
+      onOpenProgramGoals={onOpenProgramGoals}
     />
   );
 }

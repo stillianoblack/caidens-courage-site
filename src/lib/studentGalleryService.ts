@@ -13,6 +13,10 @@ export const FAMILY_GALLERY_PROGRAM_CODE = 'BlueRibbonFamily';
 
 export type GalleryItemStatus = 'pending' | 'approved' | 'rejected' | 'needs_changes';
 
+export type GalleryVisibility = 'program_private' | 'community_shared';
+
+export type GalleryUploadedByRole = 'facilitator' | 'family' | 'student' | 'admin';
+
 export type GalleryUploadSource = 'dashboard' | 'submit' | 'family';
 
 export type StudentGalleryItem = {
@@ -33,6 +37,8 @@ export type StudentGalleryItem = {
   reviewed_by?: string | null;
   approved_at?: string | null;
   rejected_at?: string | null;
+  visibility?: GalleryVisibility | string | null;
+  uploaded_by_role?: GalleryUploadedByRole | string | null;
 };
 
 /** Status values written by the app. Legacy `pending_review` is treated as pending. */
@@ -118,13 +124,29 @@ function applyGalleryProgramCodeFilter<T extends ProgramScopedQuery<T>>(
   if (!programCode?.trim()) return query;
 
   const code = programCode.trim();
-  const includeLegacyFamily =
-    code === DEFAULT_GALLERY_PROGRAM_CODE || code.toLowerCase().includes('blueribbon');
-
-  if (includeLegacyFamily) {
+  if (code === DEFAULT_GALLERY_PROGRAM_CODE) {
     return query.in('program_code', [code, FAMILY_GALLERY_PROGRAM_CODE]);
   }
   return query.eq('program_code', code);
+}
+
+export function isProgramPrivateGalleryItem(item: StudentGalleryItem): boolean {
+  const visibility = item.visibility?.trim();
+  return !visibility || visibility === 'program_private';
+}
+
+export function isCommunitySharedGalleryItem(item: StudentGalleryItem): boolean {
+  return item.visibility === 'community_shared';
+}
+
+function filterProgramPrivateItems(items: StudentGalleryItem[]): StudentGalleryItem[] {
+  return items.filter(isProgramPrivateGalleryItem);
+}
+
+function uploadedByRoleForSource(source: GalleryUploadSource): GalleryUploadedByRole {
+  if (source === 'dashboard') return 'facilitator';
+  if (source === 'family') return 'family';
+  return 'student';
 }
 
 export async function fetchFacilitatorPendingGalleryCount(programCode?: string): Promise<number> {
@@ -249,7 +271,7 @@ export async function fetchFacilitatorApprovedGalleryItems(
       return [];
     }
 
-    const items = (data ?? []) as StudentGalleryItem[];
+    const items = filterProgramPrivateItems((data ?? []) as StudentGalleryItem[]);
     logGalleryDev('GALLERY_APPROVED_COUNT', items.length, {
       program_code: programCode?.trim() || '(all programs)',
     });
@@ -258,6 +280,41 @@ export async function fetchFacilitatorApprovedGalleryItems(
     console.error('[student_gallery] facilitator approved fetch error:', err);
     return [];
   }
+}
+
+export async function fetchCommunityGalleryItems(): Promise<StudentGalleryItem[]> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return [];
+  }
+
+  try {
+    let query = supabase
+      .from('student_gallery_items')
+      .select('*')
+      .eq('status', 'approved')
+      .eq('visibility', 'community_shared')
+      .order('created_at', { ascending: false });
+
+    const { data, error } = await query;
+
+    if (error) {
+      if (/visibility/i.test(error.message)) {
+        return [];
+      }
+      console.error('[student_gallery] community fetch failed:', error);
+      return [];
+    }
+
+    return (data ?? []) as StudentGalleryItem[];
+  } catch (err) {
+    console.error('[student_gallery] community fetch error:', err);
+    return [];
+  }
+}
+
+/** Approved program-private items for the active program only. */
+export async function fetchProgramGalleryItems(programCode?: string): Promise<StudentGalleryItem[]> {
+  return fetchFacilitatorApprovedGalleryItems(programCode);
 }
 
 export async function fetchStudentGalleryItems(programCode?: string): Promise<StudentGalleryItem[]> {
@@ -286,43 +343,34 @@ export async function fetchStudentGalleryItems(programCode?: string): Promise<St
   }
 }
 
-export async function fetchApprovedStudentGalleryItems(): Promise<StudentGalleryItem[]> {
-  if (!isSupabaseConfigured() || !supabase) {
-    return [];
+/** @deprecated Use fetchProgramGalleryItems(programCode) for scoped views. */
+export async function fetchApprovedStudentGalleryItems(
+  programCode?: string,
+): Promise<StudentGalleryItem[]> {
+  if (programCode?.trim()) {
+    return fetchProgramGalleryItems(programCode);
   }
-
-  try {
-    const { data, error } = await supabase
-      .from('student_gallery_items')
-      .select('*')
-      .eq('status', 'approved')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('[student_gallery] approved fetch failed:', error);
-      return [];
-    }
-
-    return (data ?? []) as StudentGalleryItem[];
-  } catch (err) {
-    console.error('[student_gallery] approved fetch error:', err);
-    return [];
-  }
+  return fetchCommunityGalleryItems();
 }
 
 export async function fetchFamilyGallerySubmissions(
   submitterKey: string,
+  programCode?: string,
 ): Promise<StudentGalleryItem[]> {
   if (!isSupabaseConfigured() || !supabase) {
     return [];
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('student_gallery_items')
       .select('*')
       .eq('submitter_key', submitterKey)
       .order('created_at', { ascending: false });
+
+    query = applyGalleryProgramCodeFilter(query, programCode);
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('[student_gallery] family fetch failed:', error);
@@ -431,6 +479,44 @@ export async function updateStudentGalleryItemReview(
   }
 }
 
+export async function shareGalleryItemToCommunity(
+  id: string,
+): Promise<GalleryStatusUpdateResult> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, error: 'Supabase is not configured.' };
+  }
+
+  try {
+    let { data, error } = await supabase
+      .from('student_gallery_items')
+      .update({ visibility: 'community_shared' })
+      .eq('id', id)
+      .select('*');
+
+    if (error && /visibility/i.test(error.message)) {
+      return {
+        success: false,
+        error: 'Community sharing requires supabase/student_gallery_visibility.sql.',
+      };
+    }
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!data?.length) {
+      return { success: false, error: 'No rows updated.' };
+    }
+
+    return { success: true, item: data[0] as StudentGalleryItem };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Community share failed.',
+    };
+  }
+}
+
 /** @deprecated Use updateStudentGalleryItemReview */
 export async function updateStudentGalleryItemStatus(
   id: string,
@@ -486,17 +572,30 @@ export async function uploadStudentGalleryItem(
       file_path: filePath,
       status,
       upload_source: uploadSource,
+      visibility: 'program_private',
+      uploaded_by_role: uploadedByRoleForSource(uploadSource),
     };
 
     if (input.submitterKey) {
       row.submitter_key = input.submitterKey;
     }
 
-    const { data, error: insertError } = await supabase
+    let { data, error: insertError } = await supabase
       .from('student_gallery_items')
       .insert(row)
       .select('*')
       .single();
+
+    if (insertError && /visibility|uploaded_by_role/i.test(insertError.message)) {
+      const legacyRow = { ...row };
+      delete legacyRow.visibility;
+      delete legacyRow.uploaded_by_role;
+      ({ data, error: insertError } = await supabase
+        .from('student_gallery_items')
+        .insert(legacyRow)
+        .select('*')
+        .single());
+    }
 
     if (insertError) {
       console.error('[student_gallery] metadata insert failed:', insertError);

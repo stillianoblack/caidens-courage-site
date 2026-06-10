@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../../../lib/pilotTrackingLocalStorage';
 import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
 import type { ParticipantNameLookup } from '../../../lib/pilotResultsDisplay';
@@ -12,6 +13,8 @@ import PilotResultsKpiGrid from '../PilotResultsKpiGrid';
 import PilotTrackingDataTables from '../PilotTrackingDataTables';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import { computeNeedsAttention } from '../../../lib/pilotStudentProgress';
+import PilotNeedsAttentionCard from '../PilotNeedsAttentionCard';
 
 type PilotResultsPanelProps = {
   refreshKey?: number;
@@ -37,9 +40,28 @@ export default function PilotResultsPanel({
   loading = false,
 }: PilotResultsPanelProps) {
   void refreshKey;
+  const location = useLocation();
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
   const activeProgram = readActivePilotProgram();
   const hasTrackingRows = assessmentResults.length > 0 || moduleResults.length > 0;
+
+  const needsAttention = useMemo(
+    () =>
+      computeNeedsAttention({
+        participants,
+        assessments: assessmentResults,
+        modules: moduleResults,
+      }),
+    [participants, assessmentResults, moduleResults],
+  );
+
+  useEffect(() => {
+    if (location.hash !== '#needs-attention') return;
+    const timer = window.setTimeout(() => {
+      document.getElementById('needs-attention')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [location.hash, loading]);
 
   if (loading) {
     return (
@@ -55,6 +77,10 @@ export default function PilotResultsPanel({
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
       <PilotResultsKpiGrid metrics={metrics} />
+
+      <div id="needs-attention">
+        <PilotNeedsAttentionCard counts={needsAttention} />
+      </div>
 
       <section className="pilot-panelBlock pilot-panelBlock--baselineOverview">
         <PilotBaselineOverview

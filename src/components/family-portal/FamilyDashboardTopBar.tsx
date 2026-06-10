@@ -5,12 +5,14 @@ type FamilyDashboardTopBarProps = {
   pageTitle: string;
   contextTitle?: string;
   contextSubtitle?: string;
+  onOpenProgramGoals?: () => void;
 };
 
 export default function FamilyDashboardTopBar({
   pageTitle,
   contextTitle,
   contextSubtitle,
+  onOpenProgramGoals,
 }: FamilyDashboardTopBarProps) {
   return (
     <PortalHeader
@@ -18,6 +20,7 @@ export default function FamilyDashboardTopBar({
       contextTitle={contextTitle}
       contextSubtitle={contextSubtitle}
       portal="family"
+      onOpenProgramGoals={onOpenProgramGoals}
     />
   );
 }

@@ -9,6 +9,7 @@ type FamilyChildrenSectionProps = {
   adultBaselineComplete?: boolean;
   activeParticipantId?: string;
   onSelectChild?: (child: SelectableChild) => void;
+  onViewProgress?: (participantId: string) => void;
 };
 
 function baselineStatusClass(status: FamilyChildSummary['baselineStatus']): string {
@@ -23,6 +24,7 @@ export default function FamilyChildrenSection({
   adultBaselineComplete = false,
   activeParticipantId = '',
   onSelectChild,
+  onViewProgress,
 }: FamilyChildrenSectionProps) {
   return (
     <section className="family-panelBlock" aria-labelledby="family-children-title">
@@ -72,7 +74,17 @@ export default function FamilyChildrenSection({
                 </button>
               ) : null}
               <div className="family-childCardHead">
-                <h3 className="family-childName">{child.displayName}</h3>
+                {onViewProgress && child.participantId ? (
+                  <button
+                    type="button"
+                    className="family-childNameBtn"
+                    onClick={() => onViewProgress(child.participantId!)}
+                  >
+                    {child.displayName}
+                  </button>
+                ) : (
+                  <h3 className="family-childName">{child.displayName}</h3>
+                )}
                 <span className={baselineStatusClass(child.baselineStatus)}>
                   {formatChildBaselineStatusLabel(child.baselineStatus)}
                 </span>

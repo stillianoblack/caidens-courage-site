@@ -1,6 +1,7 @@
 import React from 'react';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
+import '../portal-design-system/portal-design-system.css';
 import './portal-header.css';
 
 type PortalHeaderProps = {
@@ -8,6 +9,7 @@ type PortalHeaderProps = {
   contextTitle?: string;
   contextSubtitle?: string;
   portal: 'family' | 'facilitator';
+  onOpenProgramGoals?: () => void;
 };
 
 export default function PortalHeader({
@@ -15,6 +17,7 @@ export default function PortalHeader({
   contextTitle,
   contextSubtitle,
   portal,
+  onOpenProgramGoals,
 }: PortalHeaderProps) {
   return (
     <header className="portal-header">
@@ -29,7 +32,26 @@ export default function PortalHeader({
           </div>
         ) : null}
       </div>
-      <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
+      <div className="portal-headerTools">
+        {onOpenProgramGoals ? (
+          <button
+            type="button"
+            className="portal-headerGoalsBtn"
+            onClick={onOpenProgramGoals}
+            aria-label={portal === 'family' ? 'Family Goals' : 'Program Goals'}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{portal === 'family' ? 'Family Goals' : 'Program Goals'}</span>
+          </button>
+        ) : null}
+        <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
+      </div>
       <PortalSwitcherDropdown className="portal-headerSwitcher" />
     </header>
   );

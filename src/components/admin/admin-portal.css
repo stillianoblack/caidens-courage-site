@@ -105,6 +105,13 @@
   margin-bottom: 1.25rem;
 }
 
+.adminPortal-toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .adminPortal-count {
   margin: 0;
   font-size: 0.9375rem;

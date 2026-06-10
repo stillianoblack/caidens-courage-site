@@ -620,11 +620,13 @@ export default function GameAssessmentFlow({
             guideAvatarAlt={config.guideAvatarAlt ?? config.avatarAlt}
             speakerLabel={feedbackSpeakerLabel}
             question={currentQuestion}
+            questionIndex={questionIndex}
             answer={answer}
             checked={checked}
             feedback={feedback}
             feedbackTone={feedbackTone}
             quizWrapModifier={quizWrapModifier}
+            useLockInFeedback={useCaidenHeader || useB4Header}
             useVictoriaHeader={useVictoriaHeader}
             useUncleTHeader={useUncleTHeader}
             useCaidenHeader={useCaidenHeader}

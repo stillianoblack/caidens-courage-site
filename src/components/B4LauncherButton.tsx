@@ -12,7 +12,7 @@ export default function B4LauncherButton({ onClick, className = '' }: B4Launcher
       type="button"
       onClick={onClick}
       className={[
-        'fixed z-50 flex items-center justify-center gap-2.5',
+        'fixed flex items-center justify-center gap-2.5',
         'rounded-full border border-golden-500/60 bg-[#050B18]/95 text-white font-bold',
         'shadow-[0_0_0_1px_rgba(240,206,110,0.14),0_12px_28px_-14px_rgba(240,206,110,0.5)]',
         'transition-all duration-200',

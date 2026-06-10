@@ -1,22 +1,56 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import StudentGalleryGrid from '../../student-gallery/StudentGalleryGrid';
+import { MarketingShowcaseCard } from '../../portal-design-system';
+import { CHARACTER_IMAGE_PATHS } from '../../../data/familyPortalContent';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../../config/activePilotProgram';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import {
-  fetchApprovedStudentGalleryItems,
+  fetchGalleryProgramSettings,
+  readGalleryProgramSettingsLocal,
+  type GalleryProgramSettings,
+} from '../../../lib/galleryProgramSettings';
+import {
+  fetchCommunityGalleryItems,
+  fetchProgramGalleryItems,
   fetchFamilyGallerySubmissions,
   isAllowedGalleryImageType,
   normalizeGalleryStatus,
   uploadStudentGalleryItem,
 } from '../../../lib/studentGalleryService';
 import { trackEvent } from '../../../lib/analytics';
+import { useToast } from '../../portal-design-system/ToastProvider';
 import { markGalleryViewed, requestGalleryCountsRefresh } from '../../../lib/galleryNavCounts';
+import '../../portal-design-system/portal-design-system.css';
 import './family-gallery.css';
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 
+type FamilyGalleryTabId = 'my-submissions' | 'pending-review' | 'program-gallery' | 'community-gallery';
+
+const BASE_TABS: Array<{ id: FamilyGalleryTabId; label: string }> = [
+  { id: 'my-submissions', label: "My Child's Submissions" },
+  { id: 'pending-review', label: 'Pending Review' },
+  { id: 'program-gallery', label: 'Program Gallery' },
+];
+
+function resolveFamilyGalleryTab(value: string | null): FamilyGalleryTabId {
+  if (
+    value === 'pending-review' ||
+    value === 'program-gallery' ||
+    value === 'community-gallery' ||
+    value === 'my-submissions'
+  ) {
+    return value;
+  }
+  return 'my-submissions';
+}
+
 export default function FamilyGalleryPanel() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = resolveFamilyGalleryTab(searchParams.get('tab'));
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadFormRef = useRef<HTMLFormElement>(null);
   const submitterKey = useMemo(() => getFamilyGallerySubmitterKey(), []);
   const programContext = useMemo(() => resolveActiveProgramContext(), []);
   const programCode = readActivePilotProgram()?.programCode ?? programContext?.programCode ?? '';
@@ -27,6 +61,7 @@ export default function FamilyGalleryPanel() {
   const [caption, setCaption] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const { showToast } = useToast();
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
@@ -34,29 +69,54 @@ export default function FamilyGalleryPanel() {
     Awaited<ReturnType<typeof fetchFamilyGallerySubmissions>>
   >([]);
   const [approvedItems, setApprovedItems] = useState<
-    Awaited<ReturnType<typeof fetchApprovedStudentGalleryItems>>
+    Awaited<ReturnType<typeof fetchProgramGalleryItems>>
   >([]);
+  const [communityItems, setCommunityItems] = useState<
+    Awaited<ReturnType<typeof fetchCommunityGalleryItems>>
+  >([]);
+  const [gallerySettings, setGallerySettings] = useState<GalleryProgramSettings>(() =>
+    readGalleryProgramSettingsLocal(programCode),
+  );
   const [loading, setLoading] = useState(true);
+
+  const tabs = useMemo(() => {
+    if (gallerySettings.communityGallerySharing) {
+      return [...BASE_TABS, { id: 'community-gallery' as const, label: 'Community Gallery' }];
+    }
+    return BASE_TABS;
+  }, [gallerySettings.communityGallerySharing]);
 
   useEffect(() => {
     trackEvent('gallery_viewed');
     markGalleryViewed(programCode);
   }, [programCode]);
 
+  useEffect(() => {
+    if (!programCode) return;
+    void fetchGalleryProgramSettings(programCode).then(setGallerySettings);
+  }, [programCode]);
+
   const refreshGallery = useCallback(async () => {
     setLoading(true);
-    const [mine, approved] = await Promise.all([
-      fetchFamilyGallerySubmissions(submitterKey),
-      fetchApprovedStudentGalleryItems(),
+    const [mine, approved, community] = await Promise.all([
+      fetchFamilyGallerySubmissions(submitterKey, programCode),
+      fetchProgramGalleryItems(programCode),
+      gallerySettings.communityGallerySharing ? fetchCommunityGalleryItems() : Promise.resolve([]),
     ]);
     setMySubmissions(mine);
     setApprovedItems(approved);
+    setCommunityItems(community);
     setLoading(false);
-  }, [submitterKey]);
+  }, [gallerySettings.communityGallerySharing, programCode, submitterKey]);
 
   useEffect(() => {
     void refreshGallery();
   }, [refreshGallery]);
+
+  const pendingSubmissions = useMemo(
+    () => mySubmissions.filter((item) => normalizeGalleryStatus(item.status) === 'pending'),
+    [mySubmissions],
+  );
 
   const visibleSubmissions = useMemo(
     () =>
@@ -71,6 +131,16 @@ export default function FamilyGalleryPanel() {
     () => mySubmissions.filter((item) => normalizeGalleryStatus(item.status) === 'rejected').length,
     [mySubmissions],
   );
+
+  const setTab = (tab: FamilyGalleryTabId) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
+
+  const scrollToUpload = () => {
+    uploadFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const applyFile = (file: File | null) => {
     if (!file) return;
@@ -105,6 +175,12 @@ export default function FamilyGalleryPanel() {
       return;
     }
 
+    if (!gallerySettings.allowFamilySubmit) {
+      setUploadState('error');
+      setUploadMessage('Family gallery submissions are disabled for this program.');
+      return;
+    }
+
     setUploadState('uploading');
     setUploadMessage('Uploading…');
 
@@ -125,8 +201,9 @@ export default function FamilyGalleryPanel() {
       return;
     }
 
-    setUploadState('success');
-    setUploadMessage('Submitted! Your upload is waiting for facilitator approval.');
+    setUploadState('idle');
+    setUploadMessage(null);
+    showToast("Artwork uploaded. I'll help you track the review.", 'success');
     setStudentName('');
     setActivityName('');
     setCaption('');
@@ -136,18 +213,94 @@ export default function FamilyGalleryPanel() {
     }
     await refreshGallery();
     requestGalleryCountsRefresh();
+    setTab('pending-review');
+  };
+
+  const renderTabContent = () => {
+    if (loading) return <p className="family-emptyNote">Loading gallery…</p>;
+
+    switch (activeTab) {
+      case 'pending-review':
+        return (
+          <StudentGalleryGrid
+            items={pendingSubmissions}
+            emptyMessage="No submissions waiting for review."
+            variant="family"
+          />
+        );
+      case 'program-gallery':
+        return (
+          <>
+            <p className="family-gallerySectionDesc">
+              Approved artwork from your program only. Other programs are not shown here.
+            </p>
+            <StudentGalleryGrid
+              items={approvedItems}
+              emptyMessage="No approved artwork yet. Check back after facilitator review."
+              variant="family"
+            />
+          </>
+        );
+      case 'community-gallery':
+        return gallerySettings.communityGallerySharing ? (
+          <>
+            <p className="family-gallerySectionDesc">
+              Community artwork is shared only when your program opts in and a facilitator approves
+              sharing.
+            </p>
+            <StudentGalleryGrid
+              items={communityItems}
+              emptyMessage="No community artwork available yet."
+              variant="family"
+            />
+          </>
+        ) : (
+          <p className="family-emptyNote">Community sharing is not enabled for this program.</p>
+        );
+      case 'my-submissions':
+      default:
+        return (
+          <>
+            {rejectedCount > 0 ? (
+              <p className="family-galleryRejectedNote">
+                {rejectedCount} submission{rejectedCount === 1 ? '' : 's'} were not approved.
+              </p>
+            ) : null}
+            <StudentGalleryGrid
+              items={visibleSubmissions}
+              emptyMessage="No uploads yet. Share student work above!"
+              variant="family"
+            />
+          </>
+        );
+    }
   };
 
   return (
     <div className="family-panel family-panel--gallery">
-      <header className="family-galleryHeader">
-        <h2 className="family-panelBlockTitle">Family Gallery</h2>
-        <p className="family-gallerySubtitle">
-          Upload student artwork, coloring pages, or activity photos for facilitator review.
-        </p>
-      </header>
+      <MarketingShowcaseCard
+        title="Share Your Child's Creativity"
+        description="Upload coloring pages, reflections, and student wins. Submissions stay private to your program unless approved for community sharing."
+        imageSrc={CHARACTER_IMAGE_PATHS.caiden ?? '/images/characters/caiden_photo_icon_game.webp'}
+        actions={[{ label: 'Upload Artwork', onClick: scrollToUpload }]}
+      />
 
-      <form className="family-galleryUploadCard" onSubmit={handleSubmit}>
+      <div className="family-galleryTabs" role="tablist" aria-label="Family gallery views">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            className={`family-galleryTab${activeTab === tab.id ? ' family-galleryTab--active' : ''}`}
+            onClick={() => setTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <form ref={uploadFormRef} className="family-galleryUploadCard" onSubmit={handleSubmit}>
         <h3 className="family-galleryUploadTitle">Share Student Work</h3>
         <p className="family-galleryUploadDesc">
           Upload a photo of artwork, coloring pages, or completed activities. A facilitator will
@@ -222,13 +375,13 @@ export default function FamilyGalleryPanel() {
         </div>
 
         <p className="family-galleryReviewNote">
-          Uploads are reviewed before they appear in the gallery.
+          Family uploads are pending by default and stay program-private until approved.
         </p>
 
         <button
           type="submit"
           className="family-gallerySubmitBtn"
-          disabled={uploadState === 'uploading'}
+          disabled={uploadState === 'uploading' || !gallerySettings.allowFamilySubmit}
         >
           {uploadState === 'uploading' ? 'Submitting…' : 'Submit for Review'}
         </button>
@@ -243,38 +396,9 @@ export default function FamilyGalleryPanel() {
         ) : null}
       </form>
 
-      {loading ? <p className="family-emptyNote">Loading gallery…</p> : null}
-
-      {!loading ? (
-        <>
-          <section className="family-gallerySection" aria-label="Your uploads">
-            <h3 className="family-gallerySectionTitle">Your Uploads</h3>
-            {rejectedCount > 0 ? (
-              <p className="family-galleryRejectedNote">
-                {rejectedCount} submission{rejectedCount === 1 ? '' : 's'} were not approved. Check
-                facilitator notes on items marked Needs Changes.
-              </p>
-            ) : null}
-            <StudentGalleryGrid
-              items={visibleSubmissions}
-              emptyMessage="No uploads yet. Share student work above!"
-              variant="family"
-            />
-          </section>
-
-          <section className="family-gallerySection" aria-label="Approved community gallery">
-            <h3 className="family-gallerySectionTitle">Approved Gallery</h3>
-            <p className="family-gallerySectionDesc">
-              Artwork approved by facilitators appears here for everyone to celebrate.
-            </p>
-            <StudentGalleryGrid
-              items={approvedItems}
-              emptyMessage="No approved artwork yet. Check back after facilitator review."
-              variant="family"
-            />
-          </section>
-        </>
-      ) : null}
+      <section className="family-gallerySection" aria-label={tabs.find((t) => t.id === activeTab)?.label}>
+        {renderTabContent()}
+      </section>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isChildBaselineAssessmentType } from '../config/assessmentTypeConstants';
 import { afterIdle } from '../lib/defer';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../lib/pilotTrackingLocalStorage';
 import { resolveParticipantDisplayName, buildParticipantNameLookup } from '../lib/pilotResultsDisplay';
 import {
+  formatParentGuardianShort,
+  resolveBaselineStatus,
   resolveParticipantLastActivity,
   resolveStudentStatus,
   type PilotStudentStatus,
@@ -23,6 +24,7 @@ export type PilotRosterRow = {
   childName: string;
   nickname: string;
   parentGuardianName: string;
+  parentGuardianShort: string;
   parentFirstName: string;
   parentLastName: string;
   parentEmail: string;
@@ -36,19 +38,6 @@ export type PilotRosterRow = {
   moduleCompletions: number;
   lastActivityAt: string | null;
 };
-
-function resolveBaselineStatus(
-  participantId: string,
-  assessments: LocalAssessmentV2Record[],
-): PilotRosterRow['baselineStatus'] {
-  const rows = assessments.filter(
-    (row) =>
-      row.participant_id === participantId && isChildBaselineAssessmentType(row.assessment_type),
-  );
-  if (rows.some((row) => Boolean(row.participant_id?.trim()))) return 'Complete';
-  if (rows.length > 0) return 'In Progress';
-  return 'Not Started';
-}
 
 export function usePilotRosterData(
   programCode?: string,
@@ -121,6 +110,7 @@ export function usePilotRosterData(
           childName: participant.first_name?.trim() || participant.nickname?.trim() || 'Child',
           nickname: participant.nickname?.trim() || '—',
           parentGuardianName,
+          parentGuardianShort: formatParentGuardianShort(parentFirst, parentLast),
           parentFirstName: parentFirst || '—',
           parentLastName: parentLast || '—',
           parentEmail: link?.parent_email?.trim() || '—',

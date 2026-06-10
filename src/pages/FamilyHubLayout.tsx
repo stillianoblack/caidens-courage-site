@@ -1,8 +1,9 @@
 import React, { Suspense, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
-import PortalShell from '../components/portal/PortalShell';
+import { AppShell, GoalsOnboardingDrawer } from '../components/portal-design-system';
+import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
@@ -20,18 +21,42 @@ import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
+import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
+import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const activeProgram = readActivePilotProgram();
   const hasSession = readFamilyPortalSession();
   const role = readActivePortalRole();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
+  const programCode = activeProgram?.programCode ?? '';
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
+
+  const goalsOnboarding = useProgramGoalsOnboarding({
+    programCode,
+    portalType: 'family',
+    enabled: sessionValid,
+  });
+
+  useEffect(() => {
+    const handleOpenGoals = () => goalsOnboarding.openDrawer();
+    window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
+    return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
+  }, [goalsOnboarding.openDrawer]);
+
+  useEffect(() => {
+    if (searchParams.get('openGoals') !== '1') return;
+    goalsOnboarding.openDrawer();
+    const next = new URLSearchParams(searchParams);
+    next.delete('openGoals');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, goalsOnboarding.openDrawer]);
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
@@ -63,7 +88,7 @@ export default function FamilyHubLayout() {
   }
 
   return (
-    <PortalShell
+    <AppShell
       variant="family"
       sidebar={
         <FamilyDashboardSidebar
@@ -78,6 +103,7 @@ export default function FamilyHubLayout() {
           pageTitle={pageTitle}
           contextTitle={brand.title}
           contextSubtitle="Family Portal"
+          onOpenProgramGoals={goalsOnboarding.openDrawer}
         />
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
@@ -85,6 +111,17 @@ export default function FamilyHubLayout() {
       <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
         <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
       </Suspense>
-    </PortalShell>
+
+      <GoalsOnboardingDrawer
+        open={goalsOnboarding.open}
+        onClose={goalsOnboarding.closeDrawer}
+        portalType="family"
+        programCode={programCode}
+        initialRecord={goalsOnboarding.record}
+        onSave={goalsOnboarding.saveGoals}
+        onRemindLater={goalsOnboarding.remindLater}
+        onSkip={goalsOnboarding.skipForNow}
+      />
+    </AppShell>
   );
 }

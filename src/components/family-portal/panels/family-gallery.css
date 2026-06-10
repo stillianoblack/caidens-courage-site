@@ -343,3 +343,26 @@
   background: #fef2f2;
   color: #b91c1c;
 }
+
+.family-galleryTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.family-galleryTab {
+  padding: 0.45rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: #fff;
+  color: var(--family-navy, #243e70);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.family-galleryTab--active {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: #fffbeb;
+  color: var(--family-navy-deep, #1a2f52);
+}

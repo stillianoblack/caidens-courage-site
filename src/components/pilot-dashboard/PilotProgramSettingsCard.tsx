@@ -5,17 +5,20 @@ import PilotProgramSettingsDrawer, {
   type ProgramSettingsTabId,
 } from './PilotProgramSettingsDrawer';
 import PilotUpgradePricingModal from './PilotUpgradePricingModal';
+import { openProgramGoals } from '../../lib/openProgramGoals';
 
 type PilotProgramSettingsCardProps = {
   programCode?: string;
   pricingTier?: PilotPricingTier;
 };
 
-const MENU_ITEMS: Array<{ tab: ProgramSettingsTabId; label: string }> = [
+const MENU_ITEMS: Array<{ tab: ProgramSettingsTabId | 'program-goals'; label: string }> = [
   { tab: 'program-info', label: 'Program Info' },
   { tab: 'facilitators', label: 'Facilitators' },
   { tab: 'access-codes', label: 'Access Codes' },
+  { tab: 'program-goals', label: 'Program Goals' },
   { tab: 'student-data', label: 'Student Data' },
+  { tab: 'student-gallery', label: 'Student Gallery' },
   { tab: 'exports', label: 'Exports' },
   { tab: 'support', label: 'Support' },
 ];
@@ -35,7 +38,11 @@ export default function PilotProgramSettingsCard({
     setSupportOpen(true);
   };
 
-  const openTab = (tab: ProgramSettingsTabId) => {
+  const openTab = (tab: ProgramSettingsTabId | 'program-goals') => {
+    if (tab === 'program-goals') {
+      openProgramGoals();
+      return;
+    }
     if (tab === 'support') {
       openSupport();
       return;

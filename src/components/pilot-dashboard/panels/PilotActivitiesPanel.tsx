@@ -1,18 +1,44 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   PILOT_ACTIVITY_ASSETS,
   PILOT_ACTIVITY_CATEGORIES,
   PILOT_FOCUS_FLAME_LAB_CARD,
   type ActivityCategoryId,
 } from '../../../data/pilotDashboardContent';
+import { isActivityLibraryTab } from '../../../lib/askB4DeepLinks';
 import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
 import PilotStatusPill from '../PilotStatusPill';
 
+const DEFAULT_CATEGORY: ActivityCategoryId = 'coloring-pages';
+
 export default function PilotActivitiesPanel() {
-  const [category, setCategory] = useState<ActivityCategoryId>('coloring-pages');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialCategory = tabParam && isActivityLibraryTab(tabParam) ? tabParam : DEFAULT_CATEGORY;
+  const [category, setCategory] = useState<ActivityCategoryId>(initialCategory);
   const [downloadingAll, setDownloadingAll] = useState(false);
+
+  useEffect(() => {
+    if (tabParam && isActivityLibraryTab(tabParam) && tabParam !== category) {
+      setCategory(tabParam);
+    }
+  }, [tabParam, category]);
+
+  const selectCategory = useCallback(
+    (next: ActivityCategoryId) => {
+      setCategory(next);
+      const nextParams = new URLSearchParams(searchParams);
+      if (next === DEFAULT_CATEGORY) {
+        nextParams.delete('tab');
+      } else {
+        nextParams.set('tab', next);
+      }
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   const handleDownloadAll = async () => {
     if (downloadingAll) return;
@@ -34,7 +60,7 @@ export default function PilotActivitiesPanel() {
               key={cat.id}
               type="button"
               className={`pilot-activityCatBtn${category === cat.id ? ' pilot-activityCatBtn--active' : ''}`}
-              onClick={() => setCategory(cat.id)}
+              onClick={() => selectCategory(cat.id)}
             >
               {cat.label}
             </button>

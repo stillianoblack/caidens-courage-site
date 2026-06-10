@@ -2,9 +2,11 @@ import React, { Suspense, useCallback, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
-import PortalShell from '../components/portal/PortalShell';
+import { AppShell } from '../components/portal-design-system';
 import PilotProgramWelcomeCard from '../components/pilot-program/PilotProgramWelcomeCard';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import { GoalsOnboardingDrawer } from '../components/portal-design-system';
+import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
@@ -37,6 +39,8 @@ import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
+import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
+import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -66,6 +70,26 @@ export default function ProgramDashboardPage() {
       isPortalRoleAllowed(location.pathname),
   );
   const handleSelectNav = useProgramDashboardNav();
+
+  const goalsOnboarding = useProgramGoalsOnboarding({
+    programCode: programCode ?? '',
+    portalType: 'facilitator',
+    enabled: sessionValid && !isKidsRoute,
+  });
+
+  useEffect(() => {
+    const handleOpenGoals = () => goalsOnboarding.openDrawer();
+    window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
+    return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
+  }, [goalsOnboarding.openDrawer]);
+
+  useEffect(() => {
+    if (searchParams.get('openGoals') !== '1') return;
+    goalsOnboarding.openDrawer();
+    const next = new URLSearchParams(searchParams);
+    next.delete('openGoals');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, goalsOnboarding.openDrawer]);
 
   const pageTitle = isKidsRoute
     ? resolvePortalPageTitle(location.pathname, PROGRAM_DASHBOARD_PATH)
@@ -117,7 +141,7 @@ export default function ProgramDashboardPage() {
   }
 
   return (
-    <PortalShell
+    <AppShell
       variant="facilitator"
       sidebar={
         <PilotDashboardSidebar
@@ -132,7 +156,10 @@ export default function ProgramDashboardPage() {
         />
       }
       topBar={
-        <PilotDashboardTopBar pageTitle={pageTitle} />
+        <PilotDashboardTopBar
+          pageTitle={pageTitle}
+          onOpenProgramGoals={goalsOnboarding.openDrawer}
+        />
       }
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}
     >
@@ -146,6 +173,17 @@ export default function ProgramDashboardPage() {
       >
         <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
       </Suspense>
-    </PortalShell>
+
+      <GoalsOnboardingDrawer
+        open={goalsOnboarding.open}
+        onClose={goalsOnboarding.closeDrawer}
+        portalType="facilitator"
+        programCode={programCode ?? ''}
+        initialRecord={goalsOnboarding.record}
+        onSave={goalsOnboarding.saveGoals}
+        onRemindLater={goalsOnboarding.remindLater}
+        onSkip={goalsOnboarding.skipForNow}
+      />
+    </AppShell>
   );
 }

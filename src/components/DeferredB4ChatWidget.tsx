@@ -1,5 +1,6 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import B4LauncherButton from './B4LauncherButton';
+import { OPEN_ASK_B4_EVENT } from '../lib/openAskB4';
 import { safeOnce } from '../perf/defer';
 
 type B4ChatWidgetComponent = React.ComponentType<{ defaultOpen?: boolean }>;
@@ -40,11 +41,20 @@ const DeferredB4ChatWidget: React.FC = () => {
     });
   };
 
+  useEffect(() => {
+    const handleOpen = () => {
+      setOpenOnMount(true);
+      safeOnce('b4-chat-load', loadWidget);
+    };
+    window.addEventListener(OPEN_ASK_B4_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_ASK_B4_EVENT, handleOpen);
+  }, [loadWidget]);
+
   if (Widget) {
     return <Widget defaultOpen={openOnMount} />;
   }
 
-  return <B4LauncherButton onClick={handleLauncherClick} />;
+  return <B4LauncherButton className="askB4-launcher" onClick={handleLauncherClick} />;
 };
 
 export default DeferredB4ChatWidget;

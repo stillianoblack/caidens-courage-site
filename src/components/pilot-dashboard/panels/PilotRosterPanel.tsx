@@ -1,4 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useToast } from '../../portal-design-system/ToastProvider';
+import { Link, useSearchParams } from 'react-router-dom';
+import { programDashboardTabPath } from '../../../lib/programDashboardNav';
+import {
+  filterRosterRows,
+  isRosterFilterId,
+  ROSTER_FILTER_LABELS,
+} from '../../../lib/pilotOverviewInsights';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { usePilotRosterData } from '../../../hooks/usePilotRosterData';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
@@ -16,10 +24,24 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const resolvedProgramCode = programCode?.trim() || activeProgram?.programCode?.trim() || '';
   const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh } =
     usePilotRosterData(resolvedProgramCode, true, activeProgram?.familyAccessCode);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawFilter = searchParams.get('filter');
+  const rosterFilter = isRosterFilterId(rawFilter) ? rawFilter : null;
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
   const showLoading = externalLoading || loading;
+
+  const displayRows = useMemo(
+    () => filterRosterRows(rows, rosterFilter),
+    [rows, rosterFilter],
+  );
+
+  const clearFilter = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('filter');
+    setSearchParams(next, { replace: true });
+  };
 
   if (showLoading) {
     return (
@@ -48,14 +70,28 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         </button>
       </div>
 
-      {successMessage ? <p className="pilot-rosterSuccess">{successMessage}</p> : null}
+      {rosterFilter ? (
+        <div className="pilot-rosterFilterBanner">
+          <span className="pilot-rosterFilterChip">
+            Filtered by: {ROSTER_FILTER_LABELS[rosterFilter]}
+          </span>
+          <button type="button" className="pilot-rosterFilterClear" onClick={clearFilter}>
+            Clear filter
+          </button>
+        </div>
+      ) : null}
+
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
-      {rows.length === 0 ? (
-        <p className="pilot-emptyNote">No students yet. Add your first student.</p>
+      {displayRows.length === 0 ? (
+        <p className="pilot-emptyNote">
+          {rosterFilter
+            ? `No students match “${ROSTER_FILTER_LABELS[rosterFilter]}”.`
+            : 'No students yet. Add your first student.'}
+        </p>
       ) : (
         <PilotAdminStudentTable
-          rows={rows}
+          rows={displayRows}
           variant="roster"
           onStudentClick={setDrawerParticipantId}
         />
@@ -76,11 +112,18 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         open={addStudentOpen}
         onClose={() => setAddStudentOpen(false)}
         programCode={resolvedProgramCode}
-        onSuccess={(message) => {
-          setSuccessMessage(message);
+        onSuccess={() => {
+          showToast("Student added. I'll keep their progress organized here.", 'success');
           void refresh();
         }}
       />
+
+      {rows.length > 0 && rosterFilter ? (
+        <p className="pilot-rosterFilterMeta">
+          Showing {displayRows.length} of {rows.length} students.{' '}
+          <Link to={programDashboardTabPath('roster')}>View full roster</Link>
+        </p>
+      ) : null}
     </div>
   );
 }

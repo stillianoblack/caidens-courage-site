@@ -15,6 +15,8 @@ export type PilotStudentStatus =
   | 'active'
   | 'certificate-ready';
 
+export type PilotBaselineStatus = 'Complete' | 'In Progress' | 'Not Started';
+
 export type PilotStudentDetailSnapshot = {
   participantId: string;
   childName: string;
@@ -22,6 +24,10 @@ export type PilotStudentDetailSnapshot = {
   parentName: string;
   parentEmail: string;
   parentPhone: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  familyAccessCode: string;
+  baselineStatus: PilotBaselineStatus;
   baselineScore: string;
   modulesCompleted: number;
   lastAssessmentAt: string | null;
@@ -39,6 +45,27 @@ export type PilotNeedsAttentionCounts = {
   noModules: number;
   certificateReady: number;
 };
+
+export function formatParentGuardianShort(firstName: string, lastName: string): string {
+  const first = firstName.trim();
+  const last = lastName.trim();
+  if (!first && !last) return '—';
+  if (!last) return first;
+  return `${first} ${last.charAt(0).toUpperCase()}.`;
+}
+
+export function resolveBaselineStatus(
+  participantId: string,
+  assessments: LocalAssessmentV2Record[],
+): PilotBaselineStatus {
+  const rows = assessments.filter(
+    (row) =>
+      row.participant_id === participantId && isChildBaselineAssessmentType(row.assessment_type),
+  );
+  if (rows.some((row) => Boolean(row.completed_at))) return 'Complete';
+  if (rows.length > 0) return 'In Progress';
+  return 'Not Started';
+}
 
 function hasBaselineComplete(
   participantId: string,
@@ -182,6 +209,8 @@ export function buildStudentDetailSnapshot(input: {
   const parentLast = link?.parent_last_name?.trim() ?? '';
   const parentName = [parentFirst, parentLast].filter(Boolean).join(' ') || '—';
 
+  const familyAccessCode = link?.family_program_code?.trim() || '—';
+
   return {
     participantId: participant.id,
     childName: participant.first_name?.trim() || participant.nickname?.trim() || 'Unknown Student',
@@ -189,6 +218,11 @@ export function buildStudentDetailSnapshot(input: {
     parentName,
     parentEmail: link?.parent_email?.trim() || '—',
     parentPhone: link?.parent_phone?.trim() || '—',
+    // Emergency contact fields are not persisted in student_family_links yet.
+    emergencyContactName: '—',
+    emergencyContactPhone: '—',
+    familyAccessCode,
+    baselineStatus: resolveBaselineStatus(participant.id, assessments),
     baselineScore: baseline ? formatAssessmentScore(baseline) : '—',
     modulesCompleted,
     lastAssessmentAt,

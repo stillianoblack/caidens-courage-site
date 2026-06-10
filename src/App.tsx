@@ -30,6 +30,7 @@ import {
 } from './routes/programDashboardTabRoutes';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
+import { ToastProvider } from './components/portal-design-system';
 import {
   AboutPage,
   B4ClickerPage,
@@ -106,6 +107,8 @@ import {
 } from './routes/familyLazyPanels';
 import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
 import AdminPortalPage from './pages/AdminPortalPage';
+import AdminRouteLayout from './pages/AdminRouteLayout';
+import DesignSystemPage from './pages/DesignSystemPage';
 import ProgramDashboardPage from './pages/ProgramDashboardPage';
 import FamilyHubLayout from './pages/FamilyHubLayout';
 import FamilyPortalLayout from './pages/FamilyPortalLayout';
@@ -358,7 +361,10 @@ const appRouteChildren = (
       <Route path="/schools" element={<SchoolsPage />} />
 
       {/* Private admin — not linked in public navigation */}
-      <Route path={ADMIN_PORTAL_PATH} element={<AdminPortalPage />} />
+      <Route path={ADMIN_PORTAL_PATH} element={<AdminRouteLayout />}>
+        <Route path="design-system" element={<DesignSystemPage />} />
+        <Route index element={<AdminPortalPage />} />
+      </Route>
 
       {/* Portal */}
       <Route path="/portal" element={<Portal />} />
@@ -467,11 +473,13 @@ const AppLayout: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <MissionGamePhaseProvider>
-      <Routes>
-        <Route element={<AppLayout />}>{appRouteChildren}</Route>
-      </Routes>
-    </MissionGamePhaseProvider>
+    <ToastProvider>
+      <MissionGamePhaseProvider>
+        <Routes>
+          <Route element={<AppLayout />}>{appRouteChildren}</Route>
+        </Routes>
+      </MissionGamePhaseProvider>
+    </ToastProvider>
   );
 };
 

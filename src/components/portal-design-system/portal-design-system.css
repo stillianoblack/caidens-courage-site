@@ -1,0 +1,920 @@
+/* Facilitator / Family Portal Design System — shared primitives */
+
+.ds-marketingCard {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.375rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(100, 160, 255, 0.35);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.08) 0%, transparent 42%),
+    radial-gradient(circle at 88% 82%, rgba(240, 206, 110, 0.12) 0%, transparent 38%),
+    linear-gradient(135deg, #0f2d5c 0%, #1a4a8a 48%, #0d2448 100%);
+  color: #fff;
+  box-shadow: 0 12px 32px -18px rgba(15, 45, 92, 0.55);
+}
+
+.ds-marketingCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 14px 14px;
+  pointer-events: none;
+}
+
+.ds-marketingCardInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.ds-marketingCardMedia {
+  flex-shrink: 0;
+}
+
+.ds-marketingCardImageRing {
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 3px solid rgba(240, 206, 110, 0.55);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ds-marketingCardImageRing img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.ds-marketingCardBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.ds-marketingCardTitle {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.ds-marketingCardText {
+  margin: 0 0 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ds-marketingCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ds-marketingCardBtn {
+  padding: 0.5rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 206, 110, 0.55);
+  background: rgba(240, 206, 110, 0.18);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ds-marketingCardBtn:hover {
+  background: rgba(240, 206, 110, 0.32);
+}
+
+.ds-marketingCardBtn--ghost {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ds-marketingCardBtn--ghost:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.ds-goalsDrawer {
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.ds-goalsDrawerHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.ds-goalsDrawerHeadText {
+  min-width: 0;
+  flex: 1;
+}
+
+.ds-goalsDrawerTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-goalsProgramNote {
+  margin: 1.5rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.62);
+  overflow-wrap: break-word;
+}
+
+.ds-goalsDrawerSubtext {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.ds-goalsDrawerClose {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(36, 62, 112, 0.15);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--pilot-navy, #243e70);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ds-goalsDrawerBody {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1.5rem 1.75rem 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ds-goalsLimitNote {
+  margin: 0 0 1.125rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-goalsLimitHint {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* Mobile: single column. Tablet/desktop: two columns (requires explicit template — grid alone defaults to 1 col). */
+.ds-goalsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .ds-goalsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ds-goalsOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 4.5rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pilot-navy-deep, #1a2f52);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ds-goalsOption span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  line-height: 1.45;
+}
+
+.ds-goalsOption:hover {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: #fffbeb;
+}
+
+.ds-goalsOption--selected {
+  border-color: rgba(229, 192, 106, 0.65);
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+}
+
+.ds-goalsOption input {
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: var(--pilot-gold-dark, #c8922e);
+}
+
+.ds-goalsFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 1.25rem 1.75rem 1.75rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.ds-goalsBtnPrimary {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f6d06f, #c8922e);
+  color: #0b1a2b;
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ds-goalsBtnPrimary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ds-goalsBtnSecondary {
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--pilot-navy, #243e70);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ds-goalsBtnGhost {
+  width: 100%;
+  padding: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: rgba(36, 62, 112, 0.62);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.portal-headerGoalsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.625rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--pilot-navy, #243e70);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.portal-headerGoalsBtn:hover {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: #fffbeb;
+}
+
+.portal-headerGoalsBtn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* B-4 toast notifications — bottom-right, above launcher; z-index above drawers (1201) and B-4 (2000+) */
+.ds-toastViewport {
+  position: fixed;
+  bottom: 96px;
+  right: 28px;
+  z-index: 2500;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.625rem;
+  width: min(420px, calc(100vw - 56px));
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.ds-b4Toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 0.875rem 0.875rem 0.75rem;
+  border-radius: 0.875rem;
+  animation: ds-b4ToastIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes ds-b4ToastIn {
+  from {
+    opacity: 0;
+    transform: translate(0.5rem, 0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+.ds-b4Toast--branded {
+  border: 1px solid rgba(240, 206, 110, 0.22);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.06) 0%, transparent 42%),
+    linear-gradient(145deg, #0a1628 0%, #0f2d5c 52%, #081222 100%);
+  color: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 0 0 1px rgba(240, 206, 110, 0.08),
+    0 14px 36px -14px rgba(0, 0, 0, 0.55);
+}
+
+.ds-b4Toast--system {
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: #fff;
+  color: var(--pilot-navy-deep, #1a2f52);
+  box-shadow:
+    0 12px 32px -12px rgba(26, 47, 82, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+}
+
+.ds-b4ToastAvatarWrap {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 20, 38, 0.65);
+  border: 1px solid rgba(240, 206, 110, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.ds-b4ToastAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.ds-b4ToastSystemIcon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.12);
+}
+
+.ds-b4ToastBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.ds-b4ToastLabel {
+  display: block;
+  margin: 0 0 0.15rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(240, 206, 110, 0.85);
+}
+
+.ds-b4Toast--system .ds-b4ToastLabel {
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.ds-b4ToastMessage {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ds-b4Toast--branded .ds-b4ToastMessage {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ds-b4ToastAction {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.625rem;
+  border: 1px solid rgba(240, 206, 110, 0.4);
+  border-radius: 999px;
+  background: rgba(240, 206, 110, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ds-b4Toast--system .ds-b4ToastAction {
+  border-color: rgba(36, 62, 112, 0.2);
+  background: rgba(36, 62, 112, 0.06);
+  color: var(--pilot-navy, #243e70);
+}
+
+.ds-b4ToastClose {
+  flex-shrink: 0;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: -0.1rem -0.1rem 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-b4ToastClose svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.ds-b4Toast--system .ds-b4ToastClose {
+  color: rgba(36, 62, 112, 0.45);
+}
+
+.ds-b4ToastClose:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ds-b4Toast--system .ds-b4ToastClose:hover {
+  background: rgba(36, 62, 112, 0.08);
+  color: var(--pilot-navy, #243e70);
+}
+
+.ds-b4Toast--success.ds-b4Toast--branded {
+  border-color: rgba(240, 206, 110, 0.38);
+}
+
+.ds-b4Toast--info.ds-b4Toast--branded {
+  border-color: rgba(147, 197, 253, 0.35);
+}
+
+.ds-b4Toast--warning.ds-b4Toast--branded {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+.ds-b4Toast--error.ds-b4Toast--branded {
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.ds-b4Toast--success.ds-b4Toast--system {
+  border-color: rgba(200, 146, 46, 0.45);
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+}
+
+.ds-b4Toast--success.ds-b4Toast--system .ds-b4ToastSystemIcon {
+  background: linear-gradient(135deg, #f6d06f, #c8922e);
+}
+
+.ds-b4Toast--info.ds-b4Toast--system {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+}
+
+.ds-b4Toast--info.ds-b4Toast--system .ds-b4ToastSystemIcon {
+  background: linear-gradient(135deg, #93c5fd, #3b82f6);
+}
+
+.ds-b4Toast--warning.ds-b4Toast--system {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+}
+
+.ds-b4Toast--warning.ds-b4Toast--system .ds-b4ToastSystemIcon {
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+}
+
+.ds-b4Toast--error.ds-b4Toast--system {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(180deg, #fef2f2 0%, #fff 100%);
+}
+
+.ds-b4Toast--error.ds-b4Toast--system .ds-b4ToastSystemIcon {
+  background: linear-gradient(135deg, #fca5a5, #ef4444);
+}
+
+/* When B-4 chat panel is open — keep toasts clear of launcher and input */
+@media (min-width: 640px) {
+  body[data-ask-b4-open='desktop-float'] .ds-toastViewport {
+    bottom: 1.5rem;
+    right: calc(1.5rem + min(26rem, calc(100vw - 2rem)) + 0.75rem);
+    max-width: min(420px, calc(100vw - 3rem - min(26rem, calc(100vw - 2rem))));
+  }
+}
+
+@media (max-width: 767px) {
+  .ds-marketingCardInner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .portal-headerGoalsBtn span {
+    display: none;
+  }
+
+  .ds-toastViewport {
+    bottom: 20px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+  }
+
+  body[data-ask-b4-open='desktop-float'] .ds-toastViewport {
+    bottom: auto;
+    top: 1rem;
+    left: 16px;
+    right: 16px;
+  }
+}
+
+/* Slide-out drawer size variants */
+@media (min-width: 768px) {
+  .ds-drawer--large {
+    width: clamp(720px, 54vw, 960px) !important;
+  }
+}
+
+/* Collapsible card */
+.ds-collapsibleCard {
+  margin-bottom: 1.25rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  box-shadow: 0 8px 24px -18px rgba(26, 47, 82, 0.2);
+}
+
+.ds-collapsibleCardToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ds-collapsibleCardToggle:hover {
+  background: rgba(36, 62, 112, 0.04);
+}
+
+.ds-collapsibleCardTitle {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-collapsibleCardAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-collapsibleCardChevron {
+  width: 1.125rem;
+  height: 1.125rem;
+  transition: transform 0.15s ease;
+}
+
+.ds-collapsibleCardChevron--open {
+  transform: rotate(180deg);
+}
+
+.ds-collapsibleCardHelper {
+  margin: 0;
+  padding: 0 1rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.ds-collapsibleCardBody {
+  padding: 0 1rem 1rem;
+}
+
+/* Metric card */
+.ds-metricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+  box-shadow: 0 8px 20px -16px rgba(26, 47, 82, 0.25);
+}
+
+.ds-metricCard--clickable {
+  cursor: pointer;
+  text-align: left;
+}
+
+.ds-metricCard--clickable:hover {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: #fffbeb;
+}
+
+.ds-metricCard--accent {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+}
+
+.ds-metricCardLabel {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-metricCardValue {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+  line-height: 1.2;
+}
+
+.ds-metricCardHelper {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+/* Baseline overview bars */
+.ds-baselineBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.ds-baselineBarRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ds-baselineBarMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ds-baselineBarLabel {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-baselineBarPct {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-baselineBarDetail {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-baselineBarTrack {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+}
+
+.ds-baselineBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.ds-baselineBarFill--feelings,
+.ds-baselineBarFill--story {
+  background: linear-gradient(90deg, #93c5fd, #3b82f6);
+}
+
+.ds-baselineBarFill--reading {
+  background: linear-gradient(90deg, #86efac, #22c55e);
+}
+
+.ds-baselineBarFill--focus {
+  background: linear-gradient(90deg, #fcd34d, #f59e0b);
+}
+
+.ds-baselineBarFill--creative {
+  background: linear-gradient(90deg, #c4b5fd, #8b5cf6);
+}
+
+.ds-baselineBarFill--overall {
+  background: linear-gradient(90deg, #f6d06f, #c8922e);
+}
+
+.ds-baselineBarsEmpty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+/* Status chip */
+.ds-statusChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  border: 1px solid transparent;
+}
+
+.ds-statusChip--active,
+.ds-statusChip--approved,
+.ds-statusChip--baseline-complete,
+.ds-statusChip--complete {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.ds-statusChip--in-progress,
+.ds-statusChip--pending-review {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.ds-statusChip--not-started,
+.ds-statusChip--default {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.ds-statusChip--certificate-ready {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.ds-statusChip--rejected {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+/* Empty state */
+.ds-emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px dashed rgba(36, 62, 112, 0.18);
+  background: rgba(36, 62, 112, 0.02);
+}
+
+.ds-emptyStateMedia img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.ds-emptyStateTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-emptyStateDesc {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.ds-emptyStateBtn {
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 192, 106, 0.55);
+  background: rgba(240, 206, 110, 0.18);
+  color: var(--pilot-navy-deep, #1a2f52);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Copyable compact value */
+.ds-copyChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  background: #f8fafc;
+  color: var(--pilot-navy, #243e70);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.ds-copyChip:hover,
+.ds-copyChip:focus-visible {
+  background: #eef2f7;
+  border-color: rgba(36, 62, 112, 0.28);
+  outline: none;
+}
+
+.ds-copyChip--empty {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.ds-copyChipIcon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+.ds-copyChipText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-copyChip--code .ds-copyChipText {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6875rem;
+  max-width: 9rem;
+}

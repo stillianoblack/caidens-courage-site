@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { usePilotRosterData } from '../../hooks/usePilotRosterData';
 import { usePilotTrackingResults } from '../../hooks/usePilotTrackingResults';
@@ -9,15 +9,22 @@ import {
   exportModuleResultsCsv,
   exportStudentProgressCsv,
 } from '../../lib/pilotExportCsv';
+import { useToast } from '../portal-design-system/ToastProvider';
 import CopyableCompactValue from './CopyableCompactValue';
 import PilotAdminStudentTable from './PilotAdminStudentTable';
 import PilotDrawer from './PilotDrawer';
+import {
+  fetchGalleryProgramSettings,
+  saveGalleryProgramSettings,
+  type GalleryProgramSettings,
+} from '../../lib/galleryProgramSettings';
 
 export type ProgramSettingsTabId =
   | 'program-info'
   | 'facilitators'
   | 'access-codes'
   | 'student-data'
+  | 'student-gallery'
   | 'exports'
   | 'support';
 
@@ -35,6 +42,7 @@ const TABS: Array<{ id: ProgramSettingsTabId; label: string }> = [
   { id: 'facilitators', label: 'Facilitators' },
   { id: 'access-codes', label: 'Access Codes' },
   { id: 'student-data', label: 'Student Data' },
+  { id: 'student-gallery', label: 'Student Gallery' },
   { id: 'exports', label: 'Exports' },
   { id: 'support', label: 'Support' },
 ];
@@ -77,8 +85,29 @@ export default function PilotProgramSettingsDrawer({
   const { rows: rosterRows } = usePilotRosterData(code, open && Boolean(code));
   const dateStamp = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const codeSlug = code || 'program';
+  const { showToast } = useToast();
+  const [gallerySettings, setGallerySettings] = useState<GalleryProgramSettings | null>(null);
+  const [gallerySaving, setGallerySaving] = useState(false);
+
+  useEffect(() => {
+    if (!open || !code) return;
+    void fetchGalleryProgramSettings(code).then(setGallerySettings);
+  }, [open, code]);
 
   if (!open) return null;
+
+  const handleGalleryToggle = async (
+    key: keyof GalleryProgramSettings,
+    value: boolean,
+  ) => {
+    if (!code || !gallerySettings) return;
+    const next = { ...gallerySettings, [key]: value };
+    setGallerySettings(next);
+    setGallerySaving(true);
+    await saveGalleryProgramSettings(code, next);
+    setGallerySaving(false);
+    showToast('Saved — your gallery settings are updated.', 'success');
+  };
 
   const handleExport = (type: 'progress' | 'assessments' | 'modules' | 'guardians') => {
     switch (type) {
@@ -176,6 +205,58 @@ export default function PilotProgramSettingsDrawer({
           <p className="pilot-emptyNote">No students yet. Add your first student from the Roster tab.</p>
         ) : (
           <PilotAdminStudentTable rows={rosterRows} variant="settings" />
+        );
+      case 'student-gallery':
+        return !gallerySettings ? (
+          <p className="pilot-emptyNote">Loading gallery settings…</p>
+        ) : (
+          <div className="pilot-settingsGallery">
+            <p className="pilot-settingsGalleryIntro">
+              Community sharing lets approved student work appear in the broader Caiden&apos;s Courage
+              community gallery. Keep this off for private camp pilots.
+            </p>
+            <label className="pilot-settingsToggleRow">
+              <input
+                type="checkbox"
+                checked={gallerySettings.programGalleryEnabled}
+                onChange={(e) => void handleGalleryToggle('programGalleryEnabled', e.target.checked)}
+              />
+              <span>Program Gallery</span>
+            </label>
+            <label className="pilot-settingsToggleRow">
+              <input
+                type="checkbox"
+                checked={gallerySettings.communityGallerySharing}
+                onChange={(e) =>
+                  void handleGalleryToggle('communityGallerySharing', e.target.checked)
+                }
+              />
+              <span>Community Gallery Sharing</span>
+            </label>
+            <label className="pilot-settingsToggleRow">
+              <input
+                type="checkbox"
+                checked={gallerySettings.allowFamilySubmit}
+                onChange={(e) => void handleGalleryToggle('allowFamilySubmit', e.target.checked)}
+              />
+              <span>Allow families to submit</span>
+            </label>
+            <label className="pilot-settingsToggleRow">
+              <input
+                type="checkbox"
+                checked={gallerySettings.requireFacilitatorApproval}
+                onChange={(e) =>
+                  void handleGalleryToggle('requireFacilitatorApproval', e.target.checked)
+                }
+              />
+              <span>Require facilitator approval</span>
+            </label>
+            {gallerySaving ? (
+              <p className="pilot-settingsGallerySaving" role="status">
+                Saving…
+              </p>
+            ) : null}
+          </div>
         );
       case 'exports':
         return (

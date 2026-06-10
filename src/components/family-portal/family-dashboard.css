@@ -1831,3 +1831,127 @@ a.family-dash-card:hover {
     text-align: center;
   }
 }
+
+/* Shared design system integration */
+.family-kpiRow--ds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+}
+
+.family-overviewSummary {
+  margin-bottom: 1rem;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.family-overviewSummaryTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-overviewSummaryMeta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.family-accessCodeRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.family-accessCodeRowItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.family-accessCodeRowLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.family-accessCodeChildNote {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.family-childNameBtn {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.family-childNameBtn:hover {
+  color: var(--family-gold-dark);
+}
+
+.family-needsAttentionList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.family-needsAttentionItem {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.family-needsAttentionItem--highlight {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+}
+
+.family-needsAttentionLink {
+  display: block;
+  padding: 0.75rem 0.875rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.family-needsAttentionLabel {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-needsAttentionDetail {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.family-childDrawerGoals {
+  margin-top: 1.25rem;
+}
+
+.family-childDrawerGoalsList {
+  margin: 0.5rem 0 0;
+  padding-left: 1.125rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}

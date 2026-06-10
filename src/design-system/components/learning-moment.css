@@ -1,0 +1,236 @@
+/* LearningMomentCard — Focus Flame coaching pattern */
+
+:root {
+  --lm-max-width: 900px;
+  --lm-avatar-gap: 16px;
+  --lm-badge-headline: 8px;
+  --lm-headline-body: 16px;
+  --lm-body-sections: 20px;
+  --lm-section-gap: 16px;
+  --lm-avatar-size: 72px;
+  --lm-avatar-size-mobile: 56px;
+  --lm-focus-navy: #050b18;
+  --lm-focus-gold: #f0ce6e;
+  --lm-soft-lavender: #ede9fe;
+  --lm-lavender-accent: #a78bfa;
+  --lm-parent-blue: #1d4ed8;
+  --lm-parent-bg: #f8fafc;
+}
+
+.ds-circleAvatar {
+  width: var(--lm-avatar-size);
+  height: var(--lm-avatar-size);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.ds-circleAvatar--b4 {
+  background: var(--lm-focus-navy);
+  border: 2px solid var(--lm-focus-gold);
+}
+
+.ds-circleAvatar--dr-victoria {
+  background: var(--lm-soft-lavender);
+  border: 2px solid var(--lm-lavender-accent);
+}
+
+.ds-circleAvatar--default {
+  background: rgba(36, 62, 112, 0.08);
+  border: 2px solid rgba(36, 62, 112, 0.14);
+}
+
+.ds-circleAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ds-learningMoment {
+  max-width: var(--lm-max-width);
+  width: 100%;
+  border-radius: 1rem;
+  padding: 1rem 1.125rem;
+  animation: ds-learningMomentIn 0.22s ease-out;
+}
+
+@keyframes ds-learningMomentIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ds-learningMomentRow {
+  display: flex;
+  gap: var(--lm-avatar-gap);
+  align-items: flex-start;
+}
+
+.ds-learningMomentContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.ds-learningMomentBadge {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ds-learningMomentHeadline {
+  margin: var(--lm-badge-headline) 0 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.ds-learningMomentBody {
+  margin: var(--lm-headline-body) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.ds-learningMomentSections {
+  margin-top: var(--lm-body-sections);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lm-section-gap);
+}
+
+.ds-learningMomentSectionTitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ds-learningMomentSectionText,
+.ds-learningMomentTips {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.ds-learningMomentTips {
+  padding-left: 1.125rem;
+}
+
+.ds-learningMomentAction {
+  margin-top: var(--lm-section-gap);
+}
+
+.ds-learningMomentBtn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* B4_LOCK_IN */
+.ds-learningMoment--B4_LOCK_IN {
+  border: 1px solid rgba(240, 206, 110, 0.35);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.06) 0%, transparent 42%),
+    linear-gradient(145deg, #0a1628 0%, #0f2d5c 52%, #081222 100%);
+  color: #fff;
+  box-shadow: 0 14px 36px -18px rgba(0, 0, 0, 0.45);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentBadge {
+  color: rgba(240, 206, 110, 0.92);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentHeadline,
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentBody {
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentSectionTitle {
+  color: rgba(240, 206, 110, 0.85);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentSectionText,
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentTips {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ds-learningMoment--B4_LOCK_IN .ds-learningMomentBtn {
+  border: 1px solid rgba(240, 206, 110, 0.45);
+  background: rgba(240, 206, 110, 0.14);
+  color: #fff;
+}
+
+/* B4_PARENT_COACH */
+.ds-learningMoment--B4_PARENT_COACH {
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  background: var(--lm-parent-bg);
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.22);
+}
+
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentBadge {
+  color: var(--lm-parent-blue);
+}
+
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentHeadline {
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentBody,
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentSectionText,
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentTips {
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.ds-learningMoment--B4_PARENT_COACH .ds-learningMomentSectionTitle {
+  color: rgba(36, 62, 112, 0.62);
+}
+
+/* FACILITATOR_INSIGHT */
+.ds-learningMoment--FACILITATOR_INSIGHT {
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: linear-gradient(180deg, #f5f3ff 0%, #fff 100%);
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.25);
+}
+
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentBadge {
+  color: #6d28d9;
+}
+
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentHeadline {
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentBody,
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentSectionText,
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentTips {
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.ds-learningMoment--FACILITATOR_INSIGHT .ds-learningMomentSectionTitle {
+  color: rgba(91, 33, 182, 0.62);
+}
+
+@media (max-width: 767px) {
+  .ds-circleAvatar {
+    width: var(--lm-avatar-size-mobile);
+    height: var(--lm-avatar-size-mobile);
+  }
+
+  .ds-learningMomentRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

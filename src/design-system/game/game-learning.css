@@ -1,0 +1,376 @@
+/* Focus Flame — shared game / learning design system */
+@import '../components/learning-moment.css';
+
+.ds-gameShell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-gameShellTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.ds-gameShellTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+
+.ds-gameShellMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ds-gameShellPlayer {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.ds-gameShellProgress {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.12);
+  overflow: hidden;
+}
+
+.ds-gameShellProgressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f6d06f, #c8922e);
+  transition: width 0.25s ease;
+}
+
+.ds-gameShellBody {
+  flex: 1;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.ds-gameShellBody--withInsight {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .ds-gameShellBody--withInsight {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    align-items: start;
+  }
+}
+
+.ds-gameShellMain {
+  min-width: 0;
+}
+
+.ds-gameShellAside {
+  min-width: 0;
+}
+
+.ds-gameShellFooter {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.1);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+/* Question card */
+.ds-questionCard {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.28);
+}
+
+.ds-questionCardAvatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ds-questionCardLabel {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.ds-questionCardTag {
+  margin: 0.15rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #c8922e;
+}
+
+.ds-questionCardText {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* Answer choices */
+.ds-answerList {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds-answerChoice {
+  width: 100%;
+  text-align: left;
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: #fff;
+  color: var(--pilot-navy-deep, #1a2f52);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ds-answerChoice:hover:not(:disabled) {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: #fffbeb;
+}
+
+.ds-answerChoice:focus-visible {
+  outline: 2px solid #c8922e;
+  outline-offset: 2px;
+}
+
+.ds-answerChoice--selected {
+  border-color: rgba(229, 192, 106, 0.65);
+  background: #fffbeb;
+  box-shadow: 0 0 0 1px rgba(229, 192, 106, 0.35);
+}
+
+.ds-answerChoice--correct {
+  border-color: #86efac;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.ds-answerChoice--incorrect {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.ds-answerChoice:disabled {
+  cursor: default;
+}
+
+/* B-4 Lock-In Tip */
+.ds-b4LockIn {
+  border-radius: 1rem;
+  border: 1px solid rgba(240, 206, 110, 0.35);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.06) 0%, transparent 42%),
+    linear-gradient(145deg, #0a1628 0%, #0f2d5c 52%, #081222 100%);
+  color: #fff;
+  padding: 1rem;
+  box-shadow: 0 14px 36px -18px rgba(0, 0, 0, 0.45);
+  animation: ds-b4LockInIn 0.22s ease-out;
+}
+
+@keyframes ds-b4LockInIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ds-b4LockInHead {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.ds-b4LockInAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  object-fit: contain;
+  background: rgba(7, 20, 38, 0.65);
+  border: 1px solid rgba(240, 206, 110, 0.35);
+  flex-shrink: 0;
+}
+
+.ds-b4LockInLabel {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(240, 206, 110, 0.9);
+}
+
+.ds-b4LockInLead {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ds-b4LockInTips {
+  margin: 0.75rem 0 0;
+  padding-left: 1.125rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ds-b4LockInAction {
+  margin-top: 0.75rem;
+}
+
+.ds-b4LockInBtn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 206, 110, 0.45);
+  background: rgba(240, 206, 110, 0.14);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Expert insight */
+.ds-expertInsight {
+  border-radius: 1rem;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+  padding: 1rem;
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.25);
+}
+
+.ds-expertInsightHead {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.ds-expertInsightAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ds-expertInsightLabel {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.ds-expertInsightLead {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.ds-expertInsightSection {
+  margin-top: 0.75rem;
+}
+
+.ds-expertInsightSectionTitle {
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.ds-expertInsightSectionText,
+.ds-expertInsightTips {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.ds-expertInsightTips {
+  padding-left: 1.125rem;
+}
+
+/* Learning moment (flexible) */
+.ds-learningMoment {
+  border-radius: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+}
+
+.ds-learningMoment--b4 {
+  border-color: rgba(240, 206, 110, 0.35);
+  background: #050b18;
+  color: #fff;
+}
+
+.ds-learningMoment--expert {
+  border-color: rgba(59, 130, 246, 0.25);
+  background: #eff6ff;
+}
+
+/* Mission quiz integration */
+.mission-quizLayout--lockIn {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .mission-quizLayout--lockIn {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    align-items: start;
+  }
+}
+
+.mission-quizLayoutMain {
+  min-width: 0;
+}
+
+.mission-quizLayoutAside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .mission-quizLayout--lockIn .mission-quizLayoutAside {
+    position: sticky;
+    top: 1rem;
+  }
+}

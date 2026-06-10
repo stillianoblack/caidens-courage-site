@@ -5,7 +5,7 @@ import SectionHero from '../components/courage/SectionHero';
 import StudentGalleryGrid from '../components/student-gallery/StudentGalleryGrid';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import {
-  fetchApprovedStudentGalleryItems,
+  fetchCommunityGalleryItems,
   type StudentGalleryItem,
 } from '../lib/studentGalleryService';
 
@@ -19,7 +19,7 @@ export default function StudentGalleryPublicPage() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetchApprovedStudentGalleryItems().then((next) => {
+    void fetchCommunityGalleryItems().then((next) => {
       if (!cancelled) {
         setItems(next);
         setLoading(false);
@@ -36,8 +36,8 @@ export default function StudentGalleryPublicPage() {
 
       <SectionHero
         eyebrow="STUDENT GALLERY"
-        title="Focus Flame Pilot Gallery"
-        description="Celebrating courage, creativity, and focus from Blue Ribbon pilot students."
+        title="Community Student Gallery"
+        description="Celebrating courage, creativity, and focus from programs that opted into community sharing."
       />
 
       <div className="cc-site-container mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -46,7 +46,7 @@ export default function StudentGalleryPublicPage() {
           {!loading ? (
             <StudentGalleryGrid
               items={items}
-              emptyMessage="Approved student artwork will appear here soon."
+              emptyMessage="Community-shared student artwork will appear here when programs opt in."
             />
           ) : null}
         </div>

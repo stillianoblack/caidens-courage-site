@@ -5,6 +5,7 @@ import {
   FAMILY_HUB_PATH,
   KIDS_PORTAL_PATH,
 } from '../config/courageRoutes';
+import { activitiesLibraryTabPath } from '../lib/askB4DeepLinks';
 import { programDashboardTabPath } from '../lib/programDashboardNav';
 import type { PilotSidebarNavId } from './pilotDashboardContent';
 
@@ -395,7 +396,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Worksheets and hands-on printable adventures',
     category: 'Activities Library',
     tags: ['printable', 'worksheet', 'activities'],
-    href: facilitatorTabPath('activities-library'),
+    href: activitiesLibraryTabPath('printable-activities'),
   },
   {
     id: 'facilitator-sel-worksheet',
@@ -404,7 +405,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     category: 'Activities Library',
     tags: ['worksheet', 'sel', 'b-4', 'b4', 'printable', 'scan'],
     character: 'B-4',
-    href: facilitatorTabPath('activities-library'),
+    href: activitiesLibraryTabPath('b4-reset-tools'),
   },
   {
     id: 'facilitator-caiden-preview',

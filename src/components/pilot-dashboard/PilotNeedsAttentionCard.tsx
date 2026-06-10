@@ -1,18 +1,26 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { rosterFilterPath } from '../../lib/askB4DeepLinks';
+import type { RosterFilterId } from '../../lib/pilotOverviewInsights';
 import type { PilotNeedsAttentionCounts } from '../../lib/pilotStudentProgress';
 
 type PilotNeedsAttentionCardProps = {
   counts: PilotNeedsAttentionCounts;
 };
 
-export default function PilotNeedsAttentionCard({ counts }: PilotNeedsAttentionCardProps) {
-  const items = [
-    { label: 'Missing baseline', value: counts.missingBaseline },
-    { label: 'Inactive 7+ days', value: counts.inactive7PlusDays },
-    { label: 'No modules completed', value: counts.noModules },
-    { label: 'Certificate ready', value: counts.certificateReady, highlight: true },
-  ];
+const ATTENTION_ITEMS: Array<{
+  label: string;
+  key: keyof PilotNeedsAttentionCounts;
+  filter: RosterFilterId;
+  highlight?: boolean;
+}> = [
+  { label: 'Missing baseline', key: 'missingBaseline', filter: 'missing-baseline' },
+  { label: 'Inactive 7+ days', key: 'inactive7PlusDays', filter: 'inactive' },
+  { label: 'No modules completed', key: 'noModules', filter: 'no-modules' },
+  { label: 'Certificate ready', key: 'certificateReady', filter: 'certificate-ready', highlight: true },
+];
 
+export default function PilotNeedsAttentionCard({ counts }: PilotNeedsAttentionCardProps) {
   return (
     <section className="pilot-panelBlock pilot-needsAttention">
       <div className="pilot-panelBlockHead">
@@ -20,14 +28,17 @@ export default function PilotNeedsAttentionCard({ counts }: PilotNeedsAttentionC
         <p className="pilot-panelBlockSub">Quick flags for follow-up with students and families.</p>
       </div>
       <div className="pilot-needsAttentionGrid">
-        {items.map((item) => (
-          <article
+        {ATTENTION_ITEMS.map((item) => (
+          <Link
             key={item.label}
-            className={`pilot-needsAttentionItem${item.highlight ? ' pilot-needsAttentionItem--highlight' : ''}`}
+            to={rosterFilterPath(item.filter)}
+            className={`pilot-needsAttentionItem pilot-needsAttentionItem--link${
+              item.highlight ? ' pilot-needsAttentionItem--highlight' : ''
+            }`}
           >
-            <p className="pilot-needsAttentionValue">{item.value}</p>
+            <p className="pilot-needsAttentionValue">{counts[item.key]}</p>
             <p className="pilot-needsAttentionLabel">{item.label}</p>
-          </article>
+          </Link>
         ))}
       </div>
     </section>

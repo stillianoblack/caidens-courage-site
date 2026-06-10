@@ -1,4 +1,5 @@
 import { getAskB4KnowledgeIndex, type AskB4Action, type AskB4KnowledgeEntry } from '../data/askB4Knowledge';
+import { resolveAskB4PromptDeepLink } from './askB4DeepLinks';
 import type { AskB4Mode } from './askB4Mode';
 
 export type AskB4Response = {
@@ -63,7 +64,11 @@ function dedupeActions(actions: AskB4Action[]): AskB4Action[] {
   });
 }
 
-export function answerAskB4Question(query: string, mode: AskB4Mode): AskB4Response {
+export function answerAskB4Question(
+  query: string,
+  mode: AskB4Mode,
+  pathname?: string,
+): AskB4Response {
   const trimmed = query.trim();
   if (!trimmed) {
     return { answer: FALLBACK_ANSWER, actions: [], matchedIds: [] };
@@ -109,9 +114,17 @@ export function answerAskB4Question(query: string, mode: AskB4Mode): AskB4Respon
     top.flatMap(({ entry }) => entry.recommendedResources ?? []).slice(0, 3),
   );
 
+  const promptDeepLink = resolveAskB4PromptDeepLink(trimmed, mode, pathname);
+  if (promptDeepLink) {
+    actions.unshift({
+      label: 'Open in portal',
+      href: promptDeepLink,
+    });
+  }
+
   return {
     answer,
-    actions,
+    actions: dedupeActions(actions).slice(0, 4),
     matchedIds: top.map(({ entry }) => entry.id),
   };
 }

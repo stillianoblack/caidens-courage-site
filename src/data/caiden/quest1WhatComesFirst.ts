@@ -47,6 +47,16 @@ export const CAIDEN_QUEST_1_CONFIG: GameAssessmentConfig = {
       feedbackCorrect: 'Great choice. Caiden focused on what needed to happen first.',
       feedbackIncorrect:
         'Try again. The Camp Challenge starts soon, so Caiden should prepare what he needs.',
+      lockInTipsCorrect: [
+        'Say the first step out loud before starting.',
+        'Clear one small area so packing feels easier.',
+        'Set a short timer for the prep burst.',
+      ],
+      lockInTipsIncorrect: [
+        'Ask: what has a deadline coming up first?',
+        'Pick the task tied to the Camp Challenge.',
+        'Try one small prep step and check again.',
+      ],
     },
     {
       id: 'cq1-q2',
@@ -71,6 +81,16 @@ export const CAIDEN_QUEST_1_CONFIG: GameAssessmentConfig = {
       correctId: 'clothes',
       feedbackCorrect: 'Yes. One small step makes a big task easier.',
       feedbackIncorrect: 'Think smaller. Caiden does not need to fix everything at once.',
+      lockInTipsCorrect: [
+        'Name one category to tackle first (clothes, books, trash).',
+        'Celebrate finishing that slice before the next.',
+        'Use a 5-minute burst so the step stays small.',
+      ],
+      lockInTipsIncorrect: [
+        'Shrink the goal until it feels doable in one sitting.',
+        'Pick the easiest visible pile first.',
+        'Breathe once, then choose one item to move.',
+      ],
     },
     {
       id: 'cq1-q3',
@@ -95,6 +115,16 @@ export const CAIDEN_QUEST_1_CONFIG: GameAssessmentConfig = {
       correctId: 'move',
       feedbackCorrect: 'Correct. Moving the distraction away helps Caiden protect his focus.',
       feedbackIncorrect: "The tablet is pulling Caiden's attention away. What would help him focus?",
+      lockInTipsCorrect: [
+        'Move distractions out of arm\'s reach before deep work.',
+        'Silence non-essential notifications for this block.',
+        'Tell a grown-up your focus plan so they can cheer you on.',
+      ],
+      lockInTipsIncorrect: [
+        'Notice what is pulling attention away from the journal.',
+        'Try face-down, another room, or a focus timer.',
+        'Return to one sentence in the journal after resetting.',
+      ],
     },
     {
       id: 'cq1-q4',

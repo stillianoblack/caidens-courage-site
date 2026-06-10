@@ -1,5 +1,11 @@
 import React from 'react';
 import type { GameAnswerValue, GameQuestion } from '../../types/gameAssessment';
+import LearningMomentCard from '../../design-system/game/LearningMomentCard';
+import {
+  resolveLockInTips,
+  shouldShowExpertInsight,
+  usesB4LockInFeedback,
+} from '../../design-system/game/feedbackRhythm';
 import GameQuestionRenderer from '../game-assessment/GameQuestionRenderer';
 import MissionCardContent, { questionHasMissionCard } from './MissionCardContent';
 import MissionFeedbackCard from './MissionFeedbackCard';
@@ -14,11 +20,14 @@ type MissionQuizLayoutProps = {
   guideAvatarAlt?: string;
   speakerLabel: string;
   question: GameQuestion;
+  questionIndex?: number;
   answer: GameAnswerValue;
   checked: boolean;
   feedback: string | null;
   feedbackTone: 'success' | 'try' | 'neutral';
   quizWrapModifier?: string;
+  useLockInFeedback?: boolean;
+  useAdultLearningRhythm?: boolean;
   useVictoriaHeader?: boolean;
   useUncleTHeader?: boolean;
   useCaidenHeader?: boolean;
@@ -39,11 +48,14 @@ export default function MissionQuizLayout({
   guideAvatarAlt,
   speakerLabel,
   question,
+  questionIndex = 0,
   answer,
   checked,
   feedback,
   feedbackTone,
   quizWrapModifier = '',
+  useLockInFeedback,
+  useAdultLearningRhythm = false,
   useVictoriaHeader = false,
   useUncleTHeader = false,
   useCaidenHeader = false,
@@ -65,8 +77,34 @@ export default function MissionQuizLayout({
       : question.feedbackDetailIncorrect ?? question.feedbackDetail
     : undefined;
 
-  return (
-    <div className={['bbc-quizWrap', 'game-quizWrap', 'mission-quizLayout', quizWrapModifier].filter(Boolean).join(' ')}>
+  const lockInEnabled = useLockInFeedback ?? usesB4LockInFeedback(theme);
+  const showLockInTip = Boolean(checked && feedback && lockInEnabled);
+  const showExpertInsight =
+    Boolean(
+      checked &&
+        feedback &&
+        useAdultLearningRhythm &&
+        detail &&
+        shouldShowExpertInsight(questionIndex),
+    );
+  const showLegacyFeedback = Boolean(
+    checked && feedback && !showLockInTip && !showExpertInsight,
+  );
+
+  const showLearningMoment = showLockInTip || showExpertInsight;
+
+  const layoutClass = [
+    'bbc-quizWrap',
+    'game-quizWrap',
+    'mission-quizLayout',
+    showLearningMoment ? 'mission-quizLayout--lockIn' : '',
+    quizWrapModifier,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const quizBody = (
+    <>
       {hasMissionCard && avatarSrc ? (
         <MissionSpeechRow avatarSrc={avatarSrc} avatarAlt={avatarAlt} theme={theme}>
           <MissionCardContent question={question} {...cardFlags} />
@@ -88,16 +126,47 @@ export default function MissionQuizLayout({
         onSequenceClear={onSequenceClear}
       />
 
-      {checked && feedback ? (
+      {showLegacyFeedback ? (
         <MissionFeedbackCard
           theme={theme}
           avatarSrc={feedbackAvatarSrc}
           avatarAlt={feedbackAvatarAlt}
           speakerLabel={speakerLabel}
-          message={feedback}
+          message={feedback!}
           tone={feedbackTone}
           detail={useVictoriaHeader || useUncleTHeader || useCharlieHeader ? detail : undefined}
         />
+      ) : null}
+    </>
+  );
+
+  return (
+    <div className={layoutClass}>
+      <div className="mission-quizLayoutMain">{quizBody}</div>
+      {showLearningMoment ? (
+        <div className="mission-quizLayoutAside">
+          {showLockInTip ? (
+            <LearningMomentCard
+              variant="B4_LOCK_IN"
+              headline={feedback!}
+              tips={
+                useAdultLearningRhythm
+                  ? resolveLockInTips(question, feedbackTone).slice(0, 2)
+                  : resolveLockInTips(question, feedbackTone)
+              }
+            />
+          ) : null}
+          {showExpertInsight ? (
+            <LearningMomentCard
+              variant="FACILITATOR_INSIGHT"
+              headline={feedback!}
+              whyItMatters={detail?.whyItMatters}
+              tryThis={detail?.tryThis ? [...detail.tryThis] : undefined}
+              tryThisLabel={detail?.tryThisLabel}
+              watchFor={detail?.watchFor}
+            />
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

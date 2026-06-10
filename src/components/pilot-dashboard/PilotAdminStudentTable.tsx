@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { PilotRosterRow } from '../../hooks/usePilotRosterData';
+import { useToast } from '../portal-design-system/ToastProvider';
 import CopyableCompactValue from './CopyableCompactValue';
 import PilotStatusChip from './PilotStatusChip';
 
@@ -25,22 +26,54 @@ function formatCompactActivityDate(iso: string | null): string {
   }
 }
 
-function renderChildCell(
-  row: PilotRosterRow,
-  onStudentClick?: (participantId: string) => void,
-): React.ReactNode {
+function ChildNameCell({
+  row,
+  onStudentClick,
+}: {
+  row: PilotRosterRow;
+  onStudentClick?: (participantId: string) => void;
+}) {
   if (onStudentClick) {
     return (
       <button
         type="button"
         className="pilot-studentLinkBtn"
+        title={row.childName}
         onClick={() => onStudentClick(row.participantId)}
       >
         {row.childName}
       </button>
     );
   }
-  return row.childName;
+  return <span title={row.childName}>{row.childName}</span>;
+}
+
+function ParentGuardianCell({ row }: { row: PilotRosterRow }) {
+  const { showToast } = useToast();
+  const fullName = row.parentGuardianName;
+  const canCopy = fullName.trim() && fullName !== '—';
+
+  const handleClick = useCallback(async () => {
+    if (!canCopy) return;
+    try {
+      await navigator.clipboard.writeText(fullName);
+      showToast('Copied.', 'success');
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, [canCopy, fullName, showToast]);
+
+  return (
+    <button
+      type="button"
+      className="pilot-parentShortBtn"
+      title={fullName}
+      onClick={() => void handleClick()}
+      disabled={!canCopy}
+    >
+      {row.parentGuardianShort}
+    </button>
+  );
 }
 
 export default function PilotAdminStudentTable({
@@ -60,7 +93,6 @@ export default function PilotAdminStudentTable({
             <th scope="col">Parent/Guardian</th>
             <th scope="col">Email</th>
             {isRoster ? <th scope="col">Phone</th> : null}
-            {isRoster ? <th scope="col">Emergency</th> : null}
             <th scope="col">Family Code</th>
             <th scope="col">Baseline</th>
             {isRoster ? <th scope="col">Modules</th> : null}
@@ -71,26 +103,21 @@ export default function PilotAdminStudentTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row.participantId}>
-              <td className="pilot-adminCellChild">{renderChildCell(row, onStudentClick)}</td>
+              <td className="pilot-adminCellChild">
+                <ChildNameCell row={row} onStudentClick={onStudentClick} />
+              </td>
               {isRoster ? (
-                <td className="pilot-adminCellText">{row.nickname}</td>
+                <td className="pilot-adminCellText pilot-adminCellNickname">{row.nickname}</td>
               ) : null}
-              <td className="pilot-adminCellText">{row.parentGuardianName}</td>
+              <td className="pilot-adminCellParent">
+                <ParentGuardianCell row={row} />
+              </td>
               <td className="pilot-adminCellChip">
                 <CopyableCompactValue value={row.parentEmail} type="email" />
               </td>
               {isRoster ? (
                 <td className="pilot-adminCellChip">
                   <CopyableCompactValue value={row.parentPhone} type="phone" />
-                </td>
-              ) : null}
-              {isRoster ? (
-                <td className="pilot-adminCellChip">
-                  {row.emergencyContact.trim() && row.emergencyContact !== '—' ? (
-                    <CopyableCompactValue value={row.emergencyContact} type="text" label="Emergency" />
-                  ) : (
-                    <span className="pilot-copyChip pilot-copyChip--empty">—</span>
-                  )}
                 </td>
               ) : null}
               <td className="pilot-adminCellChip">

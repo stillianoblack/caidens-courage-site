@@ -15,6 +15,15 @@ import {
   KIDS_PORTAL_PATH,
 } from '../config/courageRoutes';
 import {
+  activitiesLibraryTabPath,
+  programGoalsPath,
+  resultsNeedsAttentionPath,
+  rosterFilterPath,
+  studentGalleryCommunityPath,
+  studentGalleryPendingPath,
+} from '../lib/askB4DeepLinks';
+import { programDashboardTabPath } from '../lib/programDashboardNav';
+import {
   FACILITATOR_PORTAL_SEARCH_RESOURCES,
   FAMILY_PORTAL_SEARCH_RESOURCES,
   type PortalSearchResource,
@@ -41,10 +50,6 @@ export type AskB4KnowledgeEntry = {
   familyAnswer?: string;
   facilitatorAnswer?: string;
 };
-
-function facilitatorHash(section: string): string {
-  return `${FACILITATOR_PORTAL_PATH}#${section}`;
-}
 
 function portalResourceToEntry(
   resource: PortalSearchResource,
@@ -269,6 +274,7 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
       'Miranda\'s Mystery Files are the best place to build reading comprehension, inference, and context clues.',
     tags: ['reading', 'comprehension', 'inference', 'context clues', 'miranda', 'skills'],
     recommendedResources: [
+      { label: 'Weekly Reading Activities', href: activitiesLibraryTabPath('weekly-activities') },
       { label: "Open Miranda's Mystery Files", href: `${KIDS_PORTAL_PATH}/miranda` },
     ],
     familyAnswer:
@@ -285,6 +291,7 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
       'B-4 Focus Missions and Check-In support self-regulation, feelings awareness, and focus moves.',
     tags: ['self-regulation', 'sel', 'b-4', 'feelings', 'focus moves'],
     recommendedResources: [
+      { label: 'B-4 Reset Tools', href: activitiesLibraryTabPath('b4-reset-tools') },
       { label: 'B-4 Focus Missions', href: `${KIDS_PORTAL_PATH}/b4` },
       { label: 'B-4 SEL Scan Worksheet', href: `${FAMILY_PORTAL_PATH}/downloads` },
     ],
@@ -338,7 +345,10 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     tags: ['coloring', 'downloads', 'print', 'art'],
     recommendedResources: [
       { label: 'View Coloring Pages', href: `${FAMILY_PORTAL_PATH}/downloads` },
+      { label: 'Facilitator Coloring Pages', href: activitiesLibraryTabPath('coloring-pages') },
     ],
+    facilitatorAnswer:
+      'Open Activities Library → Coloring Pages for printable camp and classroom coloring sheets.',
   },
   {
     id: 'download-sel-worksheet',
@@ -409,12 +419,85 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     summary:
       'In Facilitator Portal → Student Gallery, review pending uploads. Approve, reject, or request changes with an optional note to families.',
     tags: ['gallery', 'approval', 'upload', 'review', 'pending', 'facilitator'],
-    relatedRoutes: [facilitatorHash('student-gallery')],
+    relatedRoutes: [programDashboardTabPath('student-gallery')],
     recommendedResources: [
-      { label: 'Open Student Gallery', href: facilitatorHash('student-gallery') },
+      { label: 'Pending Gallery Review', href: studentGalleryPendingPath() },
+      { label: 'Open Student Gallery', href: programDashboardTabPath('student-gallery') },
     ],
     facilitatorAnswer:
       'Go to Facilitator Portal → Student Gallery. Pending family uploads appear first. Approve to publish, reject to decline, or request changes with a note families will see.',
+  },
+  {
+    id: 'facilitator-needs-attention',
+    title: 'Students Needing Attention',
+    category: 'Facilitator Guidance',
+    modes: ['facilitator'],
+    summary:
+      'Results and Overview flag students missing baseline, inactive 7+ days, or with no module completions.',
+    tags: ['needs attention', 'students', 'follow up', 'inactive', 'baseline', 'results'],
+    recommendedResources: [
+      { label: 'View Needs Attention', href: resultsNeedsAttentionPath() },
+      { label: 'Open Results', href: programDashboardTabPath('results') },
+    ],
+    facilitatorAnswer:
+      'Open Results to review Needs Attention flags — missing baseline, inactive students, and module gaps.',
+  },
+  {
+    id: 'facilitator-missing-baseline',
+    title: 'Missing Baseline Students',
+    category: 'Facilitator Guidance',
+    modes: ['facilitator'],
+    summary:
+      'Roster shows baseline status per student. Filter to students who have not completed the B-4 Baseline Check.',
+    tags: ['baseline', 'missing', 'not completed', 'roster', 'students', 'who has not'],
+    recommendedResources: [
+      { label: 'Roster — Missing Baseline', href: rosterFilterPath('missing-baseline') },
+      { label: 'Open Assessments', href: programDashboardTabPath('assessments') },
+    ],
+    facilitatorAnswer:
+      'Open Roster filtered to missing baseline to see who still needs the B-4 Baseline Check.',
+  },
+  {
+    id: 'facilitator-program-goals',
+    title: 'Program Goals',
+    category: 'Facilitator Guidance',
+    modes: ['facilitator'],
+    summary:
+      'Set up to 5 program goals so Caiden\'s Courage can tailor support for your students, families, and facilitators.',
+    tags: ['program goals', 'goals', 'onboarding', 'improve', 'focus', 'settings'],
+    recommendedResources: [
+      { label: 'Choose Program Goals', href: programGoalsPath() },
+    ],
+    facilitatorAnswer:
+      'Open Program Goals from the header checklist or Program Settings. Choose up to 5 focus areas like reading confidence, emotional regulation, or teamwork.',
+  },
+  {
+    id: 'facilitator-community-gallery',
+    title: 'Community Gallery',
+    category: 'Gallery',
+    modes: ['facilitator'],
+    summary:
+      'Community sharing is opt-in. Approved work stays in your Program Gallery unless you enable community sharing in Program Settings.',
+    tags: ['community gallery', 'gallery', 'sharing', 'public', 'student work'],
+    recommendedResources: [
+      { label: 'Community Gallery Tab', href: studentGalleryCommunityPath() },
+      { label: 'Student Gallery', href: programDashboardTabPath('student-gallery') },
+    ],
+    facilitatorAnswer:
+      'Student Gallery has Program, Pending Review, and Community tabs. Community sharing is off by default — enable it in Program Settings → Student Gallery when you are ready.',
+  },
+  {
+    id: 'facilitator-certificates',
+    title: 'Certificates',
+    category: 'Downloads',
+    modes: ['facilitator'],
+    summary: 'Printable courage and completion certificates for students in your program.',
+    tags: ['certificates', 'print', 'celebrate', 'completion'],
+    recommendedResources: [
+      { label: 'Open Certificates', href: programDashboardTabPath('certificates') },
+    ],
+    facilitatorAnswer:
+      'Open Certificates in the facilitator dashboard for printable courage and completion templates.',
   },
   {
     id: 'facilitator-week-1',
@@ -425,8 +508,9 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
       'Pilot flow: have learners complete the B-4 Baseline Check, then Week 1 kit activities, Caiden/Miranda games, and coloring pages.',
     tags: ['week 1', 'start', 'pilot', 'sequence', 'facilitator'],
     recommendedResources: [
-      { label: 'Open Assessments', href: facilitatorHash('assessments') },
-      { label: 'Weekly Modules', href: facilitatorHash('weekly-modules') },
+      { label: 'Open Assessments', href: programDashboardTabPath('assessments') },
+      { label: 'Weekly Modules', href: programDashboardTabPath('weekly-modules') },
+      { label: 'Coloring Pages', href: activitiesLibraryTabPath('coloring-pages') },
     ],
     facilitatorAnswer:
       'Start Week 1 by running the B-4 Baseline Check, then open Weekly Modules for the Week 1 kit. Assign Caiden or Miranda games and share coloring pages from Activities Library.',

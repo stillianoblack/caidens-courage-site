@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   CHARACTER_IMAGE_PATHS,
@@ -8,14 +8,28 @@ import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetr
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
+import { buildFamilyNeedsAttention } from '../../../lib/familyOverviewInsights';
+import { familyPortalPath } from '../../../lib/familyPortalPaths';
+import { fetchProgramGoals } from '../../../lib/programGoalsService';
+import type { ProgramGoalsRecord } from '../../../lib/programGoalsService';
+import { normalizeGalleryStatus } from '../../../lib/studentGalleryService';
+import { fetchFamilyGallerySubmissions } from '../../../lib/studentGalleryService';
+import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import AddChildForm from '../AddChildForm';
 import ActiveChildSelector from '../ActiveChildSelector';
 import { useActiveChild } from '../../../hooks/useActiveChild';
 import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
+import FamilyChildProgressDrawer from '../FamilyChildProgressDrawer';
+import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyValueCards from '../FamilyValueCards';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
+import {
+  BaselineOverviewBars,
+  MetricCard,
+} from '../../portal-design-system';
 import '../../focus-skills/focus-skills-snapshot.css';
+import '../../portal-design-system/portal-design-system.css';
 
 export default function FamilyOverviewPanel() {
   const location = useLocation();
@@ -34,6 +48,26 @@ export default function FamilyOverviewPanel() {
   const nextStepHref = `${resolvePortalKidsBasePath(location.pathname)}${FAMILY_NEXT_STEP.hrefPath}`;
   const baselinePath = getPortalRoute('baseline-check', location.pathname);
 
+  const [goalsRecord, setGoalsRecord] = useState<ProgramGoalsRecord | null>(null);
+  const [galleryPendingCount, setGalleryPendingCount] = useState(0);
+  const [gallerySubmissionCount, setGallerySubmissionCount] = useState(0);
+  const [progressChildId, setProgressChildId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!programCode) return;
+    void fetchProgramGoals(programCode, 'family').then(setGoalsRecord);
+  }, [programCode]);
+
+  useEffect(() => {
+    if (!programCode) return;
+    const submitterKey = getFamilyGallerySubmitterKey();
+    void fetchFamilyGallerySubmissions(submitterKey, programCode).then((items) => {
+      const pending = items.filter((item) => normalizeGalleryStatus(item.status) === 'pending').length;
+      setGalleryPendingCount(pending);
+      setGallerySubmissionCount(items.length);
+    });
+  }, [programCode]);
+
   const selectableChildren = useMemo(
     () =>
       visibleChildren
@@ -48,63 +82,122 @@ export default function FamilyOverviewPanel() {
 
   const { activeChild, needsChildSelection, selectChild } = useActiveChild(selectableChildren);
 
-  const kpis = useMemo(
+  const activeChildSummary = useMemo(
+    () => children.find((child) => child.participantId === activeChild?.participantId) ?? children[0] ?? null,
+    [activeChild?.participantId, children],
+  );
+
+  const focusGoal = goalsRecord?.selected_goals?.[0] ?? 'Not set yet';
+
+  const metricCards = useMemo(
     () => [
       {
-        label: 'Children',
-        value: loading ? '—' : String(children.length),
-        detail: null as string | null,
+        label: 'Baseline status',
+        value: loading ? '—' : activeChildSummary?.baselineStatus ?? '—',
+        helperText: activeChildSummary?.displayName,
       },
       {
-        label: 'Assessments',
-        value: loading ? '—' : `${assessmentProgress.percent}%`,
-        detail: loading ? null : assessmentProgress.label,
+        label: 'Activities completed',
+        value: loading ? '—' : String(assessmentProgress.completed),
+        helperText: assessmentProgress.label,
       },
       {
-        label: 'Overall Progress',
+        label: 'Modules completed',
+        value: loading ? '—' : String(metrics.overall.completed),
+        helperText: metrics.overall.label,
+      },
+      {
+        label: 'Gallery submissions',
+        value: loading ? '—' : String(gallerySubmissionCount),
+        helperText: galleryPendingCount > 0 ? `${galleryPendingCount} pending review` : 'Upload artwork anytime',
+      },
+      {
+        label: 'Current focus goal',
+        value: loading ? '—' : focusGoal,
+        accent: Boolean(goalsRecord?.selected_goals?.length),
+      },
+      {
+        label: 'Overall progress',
         value: loading ? '—' : metrics.hasActivity ? `${overallProgress.percent}%` : '0%',
-        detail: loading ? null : metrics.hasActivity ? overallProgress.label : '0 of 0 completed',
-      },
-      {
-        label: 'Status',
-        value: loading ? '—' : metrics.overallLabel,
-        detail: null as string | null,
-        highlight: true as const,
+        helperText: overallProgress.label,
+        accent: true,
       },
     ],
     [
+      activeChildSummary,
+      assessmentProgress.completed,
       assessmentProgress.label,
-      assessmentProgress.percent,
-      children.length,
+      focusGoal,
+      galleryPendingCount,
+      gallerySubmissionCount,
+      goalsRecord?.selected_goals?.length,
       loading,
       metrics.hasActivity,
-      metrics.overallLabel,
+      metrics.overall.completed,
+      metrics.overall.label,
       overallProgress.label,
       overallProgress.percent,
     ],
   );
 
+  const needsAttention = useMemo(
+    () =>
+      buildFamilyNeedsAttention({
+        children,
+        metrics,
+        galleryPendingCount,
+        baselinePath,
+        galleryPath: familyPortalPath('gallery', location.pathname),
+        certificatesPath: familyPortalPath('certificates', location.pathname),
+        continueLearningPath: familyPortalPath('continue-learning', location.pathname),
+      }),
+    [baselinePath, children, galleryPendingCount, location.pathname, metrics],
+  );
+
+  const baselineRows = useMemo(
+    () =>
+      metrics.rows.map((row) => ({
+        key: row.key,
+        label: row.label,
+        pct: row.pct,
+        tone: row.tone,
+        labelDetail: row.labelDetail,
+      })),
+    [metrics.rows],
+  );
+
   const showProgressBars = !loading && metrics.hasActivity;
   const showEmptyHelper = !loading && !metrics.hasChildActivity && metrics.emptyStateMessage;
+  const progressDrawerChild =
+    children.find((child) => child.participantId === progressChildId) ?? null;
 
   return (
     <div className="family-panel family-panel--overview">
-      <div className="family-kpiRow">
-        {kpis.map((kpi) => (
-          <article
+      {activeChildSummary ? (
+        <section className="family-overviewSummary">
+          <h2 className="family-overviewSummaryTitle">{activeChildSummary.displayName}</h2>
+          <p className="family-overviewSummaryMeta">
+            {programCode ? `Program: ${programCode}` : 'Family program'} · Last activity:{' '}
+            {activeChildSummary.latestActivity ?? 'No activity yet'}
+          </p>
+        </section>
+      ) : null}
+
+      <div className="family-kpiRow family-kpiRow--ds">
+        {metricCards.map((kpi) => (
+          <MetricCard
             key={kpi.label}
-            className={`family-kpiCard${'highlight' in kpi && kpi.highlight ? ' family-kpiCard--highlight' : ''}`}
-          >
-            <p className="family-kpiLabel">{kpi.label}</p>
-            <p className="family-kpiValue">{kpi.value}</p>
-            {kpi.detail ? <p className="family-kpiDetail">{kpi.detail}</p> : null}
-          </article>
+            label={kpi.label}
+            value={kpi.value}
+            helperText={kpi.helperText}
+            accent={kpi.accent}
+          />
         ))}
       </div>
 
       <FamilyAccessCodeCard />
-
       <FamilyValueCards />
+      <FamilyNeedsAttentionCard items={needsAttention} />
 
       {claimRequired ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
@@ -136,6 +229,7 @@ export default function FamilyOverviewPanel() {
         adultBaselineComplete={adultBaselineComplete}
         activeParticipantId={activeChild?.participantId}
         onSelectChild={selectChild}
+        onViewProgress={(participantId) => setProgressChildId(participantId)}
       />
 
       <section className="family-panelBlock">
@@ -155,23 +249,7 @@ export default function FamilyOverviewPanel() {
           </p>
         ) : null}
         {showProgressBars ? (
-          <div className="family-growthChart">
-            {metrics.rows.map(({ key, label, pct, tone, labelDetail }) => (
-              <div key={key} className="family-growthRow">
-                <div className="family-growthMeta">
-                  <span className="family-growthLabel">{label}</span>
-                  <span className="family-growthPct">{pct}%</span>
-                </div>
-                <p className="family-growthDetail">{labelDetail}</p>
-                <div className="family-growthTrack" aria-hidden="true">
-                  <div
-                    className={`family-growthFill family-growthFill--${tone}`}
-                    style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <BaselineOverviewBars rows={baselineRows} />
         ) : null}
       </section>
 
@@ -199,8 +277,7 @@ export default function FamilyOverviewPanel() {
             </ul>
           ) : (
             <p className="family-panelHelper">
-              {metrics.emptyStateMessage ??
-                'Completed games and check-ins will show up here.'}
+              {metrics.emptyStateMessage ?? 'Completed games and check-ins will show up here.'}
             </p>
           )}
         </section>
@@ -232,6 +309,14 @@ export default function FamilyOverviewPanel() {
           </div>
         </section>
       </div>
+
+      <FamilyChildProgressDrawer
+        open={Boolean(progressChildId)}
+        onClose={() => setProgressChildId(null)}
+        child={progressDrawerChild}
+        goalsRecord={goalsRecord}
+        gallerySubmissionCount={gallerySubmissionCount}
+      />
     </div>
   );
 }

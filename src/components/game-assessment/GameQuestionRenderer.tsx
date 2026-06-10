@@ -5,6 +5,7 @@ import {
   isSequenceQuestion,
   isTrueFalseQuestion,
 } from '../../types/gameAssessment';
+import AnswerChoiceList from '../../design-system/game/AnswerChoiceList';
 
 type GameQuestionRendererProps = {
   question: GameQuestion;
@@ -126,50 +127,21 @@ export default function GameQuestionRenderer({
 
   if (isChoiceQuestion(question) && choiceUsesCards(question.type)) {
     const selectedId = typeof answer === 'string' ? answer : null;
-    const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
     const showLetterPrefix = question.type === 'missing_letter' || question.type === 'context_clue';
 
     return (
-      <div className="bbc-answers" role="group" aria-labelledby="game-question">
-        {question.options.map((choice, optionIndex) => {
-          const isSelected = selectedId === choice.id;
-          const isCorrect = checked && choice.id === question.correctId;
-          const isWrong = checked && isSelected && choice.id !== question.correctId;
-          const prefix = optionLabels[optionIndex] ?? String(optionIndex + 1);
-          return (
-            <button
-              key={choice.id}
-              type="button"
-              disabled={checked}
-              className={[
-                'bbc-answerCard',
-                showLetterPrefix ? 'bbc-answerCard--lettered' : '',
-                isSelected && !checked ? 'bbc-answerCard--selected' : '',
-                isCorrect ? 'bbc-answerCard--correct' : '',
-                isWrong ? 'bbc-answerCard--wrong' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => {
-                playSelect();
-                onSelectChoice(choice.id);
-              }}
-              aria-pressed={isSelected}
-            >
-              {showLetterPrefix ? (
-                <>
-                  <span className="game-optionLetter" aria-hidden="true">
-                    {prefix}.
-                  </span>{' '}
-                  {choice.label}
-                </>
-              ) : (
-                choice.label
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <AnswerChoiceList
+        className="bbc-answers"
+        options={question.options}
+        selectedId={selectedId}
+        correctId={question.correctId}
+        checked={checked}
+        showLetterPrefix={showLetterPrefix}
+        onSelect={(id) => {
+          playSelect();
+          onSelectChoice(id);
+        }}
+      />
     );
   }
 

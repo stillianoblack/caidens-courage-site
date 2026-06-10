@@ -1,16 +1,28 @@
+.askB4-launcher {
+  z-index: 2050;
+}
+
+/* Mobile only — desktop uses floating assistant with no dim overlay */
 .askB4-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 48;
-  background: rgba(5, 11, 24, 0.45);
-  backdrop-filter: blur(2px);
+  z-index: 1500;
+  background: rgba(8, 18, 38, 0.2);
+}
+
+body[data-ask-b4-open='desktop-float'] .pilot-rail,
+body[data-ask-b4-open='desktop-float'] .family-rail,
+body[data-ask-b4-open='desktop-float'] .portal-header,
+body[data-ask-b4-open='desktop-float'] .pilot-topbar,
+body[data-ask-b4-open='desktop-float'] .family-topbar {
+  z-index: 1000;
 }
 
 .askB4-drawer {
   position: fixed;
   bottom: 0;
   right: 0;
-  z-index: 50;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   width: min(24rem, 100vw);
@@ -28,9 +40,13 @@
   .askB4-drawer {
     bottom: 1.5rem;
     right: 1.5rem;
-    height: 32.5rem;
-    max-height: calc(100dvh - 3rem);
+    width: min(26rem, calc(100vw - 2rem));
+    height: min(720px, calc(100vh - 120px));
+    max-height: min(720px, calc(100vh - 120px));
     border-radius: 1rem;
+    box-shadow:
+      0 0 0 1px rgba(240, 206, 110, 0.12),
+      0 20px 48px -12px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -277,6 +293,12 @@
   color: rgba(255, 255, 255, 0.88);
   cursor: pointer;
   text-align: left;
+}
+
+.askB4-starterBtn--link {
+  border-color: rgba(240, 206, 110, 0.45);
+  background: rgba(240, 206, 110, 0.12);
+  color: #f6d06f;
 }
 
 .askB4-footer {

@@ -208,6 +208,10 @@ export type GameQuestionBase = {
   feedbackDetail?: GameFeedbackDetail;
   feedbackDetailCorrect?: GameFeedbackDetail;
   feedbackDetailIncorrect?: GameFeedbackDetail;
+  /** B-4 lock-in tip bullets shown after answer check */
+  lockInTips?: string[];
+  lockInTipsCorrect?: string[];
+  lockInTipsIncorrect?: string[];
 };
 
 export type GameChoiceQuestion = GameQuestionBase & {

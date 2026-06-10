@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../../../lib/pilotTrackingLocalStorage';
 import type { PilotTrackingMetrics } from '../../../lib/pilotTrackingMetrics';
@@ -16,13 +16,20 @@ import PilotTrackingDataTables from '../PilotTrackingDataTables';
 import PilotNeedsAttentionCard from '../PilotNeedsAttentionCard';
 import PilotResultsKpiGrid from '../PilotResultsKpiGrid';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
+import PilotOverviewGalleryCard from '../PilotOverviewGalleryCard';
+import PilotB4RecommendationCard from '../PilotB4RecommendationCard';
 import { computeNeedsAttention } from '../../../lib/pilotStudentProgress';
+import { buildB4Recommendation, buildRecentStudentActivityFeed } from '../../../lib/pilotOverviewInsights';
 import type { StudentParticipantRecord } from '../../../lib/pilotTrackingService';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
+import {
+  fetchFacilitatorApprovedGalleryItems,
+  type StudentGalleryItem,
+} from '../../../lib/studentGalleryService';
 
 type PilotOverviewPanelProps = {
   metrics: PilotTrackingMetrics;
@@ -70,6 +77,9 @@ export default function PilotOverviewPanel({
 }: PilotOverviewPanelProps) {
   const location = useLocation();
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
+  const [galleryItems, setGalleryItems] = useState<StudentGalleryItem[]>([]);
+  const programCode = activeProgram?.programCode?.trim() ?? '';
+
   const needsAttention = useMemo(
     () =>
       computeNeedsAttention({
@@ -79,6 +89,40 @@ export default function PilotOverviewPanel({
       }),
     [assessmentResults, moduleResults, participants],
   );
+
+  useEffect(() => {
+    if (!programCode) return;
+    let cancelled = false;
+    void fetchFacilitatorApprovedGalleryItems(programCode).then((items) => {
+      if (!cancelled) setGalleryItems(items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [programCode]);
+
+  const recentStudentActivity = useMemo(
+    () =>
+      buildRecentStudentActivityFeed({
+        assessments: assessmentResults,
+        modules: moduleResults,
+        participants,
+        galleryItems,
+        participantLookup,
+        limit: 5,
+      }),
+    [assessmentResults, galleryItems, moduleResults, participantLookup, participants],
+  );
+
+  const b4Recommendation = useMemo(
+    () =>
+      buildB4Recommendation({
+        missingBaseline: needsAttention.missingBaseline,
+        noModules: needsAttention.noModules,
+      }),
+    [needsAttention.missingBaseline, needsAttention.noModules],
+  );
+
   const stepIndex = useMemo(
     () => recommendedStepIndex(metrics.baselineChecksCompleted),
     [metrics.baselineChecksCompleted],
@@ -112,6 +156,34 @@ export default function PilotOverviewPanel({
       <PilotResultsKpiGrid metrics={metrics} compact />
 
       <PilotNeedsAttentionCard counts={needsAttention} />
+
+      <section className="pilot-panelBlock pilot-panelBlock--studentActivity">
+        <div className="pilot-panelBlockHead">
+          <h2 className="pilot-panelBlockTitle">Recent Student Activity</h2>
+        </div>
+        {recentStudentActivity.length === 0 ? (
+          <p className="pilot-emptyNote">No recent activity yet.</p>
+        ) : (
+          <ul className="pilot-activityList">
+            {recentStudentActivity.map((item) => (
+              <li key={item.id} className="pilot-activityItem">
+                <span className="pilot-activityDot" aria-hidden="true" />
+                <div className="pilot-activityBody">
+                  <p className="pilot-activityLabel">{item.label}</p>
+                </div>
+                <time className="pilot-activityTime" dateTime={item.at}>
+                  {formatActivityTime(item.at)}
+                </time>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <div className="pilot-overviewInsightRow">
+        <PilotOverviewGalleryCard programCode={programCode} />
+        <PilotB4RecommendationCard recommendation={b4Recommendation} />
+      </div>
 
       <section className="pilot-panelBlock pilot-characterTracks">
         <div className="pilot-panelBlockHead">
@@ -167,30 +239,6 @@ export default function PilotOverviewPanel({
       />
 
       <div className="pilot-overviewSplit">
-        <section className="pilot-panelBlock pilot-panelBlock--activity">
-          <div className="pilot-panelBlockHead">
-            <h2 className="pilot-panelBlockTitle">Recent Activity</h2>
-          </div>
-          {metrics.recentActivity.length === 0 ? (
-            <p className="pilot-emptyNote">No activity yet.</p>
-          ) : (
-            <ul className="pilot-activityList">
-              {metrics.recentActivity.slice(0, 5).map((item) => (
-                <li key={item.id} className="pilot-activityItem">
-                  <span className="pilot-activityDot" aria-hidden="true" />
-                  <div className="pilot-activityBody">
-                    <p className="pilot-activityLabel">{item.label}</p>
-                    <p className="pilot-activityDetail">{item.detail}</p>
-                  </div>
-                  <time className="pilot-activityTime" dateTime={item.at}>
-                    {formatActivityTime(item.at)}
-                  </time>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
         <section className="pilot-panelBlock pilot-panelBlock--next">
           <div className="pilot-panelBlockHead pilot-panelBlockHead--next">
             <h2 className="pilot-panelBlockTitle">Next Recommended Step</h2>

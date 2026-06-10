@@ -8,11 +8,13 @@ import {
   ASK_B4_MODE_LABELS,
   ASK_B4_MODES,
   ASK_B4_STARTER_PROMPTS,
+  type AskB4StarterPrompt,
   detectAskB4Mode,
   getAskB4Welcome,
   type AskB4Mode,
 } from '../lib/askB4Mode';
 import { trackEvent } from '../lib/analytics';
+import { OPEN_ASK_B4_EVENT } from '../lib/openAskB4';
 import B4LauncherButton from './B4LauncherButton';
 import './ask-b4-chat.css';
 
@@ -46,10 +48,13 @@ function AskB4ActionButtons({
   );
 }
 
+const ASK_B4_MOBILE_MQ = '(max-width: 639px)';
+
 const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [mode, setMode] = useState<AskB4Mode>(() => detectAskB4Mode(location.pathname));
   const [messages, setMessages] = useState<Message[]>(() =>
     defaultOpen
@@ -72,12 +77,26 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      const detected = detectAskB4Mode(location.pathname);
-      setMode(detected);
-      resetConversation(detected);
+    if (!isOpen) return;
+    setMode(detectAskB4Mode(location.pathname));
+  }, [isOpen, location.pathname]);
+
+  useEffect(() => {
+    const mq = window.matchMedia(ASK_B4_MOBILE_MQ);
+    const syncViewport = () => setIsMobileViewport(mq.matches);
+    syncViewport();
+    mq.addEventListener('change', syncViewport);
+    return () => mq.removeEventListener('change', syncViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.removeAttribute('data-ask-b4-open');
+      return;
     }
-  }, [isOpen, location.pathname, resetConversation]);
+    document.body.setAttribute('data-ask-b4-open', 'desktop-float');
+    return () => document.body.removeAttribute('data-ask-b4-open');
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && messages.length > 0) {
@@ -87,6 +106,8 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
   useEffect(() => {
     if (!isOpen) return;
+    const isMobile = window.matchMedia('(max-width: 639px)').matches;
+    if (!isMobile) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -140,6 +161,15 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleOpen = () => {
+      trackEvent('ask_b4_opened');
+      setIsOpen(true);
+    };
+    window.addEventListener(OPEN_ASK_B4_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_ASK_B4_EVENT, handleOpen);
+  }, []);
+
   const handleActionNavigate = useCallback(
     (action: AskB4Action) => {
       ensureFacilitatorPortalAccess();
@@ -148,7 +178,6 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
         ensureFamilyPortalAccess();
       }
       navigate(action.href);
-      setIsOpen(false);
     },
     [navigate],
   );
@@ -169,7 +198,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-    const response = answerAskB4Question(text, mode);
+    const response = answerAskB4Question(text, mode, location.pathname);
     setMessages((prev) => [
       ...prev,
       {
@@ -179,6 +208,16 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
       },
     ]);
     setIsLoading(false);
+  };
+
+  const handleStarterClick = (starter: AskB4StarterPrompt) => {
+    if (starter.href) {
+      ensureFacilitatorPortalAccess();
+      ensureFamilyPortalAccess();
+      navigate(starter.href);
+      return;
+    }
+    void sendMessage(starter.text);
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -201,6 +240,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     <>
       {!isOpen ? (
         <B4LauncherButton
+          className="askB4-launcher"
           onClick={() => {
             trackEvent('ask_b4_opened');
             setIsOpen(true);
@@ -210,11 +250,13 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
       {isOpen ? (
         <>
-          <div
-            className="askB4-backdrop"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
+          {isMobileViewport ? (
+            <div
+              className="askB4-backdrop"
+              onClick={() => setIsOpen(false)}
+              aria-hidden="true"
+            />
+          ) : null}
 
           <div
             ref={drawerRef}
@@ -301,14 +343,14 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
               {messages.length <= 1 && !isLoading ? (
                 <div className="askB4-starters">
-                  {ASK_B4_STARTER_PROMPTS[mode].map((prompt) => (
+                  {ASK_B4_STARTER_PROMPTS[mode].map((starter) => (
                     <button
-                      key={prompt}
+                      key={starter.text}
                       type="button"
-                      className="askB4-starterBtn"
-                      onClick={() => void sendMessage(prompt)}
+                      className={`askB4-starterBtn${starter.href ? ' askB4-starterBtn--link' : ''}`}
+                      onClick={() => handleStarterClick(starter)}
                     >
-                      {prompt}
+                      {starter.text}
                     </button>
                   ))}
                 </div>

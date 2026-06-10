@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import { useToast } from '../portal-design-system/ToastProvider';
 
 async function copyText(value: string): Promise<boolean> {
   try {
@@ -10,20 +11,16 @@ async function copyText(value: string): Promise<boolean> {
 }
 
 export function useCopyToast() {
-  const [visible, setVisible] = useState(false);
+  const { showToast } = useToast();
 
-  const copyWithToast = useCallback(async (value: string) => {
-    const copied = await copyText(value);
-    if (!copied) return;
-    setVisible(true);
-    window.setTimeout(() => setVisible(false), 2000);
-  }, []);
+  const copyWithToast = useCallback(
+    async (value: string, message = 'Copied.') => {
+      const copied = await copyText(value);
+      if (!copied) return;
+      showToast(message, 'success');
+    },
+    [showToast],
+  );
 
-  const toast = visible ? (
-    <div className="portal-copyToast" role="status" aria-live="polite">
-      Copied
-    </div>
-  ) : null;
-
-  return { copyWithToast, toast };
+  return { copyWithToast, toast: null };
 }
