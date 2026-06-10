@@ -1,5 +1,5 @@
 import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
-import { familyPortalPath, familyGoalsPath } from './familyPortalPaths';
+import { familyDownloadsTabPath, familyGoalsPath, familyPortalPath } from './familyPortalPaths';
 import type { ActivityCategoryId } from '../data/pilotDashboardContent';
 import { programDashboardTabPath } from './programDashboardNav';
 
@@ -67,8 +67,14 @@ export function resolveAskB4PromptDeepLink(
   };
 
   const familyLinks: Record<string, string> = {
-    'where are the coloring pages?': familyPortalPath('downloads', pathname),
-    'show coloring pages': familyPortalPath('downloads', pathname),
+    'help me pick an activity': familyPortalPath('continue-learning', pathname),
+    "show my child's progress": familyPortalPath('', pathname),
+    'show my child\u2019s progress': familyPortalPath('', pathname),
+    'explain these scores': familyPortalPath('results', pathname),
+    'help me update family goals': familyGoalsPath(pathname),
+    'where are the coloring pages?': familyDownloadsTabPath('coloring-pages', pathname),
+    'show coloring pages': familyDownloadsTabPath('coloring-pages', pathname),
+    'how do i submit artwork?': familyPortalPath('gallery', pathname),
     'which activity helps with reading?': familyPortalPath('characters', pathname),
     'which activity helps with focus?': familyPortalPath('characters', pathname),
     'how can i help my child focus?': familyPortalPath('characters', pathname),
@@ -76,11 +82,12 @@ export function resolveAskB4PromptDeepLink(
     'what does the b-4 baseline mean?': familyPortalPath('baseline-check', pathname),
     'where is my child\u2019s certificate?': familyPortalPath('certificates', pathname),
     "where is my child's certificate?": familyPortalPath('certificates', pathname),
-    'how do i submit artwork?': familyPortalPath('gallery', pathname),
     'help me choose family goals': familyGoalsPath(pathname),
     'open family goals': familyGoalsPath(pathname),
     'child progress': familyPortalPath('', pathname),
     'family overview': familyPortalPath('', pathname),
+    certificates: familyPortalPath('certificates', pathname),
+    gallery: familyPortalPath('gallery', pathname),
   };
 
   const table = mode === 'facilitator' ? facilitatorLinks : mode === 'family' ? familyLinks : {};

@@ -546,7 +546,7 @@
 
 /* When B-4 chat panel is open — keep toasts clear of launcher and input */
 @media (min-width: 640px) {
-  body[data-ask-b4-open='desktop-float'] .ds-toastViewport {
+  body[data-ask-b4-open] .ds-toastViewport {
     bottom: 1.5rem;
     right: calc(1.5rem + min(26rem, calc(100vw - 2rem)) + 0.75rem);
     max-width: min(420px, calc(100vw - 3rem - min(26rem, calc(100vw - 2rem))));
@@ -572,7 +572,7 @@
     z-index: 2500;
   }
 
-  body[data-ask-b4-open='desktop-float'] .ds-toastViewport {
+  body[data-ask-b4-open] .ds-toastViewport {
     bottom: auto;
     top: 1rem;
     left: 16px;

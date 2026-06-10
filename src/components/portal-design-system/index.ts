@@ -1,4 +1,5 @@
 export { default as AppShell } from './AppShell';
+export { default as B4Assistant } from './B4Assistant';
 export type { AppShellVariant } from './AppShell';
 export { default as MarketingShowcaseCard } from './MarketingShowcaseCard';
 export type { MarketingShowcaseAction } from './MarketingShowcaseCard';

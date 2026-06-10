@@ -3,14 +3,23 @@ import React from 'react';
 type B4LauncherButtonProps = {
   onClick: () => void;
   className?: string;
+  ariaExpanded?: boolean;
+  ariaLabel?: string;
 };
 
 /** Shared floating B-4 launcher — compact on mobile, labeled on desktop. */
-export default function B4LauncherButton({ onClick, className = '' }: B4LauncherButtonProps) {
+export default function B4LauncherButton({
+  onClick,
+  className = '',
+  ariaExpanded,
+  ariaLabel = 'Ask B-4',
+}: B4LauncherButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-expanded={ariaExpanded}
+      aria-label={ariaLabel}
       className={[
         'fixed flex items-center justify-center gap-2.5',
         'rounded-full border border-golden-500/60 bg-[#050B18]/95 text-white font-bold',
@@ -21,7 +30,6 @@ export default function B4LauncherButton({ onClick, className = '' }: B4Launcher
         'sm:h-auto sm:w-auto sm:px-4 sm:py-2.5',
         className,
       ].join(' ')}
-      aria-label="Ask B-4"
     >
       <img
         src="/images/icons/B4_Chat_Icon.webp"

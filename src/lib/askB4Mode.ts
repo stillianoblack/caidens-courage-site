@@ -14,7 +14,7 @@ import {
   resultsNeedsAttentionPath,
   studentGalleryPendingPath,
 } from './askB4DeepLinks';
-import { familyGoalsPath, familyPortalPath } from './familyPortalPaths';
+import { familyDownloadsTabPath, familyGoalsPath, familyPortalPath } from './familyPortalPaths';
 import { programDashboardTabPath } from './programDashboardNav';
 
 export type AskB4Mode = 'kid' | 'family' | 'facilitator';
@@ -32,13 +32,12 @@ export const ASK_B4_STARTER_PROMPTS: Record<AskB4Mode, AskB4StarterPrompt[]> = {
     { text: 'What is the Focus Flame?' },
   ],
   family: [
-    { text: 'What should we try first?', href: familyPortalPath('continue-learning') },
-    { text: 'Show coloring pages', href: familyPortalPath('downloads') },
-    { text: 'How can I help my child focus?', href: familyPortalPath('characters') },
-    { text: 'What does the B-4 Baseline mean?', href: familyPortalPath('baseline-check') },
-    { text: "Where is my child's certificate?", href: familyPortalPath('certificates') },
+    { text: 'Help me pick an activity', href: familyPortalPath('continue-learning') },
+    { text: "Show my child's progress", href: familyPortalPath('') },
+    { text: 'Explain these scores', href: familyPortalPath('results') },
+    { text: 'Help me update family goals', href: familyGoalsPath() },
+    { text: 'Where are coloring pages?', href: familyDownloadsTabPath('coloring-pages') },
     { text: 'How do I submit artwork?', href: familyPortalPath('gallery') },
-    { text: 'Help me choose family goals', href: familyGoalsPath() },
   ],
   facilitator: [
     { text: 'What should we do for Week 1?', href: programDashboardTabPath('weekly-modules') },

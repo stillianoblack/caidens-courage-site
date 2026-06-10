@@ -72,7 +72,7 @@ export default function GoalsOnboardingDrawer({
 
   const handleRemindLater = async () => {
     await onRemindLater();
-    showToast("Okay — I'll remind you later.", 'info');
+    showToast("Okay — I'll remind you tomorrow.", 'info');
   };
 
   const handleSkip = async () => {
@@ -84,10 +84,19 @@ export default function GoalsOnboardingDrawer({
     showToast(skipMessage, 'info');
   };
 
+  const handleDismiss = () => {
+    onClose();
+    const dismissMessage =
+      portalType === 'family'
+        ? 'Okay — you can set goals anytime from Family Goals.'
+        : 'Okay — you can set goals anytime from Program Goals.';
+    showToast(dismissMessage, 'info');
+  };
+
   return (
     <SlideOutDrawer
       open={open}
-      onClose={onClose}
+      onClose={handleDismiss}
       className="pilot-drawer pilot-drawer--settings ds-goalsDrawer"
       titleId="program-goals-drawer-title"
     >
@@ -98,7 +107,7 @@ export default function GoalsOnboardingDrawer({
           </h2>
           <p className="ds-goalsDrawerSubtext">{copy.subtext}</p>
         </div>
-        <button type="button" className="ds-goalsDrawerClose" onClick={onClose} aria-label="Close">
+        <button type="button" className="ds-goalsDrawerClose" onClick={handleDismiss} aria-label="Close">
           ×
         </button>
       </div>

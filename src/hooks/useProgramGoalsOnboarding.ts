@@ -2,13 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ProgramGoalsPortalType } from '../data/programGoalsOptions';
 import {
   fetchProgramGoals,
+  readGoalsDrawerDismissedUntilLocal,
   readProgramGoalsSkippedLocal,
   remindLaterDismissedUntil,
   saveProgramGoals,
   shouldShowGoalsOnboarding,
+  skipGoalsDismissedUntil,
   writeProgramGoalsSkippedLocal,
   type ProgramGoalsRecord,
 } from '../lib/programGoalsService';
+
+export type GoalsDismissReason = 'close' | 'remind' | 'skip';
 
 type UseProgramGoalsOnboardingOptions = {
   programCode: string;
@@ -47,7 +51,8 @@ export function useProgramGoalsOnboarding({
     if (!enabled || loading || autoShownRef.current || !programCode.trim()) return;
 
     const skipped = readProgramGoalsSkippedLocal(programCode, portalType);
-    if (!shouldShowGoalsOnboarding(record, skipped)) return;
+    const localDismissedUntil = readGoalsDrawerDismissedUntilLocal(programCode, portalType);
+    if (!shouldShowGoalsOnboarding(record, skipped, localDismissedUntil)) return;
 
     const delayMs = 5000 + Math.floor(Math.random() * 2000);
     const timer = window.setTimeout(() => {
@@ -58,8 +63,42 @@ export function useProgramGoalsOnboarding({
     return () => window.clearTimeout(timer);
   }, [enabled, loading, programCode, portalType, record]);
 
-  const openDrawer = useCallback(() => setOpen(true), []);
-  const closeDrawer = useCallback(() => setOpen(false), []);
+  const openDrawer = useCallback(() => {
+    autoShownRef.current = true;
+    setOpen(true);
+  }, []);
+
+  const dismissDrawer = useCallback(
+    async (reason: GoalsDismissReason) => {
+      if (!programCode.trim()) {
+        setOpen(false);
+        return;
+      }
+
+      autoShownRef.current = true;
+      const dismissedUntil =
+        reason === 'skip' ? skipGoalsDismissedUntil() : remindLaterDismissedUntil();
+
+      if (reason === 'skip') {
+        writeProgramGoalsSkippedLocal(programCode, portalType, true);
+      } else {
+        writeProgramGoalsSkippedLocal(programCode, portalType, false);
+      }
+
+      const next: ProgramGoalsRecord = {
+        program_code: programCode,
+        portal_type: portalType,
+        selected_goals: reason === 'skip' ? [] : (record?.selected_goals ?? []),
+        custom_goal: record?.custom_goal,
+        completed_at: null,
+        dismissed_until: dismissedUntil,
+      };
+      const saved = await saveProgramGoals(next);
+      setRecord(saved);
+      setOpen(false);
+    },
+    [programCode, portalType, record],
+  );
 
   const saveGoals = useCallback(
     async (selectedGoals: string[], customGoal?: string) => {
@@ -74,43 +113,25 @@ export function useProgramGoalsOnboarding({
       const saved = await saveProgramGoals(next);
       setRecord(saved);
       writeProgramGoalsSkippedLocal(programCode, portalType, false);
+      autoShownRef.current = true;
       setOpen(false);
     },
     [programCode, portalType],
   );
 
   const remindLater = useCallback(async () => {
-    const next: ProgramGoalsRecord = {
-      program_code: programCode,
-      portal_type: portalType,
-      selected_goals: record?.selected_goals ?? [],
-      custom_goal: record?.custom_goal,
-      completed_at: null,
-      dismissed_until: remindLaterDismissedUntil(),
-    };
-    const saved = await saveProgramGoals(next);
-    setRecord(saved);
-    setOpen(false);
-  }, [programCode, portalType, record]);
+    await dismissDrawer('remind');
+  }, [dismissDrawer]);
 
   const skipForNow = useCallback(async () => {
-    writeProgramGoalsSkippedLocal(programCode, portalType, true);
-    const next: ProgramGoalsRecord = {
-      program_code: programCode,
-      portal_type: portalType,
-      selected_goals: [],
-      completed_at: null,
-      dismissed_until: null,
-    };
-    await saveProgramGoals(next);
-    setRecord(next);
-    setOpen(false);
-  }, [programCode, portalType]);
+    await dismissDrawer('skip');
+  }, [dismissDrawer]);
 
   return {
     open,
     openDrawer,
-    closeDrawer,
+    closeDrawer: () => dismissDrawer('close'),
+    dismissDrawer,
     record,
     loading,
     saveGoals,

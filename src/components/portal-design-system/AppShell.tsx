@@ -1,5 +1,6 @@
 import React from 'react';
 import PortalShell from '../portal/PortalShell';
+import B4Assistant from './B4Assistant';
 
 export type AppShellVariant = 'facilitator' | 'family' | 'kid';
 
@@ -11,15 +12,18 @@ type AppShellProps = {
   children: React.ReactNode;
 };
 
-/**
- * Shared portal shell for Facilitator, Family, and Kid portals.
- * B-4 assistant mounts globally via App.tsx (DeferredB4ChatWidget).
- */
+/** Shared portal shell for Facilitator, Family, and Kid portals. */
 export default function AppShell({ variant, sidebar, topBar, footer, children }: AppShellProps) {
   const shellVariant = variant === 'kid' ? 'family' : variant;
 
   return (
-    <PortalShell variant={shellVariant} sidebar={sidebar} topBar={topBar} footer={footer}>
+    <PortalShell
+      variant={shellVariant}
+      sidebar={sidebar}
+      topBar={topBar}
+      footer={footer}
+      floating={<B4Assistant />}
+    >
       {children}
     </PortalShell>
   );

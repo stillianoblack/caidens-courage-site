@@ -1,66 +1,97 @@
-.askB4-launcher {
-  z-index: 2050;
-  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-  right: max(1rem, env(safe-area-inset-right, 0px));
+/* Ask B-4 stacking: backdrop 900, panel 1000, launcher 1001 (closed) / 999 (open) */
+.askB4-root {
+  --askB4-launcher-offset: 24px;
+  --askB4-panel-launcher-gap: 96px;
+  --askB4-z-backdrop: 900;
+  --askB4-z-panel: 1000;
+  --askB4-z-launcher: 1001;
+  --askB4-z-launcher-open: 999;
 }
 
-@media (min-width: 640px) {
-  .askB4-launcher {
-    bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
-    right: max(1.5rem, env(safe-area-inset-right, 0px));
-  }
+.askB4-launcher {
+  position: fixed;
+  z-index: var(--askB4-z-launcher);
+  bottom: calc(var(--askB4-launcher-offset) + env(safe-area-inset-bottom, 0px));
+  right: calc(var(--askB4-launcher-offset) + env(safe-area-inset-right, 0px));
+  pointer-events: auto;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.askB4-root.is-open .askB4-launcher {
+  z-index: var(--askB4-z-launcher-open);
+  transform: scale(0.92);
+  opacity: 0.9;
 }
 
 /* Mobile only — desktop uses floating assistant with no dim overlay */
 .askB4-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1500;
+  z-index: var(--askB4-z-backdrop);
   background: rgba(8, 18, 38, 0.2);
 }
 
-body[data-ask-b4-open='desktop-float'] .pilot-rail,
-body[data-ask-b4-open='desktop-float'] .family-rail,
-body[data-ask-b4-open='desktop-float'] .portal-header,
-body[data-ask-b4-open='desktop-float'] .pilot-topbar,
-body[data-ask-b4-open='desktop-float'] .family-topbar {
+body[data-ask-b4-open] .pilot-rail,
+body[data-ask-b4-open] .family-rail,
+body[data-ask-b4-open] .portal-header,
+body[data-ask-b4-open] .pilot-topbar,
+body[data-ask-b4-open] .family-topbar {
   z-index: 1000;
 }
 
-.askB4-drawer {
+.askB4-drawer,
+.askB4-panel {
   position: fixed;
-  bottom: 0;
-  right: 0;
-  z-index: 2000;
+  z-index: var(--askB4-z-panel);
   display: flex;
   flex-direction: column;
-  width: min(24rem, 100vw);
-  height: min(34rem, 100dvh);
-  max-height: 100dvh;
   min-height: 0;
   overflow: hidden;
   background: #050b18;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem 1rem 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
 }
 
+.askB4-drawer {
+  bottom: 0;
+  right: 0;
+  width: min(24rem, 100vw);
+  height: min(34rem, 100dvh);
+  max-height: 100dvh;
+  border-radius: 1rem 1rem 0 0;
+}
+
 @media (min-width: 640px) {
+  .askB4-root {
+    --askB4-launcher-offset: 24px;
+    --askB4-panel-launcher-gap: 96px;
+  }
+
   .askB4-drawer {
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: min(26rem, calc(100vw - 2rem));
-    height: min(720px, calc(100vh - 120px));
-    max-height: min(720px, calc(100vh - 120px));
+    bottom: calc(var(--askB4-launcher-offset) + env(safe-area-inset-bottom, 0px));
+    right: calc(var(--askB4-launcher-offset) + env(safe-area-inset-right, 0px));
+    width: min(26rem, calc(100vw - 2 * var(--askB4-launcher-offset)));
+    height: min(720px, calc(100dvh - var(--askB4-panel-launcher-gap) - env(safe-area-inset-bottom, 0px)));
+    max-height: min(720px, calc(100dvh - var(--askB4-panel-launcher-gap) - env(safe-area-inset-bottom, 0px)));
     border-radius: 1rem;
     box-shadow:
       0 0 0 1px rgba(240, 206, 110, 0.12),
       0 20px 48px -12px rgba(0, 0, 0, 0.45);
   }
+
+  .askB4-root.is-open .askB4-drawer {
+    bottom: calc(var(--askB4-panel-launcher-gap) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
-/* Mobile: bottom sheet — override legacy index.css top offset for Ask B-4 */
+/* Mobile: bottom sheet above launcher — override legacy index.css top offset for Ask B-4 */
 @media (max-width: 639px) {
+  .askB4-root {
+    --askB4-panel-launcher-gap: 92px;
+  }
+
   .askB4-drawer.b4-chat-drawer {
     top: auto !important;
     bottom: 0 !important;
@@ -71,6 +102,12 @@ body[data-ask-b4-open='desktop-float'] .family-topbar {
     height: min(88dvh, 100dvh) !important;
     max-height: 88dvh !important;
     border-radius: 1rem 1rem 0 0;
+  }
+
+  .askB4-root.is-open .askB4-drawer.b4-chat-drawer {
+    bottom: calc(var(--askB4-panel-launcher-gap) + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(88dvh, calc(100dvh - 120px - env(safe-area-inset-bottom, 0px))) !important;
+    height: auto !important;
   }
 }
 

@@ -127,7 +127,9 @@ export default function DesignSystemPageContent() {
             <ShellPreview variant="kid" label="Kid shell (maps to family layout)" />
           </div>
           <p className="dsPageNote">
-            Live shells use real sidebars and headers. B-4 mounts globally via <code>App.tsx</code>.
+            Live shells use real sidebars and headers. <code>B4Assistant</code> mounts inside{' '}
+            <code>AppShell</code> for Facilitator, Family, and Kid portals (family game routes
+            included). Marketing pages still use the global launcher from <code>App.tsx</code>.
           </p>
         </section>
 
@@ -448,7 +450,17 @@ export default function DesignSystemPageContent() {
         </section>
 
         <section id="b4" className="dsPageSection">
-          <h2 className="dsPageSectionTitle">11. B-4 Assistant States</h2>
+          <h2 className="dsPageSectionTitle">11. B-4 Assistant</h2>
+          <p className="dsPageSectionSub">
+            <code>B4Assistant</code> wraps the deferred <code>B4ChatWidget</code> launcher + drawer.
+            Facilitator, Family, and Kid portals mount it from <code>AppShell</code>. Family mode
+            defaults to the Family tab with parent-friendly prompts and deep links to downloads,
+            progress, goals, gallery, and certificates.
+          </p>
+          <ul className="dsPageList">
+            <li>Desktop: fixed bottom-right, no dim overlay until mobile sheet opens.</li>
+            <li>Mobile: safe-area launcher; toasts stack above the B-4 icon (z-index 2500 vs 2050).</li>
+          </ul>
           <div className="dsB4Mock">
             <div>
               <p className="dsShellPreviewLabel">Closed launcher</p>
@@ -486,17 +498,39 @@ export default function DesignSystemPageContent() {
         </section>
 
         <section id="goals" className="dsPageSection">
-          <h2 className="dsPageSectionTitle">12. Goals Onboarding</h2>
+          <h2 className="dsPageSectionTitle">12. Goals Onboarding Drawer</h2>
           <p className="dsPageSectionSub">
-            Desktop uses a 2-column goal grid; mobile collapses to 1 column (see live drawer at
-            viewport &lt; 768px).
+            <code>GoalsOnboardingDrawer</code> auto-opens at most once per day per portal/program/user.
+            Dismissal persists to Supabase <code>program_goals.dismissed_until</code> when available,
+            with localStorage fallback key{' '}
+            <code>focusFlame:goalsDrawer:{'{portal}'}:{'{program_code}'}:{'{email}'}</code>.
           </p>
+          <ul className="dsPageList">
+            <li>
+              <strong>Auto-open first visit</strong> — after ~5–7s if no goals saved and not dismissed.
+            </li>
+            <li>
+              <strong>Dismissed state</strong> — X, outside click, Escape, or Remind Me Later → 24h;
+              toast confirms manual reopen path.
+            </li>
+            <li>
+              <strong>Skip for Now</strong> — dismissed for 7 days.
+            </li>
+            <li>
+              <strong>Completed state</strong> — Save Goals sets <code>completed_at</code>; no further
+              auto-open.
+            </li>
+            <li>
+              <strong>Manual reopen</strong> — Family Goals / Program Goals header button always opens
+              the drawer.
+            </li>
+          </ul>
           <div className="dsPageRow">
             <button type="button" className="dsBtnGold" onClick={() => setFacilitatorGoalsOpen(true)}>
-              Facilitator variant
+              Facilitator variant (manual)
             </button>
             <button type="button" className="dsBtnGold" onClick={() => setFamilyGoalsOpen(true)}>
-              Family variant
+              Family variant (manual)
             </button>
           </div>
         </section>

@@ -1,3 +1,4 @@
+import { readParentClaimContext } from '../config/parentClaimContext';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { ProgramGoalsPortalType } from '../data/programGoalsOptions';
 
@@ -11,9 +12,10 @@ export type ProgramGoalsRecord = {
   dismissed_until?: string | null;
 };
 
-const REMIND_LATER_DAYS = 3;
-
 export const PROGRAM_GOALS_SAVED_EVENT = 'caidens:program-goals-saved';
+
+const REMIND_LATER_HOURS = 24;
+const SKIP_DAYS = 7;
 
 function notifyProgramGoalsSaved(record: ProgramGoalsRecord): void {
   if (typeof window === 'undefined') return;
@@ -22,8 +24,54 @@ function notifyProgramGoalsSaved(record: ProgramGoalsRecord): void {
   );
 }
 
-function storageKey(programCode: string, portalType: ProgramGoalsPortalType, suffix: string): string {
+function legacyStorageKey(programCode: string, portalType: ProgramGoalsPortalType, suffix: string): string {
   return `${portalType}_program_goals_${suffix}_${programCode.trim()}`;
+}
+
+export function resolveGoalsDrawerUserScope(): string {
+  const claim = readParentClaimContext();
+  const email = claim?.email?.trim().toLowerCase();
+  if (email) return email;
+  const phone = claim?.phone?.replace(/\D/g, '');
+  if (phone) return phone;
+  return 'anonymous';
+}
+
+export function goalsDrawerDismissStorageKey(
+  programCode: string,
+  portalType: ProgramGoalsPortalType,
+  userScope?: string,
+): string {
+  const scope = userScope?.trim() || resolveGoalsDrawerUserScope();
+  return `focusFlame:goalsDrawer:${portalType}:${programCode.trim()}:${scope}`;
+}
+
+export function readGoalsDrawerDismissedUntilLocal(
+  programCode: string,
+  portalType: ProgramGoalsPortalType,
+  userScope?: string,
+): string | null {
+  if (!programCode.trim() || typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(goalsDrawerDismissStorageKey(programCode, portalType, userScope));
+  } catch {
+    return null;
+  }
+}
+
+export function writeGoalsDrawerDismissedUntilLocal(
+  programCode: string,
+  portalType: ProgramGoalsPortalType,
+  dismissedUntil: string | null,
+  userScope?: string,
+): void {
+  if (!programCode.trim() || typeof window === 'undefined') return;
+  const key = goalsDrawerDismissStorageKey(programCode, portalType, userScope);
+  if (!dismissedUntil) {
+    localStorage.removeItem(key);
+    return;
+  }
+  localStorage.setItem(key, dismissedUntil);
 }
 
 export function readProgramGoalsLocal(
@@ -32,7 +80,7 @@ export function readProgramGoalsLocal(
 ): ProgramGoalsRecord | null {
   if (!programCode.trim() || typeof window === 'undefined') return null;
   try {
-    const raw = localStorage.getItem(storageKey(programCode, portalType, 'data'));
+    const raw = localStorage.getItem(legacyStorageKey(programCode, portalType, 'data'));
     if (!raw) return null;
     return JSON.parse(raw) as ProgramGoalsRecord;
   } catch {
@@ -43,7 +91,7 @@ export function readProgramGoalsLocal(
 function writeProgramGoalsLocal(record: ProgramGoalsRecord): void {
   if (!record.program_code.trim() || typeof window === 'undefined') return;
   localStorage.setItem(
-    storageKey(record.program_code, record.portal_type, 'data'),
+    legacyStorageKey(record.program_code, record.portal_type, 'data'),
     JSON.stringify(record),
   );
 }
@@ -53,7 +101,7 @@ export function readProgramGoalsSkippedLocal(
   portalType: ProgramGoalsPortalType,
 ): boolean {
   try {
-    return localStorage.getItem(storageKey(programCode, portalType, 'skipped')) === 'true';
+    return localStorage.getItem(legacyStorageKey(programCode, portalType, 'skipped')) === 'true';
   } catch {
     return false;
   }
@@ -65,7 +113,32 @@ export function writeProgramGoalsSkippedLocal(
   skipped: boolean,
 ): void {
   if (!programCode.trim() || typeof window === 'undefined') return;
-  localStorage.setItem(storageKey(programCode, portalType, 'skipped'), skipped ? 'true' : 'false');
+  localStorage.setItem(legacyStorageKey(programCode, portalType, 'skipped'), skipped ? 'true' : 'false');
+}
+
+export function dismissGoalsForHours(hours: number): string {
+  const date = new Date();
+  date.setHours(date.getHours() + hours);
+  return date.toISOString();
+}
+
+export function dismissGoalsForDays(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString();
+}
+
+export function remindLaterDismissedUntil(): string {
+  return dismissGoalsForHours(REMIND_LATER_HOURS);
+}
+
+export function skipGoalsDismissedUntil(): string {
+  return dismissGoalsForDays(SKIP_DAYS);
+}
+
+function isDismissedUntilActive(value?: string | null): boolean {
+  if (!value?.trim()) return false;
+  return new Date(value).getTime() > Date.now();
 }
 
 export async function fetchProgramGoals(
@@ -73,7 +146,17 @@ export async function fetchProgramGoals(
   portalType: ProgramGoalsPortalType,
 ): Promise<ProgramGoalsRecord | null> {
   const local = readProgramGoalsLocal(programCode, portalType);
+  const localDismissedUntil = readGoalsDrawerDismissedUntilLocal(programCode, portalType);
   if (!programCode.trim() || !isSupabaseConfigured() || !supabase) {
+    if (local) return local;
+    if (localDismissedUntil) {
+      return {
+        program_code: programCode,
+        portal_type: portalType,
+        selected_goals: [],
+        dismissed_until: localDismissedUntil,
+      };
+    }
     return local;
   }
 
@@ -93,7 +176,19 @@ export async function fetchProgramGoals(
       return local;
     }
 
-    if (!data) return local;
+    if (!data) {
+      if (localDismissedUntil) {
+        return {
+          program_code: programCode,
+          portal_type: portalType,
+          selected_goals: local?.selected_goals ?? [],
+          custom_goal: local?.custom_goal,
+          completed_at: local?.completed_at ?? null,
+          dismissed_until: localDismissedUntil,
+        };
+      }
+      return local;
+    }
 
     const record: ProgramGoalsRecord = {
       id: data.id,
@@ -102,9 +197,12 @@ export async function fetchProgramGoals(
       selected_goals: Array.isArray(data.selected_goals) ? (data.selected_goals as string[]) : [],
       custom_goal: data.custom_goal,
       completed_at: data.completed_at,
-      dismissed_until: data.dismissed_until,
+      dismissed_until: data.dismissed_until ?? localDismissedUntil,
     };
     writeProgramGoalsLocal(record);
+    if (record.dismissed_until) {
+      writeGoalsDrawerDismissedUntilLocal(programCode, portalType, record.dismissed_until);
+    }
     return record;
   } catch (err) {
     console.warn('[program_goals] fetch error:', err);
@@ -116,6 +214,16 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
   const now = new Date().toISOString();
 
   writeProgramGoalsLocal(record);
+  if (record.dismissed_until) {
+    writeGoalsDrawerDismissedUntilLocal(
+      record.program_code,
+      record.portal_type,
+      record.dismissed_until,
+    );
+  } else if (record.completed_at) {
+    writeGoalsDrawerDismissedUntilLocal(record.program_code, record.portal_type, null);
+    writeProgramGoalsSkippedLocal(record.program_code, record.portal_type, false);
+  }
 
   let saved = record;
 
@@ -150,6 +258,13 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
           dismissed_until: data.dismissed_until,
         };
         writeProgramGoalsLocal(saved);
+        if (saved.dismissed_until) {
+          writeGoalsDrawerDismissedUntilLocal(
+            saved.program_code,
+            saved.portal_type,
+            saved.dismissed_until,
+          );
+        }
       }
     } catch (err) {
       console.warn('[program_goals] save error:', err);
@@ -160,17 +275,14 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
   return saved;
 }
 
-export function shouldShowGoalsOnboarding(record: ProgramGoalsRecord | null, skipped: boolean): boolean {
-  if (skipped) return false;
+export function shouldShowGoalsOnboarding(
+  record: ProgramGoalsRecord | null,
+  skipped: boolean,
+  localDismissedUntil?: string | null,
+): boolean {
   if (record?.completed_at) return false;
-  if (record?.dismissed_until) {
-    return new Date(record.dismissed_until).getTime() <= Date.now();
-  }
+  if (isDismissedUntilActive(record?.dismissed_until)) return false;
+  if (isDismissedUntilActive(localDismissedUntil)) return false;
+  if (skipped && !record?.dismissed_until && !localDismissedUntil) return false;
   return true;
-}
-
-export function remindLaterDismissedUntil(): string {
-  const date = new Date();
-  date.setDate(date.getDate() + REMIND_LATER_DAYS);
-  return date.toISOString();
 }

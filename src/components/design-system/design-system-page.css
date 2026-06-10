@@ -116,6 +116,18 @@
   color: rgba(36, 62, 112, 0.62);
 }
 
+.dsPageList {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.dsPageList li + li {
+  margin-top: 0.35rem;
+}
+
 /* Shell previews */
 .dsShellPreview {
   border-radius: 0.875rem;

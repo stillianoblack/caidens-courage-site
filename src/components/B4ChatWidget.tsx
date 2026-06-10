@@ -14,7 +14,8 @@ import {
   type AskB4Mode,
 } from '../lib/askB4Mode';
 import { trackEvent } from '../lib/analytics';
-import { OPEN_ASK_B4_EVENT } from '../lib/openAskB4';
+import { consumeAskB4OpenPending, OPEN_ASK_B4_EVENT, type OpenAskB4Detail } from '../lib/openAskB4';
+import { logAskB4Debug } from '../lib/askB4Debug';
 import B4LauncherButton from './B4LauncherButton';
 import './ask-b4-chat.css';
 
@@ -50,17 +51,13 @@ function AskB4ActionButtons({
 
 const ASK_B4_MOBILE_MQ = '(max-width: 639px)';
 
-const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false }) => {
+const B4ChatWidget: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [mode, setMode] = useState<AskB4Mode>(() => detectAskB4Mode(location.pathname));
-  const [messages, setMessages] = useState<Message[]>(() =>
-    defaultOpen
-      ? [{ role: 'assistant', content: getAskB4Welcome(detectAskB4Mode(location.pathname)) }]
-      : [],
-  );
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,6 +72,50 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
       },
     ]);
   }, []);
+
+  const openAssistant = useCallback(() => {
+    const nextMode = detectAskB4Mode(location.pathname);
+    logAskB4Debug('openAssistant', {
+      isOpenBefore: isOpen,
+      isLoading,
+      messageCount: messages.length,
+    });
+    setIsLoading(false);
+    setInputValue('');
+    setMode(nextMode);
+    if (messages.length === 0) {
+      resetConversation(nextMode);
+    }
+    setIsOpen(true);
+    trackEvent('ask_b4_opened');
+  }, [isLoading, isOpen, location.pathname, messages.length, resetConversation]);
+
+  const closeAssistant = useCallback(() => {
+    logAskB4Debug('closeAssistant', {
+      isOpenBefore: isOpen,
+      isLoading,
+      messageCount: messages.length,
+    });
+    setIsOpen(false);
+    setIsLoading(false);
+    document.body.removeAttribute('data-ask-b4-open');
+    document.body.style.overflow = '';
+  }, [isLoading, isOpen, messages.length]);
+
+  const handleLauncherClick = useCallback(() => {
+    logAskB4Debug('launcher clicked', { isOpen, isLoading });
+    if (isOpen) {
+      closeAssistant();
+      return;
+    }
+    openAssistant();
+  }, [closeAssistant, isLoading, isOpen, openAssistant]);
+
+  useEffect(() => {
+    if (consumeAskB4OpenPending()) {
+      openAssistant();
+    }
+  }, [openAssistant]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -94,7 +135,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
       document.body.removeAttribute('data-ask-b4-open');
       return;
     }
-    document.body.setAttribute('data-ask-b4-open', 'desktop-float');
+    document.body.setAttribute('data-ask-b4-open', 'true');
     return () => document.body.removeAttribute('data-ask-b4-open');
   }, [isOpen]);
 
@@ -125,54 +166,56 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
 
   useEffect(() => {
     if (!isOpen || !drawerRef.current || typeof window === 'undefined') return;
+    const isMobile = window.matchMedia(ASK_B4_MOBILE_MQ).matches;
+    if (!isMobile) return;
+
     const drawer = drawerRef.current;
     const vv = window.visualViewport;
+    if (!vv) return;
+
+    const launcherClearancePx = 92;
 
     const syncDrawerHeight = () => {
-      if (!vv) return;
       const insetTop = Math.max(0, vv.offsetTop);
       const visibleHeight = vv.height;
-      drawer.style.maxHeight = `${visibleHeight - insetTop}px`;
+      const maxHeight = visibleHeight - insetTop - launcherClearancePx;
+      drawer.style.maxHeight = `${Math.max(200, maxHeight)}px`;
       drawer.style.top = insetTop > 0 ? `${insetTop}px` : '';
     };
 
-    if (vv) {
-      syncDrawerHeight();
-      vv.addEventListener('resize', syncDrawerHeight);
-      vv.addEventListener('scroll', syncDrawerHeight);
-      return () => {
-        vv.removeEventListener('resize', syncDrawerHeight);
-        vv.removeEventListener('scroll', syncDrawerHeight);
-        drawer.style.maxHeight = '';
-        drawer.style.top = '';
-      };
-    }
-    return undefined;
+    syncDrawerHeight();
+    vv.addEventListener('resize', syncDrawerHeight);
+    vv.addEventListener('scroll', syncDrawerHeight);
+    return () => {
+      vv.removeEventListener('resize', syncDrawerHeight);
+      vv.removeEventListener('scroll', syncDrawerHeight);
+      drawer.style.maxHeight = '';
+      drawer.style.top = '';
+    };
   }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsOpen(false);
+        closeAssistant();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [closeAssistant, isOpen]);
 
   const pendingPromptRef = useRef<string | null>(null);
 
   useEffect(() => {
     const handleOpen = (event: Event) => {
-      const prompt = (event as CustomEvent<{ prompt?: string }>).detail?.prompt?.trim();
+      const prompt = (event as CustomEvent<OpenAskB4Detail>).detail?.prompt?.trim();
       pendingPromptRef.current = prompt || null;
-      trackEvent('ask_b4_opened');
-      setIsOpen(true);
+      openAssistant();
     };
     window.addEventListener(OPEN_ASK_B4_EVENT, handleOpen);
     return () => window.removeEventListener(OPEN_ASK_B4_EVENT, handleOpen);
-  }, []);
+  }, [openAssistant]);
 
   const handleActionNavigate = useCallback(
     (action: AskB4Action) => {
@@ -181,9 +224,10 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
       if (action.grantFamilyAccess) {
         ensureFamilyPortalAccess();
       }
+      closeAssistant();
       navigate(action.href);
     },
-    [navigate],
+    [closeAssistant, navigate],
   );
 
   const handleModeChange = (nextMode: AskB4Mode) => {
@@ -200,18 +244,21 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     setMessages((prev) => [...prev, { role: 'user', content: text }]);
     setInputValue('');
 
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    try {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-    const response = answerAskB4Question(text, mode, location.pathname);
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: 'assistant',
-        content: response.answer,
-        actions: response.actions,
-      },
-    ]);
-    setIsLoading(false);
+      const response = answerAskB4Question(text, mode, location.pathname);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: response.answer,
+          actions: response.actions,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -226,6 +273,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
     if (starter.href) {
       ensureFacilitatorPortalAccess();
       ensureFamilyPortalAccess();
+      closeAssistant();
       navigate(starter.href);
       return;
     }
@@ -249,30 +297,29 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
   }
 
   return (
-    <>
-      {!isOpen ? (
-        <B4LauncherButton
-          className="askB4-launcher"
-          onClick={() => {
-            trackEvent('ask_b4_opened');
-            setIsOpen(true);
-          }}
-        />
-      ) : null}
+    <div
+      className={`askB4-root${isOpen ? ' is-open' : ''}`}
+      data-ask-b4-open={isOpen ? 'true' : undefined}
+    >
+      <B4LauncherButton
+        className="askB4-launcher"
+        onClick={handleLauncherClick}
+        ariaExpanded={isOpen}
+      />
 
       {isOpen ? (
         <>
           {isMobileViewport ? (
             <div
               className="askB4-backdrop"
-              onClick={() => setIsOpen(false)}
+              onClick={closeAssistant}
               aria-hidden="true"
             />
           ) : null}
 
           <div
             ref={drawerRef}
-            className="askB4-drawer b4-chat-drawer"
+            className="askB4-drawer askB4-panel b4-chat-drawer"
             role="dialog"
             aria-modal="true"
             aria-labelledby="ask-b4-title"
@@ -300,7 +347,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
               <button
                 type="button"
                 className="askB4-closeBtn"
-                onClick={() => setIsOpen(false)}
+                onClick={closeAssistant}
                 aria-label="Close Ask B-4"
               >
                 ×
@@ -396,7 +443,7 @@ const B4ChatWidget: React.FC<{ defaultOpen?: boolean }> = ({ defaultOpen = false
           </div>
         </>
       ) : null}
-    </>
+    </div>
   );
 };
 

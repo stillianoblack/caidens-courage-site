@@ -11,6 +11,7 @@ import AdultAssessmentPage from './pages/AdultAssessmentPage';
 import PilotDashboardPage from './pages/PilotDashboardPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+import { shouldMountPortalB4Assistant } from './lib/portalB4Routes';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
 import PortalRouteLoader from './components/portal/PortalRouteLoader';
@@ -434,11 +435,12 @@ const AppLayout: React.FC = () => {
     location.pathname.startsWith(`${CAIDEN_QUEST_HUB_PATH}`) ||
     location.pathname === KIDS_PORTAL_PATH ||
     location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);
-  /** Hide Ask B-4 during active gameplay; intro, portals, and completion keep the button. */
+  /** Hide global Ask B-4 during gameplay and on portal shells (AppShell mounts B4Assistant). */
   const hideAskB4Chat =
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
-    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
+    location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
+    shouldMountPortalB4Assistant(location.pathname);
   const isPortalShellRoute =
     location.pathname === '/portal' ||
     location.pathname.startsWith(`${FAMILY_HUB_PATH}/`) ||

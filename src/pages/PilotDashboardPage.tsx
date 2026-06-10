@@ -23,6 +23,7 @@ import {
 import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
+import { B4Assistant } from '../components/portal-design-system';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PILOT_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -205,6 +206,8 @@ export default function PilotDashboardPage() {
 
         <footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>
       </div>
+
+      <B4Assistant />
     </div>
   );
 }
