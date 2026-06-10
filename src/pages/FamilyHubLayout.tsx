@@ -38,25 +38,33 @@ export default function FamilyHubLayout() {
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
 
-  const goalsOnboarding = useProgramGoalsOnboarding({
+  const {
+    open: goalsOpen,
+    openDrawer: openGoalsDrawer,
+    closeDrawer: closeGoalsDrawer,
+    record: goalsRecord,
+    saveGoals,
+    remindLater: remindGoalsLater,
+    skipForNow: skipGoalsForNow,
+  } = useProgramGoalsOnboarding({
     programCode,
     portalType: 'family',
     enabled: sessionValid,
   });
 
   useEffect(() => {
-    const handleOpenGoals = () => goalsOnboarding.openDrawer();
+    const handleOpenGoals = () => openGoalsDrawer();
     window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
     return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
-  }, [goalsOnboarding.openDrawer]);
+  }, [openGoalsDrawer]);
 
   useEffect(() => {
     if (searchParams.get('openGoals') !== '1') return;
-    goalsOnboarding.openDrawer();
+    openGoalsDrawer();
     const next = new URLSearchParams(searchParams);
     next.delete('openGoals');
     setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, goalsOnboarding.openDrawer]);
+  }, [searchParams, setSearchParams, openGoalsDrawer]);
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
@@ -103,7 +111,7 @@ export default function FamilyHubLayout() {
           pageTitle={pageTitle}
           contextTitle={brand.title}
           contextSubtitle="Family Portal"
-          onOpenProgramGoals={goalsOnboarding.openDrawer}
+          onOpenProgramGoals={openGoalsDrawer}
         />
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
@@ -113,14 +121,14 @@ export default function FamilyHubLayout() {
       </Suspense>
 
       <GoalsOnboardingDrawer
-        open={goalsOnboarding.open}
-        onClose={goalsOnboarding.closeDrawer}
+        open={goalsOpen}
+        onClose={closeGoalsDrawer}
         portalType="family"
         programCode={programCode}
-        initialRecord={goalsOnboarding.record}
-        onSave={goalsOnboarding.saveGoals}
-        onRemindLater={goalsOnboarding.remindLater}
-        onSkip={goalsOnboarding.skipForNow}
+        initialRecord={goalsRecord}
+        onSave={saveGoals}
+        onRemindLater={remindGoalsLater}
+        onSkip={skipGoalsForNow}
       />
     </AppShell>
   );

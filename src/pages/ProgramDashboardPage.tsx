@@ -71,25 +71,33 @@ export default function ProgramDashboardPage() {
   );
   const handleSelectNav = useProgramDashboardNav();
 
-  const goalsOnboarding = useProgramGoalsOnboarding({
+  const {
+    open: goalsOpen,
+    openDrawer: openGoalsDrawer,
+    closeDrawer: closeGoalsDrawer,
+    record: goalsRecord,
+    saveGoals,
+    remindLater: remindGoalsLater,
+    skipForNow: skipGoalsForNow,
+  } = useProgramGoalsOnboarding({
     programCode: programCode ?? '',
     portalType: 'facilitator',
     enabled: sessionValid && !isKidsRoute,
   });
 
   useEffect(() => {
-    const handleOpenGoals = () => goalsOnboarding.openDrawer();
+    const handleOpenGoals = () => openGoalsDrawer();
     window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
     return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
-  }, [goalsOnboarding.openDrawer]);
+  }, [openGoalsDrawer]);
 
   useEffect(() => {
     if (searchParams.get('openGoals') !== '1') return;
-    goalsOnboarding.openDrawer();
+    openGoalsDrawer();
     const next = new URLSearchParams(searchParams);
     next.delete('openGoals');
     setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, goalsOnboarding.openDrawer]);
+  }, [searchParams, setSearchParams, openGoalsDrawer]);
 
   const pageTitle = isKidsRoute
     ? resolvePortalPageTitle(location.pathname, PROGRAM_DASHBOARD_PATH)
@@ -158,7 +166,7 @@ export default function ProgramDashboardPage() {
       topBar={
         <PilotDashboardTopBar
           pageTitle={pageTitle}
-          onOpenProgramGoals={goalsOnboarding.openDrawer}
+          onOpenProgramGoals={openGoalsDrawer}
         />
       }
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}
@@ -175,14 +183,14 @@ export default function ProgramDashboardPage() {
       </Suspense>
 
       <GoalsOnboardingDrawer
-        open={goalsOnboarding.open}
-        onClose={goalsOnboarding.closeDrawer}
+        open={goalsOpen}
+        onClose={closeGoalsDrawer}
         portalType="facilitator"
         programCode={programCode ?? ''}
-        initialRecord={goalsOnboarding.record}
-        onSave={goalsOnboarding.saveGoals}
-        onRemindLater={goalsOnboarding.remindLater}
-        onSkip={goalsOnboarding.skipForNow}
+        initialRecord={goalsRecord}
+        onSave={saveGoals}
+        onRemindLater={remindGoalsLater}
+        onSkip={skipGoalsForNow}
       />
     </AppShell>
   );

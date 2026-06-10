@@ -32,25 +32,33 @@ export default function FamilyPortalLayout() {
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode ?? '';
 
-  const goalsOnboarding = useProgramGoalsOnboarding({
+  const {
+    open: goalsOpen,
+    openDrawer: openGoalsDrawer,
+    closeDrawer: closeGoalsDrawer,
+    record: goalsRecord,
+    saveGoals,
+    remindLater: remindGoalsLater,
+    skipForNow: skipGoalsForNow,
+  } = useProgramGoalsOnboarding({
     programCode,
     portalType: 'family',
     enabled: hasSession && Boolean(programCode),
   });
 
   useEffect(() => {
-    const handleOpenGoals = () => goalsOnboarding.openDrawer();
+    const handleOpenGoals = () => openGoalsDrawer();
     window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
     return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
-  }, [goalsOnboarding.openDrawer]);
+  }, [openGoalsDrawer]);
 
   useEffect(() => {
     if (searchParams.get('openGoals') !== '1') return;
-    goalsOnboarding.openDrawer();
+    openGoalsDrawer();
     const next = new URLSearchParams(searchParams);
     next.delete('openGoals');
     setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, goalsOnboarding.openDrawer]);
+  }, [searchParams, setSearchParams, openGoalsDrawer]);
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
@@ -90,7 +98,7 @@ export default function FamilyPortalLayout() {
           pageTitle={pageTitle}
           contextTitle={brand.title}
           contextSubtitle="Family Portal"
-          onOpenProgramGoals={goalsOnboarding.openDrawer}
+          onOpenProgramGoals={openGoalsDrawer}
         />
       }
       footer={
@@ -102,14 +110,14 @@ export default function FamilyPortalLayout() {
       </Suspense>
 
       <GoalsOnboardingDrawer
-        open={goalsOnboarding.open}
-        onClose={goalsOnboarding.closeDrawer}
+        open={goalsOpen}
+        onClose={closeGoalsDrawer}
         portalType="family"
         programCode={programCode}
-        initialRecord={goalsOnboarding.record}
-        onSave={goalsOnboarding.saveGoals}
-        onRemindLater={goalsOnboarding.remindLater}
-        onSkip={goalsOnboarding.skipForNow}
+        initialRecord={goalsRecord}
+        onSave={saveGoals}
+        onRemindLater={remindGoalsLater}
+        onSkip={skipGoalsForNow}
       />
     </AppShell>
   );
