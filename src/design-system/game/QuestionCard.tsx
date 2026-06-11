@@ -1,6 +1,5 @@
 import React from 'react';
 import { getCharacter } from '../characters/characterRegistry';
-import './game-learning.css';
 
 export type QuestionCardProps = {
   sceneLabel?: string;

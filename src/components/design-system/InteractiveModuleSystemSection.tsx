@@ -20,7 +20,6 @@ import {
   DEMO_GAME_OPTIONS,
   DEMO_GAME_QUESTION,
 } from '../../data/designSystemGameDemoData';
-import '../../design-system/game/game-learning.css';
 
 const QUEST_Q1 = CAIDEN_QUEST_1_CONFIG.questions[0];
 

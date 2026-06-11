@@ -1,5 +1,5 @@
 import React from 'react';
-import './game-interaction-shell.css';
+import '../../../design-system/game/gameDesignStyles';
 
 type GameInteractionShellProps = {
   children: React.ReactNode;

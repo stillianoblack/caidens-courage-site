@@ -3,7 +3,6 @@ import AvatarContainer, { type AvatarContainerVariant } from '../components/Avat
 import { LEARNING_MOMENT_VARIANTS } from '../components/learningMomentCard.registry';
 import { getCharacter } from '../characters/characterRegistry';
 import CoachingRailShell from './CoachingRailShell';
-import '../components/learning-moment.css';
 
 export type LearningMomentVariant = 'B4_LOCK_IN' | 'B4_PARENT_COACH' | 'FACILITATOR_INSIGHT';
 

@@ -3,7 +3,6 @@ import AvatarContainer from '../components/AvatarContainer';
 import { getCharacter } from '../characters/characterRegistry';
 import CoachingRailShell from './CoachingRailShell';
 import { getGuidePanelLabel, getPreSubmitGuideMessage } from './getPreSubmitGuideMessage';
-import '../components/learning-moment.css';
 
 export type GameCoachingRailVariant = 'b4' | 'facilitator';
 

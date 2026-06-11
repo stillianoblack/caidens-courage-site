@@ -1,5 +1,4 @@
 import React from 'react';
-import './learning-moment.css';
 
 export type AvatarContainerVariant = 'b4' | 'dr-victoria' | 'default';
 

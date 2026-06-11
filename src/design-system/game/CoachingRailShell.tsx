@@ -1,5 +1,4 @@
 import React from 'react';
-import '../components/learning-moment.css';
 
 export type CoachingRailShellVariant = 'b4' | 'facilitator' | 'placeholder';
 

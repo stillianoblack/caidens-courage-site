@@ -21,7 +21,6 @@ import {
 } from '../../data/designSystemGameDemoData';
 import { getB4LockInTip } from '../../design-system/game/getB4LockInTip';
 import { CAIDEN_QUEST_1_CONFIG } from '../../data/caiden/quest1WhatComesFirst';
-import '../../design-system/game/game-learning.css';
 
 export default function GameLearningDesignSystemSection() {
   const [kidSelected, setKidSelected] = useState<string | null>(null);

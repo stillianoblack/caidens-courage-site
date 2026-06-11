@@ -1,6 +1,5 @@
 import React from 'react';
 import type { GameChoiceOption } from '../../types/gameAssessment';
-import './game-learning.css';
 
 export type AnswerChoiceListProps = {
   options: GameChoiceOption[];

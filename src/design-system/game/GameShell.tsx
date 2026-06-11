@@ -1,8 +1,6 @@
 import React from 'react';
 import PortalBackButton from '../../components/portal/PortalBackButton';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
-import './game-learning.css';
-
 export type GameShellPortalType = 'facilitator' | 'family' | 'kid';
 
 /**

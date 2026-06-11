@@ -1,3 +1,5 @@
+import './gameDesignStyles';
+
 export { default as GameShell } from './GameShell';
 export type { GameShellProps, GameShellPortalType } from './GameShell';
 
