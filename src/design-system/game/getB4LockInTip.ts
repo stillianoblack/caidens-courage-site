@@ -31,6 +31,8 @@ export type B4LockInTipInput = {
   characterId?: string;
   learningGoal?: string;
   question?: GameQuestion;
+  /** When false, incorrect tips avoid naming the correct answer. */
+  revealCorrectAnswer?: boolean;
 };
 
 export type B4LockInTipTone = 'success' | 'try' | 'neutral';
@@ -230,6 +232,7 @@ function buildFocusBody(
   labels: AnswerLabels,
   character: string,
   portalType: B4LockInPortalType,
+  revealCorrectAnswer = false,
 ): string {
   const { selectedLabel, correctLabel } = labels;
 
@@ -252,8 +255,11 @@ function buildFocusBody(
   if (labelMatchesPatterns(selectedLabel, DISTRACTION_PATTERNS)) {
     return `That choice may pull attention away from the main task. ${character} can protect focus by clearing the distraction first.`;
   }
-  if (selectedLabel && correctLabel) {
+  if (selectedLabel && correctLabel && revealCorrectAnswer) {
     return `"${shortenLabel(selectedLabel)}" may not get ${character} closer right now. Look for a smaller move like "${shortenLabel(correctLabel)}."`;
+  }
+  if (selectedLabel) {
+    return `"${shortenLabel(selectedLabel)}" may not get ${character} closer right now. Look for the smallest next step.`;
   }
   return `That path may not help ${character} lock in yet. Look for the smallest next step.`;
 }
@@ -265,6 +271,7 @@ function buildSkillBody(
   character: string,
   portalType: B4LockInPortalType,
   learningGoal?: string,
+  revealCorrectAnswer = false,
 ): string {
   const goal = learningGoal ? ` for ${learningGoal.toLowerCase()}` : '';
 
@@ -291,7 +298,7 @@ function buildSkillBody(
         ? `${character} noticed how nature works${goal}. Curiosity plus one observation builds understanding.`
         : `Look at what the animal or plant is really doing${goal}. The answer is usually in the behavior, not the joke option.`;
     default:
-      return buildFocusBody(isCorrect, labels, character, portalType);
+      return buildFocusBody(isCorrect, labels, character, portalType, revealCorrectAnswer);
   }
 }
 
@@ -417,11 +424,12 @@ function fallbackTips(
   characterId: string | undefined,
   portalType: B4LockInPortalType,
   labels: AnswerLabels,
+  revealCorrectAnswer = false,
 ): string[] {
   const template = SKILL_TIP_TEMPLATES[skill] ?? SKILL_TIP_TEMPLATES.focus;
   let tips = isCorrect ? [...template.correct] : [...template.incorrect];
 
-  if (!isCorrect && labels.correctLabel) {
+  if (!isCorrect && labels.correctLabel && revealCorrectAnswer) {
     tips[0] = `Look for a move like "${shortenLabel(labels.correctLabel)}."`;
   }
 
@@ -429,7 +437,11 @@ function fallbackTips(
   return portalAdaptTips(tips.slice(0, 3), portalType);
 }
 
-function detailTryThisTips(question: GameQuestion, isCorrect: boolean): string[] | undefined {
+function detailTryThisTips(
+  question: GameQuestion | undefined,
+  isCorrect: boolean,
+): string[] | undefined {
+  if (!question) return undefined;
   const detail = isCorrect
     ? question.feedbackDetailCorrect ?? question.feedbackDetail
     : question.feedbackDetailIncorrect ?? question.feedbackDetail;
@@ -452,6 +464,7 @@ export function getB4LockInTip(input: B4LockInTipInput): B4LockInTipResult {
     characterId,
     learningGoal,
     question,
+    revealCorrectAnswer = isCorrect,
   } = input;
 
   const skill = normalizeB4SkillArea(skillArea);
@@ -484,15 +497,23 @@ export function getB4LockInTip(input: B4LockInTipInput): B4LockInTipResult {
   }
 
   if (!body) {
-    body = buildSkillBody(skill, isCorrect, labels, character, portalType, learningGoal);
+    body = buildSkillBody(
+      skill,
+      isCorrect,
+      labels,
+      character,
+      portalType,
+      learningGoal,
+      revealCorrectAnswer,
+    );
   }
 
   if (!tips?.length) {
-    tips = detailTryThisTips(question!, isCorrect);
+    tips = detailTryThisTips(question, isCorrect);
   }
 
   if (!tips?.length) {
-    tips = fallbackTips(skill, isCorrect, characterId, portalType, labels);
+    tips = fallbackTips(skill, isCorrect, characterId, portalType, labels, revealCorrectAnswer);
   } else {
     tips = portalAdaptTips(tips.slice(0, 3), portalType);
   }
@@ -534,6 +555,7 @@ export type BuildB4LockInFromGameParams = {
   question: GameQuestion;
   answer: GameAnswerValue;
   isCorrect: boolean;
+  revealCorrectAnswer?: boolean;
   tracking?: {
     moduleId?: string;
     character?: string;
@@ -543,7 +565,7 @@ export type BuildB4LockInFromGameParams = {
 
 /** Convenience wrapper for GameAssessmentFlow / MissionQuizLayout. */
 export function buildB4LockInTipFromGame(params: BuildB4LockInFromGameParams): B4LockInTipResult {
-  const { portalType, config, question, answer, isCorrect, tracking } = params;
+  const { portalType, config, question, answer, isCorrect, revealCorrectAnswer, tracking } = params;
   return getB4LockInTip({
     portalType,
     gameId: config.id,
@@ -551,6 +573,7 @@ export function buildB4LockInTipFromGame(params: BuildB4LockInFromGameParams): B
     questionId: question.id,
     selectedAnswer: answer,
     isCorrect,
+    revealCorrectAnswer: revealCorrectAnswer ?? isCorrect,
     skillArea: tracking?.skillArea,
     characterId: tracking?.character,
     learningGoal: question.clueCard?.tag ?? question.clueCard?.label,

@@ -12,7 +12,139 @@
   margin-bottom: 0.75rem;
 }
 
+/* Persistent portal chrome: fixed viewport shell, scrollable main content only */
+.portal-shell {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.portal-shell .family-main,
+.portal-shell .pilot-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.portal-shell .portal-header {
+  flex-shrink: 0;
+  box-shadow:
+    0 1px 0 var(--family-border, var(--pilot-border, rgba(36, 62, 112, 0.1))),
+    0 6px 16px -12px rgba(26, 47, 82, 0.18);
+}
+
+.portal-shell .family-content,
+.portal-shell .pilot-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.portal-shell .family-miniFooter,
+.portal-shell .pilot-miniFooter {
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .portal-shell.family-shell .family-rail,
+  .portal-shell.pilot-shell .pilot-rail {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    z-index: 30;
+  }
+
+  .portal-shell.family-shell .family-main {
+    margin-left: var(--family-rail-w);
+  }
+
+  .portal-shell.pilot-shell .pilot-main {
+    margin-left: var(--pilot-rail-w);
+  }
+
+  .portal-shell .family-railUpper,
+  .portal-shell .pilot-railUpper {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .portal-shell .family-railNav,
+  .portal-shell .pilot-railNav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .portal-shell .family-railFooter,
+  .portal-shell .family-railSupport,
+  .portal-shell .pilot-railFooter {
+    flex-shrink: 0;
+  }
+
+  .portal-shell .family-rail--hasUpgrade .family-railSupport {
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: 0 -10px 20px -14px rgba(26, 47, 82, 0.18);
+  }
+}
+
 @media (max-width: 767px) {
+  .portal-shell {
+    flex-direction: column;
+  }
+
+  .portal-shell.family-shell .family-rail,
+  .portal-shell.pilot-shell .pilot-rail {
+    position: relative;
+    flex-shrink: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .portal-shell .family-main,
+  .portal-shell .pilot-main {
+    margin-left: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .portal-shell .family-railUpper,
+  .portal-shell .pilot-railUpper {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .portal-shell .family-railNav,
+  .portal-shell .pilot-railNav {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
   .portal-contentFrame.family-content,
   .portal-contentFrame.pilot-content {
     padding: 1.25rem 1.25rem 2rem;

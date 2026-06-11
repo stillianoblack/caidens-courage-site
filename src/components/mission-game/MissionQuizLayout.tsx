@@ -42,6 +42,8 @@ type MissionQuizLayoutProps = {
   gameId?: string;
   b4PortalType?: B4LockInPortalType;
   tracking?: ModuleTrackingDefinition | null;
+  revealCorrectAnswer?: boolean;
+  activeHint?: string | null;
   onPlaySelect: () => void;
   onSelectChoice: (id: string) => void;
   onSelectTrueFalse: (value: boolean) => void;
@@ -74,6 +76,8 @@ export default function MissionQuizLayout({
   gameId,
   b4PortalType = 'facilitator',
   tracking,
+  revealCorrectAnswer = false,
+  activeHint,
   onPlaySelect,
   onSelectChoice,
   onSelectTrueFalse,
@@ -97,8 +101,9 @@ export default function MissionQuizLayout({
   const lockInEnabled = useLockInFeedback ?? usesB4LockInFeedback(theme);
   const useCoachingRail = lockInEnabled || useAdultLearningRhythm;
   const hasAnswer = isGameAnswerComplete(question, answer);
-  const answerIsCorrect = hasAnswer && isGameAnswerCorrect(question, answer);
-  const showLockInTip = Boolean(hasAnswer && lockInEnabled);
+  const answerIsCorrect = checked && isGameAnswerCorrect(question, answer);
+  /** Lock-in tips only after Check — never on select (commit-before-feedback). */
+  const showLockInTip = Boolean(checked && lockInEnabled);
   const showFacilitatorInsight = Boolean(checked && feedback && useAdultLearningRhythm);
   const showLearningMoment = showLockInTip || showFacilitatorInsight;
   const showLegacyFeedback = Boolean(checked && feedback && !useCoachingRail);
@@ -114,9 +119,19 @@ export default function MissionQuizLayout({
       question,
       answer,
       isCorrect: answerIsCorrect,
+      revealCorrectAnswer: revealCorrectAnswer || answerIsCorrect,
       tracking,
     });
-  }, [showLockInTip, gameId, b4PortalType, question, answer, answerIsCorrect, tracking]);
+  }, [
+    showLockInTip,
+    gameId,
+    b4PortalType,
+    question,
+    answer,
+    answerIsCorrect,
+    revealCorrectAnswer,
+    tracking,
+  ]);
 
   const layoutClass = [
     'bbc-quizWrap',
@@ -159,7 +174,12 @@ export default function MissionQuizLayout({
       ) : null}
     </>
   ) : (
-    <GameCoachingRailPlaceholder variant={coachingRailVariant} caretTop={caretTop} />
+    <GameCoachingRailPlaceholder
+      variant={coachingRailVariant}
+      caretTop={caretTop}
+      hasSelection={hasAnswer}
+      hasHints={Boolean(question.hints?.length)}
+    />
   );
 
   if (!useCoachingRail) {

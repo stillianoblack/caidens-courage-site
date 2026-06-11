@@ -11,6 +11,7 @@ import AdultAssessmentPage from './pages/AdultAssessmentPage';
 import PilotDashboardPage from './pages/PilotDashboardPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
+import { ENABLE_B4_CHAT } from './config/featureFlags';
 import { shouldMountPortalB4Assistant } from './lib/portalB4Routes';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
@@ -101,6 +102,7 @@ import {
   FamilyGuidePanel,
   FamilyOverviewPanel,
   FamilyResultsPanel,
+  FamilyProgramSettingsPanel,
 } from './routes/familyPanels';
 import {
   FamilyAdultGuideHubPage,
@@ -270,6 +272,7 @@ const appRouteChildren = (
           <Route path="gallery" element={<FamilyGalleryPanel />} />
           <Route path="certificates" element={<FamilyCertificatesPanel />} />
           <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="settings" element={<FamilyProgramSettingsPanel />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route
@@ -323,6 +326,7 @@ const appRouteChildren = (
           <Route path="certificates" element={<FamilyCertificatesPanel />} />
           <Route path="guide" element={<FamilyGuidePanel />} />
           <Route path="parent-corner" element={<FamilyGuidePanel />} />
+          <Route path="settings" element={<FamilyProgramSettingsPanel />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route path={`${FAMILY_HUB_PATH}/guide/:guideId`} element={<FamilyAdultGuideHubPage />} />
@@ -437,6 +441,7 @@ const AppLayout: React.FC = () => {
     location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);
   /** Hide global Ask B-4 during gameplay and on portal shells (AppShell mounts B4Assistant). */
   const hideAskB4Chat =
+    !ENABLE_B4_CHAT ||
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||

@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import { countFamilyCertificatesEarned } from '../lib/familyProgressMetrics';
 import { familyPortalPath } from '../lib/familyPortalPaths';
-import { fetchProgramGoals, PROGRAM_GOALS_SAVED_EVENT } from '../lib/programGoalsService';
+import {
+  fetchFamilyChildGoals,
+  FAMILY_CHILD_GOALS_SAVED_EVENT,
+  hasFamilyChildGoals,
+} from '../lib/familyChildGoalsService';
 import { fetchFamilyGallerySubmissions } from '../lib/studentGalleryService';
 import { normalizeGalleryStatus } from '../lib/studentGalleryService';
 import { getFamilyGallerySubmitterKey } from '../lib/familyGallerySession';
@@ -29,22 +33,23 @@ export function useFamilyPortalNotifications(
   >,
   pathname: string,
 ): FamilyPortalNotification[] {
-  const [goalsCount, setGoalsCount] = useState(0);
+  const [familyGoalsComplete, setFamilyGoalsComplete] = useState(false);
   const [approvedGalleryCount, setApprovedGalleryCount] = useState(0);
 
   const programCode = metrics.programCode || resolveTrackingProgramCode() || '';
+  const primaryChildId = metrics.children[0]?.participantId ?? null;
 
   useEffect(() => {
     if (!programCode) return;
     const refreshGoals = () => {
-      void fetchProgramGoals(programCode, 'family').then((record) => {
-        setGoalsCount(record?.selected_goals?.length ?? 0);
+      void fetchFamilyChildGoals(programCode, primaryChildId).then((record) => {
+        setFamilyGoalsComplete(hasFamilyChildGoals(record));
       });
     };
     refreshGoals();
-    window.addEventListener(PROGRAM_GOALS_SAVED_EVENT, refreshGoals);
-    return () => window.removeEventListener(PROGRAM_GOALS_SAVED_EVENT, refreshGoals);
-  }, [programCode]);
+    window.addEventListener(FAMILY_CHILD_GOALS_SAVED_EVENT, refreshGoals);
+    return () => window.removeEventListener(FAMILY_CHILD_GOALS_SAVED_EVENT, refreshGoals);
+  }, [programCode, primaryChildId]);
 
   useEffect(() => {
     if (!programCode) return;
@@ -96,7 +101,7 @@ export function useFamilyPortalNotifications(
       });
     }
 
-    if (goalsCount === 0) {
+    if (metrics.children.length > 0 && !familyGoalsComplete) {
       items.push({
         id: 'goals-not-set',
         label: 'Goals not set',
@@ -108,7 +113,7 @@ export function useFamilyPortalNotifications(
     return items;
   }, [
     approvedGalleryCount,
-    goalsCount,
+    familyGoalsComplete,
     metrics.children,
     metrics.claimRequired,
     metrics.loading,

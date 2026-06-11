@@ -79,6 +79,7 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
     '/guide',
     '/parent-corner',
     '/characters',
+    '/settings',
   ]);
 
   return !mainPanelPaths.has(remainder);
@@ -166,6 +167,9 @@ export function resolvePortalPageTitle(pathname: string, basePath = resolveFamil
   }
   if (pathname.includes('/baseline-check')) {
     return 'B-4 Check-In';
+  }
+  if (pathname.startsWith(`${basePath}/settings`)) {
+    return 'Settings';
   }
   return FAMILY_NAV_TITLE[resolvePortalNavId(pathname, basePath)];
 }

@@ -204,6 +204,17 @@ export type GameQuestionBase = {
   vocabularyWord?: string;
   feedbackCorrect: string;
   feedbackIncorrect: string;
+  /** Alias for feedbackCorrect — preferred in new content */
+  correctFeedback?: string;
+  /** Alias for feedbackIncorrect — preferred in new content */
+  incorrectFeedback?: string;
+  /** Up to 2 optional hints (broad → specific, never reveal answer) */
+  hints?: string[];
+  /** Deeper learning copy shown via Explain More after submit */
+  explainMore?: string;
+  skillTags?: string[];
+  gradeBand?: string;
+  character?: string;
   /** Expanded coaching shown in Victoria (and other) feedback cards */
   feedbackDetail?: GameFeedbackDetail;
   feedbackDetailCorrect?: GameFeedbackDetail;

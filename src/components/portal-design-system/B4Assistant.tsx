@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { ENABLE_B4_CHAT } from '../../config/featureFlags';
 import DeferredB4ChatWidget from '../DeferredB4ChatWidget';
 
 const B4_ASSISTANT_INSTANCE_KEY = '__caidensB4AssistantInstance';
@@ -30,7 +31,7 @@ export default function B4Assistant() {
     };
   }, []);
 
-  if (!mounted || !isPrimaryRef.current) return null;
+  if (!ENABLE_B4_CHAT || !mounted || !isPrimaryRef.current) return null;
 
   return createPortal(<DeferredB4ChatWidget />, document.body);
 }

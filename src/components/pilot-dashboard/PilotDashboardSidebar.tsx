@@ -46,38 +46,40 @@ export default function PilotDashboardSidebar({
 
   return (
     <aside className="pilot-rail" aria-label="Pilot dashboard navigation">
-      <div className="pilot-railBrand">
-        <p className="pilot-railBrandTitle">{brandTitle}</p>
-        <p className="pilot-railBrandSub">{brandSubtitle}</p>
-      </div>
+      <div className="pilot-railUpper">
+        <div className="pilot-railBrand">
+          <p className="pilot-railBrandTitle">{brandTitle}</p>
+          <p className="pilot-railBrandSub">{brandSubtitle}</p>
+        </div>
 
-      <nav className="pilot-railNav" role="tablist" aria-label="Dashboard sections">
-        <ul className="pilot-railNavList">
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <a
-                href={programDashboardTabPath(item.id)}
-                role="tab"
-                aria-selected={activeId === item.id}
-                className={`pilot-railNavBtn${activeId === item.id ? ' pilot-railNavBtn--active' : ''}`}
-                onClick={(event) => {
-                  if (event.defaultPrevented) return;
-                  onSelect(item.id);
-                }}
-              >
-                <span className="pilot-railIcon">
-                  <PilotNavIcon name={item.icon} />
-                </span>
-                <span>
-                  {item.id === 'student-gallery'
-                    ? formatGalleryNavLabel(item.label, galleryPendingCount)
-                    : item.label}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+        <nav className="pilot-railNav" role="tablist" aria-label="Dashboard sections">
+          <ul className="pilot-railNavList">
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={programDashboardTabPath(item.id)}
+                  role="tab"
+                  aria-selected={activeId === item.id}
+                  className={`pilot-railNavBtn${activeId === item.id ? ' pilot-railNavBtn--active' : ''}`}
+                  onClick={(event) => {
+                    if (event.defaultPrevented) return;
+                    onSelect(item.id);
+                  }}
+                >
+                  <span className="pilot-railIcon">
+                    <PilotNavIcon name={item.icon} />
+                  </span>
+                  <span>
+                    {item.id === 'student-gallery'
+                      ? formatGalleryNavLabel(item.label, galleryPendingCount)
+                      : item.label}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
 
       {showProgramSettings ? (
         <PilotProgramSettingsCard programCode={programCode} pricingTier={pricingTier} />

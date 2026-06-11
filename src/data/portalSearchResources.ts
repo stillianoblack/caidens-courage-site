@@ -101,6 +101,14 @@ export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     href: `${FAMILY_HUB_PATH}/guide`,
   },
   {
+    id: 'family-settings',
+    title: 'Settings',
+    description: 'Family goals, child profiles, access codes, reminders, and plan',
+    category: 'Navigation',
+    tags: ['settings', 'access', 'family', 'goals', 'parent', 'guardian', 'plan'],
+    href: `${FAMILY_HUB_PATH}/settings`,
+  },
+  {
     id: 'family-dr-victoria-hub',
     title: 'Dr. Victoria Learning Hub',
     description: 'Parent training missions for understanding, support, and focus-friendly environments',

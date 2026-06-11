@@ -4,6 +4,7 @@ import B4BaselineCheckFlow from '../components/b4/B4BaselineCheckFlow';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
+import '../components/portal/portal-shell.css';
 import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
 import { forcePortalRoleForRoute } from '../config/portalContext';
 import {
@@ -62,7 +63,7 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
   if (!isProgram && !sessionType) return null;
 
   return (
-    <div className="pilot-shell">
+    <div className="pilot-shell portal-shell">
       <PilotDashboardSidebar
         activeId="assessments"
         onSelect={handleSelectNav}
@@ -73,11 +74,7 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
         showSupportCard={isProgram}
       />
       <div className="pilot-main">
-        <PilotDashboardTopBar
-          pageTitle="B-4 Baseline Check"
-          contextTitle={brand.title}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle="B-4 Baseline Check" />
         <div className="pilot-content pilot-content--wide">
           <B4BaselineCheckFlow
             embedded

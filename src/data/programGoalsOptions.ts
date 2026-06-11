@@ -14,10 +14,10 @@ export const FACILITATOR_GOALS_COPY: ProgramGoalsCopy = {
 };
 
 export const FAMILY_GOALS_COPY: ProgramGoalsCopy = {
-  title: 'Tell us how you\u2019d like to support your child',
+  title: 'Tell B-4 What Your Child Needs Most',
   subtext:
-    'Choose up to 5 goals so Caiden\u2019s Courage can recommend activities, tools, and resources for your child.',
-  maxGoals: 5,
+    'Parent/Guardian: choose up to 3 focus areas so B-4 can recommend better adventures and activities.',
+  maxGoals: 3,
 };
 
 export const FACILITATOR_GOAL_OPTIONS = [

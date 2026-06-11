@@ -10,6 +10,7 @@ import {
   type PortalAudienceTab,
   type PortalPathTheme,
 } from '../../config/portalAudience';
+import { withoutB4ChatBullets, withoutB4ChatCards } from '../../config/featureFlags';
 
 type PathCard = {
   title: string;
@@ -306,7 +307,8 @@ type PortalPricingSectionProps = {
 
 export default function PortalPricingSection({ audience, onAudienceChange }: PortalPricingSectionProps) {
   const included = PORTAL_INCLUDED_BY_AUDIENCE[audience];
-  const cards = CARDS_BY_AUDIENCE[audience];
+  const cards = withoutB4ChatCards(CARDS_BY_AUDIENCE[audience]);
+  const includedBullets = withoutB4ChatBullets(included.bullets);
   const activeTab = getPortalPathTab(audience);
 
   const handleTabKeyDown = useCallback(
@@ -420,7 +422,7 @@ export default function PortalPricingSection({ audience, onAudienceChange }: Por
           <div className="cc-portal-included mx-auto mt-10 max-w-3xl rounded-2xl border border-navy-100/90 bg-gradient-to-br from-[#F3F8FF] to-[#FAF9F3] p-6 sm:p-8">
             <h3 className="font-display text-lg font-extrabold text-navy-600 sm:text-xl">{included.title}</h3>
             <ul className="mt-4 space-y-2.5">
-              {included.bullets.map((bullet) => (
+              {includedBullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-3 text-sm text-navy-600 sm:text-base">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-golden-500" aria-hidden />
                   <span>{bullet}</span>

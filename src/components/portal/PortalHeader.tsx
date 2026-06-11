@@ -9,8 +9,6 @@ import './portal-header.css';
 
 type PortalHeaderProps = {
   pageTitle: string;
-  contextTitle?: string;
-  contextSubtitle?: string;
   portal: 'family' | 'facilitator';
   onOpenProgramGoals?: () => void;
   linkedCampLabel?: string | null;
@@ -19,8 +17,6 @@ type PortalHeaderProps = {
 
 export default function PortalHeader({
   pageTitle,
-  contextTitle,
-  contextSubtitle,
   portal,
   onOpenProgramGoals,
   linkedCampLabel = null,
@@ -35,14 +31,6 @@ export default function PortalHeader({
             <FamilyLinkedCampBadge label={linkedCampLabel} className="portal-headerCampBadge" />
           ) : null}
         </div>
-        {contextTitle || contextSubtitle ? (
-          <div className="portal-headerContext">
-            {contextTitle ? <p className="portal-headerContextTitle">{contextTitle}</p> : null}
-            {contextSubtitle ? (
-              <p className="portal-headerContextSubtitle">{contextSubtitle}</p>
-            ) : null}
-          </div>
-        ) : null}
       </div>
       <div className="portal-headerTools">
         {portal === 'family' ? <FamilyNotificationBell items={notifications} /> : null}

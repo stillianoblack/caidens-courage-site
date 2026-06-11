@@ -4,7 +4,7 @@ import { getB4LockInTip, type B4LockInPortalType } from './getB4LockInTip';
 
 export type FeedbackRhythmMode = 'kid' | 'family' | 'facilitator';
 
-/** B-4 lock-in tips appear after answer check for these themes. */
+/** B-4 lock-in tips (after Check only) for these themes. */
 export function usesB4LockInFeedback(theme: MissionGameTheme): boolean {
   return theme === 'caiden' || theme === 'b4' || theme === 'miranda' || theme === 'charlie';
 }

@@ -46,6 +46,8 @@ export default function B4GuidePage() {
   const [moduleStepIndex, setModuleStepIndex] = useState(INITIAL_STATE.moduleStepIndex);
   const [moduleAnswers, setModuleAnswers] = useState(INITIAL_STATE.moduleAnswers);
   const [focusMovePending, setFocusMovePending] = useState(INITIAL_STATE.focusMovePending);
+  const [assessmentSelected, setAssessmentSelected] = useState<string | null>(null);
+  const [assessmentChecked, setAssessmentChecked] = useState(false);
 
   useEffect(() => {
     document.title = `${B4_GUIDE_PAGE_TITLE} | Caiden's Courage`;
@@ -59,6 +61,8 @@ export default function B4GuidePage() {
     setModuleStepIndex(INITIAL_STATE.moduleStepIndex);
     setModuleAnswers(INITIAL_STATE.moduleAnswers);
     setFocusMovePending(INITIAL_STATE.focusMovePending);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -66,6 +70,8 @@ export default function B4GuidePage() {
     setAssessmentAnswers({});
     setAssessmentIndex(0);
     setAssessmentResult(null);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
     setScreen('assessment');
   };
 
@@ -76,10 +82,22 @@ export default function B4GuidePage() {
     setScreen('module');
   };
 
-  const handleAssessmentAnswer = (choiceId: string) => {
+  const handleAssessmentSelect = (choiceId: string) => {
+    setAssessmentSelected(choiceId);
+  };
+
+  const handleAssessmentCheck = () => {
+    if (!assessmentSelected) return;
+    setAssessmentChecked(true);
+  };
+
+  const handleAssessmentContinue = () => {
+    if (!assessmentSelected) return;
     const question = B4_ASSESSMENT_QUESTIONS[assessmentIndex];
-    const nextAnswers = { ...assessmentAnswers, [question.id]: choiceId };
+    const nextAnswers = { ...assessmentAnswers, [question.id]: assessmentSelected };
     setAssessmentAnswers(nextAnswers);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
 
     if (assessmentIndex + 1 >= B4_ASSESSMENT_QUESTIONS.length) {
       const resultType = calculateAssessmentResult(nextAnswers);
@@ -162,7 +180,11 @@ export default function B4GuidePage() {
             current={assessmentIndex + 1}
             total={B4_ASSESSMENT_QUESTIONS.length}
             progressLabel={`Question ${assessmentIndex + 1} of ${B4_ASSESSMENT_QUESTIONS.length}`}
-            onSelect={handleAssessmentAnswer}
+            selectedId={assessmentSelected}
+            checked={assessmentChecked}
+            onSelect={handleAssessmentSelect}
+            onCheck={handleAssessmentCheck}
+            onContinue={handleAssessmentContinue}
           />
         ) : null}
 

@@ -1,3 +1,5 @@
+import { withoutB4ChatResources } from './featureFlags';
+
 /**
  * Caiden's Courage Portal — MVP access-code configuration.
  *
@@ -278,10 +280,16 @@ export function getDashboardHeroTitle(type: PortalAccessType): string {
  * School and pilot codes share the school resource set for MVP.
  */
 export function getDashboardResources(type: PortalAccessType): PortalResourceItem[] {
-  if (type === 'kids') return getPortalTierByType('kids')?.resources ?? [];
-  if (type === 'parent') return getPortalTierByType('parent')?.resources ?? [];
-  if (type === 'teacher') return getPortalTierByType('teacher')?.resources ?? [];
-  return getPortalTierByType('school')?.resources ?? [];
+  if (type === 'kids') {
+    return withoutB4ChatResources(getPortalTierByType('kids')?.resources ?? []);
+  }
+  if (type === 'parent') {
+    return withoutB4ChatResources(getPortalTierByType('parent')?.resources ?? []);
+  }
+  if (type === 'teacher') {
+    return withoutB4ChatResources(getPortalTierByType('teacher')?.resources ?? []);
+  }
+  return withoutB4ChatResources(getPortalTierByType('school')?.resources ?? []);
 }
 
 /** Build post-unlock dashboard URL with audience query params. */

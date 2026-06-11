@@ -42,6 +42,14 @@ export function isGameAnswerCorrect(question: GameQuestion, answer: GameAnswerVa
   return false;
 }
 
+export function getCorrectFeedbackMessage(question: GameQuestion): string {
+  return question.correctFeedback ?? question.feedbackCorrect;
+}
+
+export function getIncorrectFeedbackMessage(question: GameQuestion): string {
+  return question.incorrectFeedback ?? question.feedbackIncorrect;
+}
+
 export function getGameQuestionFeedback(
   question: GameQuestion,
   answer: GameAnswerValue,
@@ -49,6 +57,6 @@ export function getGameQuestionFeedback(
   const correct = isGameAnswerCorrect(question, answer);
   return {
     correct,
-    message: correct ? question.feedbackCorrect : question.feedbackIncorrect,
+    message: correct ? getCorrectFeedbackMessage(question) : getIncorrectFeedbackMessage(question),
   };
 }

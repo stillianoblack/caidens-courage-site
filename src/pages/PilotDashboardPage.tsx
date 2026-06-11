@@ -12,6 +12,7 @@ import PilotRosterPanel from '../components/pilot-dashboard/panels/PilotRosterPa
 import PilotResultsPanel from '../components/pilot-dashboard/panels/PilotResultsPanel';
 import PilotWeeklyModulesPanel from '../components/pilot-dashboard/panels/PilotWeeklyModulesPanel';
 import '../components/pilot-dashboard/pilot-dashboard.css';
+import '../components/portal/portal-shell.css';
 import { FACILITATOR_BASELINE_CHECK_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
@@ -186,7 +187,7 @@ export default function PilotDashboardPage() {
   };
 
   return (
-    <div className="pilot-shell">
+    <div className="pilot-shell portal-shell">
       <PilotDashboardSidebar
         activeId={activeNav}
         onSelect={handleSelectNav}

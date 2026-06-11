@@ -18,6 +18,7 @@ import {
   loadFamilyDashboardData,
   type FamilyDashboardData,
 } from '../lib/familyDashboardDataService';
+import type { StudentParticipantRecord } from '../lib/pilotTrackingService';
 import {
   logFamilyProgressMetrics,
   partitionAdultAssessments,
@@ -63,6 +64,7 @@ export type FamilyDashboardMetrics = {
   overallProgress: ProgressCounts;
   loading: boolean;
   refresh: () => Promise<void>;
+  studentParticipants: StudentParticipantRecord[];
 };
 
 export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboardMetrics {
@@ -225,6 +227,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       overallProgress: metrics.overall,
       loading,
       refresh,
+      studentParticipants: data.studentParticipants,
     };
   }, [campProgramCode, campProgramName, data, loading, refresh]);
 }

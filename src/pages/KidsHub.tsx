@@ -117,7 +117,7 @@ const KidsHub: React.FC = () => {
 
           <KidsHubCard
             title="Get a B-4 Reset"
-            description="Need a focus reset? Try B-4 Reset Tools or tap Ask B-4 in the corner to chat anytime."
+            description="Need a focus reset? Open B-4 Reset Tools for quick focus and feelings activities."
             imageSrc="/images/characters/B4_Robot_Hero.webp"
             imageAlt="B-4 robot companion"
             imageFit="contain"
@@ -126,18 +126,6 @@ const KidsHub: React.FC = () => {
               <Button variant="primary" size="lg" as={Link} to={BMC_RESET_TOOLS_PATH} className="w-full sm:w-auto">
                 Open B-4 Reset Tools
               </Button>
-            }
-            footerNote={
-              <div className="flex items-center gap-3">
-                <img
-                  src="/images/icons/B4_Chat_Icon.webp"
-                  alt=""
-                  className="h-10 w-10 object-contain sm:h-12 sm:w-12"
-                  decoding="async"
-                  aria-hidden
-                />
-                <p className="text-sm text-navy-500">Or use the floating Ask B-4 button on this site.</p>
-              </div>
             }
           />
 

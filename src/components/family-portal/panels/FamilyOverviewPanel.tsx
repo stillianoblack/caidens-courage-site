@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { readParentClaimContext } from '../../../config/parentClaimContext';
@@ -26,16 +26,16 @@ import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import { normalizeGalleryStatus } from '../../../lib/studentGalleryService';
 import { fetchFamilyGallerySubmissions } from '../../../lib/studentGalleryService';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
+import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
 import AddChildForm from '../AddChildForm';
 import ActiveChildSelector from '../ActiveChildSelector';
 import { useActiveChild } from '../../../hooks/useActiveChild';
-import FamilyAccessCodeCard from '../FamilyAccessCodeCard';
+import { Link } from 'react-router-dom';
+import { familySettingsPath } from '../../../lib/familyPortalPaths';
 import FamilyB4QuickActions from '../FamilyB4QuickActions';
-import FamilyCertificatePreviewCard from '../FamilyCertificatePreviewCard';
 import FamilyChildrenSection from '../FamilyChildrenSection';
 import FamilyChildProgressDrawer from '../FamilyChildProgressDrawer';
 import FamilyChildSummaryCard from '../FamilyChildSummaryCard';
-import FamilyGoalsSummaryCard from '../FamilyGoalsSummaryCard';
 import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyRecommendedNextCard from '../FamilyRecommendedNextCard';
@@ -91,6 +91,7 @@ export default function FamilyOverviewPanel() {
   const downloadsPath = familyPortalPath('downloads', location.pathname);
   const certificatesPath = familyPortalPath('certificates', location.pathname);
   const overviewPath = familyPortalPath('', location.pathname);
+  const addChildRef = useRef<HTMLDivElement | null>(null);
 
   const [goalsRecord, setGoalsRecord] = useState<ProgramGoalsRecord | null>(null);
   const [galleryItems, setGalleryItems] = useState<StudentGalleryItem[]>([]);
@@ -451,6 +452,16 @@ export default function FamilyOverviewPanel() {
     programCode,
   ]);
 
+  const scrollToAddChild = () => {
+    addChildRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    const handleAddChildFocus = () => scrollToAddChild();
+    window.addEventListener(FOCUS_FLAME_ADD_CHILD_EVENT, handleAddChildFocus);
+    return () => window.removeEventListener(FOCUS_FLAME_ADD_CHILD_EVENT, handleAddChildFocus);
+  }, []);
+
   return (
     <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />
@@ -477,11 +488,15 @@ export default function FamilyOverviewPanel() {
       ) : null}
 
       {showAddChildForm ? (
-        <AddChildForm
-          routeToBaseline
-          baselinePath={baselinePath}
-          onAdded={() => void refresh()}
-        />
+        <div id="family-add-child" ref={addChildRef}>
+          <AddChildForm
+            routeToBaseline
+            baselinePath={baselinePath}
+            onAdded={() => {
+              void refresh();
+            }}
+          />
+        </div>
       ) : null}
 
       <div className="family-kpiRow family-kpiRow--ds">
@@ -496,18 +511,15 @@ export default function FamilyOverviewPanel() {
         ))}
       </div>
 
-      <FamilyAccessCodeCard
-        campProgramCode={campProgramCode}
-        studentAccessCode={campProgramCode}
-      />
-
-      <div className="family-overviewActionRow">
-        <FamilyGoalsSummaryCard goals={goalsRecord?.selected_goals ?? []} />
-        <FamilyCertificatePreviewCard
-          count={activeChildCertificates}
-          certificatesPath={certificatesPath}
-        />
-      </div>
+      <section className="family-accessCodeSummary">
+        <p className="family-accessCodeSummaryCopy">
+          Family access codes and sharing options are in{' '}
+          <Link to={familySettingsPath(location.pathname)} className="family-accessCodeSummaryLink">
+            Settings
+          </Link>
+          .
+        </p>
+      </section>
 
       <FamilyB4QuickActions actions={b4QuickActions} onOpenChildDrawer={openChildDrawer} />
       <FamilyNeedsAttentionCard items={needsAttention} />

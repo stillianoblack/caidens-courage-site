@@ -1,8 +1,8 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useCallback, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
-import { AppShell, GoalsOnboardingDrawer } from '../components/portal-design-system';
+import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
@@ -22,13 +22,14 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
-import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
+import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
+import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const activeProgram = readActivePilotProgram();
   const hasSession = readFamilyPortalSession();
   const role = readActivePortalRole();
@@ -41,33 +42,29 @@ export default function FamilyHubLayout() {
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
 
-  const {
-    open: goalsOpen,
-    openDrawer: openGoalsDrawer,
-    closeDrawer: closeGoalsDrawer,
-    record: goalsRecord,
-    saveGoals,
-    remindLater: remindGoalsLater,
-    skipForNow: skipGoalsForNow,
-  } = useProgramGoalsOnboarding({
-    programCode,
-    portalType: 'family',
-    enabled: sessionValid,
-  });
+  const openFamilyGoalsSettings = useCallback(() => {
+    navigate(familyGoalsPath(location.pathname));
+  }, [location.pathname, navigate]);
+
+  const openJourneySettings = useCallback(() => {
+    navigate(familySettingsTabPath('overview', location.pathname));
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
-    const handleOpenGoals = () => openGoalsDrawer();
+    const handleOpenGoals = () => openFamilyGoalsSettings();
+    const handleOpenJourney = () => openJourneySettings();
     window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
-    return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
-  }, [openGoalsDrawer]);
+    window.addEventListener(OPEN_FOCUS_FLAME_JOURNEY_EVENT, handleOpenJourney);
+    return () => {
+      window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
+      window.removeEventListener(OPEN_FOCUS_FLAME_JOURNEY_EVENT, handleOpenJourney);
+    };
+  }, [openFamilyGoalsSettings, openJourneySettings]);
 
   useEffect(() => {
     if (searchParams.get('openGoals') !== '1') return;
-    openGoalsDrawer();
-    const next = new URLSearchParams(searchParams);
-    next.delete('openGoals');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, openGoalsDrawer]);
+    navigate(familyGoalsPath(location.pathname), { replace: true });
+  }, [location.pathname, navigate, searchParams]);
 
   useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
@@ -112,9 +109,7 @@ export default function FamilyHubLayout() {
       topBar={
         <FamilyDashboardTopBar
           pageTitle={pageTitle}
-          contextTitle={brand.title}
-          contextSubtitle="Family Portal"
-          onOpenProgramGoals={openGoalsDrawer}
+          onOpenProgramGoals={openFamilyGoalsSettings}
           linkedCampLabel={linkedCampLabel}
           notifications={notifications}
         />
@@ -124,17 +119,6 @@ export default function FamilyHubLayout() {
       <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
         <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
       </Suspense>
-
-      <GoalsOnboardingDrawer
-        open={goalsOpen}
-        onClose={closeGoalsDrawer}
-        portalType="family"
-        programCode={programCode}
-        initialRecord={goalsRecord}
-        onSave={saveGoals}
-        onRemindLater={remindGoalsLater}
-        onSkip={skipGoalsForNow}
-      />
     </AppShell>
   );
 }

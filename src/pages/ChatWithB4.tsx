@@ -1,8 +1,14 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { ENABLE_B4_CHAT } from '../config/featureFlags';
 
 const ChatWithB4: React.FC = () => {
+  if (!ENABLE_B4_CHAT) {
+    return <Navigate to="/kids" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-cream font-body">
       <Header />
@@ -23,4 +29,3 @@ const ChatWithB4: React.FC = () => {
 };
 
 export default ChatWithB4;
-

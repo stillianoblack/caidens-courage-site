@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import CheckButton from '../../design-system/game/CheckButton';
 import StepMicroFeedback from './StepMicroFeedback';
 import type { WhyOption } from './focusFlameReasoning';
 import { STORY_CLUE_B4, storyClueCorrectOption } from './focusFlameReasoning';
@@ -27,10 +28,10 @@ export default function ReasoningWhyStep({
 }) {
   const correctOption = storyClueCorrectOption(options);
 
-  const [selectedWrongIds, setSelectedWrongIds] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
   const [storyClueAttempts, setStoryClueAttempts] = useState(0);
   const [resolved, setResolved] = useState(false);
-  const [selectedCorrectId, setSelectedCorrectId] = useState<string | null>(null);
   const [revealedCorrect, setRevealedCorrect] = useState(false);
   const [headline, setHeadline] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -41,10 +42,10 @@ export default function ReasoningWhyStep({
   const pointsAwardedRef = useRef(false);
 
   const resetStep = useCallback(() => {
-    setSelectedWrongIds([]);
+    setSelectedId(null);
+    setChecked(false);
     setStoryClueAttempts(0);
     setResolved(false);
-    setSelectedCorrectId(null);
     setRevealedCorrect(false);
     setHeadline(null);
     setMessage(null);
@@ -61,7 +62,6 @@ export default function ReasoningWhyStep({
   const bumpFeedback = () => setFeedbackKey((k) => k + 1);
 
   const handleCorrect = (opt: WhyOption, wrongCount: number) => {
-    setSelectedCorrectId(opt.id);
     setResolved(true);
 
     if (!pointsAwardedRef.current) {
@@ -71,7 +71,7 @@ export default function ReasoningWhyStep({
     }
 
     if (wrongCount === 0) {
-      setHeadline('Nice. That’s the story clue.');
+      setHeadline('Nice. That\u2019s the story clue.');
     } else {
       setHeadline('Nice. You found the story clue.');
     }
@@ -80,24 +80,25 @@ export default function ReasoningWhyStep({
     bumpFeedback();
   };
 
-  const handleSelect = (opt: WhyOption) => {
-    if (resolved) return;
-    if (selectedWrongIds.includes(opt.id)) return;
+  const handleCheck = () => {
+    if (!selectedId || checked) return;
+    const opt = options.find((option) => option.id === selectedId);
+    if (!opt) return;
+
+    setChecked(true);
 
     if (opt.isCorrect) {
       handleCorrect(opt, storyClueAttempts);
       return;
     }
 
-    const nextWrongIds = [...selectedWrongIds, opt.id];
-    setSelectedWrongIds(nextWrongIds);
     const nextAttempts = storyClueAttempts + 1;
     setStoryClueAttempts(nextAttempts);
 
     if (nextAttempts === 1) {
       onB4Message(STORY_CLUE_B4.wrongFirst);
       setHeadline(null);
-      setMessage('Try again — look for the story clue.');
+      setMessage('Not quite. Try again or look for the story clue.');
       if (!feedbackPlayedRef.current) {
         feedbackPlayedRef.current = true;
         onTryAgainSound?.();
@@ -107,7 +108,6 @@ export default function ReasoningWhyStep({
     }
 
     setRevealedCorrect(true);
-    setSelectedCorrectId(correctOption.id);
     setResolved(true);
     onB4Message(STORY_CLUE_B4.revealed);
     setHeadline(null);
@@ -116,19 +116,31 @@ export default function ReasoningWhyStep({
     bumpFeedback();
   };
 
+  const handleTryAgain = () => {
+    if (resolved || storyClueAttempts === 0 || storyClueAttempts >= 2) return;
+    setChecked(false);
+    setSelectedId(null);
+    setHeadline(null);
+    setMessage(null);
+  };
+
   const optionClass = (opt: WhyOption) => {
-    const isWrong = selectedWrongIds.includes(opt.id);
-    const isChosenCorrect = selectedCorrectId === opt.id && opt.isCorrect;
+    const isSelected = selectedId === opt.id;
+    const isCorrect = checked && opt.isCorrect && isSelected;
+    const isWrong = checked && isSelected && !opt.isCorrect;
     const isRevealedCorrect = revealedCorrect && opt.isCorrect;
     return [
       'ffl-reasoningWhy-option',
+      isSelected && !checked ? 'ffl-reasoningWhy-option--selected' : '',
       isWrong ? 'ffl-reasoningWhy-option--wrong' : '',
-      isChosenCorrect || isRevealedCorrect ? 'ffl-reasoningWhy-option--correct' : '',
+      isCorrect || isRevealedCorrect ? 'ffl-reasoningWhy-option--correct' : '',
       isRevealedCorrect ? 'ffl-reasoningWhy-option--revealed' : '',
     ]
       .filter(Boolean)
       .join(' ');
   };
+
+  const canTryAgain = checked && !resolved && storyClueAttempts === 1;
 
   return (
     <div className="ffl-selStep ffl-reasoningWhyStep">
@@ -138,27 +150,21 @@ export default function ReasoningWhyStep({
       </header>
 
       <div className="ffl-reasoningWhy-options" role="group" aria-label={prompt}>
-        {options.map((opt) => {
-          const isWrong = selectedWrongIds.includes(opt.id);
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              className={optionClass(opt)}
-              aria-pressed={selectedCorrectId === opt.id}
-              aria-disabled={isWrong || resolved}
-              disabled={isWrong}
-              onClick={() => handleSelect(opt)}
-            >
-              <span className="ffl-reasoningWhy-option-label">{opt.label}</span>
-              {isWrong ? (
-                <span className="ffl-reasoningWhy-option-mark" aria-hidden="true">
-                  ×
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
+        {options.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            className={optionClass(opt)}
+            aria-pressed={selectedId === opt.id}
+            disabled={checked && !canTryAgain}
+            onClick={() => {
+              if (checked && !canTryAgain) return;
+              setSelectedId(opt.id);
+            }}
+          >
+            <span className="ffl-reasoningWhy-option-label">{opt.label}</span>
+          </button>
+        ))}
       </div>
 
       <StepMicroFeedback
@@ -169,17 +175,25 @@ export default function ReasoningWhyStep({
       />
 
       <div className="ffl-stepActions">
-        <button
-          type="button"
-          className="ffl-ctaPrimary ffl-ctaPrimary--small"
-          onClick={() => {
-            onNextClick();
-            onNext();
-          }}
-          disabled={!resolved}
-        >
-          Next
-        </button>
+        {!checked ? (
+          <CheckButton disabled={!selectedId} onClick={handleCheck} />
+        ) : canTryAgain ? (
+          <button type="button" className="bbc-tryAgainBtn" onClick={handleTryAgain}>
+            Try Again
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="ffl-ctaPrimary ffl-ctaPrimary--small"
+            onClick={() => {
+              onNextClick();
+              onNext();
+            }}
+            disabled={!resolved}
+          >
+            Next
+          </button>
+        )}
       </div>
     </div>
   );

@@ -4,10 +4,11 @@ import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
+import '../components/portal/portal-shell.css';
 import { FACILITATOR_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import { getAdultGuideById, getAdultGuideMissionById } from '../data/adult/adultGuideRegistry';
-import { BLUE_RIBBON_PILOT_BRAND, PILOT_ADULT_TRAINING_INTRO } from '../data/pilotDashboardContent';
+import { PILOT_ADULT_TRAINING_INTRO } from '../data/pilotDashboardContent';
 import { useMissionGamePhase } from '../context/MissionGamePhaseContext';
 import type { PilotSidebarNavId } from '../data/pilotDashboardContent';
 
@@ -42,15 +43,13 @@ export default function FacilitatorAdultGuideMissionPage() {
     guide.theme.id === 'uncle-t' ? 'Continue Coaching Hub' : 'Continue Learning Hub';
 
   return (
-    <div className={`pilot-shell${isGameActive ? ' pilot-shell--game-active' : ''}`}>
+    <div
+      className={`pilot-shell portal-shell${isGameActive ? ' pilot-shell--game-active' : ''}`}
+    >
       <PilotDashboardSidebar activeId="facilitator-center" onSelect={handleSelectNav} />
 
       <div className="pilot-main">
-        <PilotDashboardTopBar
-          pageTitle={PILOT_ADULT_TRAINING_INTRO.title}
-          contextTitle={BLUE_RIBBON_PILOT_BRAND}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle={PILOT_ADULT_TRAINING_INTRO.title} />
 
         <div className="pilot-content pilot-content--wide">
           <GameAssessmentFlow

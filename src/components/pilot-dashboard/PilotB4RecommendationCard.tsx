@@ -1,4 +1,5 @@
 import React from 'react';
+import { ENABLE_B4_CHAT } from '../../config/featureFlags';
 import { openAskB4 } from '../../lib/openAskB4';
 import type { B4Recommendation } from '../../lib/pilotOverviewInsights';
 
@@ -7,6 +8,8 @@ type PilotB4RecommendationCardProps = {
 };
 
 export default function PilotB4RecommendationCard({ recommendation }: PilotB4RecommendationCardProps) {
+  if (!ENABLE_B4_CHAT) return null;
+
   return (
     <section className="pilot-overviewMiniCard pilot-overviewMiniCard--b4">
       <h3 className="pilot-overviewMiniCardTitle">B-4 Recommendation</h3>

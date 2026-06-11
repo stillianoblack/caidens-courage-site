@@ -25,6 +25,10 @@ export type BaselineMcQuestion = {
   text: string;
   choices: BaselineMcChoice[];
   correctId: string;
+  hints?: string[];
+  correctFeedback?: string;
+  incorrectFeedback?: string;
+  explainMore?: string;
 };
 
 export const B4_BASELINE_PRIVACY_NOTE =

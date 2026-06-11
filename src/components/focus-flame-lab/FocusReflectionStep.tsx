@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import CheckButton from '../../design-system/game/CheckButton';
 import StepMicroFeedback from './StepMicroFeedback';
 import {
   FOCUS_REFLECTION_B4,
@@ -28,10 +29,10 @@ export default function FocusReflectionStep({
 }) {
   const correctOption = FOCUS_REFLECTION_OPTIONS.find((o) => o.isCorrect)!;
 
-  const [selectedWrongIds, setSelectedWrongIds] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [resolved, setResolved] = useState(false);
-  const [selectedCorrectId, setSelectedCorrectId] = useState<string | null>(null);
   const [revealedCorrect, setRevealedCorrect] = useState(false);
   const [headline, setHeadline] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -43,10 +44,10 @@ export default function FocusReflectionStep({
   const pointsAwardedRef = useRef(false);
 
   const resetStep = useCallback(() => {
-    setSelectedWrongIds([]);
+    setSelectedId(null);
+    setChecked(false);
     setAttempts(0);
     setResolved(false);
-    setSelectedCorrectId(null);
     setRevealedCorrect(false);
     setHeadline(null);
     setMessage(null);
@@ -65,7 +66,6 @@ export default function FocusReflectionStep({
 
   const finishCorrect = useCallback(
     (opt: ReflectionOption, wrongCount: number) => {
-      setSelectedCorrectId(opt.id);
       setResolved(true);
       setShowContinue(true);
 
@@ -81,27 +81,28 @@ export default function FocusReflectionStep({
       onCorrectB4Clip?.();
       bumpFeedback();
     },
-    [onAwardPoints, onB4Message, onCorrectB4Clip]
+    [onAwardPoints, onB4Message, onCorrectB4Clip],
   );
 
-  const handleSelect = (opt: ReflectionOption) => {
-    if (resolved) return;
-    if (selectedWrongIds.includes(opt.id)) return;
+  const handleCheck = () => {
+    if (!selectedId || checked) return;
+    const opt = FOCUS_REFLECTION_OPTIONS.find((option) => option.id === selectedId);
+    if (!opt) return;
+
+    setChecked(true);
 
     if (opt.isCorrect) {
       finishCorrect(opt, attempts);
       return;
     }
 
-    const nextWrongIds = [...selectedWrongIds, opt.id];
-    setSelectedWrongIds(nextWrongIds);
     const nextAttempts = attempts + 1;
     setAttempts(nextAttempts);
 
     if (nextAttempts === 1) {
       onB4Message(FOCUS_REFLECTION_B4.wrongFirst);
       setHeadline(null);
-      setMessage(FOCUS_REFLECTION_B4.wrongFirst);
+      setMessage('Not quite. Try again or think about what helps you refocus.');
       if (!feedbackPlayedRef.current) {
         feedbackPlayedRef.current = true;
         onTryAgainSound?.();
@@ -111,7 +112,6 @@ export default function FocusReflectionStep({
     }
 
     setRevealedCorrect(true);
-    setSelectedCorrectId(correctOption.id);
     setResolved(true);
     setShowContinue(true);
     onB4Message(FOCUS_REFLECTION_B4.revealed);
@@ -122,19 +122,31 @@ export default function FocusReflectionStep({
     bumpFeedback();
   };
 
+  const handleTryAgain = () => {
+    if (resolved || attempts === 0 || attempts >= 2) return;
+    setChecked(false);
+    setSelectedId(null);
+    setHeadline(null);
+    setMessage(null);
+  };
+
   const optionClass = (opt: ReflectionOption) => {
-    const isWrong = selectedWrongIds.includes(opt.id);
-    const isChosenCorrect = selectedCorrectId === opt.id && opt.isCorrect;
+    const isSelected = selectedId === opt.id;
+    const isCorrect = checked && isSelected && opt.isCorrect;
+    const isWrong = checked && isSelected && !opt.isCorrect;
     const isRevealedCorrect = revealedCorrect && opt.isCorrect;
     return [
       'ffl-reasoningWhy-option',
+      isSelected && !checked ? 'ffl-reasoningWhy-option--selected' : '',
       isWrong ? 'ffl-reasoningWhy-option--wrong' : '',
-      isChosenCorrect || isRevealedCorrect ? 'ffl-reasoningWhy-option--correct' : '',
+      isCorrect || isRevealedCorrect ? 'ffl-reasoningWhy-option--correct' : '',
       isRevealedCorrect ? 'ffl-reasoningWhy-option--revealed' : '',
     ]
       .filter(Boolean)
       .join(' ');
   };
+
+  const canTryAgain = checked && !resolved && attempts === 1;
 
   return (
     <div className="ffl-selStep ffl-reasoningWhyStep ffl-focusReflectionStep">
@@ -145,32 +157,21 @@ export default function FocusReflectionStep({
       </header>
 
       <div className="ffl-reasoningWhy-options" role="group" aria-label={FOCUS_REFLECTION_PROMPT}>
-        {FOCUS_REFLECTION_OPTIONS.map((opt) => {
-          const isWrong = selectedWrongIds.includes(opt.id);
-          const isCorrect = selectedCorrectId === opt.id && opt.isCorrect;
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              className={optionClass(opt)}
-              aria-pressed={isCorrect}
-              aria-disabled={isWrong || resolved}
-              disabled={isWrong}
-              onClick={() => handleSelect(opt)}
-            >
-              <span className="ffl-reasoningWhy-option-label">{opt.label}</span>
-              {isWrong ? (
-                <span className="ffl-reasoningWhy-option-mark" aria-hidden="true">
-                  ×
-                </span>
-              ) : isCorrect ? (
-                <span className="ffl-reasoningWhy-option-mark ffl-reasoningWhy-option-mark--check" aria-hidden="true">
-                  ✓
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
+        {FOCUS_REFLECTION_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            className={optionClass(opt)}
+            aria-pressed={selectedId === opt.id}
+            disabled={checked && !canTryAgain}
+            onClick={() => {
+              if (checked && !canTryAgain) return;
+              setSelectedId(opt.id);
+            }}
+          >
+            <span className="ffl-reasoningWhy-option-label">{opt.label}</span>
+          </button>
+        ))}
       </div>
 
       <StepMicroFeedback
@@ -180,18 +181,28 @@ export default function FocusReflectionStep({
         triggerKey={feedbackKey}
       />
 
-      <div className={`ffl-stepActions ffl-focusReflection-actions${showContinue ? ' ffl-focusReflection-actions--visible' : ''}`}>
-        <button
-          type="button"
-          className="ffl-ctaPrimary ffl-ctaPrimary--small ffl-focusReflection-continue"
-          onClick={() => {
-            onContinueClick();
-            onContinue();
-          }}
-          disabled={!showContinue}
-        >
-          Continue
-        </button>
+      <div
+        className={`ffl-stepActions ffl-focusReflection-actions${showContinue ? ' ffl-focusReflection-actions--visible' : ''}`}
+      >
+        {!checked ? (
+          <CheckButton disabled={!selectedId} onClick={handleCheck} />
+        ) : canTryAgain ? (
+          <button type="button" className="bbc-tryAgainBtn" onClick={handleTryAgain}>
+            Try Again
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="ffl-ctaPrimary ffl-ctaPrimary--small ffl-focusReflection-continue"
+            onClick={() => {
+              onContinueClick();
+              onContinue();
+            }}
+            disabled={!showContinue}
+          >
+            Continue
+          </button>
+        )}
       </div>
     </div>
   );

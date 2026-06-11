@@ -49,6 +49,8 @@ export function useProgramGoalsOnboarding({
 
   useEffect(() => {
     if (!enabled || loading || autoShownRef.current || !programCode.trim()) return;
+    // Family portal uses inline Parent/Guardian child goals checklist on Home.
+    if (portalType === 'family') return;
 
     const skipped = readProgramGoalsSkippedLocal(programCode, portalType);
     const localDismissedUntil = readGoalsDrawerDismissedUntilLocal(programCode, portalType);

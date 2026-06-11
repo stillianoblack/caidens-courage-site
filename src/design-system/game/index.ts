@@ -55,6 +55,21 @@ export type {
 } from './getB4LockInTip';
 export { default as ModuleFooter } from './ModuleFooter';
 
+export { default as CheckButton } from './CheckButton';
+export type { CheckButtonProps } from './CheckButton';
+
+export { default as HintButton } from './HintButton';
+export type { HintButtonProps } from './HintButton';
+
+export { default as ExplainMoreButton } from './ExplainMoreButton';
+export type { ExplainMoreButtonProps } from './ExplainMoreButton';
+
+export { default as FeedbackPanel } from './FeedbackPanel';
+export type { FeedbackPanelProps } from './FeedbackPanel';
+
+export { getPreSubmitGuideMessage, getGuidePanelLabel } from './getPreSubmitGuideMessage';
+export type { GuideCharacter, PreSubmitGuideInput } from './getPreSubmitGuideMessage';
+
 export {
   INTERACTIVE_MODULE_COMPONENTS,
   INTERACTIVE_MODULE_EXAMPLES,

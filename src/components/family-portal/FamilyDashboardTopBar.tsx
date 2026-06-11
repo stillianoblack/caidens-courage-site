@@ -4,8 +4,6 @@ import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifi
 
 type FamilyDashboardTopBarProps = {
   pageTitle: string;
-  contextTitle?: string;
-  contextSubtitle?: string;
   onOpenProgramGoals?: () => void;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
@@ -13,8 +11,6 @@ type FamilyDashboardTopBarProps = {
 
 export default function FamilyDashboardTopBar({
   pageTitle,
-  contextTitle,
-  contextSubtitle,
   onOpenProgramGoals,
   linkedCampLabel = null,
   notifications = [],
@@ -22,8 +18,6 @@ export default function FamilyDashboardTopBar({
   return (
     <PortalHeader
       pageTitle={pageTitle}
-      contextTitle={contextTitle}
-      contextSubtitle={contextSubtitle}
       portal="family"
       onOpenProgramGoals={onOpenProgramGoals}
       linkedCampLabel={linkedCampLabel}

@@ -4,6 +4,7 @@ import AdultGrowthCheckFlow from '../components/adult-assessment/AdultGrowthChec
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
+import '../components/portal/portal-shell.css';
 import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
 import { forcePortalRoleForRoute } from '../config/portalContext';
 import {
@@ -81,7 +82,7 @@ export default function AdultAssessmentPage({ variant }: AdultAssessmentPageProp
   const pageTitle = phase === 'baseline' ? 'Adult Baseline Assessment' : 'Adult Growth Assessment';
 
   return (
-    <div className="pilot-shell">
+    <div className="pilot-shell portal-shell">
       <PilotDashboardSidebar
         activeId="assessments"
         onSelect={handleSelectNav}
@@ -92,11 +93,7 @@ export default function AdultAssessmentPage({ variant }: AdultAssessmentPageProp
         showSupportCard={isProgram}
       />
       <div className="pilot-main">
-        <PilotDashboardTopBar
-          pageTitle={pageTitle}
-          contextTitle={brand.title}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle={pageTitle} />
         <div className="pilot-content pilot-content--wide">
           <AdultGrowthCheckFlow
             phase={phase}

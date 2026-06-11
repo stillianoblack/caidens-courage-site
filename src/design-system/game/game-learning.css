@@ -522,3 +522,89 @@
     top: 1rem;
   }
 }
+
+/* Commit-before-feedback interaction controls */
+.ds-feedbackPanel {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.ds-feedbackPanel--success {
+  background: var(--bbc-success-bg, #ecfdf5);
+  border-color: rgba(5, 150, 105, 0.2);
+}
+
+.ds-feedbackPanel--try {
+  background: var(--bbc-try-bg, #fffbeb);
+  border-color: rgba(229, 192, 106, 0.35);
+}
+
+.ds-feedbackPanelMessage {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--bbc-navy-deep, #1a2f52);
+}
+
+.ds-feedbackPanelHint {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--bbc-muted, #6b7280);
+}
+
+.ds-feedbackPanelHintLabel {
+  font-weight: 700;
+  color: var(--bbc-navy, #243e70);
+}
+
+.ds-feedbackPanelExplain {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--bbc-navy-deep, #1a2f52);
+}
+
+.ds-feedbackPanelActions {
+  margin-top: 0.5rem;
+}
+
+.bbc-hintBtn,
+.bbc-tryAgainBtn,
+.bbc-explainMoreBtn {
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  background: #fff;
+  color: var(--bbc-navy, #243e70);
+  border-radius: 9999px;
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bbc-hintBtn:disabled,
+.bbc-tryAgainBtn:disabled,
+.bbc-explainMoreBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bbc-bottomBarActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.bbc-bottomBarInner--retry {
+  flex-wrap: wrap;
+}
+
+.ffl-reasoningWhy-option--selected {
+  outline: 2px solid var(--bbc-gold, #e5c06a);
+  outline-offset: 2px;
+}

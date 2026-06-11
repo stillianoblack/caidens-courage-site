@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuestionInteraction } from '../../hooks/useQuestionInteraction';
 import { useLocation, useNavigate } from 'react-router-dom';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import '../b4-baseline-check/b4-baseline-check.css';
@@ -10,9 +11,14 @@ import { useSetMissionGamePhase } from '../../context/MissionGamePhaseContext';
 import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
 import type { GameAnswerValue, GameAssessmentConfig } from '../../types/gameAssessment';
 import {
+  getCorrectFeedbackMessage,
   getGameQuestionFeedback,
+  getIncorrectFeedbackMessage,
   isGameAnswerComplete,
+  isGameAnswerCorrect,
 } from '../../lib/gameAssessmentValidation';
+import { mergeAttemptIntoAnswersJson, scoreFromFirstAttempts } from '../../lib/questionAttemptTracking';
+import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import GameAssessmentComplete from './GameAssessmentComplete';
 import CharacterSpeechBubble from './shared/CharacterSpeechBubble';
 import PortalBackButton from '../portal/PortalBackButton';
@@ -91,10 +97,6 @@ type GameAssessmentFlowProps = {
   /** Optional universal tracking metadata override */
   tracking?: ModuleTrackingDefinition;
 };
-
-function emptyAnswer(): GameAnswerValue {
-  return null;
-}
 
 function getMissionTheme(flags: {
   useVictoriaHeader: boolean;
@@ -196,15 +198,56 @@ export default function GameAssessmentFlow({
 
   const [view, setView] = useState<GameView>(skipLanding ? 'quiz' : 'landing');
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [answer, setAnswer] = useState<GameAnswerValue>(emptyAnswer());
-  const [checked, setChecked] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
   const [score, setScore] = useState(0);
   const [answersRecord, setAnswersRecord] = useState<Record<string, GameAnswerValue>>({});
+  const [attemptsRecord, setAttemptsRecord] = useState<QuestionAttemptsMap>({});
   const quizStartedAtRef = useRef<number | null>(null);
 
   const currentQuestion = config.questions[questionIndex];
+
+  const interaction = useQuestionInteraction({
+    questionId: currentQuestion?.id ?? '',
+    hints: currentQuestion?.hints,
+    explainMore: currentQuestion?.explainMore,
+    maxAttempts: 2,
+    isAnswerComplete: (value) =>
+      currentQuestion ? isGameAnswerComplete(currentQuestion, value) : false,
+    isAnswerCorrect: (value) =>
+      currentQuestion ? isGameAnswerCorrect(currentQuestion, value) : false,
+    getCorrectFeedback: () =>
+      currentQuestion ? getCorrectFeedbackMessage(currentQuestion) : '',
+    getIncorrectFeedback: () =>
+      currentQuestion
+        ? getIncorrectFeedbackMessage(currentQuestion)
+        : 'Not quite. Try again or use a hint.',
+  });
+
+  const {
+    answer,
+    checked,
+    feedback,
+    feedbackTone,
+    canCheck,
+    canContinue,
+    canTryAgain,
+    canUseHint,
+    canExplainMore,
+    showExplainMore,
+    activeHint,
+    selectAnswer,
+    check: submitCheck,
+    tryAgain,
+    useHint: revealHint,
+    toggleExplainMore,
+    reset: resetInteraction,
+    buildAttemptRecord,
+    attemptsCount,
+    isCorrect,
+  } = interaction;
+
+  useEffect(() => {
+    resetInteraction();
+  }, [questionIndex, resetInteraction]);
   const quizAvatarSrc = config.quizAvatarSrc ?? config.avatarSrc ?? '';
   const introAvatarSrc = quizAvatarSrc || config.avatarSrc || '';
   const decorVariant =
@@ -272,11 +315,8 @@ export default function GameAssessmentFlow({
   }, [checked, questionIndex, totalQuestions, view]);
 
   const resetQuestionState = useCallback(() => {
-    setAnswer(emptyAnswer());
-    setChecked(false);
-    setFeedback(null);
-    setFeedbackTone('neutral');
-  }, []);
+    resetInteraction();
+  }, [resetInteraction]);
 
   const handleExit = useCallback(() => {
     playItemButton();
@@ -308,7 +348,10 @@ export default function GameAssessmentFlow({
   ]);
 
   const persistModuleCompletion = useCallback(
-    async (finalScore: number, answers: Record<string, GameAnswerValue>) => {
+    async (
+      finalScore: number,
+      answers: Record<string, GameAnswerValue> | ReturnType<typeof mergeAttemptIntoAnswersJson>,
+    ) => {
       const timeSpentSeconds = quizStartedAtRef.current
         ? Math.round((Date.now() - quizStartedAtRef.current) / 1000)
         : undefined;
@@ -328,19 +371,23 @@ export default function GameAssessmentFlow({
   );
 
   const computeScoreFromAnswers = useCallback(
-    (finalAnswers: Record<string, GameAnswerValue>) =>
-      config.questions.reduce((sum, question) => {
+    (finalAnswers: Record<string, GameAnswerValue>, attempts?: QuestionAttemptsMap) => {
+      if (attempts && Object.keys(attempts).length > 0) {
+        return scoreFromFirstAttempts(attempts);
+      }
+      return config.questions.reduce((sum, question) => {
         const value = finalAnswers[question.id];
         if (value == null) return sum;
         const result = getGameQuestionFeedback(question, value);
         return sum + (result.correct ? 1 : 0);
-      }, 0),
+      }, 0);
+    },
     [config.questions],
   );
 
   const finishGameSession = useCallback(
-    (finalAnswers: Record<string, GameAnswerValue>) => {
-      const finalScore = computeScoreFromAnswers(finalAnswers);
+    (finalAnswers: Record<string, GameAnswerValue>, questionAttempts: QuestionAttemptsMap) => {
+      const finalScore = computeScoreFromAnswers(finalAnswers, questionAttempts);
       const trackingMeta = tracking ?? resolveModuleTracking(config);
       const role = readActivePortalRole() ?? trackingMeta?.role ?? 'student';
       const isTraining = Boolean(adultGuideId && adultMissionId);
@@ -367,7 +414,10 @@ export default function GameAssessmentFlow({
         role,
       });
 
-      void persistModuleCompletion(finalScore, finalAnswers);
+      void persistModuleCompletion(
+        finalScore,
+        mergeAttemptIntoAnswersJson(finalAnswers, questionAttempts),
+      );
       setView('complete');
       resetQuestionState();
     },
@@ -388,6 +438,7 @@ export default function GameAssessmentFlow({
     quizStartedAtRef.current = Date.now();
     emitGameStarted();
     setAnswersRecord({});
+    setAttemptsRecord({});
     setView('quiz');
     setQuestionIndex(0);
     setScore(0);
@@ -395,34 +446,36 @@ export default function GameAssessmentFlow({
   };
 
   const handleCheck = () => {
-    if (!currentQuestion || !isGameAnswerComplete(currentQuestion, answer)) return;
+    if (!currentQuestion || !canCheck) return;
 
     playSelect();
-    const result = getGameQuestionFeedback(currentQuestion, answer);
-    setChecked(true);
-    setFeedback(result.message);
-    setFeedbackTone(result.correct ? 'success' : 'try');
-    if (result.correct) {
+    const wasFirstAttempt = attemptsCount === 0;
+    const correct = isGameAnswerCorrect(currentQuestion, answer);
+    submitCheck();
+    if (correct && wasFirstAttempt) {
       setScore((prev) => prev + 1);
       playResultFeelings();
     }
   };
 
   const handleContinue = () => {
+    if (!currentQuestion || !canContinue) return;
+
     playContinue();
-    const nextAnswers = currentQuestion
-      ? { ...answersRecord, [currentQuestion.id]: answer }
-      : answersRecord;
+    const attempt = buildAttemptRecord();
+    const nextAttempts = { ...attemptsRecord, [currentQuestion.id]: attempt };
+    const nextAnswers = { ...answersRecord, [currentQuestion.id]: answer };
 
     if (questionIndex + 1 >= totalQuestions) {
       setAnswersRecord(nextAnswers);
-      finishGameSession(nextAnswers);
+      setAttemptsRecord(nextAttempts);
+      finishGameSession(nextAnswers, nextAttempts);
       return;
     }
 
     setAnswersRecord(nextAnswers);
+    setAttemptsRecord(nextAttempts);
     setQuestionIndex((index) => index + 1);
-    resetQuestionState();
   };
 
   const handleSkip = () => {
@@ -430,16 +483,26 @@ export default function GameAssessmentFlow({
     const nextAnswers = currentQuestion
       ? { ...answersRecord, [currentQuestion.id]: answer }
       : answersRecord;
+    const nextAttempts = attemptsRecord;
 
     if (questionIndex + 1 >= totalQuestions) {
       setAnswersRecord(nextAnswers);
-      finishGameSession(nextAnswers);
+      finishGameSession(nextAnswers, nextAttempts);
       return;
     }
 
     setAnswersRecord(nextAnswers);
     setQuestionIndex((index) => index + 1);
-    resetQuestionState();
+  };
+
+  const handleTryAgain = () => {
+    playSelect();
+    tryAgain();
+  };
+
+  const handleUseHint = () => {
+    playSelect();
+    revealHint();
   };
 
   const handlePlayAgain = () => {
@@ -450,8 +513,8 @@ export default function GameAssessmentFlow({
     resetQuestionState();
   };
 
-  const canCheck = currentQuestion ? isGameAnswerComplete(currentQuestion, answer) : false;
   const showTopBar = view !== 'landing';
+  const revealCorrectAnswer = checked && (isCorrect || attemptsCount >= 2);
   const headerFlags = {
     useVictoriaHeader,
     useUncleTHeader,
@@ -694,17 +757,17 @@ export default function GameAssessmentFlow({
             useCaidenHeader={useCaidenHeader}
             useMirandaHeader={useMirandaHeader}
             useCharlieHeader={useCharlieHeader}
+            revealCorrectAnswer={revealCorrectAnswer}
+            activeHint={activeHint}
             onPlaySelect={playSelect}
-            onSelectChoice={(id) => setAnswer(id)}
-            onSelectTrueFalse={(value) => setAnswer(value)}
+            onSelectChoice={(id) => selectAnswer(id)}
+            onSelectTrueFalse={(value) => selectAnswer(value)}
             onSequenceTap={(id) => {
-              setAnswer((prev) => {
-                const order = Array.isArray(prev) ? [...prev] : [];
-                if (order.includes(id)) return order;
-                return [...order, id];
-              });
+              const order = Array.isArray(answer) ? [...answer] : [];
+              if (order.includes(id)) return;
+              selectAnswer([...order, id]);
             }}
-            onSequenceClear={() => setAnswer([])}
+            onSequenceClear={() => selectAnswer([])}
           />
         ) : null}
 
@@ -786,9 +849,18 @@ export default function GameAssessmentFlow({
           feedbackTone={feedbackTone}
           hideInlineFeedback={usesCoachingShell}
           coachingShell={usesCoachingShell}
+          canTryAgain={canTryAgain}
+          canUseHint={canUseHint}
+          canExplainMore={canExplainMore}
+          showExplainMore={showExplainMore}
+          explainMore={currentQuestion?.explainMore}
+          activeHint={activeHint}
           onSkip={handleSkip}
           onCheck={handleCheck}
           onContinue={handleContinue}
+          onTryAgain={handleTryAgain}
+          onUseHint={handleUseHint}
+          onToggleExplainMore={toggleExplainMore}
         />
       ) : null}
     </div>

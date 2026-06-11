@@ -1,3 +1,5 @@
+import { ENABLE_B4_CHAT } from '../config/featureFlags';
+
 export const OPEN_ASK_B4_EVENT = 'caidens:open-ask-b4';
 
 export type OpenAskB4Detail = {
@@ -18,7 +20,7 @@ export function consumeAskB4OpenPending(): boolean {
 }
 
 export function openAskB4(prompt?: string): void {
-  if (typeof window === 'undefined') return;
+  if (!ENABLE_B4_CHAT || typeof window === 'undefined') return;
   markAskB4OpenPending();
   window.dispatchEvent(
     new CustomEvent<OpenAskB4Detail>(OPEN_ASK_B4_EVENT, {

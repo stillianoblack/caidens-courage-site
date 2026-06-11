@@ -1,4 +1,7 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuestionInteraction } from '../../hooks/useQuestionInteraction';
+import { mergeAttemptIntoAnswersJson } from '../../lib/questionAttemptTracking';
+import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import {
   ADULT_POST_ASSESSMENT_TYPE,
   ADULT_PRE_ASSESSMENT_TYPE,
@@ -73,10 +76,7 @@ export default function AdultGrowthCheckFlow({
   );
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [selected, setSelected] = useState<string | null>(null);
-  const [checked, setChecked] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
+  const [attemptsRecord, setAttemptsRecord] = useState<QuestionAttemptsMap>({});
   const [resultRecord, setResultRecord] = useState<AdultAssessmentRecord | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [linkingPortal, setLinkingPortal] = useState(false);
@@ -87,6 +87,39 @@ export default function AdultGrowthCheckFlow({
     familyPortal && phase === 'baseline' && shouldMigrateFromCampProgram();
   const totalQuestions = ADULT_GROWTH_CHECK_QUESTIONS.length;
   const currentQuestion = ADULT_GROWTH_CHECK_QUESTIONS[questionIndex];
+
+  const interaction = useQuestionInteraction({
+    questionId: currentQuestion?.id ?? '',
+    hints: currentQuestion?.hints,
+    explainMore: currentQuestion?.explainMore,
+    maxAttempts: 1,
+    isAnswerComplete: (value) => typeof value === 'string' && value.length > 0,
+    isAnswerCorrect: (value) =>
+      currentQuestion ? value === currentQuestion.correctId : false,
+    getCorrectFeedback: () =>
+      currentQuestion?.correctFeedback ??
+      'Great reflection — that support mindset helps kids thrive.',
+    getIncorrectFeedback: () =>
+      currentQuestion?.incorrectFeedback ??
+      'Not quite. The best answer focuses on understanding and support.',
+  });
+
+  const {
+    answer: selected,
+    checked,
+    feedback,
+    feedbackTone,
+    canCheck,
+    canContinue,
+    selectAnswer,
+    check: submitCheck,
+    reset: resetInteraction,
+    buildAttemptRecord,
+  } = interaction;
+
+  useEffect(() => {
+    resetInteraction();
+  }, [questionIndex, resetInteraction]);
 
   useSetMissionGamePhase(view === 'quiz' ? 'quiz' : view === 'results' ? 'complete' : 'landing');
 
@@ -100,11 +133,9 @@ export default function AdultGrowthCheckFlow({
   const resetQuiz = useCallback(() => {
     setQuestionIndex(0);
     setAnswers({});
-    setSelected(null);
-    setChecked(false);
-    setFeedback(null);
-    setFeedbackTone('neutral');
-  }, []);
+    setAttemptsRecord({});
+    resetInteraction();
+  }, [resetInteraction]);
 
   const handleProfileSubmit = async (values: AdultAssessmentProfile) => {
     playSelect();
@@ -167,7 +198,7 @@ export default function AdultGrowthCheckFlow({
   };
 
   const finishAssessment = useCallback(
-    async (finalAnswers: Record<string, string>) => {
+    async (finalAnswers: Record<string, string>, questionAttempts: QuestionAttemptsMap = {}) => {
       if (!profile) return;
 
       const scores = scoreAdultAssessment(finalAnswers);
@@ -185,7 +216,12 @@ export default function AdultGrowthCheckFlow({
       });
 
       saveAdultAssessmentResult(record);
-      const submit = await saveAdultAssessmentToSupabase(record);
+      const submit = await saveAdultAssessmentToSupabase(record, {
+        answersJson: mergeAttemptIntoAnswersJson(
+          Object.fromEntries(Object.entries(finalAnswers)),
+          questionAttempts,
+        ),
+      });
       trackEvent('adult_assessment_completed', {
         role: familyPortal ? 'parent' : 'facilitator',
         assessment_type: phase === 'baseline' ? ADULT_PRE_ASSESSMENT_TYPE : ADULT_POST_ASSESSMENT_TYPE,
@@ -208,58 +244,50 @@ export default function AdultGrowthCheckFlow({
   );
 
   const handleCheck = () => {
-    if (!currentQuestion || !selected) return;
+    if (!currentQuestion || !canCheck || typeof selected !== 'string') return;
 
     playSelect();
     const correct = selected === currentQuestion.correctId;
-    setChecked(true);
-    setFeedback(
-      correct
-        ? 'Great reflection — that support mindset helps kids thrive.'
-        : 'Good try — the best answer focuses on understanding and support.',
-    );
-    setFeedbackTone(correct ? 'success' : 'try');
+    submitCheck();
     if (correct) {
       playResultFeelings();
     }
   };
 
   const handleContinue = () => {
-    if (!currentQuestion || !selected) return;
+    if (!currentQuestion || typeof selected !== 'string' || !canContinue) return;
 
     playContinue();
+    const attempt = buildAttemptRecord();
+    const nextAttempts = { ...attemptsRecord, [currentQuestion.id]: attempt };
     const nextAnswers = { ...answers, [currentQuestion.id]: selected };
 
     if (questionIndex + 1 >= totalQuestions) {
-      void finishAssessment(nextAnswers);
+      void finishAssessment(nextAnswers, nextAttempts);
       return;
     }
 
     setAnswers(nextAnswers);
+    setAttemptsRecord(nextAttempts);
     setQuestionIndex((index) => index + 1);
-    setSelected(null);
-    setChecked(false);
-    setFeedback(null);
-    setFeedbackTone('neutral');
   };
 
   const handleSkip = () => {
     playItemButton();
     if (!currentQuestion) return;
 
-    const nextAnswers = { ...answers, [currentQuestion.id]: selected ?? '' };
+    const nextAnswers = {
+      ...answers,
+      [currentQuestion.id]: typeof selected === 'string' ? selected : '',
+    };
 
     if (questionIndex + 1 >= totalQuestions) {
-      void finishAssessment(nextAnswers);
+      void finishAssessment(nextAnswers, attemptsRecord);
       return;
     }
 
     setAnswers(nextAnswers);
     setQuestionIndex((index) => index + 1);
-    setSelected(null);
-    setChecked(false);
-    setFeedback(null);
-    setFeedbackTone('neutral');
   };
 
   const handleExit = () => {
@@ -281,9 +309,17 @@ export default function AdultGrowthCheckFlow({
 
   const isVictoriaQuestion = currentQuestion?.domain === 'understanding';
   const guidePortraitSrc = isVictoriaQuestion ? DR_VICTORIA_GUIDE_SRC : UNCLE_T_GUIDE_SRC;
-  const guideSpeech = isVictoriaQuestion
-    ? 'Dr. Victoria reflection — choose the most helpful response.'
-    : 'Uncle T coaching moment — what would help most?';
+  const guideSpeech = checked
+    ? isVictoriaQuestion
+      ? feedbackTone === 'success'
+        ? 'Great choice! Here\u2019s why that reflection works.'
+        : 'Not quite. Try again or use a hint.'
+      : feedbackTone === 'success'
+        ? 'Strong coaching move — here\u2019s why it helps.'
+        : 'Not quite. Think about what the child needs most.'
+    : isVictoriaQuestion
+      ? 'Choose your answer, then press Check.'
+      : 'Choose your answer, then press Check.';
 
   return (
     <div
@@ -414,7 +450,7 @@ export default function AdultGrowthCheckFlow({
                       .join(' ')}
                     onClick={() => {
                       playSelect();
-                      setSelected(choice.id);
+                      selectAnswer(choice.id);
                     }}
                     aria-pressed={isSelected}
                   >
@@ -424,7 +460,7 @@ export default function AdultGrowthCheckFlow({
               })}
             </div>
 
-            {feedback ? (
+            {checked && feedback ? (
               <p
                 className={[
                   'bbc-feedback',
@@ -458,7 +494,7 @@ export default function AdultGrowthCheckFlow({
 
       {view === 'quiz' ? (
         <B4BaselineBottomBar
-          canCheck={Boolean(selected)}
+          canCheck={canCheck}
           checked={checked}
           feedback={null}
           feedbackTone={feedbackTone}

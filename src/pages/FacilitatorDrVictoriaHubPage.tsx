@@ -4,11 +4,12 @@ import AdultLearningHub from '../components/adult-learning/AdultLearningHub';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
+import '../components/portal/portal-shell.css';
 import '../components/adult-learning/adult-learning-hub.css';
 import { FACILITATOR_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import { DR_VICTORIA_LEARNING_HUB } from '../data/adult/drVictoriaHub';
-import { BLUE_RIBBON_PILOT_BRAND, type PilotSidebarNavId } from '../data/pilotDashboardContent';
+import { type PilotSidebarNavId } from '../data/pilotDashboardContent';
 
 export default function FacilitatorDrVictoriaHubPage() {
   const navigate = useNavigate();
@@ -27,15 +28,11 @@ export default function FacilitatorDrVictoriaHubPage() {
   }
 
   return (
-    <div className="pilot-shell">
+    <div className="pilot-shell portal-shell">
       <PilotDashboardSidebar activeId="facilitator-center" onSelect={handleSelectNav} />
 
       <div className="pilot-main">
-        <PilotDashboardTopBar
-          pageTitle={DR_VICTORIA_LEARNING_HUB.hubTitle}
-          contextTitle={BLUE_RIBBON_PILOT_BRAND}
-          contextSubtitle="Facilitator Portal"
-        />
+        <PilotDashboardTopBar pageTitle={DR_VICTORIA_LEARNING_HUB.hubTitle} />
 
         <div className="pilot-content pilot-content--wide">
           <AdultLearningHub

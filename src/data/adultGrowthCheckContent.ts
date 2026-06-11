@@ -37,6 +37,10 @@ export type AdultMcQuestion = {
   choices: AdultMcChoice[];
   correctId: string;
   domain: 'understanding' | 'support';
+  hints?: string[];
+  correctFeedback?: string;
+  incorrectFeedback?: string;
+  explainMore?: string;
 };
 
 export const ADULT_GROWTH_CHECK_QUESTIONS: AdultMcQuestion[] = [

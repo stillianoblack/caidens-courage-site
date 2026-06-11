@@ -68,6 +68,8 @@ export default function B4GuideFlow({
   const [moduleStepIndex, setModuleStepIndex] = useState(INITIAL_STATE.moduleStepIndex);
   const [moduleAnswers, setModuleAnswers] = useState(INITIAL_STATE.moduleAnswers);
   const [focusMovePending, setFocusMovePending] = useState(INITIAL_STATE.focusMovePending);
+  const [assessmentSelected, setAssessmentSelected] = useState<string | null>(null);
+  const [assessmentChecked, setAssessmentChecked] = useState(false);
 
   const resetAll = useCallback(() => {
     setScreen(initialScreen);
@@ -77,6 +79,8 @@ export default function B4GuideFlow({
     setModuleStepIndex(INITIAL_STATE.moduleStepIndex);
     setModuleAnswers(INITIAL_STATE.moduleAnswers);
     setFocusMovePending(INITIAL_STATE.focusMovePending);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [initialScreen]);
 
@@ -92,6 +96,8 @@ export default function B4GuideFlow({
     setAssessmentAnswers({});
     setAssessmentIndex(0);
     setAssessmentResult(null);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
     setScreen('assessment');
   };
 
@@ -102,11 +108,25 @@ export default function B4GuideFlow({
     setScreen('module');
   };
 
-  const handleAssessmentAnswer = (choiceId: string) => {
+  const handleAssessmentSelect = (choiceId: string) => {
+    playSelect();
+    setAssessmentSelected(choiceId);
+  };
+
+  const handleAssessmentCheck = () => {
+    if (!assessmentSelected) return;
+    playSelect();
+    setAssessmentChecked(true);
+  };
+
+  const handleAssessmentContinue = () => {
+    if (!assessmentSelected) return;
     playSelect();
     const question = B4_ASSESSMENT_QUESTIONS[assessmentIndex];
-    const nextAnswers = { ...assessmentAnswers, [question.id]: choiceId };
+    const nextAnswers = { ...assessmentAnswers, [question.id]: assessmentSelected };
     setAssessmentAnswers(nextAnswers);
+    setAssessmentSelected(null);
+    setAssessmentChecked(false);
 
     if (assessmentIndex + 1 >= B4_ASSESSMENT_QUESTIONS.length) {
       const resultType = calculateAssessmentResult(nextAnswers);
@@ -213,7 +233,11 @@ export default function B4GuideFlow({
             current={assessmentIndex + 1}
             total={B4_ASSESSMENT_QUESTIONS.length}
             progressLabel={`Question ${assessmentIndex + 1} of ${B4_ASSESSMENT_QUESTIONS.length}`}
-            onSelect={handleAssessmentAnswer}
+            selectedId={assessmentSelected}
+            checked={assessmentChecked}
+            onSelect={handleAssessmentSelect}
+            onCheck={handleAssessmentCheck}
+            onContinue={handleAssessmentContinue}
           />
         ) : null}
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildNickname } from '../../config/activeChildNickname';
@@ -43,6 +43,7 @@ import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
+import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 
 type View = 'landing' | 'hub' | 'quiz' | 'module-complete' | 'final';
 
@@ -91,6 +92,11 @@ export default function B4BaselineCheckFlow({
   const [checked, setChecked] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackTone, setFeedbackTone] = useState<'success' | 'try' | 'neutral'>('neutral');
+  const [mcAttempts, setMcAttempts] = useState(0);
+  const [mcHintsUsed, setMcHintsUsed] = useState(0);
+  const [activeHint, setActiveHint] = useState<string | null>(null);
+  const [mcAttemptsRecord, setMcAttemptsRecord] = useState<QuestionAttemptsMap>({});
+  const mcFirstAnswerRef = useRef<Record<string, string>>({});
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
@@ -156,7 +162,26 @@ export default function B4BaselineCheckFlow({
     setChecked(false);
     setFeedback(null);
     setFeedbackTone('neutral');
+    setMcAttempts(0);
+    setMcHintsUsed(0);
+    setActiveHint(null);
+    setMcAttemptsRecord({});
+    mcFirstAnswerRef.current = {};
   };
+
+  const mcMaxAttempts = 2;
+  const canMcTryAgain = Boolean(
+    currentMc && checked && selected !== currentMc.correctId && mcAttempts < mcMaxAttempts,
+  );
+  const canMcUseHint = Boolean(
+    currentMc && currentMc.hints?.length && mcHintsUsed < (currentMc.hints?.length ?? 0),
+  );
+  const canMcContinue = Boolean(
+    checked &&
+      (activeModule === 'feelings' ||
+        selected === currentMc?.correctId ||
+        mcAttempts >= mcMaxAttempts),
+  );
 
   const goLanding = () => {
     playItemButton();
@@ -264,7 +289,11 @@ export default function B4BaselineCheckFlow({
     playModuleWin();
 
     if (isBaselineFullyComplete(next, participantId) && next.record) {
-      const submitResult = await submitBaselineResults(next.record);
+      const submitResult = await submitBaselineResults({
+        ...next.record,
+        mcAnswers: overrides?.mc ?? mcAnswers,
+        questionAttempts: mcAttemptsRecord,
+      });
       const record = next.record;
       const maxScore = (['feelings', 'reading', 'focus-moves'] as BaselineModuleId[]).reduce(
         (sum, moduleId) => sum + getBaselineModuleQuestionCount(moduleId),
@@ -309,16 +338,35 @@ export default function B4BaselineCheckFlow({
     }
 
     if (currentMc) {
+      const nextAttempts = mcAttempts + 1;
+      setMcAttempts(nextAttempts);
       const correct = selected === currentMc.correctId;
       if (correct) {
-        setFeedback('Nice! You got it.');
+        setFeedback(currentMc.correctFeedback ?? 'Nice! You got it.');
         setFeedbackTone('success');
       } else {
-        const label = currentMc.choices.find((c) => c.id === currentMc.correctId)?.label ?? '';
-        setFeedback(`Good try. A strong choice: ${label}`);
+        setFeedback(
+          currentMc.incorrectFeedback ?? 'Not quite. Try again or use a hint.',
+        );
         setFeedbackTone('try');
       }
     }
+  };
+
+  const handleMcTryAgain = () => {
+    if (!canMcTryAgain) return;
+    playSelect();
+    setChecked(false);
+    setFeedback(null);
+    setFeedbackTone('neutral');
+    setSelected(null);
+  };
+
+  const handleMcUseHint = () => {
+    if (!currentMc?.hints?.length || mcHintsUsed >= currentMc.hints.length) return;
+    playSelect();
+    setActiveHint(currentMc.hints[mcHintsUsed]);
+    setMcHintsUsed((count) => count + 1);
   };
 
   const advanceQuestion = (overrides?: {
@@ -330,6 +378,9 @@ export default function B4BaselineCheckFlow({
     setChecked(false);
     setFeedback(null);
     setFeedbackTone('neutral');
+    setMcAttempts(0);
+    setMcHintsUsed(0);
+    setActiveHint(null);
 
     if (activeModule === 'feelings') {
       const q = B4_BASELINE_FEELINGS_QUESTIONS[questionIndex];
@@ -348,10 +399,32 @@ export default function B4BaselineCheckFlow({
     }
 
     if (currentMc) {
+      const finalAnswer = String(selected);
       const nextMc = overrides?.mc ?? {
         ...mcAnswers,
-        ...(selected != null ? { [currentMc.id]: String(selected) } : mcAnswers),
+        ...(selected != null ? { [currentMc.id]: finalAnswer } : mcAnswers),
       };
+      if (selected != null) {
+        if (!mcFirstAnswerRef.current[currentMc.id]) {
+          mcFirstAnswerRef.current[currentMc.id] = finalAnswer;
+        }
+        const firstAnswer = mcFirstAnswerRef.current[currentMc.id];
+        const isCorrectFirst = firstAnswer === currentMc.correctId;
+        const isCorrectFinal = finalAnswer === currentMc.correctId;
+        setMcAttemptsRecord((prev) => ({
+          ...prev,
+          [currentMc.id]: {
+            questionId: currentMc.id,
+            first_selected_answer: firstAnswer,
+            final_selected_answer: finalAnswer,
+            is_correct_first_try: isCorrectFirst,
+            is_correct_final: isCorrectFinal,
+            attempts_count: mcAttempts,
+            hints_used_count: mcHintsUsed,
+            completed_at: new Date().toISOString(),
+          },
+        }));
+      }
       setMcAnswers(nextMc);
 
       const pool =
@@ -535,11 +608,12 @@ export default function B4BaselineCheckFlow({
                   const isSelected = selected === choice.id;
                   const isCorrect = checked && choice.id === currentMc.correctId;
                   const isWrong = checked && isSelected && choice.id !== currentMc.correctId;
+                  const lockChoice = checked && !canMcTryAgain;
                   return (
                     <button
                       key={choice.id}
                       type="button"
-                      disabled={checked}
+                      disabled={lockChoice}
                       className={[
                         'bbc-answerCard',
                         isSelected && !checked ? 'bbc-answerCard--selected' : '',
@@ -591,13 +665,21 @@ export default function B4BaselineCheckFlow({
 
       {view === 'quiz' ? (
         <B4BaselineBottomBar
-          canCheck={selected != null}
+          canCheck={selected != null && !checked}
           checked={checked}
           feedback={feedback}
           feedbackTone={feedbackTone}
+          canTryAgain={canMcTryAgain}
+          canUseHint={canMcUseHint}
+          activeHint={activeHint}
           onSkip={handleSkip}
           onCheck={handleCheck}
-          onContinue={() => advanceQuestion()}
+          onContinue={() => {
+            if (!canMcContinue && activeModule !== 'feelings') return;
+            advanceQuestion();
+          }}
+          onTryAgain={handleMcTryAgain}
+          onUseHint={handleMcUseHint}
         />
       ) : null}
     </div>

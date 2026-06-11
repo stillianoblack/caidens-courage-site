@@ -5,6 +5,7 @@ import { resolveModuleTracking } from '../data/moduleTrackingRegistry';
 import type { GameAssessmentConfig } from '../types/gameAssessment';
 import type { GameAnswerValue } from '../types/gameAssessment';
 import type { ModuleCompletionAnswers, ModuleTrackingDefinition } from '../types/moduleTracking';
+import type { EnrichedAnswersJson } from '../types/questionInteraction';
 import { loadAdultAssessmentSession } from './adultAssessmentStorage';
 import { logTrackingSaveBlocked, resolveTrackingProgramCode } from './activeProgramContext';
 import { notifyModuleComplete } from './activeChildContext';
@@ -21,7 +22,7 @@ export type RecordInteractiveCompletionInput = {
   config: GameAssessmentConfig;
   score: number;
   maxScore: number;
-  answers?: Record<string, GameAnswerValue>;
+  answers?: Record<string, GameAnswerValue> | EnrichedAnswersJson;
   timeSpentSeconds?: number;
   tracking?: ModuleTrackingDefinition;
   guideId?: string;
@@ -29,8 +30,26 @@ export type RecordInteractiveCompletionInput = {
   pathname?: string;
 };
 
-function answersToJson(answers?: Record<string, GameAnswerValue>): Record<string, unknown> | undefined {
+function isEnrichedAnswersJson(
+  answers: Record<string, GameAnswerValue> | EnrichedAnswersJson,
+): answers is EnrichedAnswersJson {
+  return 'answers' in answers && typeof answers.answers === 'object' && answers.answers !== null;
+}
+
+function answersToJson(
+  answers?: Record<string, GameAnswerValue> | EnrichedAnswersJson,
+): Record<string, unknown> | undefined {
   if (!answers) return undefined;
+
+  if (isEnrichedAnswersJson(answers)) {
+    return {
+      ...Object.fromEntries(
+        Object.entries(answers.answers).map(([key, value]) => [key, value as unknown]),
+      ),
+      _attempts: answers._attempts,
+    };
+  }
+
   return Object.fromEntries(
     Object.entries(answers).map(([key, value]) => [key, value as unknown]),
   );

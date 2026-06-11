@@ -8,6 +8,7 @@ import {
   hasAllBaselineModules,
   type BaselineModuleId,
 } from '../data/b4BaselineCheckContent';
+import type { QuestionAttemptsMap } from '../types/questionInteraction';
 import {
   saveStudentBaselineToSupabase,
   type BaselineSubmitResult,
@@ -41,6 +42,8 @@ export type B4BaselineCheckRecord = {
   readingScore: number;
   focusMovesScore: number;
   completedAt: string;
+  mcAnswers?: Record<string, string>;
+  questionAttempts?: QuestionAttemptsMap;
 };
 
 export type B4BaselineStudentProfile = {

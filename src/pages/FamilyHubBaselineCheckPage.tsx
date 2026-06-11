@@ -46,11 +46,7 @@ export default function FamilyHubBaselineCheckPage() {
         />
       }
       topBar={
-        <FamilyDashboardTopBar
-          pageTitle="B-4 Baseline Check"
-          contextTitle={brand.title}
-          contextSubtitle="Family Portal"
-        />
+        <FamilyDashboardTopBar pageTitle="B-4 Baseline Check" />
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
     >

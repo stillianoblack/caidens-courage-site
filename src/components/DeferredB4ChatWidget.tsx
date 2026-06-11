@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { ENABLE_B4_CHAT } from '../config/featureFlags';
 import B4LauncherButton from './B4LauncherButton';
 import { markAskB4OpenPending, OPEN_ASK_B4_EVENT, type OpenAskB4Detail } from '../lib/openAskB4';
 import { logAskB4Debug } from '../lib/askB4Debug';
@@ -15,8 +16,7 @@ function loadB4ChatWidgetModule(): Promise<{ default: B4ChatWidgetComponent }> {
   return widgetModulePromise;
 }
 
-/** Loads the full B-4 chat only after someone opens it. */
-const DeferredB4ChatWidget: React.FC = () => {
+function DeferredB4ChatWidgetActive() {
   const [Widget, setWidget] = useState<B4ChatWidgetComponent | null>(null);
   const [loadError, setLoadError] = useState(false);
 
@@ -40,6 +40,36 @@ const DeferredB4ChatWidget: React.FC = () => {
         (window as Window & { __INIT_CHAT_RUNNING__?: boolean }).__INIT_CHAT_RUNNING__ = false;
       });
   }, []);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const loadAfterPaint = () => {
+      void ensureWidgetLoaded();
+    };
+
+    if ('requestIdleCallback' in window) {
+      idleId = (
+        window as Window & {
+          requestIdleCallback: (callback: () => void, options?: { timeout?: number }) => number;
+        }
+      ).requestIdleCallback(loadAfterPaint, { timeout: 2500 });
+    } else {
+      timeoutId = globalThis.setTimeout(loadAfterPaint, 1500);
+    }
+
+    return () => {
+      if (timeoutId !== null) globalThis.clearTimeout(timeoutId);
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        (
+          window as Window & {
+            cancelIdleCallback: (id: number) => void;
+          }
+        ).cancelIdleCallback(idleId);
+      }
+    };
+  }, [ensureWidgetLoaded]);
 
   useEffect(() => {
     const handleOpen = (event: Event) => {
@@ -74,6 +104,12 @@ const DeferredB4ChatWidget: React.FC = () => {
   }
 
   return <B4LauncherButton className="askB4-launcher" onClick={handleLauncherClick} />;
+}
+
+/** Loads the full B-4 chat after first paint, with click-to-load as a fallback. */
+const DeferredB4ChatWidget: React.FC = () => {
+  if (!ENABLE_B4_CHAT) return null;
+  return <DeferredB4ChatWidgetActive />;
 };
 
 export default DeferredB4ChatWidget;

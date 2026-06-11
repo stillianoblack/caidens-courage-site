@@ -2,6 +2,7 @@ import React from 'react';
 import AvatarContainer from '../components/AvatarContainer';
 import { getCharacter } from '../characters/characterRegistry';
 import CoachingRailShell from './CoachingRailShell';
+import { getGuidePanelLabel, getPreSubmitGuideMessage } from './getPreSubmitGuideMessage';
 import '../components/learning-moment.css';
 
 export type GameCoachingRailVariant = 'b4' | 'facilitator';
@@ -9,6 +10,8 @@ export type GameCoachingRailVariant = 'b4' | 'facilitator';
 export type GameCoachingRailPlaceholderProps = {
   variant?: GameCoachingRailVariant;
   phase?: 'landing' | 'quiz';
+  hasSelection?: boolean;
+  hasHints?: boolean;
   className?: string;
   caretTop?: number;
 };
@@ -16,18 +19,22 @@ export type GameCoachingRailPlaceholderProps = {
 export default function GameCoachingRailPlaceholder({
   variant = 'b4',
   phase = 'quiz',
+  hasSelection = false,
+  hasHints = false,
   className = '',
   caretTop,
 }: GameCoachingRailPlaceholderProps) {
   const isFacilitator = variant === 'facilitator';
   const character = getCharacter(isFacilitator ? 'dr-victoria' : 'b4');
   const avatarVariant = isFacilitator ? 'dr-victoria' : 'b4';
-  const label = isFacilitator ? 'Dr. Victoria Says' : 'B-4 Lock-In Tips';
-  const message = isFacilitator
-    ? phase === 'landing'
-      ? 'Start training to unlock reflection guidance after each scenario.'
-      : 'Choose an answer and tap Check to unlock reflection guidance.'
-    : 'Choose an answer to unlock a B-4 Lock-In Tip.';
+  const guideCharacter = isFacilitator ? 'dr-victoria' : 'b4';
+  const label = getGuidePanelLabel(guideCharacter);
+  const message = getPreSubmitGuideMessage({
+    character: guideCharacter,
+    phase,
+    hasSelection,
+    hasHints,
+  });
 
   return (
     <CoachingRailShell variant="placeholder" className={className} caretTop={caretTop}>

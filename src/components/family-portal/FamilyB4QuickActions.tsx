@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ENABLE_B4_CHAT } from '../../config/featureFlags';
 import type { FamilyB4QuickAction } from '../../lib/familyOverviewRecommendations';
 import { openAskB4 } from '../../lib/openAskB4';
 import { openProgramGoals } from '../../lib/openProgramGoals';
@@ -10,7 +11,7 @@ type FamilyB4QuickActionsProps = {
   className?: string;
 };
 
-export default function FamilyB4QuickActions({
+function FamilyB4QuickActionsPanel({
   actions,
   onOpenChildDrawer,
   className = '',
@@ -52,4 +53,9 @@ export default function FamilyB4QuickActions({
       </div>
     </section>
   );
+}
+
+export default function FamilyB4QuickActions(props: FamilyB4QuickActionsProps) {
+  if (!ENABLE_B4_CHAT) return null;
+  return <FamilyB4QuickActionsPanel {...props} />;
 }

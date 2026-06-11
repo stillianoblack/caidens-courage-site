@@ -36,7 +36,6 @@ const CAIDEN_IMG = '/images/focus-flame-lab/thepath.webp';
 
 const B4_SEL_CHECK = 'Thanks for sharing. B-4 is learning your focus style.';
 const B4_MC_CORRECT = 'Yes! You got it.';
-const B4_MC_TRY = 'Good try. B-4 saved your answer — keep going!';
 
 export default function Week0AssessmentExperience() {
   const navigate = useNavigate();
@@ -132,11 +131,9 @@ export default function Week0AssessmentExperience() {
         setFeedbackMessage(B4_MC_CORRECT);
         setB4Message(B4_MC_CORRECT);
       } else {
-        const correctLabel =
-          currentMcQuestion.choices.find((c) => c.id === currentMcQuestion.correctId)?.label ?? '';
-        setFeedbackHeadline('Good try!');
-        setFeedbackMessage(`${B4_MC_TRY} A strong choice: ${correctLabel}`);
-        setB4Message(B4_MC_TRY);
+        setFeedbackHeadline('Not quite');
+        setFeedbackMessage('Good try. Think it through and try again, or keep going when you are ready.');
+        setB4Message('Choose your answer, then press Check.');
       }
     }
   };

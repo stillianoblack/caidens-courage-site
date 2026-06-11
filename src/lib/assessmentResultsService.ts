@@ -335,6 +335,7 @@ export function adultRecordToSupabaseRow(
 
 export async function saveAdultAssessmentToSupabase(
   record: AdultAssessmentRecord,
+  extras?: { answersJson?: Record<string, unknown> },
 ): Promise<BaselineSubmitResult> {
   if (!isSupabaseConfigured() || !supabase) {
     return { success: false, message: TRACKING_SAVE_WARNING };
@@ -369,6 +370,7 @@ export async function saveAdultAssessmentToSupabase(
       support_score: record.supportScore,
       total_score: record.totalScore,
       max_score: record.totalQuestions,
+      answers_json: extras?.answersJson,
       completed_at: record.completedAt,
     });
 
@@ -492,6 +494,8 @@ export async function saveStudentBaselineToSupabase(
       first_name: record.firstName,
       participant_id: record.participantId,
       anonymous_student_id: record.anonymousStudentId,
+      ...(record.mcAnswers ? { mcAnswers: record.mcAnswers } : {}),
+      ...(record.questionAttempts ? { _attempts: record.questionAttempts } : {}),
     },
   });
 }

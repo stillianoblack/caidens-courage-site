@@ -13,3 +13,4 @@ export { default as FamilyGuidePanel } from '../components/family-portal/panels/
 export { default as FamilyResultsPanel } from '../components/family-portal/panels/FamilyResultsPanel';
 export { default as FamilyBaselineCheckPanel } from '../components/family-portal/panels/FamilyBaselineCheckPanel';
 export { default as FamilyAdultAssessmentPanel } from '../components/family-portal/panels/FamilyAdultAssessmentPanel';
+export { default as FamilyProgramSettingsPanel } from '../components/family-portal/panels/FamilyProgramSettingsPanel';

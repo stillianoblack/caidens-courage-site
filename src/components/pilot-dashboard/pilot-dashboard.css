@@ -35,11 +35,16 @@
   background: #fff;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
   height: 100dvh;
-  overflow-y: auto;
+  max-height: 100dvh;
   z-index: 20;
+}
+
+.pilot-railUpper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .pilot-railBrand {
@@ -66,6 +71,7 @@
 
 .pilot-railNav {
   flex: 1;
+  min-height: 0;
   padding: 0.75rem 0.625rem 1rem;
 }
 
@@ -2188,6 +2194,11 @@ button.pilot-dash-card:hover {
     position: relative;
     border-right: none;
     border-bottom: 1px solid var(--pilot-border);
+  }
+
+  .pilot-railUpper {
+    flex: none;
+    min-height: auto;
   }
 
   .pilot-railBrand {
