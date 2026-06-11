@@ -9,10 +9,7 @@ import {
   type BaselineModuleId,
 } from '../data/b4BaselineCheckContent';
 import type { QuestionAttemptsMap } from '../types/questionInteraction';
-import {
-  saveStudentBaselineToSupabase,
-  type BaselineSubmitResult,
-} from './assessmentResultsService';
+import type { BaselineSubmitResult } from './assessmentResultsService';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveTrackingProgramCode } from './activeProgramContext';
 
@@ -355,6 +352,7 @@ export async function submitBaselineResults(
     groupName: activeProgram?.groupName || result.groupName,
   };
 
+  const { saveStudentBaselineToSupabase } = await import('./assessmentResultsService');
   return saveStudentBaselineToSupabase(normalizedResult);
 }
 

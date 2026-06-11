@@ -5,10 +5,6 @@ import {
   useMissionGamePhase,
 } from './context/MissionGamePhaseContext';
 import LegacySchoolRouteRedirect, { LegacyCampCourageRedirect } from './components/schools/LegacySchoolRouteRedirect';
-import Portal from './pages/Portal';
-import PortalDashboard from './pages/PortalDashboard';
-import AdultAssessmentPage from './pages/AdultAssessmentPage';
-import PilotDashboardPage from './pages/PilotDashboardPage';
 import AnalyticsRouteTracker from './components/analytics/AnalyticsRouteTracker';
 import DeferredB4ChatWidget from './components/DeferredB4ChatWidget';
 import { ENABLE_B4_CHAT } from './config/featureFlags';
@@ -19,17 +15,6 @@ import PortalRouteLoader from './components/portal/PortalRouteLoader';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { resolveAppOutletKey } from './lib/portalOutletKey';
 import { resolvePortalRouteLoaderMessage } from './lib/portalRouteLoaderMessage';
-import {
-  ProgramActivitiesTabRoute,
-  ProgramAssessmentsTabRoute,
-  ProgramCertificatesTabRoute,
-  ProgramFacilitatorCenterTabRoute,
-  ProgramGalleryTabRoute,
-  ProgramOverviewTabRoute,
-  ProgramResultsTabRoute,
-  ProgramRosterTabRoute,
-  ProgramWeeklyModulesTabRoute,
-} from './routes/programDashboardTabRoutes';
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import { ToastProvider } from './components/portal-design-system';
@@ -91,31 +76,6 @@ import {
   WorldPage,
 } from './routes/lazyPages';
 import {
-  FamilyAdultAssessmentPanel,
-  FamilyBaselineCheckPanel,
-  FamilyCertificatesPanel,
-  FamilyCharacterProfilePage,
-  FamilyCharactersPanel,
-  FamilyContinueLearningPanel,
-  FamilyDownloadsPanel,
-  FamilyGalleryPanel,
-  FamilyGuidePanel,
-  FamilyOverviewPanel,
-  FamilyResultsPanel,
-  FamilyProgramSettingsPanel,
-} from './routes/familyPanels';
-import {
-  FamilyAdultGuideHubPage,
-  FamilyAdultGuideMissionPage,
-} from './routes/familyLazyPanels';
-import FacilitatorPortalEntry from './pages/FacilitatorPortalEntry';
-import AdminPortalPage from './pages/AdminPortalPage';
-import AdminRouteLayout from './pages/AdminRouteLayout';
-import DesignSystemPage from './pages/DesignSystemPage';
-import ProgramDashboardPage from './pages/ProgramDashboardPage';
-import FamilyHubLayout from './pages/FamilyHubLayout';
-import FamilyPortalLayout from './pages/FamilyPortalLayout';
-import {
   BMC_ACTIVITIES_PATH,
   BMC_COLORING_PATH,
   BMC_RESET_TOOLS_PATH,
@@ -155,6 +115,104 @@ import {
   STUDENT_GALLERY_SUBMIT_PATH,
   STUDENT_GALLERY_PUBLIC_PATH,
 } from './config/courageRoutes';
+
+const Portal = React.lazy(() => import('./pages/Portal'));
+const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
+const AdultAssessmentPage = React.lazy(() => import('./pages/AdultAssessmentPage'));
+const PilotDashboardPage = React.lazy(() => import('./pages/PilotDashboardPage'));
+const FacilitatorPortalEntry = React.lazy(() => import('./pages/FacilitatorPortalEntry'));
+const AdminPortalPage = React.lazy(() => import('./pages/AdminPortalPage'));
+const AdminRouteLayout = React.lazy(() => import('./pages/AdminRouteLayout'));
+const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
+const ProgramDashboardPage = React.lazy(() => import('./pages/ProgramDashboardPage'));
+const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
+const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
+
+const ProgramOverviewTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramOverviewTabRoute,
+  })),
+);
+const ProgramRosterTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramRosterTabRoute,
+  })),
+);
+const ProgramWeeklyModulesTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramWeeklyModulesTabRoute,
+  })),
+);
+const ProgramActivitiesTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramActivitiesTabRoute,
+  })),
+);
+const ProgramAssessmentsTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramAssessmentsTabRoute,
+  })),
+);
+const ProgramResultsTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramResultsTabRoute,
+  })),
+);
+const ProgramCertificatesTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramCertificatesTabRoute,
+  })),
+);
+const ProgramGalleryTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramGalleryTabRoute,
+  })),
+);
+const ProgramFacilitatorCenterTabRoute = React.lazy(() =>
+  import('./routes/programDashboardTabRoutes').then((module) => ({
+    default: module.ProgramFacilitatorCenterTabRoute,
+  })),
+);
+const FamilyOverviewPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyOverviewPanel'),
+);
+const FamilyResultsPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyResultsPanel'),
+);
+const FamilyContinueLearningPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyContinueLearningPanel'),
+);
+const FamilyBaselineCheckPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyBaselineCheckPanel'),
+);
+const FamilyCharactersPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyCharactersPanel'),
+);
+const FamilyCharacterProfilePage = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyCharacterProfilePage'),
+);
+const FamilyDownloadsPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyDownloadsPanel'),
+);
+const FamilyGalleryPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyGalleryPanel'),
+);
+const FamilyCertificatesPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyCertificatesPanel'),
+);
+const FamilyGuidePanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyGuidePanel'),
+);
+const FamilyProgramSettingsPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyProgramSettingsPanel'),
+);
+const FamilyAdultAssessmentPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyAdultAssessmentPanel'),
+);
+const FamilyAdultGuideHubPage = React.lazy(() => import('./pages/FamilyAdultGuideHubPage'));
+const FamilyAdultGuideMissionPage = React.lazy(() =>
+  import('./pages/FamilyAdultGuideMissionPage'),
+);
 
 /** Vale domains must not render the Courage hub at `/` (client navigations skip Netlify root redirect). */
 const isCaidenValeHost = (): boolean => {

@@ -57,7 +57,9 @@ const FACILITATOR_NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntr
 const VALID_FACILITATOR_NAV = new Set(PILOT_SIDEBAR_NAV.map((item) => item.id));
 
 let initialized = false;
+let gaConfigured = false;
 let lastPageViewKey = '';
+const queuedGaCalls: Array<Parameters<GtagFn>> = [];
 
 const isBrowser = typeof window !== 'undefined';
 const isDev = process.env.NODE_ENV === 'development';
@@ -209,14 +211,16 @@ function applyClarityTags(tags: AnalyticsEventParams): void {
 }
 
 function sendGa4Event(eventName: string, params: AnalyticsEventParams): void {
+  const args: Parameters<GtagFn> = ['event', eventName, sanitizeParams(params)];
   const gtag = getGtag();
-  if (!gtag) return;
-  gtag('event', eventName, sanitizeParams(params));
+  if (!gtag || !gaConfigured) {
+    queuedGaCalls.push(args);
+    return;
+  }
+  gtag(...args);
 }
 
 function sendGa4UserProperties(userData: AnalyticsUserData): void {
-  const gtag = getGtag();
-  if (!gtag) return;
   const properties = sanitizeParams({
     participant_id: userData.participant_id,
     nickname: userData.nickname,
@@ -225,7 +229,23 @@ function sendGa4UserProperties(userData: AnalyticsUserData): void {
     organization: userData.organization,
   });
   if (Object.keys(properties).length === 0) return;
-  gtag('set', 'user_properties', properties);
+
+  const args: Parameters<GtagFn> = ['set', 'user_properties', properties];
+  const gtag = getGtag();
+  if (!gtag || !gaConfigured) {
+    queuedGaCalls.push(args);
+    return;
+  }
+  gtag(...args);
+}
+
+function flushQueuedGaCalls(): void {
+  const gtag = getGtag();
+  if (!gtag || !gaConfigured) return;
+  while (queuedGaCalls.length > 0) {
+    const args = queuedGaCalls.shift();
+    if (args) gtag(...args);
+  }
 }
 
 /** Initialize GA4 and Microsoft Clarity. Safe to call multiple times. */
@@ -247,6 +267,8 @@ export function initAnalytics(): void {
         send_page_view: false,
         debug_mode: gaDebugEnabled,
       });
+      gaConfigured = true;
+      flushQueuedGaCalls();
     })
     .catch((error) => {
       if (isDev) console.warn('[analytics] GA4 failed to load', error);
