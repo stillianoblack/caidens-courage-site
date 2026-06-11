@@ -1,9 +1,10 @@
 /**
  * Pilot phase: conversational Ask B-4 chat (floating widget, dashboard prompts, /chat marketing).
- * Set REACT_APP_ENABLE_B4_CHAT=true to re-enable after pilot.
+ * The conversational chatbot is intentionally hidden for performance.
+ * Flip this constant back to the env check when you are ready to re-enable it.
  * B-4 check-ins, assessments, and in-game guidance are unaffected.
  */
-export const ENABLE_B4_CHAT = process.env.REACT_APP_ENABLE_B4_CHAT === 'true';
+export const ENABLE_B4_CHAT = false;
 
 /** Filter marketing/path cards that launch Ask B-4 chat. */
 export function withoutB4ChatCards<T extends { title: string; ctaTo?: string }>(cards: T[]): T[] {
