@@ -1,39 +1,61 @@
 import React from 'react';
-import type { FamilySettingsTabId } from '../../../data/familySettingsContent';
 import SettingsContentPanel from './SettingsContentPanel';
 import SettingsTabRail from './SettingsTabRail';
 
-type SettingsTab = {
-  id: FamilySettingsTabId;
+type SettingsTab<T extends string> = {
+  id: T;
   label: string;
 };
 
-type SettingsPageLayoutProps = {
+type SettingsPageLayoutProps<T extends string> = {
   title: string;
   subtitle: string;
-  tabs: SettingsTab[];
-  activeTab: FamilySettingsTabId;
-  onSelectTab: (tab: FamilySettingsTabId) => void;
+  tabs: SettingsTab<T>[];
+  activeTab: T;
+  onSelectTab: (tab: T) => void;
   children: React.ReactNode;
+  toolbar?: React.ReactNode;
+  panelClassName?: string;
+  tabAriaLabel?: string;
 };
 
-export default function SettingsPageLayout({
+export default function SettingsPageLayout<T extends string>({
   title,
   subtitle,
   tabs,
   activeTab,
   onSelectTab,
   children,
-}: SettingsPageLayoutProps) {
+  toolbar,
+  panelClassName = 'family-panel family-panel--settings',
+  tabAriaLabel,
+}: SettingsPageLayoutProps<T>) {
   return (
-    <div className="family-panel family-panel--settings">
+    <div className={panelClassName}>
       <header className="family-panelIntro">
-        <h1 className="family-panelIntroTitle">{title}</h1>
-        <p className="family-panelIntroSubtitle">{subtitle}</p>
+        {toolbar ? (
+          <div className="portal-settingsIntroRow">
+            <div>
+              <h1 className="family-panelIntroTitle">{title}</h1>
+              <p className="family-panelIntroSubtitle">{subtitle}</p>
+            </div>
+            <div className="portal-settingsToolbar">{toolbar}</div>
+          </div>
+        ) : (
+          <>
+            <h1 className="family-panelIntroTitle">{title}</h1>
+            <p className="family-panelIntroSubtitle">{subtitle}</p>
+          </>
+        )}
       </header>
 
       <div className="family-settingsLayout family-resourceLayout">
-        <SettingsTabRail tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+        <SettingsTabRail
+          tabs={tabs}
+          activeTab={activeTab}
+          onSelectTab={onSelectTab}
+          ariaLabel={tabAriaLabel}
+        />
         <SettingsContentPanel>{children}</SettingsContentPanel>
       </div>
     </div>

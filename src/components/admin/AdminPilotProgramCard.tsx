@@ -33,6 +33,8 @@ function formatCreatedAt(value?: string): string {
 function statusClass(status: string): string {
   const normalized = status.trim().toLowerCase();
   if (normalized === 'active') return 'adminPortal-status adminPortal-status--active';
+  if (normalized === 'archived') return 'adminPortal-status adminPortal-status--paused';
+  if (normalized === 'testing') return 'adminPortal-status adminPortal-status--completed';
   if (normalized === 'paused') return 'adminPortal-status adminPortal-status--paused';
   if (normalized === 'completed') return 'adminPortal-status adminPortal-status--completed';
   return 'adminPortal-status';

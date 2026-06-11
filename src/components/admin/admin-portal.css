@@ -401,12 +401,168 @@
   background: #f8fafc;
 }
 
+.adminPortal-main--settings {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.adminPortal-settingsPanel {
+  background: transparent;
+  padding: 0;
+}
+
+.adminPortal-accountGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.adminPortal-accountStat {
+  padding: 0.85rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fffaf5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.adminPortal-accountStat strong {
+  font-size: 1.25rem;
+  color: #1a2f52;
+}
+
+.adminPortal-accountStat span {
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.adminPortal-accountList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.adminPortal-accountListItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.adminPortal-accountListItem p {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.adminPortal-accountMeta {
+  font-size: 0.75rem !important;
+}
+
+.adminPortal-accountTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-content: flex-start;
+}
+
+.adminPortal-tag {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.adminPortal-designList {
+  margin: 1.25rem 0 0;
+  padding-left: 1.1rem;
+  color: rgba(36, 62, 112, 0.78);
+  line-height: 1.6;
+}
+
+.adminPortal-toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #243e70;
+}
+
+.adminPortal-cleanupPreview {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.adminPortal-cleanupWarning {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.625rem;
+  background: #fffaf5;
+  border: 1px solid rgba(229, 192, 106, 0.35);
+  color: #6b4f14;
+  font-size: 0.875rem;
+}
+
+.adminPortal-cleanupTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.adminPortal-cleanupTable th,
+.adminPortal-cleanupTable td {
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  text-align: left;
+}
+
+.adminPortal-dangerZone {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(180, 48, 48, 0.25);
+}
+
+.adminPortal-btn--danger {
+  background: #8f1f1f;
+  color: #fff;
+}
+
+.adminPortal-protectedNote {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #8a6420;
+}
+
+.adminPortal-actionSuccess {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f6b43;
+}
+
 @media (max-width: 640px) {
   .adminPortal-reassignGrid {
     grid-template-columns: 1fr;
   }
-  .adminPortal-main {
-    margin-top: -1rem;
+
+  .adminPortal-accountGrid {
+    grid-template-columns: 1fr;
   }
 
   .adminPortal-programCard {

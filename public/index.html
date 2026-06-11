@@ -22,11 +22,12 @@
       (function() {
         var p = typeof location !== 'undefined' && location.pathname;
         if (!p || p === '/' || p === '') {
-          var mobile = document.createElement('link');
-          mobile.rel = 'preload'; mobile.as = 'image'; mobile.href = "/images/hero/hero-mobile.webp"; mobile.type = 'image/webp'; mobile.media = '(max-width: 768px)';
-          var desktop = document.createElement('link');
-          desktop.rel = 'preload'; desktop.as = 'image'; desktop.href = "/images/hero/hero-desktop.webp"; desktop.type = 'image/webp'; desktop.media = '(min-width: 769px)';
-          document.head.appendChild(mobile); document.head.appendChild(desktop);
+          var poster = document.createElement('link');
+          poster.rel = 'preload';
+          poster.as = 'image';
+          poster.href = "/images/caidenscourage/Videos/homepage-video_thumbnail.webp";
+          poster.type = 'image/webp';
+          document.head.appendChild(poster);
         }
       })();
     </script>

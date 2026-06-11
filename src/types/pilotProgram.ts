@@ -19,7 +19,7 @@ export type PilotPricingTier =
 
 export type PilotPaymentStatus = 'pending' | 'paid' | 'waived';
 
-export type PilotStatus = 'active' | 'paused' | 'completed';
+export type PilotStatus = 'active' | 'paused' | 'completed' | 'archived' | 'testing';
 
 export type PilotProgramSignupInput = {
   programType: PilotProgramType;
@@ -49,6 +49,8 @@ export type PilotProgramRecord = {
   pricing_tier: PilotPricingTier;
   payment_status: PilotPaymentStatus;
   pilot_status: PilotStatus;
+  archived_at?: string | null;
+  archived_by?: string | null;
   agreed_to_terms: boolean;
   agreed_at: string;
   created_at?: string;

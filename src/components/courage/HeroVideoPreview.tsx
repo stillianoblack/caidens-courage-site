@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 const HERO_VIDEO_SRC = '/images/caidenscourage/Videos/hero_video_cc.mp4';
-const HERO_VIDEO_POSTER = '/images/caidenscourage/backgrounds/caidens_thumbnail.webp';
+const HERO_VIDEO_POSTER = '/images/caidenscourage/Videos/homepage-video_thumbnail.webp';
 const PIP_VISIBILITY_THRESHOLD = 0.375;
 
 function PlayIcon({ className }: { className?: string }) {
@@ -25,6 +25,7 @@ function canUsePictureInPicture(video: HTMLVideoElement): boolean {
 export default function HeroVideoPreview() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const pipRequestedRef = useRef(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [showPreviewChrome, setShowPreviewChrome] = useState(true);
 
   const resetPipSession = useCallback(() => {
@@ -66,6 +67,12 @@ export default function HeroVideoPreview() {
   }, []);
 
   const handlePlay = useCallback(async () => {
+    setShouldLoadVideo(true);
+
+    await new Promise<void>((resolve) => {
+      window.requestAnimationFrame(() => resolve());
+    });
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -133,9 +140,9 @@ export default function HeroVideoPreview() {
         <video
           ref={videoRef}
           className="cc-hero-video"
-          src={HERO_VIDEO_SRC}
+          src={shouldLoadVideo ? HERO_VIDEO_SRC : undefined}
           poster={HERO_VIDEO_POSTER}
-          preload="metadata"
+          preload="none"
           playsInline
           aria-label="Caiden's Courage introduction video preview"
         />

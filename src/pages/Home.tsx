@@ -1,16 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import ThreeWaysSection from '../components/courage/ThreeWaysSection';
-import ChoosePathSection from '../components/courage/ChoosePathSection';
-import BuiltFromRealStorySection from '../components/courage/BuiltFromRealStorySection';
 import Button from '../components/ui/Button';
-import FocusFlameLabCallout from '../components/courage/FocusFlameLabCallout';
-import CourageEmailSignup from '../components/courage/CourageEmailSignup';
 import useHashScroll from '../hooks/useHashScroll';
 import HeroVideoPreview from '../components/courage/HeroVideoPreview';
 import { VALE_COMICBOOK_URL } from '../config/valeLinks';
+
+const FocusFlameLabCallout = React.lazy(() => import('../components/courage/FocusFlameLabCallout'));
+const ChoosePathSection = React.lazy(() => import('../components/courage/ChoosePathSection'));
+const BuiltFromRealStorySection = React.lazy(() => import('../components/courage/BuiltFromRealStorySection'));
+const CourageEmailSignup = React.lazy(() => import('../components/courage/CourageEmailSignup'));
 
 type HowItWorksStepName = 'Read' | 'Play' | 'Reflect' | 'Grow';
 
@@ -289,6 +290,55 @@ function HowItWorksCarousel() {
   );
 }
 
+function DeferredHomepageSections() {
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const render = () => setShouldRender(true);
+    if ('requestIdleCallback' in window) {
+      const idleId = (window as Window & {
+        requestIdleCallback: (callback: () => void, options?: { timeout?: number }) => number;
+        cancelIdleCallback: (id: number) => void;
+      }).requestIdleCallback(render, { timeout: 1200 });
+      return () => {
+        (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      };
+    }
+
+    const timerId = globalThis.setTimeout(render, 450);
+    return () => globalThis.clearTimeout(timerId);
+  }, []);
+
+  if (!shouldRender) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <FocusFlameLabCallout />
+
+      <HowItWorksCarousel />
+
+      <ChoosePathSection />
+
+      <BuiltFromRealStorySection />
+
+      {/* Email Signup */}
+      <section id="join" className="scroll-mt-24 border-t border-navy-100/80 bg-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
+        <div className="cc-site-container mx-auto text-left">
+          <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl">Join the Courage Club</h2>
+          <p className="mt-3 max-w-2xl text-base text-navy-600 sm:text-lg">
+            Get new activities, updates, and Focus Flame tools for kids, parents, and educators.
+          </p>
+          <div className="max-w-xl">
+            <CourageEmailSignup />
+          </div>
+        </div>
+      </section>
+    </Suspense>
+  );
+}
+
 const Home: React.FC = () => {
   useHashScroll();
 
@@ -345,26 +395,7 @@ const Home: React.FC = () => {
 
       <ThreeWaysSection />
 
-      <FocusFlameLabCallout />
-
-      <HowItWorksCarousel />
-
-      <ChoosePathSection />
-
-      <BuiltFromRealStorySection />
-
-      {/* Email Signup */}
-      <section id="join" className="scroll-mt-24 border-t border-navy-100/80 bg-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-        <div className="cc-site-container mx-auto text-left">
-          <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl">Join the Courage Club</h2>
-          <p className="mt-3 max-w-2xl text-base text-navy-600 sm:text-lg">
-            Get new activities, updates, and Focus Flame tools for kids, parents, and educators.
-          </p>
-          <div className="max-w-xl">
-            <CourageEmailSignup />
-          </div>
-        </div>
-      </section>
+      <DeferredHomepageSections />
 
       <CourageFooter />
     </div>

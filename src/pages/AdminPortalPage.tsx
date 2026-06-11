@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   clearAdminSession,
   isAdminAccessConfigured,
@@ -6,15 +7,26 @@ import {
   verifyAdminCredentials,
   writeAdminSession,
 } from '../config/adminAccess';
+import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
+import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
+import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
+import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
+import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
+import {
+  ADMIN_PORTAL_PAGE,
+  ADMIN_PORTAL_TABS,
+  type AdminPortalTabId,
+} from '../data/adminPortalContent';
 import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
+import { resolveAdminPortalTab } from '../lib/adminPortalPaths';
 import type { PilotProgramRecord } from '../types/pilotProgram';
-import AdminParticipantReassignment from '../components/admin/AdminParticipantReassignment';
-import AdminPilotProgramCard from '../components/admin/AdminPilotProgramCard';
-import { Link } from 'react-router-dom';
-import { DESIGN_SYSTEM_PATH } from '../config/courageRoutes';
+import '../components/family-portal/family-dashboard.css';
 import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<AdminPortalTabId>(resolveAdminPortalTab(tabParam));
   const [unlocked, setUnlocked] = useState(() => readAdminSession());
   const [email, setEmail] = useState('');
   const [passcode, setPasscode] = useState('');
@@ -27,8 +39,14 @@ export default function AdminPortalPage() {
   const configured = isAdminAccessConfigured();
 
   useEffect(() => {
-    document.title = "Pilot Admin | Caiden's Courage";
+    document.title = "Admin Portal | Caiden's Courage";
   }, []);
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(resolveAdminPortalTab(tabParam));
+    }
+  }, [tabParam]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -54,6 +72,20 @@ export default function AdminPortalPage() {
       void loadPrograms();
     }
   }, [configured, loadPrograms, unlocked]);
+
+  const selectTab = useCallback(
+    (next: AdminPortalTabId) => {
+      setActiveTab(next);
+      const nextParams = new URLSearchParams(searchParams);
+      if (next === 'manage-accounts') {
+        nextParams.delete('tab');
+      } else {
+        nextParams.set('tab', next);
+      }
+      setSearchParams(nextParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,16 +115,32 @@ export default function AdminPortalPage() {
     setPasscode('');
   };
 
+  const renderTab = () => {
+    switch (activeTab) {
+      case 'manage-accounts':
+        return <AdminManageAccountsTab programs={programs} onCopied={handleCopied} />;
+      case 'design-system':
+        return <AdminDesignSystemTab />;
+      case 'pilot-programs':
+        return (
+          <AdminPilotProgramsTab
+            programs={programs}
+            loading={loading}
+            loadError={loadError}
+            onCopied={handleCopied}
+            onChanged={() => void loadPrograms()}
+          />
+        );
+      case 'data-cleanup':
+        return <AdminDataCleanupTab onChanged={() => void loadPrograms()} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="adminPortal-page font-body">
-      <header className="adminPortal-hero">
-        <h1 className="adminPortal-heroTitle">Pilot Admin</h1>
-        <p className="adminPortal-heroSub">
-          Manage pilot programs, access codes, and dashboard links.
-        </p>
-      </header>
-
-      <main className="adminPortal-main">
+      <main className="adminPortal-main adminPortal-main--settings">
         {!configured ? (
           <section className="adminPortal-card">
             <h2 className="adminPortal-cardTitle">Admin access is not configured.</h2>
@@ -103,8 +151,8 @@ export default function AdminPortalPage() {
           </section>
         ) : !unlocked ? (
           <section className="adminPortal-card">
-            <h2 className="adminPortal-cardTitle">Admin unlock</h2>
-            <p className="adminPortal-cardSub">Enter your admin email and passcode to manage pilot programs.</p>
+            <h2 className="adminPortal-cardTitle">Admin Portal</h2>
+            <p className="adminPortal-cardSub">Enter your admin email and passcode to continue.</p>
             <form className="adminPortal-form" onSubmit={handleUnlock}>
               <div className="adminPortal-field">
                 <label htmlFor="admin-email">Admin Email</label>
@@ -135,40 +183,22 @@ export default function AdminPortalPage() {
             </form>
           </section>
         ) : (
-          <>
-            <AdminParticipantReassignment onCopied={handleCopied} />
-            <section className="adminPortal-card">
-              <div className="adminPortal-toolbar">
-                <p className="adminPortal-count">
-                  {loading ? 'Loading pilot programs…' : `${programs.length} pilot program${programs.length === 1 ? '' : 's'}`}
-                </p>
-                <div className="adminPortal-toolbarActions">
-                  <Link to={DESIGN_SYSTEM_PATH} className="adminPortal-btn adminPortal-btn--ghost">
-                    Design System
-                  </Link>
-                  <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
-                    Sign out
-                  </button>
-                </div>
-              </div>
-
-              {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
-
-              {!loading && !loadError && programs.length === 0 ? (
-                <p className="adminPortal-empty">No pilot programs found in Supabase.</p>
-              ) : null}
-
-              <div className="adminPortal-programList">
-                {programs.map((program) => (
-                  <AdminPilotProgramCard
-                    key={program.id ?? program.program_code}
-                    program={program}
-                    onCopied={handleCopied}
-                  />
-                ))}
-              </div>
-            </section>
-          </>
+          <SettingsPageLayout
+            title={ADMIN_PORTAL_PAGE.title}
+            subtitle={ADMIN_PORTAL_PAGE.subtitle}
+            tabs={ADMIN_PORTAL_TABS}
+            activeTab={activeTab}
+            onSelectTab={selectTab}
+            panelClassName="family-panel family-panel--settings adminPortal-settingsPanel"
+            tabAriaLabel="Admin portal sections"
+            toolbar={
+              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
+                Sign out
+              </button>
+            }
+          >
+            {renderTab()}
+          </SettingsPageLayout>
         )}
       </main>
 

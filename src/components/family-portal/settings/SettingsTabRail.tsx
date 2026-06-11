@@ -1,24 +1,23 @@
 import React from 'react';
-import type { FamilySettingsTabId } from '../../../data/familySettingsContent';
 
-type SettingsTab = {
-  id: FamilySettingsTabId;
+type SettingsTab<T extends string> = {
+  id: T;
   label: string;
 };
 
-type SettingsTabRailProps = {
-  tabs: SettingsTab[];
-  activeTab: FamilySettingsTabId;
-  onSelectTab: (tab: FamilySettingsTabId) => void;
+type SettingsTabRailProps<T extends string> = {
+  tabs: SettingsTab<T>[];
+  activeTab: T;
+  onSelectTab: (tab: T) => void;
   ariaLabel?: string;
 };
 
-export default function SettingsTabRail({
+export default function SettingsTabRail<T extends string>({
   tabs,
   activeTab,
   onSelectTab,
   ariaLabel = 'Settings sections',
-}: SettingsTabRailProps) {
+}: SettingsTabRailProps<T>) {
   return (
     <div className="family-settingsCategories family-resourceCategories" role="tablist" aria-label={ariaLabel}>
       {tabs.map((tab) => (
