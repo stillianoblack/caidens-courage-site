@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 import {
   courageInTheDarkMissions,
@@ -13,6 +14,7 @@ type CourageMissionListPanelProps = {
   isMissionComplete: (mission: CourageInTheDarkMission) => boolean;
   isMissionLocked: (mission: CourageInTheDarkMission) => boolean;
   getMissionUnlockReason?: (mission: CourageInTheDarkMission) => string;
+  getMissionHref?: (mission: CourageInTheDarkMission) => string | null;
   onSelectMission: (mission: CourageInTheDarkMission) => void;
   onLaunchMission: (mission: CourageInTheDarkMission) => void;
   comingSoonMissionId?: string | null;
@@ -26,6 +28,7 @@ export default function CourageMissionListPanel({
   isMissionComplete,
   isMissionLocked,
   getMissionUnlockReason,
+  getMissionHref,
   onSelectMission,
   onLaunchMission,
   comingSoonMissionId,
@@ -94,6 +97,7 @@ export default function CourageMissionListPanel({
           const selected = selectedMissionId === mission.id;
           const comingSoon = comingSoonMissionId === mission.id;
           const unlockReason = locked ? getMissionUnlockReason?.(mission) : undefined;
+          const missionHref = !locked && !comingSoon ? getMissionHref?.(mission) ?? null : null;
 
           return (
             <li
@@ -149,15 +153,26 @@ export default function CourageMissionListPanel({
                     </p>
                   ) : null}
                   {!locked ? (
-                    <button
-                      type="button"
-                      className="courageMissionListRowStart"
-                      data-color={mission.color}
-                      onClick={() => handleLaunchMission(mission)}
-                      disabled={comingSoon}
-                    >
-                      Start Adventure
-                    </button>
+                    missionHref ? (
+                      <Link
+                        to={missionHref}
+                        className="courageMissionListRowStart"
+                        data-color={mission.color}
+                        onClick={playClick}
+                      >
+                        Start Adventure
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        className="courageMissionListRowStart"
+                        data-color={mission.color}
+                        onClick={() => handleLaunchMission(mission)}
+                        disabled={comingSoon}
+                      >
+                        Start Adventure
+                      </button>
+                    )
                   ) : null}
                 </div>
               ) : null}

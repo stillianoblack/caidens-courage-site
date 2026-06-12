@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   COURAGE_IN_THE_DARK_BG,
   courageMapHotspots,
@@ -71,7 +70,6 @@ export default function CourageInTheDarkMap({
     );
   }
 
-  const navigate = useNavigate();
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const previewCloseTimerRef = useRef<number | null>(null);
   const previewPinnedRef = useRef(false);
@@ -179,19 +177,9 @@ export default function CourageInTheDarkMap({
     );
   }, [resolvedKidsBase, selectedHotspot, week, weekTitle]);
 
-  const handleStartAdventure = useCallback(() => {
-    if (!selectedHotspot || isHotspotLocked(selectedHotspot)) return;
-
-    if (!targetHref) {
-      if (process.env.NODE_ENV === 'development') {
-        console.info('[COURAGE_MAP] Adventure coming soon:', selectedHotspot.targetGameSlug);
-      }
-      return;
-    }
-
+  const handlePreviewStart = useCallback(() => {
     closePreview();
-    navigate(targetHref);
-  }, [closePreview, isHotspotLocked, navigate, selectedHotspot, targetHref]);
+  }, [closePreview]);
 
   const comingSoon = Boolean(selectedHotspot && !targetHref);
 
@@ -344,9 +332,10 @@ export default function CourageInTheDarkMap({
           comingSoon={comingSoon}
           locked={isHotspotLocked(selectedHotspot)}
           lockedReason={getHotspotUnlockState(selectedHotspot).reason}
+          startHref={targetHref}
           showBackdrop={previewPinned}
           onClose={closePreview}
-          onStart={handleStartAdventure}
+          onStart={handlePreviewStart}
           onPointerEnter={cancelHoverPreviewClose}
           onPointerLeave={scheduleHoverPreviewClose}
         />

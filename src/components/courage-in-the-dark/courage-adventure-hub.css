@@ -373,12 +373,17 @@
 
 .courageMissionCardPrimary,
 .courageMissionCardSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 2.75rem;
   padding: 0.6rem 1rem;
   border-radius: 0.75rem;
   font-size: 0.9375rem;
   font-weight: 800;
   cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .courageMissionCardPrimary {
@@ -1084,6 +1089,9 @@
 }
 
 .courageMissionListRowStart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-height: 2.35rem;
   padding: 0.45rem 0.75rem;
@@ -1092,6 +1100,8 @@
   font-size: 0.8125rem;
   font-weight: 800;
   cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
   color: #1a1035;
   background: linear-gradient(135deg, #fff8e8, #fde68a);
   box-shadow: 0 6px 16px -10px rgba(15, 10, 35, 0.4);

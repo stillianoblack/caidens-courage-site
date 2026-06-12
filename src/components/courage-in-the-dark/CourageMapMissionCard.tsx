@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import type { CourageMapHotspot } from '../../data/courageInTheDarkMap';
 import type { CourageMissionCardAnchor } from '../../lib/courageMapCardPosition';
 import { useCourageHubAudio } from './CourageHubAudioContext';
@@ -12,8 +13,8 @@ type CourageMapMissionCardProps = {
   comingSoon?: boolean;
   locked?: boolean;
   lockedReason?: string;
+  startHref?: string | null;
   onClose: () => void;
-  onStart: () => void;
 };
 
 function MissionCardContent({
@@ -21,6 +22,7 @@ function MissionCardContent({
   comingSoon,
   locked,
   lockedReason,
+  startHref,
   onClose,
   onStart,
   showSheetHandle,
@@ -29,10 +31,12 @@ function MissionCardContent({
   comingSoon?: boolean;
   locked?: boolean;
   lockedReason?: string;
+  startHref?: string | null;
   onClose: () => void;
   onStart: () => void;
   showSheetHandle?: boolean;
 }) {
+  const canStart = Boolean(startHref) && !locked && !comingSoon;
   return (
     <div
       className="courageMissionCard"
@@ -96,15 +100,25 @@ function MissionCardContent({
       ) : null}
 
       <div className="courageMissionCardActions">
-        <button
-          type="button"
-          className="courageMissionCardPrimary"
-          data-color={hotspot.color}
-          onClick={onStart}
-          disabled={locked || comingSoon}
-        >
-          Start Adventure
-        </button>
+        {canStart ? (
+          <Link
+            to={startHref!}
+            className="courageMissionCardPrimary"
+            data-color={hotspot.color}
+            onClick={onStart}
+          >
+            Start Adventure
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="courageMissionCardPrimary"
+            data-color={hotspot.color}
+            disabled
+          >
+            Start Adventure
+          </button>
+        )}
         <button type="button" className="courageMissionCardSecondary" onClick={onClose}>
           Close
         </button>
@@ -120,8 +134,8 @@ export default function CourageMapMissionCard({
   comingSoon = false,
   locked = false,
   lockedReason,
+  startHref,
   onClose,
-  onStart,
 }: CourageMapMissionCardProps) {
   const { playClick } = useCourageHubAudio();
 
@@ -130,10 +144,9 @@ export default function CourageMapMissionCard({
     onClose();
   }, [onClose, playClick]);
 
-  const handleStart = useCallback(() => {
+  const handleStartAudio = useCallback(() => {
     playClick();
-    onStart();
-  }, [onStart, playClick]);
+  }, [playClick]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -162,8 +175,9 @@ export default function CourageMapMissionCard({
             comingSoon={comingSoon}
             locked={locked}
             lockedReason={lockedReason}
+            startHref={startHref}
             onClose={handleClose}
-            onStart={handleStart}
+            onStart={handleStartAudio}
             showSheetHandle
           />
         </div>
@@ -191,8 +205,9 @@ export default function CourageMapMissionCard({
         comingSoon={comingSoon}
         locked={locked}
         lockedReason={lockedReason}
+        startHref={startHref}
         onClose={handleClose}
-        onStart={handleStart}
+        onStart={handleStartAudio}
       />
     </div>
   );

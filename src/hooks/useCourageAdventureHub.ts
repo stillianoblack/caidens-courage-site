@@ -144,16 +144,17 @@ export function useCourageAdventureHub({
     );
   }, [resolvedKidsBase, selectedHotspot, week, weekTitle]);
 
+  const resolveMissionHref = useCallback(
+    (mission: CourageInTheDarkMission) =>
+      resolveCourageMapTargetHref(mission.targetGameSlug, resolvedKidsBase, week, weekTitle),
+    [resolvedKidsBase, week, weekTitle],
+  );
+
   const launchMission = useCallback(
     (mission: CourageInTheDarkMission) => {
       if (isHotspotLocked(mission)) return false;
 
-      const href = resolveCourageMapTargetHref(
-        mission.targetGameSlug,
-        resolvedKidsBase,
-        week,
-        weekTitle,
-      );
+      const href = resolveMissionHref(mission);
 
       if (!href) {
         console.warn(
@@ -167,7 +168,7 @@ export function useCourageAdventureHub({
       navigate(href);
       return true;
     },
-    [isHotspotLocked, navigate, resolvedKidsBase, week, weekTitle],
+    [isHotspotLocked, navigate, resolveMissionHref],
   );
 
   const startAdventure = useCallback(() => {
@@ -186,6 +187,7 @@ export function useCourageAdventureHub({
     selectHotspot,
     deselectHotspot,
     launchMission,
+    resolveMissionHref,
     startAdventure,
     targetHref,
     totalCoins: progress.totalCoins,

@@ -79,7 +79,7 @@ export default function CourageInTheDarkAdventureHub({
     selectHotspot,
     deselectHotspot,
     launchMission,
-    startAdventure,
+    resolveMissionHref,
     targetHref,
     animatingHotspotId,
   } = useCourageAdventureHub({
@@ -201,8 +201,8 @@ export default function CourageInTheDarkAdventureHub({
         comingSoon={comingSoon}
         locked={locked}
         lockedReason={lockedReason}
+        startHref={targetHref}
         onClose={deselectHotspot}
-        onStart={startAdventure}
       />
     );
   }, [
@@ -214,7 +214,7 @@ export default function CourageInTheDarkAdventureHub({
     locked,
     lockedReason,
     selectedHotspot,
-    startAdventure,
+    targetHref,
     viewMode,
   ]);
 
@@ -227,6 +227,7 @@ export default function CourageInTheDarkAdventureHub({
       isMissionComplete={isHotspotComplete}
       isMissionLocked={isHotspotLocked}
       getMissionUnlockReason={(mission) => getMissionUnlockState(mission).reason}
+      getMissionHref={resolveMissionHref}
       onSelectMission={handleSelectMission}
       onLaunchMission={handleLaunchFromList}
       comingSoonMissionId={listComingSoonId}
@@ -353,6 +354,7 @@ export default function CourageInTheDarkAdventureHub({
                 isMissionComplete={isHotspotComplete}
                 isMissionLocked={isHotspotLocked}
                 getMissionUnlockReason={(mission) => getMissionUnlockState(mission).reason}
+                getMissionHref={resolveMissionHref}
                 onSelectMission={handleSelectMission}
                 onLaunchMission={handleLaunchFromList}
                 comingSoonMissionId={listComingSoonId}

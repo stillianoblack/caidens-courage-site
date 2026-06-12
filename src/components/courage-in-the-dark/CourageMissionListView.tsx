@@ -12,6 +12,7 @@ type CourageMissionListViewProps = {
   isMissionComplete: (mission: CourageInTheDarkMission) => boolean;
   isMissionLocked: (mission: CourageInTheDarkMission) => boolean;
   getMissionUnlockReason?: (mission: CourageInTheDarkMission) => string;
+  getMissionHref?: (mission: CourageInTheDarkMission) => string | null;
   onSelectMission: (mission: CourageInTheDarkMission) => void;
   onLaunchMission: (mission: CourageInTheDarkMission) => void;
   comingSoonMissionId?: string | null;
@@ -27,6 +28,7 @@ export default function CourageMissionListView({
   isMissionComplete,
   isMissionLocked,
   getMissionUnlockReason,
+  getMissionHref,
   onSelectMission,
   onLaunchMission,
   comingSoonMissionId,
@@ -50,6 +52,7 @@ export default function CourageMissionListView({
         isMissionComplete={isMissionComplete}
         isMissionLocked={isMissionLocked}
         getMissionUnlockReason={getMissionUnlockReason}
+        getMissionHref={getMissionHref}
         onSelectMission={onSelectMission}
         onLaunchMission={onLaunchMission}
         comingSoonMissionId={comingSoonMissionId}

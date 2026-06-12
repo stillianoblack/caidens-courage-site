@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import type { CourageMapHotspot } from '../../data/courageInTheDarkMap';
 
@@ -9,6 +10,7 @@ type CourageMapMissionPreviewProps = {
   comingSoon?: boolean;
   locked?: boolean;
   lockedReason?: string;
+  startHref?: string | null;
   onClose: () => void;
   onStart: () => void;
   onPointerEnter?: () => void;
@@ -24,6 +26,7 @@ export default function CourageMapMissionPreview({
   comingSoon = false,
   locked = false,
   lockedReason,
+  startHref,
   onClose,
   onStart,
   onPointerEnter,
@@ -46,6 +49,7 @@ export default function CourageMapMissionPreview({
 
   if (!open || typeof document === 'undefined') return null;
 
+  const canStart = Boolean(startHref) && !locked && !comingSoon;
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
   const anchored = !isMobile && anchor;
 
@@ -97,14 +101,19 @@ export default function CourageMapMissionPreview({
           </p>
         ) : null}
         <div className="courageMapPreviewActions">
-          <button
-            type="button"
-            className="courageMapPreviewPrimary"
-            onClick={onStart}
-            disabled={locked || comingSoon}
-          >
-            Start Adventure
-          </button>
+          {canStart ? (
+            <Link
+              to={startHref!}
+              className="courageMapPreviewPrimary"
+              onClick={onStart}
+            >
+              Start Adventure
+            </Link>
+          ) : (
+            <button type="button" className="courageMapPreviewPrimary" disabled>
+              Start Adventure
+            </button>
+          )}
           <button type="button" className="courageMapPreviewSecondary" onClick={onClose}>
             Close
           </button>
