@@ -23,7 +23,7 @@ export type GameplayShellProps = {
   className?: string;
   idleSessionGuard?: {
     enabled?: boolean;
-    onReturn: () => void;
+    onEndSession: () => void;
   };
 };
 
@@ -69,7 +69,7 @@ export default function GameplayShell({
       {idleSessionGuard ? (
         <IdleSessionGuard
           enabled={idleSessionGuard.enabled ?? active}
-          onReturn={idleSessionGuard.onReturn}
+          onEndSession={idleSessionGuard.onEndSession}
         />
       ) : null}
     </div>

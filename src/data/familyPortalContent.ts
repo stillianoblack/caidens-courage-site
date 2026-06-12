@@ -25,6 +25,7 @@ export type FamilySidebarNavId =
   | 'results'
   | 'continue-learning'
   | 'character-hub'
+  | 'inventory'
   | 'downloads'
   | 'gallery'
   | 'certificates'
@@ -51,6 +52,12 @@ function buildFamilySidebarNav(basePath: string): FamilySidebarNavItem[] {
       label: 'Character Hub',
       path: `${basePath}/characters`,
       icon: 'character-hub',
+    },
+    {
+      id: 'inventory',
+      label: 'Inventory',
+      path: `${basePath}/inventory`,
+      icon: 'inventory',
     },
     { id: 'downloads', label: 'Parent Resources', path: `${basePath}/downloads`, icon: 'downloads' },
     { id: 'guide', label: 'Parent Corner', path: `${basePath}/guide`, icon: 'guide' },
@@ -90,6 +97,7 @@ export function resolveFamilyPortalBrand(isProgramHub: boolean): { title: string
 export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> = {
   guide: 'Guides, discussion tools, and adult learning activities for supporting kids at home.',
   downloads: 'Parent-friendly activities, printables, and calm-down tools to try at home.',
+  inventory: 'Badges, stickers, and decorations earned from Courage in the Dark adventures.',
 };
 
 export type FamilyParentResourceCategoryId =
@@ -116,6 +124,7 @@ export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
   results: 'Results',
   'continue-learning': 'Weekly Adventures',
   'character-hub': 'Character Hub',
+  inventory: 'Inventory',
   downloads: 'Parent Resources',
   gallery: 'Gallery',
   certificates: 'Certificates',

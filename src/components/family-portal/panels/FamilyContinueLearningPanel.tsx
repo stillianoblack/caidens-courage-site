@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import WeeklyAdventuresUnlockCard from '../WeeklyAdventuresUnlockCard';
+import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import AdventureTrail from '../../../design-system/components/AdventureTrail';
 import AdventureTrailLayout from '../../../design-system/components/AdventureTrailLayout';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
@@ -16,6 +17,8 @@ import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGa
 import { getUnlockedWeek, resolvePilotStartDate } from '../../../lib/pilotWeekUnlock';
 import { PortalPageIntro } from '../../portal-design-system';
 import '../weekly-adventures-unlock-card.css';
+import '../../courage-in-the-dark/courage-adventure-hub.css';
+import '../../courage-in-the-dark/courage-in-the-dark-map.css';
 
 const BASELINE_LOCKED_LABEL = 'Complete B-4 Check-In to unlock';
 
@@ -69,6 +72,30 @@ export default function FamilyContinueLearningPanel() {
     pilotStartDate,
   );
 
+  const weekOne = useMemo(() => trailWeeks.find((week) => week.week === 1), [trailWeeks]);
+  const trailWeeksAfterHero = useMemo(
+    () => trailWeeks.filter((week) => week.week !== 1),
+    [trailWeeks],
+  );
+
+  const showCourageHero = Boolean(weekOne && weekOne.weekStatus !== 'locked');
+
+  const courageMapNodes = useMemo(
+    () =>
+      weekOne?.nodes.filter((node) =>
+        ['caiden', 'miranda', 'b4', 'charlie', 'zeke'].includes(node.kind),
+      ) ?? [],
+    [weekOne?.nodes],
+  );
+
+  const courageMapSupplementaryNodes = useMemo(
+    () =>
+      weekOne?.nodes.filter(
+        (node) => node.kind === 'family_activity' || node.kind === 'certificate',
+      ) ?? [],
+    [weekOne?.nodes],
+  );
+
   useEffect(() => {
     void refresh();
   }, [location.pathname, refresh, activeChild?.participantId]);
@@ -87,13 +114,18 @@ export default function FamilyContinueLearningPanel() {
   const showAddChildPrompt = !childrenLoading && !claimRequired && !hasChildren;
   const showUnlockCard =
     hasChildren && hasActiveChild && !baselineLoading && !baselineComplete;
-
   return (
-    <div className="family-panel">
-      <PortalPageIntro>
-        Follow each week&apos;s recommended games, downloads, and family activities after your
-        child completes their B-4 Check-In.
-      </PortalPageIntro>
+    <div
+      className={['family-panel', showCourageHero ? 'family-panel--courageHub' : '']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {!showCourageHero ? (
+        <PortalPageIntro>
+          Follow each week&apos;s recommended games, downloads, and family activities after your
+          child completes their B-4 Check-In.
+        </PortalPageIntro>
+      ) : null}
 
       {showClaimPrompt ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
@@ -117,9 +149,36 @@ export default function FamilyContinueLearningPanel() {
 
       {showUnlockCard ? <WeeklyAdventuresUnlockCard baselinePath={baselinePath} /> : null}
 
-      <AdventureTrailLayout>
+      {showCourageHero && weekOne ? (
+        <section id="week-1" className="courageMapHubSection" aria-label="Week 1 adventure hub">
+          {!hasActiveChild && hasChildren ? (
+            <p className="family-panelHelper courageMapProgressWarning" role="status">
+              Select a child in the Family Portal to save mission progress.
+            </p>
+          ) : null}
+          <CourageInTheDarkAdventureHub
+            weekNodes={courageMapNodes}
+            supplementaryNodes={courageMapSupplementaryNodes}
+            weekTitle={weekOne.title}
+            week={weekOne.week}
+            weekUnlockStatus={weekOne.unlockStatus}
+            selFocus={weekOne.selFocus}
+            baselineLocked={adventuresLocked}
+            baselineLockedLabel={
+              !hasActiveChild ? 'Select your child to begin' : BASELINE_LOCKED_LABEL
+            }
+          />
+        </section>
+      ) : null}
+
+      <AdventureTrailLayout
+        className={showCourageHero ? 'adventureTrailLayout--singleColumn' : undefined}
+      >
+        {showCourageHero && trailWeeksAfterHero.length > 0 ? (
+          <h2 className="courageMapHubTrailHeading">More Weekly Adventures</h2>
+        ) : null}
         <AdventureTrail
-          weeks={trailWeeks}
+          weeks={showCourageHero ? trailWeeksAfterHero : trailWeeks}
           pilotStartDate={pilotStartDate}
           baselineLocked={adventuresLocked}
           baselineLockedLabel={

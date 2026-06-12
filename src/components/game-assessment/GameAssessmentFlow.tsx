@@ -58,10 +58,24 @@ import { readActiveChildNickname } from '../../config/activeChildNickname';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
+import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
+import {
+  completeWeeklyCourageMission,
+  resolveWeeklyCourageMissionPayload,
+} from '../../lib/courageWeeklyMissionCompletion';
 import {
   navigateGameExit,
   shouldGameplayExitImmediately,
 } from '../../lib/gameExitNavigation';
+import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
+import {
+  readWeeklyAdventureRouteContext,
+  resolveWeeklyAdventureReturnHref,
+} from '../../lib/weeklyAdventureRouteContext';
+import type {
+  CompleteMissionResult,
+  CourageMissionRewardPayload,
+} from '../../types/courageMissionProgress';
 import type { ModuleTrackingDefinition } from '../../types/moduleTracking';
 import '../caiden/caiden-game.css';
 import '../adult/adult-game.css';
@@ -69,7 +83,7 @@ import '../adult/uncle-t-game.css';
 import '../mission-game/mission-game.css';
 import '../charlie/charlie-game.css';
 
-type GameView = 'landing' | 'quiz' | 'complete';
+type GameView = 'landing' | 'quiz' | 'complete' | 'courage-celebration';
 
 type GameAssessmentFlowProps = {
   config: GameAssessmentConfig;
@@ -223,6 +237,9 @@ export default function GameAssessmentFlow({
     playContinue,
     playModuleWin,
     playResultFeelings,
+    playMissionCompleteChime,
+    playCoinTick,
+    playBadgeSparkle,
   } = useBaselineCheckSounds();
 
   const [view, setView] = useState<GameView>(skipLanding ? 'quiz' : 'landing');
@@ -230,7 +247,17 @@ export default function GameAssessmentFlow({
   const [score, setScore] = useState(0);
   const [answersRecord, setAnswersRecord] = useState<Record<string, GameAnswerValue>>({});
   const [attemptsRecord, setAttemptsRecord] = useState<QuestionAttemptsMap>({});
+  const [courageMissionPayload, setCourageMissionPayload] =
+    useState<CourageMissionRewardPayload | null>(null);
+  const [courageMissionResult, setCourageMissionResult] = useState<CompleteMissionResult | null>(
+    null,
+  );
   const quizStartedAtRef = useRef<number | null>(null);
+
+  const weeklyCouragePayload = useMemo(
+    () => resolveWeeklyCourageMissionPayload(currentPathname, currentSearch),
+    [currentPathname, currentSearch],
+  );
 
   const currentQuestion = config.questions[questionIndex];
 
@@ -364,7 +391,7 @@ export default function GameAssessmentFlow({
 
   const resolvedExitPath = gameplayBreadcrumb.href;
 
-  useSetMissionGamePhase(view);
+  useSetMissionGamePhase(view === 'courage-celebration' ? 'complete' : view);
 
   useEffect(() => {
     document.title = `${config.landing.title} | Caiden's Courage`;
@@ -409,6 +436,10 @@ export default function GameAssessmentFlow({
   const resetQuestionState = useCallback(() => {
     resetInteraction();
   }, [resetInteraction]);
+
+  const handleIdleEndSession = useCallback(() => {
+    endProtectedChildSession(navigate, currentPathname);
+  }, [currentPathname, navigate]);
 
   const handleExit = useCallback(() => {
     playItemButton();
@@ -481,6 +512,13 @@ export default function GameAssessmentFlow({
     [config.questions],
   );
 
+  const handleReturnToAdventureMap = useCallback(() => {
+    playItemButton();
+    const context = readWeeklyAdventureRouteContext(currentSearch);
+    const week = context.week && context.week > 0 ? context.week : 1;
+    navigate(resolveWeeklyAdventureReturnHref(currentPathname, week));
+  }, [currentPathname, currentSearch, navigate, playItemButton]);
+
   const finishGameSession = useCallback(
     (finalAnswers: Record<string, GameAnswerValue>, questionAttempts: QuestionAttemptsMap) => {
       const finalScore = computeScoreFromAnswers(finalAnswers, questionAttempts);
@@ -510,10 +548,27 @@ export default function GameAssessmentFlow({
         role,
       });
 
-      void persistModuleCompletion(
-        finalScore,
-        mergeAttemptIntoAnswersJson(finalAnswers, questionAttempts),
-      );
+      const mergedAnswers = mergeAttemptIntoAnswersJson(finalAnswers, questionAttempts);
+
+      if (weeklyCouragePayload) {
+        void (async () => {
+          const result = await completeWeeklyCourageMission(currentPathname, currentSearch);
+          setCourageMissionPayload(weeklyCouragePayload);
+          setCourageMissionResult(
+            result ?? {
+              ok: false,
+              error: 'save_failed',
+              message: 'Progress could not save. Please try again.',
+            },
+          );
+          await persistModuleCompletion(finalScore, mergedAnswers);
+          setView('courage-celebration');
+          resetQuestionState();
+        })();
+        return;
+      }
+
+      void persistModuleCompletion(finalScore, mergedAnswers);
       setView('complete');
       resetQuestionState();
     },
@@ -522,10 +577,13 @@ export default function GameAssessmentFlow({
       adultMissionId,
       computeScoreFromAnswers,
       config,
+      currentPathname,
+      currentSearch,
       persistModuleCompletion,
       playModuleWin,
       resetQuestionState,
       tracking,
+      weeklyCouragePayload,
     ],
   );
 
@@ -784,7 +842,7 @@ export default function GameAssessmentFlow({
             onBackClick={playItemButton}
             onBack={!showHubBackLink ? handleExit : undefined}
             progressPercent={progressPct}
-            showProgress={view === 'quiz' || view === 'complete'}
+            showProgress={view === 'quiz' || view === 'complete' || view === 'courage-celebration'}
             playerName={playerName}
             showFlameStatus={!useAdultGuideHeader}
             flameDisplay={topBarFlames.flameDisplay}
@@ -796,7 +854,7 @@ export default function GameAssessmentFlow({
           <GameHeader
             progressPct={progressPct}
             onExit={handleExit}
-            showProgress={view === 'quiz' || view === 'complete'}
+            showProgress={view === 'quiz' || view === 'complete' || view === 'courage-celebration'}
             soundEnabled={soundEnabled}
             onToggleSound={toggleSound}
             playerName={playerName}
@@ -935,6 +993,19 @@ export default function GameAssessmentFlow({
           />
         ) : null}
 
+        {view === 'courage-celebration' && courageMissionPayload && courageMissionResult ? (
+          <CourageMissionCompleteCelebration
+            payload={courageMissionPayload}
+            result={courageMissionResult}
+            onReturnToMap={handleReturnToAdventureMap}
+            sounds={{
+              playMissionComplete: playMissionCompleteChime,
+              playCoinTick,
+              playBadgeSparkle,
+            }}
+          />
+        ) : null}
+
         {view === 'complete' ? (
           <GameAssessmentComplete
             config={config.complete}
@@ -1031,7 +1102,7 @@ export default function GameAssessmentFlow({
 
       <IdleSessionGuard
         enabled={view === 'quiz' || view === 'landing'}
-        onReturn={() => navigateGameExit(navigate, exitPath, currentPathname)}
+        onEndSession={handleIdleEndSession}
       />
     </div>
   );

@@ -1,0 +1,1179 @@
+/* Courage in the Dark — adventure hub (full-width map + floating mission card) */
+
+.courageMapProgressWarning {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(251, 191, 36, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #92400e;
+  font-size: 0.92rem;
+}
+
+.courageAdventureHub {
+  width: 100%;
+  max-width: min(1600px, 100%);
+  margin-inline: auto;
+  overflow-x: clip;
+}
+
+.courageAdventureHubMapCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.courageAdventureHubMapWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 1.125rem;
+}
+
+.courageMapCanvas--hub {
+  width: 100%;
+  min-height: 620px;
+  height: clamp(620px, 76vh, 860px);
+  max-height: 860px;
+  aspect-ratio: auto;
+  border-radius: 1.125rem;
+}
+
+.courageMapCanvas--hubSplit {
+  min-height: 560px;
+  height: clamp(560px, 70vh, 780px);
+  max-height: 780px;
+}
+
+/* Hotspot character accents */
+.courageMapHotspotGlow[data-color='gold'] {
+  background: radial-gradient(ellipse at center bottom, rgba(250, 204, 21, 0.55), transparent 70%);
+}
+
+.courageMapHotspotGlow[data-color='purple'] {
+  background: radial-gradient(ellipse at center bottom, rgba(192, 132, 252, 0.55), transparent 70%);
+}
+
+.courageMapHotspotGlow[data-color='green'] {
+  background: radial-gradient(ellipse at center bottom, rgba(110, 231, 183, 0.55), transparent 70%);
+}
+
+.courageMapHotspotGlow[data-color='orange'] {
+  background: radial-gradient(ellipse at center bottom, rgba(251, 191, 36, 0.55), transparent 70%);
+}
+
+.courageMapHotspotGlow[data-color='blue'] {
+  background: radial-gradient(ellipse at center bottom, rgba(125, 211, 252, 0.55), transparent 70%);
+}
+
+.courageMapHotspotRing[data-color='gold'] {
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.42) 0%, rgba(30, 64, 175, 0.18) 55%, transparent 72%);
+}
+
+.courageMapHotspotRing[data-color='purple'] {
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.42) 0%, rgba(217, 70, 239, 0.18) 55%, transparent 72%);
+}
+
+.courageMapHotspotRing[data-color='green'] {
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.42) 0%, rgba(20, 184, 166, 0.18) 55%, transparent 72%);
+}
+
+.courageMapHotspotRing[data-color='orange'] {
+  background: radial-gradient(circle, rgba(253, 186, 116, 0.42) 0%, rgba(34, 197, 94, 0.18) 55%, transparent 72%);
+}
+
+.courageMapHotspotRing[data-color='blue'] {
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.42) 0%, rgba(6, 182, 212, 0.18) 55%, transparent 72%);
+}
+
+.courageMapHotspot--selected[data-color='gold']::after {
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.62) 0%, rgba(30, 64, 175, 0.28) 42%, transparent 72%);
+  width: 8rem;
+  height: 8rem;
+}
+
+.courageMapHotspot--selected[data-color='purple']::after {
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.62) 0%, rgba(217, 70, 239, 0.28) 42%, transparent 72%);
+  width: 8rem;
+  height: 8rem;
+}
+
+.courageMapHotspot--selected[data-color='green']::after {
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.62) 0%, rgba(20, 184, 166, 0.28) 42%, transparent 72%);
+  width: 8rem;
+  height: 8rem;
+}
+
+.courageMapHotspot--selected[data-color='orange']::after {
+  background: radial-gradient(circle, rgba(253, 186, 116, 0.62) 0%, rgba(34, 197, 94, 0.28) 42%, transparent 72%);
+  width: 8rem;
+  height: 8rem;
+}
+
+.courageMapHotspot--selected[data-color='blue']::after {
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.62) 0%, rgba(6, 182, 212, 0.28) 42%, transparent 72%);
+  width: 8rem;
+  height: 8rem;
+}
+
+.courageAdventureHub .courageMapHotspotRing {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.courageAdventureHub .courageMapHotspotToken {
+  max-height: min(30vh, 12.5rem);
+}
+
+.courageAdventureHub .courageMapHotspotLabel {
+  font-size: 0.75rem;
+  max-width: 10.5rem;
+}
+
+/* Floating mission card */
+.courageMissionCardFloat {
+  position: absolute;
+  z-index: 8;
+  width: min(400px, calc(100% - 2rem));
+  max-width: 420px;
+  animation: courageMissionCardIn 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: auto;
+}
+
+.courageMissionCardFloat--tablet {
+  left: 50% !important;
+  top: auto !important;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  width: min(400px, calc(100% - 2.5rem));
+}
+
+@keyframes courageMissionCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.courageMissionCardFloat--tablet {
+  animation-name: courageMissionCardInTablet;
+}
+
+@keyframes courageMissionCardInTablet {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+/* Reusable dotted texture — bottom-left corner accent */
+.courageBrandDots {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  height: 48%;
+  pointer-events: none;
+  opacity: 0.42;
+  background-size: 11px 11px;
+  mask-image: radial-gradient(ellipse 90% 90% at 0% 100%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 0% 100%, #000 0%, transparent 72%);
+}
+
+.courageBrandDots--gold {
+  background-image: radial-gradient(circle, rgba(250, 204, 21, 0.35) 1px, transparent 1px);
+}
+
+.courageBrandDots--purple {
+  background-image: radial-gradient(circle, rgba(192, 132, 252, 0.38) 1px, transparent 1px);
+}
+
+.courageBrandDots--green {
+  background-image: radial-gradient(circle, rgba(52, 211, 153, 0.35) 1px, transparent 1px);
+}
+
+.courageBrandDots--orange {
+  background-image: radial-gradient(circle, rgba(251, 146, 60, 0.35) 1px, transparent 1px);
+}
+
+.courageBrandDots--blue {
+  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.38) 1px, transparent 1px);
+}
+
+.courageMissionCard {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 1.25rem 1.35rem;
+  border-radius: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 24px 60px -20px rgba(15, 10, 35, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #fff8f0;
+  backdrop-filter: blur(8px);
+}
+
+.courageMissionCardShine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.16) 0%, transparent 38%, rgba(0, 0, 0, 0.08) 100%);
+  pointer-events: none;
+}
+
+.courageMissionCard[data-color='gold'] {
+  background: linear-gradient(152deg, #fbbf24 0%, #b45309 42%, #0f172a 100%);
+}
+
+.courageMissionCard[data-color='purple'] {
+  background: linear-gradient(152deg, #c4b5fd 0%, #7c3aed 44%, #2e1065 100%);
+  color: #faf5ff;
+}
+
+.courageMissionCard[data-color='green'] {
+  background: linear-gradient(152deg, #5eead4 0%, #0d9488 42%, #052e16 100%);
+}
+
+.courageMissionCard[data-color='orange'] {
+  background: linear-gradient(152deg, #fb923c 0%, #c2410c 40%, #14532d 100%);
+}
+
+.courageMissionCard[data-color='blue'] {
+  background: linear-gradient(152deg, #38bdf8 0%, #0284c7 42%, #1e3a8a 100%);
+}
+
+.courageMissionCardClose {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 2;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(15, 10, 35, 0.25);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.courageMissionCardClose {
+  color: #fff;
+}
+
+.courageMissionCardPortrait {
+  position: relative;
+  z-index: 1;
+  width: 5.5rem;
+  height: 5.5rem;
+  margin: 0 auto 0.65rem;
+  border-radius: 50%;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 28px -12px rgba(15, 10, 35, 0.55);
+}
+
+.courageMissionCardPortrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.courageMissionCardCharacter {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+
+.courageMissionCardTitle {
+  position: relative;
+  z-index: 1;
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.courageMissionCardDesc {
+  position: relative;
+  z-index: 1;
+  margin: 0.65rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-align: center;
+  opacity: 0.94;
+}
+
+.courageMissionCardRewardChip {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.85rem auto 0;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 4px 14px -8px rgba(15, 10, 35, 0.45);
+}
+
+
+.courageMissionCardComingSoon {
+  position: relative;
+  z-index: 1;
+  margin: 0.65rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.courageMissionCardLockedNote {
+  position: relative;
+  z-index: 1;
+  margin: 0.65rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.courageMissionCardActions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.courageMissionCardPrimary,
+.courageMissionCardSecondary {
+  min-height: 2.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.courageMissionCardPrimary {
+  border: none;
+  color: #1a1035;
+  background: linear-gradient(135deg, #fff8e8, #fde68a);
+  box-shadow: 0 8px 20px -10px rgba(15, 10, 35, 0.5);
+}
+
+.courageMissionCardPrimary[data-color='gold'] {
+  background: linear-gradient(135deg, #fff8e8, #fde68a);
+  color: #1a1035;
+}
+
+.courageMissionCardPrimary[data-color='purple'] {
+  background: linear-gradient(135deg, #faf5ff, #e9d5ff);
+  color: #3b0764;
+}
+
+.courageMissionCardPrimary[data-color='green'] {
+  background: linear-gradient(135deg, #ecfdf5, #6ee7b7);
+  color: #064e3b;
+}
+
+.courageMissionCardPrimary[data-color='orange'] {
+  background: linear-gradient(135deg, #fff7ed, #fdba74);
+  color: #431407;
+}
+
+.courageMissionCardPrimary[data-color='blue'] {
+  background: linear-gradient(135deg, #f0f9ff, #7dd3fc);
+  color: #1e3a8a;
+}
+
+.courageMissionCardPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.courageMissionCardSecondary {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: inherit;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+
+/* Mobile bottom sheet */
+.courageMissionCardBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  border: none;
+  padding: 0;
+  background: rgba(15, 10, 35, 0.42);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.courageMissionCardSheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1301;
+  max-height: min(82vh, 34rem);
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.courageMissionCardSheet--open {
+  transform: translateY(0);
+}
+
+.courageMissionCardSheet .courageMissionCard {
+  border-radius: 1.25rem 1.25rem 0 0;
+  border-bottom: none;
+  padding-bottom: calc(1.35rem + env(safe-area-inset-bottom, 0px));
+}
+
+.courageMissionCardSheetHandle {
+  display: block;
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0 auto 0.85rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .courageMapCanvas--hub {
+    min-height: 550px;
+    height: clamp(550px, 68vh, 760px);
+  }
+
+  .courageAdventureHubSplit {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .courageMissionListPanel {
+    min-height: auto;
+    max-height: none;
+  }
+
+  .courageMapCanvas--hubSplit {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 767px) {
+  .courageMapCanvas--hub {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+
+  .courageAdventureHub .courageMapHotspotRing {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .courageAdventureHub .courageMapHotspotToken {
+    max-height: min(18vh, 7.5rem);
+  }
+
+  .courageAdventureHub .courageMapHotspotLabel {
+    font-size: 0.625rem;
+    max-width: 7rem;
+  }
+
+  .courageMapHotspot--selected[data-color]::after {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+/* Hero bar + view toggle */
+.courageMapCanvasHeroOverlay--interactive {
+  pointer-events: none;
+}
+
+.courageMapCanvasHeroOverlay--interactive .courageHubHeroBar {
+  pointer-events: auto;
+}
+
+.courageHubHeroBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.courageHubHeaderCopy,
+.courageHubHeroBarCopy {
+  min-width: 0;
+  max-width: min(36rem, 58%);
+}
+
+.courageHubControls--overlay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.courageHubControlsTrailing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Mobile stack — title, map, controls, optional list */
+.courageAdventureHub--mobileStack {
+  overflow-x: clip;
+}
+
+.courageAdventureHubMobileStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.courageHubHeaderCopy--mobile {
+  max-width: 100%;
+  padding: 0 0.1rem;
+}
+
+.courageHubHeaderCopy--mobile .courageMapCanvasEyebrow {
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.courageHubHeaderCopy--mobile .courageMapCanvasTitle {
+  color: var(--family-navy-deep, #1a2f52);
+  text-shadow: none;
+  font-size: clamp(1.25rem, 5vw, 1.5rem);
+}
+
+.courageHubHeaderCopy--mobile .courageMapCanvasSubtitle {
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageHubHeaderCopy--mobile .courageMapCanvasSelFocus {
+  color: rgba(30, 64, 175, 0.82);
+}
+
+.courageAdventureHubMobileStack .courageAdventureHubMapWrap {
+  border-radius: 1.125rem;
+  overflow: hidden;
+}
+
+.courageHubControls--mobileBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(26, 47, 82, 0.1);
+  box-shadow: 0 8px 24px -18px rgba(26, 47, 82, 0.35);
+  box-sizing: border-box;
+}
+
+.courageHubControls--mobileBar .courageHubViewToggle {
+  flex: 1 1 100%;
+  width: 100%;
+  justify-content: stretch;
+  background: rgba(26, 47, 82, 0.06);
+  border-color: rgba(26, 47, 82, 0.12);
+  box-shadow: none;
+}
+
+.courageHubControls--mobileBar .courageHubViewToggleBtn {
+  flex: 1 1 0;
+  justify-content: center;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageHubControls--mobileBar .courageHubViewToggleBtn--active {
+  background: linear-gradient(135deg, #e5c06a, #d4a84a);
+  color: #1a1035;
+}
+
+.courageHubControls--mobileBar .courageMapCanvasStatus {
+  color: #1a2f52;
+  background: rgba(229, 192, 106, 0.22);
+  border: 1px solid rgba(229, 192, 106, 0.35);
+}
+
+.courageHubControls--mobileBar .courageHubSoundToggle {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(26, 47, 82, 0.14);
+  color: #1a2f52;
+}
+
+.courageHubControls--mobileBar .courageHubControlsTrailing {
+  margin-left: auto;
+}
+
+.courageAdventureHubMobileList {
+  width: 100%;
+  min-width: 0;
+  animation: courageHubViewFadeIn 0.32s ease-out;
+}
+
+.courageAdventureHubMobileList .courageMissionListPanel {
+  min-height: auto;
+  max-height: none;
+}
+
+.courageHubViewToggle {
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgba(26, 16, 53, 0.55);
+  border: 1px solid rgba(229, 192, 106, 0.32);
+  box-shadow: 0 6px 18px -12px rgba(0, 0, 0, 0.45);
+}
+
+.courageHubHeroBar--panel .courageHubViewToggle {
+  background: rgba(26, 47, 82, 0.08);
+  border-color: rgba(26, 47, 82, 0.12);
+}
+
+.courageHubViewToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 248, 232, 0.82);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.courageHubHeroBar--panel .courageHubViewToggleBtn {
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageHubViewToggleBtn--active {
+  background: linear-gradient(135deg, rgba(229, 192, 106, 0.95), rgba(212, 168, 74, 0.95));
+  color: #1a1035;
+  box-shadow: 0 4px 12px -8px rgba(0, 0, 0, 0.35);
+}
+
+.courageHubHeroBar--panel .courageHubViewToggleBtn--active {
+  background: linear-gradient(135deg, #e5c06a, #d4a84a);
+  color: #1a1035;
+}
+
+.courageHubViewToggleIcon {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.courageHubSoundToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 192, 106, 0.35);
+  background: rgba(26, 16, 53, 0.55);
+  color: #fff8e8;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.courageHubHeroBar--panel .courageHubSoundToggle {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(26, 47, 82, 0.14);
+}
+
+.courageHubSoundToggle:hover {
+  transform: scale(1.05);
+  border-color: rgba(229, 192, 106, 0.55);
+}
+
+.courageHubSoundToggle[aria-pressed='false'] {
+  opacity: 0.82;
+}
+
+.courageHubSoundToggleIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.courageHubHeroBar--panel {
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  border-radius: 1.125rem 1.125rem 0 0;
+  background: linear-gradient(180deg, rgba(12, 8, 28, 0.06) 0%, transparent 100%);
+}
+
+/* View transitions */
+.courageAdventureHubView {
+  animation: courageHubViewFadeIn 0.32s ease-out;
+}
+
+@keyframes courageHubViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mission list split layout — map left + panel right */
+.courageAdventureHubSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(280px, 3fr);
+  gap: 22px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.courageAdventureHubSplitMap {
+  min-width: 0;
+}
+
+.courageAdventureHubSplitMap .courageAdventureHubMapWrap {
+  height: 100%;
+}
+
+.courageMissionListPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: clamp(560px, 70vh, 780px);
+  max-height: clamp(560px, 70vh, 780px);
+  border-radius: 1.125rem;
+  overflow: hidden;
+  background: linear-gradient(168deg, #fffdf8 0%, #f3eeff 42%, #eef6ff 100%);
+  border: 1px solid rgba(229, 192, 106, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(26, 16, 53, 0.04),
+    0 18px 48px -24px rgba(26, 16, 53, 0.35);
+}
+
+.courageMissionListPanelHeader {
+  flex-shrink: 0;
+  padding: 1.1rem 1.15rem 0.65rem;
+}
+
+.courageMissionListPanelTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #2a1f4d;
+}
+
+.courageMissionListPanelIntro {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageMissionListPanelProgress {
+  flex-shrink: 0;
+  padding: 0 1.15rem 0.85rem;
+  border-bottom: 1px solid rgba(26, 47, 82, 0.08);
+}
+
+.courageMissionListPanelProgressRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+}
+
+.courageMissionListPanelProgressLabel {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #2a1f4d;
+}
+
+.courageMissionListPanelProgressCount {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageMissionListPanelProgressTrack {
+  margin-top: 0.5rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(26, 47, 82, 0.1);
+  overflow: hidden;
+}
+
+.courageMissionListPanelProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e5c06a, #60a5fa, #6ee7b7);
+  transition: width 0.4s ease;
+}
+
+.courageMissionListPanelProgressMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.58);
+}
+
+.courageMissionListRows {
+  list-style: none;
+  margin: 0;
+  padding: 0.65rem 0.75rem 0.85rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.courageMissionListRowWrap {
+  animation: courageMissionListRowIn 0.34s ease-out both;
+}
+
+@keyframes courageMissionListRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.courageMissionListRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.65rem;
+  border: 1px solid rgba(26, 47, 82, 0.1);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.courageMissionListRow:hover:not(:disabled) {
+  border-color: rgba(26, 47, 82, 0.18);
+  box-shadow: 0 8px 20px -14px rgba(26, 16, 53, 0.35);
+  transform: translateY(-1px);
+}
+
+.courageMissionListRow--selected {
+  border-width: 2px;
+  transform: translateY(-2px) scale(1.01);
+  background: #fff;
+}
+
+.courageMissionListRow--selected[data-color='gold'] {
+  border-color: rgba(251, 191, 36, 0.85);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25), 0 12px 28px -14px rgba(30, 64, 175, 0.35);
+}
+
+.courageMissionListRow--selected[data-color='purple'] {
+  border-color: rgba(192, 132, 252, 0.85);
+  box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.25), 0 12px 28px -14px rgba(124, 58, 237, 0.35);
+}
+
+.courageMissionListRow--selected[data-color='green'] {
+  border-color: rgba(52, 211, 153, 0.85);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.25), 0 12px 28px -14px rgba(13, 148, 136, 0.35);
+}
+
+.courageMissionListRow--selected[data-color='orange'] {
+  border-color: rgba(251, 146, 60, 0.85);
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.25), 0 12px 28px -14px rgba(194, 65, 12, 0.35);
+}
+
+.courageMissionListRow--selected[data-color='blue'] {
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.25), 0 12px 28px -14px rgba(37, 99, 235, 0.35);
+}
+
+.courageMissionListRow--locked {
+  opacity: 0.72;
+  cursor: pointer;
+}
+
+.courageMissionListRowThumb {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #fde047, #1e3a8a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.courageMissionListRowThumb[data-color='gold'] {
+  background: linear-gradient(135deg, #fde047, #1e3a8a);
+}
+
+.courageMissionListRowThumb[data-color='purple'] {
+  background: linear-gradient(135deg, #c4b5fd, #5b21b6);
+}
+
+.courageMissionListRowThumb[data-color='green'] {
+  background: linear-gradient(135deg, #6ee7b7, #065f46);
+}
+
+.courageMissionListRowThumb[data-color='orange'] {
+  background: linear-gradient(135deg, #fdba74, #14532d);
+}
+
+.courageMissionListRowThumb[data-color='blue'] {
+  background: linear-gradient(135deg, #7dd3fc, #1e40af);
+}
+
+.courageMissionListRowThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.courageMissionListRowCopy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.courageMissionListRowCharacter {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.58);
+}
+
+.courageMissionListRowTitle {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #2a1f4d;
+  line-height: 1.2;
+}
+
+.courageMissionListRowReward {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courageMissionListRowStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+}
+
+.courageMissionListRowBadge {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+}
+
+.courageMissionListRowChevron {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.35);
+  line-height: 1;
+}
+
+.courageMissionListRowLock {
+  font-size: 0.75rem;
+}
+
+.courageMissionListRowActions {
+  padding: 0 0.65rem 0.55rem;
+}
+
+.courageMissionListRowComingSoon {
+  margin: 0 0 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.courageMissionListRowLockedNote {
+  margin: 0 0 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.courageMissionListRowStart {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  border: none;
+  border-radius: 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: #1a1035;
+  background: linear-gradient(135deg, #fff8e8, #fde68a);
+  box-shadow: 0 6px 16px -10px rgba(15, 10, 35, 0.4);
+}
+
+.courageMissionListRowStart[data-color='purple'] {
+  background: linear-gradient(135deg, #ede9fe, #c4b5fd);
+  color: #3b0764;
+}
+
+.courageMissionListRowStart[data-color='green'] {
+  background: linear-gradient(135deg, #ecfdf5, #6ee7b7);
+  color: #064e3b;
+}
+
+.courageMissionListRowStart[data-color='orange'] {
+  background: linear-gradient(135deg, #fff7ed, #fdba74);
+  color: #431407;
+}
+
+.courageMissionListRowStart[data-color='blue'] {
+  background: linear-gradient(135deg, #f0f9ff, #7dd3fc);
+  color: #1e3a8a;
+}
+
+.courageMissionListRowStart:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.courageAdventureHubSplitMap .courageMapHotspot--selected::after {
+  width: 9rem;
+  height: 9rem;
+  opacity: 1;
+}
+
+@media (max-width: 767px) {
+  .courageHubControls--overlay .courageHubViewToggle {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .courageHubControls--overlay .courageHubViewToggleBtn {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
+  }
+
+  .courageHubControls--overlay .courageHubViewToggleLabel {
+    font-size: 0.625rem;
+  }
+
+  .courageAdventureHubSplit {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .courageMissionListPanel {
+    min-height: auto;
+    max-height: none;
+  }
+
+  .courageMapCanvas--hubSplit {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courageMissionCardFloat,
+  .courageMissionCardSheet,
+  .courageMapHotspotFloat,
+  .courageMapHotspotRing,
+  .courageAdventureHubView,
+  .courageMissionListRowWrap {
+    animation: none;
+    transition: none;
+  }
+
+  .courageMissionListRow:hover:not(:disabled),
+  .courageMissionListRow--selected {
+    transform: none;
+  }
+}

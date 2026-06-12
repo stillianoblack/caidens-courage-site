@@ -32,6 +32,8 @@ export function useBaselineCheckSounds() {
       success2: audioPath(publicUrl, 'Success Button 2.mp3'),
       success4: audioPath(publicUrl, 'Success Button 4.mp3'),
       success3: audioPath(publicUrl, 'Success Button 3.mp3'),
+      coinTick: audioPath(publicUrl, 'button-soft-click.mp3'),
+      badgeSparkle: audioPath(publicUrl, 'b4/reward.mp3'),
     }),
     [publicUrl],
   );
@@ -67,6 +69,15 @@ export function useBaselineCheckSounds() {
     () => play(paths.success4, 0.48, paths.success3),
     [paths.success4, paths.success3, play],
   );
+  const playMissionCompleteChime = useCallback(
+    () => play(paths.moduleWin, 0.46),
+    [paths.moduleWin, play],
+  );
+  const playCoinTick = useCallback(() => play(paths.coinTick, 0.24), [paths.coinTick, play]);
+  const playBadgeSparkle = useCallback(
+    () => play(paths.badgeSparkle, 0.38, paths.success1),
+    [paths.badgeSparkle, paths.success1, play],
+  );
 
   const toggleSound = useCallback(() => {
     if (soundEnabled) {
@@ -95,5 +106,8 @@ export function useBaselineCheckSounds() {
     playResultFeelings,
     playResultReading,
     playResultFocus,
+    playMissionCompleteChime,
+    playCoinTick,
+    playBadgeSparkle,
   };
 }

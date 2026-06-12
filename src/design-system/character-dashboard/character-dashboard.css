@@ -38,6 +38,14 @@
   min-width: 0;
 }
 
+.character-dashboard-breadcrumbRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .character-dashboard-breadcrumb .portal-breadcrumb,
 .character-dashboard-breadcrumb .portal-backBtn {
   margin-bottom: 0;

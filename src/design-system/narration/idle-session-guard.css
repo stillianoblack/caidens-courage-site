@@ -24,9 +24,17 @@
 }
 
 .ds-idleGuardBody {
-  margin: 0 0 1rem;
+  margin: 0 0 0.65rem;
   color: rgba(26, 47, 82, 0.82);
   line-height: 1.45;
+}
+
+.ds-idleGuardCountdown {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a2f52;
+  line-height: 1.4;
 }
 
 .ds-idleGuardActions {

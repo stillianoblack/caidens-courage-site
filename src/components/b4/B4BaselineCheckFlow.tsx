@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildNickname } from '../../config/activeChildNickname';
@@ -60,8 +61,28 @@ import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
+import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
+import {
+  completeWeeklyCourageMission,
+  resolveWeeklyCourageMissionPayload,
+} from '../../lib/courageWeeklyMissionCompletion';
+import { readWeeklyAdventureRouteContext,
+  resolveWeeklyAdventureReturnHref,
+} from '../../lib/weeklyAdventureRouteContext';
+import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
+import type {
+  CompleteMissionResult,
+  CourageMissionRewardPayload,
+} from '../../types/courageMissionProgress';
 
-type View = 'landing' | 'grade_gate' | 'hub' | 'quiz' | 'module-complete' | 'final';
+type View =
+  | 'landing'
+  | 'grade_gate'
+  | 'hub'
+  | 'quiz'
+  | 'module-complete'
+  | 'final'
+  | 'courage-celebration';
 
 type B4BaselineCheckFlowProps = {
   embedded?: boolean;
@@ -74,6 +95,8 @@ export default function B4BaselineCheckFlow({
   familyPortal = false,
   onExit,
 }: B4BaselineCheckFlowProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     soundEnabled,
     toggleSound,
@@ -84,6 +107,9 @@ export default function B4BaselineCheckFlow({
     playResultFeelings,
     playResultReading,
     playResultFocus,
+    playMissionCompleteChime,
+    playCoinTick,
+    playBadgeSparkle,
   } = useBaselineCheckSounds();
 
   const activeParticipantId = readActiveChildParticipantId();
@@ -92,10 +118,17 @@ export default function B4BaselineCheckFlow({
   const [playerName, setPlayerName] = useState(
     () => readActiveChildNickname() || loadB4BaselineState(activeParticipantId).profile?.nickname || '',
   );
+  const [courageMissionPayload, setCourageMissionPayload] =
+    useState<CourageMissionRewardPayload | null>(null);
+  const [courageMissionResult, setCourageMissionResult] = useState<CompleteMissionResult | null>(
+    null,
+  );
 
   const missionPhase: MissionGamePhase = useMemo(() => {
     if (view === 'quiz') return 'quiz';
-    if (view === 'module-complete' || view === 'final') return 'complete';
+    if (view === 'module-complete' || view === 'final' || view === 'courage-celebration') {
+      return 'complete';
+    }
     if (view === 'landing' || view === 'hub' || view === 'grade_gate') return 'landing';
     return 'off';
   }, [view]);
@@ -325,6 +358,26 @@ export default function B4BaselineCheckFlow({
     setHubState(next);
     playModuleWin();
 
+    if (activeModule === 'feelings') {
+      const weeklyPayload = resolveWeeklyCourageMissionPayload(
+        location.pathname,
+        location.search,
+      );
+      if (weeklyPayload) {
+        const result = await completeWeeklyCourageMission(location.pathname, location.search);
+        setCourageMissionPayload(weeklyPayload);
+        setCourageMissionResult(
+          result ?? {
+            ok: false,
+            error: 'save_failed',
+            message: 'Progress could not save. Please try again.',
+          },
+        );
+        setView('courage-celebration');
+        return;
+      }
+    }
+
     if (isBaselineFullyComplete(next, participantId) && next.record) {
       const submitResult = await submitBaselineResults({
         ...next.record,
@@ -496,7 +549,22 @@ export default function B4BaselineCheckFlow({
     setFeedback(null);
   };
 
+  const handleReturnToAdventureMap = useCallback(() => {
+    playItemButton();
+    const context = readWeeklyAdventureRouteContext(location.search);
+    const week = context.week && context.week > 0 ? context.week : 1;
+    navigate(resolveWeeklyAdventureReturnHref(location.pathname, week));
+  }, [location.pathname, location.search, navigate, playItemButton]);
+
+  const handleIdleEndSession = useCallback(() => {
+    endProtectedChildSession(navigate, location.pathname);
+  }, [location.pathname, navigate]);
+
   const handleExit = () => {
+    if (view === 'courage-celebration') {
+      handleReturnToAdventureMap();
+      return;
+    }
     if (embedded && onExit && view !== 'landing') {
       onExit();
       return;
@@ -591,7 +659,7 @@ export default function B4BaselineCheckFlow({
       embedded={embedded}
       active={view === 'quiz'}
       coachingShell={view === 'quiz'}
-      idleSessionGuard={{ enabled: view === 'quiz', onReturn: handleExit }}
+      idleSessionGuard={{ enabled: view === 'quiz', onEndSession: handleIdleEndSession }}
       topBar={
         showTopBar ? (
           view === 'quiz' ? (
@@ -810,6 +878,19 @@ export default function B4BaselineCheckFlow({
               readAloudResetKey={baselineReadAloudResetKey}
             />
           </GameInteractionShell>
+        ) : null}
+
+        {view === 'courage-celebration' && courageMissionPayload && courageMissionResult ? (
+          <CourageMissionCompleteCelebration
+            payload={courageMissionPayload}
+            result={courageMissionResult}
+            onReturnToMap={handleReturnToAdventureMap}
+            sounds={{
+              playMissionComplete: playMissionCompleteChime,
+              playCoinTick,
+              playBadgeSparkle,
+            }}
+          />
         ) : null}
 
         {view === 'module-complete' ? (

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuestionInteraction } from '../../hooks/useQuestionInteraction';
 import { mergeAttemptIntoAnswersJson } from '../../lib/questionAttemptTracking';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
@@ -47,6 +48,7 @@ import {
   shouldMigrateFromCampProgram,
 } from '../../lib/parentChildLinkFromCampService';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
+import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
 import AdultInfoForm from './AdultInfoForm';
 import AdultGrowthCheckResults from './AdultGrowthCheckResults';
 
@@ -71,6 +73,8 @@ export default function AdultGrowthCheckFlow({
   continueLearningHref,
   onExit,
 }: AdultGrowthCheckFlowProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     soundEnabled,
     toggleSound,
@@ -301,6 +305,10 @@ export default function AdultGrowthCheckFlow({
     setQuestionIndex((index) => index + 1);
   };
 
+  const handleIdleEndSession = useCallback(() => {
+    endProtectedChildSession(navigate, location.pathname);
+  }, [location.pathname, navigate]);
+
   const handleExit = () => {
     playItemButton();
     if (embedded && onExit && view === 'quiz') {
@@ -361,7 +369,7 @@ export default function AdultGrowthCheckFlow({
       embedded={embedded}
       active={view === 'quiz'}
       coachingShell={view === 'quiz'}
-      idleSessionGuard={{ enabled: view === 'quiz', onReturn: handleExit }}
+      idleSessionGuard={{ enabled: view === 'quiz', onEndSession: handleIdleEndSession }}
       themeClassName={view === 'quiz' ? quizThemeClasses : 'adult-assessment-game bbc-app--adult'}
       topBar={
         embedded || view !== 'form' ? (

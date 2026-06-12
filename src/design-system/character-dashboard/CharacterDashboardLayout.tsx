@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import PortalBreadcrumb from '../../components/portal/PortalBreadcrumb';
+import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import MissionCoachCard from '../components/MissionCoachCard';
 import type { MissionCoachCardProps } from '../components/MissionCoachCard';
 import {
@@ -69,12 +70,15 @@ export default function CharacterDashboardLayout({
     >
       <div className="character-dashboard-grid">
         <div className="character-dashboard-breadcrumb">
-          <PortalBreadcrumb
-            label={backLabel}
-            href={backHref}
-            theme={theme ?? characterId}
-            variant="game"
-          />
+          <div className="character-dashboard-breadcrumbRow">
+            <PortalBreadcrumb
+              label={backLabel}
+              href={backHref}
+              theme={theme ?? characterId}
+              variant="game"
+            />
+            <FocusCoinWalletBadge compact />
+          </div>
         </div>
 
         <div className="character-dashboard-hero">

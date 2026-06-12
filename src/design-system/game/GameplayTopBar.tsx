@@ -2,7 +2,9 @@ import React from 'react';
 import PortalBreadcrumb from '../../components/portal/PortalBreadcrumb';
 import GamePlayerPill from '../../components/game-assessment/shared/GamePlayerPill';
 import SoundToggleButton from '../../components/game-assessment/shared/SoundToggleButton';
+import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
+import './gameplay-top-bar.css';
 
 const FLAME_SRC = '/images/icons/focus-flame-mark.svg';
 
@@ -149,6 +151,7 @@ export default function GameplayTopBar({
       </div>
 
       <div className="ds-gameplayTopBar-controls">
+        <FocusCoinWalletBadge compact />
         <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
         <FlameStatus display={resolvedFlameDisplay} lit={flamesLit} />
         {onToggleSound ? (

@@ -1,0 +1,412 @@
+.courageMissionComplete {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(100%, 36rem);
+  margin: 0 auto;
+}
+
+.courageMissionCompleteCapture {
+  width: 100%;
+  padding: 2rem 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(165deg, rgba(18, 28, 48, 0.96), rgba(8, 14, 28, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  overflow: hidden;
+}
+
+.courageMissionComplete--error {
+  width: min(100%, 36rem);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1.75rem;
+  gap: 0.85rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(165deg, rgba(18, 28, 48, 0.96), rgba(8, 14, 28, 0.98));
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.courageMissionCompleteBadge {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #fbbf24, #f59e0b);
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
+  animation: courageMissionBadgePop 0.8s ease-out;
+}
+
+.courageMissionComplete--error .courageMissionCompleteBadge {
+  background: linear-gradient(145deg, #f87171, #ef4444);
+  color: #fff;
+}
+
+@keyframes courageMissionBadgePop {
+  0% {
+    transform: scale(0.4);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
+  }
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1rem rgba(251, 191, 36, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
+
+.courageMissionCompleteEyebrow {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.courageMissionCompleteTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.15;
+  color: #fff;
+}
+
+.courageMissionCompleteCharacter {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(251, 191, 36, 0.92);
+}
+
+.courageMissionCompleteBody {
+  margin: 0;
+  max-width: 28rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.courageMissionCompleteRewards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.courageMissionCompleteRewardCard {
+  padding: 0.9rem 0.75rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.courageMissionCompleteRewardCard--coins {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+.courageMissionCompleteRewardCard--item {
+  grid-column: 1 / -1;
+}
+
+.courageMissionCompleteRewardLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.courageMissionCompleteRewardValue {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.courageMissionCompleteArt {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.35rem;
+}
+
+.courageMissionCompleteCoinTotal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fbbf24;
+  font-variant-numeric: tabular-nums;
+}
+
+.courageMissionCompleteCoinIcon {
+  font-size: 1.35rem;
+  animation: courageMissionCoinSpin 1.2s ease-out;
+}
+
+@keyframes courageMissionCoinSpin {
+  0% {
+    transform: rotateY(0deg) scale(0.6);
+  }
+  100% {
+    transform: rotateY(720deg) scale(1);
+  }
+}
+
+.courageMissionCompleteCoinEarned {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(251, 191, 36, 0.9);
+}
+
+.courageMissionCompleteWallet {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.courageMissionCompleteWalletLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.courageMissionCompleteWalletRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  font-weight: 800;
+}
+
+.courageMissionCompleteWalletOld {
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.courageMissionCompleteWalletArrow {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.courageMissionCompleteWalletNew {
+  color: #fbbf24;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.courageMissionCompleteWalletUnit {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.courageMissionCompleteNextUnlock {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  text-align: left;
+}
+
+.courageMissionCompleteNextUnlockEyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.85);
+}
+
+.courageMissionCompleteNextUnlockBody {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.courageMissionCompleteNextUnlockArt {
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.25rem;
+  flex-shrink: 0;
+}
+
+.courageMissionCompleteNextUnlockName {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.courageMissionCompleteNextUnlockAway {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.courageMissionCompleteBtn {
+  margin-top: 0.35rem;
+  min-width: 14rem;
+  padding: 0.8rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #38bdf8, #2563eb);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.courageMissionCompleteBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
+}
+
+.courageMissionCompleteActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.courageMissionCompleteBtn--secondary {
+  min-width: 12rem;
+  padding: 0.65rem 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.88rem;
+  box-shadow: none;
+}
+
+.courageMissionCompleteBtn--secondary:hover {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+
+.courageMissionCompleteBtn--secondary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
+.courageMissionCompleteShareHint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.courageMissionCompleteToast {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.95);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  z-index: 1300;
+  animation: courageMissionToastIn 0.25s ease-out;
+}
+
+@keyframes courageMissionToastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.courageMissionCompleteBrand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem 0.75rem;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.courageMissionCompleteBrandLogo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.courageMissionCompleteBrandTitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fff;
+  text-align: left;
+}
+
+.courageMissionCompleteBrandSub {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.68);
+  text-align: left;
+}
+
+.courageMissionCompleteBrandMeta {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.courageMissionCompleteNextUnlock--belowCard {
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .courageMissionCompleteRewards {
+    grid-template-columns: 1fr;
+  }
+
+  .courageMissionCompleteRewardCard--item {
+    grid-column: auto;
+  }
+}

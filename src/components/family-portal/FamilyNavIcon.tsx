@@ -76,6 +76,14 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
           <path d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
         </svg>
       );
+    case 'inventory':
+      return (
+        <svg {...common}>
+          <path d="M5 7h14l-1 12H6L5 7z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+          <path d="M9 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <path d="M9 11v5M12 11v5M15 11v5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      );
     default:
       return null;
   }

@@ -184,6 +184,9 @@ const FamilyResultsPanel = React.lazy(() =>
 const FamilyContinueLearningPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyContinueLearningPanel'),
 );
+const FamilyInventoryPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyInventoryPanel'),
+);
 const FamilyBaselineCheckPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyBaselineCheckPanel'),
 );
@@ -233,6 +236,7 @@ const RootRoute: React.FC = () => {
 const appRouteChildren = (
   <>
       <Route path="/" element={<RootRoute />} />
+      <Route path="/inventory" element={<Navigate to={`${FAMILY_HUB_PATH}/inventory`} replace />} />
 
       {/* Story world */}
       <Route path={STORY_PATH} element={<StoryHubPage />} />
@@ -324,6 +328,7 @@ const appRouteChildren = (
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="inventory" element={<FamilyInventoryPanel />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
             <Route index element={<FamilyCharactersPanel />} />
@@ -379,6 +384,7 @@ const appRouteChildren = (
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="inventory" element={<FamilyInventoryPanel />} />
           <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">

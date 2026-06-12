@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import '../b4-baseline-check/b4-baseline-check.css';
@@ -31,6 +32,7 @@ import {
   buildReadAloudSegmentsFromParts,
 } from '../../design-system/narration';
 import { resolveGameplayTopBarFlames } from '../../design-system/game/resolveGameplayTopBarConfig';
+import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
 import { B4_GAME_AVATAR_SRC } from '../../data/b4/portalAssets';
 import '../../design-system/game/gameDesignStyles';
 
@@ -62,6 +64,8 @@ export default function B4GuideFlow({
   initialScreen = 'select',
   onExit,
 }: B4GuideFlowProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { soundEnabled, toggleSound, playSelect, playModuleWin } = useBaselineCheckSounds();
   const [screen, setScreen] = useState<Screen>(initialScreen);
 
@@ -218,13 +222,9 @@ export default function B4GuideFlow({
     currentAssessmentQuestion,
   ]);
 
-  const handleIdleReturn = useCallback(() => {
-    if (embedded && onExit) {
-      onExit();
-      return;
-    }
-    resetAll();
-  }, [embedded, onExit, resetAll]);
+  const handleIdleEndSession = useCallback(() => {
+    endProtectedChildSession(navigate, location.pathname);
+  }, [location.pathname, navigate]);
 
   if (embedded) {
     return (
@@ -233,7 +233,7 @@ export default function B4GuideFlow({
         embedded
         active={isAssessmentQuiz}
         coachingShell={isAssessmentQuiz}
-        idleSessionGuard={{ enabled: isAssessmentQuiz, onReturn: handleIdleReturn }}
+        idleSessionGuard={{ enabled: isAssessmentQuiz, onEndSession: handleIdleEndSession }}
         topBar={
           <GameplayTopBar
             variant="b4"

@@ -1,0 +1,569 @@
+/* Courage in the Dark — Week 1 rainforest adventure map */
+
+.courageMapShell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.courageMapShellHeader {
+  margin-bottom: 0.75rem;
+}
+
+.courageMapShellTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 800;
+  color: #2a1f4d;
+}
+
+.courageMapShellSubtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9375rem;
+  color: rgba(42, 31, 77, 0.72);
+}
+
+.courageMapCanvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1a1035 0%, #0f2848 55%, #123a2e 100%);
+  box-shadow:
+    0 0 0 1px rgba(229, 192, 106, 0.22),
+    0 18px 48px -20px rgba(26, 16, 53, 0.65),
+    inset 0 0 80px rgba(100, 160, 255, 0.08);
+}
+
+.courageMapCanvas--locked {
+  filter: saturate(0.65) brightness(0.82);
+}
+
+.courageMapBg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.courageMapHotspots {
+  position: absolute;
+  inset: 0;
+}
+
+.courageMapHotspot {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.courageMapHotspot:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.courageMapHotspot--locked {
+  cursor: pointer;
+  opacity: 0.72;
+}
+
+.courageMapHotspot--locked .courageMapHotspotLabel {
+  opacity: 0.92;
+}
+
+.courageMapHotspotRing {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.35) 0%, rgba(100, 160, 255, 0.12) 55%, transparent 72%);
+  animation: courageMapPulse 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.courageMapHotspotRing--complete {
+  background: radial-gradient(circle, rgba(120, 220, 160, 0.4) 0%, rgba(80, 180, 120, 0.1) 55%, transparent 72%);
+}
+
+@keyframes courageMapPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+.courageMapHotspotTokenWrap {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: transform 0.28s ease, filter 0.28s ease;
+  filter: drop-shadow(0 8px 16px rgba(15, 10, 35, 0.45));
+}
+
+.courageMapHotspotFloat {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: courageMapFloat 3.6s ease-in-out infinite;
+}
+
+.courageMapHotspot:hover:not(:disabled):not(.courageMapHotspot--locked) .courageMapHotspotTokenWrap,
+.courageMapHotspot--selected .courageMapHotspotTokenWrap {
+  transform: scale(1.08);
+  filter: drop-shadow(0 10px 22px rgba(15, 10, 35, 0.5));
+}
+
+.courageMapHotspot:nth-child(2n) .courageMapHotspotFloat {
+  animation-delay: -1.2s;
+}
+
+.courageMapHotspot:nth-child(3n) .courageMapHotspotFloat {
+  animation-delay: -2.1s;
+}
+
+@keyframes courageMapFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.courageMapHotspotToken {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.courageMapHotspotGlow {
+  position: absolute;
+  inset: 10% 5% -8%;
+  background: radial-gradient(ellipse at center bottom, rgba(229, 192, 106, 0.45), transparent 70%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.courageMapHotspot--selected .courageMapHotspotGlow,
+.courageMapHotspot:hover:not(:disabled):not(.courageMapHotspot--locked) .courageMapHotspotGlow,
+.courageMapHotspot:focus-visible .courageMapHotspotGlow {
+  opacity: 1;
+}
+
+.courageMapHotspot--selected::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 7rem;
+  height: 7rem;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 192, 106, 0.42) 0%, rgba(100, 160, 255, 0.18) 45%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.courageMapHotspotLabel {
+  position: relative;
+  z-index: 1;
+  margin-top: -0.15rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff8e8;
+  background: rgba(26, 16, 53, 0.72);
+  border: 1px solid rgba(229, 192, 106, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courageMapHotspotBadge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.courageMapHotspotReward {
+  position: absolute;
+  bottom: -0.15rem;
+  left: -0.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(251, 191, 36, 0.65);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.courageMapHotspot--justComplete .courageMapHotspotBadge {
+  animation: courageMapCheckmarkPop 0.3s ease-out;
+}
+
+.courageMapHotspot--justComplete .courageMapHotspotReward {
+  animation: courageMapCheckmarkPop 0.3s ease-out 0.05s both;
+}
+
+@keyframes courageMapCheckmarkPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.courageMapHotspotLock {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  font-size: 0.75rem;
+}
+
+/* Mission preview */
+.courageMapPreviewBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(15, 10, 35, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.courageMapPreviewCard {
+  position: fixed;
+  z-index: 1301;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1.125rem 1.25rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 192, 106, 0.35);
+  background: linear-gradient(160deg, #fffdf8 0%, #f3eeff 48%, #eef6ff 100%);
+  box-shadow: 0 20px 50px -24px rgba(26, 16, 53, 0.55);
+  color: #1a2f52;
+}
+
+.courageMapPreviewCard--anchored {
+  transform: translate(-50%, 0.75rem);
+}
+
+.courageMapPreviewEyebrow {
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(42, 31, 77, 0.62);
+}
+
+.courageMapPreviewTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #2a1f4d;
+}
+
+.courageMapPreviewDesc {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(26, 47, 82, 0.82);
+}
+
+.courageMapPreviewReward {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #5c3b00;
+  background: rgba(229, 192, 106, 0.22);
+  border: 1px solid rgba(229, 192, 106, 0.35);
+}
+
+.courageMapPreviewActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.courageMapPreviewPrimary,
+.courageMapPreviewSecondary {
+  flex: 1 1 auto;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.courageMapPreviewPrimary {
+  border: none;
+  color: #1a1035;
+  background: linear-gradient(135deg, #e5c06a 0%, #d4a84a 100%);
+  box-shadow: 0 6px 16px -8px rgba(92, 59, 0, 0.55);
+}
+
+.courageMapPreviewPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.courageMapPreviewSecondary {
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  color: #243e70;
+  background: #fff;
+}
+
+.courageMapComingSoon {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: #9a3412;
+}
+
+.courageMapPreviewLockedNote {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.courageMapSupplementary {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* —— Hero hub (primary Weekly Adventures experience) —— */
+.courageMapHubSection {
+  width: 100%;
+  margin: 0;
+  scroll-margin-top: 5.5rem;
+}
+
+.family-panel--courageHub {
+  gap: 1rem;
+}
+
+.portal-shell .family-content:has(.family-panel--courageHub) {
+  max-width: min(1600px, 100%);
+}
+
+.portal-layoutMain:has(.family-panel--courageHub) {
+  max-width: min(1600px, 100%);
+}
+
+.courageMapHubTrailHeading {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.courageMapShell--hero {
+  width: 100%;
+  max-width: min(1500px, 100%);
+  margin-inline: auto;
+  overflow-x: clip;
+}
+
+.courageMapShell--hero .courageMapCanvas--hero {
+  width: 100%;
+  min-height: 700px;
+  height: 75vh;
+  max-height: 920px;
+  aspect-ratio: auto;
+  border-radius: 1.125rem;
+}
+
+.courageMapCanvasHeroOverlay {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: clamp(0.85rem, 2vw, 1.35rem) clamp(1rem, 2.5vw, 1.5rem);
+  background: linear-gradient(180deg, rgba(12, 8, 28, 0.72) 0%, rgba(12, 8, 28, 0.28) 62%, transparent 100%);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.courageMapCanvasHeroCopy {
+  min-width: 0;
+  max-width: min(36rem, 78%);
+}
+
+.courageMapCanvasEyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(229, 192, 106, 0.92);
+}
+
+.courageMapCanvasTitle {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff8e8;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.courageMapCanvasSubtitle {
+  margin: 0.35rem 0 0;
+  font-size: clamp(0.875rem, 1.8vw, 1rem);
+  color: rgba(255, 248, 232, 0.88);
+}
+
+.courageMapCanvasSelFocus {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(200, 220, 255, 0.85);
+}
+
+.courageMapCanvasStatus {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #fff8e8;
+  background: rgba(26, 16, 53, 0.55);
+  border: 1px solid rgba(229, 192, 106, 0.35);
+}
+
+.courageMapShell--hero .courageMapHotspotRing {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.courageMapShell--hero .courageMapHotspotToken {
+  max-height: min(30vh, 12.5rem);
+}
+
+.courageMapShell--hero .courageMapHotspotLabel {
+  font-size: 0.75rem;
+  max-width: 10.5rem;
+}
+
+.courageMapSupplementary--hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .courageMapShell--hero .courageMapCanvas--hero {
+    min-height: 550px;
+    height: 62vh;
+  }
+}
+
+@media (max-width: 767px) {
+  .courageMapHotspotLabel {
+    font-size: 0.625rem;
+    max-width: 7rem;
+  }
+
+  .courageMapHotspotRing {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .courageMapShell--hero .courageMapCanvas--hero {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+
+  .courageMapShell--hero .courageMapHotspotToken {
+    max-height: min(18vh, 7.5rem);
+  }
+
+  .courageMapCanvasHeroOverlay {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.75rem;
+  }
+
+  .courageMapCanvasHeroCopy {
+    max-width: 100%;
+  }
+
+  .courageMapPreviewCard--anchored {
+    left: 50% !important;
+    top: auto !important;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}

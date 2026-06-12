@@ -8,22 +8,25 @@ export type IdleSessionGuardProps = {
   enabled?: boolean;
   idleMs?: number;
   warningMs?: number;
-  onReturn: () => void;
+  onEndSession: () => void;
+  /** @deprecated Use onEndSession */
+  onReturn?: () => void;
 };
 
 export default function IdleSessionGuard({
   enabled = true,
   idleMs = DEFAULT_IDLE_MS,
   warningMs = DEFAULT_WARNING_MS,
+  onEndSession,
   onReturn,
 }: IdleSessionGuardProps) {
   const [open, setOpen] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(Math.ceil(warningMs / 1000));
   const idleTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
-  const onReturnRef = useRef(onReturn);
+  const onEndSessionRef = useRef(onEndSession ?? onReturn);
 
-  onReturnRef.current = onReturn;
+  onEndSessionRef.current = onEndSession ?? onReturn;
 
   const clearTimers = useCallback(() => {
     if (idleTimerRef.current != null) {
@@ -59,10 +62,10 @@ export default function IdleSessionGuard({
     scheduleIdleTimer();
   }, [closeModal, scheduleIdleTimer]);
 
-  const returnNow = useCallback(() => {
+  const endSessionNow = useCallback(() => {
     closeModal();
     clearTimers();
-    onReturnRef.current();
+    onEndSessionRef.current?.();
   }, [clearTimers, closeModal]);
 
   useEffect(() => {
@@ -105,7 +108,7 @@ export default function IdleSessionGuard({
     countdownTimerRef.current = window.setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
-          returnNow();
+          endSessionNow();
           return 0;
         }
         return prev - 1;
@@ -118,7 +121,7 @@ export default function IdleSessionGuard({
         countdownTimerRef.current = null;
       }
     };
-  }, [open, returnNow]);
+  }, [endSessionNow, open]);
 
   if (!enabled || !open) return null;
 
@@ -135,14 +138,19 @@ export default function IdleSessionGuard({
           Still playing?
         </h2>
         <p id="idle-guard-desc" className="ds-idleGuardBody">
-          Returning to Character Hub in {secondsLeft} second{secondsLeft === 1 ? '' : 's'}.
+          For your safety, we&apos;ll close this session soon to protect your progress and personal
+          info.
+        </p>
+        <p className="ds-idleGuardCountdown" role="status" aria-live="polite">
+          Ending session in {secondsLeft} second{secondsLeft === 1 ? '' : 's'} to protect your
+          progress.
         </p>
         <div className="ds-idleGuardActions">
           <button type="button" className="ds-idleGuardBtn ds-idleGuardBtn--primary" onClick={continuePlaying}>
             Continue Playing
           </button>
-          <button type="button" className="ds-idleGuardBtn" onClick={returnNow}>
-            Return Now
+          <button type="button" className="ds-idleGuardBtn" onClick={endSessionNow}>
+            End Session Now
           </button>
         </div>
       </div>
