@@ -1,3 +1,5 @@
+@import './portal-shell-back.css';
+
 .portal-contentFrame {
   max-width: 70rem;
   margin-left: 0;
@@ -48,9 +50,45 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.portal-shell .family-main:has(.portal-layout--withRail) .family-content,
+.portal-shell .pilot-main:has(.portal-layout--withRail) .family-content,
+.portal-shell .pilot-main:has(.portal-layout--withRail) .pilot-content {
+  flex: none;
+  min-height: auto;
+  overflow: visible;
+}
+
 .portal-shell .family-miniFooter,
 .portal-shell .pilot-miniFooter {
   flex-shrink: 0;
+}
+
+/* Journey / character dashboard — same horizontal inset as active gameplay */
+.portal-shell .family-content:has(.character-dashboard),
+.portal-shell .pilot-content:has(.character-dashboard) {
+  padding: 0 var(--portal-shell-back-inset-x, 1rem) 1.5rem;
+  overflow-x: clip;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hide main-column copyright on embedded gameplay and character journey screens */
+.portal-shell:has(.portal-gameFrame) .family-miniFooter,
+.portal-shell:has(.portal-gameFrame) .pilot-miniFooter,
+.portal-shell:has(.character-dashboard) .family-miniFooter,
+.portal-shell:has(.character-dashboard) .pilot-miniFooter {
+  display: none;
+}
+
+.family-railCopyright,
+.pilot-railCopyright {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--family-border, rgba(36, 62, 112, 0.12));
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--family-muted, rgba(26, 47, 82, 0.55));
 }
 
 @media (min-width: 768px) {

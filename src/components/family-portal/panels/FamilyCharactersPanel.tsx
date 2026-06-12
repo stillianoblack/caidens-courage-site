@@ -18,6 +18,8 @@ import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { getCharacterProgress } from '../../../lib/characterProgressService';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
+import { PortalPageIntro } from '../../portal-design-system';
+import '../../../design-system/components/weekly-adventure-card.css';
 
 function CharacterCardGrid({
   characters,
@@ -33,13 +35,10 @@ function CharacterCardGrid({
   baselinePath: string;
 }) {
   return (
-    <div className="family-dash-grid family-dash-grid--2">
+    <div className="weeklyAdventureCardGrid">
       {characters.map((character) => {
         const isB4CheckIn = character.id === 'b4';
-        const progress =
-          character.id === 'zeke'
-            ? null
-            : getCharacterProgress(character.id, modules);
+        const progress = getCharacterProgress(character.id, modules);
         const gamesLocked = !hasActiveChild || (!baselineComplete && !isB4CheckIn);
         const status =
           isB4CheckIn && !baselineComplete
@@ -102,10 +101,9 @@ export default function FamilyCharactersPanel() {
 
   return (
     <div className="family-panel family-panel--characterHub">
-      <div className="family-panelIntro">
-        <h2 className="family-panelIntroTitle">{CHARACTER_HUB_PAGE.title}</h2>
-        <p className="family-panelIntroSubtitle">{CHARACTER_HUB_PAGE.subtitle}</p>
-      </div>
+      <PortalPageIntro className="family-characterHubIntro">
+        {CHARACTER_HUB_PAGE.subtitle}
+      </PortalPageIntro>
 
       {!loading && claimRequired ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
@@ -150,7 +148,7 @@ export default function FamilyCharactersPanel() {
           </h3>
           <p className="family-characterHubSectionDesc">{CHARACTER_HUB_ADULT_SECTION.description}</p>
         </header>
-        <div className="family-dash-grid family-dash-grid--2">
+        <div className="weeklyAdventureCardGrid">
           {adultGuides.map((character) => (
             <CharacterAdventureCard
               key={character.id}

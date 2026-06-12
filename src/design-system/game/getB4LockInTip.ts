@@ -149,7 +149,7 @@ export function resolveAnswerLabels(
 function tipsLabelForPortal(portalType: B4LockInPortalType): string {
   switch (portalType) {
     case 'family':
-      return 'Try this together';
+      return 'Practice together';
     case 'facilitator':
       return 'Camp & classroom moves';
     default:
@@ -538,8 +538,16 @@ export function getB4LockInTip(input: B4LockInTipInput): B4LockInTipResult {
   headline = enhanced.headline;
   body = enhanced.body;
 
+  if (!isCorrect && !revealCorrectAnswer) {
+    const explanation = headline;
+    headline = 'Not quite.';
+    if (!body && explanation) {
+      body = explanation;
+    }
+  }
+
   return {
-    title: 'B-4 Lock-In Tips',
+    title: 'B-4 Coach',
     headline,
     body,
     tips,

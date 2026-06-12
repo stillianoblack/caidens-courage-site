@@ -1,0 +1,44 @@
+/* Shared gameplay shell — Miranda-style coaching shell reference layout */
+@import './gameplayShellVariants.css';
+
+.ds-gameplayShell,
+.bbc-app.ds-gameplayShell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.bbc-app--coachingShell.bbc-app--game-active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.bbc-app--coachingShell.bbc-app--game-active .bbc-main--quiz {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  scroll-padding-bottom: calc(var(--game-action-bar-height, 5.75rem) + 0.75rem);
+}
+
+/* Variant surface tints */
+.adult-assessment-game.bbc-app {
+  --bbc-bg: #f8fafc;
+  background: linear-gradient(180deg, #f0f4fa 0%, #ffffff 45%, #f8fafc 100%);
+}
+
+.adult-assessment-game.bbc-app--adult-victoria {
+  background: linear-gradient(180deg, #f5f0ff 0%, #ffffff 45%, #faf8ff 100%);
+}
+
+.adult-assessment-game.bbc-app--adult-uncleT {
+  background: linear-gradient(180deg, #fff8f0 0%, #ffffff 45%, #fffdf8 100%);
+}

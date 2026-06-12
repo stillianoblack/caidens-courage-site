@@ -26,6 +26,7 @@ import {
   B4ToolsLibraryPage,
   B4PortalCheckInPage,
   B4PortalFeelingFinderPage,
+  B4PortalMissionPage,
   B4PortalPage,
   B4PortalWeek1Page,
   B4ResultsAdminPage,
@@ -36,6 +37,8 @@ import {
   CharactersPage,
   CharliePortalHubPage,
   CharliePortalMissionPage,
+  ZekePortalHubPage,
+  ZekePortalMissionPage,
   ChatWithB4Page,
   ClassicHomePage,
   ContactPage,
@@ -47,7 +50,6 @@ import {
   HomePage,
   JourneyPage,
   KidsHubPage,
-  KidsCharacterPage,
   KidsPortalPage,
   MissionPage,
   MirandaMissionPage,
@@ -288,9 +290,11 @@ const appRouteChildren = (
         <Route path="kids/b4/check-in" element={<B4PortalCheckInPage />} />
         <Route path="kids/b4/week-1" element={<B4PortalWeek1Page />} />
         <Route path="kids/b4/feeling-finder" element={<B4PortalFeelingFinderPage />} />
+        <Route path="kids/b4/:missionId" element={<B4PortalMissionPage />} />
         <Route path="kids/charlie" element={<CharliePortalHubPage />} />
         <Route path="kids/charlie/:missionId" element={<CharliePortalMissionPage />} />
-        <Route path="kids/zeke" element={<KidsCharacterPage character="zeke" />} />
+        <Route path="kids/zeke" element={<ZekePortalHubPage />} />
+        <Route path="kids/zeke/:missionId" element={<ZekePortalMissionPage />} />
       </Route>
       <Route
         path={PROGRAM_BASELINE_CHECK_PATH}
@@ -361,8 +365,11 @@ const appRouteChildren = (
         <Route path={`${KIDS_PORTAL_PATH}/b4/check-in`} element={<B4PortalCheckInPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/b4/week-1`} element={<B4PortalWeek1Page />} />
         <Route path={`${KIDS_PORTAL_PATH}/b4/feeling-finder`} element={<B4PortalFeelingFinderPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/b4/:missionId`} element={<B4PortalMissionPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/charlie`} element={<CharliePortalHubPage />} />
         <Route path={`${KIDS_PORTAL_PATH}/charlie/:missionId`} element={<CharliePortalMissionPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/zeke`} element={<ZekePortalHubPage />} />
+        <Route path={`${KIDS_PORTAL_PATH}/zeke/:missionId`} element={<ZekePortalMissionPage />} />
       </Route>
 
       {/* Program family hub (/family-hub) */}
@@ -400,20 +407,23 @@ const appRouteChildren = (
         <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/check-in`} element={<B4PortalCheckInPage />} />
         <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/week-1`} element={<B4PortalWeek1Page />} />
         <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/feeling-finder`} element={<B4PortalFeelingFinderPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/b4/:missionId`} element={<B4PortalMissionPage />} />
         <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie`} element={<CharliePortalHubPage />} />
         <Route path={`${FAMILY_HUB_KIDS_BASE}/charlie/:missionId`} element={<CharliePortalMissionPage />} />
-        <Route path={`${FAMILY_HUB_KIDS_BASE}/zeke`} element={<KidsCharacterPage character="zeke" />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/zeke`} element={<ZekePortalHubPage />} />
+        <Route path={`${FAMILY_HUB_KIDS_BASE}/zeke/:missionId`} element={<ZekePortalMissionPage />} />
       </Route>
 
       {/* Legacy kids hub (non-portal shell) */}
       <Route path={KIDS_PORTAL_PATH} element={<KidsPortalPage />} />
-      <Route path={`${KIDS_PORTAL_PATH}/zeke`} element={<KidsCharacterPage character="zeke" />} />
+      <Route path={`${KIDS_PORTAL_PATH}/zeke`} element={<ZekePortalHubPage />} />
+      <Route path={`${KIDS_PORTAL_PATH}/zeke/:missionId`} element={<ZekePortalMissionPage />} />
 
       <Route path={MIRANDA_MYSTERY_FILES_PATH} element={<MirandaMysteryFilesHubPage />} />
       <Route path={`${MIRANDA_MYSTERY_FILES_PATH}/:missionId`} element={<MirandaMissionPage />} />
       <Route
         path={MIRANDA_FIRST_DAY_PATH}
-        element={<Navigate to={`${MIRANDA_MYSTERY_FILES_PATH}/the-missing-student`} replace />}
+        element={<Navigate to={`${MIRANDA_MYSTERY_FILES_PATH}/miranda-mystery-file-1`} replace />}
       />
       <Route path={STUDENT_GALLERY_SUBMIT_PATH} element={<StudentGallerySubmitPage />} />
       <Route path={STUDENT_GALLERY_PUBLIC_PATH} element={<StudentGalleryPublicPage />} />

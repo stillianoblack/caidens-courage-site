@@ -37,6 +37,9 @@ export type PilotStudentDetailSnapshot = {
   status: PilotStudentStatus;
   campProgramCode: string;
   familyProgramCode: string;
+  gradeLevel: string | null;
+  gradeBand: string | null;
+  allowStretchLevel: boolean;
 };
 
 export type PilotNeedsAttentionCounts = {
@@ -237,6 +240,9 @@ export function buildStudentDetailSnapshot(input: {
     }),
     campProgramCode: link?.camp_program_code?.trim() || programCode?.trim() || '—',
     familyProgramCode: link?.family_program_code?.trim() || '—',
+    gradeLevel: participant.grade_level?.trim() || null,
+    gradeBand: participant.grade_band?.trim() || null,
+    allowStretchLevel: Boolean(participant.allow_stretch_level),
   };
 }
 

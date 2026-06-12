@@ -1,0 +1,69 @@
+.ds-readAloud {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(26, 47, 82, 0.12);
+  background: rgba(255, 252, 247, 0.96);
+  box-shadow: 0 6px 18px rgba(26, 47, 82, 0.06);
+}
+
+.ds-readAloud-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ds-readAloud-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ds-readAloud-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #1a2f52;
+}
+
+.ds-readAloud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ds-readAloud-btn {
+  appearance: none;
+  border: 1px solid rgba(26, 47, 82, 0.16);
+  border-radius: 999px;
+  background: #fff;
+  color: #1a2f52;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+}
+
+.ds-readAloud-btn:hover {
+  border-color: rgba(26, 47, 82, 0.28);
+  background: rgba(26, 47, 82, 0.04);
+}
+
+.ds-readAloud-btn:focus-visible {
+  outline: 2px solid #3d7dd6;
+  outline-offset: 2px;
+}
+
+.ds-readAloud-btn--primary {
+  border-color: rgba(61, 125, 214, 0.35);
+  background: rgba(61, 125, 214, 0.1);
+}
+
+@media (max-width: 719px) {
+  .mission-quizLayoutAside .ds-readAloud {
+    margin-top: 0.25rem;
+  }
+}

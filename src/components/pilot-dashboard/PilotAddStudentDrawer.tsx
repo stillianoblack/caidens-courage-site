@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import { createCampChildWithParentLink } from '../../lib/campChildOnboardingService';
+import {
+  GRADE_LEVEL_ENCOURAGE,
+  GRADE_LEVEL_LABEL,
+  GRADE_LEVEL_OPTIONS,
+  isGradeLevel,
+  type GradeLevel,
+} from '../../data/gradeLevelOptions';
 import PilotDrawer from './PilotDrawer';
 
 type PilotAddStudentDrawerProps = {
@@ -21,6 +28,7 @@ export default function PilotAddStudentDrawer({
   const [parentLastName, setParentLastName] = useState('');
   const [parentEmail, setParentEmail] = useState('');
   const [parentPhone, setParentPhone] = useState('');
+  const [gradeLevel, setGradeLevel] = useState<GradeLevel | ''>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,6 +46,7 @@ export default function PilotAddStudentDrawer({
     setParentLastName('');
     setParentEmail('');
     setParentPhone('');
+    setGradeLevel('');
     setError(null);
   };
 
@@ -60,6 +69,7 @@ export default function PilotAddStudentDrawer({
       parentLastName: parentLastName.trim(),
       parentEmail: parentEmail.trim(),
       parentPhone: parentPhone.trim() || undefined,
+      gradeLevel: isGradeLevel(gradeLevel) ? gradeLevel : undefined,
       campProgramCode: programCode.trim(),
     });
 
@@ -149,6 +159,24 @@ export default function PilotAddStudentDrawer({
             value={parentPhone}
             onChange={(event) => setParentPhone(event.target.value)}
           />
+        </label>
+        <label className="pilot-drawerField">
+          <span>{GRADE_LEVEL_LABEL} (recommended)</span>
+          <select
+            value={gradeLevel}
+            onChange={(event) => {
+              const next = event.target.value;
+              setGradeLevel(isGradeLevel(next) ? next : '');
+            }}
+          >
+            <option value="">Choose grade…</option>
+            {GRADE_LEVEL_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="pilot-drawerFieldHint">{GRADE_LEVEL_ENCOURAGE}</span>
         </label>
         {error ? <p className="pilot-syncWarning">{error}</p> : null}
 

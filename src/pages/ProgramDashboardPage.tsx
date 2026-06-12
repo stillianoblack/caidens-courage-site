@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
@@ -41,6 +41,11 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
+import { FacilitatorOverviewCoachProvider } from '../components/pilot-dashboard/coach/FacilitatorOverviewCoachProvider';
+
+const FacilitatorOverviewCoachRail = lazy(
+  () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
+);
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -57,6 +62,7 @@ export default function ProgramDashboardPage() {
 
   const isKidsRoute = isProgramDashboardKidsPath(location.pathname);
   const activeNav = resolveProgramDashboardTab(location.pathname);
+  const showOverviewCoach = !isKidsRoute && activeNav === 'overview';
   const brand = resolvePortalRailBrand();
   const programCode = activeProgram?.programCode;
   const role = readActivePortalRole();
@@ -149,8 +155,21 @@ export default function ProgramDashboardPage() {
   }
 
   return (
+    <FacilitatorOverviewCoachProvider
+      enabled={showOverviewCoach}
+      programCode={programCode}
+      activeProgram={activeProgram}
+      sharedProgramGoals={goalsRecord}
+    >
     <AppShell
       variant="facilitator"
+      rightRail={
+        showOverviewCoach ? (
+          <Suspense fallback={null}>
+            <FacilitatorOverviewCoachRail />
+          </Suspense>
+        ) : undefined
+      }
       sidebar={
         <PilotDashboardSidebar
           activeId={activeNav}
@@ -193,5 +212,6 @@ export default function ProgramDashboardPage() {
         onSkip={skipGoalsForNow}
       />
     </AppShell>
+    </FacilitatorOverviewCoachProvider>
   );
 }

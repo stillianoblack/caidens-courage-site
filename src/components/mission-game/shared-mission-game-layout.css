@@ -34,8 +34,80 @@
   overflow: visible;
 }
 
+/* Gameplay shell: quiz scrolls above a pinned bottom action bar */
+.bbc-app--game-active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  isolation: isolate;
+  position: relative;
+}
+
+.bbc-app--game-active:not(.portal-gameFrame) {
+  min-height: 100dvh;
+  max-height: 100dvh;
+}
+
 .portal-gameFrame.bbc-app--game-active {
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Portal content: game fills the scroll frame; quiz scrolls inside the shell */
+.portal-shell .family-content:has(.portal-gameFrame.bbc-app--game-active),
+.portal-shell .pilot-content:has(.portal-gameFrame.bbc-app--game-active) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0;
+}
+
+.portal-shell .portal-contentFrame:has(.bbc-app--coachingShell.bbc-app--game-active) {
+  padding: 0;
+  max-width: none;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-gameFrame.bbc-app--game-active.bbc-app--coachingShell {
+  flex: 1;
+  min-height: 0;
+  border-radius: 0;
+}
+
+.bbc-app--game-active .bbc-main--quiz {
+  flex: 1;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-bottom: calc(var(--game-action-bar-height, 5.75rem) + 0.75rem);
+  padding-top: 0.5rem;
+  padding-bottom: 0;
+}
+
+.bbc-app--game-active .bbc-bottomBar {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-top: auto;
+  z-index: 10;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(36, 62, 112, 0.1);
+  backdrop-filter: blur(8px);
 }
 
 /* Portal-embedded gameplay headers stay inside the card — never sticky over portal nav */
@@ -45,6 +117,7 @@
 .portal-gameFrame .victoria-topBar,
 .portal-gameFrame .uncleT-topBar,
 .portal-gameFrame .charlie-topBar,
+.portal-gameFrame .ds-gameplayTopBar,
 .portal-gameFrame.miranda-game .miranda-topBar {
   position: relative;
   top: auto;
@@ -56,7 +129,8 @@
 .portal-gameFrame.bbc-app--game-active .miranda-topBar,
 .portal-gameFrame.bbc-app--game-active .victoria-topBar,
 .portal-gameFrame.bbc-app--game-active .uncleT-topBar,
-.portal-gameFrame.bbc-app--game-active .charlie-topBar {
+.portal-gameFrame.bbc-app--game-active .charlie-topBar,
+.portal-gameFrame.bbc-app--game-active .ds-gameplayTopBar {
   max-width: none;
   margin-left: 0;
   margin-right: 0;
@@ -67,7 +141,8 @@
 .portal-gameFrame.bbc-app--game-active .miranda-topBar,
 .portal-gameFrame.bbc-app--game-active .victoria-topBar,
 .portal-gameFrame.bbc-app--game-active .uncleT-topBar,
-.portal-gameFrame.bbc-app--game-active .charlie-topBar {
+.portal-gameFrame.bbc-app--game-active .charlie-topBar,
+.portal-gameFrame.bbc-app--game-active .ds-gameplayTopBar {
   position: relative;
   top: auto;
   z-index: 1;
@@ -89,49 +164,15 @@
   padding-top: max(0.5rem, env(safe-area-inset-top));
 }
 
-.bbc-app--game-active {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  flex: 1;
-  overflow: visible;
-  isolation: isolate;
-}
-
-.bbc-app--game-active .bbc-main--quiz {
-  flex: 1;
-  min-height: auto;
-  overflow: visible;
-  overscroll-behavior: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-top: 0.5rem;
-  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
-}
-
-.portal-gameFrame.bbc-app--game-active .bbc-bottomBar {
-  position: sticky;
-  bottom: 0;
-  left: auto;
-  right: auto;
-  width: 100%;
-  z-index: 2;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
-
-.bbc-app--game-active:not(.portal-gameFrame) .bbc-bottomBar {
-  z-index: 5;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
-
 .shared-mission-game .mission-quizLayout {
   gap: 0.75rem;
 }
 
 /* Coaching rail: left-aligned two-column shell inside facilitator frame */
 .shared-mission-game--coachingRail .game-interactionShellInner {
-  max-width: none;
+  max-width: min(var(--game-shell-layout-max, 66.5rem), 100%);
   margin-left: 0;
-  margin-right: 0;
+  margin-right: auto;
 }
 
 .shared-mission-game--coachingRail .mission-quizLayout.mission-quizLayout--coachingRail {
@@ -155,12 +196,21 @@
 .shared-mission-game--coachingRail .bbc-questionText,
 .shared-mission-game--coachingRail .bbc-answers,
 .shared-mission-game--coachingRail .ds-answerList {
-  max-width: none;
+  max-width: min(var(--game-main-column-max, 42rem), 100%);
 }
 
 .shared-mission-game--coachingRail .bbc-answerCard,
 .shared-mission-game--coachingRail .ds-answerChoice {
-  max-width: none;
+  max-width: min(var(--game-main-column-max, 42rem), 100%);
+}
+
+.shared-mission-game--coachingRail .mission-quizLayoutScenario {
+  margin-bottom: 0.375rem;
+}
+
+.shared-mission-game--coachingRail .mission-quizLayoutScenario .ds-questionCard--gameScenario {
+  padding: 0.875rem 1rem;
+  max-width: min(var(--game-main-column-max, 42rem), 100%);
 }
 
 /* Compact desktop gameplay — keep questions and answers above the fold */
@@ -173,12 +223,19 @@
     margin-right: auto;
   }
 
-  .shared-mission-game--coachingRail .bbc-main--quiz,
+  .bbc-app--coachingShell.bbc-app--game-active .bbc-main--quiz,
+  .bbc-main--quiz:has(.shared-mission-game--coachingRail),
   .portal-gameFrame.bbc-app--game-active .bbc-main--quiz {
     padding-top: 1rem;
     max-width: none;
+    width: 100%;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  .bbc-app--coachingShell.bbc-app--game-active .mission-quizLayout--coachingRail {
+    width: 100%;
+    max-width: min(var(--game-shell-layout-max, 66.5rem), 100%);
   }
 
   .shared-mission-game .mission-quizLayout {
@@ -206,10 +263,6 @@
   .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-answerCard--assessment {
     max-width: 43.75rem;
     min-height: 4rem;
-  }
-
-  .bbc-app--game-active .bbc-main--quiz {
-    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -278,6 +331,15 @@
   .portal-contentFrame.family-content,
   .portal-contentFrame.pilot-content {
     padding: 1.25rem 1.25rem 2rem;
+  }
+
+  .portal-shell .family-content:has(.portal-gameFrame.bbc-app--game-active),
+  .portal-shell .pilot-content:has(.portal-gameFrame.bbc-app--game-active) {
+    padding-bottom: 0;
+  }
+
+  .portal-shell .portal-contentFrame:has(.bbc-app--coachingShell.bbc-app--game-active) {
+    padding: 0;
   }
 
   .portal-gameFrame.bbc-app--game-active {

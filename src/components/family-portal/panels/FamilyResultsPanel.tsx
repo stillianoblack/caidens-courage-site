@@ -1,6 +1,7 @@
 import React from 'react';
 import { useFamilyResults } from '../../../hooks/useFamilyResults';
 import type { FamilyResultEntry } from '../../../lib/familyResultsService';
+import { PortalPageIntro } from '../../portal-design-system';
 
 function formatCompletedDate(iso: string): string {
   if (!iso) return '—';
@@ -68,12 +69,9 @@ export default function FamilyResultsPanel() {
 
   return (
     <div className="family-panel family-panel--results">
-      <header className="family-panelIntro">
-        <h1 className="family-panelIntroTitle">Results</h1>
-        <p className="family-panelIntroSubtitle">
-          Assessment scores and reflections for everyone in your family program.
-        </p>
-      </header>
+      <PortalPageIntro>
+        Assessment scores and reflections for everyone in your family program.
+      </PortalPageIntro>
 
       {loading ? (
         <div className="family-progressSkeleton" aria-busy="true" aria-label="Loading results">

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { afterIdle } from '../lib/defer';
+import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
+import { getGradeBand } from '../lib/getGradeBand';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../lib/pilotTrackingLocalStorage';
 import { resolveParticipantDisplayName, buildParticipantNameLookup } from '../lib/pilotResultsDisplay';
 import {
@@ -9,15 +11,13 @@ import {
   resolveStudentStatus,
   type PilotStudentStatus,
 } from '../lib/pilotStudentProgress';
-import {
-  fetchStudentParticipantsFromSupabase,
-  loadPilotTrackingData,
-  type StudentParticipantRecord,
-} from '../lib/pilotTrackingService';
+import { loadProgramParticipantDirectory } from '../lib/pilotParticipantDirectory';
+import { loadPilotTrackingData, type StudentParticipantRecord } from '../lib/pilotTrackingService';
 import {
   fetchStudentFamilyLinksByCampProgram,
   type StudentFamilyLink,
 } from '../lib/studentFamilyLinkService';
+import { resolveSyncWarningMessage } from '../lib/syncWarningMessages';
 
 export type PilotRosterRow = {
   participantId: string;
@@ -37,6 +37,8 @@ export type PilotRosterRow = {
   status: PilotStudentStatus;
   moduleCompletions: number;
   lastActivityAt: string | null;
+  gradeLevel: string | null;
+  gradeBand: string | null;
 };
 
 export function usePilotRosterData(
@@ -63,18 +65,21 @@ export function usePilotRosterData(
 
     setLoading(true);
     try {
-      const [participantsPayload, linksPayload, trackingPayload] = await Promise.all([
-        fetchStudentParticipantsFromSupabase(code),
+      const [linksPayload, trackingPayload] = await Promise.all([
         fetchStudentFamilyLinksByCampProgram(code),
         loadPilotTrackingData(code),
       ]);
 
-      setParticipants(participantsPayload.participants);
+      const directoryPayload = await loadProgramParticipantDirectory(code);
+
+      setParticipants(directoryPayload.participants);
       setLinks(linksPayload.links);
       setAssessmentResults(trackingPayload.assessmentResults);
       setModuleResults(trackingPayload.moduleResults);
       setWarning(
-        participantsPayload.error || linksPayload.error || trackingPayload.warning || undefined,
+        resolveSyncWarningMessage(
+          directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || undefined,
+        ) ?? undefined,
       );
     } finally {
       setLoading(false);
@@ -132,12 +137,25 @@ export function usePilotRosterData(
             modules: moduleResults,
             participantCreatedAt: participant.created_at,
           }),
+          gradeLevel: normalizeGradeLevelStorage(participant.grade_level),
+          gradeBand: participant.grade_band?.trim() || null,
         };
       })
       .sort((a, b) => a.childName.localeCompare(b.childName));
   }, [assessmentResults, links, moduleResults, participants, programCode, programFamilyAccessCode]);
 
   const participantLookup = useMemo(() => buildParticipantNameLookup(participants), [participants]);
+
+  const updateParticipantGrade = useCallback((participantId: string, gradeLevel: GradeLevel) => {
+    const gradeBand = getGradeBand(gradeLevel);
+    setParticipants((prev) =>
+      prev.map((row) =>
+        row.id === participantId
+          ? { ...row, grade_level: gradeLevel, grade_band: gradeBand }
+          : row,
+      ),
+    );
+  }, []);
 
   return {
     rows,
@@ -149,6 +167,7 @@ export function usePilotRosterData(
     loading: enabled && loading,
     warning,
     refresh,
+    updateParticipantGrade,
     resolveName: (participantId: string) =>
       resolveParticipantDisplayName(participantId, participantLookup),
   };

@@ -8,6 +8,9 @@ import GoalsOnboardingDrawer from '../portal-design-system/GoalsOnboardingDrawer
 import MarketingShowcaseCard from '../portal-design-system/MarketingShowcaseCard';
 import MetricCard from '../portal-design-system/MetricCard';
 import SlideOutDrawer from '../portal-design-system/SlideOutDrawer';
+import B4InsightsDrawer from '../../design-system/components/B4InsightsDrawer';
+import { B4_AVATAR_SRC } from '../../data/b4/avatar';
+import '../../design-system/components/b4-insights-drawer.css';
 import StatusChip from '../portal-design-system/StatusChip';
 import { useToast } from '../portal-design-system/ToastProvider';
 import PilotAdminStudentTable from '../pilot-dashboard/PilotAdminStudentTable';
@@ -30,8 +33,10 @@ import {
 } from '../../data/designSystemDemoData';
 import FeaturedStudentWorkCard from './FeaturedStudentWorkCard';
 import GameLearningDesignSystemSection from './GameLearningDesignSystemSection';
+import GameUIPatternsSection from './GameUIPatternsSection';
 import FamilyPortalDesignSystemSection from './FamilyPortalDesignSystemSection';
 import InteractiveModuleSystemSection from './InteractiveModuleSystemSection';
+import ContentClassificationSection from './ContentClassificationSection';
 import '../portal-design-system/portal-design-system.css';
 import '../pilot-dashboard/pilot-dashboard.css';
 import './design-system-page.css';
@@ -41,6 +46,7 @@ const SECTIONS = [
   { id: 'buttons', label: 'Buttons' },
   { id: 'cards', label: 'Cards' },
   { id: 'drawers', label: 'Drawers' },
+  { id: 'b4-insights', label: 'B-4 Insights' },
   { id: 'toasts', label: 'Toasts' },
   { id: 'copy', label: 'Copy Values' },
   { id: 'status', label: 'Status Chips' },
@@ -50,7 +56,9 @@ const SECTIONS = [
   { id: 'b4', label: 'B-4' },
   { id: 'goals', label: 'Goals' },
   { id: 'game-learning', label: 'Game Learning' },
+  { id: 'game-ui-patterns', label: 'Game UI Patterns' },
   { id: 'interactive-modules', label: 'Interactive Modules' },
+  { id: 'content-classification', label: 'Content Classification' },
   { id: 'family-portal', label: 'Family Portal' },
 ] as const;
 
@@ -95,6 +103,7 @@ export default function DesignSystemPageContent() {
   const [studentDrawerOpen, setStudentDrawerOpen] = useState(false);
   const [facilitatorGoalsOpen, setFacilitatorGoalsOpen] = useState(false);
   const [familyGoalsOpen, setFamilyGoalsOpen] = useState(false);
+  const [b4InsightsOpen, setB4InsightsOpen] = useState(false);
 
   return (
     <>
@@ -281,6 +290,62 @@ export default function DesignSystemPageContent() {
             }}
             onRemindLater={noopAsync}
             onSkip={noopAsync}
+          />
+        </section>
+
+        <section id="b4-insights" className="dsPageSection">
+          <h2 className="dsPageSectionTitle">B-4 Insights Drawer</h2>
+          <p className="dsPageSectionSub">
+            Editorial interpretation drawer for dashboard metrics. Use when a user clicks a progress card
+            and needs meaning + next steps. Do not use for settings, forms, admin editing, or chat.
+          </p>
+          <div className="dsPageRow">
+            <button type="button" className="dsBtnSecondary" onClick={() => setB4InsightsOpen(true)}>
+              Open B-4 Insights drawer
+            </button>
+          </div>
+          <B4InsightsDrawer
+            isOpen={b4InsightsOpen}
+            onClose={() => setB4InsightsOpen(false)}
+            portalType="family"
+            title="Justice's Progress Snapshot"
+            eyebrow="B-4 Insights"
+            childName="Justice"
+            programName="Blue Ribbon Results Academy"
+            avatarImage={B4_AVATAR_SRC}
+            summary="Justice has completed 2 of 12 modules and finished the B-4 Check-In. The next best step is setting family goals so B-4 can personalize activities."
+            insights={[
+              {
+                id: 'progress',
+                label: 'Recent progress',
+                detail: 'Momentum is building across weekly adventures.',
+                tone: 'progress',
+              },
+              {
+                id: 'goals',
+                label: 'Family goals not set',
+                detail: 'Goals help B-4 recommend better activities.',
+                tone: 'setup',
+              },
+            ]}
+            recommendations={[
+              'Continue weekly adventures to grow overall progress.',
+              'Set family goals to personalize recommendations.',
+            ]}
+            nextActions={[
+              {
+                id: 'goals',
+                label: 'Set Family Goals',
+                href: familyPortalPath('settings', '/family-hub'),
+                variant: 'primary',
+              },
+            ]}
+            metrics={[
+              { label: 'Overall progress', value: '24%' },
+              { label: 'Baseline status', value: 'Complete' },
+              { label: 'Modules completed', value: '2 of 12' },
+              { label: 'Family goals', value: 'Not set yet' },
+            ]}
           />
         </section>
 
@@ -536,7 +601,9 @@ export default function DesignSystemPageContent() {
         </section>
 
         <GameLearningDesignSystemSection />
+        <GameUIPatternsSection />
         <InteractiveModuleSystemSection />
+        <ContentClassificationSection />
         <FamilyPortalDesignSystemSection />
       </main>
     </>

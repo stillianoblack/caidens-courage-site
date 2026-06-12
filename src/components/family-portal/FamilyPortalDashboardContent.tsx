@@ -40,7 +40,7 @@ function renderActivePanel(activeNav: FamilySidebarNavId): React.ReactNode {
 /** Main family portal panels — tab-panel pattern keyed off location.pathname. */
 export default function FamilyPortalDashboardContent({ basePath }: FamilyPortalDashboardContentProps) {
   const location = useLocation();
-  const activeNav = resolvePortalNavId(location.pathname, basePath);
+  const activeNav = resolvePortalNavId(location.pathname, basePath, location.search);
 
   return <div className="family-tabPanel">{renderActivePanel(activeNav)}</div>;
 }

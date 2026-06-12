@@ -12,6 +12,7 @@ type CaidenGameHeaderProps = {
   onToggleSound?: () => void;
   playerName?: string;
   playerIndex?: number;
+  hideExitButton?: boolean;
 };
 
 export default function CaidenGameHeader({
@@ -22,12 +23,22 @@ export default function CaidenGameHeader({
   onToggleSound,
   playerName,
   playerIndex = 1,
+  hideExitButton = false,
 }: CaidenGameHeaderProps) {
   return (
-    <header className="caiden-topBar">
-      <button type="button" className="bbc-exitBtn caiden-exitBtn" onClick={onExit} aria-label="Exit quest">
-        ×
-      </button>
+    <header
+      className={[
+        'caiden-topBar',
+        hideExitButton ? 'caiden-topBar--noExit' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {hideExitButton ? null : (
+        <button type="button" className="bbc-exitBtn caiden-exitBtn" onClick={onExit} aria-label="Exit quest">
+          ×
+        </button>
+      )}
       {showProgress ? (
         <div
           className="caiden-progressTrack"

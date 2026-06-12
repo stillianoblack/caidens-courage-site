@@ -13,6 +13,7 @@ type MirandaGameHeaderProps = {
   onToggleSound?: () => void;
   playerName?: string;
   playerIndex?: number;
+  hideExitButton?: boolean;
 };
 
 /** Floating Miranda header — no white bar; rounded progress pill on the page. */
@@ -25,12 +26,22 @@ export default function MirandaGameHeader({
   onToggleSound,
   playerName,
   playerIndex = 1,
+  hideExitButton = false,
 }: MirandaGameHeaderProps) {
   return (
-    <header className="miranda-topBar">
-      <button type="button" className="bbc-exitBtn miranda-exitBtn" onClick={onExit} aria-label="Exit case">
-        ×
-      </button>
+    <header
+      className={[
+        'miranda-topBar',
+        hideExitButton ? 'miranda-topBar--noExit' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {hideExitButton ? null : (
+        <button type="button" className="bbc-exitBtn miranda-exitBtn" onClick={onExit} aria-label="Exit case">
+          ×
+        </button>
+      )}
       {showProgress ? (
         <div
           className="miranda-progressTrack"

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import AdultLearningHub from '../components/adult-learning/AdultLearningHub';
-import '../components/adult-learning/adult-learning-hub.css';
 import { FAMILY_HUB_PATH } from '../config/courageRoutes';
 import { getAdultGuideById } from '../data/adult/adultGuideRegistry';
 

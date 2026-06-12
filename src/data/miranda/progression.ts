@@ -8,11 +8,12 @@ export type MirandaNextCase = {
 };
 
 const NEXT_CASE_ICONS: Record<number, string> = {
+  1: '📋',
   2: '🔍',
-  3: '🔤',
-  4: '📓',
-  5: '👣',
-  6: '🔍',
+  3: '🔍',
+  4: '🔤',
+  5: '📓',
+  6: '👣',
 };
 
 export function getMirandaMissionByFileNumber(fileNumber: number): MirandaMissionMeta | undefined {

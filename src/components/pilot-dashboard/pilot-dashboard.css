@@ -339,6 +339,18 @@
   background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
 }
 
+.pilot-kpiCard--clickable {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.pilot-kpiCard--clickable:hover {
+  border-color: rgba(229, 192, 106, 0.4);
+  box-shadow: 0 8px 24px -12px rgba(36, 62, 112, 0.2);
+}
+
 .pilot-kpiLabel {
   font-size: 0.6875rem;
   font-weight: 800;
@@ -1150,6 +1162,29 @@
     grid-template-columns: 13rem 1fr;
     align-items: start;
   }
+}
+
+.pilot-gameLibraryPreview {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px dashed var(--pilot-border);
+  border-radius: 0.875rem;
+  background: rgba(36, 62, 112, 0.03);
+}
+
+.pilot-gameLibraryPreview .pilot-dash-cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.pilot-gameLibraryPreviewList {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(36, 62, 112, 0.72);
 }
 
 .pilot-activitiesCategories {
@@ -3705,6 +3740,46 @@ a.pilot-overviewMiniCard:hover {
 .pilot-resultsTable--adminCompact .pilot-adminCellNum {
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.pilot-adminCellGrade {
+  min-width: 9.5rem;
+}
+
+.pilot-rosterGradeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pilot-rosterGradeSelect {
+  width: 100%;
+  max-width: 10.5rem;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.35rem;
+  border-radius: 6px;
+  border: 1px solid rgba(36, 62, 112, 0.22);
+  background: #fff;
+  color: rgba(20, 36, 68, 0.92);
+}
+
+.pilot-rosterGradeStatus {
+  font-size: 0.68rem;
+  color: rgba(36, 62, 112, 0.65);
+}
+
+.pilot-rosterGradeStatus--ok {
+  color: #1a7f4b;
+}
+
+.pilot-rosterGradeStatus--hint {
+  font-variant-numeric: tabular-nums;
+}
+
+.pilot-drawerFieldHint {
+  font-size: 0.78rem;
+  color: rgba(36, 62, 112, 0.72);
+  margin-top: 0.25rem;
 }
 
 .pilot-drawerGrid dd .pilot-copyChip {

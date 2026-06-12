@@ -1,5 +1,8 @@
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
+import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
+import { getGradeBand } from './getGradeBand';
 import { isValidSupabaseParticipantId } from './pilotTrackingService';
+import { saveParticipantGradeLevel } from './participantGradeService';
 import { createCampStudentFamilyLink } from './studentFamilyLinkService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -10,6 +13,7 @@ export type CampChildOnboardingInput = {
   parentLastName: string;
   parentEmail: string;
   parentPhone?: string;
+  gradeLevel?: GradeLevel;
   campProgramCode: string;
 };
 
@@ -39,10 +43,13 @@ async function insertCampChildParticipant(input: {
   firstName: string;
   nickname: string;
   campProgramCode: string;
+  gradeLevel?: GradeLevel;
 }): Promise<{ participantId: string } | { error: string }> {
   const firstName = input.firstName.trim();
   const nickname = input.nickname.trim();
   const campProgramCode = input.campProgramCode.trim();
+  const gradeLevel = normalizeGradeLevelStorage(input.gradeLevel) ?? undefined;
+  const gradeBand = gradeLevel ? getGradeBand(gradeLevel) : undefined;
 
   console.info('[CAMP_CHILD_INSERT_START]', {
     first_name: firstName,
@@ -83,10 +90,14 @@ async function insertCampChildParticipant(input: {
         return { error: 'Existing participant id is not a valid UUID.' };
       }
 
-      const updatePayload = {
+      const updatePayload: Record<string, string> = {
         nickname,
         first_name: firstName,
       };
+      if (gradeLevel) {
+        updatePayload.grade_level = gradeLevel;
+        updatePayload.grade_band = gradeBand!;
+      }
 
       const { error: updateError } = await withTimeout(
         supabase.from('participants').update(updatePayload).eq('id', participantId),
@@ -106,13 +117,17 @@ async function insertCampChildParticipant(input: {
       return { participantId };
     }
 
-    const insertPayload = {
+    const insertPayload: Record<string, string | null> = {
       role: 'student',
       nickname,
       first_name: firstName,
       program_code: campProgramCode,
       group_name: null,
     };
+    if (gradeLevel) {
+      insertPayload.grade_level = gradeLevel;
+      insertPayload.grade_band = gradeBand!;
+    }
 
     const { data, error: insertError } = await withTimeout(
       supabase.from('participants').insert(insertPayload).select('id').single(),
@@ -164,6 +179,7 @@ export async function createCampChildWithParentLink(
       firstName: childFirstName,
       nickname: displayName,
       campProgramCode,
+      gradeLevel: normalizeGradeLevelStorage(input.gradeLevel) ?? undefined,
     });
 
     if ('error' in participantResult) {
@@ -201,7 +217,12 @@ export async function createCampChildWithParentLink(
       parent_email: parentEmail,
       parent_last_name: parentLastName,
       link_id: linkResult.link?.id ?? null,
+      grade_level: input.gradeLevel ?? null,
     });
+
+    if (input.gradeLevel && normalizeGradeLevelStorage(input.gradeLevel)) {
+      await saveParticipantGradeLevel(participantId, normalizeGradeLevelStorage(input.gradeLevel)!);
+    }
 
     return {
       success: true,

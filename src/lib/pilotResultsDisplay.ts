@@ -3,12 +3,28 @@ import type { StudentParticipantRecord } from './pilotTrackingService';
 
 export type ParticipantNameLookup = Map<string, Pick<StudentParticipantRecord, 'nickname' | 'first_name'>>;
 
+export function mergeParticipantRecords(
+  ...groups: StudentParticipantRecord[][]
+): StudentParticipantRecord[] {
+  const byId = new Map<string, StudentParticipantRecord>();
+  for (const group of groups) {
+    for (const participant of group) {
+      const id = participant.id?.trim();
+      if (!id) continue;
+      byId.set(id, participant);
+    }
+  }
+  return Array.from(byId.values());
+}
+
 export function buildParticipantNameLookup(
   participants: StudentParticipantRecord[],
 ): ParticipantNameLookup {
   const lookup: ParticipantNameLookup = new Map();
   for (const participant of participants) {
-    lookup.set(participant.id, {
+    const id = participant.id?.trim();
+    if (!id) continue;
+    lookup.set(id, {
       nickname: participant.nickname,
       first_name: participant.first_name,
     });
@@ -24,8 +40,8 @@ export function resolveParticipantDisplayName(
   if (!id) return 'Unknown Student';
   const participant = lookup.get(id);
   return (
-    participant?.first_name?.trim() ||
     participant?.nickname?.trim() ||
+    participant?.first_name?.trim() ||
     'Unknown Student'
   );
 }

@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
+import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
+import '../b4-baseline-check/b4-baseline-check.css';
 import CompletionCard from '../b4-guide/CompletionCard';
 import ModeSelectCard from '../b4-guide/ModeSelectCard';
 import ModuleStepCard from '../b4-guide/ModuleStepCard';
-import QuestionCard from '../b4-guide/QuestionCard';
 import ResultCard from '../b4-guide/ResultCard';
 import '../b4-guide/b4-guide.css';
 import {
@@ -18,9 +19,20 @@ import {
   type B4GuideResultType,
 } from '../../data/b4GuideContent';
 import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
-import CharacterAvatar from '../game-assessment/shared/CharacterAvatar';
-import SoundToggleButton from '../game-assessment/shared/SoundToggleButton';
+import GameInteractionShell from '../game-assessment/shared/GameInteractionShell';
+import GameplayTopBar from '../../design-system/game/GameplayTopBar';
+import GameplayShell from '../../design-system/game/GameplayShell';
+import CoachingShellQuizFrame from '../../design-system/game/CoachingShellQuizFrame';
+import ScenarioCard from '../../design-system/game/ScenarioCard';
+import AssessmentCoachRail from '../../design-system/game/AssessmentCoachRail';
+import {
+  buildAssessmentCoachRailSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromParts,
+} from '../../design-system/narration';
+import { resolveGameplayTopBarFlames } from '../../design-system/game/resolveGameplayTopBarConfig';
 import { B4_GAME_AVATAR_SRC } from '../../data/b4/portalAssets';
+import '../../design-system/game/gameDesignStyles';
 
 type Screen =
   | 'select'
@@ -168,43 +180,219 @@ export default function B4GuideFlow({
       ? currentModuleStep.instructions[moduleAnswers['focus-move']]
       : null;
 
-  return (
-    <main
-      className={['b4g-app', embedded ? 'b4-guide--embedded' : '', embedded ? 'portal-gameFrame' : '']
-        .filter(Boolean)
-        .join(' ')}
-      aria-label={B4_GUIDE_PAGE_TITLE}
-    >
-      <div className="b4g-shell">
-        {embedded ? (
-          <div className="b4g-portalTopBar">
-            <span aria-hidden="true" />
-            <SoundToggleButton soundEnabled={soundEnabled} onToggle={toggleSound} />
-          </div>
-        ) : null}
+  const isAssessmentQuiz = screen === 'assessment';
+  const assessmentProgress = Math.round(
+    ((assessmentIndex + (assessmentChecked ? 1 : 0)) / B4_ASSESSMENT_QUESTIONS.length) * 100,
+  );
+  const b4Flames = resolveGameplayTopBarFlames('b4', { useB4Header: true });
+  const currentAssessmentQuestion = B4_ASSESSMENT_QUESTIONS[assessmentIndex];
 
-        {embedded && screen === initialScreen ? (
-          <button type="button" className="b4g-back" onClick={handleBack}>
-            ← Back to B-4 Missions
-          </button>
-        ) : screen !== initialScreen ? (
-          <button type="button" className="b4g-back" onClick={resetAll}>
-            ← Back to menu
-          </button>
-        ) : null}
+  const guideReadAloudSegments = useMemo(() => {
+    if (!currentAssessmentQuestion) return [];
 
-        {embedded ? (
-          <div className="b4g-portalHero">
-            <CharacterAvatar
-              src={B4_GAME_AVATAR_SRC}
-              alt="B-4"
-              size="medium"
-              theme="b4"
-              className="b4g-portalAvatar"
+    const questionSegments = buildReadAloudSegmentsFromParts({
+      scenarioTitle: `Question ${assessmentIndex + 1} of ${B4_ASSESSMENT_QUESTIONS.length}`,
+      scenarioDescription: 'Choose the answer that best describes your focus right now.',
+      question: currentAssessmentQuestion.prompt,
+      choices: currentAssessmentQuestion.choices.map(
+        (choice, index) =>
+          `Choice ${['one', 'two', 'three', 'four', 'five', 'six'][index] ?? index + 1}. ${choice.label}`,
+      ),
+    });
+
+    const coachSegments = buildAssessmentCoachRailSegments({
+      guideCharacter: 'b4',
+      checked: assessmentChecked,
+      hasSelection: Boolean(assessmentSelected),
+    });
+
+    return buildGameplayReadAloudSegments(
+      questionSegments,
+      coachSegments,
+      assessmentChecked ? 'coach_only' : 'full',
+    );
+  }, [
+    assessmentChecked,
+    assessmentIndex,
+    assessmentSelected,
+    currentAssessmentQuestion,
+  ]);
+
+  const handleIdleReturn = useCallback(() => {
+    if (embedded && onExit) {
+      onExit();
+      return;
+    }
+    resetAll();
+  }, [embedded, onExit, resetAll]);
+
+  if (embedded) {
+    return (
+      <GameplayShell
+        variant="b4"
+        embedded
+        active={isAssessmentQuiz}
+        coachingShell={isAssessmentQuiz}
+        idleSessionGuard={{ enabled: isAssessmentQuiz, onReturn: handleIdleReturn }}
+        topBar={
+          <GameplayTopBar
+            variant="b4"
+            backLabel={screen === initialScreen ? 'Back to B-4 Missions' : 'Back to menu'}
+            onBack={handleBack}
+            progressPercent={assessmentProgress}
+            showProgress={isAssessmentQuiz}
+            flameDisplay={b4Flames.flameDisplay}
+            flamesLit={b4Flames.flamesLit}
+            soundEnabled={soundEnabled}
+            onToggleSound={toggleSound}
+          />
+        }
+        footer={
+          isAssessmentQuiz ? (
+            <B4BaselineBottomBar
+              canCheck={Boolean(assessmentSelected) && !assessmentChecked}
+              checked={assessmentChecked}
+              hideInlineFeedback
+              coachingShell
+              onSkip={handleAssessmentContinue}
+              onCheck={handleAssessmentCheck}
+              onContinue={handleAssessmentContinue}
             />
-          </div>
-        ) : null}
+          ) : null
+        }
+      >
+        <main
+          className={[
+            'bbc-main',
+            screen === 'select' ? 'bbc-main--landing' : '',
+            isAssessmentQuiz ? 'bbc-main--quiz' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-label={B4_GUIDE_PAGE_TITLE}
+        >
+          {screen === 'select' ? (
+            <div className="game-focusFlameLanding">
+              <div className="game-focusFlameLandingMain">
+                <div className="bbc-landing game-landing game-landing--focusFlameShell">
+                  <p className="bbc-eyebrow">Interactive check-in</p>
+                  <h1 className="bbc-title">{B4_GUIDE_PAGE_TITLE}</h1>
+                  <h2 className="bbc-subtitle">What do you want to try first?</h2>
+                  <div className="b4g-mode-grid">
+                    {B4_GUIDE_MODE_OPTIONS.map((option) => (
+                      <ModeSelectCard
+                        key={option.id}
+                        title={option.title}
+                        description={option.description}
+                        cta={option.cta}
+                        onSelect={option.id === 'assessment' ? startAssessment : startModule}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <aside className="game-focusFlameLandingAside">
+                <AssessmentCoachRail guideCharacter="b4" phase="landing" />
+              </aside>
+            </div>
+          ) : null}
 
+          {isAssessmentQuiz && currentAssessmentQuestion ? (
+            <GameInteractionShell className="shared-mission-game shared-mission-game--coachingRail">
+              <CoachingShellQuizFrame
+                scenario={
+                  <ScenarioCard
+                    sceneLabel="Scenario"
+                    tag={`Question ${assessmentIndex + 1} of ${B4_ASSESSMENT_QUESTIONS.length}`}
+                    storyPrompt="Choose the answer that best describes your focus right now."
+                    characterId="b4"
+                    avatarSrc={B4_GAME_AVATAR_SRC}
+                    avatarAlt="B-4"
+                  />
+                }
+                question={
+                  <h2 className="bbc-questionText mission-questionText" id="b4g-question-prompt">
+                    {currentAssessmentQuestion.prompt}
+                  </h2>
+                }
+                answers={
+                  <div className="bbc-answers" role="group" aria-labelledby="b4g-question-prompt">
+                    {currentAssessmentQuestion.choices.map((choice) => {
+                      const isSelected = assessmentSelected === choice.id;
+                      return (
+                        <button
+                          key={choice.id}
+                          type="button"
+                          className={[
+                            'bbc-answerCard',
+                            isSelected ? 'bbc-answerCard--selected' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          disabled={assessmentChecked}
+                          aria-pressed={isSelected}
+                          onClick={() => handleAssessmentSelect(choice.id)}
+                        >
+                          {choice.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                }
+                coachRail={
+                  <AssessmentCoachRail
+                    guideCharacter="b4"
+                    checked={assessmentChecked}
+                    hasSelection={Boolean(assessmentSelected)}
+                  />
+                }
+                readAloudSegments={guideReadAloudSegments}
+                readAloudResetKey={`${currentAssessmentQuestion.id}-${assessmentChecked ? 'checked' : 'open'}`}
+              />
+            </GameInteractionShell>
+          ) : null}
+
+          {screen === 'assessment-result' && assessmentResult ? (
+            <ResultCard
+              result={B4_GUIDE_RESULTS[assessmentResult]}
+              onStartWeek1={startModule}
+              onBack={resetAll}
+            />
+          ) : null}
+
+          {screen === 'module' && currentModuleStep ? (
+            <>
+              {moduleStepIndex === 0 ? (
+                <h2 className="b4g-screen-title">{B4_MODULE_TITLE}</h2>
+              ) : null}
+              <ModuleStepCard
+                step={currentModuleStep}
+                stepIndex={moduleStepIndex}
+                totalSteps={B4_MODULE_STEPS.length}
+                selectedChoiceId={moduleAnswers[currentModuleStep.id]}
+                instruction={focusMovePending ? focusMoveInstruction : null}
+                onSelect={handleModuleSelect}
+                onContinue={currentModuleStep.kind === 'focus-move' ? advanceModule : undefined}
+              />
+            </>
+          ) : null}
+
+          {screen === 'completion' ? (
+            <CompletionCard
+              title={B4_COMPLETION.title}
+              b4Message={B4_COMPLETION.b4Message}
+              badge={B4_COMPLETION.badge}
+              onTryAgain={resetAll}
+            />
+          ) : null}
+        </main>
+      </GameplayShell>
+    );
+  }
+
+  return (
+    <main className="b4g-app" aria-label={B4_GUIDE_PAGE_TITLE}>
+      <div className="b4g-shell">
         {screen === 'select' ? (
           <>
             <header className="b4g-header">
@@ -224,21 +412,6 @@ export default function B4GuideFlow({
               ))}
             </div>
           </>
-        ) : null}
-
-        {screen === 'assessment' ? (
-          <QuestionCard
-            prompt={B4_ASSESSMENT_QUESTIONS[assessmentIndex].prompt}
-            choices={B4_ASSESSMENT_QUESTIONS[assessmentIndex].choices}
-            current={assessmentIndex + 1}
-            total={B4_ASSESSMENT_QUESTIONS.length}
-            progressLabel={`Question ${assessmentIndex + 1} of ${B4_ASSESSMENT_QUESTIONS.length}`}
-            selectedId={assessmentSelected}
-            checked={assessmentChecked}
-            onSelect={handleAssessmentSelect}
-            onCheck={handleAssessmentCheck}
-            onContinue={handleAssessmentContinue}
-          />
         ) : null}
 
         {screen === 'assessment-result' && assessmentResult ? (

@@ -7,6 +7,7 @@ import { PILOT_STUDENT_GALLERY } from '../../../data/pilotDashboardContent';
 import { trackEvent } from '../../../lib/analytics';
 import { requestGalleryCountsRefresh } from '../../../lib/galleryNavCounts';
 import { readGalleryProgramSettingsLocal } from '../../../lib/galleryProgramSettings';
+import { PortalPageIntro } from '../../portal-design-system';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import {
   fetchCommunityGalleryItems,
@@ -220,7 +221,7 @@ export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
 
   return (
     <div className="pilot-panel pilot-panel--gallery">
-      <p className="pilot-panelIntro">{PILOT_STUDENT_GALLERY.description}</p>
+      <PortalPageIntro>{PILOT_STUDENT_GALLERY.description}</PortalPageIntro>
 
       <MarketingShowcaseCard
         title="Celebrate Student Creativity"

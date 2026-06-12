@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'development') {
   console.log('SUPABASE_CONFIG_READY', hasSupabaseEnv);
   if (!hasSupabaseEnv) {
     console.warn(
-      'Supabase env vars missing or invalid. Check .env.local at project root and restart yarn start.',
+      '[LOCAL_DATA_DEBUG] Supabase env missing. Localhost may not show production data. Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY in .env.local.',
     );
   }
 }

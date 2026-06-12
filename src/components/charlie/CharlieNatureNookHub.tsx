@@ -1,79 +1,86 @@
 import React, { useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import PortalBackButton from '../portal/PortalBackButton';
-import CharacterAvatar from '../game-assessment/shared/CharacterAvatar';
-import { CHARLIE_AVATAR_SRC, CHARLIE_HUB, CHARLIE_HUB_MISSIONS } from '../../data/charlie';
-import { getPortalRoute, remapPortalKidsRoute } from '../../lib/portalGamePaths';
-import './charlie-hub.css';
+import { useLocation } from 'react-router-dom';
+import CharacterAdventureCard from '../family-portal/CharacterAdventureCard';
+import { CharacterDashboardLayout, QuestGrid } from '../../design-system/character-dashboard';
+import { buildPortalReturnState, formatBackLabel } from '../../lib/portalBreadcrumbNav';
+import { buildCharacterDashboardCoach } from '../../lib/characterDashboardCoach';
+import { useCharacterModuleProgress } from '../../hooks/useCharacterModuleProgress';
+import { applyMissionBoardProgress } from '../../lib/characterProgressService';
+import { remapPortalKidsRoute } from '../../lib/portalGamePaths';
+import { CHARLIE_AVATAR_SRC, CHARLIE_HUB } from '../../data/charlie';
+import { buildCharlieMissionBoardItems } from '../../data/charlie/missionBoardData';
+import { useCharlieGradeBand } from '../../hooks/useCharlieGradeBand';
+import '../../design-system/character-dashboard/character-dashboard.css';
+import '../family-portal/family-dashboard.css';
 
 export default function CharlieNatureNookHub() {
   const location = useLocation();
+  const { progress } = useCharacterModuleProgress('charlie');
+  const { band: gradeBand } = useCharlieGradeBand();
+
   const missions = useMemo(
     () =>
-      CHARLIE_HUB_MISSIONS.map((mission) => ({
-        ...mission,
-        route: remapPortalKidsRoute(mission.route, location.pathname),
-      })),
-    [location.pathname],
+      applyMissionBoardProgress(buildCharlieMissionBoardItems(gradeBand), progress.completedModuleIds).map(
+        (mission) => ({
+          ...mission,
+          route: remapPortalKidsRoute(mission.route, location.pathname),
+        }),
+      ),
+    [gradeBand, location.pathname, progress.completedModuleIds],
   );
 
+  const questReturnState = buildPortalReturnState(
+    location.pathname,
+    formatBackLabel("Charlie's Science Lab"),
+  );
+
+  const firstMission = missions.find((mission) => mission.status === 'active' || mission.status === 'available');
+
+  const coach = buildCharacterDashboardCoach({
+    characterId: 'charlie',
+    pathname: location.pathname,
+    completedCount: progress.completedCount,
+    totalCount: progress.totalCount || missions.length,
+    progressPercent: progress.percent,
+    firstQuestHref: firstMission?.route,
+    nextQuestHref: firstMission?.route,
+  });
+
   return (
-    <div className="charlie-hub">
-      <PortalBackButton
-        hubName="Character Hub"
-        to={getPortalRoute('characters', location.pathname)}
-        theme="charlie"
-      />
-
-      <header className="charlie-hubHeader">
-        <CharacterAvatar
-          src={CHARLIE_AVATAR_SRC}
-          alt="Charlie Perk"
-          size="large"
-          theme="charlie"
-          className="charlie-hubAvatar"
-        />
-        <p className="charlie-hubEyebrow">{CHARLIE_HUB.eyebrow}</p>
-        <h1 className="charlie-hubTitle">{CHARLIE_HUB.title}</h1>
-        <p className="charlie-hubSubtitle">{CHARLIE_HUB.subtitle}</p>
-        <p className="charlie-hubIntro">{CHARLIE_HUB.intro}</p>
-      </header>
-
-      <div className="charlie-hubMissionGrid">
-        {missions.map((mission) =>
-          mission.status === 'available' ? (
-            <Link key={mission.id} to={mission.route} className="charlie-hubMissionCard charlie-hubMissionCard--available">
-              <span className="charlie-hubMissionStrip" aria-hidden="true" />
-              <div className="charlie-hubMissionBody">
-                <p className="charlie-hubMissionNumber">Mission {mission.number}</p>
-                <h2 className="charlie-hubMissionTitle">{mission.title}</h2>
-                <p className="charlie-hubMissionDesc">{mission.description}</p>
-                <p className="charlie-hubMissionSkill">
-                  <span>Skill:</span> {mission.skillFocus}
-                </p>
-                <span className="charlie-hubMissionDifficulty">{mission.difficulty}</span>
-              </div>
-              <span className="charlie-hubMissionCta">
-                Start Mission
-                <span aria-hidden="true">→</span>
-              </span>
-            </Link>
-          ) : (
-            <div
+    <CharacterDashboardLayout
+      characterId="charlie"
+      theme="charlie"
+      hero={{
+        imageSrc: CHARLIE_AVATAR_SRC,
+        imageAlt: 'Charlie Perk',
+        name: 'Charlie Perk',
+        subtitle: CHARLIE_HUB.subtitle,
+        description: CHARLIE_HUB.intro,
+        availableCountLabel: `${missions.length} Science Missions Available`,
+        theme: 'charlie',
+      }}
+      coach={coach}
+      quests={
+        <QuestGrid aria-label="Science missions">
+          {missions.map((mission) => (
+            <CharacterAdventureCard
               key={mission.id}
-              className="charlie-hubMissionCard charlie-hubMissionCard--locked"
-            >
-              <span className="charlie-hubMissionStrip" aria-hidden="true" />
-              <div className="charlie-hubMissionBody">
-                <p className="charlie-hubMissionNumber">Mission {mission.number}</p>
-                <h2 className="charlie-hubMissionTitle">{mission.title}</h2>
-                <p className="charlie-hubMissionDesc">{mission.description}</p>
-              </div>
-              <span className="charlie-hubMissionCta charlie-hubMissionCta--locked">Coming Soon</span>
-            </div>
-          ),
-        )}
-      </div>
-    </div>
+              characterId="charlie"
+              title={`Mission ${mission.fileNumber}: ${mission.title}`}
+              description={mission.description}
+              cta={mission.status === 'locked' ? 'Coming Next' : 'Start Mission'}
+              href={mission.status === 'locked' ? '#' : mission.route}
+              useCharacterHubLaunch={mission.status !== 'locked'}
+              linkState={mission.status === 'locked' ? undefined : questReturnState}
+              status={mission.status === 'locked' ? 'Locked' : 'Available'}
+              locked={mission.status === 'locked'}
+              lockedLabel={mission.status === 'locked' ? 'Coming Next' : undefined}
+              skillTags={mission.skills?.slice(0, 3).join(' · ')}
+              layout="horizontal"
+            />
+          ))}
+        </QuestGrid>
+      }
+    />
   );
 }

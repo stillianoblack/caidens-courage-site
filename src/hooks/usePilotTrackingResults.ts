@@ -1,21 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { afterIdle } from '../lib/defer';
 import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import { computePilotTrackingMetrics, type PilotTrackingMetrics } from '../lib/pilotTrackingMetrics';
+import { loadPilotDashboardTracking } from '../lib/pilotDashboardTrackingLoader';
+import { buildParticipantNameLookup } from '../lib/pilotResultsDisplay';
+import type { StudentFamilyLink } from '../lib/studentFamilyLinkService';
 import {
-  buildParticipantNameLookup,
-  collectParticipantIdsFromResults,
-} from '../lib/pilotResultsDisplay';
-import {
-  fetchParticipantsByIds,
-  fetchStudentFamilyLinksByCampProgram,
-  type StudentFamilyLink,
-} from '../lib/studentFamilyLinkService';
-import {
-  fetchStudentParticipantsFromSupabase,
   loadPilotTrackingData,
   type StudentParticipantRecord,
 } from '../lib/pilotTrackingService';
+import { resolveSyncWarningMessage } from '../lib/syncWarningMessages';
 
 const EMPTY_METRICS = computePilotTrackingMetrics({
   legacyBaselines: [],
@@ -45,43 +38,43 @@ export function usePilotTrackingResults(
   const [familyLinks, setFamilyLinks] = useState<StudentFamilyLink[]>([]);
 
   const refresh = useCallback(async () => {
+    const code = programCode?.trim();
+    if (!code) {
+      setParticipants([]);
+      setModuleResults([]);
+      setAssessmentResults([]);
+      setFamilyLinks([]);
+      return;
+    }
+
     setLoading(true);
     try {
-      const [legacyPayload, trackingPayload, programParticipantsPayload, familyLinksPayload] =
-        await Promise.all([
-          loadAssessmentResults(programCode),
-          loadPilotTrackingData(programCode),
-          programCode
-            ? fetchStudentParticipantsFromSupabase(programCode)
-            : Promise.resolve({ participants: [] }),
-          programCode
-            ? fetchStudentFamilyLinksByCampProgram(programCode)
-            : Promise.resolve({ links: [] as StudentFamilyLink[], error: undefined }),
-        ]);
+      const { legacyPayload, trackingPayload, familyLinksPayload, directoryPayload } =
+        await loadPilotDashboardTracking(code);
 
-      const orphanIds = collectParticipantIdsFromResults({
-        moduleResults: trackingPayload.moduleResults,
-        assessmentResults: trackingPayload.assessmentResults,
-      }).filter(
-        (id) => !programParticipantsPayload.participants.some((participant) => participant.id === id),
-      );
-      const orphanParticipantsPayload =
-        orphanIds.length > 0
-          ? await fetchParticipantsByIds(orphanIds)
-          : { participants: [] as StudentParticipantRecord[] };
+      if (process.env.NODE_ENV === 'development') {
+        console.info('[PILOT_PARTICIPANT_LOOKUP]', {
+          program_code: code,
+          merged_participants: directoryPayload.participants.length,
+          directory_errors: directoryPayload.errors,
+        });
+      }
 
       setLegacyResults(legacyPayload.results);
       setLegacySource(legacyPayload.source);
       setModuleResults(trackingPayload.moduleResults);
       setAssessmentResults(trackingPayload.assessmentResults);
-      setParticipants([
-        ...programParticipantsPayload.participants,
-        ...orphanParticipantsPayload.participants,
-      ]);
+      setParticipants(directoryPayload.participants);
       setFamilyLinks(familyLinksPayload.links);
       setTrackingSource(trackingPayload.source);
       setWarning(
-        legacyPayload.warning ?? trackingPayload.warning ?? familyLinksPayload.error ?? undefined,
+        resolveSyncWarningMessage(
+          legacyPayload.warning ??
+            trackingPayload.warning ??
+            directoryPayload.errors[0] ??
+            familyLinksPayload.error ??
+            undefined,
+        ) ?? undefined,
       );
     } finally {
       setLoading(false);
@@ -89,13 +82,11 @@ export function usePilotTrackingResults(
   }, [programCode]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !programCode?.trim()) {
       return;
     }
-    afterIdle(() => {
-      void refresh();
-    });
-  }, [enabled, refresh, refreshKey]);
+    void refresh();
+  }, [enabled, programCode, refresh, refreshKey]);
 
   const metrics = useMemo(
     (): PilotTrackingMetrics =>

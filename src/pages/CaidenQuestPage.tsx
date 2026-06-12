@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
+import CaidenQuestFlow from '../components/caiden/CaidenQuestFlow';
 import { getCaidenQuestById } from '../data/caiden';
 import { resolveCaidenHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';
 
@@ -11,15 +11,14 @@ export default function CaidenQuestPage() {
   const quest = getCaidenQuestById(questId);
 
   if (!quest) {
-    return <Navigate to={hubPath} replace />;
+    return <Navigate to={`${hubPath}${location.search}`} replace />;
   }
 
   return (
-    <GameAssessmentFlow
-      config={quest.config}
-      themeClassName="caiden-game"
+    <CaidenQuestFlow
+      questId={quest.id}
       exitPath={hubPath}
-      useCaidenHeader
+      exitLabel="Back to Focus Flame Journey"
       embedded
       skipLanding
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}

@@ -131,11 +131,18 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     category: 'Characters',
     modes: ['kid', 'family', 'facilitator'],
     summary:
-      'Zeke leads Logic Lab — patterns, puzzles, and critical-thinking challenges (coming soon in the pilot).',
-    tags: ['zeke', 'character', 'logic', 'puzzles'],
+      'Zeke leads Team Quest — eight adaptive SEL missions on courage, teamwork, speaking up, and friendship repair.',
+    tags: ['zeke', 'character', 'teamwork', 'social skills', 'courage', 'sel'],
     recommendedResources: [
-      { label: "Preview Zeke's Logic Lab", href: `${KIDS_PORTAL_PATH}/zeke` },
+      { label: "Open Zeke's Team Quest", href: `${KIDS_PORTAL_PATH}/zeke` },
+      { label: 'Mission 1: The New Table', href: `${KIDS_PORTAL_PATH}/zeke/zeke-new-table` },
     ],
+    kidAnswer:
+      'Zeke is your team buddy! He helps you join in, share the spotlight, speak up kindly, and repair friendships.',
+    familyAnswer:
+      "Zeke's Team Quest builds social courage and teamwork. Missions adapt to your child's grade band.",
+    facilitatorAnswer:
+      'Assign Zeke missions for social confidence, teamwork, and respectful speaking-up practice. Content adapts K-1 through 6-8.',
   },
   {
     id: 'hub-caiden-journey',
@@ -181,6 +188,22 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
     ],
   },
   {
+    id: 'hub-zeke-team-quest',
+    title: "Zeke's Team Quest",
+    category: 'Character Hubs',
+    modes: ['kid', 'family', 'facilitator'],
+    summary:
+      'Eight adaptive SEL missions on joining in, teamwork, speaking up, leadership, and friendship repair.',
+    tags: ['zeke', 'team quest', 'social skills', 'teamwork', 'courage', 'sel'],
+    recommendedResources: [
+      { label: "Open Zeke's Team Quest", href: `${KIDS_PORTAL_PATH}/zeke` },
+    ],
+    familyAnswer:
+      "Start with Mission 1: The New Table. Zeke's missions adapt to your child's grade level.",
+    facilitatorAnswer:
+      'Use Zeke for social confidence and teamwork practice. Eight missions with grade-band adaptive content.',
+  },
+  {
     id: 'game-caiden-quest-1',
     title: 'Caiden Quest 1: What Comes First?',
     category: 'Games',
@@ -194,12 +217,12 @@ export const ASK_B4_CORE_KNOWLEDGE: AskB4KnowledgeEntry[] = [
   },
   {
     id: 'game-caiden-quest-2',
-    title: 'Caiden Quest 2: Choose Your Next Move',
+    title: 'Caiden Quest 2: Focus or Distraction?',
     category: 'Games',
     modes: ['kid', 'family', 'facilitator'],
     summary:
-      'Caiden Quest 2 builds decision-making and flexible thinking — choosing the best next move under pressure.',
-    tags: ['caiden', 'quest 2', 'decision making', 'flexible thinking'],
+      'Caiden Quest 2 builds attention control — spotting distractions and protecting focus.',
+    tags: ['caiden', 'quest 2', 'attention', 'focus', 'distraction'],
     recommendedResources: [
       { label: 'Start Quest 2', href: `${CAIDEN_QUEST_HUB_PATH}/quest-2` },
     ],

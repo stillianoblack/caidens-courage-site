@@ -1,0 +1,303 @@
+import type { CharlieAdaptiveMissionFile } from '../../../types/charlieAdaptiveQuest';
+import { registerCharlieAdaptiveMission } from '../charlieAdaptiveBuilder';
+import { makeCharlieQuestion, bandContent } from '../charlieQuestionHelpers';
+
+export const CHARLIE_MISSION_8_ID = 'charlie-science-fair-mystery';
+
+const MODULE_ID = CHARLIE_MISSION_8_ID;
+const MODULE_TITLE = 'The Great Science Fair Mystery';
+const SKILL = 'Critical Thinking / Evidence';
+
+export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
+  id: MODULE_ID,
+  title: "Charlie Perk's Science Lab",
+  subtitle: MODULE_TITLE,
+  character: 'charlie',
+  missionNumber: 8,
+  skillArea: SKILL,
+  skillFocus: ['Critical Thinking', 'Evidence', 'Fair Testing'],
+  storySetup:
+    'Two science fair projects claim opposite results. One says plants grow better with music. Another says silence wins. Charlie has to judge the evidence without making the plants perform a concert.',
+  missionB4Tip: 'Evidence beats opinions. Even loud opinions. Especially loud opinions.',
+  scenarioAccent: 'bug-leaf',
+  landing: {
+    eyebrow: 'MISSION 8',
+    title: "Charlie Perk's Science Lab",
+    subtitle: MODULE_TITLE,
+    body: 'Music vs. silence — two projects, opposite results. Judge the evidence, not the poster.',
+    cta: 'Start Mission',
+  },
+  complete: {
+    title: 'Critical Thinking Badge Earned!',
+    message: 'You helped Charlie trust evidence over loud opinions. Science fair mystery solved.',
+    badges: ['Evidence Judge', 'Fair Test Spotter', 'Critical Thinker'],
+  },
+  gradeContent: {
+    'K-1': bandContent(
+      'Choose the project that watched carefully and kept track.',
+      [
+        makeCharlieQuestion(
+          {
+            id: 'cm8-k1-q1',
+            question: 'Which project should Charlie trust more?',
+            choices: [
+              'The one that watched carefully and kept track',
+              'The one with the biggest poster',
+              'The one with the funniest title',
+              'The one closest to snacks',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Careful watching and notes beat flashy posters.',
+            incorrectFeedback: 'Trust the project that paid attention and wrote things down.',
+            hint: 'Which project did the careful science work?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          'K-1',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-k1-q2',
+            question: 'One student measured plant height every day. Why is that helpful?',
+            choices: [
+              'It shows what changed over time',
+              'It makes the plant taller instantly',
+              'It replaces watering',
+              'It turns plants into music fans',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Measuring over time is real evidence.',
+            incorrectFeedback: 'Daily measurements show how the plant changed.',
+            hint: 'What can Charlie learn from daily measurements?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          'K-1',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-k1-q3',
+            question: 'A project says "music wins" but nobody wrote anything down. What should Charlie think?',
+            choices: [
+              'That is not strong evidence',
+              'It must be true because it sounds exciting',
+              'Posters always tell the truth',
+              'Snacks prove the result',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'No notes = weak evidence, even if it sounds cool.',
+            incorrectFeedback: 'Claims need records — writing things down matters.',
+            hint: 'What was missing from that project?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          'K-1',
+        ),
+      ],
+      SKILL,
+    ),
+    '2-3': bandContent(
+      'Look for fair testing when two projects disagree.',
+      [
+        makeCharlieQuestion(
+          {
+            id: 'cm8-23-q1',
+            question: 'What makes a science fair test fair?',
+            choices: [
+              'Testing things the same way except for one change',
+              'Changing everything',
+              'Picking the answer first',
+              'Only writing down exciting results',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Fair tests change one thing — that is how you know what caused the result.',
+            incorrectFeedback: 'A fair test keeps everything the same except one change.',
+            hint: 'How many things should be different in a fair test?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '2-3',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-23-q2',
+            question: 'Project A gave both plants the same water and light. Project B did not. Which is fairer?',
+            choices: [
+              'Project A — both plants were treated the same except music',
+              'Project B — random care is more exciting',
+              'Neither — fair tests do not exist',
+              'Both — if the poster is big enough',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Same water and light means music is the only difference tested.',
+            incorrectFeedback: 'Fair tests keep water, light, and soil the same.',
+            hint: 'What should stay the same when testing music vs. silence?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '2-3',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-23-q3',
+            question: 'One project tested three plants with music and three in silence. Why is that better than one plant each?',
+            choices: [
+              'More plants give stronger evidence',
+              'Plants perform better in groups for applause',
+              'One plant is always enough',
+              'Three plants means three posters',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'More than one plant helps you trust the pattern.',
+            incorrectFeedback: 'Testing several plants gives stronger evidence than just one.',
+            hint: 'Why test more than a single plant?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '2-3',
+        ),
+      ],
+      SKILL,
+    ),
+    '4-5': bandContent(
+      'Compare evidence quality between the two science fair projects.',
+      [
+        makeCharlieQuestion(
+          {
+            id: 'cm8-45-q1',
+            question: 'What should Charlie compare?',
+            choices: [
+              'The evidence and how each test was done',
+              'Poster glitter levels',
+              'Who talked louder',
+              'Which plant looked cooler',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Compare methods and evidence — not glitter volume.',
+            incorrectFeedback: 'Look at how each test was done and what evidence they have.',
+            hint: 'What matters more than poster decorations?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '4-5',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-45-q2',
+            question: 'The music project kept a chart of heights. The silence project only has a drawing. Which evidence is stronger?',
+            choices: [
+              'The chart with measured data',
+              'The drawing with no measurements',
+              'Both are equal because art is science',
+              'Neither — guess based on favorite song',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Measured data beats a picture without numbers.',
+            incorrectFeedback: 'Charts with measurements are stronger than drawings alone.',
+            hint: 'Which project recorded actual measurements?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '4-5',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-45-q3',
+            question: 'Both projects ran two weeks. One changed water amounts halfway through. Why does that matter?',
+            choices: [
+              'Changing water mid-test makes the results less fair',
+              'Water changes make posters shinier',
+              'It does not matter at all',
+              'Plants prefer surprise water',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Mid-test changes muddy the evidence — hard to know what caused growth.',
+            incorrectFeedback: 'If water changed halfway, the test is less fair.',
+            hint: 'What problem happens if you change care during a test?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '4-5',
+        ),
+      ],
+      SKILL,
+    ),
+    '6-8': bandContent(
+      'Evaluate claims, evidence, sample size, and controlled variables.',
+      [
+        makeCharlieQuestion(
+          {
+            id: 'cm8-68-q1',
+            question: 'Which claim is strongest?',
+            choices: [
+              'The claim supported by repeated, fair evidence',
+              'The claim with the most confident speaker',
+              'The claim that sounds surprising',
+              'The claim with no measurements',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Repeated fair evidence wins over confident speeches.',
+            incorrectFeedback: 'Strong claims need repeated, fair evidence — not just confidence.',
+            hint: 'What makes a science claim trustworthy?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '6-8',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-68-q2',
+            question: 'The music project tested 6 plants with controlled light, water, and soil. The silence project used 1 plant near a window. What is Charlie\'s best critique?',
+            choices: [
+              'The music project has stronger sample size and controlled variables',
+              'The silence project wins because it is simpler',
+              'Sample size never matters in plant science',
+              'Window location does not affect plants',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Sample size plus controlled variables — that is stronger evidence.',
+            incorrectFeedback: 'More plants with controlled conditions beats one plant by a window.',
+            hint: 'Compare sample size and whether variables were controlled.',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '6-8',
+        ),
+        makeCharlieQuestion(
+          {
+            id: 'cm8-68-q3',
+            question: 'A judge says, "I love music, so the music project wins." What should Charlie argue?',
+            choices: [
+              'Personal preference is not the same as scientific evidence',
+              'Judges should always pick their favorite',
+              'Loud opinions are better than data',
+              'Evidence only matters for grown-ups',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Evidence beats opinions — even musical ones.',
+            incorrectFeedback: 'Science fair winners need evidence, not personal favorites.',
+            hint: 'What is the difference between liking music and proving a result?',
+          },
+          SKILL,
+          MODULE_ID,
+          MODULE_TITLE,
+          '6-8',
+        ),
+      ],
+      SKILL,
+    ),
+  },
+};
+
+registerCharlieAdaptiveMission(CHARLIE_MISSION_8_FILE);

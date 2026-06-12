@@ -16,6 +16,9 @@ export type LocalParticipantRecord = {
   group_name?: string;
   organization?: string;
   child_age_range?: string;
+  grade_level?: string;
+  grade_band?: string;
+  allow_stretch_level?: boolean;
   email_opt_in?: boolean;
   created_at: string;
   updated_at: string;
@@ -152,6 +155,37 @@ export function createLocalParticipant(
     ...payload,
     created_at: now,
     updated_at: now,
+  });
+}
+
+type ParticipantGradeFields = {
+  id: string;
+  grade_level?: string | null;
+  grade_band?: string | null;
+  allow_stretch_level?: boolean | null;
+};
+
+/** Prefer Supabase values; fill grade fields from local cache when remote is empty. */
+export function mergeLocalParticipantGradeOverrides<T extends ParticipantGradeFields>(
+  participants: T[],
+): T[] {
+  const localById = new Map(loadLocalParticipants().map((row) => [row.id, row]));
+  return participants.map((participant) => {
+    const local = localById.get(participant.id);
+    if (!local) return participant;
+
+    const remoteLevel = participant.grade_level?.trim();
+    const localLevel = local.grade_level?.trim();
+    const remoteGrade = participant.grade_band?.trim();
+    const localGrade = local.grade_band?.trim();
+
+    return {
+      ...participant,
+      grade_level: remoteLevel || localLevel || participant.grade_level,
+      grade_band: remoteGrade || localGrade || participant.grade_band,
+      allow_stretch_level:
+        participant.allow_stretch_level ?? local.allow_stretch_level ?? participant.allow_stretch_level,
+    };
   });
 }
 

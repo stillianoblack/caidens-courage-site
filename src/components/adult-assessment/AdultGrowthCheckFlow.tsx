@@ -9,8 +9,20 @@ import {
 import { resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { useSetMissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
-import B4BaselineTopBar, { B4BaselineDecor } from '../b4-baseline-check/B4BaselineTopBar';
+import B4BaselineTopBar from '../b4-baseline-check/B4BaselineTopBar';
 import '../b4-baseline-check/b4-baseline-check.css';
+import GameInteractionShell from '../game-assessment/shared/GameInteractionShell';
+import GameplayTopBar from '../../design-system/game/GameplayTopBar';
+import GameplayShell from '../../design-system/game/GameplayShell';
+import CoachingShellQuizFrame from '../../design-system/game/CoachingShellQuizFrame';
+import ScenarioCard from '../../design-system/game/ScenarioCard';
+import AssessmentCoachRail from '../../design-system/game/AssessmentCoachRail';
+import {
+  buildAssessmentCoachRailSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromParts,
+} from '../../design-system/narration';
+import '../../design-system/game/gameDesignStyles';
 import {
   ADULT_GROWTH_CHECK_NAME,
   ADULT_GROWTH_CHECK_QUESTIONS,
@@ -35,7 +47,6 @@ import {
   shouldMigrateFromCampProgram,
 } from '../../lib/parentChildLinkFromCampService';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
-import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from '../../data/adult/sharedAssets';
 import AdultInfoForm from './AdultInfoForm';
 import AdultGrowthCheckResults from './AdultGrowthCheckResults';
 
@@ -308,45 +319,90 @@ export default function AdultGrowthCheckFlow({
     phase === 'baseline' ? 'Adult Baseline Assessment' : 'Adult Growth Assessment';
 
   const isVictoriaQuestion = currentQuestion?.domain === 'understanding';
-  const guidePortraitSrc = isVictoriaQuestion ? DR_VICTORIA_GUIDE_SRC : UNCLE_T_GUIDE_SRC;
-  const guideSpeech = checked
-    ? isVictoriaQuestion
-      ? feedbackTone === 'success'
-        ? 'Great choice! Here\u2019s why that reflection works.'
-        : 'Not quite. Try again or use a hint.'
-      : feedbackTone === 'success'
-        ? 'Strong coaching move — here\u2019s why it helps.'
-        : 'Not quite. Think about what the child needs most.'
-    : isVictoriaQuestion
-      ? 'Choose your answer, then press Check.'
-      : 'Choose your answer, then press Check.';
+  const quizGuideCharacter = isVictoriaQuestion ? 'dr-victoria' : 'uncle-t';
+  const quizTopBarVariant = isVictoriaQuestion ? 'victoria' : 'uncle-t';
+
+  const quizThemeClasses = [
+    'adult-assessment-game',
+    isVictoriaQuestion ? 'victoria-game bbc-app--adult-victoria' : 'uncle-t-game bbc-app--adult-uncleT',
+  ].join(' ');
+
+  const adultReadAloudSegments = useMemo(() => {
+    if (!currentQuestion) return [];
+
+    const questionSegments = buildReadAloudSegmentsFromParts({
+      scenarioTitle: isVictoriaQuestion ? 'Understanding' : 'Support',
+      scenarioDescription: 'Consider the situation carefully before you choose your answer.',
+      question: currentQuestion.text,
+      choices: currentQuestion.choices.map(
+        (choice, index) =>
+          `Choice ${['one', 'two', 'three', 'four', 'five', 'six'][index] ?? index + 1}. ${choice.label}`,
+      ),
+    });
+
+    const coachSegments = buildAssessmentCoachRailSegments({
+      guideCharacter: quizGuideCharacter,
+      checked,
+      feedback,
+      hasSelection: typeof selected === 'string' && selected.length > 0,
+      hasHints: Boolean(currentQuestion.hints?.length),
+    });
+
+    return buildGameplayReadAloudSegments(
+      questionSegments,
+      coachSegments,
+      checked ? 'coach_only' : 'full',
+    );
+  }, [checked, currentQuestion, feedback, isVictoriaQuestion, quizGuideCharacter, selected]);
 
   return (
-    <div
-      className={[
-        'bbc-app',
-        'bbc-app--adult',
-        view === 'quiz' && isVictoriaQuestion ? 'bbc-app--adult-victoria' : '',
-        view === 'quiz' && !isVictoriaQuestion ? 'bbc-app--adult-uncleT' : '',
-        embedded ? 'b4-game--embedded' : '',
-        embedded ? 'portal-gameFrame' : '',
-        view === 'quiz' ? 'bbc-app--game-active' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+    <GameplayShell
+      variant="adultAssessment"
+      embedded={embedded}
+      active={view === 'quiz'}
+      coachingShell={view === 'quiz'}
+      idleSessionGuard={{ enabled: view === 'quiz', onReturn: handleExit }}
+      themeClassName={view === 'quiz' ? quizThemeClasses : 'adult-assessment-game bbc-app--adult'}
+      topBar={
+        embedded || view !== 'form' ? (
+          view === 'quiz' ? (
+            <GameplayTopBar
+              variant={quizTopBarVariant}
+              onBack={handleExit}
+              progressPercent={progressPct}
+              showProgress
+              showFlameStatus={false}
+              flameDisplay="none"
+              soundEnabled={soundEnabled}
+              onToggleSound={toggleSound}
+            />
+          ) : (
+            <B4BaselineTopBar
+              progressPct={progressPct}
+              onExit={handleExit}
+              showProgress={false}
+              soundEnabled={soundEnabled}
+              onToggleSound={toggleSound}
+            />
+          )
+        ) : null
+      }
+      footer={
+        view === 'quiz' ? (
+          <B4BaselineBottomBar
+            canCheck={canCheck}
+            checked={checked}
+            feedback={null}
+            feedbackTone={feedbackTone}
+            hideInlineFeedback
+            coachingShell
+            onSkip={handleSkip}
+            onCheck={handleCheck}
+            onContinue={handleContinue}
+          />
+        ) : null
+      }
     >
-      <B4BaselineDecor />
-
-      {embedded || view !== 'form' ? (
-        <B4BaselineTopBar
-          progressPct={progressPct}
-          onExit={handleExit}
-          showProgress={view === 'quiz'}
-          soundEnabled={soundEnabled}
-          onToggleSound={toggleSound}
-        />
-      ) : null}
-
       <main
         className={[
           'bbc-main',
@@ -394,87 +450,71 @@ export default function AdultGrowthCheckFlow({
         ) : null}
 
         {view === 'quiz' && currentQuestion ? (
-          <div
-            className={[
-              'bbc-quizWrap',
-              'bbc-quizWrap--adult',
-              isVictoriaQuestion ? 'bbc-quizWrap--victoria' : 'bbc-quizWrap--uncleT',
-            ].join(' ')}
-          >
-            <div className="bbc-quizPrompt">
-              <div className="bbc-quizB4 bbc-quizGuide" aria-hidden="true">
-                <img src={guidePortraitSrc} alt="" decoding="async" />
-              </div>
-              <div
-                className={[
-                  'bbc-speechBubble',
-                  'bbc-speechBubble--adult',
-                  isVictoriaQuestion ? 'bbc-speechBubble--victoria' : 'bbc-speechBubble--uncleT',
-                ].join(' ')}
-              >
-                {guideSpeech}
-              </div>
-            </div>
-
-            <h2 className="bbc-questionText bbc-questionText--centered" id="bbc-question">
-              {currentQuestion.text.split('\n').map((line, index) => (
-                <React.Fragment key={line}>
-                  {index > 0 ? <br /> : null}
-                  {line}
-                </React.Fragment>
-              ))}
-            </h2>
-
-            <div
-              className="bbc-answers bbc-answers--centered"
-              role="group"
-              aria-labelledby="bbc-question"
-            >
-              {currentQuestion.choices.map((choice) => {
-                const isSelected = selected === choice.id;
-                const isCorrect = checked && choice.id === currentQuestion.correctId;
-                const isWrong = checked && isSelected && choice.id !== currentQuestion.correctId;
-                return (
-                  <button
-                    key={choice.id}
-                    type="button"
-                    disabled={checked}
-                    className={[
-                      'bbc-answerCard',
-                      'bbc-answerCard--assessment',
-                      isSelected && !checked ? 'bbc-answerCard--selected' : '',
-                      isCorrect ? 'bbc-answerCard--correct' : '',
-                      isWrong ? 'bbc-answerCard--wrong' : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => {
-                      playSelect();
-                      selectAnswer(choice.id);
-                    }}
-                    aria-pressed={isSelected}
-                  >
-                    <span className="bbc-answerLabel">{choice.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {checked && feedback ? (
-              <p
-                className={[
-                  'bbc-feedback',
-                  feedbackTone === 'success' ? 'bbc-feedback--success' : '',
-                  feedbackTone === 'try' ? 'bbc-feedback--try' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                role="status"
-              >
-                {feedback}
-              </p>
-            ) : null}
-          </div>
+          <GameInteractionShell className="shared-mission-game shared-mission-game--coachingRail">
+            <CoachingShellQuizFrame
+              scenario={
+                <ScenarioCard
+                  sceneLabel="Training Scenario"
+                  tag={isVictoriaQuestion ? 'Understanding' : 'Support'}
+                  storyPrompt="Consider the situation carefully before you choose your answer."
+                  characterId={isVictoriaQuestion ? 'dr-victoria' : 'uncle-t'}
+                />
+              }
+              question={
+                <h2 className="bbc-questionText mission-questionText" id="bbc-question">
+                  {currentQuestion.text.split('\n').map((line, index) => (
+                    <React.Fragment key={line}>
+                      {index > 0 ? <br /> : null}
+                      {line}
+                    </React.Fragment>
+                  ))}
+                </h2>
+              }
+              answers={
+                <div className="bbc-answers" role="group" aria-labelledby="bbc-question">
+                  {currentQuestion.choices.map((choice) => {
+                    const isSelected = selected === choice.id;
+                    const isCorrect = checked && choice.id === currentQuestion.correctId;
+                    const isWrong = checked && isSelected && choice.id !== currentQuestion.correctId;
+                    return (
+                      <button
+                        key={choice.id}
+                        type="button"
+                        disabled={checked}
+                        className={[
+                          'bbc-answerCard',
+                          isSelected && !checked ? 'bbc-answerCard--selected' : '',
+                          isCorrect ? 'bbc-answerCard--correct' : '',
+                          isWrong ? 'bbc-answerCard--wrong' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        onClick={() => {
+                          playSelect();
+                          selectAnswer(choice.id);
+                        }}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="bbc-answerLabel">{choice.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              }
+              coachRail={
+                <AssessmentCoachRail
+                  guideCharacter={quizGuideCharacter}
+                  checked={checked}
+                  feedback={feedback}
+                  feedbackTone={feedbackTone}
+                  hasSelection={typeof selected === 'string' && selected.length > 0}
+                  hasHints={Boolean(currentQuestion.hints?.length)}
+                />
+              }
+              readAloudSegments={adultReadAloudSegments}
+              readAloudResetKey={`${currentQuestion.id}-${checked ? 'checked' : 'open'}`}
+            />
+          </GameInteractionShell>
         ) : null}
 
         {view === 'results' && resultRecord ? (
@@ -491,18 +531,6 @@ export default function AdultGrowthCheckFlow({
           />
         ) : null}
       </main>
-
-      {view === 'quiz' ? (
-        <B4BaselineBottomBar
-          canCheck={canCheck}
-          checked={checked}
-          feedback={null}
-          feedbackTone={feedbackTone}
-          onSkip={handleSkip}
-          onCheck={handleCheck}
-          onContinue={handleContinue}
-        />
-      ) : null}
-    </div>
+    </GameplayShell>
   );
 }

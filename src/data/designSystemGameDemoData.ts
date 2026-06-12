@@ -1,12 +1,12 @@
 import type { GameChoiceOption } from '../types/gameAssessment';
 import { getB4LockInTip } from '../design-system/game/getB4LockInTip';
-import { CAIDEN_QUEST_1_CONFIG } from './caiden/quest1WhatComesFirst';
+import { CAIDEN_QUEST_1_CONFIG } from './caiden';
 
 const QUEST_Q1 = CAIDEN_QUEST_1_CONFIG.questions[0];
 const QUEST_Q2 = CAIDEN_QUEST_1_CONFIG.questions[1];
 
 export const DEMO_GAME_QUESTION = {
-  sceneLabel: 'Mission Card',
+  sceneLabel: 'Scenario',
   tag: 'GETTING STARTED',
   storyPrompt:
     'Caiden has homework, a drawing idea, and a camp bag to pack. The Camp Challenge starts soon.',
@@ -99,11 +99,11 @@ export const DEMO_B4_FEEDBACK_EXAMPLES = {
 export const DEMO_FAMILY_LOCK_IN = {
   message: 'Great choice. This helps your child practice calming their body before reacting.',
   tips: [
-    'Try this together: ask your child what they noticed first.',
+    'Practice together: ask your child what they noticed first.',
     'Name one small next step out loud.',
     'Celebrate the effort, not perfection.',
   ],
-  label: 'B-4 Lock-In Tips',
+  label: 'B-4 Coach',
 };
 
 export const DEMO_EXPERT_INSIGHT = {

@@ -9,6 +9,7 @@ import {
 } from '../config/courageRoutes';
 import { resolveCharacterProfileTitle } from '../data/characterProfiles';
 import { FAMILY_NAV_TITLE, type FamilySidebarNavId } from '../data/familyPortalContent';
+import { isWeeklyAdventureSource } from './weeklyAdventureRouteContext';
 
 export function resolveFamilyBasePath(pathname: string): string {
   if (pathname.startsWith(FAMILY_HUB_PATH)) return FAMILY_HUB_PATH;
@@ -88,7 +89,11 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
 export function resolvePortalNavId(
   pathname: string,
   basePath = resolveFamilyBasePath(pathname),
+  search = '',
 ): FamilySidebarNavId {
+  if (isWeeklyAdventureSource(search)) {
+    return 'continue-learning';
+  }
   if (isCharacterHubRoute(pathname, basePath)) {
     return 'character-hub';
   }
@@ -108,6 +113,7 @@ export function resolvePortalNavId(
   const segments: Array<{ id: FamilySidebarNavId; segment: string; exact?: boolean }> = [
     { id: 'overview', segment: basePath, exact: true },
     { id: 'results', segment: `${basePath}/results` },
+    { id: 'continue-learning', segment: `${basePath}/weekly-adventures` },
     { id: 'continue-learning', segment: `${basePath}/continue-learning` },
     { id: 'character-hub', segment: `${basePath}/characters` },
     { id: 'downloads', segment: `${basePath}/downloads` },
@@ -147,7 +153,7 @@ export function resolvePortalPageTitle(pathname: string, basePath = resolveFamil
   }
   if (pathname.startsWith(`${kidsBase}/charlie`)) {
     return pathname === `${kidsBase}/charlie` || pathname === `${kidsBase}/charlie/`
-      ? "Charlie Perk\u2019s Nature Nook"
+      ? "Charlie Perk\u2019s Science Lab"
       : 'Turtle Trail Trouble';
   }
   if (pathname.startsWith(FAMILY_DR_VICTORIA_MISSION_BASE)) {

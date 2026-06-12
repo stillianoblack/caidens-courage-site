@@ -1,7 +1,9 @@
 import React, { useCallback } from 'react';
 import type { PilotRosterRow } from '../../hooks/usePilotRosterData';
+import type { GradeLevel } from '../../data/gradeLevelOptions';
 import { useToast } from '../portal-design-system/ToastProvider';
 import CopyableCompactValue from './CopyableCompactValue';
+import PilotRosterGradeSelect from './PilotRosterGradeSelect';
 import PilotStatusChip from './PilotStatusChip';
 
 export type PilotAdminStudentTableVariant = 'roster' | 'settings';
@@ -10,6 +12,7 @@ type PilotAdminStudentTableProps = {
   rows: PilotRosterRow[];
   variant: PilotAdminStudentTableVariant;
   onStudentClick?: (participantId: string) => void;
+  onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void;
 };
 
 function formatCompactActivityDate(iso: string | null): string {
@@ -80,6 +83,7 @@ export default function PilotAdminStudentTable({
   rows,
   variant,
   onStudentClick,
+  onGradeSaved,
 }: PilotAdminStudentTableProps) {
   const isRoster = variant === 'roster';
 
@@ -91,6 +95,7 @@ export default function PilotAdminStudentTable({
             <th scope="col">Child</th>
             {isRoster ? <th scope="col">Nickname</th> : null}
             <th scope="col">Parent/Guardian</th>
+            {isRoster ? <th scope="col">Grade</th> : null}
             <th scope="col">Email</th>
             {isRoster ? <th scope="col">Phone</th> : null}
             <th scope="col">Family Code</th>
@@ -112,6 +117,15 @@ export default function PilotAdminStudentTable({
               <td className="pilot-adminCellParent">
                 <ParentGuardianCell row={row} />
               </td>
+              {isRoster ? (
+                <td className="pilot-adminCellGrade">
+                  <PilotRosterGradeSelect
+                    participantId={row.participantId}
+                    gradeLevel={row.gradeLevel}
+                    onSaved={(gradeLevel) => onGradeSaved?.(row.participantId, gradeLevel)}
+                  />
+                </td>
+              ) : null}
               <td className="pilot-adminCellChip">
                 <CopyableCompactValue value={row.parentEmail} type="email" />
               </td>

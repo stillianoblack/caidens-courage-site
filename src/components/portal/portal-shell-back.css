@@ -1,0 +1,8 @@
+/* Shared portal back-link inset — matches GameplayTopBar + character dashboards */
+:root {
+  --portal-shell-back-inset-x: 1rem;
+  --portal-shell-back-inset-top: 0.75rem;
+  --portal-shell-back-inset-bottom: 0.625rem;
+  --portal-shell-back-padding: var(--portal-shell-back-inset-top) var(--portal-shell-back-inset-x)
+    var(--portal-shell-back-inset-bottom);
+}

@@ -1,6 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { MissionBoardItem } from '../../types/missionBoard';
+import {
+  buildPortalReturnState,
+  inferCharacterFromPath,
+  resolveCharacterGameplayBackLabel,
+} from '../../lib/portalBreadcrumbNav';
 import FolderTab from './FolderTab';
 import MissionPreviewGraphic from './MissionPreviewGraphic';
 
@@ -26,6 +31,13 @@ export default function MissionFolderCard({
   className = '',
   layout = 'board',
 }: MissionFolderCardProps) {
+  const location = useLocation();
+  const characterId = inferCharacterFromPath(location.pathname);
+  const returnState = buildPortalReturnState(
+    location.pathname,
+    resolveCharacterGameplayBackLabel(characterId),
+  );
+
   const isLocked = mission.status === 'locked';
   const isCompleted = mission.status === 'completed';
   const isActive = mission.status === 'active';
@@ -89,6 +101,7 @@ export default function MissionFolderCard({
   return (
     <Link
       to={mission.route}
+      state={returnState}
       className={cardClass}
       role="listitem"
       onClick={onSelect}

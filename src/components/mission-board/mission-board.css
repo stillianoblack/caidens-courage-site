@@ -1,6 +1,9 @@
 /* Reusable character mission board — Detective Case Board */
 
 .characterMissionBoard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   max-width: 44rem;
   margin: 0 auto;
   text-align: center;
@@ -492,6 +495,9 @@
 
 .mission-boardTopBack {
   margin-bottom: 0.75rem;
+  text-align: left;
+  align-self: flex-start;
+  width: 100%;
 }
 
 .mission-boardFoot {

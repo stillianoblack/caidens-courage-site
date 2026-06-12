@@ -9,6 +9,7 @@ import {
 } from '../../../lib/pilotOverviewInsights';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { usePilotRosterData } from '../../../hooks/usePilotRosterData';
+import { PortalPageIntro } from '../../portal-design-system';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import PilotAddStudentDrawer from '../PilotAddStudentDrawer';
 import PilotAdminStudentTable from '../PilotAdminStudentTable';
@@ -22,7 +23,7 @@ type PilotRosterPanelProps = {
 export default function PilotRosterPanel({ programCode, loading: externalLoading }: PilotRosterPanelProps) {
   const activeProgram = readActivePilotProgram();
   const resolvedProgramCode = programCode?.trim() || activeProgram?.programCode?.trim() || '';
-  const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh } =
+  const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh, updateParticipantGrade } =
     usePilotRosterData(resolvedProgramCode, true, activeProgram?.familyAccessCode);
   const [searchParams, setSearchParams] = useSearchParams();
   const rawFilter = searchParams.get('filter');
@@ -56,9 +57,9 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       <div className="pilot-panelIntro pilot-panelIntro--roster">
         <div>
           <h2 className="pilot-panelIntroTitle">Program Roster</h2>
-          <p className="pilot-panelIntroSubtitle">
+          <PortalPageIntro>
             Students enrolled in the active program with Parent/Guardian contact and progress summary.
-          </p>
+          </PortalPageIntro>
         </div>
         <button
           type="button"
@@ -94,6 +95,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           rows={displayRows}
           variant="roster"
           onStudentClick={setDrawerParticipantId}
+          onGradeSaved={updateParticipantGrade}
         />
       )}
 

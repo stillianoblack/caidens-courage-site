@@ -19,7 +19,7 @@ export type MissionFolderLabel =
   | 'LETTER FILE'
   | 'NOTEBOOK FILE'
   | 'TRAIL FILE'
-  | 'QUEST CHECKPOINT';
+  | 'Focus Quest';
 
 export type MissionArtworkType =
   | 'case-file'

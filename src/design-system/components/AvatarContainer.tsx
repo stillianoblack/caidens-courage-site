@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type AvatarContainerVariant = 'b4' | 'dr-victoria' | 'default';
+export type AvatarContainerVariant = 'b4' | 'dr-victoria' | 'uncle-t' | 'default';
 
 export type AvatarContainerProps = {
   src: string;

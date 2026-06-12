@@ -20,7 +20,7 @@ import {
   DEMO_LOCK_IN_TIP,
 } from '../../data/designSystemGameDemoData';
 import { getB4LockInTip } from '../../design-system/game/getB4LockInTip';
-import { CAIDEN_QUEST_1_CONFIG } from '../../data/caiden/quest1WhatComesFirst';
+import { CAIDEN_QUEST_1_CONFIG } from '../../data/caiden';
 
 export default function GameLearningDesignSystemSection() {
   const [kidSelected, setKidSelected] = useState<string | null>(null);
@@ -117,7 +117,8 @@ export default function GameLearningDesignSystemSection() {
 
       <h4 className="dsPageSectionSub">Live answer-aware preview</h4>
       <p className="dsPageNote">
-        Select an answer to see <code>getB4LockInTip</code> update from real Quest 1 question data.
+        Select an answer, press Check, then see <code>getB4LockInTip</code> update from real Quest 1
+        question data.
       </p>
       <AnswerChoiceList
         options={DEMO_GAME_OPTIONS}
@@ -126,9 +127,17 @@ export default function GameLearningDesignSystemSection() {
         checked={kidChecked}
         onSelect={(id) => {
           setKidSelected(id);
-          setKidChecked(true);
+          setKidChecked(false);
         }}
       />
+      <button
+        type="button"
+        className="dsBtnGold"
+        disabled={!kidSelected || kidChecked}
+        onClick={() => setKidChecked(true)}
+      >
+        Check
+      </button>
       {kidChecked && kidSelected ? (
         <LearningMomentCard
           {...getB4LockInTip({
@@ -229,19 +238,19 @@ export default function GameLearningDesignSystemSection() {
 
       <h3 className="dsPageSectionSub">Facilitator GameShell — B-4 coaching rail (before / after)</h3>
       <p className="dsPageNote">
-        Matches live facilitator games: left game column + 280–360px B-4 rail, 32px gap. B-4 fills on
-        answer selection via <code>getB4LockInTip</code> (portalType=facilitator).
+        Matches live facilitator games: left game column + B-4 rail. B-4 feedback appears only after
+        Check via <code>getB4LockInTip</code> (portalType=facilitator).
       </p>
-      <div className="mission-quizLayout mission-quizLayout--coachingRail mission-quizLayout--hasMission">
-        <div className="mission-quizLayoutMission">
-          <QuestionCard
-            characterId="caiden"
-            sceneLabel="Mission Card"
-            tag="GETTING STARTED"
-            storyPrompt={DEMO_GAME_QUESTION.storyPrompt}
-          />
-        </div>
+      <div className="mission-quizLayout mission-quizLayout--coachingRail">
         <div className="mission-quizLayoutLearning">
+          <div className="mission-quizLayoutScenario">
+            <QuestionCard
+              characterId="caiden"
+              sceneLabel="Scenario"
+              tag="GETTING STARTED"
+              storyPrompt={DEMO_GAME_QUESTION.storyPrompt}
+            />
+          </div>
           <h4 className="dsGameDemoPrompt">{DEMO_GAME_QUESTION.prompt}</h4>
           <AnswerChoiceList
             options={DEMO_GAME_OPTIONS}
@@ -253,10 +262,18 @@ export default function GameLearningDesignSystemSection() {
               setKidChecked(false);
             }}
           />
+          <button
+            type="button"
+            className="dsBtnGold"
+            disabled={!kidSelected || kidChecked}
+            onClick={() => setKidChecked(true)}
+          >
+            Check
+          </button>
         </div>
         <aside className="mission-quizLayoutAside">
           <div className="mission-quizLayoutAsideInner">
-            {kidSelected ? (
+            {kidChecked && kidSelected ? (
               <LearningMomentCard
                 {...getB4LockInTip({
                   portalType: 'facilitator',

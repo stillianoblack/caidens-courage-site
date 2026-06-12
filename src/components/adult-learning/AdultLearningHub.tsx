@@ -1,14 +1,20 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import CharacterAvatar from '../game-assessment/shared/CharacterAvatar';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import CharacterAdventureCard from '../family-portal/CharacterAdventureCard';
+import { CharacterDashboardLayout, QuestGrid } from '../../design-system/character-dashboard';
+import { buildPortalReturnState, formatBackLabel } from '../../lib/portalBreadcrumbNav';
+import { buildAdultLearningDashboardCoach } from '../../lib/characterDashboardCoach';
+import { readCompletedAdultTrainingMissions } from '../../lib/adultTrainingCompletion';
+import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../../lib/adultAssessmentStorage';
 import {
   adultTrainingMissionPath,
   countAvailableMissions,
   type AdultGuide,
   type AdultTrainingPortal,
 } from '../../types/adultTraining';
-import AdultTrainingBackButton from './AdultTrainingBackButton';
-import './adult-training-back-button.css';
+import type { FamilyCharacterId } from '../../data/familyPortalContent';
+import '../../design-system/character-dashboard/character-dashboard.css';
+import '../family-portal/family-dashboard.css';
 import './adult-learning-hub.css';
 
 type AdultLearningHubProps = {
@@ -19,6 +25,25 @@ type AdultLearningHubProps = {
   embedded?: boolean;
 };
 
+function useCompletedAdultMissions(guideId: string): string[] {
+  const [completedIds, setCompletedIds] = useState(() => readCompletedAdultTrainingMissions(guideId));
+
+  const refresh = useCallback(() => {
+    setCompletedIds(readCompletedAdultTrainingMissions(guideId));
+  }, [guideId]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, refresh);
+    return () => window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, refresh);
+  }, [refresh]);
+
+  return completedIds;
+}
+
 export default function AdultLearningHub({
   guide,
   portal,
@@ -26,136 +51,123 @@ export default function AdultLearningHub({
   backLabel,
   embedded = false,
 }: AdultLearningHubProps) {
+  const location = useLocation();
+  const completedMissionIds = useCompletedAdultMissions(guide.id);
   const availableCount = countAvailableMissions(guide);
+  const characterId = guide.id as FamilyCharacterId;
+  const heroTheme = guide.theme.id === 'victoria' ? 'victoria' : 'uncle-t';
+
+  const questReturnState = buildPortalReturnState(
+    location.pathname,
+    formatBackLabel(guide.hubTitle),
+  );
+
+  const coach = buildAdultLearningDashboardCoach({
+    guide,
+    portal,
+    pathname: location.pathname,
+    completedMissionIds,
+  });
+
+  const missions = useMemo(
+    () =>
+      guide.missions.map((mission) => ({
+        ...mission,
+        path: adultTrainingMissionPath(portal, guide, mission.id),
+        isComplete: completedMissionIds.includes(mission.id),
+      })),
+    [completedMissionIds, guide, portal],
+  );
 
   return (
-    <div
-      className={[
-        'adultLearningHub',
-        `adultLearningHub--${guide.theme.hubClassName}`,
-        embedded ? 'adultLearningHub--embedded' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <div className="adultLearningHub-backRow">
-        <AdultTrainingBackButton
-          to={backPath}
-          label={backLabel}
-          theme={guide.theme.id}
-          variant="inline"
-        />
-      </div>
-
-      <header className="adultLearningHub-hero">
-        <CharacterAvatar
-          src={guide.portraitSrc}
-          alt={guide.portraitAlt}
-          size="large"
-          theme={guide.theme.id}
-          className="adultLearningHub-portrait"
-        />
-        <div className="adultLearningHub-heroBody">
-          <p className="adultLearningHub-eyebrow">{guide.progressTrackLabel.toUpperCase()}</p>
-          <h1 className="adultLearningHub-title">{guide.hubTitle}</h1>
-          <p className="adultLearningHub-subtitle">{guide.hubSubtitle}</p>
-          <p className="adultLearningHub-description">{guide.hubDescription}</p>
-          <div className="adultLearningHub-progressPill">
-            <span className="adultLearningHub-progressTrack">{guide.progressTrackLabel}</span>
-            <span className="adultLearningHub-progressCount">
-              {availableCount} Mission{availableCount === 1 ? '' : 's'} Available
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <section className="adultLearningHub-section" aria-labelledby="adult-learning-missions">
-        <h2 id="adult-learning-missions" className="adultLearningHub-sectionTitle">
-          Training Missions
-        </h2>
-        <div className="adultLearningHub-missionGrid">
-          {guide.missions.map((mission) => {
-            const missionPath = adultTrainingMissionPath(portal, guide, mission.id);
-            const card = (
-              <article
-                className={`adultLearningHub-missionCard${
-                  mission.status === 'locked'
-                    ? ' adultLearningHub-missionCard--locked'
-                    : ' adultLearningHub-missionCard--available'
-                }`}
-              >
-                <div className="adultLearningHub-missionCardBanner">
-                  <p className="adultLearningHub-missionNumber">Mission {mission.number}</p>
-                  <span className="adultLearningHub-missionDifficulty">{mission.difficulty}</span>
-                </div>
-                <h3 className="adultLearningHub-missionTitle">{mission.title}</h3>
-                <p className="adultLearningHub-missionDescription">{mission.description}</p>
-                <p className="adultLearningHub-missionSkill">
-                  <span className="adultLearningHub-missionSkillLabel">Skill focus:</span>{' '}
-                  {mission.skillFocus}
-                </p>
-                <div className="adultLearningHub-missionFooter">
-                  <span className="adultLearningHub-missionBadge">{mission.badge}</span>
-                  <span
-                    className={`adultLearningHub-missionStatus adultLearningHub-missionStatus--${mission.status}`}
-                  >
-                    {mission.status === 'available' ? 'Available' : 'Locked'}
-                  </span>
-                  <span className="adultLearningHub-missionCta">
-                    {mission.status === 'available' ? 'Start Mission' : 'Coming Soon'}
-                  </span>
-                </div>
-              </article>
-            );
-
-            return mission.status === 'available' ? (
-              <Link key={mission.id} to={missionPath} className="adultLearningHub-missionLink">
-                {card}
-              </Link>
-            ) : (
-              <div key={mission.id} className="adultLearningHub-missionLink adultLearningHub-missionLink--locked">
-                {card}
-              </div>
-            );
-          })}
-
-          {guide.futureMissions.map((mission) => (
-            <div
-              key={`future-${mission.number}`}
-              className="adultLearningHub-missionLink adultLearningHub-missionLink--locked"
-            >
-              <article className="adultLearningHub-missionCard adultLearningHub-missionCard--locked">
-                <p className="adultLearningHub-missionNumber">Mission {mission.number}</p>
-                <h3 className="adultLearningHub-missionTitle">{mission.title}</h3>
-                <p className="adultLearningHub-missionDescription">Coming soon in this learning track.</p>
-                <div className="adultLearningHub-missionFooter">
-                  <span className="adultLearningHub-missionStatus adultLearningHub-missionStatus--locked">
-                    Coming Soon
-                  </span>
-                </div>
-              </article>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="adultLearningHub-section" aria-labelledby="adult-learning-badges">
-        <h2 id="adult-learning-badges" className="adultLearningHub-sectionTitle">
-          Badges Earned
-        </h2>
-        <div className="adultLearningHub-badgesPanel">
-          <p className="adultLearningHub-badgesHint">
-            Complete missions to earn badges that celebrate your adult learning journey.
-          </p>
-          <div className="adultLearningHub-badgesList" aria-label="Available badge rewards">
-            {guide.missions.map((mission) => (
-              <span key={mission.id} className="adultLearningHub-badgePill">
-                {mission.badge}
-              </span>
+    <CharacterDashboardLayout
+      characterId={guide.id}
+      theme={guide.theme.id}
+      portalInset={embedded}
+      breadcrumbLabel={backLabel}
+      breadcrumbHref={backPath}
+      hero={{
+        imageSrc: guide.portraitSrc,
+        imageAlt: guide.portraitAlt,
+        name: guide.hubTitle,
+        subtitle: guide.hubSubtitle,
+        description: guide.hubDescription,
+        availableCountLabel: `${guide.progressTrackLabel} · ${availableCount} Mission${availableCount === 1 ? '' : 's'} Available`,
+        theme: heroTheme,
+      }}
+      coach={coach}
+      quests={
+        <>
+          <h2 id="adult-learning-missions" className="char-questSectionTitle">
+            Training Missions
+          </h2>
+          <QuestGrid aria-labelledby="adult-learning-missions">
+            {missions.map((mission) => (
+              <CharacterAdventureCard
+                key={mission.id}
+                characterId={characterId}
+                title={`Mission ${mission.number}: ${mission.title}`}
+                description={mission.description}
+                cta={mission.status === 'locked' ? 'Coming Soon' : 'Start Mission'}
+                href={mission.status === 'locked' ? '#' : mission.path}
+                linkState={mission.status === 'locked' ? undefined : questReturnState}
+                status={
+                  mission.isComplete
+                    ? 'Complete'
+                    : mission.status === 'locked'
+                      ? 'Locked'
+                      : 'Available'
+                }
+                locked={mission.status === 'locked'}
+                lockedLabel="Coming Soon"
+                skillTags={`${mission.difficulty} · ${mission.skillFocus}`}
+                layout="horizontal"
+              />
             ))}
+            {guide.futureMissions.map((mission) => (
+              <CharacterAdventureCard
+                key={`future-${mission.number}`}
+                characterId={characterId}
+                title={`Mission ${mission.number}: ${mission.title}`}
+                description="Coming soon in this learning track."
+                cta="Coming Soon"
+                href="#"
+                status="Locked"
+                locked
+                lockedLabel="Coming Soon"
+                layout="horizontal"
+              />
+            ))}
+          </QuestGrid>
+        </>
+      }
+      footer={
+        <section className="adultLearningHub-badgesSection" aria-labelledby="adult-learning-badges">
+          <h2 id="adult-learning-badges" className="char-questSectionTitle">
+            Badges Earned
+          </h2>
+          <div className="adultLearningHub-badgesPanel">
+            <p className="adultLearningHub-badgesHint">
+              Complete missions to earn badges that celebrate your adult learning journey.
+            </p>
+            <div className="adultLearningHub-badgesList" aria-label="Available badge rewards">
+              {guide.missions.map((mission) => (
+                <span
+                  key={mission.id}
+                  className={[
+                    'adultLearningHub-badgePill',
+                    completedMissionIds.includes(mission.id) ? 'adultLearningHub-badgePill--earned' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {mission.badge}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      }
+    />
   );
 }

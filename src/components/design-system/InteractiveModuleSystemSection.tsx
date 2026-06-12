@@ -13,7 +13,7 @@ import {
   INTERACTIVE_MODULE_RULES,
 } from '../../design-system/game/interactiveModuleRegistry';
 import { getB4LockInTip } from '../../design-system/game/getB4LockInTip';
-import { CAIDEN_QUEST_1_CONFIG } from '../../data/caiden/quest1WhatComesFirst';
+import { CAIDEN_QUEST_1_CONFIG } from '../../data/caiden';
 import {
   DEMO_B4_FEEDBACK_EXAMPLES,
   DEMO_EXPERT_INSIGHT,
@@ -182,7 +182,7 @@ export default function InteractiveModuleSystemSection() {
       >
         <QuestionCard
           characterId="caiden"
-          sceneLabel="Mission Card"
+            sceneLabel="Scenario"
           tag="GETTING STARTED"
           storyPrompt={DEMO_GAME_QUESTION.storyPrompt}
         />

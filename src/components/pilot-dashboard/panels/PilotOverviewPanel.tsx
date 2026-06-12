@@ -18,12 +18,21 @@ import PilotResultsKpiGrid from '../PilotResultsKpiGrid';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
 import PilotOverviewGalleryCard from '../PilotOverviewGalleryCard';
 import PilotB4RecommendationCard from '../PilotB4RecommendationCard';
+import B4InsightsDrawer from '../../../design-system/components/B4InsightsDrawer';
+import {
+  buildFacilitatorB4Insights,
+  buildFacilitatorStudentB4Insights,
+} from '../../../lib/facilitatorB4InsightsBuilders';
+import type { FacilitatorB4InsightTopic } from '../../../types/b4Insights';
+import '../../../design-system/components/b4-insights-drawer.css';
 import { computeNeedsAttention } from '../../../lib/pilotStudentProgress';
 import { buildB4Recommendation, buildRecentStudentActivityFeed } from '../../../lib/pilotOverviewInsights';
 import type { StudentParticipantRecord } from '../../../lib/pilotTrackingService';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
+import { FacilitatorOverviewCoachSlot } from '../coach/FacilitatorOverviewCoachProvider';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
+import { FACILITATOR_B4_RESULTS_PATH, PROGRAM_DASHBOARD_PATH } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
 import {
@@ -77,6 +86,9 @@ export default function PilotOverviewPanel({
 }: PilotOverviewPanelProps) {
   const location = useLocation();
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [insightTopic, setInsightTopic] = useState<FacilitatorB4InsightTopic>('participation');
+  const [insightStudentId, setInsightStudentId] = useState<string | null>(null);
   const [galleryItems, setGalleryItems] = useState<StudentGalleryItem[]>([]);
   const programCode = activeProgram?.programCode?.trim() ?? '';
 
@@ -133,6 +145,52 @@ export default function PilotOverviewPanel({
     [stepIndex],
   );
 
+  const facilitatorInsightPaths = useMemo(
+    () => ({
+      results: FACILITATOR_B4_RESULTS_PATH,
+      participants: `${PROGRAM_DASHBOARD_PATH}/roster`,
+    }),
+    [],
+  );
+
+  const facilitatorInsights = useMemo(() => {
+    if (insightTopic === 'student-progress' && insightStudentId) {
+      return buildFacilitatorStudentB4Insights({
+        participantId: insightStudentId,
+        participantLookup,
+        assessments: assessmentResults,
+        modules: moduleResults,
+        programName: activeProgram?.groupName ?? programCode,
+        paths: facilitatorInsightPaths,
+      });
+    }
+
+    return buildFacilitatorB4Insights({
+      topic: insightTopic === 'student-progress' ? 'participation' : insightTopic,
+      metrics,
+      programName: activeProgram?.groupName ?? programCode,
+      missingBaselineCount: needsAttention.missingBaseline,
+      paths: facilitatorInsightPaths,
+    });
+  }, [
+    activeProgram?.groupName,
+    assessmentResults,
+    facilitatorInsightPaths,
+    insightStudentId,
+    insightTopic,
+    metrics,
+    moduleResults,
+    needsAttention.missingBaseline,
+    participantLookup,
+    programCode,
+  ]);
+
+  const openInsights = (topic: FacilitatorB4InsightTopic, participantId?: string | null) => {
+    setInsightTopic(topic);
+    setInsightStudentId(participantId ?? null);
+    setInsightsOpen(true);
+  };
+
   const handleNextStepClick = () => {
     if (recommendedStep.internalNav) {
       onSelectNav?.(recommendedStep.internalNav);
@@ -153,7 +211,13 @@ export default function PilotOverviewPanel({
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
-      <PilotResultsKpiGrid metrics={metrics} compact />
+      <PilotResultsKpiGrid
+        metrics={metrics}
+        compact
+        onCardClick={(topic) => openInsights(topic)}
+      />
+
+      <FacilitatorOverviewCoachSlot slot="afterMetrics" />
 
       <PilotNeedsAttentionCard counts={needsAttention} />
 
@@ -182,7 +246,12 @@ export default function PilotOverviewPanel({
 
       <div className="pilot-overviewInsightRow">
         <PilotOverviewGalleryCard programCode={programCode} />
-        <PilotB4RecommendationCard recommendation={b4Recommendation} />
+        <PilotB4RecommendationCard
+          recommendation={b4Recommendation}
+          onOpenInsights={() =>
+            openInsights(metrics.baselineChecksCompleted === 0 ? 'baseline' : 'modules')
+          }
+        />
       </div>
 
       <section className="pilot-panelBlock pilot-characterTracks">
@@ -221,10 +290,50 @@ export default function PilotOverviewPanel({
         assessmentResults={assessmentResults}
         moduleResults={moduleResults}
         participantLookup={participantLookup}
-        onStudentClick={setDrawerParticipantId}
+        onStudentClick={(participantId) => openInsights('student-progress', participantId)}
         assessmentLimit={5}
         moduleLimit={5}
         showEmptyStates
+      />
+
+      <div className="pilot-overviewSplit">
+        <section className="pilot-panelBlock pilot-panelBlock--next">
+              <div className="pilot-panelBlockHead pilot-panelBlockHead--next">
+                <h2 className="pilot-panelBlockTitle">Next Recommended Step</h2>
+                <div className="pilot-nextDots" aria-hidden="true">
+                  {PILOT_RECOMMENDED_STEPS.map((step, index) => (
+                    <span
+                      key={step.id}
+                      className={`pilot-nextDot${index === stepIndex ? ' pilot-nextDot--active' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="pilot-nextCard">
+                <h3 className="pilot-nextTitle">{recommendedStep.title}</h3>
+                <p className="pilot-nextCopy">{recommendedStep.copy}</p>
+                {recommendedStep.internalNav ? (
+                  <button type="button" className="pilot-nextCta" onClick={handleNextStepClick}>
+                    {recommendedStep.cta}
+                  </button>
+                ) : (
+                  <Link to={recommendedStep.href} className="pilot-nextCta">
+                    {recommendedStep.cta}
+                  </Link>
+                )}
+              </div>
+        </section>
+      </div>
+
+      <FacilitatorOverviewCoachSlot slot="footer" />
+
+      <B4InsightsDrawer
+        isOpen={insightsOpen}
+        onClose={() => {
+          setInsightsOpen(false);
+          setInsightStudentId(null);
+        }}
+        {...facilitatorInsights}
       />
 
       <PilotStudentDetailDrawer
@@ -237,35 +346,6 @@ export default function PilotOverviewPanel({
         moduleResults={moduleResults}
         programCode={activeProgram?.programCode}
       />
-
-      <div className="pilot-overviewSplit">
-        <section className="pilot-panelBlock pilot-panelBlock--next">
-          <div className="pilot-panelBlockHead pilot-panelBlockHead--next">
-            <h2 className="pilot-panelBlockTitle">Next Recommended Step</h2>
-            <div className="pilot-nextDots" aria-hidden="true">
-              {PILOT_RECOMMENDED_STEPS.map((step, index) => (
-                <span
-                  key={step.id}
-                  className={`pilot-nextDot${index === stepIndex ? ' pilot-nextDot--active' : ''}`}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="pilot-nextCard">
-            <h3 className="pilot-nextTitle">{recommendedStep.title}</h3>
-            <p className="pilot-nextCopy">{recommendedStep.copy}</p>
-            {recommendedStep.internalNav ? (
-              <button type="button" className="pilot-nextCta" onClick={handleNextStepClick}>
-                {recommendedStep.cta}
-              </button>
-            ) : (
-              <Link to={recommendedStep.href} className="pilot-nextCta">
-                {recommendedStep.cta}
-              </Link>
-            )}
-          </div>
-        </section>
-      </div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import type { GameQuestion } from '../../types/gameAssessment';
-import CaidenQuestCard, { questionHasCaidenQuestGraphic } from '../caiden/CaidenQuestCard';
+import ScenarioCard from '../../design-system/game/ScenarioCard';
+import { resolveGameScenarioImage } from '../../design-system/game/gameScenarioAssets';
+import { questionHasCaidenQuestGraphic } from '../caiden/CaidenQuestCard';
 import MirandaClueCard, { questionHasMirandaClueGraphic } from '../miranda/MirandaClueCard';
 import VictoriaReflectionCard, { questionHasVictoriaReflectionGraphic } from '../adult/VictoriaReflectionCard';
 import VictoriaFocusLabCard, { questionHasVictoriaFocusLabGraphic } from '../adult/VictoriaFocusLabCard';
@@ -14,11 +16,19 @@ type MissionCardFlags = {
   useCaidenHeader?: boolean;
   useMirandaHeader?: boolean;
   useCharlieHeader?: boolean;
+  useB4Header?: boolean;
 };
 
 type MissionCardContentProps = MissionCardFlags & {
   question: GameQuestion;
+  useCoachingRail?: boolean;
 };
+
+function resolveClueImageSrc(question: GameQuestion): string | undefined {
+  const clueCard = question.clueCard;
+  if (!clueCard || !('imageSrc' in clueCard)) return undefined;
+  return clueCard.imageSrc;
+}
 
 export function questionHasMissionCard(question: GameQuestion, flags: MissionCardFlags): boolean {
   if (flags.useVictoriaHeader && questionHasVictoriaReflectionGraphic(question)) return true;
@@ -33,12 +43,48 @@ export function questionHasMissionCard(question: GameQuestion, flags: MissionCar
 
 export default function MissionCardContent({
   question,
+  useCoachingRail = false,
   useVictoriaHeader = false,
   useUncleTHeader = false,
   useCaidenHeader = false,
   useMirandaHeader = false,
   useCharlieHeader = false,
+  useB4Header = false,
 }: MissionCardContentProps) {
+  if (useCoachingRail && (question.clueCard || question.story)) {
+    const storyPrompt = question.clueCard?.text ?? question.story ?? '';
+    if (storyPrompt) {
+      const scenarioImage = resolveGameScenarioImage({
+        useCaidenHeader,
+        useMirandaHeader,
+        useCharlieHeader,
+        useUncleTHeader,
+        useVictoriaHeader,
+        useB4Header,
+        imageSrc: resolveClueImageSrc(question),
+      });
+
+      if (scenarioImage) {
+        return (
+          <ScenarioCard
+            tag={question.clueCard?.tag}
+            storyPrompt={storyPrompt}
+            sceneImageSrc={scenarioImage.src}
+            sceneImageAlt={scenarioImage.alt}
+            sceneImageFit={scenarioImage.objectFit}
+          />
+        );
+      }
+
+      return (
+        <ScenarioCard
+          tag={question.clueCard?.tag}
+          storyPrompt={storyPrompt}
+        />
+      );
+    }
+  }
+
   if (useCharlieHeader && question.clueCard?.variant === 'nature_card') {
     return (
       <CharlieNatureCard
@@ -75,17 +121,6 @@ export default function MissionCardContent({
   if (useVictoriaHeader && question.clueCard?.variant === 'focus_lab') {
     return (
       <VictoriaFocusLabCard
-        label={question.clueCard.label}
-        tag={question.clueCard.tag}
-        text={question.clueCard.text}
-        accent={question.clueCard.accent}
-      />
-    );
-  }
-
-  if (useCaidenHeader && question.clueCard?.variant === 'focus_quest') {
-    return (
-      <CaidenQuestCard
         label={question.clueCard.label}
         tag={question.clueCard.tag}
         text={question.clueCard.text}

@@ -10,6 +10,7 @@ type CharlieGameHeaderProps = {
   onToggleSound?: () => void;
   playerName?: string;
   playerIndex?: number;
+  hideExitButton?: boolean;
 };
 
 export default function CharlieGameHeader({
@@ -20,12 +21,22 @@ export default function CharlieGameHeader({
   onToggleSound,
   playerName,
   playerIndex = 1,
+  hideExitButton = false,
 }: CharlieGameHeaderProps) {
   return (
-    <header className="charlie-topBar">
-      <button type="button" className="bbc-exitBtn charlie-exitBtn" onClick={onExit} aria-label="Exit mission">
-        ×
-      </button>
+    <header
+      className={[
+        'charlie-topBar',
+        hideExitButton ? 'charlie-topBar--noExit' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {hideExitButton ? null : (
+        <button type="button" className="bbc-exitBtn charlie-exitBtn" onClick={onExit} aria-label="Exit mission">
+          ×
+        </button>
+      )}
       {showProgress ? (
         <div
           className="charlie-progressTrack"

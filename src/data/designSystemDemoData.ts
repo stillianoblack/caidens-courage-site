@@ -29,6 +29,8 @@ export const DEMO_ROSTER_ROWS: PilotRosterRow[] = [
     status: 'active',
     moduleCompletions: 4,
     lastActivityAt: '2026-06-08T14:22:00.000Z',
+    gradeLevel: '3',
+    gradeBand: '2-3',
   },
   {
     participantId: 'demo-student-002',
@@ -48,6 +50,8 @@ export const DEMO_ROSTER_ROWS: PilotRosterRow[] = [
     status: 'not-started',
     moduleCompletions: 0,
     lastActivityAt: null,
+    gradeLevel: null,
+    gradeBand: null,
   },
 ];
 

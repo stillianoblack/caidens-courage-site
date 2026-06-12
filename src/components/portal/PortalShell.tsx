@@ -1,5 +1,7 @@
 import React from 'react';
+import PortalLayout from './PortalLayout';
 import './portal-shell.css';
+import './portal-layout.css';
 
 type PortalShellProps = {
   variant: 'family' | 'facilitator';
@@ -7,6 +9,7 @@ type PortalShellProps = {
   topBar: React.ReactNode;
   footer?: React.ReactNode;
   floating?: React.ReactNode;
+  rightRail?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -16,6 +19,7 @@ export default function PortalShell({
   topBar,
   footer,
   floating,
+  rightRail,
   children,
 }: PortalShellProps) {
   const shellClass = variant === 'family' ? 'family-shell portal-shell' : 'pilot-shell portal-shell';
@@ -27,7 +31,9 @@ export default function PortalShell({
       {sidebar}
       <div className={mainClass}>
         {topBar}
-        <div className={contentClass}>{children}</div>
+        <PortalLayout rightRail={rightRail}>
+          <div className={contentClass}>{children}</div>
+        </PortalLayout>
         {footer}
       </div>
       {floating}

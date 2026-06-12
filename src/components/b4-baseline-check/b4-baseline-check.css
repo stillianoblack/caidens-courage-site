@@ -363,6 +363,23 @@
   color: var(--bbc-muted);
 }
 
+.bbc-fieldSelect {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.bbc-gradeGate {
+  margin-top: 0.5rem;
+}
+
+.bbc-gradeGateTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--bbc-navy-deep);
+  text-align: center;
+}
+
 .bbc-eyebrow {
   font-size: 0.75rem;
   font-weight: 800;
@@ -891,20 +908,17 @@
 }
 
 .bbc-bottomBar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   padding: 1rem 1.25rem;
   border-top: 2px solid var(--bbc-border);
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(8px);
+  box-shadow: 0 -8px 24px -14px rgba(26, 47, 82, 0.14);
 }
 
 @media (min-width: 768px) {
@@ -1166,8 +1180,8 @@
 }
 
 @media (min-width: 768px) {
-  .bbc-app--game-active .bbc-main--quiz,
-  .bbc-main--quiz {
+  .bbc-app--game-active:not(.bbc-app--coachingShell) .bbc-main--quiz,
+  .bbc-main--quiz:not(:has(.shared-mission-game--coachingRail)) {
     padding-top: 1.5rem;
     max-width: 47.5rem;
     margin-left: auto;
@@ -1179,15 +1193,23 @@
     gap: 0.625rem;
   }
 
-  .bbc-questionText,
-  .bbc-questionText--centered,
-  .mission-questionText {
+  .bbc-app--coachingShell .bbc-questionText,
+  .bbc-app--coachingShell .bbc-questionText--centered,
+  .bbc-app--coachingShell .mission-questionText,
+  .bbc-app--coachingShell .bbc-answers,
+  .bbc-app--coachingShell .bbc-answers--centered {
+    max-width: none;
+  }
+
+  .bbc-app:not(.bbc-app--coachingShell) .bbc-questionText,
+  .bbc-app:not(.bbc-app--coachingShell) .bbc-questionText--centered,
+  .bbc-app:not(.bbc-app--coachingShell) .mission-questionText {
     max-width: 47.5rem;
     margin-bottom: 1.5rem;
   }
 
-  .bbc-answers,
-  .bbc-answers--centered {
+  .bbc-app:not(.bbc-app--coachingShell) .bbc-answers,
+  .bbc-app:not(.bbc-app--coachingShell) .bbc-answers--centered {
     gap: 0.75rem;
     max-width: 47.5rem;
   }
@@ -1195,6 +1217,11 @@
   .bbc-answerCard--assessment {
     max-width: 43.75rem;
     min-height: 64px;
+  }
+
+  .bbc-app--coachingShell .bbc-answerCard,
+  .bbc-app--coachingShell .bbc-answerCard--assessment {
+    max-width: none;
   }
 }
 

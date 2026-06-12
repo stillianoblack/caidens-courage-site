@@ -1,58 +1,104 @@
 import React, { useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import PortalBackButton from '../portal/PortalBackButton';
-import CharacterAvatar from '../game-assessment/shared/CharacterAvatar';
-import { B4_GAME_AVATAR_SRC, B4_PORTAL_HUB, B4_PORTAL_MISSIONS } from '../../data/b4/portalAssets';
-import { getPortalRoute, remapPortalKidsRoute } from '../../lib/portalGamePaths';
-import './b4-portal-hub.css';
+import { useLocation } from 'react-router-dom';
+import CharacterAdventureCard from '../family-portal/CharacterAdventureCard';
+import { CharacterDashboardLayout, QuestGrid } from '../../design-system/character-dashboard';
+import { buildPortalReturnState, formatBackLabel } from '../../lib/portalBreadcrumbNav';
+import { buildCharacterDashboardCoach } from '../../lib/characterDashboardCoach';
+import { useCharacterModuleProgress } from '../../hooks/useCharacterModuleProgress';
+import { applyMissionBoardProgress } from '../../lib/characterProgressService';
+import { remapPortalKidsRoute } from '../../lib/portalGamePaths';
+import { B4_GAME_AVATAR_SRC, B4_HUB, B4_HUB_PATH } from '../../data/b4';
+import { buildB4MissionBoardItems } from '../../data/b4/missionBoardData';
+import { useB4GradeBand } from '../../hooks/useB4GradeBand';
+import '../../design-system/character-dashboard/character-dashboard.css';
+import '../family-portal/family-dashboard.css';
 
 export default function B4FocusMissionHub() {
   const location = useLocation();
+  const { progress } = useCharacterModuleProgress('b4');
+  const { band: gradeBand } = useB4GradeBand();
+
   const missions = useMemo(
     () =>
-      B4_PORTAL_MISSIONS.map((mission) => ({
-        ...mission,
-        route: remapPortalKidsRoute(mission.route, location.pathname),
-      })),
+      applyMissionBoardProgress(buildB4MissionBoardItems(gradeBand), progress.completedModuleIds).map(
+        (mission) => ({
+          ...mission,
+          route: remapPortalKidsRoute(mission.route, location.pathname),
+        }),
+      ),
+    [gradeBand, location.pathname, progress.completedModuleIds],
+  );
+
+  const questReturnState = buildPortalReturnState(
+    location.pathname,
+    formatBackLabel('B-4 Missions'),
+  );
+
+  const checkInHref = useMemo(
+    () => remapPortalKidsRoute(`${B4_HUB_PATH}/check-in`, location.pathname),
     [location.pathname],
   );
 
+  const firstMission = missions.find(
+    (mission) => mission.status === 'active' || mission.status === 'available',
+  );
+
+  const coach = buildCharacterDashboardCoach({
+    characterId: 'b4',
+    pathname: location.pathname,
+    completedCount: progress.completedCount,
+    totalCount: progress.totalCount || missions.length,
+    progressPercent: progress.percent,
+    firstQuestHref: firstMission?.route,
+    nextQuestHref: firstMission?.route,
+  });
+
   return (
-    <div className="b4-portalHub">
-      <PortalBackButton
-        hubName="Character Hub"
-        to={getPortalRoute('characters', location.pathname)}
-        theme="b4"
-      />
-
-      <header className="b4-portalHubHeader">
-        <CharacterAvatar
-          src={B4_GAME_AVATAR_SRC}
-          alt="B-4"
-          size="large"
-          theme="b4"
-          className="b4-portalHubAvatar"
-        />
-        <p className="b4-portalHubEyebrow">FOCUS FLAME ACADEMY</p>
-        <h1 className="b4-portalHubTitle">{B4_PORTAL_HUB.title}</h1>
-        <p className="b4-portalHubSubtitle">{B4_PORTAL_HUB.subtitle}</p>
-      </header>
-
-      <div className="b4-portalMissionGrid">
-        {missions.map((mission) => (
-          <Link key={mission.id} to={mission.route} className="b4-portalMissionCard">
-            <span className="b4-portalMissionCardStrip" aria-hidden="true" />
-            <div className="b4-portalMissionCardBody">
-              <h2 className="b4-portalMissionCardTitle">{mission.title}</h2>
-              <p className="b4-portalMissionCardDesc">{mission.description}</p>
-            </div>
-            <span className="b4-portalMissionCardCta">
-              {mission.cta}
-              <span aria-hidden="true">→</span>
-            </span>
-          </Link>
-        ))}
-      </div>
-    </div>
+    <CharacterDashboardLayout
+      characterId="b4"
+      theme="b4"
+      hero={{
+        imageSrc: B4_GAME_AVATAR_SRC,
+        imageAlt: 'B-4',
+        name: 'B-4',
+        subtitle: B4_HUB.subtitle,
+        description: B4_HUB.intro,
+        availableCountLabel: `${missions.length} SEL Missions Available`,
+        theme: 'b4',
+      }}
+      coach={coach}
+      quests={
+        <QuestGrid aria-label="B-4 SEL missions">
+          {missions.map((mission) => (
+            <CharacterAdventureCard
+              key={mission.id}
+              characterId="b4"
+              title={`Mission ${mission.fileNumber}: ${mission.title}`}
+              description={mission.description}
+              cta={mission.status === 'locked' ? 'Coming Next' : 'Start Mission'}
+              href={mission.status === 'locked' ? '#' : mission.route}
+              useCharacterHubLaunch={mission.status !== 'locked'}
+              linkState={mission.status === 'locked' ? undefined : questReturnState}
+              status={mission.status === 'locked' ? 'Locked' : 'Available'}
+              locked={mission.status === 'locked'}
+              lockedLabel={mission.status === 'locked' ? 'Coming Next' : undefined}
+              skillTags={mission.skills?.slice(0, 3).join(' · ')}
+              layout="horizontal"
+            />
+          ))}
+          <CharacterAdventureCard
+            characterId="b4"
+            title="Start My B-4 Check-In"
+            description="Answer a few questions so B-4 can learn how you focus. This baseline check-in is separate from mission progress."
+            cta="Start Check-In"
+            href={checkInHref}
+            linkState={questReturnState}
+            status="Available"
+            skillTags="Baseline · Profile"
+            layout="horizontal"
+          />
+        </QuestGrid>
+      }
+    />
   );
 }

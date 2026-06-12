@@ -1,0 +1,265 @@
+.weeklyAdventureCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 11.5rem;
+  height: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.weeklyAdventureCard--link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(36, 62, 112, 0.1);
+}
+
+.weeklyAdventureCard--locked {
+  opacity: 0.72;
+  cursor: default;
+  pointer-events: none;
+  filter: grayscale(0.12);
+}
+
+.weeklyAdventureCard--locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.weeklyAdventureCardStrip {
+  height: 0.35rem;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.weeklyAdventureCardMain {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  column-gap: 0.875rem;
+  row-gap: 0.75rem;
+  padding: 1rem;
+  flex: 1;
+  align-items: start;
+}
+
+.weeklyAdventureCardMain > .weeklyAdventureCardAvatar,
+.weeklyAdventureCardMain > .weeklyAdventureCardAvatar--fallback,
+.weeklyAdventureCardMain > .weeklyAdventureCardAvatar--zekePlaceholder {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.weeklyAdventureCardText {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.weeklyAdventureCardFoot {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-self: end;
+}
+
+.weeklyAdventureCardAvatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.weeklyAdventureCardAvatar--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 800;
+  background: rgba(36, 62, 112, 0.06);
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.weeklyAdventureCardAvatar--download {
+  background: rgba(229, 192, 106, 0.18);
+  color: #92400e;
+}
+
+.weeklyAdventureCardAvatar--activity {
+  background: rgba(36, 62, 112, 0.1);
+  color: rgba(36, 62, 112, 0.65);
+}
+
+/* TODO: replace with final Zeke character art when available. */
+.weeklyAdventureCardAvatar--zekePlaceholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f766e 0%, #5eead4 100%);
+  color: #fff;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(15, 118, 110, 0.35);
+}
+
+.weeklyAdventureCardZekeIcon {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.weeklyAdventureCardTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+  line-height: 1.3;
+}
+
+.weeklyAdventureCardDesc {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.weeklyAdventureCardTags {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: rgba(36, 62, 112, 0.58);
+}
+
+.weeklyAdventureCardWeekLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.weeklyAdventureCardFootSpacer {
+  flex: 1;
+}
+
+.weeklyAdventureCardStatus {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+  flex-shrink: 0;
+}
+
+.weeklyAdventureCardCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--family-navy, #243e70);
+  white-space: nowrap;
+}
+
+.weeklyAdventureCard--link:hover .weeklyAdventureCardCta {
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+/* Character themes */
+.weeklyAdventureCard--caiden .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #e5c06a, #243e70);
+}
+
+.weeklyAdventureCard--caiden .weeklyAdventureCardWeekLabel {
+  background: rgba(229, 192, 106, 0.18);
+  color: #92400e;
+}
+
+.weeklyAdventureCard--miranda .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #7c6aad, #243e70);
+}
+
+.weeklyAdventureCard--miranda .weeklyAdventureCardWeekLabel {
+  background: rgba(124, 106, 173, 0.14);
+  color: #5b21b6;
+}
+
+.weeklyAdventureCard--b4 .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #4a90c4, #243e70);
+}
+
+.weeklyAdventureCard--b4 .weeklyAdventureCardWeekLabel {
+  background: rgba(74, 144, 196, 0.14);
+  color: #1d4ed8;
+}
+
+.weeklyAdventureCard--charlie .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #5cb85c, #1a3d2e);
+}
+
+.weeklyAdventureCard--charlie .weeklyAdventureCardWeekLabel {
+  background: rgba(92, 184, 92, 0.16);
+  color: #166534;
+}
+
+.weeklyAdventureCard--zeke .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #0f766e, #243e70);
+}
+
+.weeklyAdventureCard--zeke .weeklyAdventureCardWeekLabel {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.weeklyAdventureCard--dr-victoria .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #7c3aed, #243e70);
+}
+
+.weeklyAdventureCard--dr-victoria .weeklyAdventureCardWeekLabel {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.weeklyAdventureCard--uncle-t .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #c9732d, #243e70);
+}
+
+.weeklyAdventureCard--uncle-t .weeklyAdventureCardWeekLabel {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.weeklyAdventureCard--download .weeklyAdventureCardStrip,
+.weeklyAdventureCard--activity .weeklyAdventureCardStrip {
+  background: linear-gradient(90deg, #e5c06a, #243e70);
+}
+
+.weeklyAdventureCard--download .weeklyAdventureCardWeekLabel,
+.weeklyAdventureCard--activity .weeklyAdventureCardWeekLabel {
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.weeklyAdventureCardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .weeklyAdventureCardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

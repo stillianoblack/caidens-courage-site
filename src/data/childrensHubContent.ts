@@ -44,16 +44,16 @@ export function buildChildrensHubLinks(kidsBasePath: string): ChildrensHubLink[]
     },
     {
       id: 'charlie',
-      title: "Charlie Perk\u2019s Nature Nook",
-      description: 'Outdoor clues, camp safety, and funny SEL nature moments.',
-      cta: 'Open Nature Nook',
+      title: "Charlie Perk\u2019s Science Lab",
+      description: 'Science experiments, observation missions, and clever problem solving with Charlie.',
+      cta: 'Open Science Lab',
       href: `${kidsBasePath}/charlie`,
     },
     {
       id: 'zeke',
-      title: "Zeke's Logic Lab",
-      description: 'Patterns, puzzles, and critical-thinking challenges.',
-      cta: 'Preview Logic Lab',
+      title: "Zeke's Team Quest",
+      description: 'Practice courage, teamwork, and speaking up with Zeke.',
+      cta: 'Open Team Quest',
       href: `${kidsBasePath}/zeke`,
     },
     {

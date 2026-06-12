@@ -6,7 +6,13 @@ export type FeedbackRhythmMode = 'kid' | 'family' | 'facilitator';
 
 /** B-4 lock-in tips (after Check only) for these themes. */
 export function usesB4LockInFeedback(theme: MissionGameTheme): boolean {
-  return theme === 'caiden' || theme === 'b4' || theme === 'miranda' || theme === 'charlie';
+  return (
+    theme === 'caiden' ||
+    theme === 'b4' ||
+    theme === 'miranda' ||
+    theme === 'charlie' ||
+    theme === 'uncle-t'
+  );
 }
 
 /** Expert insight cards appear every N questions for adult learning games. */

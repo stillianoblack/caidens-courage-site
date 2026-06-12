@@ -7,6 +7,9 @@ export type PreSubmitGuideInput = {
   phase?: 'landing' | 'quiz';
 };
 
+const B4_PRE_SUBMIT_IDLE =
+  'Read the situation carefully. Choose your answer, then press Check.';
+
 const NEUTRAL_SELECTED = [
   'Ready? Press Check when you are set.',
   'You picked an answer — press Check to lock it in.',
@@ -17,30 +20,29 @@ const NEUTRAL_IDLE = [
   'Read the question, pick an answer, then press Check.',
 ];
 
-const NEUTRAL_HINT_AVAILABLE = [
-  'Need help? You can use a hint after you check.',
-  'Stuck? A hint is available once you try.',
-];
-
 export function getPreSubmitGuideMessage(input: PreSubmitGuideInput = {}): string {
-  const { hasSelection = false, hasHints = false, phase = 'quiz' } = input;
+  const { hasSelection = false, hasHints = false, phase = 'quiz', character = 'b4' } = input;
 
   if (phase === 'landing') {
-    if (input.character === 'dr-victoria') {
+    if (character === 'dr-victoria') {
       return 'Start training to unlock reflection guidance after each scenario.';
     }
-    if (input.character === 'uncle-t') {
+    if (character === 'uncle-t') {
       return 'Start coaching to unlock guidance after each scenario.';
     }
-    return 'Start the mission to unlock B-4 tips after you check your answers.';
+    return 'Start the quest to unlock B-4 coaching after you check your answers.';
   }
 
   if (hasSelection) {
     return NEUTRAL_SELECTED[0];
   }
 
+  if (character === 'b4') {
+    return B4_PRE_SUBMIT_IDLE;
+  }
+
   if (hasHints) {
-    return NEUTRAL_HINT_AVAILABLE[0];
+    return `${NEUTRAL_IDLE[0]} Need help? Use a hint after you check.`;
   }
 
   return NEUTRAL_IDLE[0];
@@ -55,6 +57,6 @@ export function getGuidePanelLabel(character: GuideCharacter = 'b4'): string {
     case 'reflection-coach':
       return 'Reflection Coach';
     default:
-      return 'B-4 Lock-In Tips';
+      return 'B-4 Coach';
   }
 }

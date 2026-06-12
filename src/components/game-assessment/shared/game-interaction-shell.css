@@ -5,7 +5,7 @@
 
 .game-interactionShellInner {
   width: 100%;
-  max-width: min(42rem, calc(100vw - 2.5rem));
+  max-width: min(42rem, 100%);
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -13,37 +13,44 @@
   gap: 1rem;
 }
 
-.shared-mission-game--coachingRail .game-interactionShellInner {
-  max-width: none;
+.portal-gameFrame .game-interactionShellInner {
+  max-width: 100%;
   margin-left: 0;
   margin-right: 0;
 }
 
+.shared-mission-game--coachingRail .game-interactionShellInner {
+  max-width: min(var(--game-shell-layout-max, 66.5rem), 100%);
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.bbc-bottomBar {
+  box-sizing: border-box;
+}
+
+.bbc-bottomBar .game-interactionShell {
+  width: 100%;
+}
+
 .bbc-bottomBar .game-interactionShellInner {
-  max-width: min(42rem, calc(100vw - 2.5rem));
+  max-width: min(42rem, 100%);
+}
+
+.portal-gameFrame .bbc-bottomBar .game-interactionShellInner,
+.portal-gameFrame .game-interactionShellInner {
+  max-width: 100%;
 }
 
 .bbc-bottomBar--coachingShell .game-interactionShellInner {
-  max-width: var(--game-shell-max, 72rem);
+  max-width: none;
   margin-left: 0;
   margin-right: 0;
   width: 100%;
 }
 
-@media (min-width: 720px) {
-  .bbc-bottomBar--coachingShell .game-interactionShellInner {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr)
-      minmax(var(--game-shell-rail-min, 17.5rem), var(--game-shell-rail-max, 22.5rem));
-    gap: var(--game-shell-gap, 2rem);
-    align-items: center;
-  }
-
-  .bbc-bottomBarInner--coachingShell {
-    grid-column: 1;
-    justify-content: flex-end;
-  }
+.bbc-bottomBar--coachingShell .bbc-bottomBarInner--coachingShell {
+  justify-content: flex-end;
 }
 
 .bbc-bottomBarInner--continueOnly {
@@ -51,10 +58,10 @@
 }
 
 .bbc-app--coachingShell .game-interactionShellInner {
-  max-width: var(--game-shell-max, 72rem);
+  max-width: min(var(--game-shell-layout-max, 66.5rem), 100%);
   width: 100%;
   margin-left: 0;
-  margin-right: 0;
+  margin-right: auto;
 }
 
 .bbc-app .caiden-topBar,

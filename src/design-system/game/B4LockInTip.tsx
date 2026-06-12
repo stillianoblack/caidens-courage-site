@@ -18,7 +18,7 @@ export default function B4LockInTip({
   actionLabel,
   onAction,
   avatarSrc,
-  label = 'B-4 Lock-In Tips',
+  label = 'B-4 Coach',
   className = '',
 }: B4LockInTipProps) {
   return (

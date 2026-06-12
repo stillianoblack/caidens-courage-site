@@ -21,20 +21,32 @@ import { mergeAttemptIntoAnswersJson, scoreFromFirstAttempts } from '../../lib/q
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import GameAssessmentComplete from './GameAssessmentComplete';
 import CharacterSpeechBubble from './shared/CharacterSpeechBubble';
-import PortalBackButton from '../portal/PortalBackButton';
+import PortalBreadcrumb from '../portal/PortalBreadcrumb';
+import {
+  inferCharacterFromPath,
+  resolveGameplayBreadcrumb,
+} from '../../lib/portalBreadcrumbNav';
 import GameInteractionShell from './shared/GameInteractionShell';
 import GameBackgroundDecor from './shared/GameBackgroundDecor';
+import GameplayTopBar from '../../design-system/game/GameplayTopBar';
+import {
+  resolveGameplayTopBarFlames,
+  resolveGameplayTopBarVariant,
+} from '../../design-system/game/resolveGameplayTopBarConfig';
 import GameHeader from './shared/GameHeader';
-import MirandaGameHeader from './MirandaGameHeader';
-import CaidenGameHeader from '../caiden/CaidenGameHeader';
-import CharlieGameHeader from '../charlie/CharlieGameHeader';
-import VictoriaGameHeader from '../adult/VictoriaGameHeader';
-import UncleTGameHeader from '../adult/UncleTGameHeader';
 import AdultMissionIntroGuide from '../adult-learning/AdultMissionIntroGuide';
 import '../adult-learning/adult-mission-intro.css';
 import type { AdultGuideThemeId } from '../../types/adultTraining';
 import GameCoachingRailPlaceholder from '../../design-system/game/GameCoachingRailPlaceholder';
+import {
+  buildCoachCardReadAloudSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromParts,
+  IdleSessionGuard,
+  ReadAloudControl,
+} from '../../design-system/narration';
 import { resolveB4PortalType } from '../../design-system/game/getB4LockInTip';
+import { patternClassName, resolveGameUIPattern } from '../../design-system/game/patterns/gameUIPatterns';
 import SharedMissionGameLayout from '../mission-game/SharedMissionGameLayout';
 import { getMissionIntroHint } from '../mission-game/missionIntroHints';
 import type { MissionGameTheme } from '../mission-game/MissionSpeechRow';
@@ -75,6 +87,8 @@ type GameAssessmentFlowProps = {
   useCharlieHeader?: boolean;
   /** B-4 focus mission header */
   useB4Header?: boolean;
+  /** Zeke team quest header */
+  useZekeHeader?: boolean;
   /** Label for hub back link on landing */
   exitLabel?: string;
   /** Render inside Family Portal content area */
@@ -96,6 +110,14 @@ type GameAssessmentFlowProps = {
   adultMissionId?: string;
   /** Optional universal tracking metadata override */
   tracking?: ModuleTrackingDefinition;
+  /** Extra metadata merged into module result answers (e.g. Miranda grade band) */
+  completionContext?: {
+    gradeBandUsed?: string;
+    gradeLevelUsed?: string;
+    contentVersionId?: string;
+    fileId?: string;
+    missionId?: string;
+  };
 };
 
 function getMissionTheme(flags: {
@@ -105,6 +127,7 @@ function getMissionTheme(flags: {
   useMirandaHeader: boolean;
   useCharlieHeader: boolean;
   useB4Header: boolean;
+  useZekeHeader: boolean;
 }): MissionGameTheme {
   if (flags.useVictoriaHeader) return 'victoria';
   if (flags.useUncleTHeader) return 'uncle-t';
@@ -112,6 +135,7 @@ function getMissionTheme(flags: {
   if (flags.useMirandaHeader) return 'miranda';
   if (flags.useCharlieHeader) return 'charlie';
   if (flags.useB4Header) return 'b4';
+  if (flags.useZekeHeader) return 'default';
   return 'default';
 }
 
@@ -131,13 +155,15 @@ function resolveHubBackName(flags: {
   useMirandaHeader: boolean;
   useCharlieHeader: boolean;
   useB4Header: boolean;
+  useZekeHeader: boolean;
 }): string {
   if (flags.useVictoriaHeader) return 'Learning Hub';
   if (flags.useUncleTHeader) return 'Coaching Hub';
   if (flags.useCaidenHeader) return 'Focus Flame Journey';
   if (flags.useMirandaHeader) return 'Mystery Files';
-  if (flags.useCharlieHeader) return 'Nature Nook';
+  if (flags.useCharlieHeader) return 'Science Lab';
   if (flags.useB4Header) return 'B-4 Missions';
+  if (flags.useZekeHeader) return 'Team Quest';
   return 'Character Hub';
 }
 
@@ -170,6 +196,7 @@ export default function GameAssessmentFlow({
   useUncleTHeader = false,
   useCharlieHeader = false,
   useB4Header = false,
+  useZekeHeader = false,
   embedded = false,
   skipLanding = false,
   familyPortalPath,
@@ -181,10 +208,12 @@ export default function GameAssessmentFlow({
   adultGuideId,
   adultMissionId,
   tracking,
+  completionContext,
 }: GameAssessmentFlowProps) {
   const hubContinueLabel = adultHubContinueLabel ?? victoriaHubContinueLabel;
   const navigate = useNavigate();
-  const { pathname: currentPathname } = useLocation();
+  const location = useLocation();
+  const { pathname: currentPathname, search: currentSearch } = location;
   const totalQuestions = config.questions.length;
   const {
     soundEnabled,
@@ -268,9 +297,72 @@ export default function GameAssessmentFlow({
     useMirandaHeader,
     useCharlieHeader,
     useB4Header,
+    useZekeHeader,
   });
   const guideHubTheme = getGuideHubTheme({ useVictoriaHeader, useUncleTHeader });
   const useAdultGuideHeader = useVictoriaHeader || useUncleTHeader;
+
+  const headerFlags = useMemo(
+    () => ({
+      useVictoriaHeader,
+      useUncleTHeader,
+      useCaidenHeader,
+      useMirandaHeader,
+      useCharlieHeader,
+      useB4Header,
+      useZekeHeader,
+    }),
+    [
+      useB4Header,
+      useCaidenHeader,
+      useCharlieHeader,
+      useMirandaHeader,
+      useUncleTHeader,
+      useVictoriaHeader,
+      useZekeHeader,
+    ],
+  );
+
+  const gameplayCharacterId = useMemo(() => {
+    if (useCaidenHeader) return 'caiden';
+    if (useMirandaHeader) return 'miranda';
+    if (useCharlieHeader) return 'charlie';
+    if (useB4Header) return 'b4';
+    if (useZekeHeader) return 'zeke';
+    return inferCharacterFromPath(currentPathname);
+  }, [
+    currentPathname,
+    useB4Header,
+    useCaidenHeader,
+    useCharlieHeader,
+    useMirandaHeader,
+    useZekeHeader,
+  ]);
+
+  const gameplayBreadcrumb = useMemo(
+    () =>
+      resolveGameplayBreadcrumb({
+        pathname: currentPathname,
+        search: currentSearch,
+        state: location.state,
+        characterId: gameplayCharacterId,
+        fallbackExitPath: exitPath,
+        fallbackExitLabel:
+          exitLabel ??
+          `Back to ${resolveHubBackName(headerFlags)}`,
+      }),
+    [
+      currentPathname,
+      currentSearch,
+      location.state,
+      gameplayCharacterId,
+      exitPath,
+      exitLabel,
+      headerFlags,
+    ],
+  );
+
+  const resolvedExitPath = gameplayBreadcrumb.href;
 
   useSetMissionGamePhase(view);
 
@@ -323,7 +415,7 @@ export default function GameAssessmentFlow({
     const exitImmediately = shouldGameplayExitImmediately(embedded, skipLanding);
 
     if (exitImmediately || view === 'complete') {
-      navigateGameExit(navigate, exitPath, currentPathname);
+      navigateGameExit(navigate, resolvedExitPath, currentPathname);
       return;
     }
 
@@ -335,14 +427,14 @@ export default function GameAssessmentFlow({
       return;
     }
 
-    navigateGameExit(navigate, exitPath, currentPathname);
+    navigateGameExit(navigate, resolvedExitPath, currentPathname);
   }, [
     currentPathname,
     embedded,
-    exitPath,
     navigate,
     playItemButton,
     resetQuestionState,
+    resolvedExitPath,
     skipLanding,
     view,
   ]);
@@ -364,10 +456,14 @@ export default function GameAssessmentFlow({
         timeSpentSeconds,
         tracking,
         guideId: adultGuideId,
-        missionId: adultMissionId,
+        missionId: adultMissionId ?? completionContext?.missionId,
+        gradeBandUsed: completionContext?.gradeBandUsed,
+        gradeLevelUsed: completionContext?.gradeLevelUsed,
+        contentVersionId: completionContext?.contentVersionId,
+        fileId: completionContext?.fileId,
       });
     },
-    [adultGuideId, adultMissionId, config, totalQuestions, tracking],
+    [adultGuideId, adultMissionId, completionContext, config, totalQuestions, tracking],
   );
 
   const computeScoreFromAnswers = useCallback(
@@ -515,16 +611,8 @@ export default function GameAssessmentFlow({
 
   const showTopBar = view !== 'landing';
   const revealCorrectAnswer = checked && (isCorrect || attemptsCount >= 2);
-  const headerFlags = {
-    useVictoriaHeader,
-    useUncleTHeader,
-    useCaidenHeader,
-    useMirandaHeader,
-    useCharlieHeader,
-    useB4Header,
-  };
-  const hubBackName =
-    exitLabel?.replace(/^Back to /i, '').trim() || resolveHubBackName(headerFlags);
+  const hubBackLabel = gameplayBreadcrumb.label;
+  const hubBackHref = gameplayBreadcrumb.href;
   const showHubBackLink = exitPath !== '/' && view !== 'complete';
   const nextCase = useMirandaHeader ? getMirandaNextCase(config.id) : null;
   const nextQuest = useCaidenHeader ? getCaidenNextQuest(config.id) : null;
@@ -554,9 +642,11 @@ export default function GameAssessmentFlow({
       useMirandaHeader ||
       useCharlieHeader ||
       useB4Header ||
+      useZekeHeader ||
       useVictoriaHeader ||
       useUncleTHeader ||
       themeClassName.includes('b4') ||
+      themeClassName.includes('zeke') ||
       config.decorVariant === 'b4',
     [
       config.decorVariant,
@@ -567,8 +657,12 @@ export default function GameAssessmentFlow({
       useMirandaHeader,
       useUncleTHeader,
       useVictoriaHeader,
+      useZekeHeader,
     ],
   );
+
+  const topBarVariant = resolveGameplayTopBarVariant(missionTheme, headerFlags);
+  const topBarFlames = resolveGameplayTopBarFlames(topBarVariant, headerFlags);
 
   const quizWrapModifier = useMemo(() => {
     switch (presentationStyle) {
@@ -604,6 +698,28 @@ export default function GameAssessmentFlow({
     embedded && shellThemeClasses[0] ? `${shellThemeClasses[0]}--embedded` : '';
   const adultGuideEmbeddedClass =
     embedded && useAdultGuideHeader ? 'adult-guide-game--embedded' : '';
+  const gamePattern = useMemo(
+    () =>
+      resolveGameUIPattern({
+        theme: missionTheme,
+        useCaidenHeader,
+        useMirandaHeader,
+        useCharlieHeader,
+        useB4Header,
+        useVictoriaHeader,
+        useUncleTHeader,
+      }),
+    [
+      missionTheme,
+      useB4Header,
+      useCaidenHeader,
+      useCharlieHeader,
+      useMirandaHeader,
+      useUncleTHeader,
+      useVictoriaHeader,
+    ],
+  );
+
   const shellClass = [
     'bbc-app',
     ...shellThemeClasses,
@@ -612,21 +728,11 @@ export default function GameAssessmentFlow({
     embedded ? 'portal-gameFrame' : '',
     usesCoachingShell ? 'bbc-app--coachingShell' : '',
     view === 'quiz' ? 'bbc-app--game-active' : '',
+    patternClassName(gamePattern.id),
   ]
     .filter(Boolean)
     .join(' ');
   const interactionShellClass = usesCoachingShell ? 'shared-mission-game--coachingRail' : '';
-  const HeaderComponent = useVictoriaHeader
-    ? VictoriaGameHeader
-    : useUncleTHeader
-      ? UncleTGameHeader
-      : useCharlieHeader
-        ? CharlieGameHeader
-        : useCaidenHeader
-          ? CaidenGameHeader
-          : useMirandaHeader
-            ? MirandaGameHeader
-            : GameHeader;
 
   const introHint = getMissionIntroHint({
     useVictoriaHeader,
@@ -636,6 +742,32 @@ export default function GameAssessmentFlow({
     useCharlieHeader,
     useB4Header,
   });
+  const landingGuideCharacter = useUncleTHeader
+    ? 'uncle-t'
+    : useVictoriaHeader
+      ? 'dr-victoria'
+      : 'b4';
+
+  const landingReadAloudSegments = useMemo(() => {
+    const missionIntro = buildReadAloudSegmentsFromParts({
+      scenarioTitle: config.landing.title,
+      scenarioDescription: [config.landing.subtitle, config.landing.body, introHint]
+        .filter(Boolean)
+        .join(' '),
+    });
+    const coachIntro = buildCoachCardReadAloudSegments({
+      state: 'placeholder',
+      guideCharacter: landingGuideCharacter,
+      phase: 'landing',
+    });
+    return buildGameplayReadAloudSegments(missionIntro, coachIntro);
+  }, [
+    config.landing.body,
+    config.landing.subtitle,
+    config.landing.title,
+    introHint,
+    landingGuideCharacter,
+  ]);
   const feedbackSpeakerLabel = getFeedbackSpeakerLabel(missionTheme);
   const playerName = readActiveChildNickname();
 
@@ -644,14 +776,32 @@ export default function GameAssessmentFlow({
       <GameBackgroundDecor variant={decorVariant} />
 
       {showTopBar ? (
-        <HeaderComponent
-          progressPct={progressPct}
-          onExit={handleExit}
-          showProgress={view === 'quiz' || view === 'complete'}
-          soundEnabled={soundEnabled}
-          onToggleSound={toggleSound}
-          playerName={playerName}
-        />
+        usesCoachingShell ? (
+          <GameplayTopBar
+            variant={topBarVariant}
+            backLabel={showHubBackLink ? hubBackLabel : undefined}
+            backHref={showHubBackLink ? hubBackHref : undefined}
+            onBackClick={playItemButton}
+            onBack={!showHubBackLink ? handleExit : undefined}
+            progressPercent={progressPct}
+            showProgress={view === 'quiz' || view === 'complete'}
+            playerName={playerName}
+            showFlameStatus={!useAdultGuideHeader}
+            flameDisplay={topBarFlames.flameDisplay}
+            flamesLit={topBarFlames.flamesLit}
+            soundEnabled={soundEnabled}
+            onToggleSound={toggleSound}
+          />
+        ) : (
+          <GameHeader
+            progressPct={progressPct}
+            onExit={handleExit}
+            showProgress={view === 'quiz' || view === 'complete'}
+            soundEnabled={soundEnabled}
+            onToggleSound={toggleSound}
+            playerName={playerName}
+          />
+        )
       ) : null}
 
       <main
@@ -665,12 +815,13 @@ export default function GameAssessmentFlow({
           .join(' ')}
       >
         <GameInteractionShell className={interactionShellClass}>
-          {showHubBackLink ? (
-            <PortalBackButton
-              to={exitPath}
-              hubName={hubBackName}
+          {showHubBackLink && !usesCoachingShell ? (
+            <PortalBreadcrumb
+              label={hubBackLabel}
+              href={hubBackHref}
               theme={missionTheme}
               onClick={playItemButton}
+              variant="game"
               className="game-shellBackBtn"
             />
           ) : null}
@@ -720,9 +871,12 @@ export default function GameAssessmentFlow({
             {usesCoachingShell ? (
               <aside className="game-focusFlameLandingAside">
                 <GameCoachingRailPlaceholder
-                  variant={useAdultGuideHeader ? 'facilitator' : 'b4'}
+                  guideCharacter={
+                    useUncleTHeader ? 'uncle-t' : useVictoriaHeader ? 'dr-victoria' : 'b4'
+                  }
                   phase="landing"
                 />
+                <ReadAloudControl segments={landingReadAloudSegments} resetKey={`landing-${config.id}`} />
               </aside>
             ) : null}
           </div>
@@ -744,6 +898,7 @@ export default function GameAssessmentFlow({
             feedbackTone={feedbackTone}
             quizWrapModifier={quizWrapModifier}
             useCoachingRail={usesCoachingShell}
+            patternId={gamePattern.id}
             useLockInFeedback={
               usesCoachingShell && !useAdultGuideHeader
             }
@@ -757,8 +912,17 @@ export default function GameAssessmentFlow({
             useCaidenHeader={useCaidenHeader}
             useMirandaHeader={useMirandaHeader}
             useCharlieHeader={useCharlieHeader}
+            useB4Header={useB4Header}
             revealCorrectAnswer={revealCorrectAnswer}
             activeHint={activeHint}
+            canTryAgain={canTryAgain}
+            canUseHint={canUseHint}
+            canExplainMore={canExplainMore}
+            showExplainMore={showExplainMore}
+            onContinue={handleContinue}
+            onTryAgain={handleTryAgain}
+            onUseHint={handleUseHint}
+            onToggleExplainMore={toggleExplainMore}
             onPlaySelect={playSelect}
             onSelectChoice={(id) => selectAnswer(id)}
             onSelectTrueFalse={(value) => selectAnswer(value)}
@@ -819,7 +983,7 @@ export default function GameAssessmentFlow({
               useCaidenHeader
                 ? 'Continue Journey'
                 : useCharlieHeader
-                  ? 'Continue Nature Nook'
+                  ? 'Continue Science Lab'
                   : useB4Header
                     ? 'Continue B-4 Missions'
                     : useAdultGuideHeader
@@ -855,6 +1019,7 @@ export default function GameAssessmentFlow({
           showExplainMore={showExplainMore}
           explainMore={currentQuestion?.explainMore}
           activeHint={activeHint}
+          attachContinueToFeedback={false}
           onSkip={handleSkip}
           onCheck={handleCheck}
           onContinue={handleContinue}
@@ -863,6 +1028,11 @@ export default function GameAssessmentFlow({
           onToggleExplainMore={toggleExplainMore}
         />
       ) : null}
+
+      <IdleSessionGuard
+        enabled={view === 'quiz' || view === 'landing'}
+        onReturn={() => navigateGameExit(navigate, exitPath, currentPathname)}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { PILOT_CERTIFICATES } from '../../../data/pilotDashboardContent';
 import { trackDownload, trackEvent } from '../../../lib/analytics';
+import { PortalPageIntro } from '../../portal-design-system';
 
 export default function PilotCertificatesPanel() {
   useEffect(() => {
@@ -9,7 +10,9 @@ export default function PilotCertificatesPanel() {
 
   return (
     <div className="pilot-panel">
-      <p className="pilot-panelIntro">Download printable celebration templates for students and facilitators.</p>
+      <PortalPageIntro>
+        Download printable celebration templates for students and facilitators.
+      </PortalPageIntro>
       <div className="pilot-dash-grid pilot-dash-grid--2">
         {PILOT_CERTIFICATES.map((cert) => (
           <a

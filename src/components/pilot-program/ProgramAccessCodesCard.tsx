@@ -7,6 +7,7 @@ import {
   writeAccessCodesCollapsed,
   writeAccessCodesHintSeen,
 } from '../../lib/facilitatorAccessCodesCollapse';
+import { OPEN_FACILITATOR_ACCESS_CODES_EVENT } from '../../lib/openFacilitatorAccessCodes';
 import { useCopyToast } from '../shared/useCopyToast';
 
 type ProgramAccessCodesCardProps = {
@@ -44,6 +45,22 @@ export default function ProgramAccessCodesCard({
 
     return () => window.clearTimeout(timer);
   }, [isCollapsible, program.programCode]);
+
+  useEffect(() => {
+    const handleOpenAccessCodes = () => {
+      setCollapsed(false);
+      writeAccessCodesCollapsed(program.programCode, false);
+      window.requestAnimationFrame(() => {
+        document.getElementById('program-access-codes')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        });
+      });
+    };
+
+    window.addEventListener(OPEN_FACILITATOR_ACCESS_CODES_EVENT, handleOpenAccessCodes);
+    return () => window.removeEventListener(OPEN_FACILITATOR_ACCESS_CODES_EVENT, handleOpenAccessCodes);
+  }, [program.programCode]);
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -94,6 +111,7 @@ export default function ProgramAccessCodesCard({
   return (
     <>
       <section
+        id="program-access-codes"
         className={`pilotAccessCodes${compact ? ' pilotAccessCodes--compact' : ''}${
           isCollapsible ? ' pilotAccessCodes--collapsible' : ''
         }${collapsed ? ' pilotAccessCodes--collapsed' : ''}`}

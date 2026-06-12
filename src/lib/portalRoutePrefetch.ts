@@ -32,8 +32,11 @@ export function prefetchFamilyPortalRoutes(): void {
     void import('../pages/B4PortalCheckInPage');
     void import('../pages/B4PortalWeek1Page');
     void import('../pages/B4PortalFeelingFinderPage');
+    void import('../pages/B4PortalMissionPage');
     void import('../pages/CharliePortalHubPage');
     void import('../pages/CharliePortalMissionPage');
+    void import('../pages/ZekePortalHubPage');
+    void import('../pages/ZekePortalMissionPage');
     void import('../pages/KidsCharacterPage');
     void import('../pages/FamilyAdultGuideHubPage');
     void import('../pages/FamilyAdultGuideMissionPage');
@@ -53,8 +56,11 @@ export function prefetchFacilitatorPortalRoutes(): void {
     void import('../pages/B4PortalCheckInPage');
     void import('../pages/B4PortalWeek1Page');
     void import('../pages/B4PortalFeelingFinderPage');
+    void import('../pages/B4PortalMissionPage');
     void import('../pages/CharliePortalHubPage');
     void import('../pages/CharliePortalMissionPage');
+    void import('../pages/ZekePortalHubPage');
+    void import('../pages/ZekePortalMissionPage');
     void import('../pages/KidsCharacterPage');
     void import('../pages/FacilitatorAdultGuideHubPage');
     void import('../pages/FacilitatorAdultGuideMissionPage');

@@ -22,8 +22,10 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
+import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourneyCoachPlacement';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
+import { isFamilyHubHomePath } from '../lib/familyPortalHomeRoute';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
 export default function FamilyHubLayout() {
@@ -36,6 +38,7 @@ export default function FamilyHubLayout() {
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
   const programCode = activeProgram?.programCode ?? '';
+  const showJourneyRail = isFamilyHubHomePath(location.pathname);
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
@@ -98,6 +101,7 @@ export default function FamilyHubLayout() {
   return (
     <AppShell
       variant="family"
+      rightRail={showJourneyRail ? <FamilyJourneyCoachRail /> : undefined}
       sidebar={
         <FamilyDashboardSidebar
           navItems={PROGRAM_FAMILY_SIDEBAR_NAV}

@@ -9,6 +9,7 @@ import {
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import AdultTrainingCard from '../../shared/AdultTrainingCard';
 import { trackDownload } from '../../../lib/analytics';
+import { PortalPageIntro } from '../../portal-design-system';
 
 export default function PilotFacilitatorPanel() {
   const activeProgram = readActivePilotProgram();
@@ -17,10 +18,7 @@ export default function PilotFacilitatorPanel() {
     <div className="pilot-panel">
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} /> : null}
 
-      <div className="pilot-panelIntro">
-        <h2 className="pilot-panelIntroTitle">{PILOT_ADULT_TRAINING_INTRO.title}</h2>
-        <p className="pilot-panelIntroSubtitle">{PILOT_ADULT_TRAINING_INTRO.subtitle}</p>
-      </div>
+      <PortalPageIntro>{PILOT_ADULT_TRAINING_INTRO.subtitle}</PortalPageIntro>
 
       <div className="adultTraining-grid">
         {PILOT_ADULT_TRAINING_CARDS.map((card) => (

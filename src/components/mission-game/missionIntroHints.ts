@@ -13,7 +13,7 @@ export function getMissionIntroHint(flags: {
     return 'Read each coaching scenario, choose your answer, then tap Check.';
   }
   if (flags.useCaidenHeader) {
-    return 'Read the quest card, choose the best answer, then tap Check.';
+    return 'Read the scenario, choose the best answer, then tap Check.';
   }
   if (flags.useMirandaHeader) {
     return 'Read the clue, choose your answer, then tap Check.';

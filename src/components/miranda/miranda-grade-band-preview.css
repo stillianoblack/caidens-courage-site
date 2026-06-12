@@ -1,0 +1,34 @@
+.miranda-gradeBandPreview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.35rem 0.625rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 191, 0.08);
+  border: 1px solid rgba(124, 92, 191, 0.22);
+  width: fit-content;
+}
+
+.miranda-gradeBandPreview-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.miranda-gradeBandPreview-pill {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #5b21b6;
+}
+
+.character-dashboard-breadcrumb + .miranda-gradeBandPreview,
+.character-dashboard-grid .miranda-gradeBandPreview {
+  grid-column: 1 / -1;
+}
+
+.bbc-app--coachingShell .miranda-gradeBandPreview {
+  margin: 0 1rem 0.5rem;
+}

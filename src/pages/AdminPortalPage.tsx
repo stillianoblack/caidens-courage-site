@@ -21,6 +21,7 @@ import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
 import { resolveAdminPortalTab } from '../lib/adminPortalPaths';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import '../components/family-portal/family-dashboard.css';
+import '../components/portal-design-system/portal-design-system.css';
 import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
@@ -189,6 +190,7 @@ export default function AdminPortalPage() {
             tabs={ADMIN_PORTAL_TABS}
             activeTab={activeTab}
             onSelectTab={selectTab}
+            showPageTitle
             panelClassName="family-panel family-panel--settings adminPortal-settingsPanel"
             tabAriaLabel="Admin portal sections"
             toolbar={

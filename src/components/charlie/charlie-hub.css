@@ -7,6 +7,11 @@
   padding: 0.5rem 0 1.5rem;
 }
 
+.charlie-hub > .portal-backBtn,
+.charlie-hub > .portal-breadcrumb {
+  margin-bottom: 0.75rem;
+}
+
 .charlie-hubHeader {
   text-align: center;
   margin-bottom: 1.5rem;

@@ -1,0 +1,101 @@
+.portal-layout--withRail {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  overflow-y: auto;
+  overflow-x: clip;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 2rem 2rem 3rem;
+  box-sizing: border-box;
+}
+
+.portal-layoutMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 70rem;
+  width: 100%;
+}
+
+.portal-shell .portal-layout--withRail .portal-contentFrame.pilot-content,
+.portal-shell .portal-layout--withRail .portal-contentFrame.family-content {
+  flex: none;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.portal-rightRail {
+  flex: 0 0 21.25rem;
+  width: 21.25rem;
+  max-width: 22.5rem;
+  min-width: 0;
+  position: sticky;
+  top: 1.5rem;
+  align-self: flex-start;
+  height: fit-content;
+  z-index: 1;
+}
+
+.portal-rightRailCoach {
+  width: 100%;
+}
+
+.portal-rightRailCoach--rail {
+  display: block;
+}
+
+.portal-rightRailCoach--inline {
+  display: none;
+  width: 100%;
+  max-width: 100%;
+}
+
+.portal-rightRailFamilyJourney {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .portal-layout--withRail {
+    flex-direction: column;
+    gap: 0;
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  .portal-layoutMain {
+    max-width: 70rem;
+  }
+
+  .portal-rightRail {
+    display: none;
+  }
+
+  .portal-rightRailCoach--rail {
+    display: none;
+  }
+
+  .portal-rightRailCoach--inlineMetrics {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .portal-layout--withRail {
+    padding: 1.25rem 1.25rem 2rem;
+  }
+
+  .portal-rightRailCoach--inlineMetrics {
+    display: none;
+  }
+
+  .portal-rightRailCoach--inlineFooter {
+    display: block;
+    margin-top: 0.5rem;
+  }
+}

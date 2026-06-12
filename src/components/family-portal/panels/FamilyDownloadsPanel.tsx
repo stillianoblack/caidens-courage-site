@@ -13,6 +13,7 @@ import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
 import FamilyLinkedCampBadge from '../FamilyLinkedCampBadge';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
+import { PortalPageIntro } from '../../portal-design-system';
 
 const DEFAULT_CATEGORY: FamilyParentResourceCategoryId = 'try-at-home';
 
@@ -75,9 +76,9 @@ export default function FamilyDownloadsPanel() {
         <FamilyLinkedCampBadge label={linkedCampLabel} className="family-panelCampBadge" />
       ) : null}
 
-      <p className="family-panelIntro">
+      <PortalPageIntro>
         Parent Resource Library — activities and tools you can try at home with your child.
-      </p>
+      </PortalPageIntro>
 
       <div className="family-resourceLayout">
         <div className="family-resourceCategories" role="tablist" aria-label="Parent resources">

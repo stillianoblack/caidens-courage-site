@@ -36,7 +36,7 @@ export const LEARNING_MOMENT_VARIANTS: Record<LearningMomentVariant, LearningMom
     id: 'B4_LOCK_IN',
     label: 'B-4 Lock-In',
     avatarType: 'b4',
-    defaultTitle: 'B-4 Lock-In Tips',
+    defaultTitle: 'B-4 Coach',
     background: 'Focus Navy gradient',
     accent: 'Focus Gold',
     portals: ['kid', 'family', 'facilitator'],

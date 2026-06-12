@@ -355,6 +355,91 @@
   margin-top: 1rem;
 }
 
+.family-settingsGradeSection {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.family-settingsGradeList {
+  display: grid;
+  gap: 1rem;
+}
+
+.family-childGradeConfig {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.family-childGradeConfig--focus {
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.family-childGradeConfig--missing {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.family-childGradeConfigName {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.family-childGradeConfigField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.family-childGradeConfigLabel {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.82);
+}
+
+.family-childGradeConfigSelect {
+  width: 100%;
+  max-width: 16rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  background: #fff;
+  font-size: 0.9375rem;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.family-childGradeConfigStretch {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgba(26, 47, 82, 0.88);
+}
+
+.family-childGradeConfigStretch input {
+  margin-top: 0.2rem;
+}
+
+.family-childGradeConfigStatus {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(26, 47, 82, 0.7);
+}
+
+.family-childGradeConfigStatus--ok {
+  color: #047857;
+}
+
+.family-childGradeConfigStatus--error {
+  color: #b91c1c;
+}
+
 .family-settingsSubheading {
   margin: 0.75rem 0 0.35rem;
   font-size: 0.8125rem;
@@ -401,27 +486,6 @@
 
 .family-settingsToggleRow--disabled {
   cursor: not-allowed;
-}
-
-.family-accessCodeSummary {
-  padding: 0.875rem 1rem;
-  border-radius: 0.875rem;
-  border: 1px dashed rgba(229, 192, 106, 0.45);
-  background: #fffaf5;
-}
-
-.family-accessCodeSummaryCopy {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: rgba(36, 62, 112, 0.78);
-}
-
-.family-accessCodeSummaryLink {
-  font-weight: 800;
-  color: var(--family-navy);
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .family-railSupportTitle {
@@ -1795,8 +1859,19 @@ a.family-dash-card:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  color: #047857;
+  background: linear-gradient(135deg, #0f766e 0%, #5eead4 100%);
+  color: #fff;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(15, 118, 110, 0.35);
+}
+
+.family-charCardAvatar.weeklyAdventureCardAvatar--zekePlaceholder {
+  width: 5rem;
+  height: 5rem;
+}
+
+.family-charCardAvatar.weeklyAdventureCardAvatar--zekePlaceholder .weeklyAdventureCardZekeIcon {
+  width: 2rem;
+  height: 2rem;
 }
 
 .family-charCardPlaceholder {
@@ -1829,7 +1904,11 @@ a.family-dash-card:hover {
 }
 
 .family-panel--characterHub {
-  gap: 2.5rem;
+  gap: 1.5rem;
+}
+
+.family-panel--characterHub .family-characterHubIntro {
+  margin-bottom: 0;
 }
 
 .family-characterHubSection {
@@ -2662,6 +2741,24 @@ a.family-dash-card:hover {
   background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
 }
 
+.family-needsAttentionLink--button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.family-childSummaryCard--clickable {
+  cursor: pointer;
+}
+
+.family-childSummaryCard--clickable:hover {
+  border-color: rgba(229, 192, 106, 0.35);
+  box-shadow: 0 10px 28px rgba(36, 62, 112, 0.1);
+}
+
 .family-needsAttentionLink {
   display: block;
   padding: 0.75rem 0.875rem;
@@ -3193,4 +3290,130 @@ a.family-dash-card:hover {
 
 .family-childGoalsMessage--warn {
   color: #b45309;
+}
+
+.family-missingActionPrompt {
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.family-missingActionTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.family-missingActionBody {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.family-missingActionCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #243e70;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.family-missingActionCta:hover {
+  background: #1b3159;
+  color: #fff;
+}
+
+.family-overviewPage {
+  min-width: 0;
+}
+
+.family-journeyCoachInline {
+  display: none;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 1.5rem;
+}
+
+.family-missionCoachSkeleton {
+  min-height: 18rem;
+  border-radius: 1.125rem;
+  background: rgba(36, 62, 112, 0.06);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.family-missionCoachSkeletonBar {
+  height: 0.85rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.1);
+}
+
+.family-missionCoachSkeletonBar--short {
+  width: 55%;
+}
+
+.family-onboardingMobileCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: linear-gradient(135deg, #fffaf5 0%, #fff 100%);
+  box-shadow: 0 8px 24px rgba(36, 62, 112, 0.08);
+}
+
+.family-onboardingMobileCardTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--family-navy-deep);
+}
+
+.family-onboardingMobileCardProgress {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.family-onboardingMobileCardCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff4d6 0%, var(--family-gold) 100%);
+  color: var(--family-navy-deep);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-decoration: none;
+  border: 1px solid rgba(201, 164, 74, 0.45);
+}
+
+@media (max-width: 1100px) {
+  .family-journeyCoachInline {
+    display: block;
+  }
+}
+
+@media (min-width: 1101px) {
+  .family-onboardingMobileCard {
+    display: none;
+  }
 }

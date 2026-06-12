@@ -4,6 +4,7 @@ import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardS
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
+import '../design-system/components/b4-insights-drawer.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal/portal-shell.css';
@@ -20,8 +21,10 @@ import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
+import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourneyCoachPlacement';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
+import { isFamilyPortalHomePath } from '../lib/familyPortalHomeRoute';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 
 export default function FamilyPortalLayout() {
@@ -33,6 +36,7 @@ export default function FamilyPortalLayout() {
   const pageTitle = resolvePortalPageTitle(location.pathname);
   const activeProgram = readActivePilotProgram();
   const programCode = activeProgram?.programCode ?? '';
+  const showJourneyRail = isFamilyPortalHomePath(location.pathname);
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
 
@@ -85,6 +89,7 @@ export default function FamilyPortalLayout() {
   return (
     <AppShell
       variant="family"
+      rightRail={showJourneyRail ? <FamilyJourneyCoachRail /> : undefined}
       sidebar={
         <FamilyDashboardSidebar
           navItems={FAMILY_SIDEBAR_NAV}

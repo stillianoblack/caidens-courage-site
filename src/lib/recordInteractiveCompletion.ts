@@ -28,6 +28,10 @@ export type RecordInteractiveCompletionInput = {
   guideId?: string;
   missionId?: string;
   pathname?: string;
+  gradeBandUsed?: string;
+  gradeLevelUsed?: string;
+  contentVersionId?: string;
+  fileId?: string;
 };
 
 function isEnrichedAnswersJson(
@@ -38,21 +42,39 @@ function isEnrichedAnswersJson(
 
 function answersToJson(
   answers?: Record<string, GameAnswerValue> | EnrichedAnswersJson,
+  meta?: {
+    gradeBandUsed?: string;
+    gradeLevelUsed?: string;
+    contentVersionId?: string;
+    fileId?: string;
+    missionId?: string;
+    moduleId?: string;
+  },
 ): Record<string, unknown> | undefined {
-  if (!answers) return undefined;
+  const trackingMeta: Record<string, unknown> = {};
+  if (meta?.gradeBandUsed) trackingMeta.grade_band_used = meta.gradeBandUsed;
+  if (meta?.gradeLevelUsed) trackingMeta.grade_level_used = meta.gradeLevelUsed;
+  if (meta?.contentVersionId) trackingMeta.content_version_id = meta.contentVersionId;
+  if (meta?.fileId) trackingMeta.file_id = meta.fileId;
+  if (meta?.missionId) trackingMeta.mission_id = meta.missionId;
+  if (meta?.moduleId) trackingMeta.module_id = meta.moduleId;
 
-  if (isEnrichedAnswersJson(answers)) {
-    return {
-      ...Object.fromEntries(
-        Object.entries(answers.answers).map(([key, value]) => [key, value as unknown]),
-      ),
-      _attempts: answers._attempts,
-    };
-  }
+  if (!answers && !Object.keys(trackingMeta).length) return undefined;
 
-  return Object.fromEntries(
-    Object.entries(answers).map(([key, value]) => [key, value as unknown]),
-  );
+  const base = !answers
+    ? {}
+    : isEnrichedAnswersJson(answers)
+      ? {
+          ...Object.fromEntries(
+            Object.entries(answers.answers).map(([key, value]) => [key, value as unknown]),
+          ),
+          _attempts: answers._attempts,
+        }
+      : Object.fromEntries(
+          Object.entries(answers).map(([key, value]) => [key, value as unknown]),
+        );
+
+  return { ...base, ...trackingMeta };
 }
 
 function resolveStudentParticipant() {
@@ -176,8 +198,23 @@ export async function recordInteractiveModuleCompletion(
       score: input.score,
       max_score: input.maxScore,
       time_spent_seconds: input.timeSpentSeconds,
-      answers_json: answersToJson(input.answers),
+      answers_json: answersToJson(input.answers, {
+        gradeBandUsed: input.gradeBandUsed,
+        gradeLevelUsed: input.gradeLevelUsed,
+        contentVersionId: input.contentVersionId,
+        fileId: input.fileId,
+        missionId: input.missionId,
+        moduleId: tracking.moduleId,
+      }),
     });
+
+    if (input.gradeBandUsed) {
+      console.info('[MODULE_SAVE] grade_band_used', {
+        module_id: tracking.moduleId,
+        grade_band_used: input.gradeBandUsed,
+        content_version_id: input.contentVersionId ?? null,
+      });
+    }
 
     if (result.source === 'local' && result.message) {
       return { warning: result.message };

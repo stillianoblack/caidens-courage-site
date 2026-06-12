@@ -10,6 +10,7 @@ import {
   isCharacterHubRoute,
   resolveFamilyBasePath,
 } from '../../lib/familyPortalNav';
+import { isWeeklyAdventureSource } from '../../lib/weeklyAdventureRouteContext';
 import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
 import { resetPortalScroll } from '../../lib/portalScroll';
@@ -35,7 +36,8 @@ export default function FamilyDashboardSidebar({
   const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
   const location = useLocation();
   const basePath = resolveFamilyBasePath(location.pathname);
-  const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath);
+  const weeklyLaunch = isWeeklyAdventureSource(location.search);
+  const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath) && !weeklyLaunch;
 
   return (
     <aside
@@ -54,6 +56,8 @@ export default function FamilyDashboardSidebar({
           <ul className="family-railNavList">
             {navItems.map((item) => {
               const characterHubActive = item.id === 'character-hub' && onCharacterRoute;
+              const weeklyAdventuresActive =
+                item.id === 'continue-learning' && weeklyLaunch;
 
               return (
                 <li key={item.id}>
@@ -62,7 +66,7 @@ export default function FamilyDashboardSidebar({
                     end={item.id === 'overview'}
                     onClick={resetPortalScroll}
                     className={({ isActive }) => {
-                      const active = isActive || characterHubActive;
+                      const active = isActive || characterHubActive || weeklyAdventuresActive;
                       return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
                     }}
                   >
@@ -85,6 +89,7 @@ export default function FamilyDashboardSidebar({
       <div className="family-railFooter">
         <FamilyProgramSettingsRailCard />
         {showUpgradeCard ? <FamilyUpgradeRailCard /> : null}
+        <p className="family-railCopyright">© 2026 Caiden&apos;s Courage™ Family Portal</p>
       </div>
     </aside>
   );

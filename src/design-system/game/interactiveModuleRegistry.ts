@@ -14,6 +14,8 @@
 export const INTERACTIVE_MODULE_COMPONENTS = {
   /** Standard wrapper for question-based experiences (alias: InteractiveModuleShell) */
   GameShell: 'GameShell',
+  /** Standard gameplay header — back, progress, player, flame, sound */
+  GameplayTopBar: 'GameplayTopBar',
   /** @deprecated Use GameShell — same component */
   InteractiveModuleShell: 'GameShell',
   /** Mission card / scenario prompt above the question */
@@ -91,9 +93,20 @@ export const INTERACTIVE_MODULE_EXAMPLES: InteractiveModuleExample[] = [
   },
 ];
 
+export const ADVENTURE_TRAIL_COMPONENTS = {
+  AdventureTrail: 'AdventureTrail',
+  TrailWeekSection: 'TrailWeekSection',
+  TrailNode: 'TrailNode',
+  TrailConnector: 'TrailConnector',
+  TrailStatusBadge: 'TrailStatusBadge',
+  CharacterHeroBadge: 'CharacterHeroBadge',
+  WeeklyAdventureCard: 'WeeklyAdventureCard',
+} as const;
+
 export const INTERACTIVE_MODULE_RULES = [
   'If it has questions, answers, progress, skip/check, and continue — use GameShell.',
   'Do not split training and games into separate shell patterns.',
+  'Scenario/setup copy belongs in the scenario card only; the main question area shows the prompt only (see resolveGameplayQuestionPrompt).',
   'Use LearningMomentCard for post-answer coaching; ModuleFooter for actions.',
   'Kid/family games: B4_LOCK_IN via getB4LockInTip(). Adult training: FACILITATOR_INSIGHT.',
   'Preserve module_results and assessment_results_v2 saving — shell changes must not break scoring.',

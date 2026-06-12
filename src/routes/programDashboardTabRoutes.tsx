@@ -10,38 +10,29 @@ import PilotResultsPanel from '../components/pilot-dashboard/panels/PilotResults
 import PilotWeeklyModulesPanel from '../components/pilot-dashboard/panels/PilotWeeklyModulesPanel';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { PROGRAM_BASELINE_CHECK_PATH } from '../config/courageRoutes';
+import { useFacilitatorOverviewData } from '../components/pilot-dashboard/coach/FacilitatorOverviewCoachProvider';
 import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
 import { useProgramDashboardNav } from '../hooks/useProgramDashboardNav';
 
 export function ProgramOverviewTabRoute() {
   const onSelectNav = useProgramDashboardNav();
   const activeProgram = readActivePilotProgram();
-  const programCode = activeProgram?.programCode;
-  const {
-    metrics,
-    moduleResults,
-    assessmentResults,
-    participantLookup,
-    participants,
-    familyLinks,
-    loading,
-    warning,
-  } = usePilotTrackingResults(0, programCode, true);
+  const overviewData = useFacilitatorOverviewData();
 
-  if (!activeProgram) {
+  if (!activeProgram || !overviewData) {
     return null;
   }
 
   return (
     <PilotOverviewPanel
-      metrics={metrics}
-      moduleResults={moduleResults}
-      assessmentResults={assessmentResults}
-      participantLookup={participantLookup}
-      participants={participants}
-      familyLinks={familyLinks}
-      loading={loading}
-      warning={warning}
+      metrics={overviewData.metrics}
+      moduleResults={overviewData.moduleResults}
+      assessmentResults={overviewData.assessmentResults}
+      participantLookup={overviewData.participantLookup}
+      participants={overviewData.participants}
+      familyLinks={overviewData.familyLinks}
+      loading={overviewData.loading}
+      warning={overviewData.warning}
       onSelectNav={onSelectNav}
       activeProgram={activeProgram}
     />

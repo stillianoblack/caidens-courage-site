@@ -1,7 +1,58 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
-import { CAIDEN_QUEST_1_CONFIG, CAIDEN_QUEST_1_ID } from './quest1WhatComesFirst';
-import { CAIDEN_QUEST_2_CONFIG, CAIDEN_QUEST_2_ID } from './quest2ChooseYourNextMove';
-import { CAIDEN_QUEST_3_CONFIG, CAIDEN_QUEST_3_ID } from './quest3ResetAndReturn';
+import type { CaidenGradeBand } from '../../types/caidenAdaptiveQuest';
+import {
+  buildCaidenAdaptiveConfig,
+  CAIDEN_ADAPTIVE_QUEST_REGISTRY,
+  getCaidenDashboardDescription,
+} from './caidenAdaptiveBuilder';
+import {
+  CAIDEN_QUEST_1_FILE,
+  CAIDEN_QUEST_1_ID,
+} from './questAdaptiveWhatComesFirst';
+import {
+  CAIDEN_QUEST_2_FILE,
+  CAIDEN_QUEST_2_ID,
+} from './questAdaptiveFocusOrDistraction';
+import {
+  CAIDEN_QUEST_3_FILE,
+  CAIDEN_QUEST_3_ID,
+} from './questAdaptiveTimeTracker';
+import {
+  CAIDEN_QUEST_4_FILE,
+  CAIDEN_QUEST_4_ID,
+} from './questAdaptiveResetAndReturn';
+import {
+  CAIDEN_QUEST_5_FILE,
+  CAIDEN_QUEST_5_ID,
+} from './questAdaptiveBuildThePlan';
+import {
+  CAIDEN_QUEST_6_FILE,
+  CAIDEN_QUEST_6_ID,
+} from './questAdaptiveSnackShopChallenge';
+import {
+  CAIDEN_QUEST_7_FILE,
+  CAIDEN_QUEST_7_ID,
+} from './questAdaptiveCampSupplyMission';
+import {
+  CAIDEN_QUEST_8_FILE,
+  CAIDEN_QUEST_8_ID,
+} from './questAdaptiveHomeworkRescuePlan';
+import {
+  CAIDEN_QUEST_9_FILE,
+  CAIDEN_QUEST_9_ID,
+} from './questAdaptiveCampLeaderChallenge';
+import './questAdaptiveWhatComesFirst';
+import './questAdaptiveFocusOrDistraction';
+import './questAdaptiveTimeTracker';
+import './questAdaptiveResetAndReturn';
+import './questAdaptiveBuildThePlan';
+import './questAdaptiveSnackShopChallenge';
+import './questAdaptiveCampSupplyMission';
+import './questAdaptiveHomeworkRescuePlan';
+import './questAdaptiveCampLeaderChallenge';
+import { applyCaidenLegacyK1Bands } from './caidenApplyLegacyK1Bands';
+
+applyCaidenLegacyK1Bands();
 
 export type CaidenQuestMeta = {
   id: string;
@@ -11,53 +62,88 @@ export type CaidenQuestMeta = {
   description: string;
   skills: string[];
   reward: string;
+  adaptiveQuestId: string;
   config: GameAssessmentConfig;
 };
 
-export const CAIDEN_QUESTS: CaidenQuestMeta[] = [
-  {
-    id: CAIDEN_QUEST_1_ID,
-    questNumber: 1,
-    title: "Caiden's Focus Quest: What Comes First?",
-    subtitle: 'What Comes First?',
-    description:
-      'Help Caiden choose what to do first, break down big tasks, spot distractions, and bring his attention back.',
-    skills: ['Executive Function', 'Planning', 'Prioritization', 'Organization'],
-    reward: 'Focus Starter Badge',
-    config: CAIDEN_QUEST_1_CONFIG,
-  },
-  {
-    id: CAIDEN_QUEST_2_ID,
-    questNumber: 2,
-    title: "Caiden's Focus Quest: Choose Your Next Move",
-    subtitle: 'Choose Your Next Move',
-    description: 'Help Caiden make strong choices, recover from mistakes, and keep growing.',
-    skills: [
-      'Self-Regulation',
-      'Emotional Awareness',
-      'Flexible Thinking',
-      'Decision Making',
-      'Recovering from Mistakes',
-      'Growth Mindset',
-    ],
-    reward: 'Focus Navigator Badge',
-    config: CAIDEN_QUEST_2_CONFIG,
-  },
-  {
-    id: CAIDEN_QUEST_3_ID,
-    questNumber: 3,
-    title: "Caiden's Focus Quest: Reset and Return",
-    subtitle: 'Reset and Return',
-    description: 'Practice focus recovery, self-regulation, and flexible thinking when attention slips.',
-    skills: ['Focus Recovery', 'Self-regulation', 'Flexible thinking'],
-    reward: 'Focus Recovery Badge',
-    config: CAIDEN_QUEST_3_CONFIG,
-  },
-];
+const CAIDEN_ADAPTIVE_FILES = [
+  CAIDEN_QUEST_1_FILE,
+  CAIDEN_QUEST_2_FILE,
+  CAIDEN_QUEST_3_FILE,
+  CAIDEN_QUEST_4_FILE,
+  CAIDEN_QUEST_5_FILE,
+  CAIDEN_QUEST_6_FILE,
+  CAIDEN_QUEST_7_FILE,
+  CAIDEN_QUEST_8_FILE,
+  CAIDEN_QUEST_9_FILE,
+] as const;
+
+export const CAIDEN_QUESTS: CaidenQuestMeta[] = CAIDEN_ADAPTIVE_FILES.map((file) => ({
+  id: file.id,
+  questNumber: file.questNumber,
+  title: `${file.title}: ${file.subtitle}`,
+  subtitle: file.subtitle,
+  description: file.gradeContent['2-3']!.dashboardDescription,
+  skills: file.skillFocus,
+  reward: file.complete.badges?.[0] ?? 'Focus Flame Badge',
+  adaptiveQuestId: file.id,
+  config: buildCaidenAdaptiveConfig(file, '2-3'),
+}));
 
 export function getCaidenQuestById(id: string | undefined): CaidenQuestMeta | undefined {
   if (!id) return undefined;
   return CAIDEN_QUESTS.find((quest) => quest.id === id);
 }
 
-export { CAIDEN_QUEST_1_ID, CAIDEN_QUEST_2_ID, CAIDEN_QUEST_3_ID };
+export function getCaidenAdaptiveQuest(questId: string) {
+  return CAIDEN_ADAPTIVE_QUEST_REGISTRY[questId];
+}
+
+export function resolveCaidenQuestDescription(
+  questId: string,
+  gradeBand: CaidenGradeBand,
+): string {
+  const file = getCaidenAdaptiveQuest(questId);
+  if (file) {
+    return getCaidenDashboardDescription(file, gradeBand);
+  }
+  return getCaidenQuestById(questId)?.description ?? '';
+}
+
+export function resolveCaidenQuestConfig(
+  questId: string,
+  gradeBand: CaidenGradeBand,
+): GameAssessmentConfig | undefined {
+  const quest = getCaidenQuestById(questId);
+  if (!quest) return undefined;
+
+  const adaptiveFile = getCaidenAdaptiveQuest(quest.adaptiveQuestId);
+  if (adaptiveFile) {
+    return buildCaidenAdaptiveConfig(adaptiveFile, gradeBand);
+  }
+
+  return quest.config;
+}
+
+export function isCaidenAdaptiveQuest(questId: string): boolean {
+  return questId in CAIDEN_ADAPTIVE_QUEST_REGISTRY;
+}
+
+export const caidenAdaptiveQuests = [...CAIDEN_ADAPTIVE_FILES];
+
+export const CAIDEN_QUEST_1_CONFIG = buildCaidenAdaptiveConfig(CAIDEN_QUEST_1_FILE, '2-3');
+
+export {
+  CAIDEN_QUEST_1_ID,
+  CAIDEN_QUEST_2_ID,
+  CAIDEN_QUEST_3_ID,
+  CAIDEN_QUEST_4_ID,
+  CAIDEN_QUEST_5_ID,
+  CAIDEN_QUEST_6_ID,
+  CAIDEN_QUEST_7_ID,
+  CAIDEN_QUEST_8_ID,
+  CAIDEN_QUEST_9_ID,
+  CAIDEN_ADAPTIVE_QUEST_REGISTRY,
+  buildCaidenAdaptiveConfig,
+  getCaidenDashboardDescription,
+};

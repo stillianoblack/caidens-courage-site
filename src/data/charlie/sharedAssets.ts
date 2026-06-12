@@ -2,9 +2,9 @@ export const CHARLIE_AVATAR_SRC = '/images/characters/charlieperk_photo_icon_gam
 export const CHARLIE_HUB_PATH = '/portal/kids/charlie';
 
 export const CHARLIE_HUB = {
-  eyebrow: 'NATURE NOOK',
-  title: "Charlie Perk\u2019s Nature Nook",
-  subtitle: 'Funny camp learning with nature, animals, and brave choices.',
+  eyebrow: 'SCIENCE LAB',
+  title: "Charlie Perk\u2019s Science Lab",
+  subtitle: 'Curious experiments, clever clues, and funny science moments with Charlie.',
   intro:
-    'Explore outdoor clues, animal facts, camp safety, and funny SEL moments with Charlie the turtle.',
+    'Charlie teaches observation, testing ideas, evidence, and problem solving — with just enough humor to keep it fun.',
 };

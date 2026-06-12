@@ -4,9 +4,13 @@ import type { FamilyNeedsAttentionItem } from '../../lib/familyOverviewInsights'
 
 type FamilyNeedsAttentionCardProps = {
   items: FamilyNeedsAttentionItem[];
+  onItemClick?: (item: FamilyNeedsAttentionItem) => void;
 };
 
-export default function FamilyNeedsAttentionCard({ items }: FamilyNeedsAttentionCardProps) {
+export default function FamilyNeedsAttentionCard({
+  items,
+  onItemClick,
+}: FamilyNeedsAttentionCardProps) {
   if (items.length === 0) return null;
 
   return (
@@ -23,7 +27,16 @@ export default function FamilyNeedsAttentionCard({ items }: FamilyNeedsAttention
               item.highlight ? ' family-needsAttentionItem--highlight' : ''
             }`}
           >
-            {item.href ? (
+            {onItemClick ? (
+              <button
+                type="button"
+                className="family-needsAttentionLink family-needsAttentionLink--button"
+                onClick={() => onItemClick(item)}
+              >
+                <span className="family-needsAttentionLabel">{item.label}</span>
+                <span className="family-needsAttentionDetail">{item.detail}</span>
+              </button>
+            ) : item.href ? (
               <Link to={item.href} className="family-needsAttentionLink">
                 <span className="family-needsAttentionLabel">{item.label}</span>
                 <span className="family-needsAttentionDetail">{item.detail}</span>

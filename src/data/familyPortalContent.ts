@@ -9,8 +9,9 @@ import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from './adult/sharedAssets';
 import { FAMILY_UNCLE_T_MISSION_BASE } from '../config/courageRoutes';
 import type { ActivityCategoryId, AdultTrainingCard } from './pilotDashboardContent';
 import { countAvailableCharlieMissions } from './charlie';
+import { countAvailableB4Missions } from './b4';
+import { countAvailableZekeMissions } from './zeke';
 import { CAIDEN_QUEST_RANK } from './caiden/missionBoardData';
-import { B4_PORTAL_MISSIONS } from './b4/portalAssets';
 import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
 import type { CharacterProfileId } from './characterProfiles';
 
@@ -185,7 +186,7 @@ export const CHARACTER_IMAGE_PATHS: Record<FamilyCharacterId, string | null> = {
   miranda: '/images/characters/miranda_photo_icon_game.webp',
   b4: '/images/characters/b-4_photo_icon_game.webp',
   charlie: '/images/characters/charlieperk_photo_icon_game.webp',
-  zeke: null,
+  zeke: '/images/characters/zeke_photo_icon_game.webp',
   'dr-victoria': DR_VICTORIA_GUIDE_SRC,
   'uncle-t': UNCLE_T_GUIDE_SRC,
 };
@@ -253,7 +254,7 @@ function buildKidsCharacterCards(shellBasePath: string): FamilyCharacterCard[] {
       id: 'b4',
       title: 'B-4',
       description: 'Practice focus moves, feelings check-ins, and brave choices.',
-      status: `${B4_PORTAL_MISSIONS.filter((m) => m.id !== 'check-in').length} Missions Available`,
+      status: `${countAvailableB4Missions()} Missions Available`,
       statusTone: 'available',
       cta: 'Meet B-4',
       skillTags: 'Feelings • SEL • Self-Regulation',
@@ -270,11 +271,11 @@ function buildKidsCharacterCards(shellBasePath: string): FamilyCharacterCard[] {
     buildCharacterHubCard(shellBasePath, {
       id: 'zeke',
       title: 'Zeke',
-      description: 'Solve patterns, puzzles, and critical-thinking challenges.',
-      status: 'Coming Soon',
-      statusTone: 'locked',
+      description: 'Practice courage, teamwork, and speaking up with Zeke.',
+      status: `${countAvailableZekeMissions()} Missions Available`,
+      statusTone: 'available',
       cta: 'Meet Zeke',
-      skillTags: 'Logic • Math • Critical Thinking',
+      skillTags: 'Social Skills • Teamwork • Courage',
     }),
   ];
 }

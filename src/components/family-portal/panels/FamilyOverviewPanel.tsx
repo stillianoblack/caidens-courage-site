@@ -6,15 +6,19 @@ import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetr
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import { buildFamilyNeedsAttention } from '../../../lib/familyOverviewInsights';
+import { buildFamilyRecommendedNext } from '../../../lib/familyOverviewRecommendations';
+import { buildFamilyB4Insights } from '../../../lib/familyB4InsightsBuilders';
 import {
-  buildFamilyOverviewB4QuickActions,
-  buildFamilyRecommendedNext,
-} from '../../../lib/familyOverviewRecommendations';
-import { familyPortalPath } from '../../../lib/familyPortalPaths';
+  familyGoalsPath,
+  familyPortalPath,
+  familySettingsChildrenGradePath,
+  familySettingsTabPath,
+} from '../../../lib/familyPortalPaths';
+import type { FamilyB4InsightTopic } from '../../../types/b4Insights';
+import { useFamilyOnboardingStatus } from '../../../hooks/useFamilyOnboardingStatus';
 import {
   buildFamilyRecentActivityTimeline,
   computeChildBaselinePct,
-  computeChildProgressRows,
   countFamilyCertificatesEarned,
 } from '../../../lib/familyProgressMetrics';
 import {
@@ -22,7 +26,6 @@ import {
   PROGRAM_GOALS_SAVED_EVENT,
 } from '../../../lib/programGoalsService';
 import type { ProgramGoalsRecord } from '../../../lib/programGoalsService';
-import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import { normalizeGalleryStatus } from '../../../lib/studentGalleryService';
 import { fetchFamilyGallerySubmissions } from '../../../lib/studentGalleryService';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
@@ -30,17 +33,17 @@ import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
 import AddChildForm from '../AddChildForm';
 import ActiveChildSelector from '../ActiveChildSelector';
 import { useActiveChild } from '../../../hooks/useActiveChild';
-import { Link } from 'react-router-dom';
-import { familySettingsPath } from '../../../lib/familyPortalPaths';
-import FamilyB4QuickActions from '../FamilyB4QuickActions';
 import FamilyChildrenSection from '../FamilyChildrenSection';
-import FamilyChildProgressDrawer from '../FamilyChildProgressDrawer';
+import B4InsightsDrawer from '../../../design-system/components/B4InsightsDrawer';
 import FamilyChildSummaryCard from '../FamilyChildSummaryCard';
 import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyRecommendedNextCard from '../FamilyRecommendedNextCard';
+import { FamilyJourneyCoachInline } from '../FamilyJourneyCoachPlacement';
+import FamilyOnboardingMobileCard from '../FamilyOnboardingMobileCard';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
-import { resolveFamilyAddChildVisibility } from '../../../lib/familyPortalLinkAudit';
+import { resolveSelectableFamilyChildren } from '../../../lib/familyOnboardingUtils';
+import FamilyMissingActionPrompt from '../FamilyMissingActionPrompt';
 import {
   formatFamilyRelativeActivityDate,
   resolveChildModuleCounts,
@@ -70,13 +73,13 @@ export default function FamilyOverviewPanel() {
     claimRequired,
     campProgramCode,
     campProgramName,
-    parentGuardianName,
     baselineAveragePct,
     certificatesEarned,
     metrics,
     moduleResults,
     v2Assessments,
     studentLegacyBaselines,
+    studentParticipants,
     assessmentProgress,
     overallProgress,
     adultBaselineComplete,
@@ -90,12 +93,14 @@ export default function FamilyOverviewPanel() {
   const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
   const downloadsPath = familyPortalPath('downloads', location.pathname);
   const certificatesPath = familyPortalPath('certificates', location.pathname);
-  const overviewPath = familyPortalPath('', location.pathname);
   const addChildRef = useRef<HTMLDivElement | null>(null);
 
   const [goalsRecord, setGoalsRecord] = useState<ProgramGoalsRecord | null>(null);
   const [galleryItems, setGalleryItems] = useState<StudentGalleryItem[]>([]);
-  const [progressChildId, setProgressChildId] = useState<string | null>(null);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [insightTopic, setInsightTopic] = useState<FamilyB4InsightTopic>('overall');
+  const [insightChildId, setInsightChildId] = useState<string | null>(null);
+  const onboarding = useFamilyOnboardingStatus();
 
   const galleryPendingCount = useMemo(
     () => galleryItems.filter((item) => normalizeGalleryStatus(item.status) === 'pending').length,
@@ -128,15 +133,8 @@ export default function FamilyOverviewPanel() {
   }, [programCode]);
 
   const selectableChildren = useMemo(
-    () =>
-      visibleChildren
-        .map((child) => ({
-          participantId: child.studentId,
-          displayName: child.displayName,
-          firstName: child.displayName,
-        }))
-        .filter((child) => Boolean(child.participantId)),
-    [visibleChildren],
+    () => resolveSelectableFamilyChildren(visibleChildren, children),
+    [children, visibleChildren],
   );
 
   const { activeChild, needsChildSelection, selectChild } = useActiveChild(selectableChildren);
@@ -207,46 +205,29 @@ export default function FamilyOverviewPanel() {
     ],
   );
 
-  const progressDrawerChild =
-    children.find((child) => child.participantId === progressChildId) ?? null;
+  const insightChild = useMemo(() => {
+    const targetId =
+      insightChildId ?? activeChildSummary?.participantId ?? children[0]?.participantId ?? null;
+    if (!targetId) return activeChildSummary;
+    return children.find((child) => child.participantId === targetId) ?? activeChildSummary;
+  }, [activeChildSummary, children, insightChildId]);
 
-  const progressDrawerLink = useMemo((): StudentFamilyLink | null => {
-    if (!progressChildId) return null;
-    return familyLinks.find((link) => link.student_id === progressChildId) ?? familyLinks[0] ?? null;
-  }, [familyLinks, progressChildId]);
+  const insightCertificateCount = useMemo(() => {
+    if (!insightChild?.participantId) return 0;
+    return countFamilyCertificatesEarned({
+      moduleResults,
+      allowedStudentIds: [insightChild.participantId],
+    });
+  }, [insightChild?.participantId, moduleResults]);
 
-  const progressDrawerBaselinePct = useMemo(() => {
-    if (!progressChildId) return null;
+  const insightBaselinePct = useMemo(() => {
+    if (!insightChild?.participantId) return null;
     return computeChildBaselinePct({
-      participantId: progressChildId,
+      participantId: insightChild.participantId,
       v2Assessments,
       legacyBaselines: studentLegacyBaselines,
     });
-  }, [progressChildId, studentLegacyBaselines, v2Assessments]);
-
-  const progressDrawerCertificateCount = useMemo(() => {
-    if (!progressChildId) return 0;
-    return countFamilyCertificatesEarned({
-      moduleResults,
-      allowedStudentIds: [progressChildId],
-    });
-  }, [moduleResults, progressChildId]);
-
-  const progressDrawerBaselineRows = useMemo(() => {
-    if (!progressDrawerChild) return [];
-    return computeChildProgressRows({
-      participantId: progressDrawerChild.participantId,
-      baselineStatus: progressDrawerChild.baselineStatus,
-      programCode: campProgramCode ?? programCode,
-      moduleResults,
-    }).map((row) => ({
-      key: row.key,
-      label: row.label,
-      pct: row.pct,
-      tone: row.tone,
-      labelDetail: row.labelDetail,
-    }));
-  }, [campProgramCode, moduleResults, progressDrawerChild, programCode]);
+  }, [insightChild?.participantId, studentLegacyBaselines, v2Assessments]);
 
   const recommendedNext = useMemo(
     () =>
@@ -266,77 +247,38 @@ export default function FamilyOverviewPanel() {
     ],
   );
 
-  const b4QuickActions = useMemo(
-    () =>
-      buildFamilyOverviewB4QuickActions({
-        overviewPath,
-        continueLearningPath,
-        downloadsPath,
-      }),
-    [continueLearningPath, downloadsPath, overviewPath],
-  );
-
-  const openChildDrawer = () => {
-    const targetId = activeChildSummary?.participantId ?? children[0]?.participantId;
-    if (targetId) setProgressChildId(targetId);
-  };
-
   const metricCards = useMemo(
     () => [
       {
-        label: 'Baseline status',
-        value: loading ? '—' : activeChildSummary?.baselineStatus ?? '—',
-        helperText: activeChildSummary?.displayName,
-      },
-      {
-        label: 'Baseline average',
-        value:
-          loading || baselineAveragePct == null ? (loading ? '—' : '—') : `${baselineAveragePct}%`,
-        helperText: 'Across completed check-ins',
-      },
-      {
-        label: 'Activities completed',
-        value: loading ? '—' : String(assessmentProgress.completed),
-        helperText: assessmentProgress.label,
-      },
-      {
-        label: 'Modules completed',
-        value: loading ? '—' : String(metrics.overall.completed),
-        helperText: metrics.overall.label,
-      },
-      {
-        label: 'Certificates earned',
-        value: loading ? '—' : String(activeChildCertificates),
-        helperText:
-          activeChildCertificates > 0 ? 'Modules at 70%+ score' : 'Complete missions to earn',
-      },
-      {
-        label: 'Gallery submissions',
-        value: loading ? '—' : String(gallerySubmissionCount),
-        helperText: galleryPendingCount > 0 ? `${galleryPendingCount} pending review` : 'Upload artwork anytime',
-      },
-      {
-        label: 'Family goals',
-        value: loading ? '—' : goalsStatus,
-        helperText: focusGoal !== 'Not set yet' ? `Focus: ${focusGoal}` : 'Set up to 5 support goals',
-        accent: Boolean(goalsRecord?.selected_goals?.length),
-      },
-      {
+        key: 'overall' as const,
         label: 'Overall progress',
         value: loading ? '—' : metrics.hasActivity ? `${overallProgress.percent}%` : '0%',
         helperText: overallProgress.label,
         accent: true,
       },
+      {
+        key: 'modules' as const,
+        label: 'Weekly adventures',
+        value: loading ? '—' : String(metrics.overall.completed),
+        helperText: metrics.overall.label,
+      },
+      {
+        key: 'baseline' as const,
+        label: 'Baseline status',
+        value: loading ? '—' : activeChildSummary?.baselineStatus ?? '—',
+        helperText: activeChildSummary?.displayName,
+      },
+      {
+        key: 'family-goals' as const,
+        label: 'Family goals',
+        value: loading ? '—' : goalsStatus,
+        helperText: focusGoal !== 'Not set yet' ? `Focus: ${focusGoal}` : 'Set up to 5 support goals',
+        accent: Boolean(goalsRecord?.selected_goals?.length),
+      },
     ],
     [
-      activeChildCertificates,
       activeChildSummary,
-      assessmentProgress.completed,
-      assessmentProgress.label,
-      baselineAveragePct,
       focusGoal,
-      galleryPendingCount,
-      gallerySubmissionCount,
       goalsRecord?.selected_goals?.length,
       goalsStatus,
       loading,
@@ -387,21 +329,85 @@ export default function FamilyOverviewPanel() {
   const showProgressBars = !loading && metrics.hasActivity;
   const showEmptyHelper = !loading && !metrics.hasChildActivity && metrics.emptyStateMessage;
 
-  const showAddChildForm = useMemo(
-    () =>
-      resolveFamilyAddChildVisibility({
-        claimRequired,
-        visibleChildrenCount: visibleChildren.length,
-        childrenSummaryCount: children.length,
-        familyLinks,
-      }),
-    [children.length, claimRequired, familyLinks, visibleChildren.length],
-  );
+  const childrenGradeSettingsPath = familySettingsChildrenGradePath(location.pathname);
+  const familyGoalsSettingsPath = familyGoalsPath(location.pathname);
 
-  const showChildSummaryCard = !showAddChildForm && Boolean(activeChildSummary);
+  const showAddChildForm = !claimRequired && !loading && !onboarding.hasChild;
+  const showAddGradePrompt = !claimRequired && !loading && onboarding.hasChild && !onboarding.hasChildGrade;
+  const showSetGoalsPrompt =
+    !claimRequired && !loading && onboarding.hasChild && onboarding.hasChildGrade && !onboarding.hasFamilyGoals;
+  const showB4CheckInPrompt =
+    !claimRequired &&
+    !loading &&
+    onboarding.hasChild &&
+    onboarding.hasChildGrade &&
+    onboarding.hasFamilyGoals &&
+    !onboarding.hasCompletedB4CheckIn;
+
+  const showChildSummaryCard = onboarding.hasChild && Boolean(activeChildSummary);
 
   const childSummaryProgramName =
     campProgramName ?? campProgramCode ?? activeProgram?.groupName ?? programCode ?? 'Your Program';
+
+  const openInsights = (topic: FamilyB4InsightTopic, participantId?: string | null) => {
+    setInsightTopic(topic);
+    setInsightChildId(participantId ?? activeChildSummary?.participantId ?? children[0]?.participantId ?? null);
+    setInsightsOpen(true);
+  };
+
+  const insightsPayload = useMemo(
+    () =>
+      buildFamilyB4Insights({
+        topic: insightTopic,
+        child: insightChild,
+        programName: childSummaryProgramName,
+        metrics,
+        overallProgress,
+        goalsStatus,
+        onboarding: {
+          hasChild: onboarding.hasChild,
+          hasChildGrade: onboarding.hasChildGrade,
+          hasFamilyGoals: onboarding.hasFamilyGoals,
+          hasCompletedB4CheckIn: onboarding.hasCompletedB4CheckIn,
+          hasChosenPath: onboarding.hasChosenPath,
+        },
+        needsAttention,
+        baselineAveragePct,
+        assessmentProgress,
+        gallerySubmissionCount,
+        certificateCount: insightCertificateCount,
+        baselineScorePct: insightBaselinePct,
+        paths: {
+          baseline: baselinePath,
+          continueLearning: continueLearningPath,
+          familyGoals: familyGoalsPath(location.pathname),
+          childrenSettings: familySettingsTabPath('children', location.pathname),
+          settingsOverview: familySettingsTabPath('overview', location.pathname),
+        },
+      }),
+    [
+      assessmentProgress,
+      baselineAveragePct,
+      baselinePath,
+      childSummaryProgramName,
+      continueLearningPath,
+      goalsStatus,
+      insightBaselinePct,
+      insightCertificateCount,
+      insightChild,
+      insightTopic,
+      location.pathname,
+      metrics,
+      needsAttention,
+      onboarding.hasChild,
+      onboarding.hasChildGrade,
+      onboarding.hasChosenPath,
+      onboarding.hasCompletedB4CheckIn,
+      onboarding.hasFamilyGoals,
+      overallProgress,
+      gallerySubmissionCount,
+    ],
+  );
 
   const childSummaryModuleCounts = useMemo(
     () =>
@@ -416,6 +422,14 @@ export default function FamilyOverviewPanel() {
         moduleResults,
       }),
     [activeChildSummary?.participantId, moduleResults],
+  );
+
+  const activeChildParticipant = useMemo(
+    () =>
+      studentParticipants.find(
+        (row) => row.id === (activeChildSummary?.participantId ?? activeChild?.participantId),
+      ),
+    [activeChild?.participantId, activeChildSummary?.participantId, studentParticipants],
   );
 
   const childSummaryLastActivity = useMemo(
@@ -463,7 +477,9 @@ export default function FamilyOverviewPanel() {
   }, []);
 
   return (
-    <div className="family-panel family-panel--overview">
+    <div className="family-overviewPage">
+      <FamilyOnboardingMobileCard />
+      <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />
 
       {showChildSummaryCard && activeChildSummary ? (
@@ -474,6 +490,8 @@ export default function FamilyOverviewPanel() {
           modulesCompleted={childSummaryModuleCounts.completed}
           modulesTotal={childSummaryModuleCounts.total}
           lastActivityLabel={childSummaryLastActivity}
+          gradeLevel={activeChildParticipant?.grade_level}
+          gradeBand={activeChildParticipant?.grade_band}
           avatarSrc={childSummaryAvatarSrc}
           avatarInitials={resolveChildDisplayInitials(activeChildSummary.displayName)}
           childOptions={childSummaryOptions}
@@ -482,7 +500,8 @@ export default function FamilyOverviewPanel() {
             const match = selectableChildren.find((child) => child.participantId === participantId);
             if (match) selectChild(match);
           }}
-          onViewProgress={openChildDrawer}
+          onViewProgress={() => openInsights('child-progress')}
+          onOpenInsights={() => openInsights('child-progress')}
           loading={loading}
         />
       ) : null}
@@ -499,6 +518,27 @@ export default function FamilyOverviewPanel() {
         </div>
       ) : null}
 
+      {showAddGradePrompt ? (
+        <FamilyMissingActionPrompt
+          kind="add-grade"
+          actionHref={childrenGradeSettingsPath}
+        />
+      ) : null}
+
+      {showSetGoalsPrompt ? (
+        <FamilyMissingActionPrompt
+          kind="set-goals"
+          actionHref={familyGoalsSettingsPath}
+        />
+      ) : null}
+
+      {showB4CheckInPrompt ? (
+        <FamilyMissingActionPrompt
+          kind="b4-check-in"
+          actionHref={baselinePath}
+        />
+      ) : null}
+
       <div className="family-kpiRow family-kpiRow--ds">
         {metricCards.map((kpi) => (
           <MetricCard
@@ -507,22 +547,15 @@ export default function FamilyOverviewPanel() {
             value={kpi.value}
             helperText={kpi.helperText}
             accent={kpi.accent}
+            onClick={() => openInsights(kpi.key)}
           />
         ))}
       </div>
 
-      <section className="family-accessCodeSummary">
-        <p className="family-accessCodeSummaryCopy">
-          Family access codes and sharing options are in{' '}
-          <Link to={familySettingsPath(location.pathname)} className="family-accessCodeSummaryLink">
-            Settings
-          </Link>
-          .
-        </p>
-      </section>
-
-      <FamilyB4QuickActions actions={b4QuickActions} onOpenChildDrawer={openChildDrawer} />
-      <FamilyNeedsAttentionCard items={needsAttention} />
+      <FamilyNeedsAttentionCard
+        items={needsAttention}
+        onItemClick={() => openInsights('needs-attention')}
+      />
 
       {claimRequired ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
@@ -548,7 +581,7 @@ export default function FamilyOverviewPanel() {
         adultBaselineComplete={adultBaselineComplete}
         activeParticipantId={activeChild?.participantId}
         onSelectChild={selectChild}
-        onViewProgress={(participantId) => setProgressChildId(participantId)}
+        onViewProgress={(participantId) => openInsights('child-progress', participantId)}
       />
 
       <section className="family-panelBlock">
@@ -597,20 +630,17 @@ export default function FamilyOverviewPanel() {
           fromPath={location.pathname}
         />
       </div>
+      </div>
 
-      <FamilyChildProgressDrawer
-        open={Boolean(progressChildId)}
-        onClose={() => setProgressChildId(null)}
-        child={progressDrawerChild}
-        goalsRecord={goalsRecord}
-        gallerySubmissionCount={gallerySubmissionCount}
-        certificateCount={progressDrawerCertificateCount}
-        campProgramCode={campProgramCode}
-        campProgramName={campProgramName}
-        baselineScorePct={progressDrawerBaselinePct}
-        baselineRows={progressDrawerBaselineRows}
-        familyLink={progressDrawerLink}
-        parentGuardianName={parentGuardianName}
+      <FamilyJourneyCoachInline />
+
+      <B4InsightsDrawer
+        isOpen={insightsOpen}
+        onClose={() => {
+          setInsightsOpen(false);
+          setInsightChildId(null);
+        }}
+        {...insightsPayload}
       />
     </div>
   );

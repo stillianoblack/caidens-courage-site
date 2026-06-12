@@ -1,4 +1,5 @@
 import { readParentClaimContext } from '../config/parentClaimContext';
+import { dedupePortalFetch } from './portalFetchDedupe';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { ProgramGoalsPortalType } from '../data/programGoalsOptions';
 
@@ -141,7 +142,7 @@ function isDismissedUntilActive(value?: string | null): boolean {
   return new Date(value).getTime() > Date.now();
 }
 
-export async function fetchProgramGoals(
+async function fetchProgramGoalsImpl(
   programCode: string,
   portalType: ProgramGoalsPortalType,
 ): Promise<ProgramGoalsRecord | null> {
@@ -208,6 +209,16 @@ export async function fetchProgramGoals(
     console.warn('[program_goals] fetch error:', err);
     return local;
   }
+}
+
+export function fetchProgramGoals(
+  programCode: string,
+  portalType: ProgramGoalsPortalType,
+): Promise<ProgramGoalsRecord | null> {
+  const code = programCode.trim();
+  return dedupePortalFetch(`program-goals:${code}:${portalType}`, () =>
+    fetchProgramGoalsImpl(programCode, portalType),
+  );
 }
 
 export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<ProgramGoalsRecord> {

@@ -20,17 +20,20 @@ type FocusFlameJourneyOnboardingProps = {
   step2Complete: boolean;
   step3Complete: boolean;
   step4Complete: boolean;
+  step5Complete: boolean;
   completedCount: number;
   totalSteps: number;
   isComplete: boolean;
   baselinePath: string;
   continueLearningPath: string;
   charactersPath: string;
+  childrenSettingsPath: string;
   programCode: string;
   childId?: string | null;
   childName?: string | null;
   childGoalsRecord?: FamilyChildGoalsRecord | null;
   onAddChild: () => void;
+  onConfigureGrade?: () => void;
   onSetGoals?: () => void;
   onPathChosen: () => void;
   onGoalsSaved: () => void;
@@ -52,23 +55,43 @@ function StepStatus({ complete, active }: { complete: boolean; active: boolean }
   return <span className="ffj-stepStatus ffj-stepStatus--pending" aria-hidden="true" />;
 }
 
+function resolveStepComplete(
+  stepId: FocusFlameJourneyStep,
+  flags: {
+    step1Complete: boolean;
+    step2Complete: boolean;
+    step3Complete: boolean;
+    step4Complete: boolean;
+    step5Complete: boolean;
+  },
+): boolean {
+  if (stepId === 1) return flags.step1Complete;
+  if (stepId === 2) return flags.step2Complete;
+  if (stepId === 3) return flags.step3Complete;
+  if (stepId === 4) return flags.step4Complete;
+  return flags.step5Complete;
+}
+
 export default function FocusFlameJourneyOnboarding({
   activeStep,
   step1Complete,
   step2Complete,
   step3Complete,
   step4Complete,
+  step5Complete,
   completedCount,
   totalSteps,
   isComplete,
   baselinePath,
   continueLearningPath,
   charactersPath,
+  childrenSettingsPath,
   programCode,
   childId,
   childName,
   childGoalsRecord,
   onAddChild,
+  onConfigureGrade,
   onSetGoals,
   onPathChosen,
   onGoalsSaved,
@@ -85,6 +108,12 @@ export default function FocusFlameJourneyOnboarding({
     setEditingGoals(true);
   };
 
+  const configureGrade = () => {
+    if (onConfigureGrade) {
+      onConfigureGrade();
+    }
+  };
+
   const steps: JourneyStepConfig[] = [
     {
       id: 1,
@@ -95,20 +124,28 @@ export default function FocusFlameJourneyOnboarding({
     },
     {
       id: 2,
-      title: 'Set Family Goals',
-      body: 'Choose focus areas and strengths so B-4 can recommend better activities.',
-      cta: step2Complete ? 'Edit Family Goals' : 'Set Family Goals',
-      onAction: openGoals,
+      title: 'Configure Grade Level',
+      body: 'Select a grade so B-4 can personalize activities.',
+      cta: step2Complete ? 'Edit Grade Level' : 'Configure Grade',
+      href: childrenSettingsPath,
+      onAction: configureGrade,
     },
     {
       id: 3,
+      title: 'Set Family Goals',
+      body: 'Choose focus areas and strengths so B-4 can recommend better activities.',
+      cta: step3Complete ? 'Edit Family Goals' : 'Set Family Goals',
+      onAction: openGoals,
+    },
+    {
+      id: 4,
       title: 'Complete the B-4 Check-In',
       body: 'Help B-4 understand your child\u2019s focus, reading, and confidence starting point.',
       cta: 'Start B-4 Check-In',
       href: baselinePath,
     },
     {
-      id: 4,
+      id: 5,
       title: 'Choose Your Path',
       body: 'Follow B-4\u2019s guided weekly path or explore character adventures.',
       cta: 'Choose a Path',
@@ -116,6 +153,13 @@ export default function FocusFlameJourneyOnboarding({
   ];
 
   const moduleClass = variant === 'drawer' ? 'ffj-module ffj-module--drawer' : 'ffj-module';
+  const stepFlags = {
+    step1Complete,
+    step2Complete,
+    step3Complete,
+    step4Complete,
+    step5Complete,
+  };
 
   return (
     <section className={moduleClass} aria-labelledby="ffj-module-title">
@@ -134,11 +178,9 @@ export default function FocusFlameJourneyOnboarding({
             {isComplete ? (
               <span className="ffj-progressActive">Focus Flame Journey Active</span>
             ) : (
-              <>
-                <span className="ffj-progressCount">
-                  {completedCount} of {totalSteps} steps completed
-                </span>
-              </>
+              <span className="ffj-progressCount">
+                {completedCount} of {totalSteps} steps completed
+              </span>
             )}
           </p>
         </div>
@@ -146,18 +188,11 @@ export default function FocusFlameJourneyOnboarding({
 
       <ol className="ffj-steps">
         {steps.map((step) => {
-          const complete =
-            step.id === 1
-              ? step1Complete
-              : step.id === 2
-                ? step2Complete
-                : step.id === 3
-                  ? step3Complete
-                  : step4Complete;
+          const complete = resolveStepComplete(step.id, stepFlags);
           const active = activeStep === step.id && !complete;
           const showGoalsEditor =
             embedGoalsEditor &&
-            step.id === 2 &&
+            step.id === 3 &&
             (active || editingGoals || (isComplete && editingGoals));
           const cardClass = [
             'ffj-stepCard',
@@ -176,7 +211,7 @@ export default function FocusFlameJourneyOnboarding({
               <h3 className="ffj-stepTitle">{step.title}</h3>
               <p className="ffj-stepBody">{step.body}</p>
 
-              {step.id === 4 && active ? (
+              {step.id === 5 && active ? (
                 <div className="ffj-pathOptions">
                   <Link
                     to={continueLearningPath}
@@ -213,7 +248,7 @@ export default function FocusFlameJourneyOnboarding({
                 </div>
               ) : null}
 
-              {!showGoalsEditor && (active || (step.id === 2 && complete && !editingGoals)) ? (
+              {!showGoalsEditor && (active || (step.id === 3 && complete && !editingGoals)) ? (
                 step.href ? (
                   <Link to={step.href} className="ffj-stepCta">
                     {step.cta}

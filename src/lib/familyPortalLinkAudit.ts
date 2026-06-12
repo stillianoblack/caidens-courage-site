@@ -55,10 +55,12 @@ export function resolveFamilyAddChildVisibility(input: {
   visibleChildrenCount: number;
   childrenSummaryCount: number;
   familyLinks: StudentFamilyLink[];
+  allFamilyLinks?: StudentFamilyLink[];
 }): boolean {
   if (input.claimRequired) return false;
   if (input.visibleChildrenCount > 0 || input.childrenSummaryCount > 0) return false;
-  const linkedStudentIds = input.familyLinks.filter((link) => link.student_id?.trim());
+  const links = input.allFamilyLinks ?? input.familyLinks;
+  const linkedStudentIds = links.filter((link) => link.student_id?.trim());
   if (linkedStudentIds.length > 0) return false;
   return true;
 }

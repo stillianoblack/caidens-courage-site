@@ -481,19 +481,20 @@ export async function findOrCreateParticipant(
         });
       } else if (existingRows && existingRows.length > 0) {
         const participantId = existingRows[0].id as string;
-        const updatePayload: Record<string, unknown> = {
-          updated_at: new Date().toISOString(),
-        };
+        const updatePayload: Record<string, unknown> = {};
         if (payload.nickname?.trim()) updatePayload.nickname = payload.nickname.trim();
         if (payload.first_name?.trim()) updatePayload.first_name = payload.first_name.trim();
         if (programName) updatePayload.program_name = programName;
         if (payload.group_name?.trim()) updatePayload.group_name = payload.group_name.trim();
 
-        const { error: updateError } = await withTimeout(
-          supabase.from('participants').update(updatePayload).eq('id', participantId),
-          DASHBOARD_FETCH_TIMEOUT_MS,
-          'participant_update',
-        );
+        const { error: updateError } =
+          Object.keys(updatePayload).length > 0
+            ? await withTimeout(
+                supabase.from('participants').update(updatePayload).eq('id', participantId),
+                DASHBOARD_FETCH_TIMEOUT_MS,
+                'participant_update',
+              )
+            : { error: null };
 
         if (updateError) {
           logTrackingSaveError({
@@ -532,7 +533,6 @@ export async function findOrCreateParticipant(
         organization: payload.organization?.trim() || null,
         child_age_range: payload.child_age_range?.trim() || null,
         email_opt_in: payload.email_opt_in ?? false,
-        updated_at: new Date().toISOString(),
       };
 
       if (payload.adult_role?.trim()) {
@@ -1049,7 +1049,21 @@ export type StudentParticipantRecord = {
   role: string;
   program_code: string;
   created_at: string;
+  child_age_range?: string | null;
+  grade_level?: string | null;
+  grade_band?: string | null;
+  allow_stretch_level?: boolean | null;
 };
+
+const STUDENT_PARTICIPANT_SELECT_WITH_GRADE =
+  'id, nickname, first_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level';
+
+const STUDENT_PARTICIPANT_SELECT_BASE =
+  'id, nickname, first_name, role, program_code, created_at';
+
+function isMissingGradeColumnError(message: string): boolean {
+  return /grade_level|grade_band|allow_stretch_level|column.*does not exist|42703/i.test(message);
+}
 
 export async function fetchStudentParticipantsFromSupabase(programCode: string): Promise<{
   participants: StudentParticipantRecord[];
@@ -1060,22 +1074,32 @@ export async function fetchStudentParticipantsFromSupabase(programCode: string):
   }
 
   try {
-    const { data, error } = await withTimeout(
-      supabase
+    const primary = await supabase
+      .from('participants')
+      .select(STUDENT_PARTICIPANT_SELECT_WITH_GRADE)
+      .eq('program_code', programCode.trim())
+      .eq('role', 'student')
+      .order('created_at', { ascending: true });
+
+    let participants: StudentParticipantRecord[] = (primary.data ?? []) as StudentParticipantRecord[];
+    let fetchError = primary.error;
+
+    if (fetchError && isMissingGradeColumnError(fetchError.message)) {
+      const fallback = await supabase
         .from('participants')
-        .select('id, nickname, first_name, role, program_code, created_at')
+        .select(STUDENT_PARTICIPANT_SELECT_BASE)
         .eq('program_code', programCode.trim())
         .eq('role', 'student')
-        .order('created_at', { ascending: true }),
-      DASHBOARD_FETCH_TIMEOUT_MS,
-      'student_participants',
-    );
-
-    if (error) {
-      return { participants: [], error: error.message };
+        .order('created_at', { ascending: true });
+      participants = (fallback.data ?? []) as StudentParticipantRecord[];
+      fetchError = fallback.error;
     }
 
-    return { participants: (data ?? []) as StudentParticipantRecord[] };
+    if (fetchError) {
+      return { participants: [], error: fetchError.message };
+    }
+
+    return { participants };
   } catch {
     return { participants: [], error: 'fetch_failed' };
   }

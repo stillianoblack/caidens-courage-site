@@ -1,10 +1,10 @@
-import type { GameAssessmentConfig } from '../../types/gameAssessment';
-import { CAIDEN_MISSION_AVATAR } from './sharedAssets';
+import type { GameAssessmentConfig } from '../../../types/gameAssessment';
+import { CAIDEN_MISSION_AVATAR } from '../sharedAssets';
 
-export const CAIDEN_QUEST_1_ID = 'quest-1';
+export const CAIDEN_LEGACY_QUEST_1_ID = 'quest-1-legacy';
 
-export const CAIDEN_QUEST_1_CONFIG: GameAssessmentConfig = {
-  id: CAIDEN_QUEST_1_ID,
+export const CAIDEN_LEGACY_QUEST_1_CONFIG: GameAssessmentConfig = {
+  id: CAIDEN_LEGACY_QUEST_1_ID,
   fileNumber: 1,
   decorVariant: 'caiden',
   presentationStyle: 'focus_quest',

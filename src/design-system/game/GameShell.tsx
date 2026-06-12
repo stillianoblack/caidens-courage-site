@@ -1,5 +1,5 @@
 import React from 'react';
-import PortalBackButton from '../../components/portal/PortalBackButton';
+import PortalBreadcrumb from '../../components/portal/PortalBreadcrumb';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
 export type GameShellPortalType = 'facilitator' | 'family' | 'kid';
 
@@ -52,16 +52,21 @@ export default function GameShell({
         <div>
           {backHref || onBack ? (
             backHref ? (
-              <PortalBackButton
-                to={backHref}
-                hubName={backLabel}
+              <PortalBreadcrumb
+                label={backLabel.startsWith('Back to') ? backLabel : `Back to ${backLabel}`}
+                href={backHref}
                 theme={backTheme}
+                variant="game"
                 className="game-shellBackBtn"
               />
             ) : (
-              <button type="button" className="game-shellBackBtn" onClick={onBack}>
-                ← {backLabel}
-              </button>
+              <PortalBreadcrumb
+                label={backLabel.startsWith('Back to') ? backLabel : `Back to ${backLabel}`}
+                onClick={onBack}
+                theme={backTheme}
+                variant="game"
+                className="game-shellBackBtn"
+              />
             )
           ) : null}
           <h1 className="ds-gameShellTitle">{gameTitle}</h1>

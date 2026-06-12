@@ -64,6 +64,18 @@ export const CHARACTER_REGISTRY: Record<string, CharacterDefinition> = {
     description: 'Facilitator tips, parent education, and reflection cards.',
     voiceNotes: 'Calm, validating, practical, research-informed.',
   },
+  'uncle-t': {
+    id: 'uncle-t',
+    displayName: 'Uncle T',
+    role: 'Adult coaching guide',
+    archetype: 'expert',
+    avatarSrc: '/images/caidenscourage/Character%20Hub/uncle-t-guide.webp',
+    themeColor: '#c9732d',
+    accentColor: '#e5c06a',
+    portalUsage: ['facilitator', 'family'],
+    description: 'Coaching moments for courage, confidence, and follow-through.',
+    voiceNotes: 'Warm, encouraging, practical, relatable.',
+  },
   'camp-coach': {
     id: 'camp-coach',
     displayName: 'Camp Coach',
@@ -103,14 +115,14 @@ export const CHARACTER_REGISTRY: Record<string, CharacterDefinition> = {
   zeke: {
     id: 'zeke',
     displayName: 'Zeke',
-    role: 'Story companion',
+    role: 'Team Quest guide',
     archetype: 'story_support',
-    avatarSrc: '/images/characters/caiden_photo_icon_game.webp',
-    themeColor: '#2d4a3e',
-    accentColor: '#86efac',
+    avatarSrc: '/images/characters/zeke_photo_icon_game.webp',
+    themeColor: '#1a2f52',
+    accentColor: '#e5c06a',
     portalUsage: ['kid', 'family'],
-    description: 'Playful story moments and peer perspective.',
-    voiceNotes: 'Friendly, energetic, supportive.',
+    description: 'Social courage, teamwork, and speaking up through adaptive team quests.',
+    voiceNotes: 'Encouraging, socially smart, warm, practical — never preachy.',
   },
   ollie: {
     id: 'ollie',
@@ -175,7 +187,7 @@ export const CHARACTER_REGISTRY: Record<string, CharacterDefinition> = {
 };
 
 export const GUIDE_CHARACTERS = ['b4', 'caiden', 'miranda'] as const;
-export const EXPERT_CHARACTERS = ['dr-victoria', 'camp-coach', 'school-counselor', 'parent-mentor'] as const;
+export const EXPERT_CHARACTERS = ['dr-victoria', 'uncle-t', 'camp-coach', 'school-counselor', 'parent-mentor'] as const;
 export const STORY_CHARACTERS = ['caiden', 'miranda', 'zeke', 'ollie-buck', 'leviathan', 'breath-of-life'] as const;
 
 export function getCharacter(id: string): CharacterDefinition | undefined {

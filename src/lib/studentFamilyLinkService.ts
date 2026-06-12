@@ -1,11 +1,8 @@
 import { hasConfirmedParentClaim, readParentClaimContext } from '../config/parentClaimContext';
+import { hydrateExistingFamilyChildren } from './hydrateExistingFamilyChildren';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
-import {
-  fetchStudentParticipantsFromSupabase,
-  isValidSupabaseParticipantId,
-  type StudentParticipantRecord,
-} from './pilotTrackingService';
+import { isValidSupabaseParticipantId, type StudentParticipantRecord } from './pilotTrackingService';
 
 export type StudentFamilyLink = {
   id: string;
@@ -77,14 +74,6 @@ export type FamilyVisibleChildrenResult = {
   errors: string[];
   claimRequired: boolean;
 };
-
-function isPrivateFamilyProgramCode(programCode: string): boolean {
-  return programCode.trim().toUpperCase().startsWith('FAMILY-');
-}
-
-function childDisplayName(participant: Pick<StudentParticipantRecord, 'nickname' | 'first_name'>): string {
-  return participant.nickname?.trim() || participant.first_name?.trim() || 'Child';
-}
 
 function slugifyToken(value: string): string {
   const slug = value.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '');
@@ -170,21 +159,34 @@ export async function fetchParticipantsByIds(
   }
 
   try {
-    const { data, error } = await withTimeout(
-      supabase
-        .from('participants')
-        .select('id, nickname, first_name, role, program_code, created_at')
-        .in('id', participantIds)
-        .eq('role', 'student'),
-      DASHBOARD_FETCH_TIMEOUT_MS,
-      'participants_by_ids',
-    );
+    const selectWithGrade =
+      'id, nickname, first_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level';
+    const selectBase = 'id, nickname, first_name, role, program_code, created_at';
 
-    if (error) {
-      return { participants: [], error: error.message };
+    const primary = await supabase
+      .from('participants')
+      .select(selectWithGrade)
+      .in('id', participantIds)
+      .eq('role', 'student');
+
+    let participants: StudentParticipantRecord[] = (primary.data ?? []) as StudentParticipantRecord[];
+    let fetchError = primary.error;
+
+    if (fetchError && /grade_level|grade_band|allow_stretch_level|column.*does not exist|42703/i.test(fetchError.message)) {
+      const fallback = await supabase
+        .from('participants')
+        .select(selectBase)
+        .in('id', participantIds)
+        .eq('role', 'student');
+      participants = (fallback.data ?? []) as StudentParticipantRecord[];
+      fetchError = fallback.error;
     }
 
-    return { participants: (data ?? []) as StudentParticipantRecord[] };
+    if (fetchError) {
+      return { participants: [], error: fetchError.message };
+    }
+
+    return { participants };
   } catch {
     return { participants: [], error: 'fetch_failed' };
   }
@@ -357,7 +359,7 @@ export async function createStudentFamilyLink(input: {
   }
 }
 
-/** Family portal children: only parent/guardian-claimed links, never a full camp roster. */
+/** Family portal children: hydrated from links + program participants (deduped). */
 export async function resolveFamilyVisibleChildren(
   familyProgramCode: string,
   parentScope?: ParentLinkScope,
@@ -365,134 +367,49 @@ export async function resolveFamilyVisibleChildren(
   const code = familyProgramCode.trim();
   const claimContext = readParentClaimContext();
   const scope = parentScope ?? claimContext ?? undefined;
-  const errors: string[] = [];
-  const emptyResult = (claimRequired: boolean): FamilyVisibleChildrenResult => ({
-    familyProgramCode: code,
-    participants: [],
-    links: [],
-    children: [],
-    allowedStudentIds: [],
-    errors,
-    claimRequired,
-  });
+  const hydration = await hydrateExistingFamilyChildren(code, scope);
 
-  if (!code) {
-    return {
-      ...emptyResult(true),
-      familyProgramCode: '',
-      errors: ['Missing active program context.'],
-    };
-  }
-
-  if (!hasConfirmedParentClaim(claimContext)) {
+  if (hydration.claimRequired) {
     console.info('[FAMILY_CLAIM_REQUIRED]', {
       family_program_code: code,
       reason: 'missing_or_unconfirmed_parent_claim',
+      linked_child_count: hydration.linkedChildCount,
+      fallback_child_count: hydration.fallbackChildCount,
     });
-    return {
-      ...emptyResult(true),
-      errors: ['Enter Parent/Guardian Email to Find Your Child.'],
-    };
-  }
+  } else {
+    console.info('[FAMILY_CLAIM_MATCH]', {
+      family_program_code: code,
+      parent_scope: {
+        email: scope?.email ?? null,
+        phone: scope?.phone ? '***' : null,
+        last_name: scope?.lastName ?? null,
+      },
+      matched_link_count: hydration.scopedLinks.length,
+      student_ids: hydration.scopedLinks.map((row) => row.student_id),
+      linked_child_count: hydration.linkedChildCount,
+      fallback_child_count: hydration.fallbackChildCount,
+    });
 
-  const isPrivateFamily = isPrivateFamilyProgramCode(code);
-  const linksPayload = await fetchStudentFamilyLinksByFamilyProgram(code);
-  if (linksPayload.error) errors.push(linksPayload.error);
-
-  const scopedLinks = linksPayload.links.filter((link) => linkMatchesParentScope(link, scope));
-
-  console.info('[FAMILY_CLAIM_MATCH]', {
-    family_program_code: code,
-    parent_scope: {
-      email: scope?.email ?? null,
-      phone: scope?.phone ? '***' : null,
-      last_name: scope?.lastName ?? null,
-    },
-    matched_link_count: scopedLinks.length,
-    student_ids: scopedLinks.map((row) => row.student_id),
-  });
-
-  const familyParticipantsPayload = isPrivateFamily
-    ? await fetchStudentParticipantsFromSupabase(code)
-    : { participants: [] as StudentParticipantRecord[], error: undefined };
-  if (familyParticipantsPayload.error) errors.push(familyParticipantsPayload.error);
-
-  const familyParticipants = familyParticipantsPayload.participants;
-  const links = scopedLinks;
-  const linkedIds = links.map((row) => row.student_id).filter(Boolean);
-  const useLinkOnlyVisibility = !isPrivateFamily || links.length > 0;
-
-  const participantIdsToFetch = new Set<string>(linkedIds);
-  if (!useLinkOnlyVisibility) {
-    for (const participant of familyParticipants) {
-      participantIdsToFetch.add(participant.id);
-    }
-  }
-
-  const missingLinkedIds = Array.from(participantIdsToFetch).filter(
-    (id) => !familyParticipants.some((participant) => participant.id === id),
-  );
-
-  const linkedParticipantsPayload = missingLinkedIds.length
-    ? await fetchParticipantsByIds(missingLinkedIds)
-    : { participants: [] as StudentParticipantRecord[] };
-  if (linkedParticipantsPayload.error) errors.push(linkedParticipantsPayload.error);
-
-  const participantById = new Map<string, StudentParticipantRecord>();
-  for (const participant of [...familyParticipants, ...linkedParticipantsPayload.participants]) {
-    participantById.set(participant.id, participant);
-  }
-
-  const children: FamilyVisibleChild[] = [];
-  const allowed = new Set<string>();
-
-  if (!useLinkOnlyVisibility) {
-    for (const participant of familyParticipants) {
-      allowed.add(participant.id);
-      children.push({
-        studentId: participant.id,
-        displayName: childDisplayName(participant),
-        source: 'family_participant',
-      });
-    }
-  }
-
-  for (const link of links) {
-    allowed.add(link.student_id);
-    if (children.some((child) => child.studentId === link.student_id)) {
-      continue;
-    }
-    const participant = participantById.get(link.student_id);
-    children.push({
-      studentId: link.student_id,
-      displayName: participant ? childDisplayName(participant) : 'Linked Child',
-      source: 'camp_link',
-      campProgramCode: link.camp_program_code,
+    console.info('[FAMILY_VISIBLE_CHILDREN]', {
+      family_program_code: code,
+      claim_required: false,
+      allowed_student_ids: hydration.allowedStudentIds,
+      children: hydration.visibleChildren.map((child) => ({
+        student_id: child.studentId,
+        display_name: child.displayName,
+        source: child.source,
+      })),
     });
   }
-
-  const sortedChildren = children.sort((a, b) => a.displayName.localeCompare(b.displayName));
-  const allowedStudentIds = Array.from(allowed);
-
-  console.info('[FAMILY_VISIBLE_CHILDREN]', {
-    family_program_code: code,
-    claim_required: false,
-    allowed_student_ids: allowedStudentIds,
-    children: sortedChildren.map((child) => ({
-      student_id: child.studentId,
-      display_name: child.displayName,
-      source: child.source,
-    })),
-  });
 
   return {
     familyProgramCode: code,
-    participants: familyParticipants,
-    links,
-    children: sortedChildren,
-    allowedStudentIds,
-    errors,
-    claimRequired: false,
+    participants: hydration.participants,
+    links: hydration.scopedLinks,
+    children: hydration.visibleChildren,
+    allowedStudentIds: hydration.allowedStudentIds,
+    errors: hydration.errors,
+    claimRequired: hydration.claimRequired,
   };
 }
 

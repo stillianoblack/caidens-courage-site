@@ -21,11 +21,11 @@ import {
   type StudentParticipantRecord,
 } from './pilotTrackingService';
 import { auditFamilyPortalLinking } from './familyPortalLinkAudit';
-import {
-  resolveFamilyVisibleChildren,
-  type FamilyVisibleChild,
-  type StudentFamilyLink,
-} from './studentFamilyLinkService';
+import { hydrateExistingFamilyChildren } from './hydrateExistingFamilyChildren';
+import { hasCanonicalGradeLevel } from './participantGradeDisplay';
+import { logLocalDataDebug, warnSupabaseEnvInDevelopment } from './familySupabaseEnv';
+import { dedupePortalFetch } from './portalFetchDedupe';
+import type { FamilyVisibleChild, StudentFamilyLink } from './studentFamilyLinkService';
 
 export const ADULT_BASELINE_ASSESSMENT_TYPES = new Set([
   ADULT_PRE_ASSESSMENT_TYPE,
@@ -245,8 +245,7 @@ export function logFamilyDashboardDebug(payload: {
   });
 }
 
-export async function loadFamilyDashboardData(programCodeInput?: string): Promise<FamilyDashboardData> {
-  const programCode = programCodeInput?.trim() || resolveTrackingProgramCode() || '';
+async function loadFamilyDashboardDataImpl(programCode: string): Promise<FamilyDashboardData> {
   if (!programCode) {
     const empty: FamilyDashboardData = {
       programCode: '',
@@ -266,9 +265,10 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
   }
 
   const errors: string[] = [];
+  warnSupabaseEnvInDevelopment();
   const linkAudit = await auditFamilyPortalLinking(programCode);
-  const visibility = await resolveFamilyVisibleChildren(programCode);
-  errors.push(...visibility.errors);
+  const hydration = await hydrateExistingFamilyChildren(programCode);
+  errors.push(...hydration.errors);
 
   if (linkAudit.findings.length) {
     console.info('[FAMILY_DASHBOARD_LINK_AUDIT]', {
@@ -278,18 +278,39 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
     });
   }
 
-  const allowedStudentIds = visibility.allowedStudentIds;
-  const visibleParticipants: StudentParticipantRecord[] = visibility.children.map((child) => {
-    const participant = visibility.participants.find((row) => row.id === child.studentId);
+  const allowedStudentIds = hydration.allowedStudentIds;
+  const visibleParticipants: StudentParticipantRecord[] = hydration.visibleChildren.map((child) => {
+    const participant = hydration.participants.find((row) => row.id === child.studentId);
     if (participant) return participant;
+    const hydratedChild = hydration.children.find((row) => row.participantId === child.studentId);
     return {
       id: child.studentId,
-      nickname: child.displayName,
-      first_name: child.displayName,
+      nickname: hydratedChild?.nickname || child.displayName,
+      first_name: hydratedChild?.firstName || child.displayName,
       role: 'student',
       program_code: child.source === 'camp_link' ? child.campProgramCode ?? programCode : programCode,
       created_at: new Date().toISOString(),
+      child_age_range: hydratedChild?.childAgeRange ?? undefined,
+      grade_level: hydratedChild?.gradeLevel ?? undefined,
+      grade_band: hydratedChild?.gradeBand ?? undefined,
+      allow_stretch_level: hydratedChild?.allowStretchLevel ?? undefined,
     };
+  });
+
+  logLocalDataDebug({
+    programCode,
+    familyContext: {
+      claim_required: hydration.claimRequired,
+      allowed_student_ids: hydration.allowedStudentIds,
+      visible_children: hydration.visibleChildren.length,
+    },
+    linkedChildCount: hydration.linkedChildCount,
+    fallbackChildCount: hydration.fallbackChildCount,
+    onboarding: {
+      has_child: hydration.visibleChildren.length > 0,
+      children_with_grade: hydration.children.filter((row) => hasCanonicalGradeLevel(row.gradeLevel)).length,
+    },
+    errors: hydration.errors,
   });
 
   const [legacyAllPayload, v2ByProgramPayload, moduleByProgramPayload, v2ByStudentsPayload, moduleByStudentsPayload] =
@@ -342,28 +363,38 @@ export async function loadFamilyDashboardData(programCodeInput?: string): Promis
   const data: FamilyDashboardData = {
     programCode,
     studentParticipants: visibleParticipants,
-    visibleChildren: visibility.children,
+    visibleChildren: hydration.visibleChildren,
     allowedStudentIds,
-    familyLinks: visibility.links,
+    familyLinks: hydration.scopedLinks,
     studentLegacyBaselines,
     adultLegacyAssessments: legacyAllPayload.rows.filter(isAdultLegacyRow),
     v2Assessments,
     moduleResults,
     errors,
-    claimRequired: visibility.claimRequired,
+    claimRequired: hydration.claimRequired,
   };
 
   logFamilyDashboardDebug(data);
 
-  console.info('[PROGRESS_SYNC]', {
-    program_code: data.programCode,
-    allowed_student_ids: data.allowedStudentIds,
-    child_count: data.visibleChildren.length,
-    baseline_rows: data.v2Assessments.filter((row) => isChildBaselineAssessmentType(row.assessment_type))
-      .length,
-    module_rows: data.moduleResults.length,
-    overall_child_sources: data.visibleChildren.map((child) => child.source),
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[PROGRESS_SYNC]', {
+      program_code: data.programCode,
+      allowed_student_ids: data.allowedStudentIds,
+      child_count: data.visibleChildren.length,
+      baseline_rows: data.v2Assessments.filter((row) => isChildBaselineAssessmentType(row.assessment_type))
+        .length,
+      module_rows: data.moduleResults.length,
+      overall_child_sources: data.visibleChildren.map((child) => child.source),
+    });
+  }
 
   return data;
+}
+
+export async function loadFamilyDashboardData(programCodeInput?: string): Promise<FamilyDashboardData> {
+  const programCode = programCodeInput?.trim() || resolveTrackingProgramCode() || '';
+  if (!programCode) {
+    return loadFamilyDashboardDataImpl('');
+  }
+  return dedupePortalFetch(`family-dashboard:${programCode}`, () => loadFamilyDashboardDataImpl(programCode));
 }

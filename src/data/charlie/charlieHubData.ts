@@ -1,6 +1,6 @@
-import { CHARLIE_MISSION_1_ID } from './charlieMission1';
-import { CHARLIE_MISSION_2_ID } from './charlieMission2';
-import { CHARLIE_HUB, CHARLIE_HUB_PATH } from './sharedAssets';
+import { CHARLIE_HUB_PATH } from './sharedAssets';
+import { getCharlieDashboardDescription } from './charlieAdaptiveBuilder';
+import { CHARLIE_ADAPTIVE_MISSION_FILES } from './charlieAdaptiveMissions';
 
 export type CharlieHubMission = {
   id: string;
@@ -14,29 +14,18 @@ export type CharlieHubMission = {
   route: string;
 };
 
-export const CHARLIE_HUB_MISSIONS: CharlieHubMission[] = [
-  {
-    id: CHARLIE_MISSION_1_ID,
-    number: 1,
-    title: 'Turtle Trail Trouble',
-    description: 'Make safe, curious choices when wildlife and camp trails cross paths.',
-    skillFocus: 'Nature awareness + SEL choices',
-    badge: 'Nature Buddy Badge',
-    difficulty: 'Beginner',
+export const CHARLIE_HUB_MISSIONS: CharlieHubMission[] = CHARLIE_ADAPTIVE_MISSION_FILES.map(
+  (mission) => ({
+    id: mission.id,
+    number: mission.missionNumber,
+    title: mission.subtitle,
+    description: getCharlieDashboardDescription(mission, '2-3'),
+    skillFocus: mission.skillFocus.join(' · '),
+    badge: mission.complete.badges?.[0] ?? 'Science Badge',
+    difficulty: 'Adaptive',
     status: 'available',
-    route: `${CHARLIE_HUB_PATH}/${CHARLIE_MISSION_1_ID}`,
-  },
-  {
-    id: CHARLIE_MISSION_2_ID,
-    number: 2,
-    title: 'Camp Critter Clues',
-    description: 'Follow animal signs, learn nature facts, and make brave outdoor choices.',
-    skillFocus: 'Observation + animal facts + brave choices',
-    badge: 'Critter Clue Badge',
-    difficulty: 'Beginner',
-    status: 'available',
-    route: `${CHARLIE_HUB_PATH}/${CHARLIE_MISSION_2_ID}`,
-  },
-];
+    route: `${CHARLIE_HUB_PATH}/${mission.id}`,
+  }),
+);
 
-export { CHARLIE_HUB };
+export { CHARLIE_HUB } from './sharedAssets';

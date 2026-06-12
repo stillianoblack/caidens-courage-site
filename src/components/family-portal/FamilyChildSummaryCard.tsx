@@ -1,5 +1,7 @@
 import React, { useId } from 'react';
 import type { FamilyChildBaselineStatus } from '../../lib/familyChildrenMetrics';
+import ParticipantGradeMeta from '../shared/ParticipantGradeMeta';
+import '../shared/participant-grade-meta.css';
 
 export type FamilyChildSummaryCardOption = {
   participantId: string;
@@ -13,12 +15,15 @@ export type FamilyChildSummaryCardProps = {
   modulesCompleted: number;
   modulesTotal: number;
   lastActivityLabel: string;
+  gradeLevel?: string | null;
+  gradeBand?: string | null;
   avatarSrc?: string | null;
   avatarInitials: string;
   childOptions?: FamilyChildSummaryCardOption[];
   activeParticipantId?: string | null;
   onSelectChild?: (participantId: string) => void;
   onViewProgress?: () => void;
+  onOpenInsights?: () => void;
   loading?: boolean;
   previewEmpty?: boolean;
   className?: string;
@@ -37,12 +42,15 @@ export default function FamilyChildSummaryCard({
   modulesCompleted,
   modulesTotal,
   lastActivityLabel,
+  gradeLevel = null,
+  gradeBand = null,
   avatarSrc = null,
   avatarInitials,
   childOptions = [],
   activeParticipantId = null,
   onSelectChild,
   onViewProgress,
+  onOpenInsights,
   loading = false,
   previewEmpty = false,
   className = '',
@@ -86,8 +94,23 @@ export default function FamilyChildSummaryCard({
 
   return (
     <section
-      className={`family-childSummaryCard${className ? ` ${className}` : ''}`}
+      className={`family-childSummaryCard${onOpenInsights ? ' family-childSummaryCard--clickable' : ''}${
+        className ? ` ${className}` : ''
+      }`}
       aria-label={`${childName} progress summary`}
+      onClick={onOpenInsights}
+      onKeyDown={
+        onOpenInsights
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onOpenInsights();
+              }
+            }
+          : undefined
+      }
+      role={onOpenInsights ? 'button' : undefined}
+      tabIndex={onOpenInsights ? 0 : undefined}
     >
       <div className="family-childSummaryAvatarWrap" aria-hidden="true">
         {avatarSrc ? (
@@ -113,7 +136,11 @@ export default function FamilyChildSummaryCard({
                 id={selectId}
                 className="family-childSummaryNameSelect"
                 value={activeParticipantId ?? childOptions[0]?.participantId ?? ''}
-                onChange={(event) => onSelectChild(event.target.value)}
+                onChange={(event) => {
+                  event.stopPropagation();
+                  onSelectChild(event.target.value);
+                }}
+                onClick={(event) => event.stopPropagation()}
               >
                 {childOptions.map((option) => (
                   <option key={option.participantId} value={option.participantId}>
@@ -153,6 +180,16 @@ export default function FamilyChildSummaryCard({
           </li>
           <li>
             <span className="family-childSummaryStatusIcon" aria-hidden="true">
+              🎓
+            </span>
+            <ParticipantGradeMeta
+              gradeLevel={gradeLevel}
+              gradeBand={gradeBand}
+              variant="compact"
+            />
+          </li>
+          <li>
+            <span className="family-childSummaryStatusIcon" aria-hidden="true">
               🕒
             </span>
             <span>Last Activity: {lastActivityLabel}</span>
@@ -164,7 +201,10 @@ export default function FamilyChildSummaryCard({
         <button
           type="button"
           className="family-nextCta family-childSummaryCta"
-          onClick={() => onViewProgress?.()}
+          onClick={(event) => {
+            event.stopPropagation();
+            onViewProgress?.();
+          }}
         >
           View Progress
         </button>

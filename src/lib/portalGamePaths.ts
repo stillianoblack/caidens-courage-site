@@ -111,6 +111,10 @@ export function resolveCharlieHubPath(pathname: string): string {
   return `${resolvePortalKidsBasePath(pathname)}/charlie`;
 }
 
+export function resolveZekeHubPath(pathname: string): string {
+  return `${resolvePortalKidsBasePath(pathname)}/zeke`;
+}
+
 export function resolvePortalRailBrand(): { title: string; subtitle: string } {
   const program = readActivePilotProgram();
   const role = readActivePortalRole();

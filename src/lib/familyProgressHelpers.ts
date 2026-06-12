@@ -362,7 +362,9 @@ export function logFamilyProgressMetrics(payload: {
   totalCount: number;
   overallPercent: number;
 }): void {
-  console.info('[FAMILY_HOME_PROGRESS]', payload);
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[FAMILY_HOME_PROGRESS]', payload);
+  }
 }
 
 export function partitionAdultAssessments(rows: LocalAssessmentV2Record[]): LocalAssessmentV2Record[] {

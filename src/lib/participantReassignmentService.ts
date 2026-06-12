@@ -234,7 +234,7 @@ export function generateParticipantReassignmentSql(input: ParticipantReassignmen
 
     const statements = [
       `-- participants (${filter.participantWhereSql})`,
-      `UPDATE public.participants SET program_code = '${escapeSql(newCode)}', updated_at = now() WHERE ${filter.participantWhereSql};`,
+      `UPDATE public.participants SET program_code = '${escapeSql(newCode)}' WHERE ${filter.participantWhereSql};`,
       `-- module_results (participant_id in matched participants)`,
       `UPDATE public.module_results SET program_code = '${escapeSql(newCode)}' WHERE program_code = '${escapeSql(oldCode)}' AND participant_id IN (${participantSubquery});`,
       `-- assessment_results_v2`,

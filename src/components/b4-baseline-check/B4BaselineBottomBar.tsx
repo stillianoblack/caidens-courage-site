@@ -20,6 +20,8 @@ type B4BaselineBottomBarProps = {
   showExplainMore?: boolean;
   explainMore?: string;
   activeHint?: string | null;
+  /** When true, Continue/Try Again render on the guide feedback card instead */
+  attachContinueToFeedback?: boolean;
   onSkip: () => void;
   onCheck: () => void;
   onContinue: () => void;
@@ -47,9 +49,13 @@ export default function B4BaselineBottomBar({
   onTryAgain,
   onUseHint,
   onToggleExplainMore,
+  attachContinueToFeedback = false,
 }: B4BaselineBottomBarProps) {
   const showInlineFeedback = Boolean(checked && feedback && !hideInlineFeedback);
-  const showContinue = checked && !canTryAgain;
+  const showContinue = checked && !canTryAgain && !attachContinueToFeedback;
+  const showBarTryAgain = canTryAgain && !attachContinueToFeedback;
+  const showBarHint = canUseHint && onUseHint && !attachContinueToFeedback;
+  const showBarExplain = canExplainMore && onToggleExplainMore && hideInlineFeedback && !attachContinueToFeedback;
   const barClass = [
     'bbc-bottomBar',
     coachingShell ? 'bbc-bottomBar--coachingShell' : '',
@@ -97,13 +103,13 @@ export default function B4BaselineBottomBar({
                 </p>
               ) : null}
               <div className="bbc-bottomBarActions">
-                {canTryAgain && onTryAgain ? (
+                {showBarTryAgain && onTryAgain ? (
                   <button type="button" className="bbc-tryAgainBtn" onClick={onTryAgain}>
                     Try Again
                   </button>
                 ) : null}
-                {canUseHint && onUseHint ? <HintButton onClick={onUseHint} /> : null}
-                {canExplainMore && onToggleExplainMore && hideInlineFeedback ? (
+                {showBarHint ? <HintButton onClick={onUseHint} /> : null}
+                {showBarExplain ? (
                   <ExplainMoreButton
                     expanded={showExplainMore}
                     onClick={onToggleExplainMore}

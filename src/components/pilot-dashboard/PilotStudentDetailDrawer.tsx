@@ -9,6 +9,8 @@ import {
 import type { StudentParticipantRecord } from '../../lib/pilotTrackingService';
 import type { StudentFamilyLink } from '../../lib/studentFamilyLinkService';
 import CopyableCompactValue from './CopyableCompactValue';
+import ParticipantGradeMeta from '../shared/ParticipantGradeMeta';
+import '../shared/participant-grade-meta.css';
 import PilotDrawer from './PilotDrawer';
 import PilotStatusChip from './PilotStatusChip';
 
@@ -84,6 +86,17 @@ export default function PilotStudentDetailDrawer({
           <div>
             <dt>Nickname</dt>
             <dd>{snapshot.nickname}</dd>
+          </div>
+          <div>
+            <dt>Grade</dt>
+            <dd>
+              <ParticipantGradeMeta
+                gradeLevel={snapshot.gradeLevel}
+                gradeBand={snapshot.gradeBand}
+                allowStretch={snapshot.allowStretchLevel}
+                variant="facilitator"
+              />
+            </dd>
           </div>
           <div>
             <dt>Parent/Guardian</dt>

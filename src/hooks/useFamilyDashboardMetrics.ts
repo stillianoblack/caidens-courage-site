@@ -73,19 +73,23 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
   const [data, setData] = useState<FamilyDashboardData>(EMPTY_DATA);
   const [campProgramName, setCampProgramName] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!resolvedCode) {
       setData(EMPTY_DATA);
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (!options?.silent) {
+      setLoading(true);
+    }
     try {
       const payload = await loadFamilyDashboardData(resolvedCode);
       setData(payload);
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, [resolvedCode]);
 
@@ -95,6 +99,9 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     const handleRefresh = () => {
       void refresh();
     };
+    const handleProfileRefresh = () => {
+      void refresh({ silent: true });
+    };
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         void refresh();
@@ -103,7 +110,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
 
     window.addEventListener('cc-baseline-complete', handleRefresh);
     window.addEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
-    window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
+    window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleProfileRefresh);
     window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
     window.addEventListener('focus', handleRefresh);
     document.addEventListener('visibilitychange', handleVisibility);
@@ -111,7 +118,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     return () => {
       window.removeEventListener('cc-baseline-complete', handleRefresh);
       window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
-      window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRefresh);
+      window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleProfileRefresh);
       window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
       window.removeEventListener('focus', handleRefresh);
       document.removeEventListener('visibilitychange', handleVisibility);
@@ -170,12 +177,14 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
         })
       : EMPTY_SNAPSHOT;
 
-    console.info('[PROGRESS_SYNC]', {
-      program_code: data.programCode,
-      children_count: children.length,
-      overall_percent: metrics.overall.percent,
-      module_results: data.moduleResults.length,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.info('[PROGRESS_SYNC]', {
+        program_code: data.programCode,
+        children_count: children.length,
+        overall_percent: metrics.overall.percent,
+        module_results: data.moduleResults.length,
+      });
+    }
 
     logFamilyProgressMetrics({
       activeProgramCode: data.programCode,

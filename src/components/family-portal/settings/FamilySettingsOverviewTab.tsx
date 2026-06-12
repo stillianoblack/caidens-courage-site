@@ -1,12 +1,14 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { useActiveChild } from '../../../hooks/useActiveChild';
-import { useFamilyChildGoals } from '../../../hooks/useFamilyChildGoals';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useFamilyOnboardingStatus } from '../../../hooks/useFamilyOnboardingStatus';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
-import { useFocusFlameJourneyOnboarding } from '../../../hooks/useFocusFlameJourneyOnboarding';
-import { familyPortalPath } from '../../../lib/familyPortalPaths';
-import { getPortalRoute } from '../../../lib/portalGamePaths';
+import { useFamilyChildGoals } from '../../../hooks/useFamilyChildGoals';
+import { useActiveChild } from '../../../hooks/useActiveChild';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
+import { resolveSelectableFamilyChildren } from '../../../lib/familyOnboardingUtils';
+import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
+import { familyPortalPath, familySettingsChildrenGradePath } from '../../../lib/familyPortalPaths';
+import { getPortalRoute } from '../../../lib/portalGamePaths';
 import FocusFlameJourneyOnboarding from '../FocusFlameJourneyOnboarding';
 
 type FamilySettingsOverviewTabProps = {
@@ -19,19 +21,14 @@ export default function FamilySettingsOverviewTab({
   onSetGoals,
 }: FamilySettingsOverviewTabProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const programCode = resolveTrackingProgramCode() ?? '';
   const { children, visibleChildren, loading } = useFamilyPortalShell(programCode);
+  const onboarding = useFamilyOnboardingStatus();
 
   const selectableChildren = React.useMemo(
-    () =>
-      visibleChildren
-        .map((child) => ({
-          participantId: child.studentId,
-          displayName: child.displayName,
-          firstName: child.displayName,
-        }))
-        .filter((child) => Boolean(child.participantId)),
-    [visibleChildren],
+    () => resolveSelectableFamilyChildren(visibleChildren, children),
+    [children, visibleChildren],
   );
 
   const { activeChild } = useActiveChild(selectableChildren);
@@ -46,17 +43,21 @@ export default function FamilySettingsOverviewTab({
   const childId = activeChild?.participantId ?? activeChildSummary?.participantId;
   const childGoals = useFamilyChildGoals(programCode, childId, activeChildSummary?.displayName);
 
-  const journey = useFocusFlameJourneyOnboarding(
-    selectableChildren.length > 0,
-    childId,
-    childGoals.complete,
-  );
-
   const baselinePath = getPortalRoute('baseline-check', location.pathname);
   const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
   const charactersPath = getPortalRoute('characters', location.pathname);
+  const childrenGradeSettingsPath = familySettingsChildrenGradePath(location.pathname);
 
-  if (loading || journey.loading) {
+  const handleConfigureGrade = () => {
+    navigate(childrenGradeSettingsPath);
+  };
+
+  const handleAddChild = () => {
+    onAddChild();
+    window.dispatchEvent(new CustomEvent(FOCUS_FLAME_ADD_CHILD_EVENT));
+  };
+
+  if (loading || onboarding.loading) {
     return <p className="family-panelHelper">Loading your journey…</p>;
   }
 
@@ -64,27 +65,30 @@ export default function FamilySettingsOverviewTab({
     <FocusFlameJourneyOnboarding
       variant="inline"
       embedGoalsEditor={false}
-      activeStep={journey.activeStep}
-      step1Complete={journey.step1Complete}
-      step2Complete={journey.step2Complete}
-      step3Complete={journey.step3Complete}
-      step4Complete={journey.step4Complete}
-      completedCount={journey.completedCount}
-      totalSteps={journey.totalSteps}
-      isComplete={journey.isComplete}
+      activeStep={onboarding.activeStep}
+      step1Complete={onboarding.hasChild}
+      step2Complete={onboarding.hasChildGrade}
+      step3Complete={onboarding.hasFamilyGoals}
+      step4Complete={onboarding.hasCompletedB4CheckIn}
+      step5Complete={onboarding.hasChosenPath}
+      completedCount={onboarding.completedCount}
+      totalSteps={onboarding.totalSteps}
+      isComplete={onboarding.isComplete}
       baselinePath={baselinePath}
       continueLearningPath={continueLearningPath}
       charactersPath={charactersPath}
+      childrenSettingsPath={childrenGradeSettingsPath}
       programCode={programCode}
       childId={childId}
       childName={activeChildSummary?.displayName}
       childGoalsRecord={childGoals.record}
-      onAddChild={onAddChild}
+      onAddChild={handleAddChild}
+      onConfigureGrade={handleConfigureGrade}
       onSetGoals={onSetGoals}
-      onPathChosen={journey.markPathChosen}
+      onPathChosen={onboarding.markPathChosen}
       onGoalsSaved={() => {
         void childGoals.refresh();
-        void journey.refresh();
+        void onboarding.refresh();
       }}
     />
   );

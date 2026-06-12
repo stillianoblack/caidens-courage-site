@@ -7,8 +7,8 @@
   --lm-headline-body: 16px;
   --lm-body-sections: 20px;
   --lm-section-gap: 16px;
-  --lm-avatar-size: 72px;
-  --lm-avatar-size-mobile: 56px;
+  --lm-avatar-size: 56px;
+  --lm-avatar-size-mobile: 44px;
   --lm-focus-navy: #050b18;
   --lm-focus-gold: #f0ce6e;
   --lm-soft-lavender: #ede9fe;
@@ -36,6 +36,11 @@
 .ds-circleAvatar--dr-victoria {
   background: var(--lm-soft-lavender);
   border: 2px solid var(--lm-lavender-accent);
+}
+
+.ds-circleAvatar--uncle-t {
+  background: #fff7ed;
+  border: 2px solid #f59e0b;
 }
 
 .ds-circleAvatar--default {
@@ -108,15 +113,15 @@
 
 .ds-learningMomentBadge {
   margin: 0;
-  font-size: 0.625rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .ds-learningMomentHeadline {
   margin: var(--lm-badge-headline) 0 0;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 800;
   line-height: 1.4;
 }

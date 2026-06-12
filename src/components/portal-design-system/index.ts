@@ -1,9 +1,14 @@
+export { default as PortalPageIntro } from './PortalPageIntro';
+export type { PortalPageIntroProps } from './PortalPageIntro';
 export { default as AppShell } from './AppShell';
 export { default as B4Assistant } from './B4Assistant';
 export type { AppShellVariant } from './AppShell';
+export { default as PortalLayout } from '../portal/PortalLayout';
+export { default as PortalRightRail } from '../portal/PortalRightRail';
 export { default as MarketingShowcaseCard } from './MarketingShowcaseCard';
 export type { MarketingShowcaseAction } from './MarketingShowcaseCard';
 export { default as SlideOutDrawer } from './SlideOutDrawer';
+export { default as B4InsightsDrawer } from '../../design-system/components/B4InsightsDrawer';
 export type { SlideOutDrawerSize } from './SlideOutDrawer';
 export { default as GoalsOnboardingDrawer } from './GoalsOnboardingDrawer';
 export { default as B4ToastNotification } from './B4ToastNotification';

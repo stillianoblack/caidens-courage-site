@@ -87,6 +87,8 @@ export type CaidenQuestClueCardData = {
   tag: string;
   text: string;
   accent?: CaidenQuestAccent;
+  /** Optional per-quest hero image — falls back to standard gameplay hero. */
+  imageSrc?: string;
 };
 
 export type VictoriaReflectionAccent =

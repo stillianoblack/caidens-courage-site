@@ -8,6 +8,10 @@ type GameHeaderProps = {
   showProgress?: boolean;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  playerName?: string;
+  playerIndex?: number;
+  hubName?: string;
+  backHref?: string;
 };
 
 /** Thin wrapper around B4BaselineTopBar for shared game/assessment headers. */

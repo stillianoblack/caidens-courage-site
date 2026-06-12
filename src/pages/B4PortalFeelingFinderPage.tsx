@@ -15,6 +15,7 @@ export default function B4PortalFeelingFinderPage() {
     <GameAssessmentFlow
       config={B4_FEELING_FINDER_CONFIG}
       themeClassName="b4-game"
+      useB4Header
       exitPath={resolveB4HubPath(location.pathname)}
       embedded
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}

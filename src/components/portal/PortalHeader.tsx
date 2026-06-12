@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
 import FamilyLinkedCampBadge from '../family-portal/FamilyLinkedCampBadge';
@@ -11,6 +12,8 @@ type PortalHeaderProps = {
   pageTitle: string;
   portal: 'family' | 'facilitator';
   onOpenProgramGoals?: () => void;
+  /** Family portal: deep link to Settings → Family Goals tab. */
+  programGoalsHref?: string;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
 };
@@ -19,6 +22,7 @@ export default function PortalHeader({
   pageTitle,
   portal,
   onOpenProgramGoals,
+  programGoalsHref,
   linkedCampLabel = null,
   notifications = [],
 }: PortalHeaderProps) {
@@ -34,12 +38,11 @@ export default function PortalHeader({
       </div>
       <div className="portal-headerTools">
         {portal === 'family' ? <FamilyNotificationBell items={notifications} /> : null}
-        {onOpenProgramGoals ? (
-          <button
-            type="button"
+        {portal === 'family' && programGoalsHref ? (
+          <Link
+            to={programGoalsHref}
             className="portal-headerGoalsBtn"
-            onClick={onOpenProgramGoals}
-            aria-label={portal === 'family' ? 'Family Goals' : 'Program Goals'}
+            aria-label="Family Goals"
           >
             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path
@@ -48,11 +51,30 @@ export default function PortalHeader({
                 clipRule="evenodd"
               />
             </svg>
-            <span>{portal === 'family' ? 'Family Goals' : 'Program Goals'}</span>
+            <span>Family Goals</span>
+          </Link>
+        ) : onOpenProgramGoals ? (
+          <button
+            type="button"
+            className="portal-headerGoalsBtn"
+            onClick={onOpenProgramGoals}
+            aria-label="Program Goals"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>Program Goals</span>
           </button>
         ) : null}
         <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
-        <PortalSwitcherDropdown className="portal-headerSwitcher" />
+        <PortalSwitcherDropdown
+          className="portal-headerSwitcher"
+          linkedCampLabel={portal === 'family' ? linkedCampLabel : undefined}
+        />
       </div>
     </header>
   );

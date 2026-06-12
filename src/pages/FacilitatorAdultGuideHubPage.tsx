@@ -5,7 +5,6 @@ import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardS
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/portal/portal-shell.css';
-import '../components/adult-learning/adult-learning-hub.css';
 import { FACILITATOR_ADULT_TRAINING_PATH, FACILITATOR_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import { getAdultGuideById } from '../data/adult/adultGuideRegistry';

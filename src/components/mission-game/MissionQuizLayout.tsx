@@ -4,16 +4,26 @@ import {
   isGameAnswerComplete,
   isGameAnswerCorrect,
 } from '../../lib/gameAssessmentValidation';
+import GuideFeedbackCard from '../../design-system/game/GuideFeedbackCard';
+import type { GuideFeedbackTone } from '../../design-system/game/GuideFeedbackCard';
+import type { GameUIPatternId } from '../../design-system/game/patterns/gameUIPatterns';
 import GameCoachingRailPlaceholder from '../../design-system/game/GameCoachingRailPlaceholder';
 import LearningMomentCard from '../../design-system/game/LearningMomentCard';
 import { buildB4LockInTipFromGame, type B4LockInPortalType } from '../../design-system/game/getB4LockInTip';
 import { usesB4LockInFeedback } from '../../design-system/game/feedbackRhythm';
 import { useCoachingRailCaret } from '../../design-system/game/useCoachingRailCaret';
+import {
+  buildCoachCardReadAloudSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromGameQuestion,
+  GameCoachingRailAside,
+} from '../../design-system/narration';
 import type { ModuleTrackingDefinition } from '../../types/moduleTracking';
 import GameQuestionRenderer from '../game-assessment/GameQuestionRenderer';
 import MissionCardContent, { questionHasMissionCard } from './MissionCardContent';
 import MissionFeedbackCard from './MissionFeedbackCard';
 import MissionSpeechRow, { type MissionGameTheme } from './MissionSpeechRow';
+import { resolveGameplayQuestionPrompt } from '../../lib/gameplayQuestionDisplay';
 import './mission-game.css';
 
 type MissionQuizLayoutProps = {
@@ -39,11 +49,22 @@ type MissionQuizLayoutProps = {
   useCaidenHeader?: boolean;
   useMirandaHeader?: boolean;
   useCharlieHeader?: boolean;
+  useB4Header?: boolean;
   gameId?: string;
   b4PortalType?: B4LockInPortalType;
   tracking?: ModuleTrackingDefinition | null;
   revealCorrectAnswer?: boolean;
   activeHint?: string | null;
+  patternId?: GameUIPatternId;
+  attachActionsToFeedback?: boolean;
+  canTryAgain?: boolean;
+  canUseHint?: boolean;
+  canExplainMore?: boolean;
+  showExplainMore?: boolean;
+  onContinue?: () => void;
+  onTryAgain?: () => void;
+  onUseHint?: () => void;
+  onToggleExplainMore?: () => void;
   onPlaySelect: () => void;
   onSelectChoice: (id: string) => void;
   onSelectTrueFalse: (value: boolean) => void;
@@ -73,11 +94,22 @@ export default function MissionQuizLayout({
   useCaidenHeader = false,
   useMirandaHeader = false,
   useCharlieHeader = false,
+  useB4Header = false,
   gameId,
   b4PortalType = 'facilitator',
   tracking,
   revealCorrectAnswer = false,
   activeHint,
+  patternId,
+  attachActionsToFeedback = false,
+  canTryAgain = false,
+  canUseHint = false,
+  canExplainMore = false,
+  showExplainMore = false,
+  onContinue,
+  onTryAgain,
+  onUseHint,
+  onToggleExplainMore,
   onPlaySelect,
   onSelectChoice,
   onSelectTrueFalse,
@@ -87,8 +119,16 @@ export default function MissionQuizLayout({
   const answersWrapRef = useRef<HTMLDivElement>(null);
   const railShellRef = useRef<HTMLDivElement>(null);
   const caretTop = useCoachingRailCaret(answer, answersWrapRef, railShellRef);
+  const questionPrompt = useMemo(() => resolveGameplayQuestionPrompt(question), [question]);
 
-  const cardFlags = { useVictoriaHeader, useUncleTHeader, useCaidenHeader, useMirandaHeader, useCharlieHeader };
+  const cardFlags = {
+    useVictoriaHeader,
+    useUncleTHeader,
+    useCaidenHeader,
+    useMirandaHeader,
+    useCharlieHeader,
+    useB4Header,
+  };
   const hasMissionCard = questionHasMissionCard(question, cardFlags);
   const feedbackAvatarSrc = guideAvatarSrc ?? avatarSrc;
   const feedbackAvatarAlt = guideAvatarAlt ?? avatarAlt;
@@ -110,6 +150,12 @@ export default function MissionQuizLayout({
 
   const facilitatorTitle =
     expertInsightTitle ?? (useUncleTHeader ? 'Uncle T Says' : 'Dr. Victoria Says');
+
+  const preCheckGuideCharacter = useUncleTHeader
+    ? 'uncle-t'
+    : useVictoriaHeader
+      ? 'dr-victoria'
+      : 'b4';
 
   const lockInTip = useMemo(() => {
     if (!showLockInTip) return null;
@@ -133,49 +179,146 @@ export default function MissionQuizLayout({
     tracking,
   ]);
 
+  const readAloudSegments = useMemo(() => {
+    const questionSegments = buildReadAloudSegmentsFromGameQuestion(question);
+
+    let coachSegments: string[] = [];
+    if (showLockInTip && lockInTip) {
+      coachSegments = buildCoachCardReadAloudSegments({ state: 'lock_in', tip: lockInTip });
+    } else if (showFacilitatorInsight && feedback) {
+      coachSegments = buildCoachCardReadAloudSegments({
+        state: 'facilitator',
+        title: facilitatorTitle,
+        headline: feedback,
+        detail,
+      });
+    } else {
+      coachSegments = buildCoachCardReadAloudSegments({
+        state: 'placeholder',
+        guideCharacter: preCheckGuideCharacter,
+        hasSelection: hasAnswer,
+        hasHints: Boolean(question.hints?.length),
+      });
+    }
+
+    const scope = checked ? 'coach_only' : 'full';
+    return buildGameplayReadAloudSegments(questionSegments, coachSegments, scope);
+  }, [
+    checked,
+    detail,
+    facilitatorTitle,
+    feedback,
+    hasAnswer,
+    lockInTip,
+    preCheckGuideCharacter,
+    question,
+    showFacilitatorInsight,
+    showLockInTip,
+  ]);
+
+  const readAloudResetKey = [
+    question.id,
+    checked ? 'checked' : 'open',
+    showLockInTip ? 'lock-in' : showFacilitatorInsight ? 'insight' : 'coach',
+    showLockInTip && lockInTip ? lockInTip.headline : '',
+  ].join('::');
+
   const layoutClass = [
     'bbc-quizWrap',
     'game-quizWrap',
     'mission-quizLayout',
     useCoachingRail ? 'mission-quizLayout--coachingRail' : '',
-    hasMissionCard ? 'mission-quizLayout--hasMission' : '',
+    hasMissionCard && !useCoachingRail ? 'mission-quizLayout--hasMission' : '',
     quizWrapModifier,
   ]
     .filter(Boolean)
     .join(' ');
 
+  const guideFeedbackTone: GuideFeedbackTone =
+    feedbackTone === 'success' ? 'success' : feedbackTone === 'try' ? 'incorrect' : 'neutral';
+
+  const renderLockInFeedback = () => {
+    if (!showLockInTip || !lockInTip) return null;
+    const learningMoment = {
+      variant: lockInTip.variant,
+      title: lockInTip.title,
+      headline: lockInTip.headline,
+      body: lockInTip.body,
+      tips: lockInTip.tips,
+      tipsLabel: lockInTip.tipsLabel,
+      showRailChevron: true,
+      caretTop,
+    } as const;
+
+    if (attachActionsToFeedback) {
+      return (
+        <GuideFeedbackCard
+          tone={guideFeedbackTone}
+          learningMoment={learningMoment}
+          showContinue={checked && !canTryAgain}
+          onContinue={onContinue}
+          showTryAgain={canTryAgain}
+          onTryAgain={onTryAgain}
+          showHint={canUseHint}
+          onHint={onUseHint}
+          canExplainMore={canExplainMore}
+          showExplainMore={showExplainMore}
+          onToggleExplainMore={onToggleExplainMore}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={['ds-guideFeedback', `ds-guideFeedback--${guideFeedbackTone}`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <LearningMomentCard {...learningMoment} className="ds-guideFeedbackCard" />
+        {canExplainMore && showExplainMore && question.explainMore ? (
+          <p className="ds-guideFeedbackExplain">{question.explainMore}</p>
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderFacilitatorFeedback = () => {
+    if (!showFacilitatorInsight) return null;
+    const learningMoment = {
+      variant: 'FACILITATOR_INSIGHT' as const,
+      title: facilitatorTitle,
+      headline: feedback!,
+      avatarSrc: guideAvatarSrc ?? avatarSrc,
+      whyItMatters: detail?.whyItMatters,
+      tryThis: detail?.tryThis ? [...detail.tryThis] : undefined,
+      tryThisLabel: detail?.tryThisLabel,
+      watchFor: detail?.watchFor,
+      showRailChevron: true,
+      caretTop,
+    };
+
+    if (attachActionsToFeedback) {
+      return (
+        <GuideFeedbackCard
+          tone={guideFeedbackTone}
+          learningMoment={learningMoment}
+          showContinue={checked && !canTryAgain}
+          onContinue={onContinue}
+        />
+      );
+    }
+
+    return <LearningMomentCard {...learningMoment} />;
+  };
+
   const coachingRailContent = showLearningMoment ? (
     <>
-      {showLockInTip && lockInTip ? (
-        <LearningMomentCard
-          variant={lockInTip.variant}
-          title={lockInTip.title}
-          headline={lockInTip.headline}
-          body={lockInTip.body}
-          tips={lockInTip.tips}
-          tipsLabel={lockInTip.tipsLabel}
-          showRailChevron
-          caretTop={caretTop}
-        />
-      ) : null}
-      {showFacilitatorInsight ? (
-        <LearningMomentCard
-          variant="FACILITATOR_INSIGHT"
-          title={facilitatorTitle}
-          headline={feedback!}
-          avatarSrc={guideAvatarSrc ?? avatarSrc}
-          whyItMatters={detail?.whyItMatters}
-          tryThis={detail?.tryThis ? [...detail.tryThis] : undefined}
-          tryThisLabel={detail?.tryThisLabel}
-          watchFor={detail?.watchFor}
-          showRailChevron
-          caretTop={caretTop}
-        />
-      ) : null}
+      {renderLockInFeedback()}
+      {renderFacilitatorFeedback()}
     </>
   ) : (
     <GameCoachingRailPlaceholder
-      variant={coachingRailVariant}
+      guideCharacter={preCheckGuideCharacter}
       caretTop={caretTop}
       hasSelection={hasAnswer}
       hasHints={Boolean(question.hints?.length)}
@@ -191,7 +334,7 @@ export default function MissionQuizLayout({
           </MissionSpeechRow>
         ) : null}
         <h2 className="bbc-questionText mission-questionText" id="game-question">
-          {question.question ?? question.prompt}
+          {questionPrompt}
         </h2>
         <GameQuestionRenderer
           question={question}
@@ -220,7 +363,7 @@ export default function MissionQuizLayout({
 
   return (
     <div className={layoutClass}>
-      {hasMissionCard && avatarSrc ? (
+      {!useCoachingRail && hasMissionCard && avatarSrc ? (
         <div className="mission-quizLayoutMission">
           <MissionSpeechRow avatarSrc={avatarSrc} avatarAlt={avatarAlt} theme={theme}>
             <MissionCardContent question={question} {...cardFlags} />
@@ -229,8 +372,13 @@ export default function MissionQuizLayout({
       ) : null}
 
       <div className="mission-quizLayoutLearning">
+        {useCoachingRail && hasMissionCard ? (
+          <div className="mission-quizLayoutScenario">
+            <MissionCardContent question={question} useCoachingRail {...cardFlags} />
+          </div>
+        ) : null}
         <h2 className="bbc-questionText mission-questionText" id="game-question">
-          {question.question ?? question.prompt}
+          {questionPrompt}
         </h2>
         <div className="mission-quizLayoutAnswers" ref={answersWrapRef}>
           <GameQuestionRenderer
@@ -258,9 +406,15 @@ export default function MissionQuizLayout({
       </div>
 
       <aside className="mission-quizLayoutAside">
-        <div ref={railShellRef} className="mission-quizLayoutAsideInner">
-          {coachingRailContent}
-        </div>
+        <GameCoachingRailAside
+          asideInnerRef={railShellRef}
+          coachContent={coachingRailContent}
+          readAloudSegments={readAloudSegments}
+          readAloudResetKey={readAloudResetKey}
+          readAloudPlayAriaLabel={
+            checked ? 'Read coach feedback aloud' : 'Read this question aloud'
+          }
+        />
       </aside>
     </div>
   );

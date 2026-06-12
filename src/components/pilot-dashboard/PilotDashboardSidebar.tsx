@@ -86,6 +86,8 @@ export default function PilotDashboardSidebar({
       ) : showSupportCard ? (
         <PilotPartnerSupportCard pricingTier={pricingTier} />
       ) : null}
+
+      <p className="pilot-railCopyright">© 2026 Caiden&apos;s Courage™ Pilot Materials</p>
     </aside>
   );
 }

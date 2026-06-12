@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
+import MirandaMissionFlow from '../components/miranda/MirandaMissionFlow';
 import '../components/miranda/miranda-portal-hub.css';
 import { getMirandaMissionById } from '../data/miranda';
 import { resolveMirandaHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';
@@ -12,15 +12,14 @@ export default function MirandaPortalMissionPage() {
   const mission = getMirandaMissionById(missionId);
 
   if (!mission) {
-    return <Navigate to={hubPath} replace />;
+    return <Navigate to={`${hubPath}${location.search}`} replace />;
   }
 
   return (
-    <GameAssessmentFlow
-      config={mission.config}
-      themeClassName="miranda-game"
+    <MirandaMissionFlow
+      missionId={mission.id}
       exitPath={hubPath}
-      useMirandaHeader
+      exitLabel="Back to Mystery Files"
       embedded
       skipLanding
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}

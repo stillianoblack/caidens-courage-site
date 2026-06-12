@@ -9,6 +9,8 @@ import {
 import { isActivityLibraryTab } from '../../../lib/askB4DeepLinks';
 import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
+import { programDashboardTabPath } from '../../../lib/programDashboardNav';
+import { setPortalReturnPath } from '../../../lib/portalReturnNav';
 import PilotStatusPill from '../PilotStatusPill';
 
 const DEFAULT_CATEGORY: ActivityCategoryId = 'coloring-pages';
@@ -72,7 +74,11 @@ export default function PilotActivitiesPanel() {
             <div className="pilot-activitySpecialCard">
               <h3 className="pilot-dash-cardTitle">Focus Flame Lab</h3>
               <p className="pilot-dash-cardDesc">{PILOT_FOCUS_FLAME_LAB_CARD.description}</p>
-              <Link to={PILOT_FOCUS_FLAME_LAB_CARD.href} className="pilot-dash-cta">
+              <Link
+                to={PILOT_FOCUS_FLAME_LAB_CARD.href}
+                className="pilot-dash-cta"
+                onClick={() => setPortalReturnPath(programDashboardTabPath('activities-library'))}
+              >
                 {PILOT_FOCUS_FLAME_LAB_CARD.cta}
               </Link>
             </div>
@@ -165,6 +171,24 @@ export default function PilotActivitiesPanel() {
           )}
         </div>
       </div>
+
+      <section className="pilot-gameLibraryPreview" aria-labelledby="pilot-game-library-heading">
+        <h3 id="pilot-game-library-heading" className="pilot-dash-cardTitle">
+          Facilitator Game Library
+          <PilotStatusPill status="Preview" tone="locked" />
+        </h3>
+        <p className="pilot-dash-cardDesc">
+          Facilitator-only preview of character games, answer keys, and discussion prompts.
+          Not visible in Family or Student portals.
+        </p>
+        <ul className="pilot-gameLibraryPreviewList">
+          <li>Preview game</li>
+          <li>View questions</li>
+          <li>View correct answers</li>
+          <li>Skill tags &amp; grade level</li>
+          <li>Discussion prompts</li>
+        </ul>
+      </section>
     </div>
   );
 }

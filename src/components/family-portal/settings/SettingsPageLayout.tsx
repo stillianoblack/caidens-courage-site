@@ -1,4 +1,5 @@
 import React from 'react';
+import { PortalPageIntro } from '../../portal-design-system';
 import SettingsContentPanel from './SettingsContentPanel';
 import SettingsTabRail from './SettingsTabRail';
 
@@ -17,6 +18,8 @@ type SettingsPageLayoutProps<T extends string> = {
   toolbar?: React.ReactNode;
   panelClassName?: string;
   tabAriaLabel?: string;
+  /** Show in-page title when no portal top bar is present (e.g. Admin Portal). */
+  showPageTitle?: boolean;
 };
 
 export default function SettingsPageLayout<T extends string>({
@@ -29,6 +32,7 @@ export default function SettingsPageLayout<T extends string>({
   toolbar,
   panelClassName = 'family-panel family-panel--settings',
   tabAriaLabel,
+  showPageTitle = false,
 }: SettingsPageLayoutProps<T>) {
   return (
     <div className={panelClassName}>
@@ -36,15 +40,15 @@ export default function SettingsPageLayout<T extends string>({
         {toolbar ? (
           <div className="portal-settingsIntroRow">
             <div>
-              <h1 className="family-panelIntroTitle">{title}</h1>
-              <p className="family-panelIntroSubtitle">{subtitle}</p>
+              {showPageTitle ? <h1 className="family-panelIntroTitle">{title}</h1> : null}
+              <PortalPageIntro>{subtitle}</PortalPageIntro>
             </div>
             <div className="portal-settingsToolbar">{toolbar}</div>
           </div>
         ) : (
           <>
-            <h1 className="family-panelIntroTitle">{title}</h1>
-            <p className="family-panelIntroSubtitle">{subtitle}</p>
+            {showPageTitle ? <h1 className="family-panelIntroTitle">{title}</h1> : null}
+            <PortalPageIntro>{subtitle}</PortalPageIntro>
           </>
         )}
       </header>

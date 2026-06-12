@@ -38,7 +38,10 @@ export default function CharacterMissionBoard({
     <div className={['characterMissionBoard', className].filter(Boolean).join(' ')}>
       {smartBack ? (
         <div className="mission-boardTopBack">
-          <PortalBackButton hubName="Character Hub" to={getPortalRoute('characters')} />
+          <PortalBackButton
+            label="Back to Character Hub"
+            to={getPortalRoute('characters')}
+          />
         </div>
       ) : null}
 

@@ -7,13 +7,29 @@ import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
 import { checkBaselineCompletion } from '../../lib/baselineCompletion';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
 import { ensureParticipantForBaseline } from '../../lib/childProfileService';
+import { readParticipantGradeSettings } from '../../lib/mirandaGradeBandResolver';
+import { hasCanonicalGradeLevel } from '../../lib/participantGradeDisplay';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import B4BaselineHub from '../b4-baseline-check/B4BaselineHub';
 import B4BaselineResults from '../b4-baseline-check/B4BaselineResults';
 import B4BaselineStudentForm from '../b4-baseline-check/B4BaselineStudentForm';
-import B4BaselineTopBar, { B4Avatar, B4BaselineDecor } from '../b4-baseline-check/B4BaselineTopBar';
+import B4BaselineGradeGate from '../b4-baseline-check/B4BaselineGradeGate';
+import B4BaselineTopBar, { B4Avatar } from '../b4-baseline-check/B4BaselineTopBar';
 import '../b4-baseline-check/b4-baseline-check.css';
+import GameInteractionShell from '../game-assessment/shared/GameInteractionShell';
+import GameplayTopBar from '../../design-system/game/GameplayTopBar';
+import GameplayShell from '../../design-system/game/GameplayShell';
+import CoachingShellQuizFrame from '../../design-system/game/CoachingShellQuizFrame';
+import ScenarioCard from '../../design-system/game/ScenarioCard';
+import AssessmentCoachRail from '../../design-system/game/AssessmentCoachRail';
+import {
+  buildAssessmentCoachRailSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromParts,
+} from '../../design-system/narration';
+import { resolveGameplayTopBarFlames } from '../../design-system/game/resolveGameplayTopBarConfig';
+import '../../design-system/game/gameDesignStyles';
 import {
   B4_BASELINE_FEELINGS_FEEDBACK,
   B4_BASELINE_FEELINGS_QUESTIONS,
@@ -45,7 +61,7 @@ import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 
-type View = 'landing' | 'hub' | 'quiz' | 'module-complete' | 'final';
+type View = 'landing' | 'grade_gate' | 'hub' | 'quiz' | 'module-complete' | 'final';
 
 type B4BaselineCheckFlowProps = {
   embedded?: boolean;
@@ -80,7 +96,7 @@ export default function B4BaselineCheckFlow({
   const missionPhase: MissionGamePhase = useMemo(() => {
     if (view === 'quiz') return 'quiz';
     if (view === 'module-complete' || view === 'final') return 'complete';
-    if (view === 'landing' || view === 'hub') return 'landing';
+    if (view === 'landing' || view === 'hub' || view === 'grade_gate') return 'landing';
     return 'off';
   }, [view]);
   useSetMissionGamePhase(missionPhase);
@@ -100,6 +116,11 @@ export default function B4BaselineCheckFlow({
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [gradeGateParticipantId, setGradeGateParticipantId] = useState<string | null>(null);
+  const [pendingBaselineStart, setPendingBaselineStart] = useState<{
+    participant: { participantId: string; firstName: string; nickname: string };
+    values: { programCode: string; groupName: string };
+  } | null>(null);
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
   const programContext = resolveActiveProgramContext();
 
@@ -198,6 +219,30 @@ export default function B4BaselineCheckFlow({
     refreshHub();
   };
 
+  const finishBaselineProfileStart = (
+    participant: { participantId: string; firstName: string; nickname: string },
+    values: { programCode: string; groupName: string },
+  ) => {
+    const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
+    const activeProgram = readActivePilotProgram();
+
+    const next = saveB4BaselineStudentProfile({
+      firstName: participant.firstName,
+      nickname: participant.nickname,
+      participantId: participant.participantId,
+      programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
+      groupName: activeProgram?.groupName || values.groupName,
+    });
+    setHubState(next);
+    refreshAnalyticsIdentity();
+    trackEvent('student_assessment_started', {
+      role: 'student',
+      assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+      participant_id: participant.participantId,
+    });
+    setView('hub');
+  };
+
   const handleStudentSubmit = async (values: {
     firstName?: string;
     nickname: string;
@@ -208,8 +253,6 @@ export default function B4BaselineCheckFlow({
     setProfileError(null);
     setProfileSubmitting(true);
 
-    const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
-    const activeProgram = readActivePilotProgram();
     const nickname = values.nickname.trim();
     const firstName = values.firstName?.trim() || nickname;
 
@@ -218,24 +261,18 @@ export default function B4BaselineCheckFlow({
         firstName,
         nickname,
         participantId: readActiveChildParticipantId() || hubState.profile?.participantId,
-        groupName: activeProgram?.groupName || values.groupName,
+        groupName: readActivePilotProgram()?.groupName || values.groupName,
       });
 
-      const next = saveB4BaselineStudentProfile({
-        firstName: participant.firstName,
-        nickname: participant.nickname,
-        participantId: participant.participantId,
-        programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
-        groupName: activeProgram?.groupName || values.groupName,
-      });
-      setHubState(next);
-      refreshAnalyticsIdentity();
-      trackEvent('student_assessment_started', {
-        role: 'student',
-        assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
-        participant_id: participant.participantId,
-      });
-      setView('hub');
+      const gradeSettings = readParticipantGradeSettings(participant.participantId);
+      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+        setPendingBaselineStart({ participant, values });
+        setGradeGateParticipantId(participant.participantId);
+        setView('grade_gate');
+        return;
+      }
+
+      finishBaselineProfileStart(participant, values);
     } catch {
       setProfileError('Could not start Before Check-In. Please try again.');
     } finally {
@@ -478,32 +515,135 @@ export default function B4BaselineCheckFlow({
   const allComplete = isBaselineFullyComplete(hubState, readActiveChildParticipantId());
   const showTopBar = embedded || view !== 'landing';
   const avatarSrc = B4_AVATAR_SRC;
+  const b4Flames = resolveGameplayTopBarFlames('b4', { useB4Header: true });
 
-  return (
-    <div
-      className={[
-        'bbc-app',
-        embedded ? 'b4-game--embedded' : '',
-        embedded ? 'portal-gameFrame' : '',
-        view === 'quiz' ? 'bbc-app--game-active' : '',
+  const baselineScenarioPrompt =
+    activeModule === 'feelings'
+      ? 'Pick the answer that feels most like you. There are no bad answers.'
+      : activeModule === 'reading' && questionIndex === 0
+        ? 'Read the story, then answer what happened.'
+        : 'Choose the best answer, then tap Check.';
+
+  const baselineScenarioTag =
+    activeModule === 'feelings'
+      ? 'Feelings Check-In'
+      : activeModule === 'reading'
+        ? 'Reading'
+        : 'Focus Moves';
+
+  const baselineReadAloudSegments = useMemo(() => {
+    const feelingsQuestion = B4_BASELINE_FEELINGS_QUESTIONS[questionIndex]?.text;
+    const questionText = activeModule === 'feelings' ? feelingsQuestion : currentMc?.text;
+    const choiceOrdinals = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+
+    let choices: string[] = [];
+    if (activeModule === 'feelings') {
+      choices = B4_BASELINE_SCALE.map(
+        (row, index) => `Choice ${choiceOrdinals[index] ?? index + 1}. ${row.label}`,
+      );
+    } else if (currentMc) {
+      choices = currentMc.choices.map(
+        (row, index) => `Choice ${choiceOrdinals[index] ?? index + 1}. ${row.label}`,
+      );
+    }
+
+    const questionSegments = buildReadAloudSegmentsFromParts({
+      scenarioTitle: baselineScenarioTag,
+      scenarioDescription: [
+        baselineScenarioPrompt,
+        activeModule === 'reading' && questionIndex === 0 ? B4_BASELINE_READING_PASSAGE : '',
       ]
         .filter(Boolean)
-        .join(' ')}
+        .join(' '),
+      question: questionText,
+      choices,
+    });
+
+    const coachSegments = buildAssessmentCoachRailSegments({
+      guideCharacter: 'b4',
+      checked,
+      feedback,
+      hasSelection: selected != null,
+      hasHints: Boolean(currentMc?.hints?.length),
+    });
+
+    return buildGameplayReadAloudSegments(
+      questionSegments,
+      coachSegments,
+      checked ? 'coach_only' : 'full',
+    );
+  }, [
+    activeModule,
+    baselineScenarioPrompt,
+    baselineScenarioTag,
+    checked,
+    currentMc,
+    feedback,
+    questionIndex,
+    selected,
+  ]);
+
+  const baselineReadAloudResetKey = `${activeModule ?? 'module'}-${questionIndex}-${checked ? 'checked' : 'open'}`;
+
+  return (
+    <GameplayShell
+      variant="b4"
+      embedded={embedded}
+      active={view === 'quiz'}
+      coachingShell={view === 'quiz'}
+      idleSessionGuard={{ enabled: view === 'quiz', onReturn: handleExit }}
+      topBar={
+        showTopBar ? (
+          view === 'quiz' ? (
+            <GameplayTopBar
+              variant="b4"
+              onBack={handleExit}
+              progressPercent={progressPct}
+              showProgress
+              playerName={playerName}
+              flameDisplay={b4Flames.flameDisplay}
+              flamesLit={b4Flames.flamesLit}
+              soundEnabled={soundEnabled}
+              onToggleSound={toggleSound}
+            />
+          ) : (
+            <B4BaselineTopBar
+              progressPct={progressPct}
+              onExit={handleExit}
+              hubName={embedded ? (familyPortal ? 'Weekly Adventures' : 'B-4 Missions') : undefined}
+              showProgress={view === 'hub'}
+              soundEnabled={soundEnabled}
+              onToggleSound={toggleSound}
+              playerName={playerName}
+            />
+          )
+        ) : null
+      }
+      footer={
+        view === 'quiz' ? (
+          <B4BaselineBottomBar
+            canCheck={selected != null && !checked}
+            checked={checked}
+            feedback={feedback}
+            feedbackTone={feedbackTone}
+            hideInlineFeedback
+            coachingShell
+            canTryAgain={canMcTryAgain}
+            canUseHint={canMcUseHint}
+            activeHint={activeHint}
+            onSkip={handleSkip}
+            onCheck={handleCheck}
+            onContinue={() => {
+              if (!canMcContinue && activeModule !== 'feelings') return;
+              advanceQuestion();
+            }}
+            onTryAgain={handleMcTryAgain}
+            onUseHint={handleMcUseHint}
+          />
+        ) : null
+      }
     >
-      <B4BaselineDecor />
-
-      {showTopBar ? (
-        <B4BaselineTopBar
-          progressPct={progressPct}
-          onExit={handleExit}
-          showProgress={view === 'quiz' || view === 'hub'}
-          soundEnabled={soundEnabled}
-          onToggleSound={toggleSound}
-          playerName={playerName}
-        />
-      ) : null}
-
-      <main className={`bbc-main${view === 'landing' ? ' bbc-main--landing' : ''}`}>
+      <main className={`bbc-main${view === 'landing' ? ' bbc-main--landing' : ''}${view === 'quiz' ? ' bbc-main--quiz' : ''}`}>
         {view === 'landing' ? (
           <div className="bbc-landing">
             {embedded && onExit ? (
@@ -539,6 +679,24 @@ export default function B4BaselineCheckFlow({
           </div>
         ) : null}
 
+        {view === 'grade_gate' && gradeGateParticipantId && pendingBaselineStart ? (
+          <div className="bbc-landing">
+            <B4BaselineGradeGate
+              participantId={gradeGateParticipantId}
+              submitting={profileSubmitting}
+              onComplete={() => {
+                playContinue();
+                finishBaselineProfileStart(
+                  pendingBaselineStart.participant,
+                  pendingBaselineStart.values,
+                );
+                setPendingBaselineStart(null);
+                setGradeGateParticipantId(null);
+              }}
+            />
+          </div>
+        ) : null}
+
         {view === 'hub' ? (
           <B4BaselineHub
             completedModules={hubState.completedModules}
@@ -549,92 +707,109 @@ export default function B4BaselineCheckFlow({
         ) : null}
 
         {view === 'quiz' && activeModule ? (
-          <div className="bbc-quizWrap bbc-quizWrap--kidFriendly">
+          <GameInteractionShell className="shared-mission-game shared-mission-game--coachingRail">
             <B4CheckInStepGraphic module={activeModule} questionIndex={questionIndex} />
-            <div className="bbc-quizPrompt">
-              <B4Avatar size="large" src={avatarSrc} />
-              <div className="bbc-speechBubble">
-                {activeModule === 'feelings'
-                  ? 'Pick the answer that feels most like you. There are no bad answers.'
-                  : activeModule === 'reading' && questionIndex === 0
-                    ? 'Read the story, then answer what happened.'
-                    : 'Choose the best answer, then tap Check.'}
-              </div>
-            </div>
-
-            {activeModule === 'reading' && questionIndex === 0 ? (
-              <div className="bbc-passage">{B4_BASELINE_READING_PASSAGE}</div>
-            ) : null}
-
-            <h2 className="bbc-questionText" id="bbc-question">
-              {activeModule === 'feelings'
-                ? B4_BASELINE_FEELINGS_QUESTIONS[questionIndex]?.text
-                : currentMc?.text}
-            </h2>
-
-            {activeModule === 'feelings' ? (
-              <div className="bbc-answers bbc-scaleGrid" role="group" aria-labelledby="bbc-question">
-                {B4_BASELINE_SCALE.map(({ value, label }) => {
-                  const isSelected = selected === value;
-                  const isChecked = checked && isSelected;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      disabled={checked}
-                      className={[
-                        'bbc-answerCard',
-                        'bbc-scaleCard',
-                        isSelected ? 'bbc-answerCard--selected' : '',
-                        isChecked ? 'bbc-answerCard--correct' : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      onClick={() => {
-                        playSelect();
-                        setSelected(value);
-                      }}
-                      aria-pressed={isSelected}
-                    >
-                      <span className="bbc-scaleNum">{value}</span>
-                      <span className="bbc-scaleLabel">{label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bbc-answers" role="group" aria-labelledby="bbc-question">
-                {currentMc?.choices.map((choice) => {
-                  const isSelected = selected === choice.id;
-                  const isCorrect = checked && choice.id === currentMc.correctId;
-                  const isWrong = checked && isSelected && choice.id !== currentMc.correctId;
-                  const lockChoice = checked && !canMcTryAgain;
-                  return (
-                    <button
-                      key={choice.id}
-                      type="button"
-                      disabled={lockChoice}
-                      className={[
-                        'bbc-answerCard',
-                        isSelected && !checked ? 'bbc-answerCard--selected' : '',
-                        isCorrect ? 'bbc-answerCard--correct' : '',
-                        isWrong ? 'bbc-answerCard--wrong' : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      onClick={() => {
-                        playSelect();
-                        setSelected(choice.id);
-                      }}
-                      aria-pressed={isSelected}
-                    >
-                      {choice.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+            <CoachingShellQuizFrame
+              scenario={
+                <>
+                  <ScenarioCard
+                    sceneLabel="Scenario"
+                    tag={baselineScenarioTag}
+                    storyPrompt={baselineScenarioPrompt}
+                    characterId="b4"
+                    avatarSrc={avatarSrc}
+                    avatarAlt="B-4"
+                  />
+                  {activeModule === 'reading' && questionIndex === 0 ? (
+                    <div className="bbc-passage">{B4_BASELINE_READING_PASSAGE}</div>
+                  ) : null}
+                </>
+              }
+              question={
+                <h2 className="bbc-questionText mission-questionText" id="bbc-question">
+                  {activeModule === 'feelings'
+                    ? B4_BASELINE_FEELINGS_QUESTIONS[questionIndex]?.text
+                    : currentMc?.text}
+                </h2>
+              }
+              answers={
+                activeModule === 'feelings' ? (
+                  <div className="bbc-answers bbc-scaleGrid" role="group" aria-labelledby="bbc-question">
+                    {B4_BASELINE_SCALE.map(({ value, label }) => {
+                      const isSelected = selected === value;
+                      const isChecked = checked && isSelected;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          disabled={checked}
+                          className={[
+                            'bbc-answerCard',
+                            'bbc-scaleCard',
+                            isSelected ? 'bbc-answerCard--selected' : '',
+                            isChecked ? 'bbc-answerCard--correct' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          onClick={() => {
+                            playSelect();
+                            setSelected(value);
+                          }}
+                          aria-pressed={isSelected}
+                        >
+                          <span className="bbc-scaleNum">{value}</span>
+                          <span className="bbc-scaleLabel">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="bbc-answers" role="group" aria-labelledby="bbc-question">
+                    {currentMc?.choices.map((choice) => {
+                      const isSelected = selected === choice.id;
+                      const isCorrect = checked && choice.id === currentMc.correctId;
+                      const isWrong = checked && isSelected && choice.id !== currentMc.correctId;
+                      const lockChoice = checked && !canMcTryAgain;
+                      return (
+                        <button
+                          key={choice.id}
+                          type="button"
+                          disabled={lockChoice}
+                          className={[
+                            'bbc-answerCard',
+                            isSelected && !checked ? 'bbc-answerCard--selected' : '',
+                            isCorrect ? 'bbc-answerCard--correct' : '',
+                            isWrong ? 'bbc-answerCard--wrong' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          onClick={() => {
+                            playSelect();
+                            setSelected(choice.id);
+                          }}
+                          aria-pressed={isSelected}
+                        >
+                          {choice.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )
+              }
+              coachRail={
+                <AssessmentCoachRail
+                  guideCharacter="b4"
+                  checked={checked}
+                  feedback={feedback}
+                  feedbackTone={feedbackTone}
+                  hasSelection={selected != null}
+                  hasHints={Boolean(currentMc?.hints?.length)}
+                />
+              }
+              readAloudSegments={baselineReadAloudSegments}
+              readAloudResetKey={baselineReadAloudResetKey}
+            />
+          </GameInteractionShell>
         ) : null}
 
         {view === 'module-complete' ? (
@@ -662,26 +837,6 @@ export default function B4BaselineCheckFlow({
           />
         ) : null}
       </main>
-
-      {view === 'quiz' ? (
-        <B4BaselineBottomBar
-          canCheck={selected != null && !checked}
-          checked={checked}
-          feedback={feedback}
-          feedbackTone={feedbackTone}
-          canTryAgain={canMcTryAgain}
-          canUseHint={canMcUseHint}
-          activeHint={activeHint}
-          onSkip={handleSkip}
-          onCheck={handleCheck}
-          onContinue={() => {
-            if (!canMcContinue && activeModule !== 'feelings') return;
-            advanceQuestion();
-          }}
-          onTryAgain={handleMcTryAgain}
-          onUseHint={handleMcUseHint}
-        />
-      ) : null}
-    </div>
+    </GameplayShell>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
+import CharlieMissionFlow from '../components/charlie/CharlieMissionFlow';
 import { getCharlieMissionById } from '../data/charlie';
 import { resolveCharlieHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';
 
@@ -11,16 +11,15 @@ export default function CharliePortalMissionPage() {
   const mission = getCharlieMissionById(missionId);
 
   if (!mission) {
-    return <Navigate to={hubPath} replace />;
+    return <Navigate to={`${hubPath}${location.search}`} replace />;
   }
 
   return (
-    <GameAssessmentFlow
-      config={mission.config}
+    <CharlieMissionFlow
+      missionId={mission.id}
       themeClassName="charlie-game"
       exitPath={hubPath}
-      exitLabel="Back to Nature Nook"
-      useCharlieHeader
+      exitLabel="Back to Science Lab"
       embedded
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}
     />

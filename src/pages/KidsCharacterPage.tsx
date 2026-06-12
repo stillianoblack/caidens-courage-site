@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import PortalSmartBackButton from '../components/family-portal/PortalSmartBackButton';
+import ZekeCharacterDashboard from '../components/zeke/ZekeCharacterDashboard';
 import '../components/family-portal/family-dashboard.css';
 import { setPortalReturnPath } from '../lib/portalReturnNav';
 import {
@@ -61,6 +62,10 @@ export default function KidsCharacterPage({ character }: KidsCharacterPageProps)
       ? `${MIRANDA_MYSTERY_FILES_PATH}?from=${encodeURIComponent(from)}`
       : MIRANDA_MYSTERY_FILES_PATH;
     return <Navigate to={target} replace />;
+  }
+
+  if (character === 'zeke') {
+    return <ZekeCharacterDashboard />;
   }
 
   return (

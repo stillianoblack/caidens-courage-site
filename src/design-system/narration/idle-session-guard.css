@@ -1,0 +1,58 @@
+.ds-idleGuardOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(16, 24, 40, 0.45);
+}
+
+.ds-idleGuardModal {
+  width: min(100%, 24rem);
+  padding: 1.25rem 1.35rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid rgba(26, 47, 82, 0.12);
+  box-shadow: 0 18px 48px rgba(26, 47, 82, 0.18);
+}
+
+.ds-idleGuardTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #1a2f52;
+}
+
+.ds-idleGuardBody {
+  margin: 0 0 1rem;
+  color: rgba(26, 47, 82, 0.82);
+  line-height: 1.45;
+}
+
+.ds-idleGuardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.ds-idleGuardBtn {
+  appearance: none;
+  border: 1px solid rgba(26, 47, 82, 0.16);
+  border-radius: 999px;
+  background: #fff;
+  color: #1a2f52;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.ds-idleGuardBtn--primary {
+  border-color: rgba(61, 125, 214, 0.35);
+  background: rgba(61, 125, 214, 0.12);
+}
+
+.ds-idleGuardBtn:focus-visible {
+  outline: 2px solid #3d7dd6;
+  outline-offset: 2px;
+}

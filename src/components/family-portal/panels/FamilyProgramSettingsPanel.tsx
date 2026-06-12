@@ -16,12 +16,17 @@ import { useActiveChild } from '../../../hooks/useActiveChild';
 import { useFamilyChildGoals } from '../../../hooks/useFamilyChildGoals';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
+import { resolveFamilyHasChild } from '../../../lib/familyOnboardingUtils';
 import type { FamilyChildSummary } from '../../../lib/familyChildrenMetrics';
 import { resolveFamilySettingsTab } from '../../../lib/familyPortalPaths';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import { formatFamilyRelativeActivityDate } from '../../../lib/familyChildSummaryCard';
 import AddChildForm from '../AddChildForm';
+import FamilyChildGradeConfig from '../FamilyChildGradeConfig';
+import ParticipantGradeMeta from '../../shared/ParticipantGradeMeta';
+import '../../shared/participant-grade-meta.css';
+import { hasCanonicalGradeLevel } from '../../../lib/participantGradeDisplay';
 import FamilyChildGoalsChecklist from '../FamilyChildGoalsChecklist';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyUpgradePricingModal from '../FamilyUpgradePricingModal';
@@ -51,11 +56,13 @@ export default function FamilyProgramSettingsPanel() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
+  const focusParam = searchParams.get('focus');
   const [activeTab, setActiveTab] = useState<FamilySettingsTabId>(resolveFamilySettingsTab(tabParam));
 
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const {
     children,
+    visibleChildren,
     familyLinks,
     campProgramCode,
     campProgramName,
@@ -63,7 +70,9 @@ export default function FamilyProgramSettingsPanel() {
     claimRequired,
     loading,
     refresh,
+    studentParticipants,
   } = useFamilyPortalShell(programCode);
+  const canShowAddChild = !claimRequired && !resolveFamilyHasChild(visibleChildren, children);
   const activeProgram = readActivePilotProgram();
   const role = readActivePortalRole();
   const familyCode = activeProgram?.familyAccessCode?.trim() || '';
@@ -91,6 +100,13 @@ export default function FamilyProgramSettingsPanel() {
   const [pricingOpen, setPricingOpen] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const addChildRef = useRef<HTMLDivElement | null>(null);
+  const gradeFocusRef = useRef<HTMLDivElement | null>(null);
+  const gradeFocusScrolledRef = useRef(false);
+
+  const participantById = useMemo(
+    () => new Map(studentParticipants.map((row) => [row.id, row])),
+    [studentParticipants],
+  );
 
   const parentClaim = readParentClaimContext();
   const parentLink = familyLinks[0];
@@ -109,10 +125,24 @@ export default function FamilyProgramSettingsPanel() {
   const [editingParent, setEditingParent] = useState(false);
 
   useEffect(() => {
-    if (tabParam) {
-      setActiveTab(resolveFamilySettingsTab(tabParam));
-    }
+    setActiveTab(resolveFamilySettingsTab(tabParam));
   }, [tabParam]);
+
+  useEffect(() => {
+    if (focusParam !== 'grade') {
+      gradeFocusScrolledRef.current = false;
+    }
+  }, [focusParam]);
+
+  useEffect(() => {
+    if (activeTab !== 'children' || focusParam !== 'grade' || loading || gradeFocusScrolledRef.current) {
+      return;
+    }
+    gradeFocusScrolledRef.current = true;
+    requestAnimationFrame(() => {
+      gradeFocusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [activeTab, focusParam, loading, children.length]);
 
   const selectTab = useCallback(
     (next: FamilySettingsTabId) => {
@@ -195,76 +225,120 @@ export default function FamilyProgramSettingsPanel() {
             title="Children"
             subtitle="Manage the children connected to this family portal."
           >
-            {loading ? <p className="family-panelHelper">Loading children…</p> : null}
+            {loading && children.length === 0 ? <p className="family-panelHelper">Loading children…</p> : null}
             {!loading && children.length === 0 ? (
               <p className="family-panelHelper">
                 No child profiles yet. Add a child to get started with B-4 Check-In and activities.
               </p>
             ) : null}
-            {!loading && children.length > 0 ? (
-              <ul className="family-settingsChildList">
-                {children.map((child) => {
-                  const link = resolveChildLink(child, familyLinks);
-                  const lastActivity = formatFamilyRelativeActivityDate(child.lastActivityAt);
-                  return (
-                    <li key={child.key} className="family-settingsChildItem">
-                      <div className="family-settingsChildMain">
-                        <p className="family-settingsChildName">{child.displayName}</p>
-                        {child.nickname && child.nickname !== child.displayName ? (
-                          <p className="family-settingsChildMeta">Nickname: {child.nickname}</p>
-                        ) : null}
-                        <p className="family-settingsChildMeta">
-                          B-4 Check-In: {formatChildBaselineStatusLabel(child.baselineStatus)}
-                        </p>
-                        {child.latestActivity ? (
-                          <p className="family-settingsChildMeta">Latest: {child.latestActivity}</p>
-                        ) : lastActivity ? (
-                          <p className="family-settingsChildMeta">Last activity: {lastActivity}</p>
-                        ) : null}
-                        {child.progressLabel ? (
-                          <p className="family-settingsChildMeta">Progress: {child.progressLabel}</p>
-                        ) : null}
-                        {link ? (
-                          <p className="family-settingsChildMeta">
-                            Parent/Guardian:{' '}
-                            {link.parent_claimed ? 'Linked' : 'Pending confirmation'}
-                          </p>
-                        ) : null}
-                      </div>
-                      {child.participantId ? (
-                        <button
-                          type="button"
-                          className="family-settingsGhostBtn"
-                          onClick={() =>
-                            selectChild({
-                              participantId: child.participantId!,
-                              displayName: child.displayName,
-                            })
+            {children.length > 0 ? (
+              <>
+                <div
+                  ref={gradeFocusRef}
+                  id="family-child-grade-focus"
+                  className="family-settingsGradeSection"
+                >
+                  <h3 className="family-settingsSubheading">Grade Level</h3>
+                  <p className="family-panelHelper">
+                    Select a grade for each child. B-4 uses this to recommend the right activities.
+                  </p>
+                  <div className="family-settingsGradeList">
+                    {children.map((child) => {
+                      if (!child.participantId) return null;
+                      const participant = participantById.get(child.participantId);
+                      return (
+                        <FamilyChildGradeConfig
+                          key={`grade-${child.key}`}
+                          participantId={child.participantId}
+                          displayName={child.displayName}
+                          gradeLevel={participant?.grade_level}
+                          allowStretchLevel={participant?.allow_stretch_level}
+                          highlighted={
+                            focusParam === 'grade' &&
+                            !hasCanonicalGradeLevel(participant?.grade_level)
                           }
-                        >
-                          {activeChild?.participantId === child.participantId ? 'Selected' : 'Select'}
-                        </button>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <h3 className="family-settingsSubheading">Child Profiles</h3>
+                <ul className="family-settingsChildList">
+                  {children.map((child) => {
+                    const link = resolveChildLink(child, familyLinks);
+                    const lastActivity = formatFamilyRelativeActivityDate(child.lastActivityAt);
+                    const participant = child.participantId
+                      ? participantById.get(child.participantId)
+                      : undefined;
+                    return (
+                      <li key={child.key} className="family-settingsChildItem">
+                        <div className="family-settingsChildMain">
+                          <p className="family-settingsChildName">{child.displayName}</p>
+                          {child.nickname && child.nickname !== child.displayName ? (
+                            <p className="family-settingsChildMeta">Nickname: {child.nickname}</p>
+                          ) : null}
+                          <ParticipantGradeMeta
+                            gradeLevel={participant?.grade_level}
+                            gradeBand={participant?.grade_band}
+                            allowStretch={Boolean(participant?.allow_stretch_level)}
+                            variant="family"
+                          />
+                          <p className="family-settingsChildMeta">
+                            B-4 Check-In: {formatChildBaselineStatusLabel(child.baselineStatus)}
+                          </p>
+                          {child.latestActivity ? (
+                            <p className="family-settingsChildMeta">Latest: {child.latestActivity}</p>
+                          ) : lastActivity ? (
+                            <p className="family-settingsChildMeta">Last activity: {lastActivity}</p>
+                          ) : null}
+                          {child.progressLabel ? (
+                            <p className="family-settingsChildMeta">Progress: {child.progressLabel}</p>
+                          ) : null}
+                          {link ? (
+                            <p className="family-settingsChildMeta">
+                              Parent/Guardian:{' '}
+                              {link.parent_claimed ? 'Linked' : 'Pending confirmation'}
+                            </p>
+                          ) : null}
+                        </div>
+                        {child.participantId ? (
+                          <button
+                            type="button"
+                            className="family-settingsGhostBtn"
+                            onClick={() =>
+                              selectChild({
+                                participantId: child.participantId!,
+                                displayName: child.displayName,
+                              })
+                            }
+                          >
+                            {activeChild?.participantId === child.participantId ? 'Selected' : 'Select'}
+                          </button>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
             ) : null}
-            <div className="family-settingsActions">
-              <button
-                type="button"
-                className="family-settingsPrimaryBtn"
-                onClick={() => {
-                  setShowAddChild(true);
-                  requestAnimationFrame(() => {
-                    addChildRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  });
-                }}
-              >
-                Add Child
-              </button>
-            </div>
-            {showAddChild ? (
+            {canShowAddChild ? (
+              <div className="family-settingsActions">
+                <button
+                  type="button"
+                  className="family-settingsPrimaryBtn"
+                  onClick={() => {
+                    setShowAddChild(true);
+                    requestAnimationFrame(() => {
+                      addChildRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                  }}
+                >
+                  Add Child
+                </button>
+              </div>
+            ) : null}
+            {showAddChild && canShowAddChild ? (
               <div ref={addChildRef} className="family-settingsAddChild">
                 <AddChildForm
                   routeToBaseline

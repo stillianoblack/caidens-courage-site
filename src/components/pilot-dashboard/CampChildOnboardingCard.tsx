@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { createCampChildWithParentLink } from '../../lib/campChildOnboardingService';
+import {
+  GRADE_LEVEL_ENCOURAGE,
+  GRADE_LEVEL_LABEL,
+  GRADE_LEVEL_OPTIONS,
+  isGradeLevel,
+  type GradeLevel,
+} from '../../data/gradeLevelOptions';
 import { isIndependentFamilyProgram } from '../../lib/independentFamilyProgram';
 
 export default function CampChildOnboardingCard() {
@@ -13,6 +20,7 @@ export default function CampChildOnboardingCard() {
   const [parentLastName, setParentLastName] = useState('');
   const [parentEmail, setParentEmail] = useState('');
   const [parentPhone, setParentPhone] = useState('');
+  const [gradeLevel, setGradeLevel] = useState<GradeLevel | ''>('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +50,7 @@ export default function CampChildOnboardingCard() {
       parentLastName: parentLastName.trim(),
       parentEmail: parentEmail.trim(),
       parentPhone: parentPhone.trim() || undefined,
+      gradeLevel: isGradeLevel(gradeLevel) ? gradeLevel : undefined,
       campProgramCode,
     });
 
@@ -59,6 +68,7 @@ export default function CampChildOnboardingCard() {
     setParentLastName('');
     setParentEmail('');
     setParentPhone('');
+    setGradeLevel('');
   };
 
   return (
@@ -138,6 +148,26 @@ export default function CampChildOnboardingCard() {
             onChange={(event) => setParentPhone(event.target.value)}
             placeholder="5551234567"
           />
+        </label>
+
+        <label className="pilot-parentLinkField">
+          <span className="pilot-parentLinkLabel">{GRADE_LEVEL_LABEL} (recommended)</span>
+          <select
+            className="pilot-parentLinkInput"
+            value={gradeLevel}
+            onChange={(event) => {
+              const next = event.target.value;
+              setGradeLevel(isGradeLevel(next) ? next : '');
+            }}
+          >
+            <option value="">Choose grade…</option>
+            {GRADE_LEVEL_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="pilot-parentLinkHint">{GRADE_LEVEL_ENCOURAGE}</span>
         </label>
 
         {message ? (

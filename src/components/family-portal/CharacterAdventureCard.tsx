@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import WeeklyAdventureCard from '../../design-system/components/WeeklyAdventureCard';
 import type { FamilyCharacterId } from '../../data/familyPortalContent';
-import { CHARACTER_ASSETS } from '../../data/familyPortalContent';
+import { appendCharacterHubGameContext } from '../../lib/weeklyAdventureRouteContext';
+import type { LinkProps } from 'react-router-dom';
 
 export type CharacterAdventureCardProps = {
   characterId: FamilyCharacterId;
@@ -15,41 +16,10 @@ export type CharacterAdventureCardProps = {
   locked?: boolean;
   lockedLabel?: string;
   skillTags?: string;
+  linkState?: LinkProps['state'];
+  /** Tag mission links launched from Character Hub quest lists. */
+  useCharacterHubLaunch?: boolean;
 };
-
-function ZekePlaceholderIcon() {
-  return (
-    <svg className="family-charCardPlaceholder" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <rect x="6" y="6" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-      <rect x="28" y="6" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-      <rect x="6" y="28" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-      <path d="M32 32h8M36 28v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CharacterAvatar({ characterId }: { characterId: FamilyCharacterId }) {
-  const asset = CHARACTER_ASSETS[characterId];
-
-  if (asset.imageSrc) {
-    return (
-      <img
-        src={asset.imageSrc}
-        alt=""
-        className="family-charCardAvatar"
-        width={80}
-        height={80}
-        loading="lazy"
-      />
-    );
-  }
-
-  return (
-    <div className="family-charCardAvatar family-charCardAvatar--placeholder" aria-hidden="true">
-      <ZekePlaceholderIcon />
-    </div>
-  );
-}
 
 export default function CharacterAdventureCard({
   characterId,
@@ -58,56 +28,34 @@ export default function CharacterAdventureCard({
   cta,
   href,
   status,
-  layout = 'vertical',
   locked = false,
   lockedLabel = 'Complete B-4 Check-In to unlock',
   skillTags,
+  linkState,
+  useCharacterHubLaunch = false,
 }: CharacterAdventureCardProps) {
-  const themeClass = `family-charCard--${characterId}`;
-  const layoutClass = layout === 'horizontal' ? 'family-charCard--horizontal' : 'family-charCard--vertical';
-  const pillClass = characterId;
+  const isExternal = href.startsWith('/downloads') || href.startsWith('http');
+  const resolvedHref = useMemo(() => {
+    if (!useCharacterHubLaunch || isExternal || href === '#') {
+      return href;
+    }
+    return appendCharacterHubGameContext(href);
+  }, [href, isExternal, useCharacterHubLaunch]);
 
-  const content = (
-    <>
-      <div className="family-charCardStrip" aria-hidden="true" />
-      <div className="family-charCardBody">
-        <CharacterAvatar characterId={characterId} />
-        <div className="family-charCardText">
-          <h3 className="family-charCardTitle">{title}</h3>
-          <p className="family-charCardDesc">{description}</p>
-          {skillTags ? <p className="family-charCardTags">{skillTags}</p> : null}
-        </div>
-      </div>
-      <div className="family-charCardFoot">
-        {status ? (
-          <span className={`family-charPill family-charPill--${pillClass}`}>
-            {locked ? lockedLabel : status}
-          </span>
-        ) : locked ? (
-          <span className={`family-charPill family-charPill--${pillClass}`}>{lockedLabel}</span>
-        ) : (
-          <span />
-        )}
-        <span className="family-charCta">
-          {locked ? lockedLabel : cta}
-          <span className="family-charCtaArrow" aria-hidden="true">
-            →
-          </span>
-        </span>
-      </div>
-    </>
-  );
-
-  return locked ? (
-    <div
-      className={['family-charCard', themeClass, layoutClass, 'family-charCard--locked'].join(' ')}
-      aria-disabled="true"
-    >
-      {content}
-    </div>
-  ) : (
-    <Link to={href} className={['family-charCard', themeClass, layoutClass].join(' ')}>
-      {content}
-    </Link>
+  return (
+    <WeeklyAdventureCard
+      character={characterId}
+      title={title}
+      description={description}
+      skillTags={skillTags}
+      cta={cta}
+      href={resolvedHref}
+      status={status}
+      locked={locked}
+      lockedLabel={lockedLabel}
+      linkState={linkState}
+      external={isExternal}
+      kind="game"
+    />
   );
 }

@@ -16,6 +16,7 @@ import {
   fetchStudentParticipantsFromSupabase,
   loadPilotTrackingData,
 } from '../../../lib/pilotTrackingService';
+import { PortalPageIntro } from '../../portal-design-system';
 import '../../b4-baseline-check/b4-results-admin.css';
 
 export default function PilotB4ResultsPanel() {
@@ -80,7 +81,7 @@ export default function PilotB4ResultsPanel() {
     <div className="pilot-panel pilot-panel--b4Results">
       <div className="pilot-resultsHead">
         <div>
-          <p className="pilot-panelIntroTitle">{PILOT_RESULTS_HEADLINE}</p>
+          <PortalPageIntro>{PILOT_RESULTS_HEADLINE}</PortalPageIntro>
           {programCode ? (
             <p className="pilot-panelIntroSubtitle">Program: {programCode}</p>
           ) : null}

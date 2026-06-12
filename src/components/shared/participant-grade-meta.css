@@ -1,0 +1,27 @@
+.participantGradeMetaLine {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(36, 62, 112, 0.88);
+}
+
+.participantGradeMetaLine--band {
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.participantGradeMetaHint {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(36, 62, 112, 0.62);
+  cursor: help;
+}
+
+.participantGradeMetaFlag {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.participantGradeMeta--compact {
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.82);
+}

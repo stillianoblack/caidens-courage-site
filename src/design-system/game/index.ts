@@ -3,8 +3,62 @@ import './gameDesignStyles';
 export { default as GameShell } from './GameShell';
 export type { GameShellProps, GameShellPortalType } from './GameShell';
 
+export { default as GameplayShell } from './GameplayShell';
+export type { GameplayShellProps } from './GameplayShell';
+
+export {
+  GAMEPLAY_SHELL_VARIANTS,
+  resolveGameplayShellVariant,
+  resolveGuideCharacterForShell,
+  type GameplayShellVariantId,
+  type GameplayShellVariantConfig,
+} from './gameplayShellVariants';
+
+export { default as CoachingShellQuizFrame } from './CoachingShellQuizFrame';
+export type { CoachingShellQuizFrameProps } from './CoachingShellQuizFrame';
+
+export {
+  ReadAloudControl,
+  GameCoachingRailAside,
+  IdleSessionGuard,
+  buildAssessmentCoachRailSegments,
+  buildCoachCardReadAloudSegments,
+  buildGameplayReadAloudSegments,
+  buildReadAloudSegmentsFromGameQuestion,
+  buildReadAloudSegmentsFromParts,
+  browserSpeechProvider,
+} from '../narration';
+export type { CoachReadAloudInput, NarrationProvider, ReadAloudParts } from '../narration';
+
+export { default as AssessmentCoachRail } from './AssessmentCoachRail';
+export type { AssessmentCoachRailProps } from './AssessmentCoachRail';
+
+export { default as GameplayTopBar } from './GameplayTopBar';
+export type {
+  GameplayTopBarProps,
+  GameplayTopBarVariant,
+  GameplayTopBarFlameDisplay,
+} from './GameplayTopBar';
+
+export {
+  resolveGameplayTopBarVariant,
+  resolveGameplayTopBarFlames,
+} from './resolveGameplayTopBarConfig';
+
+export { default as ScenarioCard } from './ScenarioCard';
+export type { ScenarioCardProps } from './ScenarioCard';
+
 export { default as QuestionCard } from './QuestionCard';
 export type { QuestionCardProps } from './QuestionCard';
+
+export { default as CharacterScenarioImage } from './CharacterScenarioImage';
+export type {
+  CharacterScenarioImageProps,
+  CharacterScenarioImageFit,
+} from './CharacterScenarioImage';
+
+export { resolveGameScenarioImage } from './gameScenarioAssets';
+export type { GameScenarioImage, GameScenarioFlags } from './gameScenarioAssets';
 
 export { default as AnswerChoiceList } from './AnswerChoiceList';
 export type { AnswerChoiceListProps } from './AnswerChoiceList';
@@ -71,6 +125,22 @@ export type { FeedbackPanelProps } from './FeedbackPanel';
 
 export { getPreSubmitGuideMessage, getGuidePanelLabel } from './getPreSubmitGuideMessage';
 export type { GuideCharacter, PreSubmitGuideInput } from './getPreSubmitGuideMessage';
+
+export {
+  GAME_UI_PATTERNS,
+  b4CheckInPattern,
+  caidenFocusMissionPattern,
+  charlieScienceLabPattern,
+  mirandaMysteryFilePattern,
+  uncleTRealLifeMissionPattern,
+  zekeTeamQuestPattern,
+  patternClassName,
+  resolveGameUIPattern,
+} from './patterns/gameUIPatterns';
+export type { GameUIPatternConfig, GameUIPatternId } from './patterns/gameUIPatterns';
+
+export { default as GuideFeedbackCard } from './GuideFeedbackCard';
+export type { GuideFeedbackCardProps, GuideFeedbackTone } from './GuideFeedbackCard';
 
 export {
   INTERACTIVE_MODULE_COMPONENTS,

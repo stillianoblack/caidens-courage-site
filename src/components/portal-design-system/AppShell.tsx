@@ -9,11 +9,19 @@ type AppShellProps = {
   sidebar: React.ReactNode;
   topBar: React.ReactNode;
   footer?: React.ReactNode;
+  rightRail?: React.ReactNode;
   children: React.ReactNode;
 };
 
 /** Shared portal shell for Facilitator, Family, and Kid portals. */
-export default function AppShell({ variant, sidebar, topBar, footer, children }: AppShellProps) {
+export default function AppShell({
+  variant,
+  sidebar,
+  topBar,
+  footer,
+  rightRail,
+  children,
+}: AppShellProps) {
   const shellVariant = variant === 'kid' ? 'family' : variant;
 
   return (
@@ -22,6 +30,7 @@ export default function AppShell({ variant, sidebar, topBar, footer, children }:
       sidebar={sidebar}
       topBar={topBar}
       footer={footer}
+      rightRail={rightRail}
       floating={<B4Assistant />}
     >
       {children}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
-import GameAssessmentFlow from '../components/game-assessment/GameAssessmentFlow';
+import MirandaMissionFlow from '../components/miranda/MirandaMissionFlow';
 import { MIRANDA_MYSTERY_FILES_PATH } from '../config/courageRoutes';
 import { getMirandaMissionById } from '../data/miranda';
 
@@ -13,11 +13,6 @@ export default function MirandaMissionPage() {
   }
 
   return (
-    <GameAssessmentFlow
-      config={mission.config}
-      themeClassName="miranda-game"
-      exitPath={MIRANDA_MYSTERY_FILES_PATH}
-      useMirandaHeader
-    />
+    <MirandaMissionFlow missionId={mission.id} exitPath={MIRANDA_MYSTERY_FILES_PATH} />
   );
 }

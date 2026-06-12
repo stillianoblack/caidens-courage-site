@@ -1,0 +1,36 @@
+/* Per-variant progress bar glow + track tint tokens */
+.ds-gameplayTopBar--miranda {
+  --gameplay-progress-glow: rgba(122, 92, 191, 0.14);
+  --gameplay-progress-track: rgba(122, 92, 191, 0.14);
+}
+
+.ds-gameplayTopBar--caiden {
+  --gameplay-progress-glow: rgba(249, 115, 22, 0.12);
+  --gameplay-progress-track: rgba(36, 62, 112, 0.12);
+}
+
+.ds-gameplayTopBar--charlie {
+  --gameplay-progress-glow: rgba(45, 106, 79, 0.12);
+  --gameplay-progress-track: rgba(45, 106, 79, 0.14);
+}
+
+.ds-gameplayTopBar--zeke {
+  --gameplay-progress-glow: rgba(96, 165, 250, 0.14);
+  --gameplay-progress-track: rgba(45, 74, 62, 0.12);
+}
+
+.ds-gameplayTopBar--b4,
+.ds-gameplayTopBar--default {
+  --gameplay-progress-glow: rgba(59, 108, 181, 0.12);
+  --gameplay-progress-track: rgba(36, 62, 112, 0.12);
+}
+
+.ds-gameplayTopBar--victoria {
+  --gameplay-progress-glow: rgba(147, 197, 253, 0.18);
+  --gameplay-progress-track: rgba(26, 58, 92, 0.12);
+}
+
+.ds-gameplayTopBar--uncle-t {
+  --gameplay-progress-glow: rgba(201, 115, 45, 0.14);
+  --gameplay-progress-track: rgba(201, 115, 45, 0.12);
+}
