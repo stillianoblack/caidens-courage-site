@@ -62,7 +62,10 @@ export default function TrailNode({
 
   if (!isInteractive) {
     return (
-      <article className={className} aria-disabled={node.state === 'locked'}>
+      <article
+        className={className}
+        aria-label={node.state === 'locked' ? `${node.title}, locked` : undefined}
+      >
         {body}
       </article>
     );
