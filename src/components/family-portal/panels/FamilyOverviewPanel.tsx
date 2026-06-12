@@ -29,6 +29,7 @@ import type { ProgramGoalsRecord } from '../../../lib/programGoalsService';
 import { normalizeGalleryStatus } from '../../../lib/studentGalleryService';
 import { fetchFamilyGallerySubmissions } from '../../../lib/studentGalleryService';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
+import { afterIdle } from '../../../lib/defer';
 import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
 import AddChildForm from '../AddChildForm';
 import ActiveChildSelector from '../ActiveChildSelector';
@@ -126,11 +127,23 @@ export default function FamilyOverviewPanel() {
     return () => window.removeEventListener(PROGRAM_GOALS_SAVED_EVENT, handleGoalsSaved);
   }, [programCode]);
 
+  // Defer gallery until core dashboard metrics finish — not needed for first paint.
   useEffect(() => {
-    if (!programCode) return;
-    const submitterKey = getFamilyGallerySubmitterKey();
-    void fetchFamilyGallerySubmissions(submitterKey, programCode).then(setGalleryItems);
-  }, [programCode]);
+    if (!programCode || loading) return;
+
+    let cancelled = false;
+    const loadGallery = () => {
+      const submitterKey = getFamilyGallerySubmitterKey();
+      void fetchFamilyGallerySubmissions(submitterKey, programCode).then((items) => {
+        if (!cancelled) setGalleryItems(items);
+      });
+    };
+
+    afterIdle(loadGallery);
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, programCode]);
 
   const selectableChildren = useMemo(
     () => resolveSelectableFamilyChildren(visibleChildren, children),
