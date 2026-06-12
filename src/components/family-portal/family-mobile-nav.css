@@ -1,0 +1,76 @@
+/* Family portal — left nav drawer (mobile only) */
+.family-mobileNavDrawer.pilot-drawer {
+  left: 0;
+  right: auto;
+  width: min(20rem, 88vw);
+  max-width: 88vw;
+  box-shadow: 16px 0 40px -20px rgba(26, 47, 82, 0.4);
+}
+
+.family-mobileNavDrawerInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.family-mobileNavDrawerClose {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--family-border, rgba(36, 62, 112, 0.12));
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--family-navy-deep, #1a2f52);
+  cursor: pointer;
+}
+
+.family-mobileNavDrawerClose svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.family-mobileNavDrawerClose:hover {
+  background: rgba(36, 62, 112, 0.04);
+}
+
+.family-mobileNavDrawer .family-rail--drawer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 100dvh;
+  border-right: none;
+  overflow: hidden;
+}
+
+.family-mobileNavDrawer .family-rail--drawer .family-railUpper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.family-mobileNavDrawer .family-rail--drawer .family-railNavList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.family-mobileNavDrawer .family-rail--drawer .family-railNavLink {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.family-mobileNavDrawer .family-rail--drawer .family-railFooter {
+  flex-shrink: 0;
+}

@@ -67,6 +67,30 @@
   flex-shrink: 0;
 }
 
+.portal-headerMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--family-border, var(--pilot-border, rgba(36, 62, 112, 0.12)));
+  border-radius: 0.625rem;
+  background: #fff;
+  color: var(--family-navy-deep, var(--pilot-navy-deep, #1a2f52));
+  cursor: pointer;
+}
+
+.portal-headerMenuBtn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.portal-headerMenuBtn:hover {
+  background: rgba(36, 62, 112, 0.04);
+}
+
 @media (min-width: 768px) {
   .portal-headerTitle {
     white-space: nowrap;
@@ -76,6 +100,10 @@
 }
 
 @media (max-width: 767px) {
+  .portal-shell.pilot-shell .portal-header {
+    position: static;
+  }
+
   .portal-header {
     min-height: auto;
     padding: 0.75rem 1rem;
@@ -89,6 +117,7 @@
 
   .portal-headerLead {
     align-items: center;
+    gap: 0.625rem;
     max-width: 100%;
   }
 

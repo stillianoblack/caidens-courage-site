@@ -9,6 +9,7 @@ type FamilyDashboardTopBarProps = {
   onOpenProgramGoals?: () => void;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
+  onOpenMobileNav?: () => void;
 };
 
 export default function FamilyDashboardTopBar({
@@ -16,6 +17,7 @@ export default function FamilyDashboardTopBar({
   onOpenProgramGoals,
   linkedCampLabel = null,
   notifications = [],
+  onOpenMobileNav,
 }: FamilyDashboardTopBarProps) {
   const location = useLocation();
   const programGoalsHref = familyGoalsPath(location.pathname);
@@ -28,6 +30,7 @@ export default function FamilyDashboardTopBar({
       onOpenProgramGoals={onOpenProgramGoals}
       linkedCampLabel={linkedCampLabel}
       notifications={notifications}
+      onOpenMobileNav={onOpenMobileNav}
     />
   );
 }

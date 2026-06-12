@@ -1,7 +1,8 @@
-import React, { Suspense, useCallback, useEffect } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
+import FamilyMobileNavDrawer from '../components/family-portal/FamilyMobileNavDrawer';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
@@ -22,6 +23,7 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
+import { useFamilyMobileNav } from '../hooks/useFamilyMobileNav';
 import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourneyCoachPlacement';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
@@ -44,6 +46,17 @@ export default function FamilyHubLayout() {
   );
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
+  const { isMobileNav, mobileNavOpen, openMobileNav, closeMobileNav } = useFamilyMobileNav();
+
+  const sidebarProps = useMemo(
+    () => ({
+      navItems: PROGRAM_FAMILY_SIDEBAR_NAV,
+      brandTitle: brand.title,
+      brandSubtitle: brand.subtitle,
+      programCode,
+    }),
+    [brand.subtitle, brand.title, programCode],
+  );
 
   const openFamilyGoalsSettings = useCallback(() => {
     navigate(familyGoalsPath(location.pathname));
@@ -99,30 +112,35 @@ export default function FamilyHubLayout() {
   }
 
   return (
-    <AppShell
-      variant="family"
-      rightRail={showJourneyRail ? <FamilyJourneyCoachRail /> : undefined}
-      sidebar={
-        <FamilyDashboardSidebar
-          navItems={PROGRAM_FAMILY_SIDEBAR_NAV}
-          brandTitle={brand.title}
-          brandSubtitle={brand.subtitle}
-          programCode={activeProgram.programCode}
-        />
-      }
-      topBar={
-        <FamilyDashboardTopBar
-          pageTitle={pageTitle}
-          onOpenProgramGoals={openFamilyGoalsSettings}
-          linkedCampLabel={linkedCampLabel}
-          notifications={notifications}
-        />
-      }
-      footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
-    >
-      <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-        <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
-      </Suspense>
-    </AppShell>
+    <>
+      <AppShell
+        variant="family"
+        rightRail={showJourneyRail ? <FamilyJourneyCoachRail /> : undefined}
+        sidebar={!isMobileNav ? <FamilyDashboardSidebar {...sidebarProps} /> : null}
+        topBar={
+          <FamilyDashboardTopBar
+            pageTitle={pageTitle}
+            onOpenProgramGoals={openFamilyGoalsSettings}
+            linkedCampLabel={linkedCampLabel}
+            notifications={notifications}
+            onOpenMobileNav={isMobileNav ? openMobileNav : undefined}
+          />
+        }
+        footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
+      >
+        <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
+          <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
+        </Suspense>
+      </AppShell>
+      {isMobileNav ? (
+        <FamilyMobileNavDrawer open={mobileNavOpen} onClose={closeMobileNav}>
+          <FamilyDashboardSidebar
+            {...sidebarProps}
+            variant="drawer"
+            onNavigate={closeMobileNav}
+          />
+        </FamilyMobileNavDrawer>
+      ) : null}
+    </>
   );
 }

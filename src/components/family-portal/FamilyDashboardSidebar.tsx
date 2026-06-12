@@ -24,6 +24,9 @@ type FamilyDashboardSidebarProps = {
   brandSubtitle?: string;
   programCode?: string;
   showUpgradeCard?: boolean;
+  variant?: 'rail' | 'drawer';
+  onNavigate?: () => void;
+  showRailCopyright?: boolean;
 };
 
 export default function FamilyDashboardSidebar({
@@ -32,16 +35,29 @@ export default function FamilyDashboardSidebar({
   brandSubtitle = FAMILY_PORTAL_SUBBRAND,
   programCode,
   showUpgradeCard = true,
+  variant = 'rail',
+  onNavigate,
+  showRailCopyright,
 }: FamilyDashboardSidebarProps) {
   const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
   const location = useLocation();
   const basePath = resolveFamilyBasePath(location.pathname);
   const weeklyLaunch = isWeeklyAdventureSource(location.search);
   const onCharacterRoute = isCharacterHubRoute(location.pathname, basePath) && !weeklyLaunch;
+  const showCopyright = showRailCopyright ?? variant !== 'drawer';
+
+  const handleNavClick = () => {
+    resetPortalScroll();
+    onNavigate?.();
+  };
 
   return (
     <aside
-      className={['family-rail', showUpgradeCard ? 'family-rail--hasUpgrade' : '']
+      className={[
+        'family-rail',
+        variant === 'drawer' ? 'family-rail--drawer' : '',
+        showUpgradeCard ? 'family-rail--hasUpgrade' : '',
+      ]
         .filter(Boolean)
         .join(' ')}
       aria-label="Family portal navigation"
@@ -64,7 +80,7 @@ export default function FamilyDashboardSidebar({
                   <NavLink
                     to={item.path}
                     end={item.id === 'overview'}
-                    onClick={resetPortalScroll}
+                    onClick={handleNavClick}
                     className={({ isActive }) => {
                       const active = isActive || characterHubActive || weeklyAdventuresActive;
                       return `family-railNavLink${active ? ' family-railNavLink--active' : ''}`;
@@ -89,7 +105,9 @@ export default function FamilyDashboardSidebar({
       <div className="family-railFooter">
         <FamilyProgramSettingsRailCard />
         {showUpgradeCard ? <FamilyUpgradeRailCard /> : null}
-        <p className="family-railCopyright">© 2026 Caiden&apos;s Courage™ Family Portal</p>
+        {showCopyright ? (
+          <p className="family-railCopyright">© 2026 Caiden&apos;s Courage™ Family Portal</p>
+        ) : null}
       </div>
     </aside>
   );

@@ -92,6 +92,12 @@
     padding: 1.25rem 1.25rem 2rem;
   }
 
+  .portal-shell.family-shell .portal-layout--withRail {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
   .portal-rightRailCoach--inlineMetrics {
     display: none;
   }

@@ -169,7 +169,35 @@
     flex-direction: column;
   }
 
-  .portal-shell.family-shell .family-rail,
+  /* Family portal: natural page scroll; nav lives in drawer overlay only */
+  .portal-shell.family-shell {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  .portal-shell.family-shell .family-main {
+    margin-left: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .portal-shell.family-shell .family-content,
+  .portal-shell.family-shell .family-main:has(.portal-layout--withRail) .family-content {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  .portal-shell.family-shell .family-miniFooter {
+    position: static;
+  }
+
   .portal-shell.pilot-shell .pilot-rail {
     position: relative;
     flex-shrink: 0;
@@ -178,21 +206,18 @@
     overflow: visible;
   }
 
-  .portal-shell .family-main,
   .portal-shell .pilot-main {
     margin-left: 0;
     flex: 1;
     min-height: 0;
   }
 
-  .portal-shell .family-railUpper,
   .portal-shell .pilot-railUpper {
     flex: none;
     min-height: auto;
     overflow: visible;
   }
 
-  .portal-shell .family-railNav,
   .portal-shell .pilot-railNav {
     flex: none;
     min-height: auto;

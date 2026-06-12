@@ -16,6 +16,7 @@ type PortalHeaderProps = {
   programGoalsHref?: string;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
+  onOpenMobileNav?: () => void;
 };
 
 export default function PortalHeader({
@@ -25,10 +26,27 @@ export default function PortalHeader({
   programGoalsHref,
   linkedCampLabel = null,
   notifications = [],
+  onOpenMobileNav,
 }: PortalHeaderProps) {
   return (
     <header className="portal-header">
       <div className="portal-headerLead">
+        {onOpenMobileNav ? (
+          <button
+            type="button"
+            className="portal-headerMenuBtn"
+            onClick={onOpenMobileNav}
+            aria-label="Open navigation"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fillRule="evenodd"
+                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 15.25z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        ) : null}
         <div className="portal-headerLeadText">
           <h1 className="portal-headerTitle">{pageTitle}</h1>
           {portal === 'family' && linkedCampLabel ? (
