@@ -2,11 +2,10 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import CharacterAdventureCard from '../family-portal/CharacterAdventureCard';
 import { CharacterDashboardLayout, QuestGrid } from '../../design-system/character-dashboard';
+import { ZEKE_AVATAR_SRC } from '../../data/zeke';
 import { buildCharacterDashboardCoach } from '../../lib/characterDashboardCoach';
 import '../../design-system/character-dashboard/character-dashboard.css';
 import '../family-portal/family-dashboard.css';
-
-const ZEKE_AVATAR_SRC = undefined;
 
 const COMING_SOON_QUESTS = [
   {

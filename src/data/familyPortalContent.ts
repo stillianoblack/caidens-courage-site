@@ -399,7 +399,7 @@ export const CHARACTER_ASSETS: Record<
   miranda: { imageSrc: CHARACTER_IMAGE_PATHS.miranda, theme: 'miranda' },
   b4: { imageSrc: CHARACTER_IMAGE_PATHS.b4, theme: 'b4' },
   charlie: { imageSrc: CHARACTER_IMAGE_PATHS.charlie, theme: 'charlie' },
-  zeke: { imageSrc: null, theme: 'zeke' },
+  zeke: { imageSrc: CHARACTER_IMAGE_PATHS.zeke, theme: 'zeke' },
   'dr-victoria': { imageSrc: CHARACTER_IMAGE_PATHS['dr-victoria'], theme: 'dr-victoria' },
   'uncle-t': { imageSrc: CHARACTER_IMAGE_PATHS['uncle-t'], theme: 'uncle-t' },
 };

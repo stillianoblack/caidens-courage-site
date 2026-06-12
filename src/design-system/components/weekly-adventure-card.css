@@ -215,12 +215,12 @@
 }
 
 .weeklyAdventureCard--zeke .weeklyAdventureCardStrip {
-  background: linear-gradient(90deg, #0f766e, #243e70);
+  background: linear-gradient(90deg, #ea580c, #c2410c);
 }
 
 .weeklyAdventureCard--zeke .weeklyAdventureCardWeekLabel {
-  background: #ecfdf5;
-  color: #047857;
+  background: rgba(251, 146, 60, 0.16);
+  color: #c2410c;
 }
 
 .weeklyAdventureCard--dr-victoria .weeklyAdventureCardStrip {

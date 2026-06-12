@@ -15,8 +15,8 @@
 }
 
 .ds-gameplayTopBar--zeke {
-  --gameplay-progress-glow: rgba(96, 165, 250, 0.14);
-  --gameplay-progress-track: rgba(45, 74, 62, 0.12);
+  --gameplay-progress-glow: rgba(249, 115, 22, 0.14);
+  --gameplay-progress-track: rgba(194, 65, 12, 0.12);
 }
 
 .ds-gameplayTopBar--b4,

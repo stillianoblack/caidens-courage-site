@@ -231,7 +231,8 @@
 }
 
 .courageMissionCard[data-color='gold'] {
-  background: linear-gradient(152deg, #fbbf24 0%, #b45309 42%, #0f172a 100%);
+  background: linear-gradient(152deg, #fde68a 0%, #fbbf24 38%, #d97706 72%, #78350f 100%);
+  color: #fffbeb;
 }
 
 .courageMissionCard[data-color='purple'] {
@@ -244,7 +245,7 @@
 }
 
 .courageMissionCard[data-color='orange'] {
-  background: linear-gradient(152deg, #fb923c 0%, #c2410c 40%, #14532d 100%);
+  background: linear-gradient(152deg, #fb923c 0%, #c2410c 42%, #431407 100%);
 }
 
 .courageMissionCard[data-color='blue'] {
@@ -985,7 +986,7 @@
 }
 
 .courageMissionListRowThumb[data-color='orange'] {
-  background: linear-gradient(135deg, #fdba74, #14532d);
+  background: linear-gradient(135deg, #fdba74, #c2410c);
 }
 
 .courageMissionListRowThumb[data-color='blue'] {
@@ -1094,6 +1095,11 @@
   color: #1a1035;
   background: linear-gradient(135deg, #fff8e8, #fde68a);
   box-shadow: 0 6px 16px -10px rgba(15, 10, 35, 0.4);
+}
+
+.courageMissionListRowStart[data-color='gold'] {
+  background: linear-gradient(135deg, #fff8e8, #fde68a);
+  color: #78350f;
 }
 
 .courageMissionListRowStart[data-color='purple'] {

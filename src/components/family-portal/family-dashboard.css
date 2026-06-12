@@ -2028,26 +2028,30 @@ a.family-dash-card:hover {
   color: #166534;
 }
 
-/* Zeke — teal + navy */
+/* Zeke — orange + navy */
 .family-charCard--zeke {
-  --char-border: #5eead4;
-  background: linear-gradient(180deg, #fff 0%, #f0fdfa 100%);
-  box-shadow: 0 8px 24px -18px rgba(15, 118, 110, 0.18);
+  --char-border: #fdba74;
+  background: linear-gradient(180deg, #fff 0%, #fff7ed 100%);
+  box-shadow: 0 8px 24px -18px rgba(194, 65, 12, 0.18);
 }
 
 .family-charCard--zeke .family-charCardStrip {
-  background: linear-gradient(90deg, #0f766e, #243e70);
+  background: linear-gradient(90deg, #ea580c, #c2410c);
 }
 
 .family-charCard--zeke:hover {
-  border-color: rgba(15, 118, 110, 0.35);
-  box-shadow: 0 14px 32px -14px rgba(15, 118, 110, 0.22);
+  border-color: rgba(234, 88, 12, 0.35);
+  box-shadow: 0 14px 32px -14px rgba(194, 65, 12, 0.22);
 }
 
-.family-charPill--zeke,
+.family-charPill--zeke {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
 .family-charPill--locked {
-  background: #ecfdf5;
-  color: #047857;
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.65);
 }
 
 .family-charCard--dr-victoria {
