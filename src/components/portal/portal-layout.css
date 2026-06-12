@@ -65,6 +65,8 @@
     flex-direction: column;
     gap: 0;
     padding: 2rem 1.5rem 3rem;
+    /* Right rail is hidden — keep main-column scroll on .family-content / .pilot-content */
+    overflow: visible;
   }
 
   .portal-layoutMain {

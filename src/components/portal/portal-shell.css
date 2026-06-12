@@ -50,12 +50,28 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.portal-shell .family-main:has(.portal-layout--withRail) .family-content,
-.portal-shell .pilot-main:has(.portal-layout--withRail) .family-content,
-.portal-shell .pilot-main:has(.portal-layout--withRail) .pilot-content {
-  flex: none;
-  min-height: auto;
-  overflow: visible;
+/* Desktop with right rail: layout row scrolls so the utility rail can stay sticky. */
+@media (min-width: 1101px) {
+  .portal-shell .family-main:has(.portal-layout--withRail) .family-content,
+  .portal-shell .pilot-main:has(.portal-layout--withRail) .pilot-content {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+}
+
+/* Tablet/mobile: right rail hidden — restore pre-rail scroll + sticky header behavior. */
+@media (max-width: 1100px) {
+  .portal-shell .family-main:has(.portal-layout--withRail) .family-content,
+  .portal-shell .pilot-main:has(.portal-layout--withRail) .family-content,
+  .portal-shell .pilot-main:has(.portal-layout--withRail) .pilot-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: clip;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .portal-shell .family-miniFooter,
