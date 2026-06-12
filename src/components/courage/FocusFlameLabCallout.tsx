@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import HeroBackgroundVideo from './HeroBackgroundVideo';
-import { FOCUS_FLAME_LAB_PATH } from '../../config/courageNav';
+import PilotAccessBadge from './PilotAccessBadge';
+import PilotAccessButton from './PilotAccessButton';
 
 export default function FocusFlameLabCallout() {
   return (
@@ -11,7 +12,7 @@ export default function FocusFlameLabCallout() {
         <div className="cc-ffl-callout-grid grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12 xl:gap-16">
           <div className="cc-ffl-callout-copy min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-golden-300/90 sm:text-[11px]">
-              Focus Flame Lab
+              Focus Flame Adventures
             </p>
             <h2 className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl lg:text-[2.65rem]">
               Help Caiden Understand His Feelings
@@ -21,22 +22,29 @@ export default function FocusFlameLabCallout() {
               their minds, and making brave choices through story-powered play.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-              <Button variant="primary" size="lg" as={Link} to={FOCUS_FLAME_LAB_PATH} className="w-full sm:w-auto">
-                Play Focus Flame Lab
-              </Button>
-              <Link
+              <PilotAccessButton
+                label="Join the Pilot"
+                interestType="focus_flame_lab"
+                clickSource="homepage_ffl_callout"
+                className="w-full sm:w-auto"
+              />
+              <Button
+                variant="secondary"
+                size="lg"
+                as={Link}
                 to="/kids"
-                className="text-sm font-semibold text-golden-300/95 underline-offset-4 transition-colors hover:text-golden-200 hover:underline"
+                className="cc-ffl-callout-secondaryBtn w-full sm:w-auto"
               >
                 Explore Kids Activities
-              </Link>
+              </Button>
             </div>
           </div>
 
           <div className="cc-ffl-callout-media min-w-0">
             <div className="cc-ffl-callout-frame relative overflow-hidden rounded-[1.25rem] shadow-[0_24px_56px_-28px_rgba(0,0,0,0.55)] sm:rounded-[1.5rem]">
+              <PilotAccessBadge overlay />
               <span className="cc-ffl-callout-badge absolute left-4 top-4 z-20 rounded-full bg-navy-900/75 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-golden-200 backdrop-blur-sm sm:left-5 sm:top-5 sm:text-[11px]">
-                Focus Flame Lab Level
+                Focus Flame Adventures
               </span>
               <div className="cc-ffl-callout-video" aria-hidden="true">
                 <HeroBackgroundVideo />

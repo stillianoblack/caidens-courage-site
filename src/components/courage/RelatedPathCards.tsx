@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { getRelatedPathCards, type RelatedPathCard } from '../../config/personaPages';
 import { HOMEPAGE_PATH_CARDS } from '../../config/homePathCards';
+import PilotAccessBadge from './PilotAccessBadge';
+import { usePilotAccess } from './PilotAccessProvider';
+import { B4_PILOT_MODAL_DESCRIPTION } from '../../config/pilotAccess';
 
 function isExternalPath(path: string): boolean {
   return path.startsWith('http://') || path.startsWith('https://');
@@ -50,6 +53,7 @@ function PathCardCta({ label }: { label: string }) {
 }
 
 function PathCard({ card, horizontalFeatured = false }: { card: RelatedPathCard; horizontalFeatured?: boolean }) {
+  const { openPilotAccessModal } = usePilotAccess();
   const className = [
     'group flex h-full overflow-hidden rounded-[1.35rem] border bg-white text-left',
     horizontalFeatured ? 'flex-col md:flex-row md:items-stretch' : 'flex-col',
@@ -62,8 +66,8 @@ function PathCard({ card, horizontalFeatured = false }: { card: RelatedPathCard;
       : 'border-navy-100/90 motion-safe:md:hover:border-navy-200/90',
   ].join(' ');
 
-  return (
-    <PathCardLink to={card.to} className={className} external={card.external}>
+  const cardBody = (
+    <>
       {card.imageSrc ? (
         <div
           className={[
@@ -71,6 +75,7 @@ function PathCard({ card, horizontalFeatured = false }: { card: RelatedPathCard;
             horizontalFeatured ? 'aspect-[16/10] md:aspect-auto md:min-h-[16rem] md:w-[42%] md:max-w-md md:shrink-0' : 'aspect-[16/10]',
           ].join(' ')}
         >
+          {card.pilotBadge ? <PilotAccessBadge overlay /> : null}
           <img
             src={card.imageSrc}
             alt={card.imageAlt ?? ''}
@@ -111,6 +116,31 @@ function PathCard({ card, horizontalFeatured = false }: { card: RelatedPathCard;
         </ul>
         <PathCardCta label={card.cta} />
       </div>
+    </>
+  );
+
+  if (card.pilotInterest) {
+    return (
+      <button
+        type="button"
+        className={className}
+        onClick={() =>
+          openPilotAccessModal({
+            interestType: card.pilotInterest,
+            description:
+              card.pilotInterest === 'b4_tools' ? B4_PILOT_MODAL_DESCRIPTION : undefined,
+            clickSource: 'path_card',
+          })
+        }
+      >
+        {cardBody}
+      </button>
+    );
+  }
+
+  return (
+    <PathCardLink to={card.to} className={className} external={card.external}>
+      {cardBody}
     </PathCardLink>
   );
 }

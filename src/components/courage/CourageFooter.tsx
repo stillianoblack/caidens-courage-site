@@ -13,8 +13,14 @@ import {
   CAMPS_PATH,
   SCHOOLS_PATH,
 } from '../../config/courageRoutes';
+import FooterLinkItem from './FooterLinkItem';
 
-type FooterLink = { label: string; href: string; external?: boolean };
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  pilotInterest?: 'focus_flame_lab' | 'b4_tools' | 'general_pilot';
+};
 
 type FooterColumn = {
   title: string;
@@ -34,8 +40,16 @@ const FOOTER_COLUMNS: FooterColumn[] = [
     title: 'Kids',
     links: [
       { label: 'Brave Mind Club', href: BRAVE_MIND_CLUB_PATH },
-      { label: 'Focus Flame Lab', href: FOCUS_FLAME_LAB_PATH },
-      { label: 'B-4 Reset Tools', href: BMC_RESET_TOOLS_PATH },
+      {
+        label: 'Focus Flame Adventures',
+        href: FOCUS_FLAME_LAB_PATH,
+        pilotInterest: 'focus_flame_lab',
+      },
+      {
+        label: 'B-4 Focus Tools',
+        href: BMC_RESET_TOOLS_PATH,
+        pilotInterest: 'b4_tools',
+      },
       { label: 'Coloring Pages', href: BMC_COLORING_PATH },
     ],
   },
@@ -58,22 +72,6 @@ const FOOTER_COLUMNS: FooterColumn[] = [
     ],
   },
 ];
-
-function FooterLinkItem({ link }: { link: FooterLink }) {
-  const className = 'text-sm text-white/70 transition-colors hover:text-white';
-  if (link.external) {
-    return (
-      <a href={link.href} rel="noopener noreferrer" className={className}>
-        {link.label}
-      </a>
-    );
-  }
-  return (
-    <Link to={link.href} className={className}>
-      {link.label}
-    </Link>
-  );
-}
 
 export default function CourageFooter() {
   return (

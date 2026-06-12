@@ -8,6 +8,7 @@ type KidsHubCardProps = {
   imageAlt: string;
   comingSoon?: boolean;
   featured?: boolean;
+  showPilotBadge?: boolean;
   /** cover (default) or contain — use contain to show full artwork scaled down */
   imageFit?: 'cover' | 'contain';
   /** CSS object-position, e.g. "50% 30%" */
@@ -25,6 +26,7 @@ export default function KidsHubCard({
   imageAlt,
   comingSoon = false,
   featured = false,
+  showPilotBadge = false,
   imageFit = 'cover',
   imagePosition = 'center',
   cta,
@@ -42,6 +44,13 @@ export default function KidsHubCard({
     >
       <div className="flex flex-col gap-5 p-5 sm:gap-6 sm:p-6 md:flex-row md:items-center md:gap-8 lg:p-7">
         <div className="cc-kids-hub-card-thumb relative flex aspect-video w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-navy-100/80 bg-[#FAF9F7] shadow-sm md:w-[min(100%,20rem)] lg:w-[min(100%,22.5rem)]">
+          {showPilotBadge ? (
+            <span className="absolute right-3 top-3 z-10">
+              <span className="rounded-full bg-golden-400 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-navy-700">
+                PILOT ACCESS
+              </span>
+            </span>
+          ) : null}
           <img
             src={imageSrc}
             alt={imageAlt}

@@ -9319,6 +9319,18 @@ a.ffl-ctaSecondary {
 }
 
 /* Focus Flame Lab — cave video product callout */
+.cc-ffl-callout-secondaryBtn {
+  border-color: #fff !important;
+  color: #fff !important;
+  background: transparent;
+}
+
+.cc-ffl-callout-secondaryBtn:hover {
+  border-color: #fff !important;
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .cc-ffl-callout-frame {
   aspect-ratio: 16 / 10;
   background: #243e70;

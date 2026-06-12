@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import SectionHero from '../components/courage/SectionHero';
+import PublicPilotExperienceGate from '../components/courage/PublicPilotExperienceGate';
+import { B4_PILOT_MODAL_DESCRIPTION } from '../config/pilotAccess';
 import Button from '../components/ui/Button';
 
 interface Unit {
@@ -128,6 +130,7 @@ const B4Clicker: React.FC = () => {
   const canGoBack = screen === 'selection' || screen === 'acknowledgement' || screen === 'mission';
 
   return (
+    <PublicPilotExperienceGate interestType="b4_tools" description={B4_PILOT_MODAL_DESCRIPTION}>
     <div className="min-h-screen bg-cream font-body">
       <CourageHeader />
 
@@ -430,6 +433,7 @@ const B4Clicker: React.FC = () => {
         </div>
       )}
     </div>
+    </PublicPilotExperienceGate>
   );
 };
 

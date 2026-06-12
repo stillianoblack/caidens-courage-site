@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import FocusFlameGame, { type FocusFlameScene } from '../components/focus-flame-lab/FocusFlameGame';
 import { FFL_EMBER_PRESETS } from '../components/focus-flame-lab/fflEmberPresets';
+import PublicPilotExperienceGate from '../components/courage/PublicPilotExperienceGate';
 
 export default function FocusFlameLabPage() {
   const publicUrl = process.env.PUBLIC_URL || '';
@@ -55,7 +56,8 @@ export default function FocusFlameLabPage() {
   );
 
   return (
-    <main
+    <PublicPilotExperienceGate interestType="focus_flame_lab">
+      <main
       className="ffl-app"
       aria-label="Focus Flame Lab"
       style={{
@@ -94,5 +96,6 @@ export default function FocusFlameLabPage() {
         getBookHref="/brave-mind-club"
       />
     </main>
+    </PublicPilotExperienceGate>
   );
 }

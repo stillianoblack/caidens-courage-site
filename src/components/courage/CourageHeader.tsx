@@ -4,7 +4,6 @@ import {
   COURAGE_LOGO_SRC,
   flattenKidsMegaNav,
   FOR_DROPDOWN,
-  FOCUS_FLAME_LAB_PATH,
   isNavPathActive,
   KIDS_MEGA_DROPDOWN,
   KIDS_NAV_PATHS,
@@ -13,6 +12,7 @@ import {
   type CourageNavLink,
 } from '../../config/courageNav';
 import { PORTAL_DASHBOARD_PATH } from '../../config/portalAccess';
+import PilotAccessNavLink from './PilotAccessNavLink';
 
 function navPillClass(isActive: boolean, mobile = false) {
   return [
@@ -37,9 +37,33 @@ function isDropdownActive(items: CourageNavLink[], pathname: string, hash: strin
 function megaNavLinkClass(href: string, pathname: string, hash: string, search: string) {
   const active = isNavHrefActive(href, pathname, hash, search);
   return [
-    'block w-full rounded-lg px-2 py-2 text-sm font-semibold transition-colors',
+    'block w-full rounded-lg px-2 py-2 text-sm font-semibold transition-colors text-left',
     active ? 'bg-navy-50 text-navy-800' : 'text-navy-600 hover:bg-navy-50 hover:text-navy-800',
   ].join(' ');
+}
+
+function renderCourageNavItem(
+  item: CourageNavLink,
+  className: string,
+  onNavigate?: () => void,
+) {
+  if (item.pilotInterest) {
+    return (
+      <PilotAccessNavLink
+        label={item.label}
+        className={className}
+        interestType={item.pilotInterest}
+        clickSource="header_nav"
+        onNavigate={onNavigate}
+      />
+    );
+  }
+
+  return (
+    <Link to={item.href} onClick={onNavigate} className={className}>
+      {item.label}
+    </Link>
+  );
 }
 
 const KIDS_MEGA_VIEWPORT_PADDING = 24;
@@ -207,18 +231,16 @@ function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: Ki
                     <ul className="space-y-0.5">
                       {section.items.map((item) => (
                         <li key={`${item.href}-${item.label}`}>
-                          <Link
-                            to={item.href}
-                            onClick={onClose}
-                            className={megaNavLinkClass(
+                          {renderCourageNavItem(
+                            item,
+                            megaNavLinkClass(
                               item.href,
                               location.pathname,
                               location.hash,
                               location.search,
-                            )}
-                          >
-                            {item.label}
-                          </Link>
+                            ),
+                            onClose,
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -304,13 +326,11 @@ function MobileKidsMegaGroup({ mega, isOpen, onToggle, onClose }: Omit<KidsMegaD
                   <ul className="space-y-1">
                     {section.items.map((item) => (
                       <li key={`${item.href}-${item.label}`}>
-                        <Link
-                          to={item.href}
-                          onClick={onClose}
-                          className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50"
-                        >
-                          {item.label}
-                        </Link>
+                        {renderCourageNavItem(
+                          item,
+                          'block rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50 text-left w-full',
+                          onClose,
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -370,7 +390,15 @@ export default function CourageHeader() {
     isNavPathActive(KIDS_NAV_PATHS, location.pathname) ||
     isDropdownActive(kidsFlatLinks, location.pathname, location.hash, location.search);
   const forActive = isDropdownActive(FOR_DROPDOWN, location.pathname, location.hash, location.search);
-  const gamesActive = location.pathname === FOCUS_FLAME_LAB_PATH || location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`);
+  const gamesActive = KIDS_MEGA_DROPDOWN.columns.some((column) =>
+    column.sections.some((section) =>
+      section.items.some(
+        (item) =>
+          item.pilotInterest === 'focus_flame_lab' &&
+          isNavHrefActive(item.href, location.pathname, location.hash, location.search),
+      ),
+    ),
+  );
   const portalActive =
     location.pathname === PORTAL_PATH || location.pathname.startsWith(PORTAL_DASHBOARD_PATH);
 
@@ -424,9 +452,12 @@ export default function CourageHeader() {
               onClose={() => setForOpen(false)}
               active={forActive}
             />
-            <NavLink to={FOCUS_FLAME_LAB_PATH} className={() => navPillClass(gamesActive)}>
-              Games
-            </NavLink>
+            <PilotAccessNavLink
+              label="Games"
+              className={navPillClass(gamesActive)}
+              interestType="focus_flame_lab"
+              clickSource="header_games"
+            />
             <NavLink to={PORTAL_PATH} className={({ isActive }) => navPillClass(isActive || portalActive)}>
               Portal
             </NavLink>
@@ -492,13 +523,13 @@ export default function CourageHeader() {
                 onClose={closeMenu}
               />
               <li>
-                <NavLink
-                  to={FOCUS_FLAME_LAB_PATH}
-                  className={() => navPillClass(gamesActive, true)}
-                  onClick={closeMenu}
-                >
-                  Games
-                </NavLink>
+                <PilotAccessNavLink
+                  label="Games"
+                  className={navPillClass(gamesActive, true)}
+                  interestType="focus_flame_lab"
+                  clickSource="header_games_mobile"
+                  onNavigate={closeMenu}
+                />
               </li>
               <li>
                 <NavLink

@@ -525,3 +525,24 @@ export function trackSalesFunnel(
     portal: params.portal ?? resolvePortalType(window.location.pathname),
   });
 }
+
+export function trackFocusFlamePilotClicked(params: AnalyticsEventParams = {}): void {
+  trackEvent('focus_flame_pilot_clicked', {
+    source_page: window.location.pathname,
+    ...params,
+  });
+}
+
+export function trackFocusFlameWaitlistSubmitted(params: AnalyticsEventParams = {}): void {
+  trackEvent('focus_flame_waitlist_submitted', {
+    source_page: window.location.pathname,
+    ...params,
+  });
+}
+
+export function trackB4WaitlistSubmitted(params: AnalyticsEventParams = {}): void {
+  trackEvent('b4_waitlist_submitted', {
+    source_page: window.location.pathname,
+    ...params,
+  });
+}

@@ -384,6 +384,8 @@ export type RelatedPathCard = {
   imageAlt?: string;
   featured?: boolean;
   external?: boolean;
+  pilotInterest?: 'focus_flame_lab' | 'b4_tools' | 'general_pilot';
+  pilotBadge?: boolean;
 };
 
 export const ALL_PATH_CARDS: RelatedPathCard[] = [

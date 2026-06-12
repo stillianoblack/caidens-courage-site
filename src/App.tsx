@@ -18,6 +18,7 @@ import { resolvePortalRouteLoaderMessage } from './lib/portalRouteLoaderMessage'
 import ScrollToTop from './components/ScrollToTop';
 import PortalDebugTracker from './components/PortalDebugTracker';
 import { ToastProvider } from './components/portal-design-system';
+import { PilotAccessProvider } from './components/courage/PilotAccessProvider';
 import {
   AboutPage,
   B4ClickerPage,
@@ -555,11 +556,13 @@ const AppLayout: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ToastProvider>
-      <MissionGamePhaseProvider>
-        <Routes>
-          <Route element={<AppLayout />}>{appRouteChildren}</Route>
-        </Routes>
-      </MissionGamePhaseProvider>
+      <PilotAccessProvider>
+        <MissionGamePhaseProvider>
+          <Routes>
+            <Route element={<AppLayout />}>{appRouteChildren}</Route>
+          </Routes>
+        </MissionGamePhaseProvider>
+      </PilotAccessProvider>
     </ToastProvider>
   );
 };

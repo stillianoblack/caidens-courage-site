@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CompletionCard from '../components/b4-guide/CompletionCard';
+import PublicPilotExperienceGate from '../components/courage/PublicPilotExperienceGate';
+import { B4_PILOT_MODAL_DESCRIPTION } from '../config/pilotAccess';
 import ModeSelectCard from '../components/b4-guide/ModeSelectCard';
 import ModuleStepCard from '../components/b4-guide/ModuleStepCard';
 import QuestionCard from '../components/b4-guide/QuestionCard';
@@ -138,7 +140,8 @@ export default function B4GuidePage() {
       : null;
 
   return (
-    <main className="b4g-app" aria-label={B4_GUIDE_PAGE_TITLE}>
+    <PublicPilotExperienceGate interestType="b4_tools" description={B4_PILOT_MODAL_DESCRIPTION}>
+      <main className="b4g-app" aria-label={B4_GUIDE_PAGE_TITLE}>
       <div className="b4g-shell">
         {screen !== 'select' ? (
           <button type="button" className="b4g-back" onClick={resetAll}>
@@ -223,5 +226,6 @@ export default function B4GuidePage() {
         ) : null}
       </div>
     </main>
+    </PublicPilotExperienceGate>
   );
 }

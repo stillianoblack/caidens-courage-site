@@ -4,8 +4,10 @@ import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import KidsHubCard from '../components/courage/KidsHubCard';
 import SectionHero from '../components/courage/SectionHero';
+import PilotAccessButton from '../components/courage/PilotAccessButton';
 import Button from '../components/ui/Button';
-import { BMC_RESET_TOOLS_PATH, BRAVE_MIND_CLUB_PATH, FOCUS_FLAME_LAB_PATH } from '../config/courageRoutes';
+import { BRAVE_MIND_CLUB_PATH } from '../config/courageRoutes';
+import { B4_PILOT_MODAL_DESCRIPTION } from '../config/pilotAccess';
 import useHashScroll from '../hooks/useHashScroll';
 
 const KidsHub: React.FC = () => {
@@ -24,10 +26,14 @@ const KidsHub: React.FC = () => {
         eyebrow="For Kids"
         titleAccent="Caiden's Courage"
         title="Kids"
-        description="Play in Focus Flame Lab, explore Brave Mind Club activities, and reset with B-4 — your kid-facing hub for courage and focus."
-        ctaLabel="Enter Focus Flame Lab"
-        ctaHref={FOCUS_FLAME_LAB_PATH}
-      />
+        description="Explore Brave Mind Club activities, printable resources, and pilot Focus Flame Adventures for courage and focus."
+      >
+        <PilotAccessButton
+          label="Request Access"
+          interestType="focus_flame_lab"
+          clickSource="kids_hub_hero"
+        />
+      </SectionHero>
 
       <section className="cc-kids-hub-list px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
         <div className="mx-auto max-w-5xl">
@@ -48,18 +54,15 @@ const KidsHub: React.FC = () => {
             title="Train Your Focus"
             description="Practice focus, feelings, and brave choices through interactive story moments."
             imageSrc="/images/caidenscourage/backgrounds/chooseyournextadvernture.webp"
-            imageAlt="Choose your next Focus Flame Lab adventure"
+            imageAlt="Choose your next Focus Flame adventure"
+            showPilotBadge
             cta={
-              <Button
-                variant="primary"
-                size="lg"
-                as={Link}
-                to={FOCUS_FLAME_LAB_PATH}
-                leftIconSrc={null}
+              <PilotAccessButton
+                label="Explore Focus Flame Adventures"
+                interestType="focus_flame_lab"
+                clickSource="kids_hub_train_focus"
                 className="w-full sm:w-auto"
-              >
-                Play Focus Flame Lab
-              </Button>
+              />
             }
           />
 
@@ -117,15 +120,20 @@ const KidsHub: React.FC = () => {
 
           <KidsHubCard
             title="Get a B-4 Reset"
-            description="Need a focus reset? Open B-4 Reset Tools for quick focus and feelings activities."
+            description="B-4's focus tools are currently available through pilot programs."
             imageSrc="/images/characters/B4_Robot_Hero.webp"
             imageAlt="B-4 robot companion"
             imageFit="contain"
             imagePosition="center bottom"
+            showPilotBadge
             cta={
-              <Button variant="primary" size="lg" as={Link} to={BMC_RESET_TOOLS_PATH} className="w-full sm:w-auto">
-                Open B-4 Reset Tools
-              </Button>
+              <PilotAccessButton
+                label="Request Access"
+                interestType="b4_tools"
+                description={B4_PILOT_MODAL_DESCRIPTION}
+                clickSource="kids_hub_b4_reset"
+                className="w-full sm:w-auto"
+              />
             }
           />
 
@@ -143,21 +151,18 @@ const KidsHub: React.FC = () => {
 
           <KidsHubCard
             title="Ready to play?"
-            description="Jump into Focus Flame Lab and help Caiden navigate feelings, bravery, and focus."
+            description="Join the pilot to explore Focus Flame Adventures and help Caiden navigate feelings, bravery, and focus."
             imageSrc="/images/focus-flame-lab/themove_intro_image.webp"
             imageAlt="Focus Flame Lab gameplay preview"
             featured
+            showPilotBadge
             cta={
-              <Button
-                variant="primary"
-                size="lg"
-                as={Link}
-                to={FOCUS_FLAME_LAB_PATH}
-                leftIconSrc={null}
+              <PilotAccessButton
+                label="Join the Pilot"
+                interestType="focus_flame_lab"
+                clickSource="kids_hub_featured"
                 className="w-full sm:w-auto"
-              >
-                Enter Focus Flame Lab
-              </Button>
+              />
             }
           />
           </div>

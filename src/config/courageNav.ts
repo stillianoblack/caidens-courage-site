@@ -15,9 +15,12 @@ import {
   CAMPS_PATH,
 } from './courageRoutes';
 
+import type { PilotInterestType } from '../types/pilotWaitlist';
+
 export type CourageNavLink = {
   label: string;
   href: string;
+  pilotInterest?: PilotInterestType;
 };
 
 export type CourageMegaNavSection = {
@@ -85,7 +88,11 @@ export const KIDS_MEGA_DROPDOWN: CourageKidsMegaNav = {
           heading: 'Practice',
           items: [
             { label: 'SEL Worksheets', href: BMC_ACTIVITIES_PATH },
-            { label: 'B-4 Reset Tools', href: BMC_RESET_TOOLS_PATH },
+            {
+              label: 'B-4 Focus Tools',
+              href: BMC_RESET_TOOLS_PATH,
+              pilotInterest: 'b4_tools',
+            },
           ],
         },
       ],
@@ -95,8 +102,16 @@ export const KIDS_MEGA_DROPDOWN: CourageKidsMegaNav = {
         {
           heading: 'Play',
           items: [
-            { label: 'B-4 Guide', href: B4_GUIDE_PATH },
-            { label: 'Focus Flame Lab', href: FOCUS_FLAME_LAB_PATH },
+            {
+              label: 'B-4 Guide',
+              href: B4_GUIDE_PATH,
+              pilotInterest: 'b4_tools',
+            },
+            {
+              label: 'Focus Flame Adventures',
+              href: FOCUS_FLAME_LAB_PATH,
+              pilotInterest: 'focus_flame_lab',
+            },
           ],
         },
       ],
@@ -128,7 +143,7 @@ export const FOR_DROPDOWN: CourageNavLink[] = [
 
 /** Educator & family resource discovery — no overlap with Kids dropdown. */
 export const RESOURCES_DROPDOWN: CourageNavLink[] = [
-  { label: 'B-4 Reset Tools', href: BMC_RESET_TOOLS_PATH },
+  { label: 'B-4 Focus Tools', href: BMC_RESET_TOOLS_PATH, pilotInterest: 'b4_tools' },
   { label: 'Family Activities', href: PARENTS_PATH },
   { label: 'Download Center', href: BRAVE_MIND_CLUB_PATH },
 ];
@@ -143,7 +158,11 @@ export const SCHOOLS_DROPDOWN: CourageNavLink[] = [
 
 /** @deprecated Use KIDS_DROPDOWN */
 export const GAMES_DROPDOWN: CourageNavLink[] = [
-  { label: 'Focus Flame Lab', href: FOCUS_FLAME_LAB_PATH },
+  {
+    label: 'Focus Flame Adventures',
+    href: FOCUS_FLAME_LAB_PATH,
+    pilotInterest: 'focus_flame_lab',
+  },
 ];
 
 /** Paths that activate each nav dropdown (includes legacy aliases). */

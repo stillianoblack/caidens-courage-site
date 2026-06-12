@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CAMPS_PATH, FOCUS_FLAME_LAB_PATH } from '../../config/courageNav';
+import { CAMPS_PATH } from '../../config/courageNav';
 import { VALE_CLASSIC_HOME_URL } from '../../config/valeLinks';
+import { B4_PILOT_MODAL_DESCRIPTION } from '../../config/pilotAccess';
+import type { PilotInterestType } from '../../types/pilotWaitlist';
+import { usePilotAccess } from './PilotAccessProvider';
+import PilotAccessBadge from './PilotAccessBadge';
 
 type Accent = 'gold' | 'blue' | 'teal';
 
@@ -14,6 +18,8 @@ type WayCard = {
   external?: boolean;
   accent: Accent;
   bullets?: readonly string[];
+  pilotInterest?: PilotInterestType;
+  pilotBadge?: boolean;
 };
 
 const WAYS: WayCard[] = [
@@ -28,11 +34,13 @@ const WAYS: WayCard[] = [
   },
   {
     title: 'Play the Games',
-    label: 'Focus Flame Lab',
+    label: 'Focus Flame Adventures',
     description: 'Interactive SEL adventures that help kids practice focus and courage.',
-    cta: 'Play Focus Flame Lab',
-    href: FOCUS_FLAME_LAB_PATH,
+    cta: 'Join the Pilot',
+    href: '/focus-flame-lab',
     accent: 'blue',
+    pilotInterest: 'focus_flame_lab',
+    pilotBadge: true,
   },
   {
     title: 'Bring Focus Flame Academy to Your Program',
@@ -103,6 +111,7 @@ function WayCardLink({
 }
 
 function ExperienceCard({ card }: { card: WayCard }) {
+  const { openPilotAccessModal } = usePilotAccess();
   const styles = accentStyles[card.accent];
   const className = [
     'group flex h-full flex-col rounded-[1.35rem] border p-6 text-left shadow-[0_10px_36px_-22px_rgba(36,62,112,0.18)]',
@@ -112,8 +121,9 @@ function ExperienceCard({ card }: { card: WayCard }) {
     styles.card,
   ].join(' ');
 
-  return (
-    <WayCardLink card={card} className={className}>
+  const content = (
+    <>
+      {card.pilotBadge ? <PilotAccessBadge className="mb-3" /> : null}
       <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs ${styles.label}`}>{card.label}</p>
       <h3 className={`mt-2 font-display text-xl font-extrabold leading-tight sm:text-2xl ${styles.title}`}>
         {card.title}
@@ -141,6 +151,31 @@ function ExperienceCard({ card }: { card: WayCard }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </span>
+    </>
+  );
+
+  if (card.pilotInterest) {
+    return (
+      <button
+        type="button"
+        className={className}
+        onClick={() =>
+          openPilotAccessModal({
+            interestType: card.pilotInterest,
+            description:
+              card.pilotInterest === 'b4_tools' ? B4_PILOT_MODAL_DESCRIPTION : undefined,
+            clickSource: 'three_ways_section',
+          })
+        }
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <WayCardLink card={card} className={className}>
+      {content}
     </WayCardLink>
   );
 }

@@ -17,7 +17,7 @@ import {
 
 const BMC_CATEGORIES = [
   { label: 'Coloring Pages', href: BMC_COLORING_PATH },
-  { label: 'B-4 Reset Tools', href: BMC_RESET_TOOLS_PATH },
+  { label: 'B-4 Focus Tools', href: BMC_RESET_TOOLS_PATH },
   { label: 'Worksheets', href: `${BRAVE_MIND_CLUB_PATH}?type=worksheet` },
   { label: 'Wallpapers', href: `${BRAVE_MIND_CLUB_PATH}?type=wallpaper` },
   { label: 'Activities', href: BMC_ACTIVITIES_PATH },
