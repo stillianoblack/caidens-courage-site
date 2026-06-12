@@ -2,7 +2,6 @@ import React from 'react';
 import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import { resolveCharacterThemeColor } from '../game-assessment/shared/characterThemeColors';
 import type { PortalBreadcrumbPortalType } from '../../lib/portalBreadcrumbNav';
-import './portal-breadcrumb.css';
 
 export type PortalBreadcrumbVariant = 'default' | 'game' | 'dashboard';
 
