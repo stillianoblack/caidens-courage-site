@@ -1,10 +1,13 @@
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 import {
   courageInTheDarkMissions,
   type CourageInTheDarkMission,
 } from '../../data/courageInTheDarkMap';
+import MissionActionCard from '../../design-system/kids-adventure/MissionActionCard';
+import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureIcon';
+import { COURAGE_IN_THE_DARK_BG } from '../../data/courageInTheDarkMap';
+import { resolveCharacterThemeId, themeDataAttributes } from '../../design-system/kids-adventure/characterThemes';
 
 type CourageMissionListPanelProps = {
   week: number;
@@ -98,17 +101,26 @@ export default function CourageMissionListPanel({
           const comingSoon = comingSoonMissionId === mission.id;
           const unlockReason = locked ? getMissionUnlockReason?.(mission) : undefined;
           const missionHref = !locked && !comingSoon ? getMissionHref?.(mission) ?? null : null;
+          const themeId = resolveCharacterThemeId(mission.id);
+          const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
+          const startLabel = complete ? 'Replay' : 'Start';
+
+          const rowStyle = {
+            animationDelay: `${index * 50}ms`,
+            '--kid-mission-bg': `url("${mission.thumbnail}")`,
+            '--kid-map-bg': `url("${COURAGE_IN_THE_DARK_BG}")`,
+          } as React.CSSProperties;
 
           return (
             <li
               key={mission.id}
               className="courageMissionListRowWrap"
-              style={{ animationDelay: `${index * 50}ms` }}
+              style={rowStyle}
             >
-              <button
-                type="button"
+              <div
                 className={[
                   'courageMissionListRow',
+                  'courageMissionListRow--compact',
                   selected ? 'courageMissionListRow--selected' : '',
                   complete ? 'courageMissionListRow--complete' : '',
                   locked ? 'courageMissionListRow--locked' : '',
@@ -116,66 +128,75 @@ export default function CourageMissionListPanel({
                   .filter(Boolean)
                   .join(' ')}
                 data-color={mission.color}
+                {...themeAttrs}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleSelectMission(mission)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleSelectMission(mission);
+                  }
+                }}
                 aria-pressed={selected}
               >
-                <span className="courageMissionListRowThumb" data-color={mission.color}>
-                  <img src={mission.thumbnail} alt="" width={44} height={44} loading="lazy" />
-                </span>
+                <div className="courageMissionListRowInner">
+                  <div className="courageMissionListRowCopy">
+                    <span className="courageMissionListRowTitle">{mission.label}</span>
+                    <span className="courageMissionListRowCharacter">{mission.characterName}</span>
+                    <span className="courageMissionListRowReward">{mission.rewardText}</span>
+                  </div>
 
-                <span className="courageMissionListRowCopy">
-                  <span className="courageMissionListRowCharacter">{mission.characterName}</span>
-                  <span className="courageMissionListRowTitle">{mission.label}</span>
-                  <span className="courageMissionListRowReward">{mission.rewardText}</span>
-                </span>
+                  <div className="courageMissionListRowMeta" aria-hidden="true">
+                    {complete ? (
+                      <span className="courageMissionListRowBadge">
+                        <KidsAdventureIcon name="check" size={16} />
+                      </span>
+                    ) : locked ? (
+                      <span className="courageMissionListRowLock">
+                        <KidsAdventureIcon name="lock" size={16} />
+                      </span>
+                    ) : null}
+                  </div>
 
-                <span className="courageMissionListRowStatus" aria-hidden="true">
-                  {complete ? (
-                    <span className="courageMissionListRowBadge">✓</span>
-                  ) : locked ? (
-                    <span className="courageMissionListRowLock">🔒</span>
-                  ) : (
-                    <span className="courageMissionListRowChevron">›</span>
-                  )}
-                </span>
-              </button>
-
-              {selected ? (
-                <div className="courageMissionListRowActions">
-                  {locked && unlockReason ? (
-                    <p className="courageMissionListRowLockedNote" role="status">
-                      {unlockReason}
-                    </p>
-                  ) : null}
-                  {comingSoon ? (
-                    <p className="courageMissionListRowComingSoon" role="status">
-                      Adventure coming soon.
-                    </p>
-                  ) : null}
-                  {!locked ? (
-                    missionHref ? (
-                      <Link
-                        to={missionHref}
-                        className="courageMissionListRowStart"
-                        data-color={mission.color}
-                        onClick={playClick}
+                  <div className="courageMissionListRowFoot">
+                    {locked && unlockReason ? (
+                      <p className="courageMissionListRowLockedNote" role="status">
+                        {unlockReason}
+                      </p>
+                    ) : null}
+                    {comingSoon ? (
+                      <p className="courageMissionListRowComingSoon" role="status">
+                        Adventure coming soon.
+                      </p>
+                    ) : null}
+                    {!locked ? (
+                      <span
+                        className="courageMissionListRowStartWrap"
+                        onClick={(event) => event.stopPropagation()}
                       >
-                        Start Adventure
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        className="courageMissionListRowStart"
-                        data-color={mission.color}
-                        onClick={() => handleLaunchMission(mission)}
-                        disabled={comingSoon}
-                      >
-                        Start Adventure
-                      </button>
-                    )
-                  ) : null}
+                        {missionHref ? (
+                          <MissionActionCard
+                            themeId={mission.id}
+                            label={startLabel}
+                            href={missionHref}
+                            onClick={playClick}
+                            className="courageMissionListRowStart"
+                          />
+                        ) : (
+                          <MissionActionCard
+                            themeId={mission.id}
+                            label={startLabel}
+                            disabled={comingSoon}
+                            onClick={() => handleLaunchMission(mission)}
+                            className="courageMissionListRowStart"
+                          />
+                        )}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-              ) : null}
+              </div>
             </li>
           );
         })}

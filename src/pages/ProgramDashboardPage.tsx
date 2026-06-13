@@ -15,11 +15,11 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
-  FAMILY_HUB_PATH,
   PILOT_PROGRAM_SIGNUP_PATH,
   PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
+import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
 import {
   PILOT_DASHBOARD_TITLE,
   PROGRAM_SIDEBAR_NAV,
@@ -136,7 +136,7 @@ export default function ProgramDashboardPage() {
       return;
     }
     if (isIndependentFamily) {
-      navigate(FAMILY_HUB_PATH, { replace: true });
+      navigate(resolveFamilyKidDefaultLandingPath(), { replace: true });
       return;
     }
     if (!sessionValid) {

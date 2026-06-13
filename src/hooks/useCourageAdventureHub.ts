@@ -80,11 +80,14 @@ export function useCourageAdventureHub({
 
   const getMissionUnlockState = useCallback(
     (mission: CourageInTheDarkMission): Week1MissionUnlockState => {
+      if (week === 1) {
+        if (!CAMP_PILOT_UNLOCK_ALL && (mapLocked || baselineLocked)) {
+          return { unlocked: false, reason: 'Complete check-in to begin' };
+        }
+        return getWeek1MissionUnlockState(mission.targetGameSlug, progress.completedMissionIds);
+      }
       if (mapLocked || baselineLocked) {
         return { unlocked: false, reason: 'Complete check-in to begin' };
-      }
-      if (week === 1) {
-        return getWeek1MissionUnlockState(mission.targetGameSlug, progress.completedMissionIds);
       }
       return { unlocked: !mission.locked, reason: mission.locked ? 'Locked' : 'Available now' };
     },
@@ -194,5 +197,6 @@ export function useCourageAdventureHub({
     unlockedBadges: progress.unlockedBadges,
     animatingHotspotId,
     refreshProgress: refresh,
+    completedMissionIds: progress.completedMissionIds,
   };
 }

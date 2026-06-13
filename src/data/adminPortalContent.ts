@@ -2,6 +2,7 @@ export type AdminPortalTabId =
   | 'manage-accounts'
   | 'design-system'
   | 'pilot-programs'
+  | 'adventures'
   | 'data-cleanup';
 
 export const ADMIN_PORTAL_PAGE = {
@@ -13,6 +14,7 @@ export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> =
   { id: 'manage-accounts', label: 'Manage Accounts' },
   { id: 'design-system', label: 'Design System' },
   { id: 'pilot-programs', label: 'Pilot Programs' },
+  { id: 'adventures', label: 'Adventures' },
   { id: 'data-cleanup', label: 'Data Cleanup' },
 ];
 

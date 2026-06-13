@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
-import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
+import { PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
+import { resolveFamilyKidDefaultLandingPath } from '../../lib/familyKidLanding';
 import { writeLastPilotProgram } from '../../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../../types/pilotProgram';
 import { isIndependentFamilyProgram } from '../../lib/independentFamilyProgram';
@@ -46,7 +47,7 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
     if (!program) return;
     applyProgramPortalUnlock(program, 'family', program.familyAccessCode);
     writeLastPilotProgram(program, 'family', adminEmail.trim(), program.familyAccessCode);
-    replaceWithPortalRoute(FAMILY_HUB_PATH);
+    replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
   };
 
   return (

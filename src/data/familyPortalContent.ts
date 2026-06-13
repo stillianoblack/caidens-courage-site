@@ -190,14 +190,16 @@ export const FAMILY_NEXT_STEP = {
 
 export type FamilyCharacterId = CharacterProfileId;
 
+const GAME_HUB_CHARACTER_BASE = '/images/caidenscourage/Game-Hub/characters';
+
 export const CHARACTER_IMAGE_PATHS: Record<FamilyCharacterId, string | null> = {
-  caiden: '/images/characters/caiden_photo_icon_game.webp',
-  miranda: '/images/characters/miranda_photo_icon_game.webp',
-  b4: '/images/characters/b-4_photo_icon_game.webp',
-  charlie: '/images/characters/charlieperk_photo_icon_game.webp',
-  zeke: '/images/characters/zeke_photo_icon_game.webp',
-  'dr-victoria': DR_VICTORIA_GUIDE_SRC,
-  'uncle-t': UNCLE_T_GUIDE_SRC,
+  caiden: `${GAME_HUB_CHARACTER_BASE}/caiden-hotspot.webp`,
+  miranda: `${GAME_HUB_CHARACTER_BASE}/miranda-hotspot.webp`,
+  b4: `${GAME_HUB_CHARACTER_BASE}/b4-hotspot.webp`,
+  charlie: `${GAME_HUB_CHARACTER_BASE}/charlie-hotspot.webp`,
+  zeke: `${GAME_HUB_CHARACTER_BASE}/zeke-hotspot.webp`,
+  'dr-victoria': `${GAME_HUB_CHARACTER_BASE}/dr-victoria-guide.webp`,
+  'uncle-t': `${GAME_HUB_CHARACTER_BASE}/uncle-t-guide.webp`,
 };
 
 export type FamilyCharacterCard = {

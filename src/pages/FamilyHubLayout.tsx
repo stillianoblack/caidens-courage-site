@@ -2,11 +2,14 @@ import React, { Suspense, useCallback, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
-import FamilyMobileNavDrawer from '../components/family-portal/FamilyMobileNavDrawer';
+import FamilyMobileBottomNav from '../components/family-portal/FamilyMobileBottomNav';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
+import '../components/family-portal/family-mobile-bottom-nav.css';
+import '../design-system/kids-adventure/kids-adventure-visual-system.css';
+import '../design-system/kids-adventure/kids-adventure-visual-system-desktop.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
@@ -16,7 +19,8 @@ import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyP
 import { afterIdle } from '../lib/defer';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
-import { resolvePortalPageTitle } from '../lib/familyPortalNav';
+import { resolvePortalPageTitle, isCharacterGameRoute } from '../lib/familyPortalNav';
+import { isKidFacingPortalRoute } from '../lib/kidFacingPortalRoutes';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
@@ -46,7 +50,9 @@ export default function FamilyHubLayout() {
   );
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
-  const { isMobileNav, mobileNavOpen, openMobileNav, closeMobileNav } = useFamilyMobileNav();
+  const { isMobileNav } = useFamilyMobileNav();
+  const isMobileGameRoute = isMobileNav && isCharacterGameRoute(location.pathname);
+  const kidFacingRoute = isKidFacingPortalRoute(location.pathname, FAMILY_HUB_PATH) || isMobileGameRoute;
 
   const sidebarProps = useMemo(
     () => ({
@@ -113,34 +119,40 @@ export default function FamilyHubLayout() {
 
   return (
     <>
-      <AppShell
-        variant="family"
-        rightRail={showJourneyRail ? <FamilyJourneyCoachRail /> : undefined}
-        sidebar={!isMobileNav ? <FamilyDashboardSidebar {...sidebarProps} /> : null}
-        topBar={
-          <FamilyDashboardTopBar
-            pageTitle={pageTitle}
-            onOpenProgramGoals={openFamilyGoalsSettings}
-            linkedCampLabel={linkedCampLabel}
-            notifications={notifications}
-            onOpenMobileNav={isMobileNav ? openMobileNav : undefined}
-          />
-        }
-        footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
+      <div
+        className={[
+          isMobileNav ? 'portal-shell--familyMobileNav' : '',
+          isMobileGameRoute ? 'portal-shell--familyMobileGame' : '',
+          kidFacingRoute ? 'kids-adventure-shell' : '',
+        ]
+          .filter(Boolean)
+          .join(' ') || undefined}
       >
-        <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-          <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
-        </Suspense>
-      </AppShell>
-      {isMobileNav ? (
-        <FamilyMobileNavDrawer open={mobileNavOpen} onClose={closeMobileNav}>
-          <FamilyDashboardSidebar
-            {...sidebarProps}
-            variant="drawer"
-            onNavigate={closeMobileNav}
-          />
-        </FamilyMobileNavDrawer>
-      ) : null}
+        <AppShell
+          variant="family"
+          rightRail={showJourneyRail && !isMobileGameRoute ? <FamilyJourneyCoachRail /> : undefined}
+          sidebar={!isMobileNav ? <FamilyDashboardSidebar {...sidebarProps} /> : null}
+          topBar={
+            isMobileGameRoute
+              ? null
+              : (
+                <FamilyDashboardTopBar
+                  pageTitle={pageTitle}
+                  onOpenProgramGoals={openFamilyGoalsSettings}
+                  linkedCampLabel={linkedCampLabel}
+                  notifications={notifications}
+                  mobileFamilySimplified={isMobileNav}
+                />
+              )
+          }
+          footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
+        >
+          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
+            <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
+          </Suspense>
+        </AppShell>
+      </div>
+      {isMobileNav && !isMobileGameRoute ? <FamilyMobileBottomNav /> : null}
     </>
   );
 }

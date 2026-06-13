@@ -1,31 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import CharacterProfilePage from '../CharacterProfilePage';
-import {
-  buildCharacterProfile,
-  isCharacterProfileId,
-} from '../../../data/characterProfiles';
-import { trackEvent } from '../../../lib/analytics';
+import { isCharacterProfileId } from '../../../data/characterProfiles';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
-import '../character-profile.css';
 
+const CHARACTER_QUERY_PARAM = 'character';
+
+/**
+ * @deprecated Bio pages route to Character Hub with an inline detail panel.
+ * Direct links to /characters/:id are preserved via redirect.
+ */
 export default function FamilyCharacterProfilePage() {
   const { characterId = '' } = useParams();
   const location = useLocation();
-
-  useEffect(() => {
-    if (isCharacterProfileId(characterId)) {
-      const profile = buildCharacterProfile(characterId, location.pathname);
-      document.title = `${profile.name} | Caiden's Courage`;
-      trackEvent('character_profile_viewed', { character_name: profile.name });
-    }
-  }, [characterId, location.pathname]);
 
   if (!isCharacterProfileId(characterId)) {
     return <Navigate to={getPortalRoute('characters', location.pathname)} replace />;
   }
 
-  const profile = buildCharacterProfile(characterId, location.pathname);
+  const charactersPath = getPortalRoute('characters', location.pathname);
+  const params = new URLSearchParams();
+  params.set(CHARACTER_QUERY_PARAM, characterId);
 
-  return <CharacterProfilePage profile={profile} pathname={location.pathname} />;
+  return <Navigate to={`${charactersPath}?${params.toString()}`} replace />;
 }

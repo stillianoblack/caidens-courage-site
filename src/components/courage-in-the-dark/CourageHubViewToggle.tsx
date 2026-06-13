@@ -1,16 +1,20 @@
 import React, { useCallback } from 'react';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 
-export type CourageHubViewMode = 'map' | 'list';
+export type CourageHubViewMode = 'explore' | 'missions' | 'activities' | 'quests';
 
 type CourageHubViewToggleProps = {
   viewMode: CourageHubViewMode;
   onViewModeChange: (mode: CourageHubViewMode) => void;
+  showQuestsTab?: boolean;
+  showActivitiesTab?: boolean;
 };
 
 export default function CourageHubViewToggle({
   viewMode,
   onViewModeChange,
+  showQuestsTab = false,
+  showActivitiesTab = true,
 }: CourageHubViewToggleProps) {
   const { playClick } = useCourageHubAudio();
 
@@ -26,46 +30,80 @@ export default function CourageHubViewToggle({
     <div
       className="courageHubViewToggle"
       role="tablist"
-      aria-label="Courage in the Dark view mode"
+      aria-label="Weekly adventure view mode"
     >
       <button
         type="button"
         role="tab"
-        id="courage-hub-tab-map"
-        aria-selected={viewMode === 'map'}
-        aria-controls="courage-hub-panel-map"
+        id="courage-hub-tab-explore"
+        aria-selected={viewMode === 'explore'}
+        aria-controls="courage-hub-panel-explore"
         className={[
           'courageHubViewToggleBtn',
-          viewMode === 'map' ? 'courageHubViewToggleBtn--active' : '',
+          viewMode === 'explore' ? 'courageHubViewToggleBtn--active' : '',
         ]
           .filter(Boolean)
           .join(' ')}
-        onClick={() => handleSelect('map')}
+        onClick={() => handleSelect('explore')}
       >
-        <span className="courageHubViewToggleIcon" aria-hidden="true">
-          🗺
-        </span>
-        <span className="courageHubViewToggleLabel">Adventure Map</span>
+        <span className="courageHubViewToggleIcon" aria-hidden="true">🗺</span>
+        <span className="courageHubViewToggleLabel">Explore</span>
       </button>
       <button
         type="button"
         role="tab"
-        id="courage-hub-tab-list"
-        aria-selected={viewMode === 'list'}
-        aria-controls="courage-hub-panel-list"
+        id="courage-hub-tab-missions"
+        aria-selected={viewMode === 'missions'}
+        aria-controls="courage-hub-panel-missions"
         className={[
           'courageHubViewToggleBtn',
-          viewMode === 'list' ? 'courageHubViewToggleBtn--active' : '',
+          viewMode === 'missions' ? 'courageHubViewToggleBtn--active' : '',
         ]
           .filter(Boolean)
           .join(' ')}
-        onClick={() => handleSelect('list')}
+        onClick={() => handleSelect('missions')}
       >
-        <span className="courageHubViewToggleIcon" aria-hidden="true">
-          📋
-        </span>
-        <span className="courageHubViewToggleLabel">Mission List</span>
+        <span className="courageHubViewToggleIcon" aria-hidden="true">📋</span>
+        <span className="courageHubViewToggleLabel">Missions</span>
       </button>
+      {showActivitiesTab ? (
+        <button
+          type="button"
+          role="tab"
+          id="courage-hub-tab-activities"
+          aria-selected={viewMode === 'activities'}
+          aria-controls="courage-hub-panel-activities"
+          className={[
+            'courageHubViewToggleBtn',
+            viewMode === 'activities' ? 'courageHubViewToggleBtn--active' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={() => handleSelect('activities')}
+        >
+          <span className="courageHubViewToggleIcon" aria-hidden="true">🎨</span>
+          <span className="courageHubViewToggleLabel">Activities</span>
+        </button>
+      ) : null}
+      {showQuestsTab ? (
+        <button
+          type="button"
+          role="tab"
+          id="courage-hub-tab-quests"
+          aria-selected={viewMode === 'quests'}
+          aria-controls="courage-hub-panel-quests"
+          className={[
+            'courageHubViewToggleBtn',
+            viewMode === 'quests' ? 'courageHubViewToggleBtn--active' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={() => handleSelect('quests')}
+        >
+          <span className="courageHubViewToggleIcon" aria-hidden="true">🔥</span>
+          <span className="courageHubViewToggleLabel">Quests</span>
+        </button>
+      ) : null}
     </div>
   );
 }

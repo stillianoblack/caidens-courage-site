@@ -1,0 +1,1457 @@
+/**
+ * Kids Adventure Visual System — MOBILE kid-facing routes (<768px).
+ * Scoped to .kids-adventure-shell. Desktop kid-facing styles live in
+ * kids-adventure-visual-system-desktop.css.
+ */
+
+@media (max-width: 767px) {
+  /* —— Warm base, no clinical wash —— */
+  .kids-adventure-shell .family-content {
+    background: #faf8f5;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub,
+  .kids-adventure-shell .family-panel--courageHub,
+  .kids-adventure-shell .inventoryPanel {
+    gap: 1rem;
+  }
+
+  /* —— Icon-only mobile header (no title, no divider) —— */
+  .portal-header--familyMobile {
+    min-height: auto;
+    padding: 0.45rem 0.75rem;
+    box-shadow: none;
+    backdrop-filter: none;
+    background: #faf8f5;
+    border-bottom: none;
+    grid-template-columns: 1fr;
+    grid-template-areas: 'tools';
+    gap: 0;
+  }
+
+  .portal-header--familyMobile .portal-headerLead {
+    display: none;
+  }
+
+  .portal-header--familyMobile .portal-headerTools {
+    grid-area: tools;
+    justify-self: stretch;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 0.4rem;
+  }
+
+  .portal-header--familyMobile .family-notificationBellBtn {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .portal-header--familyMobile .family-portalMobileChip {
+    min-height: 2.75rem;
+    padding: 0 0.65rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .portal-header--familyMobile .family-portalMobilePlayerChip {
+    padding: 0;
+    max-width: none;
+    background: transparent;
+    border: none;
+  }
+
+  .portal-header--familyMobile .family-portalMobilePlayerName {
+    display: none;
+  }
+
+  .portal-header--familyMobile .family-portalMobilePlayerAvatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
+    background: linear-gradient(145deg, #f0d078, #e5c06a);
+    color: #1a1035;
+    border: 2px solid rgba(26, 47, 82, 0.12);
+    box-shadow: 0 4px 12px -6px rgba(26, 47, 82, 0.25);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardGrid {
+    overflow: visible;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard {
+    position: relative;
+    isolation: isolate;
+    min-height: 12.75rem;
+    border-radius: 1.75rem;
+    overflow: visible;
+    clip-path: inset(-38% -32% 0 0 round 1.75rem);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme]::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    right: -2.25rem;
+    top: -2.85rem;
+    bottom: 0;
+    left: 42%;
+    background-image: var(--kid-card-image, none);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .family-characterHubSection + .family-characterHubSection {
+    margin-top: 2.5rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .char-questGrid,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardGrid {
+    gap: 1.75rem;
+    padding-top: 0.35rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard:first-child {
+    margin-top: 0.25rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'] {
+    margin-top: 1rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'] {
+    margin-top: 0.85rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='zeke'] {
+    margin-top: 1.5rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardWeekLabel {
+    height: 1.65rem;
+    min-height: 1.65rem;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(6px);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain {
+    position: relative;
+    z-index: 2;
+    min-height: 12.75rem;
+    padding: 1.25rem 1rem 1.15rem;
+    padding-right: 44%;
+    justify-content: flex-end;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::before {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardTitle {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardDesc {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    -webkit-line-clamp: 3;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardFoot {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.4rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardWeekLabel {
+    flex: 0 1 auto;
+    min-width: fit-content;
+    width: fit-content;
+    max-width: none;
+    padding-inline: 14px;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardCta {
+    flex-shrink: 0;
+  }
+
+  .kids-adventure-shell .portal-pageIntro,
+  .kids-adventure-shell .family-characterHubIntro,
+  .kids-adventure-shell .inventoryPanelHeader .portal-pageIntro,
+  .kids-adventure-shell .family-panelIntro,
+  .kids-adventure-shell .family-panelIntroTitle {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub,
+  .kids-adventure-shell .inventoryPanel {
+    gap: 0.85rem;
+  }
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardAvatar,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardAvatar--fallback,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardAvatar--zekePlaceholder {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(8, 18, 36, 0.72) 0%, rgba(8, 18, 36, 0.96) 52%, rgba(8, 18, 36, 0.99) 100%);
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(232, 191, 79, 0.15) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(60, 35, 8, 0.75) 0%, rgba(26, 47, 82, 0.97) 42%, rgba(8, 18, 36, 0.99) 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.18) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(46, 16, 101, 0.78) 0%, rgba(49, 46, 129, 0.97) 42%, rgba(15, 10, 35, 0.99) 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='zeke'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(249, 115, 22, 0.18) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(124, 45, 18, 0.78) 0%, rgba(15, 118, 110, 0.88) 40%, rgba(26, 20, 16, 0.99) 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='charlie'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(34, 197, 94, 0.18) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(20, 83, 45, 0.78) 0%, rgba(30, 64, 175, 0.94) 42%, rgba(5, 46, 16, 0.99) 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='b4'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.18) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(8, 47, 73, 0.78) 0%, rgba(30, 58, 138, 0.97) 42%, rgba(8, 47, 73, 0.99) 100%);
+  }
+
+  /* —— Character Hub — cinematic full-color cards —— */
+  .kids-adventure-shell .weeklyAdventureCard {
+    position: relative;
+    min-height: 11.5rem;
+    border: none;
+    border-radius: 1.75rem;
+    background: #1a2f52;
+    box-shadow: 0 16px 40px -18px rgba(15, 35, 70, 0.5);
+    overflow: hidden;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardStrip {
+    display: none;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardMain {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 0.55rem;
+    padding: 1.35rem 1.25rem 1.1rem;
+    min-height: 11.5rem;
+    overflow: hidden;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardMain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--kid-card-image, none);
+    background-size: cover;
+    background-position: center 20%;
+    opacity: 0.28;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardMain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(15, 35, 70, 0.55) 0%, rgba(15, 35, 70, 0.94) 48%, rgba(8, 18, 36, 0.98) 100%);
+    mask-image: radial-gradient(ellipse 85% 85% at 0% 100%, #000 0%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 85% at 0% 100%, #000 0%, transparent 72%);
+    pointer-events: none;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='caiden'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(232, 191, 79, 0.22) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(120, 53, 15, 0.45) 0%, rgba(26, 47, 82, 0.96) 40%, rgba(8, 18, 36, 0.98) 100%);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='miranda'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.28) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(76, 29, 149, 0.5) 0%, rgba(49, 46, 129, 0.95) 42%, rgba(15, 10, 35, 0.98) 100%);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='zeke'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(249, 115, 22, 0.28) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(154, 52, 18, 0.48) 0%, rgba(15, 118, 110, 0.82) 40%, rgba(26, 20, 16, 0.98) 100%);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='charlie'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(34, 197, 94, 0.28) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(21, 128, 61, 0.48) 0%, rgba(30, 64, 175, 0.9) 42%, rgba(5, 46, 16, 0.98) 100%);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='b4'] .weeklyAdventureCardMain::after {
+    background:
+      radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.28) 0 1px, transparent 1px) 0 0 / 11px 11px,
+      linear-gradient(155deg, rgba(8, 47, 73, 0.5) 0%, rgba(30, 58, 138, 0.94) 42%, rgba(8, 47, 73, 0.98) 100%);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardAvatar,
+  .kids-adventure-shell .weeklyAdventureCardAvatar--fallback,
+  .kids-adventure-shell .weeklyAdventureCardAvatar--zekePlaceholder {
+    position: relative;
+    z-index: 1;
+    grid-column: auto;
+    grid-row: auto;
+    width: 4.75rem;
+    height: 4.75rem;
+    margin: 0;
+    border: 3px solid rgba(255, 255, 255, 0.88);
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardText {
+    position: relative;
+    z-index: 1;
+    grid-column: auto;
+    grid-row: auto;
+    min-width: 0;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardTitle {
+    font-size: 1.125rem;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardDesc {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.88);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardTags {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardFoot {
+    position: relative;
+    z-index: 1;
+    grid-column: auto;
+    grid-row: auto;
+    margin-top: 0.15rem;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardWeekLabel {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-weight: 800;
+    font-size: 0.6875rem;
+    text-transform: none;
+    letter-spacing: 0.01em;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCardCta {
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    border: none;
+    box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.45);
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='caiden'] .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #f0d078, #e8bf4f);
+    color: #1a1035;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='miranda'] .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+    color: #fff;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='zeke'] .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #fdba74, #f97316);
+    color: #1a1035;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='charlie'] .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #86efac, #22c55e);
+    color: #052e16;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme='b4'] .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #67e8f9, #0ea5e9);
+    color: #082f49;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard--dr-victoria .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #ddd6fe, #8b5cf6);
+    color: #fff;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard--uncle-t .weeklyAdventureCardCta {
+    background: linear-gradient(135deg, #fcd34d, #f59e0b);
+    color: #1a1035;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard--locked .weeklyAdventureCardCta {
+    background: rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: none;
+  }
+
+  .kids-adventure-shell .weeklyAdventureCard--link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 44px -16px rgba(15, 35, 70, 0.55);
+  }
+
+  /* —— Weekly Adventures — compact mission cards (panel) —— */
+  .kids-adventure-shell .courageMissionListPanel {
+    border: none;
+    border-radius: 1.75rem;
+    background: #faf8f5;
+    box-shadow: none;
+  }
+
+  .kids-adventure-shell .courageMissionListPanelHeader,
+  .kids-adventure-shell .courageMissionListPanelProgress {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .kids-adventure-shell .courageMissionListPanelProgress {
+    border-bottom-color: rgba(15, 35, 70, 0.08);
+  }
+
+  .kids-adventure-shell .courageMissionListRows {
+    padding: 0.25rem 1.25rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .kids-adventure-shell .courageMissionListPanel .courageMissionListRow--compact {
+    min-height: 5.25rem;
+    padding: 1.25rem;
+    border-radius: 1.75rem;
+  }
+
+  .kids-adventure-shell .courageMissionListPanel .courageMissionListRowTitle {
+    font-size: 1.0625rem;
+  }
+
+  .kids-adventure-shell .courageMissionListPanel .courageMissionListRowStart {
+    min-height: 2.25rem;
+    min-width: 5.5rem;
+  }
+
+  /* —— Hub controls — clean card, not washed panel —— */
+  .kids-adventure-shell .courageHubControls--mobileBar {
+    border-radius: 1.25rem;
+    background: #fff;
+    border: 1px solid rgba(15, 35, 70, 0.08);
+    box-shadow: 0 8px 24px -16px rgba(15, 35, 70, 0.25);
+  }
+
+  /* —— Mission bottom sheet — floating, rounded —— */
+  .kids-adventure-shell .courageMissionCardBackdrop {
+    background: rgba(8, 18, 36, 0.52);
+    backdrop-filter: blur(3px);
+  }
+
+  .kids-adventure-shell .courageMissionCardSheet {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: calc(100% - 24px);
+    max-height: min(78vh, 34rem);
+    border-radius: 1.75rem;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  }
+
+  .kids-adventure-shell .courageMissionCardSheet .courageMissionCard {
+    border-radius: 1.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    padding-bottom: calc(1.35rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .kids-adventure-shell .courageMissionCardPortrait {
+    width: 6.25rem;
+    height: 6.25rem;
+  }
+
+  .kids-adventure-shell .courageMissionCardSecondary {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.62);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .kids-adventure-shell .courageMissionCardSecondary:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  /* —— Inventory — cinematic collectible cards —— */
+  .kids-adventure-shell .kidInventoryCard {
+    padding: 1rem 0.85rem;
+    border-radius: 1.75rem;
+    background: linear-gradient(155deg, #1a2f52 0%, #152238 55%, #0a1428 100%);
+    border: 2px solid rgba(229, 192, 106, 0.38);
+    box-shadow: 0 14px 36px -16px rgba(15, 35, 70, 0.5);
+    color: #fff;
+    gap: 0.45rem;
+  }
+
+  .kids-adventure-shell .kidInventoryCardLabel {
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .kids-adventure-shell .kidInventoryCardCost {
+    color: #fde68a;
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .kids-adventure-shell .kidInventoryCardDesc {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--sticker {
+    aspect-ratio: 5 / 7;
+    max-width: 11rem;
+    padding: 0.85rem 0.75rem 0.7rem;
+    border: 2px solid rgba(229, 192, 106, 0.45);
+    border-radius: 1.75rem;
+    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
+    color: #fff;
+    box-shadow: 0 14px 32px -14px rgba(15, 35, 70, 0.5);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardLabel,
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardDesc {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArtWrap {
+    width: 100%;
+    height: auto;
+    min-height: 5.75rem;
+    flex: 1;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0.15rem;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArt {
+    max-width: 5.5rem;
+    max-height: 5.5rem;
+    opacity: 1;
+    filter: none;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--sticker[data-kid-theme],
+  .kids-adventure-shell .kidInventoryCard--sticker:not([data-kid-theme]) {
+    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--decoration {
+    background: #0f766e;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop {
+    width: 100%;
+    max-width: 11rem;
+    aspect-ratio: 5 / 7;
+    min-height: 0;
+    padding: 0.85rem 0.75rem 0.7rem;
+    opacity: 1;
+    align-items: stretch;
+    text-align: left;
+    border-radius: 1.75rem;
+    border: 2px solid rgba(229, 192, 106, 0.45);
+    gap: 0.4rem;
+    box-shadow: 0 14px 36px -14px rgba(15, 35, 70, 0.55);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop[data-kid-theme='caiden'] {
+    background: linear-gradient(160deg, #b45309 0%, #92400e 55%, #1a2f52 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop[data-kid-theme='miranda'] {
+    background: linear-gradient(160deg, #8b5cf6 0%, #6d28d9 55%, #312e81 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop[data-kid-theme='zeke'] {
+    background: linear-gradient(160deg, #fb923c 0%, #ea580c 50%, #0f766e 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop[data-kid-theme='charlie'] {
+    background: linear-gradient(160deg, #4ade80 0%, #15803d 50%, #1e40af 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop[data-kid-theme='b4'] {
+    background: linear-gradient(160deg, #38bdf8 0%, #0284c7 50%, #1e3a8a 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop:not([data-kid-theme]) {
+    background: linear-gradient(160deg, #3b82f6 0%, #1e3a8a 55%, #152238 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArtWrap {
+    width: 5rem;
+    height: 5rem;
+    align-self: center;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArt {
+    max-width: 4.75rem;
+    max-height: 4.75rem;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--item {
+    background: #1e3a8a;
+  }
+
+  .kids-adventure-shell .kidInventoryCardArtWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 0.85rem;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    padding: 0.35rem;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .kids-adventure-shell .kidInventoryCardArt {
+    width: 100%;
+    height: 100%;
+    max-width: 2.75rem;
+    max-height: 2.75rem;
+    object-fit: contain;
+    margin: auto;
+  }
+
+  .kids-adventure-shell .kidInventoryCardLabel {
+    font-size: 0.875rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardLabel {
+    font-size: 1.0625rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardDesc {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 2;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardCost {
+    font-size: 0.8125rem;
+    font-weight: 800;
+  }
+
+  .kids-adventure-shell .kidInventoryCardDesc {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .kids-adventure-shell .inventorySection,
+  .kids-adventure-shell .inventoryShop {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .kids-adventure-shell .inventorySectionTitle {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    margin-bottom: 0.65rem;
+    color: #1a2f52;
+  }
+
+  .kids-adventure-shell .inventoryCardGrid {
+    gap: 0.85rem;
+  }
+
+  .kids-adventure-shell .inventoryCardGrid--shop {
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .kids-adventure-shell .inventoryPanelHeader > .focusCoinWalletBadge {
+    display: none;
+  }
+
+  .kids-adventure-shell .kidInventoryCardFallback {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardFallback {
+    background: rgba(232, 191, 79, 0.35);
+    color: #fde68a;
+  }
+
+  .kids-adventure-shell .inventoryShopNote {
+    color: rgba(26, 47, 82, 0.65);
+  }
+
+  /* —— Character profile —— */
+  .kids-adventure-shell .characterProfile {
+    border-radius: 1.75rem;
+    padding: 1.15rem;
+    background: #fff;
+    border: 1px solid rgba(15, 35, 70, 0.08);
+    box-shadow: 0 12px 32px -20px rgba(15, 35, 70, 0.3);
+  }
+
+  .kids-adventure-shell .characterProfile--caiden {
+    border-top: 4px solid #e8bf4f;
+  }
+
+  .kids-adventure-shell .characterProfile--miranda {
+    border-top: 4px solid #8b5cf6;
+  }
+
+  .kids-adventure-shell .characterProfile--zeke {
+    border-top: 4px solid #f97316;
+  }
+
+  .kids-adventure-shell .characterProfile--charlie {
+    border-top: 4px solid #22c55e;
+  }
+
+  .kids-adventure-shell .characterProfile--b4 {
+    border-top: 4px solid #0ea5e9;
+  }
+
+  .kids-adventure-shell .characterProfileBtn--secondary {
+    border: 2px solid rgba(26, 47, 82, 0.18);
+    color: #1a2f52;
+    background: #fff;
+  }
+
+  /* —— Reward / mission complete —— */
+  .kids-adventure-shell .courageMissionCompleteCapture,
+  .portal-shell--familyMobileGame .courageMissionCompleteCapture {
+    border-radius: 1.75rem;
+  }
+
+  .kids-adventure-shell .courageMissionCompleteBtn--secondary,
+  .portal-shell--familyMobileGame .courageMissionCompleteBtn--secondary {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.62);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .kids-adventure-shell .courageMissionCompleteRewardCard,
+  .portal-shell--familyMobileGame .courageMissionCompleteRewardCard {
+    border-radius: 1.125rem;
+  }
+
+  .courageMissionComplete--caiden .courageMissionCompleteCapture {
+    border-top: 4px solid #e8bf4f;
+  }
+
+  .courageMissionComplete--miranda .courageMissionCompleteCapture {
+    border-top: 4px solid #8b5cf6;
+  }
+
+  .courageMissionComplete--zeke .courageMissionCompleteCapture {
+    border-top: 4px solid #f97316;
+  }
+
+  .courageMissionComplete--charlie .courageMissionCompleteCapture {
+    border-top: 4px solid #22c55e;
+  }
+
+  .courageMissionComplete--b4 .courageMissionCompleteCapture {
+    border-top: 4px solid #0ea5e9;
+  }
+
+  .courageMissionComplete--b4 .courageMissionCompleteBadge {
+    background: linear-gradient(145deg, #67e8f9, #0ea5e9);
+    color: #082f49;
+  }
+
+  /* —— Week 1 extras —— */
+  .kids-adventure-shell .week1ExtrasCard {
+    border-radius: 1.75rem;
+    box-shadow: 0 12px 32px -18px rgba(15, 35, 70, 0.35);
+  }
+
+  .kids-adventure-shell .week1ExtrasCardBtn {
+    background: linear-gradient(135deg, #f0d078, #e5c06a);
+    color: #1a1035;
+  }
+
+  /* —— B-4 mission cyan theme —— */
+  .kids-adventure-shell .bbc-app {
+    --bbc-gold: #38bdf8;
+    --bbc-gold-dark: #0ea5e9;
+    --bbc-gold-pale: #ecfeff;
+  }
+
+  .kids-adventure-shell .bbc-app .bbc-topBar {
+    border-bottom-color: rgba(14, 165, 233, 0.25);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--disabled:not(.kidInventoryCard--shop) {
+    opacity: 0.72;
+    filter: grayscale(0.12);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shop.kidInventoryCard--disabled {
+    opacity: 1;
+    filter: none;
+  }
+
+  .kidMissionActionCard.courageMissionListRowStart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font: inherit;
+  }
+
+  /* —— Mobile game — cinematic scenario cards —— */
+  .kids-adventure-shell .portal-gameFrame .shared-mission-game .mission-scenarioCard,
+  .portal-shell--familyMobileGame .portal-gameFrame .shared-mission-game .mission-scenarioCard {
+    border-radius: 1.75rem;
+    border: none;
+    overflow: hidden;
+    box-shadow: 0 14px 36px -18px rgba(15, 35, 70, 0.45);
+    padding: 0;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCard,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCard {
+    background: linear-gradient(155deg, rgba(232, 191, 79, 0.95) 0%, rgba(26, 47, 82, 0.96) 48%, rgba(8, 18, 36, 0.98) 100%);
+    color: #fff;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCardHead,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCardHead {
+    padding: 0.65rem 0.85rem 0;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCardLabel,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCardLabel {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCardTag,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCardTag {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCard .mission-scenarioCardBody,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCard .mission-scenarioCardBody {
+    padding: 0.65rem 0.85rem 0.85rem;
+    gap: 0.75rem;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .caiden-questCardText,
+  .portal-shell--familyMobileGame .portal-gameFrame .caiden-questCardText {
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .shared-mission-game .mission-scenarioIllustration,
+  .portal-shell--familyMobileGame .portal-gameFrame .shared-mission-game .mission-scenarioIllustration {
+    width: 5.25rem;
+    min-height: 5.25rem;
+    max-width: 5.25rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .kids-adventure-shell .inventoryCardGrid--shop {
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 1rem;
+  }
+
+  .kids-adventure-shell .inventoryShop {
+    gap: 0.75rem;
+  }
+
+  .kids-adventure-shell .inventoryShopNote {
+    margin-bottom: 0.5rem;
+  }
+
+  .kids-adventure-shell .courageMissionCardCharacter {
+    display: none;
+  }
+
+  .kids-adventure-shell .courageMissionCardPrimary,
+  .kids-adventure-shell .courageMissionCardSecondary {
+    border-radius: 999px;
+    font-weight: 800;
+    padding: 0.75rem 1.15rem;
+  }
+
+  .kids-adventure-shell .courageMissionListRowCharacter {
+    display: none;
+  }
+
+  .kids-adventure-shell .courageMissionListPanel .courageMissionListRowCharacter {
+    display: block;
+  }
+
+  .portal-shell--familyMobileGame .ds-gameplayTopBar {
+    box-shadow: none;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .portal-shell--familyMobileGame .ds-questionCard--gameScenario {
+    border-radius: 1.35rem;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 12px 32px -18px rgba(15, 35, 70, 0.2);
+  }
+
+  .portal-shell--familyMobileGame .ds-characterScenarioImage {
+    max-width: 6.5rem;
+    max-height: 5.5rem;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .shared-mission-game .bbc-answerCard,
+  .portal-shell--familyMobileGame .portal-gameFrame .shared-mission-game .bbc-answerCard {
+    min-height: 3.85rem;
+    border-radius: 1.125rem;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+    border-width: 2px;
+    box-shadow: 0 8px 22px -14px rgba(15, 35, 70, 0.18);
+  }
+
+  .kids-adventure-shell .portal-gameFrame .shared-mission-game .mission-speechAvatar,
+  .portal-shell--familyMobileGame .portal-gameFrame .shared-mission-game .mission-speechAvatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 2px solid rgba(232, 191, 79, 0.55);
+  }
+
+  .kids-adventure-shell .portal-gameFrame .bbc-app,
+  .portal-shell--familyMobileGame .portal-gameFrame .bbc-app {
+    background: #faf8f5;
+  }
+
+  .kids-adventure-shell .portal-gameFrame .bbc-main--quiz,
+  .portal-shell--familyMobileGame .portal-gameFrame .bbc-main--quiz {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
+  /* —— Reward card component —— */
+  .kidRewardCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 0.75rem;
+    border-radius: 1.125rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+  }
+
+  .kidRewardCardLabel {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .kidRewardCardFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #fde68a, #e5c06a);
+    color: #1a1035;
+  }
+
+  .kidRewardCard[data-kid-theme='miranda'] .kidRewardCardFallback {
+    background: linear-gradient(145deg, #ddd6fe, #8b5cf6);
+    color: #fff;
+  }
+
+  .kidRewardCard[data-kid-theme='zeke'] .kidRewardCardFallback {
+    background: linear-gradient(145deg, #fdba74, #f97316);
+    color: #1a1035;
+  }
+
+  .kidRewardCard[data-kid-theme='charlie'] .kidRewardCardFallback {
+    background: linear-gradient(145deg, #86efac, #22c55e);
+    color: #052e16;
+  }
+
+  .kidRewardCard[data-kid-theme='b4'] .kidRewardCardFallback {
+    background: linear-gradient(145deg, #67e8f9, #0ea5e9);
+    color: #082f49;
+  }
+
+  /* —— Character hub final overrides (consistent cards, hero character on color) —— */
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard {
+    position: relative;
+    isolation: isolate;
+    min-height: 12.75rem;
+    overflow: visible;
+    clip-path: inset(-38% -32% 0 0 round 1.75rem);
+    border-radius: 1.75rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme]::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    right: -2.25rem;
+    top: -2.85rem;
+    bottom: 0;
+    left: 42%;
+    background-image: var(--kid-card-image, none);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain {
+    position: relative;
+    z-index: 2;
+    min-height: 12.75rem;
+    padding: 1.25rem 1rem 1.15rem;
+    padding-right: 42%;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::before {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'] {
+    background: linear-gradient(145deg, #b45309 0%, #1a2f52 52%, #152238 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'] {
+    background: linear-gradient(145deg, #7c3aed 0%, #4c1d95 48%, #1e1035 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='zeke'] {
+    background: linear-gradient(145deg, #ea580c 0%, #0f766e 45%, #1c1917 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='charlie'] {
+    background: linear-gradient(145deg, #16a34a 0%, #1e40af 48%, #052e16 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='b4'] {
+    background: linear-gradient(145deg, #0ea5e9 0%, #1e3a8a 48%, #082f49 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--dr-victoria {
+    background: linear-gradient(145deg, #7c3aed 0%, #312e81 48%, #1a1035 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--uncle-t {
+    background: linear-gradient(145deg, #c9732d 0%, #1a2f52 48%, #0d1a30 100%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--dr-victoria::after,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--uncle-t::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    right: -2rem;
+    top: -2.75rem;
+    bottom: 0;
+    left: 38%;
+    background-image: var(--kid-card-image, none);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::before {
+    display: none;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme]::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    right: -2rem;
+    top: -2.75rem;
+    bottom: 0;
+    left: 38%;
+    background-image: var(--kid-card-image, none);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::after {
+    z-index: 0;
+    inset: 0;
+    mask-image: none;
+    -webkit-mask-image: none;
+    background: linear-gradient(102deg, rgba(8, 18, 36, 0.78) 0%, rgba(8, 18, 36, 0.42) 40%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'] .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(60, 35, 8, 0.72) 0%, rgba(26, 47, 82, 0.38) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'] .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(46, 16, 101, 0.75) 0%, rgba(49, 46, 129, 0.4) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='zeke'] .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(124, 45, 18, 0.72) 0%, rgba(15, 118, 110, 0.38) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='charlie'] .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(20, 83, 45, 0.72) 0%, rgba(30, 64, 175, 0.38) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='b4'] .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(8, 47, 73, 0.75) 0%, rgba(30, 58, 138, 0.4) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--dr-victoria .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(46, 16, 101, 0.75) 0%, rgba(49, 46, 129, 0.4) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--uncle-t .weeklyAdventureCardMain::after {
+    background: linear-gradient(102deg, rgba(120, 53, 15, 0.72) 0%, rgba(26, 47, 82, 0.38) 42%, transparent 58%);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardText,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardFoot {
+    z-index: 2;
+  }
+
+  /* Translucent mission-count pills — beat per-theme solid fills */
+  .kids-adventure-shell .weeklyAdventureCard[data-kid-theme] .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--caiden .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--miranda .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--zeke .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--charlie .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--b4 .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--dr-victoria .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .weeklyAdventureCard--uncle-t .weeklyAdventureCardWeekLabel,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardWeekLabel {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    text-transform: none;
+    letter-spacing: 0.01em;
+  }
+
+  /* View Progress card — translucent Caiden in background */
+  .kids-adventure-shell .family-childSummaryCard {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    background: linear-gradient(135deg, #1a2f52 0%, #243e70 100%);
+    box-shadow: 0 12px 32px -16px rgba(15, 35, 70, 0.45);
+  }
+
+  .kids-adventure-shell .family-childSummaryCard::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    right: -8%;
+    bottom: -18%;
+    width: 58%;
+    height: 95%;
+    background-image: url(../../../public/images/caidenscourage/Game-Hub/characters/caiden-hotspot.webp);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
+  .kids-adventure-shell .family-childSummaryCard > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .kids-adventure-shell .family-childSummaryName,
+  .kids-adventure-shell .family-childSummaryProgram,
+  .kids-adventure-shell .family-childSummaryStatusRow {
+    color: #fff;
+  }
+
+  .kids-adventure-shell .family-childSummaryProgram {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .kids-adventure-shell .family-childSummaryStatusRow {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  /* Owned badges — blue playing-card style, glow behind character */
+  .kids-adventure-shell .kidInventoryCard--badge {
+    aspect-ratio: 5 / 7;
+    max-width: 11rem;
+    min-height: 0;
+    padding: 0.85rem 0.75rem 0.7rem;
+    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
+    border: 2px solid rgba(229, 192, 106, 0.55);
+    border-radius: 1.75rem;
+    box-shadow: 0 14px 32px -14px rgba(15, 35, 70, 0.5);
+    gap: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme],
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='caiden'],
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='miranda'],
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='zeke'],
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='charlie'],
+  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='b4'] {
+    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap {
+    width: 100%;
+    height: auto;
+    min-height: 5.75rem;
+    flex: 1;
+    max-width: 100%;
+    border-radius: 0.85rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0.15rem;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArt {
+    max-width: 6.25rem;
+    max-height: 6.5rem;
+    opacity: 1;
+    filter: none;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardLabel {
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardRarity {
+    align-self: flex-start;
+    background: rgba(240, 208, 120, 0.28);
+    color: #fde68a;
+  }
+
+  /* Character glow behind collectible art */
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap,
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArtWrap,
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArtWrap {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap::before,
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArtWrap::before,
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArtWrap::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 88%;
+    height: 88%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(125, 211, 252, 0.72) 0%, rgba(56, 189, 248, 0.28) 42%, transparent 72%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArt,
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArt,
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArt,
+  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardFallback,
+  .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardFallback,
+  .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardFallback {
+    position: relative;
+    z-index: 1;
+  }
+
+  .kids-adventure-shell .inventoryCardGrid--shop {
+    grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .kids-adventure-shell .inventorySection {
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .kids-adventure-shell .inventoryShop {
+    margin-top: 0.5rem;
+  }
+
+  .kids-adventure-shell .kidInventoryCardOwnedMark {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.92);
+    color: #fff;
+    box-shadow: 0 4px 10px -6px rgba(22, 101, 52, 0.55);
+  }
+
+  .kids-adventure-shell .kidInventoryCard {
+    position: relative;
+  }
+
+  .kids-adventure-shell .kidInventoryCardRarity {
+    display: inline-flex;
+    align-self: center;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: rgba(240, 208, 120, 0.28);
+    color: #92400e;
+  }
+
+  .kids-adventure-shell .kidInventoryCardCategory {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.82);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .kids-adventure-shell .kidInventoryCardShopCta {
+    display: inline-flex;
+    align-self: stretch;
+    justify-content: center;
+    margin-top: 0.25rem;
+    padding: 0.42rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    background: #1a2f52;
+    color: #fff;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shopState-owned .kidInventoryCardShopCta {
+    background: rgba(34, 197, 94, 0.88);
+    color: #ecfdf5;
+  }
+
+  .kids-adventure-shell .kidInventoryCard--shopState-need_coins .kidInventoryCardShopCta {
+    background: #1e3a8a;
+    color: #fff;
+  }
+}

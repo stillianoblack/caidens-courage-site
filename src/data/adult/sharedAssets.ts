@@ -1,8 +1,8 @@
 export const DR_VICTORIA_GUIDE_SRC =
-  '/images/caidenscourage/Character%20Hub/dr-victoria-guide.webp';
+  '/images/caidenscourage/Game-Hub/characters/dr-victoria-guide.webp';
 
 export const UNCLE_T_GUIDE_SRC =
-  '/images/caidenscourage/Character%20Hub/uncle-t-guide.webp';
+  '/images/caidenscourage/Game-Hub/characters/uncle-t-guide.webp';
 
 export const DR_VICTORIA_MISSION_AVATAR = {
   avatarSrc: DR_VICTORIA_GUIDE_SRC,

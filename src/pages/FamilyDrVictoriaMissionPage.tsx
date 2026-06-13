@@ -21,6 +21,7 @@ export default function FamilyDrVictoriaMissionPage() {
       exitLabel="Back to Learning Hub"
       useVictoriaHeader
       embedded
+      skipLanding
       portalSectionPath={DR_VICTORIA_LEARNING_HUB.routes.familySection}
       portalSectionLabel="Return to Parent Corner"
       victoriaHubContinueLabel="Continue Learning Hub"

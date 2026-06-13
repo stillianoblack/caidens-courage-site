@@ -32,7 +32,7 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
   {
     id: 'caiden',
     characterName: 'Caiden',
-    label: 'Courage in the Cave',
+    label: 'Courage by the Bridge',
     token: `${CHARACTER_ASSET_DIR}/caiden-hotspot.webp`,
     thumbnail: `${CHARACTER_ASSET_DIR}/caiden-hotspot.webp`,
     color: 'gold',
@@ -62,7 +62,7 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
   {
     id: 'zeke',
     characterName: 'Zeke',
-    label: "Zeke's Bridge Challenge",
+    label: "Zeke's Cave Challenge",
     token: '/images/characters/zeke_photo_icon_game.webp',
     thumbnail: '/images/characters/zeke_photo_icon_game.webp',
     color: 'orange',

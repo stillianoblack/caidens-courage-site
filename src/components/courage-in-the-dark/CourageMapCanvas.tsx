@@ -17,6 +17,8 @@ type CourageMapCanvasProps = {
   baselineLocked?: boolean;
   selectedHotspotId?: string | null;
   heroBar?: React.ReactNode;
+  mapBackgroundSrc?: string;
+  adminPreviewBadge?: boolean;
   isHotspotComplete: (hotspot: CourageInTheDarkMission) => boolean;
   isHotspotLocked: (hotspot: CourageInTheDarkMission) => boolean;
   animatingHotspotId?: string | null;
@@ -34,7 +36,9 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
   mapLocked = false,
   baselineLocked = false,
   selectedHotspotId = null,
-  heroBar,
+    heroBar,
+    mapBackgroundSrc = COURAGE_IN_THE_DARK_BG,
+    adminPreviewBadge = false,
     isHotspotComplete,
     isHotspotLocked,
     animatingHotspotId = null,
@@ -66,13 +70,17 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
         .join(' ')}
     >
       <img
-        src={COURAGE_IN_THE_DARK_BG}
+        src={mapBackgroundSrc}
         alt=""
         className="courageMapBg"
         width={1600}
         height={900}
         decoding="async"
       />
+
+      {adminPreviewBadge ? (
+        <span className="courageMapAdminPreviewBadge" role="status">Admin Preview</span>
+      ) : null}
 
       {isHub && heroBar ? (
         <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--interactive">

@@ -2,10 +2,10 @@ import { useCallback, useState, type FormEvent } from 'react';
 import {
   B4_RESULTS_ADMIN_PATH,
   BLUE_RIBBON_PILOT_PATH,
-  FAMILY_HUB_PATH,
   FAMILY_PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
+import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
 import { writeBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
 import { applyProgramPortalUnlock, writeActivePortalRole } from '../config/portalContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
@@ -120,7 +120,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
             setParentEmail('');
             setParentLastName('');
             setNeedsLastNameConfirm(false);
-            navigateToPortal(FAMILY_HUB_PATH, 'parent-claim-family');
+            navigateToPortal(resolveFamilyKidDefaultLandingPath(), 'parent-claim-family');
             setSubmitting(false);
             onUnlock?.();
             return;
@@ -177,7 +177,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         writeActivePortalRole('family');
         setAccessCode('');
         onUnlock?.();
-        navigateToPortal(FAMILY_PORTAL_PATH, 'blueribbon-family-code');
+        navigateToPortal(resolveFamilyKidDefaultLandingPath(FAMILY_PORTAL_PATH), 'blueribbon-family-code');
         return;
       }
 

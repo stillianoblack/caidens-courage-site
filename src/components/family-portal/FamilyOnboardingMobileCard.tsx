@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { FAMILY_MISSION_COACH_COPY } from '../../data/familyMissionCoachContent';
 import { useFamilyOnboardingStatus } from '../../hooks/useFamilyOnboardingStatus';
 import { familySettingsTabPath } from '../../lib/familyPortalPaths';
-
 export default function FamilyOnboardingMobileCard() {
   const location = useLocation();
   const { isComplete, loading, progressPercent } = useFamilyOnboardingStatus();

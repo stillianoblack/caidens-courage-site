@@ -88,6 +88,7 @@ export const PROGRAM_ADULT_BASELINE_PATH = `${PROGRAM_ADULT_ASSESSMENT_BASE}/bas
 export const PROGRAM_ADULT_GROWTH_PATH = `${PROGRAM_ADULT_ASSESSMENT_BASE}/growth`;
 
 export const PILOT_PROGRAM_SIGNUP_PATH = '/pilot-program-signup';
+export const PILOT_INFO_PATH = '/pilot-info';
 export const PILOT_TERMS_PATH = '/pilot-terms';
 
 export const PILOT_DASHBOARD_PATH = '/pilot-dashboard';

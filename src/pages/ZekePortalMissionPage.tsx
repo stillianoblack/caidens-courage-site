@@ -21,6 +21,7 @@ export default function ZekePortalMissionPage() {
       exitPath={hubPath}
       exitLabel="Back to Team Quest"
       embedded
+      skipLanding
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}
     />
   );

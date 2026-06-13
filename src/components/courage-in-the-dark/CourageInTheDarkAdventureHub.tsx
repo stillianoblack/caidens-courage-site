@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CourageHubViewMode } from './CourageHubViewToggle';
 import type { CourageInTheDarkMission } from '../../data/courageInTheDarkMap';
+import type { QuestProgressRow } from '../../lib/participantQuestService';
 import { useToast } from '../portal-design-system/ToastProvider';
 import { useCourageAdventureHub } from '../../hooks/useCourageAdventureHub';
 import { useMobileHubLayout } from '../../hooks/useMobileHubLayout';
 import { computeCourageMissionCardAnchor } from '../../lib/courageMapCardPosition';
 import type { AdventureTrailNodeView } from '../../types/adventureTrail';
-import TrailNode from '../../design-system/components/TrailNode';
 import CourageHubHeroBar from './CourageHubHeroBar';
 import CourageHubHeaderCopy from './CourageHubHeaderCopy';
 import CourageHubControls from './CourageHubControls';
 import CourageB4WelcomeOverlay from './CourageB4WelcomeOverlay';
-import type { CourageHubViewMode } from './CourageHubViewToggle';
 import { useCourageWeekWelcome } from '../../hooks/useCourageWeekWelcome';
 import CourageMapCanvas from './CourageMapCanvas';
 import CourageMapMissionCard, {
@@ -18,10 +18,17 @@ import CourageMapMissionCard, {
 } from './CourageMapMissionCard';
 import CourageMissionListPanel from './CourageMissionListPanel';
 import CourageMissionListView from './CourageMissionListView';
+import CourageQuestListPanel from './CourageQuestListPanel';
+import CourageQuestListView from './CourageQuestListView';
+import CourageActivitiesListView from './CourageActivitiesListView';
+import CourageActivitiesPanel from './CourageActivitiesPanel';
+import { type Week1ExtrasPaths } from './Week1ExtrasCards';
 import { CourageHubAudioProvider } from './CourageHubAudioContext';
 import './courage-in-the-dark-map.css';
 import './courage-adventure-hub.css';
 import './courage-b4-welcome.css';
+import './courage-quest-list-panel.css';
+import './courage-activities-panel.css';
 
 const MOBILE_CARD_MQ = '(max-width: 767px)';
 const TABLET_CARD_MQ = '(min-width: 768px) and (max-width: 1100px)';
@@ -35,6 +42,13 @@ function resolveCardLayout(): CardLayout {
   return 'float';
 }
 
+export type CourageHubQuestPanelProps = {
+  quests: QuestProgressRow[];
+  loading?: boolean;
+  claimingKey?: string | null;
+  onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
+};
+
 type CourageInTheDarkAdventureHubProps = {
   weekNodes: AdventureTrailNodeView[];
   supplementaryNodes?: AdventureTrailNodeView[];
@@ -46,11 +60,16 @@ type CourageInTheDarkAdventureHubProps = {
   baselineLocked?: boolean;
   baselineLockedLabel?: string;
   mapLocked?: boolean;
+  mapBackgroundSrc?: string;
+  adminPreview?: boolean;
+  initialViewMode?: CourageHubViewMode;
+  embeddedInFamilyPortal?: boolean;
+  week1ExtrasPaths?: Week1ExtrasPaths;
+  questPanel?: CourageHubQuestPanelProps;
 };
 
 export default function CourageInTheDarkAdventureHub({
   weekNodes,
-  supplementaryNodes = [],
   weekTitle = 'Courage in the Dark',
   week = 1,
   weekUnlockStatus,
@@ -59,11 +78,17 @@ export default function CourageInTheDarkAdventureHub({
   baselineLocked = false,
   baselineLockedLabel = 'Complete B-4 Check-In to unlock',
   mapLocked = false,
+  mapBackgroundSrc,
+  adminPreview = false,
+  initialViewMode,
+  embeddedInFamilyPortal = false,
+  week1ExtrasPaths,
+  questPanel,
 }: CourageInTheDarkAdventureHubProps) {
   const isMobileLayout = useMobileHubLayout();
   const { showToast } = useToast();
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const [viewMode, setViewMode] = useState<CourageHubViewMode>('map');
+  const [viewMode, setViewMode] = useState<CourageHubViewMode>(initialViewMode ?? 'explore');
   const [cardLayout, setCardLayout] = useState<CardLayout>(resolveCardLayout);
   const [cardAnchor, setCardAnchor] = useState<CourageMissionCardAnchor | null>(null);
   const [listComingSoonId, setListComingSoonId] = useState<string | null>(null);
@@ -82,6 +107,7 @@ export default function CourageInTheDarkAdventureHub({
     resolveMissionHref,
     targetHref,
     animatingHotspotId,
+    completedMissionIds,
   } = useCourageAdventureHub({
     weekNodes,
     weekTitle,
@@ -94,10 +120,39 @@ export default function CourageInTheDarkAdventureHub({
   const { showWelcome, dismissWelcome } = useCourageWeekWelcome(week);
 
   useEffect(() => {
-    if (viewMode === 'map') {
+    if (initialViewMode) {
+      setViewMode(initialViewMode);
+    }
+  }, [initialViewMode]);
+
+  const showFamilyMobileControls = embeddedInFamilyPortal && isMobileLayout;
+  const showQuestsTab = Boolean(questPanel);
+  const showActivitiesTab = Boolean(week1ExtrasPaths);
+
+  useEffect(() => {
+    if (viewMode === 'quests' && !showQuestsTab) {
+      setViewMode('explore');
+    }
+    if (viewMode === 'activities' && !showActivitiesTab) {
+      setViewMode('explore');
+    }
+  }, [viewMode, showQuestsTab, showActivitiesTab]);
+
+  useEffect(() => {
+    if (viewMode === 'explore') {
       setListComingSoonId(null);
     }
   }, [viewMode]);
+
+  const handleViewModeChange = useCallback(
+    (mode: CourageHubViewMode) => {
+      setViewMode(mode);
+      if (mode === 'explore') {
+        deselectHotspot();
+      }
+    },
+    [deselectHotspot],
+  );
 
   const updateCardAnchor = useCallback((hotspot: CourageInTheDarkMission | null) => {
     if (!hotspot || !mapRef.current) {
@@ -147,7 +202,7 @@ export default function CourageInTheDarkAdventureHub({
       if (isHotspotLocked(mission)) {
         showToast(getMissionUnlockState(mission).reason, 'info');
       }
-      if (viewMode === 'map' && !isMobileLayout) {
+      if (viewMode === 'explore' && !isMobileLayout) {
         updateCardAnchor(mission);
       }
     },
@@ -185,13 +240,15 @@ export default function CourageInTheDarkAdventureHub({
       selFocus={selFocus}
       weekUnlockStatus={weekUnlockStatus}
       viewMode={viewMode}
-      onViewModeChange={setViewMode}
+      onViewModeChange={handleViewModeChange}
+      showQuestsTab={showQuestsTab}
+      showActivitiesTab={showActivitiesTab}
     />
   );
 
   const missionCard = useMemo(() => {
     if (!selectedHotspot) return null;
-    if (!isMobileLayout && viewMode !== 'map') return null;
+    if (!isMobileLayout && viewMode !== 'explore') return null;
 
     return (
       <CourageMapMissionCard
@@ -234,6 +291,15 @@ export default function CourageInTheDarkAdventureHub({
     />
   );
 
+  const questListPanel = questPanel ? (
+    <CourageQuestListPanel
+      quests={questPanel.quests}
+      loading={questPanel.loading}
+      claimingKey={questPanel.claimingKey}
+      onClaim={questPanel.onClaim}
+    />
+  ) : null;
+
   const mapCanvas = (mapSize: 'full' | 'split', heroBar: React.ReactNode | null) => (
     <div className="courageAdventureHubMapWrap">
       <CourageMapCanvas
@@ -248,36 +314,60 @@ export default function CourageInTheDarkAdventureHub({
         baselineLocked={baselineLocked}
         selectedHotspotId={selectedHotspot?.id ?? null}
         heroBar={heroBar}
+        mapBackgroundSrc={mapBackgroundSrc}
+        adminPreviewBadge={adminPreview}
         isHotspotComplete={isHotspotComplete}
         isHotspotLocked={isHotspotLocked}
         animatingHotspotId={animatingHotspotId}
         onSelectHotspot={handleSelectMission}
       />
       <CourageB4WelcomeOverlay open={showWelcome && !mapLocked && !baselineLocked} onDismiss={dismissWelcome} />
-      {!isMobileLayout && viewMode === 'map' && cardLayout !== 'sheet' ? missionCard : null}
+      {!isMobileLayout && viewMode === 'explore' && cardLayout !== 'sheet' ? missionCard : null}
     </div>
   );
-
-  const supplementarySection =
-    supplementaryNodes.length > 0 ? (
-      <div className="courageMapSupplementary courageMapSupplementary--hero">
-        {supplementaryNodes.map((node) => (
-          <TrailNode
-            key={node.id}
-            node={node}
-            lockedHelperText={
-              node.state === 'locked' && baselineLocked ? baselineLockedLabel : undefined
-            }
-          />
-        ))}
-      </div>
-    ) : null;
 
   const baselineHelper = baselineLocked ? (
     <p className="family-panelHelper" role="status">
       {baselineLockedLabel}
     </p>
   ) : null;
+
+  const splitMapSlot = mapCanvas('split', desktopHeroBar);
+
+  const desktopSplitView =
+    viewMode === 'missions' ? (
+      <CourageMissionListView
+        week={week}
+        viewMode={viewMode}
+        mapSlot={splitMapSlot}
+        completedCount={completedCount}
+        totalAdventures={totalAdventures}
+        selectedMissionId={selectedHotspot?.id ?? null}
+        isMissionComplete={isHotspotComplete}
+        isMissionLocked={isHotspotLocked}
+        getMissionUnlockReason={(mission) => getMissionUnlockState(mission).reason}
+        getMissionHref={resolveMissionHref}
+        onSelectMission={handleSelectMission}
+        onLaunchMission={handleLaunchFromList}
+        comingSoonMissionId={listComingSoonId}
+      />
+    ) : viewMode === 'activities' && week1ExtrasPaths ? (
+      <CourageActivitiesListView
+        viewMode={viewMode}
+        mapSlot={splitMapSlot}
+        completedMissionIds={completedMissionIds}
+        paths={week1ExtrasPaths}
+      />
+    ) : viewMode === 'quests' && questListPanel ? (
+      <CourageQuestListView
+        viewMode={viewMode}
+        mapSlot={splitMapSlot}
+        quests={questPanel!.quests}
+        loading={questPanel!.loading}
+        claimingKey={questPanel!.claimingKey}
+        onClaim={questPanel!.onClaim}
+      />
+    ) : null;
 
   return (
     <CourageHubAudioProvider>
@@ -302,72 +392,79 @@ export default function CourageInTheDarkAdventureHub({
               />
 
               <div
-                id="courage-hub-panel-map"
+                id="courage-hub-panel-explore"
                 role="tabpanel"
-                aria-labelledby="courage-hub-tab-map"
+                aria-labelledby="courage-hub-tab-explore"
                 className="courageAdventureHubView courageAdventureHubView--map"
               >
                 {mapCanvas('full', null)}
                 {cardLayout === 'sheet' ? missionCard : null}
               </div>
 
-              <CourageHubControls
-                variant="mobileBar"
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-                weekUnlockStatus={weekUnlockStatus}
-              />
+              {showFamilyMobileControls || !embeddedInFamilyPortal ? (
+                <CourageHubControls
+                  variant="mobileBar"
+                  viewMode={viewMode}
+                  onViewModeChange={handleViewModeChange}
+                  weekUnlockStatus={weekUnlockStatus}
+                  showQuestsTab={showQuestsTab}
+                  showActivitiesTab={showActivitiesTab}
+                />
+              ) : null}
 
-              {viewMode === 'list' ? (
+              {viewMode === 'missions' ? (
                 <div
-                  id="courage-hub-panel-list"
+                  id="courage-hub-panel-missions"
                   role="tabpanel"
-                  aria-labelledby="courage-hub-tab-list"
+                  aria-labelledby="courage-hub-tab-missions"
                   className="courageAdventureHubMobileList"
                 >
                   {missionListPanel}
                 </div>
               ) : null}
 
+              {viewMode === 'activities' && week1ExtrasPaths ? (
+                <div
+                  id="courage-hub-panel-activities"
+                  role="tabpanel"
+                  aria-labelledby="courage-hub-tab-activities"
+                  className="courageAdventureHubMobileActivities"
+                >
+                  <CourageActivitiesPanel
+                    completedMissionIds={completedMissionIds}
+                    paths={week1ExtrasPaths}
+                  />
+                </div>
+              ) : null}
+
+              {viewMode === 'quests' && questListPanel ? (
+                <div
+                  id="courage-hub-panel-quests"
+                  role="tabpanel"
+                  aria-labelledby="courage-hub-tab-quests"
+                  className="courageAdventureHubMobileQuests"
+                >
+                  {questListPanel}
+                </div>
+              ) : null}
+
               {baselineHelper}
-              {supplementarySection}
             </div>
-          ) : viewMode === 'map' ? (
+          ) : viewMode === 'explore' ? (
             <div
-              id="courage-hub-panel-map"
+              id="courage-hub-panel-explore"
               role="tabpanel"
-              aria-labelledby="courage-hub-tab-map"
+              aria-labelledby="courage-hub-tab-explore"
               className="courageAdventureHubView courageAdventureHubView--map"
             >
               {mapCanvas('full', desktopHeroBar)}
               {cardLayout === 'sheet' ? missionCard : null}
             </div>
           ) : (
-            <div className="courageAdventureHubView courageAdventureHubView--list">
-              <CourageMissionListView
-                week={week}
-                viewMode={viewMode}
-                mapSlot={mapCanvas('split', desktopHeroBar)}
-                completedCount={completedCount}
-                totalAdventures={totalAdventures}
-                selectedMissionId={selectedHotspot?.id ?? null}
-                isMissionComplete={isHotspotComplete}
-                isMissionLocked={isHotspotLocked}
-                getMissionUnlockReason={(mission) => getMissionUnlockState(mission).reason}
-                getMissionHref={resolveMissionHref}
-                onSelectMission={handleSelectMission}
-                onLaunchMission={handleLaunchFromList}
-                comingSoonMissionId={listComingSoonId}
-              />
-            </div>
+            desktopSplitView
           )}
 
-          {!isMobileLayout ? (
-            <>
-              {baselineHelper}
-              {supplementarySection}
-            </>
-          ) : null}
+          {!isMobileLayout ? baselineHelper : null}
         </div>
       </div>
     </CourageHubAudioProvider>

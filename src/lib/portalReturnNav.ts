@@ -24,8 +24,10 @@ const PORTAL_RETURN_LABELS: Array<{ match: (path: string) => boolean; label: str
   {
     match: (path) =>
       path.startsWith(`${FAMILY_PORTAL_PATH}/continue-learning`) ||
-      path.startsWith(`${FAMILY_HUB_PATH}/continue-learning`),
-    label: '← Back to Weekly Adventures',
+      path.startsWith(`${FAMILY_HUB_PATH}/continue-learning`) ||
+      path.startsWith(`${FAMILY_PORTAL_PATH}/weekly-adventures`) ||
+      path.startsWith(`${FAMILY_HUB_PATH}/weekly-adventures`),
+    label: '← Back to Adventure Map',
   },
   {
     match: (path) =>
@@ -129,8 +131,11 @@ export function resolvePortalBackTarget(pathname: string): { path: string; hubNa
   ) {
     return { path: resolvePortalCharacterHubPath(pathname), hubName: 'Character Hub' };
   }
-  if (pathname.includes('/continue-learning')) {
-    return { path: getPortalRoute('continue-learning', pathname), hubName: 'Weekly Adventures' };
+  if (
+    pathname.includes('/continue-learning') ||
+    pathname.includes('/weekly-adventures')
+  ) {
+    return { path: getPortalRoute('continue-learning', pathname), hubName: 'Adventure Map' };
   }
   return { path: resolvePortalCharacterHubPath(pathname), hubName: 'Character Hub' };
 }

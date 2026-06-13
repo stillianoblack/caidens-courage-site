@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PortalBreadcrumb from '../../components/portal/PortalBreadcrumb';
-import GamePlayerPill from '../../components/game-assessment/shared/GamePlayerPill';
 import SoundToggleButton from '../../components/game-assessment/shared/SoundToggleButton';
 import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
+import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
+import GameBackIconButton from './GameBackIconButton';
 import './gameplay-top-bar.css';
 
 const FLAME_SRC = '/images/icons/focus-flame-mark.svg';
+const MOBILE_GAME_BACK_MQ = '(max-width: 719px)';
+
+function resolveIsMobileGameBack(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia(MOBILE_GAME_BACK_MQ).matches;
+}
 
 export type GameplayTopBarVariant = MissionGameTheme | 'zeke';
 
@@ -39,16 +47,18 @@ export type GameplayTopBarProps = {
 function FlameStatus({
   display,
   lit,
+  className = '',
 }: {
   display: GameplayTopBarFlameDisplay;
   lit: number;
+  className?: string;
 }) {
   if (display === 'none') return null;
 
   if (display === 'single') {
     if (lit <= 0) return null;
     return (
-      <div className="ds-gameplayTopBar-flames" aria-hidden="true">
+      <div className={['ds-gameplayTopBar-flames', className].filter(Boolean).join(' ')} aria-hidden="true">
         <img
           src={FLAME_SRC}
           alt=""
@@ -60,7 +70,7 @@ function FlameStatus({
 
   const total = 5;
   return (
-    <div className="ds-gameplayTopBar-flames" aria-label={`${lit} focus flames`}>
+    <div className={['ds-gameplayTopBar-flames', className].filter(Boolean).join(' ')} aria-label={`${lit} focus flames`}>
       {Array.from({ length: total }, (_, i) => i + 1).map((index) => (
         <img
           key={index}
@@ -100,9 +110,40 @@ export default function GameplayTopBar({
   onToggleSound,
   className = '',
 }: GameplayTopBarProps) {
+  const navigate = useNavigate();
+  const [isMobileGameBack, setIsMobileGameBack] = useState(resolveIsMobileGameBack);
   const resolvedBackLabel = backLabel ?? (hubName ? `Back to ${hubName}` : undefined);
-  const showBack = Boolean(resolvedBackLabel && (backHref || onBack));
+  const showBack = Boolean(resolvedBackLabel && (backHref || onBack || onBackClick));
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_GAME_BACK_MQ);
+    const update = () => setIsMobileGameBack(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
   const resolvedFlameDisplay = showFlameStatus ? flameDisplay : 'none';
+
+  const handleMobileBack = useCallback(() => {
+    onBackClick?.();
+    if (onBack) {
+      onBack();
+      return;
+    }
+    if (backHref) {
+      navigate(backHref);
+      return;
+    }
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate(resolveMobileGameBackTarget(window.location.pathname, window.location.search).path);
+  }, [backHref, navigate, onBack, onBackClick]);
+
+  const mobileBackLabel = backHref
+    ? resolvedBackLabel
+    : resolveMobileGameBackTarget(window.location.pathname, window.location.search).ariaLabel;
 
   return (
     <header
@@ -111,20 +152,32 @@ export default function GameplayTopBar({
         .join(' ')}
     >
       <div className="ds-gameplayTopBar-back">
-        {showBack && backHref && resolvedBackLabel ? (
-          <PortalBreadcrumb
-            label={resolvedBackLabel}
-            href={backHref}
-            onClick={onBackClick}
+        {showBack && !isMobileGameBack && resolvedBackLabel ? (
+          backHref ? (
+            <PortalBreadcrumb
+              label={resolvedBackLabel}
+              href={backHref}
+              onClick={onBackClick}
+              theme={variant}
+              variant="game"
+              className="ds-gameplayTopBar-backText"
+            />
+          ) : (
+            <PortalBreadcrumb
+              label={resolvedBackLabel}
+              onClick={onBack ?? onBackClick}
+              theme={variant}
+              variant="game"
+              className="ds-gameplayTopBar-backText"
+            />
+          )
+        ) : null}
+        {showBack && isMobileGameBack ? (
+          <GameBackIconButton
+            onClick={handleMobileBack}
+            ariaLabel={mobileBackLabel}
             theme={variant}
-            variant="game"
-          />
-        ) : showBack && onBack && resolvedBackLabel ? (
-          <PortalBreadcrumb
-            label={resolvedBackLabel}
-            onClick={onBack}
-            theme={variant}
-            variant="game"
+            className="ds-gameplayTopBar-backIconOnly"
           />
         ) : null}
       </div>
@@ -151,11 +204,18 @@ export default function GameplayTopBar({
       </div>
 
       <div className="ds-gameplayTopBar-controls">
-        <FocusCoinWalletBadge compact />
-        <GamePlayerPill displayName={playerName} playerIndex={playerIndex} />
-        <FlameStatus display={resolvedFlameDisplay} lit={flamesLit} />
+        <FocusCoinWalletBadge compact className="ds-gameplayTopBar-coinChip family-portalMobileChip" />
+        {playerName ? (
+          <span className="ds-gameplayTopBar-playerChip family-portalMobilePlayerChip" title={playerName}>
+            <span className="ds-gameplayTopBar-playerAvatar family-portalMobilePlayerAvatar" aria-hidden="true">
+              {playerName.charAt(0).toUpperCase()}
+            </span>
+            <span className="ds-gameplayTopBar-playerName family-portalMobilePlayerName">{playerName}</span>
+          </span>
+        ) : null}
+        <FlameStatus display={resolvedFlameDisplay} lit={flamesLit} className="ds-gameplayTopBar-flamesDesktop" />
         {onToggleSound ? (
-          <SoundToggleButton soundEnabled={soundEnabled} onToggle={onToggleSound} />
+          <SoundToggleButton soundEnabled={soundEnabled} onToggle={onToggleSound} className="ds-gameplayTopBar-soundBtn" />
         ) : null}
       </div>
     </header>

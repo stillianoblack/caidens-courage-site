@@ -1,19 +1,35 @@
 import React from 'react';
 import type { FamilySidebarNavId } from '../../data/familyPortalContent';
+import type { FamilyMobileBottomNavId } from './FamilyMobileBottomNav';
+
+export type FamilyNavIconName = FamilySidebarNavId | FamilyMobileBottomNavId;
 
 type FamilyNavIconProps = {
-  name: FamilySidebarNavId;
+  name: FamilyNavIconName;
+  className?: string;
 };
 
-export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
+export default function FamilyNavIcon({ name, className }: FamilyNavIconProps) {
   const common = {
-    className: 'family-railIconSvg',
+    className: className ?? 'family-railIconSvg',
     viewBox: '0 0 24 24',
     fill: 'none',
     'aria-hidden': true as const,
   };
 
   switch (name) {
+    case 'home':
+      return (
+        <svg {...common}>
+          <path
+            d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 19v-8.5z"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinejoin="round"
+          />
+          <path d="M10 20.5V14h4v6.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      );
     case 'overview':
       return (
         <svg {...common}>
@@ -30,11 +46,12 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
           <path d="M4 5h16" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
         </svg>
       );
+    case 'adventures':
     case 'continue-learning':
       return (
         <svg {...common}>
           <path
-            d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16.5 7.1 18.2l.9-5.5-4-3.9 5.5-.8L12 3z"
+            d="M12 2.5l2.2 4.5 5 .75-3.6 3.5.85 5L12 14.8 7.35 16.2l.85-5L4.8 7.75l5-.75L12 2.5z"
             stroke="currentColor"
             strokeWidth="1.75"
             strokeLinejoin="round"
@@ -70,6 +87,7 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
         </svg>
       );
     case 'character-hub':
+    case 'characters':
       return (
         <svg {...common}>
           <circle cx="12" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.75" />
@@ -79,9 +97,22 @@ export default function FamilyNavIcon({ name }: FamilyNavIconProps) {
     case 'inventory':
       return (
         <svg {...common}>
-          <path d="M5 7h14l-1 12H6L5 7z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
-          <path d="M9 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-          <path d="M9 11v5M12 11v5M15 11v5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <path
+            d="M7 9h10l-1.1 11H8.1L7 9z"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinejoin="round"
+          />
+          <path d="M9 9V6.5a3 3 0 016 0V9" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <path d="M9.5 13h5.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      );
+    case 'profile':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.75" />
+          <path d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          <circle cx="17.5" cy="7.5" r="1.5" fill="currentColor" />
         </svg>
       );
     default:

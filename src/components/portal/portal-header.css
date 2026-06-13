@@ -104,6 +104,35 @@
     position: static;
   }
 
+  .portal-header--familyMobile {
+    min-height: auto;
+    padding: 0.5rem 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'lead tools';
+    gap: 0.35rem;
+  }
+
+  .portal-header--familyMobile .portal-headerLeadText {
+    gap: 0;
+  }
+
+  .portal-header--familyMobile .portal-headerTitle {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .portal-header--familyMobile .portal-headerCampBadge {
+    display: none;
+  }
+
+  .portal-header--familyMobile .portal-headerTools {
+    justify-self: end;
+    width: auto;
+    max-width: none;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
   .portal-header {
     min-height: auto;
     padding: 0.75rem 1rem;
@@ -160,4 +189,64 @@
     flex-shrink: 0;
     white-space: nowrap;
   }
+}
+
+.family-portalMobileChips {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.family-portalMobilePlayerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 6.5rem;
+  padding: 0.28rem 0.5rem 0.28rem 0.35rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.06);
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  color: var(--family-navy-deep, #1a2f52);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.family-portalMobilePlayerAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgba(229, 192, 106, 0.35);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.family-portalMobilePlayerName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portal-header--familyMobile .family-notificationBellBtn {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.portal-shell--familyMobileNav .family-content {
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0));
+}
+
+.portal-shell--familyMobileGame .family-content {
+  padding-bottom: 0;
+}
+
+.portal-shell--familyMobileGame .family-miniFooter {
+  display: none;
 }

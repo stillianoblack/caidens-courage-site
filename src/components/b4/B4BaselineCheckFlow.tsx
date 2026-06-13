@@ -8,7 +8,7 @@ import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
 import { checkBaselineCompletion } from '../../lib/baselineCompletion';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
 import { ensureParticipantForBaseline } from '../../lib/childProfileService';
-import { readParticipantGradeSettings } from '../../lib/mirandaGradeBandResolver';
+import { readParticipantGradeSettings, readParticipantGradeSettingsAsync } from '../../lib/mirandaGradeBandResolver';
 import { hasCanonicalGradeLevel } from '../../lib/participantGradeDisplay';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
@@ -297,7 +297,7 @@ export default function B4BaselineCheckFlow({
         groupName: readActivePilotProgram()?.groupName || values.groupName,
       });
 
-      const gradeSettings = readParticipantGradeSettings(participant.participantId);
+      const gradeSettings = await readParticipantGradeSettingsAsync(participant.participantId);
       if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
         setPendingBaselineStart({ participant, values });
         setGradeGateParticipantId(participant.participantId);
@@ -714,9 +714,9 @@ export default function B4BaselineCheckFlow({
       <main className={`bbc-main${view === 'landing' ? ' bbc-main--landing' : ''}${view === 'quiz' ? ' bbc-main--quiz' : ''}`}>
         {view === 'landing' ? (
           <div className="bbc-landing">
-            {embedded && onExit ? (
+            {embedded && onExit && !showTopBar ? (
               <button type="button" className="bbc-embeddedBack" onClick={onExit}>
-                {familyPortal ? '← Back to Weekly Adventures' : '← Back to B-4 Missions'}
+                {familyPortal ? '← Back to Adventure Map' : '← Back to B-4 Missions'}
               </button>
             ) : null}
             <p className="bbc-eyebrow">{landingCopy.eyebrow}</p>

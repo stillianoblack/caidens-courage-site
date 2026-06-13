@@ -11,6 +11,8 @@ type CourageHubHeroBarProps = {
   weekUnlockStatus?: string;
   viewMode: CourageHubViewMode;
   onViewModeChange: (mode: CourageHubViewMode) => void;
+  showQuestsTab?: boolean;
+  showActivitiesTab?: boolean;
 };
 
 export default function CourageHubHeroBar({
@@ -21,6 +23,8 @@ export default function CourageHubHeroBar({
   weekUnlockStatus,
   viewMode,
   onViewModeChange,
+  showQuestsTab = false,
+  showActivitiesTab = true,
 }: CourageHubHeroBarProps) {
   return (
     <div
@@ -37,6 +41,8 @@ export default function CourageHubHeroBar({
         viewMode={viewMode}
         onViewModeChange={onViewModeChange}
         weekUnlockStatus={weekUnlockStatus}
+        showQuestsTab={showQuestsTab}
+        showActivitiesTab={showActivitiesTab}
       />
     </div>
   );

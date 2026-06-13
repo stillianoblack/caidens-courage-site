@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import PortalHeader from '../portal/PortalHeader';
+import FamilyPortalMobileHeaderChips from './FamilyPortalMobileHeaderChips';
 import { familyGoalsPath } from '../../lib/familyPortalPaths';
 import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifications';
 
@@ -10,6 +11,7 @@ type FamilyDashboardTopBarProps = {
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
   onOpenMobileNav?: () => void;
+  mobileFamilySimplified?: boolean;
 };
 
 export default function FamilyDashboardTopBar({
@@ -18,6 +20,7 @@ export default function FamilyDashboardTopBar({
   linkedCampLabel = null,
   notifications = [],
   onOpenMobileNav,
+  mobileFamilySimplified = false,
 }: FamilyDashboardTopBarProps) {
   const location = useLocation();
   const programGoalsHref = familyGoalsPath(location.pathname);
@@ -31,6 +34,10 @@ export default function FamilyDashboardTopBar({
       linkedCampLabel={linkedCampLabel}
       notifications={notifications}
       onOpenMobileNav={onOpenMobileNav}
+      mobileFamilySimplified={mobileFamilySimplified}
+      mobileFamilyChips={
+        mobileFamilySimplified ? <FamilyPortalMobileHeaderChips /> : undefined
+      }
     />
   );
 }

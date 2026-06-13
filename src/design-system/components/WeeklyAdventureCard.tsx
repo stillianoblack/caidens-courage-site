@@ -2,6 +2,11 @@ import React from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
 import type { FamilyCharacterId } from '../../data/familyPortalContent';
 import { CHARACTER_ASSETS } from '../../data/familyPortalContent';
+import {
+  getCharacterTheme,
+  resolveCharacterThemeId,
+  resolveHotspotImage,
+} from '../kids-adventure/characterThemes';
 import ZekePlaceholderAvatar from './ZekePlaceholderAvatar';
 import './weekly-adventure-card.css';
 
@@ -24,6 +29,8 @@ export type WeeklyAdventureCardProps = {
   external?: boolean;
   linkState?: LinkProps['state'];
   className?: string;
+  /** When set, card activates in place instead of navigating (Character Hub meet panel). */
+  onActivate?: () => void;
 };
 
 function resolveThemeClass(character?: WeeklyAdventureCardProps['character'], kind?: WeeklyAdventureCardKind) {
@@ -104,18 +111,42 @@ export default function WeeklyAdventureCard({
   external,
   linkState,
   className,
+  onActivate,
 }: WeeklyAdventureCardProps) {
   const themeClass = resolveThemeClass(character, kind);
+  const themeId = character && character !== 'download' && character !== 'activity'
+    ? resolveCharacterThemeId(character)
+    : null;
+  const stripStyle = accentColor
+    ? { background: accentColor }
+    : themeId
+      ? { background: getCharacterTheme(themeId).stripGradient }
+      : undefined;
   const isExternal = external ?? (href.startsWith('/downloads') || href.startsWith('http'));
   const displayCta = locked ? lockedLabel : cta;
   const footerPill = weekLabel ?? (!locked && status ? status : undefined);
+  const cardImageSrc =
+    avatarSrc !== undefined && avatarSrc !== null
+      ? avatarSrc
+      : themeId
+        ? resolveHotspotImage(themeId)
+        : character && character !== 'download' && character !== 'activity'
+          ? CHARACTER_ASSETS[character]?.imageSrc
+          : null;
+  const cardSurfaceStyle: React.CSSProperties | undefined = cardImageSrc
+    ? ({ '--kid-card-image': `url("${cardImageSrc}")` } as React.CSSProperties)
+    : undefined;
+  const cardSurfaceAttrs = {
+    'data-kid-theme': themeId ?? undefined,
+    style: cardSurfaceStyle,
+  };
 
   const content = (
     <>
       <div
         className="weeklyAdventureCardStrip"
         aria-hidden="true"
-        style={accentColor ? { background: accentColor } : undefined}
+        style={stripStyle}
       />
       <div className="weeklyAdventureCardMain">
         <CardAvatar character={character} kind={kind} avatarSrc={avatarSrc} />
@@ -150,22 +181,35 @@ export default function WeeklyAdventureCard({
 
   if (locked) {
     return (
-      <div className={cardClass} aria-disabled="true">
+      <div className={cardClass} aria-disabled="true" {...cardSurfaceAttrs}>
         {content}
       </div>
     );
   }
 
+  if (onActivate) {
+    return (
+      <button
+        type="button"
+        className={cardClass}
+        onClick={onActivate}
+        {...cardSurfaceAttrs}
+      >
+        {content}
+      </button>
+    );
+  }
+
   if (isExternal) {
     return (
-      <a href={href} className={cardClass}>
+      <a href={href} className={cardClass} {...cardSurfaceAttrs}>
         {content}
       </a>
     );
   }
 
   return (
-    <Link to={href} state={linkState} className={cardClass}>
+    <Link to={href} state={linkState} className={cardClass} {...cardSurfaceAttrs}>
       {content}
     </Link>
   );

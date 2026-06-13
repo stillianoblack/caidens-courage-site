@@ -40,6 +40,7 @@ import FamilyChildSummaryCard from '../FamilyChildSummaryCard';
 import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyRecommendedNextCard from '../FamilyRecommendedNextCard';
+import FamilyWeeklyAdventureCtaBanner from '../FamilyWeeklyAdventureCtaBanner';
 import { FamilyJourneyCoachInline } from '../FamilyJourneyCoachPlacement';
 import FamilyOnboardingMobileCard from '../FamilyOnboardingMobileCard';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
@@ -491,6 +492,8 @@ export default function FamilyOverviewPanel() {
 
   return (
     <div className="family-overviewPage">
+      <FamilyWeeklyAdventureCtaBanner />
+      <FamilyJourneyCoachInline />
       <FamilyOnboardingMobileCard />
       <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />
@@ -644,8 +647,6 @@ export default function FamilyOverviewPanel() {
         />
       </div>
       </div>
-
-      <FamilyJourneyCoachInline />
 
       <B4InsightsDrawer
         isOpen={insightsOpen}

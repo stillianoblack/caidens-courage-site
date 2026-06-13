@@ -133,15 +133,24 @@
 
 @media (max-width: 719px) {
   .ds-gameplayTopBar {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'back controls'
-      'progress progress';
-    gap: 0.5rem 0.75rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'back progress controls';
+    gap: 0.35rem 0.5rem;
+    padding: 0.35rem 0.5rem 0.4rem;
   }
 
   .ds-gameplayTopBar-back {
     grid-area: back;
+    display: flex;
+    align-items: center;
+  }
+
+  .ds-gameplayTopBar-backText {
+    display: none;
+  }
+
+  .ds-gameplayTopBar-backIconOnly {
+    display: inline-flex;
   }
 
   .ds-gameplayTopBar-progress {
@@ -151,9 +160,98 @@
   .ds-gameplayTopBar-controls {
     grid-area: controls;
     justify-self: end;
+    gap: 0.35rem;
   }
 
-  .ds-gameplayTopBar-back .game-backBtn-label {
-    font-size: 0.875rem;
+  .ds-gameplayTopBar-flamesDesktop {
+    display: none;
+  }
+
+  .ds-gameplayTopBar-controls .bbc-playerPill {
+    display: none;
+  }
+
+  .ds-gameplayTopBar-controls .family-portalMobilePlayerName {
+    display: none;
+  }
+
+  .ds-gameplayTopBar-controls .family-portalMobilePlayerChip {
+    padding: 0;
+    max-width: none;
+    background: transparent;
+    border: none;
+  }
+
+  .ds-gameplayTopBar-controls .family-portalMobilePlayerAvatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
+    background: linear-gradient(145deg, #f0d078, #e5c06a);
+    color: #1a1035;
+    border: 2px solid rgba(26, 47, 82, 0.12);
+    box-shadow: 0 4px 12px -6px rgba(26, 47, 82, 0.25);
+  }
+
+  .ds-gameplayTopBar-controls .family-portalMobileChip {
+    min-height: 2.75rem;
+    padding: 0 0.65rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .ds-gameplayTopBar-controls .ds-gameplayTopBar-soundBtn {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 2px solid rgba(26, 47, 82, 0.18);
+    background: #fff;
+    box-shadow: 0 4px 12px -8px rgba(26, 47, 82, 0.25);
+  }
+
+  .ds-gameplayTopBar-controls {
+    gap: 0.35rem;
+  }
+
+  .ds-gameplayTopBar-progressGlow {
+    padding: 0.25rem 0.45rem;
+  }
+
+  .ds-gameplayTopBar-progressTrack {
+    height: 0.5rem;
+  }
+}
+
+@media (min-width: 720px) {
+  .ds-gameplayTopBar-backIconOnly {
+    display: none;
+  }
+}
+
+.ds-gameplayTopBar-backIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--family-navy-deep, #1a2f52);
+  cursor: pointer;
+  box-shadow: 0 4px 14px -10px rgba(26, 47, 82, 0.35);
+}
+
+.ds-gameplayTopBar-backIconBtn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+@media (max-width: 719px) {
+  .bbc-main--guideHubBack .game-shellBackBtn {
+    display: none;
   }
 }

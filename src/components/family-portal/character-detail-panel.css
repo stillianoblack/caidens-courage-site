@@ -1,0 +1,447 @@
+.characterDetailSheetRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 16px calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.characterDetailBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 18, 36, 0.58);
+  border: none;
+  cursor: pointer;
+}
+
+.characterDetailPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* —— Mobile bottom sheet —— */
+.characterDetailPanel--sheet {
+  width: 100%;
+  max-width: calc(100vw - 32px);
+  margin: 0 auto;
+  max-height: min(78vh, 40rem);
+  border-radius: 2rem 2rem 0 0;
+  box-shadow: 0 -16px 48px -16px rgba(0, 0, 0, 0.5);
+}
+
+.characterDetailPanel--sheet .characterDetailBody {
+  padding: 0 1.25rem 0.5rem;
+}
+
+.characterDetailPanel--sheet .characterDetailHeader {
+  padding: 0.65rem 1rem 0;
+}
+
+.characterDetailPanel--sheet .characterDetailPortrait {
+  width: 7.5rem;
+  height: 7.5rem;
+  max-width: 150px;
+  max-height: 150px;
+}
+
+.characterDetailPanel--sheet .characterDetailPortraitImage {
+  max-height: 6.75rem;
+}
+
+.characterDetailPanel--sheet .characterDetailActions {
+  padding: 0.75rem 1.25rem 1rem;
+}
+
+/* —— Desktop inspector (fixed right, does not shrink grid) —— */
+.characterDetailPanel--inspector {
+  position: fixed;
+  top: calc(var(--portal-header-height, 4rem) + 1rem);
+  right: 1.25rem;
+  z-index: 55;
+  width: min(360px, calc(100vw - 2rem));
+  max-height: calc(100vh - var(--portal-header-height, 4rem) - 2rem);
+  border-radius: 1.75rem;
+  box-shadow: 0 24px 56px -20px rgba(8, 18, 36, 0.55);
+}
+
+.characterDetailPanel--inspector .characterDetailBody {
+  padding: 0 1.35rem 0.75rem;
+}
+
+.characterDetailPanel--inspector .characterDetailHeader {
+  padding: 0.75rem 1rem 0;
+}
+
+.characterDetailPanel--inspector .characterDetailPortrait {
+  width: 9rem;
+  height: 9rem;
+}
+
+.characterDetailPanel--inspector .characterDetailActions {
+  padding: 0.85rem 1.35rem 1.25rem;
+}
+
+.characterDetailPanel--caiden {
+  background: linear-gradient(180deg, #a54d16 0%, #0d2f67 62%, #081830 100%);
+}
+
+.characterDetailPanel--miranda {
+  background: linear-gradient(180deg, #7c3aed 0%, #1e1035 62%, #0a0618 100%);
+}
+
+.characterDetailPanel--zeke {
+  background: linear-gradient(180deg, #ea580c 0%, #0f766e 55%, #0c1410 100%);
+}
+
+.characterDetailPanel--charlie {
+  background: linear-gradient(180deg, #16a34a 0%, #1e40af 55%, #052e16 100%);
+}
+
+.characterDetailPanel--b4 {
+  background: linear-gradient(180deg, #0ea5e9 0%, #082f49 62%, #041a28 100%);
+}
+
+.characterDetailPanel--dr-victoria {
+  background: linear-gradient(180deg, #7c3aed 0%, #312e81 58%, #1a1035 100%);
+}
+
+.characterDetailPanel--uncle-t {
+  background: linear-gradient(180deg, #c9732d 0%, #1a2f52 58%, #0d1a30 100%);
+}
+
+.characterDetailHeader {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.characterDetailClose {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.characterDetailBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.characterDetailPortrait {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  margin-bottom: 0.65rem;
+  overflow: hidden;
+}
+
+.characterDetailPortrait--caiden {
+  background: radial-gradient(circle at 35% 30%, #fde68a 0%, #e8bf4f 42%, #92400e 100%);
+}
+
+.characterDetailPortrait--miranda {
+  background: radial-gradient(circle at 35% 30%, #ddd6fe 0%, #8b5cf6 45%, #4c1d95 100%);
+}
+
+.characterDetailPortrait--zeke {
+  background: radial-gradient(circle at 35% 30%, #fdba74 0%, #f97316 42%, #0f766e 100%);
+}
+
+.characterDetailPortrait--charlie {
+  background: radial-gradient(circle at 35% 30%, #bbf7d0 0%, #22c55e 42%, #166534 100%);
+}
+
+.characterDetailPortrait--b4 {
+  background: radial-gradient(circle at 35% 30%, #bae6fd 0%, #0ea5e9 42%, #0369a1 100%);
+}
+
+.characterDetailPortrait--dr-victoria {
+  background: radial-gradient(circle at 35% 30%, #ddd6fe 0%, #8b5cf6 45%, #312e81 100%);
+}
+
+.characterDetailPortrait--uncle-t {
+  background: radial-gradient(circle at 35% 30%, #fcd34d 0%, #f59e0b 42%, #b45309 100%);
+}
+
+.characterDetailPortraitImage {
+  width: 88%;
+  height: 88%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 8px 16px -8px rgba(0, 0, 0, 0.4));
+}
+
+.characterDetailPortraitFallback {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.characterDetailName {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.15;
+  width: 100%;
+}
+
+.characterDetailTagline {
+  margin: 0.3rem 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+  width: 100%;
+}
+
+.characterDetailScanRow {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  text-align: left;
+}
+
+.characterDetailScanEmoji {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.characterDetailScanCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.characterDetailScanLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.characterDetailScanValue {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.characterDetailReward {
+  width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  text-align: left;
+}
+
+.characterDetailRewardLabel {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.characterDetailRewardMissions {
+  margin: 0.25rem 0 0.15rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #fff;
+}
+
+.characterDetailRewardUnlock {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.characterDetailUnlockMore {
+  width: 100%;
+  margin-top: 0.55rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: left;
+}
+
+.characterDetailUnlockMoreHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.characterDetailUnlockMoreTitle {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.characterDetailUnlockMorePill {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.characterDetailUnlockMorePill--complete {
+  background: linear-gradient(135deg, #86efac, #22c55e);
+  color: #052e16;
+  border-color: transparent;
+}
+
+.characterDetailUnlockMoreBody {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.characterDetailUnlockMoreIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.characterDetailUnlockMoreText {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.characterDetailUnlockMore--caiden {
+  background: linear-gradient(135deg, rgba(232, 191, 79, 0.28), rgba(26, 47, 82, 0.35));
+}
+
+.characterDetailUnlockMore--miranda,
+.characterDetailUnlockMore--dr-victoria {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.28), rgba(49, 46, 129, 0.35));
+}
+
+.characterDetailUnlockMore--zeke,
+.characterDetailUnlockMore--uncle-t {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.28), rgba(15, 118, 110, 0.32));
+}
+
+.characterDetailUnlockMore--charlie {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.28), rgba(30, 64, 175, 0.32));
+}
+
+.characterDetailUnlockMore--b4 {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.28), rgba(30, 58, 138, 0.35));
+}
+
+.characterDetailActions {
+  flex-shrink: 0;
+  background: linear-gradient(180deg, transparent, rgba(8, 18, 36, 0.35));
+}
+
+.characterDetailPanel--sheet .characterDetailActions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+.characterDetailCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1.35rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  background: linear-gradient(135deg, #f0d078, #e5c06a);
+  color: #1a1035;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.45);
+}
+
+.characterDetailCta--miranda,
+.characterDetailCta--dr-victoria {
+  background: linear-gradient(135deg, #ddd6fe, #8b5cf6);
+  color: #fff;
+}
+
+.characterDetailCta--zeke {
+  background: linear-gradient(135deg, #fdba74, #f97316);
+  color: #1a1035;
+}
+
+.characterDetailCta--charlie {
+  background: linear-gradient(135deg, #86efac, #22c55e);
+  color: #052e16;
+}
+
+.characterDetailCta--b4 {
+  background: linear-gradient(135deg, #67e8f9, #0ea5e9);
+  color: #082f49;
+}
+
+.characterDetailCta--uncle-t {
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+  color: #1a1035;
+}
+
+.family-characterHubLayout {
+  display: block;
+}
+
+.family-characterHubMain {
+  width: 100%;
+  overflow: visible;
+}
+
+.kids-adventure-shell .family-panel--characterHub {
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .characterDetailPanel--inspector .characterDetailCta {
+    min-height: 3.15rem;
+    font-size: 1.0625rem;
+  }
+}

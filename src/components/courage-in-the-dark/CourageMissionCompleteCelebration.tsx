@@ -6,9 +6,13 @@ import { getBadgeArtworkPath, getRewardItemArtworkPath } from '../../lib/rewardA
 import { shareCampAchievement } from '../../lib/shareCampAchievement';
 import { notifyFocusCoinWalletUpdated } from '../../hooks/useFocusCoinWallet';
 import { COURAGE_LOGO_SRC } from '../../config/courageNav';
+import FocusCoinIcon from '../rewards/FocusCoinIcon';
+import { resolveCharacterThemeId, CHARACTER_HOTSPOT_IMAGES } from '../../design-system/kids-adventure/characterThemes';
 import GoldConfetti from '../rewards/GoldConfetti';
 import './courage-mission-complete.css';
 import '../rewards/gold-confetti.css';
+
+const FOCUS_FLAME_BRAND_SRC = '/images/icons/focus-flame-mark.svg';
 
 type CelebrationSounds = {
   playMissionComplete?: () => void;
@@ -140,6 +144,9 @@ export default function CourageMissionCompleteCelebration({
     () => (hasCoinReward ? getNextUnlockPreview(newTotal) : null),
     [hasCoinReward, newTotal],
   );
+  const themeId = resolveCharacterThemeId(payload.character_id ?? payload.character_name);
+  const themeClass = themeId ? `courageMissionComplete--${themeId}` : '';
+  const characterHeroSrc = themeId ? CHARACTER_HOTSPOT_IMAGES[themeId] : null;
 
   useEffect(() => {
     if (!result.ok || result.alreadyCompleted) return;
@@ -192,18 +199,26 @@ export default function CourageMissionCompleteCelebration({
         <h2 className="courageMissionCompleteTitle">Progress Not Saved</h2>
         <p className="courageMissionCompleteBody">{result.message}</p>
         <button type="button" className="courageMissionCompleteBtn" onClick={onReturnToMap}>
-          Return to Adventure Map
+          ← Back to Adventure Map
         </button>
       </div>
     );
   }
 
   return (
-    <div className="courageMissionComplete" role="status">
+    <div className={['courageMissionComplete', themeClass].filter(Boolean).join(' ')} role="status">
       <GoldConfetti active={!isReplay} />
 
       <div ref={captureRef} className="courageMissionCompleteCapture">
         <div className="courageMissionCompleteInner">
+          {characterHeroSrc ? (
+            <img
+              src={characterHeroSrc}
+              alt=""
+              className="courageMissionCompleteHeroArt"
+            />
+          ) : null}
+
           <div className="courageMissionCompleteBadge" aria-hidden="true">
             ✓
           </div>
@@ -223,9 +238,7 @@ export default function CourageMissionCompleteCelebration({
                 <div className="courageMissionCompleteRewardCard courageMissionCompleteRewardCard--coins">
                   <p className="courageMissionCompleteRewardLabel">Focus Coins</p>
                   <p className="courageMissionCompleteCoinTotal" aria-live="polite">
-                    <span className="courageMissionCompleteCoinIcon" aria-hidden="true">
-                      🪙
-                    </span>
+                    <FocusCoinIcon size={22} className="courageMissionCompleteCoinIcon" />
                     {animatedCoins}
                   </p>
                   <p className="courageMissionCompleteCoinEarned">+{result.coinsEarned} earned</p>
@@ -281,7 +294,16 @@ export default function CourageMissionCompleteCelebration({
           )}
 
           <footer className="courageMissionCompleteBrand">
-            <img src={COURAGE_LOGO_SRC} alt="" className="courageMissionCompleteBrandLogo" />
+            <img
+              src={FOCUS_FLAME_BRAND_SRC}
+              alt=""
+              className="courageMissionCompleteBrandLogo"
+            />
+            <img
+              src={COURAGE_LOGO_SRC}
+              alt=""
+              className="courageMissionCompleteBrandMark"
+            />
             <div>
               <p className="courageMissionCompleteBrandTitle">Caiden&apos;s Courage</p>
               <p className="courageMissionCompleteBrandSub">Focus Flame Academy</p>
@@ -313,7 +335,7 @@ export default function CourageMissionCompleteCelebration({
 
       <div className="courageMissionCompleteActions">
         <button type="button" className="courageMissionCompleteBtn" onClick={onReturnToMap}>
-          Return to Adventure Map
+          ← Back to Adventure Map
         </button>
         <button
           type="button"

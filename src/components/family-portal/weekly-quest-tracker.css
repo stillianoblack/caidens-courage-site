@@ -1,0 +1,170 @@
+.weeklyQuestTracker {
+  margin: 0 0 0.85rem;
+}
+
+.weeklyQuestTrackerToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: none;
+  border-radius: 1.15rem;
+  background: linear-gradient(135deg, #1a2f52 0%, #243e70 100%);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 28px -16px rgba(15, 35, 70, 0.45);
+  text-align: left;
+}
+
+.weeklyQuestTrackerToggleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: rgba(240, 208, 120, 0.22);
+  color: #fde68a;
+  flex-shrink: 0;
+}
+
+.weeklyQuestTrackerToggleCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.weeklyQuestTrackerToggleTitle {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.weeklyQuestTrackerToggleMeta {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.weeklyQuestTrackerChevron {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.875rem;
+}
+
+.weeklyQuestTrackerList {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.weeklyQuestTrackerItem {
+  padding: 0.75rem 0.85rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid rgba(26, 47, 82, 0.08);
+  box-shadow: 0 8px 22px -16px rgba(15, 35, 70, 0.25);
+}
+
+.weeklyQuestTrackerItemHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.weeklyQuestTrackerItemIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  background: rgba(240, 208, 120, 0.22);
+  color: #b45309;
+  flex-shrink: 0;
+}
+
+.weeklyQuestTrackerItemCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.weeklyQuestTrackerItemTitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.weeklyQuestTrackerItemDesc {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(26, 47, 82, 0.68);
+}
+
+.weeklyQuestTrackerReward {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: #b45309;
+  white-space: nowrap;
+}
+
+.weeklyQuestTrackerBar {
+  margin-top: 0.55rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(26, 47, 82, 0.1);
+  overflow: hidden;
+}
+
+.weeklyQuestTrackerBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f0d078, #ea580c);
+}
+
+.weeklyQuestTrackerProgress {
+  margin: 0.35rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.weeklyQuestTrackerClaimBtn {
+  margin-top: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f0d078, #e5c06a);
+  color: #1a1035;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.weeklyQuestTrackerClaimed {
+  display: inline-flex;
+  margin-top: 0.45rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.14);
+  color: #166534;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+@media (min-width: 768px) {
+  .weeklyQuestTracker {
+    margin-left: auto;
+    max-width: 22rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .kids-adventure-shell .weeklyQuestTracker {
+    margin-bottom: 1rem;
+  }
+}

@@ -2,14 +2,48 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ActiveChildSelector from '../ActiveChildSelector';
 import { useActiveChild } from '../../../hooks/useActiveChild';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
+import { useFocusCoinWallet } from '../../../hooks/useFocusCoinWallet';
 import FocusCoinWalletBadge from '../../rewards/FocusCoinWalletBadge';
-import { REWARD_SHOP_ITEMS } from '../../../data/rewardShopItems';
+import { REWARD_SHOP_ITEMS, type RewardShopCategory } from '../../../data/rewardShopItems';
 import { getBadgeArtworkPath, getRewardItemArtworkPath } from '../../../lib/rewardArtwork';
 import { getPlayerInventory, type PlayerInventorySnapshot } from '../../../lib/getPlayerInventory';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { MODULE_COMPLETE_EVENT } from '../../../lib/activeChildContext';
 import { PortalPageIntro } from '../../portal-design-system';
+import InventoryItemCard, {
+  type InventoryCardRarity,
+  type InventoryShopState,
+} from '../../../design-system/kids-adventure/InventoryItemCard';
 import '../inventory-panel.css';
+
+const SHOP_CATEGORY_LABELS: Record<RewardShopCategory, string> = {
+  decoration: 'Decoration',
+  pack: 'Pack',
+  skin: 'Skin',
+  sticker: 'Sticker',
+};
+
+const BADGE_RARITY: Record<string, InventoryCardRarity> = {
+  'Focus Flame Badge': 'Epic',
+  'Courage Badge': 'Rare',
+};
+
+function resolveBadgeRarity(label: string): InventoryCardRarity {
+  return BADGE_RARITY[label] ?? 'Common';
+}
+
+function resolveShopState(
+  itemName: string,
+  cost: number,
+  walletTotal: number,
+  ownedDecorations: string[],
+  ownedItems: string[],
+): InventoryShopState {
+  const owned = ownedDecorations.includes(itemName) || ownedItems.includes(itemName);
+  if (owned) return 'owned';
+  if (walletTotal >= cost) return 'available';
+  return 'need_coins';
+}
 
 function InventorySection({
   title,
@@ -37,6 +71,7 @@ function InventorySection({
 export default function FamilyInventoryPanel() {
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const { visibleChildren } = useFamilyDashboardMetrics(programCode);
+  const { totalCoins } = useFocusCoinWallet();
   const selectableChildren = useMemo(
     () =>
       visibleChildren
@@ -95,10 +130,15 @@ export default function FamilyInventoryPanel() {
         emptyLabel="Complete missions to earn badges."
         items={inventory.badges}
         renderItem={(badge) => (
-          <article key={badge} className="inventoryCard">
-            <img src={getBadgeArtworkPath(badge)} alt="" className="inventoryCardArt" />
-            <p className="inventoryCardLabel">{badge}</p>
-          </article>
+          <InventoryItemCard
+            key={badge}
+            label={badge}
+            imageSrc={getBadgeArtworkPath(badge)}
+            variant="badge"
+            themeHint={badge}
+            owned
+            rarity={resolveBadgeRarity(badge)}
+          />
         )}
       />
 
@@ -107,22 +147,30 @@ export default function FamilyInventoryPanel() {
         emptyLabel="Mission rewards will show up here."
         items={inventory.items}
         renderItem={(item) => (
-          <article key={item} className="inventoryCard">
-            <img src={getRewardItemArtworkPath(item)} alt="" className="inventoryCardArt" />
-            <p className="inventoryCardLabel">{item}</p>
-          </article>
+          <InventoryItemCard
+            key={item}
+            label={item}
+            imageSrc={getRewardItemArtworkPath(item)}
+            variant="item"
+            owned
+            themeHint={item}
+          />
         )}
       />
 
       <InventorySection
-        title="Owned Stickers"
+        title="Game Stickers"
         emptyLabel="Sticker packs unlock from weekly adventures."
         items={inventory.stickers}
         renderItem={(item) => (
-          <article key={item} className="inventoryCard inventoryCard--sticker">
-            <img src={getRewardItemArtworkPath(item)} alt="" className="inventoryCardArt" />
-            <p className="inventoryCardLabel">{item}</p>
-          </article>
+          <InventoryItemCard
+            key={item}
+            label={item}
+            imageSrc={getRewardItemArtworkPath(item)}
+            variant="sticker"
+            themeHint={item}
+            owned
+          />
         )}
       />
 
@@ -131,28 +179,46 @@ export default function FamilyInventoryPanel() {
         emptyLabel="Save up Focus Coins to unlock decorations in the shop."
         items={inventory.decorations}
         renderItem={(item) => (
-          <article key={item} className="inventoryCard inventoryCard--decoration">
-            <img src={getRewardItemArtworkPath(item)} alt="" className="inventoryCardArt" />
-            <p className="inventoryCardLabel">{item}</p>
-          </article>
+          <InventoryItemCard
+            key={item}
+            label={item}
+            imageSrc={getRewardItemArtworkPath(item)}
+            variant="decoration"
+            owned
+            themeHint={item}
+          />
         )}
       />
 
       <section className="inventoryShop">
         <h3 className="inventorySectionTitle">Reward Shop</h3>
-        <p className="inventoryShopNote">Preview only — purchasing coming soon.</p>
+        <p className="inventoryShopNote">Unlock rewards with Focus Coins you earn on adventures.</p>
         <div className="inventoryCardGrid inventoryCardGrid--shop">
-          {REWARD_SHOP_ITEMS.map((item) => (
-            <article key={item.id} className="inventoryShopCard">
-              <img src={item.image} alt="" className="inventoryCardArt" />
-              <p className="inventoryCardLabel">{item.name}</p>
-              <p className="inventoryShopCost">{item.cost} Focus Coins</p>
-              <p className="inventoryShopDesc">{item.description}</p>
-              <button type="button" className="inventoryShopBtn" disabled>
-                Coming Soon
-              </button>
-            </article>
-          ))}
+          {REWARD_SHOP_ITEMS.map((item) => {
+            const shopState = resolveShopState(
+              item.name,
+              item.cost,
+              totalCoins,
+              inventory.decorations,
+              [...inventory.items, ...inventory.stickers],
+            );
+            return (
+              <InventoryItemCard
+                key={item.id}
+                label={item.name}
+                imageSrc={item.image}
+                variant="shop"
+                cost={item.cost}
+                description={item.description.split('.')[0]}
+                themeHint={item.name}
+                category={SHOP_CATEGORY_LABELS[item.category]}
+                shopState={shopState}
+                owned={shopState === 'owned'}
+                rarity={item.cost >= 150 ? 'Epic' : item.cost >= 100 ? 'Rare' : 'Common'}
+                disabled={shopState === 'locked'}
+              />
+            );
+          })}
         </div>
       </section>
     </div>

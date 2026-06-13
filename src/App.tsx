@@ -60,6 +60,7 @@ import {
   NotifySuccessPage,
   ParentsPage,
   PilotProgramSignupPage,
+  PilotInfoPage,
   PilotTermsPage,
   PreviewPage,
   PrivacyPolicyPage,
@@ -103,6 +104,7 @@ import {
   BLUE_RIBBON_PILOT_PATH,
   PROGRAM_DASHBOARD_PATH,
   PILOT_PROGRAM_SIGNUP_PATH,
+  PILOT_INFO_PATH,
   PILOT_TERMS_PATH,
   ADMIN_PORTAL_PATH,
   FAMILY_PORTAL_PATH,
@@ -318,6 +320,7 @@ const appRouteChildren = (
         element={<AdultAssessmentPage variant="program" />}
       />
       <Route path={PILOT_PROGRAM_SIGNUP_PATH} element={<PilotProgramSignupPage />} />
+      <Route path={PILOT_INFO_PATH} element={<PilotInfoPage />} />
       <Route path={PILOT_TERMS_PATH} element={<PilotTermsPage />} />
       <Route path={ACADEMY_DASHBOARD_ALIAS_PATH} element={<Navigate to={FACILITATOR_PORTAL_PATH} replace />} />
       <Route path={B4_RESULTS_ADMIN_PATH} element={<B4ResultsAdminPage />} />
@@ -329,6 +332,7 @@ const appRouteChildren = (
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
           <Route path="inventory" element={<FamilyInventoryPanel />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">

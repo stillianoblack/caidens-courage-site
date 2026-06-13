@@ -671,7 +671,8 @@ export default function GameAssessmentFlow({
   const revealCorrectAnswer = checked && (isCorrect || attemptsCount >= 2);
   const hubBackLabel = gameplayBreadcrumb.label;
   const hubBackHref = gameplayBreadcrumb.href;
-  const showHubBackLink = exitPath !== '/' && view !== 'complete';
+  const showHubBackLink =
+    exitPath !== '/' && view !== 'complete' && view !== 'courage-celebration';
   const nextCase = useMirandaHeader ? getMirandaNextCase(config.id) : null;
   const nextQuest = useCaidenHeader ? getCaidenNextQuest(config.id) : null;
   const presentationStyle = config.presentationStyle ?? 'default';
@@ -840,7 +841,9 @@ export default function GameAssessmentFlow({
             backLabel={showHubBackLink ? hubBackLabel : undefined}
             backHref={showHubBackLink ? hubBackHref : undefined}
             onBackClick={playItemButton}
-            onBack={!showHubBackLink ? handleExit : undefined}
+            onBack={
+              !showHubBackLink && view !== 'courage-celebration' ? handleExit : undefined
+            }
             progressPercent={progressPct}
             showProgress={view === 'quiz' || view === 'complete' || view === 'courage-celebration'}
             playerName={playerName}
@@ -885,6 +888,7 @@ export default function GameAssessmentFlow({
           ) : null}
 
         {view === 'landing' ? (
+          /* TODO: deprecated intro screen — family portal missions use skipLanding to bypass */
           <div className={usesCoachingShell ? 'game-focusFlameLanding' : ''}>
             <div className={usesCoachingShell ? 'game-focusFlameLandingMain' : ''}>
               <div
@@ -970,6 +974,7 @@ export default function GameAssessmentFlow({
             useCaidenHeader={useCaidenHeader}
             useMirandaHeader={useMirandaHeader}
             useCharlieHeader={useCharlieHeader}
+            useZekeHeader={useZekeHeader}
             useB4Header={useB4Header}
             revealCorrectAnswer={revealCorrectAnswer}
             activeHint={activeHint}

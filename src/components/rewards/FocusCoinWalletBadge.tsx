@@ -34,7 +34,7 @@ export default function FocusCoinWalletBadge({
 
   return (
     <div
-      className={className}
+      className={['focusCoinWalletBadge', className].filter(Boolean).join(' ')}
       style={{
         ...walletStyle,
         ...(compact

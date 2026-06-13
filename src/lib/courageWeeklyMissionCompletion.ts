@@ -10,8 +10,10 @@ import type {
 } from '../types/courageMissionProgress';
 import { notifyModuleComplete } from './activeChildContext';
 import { markRecentlyCompletedHotspot } from './courageMapReturnFeedback';
+import { trackMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
 import { completeMissionWithSupabase } from './completeMissionWithSupabase';
+import { ensureWeekGradeLevel } from './participantWeekGradeService';
 import {
   logPlayerParticipantContext,
   resolvePlayerParticipantContext,
@@ -70,6 +72,9 @@ export async function completeWeeklyCourageMission(
     };
   }
 
+  void ensureWeekGradeLevel(payload.participant_id, payload.week_id);
+  markDailyAdventureComplete(payload.participant_id);
+
   const result = await completeMissionWithSupabase(payload);
 
   if (result.ok) {
@@ -98,3 +103,25 @@ function parseWeekNumber(weekId: string): number {
 }
 
 export type { CourageMissionCompletionPayload, CourageMissionRewardPayload };
+
+function dailyQuestStorageKey(participantId: string): string {
+  return `cc-daily-quest-${participantId}-${new Date().toISOString().slice(0, 10)}`;
+}
+
+export function markDailyAdventureComplete(participantId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(dailyQuestStorageKey(participantId), '1');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isDailyAdventureComplete(participantId: string | null | undefined): boolean {
+  if (!participantId || typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(dailyQuestStorageKey(participantId)) === '1';
+  } catch {
+    return false;
+  }
+}

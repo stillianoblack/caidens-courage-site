@@ -19,6 +19,8 @@ export type CharacterAdventureCardProps = {
   linkState?: LinkProps['state'];
   /** Tag mission links launched from Character Hub quest lists. */
   useCharacterHubLaunch?: boolean;
+  /** Open Character Hub detail panel instead of navigating to bio page. */
+  onMeetClick?: () => void;
 };
 
 export default function CharacterAdventureCard({
@@ -33,6 +35,7 @@ export default function CharacterAdventureCard({
   skillTags,
   linkState,
   useCharacterHubLaunch = false,
+  onMeetClick,
 }: CharacterAdventureCardProps) {
   const isExternal = href.startsWith('/downloads') || href.startsWith('http');
   const resolvedHref = useMemo(() => {
@@ -41,6 +44,8 @@ export default function CharacterAdventureCard({
     }
     return appendCharacterHubGameContext(href);
   }, [href, isExternal, useCharacterHubLaunch]);
+
+  const useMeetPanel = Boolean(onMeetClick) && !locked && !isExternal;
 
   return (
     <WeeklyAdventureCard
@@ -56,6 +61,7 @@ export default function CharacterAdventureCard({
       linkState={linkState}
       external={isExternal}
       kind="game"
+      onActivate={useMeetPanel ? onMeetClick : undefined}
     />
   );
 }

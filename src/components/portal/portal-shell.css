@@ -77,6 +77,7 @@
 .portal-shell .family-miniFooter,
 .portal-shell .pilot-miniFooter {
   flex-shrink: 0;
+  display: none;
 }
 
 /* Journey / character dashboard — same horizontal inset as active gameplay */
@@ -93,7 +94,9 @@
 .portal-shell:has(.portal-gameFrame) .family-miniFooter,
 .portal-shell:has(.portal-gameFrame) .pilot-miniFooter,
 .portal-shell:has(.character-dashboard) .family-miniFooter,
-.portal-shell:has(.character-dashboard) .pilot-miniFooter {
+.portal-shell:has(.character-dashboard) .pilot-miniFooter,
+.portal-shell:has(.kids-adventure-shell) .family-miniFooter,
+.portal-shell:has(.kids-adventure-shell) .pilot-miniFooter {
   display: none;
 }
 

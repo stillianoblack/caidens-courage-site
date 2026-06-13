@@ -1,4 +1,5 @@
 import { toPng } from 'html-to-image';
+import { preloadCaptureImages } from './preloadCaptureImages';
 
 type CaptureAchievementOptions = {
   element: HTMLElement;
@@ -46,6 +47,8 @@ export function downloadAchievementPng(dataUrl: string, missionId: string, date 
 export async function captureAchievementPng({
   element,
 }: Pick<CaptureAchievementOptions, 'element'>): Promise<CapturedAchievementPng> {
+  await preloadCaptureImages(element);
+
   const dataUrl = await toPng(element, {
     cacheBust: true,
     pixelRatio: 2,

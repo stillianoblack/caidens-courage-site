@@ -1,0 +1,48 @@
+.courageActivitiesPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: clamp(560px, 70vh, 780px);
+  max-height: clamp(560px, 70vh, 780px);
+  border-radius: 1.125rem;
+  overflow: hidden;
+  background: linear-gradient(168deg, #fffdf8 0%, #f3eeff 42%, #eef6ff 100%);
+  border: 1px solid rgba(229, 192, 106, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(26, 16, 53, 0.04),
+    0 18px 48px -24px rgba(26, 16, 53, 0.35);
+}
+
+.courageActivitiesPanelHeader {
+  flex-shrink: 0;
+  padding: 1.1rem 1.15rem 0.65rem;
+}
+
+.courageActivitiesPanelTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #2a1f4d;
+}
+
+.courageActivitiesPanelIntro {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.courageActivitiesPanel .week1Extras {
+  padding: 0 1rem 1rem;
+  overflow-y: auto;
+}
+
+.courageActivitiesPanel .week1ExtrasTitle,
+.courageActivitiesPanel .week1ExtrasIntro {
+  display: none;
+}
+
+.courageActivitiesPanel .week1ExtrasGrid {
+  grid-template-columns: 1fr;
+}

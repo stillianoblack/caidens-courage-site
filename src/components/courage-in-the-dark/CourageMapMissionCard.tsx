@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { CourageMapHotspot } from '../../data/courageInTheDarkMap';
 import type { CourageMissionCardAnchor } from '../../lib/courageMapCardPosition';
+import { resolveCharacterThemeId, themeDataAttributes } from '../../design-system/kids-adventure/characterThemes';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 
 export type { CourageMissionCardAnchor };
@@ -37,10 +38,13 @@ function MissionCardContent({
   showSheetHandle?: boolean;
 }) {
   const canStart = Boolean(startHref) && !locked && !comingSoon;
+  const themeId = resolveCharacterThemeId(hotspot.id);
+  const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
   return (
     <div
       className="courageMissionCard"
       data-color={hotspot.color}
+      {...themeAttrs}
       role="dialog"
       aria-modal="true"
       aria-labelledby={`courage-mission-card-${hotspot.id}`}
@@ -79,7 +83,6 @@ function MissionCardContent({
         />
       </div>
 
-      <p className="courageMissionCardCharacter">{hotspot.characterName}</p>
       <h3 id={`courage-mission-card-${hotspot.id}`} className="courageMissionCardTitle">
         {hotspot.label}
       </h3>

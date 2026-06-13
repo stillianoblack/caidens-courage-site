@@ -11,6 +11,7 @@ import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccounts
 import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
 import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
 import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
+import AdminAdventuresTab from '../components/admin/tabs/AdminAdventuresTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -132,6 +133,8 @@ export default function AdminPortalPage() {
             onChanged={() => void loadPrograms()}
           />
         );
+      case 'adventures':
+        return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
         return <AdminDataCleanupTab onChanged={() => void loadPrograms()} />;
       default:

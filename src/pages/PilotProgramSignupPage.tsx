@@ -6,7 +6,8 @@ import PilotProgramSignupForm from '../components/pilot-program/PilotProgramSign
 import '../components/pilot-program/pilot-program.css';
 import { applyProgramPortalUnlock } from '../config/portalContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
-import { FAMILY_HUB_PATH, PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
+import { PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
@@ -45,7 +46,7 @@ export default function PilotProgramSignupPage() {
       );
       refreshAnalyticsIdentity();
       trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
-      replaceWithPortalRoute(FAMILY_HUB_PATH);
+      replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
       return;
     }
 

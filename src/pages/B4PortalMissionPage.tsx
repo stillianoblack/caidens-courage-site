@@ -19,8 +19,9 @@ export default function B4PortalMissionPage() {
       missionId={mission.id}
       themeClassName="b4-game"
       exitPath={hubPath}
-      exitLabel="Back to B-4 Missions"
+      exitLabel="← Back to Missions"
       embedded
+      skipLanding
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}
     />
   );

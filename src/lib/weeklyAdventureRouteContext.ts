@@ -48,6 +48,16 @@ export function weeklyAdventureWeekAnchor(week: number): string {
   return `week-${week}`;
 }
 
+export const WEEKLY_VIEW_PARAM = 'view';
+export const WEEKLY_VIEW_EXPLORE_VALUE = 'explore';
+export const WEEKLY_VIEW_MISSIONS_VALUE = 'missions';
+export const WEEKLY_VIEW_ACTIVITIES_VALUE = 'activities';
+export const WEEKLY_VIEW_QUESTS_VALUE = 'quests';
+/** @deprecated Use WEEKLY_VIEW_EXPLORE_VALUE */
+export const WEEKLY_VIEW_MAP_VALUE = 'map';
+/** @deprecated Use WEEKLY_VIEW_MISSIONS_VALUE */
+export const WEEKLY_VIEW_LIST_VALUE = 'list';
+
 export function resolveWeeklyAdventuresPanelPath(pathname?: string): string {
   const basePath = resolveFamilyBasePath(pathname ?? '');
   return `${basePath}/weekly-adventures`;
@@ -57,11 +67,14 @@ export function resolveWeeklyAdventureReturnHref(
   pathname: string,
   week: number,
 ): string {
-  return `${resolveWeeklyAdventuresPanelPath(pathname)}#${weeklyAdventureWeekAnchor(week)}`;
+  const base = resolveWeeklyAdventuresPanelPath(pathname);
+  const params = new URLSearchParams();
+  params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_MISSIONS_VALUE);
+  return `${base}?${params.toString()}#${weeklyAdventureWeekAnchor(week)}`;
 }
 
 export function resolveWeeklyAdventureBackLabel(): string {
-  return formatBackLabel('Weekly Adventures');
+  return formatBackLabel('Mission List');
 }
 
 export function resolveWeeklyAdventureGameplayBack(

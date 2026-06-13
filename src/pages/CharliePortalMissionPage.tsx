@@ -21,6 +21,7 @@ export default function CharliePortalMissionPage() {
       exitPath={hubPath}
       exitLabel="Back to Science Lab"
       embedded
+      skipLanding
       familyPortalPath={resolvePortalFamilyShellPath(location.pathname)}
     />
   );

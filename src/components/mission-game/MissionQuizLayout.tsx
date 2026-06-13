@@ -49,6 +49,7 @@ type MissionQuizLayoutProps = {
   useCaidenHeader?: boolean;
   useMirandaHeader?: boolean;
   useCharlieHeader?: boolean;
+  useZekeHeader?: boolean;
   useB4Header?: boolean;
   gameId?: string;
   b4PortalType?: B4LockInPortalType;
@@ -94,6 +95,7 @@ export default function MissionQuizLayout({
   useCaidenHeader = false,
   useMirandaHeader = false,
   useCharlieHeader = false,
+  useZekeHeader = false,
   useB4Header = false,
   gameId,
   b4PortalType = 'facilitator',
@@ -127,6 +129,7 @@ export default function MissionQuizLayout({
     useCaidenHeader,
     useMirandaHeader,
     useCharlieHeader,
+    useZekeHeader,
     useB4Header,
   };
   const hasMissionCard = questionHasMissionCard(question, cardFlags);

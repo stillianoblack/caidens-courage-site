@@ -25,6 +25,7 @@ export const TrainingGuidesPage = lazy(() => import('../pages/TrainingGuides'));
 export const JourneyPage = lazy(() => import('../pages/Journey'));
 export const ContactPage = lazy(() => import('../pages/Contact'));
 export const PilotProgramSignupPage = lazy(() => import('../pages/PilotProgramSignupPage'));
+export const PilotInfoPage = lazy(() => import('../pages/PilotInfoPage'));
 export const PrivacyPolicyPage = lazy(() => import('../pages/PrivacyPolicy'));
 export const TermsPage = lazy(() => import('../pages/Terms'));
 export const ThankYouPage = lazy(() => import('../pages/ThankYou'));

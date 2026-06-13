@@ -1,0 +1,112 @@
+.week1Extras {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.week1ExtrasTitle {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.week1ExtrasIntro {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  color: rgba(26, 47, 82, 0.72);
+  line-height: 1.45;
+}
+
+.week1ExtrasGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.week1ExtrasCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.15rem 1.15rem 1.25rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  box-shadow: 0 12px 32px -22px rgba(26, 47, 82, 0.45);
+  min-height: 10.5rem;
+  box-sizing: border-box;
+}
+
+.week1ExtrasCard--locked {
+  opacity: 0.72;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.week1ExtrasCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 1rem;
+  background: linear-gradient(145deg, rgba(229, 192, 106, 0.28), rgba(26, 47, 82, 0.08));
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.week1ExtrasCardTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+  line-height: 1.25;
+}
+
+.week1ExtrasCardDesc {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.week1ExtrasCardBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e5c06a, #d4a84a);
+  color: #1a1035;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.week1ExtrasCardBtn--disabled {
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(26, 47, 82, 0.55);
+  cursor: default;
+}
+
+.week1ExtrasCardLock {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+@media (max-width: 767px) {
+  .week1ExtrasGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .week1ExtrasCard {
+    min-height: auto;
+  }
+}

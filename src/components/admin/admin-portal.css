@@ -86,6 +86,49 @@
   border-color: #d4a84b;
 }
 
+.adminPortal-fieldHint {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.adminPortal-fieldHint--example {
+  color: rgba(36, 62, 112, 0.5);
+  font-size: 0.6875rem;
+}
+
+.adminImagePreview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.adminImagePreviewLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(36, 62, 112, 0.65);
+}
+
+.adminImagePreviewImg {
+  max-width: 100%;
+  max-height: 8rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(36, 62, 112, 0.15);
+  object-fit: cover;
+}
+
+.adminImagePreviewError {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.adminAdventureMapPreviewActions {
+  margin-bottom: 0.75rem;
+}
+
 .adminPortal-error {
   margin: 0;
   padding: 0.75rem 0.9rem;
@@ -554,6 +597,150 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #1f6b43;
+}
+
+.adminAdventuresToolbar {
+  margin-bottom: 0.85rem;
+}
+
+.adminAdventuresList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.adminAdventureRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(26, 47, 82, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.adminAdventureRowMain {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.adminAdventureThumb {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.adminAdventureThumb--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 47, 82, 0.08);
+  font-size: 1.25rem;
+}
+
+.adminAdventureTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+
+.adminAdventureMeta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.adminAdventureActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.adminAdventureActiveBadge {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.14);
+  color: #166534;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.adminAdventureForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(26, 47, 82, 0.1);
+}
+
+.adminAdventureFormTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.adminAdventureFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.adminAdventureUploadRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.adminAdventurePreviewCard {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(26, 47, 82, 0.1);
+  background: linear-gradient(145deg, rgba(229, 192, 106, 0.16), rgba(26, 47, 82, 0.06));
+}
+
+.adminAdventurePreviewArt {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.85rem;
+  object-fit: cover;
+}
+
+.adminAdventurePreviewTitle {
+  margin: 0;
+  font-weight: 800;
+}
+
+.adminAdventurePreviewSub {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(26, 47, 82, 0.68);
+}
+
+.adminAdventurePreviewDesc {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.adminAdventurePreviewCta {
+  display: inline-flex;
+  margin-top: 0.45rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e5c06a, #d4a84a);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1a1035;
 }
 
 @media (max-width: 640px) {

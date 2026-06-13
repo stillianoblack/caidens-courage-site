@@ -16,6 +16,7 @@ type MissionCardFlags = {
   useCaidenHeader?: boolean;
   useMirandaHeader?: boolean;
   useCharlieHeader?: boolean;
+  useZekeHeader?: boolean;
   useB4Header?: boolean;
 };
 
@@ -49,6 +50,7 @@ export default function MissionCardContent({
   useCaidenHeader = false,
   useMirandaHeader = false,
   useCharlieHeader = false,
+  useZekeHeader = false,
   useB4Header = false,
 }: MissionCardContentProps) {
   if (useCoachingRail && (question.clueCard || question.story)) {
@@ -58,6 +60,7 @@ export default function MissionCardContent({
         useCaidenHeader,
         useMirandaHeader,
         useCharlieHeader,
+        useZekeHeader,
         useUncleTHeader,
         useVictoriaHeader,
         useB4Header,

@@ -10,6 +10,10 @@
   font-size: 0.92rem;
 }
 
+.courageAdventureHubQuestDesktop {
+  display: none;
+}
+
 .courageAdventureHub {
   width: 100%;
   max-width: min(1600px, 100%);
@@ -612,12 +616,13 @@
   align-items: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.65rem 0.75rem;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 0.75rem 0.85rem;
+  border-radius: 1.125rem;
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(26, 47, 82, 0.1);
-  box-shadow: 0 8px 24px -18px rgba(26, 47, 82, 0.35);
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.4);
   box-sizing: border-box;
+  margin-top: 0.65rem;
 }
 
 .courageHubControls--mobileBar .courageHubViewToggle {
@@ -656,7 +661,11 @@
   margin-left: auto;
 }
 
-.courageAdventureHubMobileList {
+.courageHubControls--mobileBar .courageHubViewToggleLabel {
+  font-size: 0.6875rem;
+}
+
+.courageAdventureHubMobileQuests {
   width: 100%;
   min-width: 0;
   animation: courageHubViewFadeIn 0.32s ease-out;
@@ -774,11 +783,31 @@
   }
 }
 
+.courageMapAdminPreviewBadge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 4;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: rgba(180, 83, 9, 0.92);
+  color: #fff;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.35);
+}
+
+.courageAdminUpcoming {
+  display: none;
+}
+
 /* Mission list split layout — map left + panel right */
 .courageAdventureHubSplit {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(280px, 3fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 4fr) minmax(240px, 1fr);
+  gap: 20px;
   align-items: stretch;
   width: 100%;
 }
@@ -808,7 +837,7 @@
 
 .courageMissionListPanelHeader {
   flex-shrink: 0;
-  padding: 1.1rem 1.15rem 0.65rem;
+  padding: 1.5rem 1.5rem 0.75rem;
 }
 
 .courageMissionListPanelTitle {
@@ -828,7 +857,8 @@
 
 .courageMissionListPanelProgress {
   flex-shrink: 0;
-  padding: 0 1.15rem 0.85rem;
+  padding: 0 1.5rem 1.25rem;
+  margin-bottom: 0.25rem;
   border-bottom: 1px solid rgba(26, 47, 82, 0.08);
 }
 
@@ -881,13 +911,13 @@
 .courageMissionListRows {
   list-style: none;
   margin: 0;
-  padding: 0.65rem 0.75rem 0.85rem;
+  padding: 0.25rem 1.5rem 1.5rem;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 1.125rem;
 }
 
 .courageMissionListRowWrap {
@@ -906,33 +936,84 @@
 }
 
 .courageMissionListRow {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   width: 100%;
-  padding: 0.6rem 0.65rem;
-  border: 1px solid rgba(26, 47, 82, 0.1);
-  border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.72);
+  min-height: 6.75rem;
+  padding: 1.1rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.75rem;
+  background: #152238;
+  box-shadow: 0 14px 36px -18px rgba(15, 35, 70, 0.55);
+  overflow: hidden;
   cursor: pointer;
   text-align: left;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
-    transform 0.2s ease,
-    background 0.2s ease;
+    transform 0.2s ease;
+}
+
+.courageMissionListRow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--kid-mission-bg, var(--kid-map-bg, none));
+  background-size: cover;
+  background-position: center 85%;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.courageMissionListRow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(145deg, rgba(15, 35, 70, 0.15) 0%, rgba(15, 35, 70, 0.88) 55%, rgba(8, 18, 36, 0.96) 100%);
+  pointer-events: none;
+}
+
+.courageMissionListRow[data-kid-theme='caiden']::after {
+  background: linear-gradient(145deg, rgba(232, 191, 79, 0.22) 0%, rgba(26, 47, 82, 0.88) 50%, rgba(8, 18, 36, 0.97) 100%);
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.22);
+}
+
+.courageMissionListRow[data-kid-theme='miranda']::after {
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.28) 0%, rgba(49, 46, 129, 0.88) 50%, rgba(15, 10, 35, 0.97) 100%);
+  box-shadow: inset 0 0 0 1px rgba(192, 132, 252, 0.22);
+}
+
+.courageMissionListRow[data-kid-theme='zeke']::after {
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.26) 0%, rgba(15, 118, 110, 0.72) 48%, rgba(26, 20, 16, 0.96) 100%);
+  box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.22);
+}
+
+.courageMissionListRow[data-kid-theme='charlie']::after {
+  background: linear-gradient(145deg, rgba(34, 197, 94, 0.26) 0%, rgba(30, 64, 175, 0.82) 48%, rgba(5, 46, 16, 0.96) 100%);
+  box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.22);
+}
+
+.courageMissionListRow[data-kid-theme='b4']::after {
+  background: linear-gradient(145deg, rgba(56, 189, 248, 0.3) 0%, rgba(30, 58, 138, 0.88) 48%, rgba(8, 47, 73, 0.97) 100%);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.22);
 }
 
 .courageMissionListRow:hover:not(:disabled) {
-  border-color: rgba(26, 47, 82, 0.18);
-  box-shadow: 0 8px 20px -14px rgba(26, 16, 53, 0.35);
-  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16px 40px -16px rgba(15, 35, 70, 0.55);
+  transform: translateY(-2px);
 }
 
 .courageMissionListRow--selected {
-  border-width: 2px;
-  transform: translateY(-2px) scale(1.01);
-  background: #fff;
+  border-color: rgba(232, 191, 79, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(232, 191, 79, 0.35), 0 16px 40px -14px rgba(15, 35, 70, 0.5);
+  background: #152238;
 }
 
 .courageMissionListRow--selected[data-color='gold'] {
@@ -965,17 +1046,256 @@
   cursor: pointer;
 }
 
-.courageMissionListRowThumb {
+/* —— Compact cinematic mission cards (Weekly Adventures panel) —— */
+.courageMissionListPanel .courageMissionListRow--compact {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 1.125rem;
+  border-radius: 1.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: #152238;
+  box-shadow: 0 12px 32px -16px rgba(15, 35, 70, 0.5);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.courageMissionListPanel .courageMissionListRow--compact[data-kid-theme='caiden'] {
+  background: linear-gradient(132deg, #1a2f52 0%, #92400e 52%, #152238 100%);
+  box-shadow: 0 12px 32px -14px rgba(30, 64, 175, 0.45), inset 0 0 0 1px rgba(251, 191, 36, 0.18);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact[data-kid-theme='miranda'] {
+  background: linear-gradient(132deg, #4c1d95 0%, #6d28d9 48%, #1e1035 100%);
+  box-shadow: 0 12px 32px -14px rgba(124, 58, 237, 0.4), inset 0 0 0 1px rgba(192, 132, 252, 0.2);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact[data-kid-theme='zeke'] {
+  background: linear-gradient(132deg, #0f766e 0%, #ea580c 46%, #1c1917 100%);
+  box-shadow: 0 12px 32px -14px rgba(194, 65, 12, 0.38), inset 0 0 0 1px rgba(251, 146, 60, 0.2);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact[data-kid-theme='charlie'] {
+  background: linear-gradient(132deg, #15803d 0%, #1e40af 50%, #052e16 100%);
+  box-shadow: 0 12px 32px -14px rgba(13, 148, 136, 0.38), inset 0 0 0 1px rgba(52, 211, 153, 0.2);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact[data-kid-theme='b4'] {
+  background: linear-gradient(132deg, #0284c7 0%, #1e3a8a 50%, #082f49 100%);
+  box-shadow: 0 12px 32px -14px rgba(37, 99, 235, 0.4), inset 0 0 0 1px rgba(56, 189, 248, 0.22);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact::before {
+  inset: auto;
+  left: 38%;
+  right: -14%;
+  top: -22%;
+  bottom: -10%;
+  width: auto;
+  height: auto;
+  background-size: contain;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  opacity: 0.18;
+}
+
+.courageMissionListPanel .courageMissionListRow--compact::after {
+  background: linear-gradient(
+    108deg,
+    rgba(8, 18, 36, 0.92) 0%,
+    rgba(8, 18, 36, 0.72) 42%,
+    rgba(8, 18, 36, 0.35) 62%,
+    transparent 78%
+  );
+}
+
+.courageMissionListPanel .courageMissionListRow--compact:hover:not(.courageMissionListRow--locked) {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 16px 40px -14px rgba(15, 35, 70, 0.55);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact:active:not(.courageMissionListRow--locked) {
+  transform: scale(0.98);
+}
+
+.courageMissionListPanel .courageMissionListRow--compact.courageMissionListRow--selected {
+  border-color: rgba(232, 191, 79, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(232, 191, 79, 0.35),
+    0 16px 40px -14px rgba(15, 35, 70, 0.5);
+  transform: translateY(-2px);
+}
+
+.courageMissionListPanel .courageMissionListRowInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  gap: 0.5rem 0.35rem;
+  align-items: start;
+}
+
+.courageMissionListPanel .courageMissionListRowCopy {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  max-width: 72%;
+}
+
+.courageMissionListPanel .courageMissionListRowTitle {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.courageMissionListPanel .courageMissionListRowCharacter {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.courageMissionListPanel .courageMissionListRowReward {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: normal;
+}
+
+.courageMissionListPanel .courageMissionListRowOverview {
+  display: none;
+}
+
+.courageMissionListPanel .courageMissionListRowMeta {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  justify-self: end;
+}
+
+.courageMissionListPanel .courageMissionListRowFoot {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.courageMissionListPanel .courageMissionListRowStartWrap {
+  display: inline-flex;
   flex-shrink: 0;
-  width: 2.75rem;
-  height: 2.75rem;
+}
+
+.courageMissionListPanel .courageMissionListRowStart {
+  width: auto;
+  min-width: 5.75rem;
+  margin: 0;
+  min-height: 2.125rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #f0d078 0%, #e5c06a 48%, #d4a84a 100%);
+  color: #1a1035;
+  box-shadow: 0 6px 16px -8px rgba(15, 10, 35, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.courageMissionListPanel .courageMissionListRowStart:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -8px rgba(15, 10, 35, 0.5);
+}
+
+.courageMissionListPanel .courageMissionListRowStart[data-kid-theme] {
+  background: linear-gradient(135deg, #f0d078 0%, #e5c06a 48%, #d4a84a 100%);
+  color: #1a1035;
+}
+
+.courageMissionListPanel .courageMissionListRowStart:disabled {
+  opacity: 0.55;
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.courageMissionListPanel .courageMissionListRowLock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
-  padding: 2px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.courageMissionListPanel .courageMissionListRowThumb {
+  display: none;
+}
+
+.courageMissionListPanel .courageMissionListRowLockedNote,
+.courageMissionListPanel .courageMissionListRowComingSoon {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: left;
+}
+
+.courageMissionListPanel .courageMissionListRowBadge {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 12px -6px rgba(22, 101, 52, 0.55);
+}
+
+.courageMissionListRowThumb {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  padding: 3px;
   background: linear-gradient(135deg, #fde047, #1e3a8a);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.45);
 }
 
 .courageMissionListRowThumb[data-color='gold'] {
@@ -999,14 +1319,18 @@
 }
 
 .courageMissionListRowThumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
+  object-position: center center;
   border-radius: 50%;
-  background: #fff;
+  background: transparent;
+  display: block;
 }
 
 .courageMissionListRowCopy {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -1019,31 +1343,44 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(26, 47, 82, 0.58);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .courageMissionListRowTitle {
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 800;
-  color: #2a1f4d;
+  color: #fff;
   line-height: 1.2;
 }
 
 .courageMissionListRowReward {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  color: rgba(26, 47, 82, 0.62);
+  color: rgba(255, 255, 255, 0.78);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.courageMissionListRowOverview {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .courageMissionListRowStatus {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 1.5rem;
+  color: #fff;
 }
 
 .courageMissionListRowBadge {
@@ -1092,19 +1429,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.75rem;
+  width: calc(100% - 1rem);
+  margin-inline: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.85rem;
   border: none;
-  border-radius: 0.65rem;
-  font-size: 0.8125rem;
+  border-radius: 1.25rem;
+  font-size: 0.875rem;
   font-weight: 800;
   cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
   color: #1a1035;
-  background: linear-gradient(135deg, #fff8e8, #fde68a);
-  box-shadow: 0 6px 16px -10px rgba(15, 10, 35, 0.4);
+  background: linear-gradient(135deg, #f0d078 0%, #e5c06a 48%, #d4a84a 100%);
+  box-shadow: 0 8px 20px -10px rgba(15, 10, 35, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.courageMissionListRowStart:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px rgba(15, 10, 35, 0.5);
 }
 
 .courageMissionListRowStart[data-color='gold'] {
@@ -1143,6 +1487,17 @@
   opacity: 1;
 }
 
+@media (min-width: 768px) {
+  .courageMissionListPanel .courageMissionListRowTitle {
+    font-size: 1.1875rem;
+  }
+
+  .courageMissionListPanel .courageMissionListRow--compact {
+    padding: 1.25rem 1.375rem;
+    border-radius: 2rem;
+  }
+}
+
 @media (max-width: 767px) {
   .courageHubControls--overlay .courageHubViewToggle {
     width: 100%;
@@ -1169,6 +1524,24 @@
     max-height: none;
   }
 
+  .courageMissionListPanelHeader {
+    padding: 1.25rem 1.25rem 0.65rem;
+  }
+
+  .courageMissionListPanelProgress {
+    padding: 0 1.25rem 1rem;
+  }
+
+  .courageMissionListRows {
+    padding: 0.25rem 1.25rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .courageMissionListPanel .courageMissionListRow--compact {
+    padding: 1.25rem;
+    min-height: 5.25rem;
+  }
+
   .courageMapCanvas--hubSplit {
     min-height: auto;
     height: auto;
@@ -1192,4 +1565,40 @@
   .courageMissionListRow--selected {
     transform: none;
   }
+}
+
+.courageHubHeaderCopy--withTrailing {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.courageHubHeaderCopyMain {
+  min-width: 0;
+}
+
+.courageHubHeaderCopyTrailing {
+  flex-shrink: 0;
+}
+
+.courageHubHeaderCopy--withTrailing .courageHubViewToggle {
+  background: rgba(26, 47, 82, 0.06);
+  border-color: rgba(26, 47, 82, 0.12);
+  box-shadow: none;
+}
+
+.courageHubHeaderCopy--withTrailing .courageHubViewToggleBtn {
+  color: rgba(26, 47, 82, 0.72);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
+.courageHubHeaderCopy--withTrailing .courageHubViewToggleBtn--active {
+  background: linear-gradient(135deg, #e5c06a, #d4a84a);
+  color: #1a1035;
+}
+
+.courageHubHeaderCopy--withTrailing .courageHubViewToggleLabel {
+  font-size: 0.625rem;
 }

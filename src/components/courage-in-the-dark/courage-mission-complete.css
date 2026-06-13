@@ -9,14 +9,49 @@
 }
 
 .courageMissionCompleteCapture {
+  position: relative;
   width: 100%;
   padding: 2rem 1.5rem 1.75rem;
-  border-radius: 1.25rem;
+  border-radius: 1.35rem;
   background: linear-gradient(165deg, rgba(18, 28, 48, 0.96), rgba(8, 14, 28, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   text-align: center;
   overflow: hidden;
+}
+
+.courageMissionCompleteInner {
+  position: relative;
+  z-index: 1;
+}
+
+.courageMissionCompleteHeroArt {
+  width: min(11rem, 72%);
+  max-height: 9.5rem;
+  object-fit: contain;
+  margin: 0 auto 0.65rem;
+  display: block;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
+}
+
+.courageMissionComplete--caiden .courageMissionCompleteCapture {
+  background: linear-gradient(155deg, #b45309 0%, #1a2f52 52%, #0b1220 100%);
+}
+
+.courageMissionComplete--miranda .courageMissionCompleteCapture {
+  background: linear-gradient(155deg, #7c3aed 0%, #312e81 48%, #0b1220 100%);
+}
+
+.courageMissionComplete--zeke .courageMissionCompleteCapture {
+  background: linear-gradient(155deg, #ea580c 0%, #0f766e 45%, #0b1220 100%);
+}
+
+.courageMissionComplete--charlie .courageMissionCompleteCapture {
+  background: linear-gradient(155deg, #16a34a 0%, #1e40af 50%, #0b1220 100%);
+}
+
+.courageMissionComplete--b4 .courageMissionCompleteCapture {
+  background: linear-gradient(155deg, #0ea5e9 0%, #1e3a8a 50%, #0b1220 100%);
 }
 
 .courageMissionComplete--error {
@@ -135,14 +170,15 @@
 }
 
 .courageMissionCompleteArt {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 5.25rem;
+  height: 5.25rem;
   object-fit: contain;
   margin: 0 auto;
   display: block;
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.35rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.45rem;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.45);
 }
 
 .courageMissionCompleteCoinTotal {
@@ -301,12 +337,13 @@
 
 .courageMissionCompleteBtn--secondary {
   min-width: 12rem;
-  padding: 0.65rem 1.1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.88rem;
-  box-shadow: none;
+  padding: 0.72rem 1.15rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.45);
 }
 
 .courageMissionCompleteBtn--secondary:hover {
@@ -367,6 +404,15 @@
 }
 
 .courageMissionCompleteBrandLogo {
+  width: 2.35rem;
+  height: 2.35rem;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.2rem;
+}
+
+.courageMissionCompleteBrandMark {
   width: 2rem;
   height: 2rem;
   object-fit: contain;

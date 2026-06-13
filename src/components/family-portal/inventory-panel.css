@@ -35,12 +35,23 @@
 
 .inventoryCardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 1rem;
 }
 
 .inventoryCardGrid--shop {
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  gap: 1rem;
+}
+
+.kids-adventure-shell .inventoryCardGrid {
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 1.125rem;
+}
+
+.kids-adventure-shell .inventoryCardGrid--shop {
+  grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+  gap: 1.125rem;
 }
 
 .inventoryCard,

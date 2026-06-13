@@ -8,6 +8,7 @@ import {
   logPlayerParticipantContext,
   resolvePlayerParticipantContext,
 } from './resolvePlayerParticipantId';
+import { trackMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
 import {
   ensureStudentParticipantForSave,
   isValidSupabaseParticipantId,
@@ -172,7 +173,17 @@ export async function completeMissionWithSupabase(
     }
 
     if (existing) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[MISSION_COMPLETE] duplicate award prevented', {
+          participant_id: ensuredParticipantId,
+          mission_id: savePayload.mission_id,
+        });
+      }
       return { ok: true, alreadyCompleted: true };
+    }
+
+    if (!savePayload.mission_id && process.env.NODE_ENV === 'development') {
+      console.warn('[MISSION_COMPLETE] mission_id missing on save payload');
     }
 
     const oldCoinTotal = await readWalletTotal(ensuredParticipantId);
@@ -238,6 +249,10 @@ export async function completeMissionWithSupabase(
       if (badgeError && badgeError.code !== '23505') {
         throw badgeError;
       }
+    }
+
+    if (savePayload.coins_earned > 0) {
+      trackMonthlyCoinsEarned(ensuredParticipantId, savePayload.coins_earned);
     }
 
     return {

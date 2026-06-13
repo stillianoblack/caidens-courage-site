@@ -12,6 +12,21 @@ export type CharacterProfileId =
   | 'dr-victoria'
   | 'uncle-t';
 
+export type CharacterScanStats = {
+  focus: number;
+  courage: number;
+  teamwork: number;
+  curiosity: number;
+};
+
+export type CharacterScanContent = {
+  powers: string[];
+  loves: string[];
+  teaches: string;
+  specialTrait: string;
+  stats: CharacterScanStats;
+};
+
 export type CharacterProfileContent = {
   id: CharacterProfileId;
   name: string;
@@ -35,6 +50,58 @@ const COLORING_BY_ID: Partial<Record<CharacterProfileId, string>> = {
   b4: PORTAL_COLORING_PAGES.find((p) => p.id === 'b4')?.href,
 };
 
+export const CHARACTER_SCAN_CONTENT: Record<CharacterProfileId, CharacterScanContent> = {
+  caiden: {
+    powers: ['Focus', 'Bravery'],
+    loves: ['Drawing', 'Heroes'],
+    teaches: 'Executive Function',
+    specialTrait: 'Focus Flame Leader',
+    stats: { focus: 90, courage: 85, teamwork: 70, curiosity: 75 },
+  },
+  miranda: {
+    powers: ['Problem Solving', 'Observation'],
+    loves: ['Mysteries', 'Reading'],
+    teaches: 'Comprehension',
+    specialTrait: 'Master Detective',
+    stats: { focus: 88, courage: 72, teamwork: 68, curiosity: 92 },
+  },
+  b4: {
+    powers: ['Check-Ins', 'Reflection'],
+    loves: ['Helping Kids'],
+    teaches: 'SEL',
+    specialTrait: 'Guide Robot',
+    stats: { focus: 82, courage: 70, teamwork: 88, curiosity: 74 },
+  },
+  charlie: {
+    powers: ['Observation', 'Testing Ideas'],
+    loves: ['Experiments', 'Robots'],
+    teaches: 'Science Skills',
+    specialTrait: 'Nature Scientist',
+    stats: { focus: 78, courage: 65, teamwork: 80, curiosity: 95 },
+  },
+  zeke: {
+    powers: ['Teamwork', 'Courage'],
+    loves: ['Team Games', 'Friends'],
+    teaches: 'Social Skills',
+    specialTrait: 'Team Captain',
+    stats: { focus: 70, courage: 88, teamwork: 92, curiosity: 68 },
+  },
+  'dr-victoria': {
+    powers: ['Empathy', 'Patience'],
+    loves: ['Helping Families', 'Questions'],
+    teaches: 'Adult SEL',
+    specialTrait: 'Family Guide',
+    stats: { focus: 85, courage: 78, teamwork: 90, curiosity: 86 },
+  },
+  'uncle-t': {
+    powers: ['Encouragement', 'Coaching'],
+    loves: ['Coaching', 'Family Wisdom'],
+    teaches: 'Confidence',
+    specialTrait: 'Courage Coach',
+    stats: { focus: 76, courage: 90, teamwork: 86, curiosity: 72 },
+  },
+};
+
 export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProfileContent> = {
   caiden: {
     id: 'caiden',
@@ -46,7 +113,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
     strengths: ['Focus', 'Courage', 'Creativity', 'Emotional reset'],
     storyRole: 'Caiden is the main hero of the Focus Flame story.',
     learningFocus: 'Executive function, focus, courage, emotional regulation.',
-    imageSrc: '/images/characters/caiden_photo_icon_game.webp',
+    imageSrc: '/images/caidenscourage/Game-Hub/characters/caiden-hotspot.webp',
     theme: 'caiden',
     missionsAvailable: true,
     missionsLabel: 'Start Missions',
@@ -62,7 +129,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
     strengths: ['Observation', 'Pattern recognition', 'Confidence', 'Deduction'],
     storyRole: 'Miranda helps Caiden understand clues, choices, and hidden meaning.',
     learningFocus: 'Reading comprehension, language arts, pattern recognition, confidence.',
-    imageSrc: '/images/characters/miranda_photo_icon_game.webp',
+    imageSrc: '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
     theme: 'miranda',
     missionsAvailable: true,
     missionsLabel: 'Start Missions',
@@ -78,7 +145,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
     strengths: ['Self-awareness', 'Reflection', 'Encouragement', 'Focus strategies'],
     storyRole: 'B-4 is the guide and support companion.',
     learningFocus: 'SEL, self-awareness, focus strategies, reflection.',
-    imageSrc: '/images/characters/b-4_photo_icon_game.webp',
+    imageSrc: '/images/caidenscourage/Game-Hub/characters/b4-hotspot.webp',
     theme: 'b4',
     missionsAvailable: true,
     missionsLabel: 'Start Missions',
@@ -94,7 +161,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
     strengths: ['Observation', 'Critical thinking', 'Curiosity', 'Teamwork'],
     storyRole: 'Charlie brings science-based learning and playful experimentation to the program.',
     learningFocus: 'Science, observation, evidence, problem solving, critical thinking.',
-    imageSrc: '/images/characters/charlieperk_photo_icon_game.webp',
+    imageSrc: '/images/caidenscourage/Game-Hub/characters/charlie-hotspot.webp',
     theme: 'charlie',
     missionsAvailable: true,
     missionsLabel: 'Start Missions',
@@ -110,7 +177,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
     strengths: ['Courage', 'Teamwork', 'Leadership', 'Social awareness'],
     storyRole: 'Zeke helps the team navigate social challenges and grow together.',
     learningFocus: 'Social skills, teamwork, courage, friendship repair, inclusion.',
-    imageSrc: '/images/characters/zeke_photo_icon_game.webp',
+    imageSrc: '/images/caidenscourage/Game-Hub/characters/zeke-hotspot.webp',
     theme: 'zeke',
     missionsAvailable: true,
     missionsLabel: 'Start Missions',
@@ -155,7 +222,7 @@ export const CHARACTER_PROFILE_CONTENT: Record<CharacterProfileId, CharacterProf
   },
 };
 
-export type ResolvedCharacterProfile = CharacterProfileContent & {
+export type ResolvedCharacterProfile = CharacterProfileContent & CharacterScanContent & {
   profilePath: string;
   missionsPath: string;
   coloringHref: string | null;
@@ -199,6 +266,7 @@ export function buildCharacterProfile(
 
   return {
     ...content,
+    ...CHARACTER_SCAN_CONTENT[id],
     profilePath: `${basePath}/characters/${id}`,
     missionsPath: resolveCharacterMissionsPath(id, pathname),
     coloringHref: content.coloringAvailable ? COLORING_BY_ID[id] ?? null : null,

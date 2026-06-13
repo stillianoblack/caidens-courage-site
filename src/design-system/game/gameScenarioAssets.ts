@@ -4,6 +4,7 @@ import {
 } from '../../data/caiden/sharedAssets';
 import { MIRANDA_AVATAR_ALT, MIRANDA_AVATAR_SRC } from '../../data/miranda/sharedAssets';
 import { CHARLIE_AVATAR_SRC } from '../../data/charlie/sharedAssets';
+import { ZEKE_AVATAR_SRC } from '../../data/zeke/sharedAssets';
 import { DR_VICTORIA_GUIDE_SRC, UNCLE_T_GUIDE_SRC } from '../../data/adult/sharedAssets';
 import { getCharacter } from '../characters/characterRegistry';
 import type { CharacterScenarioImageFit } from './CharacterScenarioImage';
@@ -18,6 +19,7 @@ export type GameScenarioFlags = {
   useCaidenHeader?: boolean;
   useMirandaHeader?: boolean;
   useCharlieHeader?: boolean;
+  useZekeHeader?: boolean;
   useUncleTHeader?: boolean;
   useVictoriaHeader?: boolean;
   useB4Header?: boolean;
@@ -68,6 +70,17 @@ export function resolveGameScenarioImage(
       {
         src: CHARLIE_AVATAR_SRC,
         alt: 'Charlie Perk character gameplay icon',
+        objectFit: 'contain',
+      },
+      imageSrc,
+    );
+  }
+
+  if (input.useZekeHeader) {
+    return withCustomSrc(
+      {
+        src: ZEKE_AVATAR_SRC,
+        alt: 'Zeke character gameplay icon',
         objectFit: 'contain',
       },
       imageSrc,

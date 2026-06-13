@@ -5,7 +5,8 @@ import CourageFooter from '../components/courage/CourageFooter';
 import PortalHero from '../components/courage/PortalHero';
 import { parsePortalAudienceParam, type PortalAudienceTab } from '../config/portalAudience';
 import { usePortalUnlock } from '../hooks/usePortalUnlock';
-import { FAMILY_HUB_PATH, PORTAL_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
+import { PORTAL_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { logPortalRedirect } from '../lib/portalDebug';
 import {
   hasFacilitatorPortalSession,
@@ -57,8 +58,8 @@ const Portal: React.FC = () => {
 
   useEffect(() => {
     if (hasFamilyPortalSession()) {
-      logPortalRedirect(PORTAL_PATH, FAMILY_HUB_PATH, 'resume-family-session');
-      replaceWithPortalRoute(FAMILY_HUB_PATH);
+      logPortalRedirect(PORTAL_PATH, resolveFamilyKidDefaultLandingPath(), 'resume-family-session');
+      replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
       return;
     }
     if (hasFacilitatorPortalSession()) {

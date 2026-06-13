@@ -27,6 +27,7 @@ export default function FamilyAdultGuideMissionPage() {
       useVictoriaHeader={useVictoriaHeader}
       useUncleTHeader={useUncleTHeader}
       embedded
+      skipLanding
       familyPortalPath={FAMILY_HUB_PATH}
       portalSectionPath={guide.routes.familySection}
       portalSectionLabel="Return to Parent Corner"

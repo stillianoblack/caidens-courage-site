@@ -1860,6 +1860,16 @@ a.family-dash-card:hover {
   gap: 1.25rem;
 }
 
+.family-characterHubSection + .family-characterHubSection {
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .family-characterHubSection + .family-characterHubSection {
+    margin-top: 3.5rem;
+  }
+}
+
 .family-characterHubSectionHead {
   display: flex;
   flex-direction: column;
@@ -3285,11 +3295,120 @@ a.family-dash-card:hover {
   min-width: 0;
 }
 
+.family-weeklyAdventureCta {
+  margin-bottom: 1.25rem;
+}
+
+.family-weeklyAdventureCtaInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: 1.75rem;
+  background: linear-gradient(132deg, #ea580c 0%, #7c3aed 42%, #1a2f52 100%);
+  border: 2px solid rgba(253, 224, 138, 0.28);
+  box-shadow: 0 16px 40px -16px rgba(15, 35, 70, 0.45);
+  color: #fff;
+}
+
+.family-weeklyAdventureCtaCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.family-weeklyAdventureCtaTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.family-weeklyAdventureCtaText {
+  margin: 0.4rem 0 0.85rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.family-weeklyAdventureCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 1.15rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-decoration: none;
+  background: linear-gradient(135deg, #f0d078, #e5c06a);
+  color: #1a1035;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.35);
+}
+
+.family-weeklyAdventureCtaArt {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+}
+
+.family-weeklyAdventureCtaAvatar {
+  width: 4.25rem;
+  height: 4.25rem;
+  object-fit: contain;
+}
+
 .family-journeyCoachInline {
   display: none;
   width: 100%;
   max-width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+
+.family-journeyCoachAccordion {
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(26, 47, 82, 0.08);
+  overflow: hidden;
+}
+
+.family-journeyCoachAccordionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: none;
+  background: transparent;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #1a2f52;
+  cursor: pointer;
+  text-align: left;
+}
+
+.family-journeyCoachAccordionTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.family-journeyCoachAccordionChevron {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.family-journeyCoachAccordionBody {
+  padding: 0 0.65rem 0.85rem;
 }
 
 .family-missionCoachSkeleton {
@@ -3316,41 +3435,74 @@ a.family-dash-card:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 0.85rem 1rem;
-  padding: 1rem 1.1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(36, 62, 112, 0.1);
-  background: linear-gradient(135deg, #fffaf5 0%, #fff 100%);
-  box-shadow: 0 8px 24px rgba(36, 62, 112, 0.08);
+  padding: 1.1rem 1.15rem;
+  border-radius: 1.25rem;
+  border: none;
+  background: linear-gradient(135deg, #c2410c 0%, #e85d4a 42%, #dc6b5a 100%);
+  box-shadow:
+    0 12px 32px -12px rgba(194, 65, 12, 0.45),
+    0 0 0 1px rgba(253, 224, 138, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.family-onboardingMobileCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.family-onboardingMobileCardCopy {
+  flex: 1 1 10rem;
+  min-width: 0;
 }
 
 .family-onboardingMobileCardTitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 800;
-  color: var(--family-navy-deep);
+  color: #fff;
+  line-height: 1.25;
 }
 
 .family-onboardingMobileCardProgress {
   margin: 0.25rem 0 0;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: rgba(36, 62, 112, 0.72);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .family-onboardingMobileCardCta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1rem;
+  padding: 0.55rem 1.05rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #fff4d6 0%, var(--family-gold) 100%);
-  color: var(--family-navy-deep);
+  background: #fff;
+  color: #1a2f52;
   font-size: 0.8125rem;
   font-weight: 800;
   text-decoration: none;
-  border: 1px solid rgba(201, 164, 74, 0.45);
+  border: none;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .family-overviewClaim {
+    display: none;
+  }
+
+  .family-onboardingMobileCard {
+    margin-bottom: 1.35rem;
+  }
 }
 
 @media (max-width: 1100px) {

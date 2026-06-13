@@ -1,9 +1,38 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
+import { readActiveChildParticipantId, CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
 import {
+  readParticipantGradeSettingsAsync,
   resolveMirandaGradeBandForParticipant,
   type MirandaGradeBandResolution,
+  type ParticipantGradeSettingsSnapshot,
 } from '../lib/mirandaGradeBandResolver';
+import { isFamilyGradeBand } from '../data/familyGradeBandOptions';
+import { hasCanonicalGradeLevel } from '../lib/participantGradeDisplay';
+import { resolveAdaptiveGradeBand } from '../lib/getGradeBand';
+
+function resolveFromGradeSettings(
+  settings: ParticipantGradeSettingsSnapshot,
+): MirandaGradeBandResolution {
+  const { gradeLevel, gradeBand, allowStretch } = settings;
+  const familyGradeBand = gradeBand && isFamilyGradeBand(gradeBand) ? gradeBand : null;
+  const hasLevel = hasCanonicalGradeLevel(gradeLevel);
+  const hasBand = Boolean(gradeBand?.trim());
+
+  const band = resolveAdaptiveGradeBand({
+    gradeLevel,
+    gradeBand,
+    allowStretch,
+  });
+
+  return {
+    band,
+    bandKey: band,
+    missingGrade: !hasLevel && !hasBand,
+    needsGradeSelection: !hasLevel && hasBand,
+    familyGradeBand,
+    allowStretch,
+  };
+}
 
 export function useMirandaGradeBand(participantId?: string): MirandaGradeBandResolution {
   const [resolution, setResolution] = useState<MirandaGradeBandResolution>(() =>
@@ -11,7 +40,15 @@ export function useMirandaGradeBand(participantId?: string): MirandaGradeBandRes
   );
 
   const refresh = useCallback(() => {
-    setResolution(resolveMirandaGradeBandForParticipant(participantId));
+    const id = participantId?.trim() || readActiveChildParticipantId();
+    if (!id) {
+      setResolution(resolveMirandaGradeBandForParticipant(participantId));
+      return;
+    }
+
+    void readParticipantGradeSettingsAsync(id).then((settings) => {
+      setResolution(resolveFromGradeSettings(settings));
+    });
   }, [participantId]);
 
   useEffect(() => {

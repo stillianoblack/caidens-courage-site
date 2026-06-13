@@ -8,7 +8,7 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
   'caiden-courage-in-the-dark': {
     mission_id: 'caiden-courage-in-the-dark',
     character_id: 'caiden',
-    mission_title: 'Courage in the Cave',
+    mission_title: 'Courage by the Bridge',
     character_name: 'Caiden',
     coins_earned: 25,
     badge_unlocked: 'Cave Explorer Badge',
@@ -26,7 +26,7 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
   'zeke-bridge-challenge': {
     mission_id: 'zeke-bridge-challenge',
     character_id: 'zeke',
-    mission_title: "Zeke's Bridge Challenge",
+    mission_title: "Zeke's Cave Challenge",
     character_name: 'Zeke',
     coins_earned: 25,
     badge_unlocked: 'Brave Bridge Badge',

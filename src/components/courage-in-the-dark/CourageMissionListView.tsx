@@ -36,9 +36,9 @@ export default function CourageMissionListView({
 }: CourageMissionListViewProps) {
   return (
     <div
-      id="courage-hub-panel-list"
+      id="courage-hub-panel-missions"
       role="tabpanel"
-      aria-labelledby="courage-hub-tab-list"
+      aria-labelledby="courage-hub-tab-missions"
       className="courageAdventureHubSplit"
       data-view={viewMode}
     >
