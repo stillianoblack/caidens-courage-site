@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNarration } from './useNarration';
-import './read-aloud-icon-button.css';
 
 type ReadAloudIconButtonProps = {
   segments: string[];

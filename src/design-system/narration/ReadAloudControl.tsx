@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNarration } from './useNarration';
-import './read-aloud-control.css';
 
 export type ReadAloudControlProps = {
   segments: string[];

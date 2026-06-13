@@ -10,7 +10,6 @@ import React, {
 import { ACTIVE_CHILD_EVENT } from '../lib/activeChildContext';
 import {
   autoSelectSingleChildRoster,
-  resolveActiveParticipantFromRoster,
   rosterEntryFromChild,
   syncActiveParticipantStorage,
   validateStoredParticipantAgainstRoster,

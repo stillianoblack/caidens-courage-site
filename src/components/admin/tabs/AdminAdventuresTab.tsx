@@ -15,7 +15,7 @@ import {
   ADMIN_PREVIEW_PARAM,
   PREVIEW_ADVENTURE_PARAM,
 } from '../../../lib/adventureVisibility';
-import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH } from '../../../config/courageRoutes';
+import { FAMILY_PORTAL_PATH } from '../../../config/courageRoutes';
 
 type AdminAdventuresTabProps = {
   onCopied?: (message: string) => void;

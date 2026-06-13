@@ -1,3 +1,5 @@
+import './readAloudStyles';
+
 export type {
   NarrationPlaybackState,
   NarrationProvider,

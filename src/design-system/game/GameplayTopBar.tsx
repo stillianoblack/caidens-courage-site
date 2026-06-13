@@ -7,7 +7,7 @@ import type { MissionGameTheme } from '../../components/mission-game/MissionSpee
 import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import { useOptionalActiveParticipantContext } from '../../context/ActiveParticipantContext';
-import ReadAloudIconButton from '../narration/ReadAloudIconButton';
+import { ReadAloudIconButton } from '../narration';
 import GameBackIconButton from './GameBackIconButton';
 import './gameplay-top-bar.css';
 

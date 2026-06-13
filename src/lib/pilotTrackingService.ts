@@ -1,4 +1,3 @@
-import { readActiveChildNickname } from '../config/activeChildNickname';
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { loadB4BaselineState } from './b4BaselineCheckStorage';
