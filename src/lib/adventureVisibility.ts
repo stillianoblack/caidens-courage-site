@@ -2,6 +2,7 @@ import { readAdminSession } from '../config/adminAccess';
 import type { AdventureModuleRecord } from '../types/adventureModule';
 
 export const PREVIEW_ADVENTURE_PARAM = 'previewAdventureId';
+export const ADMIN_PREVIEW_PARAM = 'adminPreview';
 
 export type AdventureVisibilityContext = {
   isAdmin?: boolean;
@@ -17,6 +18,15 @@ export function readAdventureVisibilityContext(
     previewAdventureId,
     now: new Date(),
   };
+}
+
+export function isAdminAdventurePreviewActive(search: string): boolean {
+  const params = new URLSearchParams(search);
+  return (
+    readAdminSession() &&
+    params.get(ADMIN_PREVIEW_PARAM) === 'true' &&
+    Boolean(params.get(PREVIEW_ADVENTURE_PARAM)?.trim())
+  );
 }
 
 export function isUnlockDatePassed(unlockDate: string | null, now = new Date()): boolean {

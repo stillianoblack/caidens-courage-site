@@ -5,6 +5,9 @@ import SoundToggleButton from '../../components/game-assessment/shared/SoundTogg
 import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
 import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
+import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
+import { useOptionalActiveParticipantContext } from '../../context/ActiveParticipantContext';
+import ReadAloudIconButton from '../narration/ReadAloudIconButton';
 import GameBackIconButton from './GameBackIconButton';
 import './gameplay-top-bar.css';
 
@@ -41,6 +44,9 @@ export type GameplayTopBarProps = {
   flamesLit?: number;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  readAloudSegments?: string[];
+  readAloudResetKey?: string;
+  readAloudAriaLabel?: string;
   className?: string;
 };
 
@@ -108,6 +114,9 @@ export default function GameplayTopBar({
   flamesLit = 1,
   soundEnabled = true,
   onToggleSound,
+  readAloudSegments,
+  readAloudResetKey,
+  readAloudAriaLabel = 'Read aloud',
   className = '',
 }: GameplayTopBarProps) {
   const navigate = useNavigate();
@@ -122,6 +131,23 @@ export default function GameplayTopBar({
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
   }, []);
+  const participantCtx = useOptionalActiveParticipantContext();
+  const chip = useGameplayPlayerChip();
+  const resolvedPlayerLabel = playerName?.trim()
+    ? playerName.trim()
+    : chip.hasActiveParticipant
+      ? chip.label
+      : participantCtx
+        ? 'Choose Player'
+        : '';
+  const resolvedAvatarLetter = playerName?.trim()
+    ? playerName.trim().charAt(0).toUpperCase()
+    : chip.hasActiveParticipant
+      ? chip.avatarLetter
+      : participantCtx
+        ? '?'
+        : '';
+  const showPlayerChip = Boolean(playerName?.trim() || participantCtx);
   const resolvedFlameDisplay = showFlameStatus ? flameDisplay : 'none';
 
   const handleMobileBack = useCallback(() => {
@@ -132,10 +158,6 @@ export default function GameplayTopBar({
     }
     if (backHref) {
       navigate(backHref);
-      return;
-    }
-    if (window.history.length > 1) {
-      navigate(-1);
       return;
     }
     navigate(resolveMobileGameBackTarget(window.location.pathname, window.location.search).path);
@@ -205,16 +227,23 @@ export default function GameplayTopBar({
 
       <div className="ds-gameplayTopBar-controls">
         <FocusCoinWalletBadge compact className="ds-gameplayTopBar-coinChip family-portalMobileChip" />
-        {playerName ? (
-          <span className="ds-gameplayTopBar-playerChip family-portalMobilePlayerChip" title={playerName}>
+        {showPlayerChip ? (
+          <span className="ds-gameplayTopBar-playerChip family-portalMobilePlayerChip" title={resolvedPlayerLabel}>
             <span className="ds-gameplayTopBar-playerAvatar family-portalMobilePlayerAvatar" aria-hidden="true">
-              {playerName.charAt(0).toUpperCase()}
+              {resolvedAvatarLetter}
             </span>
-            <span className="ds-gameplayTopBar-playerName family-portalMobilePlayerName">{playerName}</span>
+            <span className="ds-gameplayTopBar-playerName family-portalMobilePlayerName">{resolvedPlayerLabel}</span>
           </span>
         ) : null}
         <FlameStatus display={resolvedFlameDisplay} lit={flamesLit} className="ds-gameplayTopBar-flamesDesktop" />
-        {onToggleSound ? (
+        {readAloudSegments && readAloudSegments.length > 0 ? (
+          <ReadAloudIconButton
+            segments={readAloudSegments}
+            resetKey={readAloudResetKey}
+            ariaLabel={readAloudAriaLabel}
+            className="ds-gameplayTopBar-readAloudBtn"
+          />
+        ) : onToggleSound ? (
           <SoundToggleButton soundEnabled={soundEnabled} onToggle={onToggleSound} className="ds-gameplayTopBar-soundBtn" />
         ) : null}
       </div>

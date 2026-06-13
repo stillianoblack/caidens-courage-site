@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
-import { readActiveChildNickname } from '../../config/activeChildNickname';
 import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
+import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
 import { checkBaselineCompletion } from '../../lib/baselineCompletion';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
@@ -116,7 +116,10 @@ export default function B4BaselineCheckFlow({
   const [hubState, setHubState] = useState(() => loadB4BaselineState(activeParticipantId));
   const [view, setView] = useState<View>('landing');
   const [playerName, setPlayerName] = useState(
-    () => readActiveChildNickname() || loadB4BaselineState(activeParticipantId).profile?.nickname || '',
+    () =>
+      readGameplayPlayerDisplayName() ||
+      loadB4BaselineState(activeParticipantId).profile?.nickname ||
+      '',
   );
   const [courageMissionPayload, setCourageMissionPayload] =
     useState<CourageMissionRewardPayload | null>(null);
@@ -160,7 +163,9 @@ export default function B4BaselineCheckFlow({
   const refreshHub = useCallback(() => {
     const participantId = readActiveChildParticipantId();
     setHubState(loadB4BaselineState(participantId));
-    setPlayerName(readActiveChildNickname() || loadB4BaselineState(participantId).profile?.nickname || '');
+    setPlayerName(
+      readGameplayPlayerDisplayName() || loadB4BaselineState(participantId).profile?.nickname || '',
+    );
   }, []);
 
   useEffect(() => {
@@ -174,15 +179,42 @@ export default function B4BaselineCheckFlow({
 
   useEffect(() => {
     if (!familyPortal || !activeParticipantId) return;
-    void checkBaselineCompletion(resolveTrackingProgramCode() ?? undefined, activeParticipantId).then(
-      (done) => {
-        if (!done) return;
-        const scoped = loadB4BaselineState(activeParticipantId);
-        if (isBaselineFullyComplete(scoped)) {
-          setHubState(scoped);
-        }
-      },
-    );
+    void (async () => {
+      const programCode = resolveTrackingProgramCode() ?? undefined;
+      const done = await checkBaselineCompletion(programCode, activeParticipantId);
+      const scoped = loadB4BaselineState(activeParticipantId);
+
+      if (done && isBaselineFullyComplete(scoped)) {
+        setHubState(scoped);
+        setView('hub');
+        return;
+      }
+
+      const displayName = readGameplayPlayerDisplayName();
+      if (!displayName) return;
+
+      const gradeSettings = await readParticipantGradeSettingsAsync(activeParticipantId);
+      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+        return;
+      }
+
+      if (scoped.profile?.participantId === activeParticipantId) {
+        setHubState(scoped);
+        setView('hub');
+        return;
+      }
+
+      const activeProgram = readActivePilotProgram();
+      const next = saveB4BaselineStudentProfile({
+        firstName: displayName,
+        nickname: displayName,
+        participantId: activeParticipantId,
+        programCode: programCode || activeProgram?.programCode || scoped.profile?.programCode || '',
+        groupName: activeProgram?.groupName || scoped.profile?.groupName || '',
+      });
+      setHubState(next);
+      setView('hub');
+    })();
   }, [activeParticipantId, familyPortal]);
 
   const handleRevealScore = useCallback(
@@ -733,7 +765,7 @@ export default function B4BaselineCheckFlow({
               familyPortal={familyPortal}
               initialFirstName={hubState.profile?.firstName ?? ''}
               initialNickname={
-                hubState.profile?.nickname ?? readActiveChildNickname() ?? ''
+                hubState.profile?.nickname ?? readGameplayPlayerDisplayName() ?? ''
               }
               initialProgramCode={
                 programContext?.programCode ?? hubState.profile?.programCode ?? ''

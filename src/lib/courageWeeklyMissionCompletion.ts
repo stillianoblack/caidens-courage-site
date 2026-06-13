@@ -17,6 +17,7 @@ import {
   logPlayerParticipantContext,
   resolvePlayerParticipantContext,
 } from './resolvePlayerParticipantId';
+import { isAdminAdventurePreviewActive } from './adventureVisibility';
 import {
   isWeeklyAdventureSource,
   readWeeklyAdventureRouteContext,
@@ -52,6 +53,13 @@ export async function completeWeeklyCourageMission(
   pathname: string,
   search: string,
 ): Promise<CompleteMissionResult | null> {
+  if (isAdminAdventurePreviewActive(search)) {
+    return {
+      ok: true,
+      alreadyCompleted: true,
+    };
+  }
+
   const reward = resolveWeeklyCourageMissionReward(pathname, search);
   if (!reward) {
     return null;

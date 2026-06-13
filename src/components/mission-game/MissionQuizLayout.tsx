@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { GameAnswerValue, GameQuestion } from '../../types/gameAssessment';
 import {
   isGameAnswerComplete,
@@ -121,6 +121,15 @@ export default function MissionQuizLayout({
   const answersWrapRef = useRef<HTMLDivElement>(null);
   const railShellRef = useRef<HTMLDivElement>(null);
   const caretTop = useCoachingRailCaret(answer, answersWrapRef, railShellRef);
+  const [compactMobile, setCompactMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 719px)');
+    const update = () => setCompactMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
   const questionPrompt = useMemo(() => resolveGameplayQuestionPrompt(question), [question]);
 
   const cardFlags = {
@@ -277,7 +286,7 @@ export default function MissionQuizLayout({
           .filter(Boolean)
           .join(' ')}
       >
-        <LearningMomentCard {...learningMoment} className="ds-guideFeedbackCard" />
+        <LearningMomentCard {...learningMoment} className="ds-guideFeedbackCard" collapsibleOnMobile={compactMobile} />
         {canExplainMore && showExplainMore && question.explainMore ? (
           <p className="ds-guideFeedbackExplain">{question.explainMore}</p>
         ) : null}
@@ -417,6 +426,7 @@ export default function MissionQuizLayout({
           readAloudPlayAriaLabel={
             checked ? 'Read coach feedback aloud' : 'Read this question aloud'
           }
+          showReadAloud={!compactMobile}
         />
       </aside>
     </div>

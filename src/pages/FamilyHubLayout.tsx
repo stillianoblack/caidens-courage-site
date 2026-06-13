@@ -19,7 +19,10 @@ import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyP
 import { afterIdle } from '../lib/defer';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
-import { resolvePortalPageTitle, isCharacterGameRoute } from '../lib/familyPortalNav';
+import {
+  resolvePortalPageTitle,
+  isMobileFamilyGameplayShellRoute,
+} from '../lib/familyPortalNav';
 import { isKidFacingPortalRoute } from '../lib/kidFacingPortalRoutes';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
@@ -32,7 +35,10 @@ import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourne
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
 import { isFamilyHubHomePath } from '../lib/familyPortalHomeRoute';
+import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
+import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
+import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -48,10 +54,13 @@ export default function FamilyHubLayout() {
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
+  const adminPreviewAccess = isAdminAdventurePreviewActive(location.search);
+  const canAccessShell = sessionValid || adminPreviewAccess;
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
   const { isMobileNav } = useFamilyMobileNav();
-  const isMobileGameRoute = isMobileNav && isCharacterGameRoute(location.pathname);
+  const isMobileGameRoute =
+    isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname, FAMILY_HUB_PATH);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname, FAMILY_HUB_PATH) || isMobileGameRoute;
 
   const sidebarProps = useMemo(
@@ -106,19 +115,20 @@ export default function FamilyHubLayout() {
   }, [sessionValid]);
 
   useEffect(() => {
-    if (!sessionValid) {
+    if (!canAccessShell) {
       clearProgramPortalContext();
       clearFamilyPortalSession();
       navigate(PORTAL_PATH, { replace: true, state: { redirect: FAMILY_HUB_PATH } });
     }
-  }, [navigate, sessionValid]);
+  }, [canAccessShell, navigate]);
 
-  if (!activeProgram) {
+  if (!activeProgram || !canAccessShell) {
     return null;
   }
 
   return (
-    <>
+    <ActiveParticipantProvider programCode={programCode}>
+      <ActiveParticipantPickerGate />
       <div
         className={[
           isMobileNav ? 'portal-shell--familyMobileNav' : '',
@@ -153,6 +163,6 @@ export default function FamilyHubLayout() {
         </AppShell>
       </div>
       {isMobileNav && !isMobileGameRoute ? <FamilyMobileBottomNav /> : null}
-    </>
+    </ActiveParticipantProvider>
   );
 }

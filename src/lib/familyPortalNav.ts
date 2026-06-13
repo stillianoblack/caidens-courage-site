@@ -38,6 +38,17 @@ export function isCharacterGameRoute(pathname: string, basePath = resolveFamilyB
   );
 }
 
+/** Mobile family portal routes that use the compact gameplay shell (no portal header / bottom nav). */
+export function isMobileFamilyGameplayShellRoute(
+  pathname: string,
+  basePath = resolveFamilyBasePath(pathname),
+): boolean {
+  return (
+    isCharacterGameRoute(pathname, basePath) ||
+    pathname.startsWith(`${basePath}/baseline-check`)
+  );
+}
+
 export function isCharacterHubRoute(pathname: string, basePath = resolveFamilyBasePath(pathname)): boolean {
   return (
     pathname === `${basePath}/characters` ||

@@ -202,9 +202,9 @@ export function saveB4BaselineStudentProfile(
   };
   const next: B4BaselinePersistedState = { ...current, profile };
   saveB4BaselineState(next, profile.participantId);
-  writeActiveChildNickname(profile.nickname);
   if (profile.participantId) {
     writeActiveChildParticipantId(profile.participantId);
+    writeActiveChildNickname(profile.nickname);
   }
   return next;
 }

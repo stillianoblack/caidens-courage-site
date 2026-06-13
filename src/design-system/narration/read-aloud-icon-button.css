@@ -1,0 +1,25 @@
+.ds-readAloudIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+  border: 2px solid rgba(26, 47, 82, 0.18);
+  background: #fff;
+  color: var(--family-navy-deep, #1a2f52);
+  box-shadow: 0 4px 12px -8px rgba(26, 47, 82, 0.25);
+  cursor: pointer;
+}
+
+.ds-readAloudIconBtn--active {
+  background: linear-gradient(145deg, #f0d078, #e5c06a);
+  border-color: rgba(146, 64, 14, 0.28);
+}
+
+.ds-readAloudIconBtnSvg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

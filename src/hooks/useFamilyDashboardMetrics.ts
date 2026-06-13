@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
-import { MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
+import { ACTIVE_CHILD_EVENT, MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
+import { isKidFacingPortalRoute } from '../lib/kidFacingPortalRoutes';
 import { ADULT_ASSESSMENT_PROGRESS_EVENT } from '../lib/adultAssessmentStorage';
 import { computeFamilyChildrenSummaries, type FamilyChildSummary } from '../lib/familyChildrenMetrics';
 import type { FamilyVisibleChild, StudentFamilyLink } from '../lib/studentFamilyLinkService';
@@ -68,10 +71,17 @@ export type FamilyDashboardMetrics = {
 };
 
 export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboardMetrics {
+  const location = useLocation();
   const resolvedCode = programCode?.trim() || resolveTrackingProgramCode() || '';
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<FamilyDashboardData>(EMPTY_DATA);
   const [campProgramName, setCampProgramName] = useState<string | null>(null);
+
+  const scopedParticipantIds = useMemo(() => {
+    if (!isKidFacingPortalRoute(location.pathname)) return undefined;
+    const activeId = readActiveChildParticipantId().trim();
+    return activeId ? [activeId] : undefined;
+  }, [location.pathname]);
 
   const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!resolvedCode) {
@@ -84,14 +94,16 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       setLoading(true);
     }
     try {
-      const payload = await loadFamilyDashboardData(resolvedCode);
+      const payload = await loadFamilyDashboardData(resolvedCode, {
+        scopedParticipantIds,
+      });
       setData(payload);
     } finally {
       if (!options?.silent) {
         setLoading(false);
       }
     }
-  }, [resolvedCode]);
+  }, [resolvedCode, scopedParticipantIds]);
 
   useEffect(() => {
     void refresh();
@@ -110,6 +122,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
 
     window.addEventListener('cc-baseline-complete', handleRefresh);
     window.addEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
+    window.addEventListener(ACTIVE_CHILD_EVENT, handleRefresh);
     window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleProfileRefresh);
     window.addEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
     window.addEventListener('focus', handleRefresh);
@@ -118,6 +131,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     return () => {
       window.removeEventListener('cc-baseline-complete', handleRefresh);
       window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
+      window.removeEventListener(ACTIVE_CHILD_EVENT, handleRefresh);
       window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleProfileRefresh);
       window.removeEventListener(ADULT_ASSESSMENT_PROGRESS_EVENT, handleRefresh);
       window.removeEventListener('focus', handleRefresh);

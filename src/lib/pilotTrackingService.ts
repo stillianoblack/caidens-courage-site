@@ -215,7 +215,11 @@ function buildStudentParticipantOrFilter(nickname?: string, firstName?: string):
 export async function ensureStudentParticipantForSave(
   input: EnsureStudentParticipantInput = {},
 ): Promise<EnsureStudentParticipantResult> {
-  const baselineState = loadB4BaselineState();
+  const participantId =
+    input.participantId?.trim() ||
+    readActiveChildParticipantId()?.trim() ||
+    '';
+  const baselineState = loadB4BaselineState(participantId || undefined);
   const programCode = resolveTrackingProgramCode('student_participant_ensure');
   if (!programCode) {
     throw new Error('Missing active program context');
@@ -223,18 +227,17 @@ export async function ensureStudentParticipantForSave(
 
   const nickname =
     input.nickname?.trim() ||
-    baselineState.profile?.nickname?.trim() ||
-    readActiveChildNickname()?.trim() ||
+    (baselineState.profile?.participantId === participantId
+      ? baselineState.profile?.nickname?.trim()
+      : '') ||
     '';
   const firstName =
     input.firstName?.trim() ||
-    baselineState.profile?.firstName?.trim() ||
+    (baselineState.profile?.participantId === participantId
+      ? baselineState.profile?.firstName?.trim()
+      : '') ||
     nickname;
-  const participantId =
-    input.participantId?.trim() ||
-    readActiveChildParticipantId()?.trim() ||
-    baselineState.profile?.participantId?.trim() ||
-    '';
+  const resolvedParticipantId = participantId || baselineState.profile?.participantId?.trim() || '';
   const groupName = resolveStudentGroupNameForSave(
     input.groupName?.trim() || baselineState.profile?.groupName?.trim(),
   );
@@ -248,7 +251,7 @@ export async function ensureStudentParticipantForSave(
 
   const { participantId: ensuredId, source } = await findOrCreateParticipant({
     role: 'student',
-    participant_id: isValidSupabaseParticipantId(participantId) ? participantId : undefined,
+    participant_id: isValidSupabaseParticipantId(resolvedParticipantId) ? resolvedParticipantId : undefined,
     nickname: resolvedNickname,
     first_name: resolvedFirstName,
     program_code: programCode,
@@ -262,7 +265,7 @@ export async function ensureStudentParticipantForSave(
     nickname: resolvedNickname,
     program_code: programCode,
     source,
-    had_known_id: isValidSupabaseParticipantId(participantId),
+    had_known_id: isValidSupabaseParticipantId(resolvedParticipantId),
   });
 
   return {

@@ -42,6 +42,7 @@ import {
   buildCoachCardReadAloudSegments,
   buildGameplayReadAloudSegments,
   buildReadAloudSegmentsFromParts,
+  buildReadAloudSegmentsFromGameQuestion,
   IdleSessionGuard,
   ReadAloudControl,
 } from '../../design-system/narration';
@@ -54,7 +55,7 @@ import { getCaidenNextQuest } from '../../data/caiden/progression';
 import { getMirandaNextCase } from '../../data/miranda/progression';
 import { markAdultTrainingMissionComplete } from '../../lib/adultTrainingCompletion';
 import { readActivePortalRole } from '../../config/portalContext';
-import { readActiveChildNickname } from '../../config/activeChildNickname';
+import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
@@ -828,7 +829,16 @@ export default function GameAssessmentFlow({
     landingGuideCharacter,
   ]);
   const feedbackSpeakerLabel = getFeedbackSpeakerLabel(missionTheme);
-  const playerName = readActiveChildNickname();
+  const playerName = readGameplayPlayerDisplayName();
+
+  const topBarReadAloudSegments = useMemo(() => {
+    if (view !== 'quiz' || !currentQuestion) return [];
+    return buildReadAloudSegmentsFromGameQuestion(currentQuestion);
+  }, [currentQuestion, view]);
+
+  const topBarReadAloudKey = currentQuestion
+    ? `${config.id}::${currentQuestion.id}::${questionIndex}`
+    : config.id;
 
   return (
     <div className={shellClass}>
@@ -850,8 +860,9 @@ export default function GameAssessmentFlow({
             showFlameStatus={!useAdultGuideHeader}
             flameDisplay={topBarFlames.flameDisplay}
             flamesLit={topBarFlames.flamesLit}
-            soundEnabled={soundEnabled}
-            onToggleSound={toggleSound}
+            readAloudSegments={topBarReadAloudSegments}
+            readAloudResetKey={topBarReadAloudKey}
+            readAloudAriaLabel="Read this question aloud"
           />
         ) : (
           <GameHeader

@@ -105,7 +105,6 @@ export default function CharacterDetailPanel({
         <ScanSection emoji="⚡" label="Powers" value={profile.powers.join(' · ')} />
         <ScanSection emoji="🎮" label="Loves" value={profile.loves.join(' · ')} />
         <ScanSection emoji="🏆" label="Teaches" value={profile.teaches} />
-        <ScanSection emoji="⭐" label="Special Trait" value={profile.specialTrait} />
 
         <div className="characterDetailReward" aria-label="Next reward">
           <span className="characterDetailRewardLabel">Next Reward</span>

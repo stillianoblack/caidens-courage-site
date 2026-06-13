@@ -581,6 +581,27 @@
   font-size: 0.875rem;
 }
 
+.ds-learningMomentMobileToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin-top: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+  cursor: pointer;
+}
+
+.bbc-app--coachingShell.bbc-app--game-active .ds-learningMomentMobileToggle {
+  border-color: rgba(36, 62, 112, 0.14);
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .bbc-app--coachingShell.bbc-app--game-active .caiden-topBar,
 .bbc-app--coachingShell.bbc-app--game-active .miranda-topBar,
 .bbc-app--coachingShell.bbc-app--game-active .charlie-topBar,

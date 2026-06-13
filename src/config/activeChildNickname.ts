@@ -1,6 +1,10 @@
+import { readActiveChildParticipantId } from './activeChildParticipant';
+
 export const ACTIVE_CHILD_NICKNAME_KEY = 'activeChildNickname';
 
 export function readActiveChildNickname(): string {
+  const participantId = readActiveChildParticipantId().trim();
+  if (!participantId) return '';
   try {
     const raw = localStorage.getItem(ACTIVE_CHILD_NICKNAME_KEY);
     return raw?.trim() ?? '';

@@ -43,6 +43,7 @@ export type LearningMomentCardProps = {
   caretTop?: number;
   tipsLabel?: string;
   numberedTips?: boolean;
+  collapsibleOnMobile?: boolean;
 };
 
 function normalizeVariant(
@@ -112,6 +113,7 @@ export default function LearningMomentCard({
   caretTop,
   tipsLabel,
   numberedTips = true,
+  collapsibleOnMobile = false,
 }: LearningMomentCardProps) {
   const variant = normalizeVariant(rawVariant);
   const meta = LEARNING_MOMENT_VARIANTS[variant];
@@ -120,6 +122,7 @@ export default function LearningMomentCard({
   const avatar = resolveAvatar(variant, avatarType, avatarSrc, badge);
   const sectionTryLabel = tryThisLabel ?? defaultTryThisLabel(variant);
   const resolvedTipsLabel = tipsLabel ?? (variant === 'B4_LOCK_IN' ? 'Try this next' : undefined);
+  const [mobileExpanded, setMobileExpanded] = React.useState(false);
 
   const showTips = tips.length > 0;
   const showWhy = Boolean(whyItMatters);
@@ -169,8 +172,20 @@ export default function LearningMomentCard({
           {resolvedHeadline ? (
             <p className="ds-learningMomentHeadline">{resolvedHeadline}</p>
           ) : null}
-          {body ? <p className="ds-learningMomentBody">{body}</p> : null}
-          {b4TipsBlock}
+          {collapsibleOnMobile ? (
+            <button
+              type="button"
+              className="ds-learningMomentMobileToggle"
+              aria-expanded={mobileExpanded}
+              onClick={() => setMobileExpanded((open) => !open)}
+            >
+              B-4 Tip
+            </button>
+          ) : null}
+          {(!collapsibleOnMobile || mobileExpanded) && body ? (
+            <p className="ds-learningMomentBody">{body}</p>
+          ) : null}
+          {(!collapsibleOnMobile || mobileExpanded) ? b4TipsBlock : null}
         </>
       ) : (
         <>

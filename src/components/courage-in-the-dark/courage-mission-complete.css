@@ -85,6 +85,12 @@
   color: #fff;
 }
 
+.courageMissionCompleteBadgeIcon {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+
 @keyframes courageMissionBadgePop {
   0% {
     transform: scale(0.4);

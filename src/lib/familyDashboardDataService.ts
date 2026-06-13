@@ -245,7 +245,10 @@ export function logFamilyDashboardDebug(payload: {
   });
 }
 
-async function loadFamilyDashboardDataImpl(programCode: string): Promise<FamilyDashboardData> {
+async function loadFamilyDashboardDataImpl(
+  programCode: string,
+  options?: { scopedParticipantIds?: string[] },
+): Promise<FamilyDashboardData> {
   if (!programCode) {
     const empty: FamilyDashboardData = {
       programCode: '',
@@ -313,13 +316,16 @@ async function loadFamilyDashboardDataImpl(programCode: string): Promise<FamilyD
     errors: hydration.errors,
   });
 
+  const scopedParticipantIds = (options?.scopedParticipantIds ?? []).filter((id) => id.trim());
+  const useParticipantScope = scopedParticipantIds.length > 0;
+
   const [legacyAllPayload, v2ByProgramPayload, moduleByProgramPayload, v2ByStudentsPayload, moduleByStudentsPayload] =
     await Promise.all([
-      fetchAllLegacyAssessmentRows(programCode),
-      fetchAssessmentV2FromSupabase(programCode),
-      fetchModuleResultsFromSupabase(programCode),
-      fetchAssessmentV2ForParticipants(allowedStudentIds),
-      fetchModuleResultsForParticipants(allowedStudentIds),
+      useParticipantScope ? Promise.resolve({ rows: [], error: undefined }) : fetchAllLegacyAssessmentRows(programCode),
+      useParticipantScope ? Promise.resolve({ results: [], error: undefined }) : fetchAssessmentV2FromSupabase(programCode),
+      useParticipantScope ? Promise.resolve({ results: [], error: undefined }) : fetchModuleResultsFromSupabase(programCode),
+      fetchAssessmentV2ForParticipants(useParticipantScope ? scopedParticipantIds : allowedStudentIds),
+      fetchModuleResultsForParticipants(useParticipantScope ? scopedParticipantIds : allowedStudentIds),
     ]);
 
   if (legacyAllPayload.error) errors.push(legacyAllPayload.error);
@@ -391,10 +397,16 @@ async function loadFamilyDashboardDataImpl(programCode: string): Promise<FamilyD
   return data;
 }
 
-export async function loadFamilyDashboardData(programCodeInput?: string): Promise<FamilyDashboardData> {
+export async function loadFamilyDashboardData(
+  programCodeInput?: string,
+  options?: { scopedParticipantIds?: string[] },
+): Promise<FamilyDashboardData> {
   const programCode = programCodeInput?.trim() || resolveTrackingProgramCode() || '';
   if (!programCode) {
     return loadFamilyDashboardDataImpl('');
   }
-  return dedupePortalFetch(`family-dashboard:${programCode}`, () => loadFamilyDashboardDataImpl(programCode));
+  const scopeKey = options?.scopedParticipantIds?.join(',') ?? 'all';
+  return dedupePortalFetch(`family-dashboard:${programCode}:${scopeKey}`, () =>
+    loadFamilyDashboardDataImpl(programCode, options),
+  );
 }

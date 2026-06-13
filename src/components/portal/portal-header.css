@@ -250,3 +250,18 @@
 .portal-shell--familyMobileGame .family-miniFooter {
   display: none;
 }
+
+/* Mobile gameplay: hide portal chrome when a mission shell is active (weekly adventures + character routes). */
+@media (max-width: 767px) {
+  body:has(.bbc-app--game-active) .family-mobileBottomNav {
+    display: none;
+  }
+
+  .portal-shell--familyMobileNav:has(.bbc-app--game-active) .portal-header {
+    display: none;
+  }
+
+  .portal-shell--familyMobileNav:has(.bbc-app--game-active) .family-content {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}

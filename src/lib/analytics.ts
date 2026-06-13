@@ -1,5 +1,6 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveChildNickname } from '../config/activeChildNickname';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActivePortalRole } from '../config/portalContext';
 import {
   FACILITATOR_PORTAL_PATH,
@@ -12,6 +13,7 @@ import { loadAdultAssessmentSession } from './adultAssessmentStorage';
 import {
   findLocalAdultParticipant,
   findLocalStudentParticipant,
+  loadLocalParticipants,
 } from './pilotTrackingLocalStorage';
 import { resolvePortalPageTitle } from './familyPortalNav';
 
@@ -159,6 +161,26 @@ export function resolveCurrentUserRole(): string | null {
 export function resolveCurrentParticipantForAnalytics(): AnalyticsUserData | null {
   const programCode = resolveCurrentProgramCode();
   const portalRole = readActivePortalRole();
+  const activeParticipantId = readActiveChildParticipantId().trim();
+
+  if (activeParticipantId && programCode) {
+    const studentById = loadLocalParticipants().find(
+      (row) => row.id === activeParticipantId && row.role === 'student',
+    );
+    if (studentById) {
+      return {
+        participant_id: studentById.id,
+        nickname: studentById.nickname,
+        role: 'student',
+        program_code: programCode,
+      };
+    }
+    return {
+      participant_id: activeParticipantId,
+      role: 'student',
+      program_code: programCode,
+    };
+  }
 
   const nickname = readActiveChildNickname();
   if (nickname && programCode) {

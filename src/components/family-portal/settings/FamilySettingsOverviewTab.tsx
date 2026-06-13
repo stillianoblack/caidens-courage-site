@@ -10,6 +10,7 @@ import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
 import { familyPortalPath, familySettingsChildrenGradePath } from '../../../lib/familyPortalPaths';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import FocusFlameJourneyOnboarding from '../FocusFlameJourneyOnboarding';
+import ParticipantDebugPanel from '../ParticipantDebugPanel';
 
 type FamilySettingsOverviewTabProps = {
   onAddChild: () => void;
@@ -62,7 +63,8 @@ export default function FamilySettingsOverviewTab({
   }
 
   return (
-    <FocusFlameJourneyOnboarding
+    <>
+      <FocusFlameJourneyOnboarding
       variant="inline"
       embedGoalsEditor={false}
       activeStep={onboarding.activeStep}
@@ -91,5 +93,7 @@ export default function FamilySettingsOverviewTab({
         void onboarding.refresh();
       }}
     />
+      <ParticipantDebugPanel />
+    </>
   );
 }

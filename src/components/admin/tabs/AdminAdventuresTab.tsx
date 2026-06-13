@@ -12,9 +12,10 @@ import {
 } from '../../../lib/adventureModuleService';
 import {
   isAdminListAdventure,
+  ADMIN_PREVIEW_PARAM,
   PREVIEW_ADVENTURE_PARAM,
 } from '../../../lib/adventureVisibility';
-import { FAMILY_HUB_PATH } from '../../../config/courageRoutes';
+import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH } from '../../../config/courageRoutes';
 
 type AdminAdventuresTabProps = {
   onCopied?: (message: string) => void;
@@ -65,7 +66,8 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
   const openPreviewLive = (id: string) => {
     const params = new URLSearchParams();
     params.set(PREVIEW_ADVENTURE_PARAM, id);
-    const url = `${FAMILY_HUB_PATH}/weekly-adventures?${params.toString()}`;
+    params.set(ADMIN_PREVIEW_PARAM, 'true');
+    const url = `${FAMILY_PORTAL_PATH}/weekly-adventures?${params.toString()}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

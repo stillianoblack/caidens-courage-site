@@ -65,7 +65,8 @@
   flex-shrink: 0;
 }
 
-.ds-gameplayTopBar-controls .bbc-soundBtn {
+.ds-gameplayTopBar-controls .bbc-soundBtn,
+.ds-gameplayTopBar-readAloudBtn.ds-readAloudIconBtn {
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 4px 14px -8px rgba(26, 47, 82, 0.2);
 }
@@ -198,7 +199,8 @@
     font-size: 0.875rem !important;
   }
 
-  .ds-gameplayTopBar-controls .ds-gameplayTopBar-soundBtn {
+  .ds-gameplayTopBar-controls .ds-gameplayTopBar-soundBtn,
+  .ds-gameplayTopBar-controls .ds-gameplayTopBar-readAloudBtn {
     width: 2.75rem;
     height: 2.75rem;
     min-width: 2.75rem;

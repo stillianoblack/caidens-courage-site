@@ -25,6 +25,7 @@ export {
 export { useNarration } from './useNarration';
 export { default as ReadAloudControl } from './ReadAloudControl';
 export type { ReadAloudControlProps } from './ReadAloudControl';
+export { default as ReadAloudIconButton } from './ReadAloudIconButton';
 
 export { default as GameCoachingRailAside } from './GameCoachingRailAside';
 export type { GameCoachingRailAsideProps } from './GameCoachingRailAside';

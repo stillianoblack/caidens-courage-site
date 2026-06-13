@@ -5,7 +5,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 16px calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  padding: 0 16px calc(96px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
 }
 
@@ -30,13 +30,23 @@
   width: 100%;
   max-width: calc(100vw - 32px);
   margin: 0 auto;
-  max-height: min(78vh, 40rem);
+  max-height: min(72vh, 36rem);
   border-radius: 2rem 2rem 0 0;
   box-shadow: 0 -16px 48px -16px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.characterDetailPanel--sheet::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .characterDetailPanel--sheet .characterDetailBody {
   padding: 0 1.25rem 0.5rem;
+  overflow: visible;
+  flex: 0 0 auto;
 }
 
 .characterDetailPanel--sheet .characterDetailHeader {
@@ -55,7 +65,10 @@
 }
 
 .characterDetailPanel--sheet .characterDetailActions {
-  padding: 0.75rem 1.25rem 1rem;
+  padding: 0.75rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 
 /* —— Desktop inspector (fixed right, does not shrink grid) —— */
@@ -68,6 +81,14 @@
   max-height: calc(100vh - var(--portal-header-height, 4rem) - 2rem);
   border-radius: 1.75rem;
   box-shadow: 0 24px 56px -20px rgba(8, 18, 36, 0.55);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.characterDetailPanel--inspector::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .characterDetailPanel--inspector .characterDetailBody {
@@ -136,8 +157,7 @@
 .characterDetailBody {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,6 +172,9 @@
   border-radius: 999px;
   margin-bottom: 0.65rem;
   overflow: hidden;
+  box-shadow:
+    0 0 0 3px rgba(232, 191, 79, 0.55),
+    0 8px 20px -8px rgba(0, 0, 0, 0.35);
 }
 
 .characterDetailPortrait--caiden {
@@ -377,12 +400,6 @@
 .characterDetailActions {
   flex-shrink: 0;
   background: linear-gradient(180deg, transparent, rgba(8, 18, 36, 0.35));
-}
-
-.characterDetailPanel--sheet .characterDetailActions {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
 }
 
 .characterDetailCta {

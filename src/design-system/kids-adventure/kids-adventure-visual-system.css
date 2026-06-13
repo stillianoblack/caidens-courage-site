@@ -93,14 +93,14 @@
     position: absolute;
     z-index: 1;
     pointer-events: none;
-    right: -2.25rem;
-    top: -2.85rem;
+    right: -2rem;
+    top: -2.75rem;
     bottom: 0;
-    left: 42%;
+    left: 38%;
     background-image: var(--kid-card-image, none);
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center bottom;
+    background-position: right bottom;
   }
 
   .kids-adventure-shell .family-panel--characterHub .family-characterHubSection + .family-characterHubSection {
@@ -114,19 +114,13 @@
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard:first-child {
-    margin-top: 0.25rem;
+    margin-top: 0;
   }
 
-  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'] {
-    margin-top: 1rem;
-  }
-
-  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'] {
-    margin-top: 0.85rem;
-  }
-
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='caiden'],
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='miranda'],
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard[data-kid-theme='zeke'] {
-    margin-top: 1.5rem;
+    margin-top: 0;
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardWeekLabel {
@@ -1093,14 +1087,14 @@
     position: absolute;
     z-index: 1;
     pointer-events: none;
-    right: -2.25rem;
-    top: -2.85rem;
+    right: -2rem;
+    top: -2.75rem;
     bottom: 0;
-    left: 42%;
+    left: 38%;
     background-image: var(--kid-card-image, none);
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center bottom;
+    background-position: right bottom;
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain {
@@ -1151,14 +1145,14 @@
     position: absolute;
     z-index: 1;
     pointer-events: none;
-    right: -2rem;
-    top: -2.75rem;
+    right: -0.75rem;
+    top: -2.25rem;
     bottom: 0;
-    left: 38%;
+    left: 46%;
     background-image: var(--kid-card-image, none);
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center bottom;
+    background-position: right bottom;
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::before {
@@ -1177,7 +1171,7 @@
     background-image: var(--kid-card-image, none);
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center bottom;
+    background-position: right bottom;
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::after {
@@ -1453,5 +1447,54 @@
   .kids-adventure-shell .kidInventoryCard--shopState-need_coins .kidInventoryCardShopCta {
     background: #1e3a8a;
     color: #fff;
+  }
+
+  /* —— Character Hub mobile containment + spacing —— */
+  .kids-adventure-shell .family-panel--characterHub {
+    padding-inline: 1rem;
+    box-sizing: border-box;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardGrid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    clip-path: inset(-28% -18% 0 0 round 1.75rem);
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--dr-victoria::after,
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCard--uncle-t::after {
+    left: 46%;
+    right: -0.75rem;
+    top: -2.25rem;
+    background-size: contain;
+    background-position: right bottom;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .family-characterHubSection + .family-characterHubSection {
+    margin-top: 2.75rem;
+  }
+
+  .portal-shell--familyMobileGame .family-portalMobileChips,
+  .portal-gameFrame .family-portalMobileChips {
+    display: none !important;
+  }
+
+  .kids-adventure-shell ::-webkit-scrollbar-thumb {
+    background: rgba(36, 62, 112, 0.18);
+  }
+
+  .kids-adventure-shell .characterDetailPanel--sheet::-webkit-scrollbar-thumb,
+  .kids-adventure-shell .characterDetailPanel--inspector::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
   }
 }

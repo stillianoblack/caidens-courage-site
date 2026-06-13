@@ -1,7 +1,6 @@
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActiveChildNickname } from '../config/activeChildNickname';
 import { readActiveChildState } from './activeChildContext';
-import { loadB4BaselineState } from './b4BaselineCheckStorage';
 import { isValidSupabaseParticipantId } from './pilotTrackingService';
 
 export type PlayerParticipantContext = {
@@ -11,29 +10,18 @@ export type PlayerParticipantContext = {
     explicit?: string;
     localStorage: string;
     activeChild: string;
-    baselineProfile: string;
-    baselineRecord: string;
   };
 };
 
-/** Resolve active child participant — same fallbacks as module tracking / B-4 check-ins. */
+/** Resolve active child participant for gameplay writes — never parent auth user id. */
 export function resolvePlayerParticipantContext(
   explicitParticipantId?: string,
 ): PlayerParticipantContext {
   const explicit = explicitParticipantId?.trim() ?? '';
   const localStorageId = readActiveChildParticipantId().trim();
   const activeChild = readActiveChildState();
-  const baselineState = loadB4BaselineState(localStorageId || undefined);
-  const baselineProfileId = baselineState.profile?.participantId?.trim() ?? '';
-  const baselineRecordId = baselineState.record?.participantId?.trim() ?? '';
 
-  const participantId =
-    explicit ||
-    localStorageId ||
-    activeChild?.participantId?.trim() ||
-    baselineProfileId ||
-    baselineRecordId ||
-    null;
+  const participantId = explicit || localStorageId || activeChild?.participantId?.trim() || null;
 
   return {
     participantId,
@@ -42,8 +30,6 @@ export function resolvePlayerParticipantContext(
       explicit: explicit || undefined,
       localStorage: localStorageId,
       activeChild: activeChild?.participantId?.trim() ?? '',
-      baselineProfile: baselineProfileId,
-      baselineRecord: baselineRecordId,
     },
   };
 }

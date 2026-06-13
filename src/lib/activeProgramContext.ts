@@ -1,4 +1,5 @@
 import type { ActivePilotProgram } from '../types/pilotProgram';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { loadB4BaselineState, saveB4BaselineStudentProfile } from './b4BaselineCheckStorage';
 import {
   logProgramAssignmentAudit,
@@ -55,12 +56,17 @@ export function requireActivePilotProgram(): ActivePilotProgram | null {
   return program;
 }
 
-/** Keep B-4 baseline local profile aligned with the unlocked portal program. */
+/** Keep B-4 baseline local profile aligned with the unlocked portal program (active child only). */
 export function syncPortalProgramContext(program: ActivePilotProgram): void {
   logActiveProgramContext(program.programCode);
 
-  const baseline = loadB4BaselineState();
-  if (!baseline.profile) {
+  const activeParticipantId = readActiveChildParticipantId().trim();
+  if (!activeParticipantId) {
+    return;
+  }
+
+  const baseline = loadB4BaselineState(activeParticipantId);
+  if (!baseline.profile || baseline.profile.participantId !== activeParticipantId) {
     return;
   }
 
@@ -74,6 +80,7 @@ export function syncPortalProgramContext(program: ActivePilotProgram): void {
 
   saveB4BaselineStudentProfile({
     nickname,
+    participantId: activeParticipantId,
     programCode: program.programCode,
     groupName: program.groupName,
   });

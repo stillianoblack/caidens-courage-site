@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CompleteMissionResult, CourageMissionRewardPayload } from '../../types/courageMissionProgress';
-import { readActiveChildNickname } from '../../config/activeChildNickname';
+import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { getNextUnlockPreview } from '../../data/rewardShopItems';
 import { getBadgeArtworkPath, getRewardItemArtworkPath } from '../../lib/rewardArtwork';
 import { shareCampAchievement } from '../../lib/shareCampAchievement';
@@ -122,7 +122,7 @@ export default function CourageMissionCompleteCelebration({
   const [sharing, setSharing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const shareDate = useMemo(() => new Date(), []);
-  const displayName = readActiveChildNickname();
+  const displayName = readGameplayPlayerDisplayName();
   const isReplay = result.ok && result.alreadyCompleted;
   const hasCoinReward = result.ok && !result.alreadyCompleted;
   const oldTotal = hasCoinReward ? result.oldCoinTotal : 0;
@@ -220,7 +220,13 @@ export default function CourageMissionCompleteCelebration({
           ) : null}
 
           <div className="courageMissionCompleteBadge" aria-hidden="true">
-            ✓
+            <img
+              src={FOCUS_FLAME_BRAND_SRC}
+              alt=""
+              className="courageMissionCompleteBadgeIcon"
+              width={40}
+              height={40}
+            />
           </div>
 
           <p className="courageMissionCompleteEyebrow">Mission Complete</p>
