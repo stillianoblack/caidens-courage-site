@@ -8,7 +8,7 @@ import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
 import { checkBaselineCompletion } from '../../lib/baselineCompletion';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
 import { ensureParticipantForBaseline } from '../../lib/childProfileService';
-import { readParticipantGradeSettings, readParticipantGradeSettingsAsync } from '../../lib/mirandaGradeBandResolver';
+import { readParticipantGradeSettingsAsync } from '../../lib/mirandaGradeBandResolver';
 import { hasCanonicalGradeLevel } from '../../lib/participantGradeDisplay';
 import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/MissionGamePhaseContext';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';

@@ -10,7 +10,6 @@ import type {
 } from '../types/courageMissionProgress';
 import { notifyModuleComplete } from './activeChildContext';
 import { markRecentlyCompletedHotspot } from './courageMapReturnFeedback';
-import { trackMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
 import { completeMissionWithSupabase } from './completeMissionWithSupabase';
 import { ensureWeekGradeLevel } from './participantWeekGradeService';
