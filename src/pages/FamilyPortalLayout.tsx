@@ -5,7 +5,6 @@ import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTo
 import FamilyMobileBottomNav from '../components/family-portal/FamilyMobileBottomNav';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
-import '../design-system/components/character-profile-sheet.css';
 import '../design-system/components/weekly-review-sheet.css';
 import '../design-system/components/b4-insights-drawer.css';
 import '../components/portal/portal-header.css';

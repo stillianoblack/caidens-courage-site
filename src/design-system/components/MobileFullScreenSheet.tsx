@@ -32,6 +32,19 @@ export default function MobileFullScreenSheet({
   if (!open) return null;
 
   const contentClass = ['ds-sheetContent', className].filter(Boolean).join(' ');
+  const closeFromPointer = (
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    event.preventDefault();
+    event.stopPropagation();
+    onClose();
+  };
+
+  const closeFromClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onClose();
+  };
 
   return createPortal(
     <div className="ds-sheetRoot" data-state="open">
@@ -39,7 +52,8 @@ export default function MobileFullScreenSheet({
         type="button"
         className="ds-sheetOverlay"
         aria-label={closeLabel}
-        onClick={onClose}
+        onClick={closeFromClick}
+        onPointerDown={closeFromPointer}
       />
       <aside
         className={contentClass}
@@ -51,7 +65,8 @@ export default function MobileFullScreenSheet({
           type="button"
           className="ds-sheetClose"
           aria-label={closeLabel}
-          onClick={onClose}
+          onClick={closeFromClick}
+          onPointerDown={closeFromPointer}
         >
           ×
         </button>

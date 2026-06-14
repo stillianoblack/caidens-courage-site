@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
 import type { FamilyCharacterId } from '../../data/familyPortalContent';
 import { CHARACTER_ASSETS } from '../../data/familyPortalContent';
@@ -113,6 +113,7 @@ export default function WeeklyAdventureCard({
   className,
   onActivate,
 }: WeeklyAdventureCardProps) {
+  const ignoreNextClickRef = useRef(false);
   const themeClass = resolveThemeClass(character, kind);
   const themeId = character && character !== 'download' && character !== 'activity'
     ? resolveCharacterThemeId(character)
@@ -188,11 +189,29 @@ export default function WeeklyAdventureCard({
   }
 
   if (onActivate) {
+    const handleActivateClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (ignoreNextClickRef.current) {
+        ignoreNextClickRef.current = false;
+        return;
+      }
+      event.stopPropagation();
+      onActivate();
+    };
+
+    const handleActivatePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+      ignoreNextClickRef.current = true;
+      event.preventDefault();
+      event.stopPropagation();
+      onActivate();
+    };
+
     return (
       <button
         type="button"
         className={cardClass}
-        onClick={onActivate}
+        onClick={handleActivateClick}
+        onPointerUp={handleActivatePointerUp}
         {...cardSurfaceAttrs}
       >
         {content}

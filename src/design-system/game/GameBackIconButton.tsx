@@ -24,7 +24,7 @@ export default function GameBackIconButton({
     onClick();
   };
 
-  const handlePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     ignoreNextClickRef.current = true;
     event.preventDefault();
@@ -37,7 +37,7 @@ export default function GameBackIconButton({
       type="button"
       className={['ds-gameplayTopBar-backIconBtn', className].filter(Boolean).join(' ')}
       onClick={handleClick}
-      onPointerUp={handlePointerUp}
+      onPointerDown={handlePointerDown}
       aria-label={ariaLabel}
       data-theme={theme}
     >

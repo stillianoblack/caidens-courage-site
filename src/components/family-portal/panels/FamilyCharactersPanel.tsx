@@ -1,4 +1,4 @@
-import React, { lazy, memo, Suspense, useMemo } from 'react';
+import React, { lazy, memo, Suspense, useEffect, useMemo } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import CharacterAdventureCard from '../CharacterAdventureCard';
@@ -28,10 +28,6 @@ import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import { familySettingsTabPath } from '../../../lib/familyPortalPaths';
 import { PortalPageIntro } from '../../portal-design-system';
-import '../../../design-system/components/weekly-adventure-card.css';
-import '../../../design-system/components/character-profile-sheet.css';
-import '../../../design-system/components/character-sheet-panel.css';
-import '../../../design-system/components/character-profile-panel.css';
 
 const CharacterProfilePanel = lazy(
   () => import('../../../design-system/components/CharacterProfilePanel'),
@@ -129,6 +125,10 @@ export default function FamilyCharactersPanel() {
   const baselinePath = getPortalRoute('baseline-check', location.pathname);
   const { modules } = useCharacterModuleProgress('miranda', activeChild?.participantId);
   const { totalCoins } = useFocusCoinWallet();
+
+  useEffect(() => {
+    void import('../../../design-system/components/CharacterProfilePanel');
+  }, []);
 
   const queryCharacterId = searchParams.get(CHARACTER_QUERY_PARAM);
   const selectedCharacterId: CharacterProfileId | null =

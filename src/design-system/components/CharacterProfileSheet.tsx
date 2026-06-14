@@ -2,8 +2,8 @@ import React from 'react';
 import SlideOutDrawer from '../../components/portal-design-system/SlideOutDrawer';
 import { useMobileViewport } from '../../hooks/useMobileViewport';
 import MobileFullScreenSheet from './MobileFullScreenSheet';
-import './character-profile-sheet.css';
 import './character-sheet-panel.css';
+import './character-profile-sheet.css';
 
 export type CharacterProfileSheetProps = {
   open: boolean;
@@ -21,11 +21,24 @@ function CharacterProfileSheetClose({
   onClose: () => void;
   closeLabel?: string;
 }) {
+  const closeFromPointer = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    event.preventDefault();
+    event.stopPropagation();
+    onClose();
+  };
+
+  const closeFromClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onClose();
+  };
+
   return (
     <button
       type="button"
       className="characterSheetPanelClose"
-      onClick={onClose}
+      onClick={closeFromClick}
+      onPointerDown={closeFromPointer}
       aria-label={closeLabel}
     >
       ×

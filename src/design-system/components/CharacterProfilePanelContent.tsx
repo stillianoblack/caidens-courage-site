@@ -6,8 +6,8 @@ import type { CharacterUnlockMore } from '../../lib/characterUnlockMore';
 import { appendCharacterHubGameContext } from '../../lib/weeklyAdventureRouteContext';
 import CharacterUnlockMoreRow from '../../components/family-portal/CharacterUnlockMoreRow';
 import '../../components/family-portal/character-detail-panel.css';
-import './character-profile-panel.css';
 import './character-sheet-panel.css';
+import './character-profile-panel.css';
 
 export type CharacterProfilePanelContentProps = {
   profile: ResolvedCharacterProfile;

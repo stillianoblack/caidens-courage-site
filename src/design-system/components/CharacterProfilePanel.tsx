@@ -4,8 +4,8 @@ import type { ResolvedCharacterProfile } from '../../data/characterProfiles';
 import type { CharacterRewardProgress } from '../../lib/characterRewardProgress';
 import type { CharacterUnlockMore } from '../../lib/characterUnlockMore';
 import CharacterProfilePanelContent from './CharacterProfilePanelContent';
-import './character-profile-sheet.css';
 import './character-sheet-panel.css';
+import './character-profile-sheet.css';
 import './character-profile-panel.css';
 
 export type CharacterProfilePanelProps = {

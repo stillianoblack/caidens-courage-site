@@ -35,14 +35,31 @@ export default function PilotDrawer({
 
   if (!open) return null;
 
+  const closeFromPointer = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    event.preventDefault();
+    event.stopPropagation();
+    onClose();
+  };
+
+  const closeFromClick = () => {
+    onClose();
+  };
+
   return createPortal(
-    <div className="pilot-drawerBackdrop" role="presentation" onClick={onClose}>
+    <div
+      className="pilot-drawerBackdrop"
+      role="presentation"
+      onClick={closeFromClick}
+      onPointerDown={closeFromPointer}
+    >
       <aside
         className={className}
         role="dialog"
         aria-labelledby={titleId}
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
       >
         {children}
       </aside>
