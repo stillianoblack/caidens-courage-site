@@ -81,11 +81,7 @@ export default function WeeklyAdventureWeekTile({
     .join(' ');
 
   if (disabled || variant === 'locked') {
-    return (
-      <article className={cardClass} aria-disabled="true">
-        {body}
-      </article>
-    );
+    return <div className={cardClass}>{body}</div>;
   }
 
   if (onAction) {

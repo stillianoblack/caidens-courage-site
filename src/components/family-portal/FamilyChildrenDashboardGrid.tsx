@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useFamilyDashboardMetrics } from '../../hooks/useFamilyDashboardMetrics';
 import { useActiveChild } from '../../hooks/useActiveChild';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
-import { buildFamilyChildJourneySnapshot } from '../../lib/familyChildJourneySnapshot';
 import { readFamilyChildGoalsLocal, hasFamilyChildGoals } from '../../lib/familyChildGoalsService';
 import { resolveSelectableFamilyChildren } from '../../lib/familyOnboardingUtils';
 import {

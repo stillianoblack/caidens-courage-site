@@ -166,8 +166,10 @@ export function useFocusFlameJourneyOnboarding(
   }, [refresh]);
 
   const status = useMemo(
-    () =>
-      computeFocusFlameJourneyStatus({
+    () => {
+      // Recompute after markPathChosen writes local journey path state.
+      void pathRevision;
+      return computeFocusFlameJourneyStatus({
         participantId: resolvedParticipantId,
         programCode,
         hasChild,
@@ -176,7 +178,8 @@ export function useFocusFlameJourneyOnboarding(
         b4CheckInComplete,
         hasModuleActivity,
         hasWeeklyAdventureActivity,
-      }),
+      });
+    },
     [
       b4CheckInComplete,
       goalsComplete,
@@ -184,9 +187,9 @@ export function useFocusFlameJourneyOnboarding(
       hasChildGrade,
       hasModuleActivity,
       hasWeeklyAdventureActivity,
+      pathRevision,
       programCode,
       resolvedParticipantId,
-      pathRevision,
     ],
   );
 

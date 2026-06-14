@@ -46,15 +46,9 @@ import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDeb
 import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
 import { resolveSelectableFamilyChildren } from '../../../lib/familyOnboardingUtils';
 import FamilyMissingActionPrompt from '../FamilyMissingActionPrompt';
-import {
-  formatFamilyRelativeActivityDate,
-  resolveChildModuleCounts,
-  resolveChildDisplayInitials,
-  resolveFamilyChildAvatarSrc,
-} from '../../../lib/familyChildSummaryCard';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
-import { claimB4CheckInCompletionReward, type RewardClaimResult } from '../../../lib/rewardClaimService';
+import type { RewardClaimResult } from '../../../lib/rewardClaimService';
 import {
   BaselineOverviewBars,
   MetricCard,
@@ -105,7 +99,6 @@ export default function FamilyOverviewPanel() {
   const [insightTopic, setInsightTopic] = useState<FamilyB4InsightTopic>('overall');
   const [insightChildId, setInsightChildId] = useState<string | null>(null);
   const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
-  const [claimRewardLoading, setClaimRewardLoading] = useState(false);
   const inventoryPath = familyPortalPath('inventory', location.pathname);
   const onboarding = useFamilyOnboardingStatus();
 
@@ -371,15 +364,6 @@ export default function FamilyOverviewPanel() {
     setInsightsOpen(true);
   };
 
-  const handleClaimB4Reward = async () => {
-    const participantId = activeChild?.participantId ?? activeChildSummary?.participantId;
-    if (!participantId) return;
-    setClaimRewardLoading(true);
-    const result = await claimB4CheckInCompletionReward(participantId);
-    setClaimRewardLoading(false);
-    setRewardClaimResult(result);
-  };
-
   const insightsPayload = useMemo(
     () =>
       buildFamilyB4Insights({
@@ -432,45 +416,6 @@ export default function FamilyOverviewPanel() {
       overallProgress,
       gallerySubmissionCount,
     ],
-  );
-
-  const childSummaryModuleCounts = useMemo(
-    () =>
-      resolveChildModuleCounts(activeChildSummary?.participantId ?? null, moduleResults),
-    [activeChildSummary?.participantId, moduleResults],
-  );
-
-  const childSummaryAvatarSrc = useMemo(
-    () =>
-      resolveFamilyChildAvatarSrc({
-        participantId: activeChildSummary?.participantId ?? null,
-        moduleResults,
-      }),
-    [activeChildSummary?.participantId, moduleResults],
-  );
-
-  const activeChildParticipant = useMemo(
-    () =>
-      studentParticipants.find(
-        (row) => row.id === (activeChildSummary?.participantId ?? activeChild?.participantId),
-      ),
-    [activeChild?.participantId, activeChildSummary?.participantId, studentParticipants],
-  );
-
-  const childSummaryLastActivity = useMemo(
-    () => formatFamilyRelativeActivityDate(activeChildSummary?.lastActivityAt),
-    [activeChildSummary?.lastActivityAt],
-  );
-
-  const childSummaryOptions = useMemo(
-    () =>
-      children
-        .filter((child) => child.participantId)
-        .map((child) => ({
-          participantId: child.participantId as string,
-          displayName: child.displayName,
-        })),
-    [children],
   );
 
   useEffect(() => {

@@ -338,29 +338,32 @@ export default function B4BaselineCheckFlow({
     refreshHub();
   };
 
-  const finishBaselineProfileStart = (
-    participant: { participantId: string; firstName: string; nickname: string },
-    values: { programCode: string; groupName: string },
-  ) => {
-    const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
-    const activeProgram = readActivePilotProgram();
+  const finishBaselineProfileStart = useCallback(
+    (
+      participant: { participantId: string; firstName: string; nickname: string },
+      values: { programCode: string; groupName: string },
+    ) => {
+      const resolvedProgramCode = resolveTrackingProgramCode('baseline_student_profile');
+      const activeProgram = readActivePilotProgram();
 
-    const next = saveB4BaselineStudentProfile({
-      firstName: participant.firstName,
-      nickname: participant.nickname,
-      participantId: participant.participantId,
-      programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
-      groupName: activeProgram?.groupName || values.groupName,
-    });
-    setHubState(next);
-    refreshAnalyticsIdentity();
-    trackEvent('student_assessment_started', {
-      role: 'student',
-      assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
-      participant_id: participant.participantId,
-    });
-    setView('hub');
-  };
+      const next = saveB4BaselineStudentProfile({
+        firstName: participant.firstName,
+        nickname: participant.nickname,
+        participantId: participant.participantId,
+        programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
+        groupName: activeProgram?.groupName || values.groupName,
+      });
+      setHubState(next);
+      refreshAnalyticsIdentity();
+      trackEvent('student_assessment_started', {
+        role: 'student',
+        assessment_type: CHILD_BASELINE_ASSESSMENT_TYPE,
+        participant_id: participant.participantId,
+      });
+      setView('hub');
+    },
+    [],
+  );
 
   const handleFamilySelectChild = useCallback(
     (participantId: string) => {

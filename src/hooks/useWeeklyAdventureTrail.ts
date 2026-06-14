@@ -51,8 +51,14 @@ export function useWeeklyAdventureTrail(
   const resolvedParticipantId = participantId?.trim() || readActiveChildParticipantId();
   const [remoteModules, setRemoteModules] = useState(loadLocalModuleResults());
   const [loading, setLoading] = useState(false);
-  const cmsModules = options.cmsModules ?? [];
-  const visibilityCtx = options.visibilityCtx ?? { now: new Date() };
+  const cmsModules = useMemo(
+    () => options.cmsModules ?? [],
+    [options.cmsModules],
+  );
+  const visibilityCtx = useMemo(
+    () => options.visibilityCtx ?? { now: new Date() },
+    [options.visibilityCtx],
+  );
 
   const refresh = useCallback(async () => {
     const id = participantId?.trim() || readActiveChildParticipantId();

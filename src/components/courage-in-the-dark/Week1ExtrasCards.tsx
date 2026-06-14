@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PORTAL_COLORING_PAGES } from '../../data/portalDownloadAssets';
 import { isWeek1GameplayComplete } from '../../lib/week1ExtrasUnlock';
 import './week1-extras-cards.css';
 
@@ -43,8 +42,6 @@ export default function Week1ExtrasCards({
   const weekNumber = paths.weekNumber ?? 1;
   const missionUnlocked = isWeek1GameplayComplete(completedMissionIds);
   const panelMode = variant === 'panel';
-  const caidenColoring =
-    PORTAL_COLORING_PAGES.find((page) => page.id === 'caiden') ?? PORTAL_COLORING_PAGES[0];
   const coloringHref = paths.coloringPageHref?.trim() || null;
   const coloringAvailable = Boolean(coloringHref);
 
