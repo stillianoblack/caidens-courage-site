@@ -4,17 +4,18 @@
   command = "yarn build"
   functions = "netlify/functions"
 
-# Enable asset optimization
+# CRA already emits optimized hashed assets. Avoid Netlify post-processing so
+# dynamic import chunks deploy exactly as the build generated them.
 [build.processing]
-  skip_processing = false
+  skip_processing = true
 
 [build.processing.css]
-  bundle = true
-  minify = true
+  bundle = false
+  minify = false
 
 [build.processing.js]
-  bundle = true
-  minify = true
+  bundle = false
+  minify = false
 
 [build.processing.html]
   pretty_urls = true

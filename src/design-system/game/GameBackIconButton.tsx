@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 type GameBackIconButtonProps = {
   onClick: () => void;
@@ -13,11 +13,31 @@ export default function GameBackIconButton({
   theme,
   className = '',
 }: GameBackIconButtonProps) {
+  const ignoreNextClickRef = useRef(false);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (ignoreNextClickRef.current) {
+      ignoreNextClickRef.current = false;
+      return;
+    }
+    onClick();
+  };
+
+  const handlePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    ignoreNextClickRef.current = true;
+    event.preventDefault();
+    event.stopPropagation();
+    onClick();
+  };
+
   return (
     <button
       type="button"
       className={['ds-gameplayTopBar-backIconBtn', className].filter(Boolean).join(' ')}
-      onClick={onClick}
+      onClick={handleClick}
+      onPointerUp={handlePointerUp}
       aria-label={ariaLabel}
       data-theme={theme}
     >
