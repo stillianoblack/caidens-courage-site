@@ -28,7 +28,8 @@ export function verifyAdminCredentials(email: string, passcode: string): boolean
 export function readAdminSession(): boolean {
   if (typeof window === 'undefined') return false;
   try {
-    return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+    if (sessionStorage.getItem(ADMIN_SESSION_KEY) === '1') return true;
+    return localStorage.getItem(ADMIN_SESSION_KEY) === '1';
   } catch {
     return false;
   }
@@ -37,15 +38,17 @@ export function readAdminSession(): boolean {
 export function writeAdminSession(): void {
   try {
     sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+    localStorage.setItem(ADMIN_SESSION_KEY, '1');
   } catch {
-    /* sessionStorage unavailable */
+    /* storage unavailable */
   }
 }
 
 export function clearAdminSession(): void {
   try {
     sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    localStorage.removeItem(ADMIN_SESSION_KEY);
   } catch {
-    /* sessionStorage unavailable */
+    /* storage unavailable */
   }
 }

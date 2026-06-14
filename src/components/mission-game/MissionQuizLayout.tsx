@@ -63,6 +63,7 @@ type MissionQuizLayoutProps = {
   canExplainMore?: boolean;
   showExplainMore?: boolean;
   onContinue?: () => void;
+  continueBusy?: boolean;
   onTryAgain?: () => void;
   onUseHint?: () => void;
   onToggleExplainMore?: () => void;
@@ -109,6 +110,7 @@ export default function MissionQuizLayout({
   canExplainMore = false,
   showExplainMore = false,
   onContinue,
+  continueBusy = false,
   onTryAgain,
   onUseHint,
   onToggleExplainMore,
@@ -269,6 +271,8 @@ export default function MissionQuizLayout({
           learningMoment={learningMoment}
           showContinue={checked && !canTryAgain}
           onContinue={onContinue}
+          continueLabel={continueBusy ? 'Saving…' : 'Continue'}
+          continueDisabled={continueBusy}
           showTryAgain={canTryAgain}
           onTryAgain={onTryAgain}
           showHint={canUseHint}
@@ -316,6 +320,8 @@ export default function MissionQuizLayout({
           learningMoment={learningMoment}
           showContinue={checked && !canTryAgain}
           onContinue={onContinue}
+          continueLabel={continueBusy ? 'Saving…' : 'Continue'}
+          continueDisabled={continueBusy}
         />
       );
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import WeeklyAdventuresUnlockCard from '../WeeklyAdventuresUnlockCard';
@@ -34,6 +34,8 @@ import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
 import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
+import type { QuestClaimResult, QuestPeriod } from '../../../lib/participantQuestService';
+import QuestRewardClaimModal from '../../courage-in-the-dark/QuestRewardClaimModal';
 import { getUnlockedWeek, resolvePilotStartDate } from '../../../lib/pilotWeekUnlock';
 import { ensureWeekGradeLevel } from '../../../lib/participantWeekGradeService';
 import { isDailyAdventureComplete } from '../../../lib/courageWeeklyMissionCompletion';
@@ -173,11 +175,21 @@ export default function FamilyContinueLearningPanel() {
     dailyAdventureComplete,
   });
 
+  const [questClaimResult, setQuestClaimResult] = useState<QuestClaimResult | null>(null);
+  const inventoryPath = familyPortalPath('inventory', location.pathname);
+
+  const handleClaimQuest = async (questKey: string, period: QuestPeriod) => {
+    const result = await claimQuest(questKey, period);
+    if (result.ok && !result.alreadyClaimed) {
+      setQuestClaimResult(result);
+    }
+  };
+
   const questPanel = {
     quests,
     loading: questsLoading,
     claimingKey,
-    onClaim: claimQuest,
+    onClaim: handleClaimQuest,
   };
 
   const week1ExtrasPaths = useMemo(
@@ -251,9 +263,12 @@ export default function FamilyContinueLearningPanel() {
       {showCourageHero && weekOne ? (
         <section id="week-1" className="courageMapHubSection" aria-label="Week 1 adventure hub">
           {!hasActiveChild && hasChildren ? (
-            <p className="family-panelHelper courageMapProgressWarning" role="status">
-              Select a child in the Family Portal to save mission progress.
-            </p>
+            <ActiveChildSelector
+              children={selectableChildren}
+              activeParticipantId={activeChild?.participantId}
+              onSelect={selectChild}
+              helper="Choose your child to save mission progress and rewards."
+            />
           ) : null}
           <CourageInTheDarkAdventureHub
             weekNodes={courageMapNodes}
@@ -295,6 +310,13 @@ export default function FamilyContinueLearningPanel() {
         <p className="family-emptyNote" role="status">
           Week 2 unlocks automatically when your pilot program reaches day 6.
         </p>
+      ) : null}
+      {questClaimResult ? (
+        <QuestRewardClaimModal
+          result={questClaimResult}
+          inventoryPath={inventoryPath}
+          onClose={() => setQuestClaimResult(null)}
+        />
       ) : null}
     </div>
   );

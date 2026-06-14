@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFocusCoinWallet } from '../../hooks/useFocusCoinWallet';
+import FocusCoinIcon from './FocusCoinIcon';
 
 type FocusCoinWalletBadgeProps = {
   /** Override wallet total (e.g. during celebration animation). */
@@ -44,9 +45,7 @@ export default function FocusCoinWalletBadge({
       aria-label={`${displayValue} Focus Coins`}
       title="Focus Coins"
     >
-      <span aria-hidden="true" style={{ fontSize: '1rem', lineHeight: 1 }}>
-        🪙
-      </span>
+      <FocusCoinIcon size={16} className="focusCoinWalletBadgeIcon" />
       <span aria-live="polite" style={{ fontVariantNumeric: 'tabular-nums', minWidth: '1.25rem', textAlign: 'center' }}>
         {loading && totalCoinsOverride === undefined ? '—' : displayValue}
       </span>

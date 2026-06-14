@@ -176,12 +176,65 @@ export async function loadParticipantQuests(
   return rows;
 }
 
+export type QuestClaimResult = {
+  ok: boolean;
+  coinsAwarded?: number;
+  newCoinTotal?: number;
+  rewardLabel?: string;
+  rewardKind?: 'coins' | 'chest' | 'badge';
+  alreadyClaimed?: boolean;
+};
+
+const QUEST_REWARD_MISSION_IDS: Record<string, string> = {
+  complete_week_missions: 'quest-weekly-explorer-chest',
+  earn_monthly_coins: 'quest-monthly-focus-flame-badge',
+};
+
+async function grantQuestInventoryReward(
+  participantId: string,
+  weekId: string,
+  questKey: string,
+  def: QuestDefinition,
+): Promise<void> {
+  if (!supabase) return;
+  const now = new Date().toISOString();
+  const missionId = QUEST_REWARD_MISSION_IDS[questKey] ?? `quest-${questKey}`;
+
+  if (questKey === 'complete_week_missions') {
+    await supabase.from('player_progress').upsert(
+      {
+        participant_id: participantId,
+        week_id: weekId,
+        mission_id: missionId,
+        reward_item: 'Explorer Chest',
+        coins_earned: 0,
+        completed_at: now,
+      },
+      { onConflict: 'participant_id,mission_id' },
+    );
+    return;
+  }
+
+  if (questKey === 'earn_monthly_coins') {
+    await supabase.from('player_badges').upsert(
+      {
+        participant_id: participantId,
+        week_id: weekId,
+        mission_id: missionId,
+        badge_name: 'Focus Flame Badge',
+        earned_at: now,
+      },
+      { onConflict: 'participant_id,badge_name' },
+    );
+  }
+}
+
 export async function claimParticipantQuest(
   participantId: string,
   questKey: string,
   period: QuestPeriod,
   weekId: string,
-): Promise<{ ok: boolean; coinsAwarded?: number; newCoinTotal?: number }> {
+): Promise<QuestClaimResult> {
   if (!isSupabaseConfigured() || !supabase) {
     return { ok: false };
   }
@@ -201,7 +254,7 @@ export async function claimParticipantQuest(
     .maybeSingle();
 
   if (existing?.claimed_at) {
-    return { ok: true, coinsAwarded: 0 };
+    return { ok: true, coinsAwarded: 0, alreadyClaimed: true, rewardLabel: def.rewardLabel };
   }
 
   if (!existing || existing.progress_count < existing.target_count) {
@@ -224,6 +277,14 @@ export async function claimParticipantQuest(
     return { ok: false };
   }
 
+  let rewardKind: QuestClaimResult['rewardKind'] = 'coins';
+  if (questKey === 'complete_week_missions') rewardKind = 'chest';
+  if (questKey === 'earn_monthly_coins') rewardKind = 'badge';
+
+  if (rewardKind !== 'coins') {
+    await grantQuestInventoryReward(participantId, weekId, questKey, def);
+  }
+
   if (def.rewardCoins > 0) {
     const { data: wallet } = await supabase
       .from('player_wallets')
@@ -240,8 +301,14 @@ export async function claimParticipantQuest(
       },
       { onConflict: 'participant_id' },
     );
-    return { ok: true, coinsAwarded: def.rewardCoins, newCoinTotal: nextTotal };
+    return {
+      ok: true,
+      coinsAwarded: def.rewardCoins,
+      newCoinTotal: nextTotal,
+      rewardLabel: def.rewardLabel,
+      rewardKind,
+    };
   }
 
-  return { ok: true, coinsAwarded: 0 };
+  return { ok: true, coinsAwarded: 0, rewardLabel: def.rewardLabel, rewardKind };
 }

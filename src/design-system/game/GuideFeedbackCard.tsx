@@ -12,6 +12,7 @@ export type GuideFeedbackCardProps = {
   showContinue?: boolean;
   onContinue?: () => void;
   continueLabel?: string;
+  continueDisabled?: boolean;
   showTryAgain?: boolean;
   onTryAgain?: () => void;
   showHint?: boolean;
@@ -31,6 +32,7 @@ export default function GuideFeedbackCard({
   showContinue = false,
   onContinue,
   continueLabel = 'Continue',
+  continueDisabled = false,
   showTryAgain = false,
   onTryAgain,
   showHint = false,
@@ -63,7 +65,12 @@ export default function GuideFeedbackCard({
           <ExplainMoreButton expanded={showExplainMore} onClick={onToggleExplainMore} />
         ) : null}
         {showContinue && onContinue ? (
-          <CheckButton label={continueLabel} className="bbc-checkBtn--continue" onClick={onContinue} />
+          <CheckButton
+            label={continueLabel}
+            className="bbc-checkBtn--continue"
+            onClick={onContinue}
+            disabled={continueDisabled}
+          />
         ) : null}
       </div>
     </div>

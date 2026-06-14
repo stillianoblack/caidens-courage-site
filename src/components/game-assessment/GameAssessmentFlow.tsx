@@ -253,6 +253,7 @@ export default function GameAssessmentFlow({
   const [courageMissionResult, setCourageMissionResult] = useState<CompleteMissionResult | null>(
     null,
   );
+  const [sessionFinishing, setSessionFinishing] = useState(false);
   const quizStartedAtRef = useRef<number | null>(null);
 
   const weeklyCouragePayload = useMemo(
@@ -553,7 +554,10 @@ export default function GameAssessmentFlow({
 
       if (weeklyCouragePayload) {
         void (async () => {
-          const result = await completeWeeklyCourageMission(currentPathname, currentSearch);
+          const [result] = await Promise.all([
+            completeWeeklyCourageMission(currentPathname, currentSearch),
+            persistModuleCompletion(finalScore, mergedAnswers),
+          ]);
           setCourageMissionPayload(weeklyCouragePayload);
           setCourageMissionResult(
             result ?? {
@@ -562,7 +566,7 @@ export default function GameAssessmentFlow({
               message: 'Progress could not save. Please try again.',
             },
           );
-          await persistModuleCompletion(finalScore, mergedAnswers);
+          setSessionFinishing(false);
           setView('courage-celebration');
           resetQuestionState();
         })();
@@ -570,6 +574,7 @@ export default function GameAssessmentFlow({
       }
 
       void persistModuleCompletion(finalScore, mergedAnswers);
+      setSessionFinishing(false);
       setView('complete');
       resetQuestionState();
     },
@@ -614,7 +619,7 @@ export default function GameAssessmentFlow({
   };
 
   const handleContinue = () => {
-    if (!currentQuestion || !canContinue) return;
+    if (!currentQuestion || !canContinue || sessionFinishing) return;
 
     playContinue();
     const attempt = buildAttemptRecord();
@@ -622,6 +627,7 @@ export default function GameAssessmentFlow({
     const nextAnswers = { ...answersRecord, [currentQuestion.id]: answer };
 
     if (questionIndex + 1 >= totalQuestions) {
+      setSessionFinishing(true);
       setAnswersRecord(nextAnswers);
       setAttemptsRecord(nextAttempts);
       finishGameSession(nextAnswers, nextAttempts);
@@ -994,6 +1000,7 @@ export default function GameAssessmentFlow({
             canExplainMore={canExplainMore}
             showExplainMore={showExplainMore}
             onContinue={handleContinue}
+            continueBusy={sessionFinishing}
             onTryAgain={handleTryAgain}
             onUseHint={handleUseHint}
             onToggleExplainMore={toggleExplainMore}

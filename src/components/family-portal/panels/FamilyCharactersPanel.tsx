@@ -81,7 +81,7 @@ function CharacterCardGrid({
               !hasActiveChild ? 'Select your child to begin' : 'Start B-4 Baseline First'
             }
             onMeetClick={
-              !meetLocked && isCharacterProfileId(character.id)
+              !meetLocked && !isBaselineLaunch && isCharacterProfileId(character.id)
                 ? () => onMeetCharacter(character.id)
                 : undefined
             }
@@ -249,28 +249,17 @@ export default function FamilyCharactersPanel() {
           </section>
         </div>
 
-        {detailProfile && !isMobileNav ? (
+        {detailProfile ? (
           <CharacterDetailPanel
             profile={detailProfile}
-            variant="inspector"
-            open={Boolean(detailProfile)}
+            variant={isMobileNav ? 'sheet' : 'inspector'}
+            open
             onClose={closeCharacterDetail}
             rewardProgress={detailRewardProgress}
             unlockMore={detailUnlockMore}
           />
         ) : null}
       </div>
-
-      {detailProfile && isMobileNav ? (
-        <CharacterDetailPanel
-          profile={detailProfile}
-          variant="sheet"
-          open={Boolean(detailProfile)}
-          onClose={closeCharacterDetail}
-          rewardProgress={detailRewardProgress}
-          unlockMore={detailUnlockMore}
-        />
-      ) : null}
     </div>
   );
 }

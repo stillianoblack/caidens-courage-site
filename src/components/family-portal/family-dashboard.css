@@ -2509,16 +2509,17 @@ a.family-dash-card:hover {
 }
 
 .family-notificationBellMenu {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  z-index: 120;
   width: min(18rem, 80vw);
   padding: 0.75rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(36, 62, 112, 0.12);
   background: #fff;
   box-shadow: 0 12px 28px rgba(36, 62, 112, 0.12);
+}
+
+.family-notificationBellMenu--portal {
+  position: fixed;
+  z-index: 12000;
 }
 
 .family-notificationBellMenuTitle {

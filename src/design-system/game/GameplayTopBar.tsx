@@ -5,6 +5,7 @@ import SoundToggleButton from '../../components/game-assessment/shared/SoundTogg
 import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
 import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
+import { safeBack } from '../../lib/safeBack';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import { useOptionalActiveParticipantContext } from '../../context/ActiveParticipantContext';
 import { ReadAloudIconButton } from '../narration';
@@ -121,8 +122,15 @@ export default function GameplayTopBar({
 }: GameplayTopBarProps) {
   const navigate = useNavigate();
   const [isMobileGameBack, setIsMobileGameBack] = useState(resolveIsMobileGameBack);
-  const resolvedBackLabel = backLabel ?? (hubName ? `Back to ${hubName}` : undefined);
-  const showBack = Boolean(resolvedBackLabel && (backHref || onBack || onBackClick));
+  const mobileFallbackBack = resolveMobileGameBackTarget(
+    typeof window !== 'undefined' ? window.location.pathname : '',
+    typeof window !== 'undefined' ? window.location.search : '',
+  );
+  const resolvedBackLabel =
+    backLabel ?? (hubName ? `Back to ${hubName}` : undefined) ?? mobileFallbackBack.ariaLabel;
+  const canNavigateBack = Boolean(backHref || onBack || onBackClick);
+  const showBackDesktop = Boolean(canNavigateBack && resolvedBackLabel && !isMobileGameBack);
+  const showBackMobile = Boolean(canNavigateBack && isMobileGameBack);
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_GAME_BACK_MQ);
@@ -156,16 +164,12 @@ export default function GameplayTopBar({
       onBack();
       return;
     }
-    if (backHref) {
-      navigate(backHref);
-      return;
-    }
-    navigate(resolveMobileGameBackTarget(window.location.pathname, window.location.search).path);
+    const fallbackPath =
+      backHref ?? resolveMobileGameBackTarget(window.location.pathname, window.location.search).path;
+    safeBack(navigate, fallbackPath, { returnPath: backHref ?? null });
   }, [backHref, navigate, onBack, onBackClick]);
 
-  const mobileBackLabel = backHref
-    ? resolvedBackLabel
-    : resolveMobileGameBackTarget(window.location.pathname, window.location.search).ariaLabel;
+  const mobileBackLabel = resolvedBackLabel ?? mobileFallbackBack.ariaLabel;
 
   return (
     <header
@@ -174,7 +178,7 @@ export default function GameplayTopBar({
         .join(' ')}
     >
       <div className="ds-gameplayTopBar-back">
-        {showBack && !isMobileGameBack && resolvedBackLabel ? (
+        {showBackDesktop && resolvedBackLabel ? (
           backHref ? (
             <PortalBreadcrumb
               label={resolvedBackLabel}
@@ -194,7 +198,7 @@ export default function GameplayTopBar({
             />
           )
         ) : null}
-        {showBack && isMobileGameBack ? (
+        {showBackMobile ? (
           <GameBackIconButton
             onClick={handleMobileBack}
             ariaLabel={mobileBackLabel}

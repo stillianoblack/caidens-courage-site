@@ -344,17 +344,18 @@
 .courageMissionCompleteBtn--secondary {
   min-width: 12rem;
   padding: 0.72rem 1.15rem;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #fff;
+  background: #1a2f52;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #f8fafc;
   font-size: 0.9rem;
   font-weight: 800;
   box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.45);
 }
 
 .courageMissionCompleteBtn--secondary:hover {
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: none;
+  background: #243a63;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.5);
 }
 
 .courageMissionCompleteBtn--secondary:disabled {

@@ -4,6 +4,7 @@ import { FOCUS_COIN_WALLET_EVENT } from '../hooks/useFocusCoinWallet';
 import {
   claimParticipantQuest,
   loadParticipantQuests,
+  type QuestClaimResult,
   type QuestProgressRow,
 } from '../lib/participantQuestService';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
@@ -61,17 +62,23 @@ export function useParticipantQuests({
   }, [refresh]);
 
   const claimQuest = useCallback(
-    async (questKey: string, period: QuestProgressRow['period']) => {
-      if (!participantId) return;
+    async (questKey: string, period: QuestProgressRow['period']): Promise<QuestClaimResult> => {
+      if (!participantId) return { ok: false };
       setClaimingKey(questKey);
       const result = await claimParticipantQuest(participantId, questKey, period, weekId);
-      if (result.ok && result.coinsAwarded && 'newCoinTotal' in result && result.newCoinTotal != null) {
-        notifyFocusCoinWalletUpdated(result.newCoinTotal);
-      } else if (result.ok && result.coinsAwarded) {
-        notifyFocusCoinWalletUpdated(0);
+      if (result.ok && !result.alreadyClaimed) {
+        if (result.coinsAwarded && result.newCoinTotal != null) {
+          notifyFocusCoinWalletUpdated(result.newCoinTotal);
+        } else if (result.coinsAwarded) {
+          notifyFocusCoinWalletUpdated(0);
+        }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent(MODULE_COMPLETE_EVENT));
+        }
       }
       await refresh();
       setClaimingKey(null);
+      return result;
     },
     [participantId, refresh, weekId],
   );

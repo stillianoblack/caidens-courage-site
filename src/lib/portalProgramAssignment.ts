@@ -9,6 +9,7 @@ import {
   readLastPilotProgramForRole,
 } from '../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../types/pilotProgram';
+import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { saveB4BaselineStudentProfile, loadB4BaselineState } from './b4BaselineCheckStorage';
 
 const ACTIVE_PORTAL_ROLE_KEY = 'activePortalRole';
@@ -114,7 +115,8 @@ function buildProgramFromFamilyContext(
 }
 
 function syncBaselineProfileToProgram(program: ActivePilotProgram): void {
-  const baseline = loadB4BaselineState();
+  const participantId = readActiveChildParticipantId();
+  const baseline = loadB4BaselineState(participantId);
   if (!baseline.profile) return;
 
   const nickname = baseline.profile.nickname;

@@ -123,8 +123,16 @@ export default function FamilyInventoryPanel() {
         onSelect={selectChild}
       />
 
-      {loading ? <p className="inventorySectionEmpty">Loading your rewards…</p> : null}
+      {loading ? (
+        <div className="inventoryCardGrid inventoryCardGrid--skeleton" aria-hidden="true">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="inventorySkeletonCard" />
+          ))}
+        </div>
+      ) : null}
 
+      {!loading ? (
+        <>
       <InventorySection
         title="Owned Badges"
         emptyLabel="Complete missions to earn badges."
@@ -189,6 +197,9 @@ export default function FamilyInventoryPanel() {
           />
         )}
       />
+
+        </>
+      ) : null}
 
       <section className="inventoryShop">
         <h3 className="inventorySectionTitle">Reward Shop</h3>

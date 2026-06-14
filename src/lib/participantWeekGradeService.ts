@@ -68,3 +68,15 @@ export async function ensureWeekGradeLevel(
 
   return gradeLevel;
 }
+
+/** Returns locked grade for a started week, or current participant grade for new weeks. */
+export async function getGradeForAdventure(
+  participantId: string | null | undefined,
+  weekNumber: number,
+): Promise<string | null> {
+  const weekId = `week-${weekNumber}`;
+  const locked = await readWeekGradeLevel(participantId, weekId);
+  if (locked) return locked;
+  const settings = await readParticipantGradeSettingsAsync(participantId ?? undefined);
+  return normalizeGradeLevelStorage(settings.gradeLevel);
+}

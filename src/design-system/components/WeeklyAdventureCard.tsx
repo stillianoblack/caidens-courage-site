@@ -134,8 +134,8 @@ export default function WeeklyAdventureCard({
           ? CHARACTER_ASSETS[character]?.imageSrc
           : null;
   const cardSurfaceStyle: React.CSSProperties | undefined = cardImageSrc
-    ? ({ '--kid-card-image': `url("${cardImageSrc}")` } as React.CSSProperties)
-    : undefined;
+    ? ({ '--kid-card-image': `url("${cardImageSrc}")`, touchAction: 'manipulation' } as React.CSSProperties)
+    : { touchAction: 'manipulation' };
   const cardSurfaceAttrs = {
     'data-kid-theme': themeId ?? undefined,
     style: cardSurfaceStyle,
