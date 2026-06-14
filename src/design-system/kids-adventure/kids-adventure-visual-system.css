@@ -16,46 +16,12 @@
     gap: 1rem;
   }
 
-  /* —— Mobile header visual tweaks inside kids adventure shell —— */
-  .kids-adventure-shell .portal-header.portal-header--familyMobile {
+  /* Kids adventure shell: warm header background on mobile */
+  .kids-adventure-shell .familyPortalMobileHeader {
     box-shadow: none;
     backdrop-filter: none;
     background: #faf8f5;
     border-bottom: none;
-  }
-
-  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-notificationBellBtn {
-    width: 2.75rem;
-    height: 2.75rem;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-  }
-
-  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobileChip {
-    min-height: 2.75rem;
-    padding: 0 0.65rem !important;
-    font-size: 0.875rem !important;
-  }
-
-  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerChip {
-    padding: 0;
-    max-width: none;
-    background: transparent;
-    border: none;
-  }
-
-  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerName {
-    display: none;
-  }
-
-  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerAvatar {
-    width: 2.75rem;
-    height: 2.75rem;
-    font-size: 1.125rem;
-    background: linear-gradient(145deg, #f0d078, #e5c06a);
-    color: #1a1035;
-    border: 2px solid rgba(26, 47, 82, 0.12);
-    box-shadow: 0 4px 12px -6px rgba(26, 47, 82, 0.25);
   }
 
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardGrid {

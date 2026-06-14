@@ -17,7 +17,7 @@ type PortalHeaderProps = {
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
   onOpenMobileNav?: () => void;
-  /** Family mobile: show coins + player chips; hide goals, search, and switcher. */
+  /** Family mobile: logo left, coins/player/bell/dropdown right. */
   mobileFamilySimplified?: boolean;
   mobileFamilyChips?: React.ReactNode;
 };
@@ -33,6 +33,33 @@ export default function PortalHeader({
   mobileFamilySimplified = false,
   mobileFamilyChips,
 }: PortalHeaderProps) {
+  const logoSrc = `${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`;
+
+  if (mobileFamilySimplified && portal === 'family') {
+    return (
+      <header
+        className="portal-header portal-header--familyMobile familyPortalMobileHeader"
+        aria-label={pageTitle}
+      >
+        <img
+          src={logoSrc}
+          alt="Caiden's Courage"
+          className="familyPortalMobileHeader-logo"
+          width={44}
+          height={44}
+        />
+        <div className="familyPortalMobileHeader-tools">
+          {mobileFamilyChips}
+          <FamilyNotificationBell items={notifications} />
+          <PortalSwitcherDropdown
+            className="familyPortalMobileHeader-switcher"
+            linkedCampLabel={linkedCampLabel}
+          />
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header
       className={[
@@ -44,15 +71,6 @@ export default function PortalHeader({
       aria-label={mobileFamilySimplified ? pageTitle : undefined}
     >
       <div className="portal-headerLead">
-        {mobileFamilySimplified ? (
-          <img
-            src="/images/icons/favcon_C.svg"
-            alt="Caiden's Courage"
-            className="portal-headerMobileLogo"
-            width={44}
-            height={44}
-          />
-        ) : null}
         {onOpenMobileNav ? (
           <button
             type="button"
@@ -116,7 +134,7 @@ export default function PortalHeader({
         {!mobileFamilySimplified ? (
           <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
         ) : null}
-        {!mobileFamilySimplified || portal === 'family' ? (
+        {!mobileFamilySimplified ? (
           <PortalSwitcherDropdown
             className="portal-headerSwitcher"
             linkedCampLabel={portal === 'family' ? linkedCampLabel : undefined}

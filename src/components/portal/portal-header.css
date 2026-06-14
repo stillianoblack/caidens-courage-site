@@ -239,6 +239,92 @@
   }
 }
 
+/* Family mobile header — flex row, avoids grid conflicts with portal-header mobile rules */
+.familyPortalMobileHeader {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: auto;
+  padding: 0.45rem 0.75rem;
+  overflow: visible;
+  grid-template-columns: unset !important;
+  grid-template-areas: unset !important;
+  box-sizing: border-box;
+}
+
+.familyPortalMobileHeader-logo {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.65rem;
+  flex-shrink: 0;
+  display: block;
+}
+
+.familyPortalMobileHeader-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.familyPortalMobileHeader-switcher {
+  flex-shrink: 0;
+}
+
+.familyPortalMobileHeader-switcher .portal-switcherTrigger {
+  min-height: 2.75rem;
+  padding: 0 0.65rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.03em;
+}
+
+.kids-adventure-shell .familyPortalMobileHeader {
+  box-shadow: none;
+  backdrop-filter: none;
+  background: #faf8f5;
+  border-bottom: none;
+}
+
+@media (max-width: 767px) {
+  .familyPortalMobileHeader .family-notificationBellBtn {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .familyPortalMobileHeader .family-portalMobileChip {
+    min-height: 2.75rem;
+    padding: 0 0.65rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .familyPortalMobileHeader .family-portalMobilePlayerChip {
+    padding: 0;
+    max-width: none;
+    background: transparent;
+    border: none;
+  }
+
+  .familyPortalMobileHeader .family-portalMobilePlayerName {
+    display: none;
+  }
+
+  .familyPortalMobileHeader .family-portalMobilePlayerAvatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
+    background: linear-gradient(145deg, #f0d078, #e5c06a);
+    color: #1a1035;
+    border: 2px solid rgba(26, 47, 82, 0.12);
+    box-shadow: 0 4px 12px -6px rgba(26, 47, 82, 0.25);
+  }
+}
+
 .family-portalMobileChips {
   display: flex;
   align-items: center;
