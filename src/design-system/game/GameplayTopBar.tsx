@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PortalBreadcrumb from '../../components/portal/PortalBreadcrumb';
 import SoundToggleButton from '../../components/game-assessment/shared/SoundToggleButton';
 import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
+import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
 import { resetPortalInteractionState } from '../../lib/resetPortalInteractionState';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
@@ -120,7 +120,6 @@ export default function GameplayTopBar({
   readAloudAriaLabel = 'Read aloud',
   className = '',
 }: GameplayTopBarProps) {
-  const navigate = useNavigate();
   const [isMobileGameBack, setIsMobileGameBack] = useState(resolveIsMobileGameBack);
   const mobileFallbackBack = resolveMobileGameBackTarget(
     typeof window !== 'undefined' ? window.location.pathname : '',
@@ -160,15 +159,15 @@ export default function GameplayTopBar({
 
   const handleMobileBack = useCallback(() => {
     onBackClick?.();
-    if (onBack) {
+    if (!backHref && onBack) {
       onBack();
       return;
     }
     const fallbackPath =
       backHref ?? resolveMobileGameBackTarget(window.location.pathname, window.location.search).path;
     resetPortalInteractionState();
-    navigate(fallbackPath, { replace: true });
-  }, [backHref, navigate, onBack, onBackClick]);
+    assignPortalRoute(fallbackPath);
+  }, [backHref, onBack, onBackClick]);
 
   const mobileBackLabel = resolvedBackLabel ?? mobileFallbackBack.ariaLabel;
 

@@ -1,5 +1,5 @@
-import React, { lazy, memo, Suspense, useEffect, useMemo } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import CharacterAdventureCard from '../CharacterAdventureCard';
 import {
@@ -95,7 +95,6 @@ const CharacterCardGrid = memo(function CharacterCardGrid({
 
 export default function FamilyCharactersPanel() {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const shellBase = resolveFamilyBasePath(location.pathname);
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const { visibleChildren, claimRequired, loading, v2Assessments } = useFamilyDashboardMetrics(programCode);
@@ -130,9 +129,17 @@ export default function FamilyCharactersPanel() {
     void import('../../../design-system/components/CharacterProfilePanel');
   }, []);
 
-  const queryCharacterId = searchParams.get(CHARACTER_QUERY_PARAM);
-  const selectedCharacterId: CharacterProfileId | null =
-    queryCharacterId && isCharacterProfileId(queryCharacterId) ? queryCharacterId : null;
+  const queryCharacterId = useMemo(() => {
+    const rawCharacterId = new URLSearchParams(location.search).get(CHARACTER_QUERY_PARAM);
+    return rawCharacterId && isCharacterProfileId(rawCharacterId) ? rawCharacterId : null;
+  }, [location.search]);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<CharacterProfileId | null>(
+    queryCharacterId,
+  );
+
+  useEffect(() => {
+    setSelectedCharacterId(queryCharacterId);
+  }, [queryCharacterId]);
 
   const detailProfile = useMemo(() => {
     if (!selectedCharacterId) return null;
@@ -155,27 +162,37 @@ export default function FamilyCharactersPanel() {
     return buildCharacterUnlockMore(selectedCharacterId, progress, totalCoins);
   }, [modules, selectedCharacterId, totalCoins]);
 
-  const openCharacterDetail = (id: CharacterProfileId) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+  const replaceCharacterQuery = useCallback(
+    (id: CharacterProfileId | null) => {
+      if (typeof window === 'undefined') return;
+      const next = new URLSearchParams(location.search);
+      if (id) {
         next.set(CHARACTER_QUERY_PARAM, id);
-        return next;
-      },
-      { replace: true },
-    );
-  };
-
-  const closeCharacterDetail = () => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+      } else {
         next.delete(CHARACTER_QUERY_PARAM);
-        return next;
-      },
-      { replace: true },
-    );
-  };
+      }
+      const nextSearch = next.toString() ? `?${next.toString()}` : '';
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${location.pathname}${nextSearch}${location.hash}`,
+      );
+    },
+    [location.hash, location.pathname, location.search],
+  );
+
+  const openCharacterDetail = useCallback(
+    (id: CharacterProfileId) => {
+      setSelectedCharacterId(id);
+      replaceCharacterQuery(id);
+    },
+    [replaceCharacterQuery],
+  );
+
+  const closeCharacterDetail = useCallback(() => {
+    setSelectedCharacterId(null);
+    replaceCharacterQuery(null);
+  }, [replaceCharacterQuery]);
 
   const layoutClass = 'family-characterHubLayout';
 
