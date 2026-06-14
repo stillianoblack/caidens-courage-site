@@ -1,15 +1,23 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { readActivePortalRole, signOutPortal } from '../../config/portalContext';
 import { PORTAL_PATH } from '../../config/courageRoutes';
+import {
+  familyGoalsPath,
+  familyPortalPath,
+  familySettingsPath,
+} from '../../lib/familyPortalPaths';
 import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import { copyToClipboard } from '../../lib/copyToClipboard';
+import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import './portal-switcher.css';
 
 type PortalSwitcherDropdownProps = {
   className?: string;
   linkedCampLabel?: string | null;
+  familyNav?: boolean;
 };
 
 function resolvePortalLabel(): string {
@@ -25,15 +33,31 @@ const MENU_Z_INDEX = 12000;
 export default function PortalSwitcherDropdown({
   className = '',
   linkedCampLabel = null,
+  familyNav = false,
 }: PortalSwitcherDropdownProps) {
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
   const currentLabel = resolvePortalLabel();
   const role = readActivePortalRole();
+  const playerChip = useGameplayPlayerChip();
   const familyCode = readActivePilotProgram()?.familyAccessCode;
   const programName = readActivePilotProgram()?.programName?.trim() || null;
+  const showFamilyNav = familyNav && role === 'family';
+  const avatarLetter = playerChip.avatarLetter || '?';
+
+  const familyNavItems = showFamilyNav
+    ? [
+        { label: 'Family Dashboard', href: familyPortalPath('', location.pathname) },
+        { label: 'Weekly Adventures', href: familyPortalPath('continue-learning', location.pathname) },
+        { label: 'Character Hub', href: familyPortalPath('characters', location.pathname) },
+        { label: 'Parent Resources', href: familyPortalPath('downloads', location.pathname) },
+        { label: 'Family Goals', href: familyGoalsPath(location.pathname) },
+        { label: 'Settings', href: familySettingsPath(location.pathname) },
+      ]
+    : [];
 
   const updateMenuPosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -90,6 +114,15 @@ export default function PortalSwitcherDropdown({
     assignPortalRoute(PORTAL_PATH);
   };
 
+  const handleRouteClick = (event: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    event.preventDefault();
+    setOpen(false);
+    assignPortalRoute(href);
+  };
+
   const menu = open ? (
     <ul
       ref={menuRef}
@@ -98,6 +131,19 @@ export default function PortalSwitcherDropdown({
       aria-label="Portal menu"
       style={menuStyle}
     >
+      {familyNavItems.map((item) => (
+        <li key={item.href}>
+          <a
+            href={item.href}
+            className="portal-switcherOption"
+            role="menuitem"
+            onClick={(event) => handleRouteClick(event, item.href)}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+      {familyNavItems.length > 0 ? <li className="portal-switcherDivider" aria-hidden="true" /> : null}
       {role === 'family' && linkedCampLabel ? (
         <li className="portal-switcherInfoBlock">
           <p className="portal-switcherCodeLabel">Linked Program</p>
@@ -134,16 +180,34 @@ export default function PortalSwitcherDropdown({
   ) : null;
 
   return (
-    <div className={`portal-switcher${className ? ` ${className}` : ''}`}>
+    <div
+      className={[
+        'portal-switcher',
+        showFamilyNav ? 'portal-switcher--familyNav' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <button
         ref={triggerRef}
         type="button"
-        className="portal-switcherTrigger"
+        className={[
+          'portal-switcherTrigger',
+          showFamilyNav ? 'portal-switcherTrigger--familyNav' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        <span>{currentLabel}</span>
+        {showFamilyNav ? (
+          <span className="portal-switcherAvatar" aria-hidden="true">
+            {avatarLetter}
+          </span>
+        ) : null}
+        <span className="portal-switcherLabel">{currentLabel}</span>
         <svg className="portal-switcherChevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path
             fillRule="evenodd"

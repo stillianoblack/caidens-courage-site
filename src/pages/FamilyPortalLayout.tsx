@@ -25,7 +25,6 @@ import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { resolvePortalPageTitle, isMobileFamilyGameplayShellRoute } from '../lib/familyPortalNav';
 import { isKidFacingPortalRoute } from '../lib/kidFacingPortalRoutes';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
-import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
@@ -144,7 +143,6 @@ export default function FamilyPortalLayout() {
               : (
                 <FamilyDashboardTopBar
                   pageTitle={pageTitle}
-                  onOpenProgramGoals={openFamilyGoalsSettings}
                   linkedCampLabel={linkedCampLabel}
                   notifications={notifications}
                   mobileFamilySimplified={isMobileNav}
@@ -157,7 +155,7 @@ export default function FamilyPortalLayout() {
         >
           <FamilyPortalDevDiagnosticBanner />
           <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-            <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
+            <Outlet />
           </Suspense>
         </AppShell>
       </div>

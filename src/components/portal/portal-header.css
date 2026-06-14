@@ -27,6 +27,64 @@
   min-width: 0;
 }
 
+.portal-header--familyNav {
+  display: flex;
+  align-items: center;
+  min-height: 5rem;
+  padding: 0.75rem 1.5rem;
+  grid-template-columns: none;
+  grid-template-areas: none;
+}
+
+.portal-headerFamilyTools {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.portal-headerFamilyToolsEnd {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.portal-headerBrandLogo {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 3.5rem;
+  display: block;
+  border-radius: 0.875rem;
+}
+
+.portal-headerCoins {
+  flex: 0 0 auto;
+}
+
+.portal-headerFamilySwitcher {
+  flex: 0 0 auto;
+  margin-left: 0.65rem;
+}
+
+.portal-headerBell {
+  flex: 0 0 auto;
+}
+
+.portal-header--familyNav .family-notificationBellBtn {
+  width: 3.5rem;
+  height: 3.5rem;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+  border-radius: 0.875rem;
+}
+
+.portal-header--familyNav .family-notificationBellBtn svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
 .pilot-shell .portal-header {
   background: rgba(255, 255, 255, 0.88);
 }
@@ -209,6 +267,31 @@
     gap: 0.35rem;
   }
 
+  .portal-header.portal-header--familyNav {
+    min-height: auto;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .portal-headerFamilyTools {
+    justify-content: flex-start;
+  }
+
+  .portal-headerFamilyToolsEnd {
+    margin-left: auto;
+    gap: 0.35rem;
+  }
+
+  .portal-headerBrandLogo {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-basis: 2.75rem;
+    border-radius: 0.65rem;
+  }
+
+  .portal-headerFamilySwitcher {
+    margin-left: 0.75rem;
+  }
+
   .portal-header.portal-header--familyMobile .family-portalMobileChips {
     order: 0;
     flex-shrink: 1;
@@ -252,6 +335,16 @@
   grid-template-columns: unset !important;
   grid-template-areas: unset !important;
   box-sizing: border-box;
+}
+
+.familyPortalMobileHeader .portal-headerFamilyTools {
+  width: 100%;
+  min-width: 0;
+}
+
+.familyPortalMobileHeader .portal-headerFamilyToolsEnd {
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 .familyPortalMobileHeader-logo {

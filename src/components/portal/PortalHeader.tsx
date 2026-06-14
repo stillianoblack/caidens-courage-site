@@ -1,9 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
-import FamilyLinkedCampBadge from '../family-portal/FamilyLinkedCampBadge';
 import FamilyNotificationBell from '../family-portal/FamilyNotificationBell';
+import FocusCoinWalletBadge from '../rewards/FocusCoinWalletBadge';
 import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifications';
 import '../portal-design-system/portal-design-system.css';
 import './portal-header.css';
@@ -12,49 +11,53 @@ type PortalHeaderProps = {
   pageTitle: string;
   portal: 'family' | 'facilitator';
   onOpenProgramGoals?: () => void;
-  /** Family portal: deep link to Settings → Family Goals tab. */
-  programGoalsHref?: string;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
   onOpenMobileNav?: () => void;
   /** Family mobile: logo left, coins/player/bell/dropdown right. */
   mobileFamilySimplified?: boolean;
-  mobileFamilyChips?: React.ReactNode;
 };
 
 export default function PortalHeader({
   pageTitle,
   portal,
   onOpenProgramGoals,
-  programGoalsHref,
   linkedCampLabel = null,
   notifications = [],
   onOpenMobileNav,
   mobileFamilySimplified = false,
-  mobileFamilyChips,
 }: PortalHeaderProps) {
   const logoSrc = `${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`;
 
-  if (mobileFamilySimplified && portal === 'family') {
+  if (portal === 'family') {
     return (
       <header
-        className="portal-header portal-header--familyMobile familyPortalMobileHeader"
+        className={[
+          'portal-header',
+          'portal-header--familyNav',
+          mobileFamilySimplified ? 'portal-header--familyMobile familyPortalMobileHeader' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-label={pageTitle}
       >
-        <img
-          src={logoSrc}
-          alt="Caiden's Courage"
-          className="familyPortalMobileHeader-logo"
-          width={44}
-          height={44}
-        />
-        <div className="familyPortalMobileHeader-tools">
-          {mobileFamilyChips}
-          <FamilyNotificationBell items={notifications} />
-          <PortalSwitcherDropdown
-            className="familyPortalMobileHeader-switcher"
-            linkedCampLabel={linkedCampLabel}
+        <div className="portal-headerFamilyTools">
+          <img
+            src={logoSrc}
+            alt="Caiden's Courage"
+            className="portal-headerBrandLogo familyPortalMobileHeader-logo"
+            width={56}
+            height={56}
           />
+          <div className="portal-headerFamilyToolsEnd">
+            <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
+            <FamilyNotificationBell items={notifications} className="portal-headerBell" />
+            <PortalSwitcherDropdown
+              className="portal-headerSwitcher portal-headerFamilySwitcher familyPortalMobileHeader-switcher"
+              linkedCampLabel={linkedCampLabel}
+              familyNav
+            />
+          </div>
         </div>
       </header>
     );
@@ -90,31 +93,11 @@ export default function PortalHeader({
         {!mobileFamilySimplified ? (
           <div className="portal-headerLeadText">
             <h1 className="portal-headerTitle">{pageTitle}</h1>
-            {portal === 'family' && linkedCampLabel ? (
-              <FamilyLinkedCampBadge label={linkedCampLabel} className="portal-headerCampBadge" />
-            ) : null}
           </div>
         ) : null}
       </div>
       <div className="portal-headerTools">
-        {mobileFamilySimplified && mobileFamilyChips ? mobileFamilyChips : null}
-        {portal === 'family' ? <FamilyNotificationBell items={notifications} /> : null}
-        {portal === 'family' && programGoalsHref && !mobileFamilySimplified ? (
-          <Link
-            to={programGoalsHref}
-            className="portal-headerGoalsBtn"
-            aria-label="Family Goals"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>Family Goals</span>
-          </Link>
-        ) : onOpenProgramGoals && !mobileFamilySimplified ? (
+        {onOpenProgramGoals && !mobileFamilySimplified ? (
           <button
             type="button"
             className="portal-headerGoalsBtn"
@@ -137,7 +120,6 @@ export default function PortalHeader({
         {!mobileFamilySimplified ? (
           <PortalSwitcherDropdown
             className="portal-headerSwitcher"
-            linkedCampLabel={portal === 'family' ? linkedCampLabel : undefined}
           />
         ) : null}
       </div>
