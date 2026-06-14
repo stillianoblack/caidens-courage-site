@@ -1177,6 +1177,7 @@
   .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardMain::after {
     z-index: 0;
     inset: 0;
+    pointer-events: none;
     mask-image: none;
     -webkit-mask-image: none;
     background: linear-gradient(102deg, rgba(8, 18, 36, 0.78) 0%, rgba(8, 18, 36, 0.42) 40%, transparent 58%);

@@ -11,6 +11,7 @@ import { resolveCharacterThemeId, themeDataAttributes } from '../../design-syste
 
 type CourageMissionListPanelProps = {
   week: number;
+  mapMissions?: CourageInTheDarkMission[];
   completedCount: number;
   totalAdventures: number;
   selectedMissionId: string | null;
@@ -25,6 +26,7 @@ type CourageMissionListPanelProps = {
 
 export default function CourageMissionListPanel({
   week,
+  mapMissions = courageInTheDarkMissions,
   completedCount,
   totalAdventures,
   selectedMissionId,
@@ -94,7 +96,7 @@ export default function CourageMissionListPanel({
       </section>
 
       <ul className="courageMissionListRows">
-        {courageInTheDarkMissions.map((mission, index) => {
+        {mapMissions.map((mission, index) => {
           const complete = isMissionComplete(mission);
           const locked = isMissionLocked(mission);
           const selected = selectedMissionId === mission.id;

@@ -1,7 +1,7 @@
 import React from 'react';
 import MissionCoachCard from '../../design-system/components/MissionCoachCard';
 import { useFamilyOnboardingStatus } from '../../hooks/useFamilyOnboardingStatus';
-import '../../design-system/components/mission-coach-card.css';
+import FocusFlameProfileReadyCard from './FocusFlameProfileReadyCard';
 
 type FamilyMissionCoachPanelProps = {
   compact?: boolean;
@@ -12,7 +12,18 @@ export default function FamilyMissionCoachPanel({
   compact = false,
   className = '',
 }: FamilyMissionCoachPanelProps) {
-  const { missionCoachProps, loading, isComplete } = useFamilyOnboardingStatus();
+  const {
+    loading,
+    missionCoachProps,
+    isComplete,
+    profileReadyChildName,
+    profileReadyAvatarSrc,
+    adventuresCompletedCount,
+    continueLearningPath,
+    activeParticipantRecord,
+    completedCount,
+    totalSteps,
+  } = useFamilyOnboardingStatus();
 
   if (loading) {
     return (
@@ -23,12 +34,29 @@ export default function FamilyMissionCoachPanel({
     );
   }
 
+  const showCelebration =
+    Boolean(profileReadyChildName) &&
+    (isComplete || (totalSteps > 0 && completedCount >= totalSteps));
+
+  if (showCelebration && profileReadyChildName) {
+    return (
+      <FocusFlameProfileReadyCard
+        childName={profileReadyChildName}
+        avatarSrc={profileReadyAvatarSrc}
+        participant={activeParticipantRecord}
+        adventuresCompletedCount={adventuresCompletedCount}
+        continueLearningPath={continueLearningPath}
+        variant={compact ? 'compact' : 'inline'}
+        className={className}
+      />
+    );
+  }
+
   return (
     <MissionCoachCard
       {...missionCoachProps}
       compact={compact}
       className={className}
-      subtitle={isComplete ? 'Your Focus Flame Journey is active' : missionCoachProps.subtitle}
     />
   );
 }

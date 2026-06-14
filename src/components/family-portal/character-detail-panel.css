@@ -1,11 +1,11 @@
 .characterDetailSheetRoot {
   position: fixed;
   inset: 0;
-  z-index: 140;
+  z-index: 1400;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 16px calc(96px + env(safe-area-inset-bottom, 0px));
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -13,6 +13,7 @@
   position: absolute;
   inset: 0;
   background: rgba(8, 18, 36, 0.58);
+  backdrop-filter: blur(2px);
   border: none;
   cursor: pointer;
 }
@@ -28,46 +29,85 @@
 /* —— Mobile bottom sheet —— */
 .characterDetailPanel--sheet {
   width: 100%;
-  max-width: calc(100vw - 32px);
-  margin: 0 auto;
-  max-height: min(72vh, 36rem);
-  border-radius: 2rem 2rem 0 0;
+  max-width: 100%;
+  margin: 0;
+  max-height: none;
+  border-radius: 1.25rem 1.25rem 0 0;
   box-shadow: 0 -16px 48px -16px rgba(0, 0, 0, 0.5);
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.characterDetailPanel--sheet::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
+  overflow: hidden;
 }
 
 .characterDetailPanel--sheet .characterDetailBody {
-  padding: 0 1.25rem 0.5rem;
+  padding: 0 1.25rem 0.35rem;
   overflow: visible;
   flex: 0 0 auto;
 }
 
 .characterDetailPanel--sheet .characterDetailHeader {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   padding: 0.65rem 1rem 0;
+  flex-shrink: 0;
+}
+
+.characterDetailSheetHandle {
+  display: block;
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0 auto 0.35rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.characterDetailPanel--sheet .characterDetailClose {
+  position: absolute;
+  top: 0.65rem;
+  right: 1rem;
 }
 
 .characterDetailPanel--sheet .characterDetailPortrait {
-  width: 7.5rem;
-  height: 7.5rem;
-  max-width: 150px;
-  max-height: 150px;
+  width: 6.75rem;
+  height: 6.75rem;
+  max-width: 132px;
+  max-height: 132px;
+  margin-bottom: 0.5rem;
 }
 
 .characterDetailPanel--sheet .characterDetailPortraitImage {
-  max-height: 6.75rem;
+  max-height: 6rem;
+}
+
+.characterDetailPanel--sheet .characterDetailName {
+  font-size: 1.3125rem;
+}
+
+.characterDetailPanel--sheet .characterDetailTagline {
+  margin: 0.25rem 0 0.55rem;
+  font-size: 0.8125rem;
+}
+
+.characterDetailPanel--sheet .characterDetailScanRow {
+  margin-bottom: 0.35rem;
+}
+
+.characterDetailPanel--sheet .characterDetailReward {
+  margin-top: 0.45rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.characterDetailPanel--sheet .characterDetailUnlockMore {
+  margin-top: 0.45rem;
+  padding: 0.6rem 0.8rem;
 }
 
 .characterDetailPanel--sheet .characterDetailActions {
-  padding: 0.75rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px));
-  position: sticky;
-  bottom: 0;
+  padding: 0.65rem 1.25rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
+  position: static;
   z-index: 2;
 }
 

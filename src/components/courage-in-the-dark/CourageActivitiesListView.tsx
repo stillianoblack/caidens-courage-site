@@ -1,6 +1,5 @@
 import React from 'react';
 import type { CourageHubViewMode } from './CourageHubViewToggle';
-import CourageActivitiesPanel from './CourageActivitiesPanel';
 import type { Week1ExtrasPaths } from './Week1ExtrasCards';
 
 type CourageActivitiesListViewProps = {
@@ -8,20 +7,16 @@ type CourageActivitiesListViewProps = {
   viewMode: CourageHubViewMode;
   completedMissionIds: readonly string[];
   paths: Week1ExtrasPaths;
+  activitiesPanel?: React.ReactNode;
 };
 
 export default function CourageActivitiesListView({
   mapSlot,
   viewMode,
-  completedMissionIds,
-  paths,
-}: CourageActivitiesListViewProps) {
-  const panel = (
-    <CourageActivitiesPanel completedMissionIds={completedMissionIds} paths={paths} />
-  );
-
+  activitiesPanel,
+}: CourageActivitiesListViewProps): React.ReactElement | null {
   if (!mapSlot) {
-    return panel;
+    return activitiesPanel ? <>{activitiesPanel}</> : null;
   }
 
   return (
@@ -33,7 +28,7 @@ export default function CourageActivitiesListView({
       data-view={viewMode}
     >
       <div className="courageAdventureHubSplitMap">{mapSlot}</div>
-      {panel}
+      {activitiesPanel}
     </div>
   );
 }

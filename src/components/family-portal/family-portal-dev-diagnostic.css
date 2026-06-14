@@ -1,0 +1,45 @@
+.familyPortalDevDiagnostic {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px dashed rgba(234, 88, 12, 0.45);
+  background: rgba(255, 247, 237, 0.95);
+  color: #7c2d12;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.familyPortalDevDiagnosticTitle {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.familyPortalDevDiagnosticList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+.familyPortalDevDiagnosticList div {
+  min-width: 0;
+}
+
+.familyPortalDevDiagnosticList dt {
+  margin: 0;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.familyPortalDevDiagnosticList dd {
+  margin: 0.1rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  word-break: break-all;
+}
+
+.familyPortalDevDiagnosticErrors {
+  margin: 0.5rem 0 0;
+  font-weight: 700;
+}

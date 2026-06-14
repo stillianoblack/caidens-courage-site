@@ -33,10 +33,11 @@ export function useFamilyChildGoals(
   useEffect(() => {
     const onSaved = (event: Event) => {
       const detail = (event as CustomEvent<FamilyChildGoalsRecord>).detail;
-      if (detail?.family_program_code === programCode) {
-        if (!childId || detail.child_id === childId) {
-          setRecord(detail);
-        }
+      if (detail?.family_program_code?.trim() !== programCode.trim()) return;
+      const savedChildId = detail.child_id?.trim() || null;
+      const activeChildId = childId?.trim() || null;
+      if (!activeChildId || savedChildId === activeChildId || savedChildId === null) {
+        setRecord(detail);
       }
     };
     window.addEventListener(FAMILY_CHILD_GOALS_SAVED_EVENT, onSaved);

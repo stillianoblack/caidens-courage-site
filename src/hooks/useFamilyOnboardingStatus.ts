@@ -23,15 +23,22 @@ import {
   resolveFamilyHasChild,
   resolveSelectableFamilyChildren,
 } from '../lib/familyOnboardingUtils';
+import { computeB4CheckInAggregate } from '../lib/b4CheckInStatus';
 import type { FocusFlameJourneyStep } from './useFocusFlameJourneyOnboarding';
 import { useFocusFlameJourneyOnboarding } from './useFocusFlameJourneyOnboarding';
+import { resolveChildModuleCounts, resolveFamilyChildAvatarSrc } from '../lib/familyChildSummaryCard';
 
 export type FamilyOnboardingStatus = {
   hasChild: boolean;
   hasChildGrade: boolean;
   hasFamilyGoals: boolean;
   hasCompletedB4CheckIn: boolean;
+  b4CheckInAggregateLabel: string | null;
   hasChosenPath: boolean;
+  isProfileReady: boolean;
+  profileReadyChildName: string | null;
+  profileReadyAvatarSrc: string | null;
+  adventuresCompletedCount: number;
   progressPercent: number;
   completedCount: number;
   totalSteps: number;
@@ -51,6 +58,8 @@ export type FamilyOnboardingStatus = {
     steps: MissionCoachStep[];
     variant: 'family';
   };
+  continueLearningPath: string;
+  activeParticipantRecord: ReturnType<typeof useFamilyDashboardMetrics>['studentParticipants'][number] | null;
 };
 
 export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
@@ -62,6 +71,7 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
     visibleChildren,
     studentParticipants,
     moduleResults,
+    v2Assessments,
     loading: metricsLoading,
   } = useFamilyDashboardMetrics(programCode);
 
@@ -71,15 +81,16 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
   );
 
   const { activeChild } = useActiveChild(selectableChildren);
+  const selectedParticipantId = activeChild?.participantId ?? null;
   const activeChildSummary = useMemo(
     () =>
-      children.find((child) => child.participantId === activeChild?.participantId) ??
-      children[0] ??
-      null,
-    [activeChild?.participantId, children],
+      selectedParticipantId
+        ? children.find((child) => child.participantId === selectedParticipantId) ?? null
+        : null,
+    [selectedParticipantId, children],
   );
 
-  const childId = activeChild?.participantId ?? activeChildSummary?.participantId ?? null;
+  const childId = selectedParticipantId;
   const childGoals = useFamilyChildGoals(
     programCode,
     childId ?? undefined,
@@ -95,13 +106,45 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
     return moduleResults.some((row) => row.participant_id?.trim() === childId);
   }, [childId, moduleResults]);
 
+  const adventuresCompletedCount = useMemo(
+    () => resolveChildModuleCounts(childId, moduleResults).completed,
+    [childId, moduleResults],
+  );
+
+  const activeParticipantRecord = useMemo(
+    () =>
+      childId ? studentParticipants.find((row) => row.id === childId) ?? null : null,
+    [childId, studentParticipants],
+  );
+
+  const profileReadyAvatarSrc = useMemo(
+    () =>
+      resolveFamilyChildAvatarSrc({
+        participantId: childId,
+        moduleResults,
+      }),
+    [childId, moduleResults],
+  );
+
   const journey = useFocusFlameJourneyOnboarding(
     hasChild,
     hasChildGrade,
     childId,
     hasFamilyGoals,
     hasModuleActivity,
+    {
+      programCode,
+      assessments: v2Assessments,
+      selectedChildName: activeChildSummary?.displayName ?? null,
+      summaryB4CheckInStatus: activeChildSummary?.b4CheckInStatus ?? null,
+    },
   );
+
+  const b4CheckInAggregate = useMemo(() => computeB4CheckInAggregate(children), [children]);
+  const b4CheckInAggregateLabel = useMemo(() => {
+    if (childId) return null;
+    return b4CheckInAggregate.label;
+  }, [b4CheckInAggregate.label, childId]);
 
   const baselinePath = getPortalRoute('baseline-check', location.pathname);
   const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
@@ -119,6 +162,7 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
     () =>
       buildFamilyMissionCoachSteps({
         journey,
+        b4CheckInAggregateLabel,
         baselinePath,
         continueLearningPath,
         childrenSettingsPath,
@@ -129,6 +173,7 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
       }),
     [
       baselinePath,
+      b4CheckInAggregateLabel,
       childrenGradeSettingsPath,
       childrenSettingsPath,
       continueLearningPath,
@@ -154,7 +199,7 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
       has_child: hasChild,
       has_child_grade: hasChildGrade,
       has_family_goals: hasFamilyGoals,
-      has_completed_b4_check_in: journey.step4Complete,
+      has_completed_b4_check_in: journey.b4CheckInComplete,
       has_chosen_path: journey.step5Complete,
       has_module_activity: hasModuleActivity,
       active_step: journey.activeStep,
@@ -168,7 +213,7 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
     journey.activeStep,
     journey.completedCount,
     journey.loading,
-    journey.step4Complete,
+    journey.b4CheckInComplete,
     journey.step5Complete,
     metricsLoading,
     programCode,
@@ -192,17 +237,24 @@ export function useFamilyOnboardingStatus(): FamilyOnboardingStatus {
     hasChild,
     hasChildGrade,
     hasFamilyGoals,
-    hasCompletedB4CheckIn: journey.step4Complete,
+    hasCompletedB4CheckIn: journey.b4CheckInComplete,
+    b4CheckInAggregateLabel,
     hasChosenPath: journey.step5Complete,
+    isProfileReady: journey.isProfileReady,
+    profileReadyChildName: activeChildSummary?.displayName ?? null,
+    profileReadyAvatarSrc,
+    adventuresCompletedCount,
     progressPercent,
     completedCount: journey.completedCount,
     totalSteps: journey.totalSteps,
     steps,
-    isComplete: journey.isComplete,
+    isComplete: journey.isProfileReady,
     activeStep: journey.activeStep,
     loading: metricsLoading || childGoals.loading || journey.loading,
     refresh,
     markPathChosen: journey.markPathChosen,
     missionCoachProps,
+    continueLearningPath,
+    activeParticipantRecord,
   };
 }

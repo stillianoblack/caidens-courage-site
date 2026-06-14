@@ -28,6 +28,7 @@
   "scripts": {
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "build": "react-scripts build",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -46,5 +47,27 @@
   },
   "devDependencies": {
     "sharp": "^0.34.5"
+  },
+  "resolutions": {
+    "schema-utils@2.7.0/ajv": "6.12.6",
+    "schema-utils@2.7.1/ajv": "6.12.6",
+    "schema-utils@3.2.0/ajv": "6.12.6",
+    "schema-utils@2.7.0/ajv-keywords": "3.5.2",
+    "schema-utils@2.7.1/ajv-keywords": "3.5.2",
+    "schema-utils@3.2.0/ajv-keywords": "3.5.2"
+  },
+  "overrides": {
+    "schema-utils@2.7.0": {
+      "ajv": "6.12.6",
+      "ajv-keywords": "3.5.2"
+    },
+    "schema-utils@2.7.1": {
+      "ajv": "6.12.6",
+      "ajv-keywords": "3.5.2"
+    },
+    "schema-utils@3.2.0": {
+      "ajv": "6.12.6",
+      "ajv-keywords": "3.5.2"
+    }
   }
 }

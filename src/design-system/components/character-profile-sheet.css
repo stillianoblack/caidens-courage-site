@@ -1,0 +1,36 @@
+/* CharacterProfileSheet — narrow desktop rail, full-screen mobile */
+
+@media (min-width: 768px) {
+  .characterProfileSheet.pilot-drawer,
+  .ds-slidePanel--characterProfile.pilot-drawer {
+    top: 24px !important;
+    right: 24px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 48px) !important;
+    width: clamp(360px, 28vw, 420px) !important;
+    max-width: 420px !important;
+    padding: 0;
+    background: transparent !important;
+    box-shadow: -16px 0 40px -20px rgba(26, 47, 82, 0.42);
+    overflow: hidden;
+    border-radius: 1.25rem;
+  }
+
+  .characterProfileSheet.pilot-drawer .characterSheetPanelShell {
+    max-height: calc(100dvh - 48px);
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+}
+
+.characterProfileSheet--mobile.ds-sheetContent .characterSheetPanelShell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 100dvh;
+}
+
+.characterProfileSheet--mobile .characterProfileHeroBar {
+  padding-top: 3.25rem;
+}

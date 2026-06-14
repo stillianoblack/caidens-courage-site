@@ -1,11 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   PILOT_ACTIVITY_ASSETS,
   PILOT_ACTIVITY_CATEGORIES,
   PILOT_FOCUS_FLAME_LAB_CARD,
+  type ActivityAsset,
   type ActivityCategoryId,
 } from '../../../data/pilotDashboardContent';
+import { useAdventureModules } from '../../../hooks/useAdventureModules';
+import { buildCmsActivityAssets } from '../../../lib/adventureWeekAssets';
 import { isActivityLibraryTab } from '../../../lib/askB4DeepLinks';
 import { trackDownload } from '../../../lib/analytics';
 import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages';
@@ -21,6 +24,20 @@ export default function PilotActivitiesPanel() {
   const initialCategory = tabParam && isActivityLibraryTab(tabParam) ? tabParam : DEFAULT_CATEGORY;
   const [category, setCategory] = useState<ActivityCategoryId>(initialCategory);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const { modules } = useAdventureModules('all');
+
+  const activityAssets = useMemo(() => {
+    const cmsAssets = buildCmsActivityAssets(modules);
+    const merged: Record<Exclude<ActivityCategoryId, 'focus-flame-lab'>, ActivityAsset[]> = {
+      ...PILOT_ACTIVITY_ASSETS,
+      'coloring-pages': [...PILOT_ACTIVITY_ASSETS['coloring-pages'], ...cmsAssets.filter((a) => a.id.includes('coloring'))],
+      'printable-activities': [...PILOT_ACTIVITY_ASSETS['printable-activities'], ...cmsAssets.filter((a) => a.id.includes('module') || a.id.includes('comic'))],
+      'reflection-journals': PILOT_ACTIVITY_ASSETS['reflection-journals'],
+      'weekly-activities': [...PILOT_ACTIVITY_ASSETS['weekly-activities'], ...cmsAssets],
+      'b4-reset-tools': PILOT_ACTIVITY_ASSETS['b4-reset-tools'],
+    };
+    return merged;
+  }, [modules]);
 
   useEffect(() => {
     if (tabParam && isActivityLibraryTab(tabParam) && tabParam !== category) {
@@ -95,7 +112,7 @@ export default function PilotActivitiesPanel() {
                 </button>
               </div>
               <ul className="pilot-assetList">
-                {PILOT_ACTIVITY_ASSETS[category].map((asset) => (
+                {activityAssets[category].map((asset) => (
                   <li key={asset.id} className="pilot-assetRow">
                     <div className="pilot-assetInfo">
                       <p className="pilot-assetTitle">{asset.title}</p>
@@ -134,7 +151,7 @@ export default function PilotActivitiesPanel() {
             </>
           ) : (
             <ul className="pilot-assetList">
-              {PILOT_ACTIVITY_ASSETS[category].map((asset) => (
+              {activityAssets[category].map((asset) => (
                 <li key={asset.id} className="pilot-assetRow">
                   <div className="pilot-assetInfo">
                     <p className="pilot-assetTitle">{asset.title}</p>

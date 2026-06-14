@@ -2766,6 +2766,123 @@ a.family-dash-card:hover {
   box-sizing: border-box;
 }
 
+.family-childSummaryCard--celebration {
+  position: relative;
+  display: block;
+  padding: 1.15rem 1.2rem 1rem;
+  border: 1px solid rgba(245, 166, 35, 0.45);
+  background: linear-gradient(145deg, #fff4dc 0%, #fff 38%, #ffe8c4 100%);
+  box-shadow:
+    0 16px 40px -24px rgba(194, 65, 12, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+.family-childSummaryGlow {
+  position: absolute;
+  inset: -30% auto auto -10%;
+  width: 12rem;
+  height: 12rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.22) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.family-childSummaryTop {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.95rem;
+}
+
+.family-childSummaryCard--celebration .family-childSummaryAvatarWrap {
+  width: 4.25rem;
+  height: 4.25rem;
+  border: 3px solid rgba(245, 166, 35, 0.55);
+  box-shadow: 0 10px 24px -16px rgba(26, 47, 82, 0.45);
+}
+
+.family-childSummaryActivePill {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(22, 121, 74, 0.12);
+  color: #16794a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.family-childSummaryPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.95rem;
+}
+
+.family-childSummaryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  font-size: 0.78rem;
+  color: rgba(26, 47, 82, 0.82);
+}
+
+.family-childSummaryPill--complete {
+  background: rgba(22, 121, 74, 0.12);
+  border-color: rgba(22, 121, 74, 0.22);
+  color: #16794a;
+}
+
+.family-childSummaryPill--progress {
+  background: rgba(245, 166, 35, 0.14);
+  border-color: rgba(245, 166, 35, 0.28);
+  color: #9a6400;
+}
+
+.family-childSummaryPillLabel {
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.family-childSummaryProgressBlock {
+  margin-bottom: 0.95rem;
+}
+
+.family-childSummaryProgressHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.family-childSummaryProgressTrack {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.1);
+  overflow: hidden;
+}
+
+.family-childSummaryProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f5a623, #e89612);
+}
+
+.family-childSummaryCta--reward {
+  background: linear-gradient(135deg, #f5a623, #e89612);
+  color: #1a2f52;
+}
+
 .family-childSummaryCard--empty {
   border-style: dashed;
   border-color: rgba(229, 192, 106, 0.45);
@@ -2883,8 +3000,12 @@ a.family-dash-card:hover {
 }
 
 .family-childSummaryActions {
-  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+  align-items: center;
   margin-left: auto;
+  margin-top: 0.15rem;
 }
 
 .family-childSummaryCta {
@@ -3152,6 +3273,104 @@ a.family-dash-card:hover {
   padding-top: 0.25rem;
 }
 
+.ffj-profileReady {
+  margin-bottom: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: linear-gradient(145deg, #fff 0%, #f3fff8 100%);
+  box-shadow: 0 14px 36px -28px rgba(26, 47, 82, 0.35);
+}
+
+.ffj-profileReady--compact {
+  padding: 0.95rem 1rem;
+}
+
+.ffj-profileReadyHeader {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ffj-profileReadyCelebration {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ffj-profileReadyAvatar {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(36, 62, 112, 0.12);
+}
+
+.ffj-profileReadyAvatar--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff7e8;
+  font-size: 1.25rem;
+}
+
+.ffj-profileReadyTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1a2f52;
+}
+
+.ffj-profileReadyCopy {
+  margin: 0.2rem 0 0;
+  color: rgba(26, 47, 82, 0.78);
+  font-size: 0.92rem;
+}
+
+.ffj-profileReadyStats {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ffj-profileReadyStats li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.88rem;
+}
+
+.ffj-profileReadyStatLabel {
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.ffj-profileReadyStatValue {
+  color: #1a2f52;
+  font-weight: 600;
+}
+
+.ffj-profileReadyStatValue--complete {
+  color: #16794a;
+}
+
+.ffj-profileReadyCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: #f5a623;
+  color: #1a2f52;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ffj-profileReadyCta:hover {
+  background: #e89612;
+}
+
 /* Parent/Guardian child goals checklist */
 .family-childGoals {
   margin-bottom: 1.5rem;
@@ -3373,43 +3592,29 @@ a.family-dash-card:hover {
   margin-bottom: 1.25rem;
 }
 
-.family-journeyCoachAccordion {
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(26, 47, 82, 0.08);
-  overflow: hidden;
+.family-journeyCoachInline--b4 {
+  padding: 0.15rem;
+  border-radius: 1.3rem;
+  background: linear-gradient(135deg, rgba(74, 144, 196, 0.28) 0%, rgba(36, 62, 112, 0.12) 55%, rgba(59, 130, 246, 0.18) 100%);
+  box-shadow: 0 10px 28px -18px rgba(36, 62, 112, 0.35);
 }
 
-.family-journeyCoachAccordionToggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.9rem 1rem;
-  border: none;
-  background: transparent;
-  font-size: 0.9375rem;
-  font-weight: 800;
-  color: #1a2f52;
-  cursor: pointer;
-  text-align: left;
+.family-missionCoachPanel--b4 .ds-missionCoach {
+  --mission-navy: #102c63;
+  --mission-navy-card: #243e70;
+  border-color: rgba(74, 144, 196, 0.35);
+  box-shadow:
+    0 14px 36px rgba(16, 44, 99, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.family-journeyCoachAccordionTitle {
-  flex: 1;
-  min-width: 0;
+.family-missionCoachPanel--b4 .ds-missionCoach-progressFill {
+  background: linear-gradient(90deg, #4a90c4, #3b82f6);
 }
 
-.family-journeyCoachAccordionChevron {
-  flex-shrink: 0;
-  font-size: 1rem;
-  line-height: 1;
-  color: rgba(26, 47, 82, 0.55);
-}
-
-.family-journeyCoachAccordionBody {
-  padding: 0 0.65rem 0.85rem;
+.family-missionCoachPanel--b4 .ds-missionCoach-step--complete .ds-missionCoach-stepIcon {
+  background: rgba(74, 144, 196, 0.22);
+  border-color: rgba(74, 144, 196, 0.45);
 }
 
 .family-missionCoachSkeleton {
@@ -3500,20 +3705,10 @@ a.family-dash-card:hover {
   .family-overviewClaim {
     display: none;
   }
-
-  .family-onboardingMobileCard {
-    margin-bottom: 1.35rem;
-  }
 }
 
 @media (max-width: 1100px) {
   .family-journeyCoachInline {
     display: block;
-  }
-}
-
-@media (min-width: 1101px) {
-  .family-onboardingMobileCard {
-    display: none;
   }
 }

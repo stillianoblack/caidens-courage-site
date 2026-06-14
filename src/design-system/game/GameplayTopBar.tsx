@@ -5,7 +5,7 @@ import SoundToggleButton from '../../components/game-assessment/shared/SoundTogg
 import FocusCoinWalletBadge from '../../components/rewards/FocusCoinWalletBadge';
 import type { MissionGameTheme } from '../../components/mission-game/MissionSpeechRow';
 import { resolveMobileGameBackTarget } from '../../lib/mobileGameBackNav';
-import { safeBack } from '../../lib/safeBack';
+import { resetPortalInteractionState } from '../../lib/resetPortalInteractionState';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import { useOptionalActiveParticipantContext } from '../../context/ActiveParticipantContext';
 import { ReadAloudIconButton } from '../narration';
@@ -166,7 +166,8 @@ export default function GameplayTopBar({
     }
     const fallbackPath =
       backHref ?? resolveMobileGameBackTarget(window.location.pathname, window.location.search).path;
-    safeBack(navigate, fallbackPath, { returnPath: backHref ?? null });
+    resetPortalInteractionState();
+    navigate(fallbackPath, { replace: true });
   }, [backHref, navigate, onBack, onBackClick]);
 
   const mobileBackLabel = resolvedBackLabel ?? mobileFallbackBack.ariaLabel;

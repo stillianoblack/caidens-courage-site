@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatChildBaselineStatusLabel } from '../../config/assessmentTypeConstants';
+import { formatB4CheckInStatusLabel, formatBaselineAssessmentStatusLabel } from '../../config/assessmentTypeConstants';
 import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
 import type { SelectableChild } from '../../hooks/useActiveChild';
 
@@ -98,7 +98,10 @@ export default function FamilyChildrenSection({
                   <h3 className="family-childName">{child.displayName}</h3>
                 )}
                 <span className={baselineStatusClass(child.baselineStatus)}>
-                  {formatChildBaselineStatusLabel(child.baselineStatus)}
+                  {formatBaselineAssessmentStatusLabel(child.baselineStatus)}
+                </span>
+                <span className={baselineStatusClass(child.b4CheckInStatus)}>
+                  {formatB4CheckInStatusLabel(child.b4CheckInStatus)}
                 </span>
               </div>
               <dl className="family-childMeta">

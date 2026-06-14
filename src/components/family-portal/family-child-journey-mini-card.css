@@ -1,0 +1,155 @@
+.familyChildJourneyMiniCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.28);
+}
+
+.familyChildJourneyMiniCard--active {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.95) 0%, #fff 100%);
+  box-shadow: 0 12px 32px -18px rgba(59, 130, 246, 0.28);
+}
+
+.familyChildJourneyMiniCard--inactive {
+  border-color: rgba(36, 62, 112, 0.08);
+  background: rgba(248, 250, 252, 0.95);
+  box-shadow: none;
+}
+
+.familyChildJourneyMiniCardHead {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.familyChildJourneyMiniCardIdentity {
+  min-width: 0;
+}
+
+.familyChildJourneyMiniCardName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.familyChildJourneyMiniCardMeta {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.familyChildJourneyMiniCardActivePill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.65rem;
+  background: rgba(59, 130, 246, 0.14);
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.familyChildJourneyMiniCardSetActiveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #1a2f52;
+  cursor: pointer;
+}
+
+.familyChildJourneyMiniCardSetActiveBtn:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #2563eb;
+}
+
+.familyChildJourneyMiniCardSteps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.familyChildJourneyMiniCardStep {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.familyChildJourneyMiniCardStepDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(26, 47, 82, 0.15);
+}
+
+.familyChildJourneyMiniCardStep--complete {
+  color: #16794a;
+}
+
+.familyChildJourneyMiniCardStep--complete .familyChildJourneyMiniCardStepDot {
+  background: #22c55e;
+}
+
+.familyChildJourneyMiniCardStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.familyChildJourneyMiniCardLink {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.familyChildJourneyMiniCardCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.08);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.familyMultiChildJourneyGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .familyMultiChildJourneyGrid {
+    gap: 1.5rem;
+  }
+}

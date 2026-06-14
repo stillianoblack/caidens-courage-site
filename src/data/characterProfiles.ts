@@ -227,6 +227,8 @@ export type ResolvedCharacterProfile = CharacterProfileContent & CharacterScanCo
   missionsPath: string;
   coloringHref: string | null;
   activitiesPath: string;
+  /** Optional hero/cover art for profile sheet header */
+  coverImageSrc: string | null;
 };
 
 export function isCharacterProfileId(value: string): value is CharacterProfileId {
@@ -271,6 +273,7 @@ export function buildCharacterProfile(
     missionsPath: resolveCharacterMissionsPath(id, pathname),
     coloringHref: content.coloringAvailable ? COLORING_BY_ID[id] ?? null : null,
     activitiesPath: getPortalRoute('downloads', pathname),
+    coverImageSrc: content.imageSrc,
   };
 }
 

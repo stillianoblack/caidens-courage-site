@@ -1,7 +1,6 @@
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 import {
-  COURAGE_IN_THE_DARK_BG,
   courageInTheDarkMissions,
   type CourageInTheDarkMission,
 } from '../../data/courageInTheDarkMap';
@@ -19,6 +18,7 @@ type CourageMapCanvasProps = {
   heroBar?: React.ReactNode;
   mapBackgroundSrc?: string;
   adminPreviewBadge?: boolean;
+  mapMissions?: CourageInTheDarkMission[];
   isHotspotComplete: (hotspot: CourageInTheDarkMission) => boolean;
   isHotspotLocked: (hotspot: CourageInTheDarkMission) => boolean;
   animatingHotspotId?: string | null;
@@ -27,18 +27,17 @@ type CourageMapCanvasProps = {
 
 const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(function CourageMapCanvas(
   {
-  variant = 'hub',
-  mapSize = 'full',
-  week = 1,
-  weekTitle = 'Courage in the Dark',
-  weekUnlockStatus,
-  selFocus,
-  mapLocked = false,
-  baselineLocked = false,
-  selectedHotspotId = null,
+    variant = 'hub',
+    mapSize = 'full',
+    week = 1,
+    weekTitle = 'Courage in the Dark',
+    mapLocked = false,
+    baselineLocked = false,
+    selectedHotspotId = null,
     heroBar,
-    mapBackgroundSrc = COURAGE_IN_THE_DARK_BG,
+    mapBackgroundSrc,
     adminPreviewBadge = false,
+    mapMissions = courageInTheDarkMissions,
     isHotspotComplete,
     isHotspotLocked,
     animatingHotspotId = null,
@@ -48,6 +47,20 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
 ) {
   const isHub = variant === 'hub';
   const { playClick } = useCourageHubAudio();
+  const [imageFailed, setImageFailed] = useState(false);
+  const resolvedBackground = mapBackgroundSrc?.trim() ?? '';
+  const showImage = Boolean(resolvedBackground) && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [resolvedBackground]);
+
+  const handleImageError = useCallback(() => {
+    setImageFailed(true);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[WEEKLY_ADVENTURE_MAP] Failed to load map background:', resolvedBackground);
+    }
+  }, [resolvedBackground]);
 
   const handleHotspotClick = useCallback(
     (hotspot: CourageInTheDarkMission) => {
@@ -64,22 +77,32 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
         'courageMapCanvas',
         isHub ? 'courageMapCanvas--hub' : '',
         isHub && mapSize === 'split' ? 'courageMapCanvas--hubSplit' : '',
+        showImage ? 'courageMapCanvas--hasImage' : '',
         mapLocked || baselineLocked ? 'courageMapCanvas--locked' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <img
-        src={mapBackgroundSrc}
-        alt=""
-        className="courageMapBg"
-        width={1600}
-        height={900}
-        decoding="async"
-      />
+      {showImage ? (
+        <img
+          key={resolvedBackground}
+          src={resolvedBackground}
+          alt=""
+          className="courageMapBg"
+          width={1600}
+          height={900}
+          decoding="async"
+          loading="eager"
+          onError={handleImageError}
+        />
+      ) : (
+        <div className="courageMapBg courageMapBg--placeholder" aria-hidden="true" />
+      )}
 
       {adminPreviewBadge ? (
-        <span className="courageMapAdminPreviewBadge" role="status">Admin Preview</span>
+        <span className="courageMapAdminPreviewBadge" role="status">
+          ADMIN PREVIEW
+        </span>
       ) : null}
 
       {isHub && heroBar ? (
@@ -89,7 +112,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
       ) : null}
 
       <div className="courageMapHotspots">
-        {courageInTheDarkMissions.map((hotspot) => {
+        {mapMissions.map((hotspot) => {
           const locked = isHotspotLocked(hotspot);
           const complete = isHotspotComplete(hotspot);
           const selected = selectedHotspotId === hotspot.id;

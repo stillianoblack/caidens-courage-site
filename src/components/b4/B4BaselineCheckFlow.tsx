@@ -5,7 +5,7 @@ import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { ACTIVE_CHILD_EVENT } from '../../lib/activeChildContext';
-import { checkBaselineCompletion } from '../../lib/baselineCompletion';
+import { getB4CheckInStatus, type B4CheckInDisplayStatus } from '../../lib/b4CheckInStatus';
 import { CHILD_BASELINE_ASSESSMENT_TYPE } from '../../config/assessmentTypeConstants';
 import { ensureParticipantForBaseline } from '../../lib/childProfileService';
 import { readParticipantGradeSettingsAsync } from '../../lib/mirandaGradeBandResolver';
@@ -59,6 +59,9 @@ import {
 import { useBaselineCheckSounds } from '../../hooks/useBaselineCheckSounds';
 import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
+import B4BaselineFamilyEntry from '../b4-baseline-check/B4BaselineFamilyEntry';
+import { useActiveParticipant } from '../../hooks/useActiveParticipant';
+import { familyPortalPath, familySettingsTabPath } from '../../lib/familyPortalPaths';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
@@ -113,6 +116,16 @@ export default function B4BaselineCheckFlow({
   } = useBaselineCheckSounds();
 
   const activeParticipantId = readActiveChildParticipantId();
+  const {
+    roster,
+    participantId: contextParticipantId,
+    displayName: contextDisplayName,
+    hasActiveParticipant,
+    needsSelection,
+    selectParticipant,
+    loading: participantLoading,
+  } = useActiveParticipant();
+  const [familyCheckInStatus, setFamilyCheckInStatus] = useState<B4CheckInDisplayStatus>('Not Started');
   const [hubState, setHubState] = useState(() => loadB4BaselineState(activeParticipantId));
   const [view, setView] = useState<View>('landing');
   const [playerName, setPlayerName] = useState(
@@ -159,6 +172,25 @@ export default function B4BaselineCheckFlow({
   } | null>(null);
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
   const programContext = resolveActiveProgramContext();
+  const childrenSettingsPath = familySettingsTabPath('children', location.pathname);
+  const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
+  const resolvedParticipantId = contextParticipantId || activeParticipantId;
+  const resolvedChildName = useMemo(() => {
+    if (contextDisplayName?.trim()) return contextDisplayName.trim();
+    const rosterMatch = roster.find((entry) => entry.participantId === resolvedParticipantId);
+    if (rosterMatch?.displayName?.trim()) return rosterMatch.displayName.trim();
+    return (
+      readGameplayPlayerDisplayName() ||
+      hubState.profile?.nickname ||
+      ''
+    );
+  }, [contextDisplayName, hubState.profile?.nickname, resolvedParticipantId, roster]);
+  const familyRoster = roster.map((entry) => ({
+    participantId: entry.participantId,
+    displayName: entry.displayName,
+  }));
+  const familyNeedsChildSelection = familyPortal && roster.length > 1 && (needsSelection || !hasActiveParticipant);
+  const familyNoChildren = familyPortal && !participantLoading && roster.length === 0;
 
   const refreshHub = useCallback(() => {
     const participantId = readActiveChildParticipantId();
@@ -178,44 +210,66 @@ export default function B4BaselineCheckFlow({
   }, [refreshHub]);
 
   useEffect(() => {
-    if (!familyPortal || !activeParticipantId) return;
+    if (!familyPortal) return;
     void (async () => {
+      const participantId = readActiveChildParticipantId();
+      if (!participantId) {
+        setFamilyCheckInStatus('Not Started');
+        setView('landing');
+        return;
+      }
+
       const programCode = resolveTrackingProgramCode() ?? undefined;
-      const done = await checkBaselineCompletion(programCode, activeParticipantId);
-      const scoped = loadB4BaselineState(activeParticipantId);
-
-      if (done && isBaselineFullyComplete(scoped)) {
-        setHubState(scoped);
-        setView('hub');
-        return;
-      }
-
-      const displayName = readGameplayPlayerDisplayName();
-      if (!displayName) return;
-
-      const gradeSettings = await readParticipantGradeSettingsAsync(activeParticipantId);
-      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
-        return;
-      }
-
-      if (scoped.profile?.participantId === activeParticipantId) {
-        setHubState(scoped);
-        setView('hub');
-        return;
-      }
-
-      const activeProgram = readActivePilotProgram();
-      const next = saveB4BaselineStudentProfile({
-        firstName: displayName,
-        nickname: displayName,
-        participantId: activeParticipantId,
-        programCode: programCode || activeProgram?.programCode || scoped.profile?.programCode || '',
-        groupName: activeProgram?.groupName || scoped.profile?.groupName || '',
+      const rosterMatch = roster.find((entry) => entry.participantId === participantId);
+      const statusResult = await getB4CheckInStatus({
+        programCode,
+        participantId,
+        selectedChildName: rosterMatch?.displayName ?? resolvedChildName,
       });
-      setHubState(next);
-      setView('hub');
+      setFamilyCheckInStatus(statusResult.displayStatus);
+
+      const scoped = loadB4BaselineState(participantId);
+      if (statusResult.status === 'complete') {
+        setHubState(scoped);
+        setView('landing');
+        return;
+      }
+
+      const displayName =
+        resolvedChildName ||
+        rosterMatch?.displayName ||
+        readGameplayPlayerDisplayName() ||
+        scoped.profile?.nickname ||
+        '';
+      if (!displayName) {
+        setView('landing');
+        return;
+      }
+
+      const gradeSettings = await readParticipantGradeSettingsAsync(participantId);
+      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+        setView('landing');
+        return;
+      }
+
+      if (statusResult.status === 'in_progress') {
+        if (scoped.profile?.participantId === participantId) {
+          setHubState(scoped);
+        } else {
+          const activeProgram = readActivePilotProgram();
+          const next = saveB4BaselineStudentProfile({
+            firstName: displayName,
+            nickname: displayName,
+            participantId,
+            programCode: programCode || activeProgram?.programCode || scoped.profile?.programCode || '',
+            groupName: activeProgram?.groupName || scoped.profile?.groupName || '',
+          });
+          setHubState(next);
+        }
+        setView('hub');
+      }
     })();
-  }, [activeParticipantId, familyPortal]);
+  }, [activeParticipantId, contextParticipantId, familyPortal, resolvedChildName, roster]);
 
   const handleRevealScore = useCallback(
     (index: 0 | 1 | 2) => {
@@ -308,6 +362,86 @@ export default function B4BaselineCheckFlow({
     setView('hub');
   };
 
+  const handleFamilySelectChild = useCallback(
+    (participantId: string) => {
+      const match = roster.find((entry) => entry.participantId === participantId);
+      if (match) {
+        selectParticipant(match);
+      }
+    },
+    [roster, selectParticipant],
+  );
+
+  const handleStartFamilyCheckIn = useCallback(async () => {
+    playSelect();
+    setProfileError(null);
+    setProfileSubmitting(true);
+
+    try {
+      const participantId = readActiveChildParticipantId();
+      const rosterMatch = roster.find((entry) => entry.participantId === participantId);
+      const displayName =
+        resolvedChildName ||
+        rosterMatch?.displayName ||
+        readGameplayPlayerDisplayName() ||
+        '';
+
+      if (!participantId || !displayName) {
+        setProfileError('Select your child before starting the B-4 Check-In.');
+        return;
+      }
+
+      const programCode = resolveTrackingProgramCode() ?? undefined;
+      const statusResult = await getB4CheckInStatus({
+        programCode,
+        participantId,
+        selectedChildName: displayName,
+      });
+      setFamilyCheckInStatus(statusResult.displayStatus);
+
+      if (statusResult.status === 'complete') {
+        setHubState(loadB4BaselineState(participantId));
+        setView('hub');
+        return;
+      }
+
+      const gradeSettings = await readParticipantGradeSettingsAsync(participantId);
+      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+        setPendingBaselineStart({
+          participant: { participantId, firstName: displayName, nickname: displayName },
+          values: {
+            programCode: programContext?.programCode ?? hubState.profile?.programCode ?? '',
+            groupName: programContext?.groupName ?? hubState.profile?.groupName ?? '',
+          },
+        });
+        setGradeGateParticipantId(participantId);
+        setView('grade_gate');
+        return;
+      }
+
+      finishBaselineProfileStart(
+        { participantId, firstName: displayName, nickname: displayName },
+        {
+          programCode: programContext?.programCode ?? hubState.profile?.programCode ?? '',
+          groupName: programContext?.groupName ?? hubState.profile?.groupName ?? '',
+        },
+      );
+    } catch {
+      setProfileError('Could not start B-4 Check-In. Please try again.');
+    } finally {
+      setProfileSubmitting(false);
+    }
+  }, [
+    finishBaselineProfileStart,
+    hubState.profile?.groupName,
+    hubState.profile?.programCode,
+    playSelect,
+    programContext?.groupName,
+    programContext?.programCode,
+    resolvedChildName,
+    roster,
+  ]);
+
   const handleStudentSubmit = async (values: {
     firstName?: string;
     nickname: string;
@@ -339,7 +473,7 @@ export default function B4BaselineCheckFlow({
 
       finishBaselineProfileStart(participant, values);
     } catch {
-      setProfileError('Could not start Before Check-In. Please try again.');
+      setProfileError('Could not start B-4 Check-In. Please try again.');
     } finally {
       setProfileSubmitting(false);
     }
@@ -745,10 +879,37 @@ export default function B4BaselineCheckFlow({
     >
       <main className={`bbc-main${view === 'landing' ? ' bbc-main--landing' : ''}${view === 'quiz' ? ' bbc-main--quiz' : ''}`}>
         {view === 'landing' ? (
+          familyPortal ? (
+            <>
+              {embedded && onExit && !showTopBar ? (
+                <button type="button" className="bbc-embeddedBack" onClick={onExit}>
+                  ← Back to Adventure Map
+                </button>
+              ) : null}
+              {profileError ? (
+                <p className="bbc-profileError" role="alert">
+                  {profileError}
+                </p>
+              ) : null}
+              <B4BaselineFamilyEntry
+                childName={resolvedChildName}
+                checkInStatus={familyCheckInStatus}
+                roster={familyRoster}
+                activeParticipantId={resolvedParticipantId}
+                needsChildSelection={familyNeedsChildSelection}
+                noChildren={familyNoChildren}
+                childrenSettingsPath={childrenSettingsPath}
+                continueLearningPath={continueLearningPath}
+                onSelectChild={handleFamilySelectChild}
+                onStartCheckIn={() => void handleStartFamilyCheckIn()}
+                starting={profileSubmitting}
+              />
+            </>
+          ) : (
           <div className="bbc-landing">
             {embedded && onExit && !showTopBar ? (
               <button type="button" className="bbc-embeddedBack" onClick={onExit}>
-                {familyPortal ? '← Back to Adventure Map' : '← Back to B-4 Missions'}
+                ← Back to B-4 Missions
               </button>
             ) : null}
             <p className="bbc-eyebrow">{landingCopy.eyebrow}</p>
@@ -777,6 +938,7 @@ export default function B4BaselineCheckFlow({
               onSubmit={(values) => void handleStudentSubmit(values)}
             />
           </div>
+          )
         ) : null}
 
         {view === 'grade_gate' && gradeGateParticipantId && pendingBaselineStart ? (

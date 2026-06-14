@@ -3,8 +3,12 @@ import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { ACTIVE_CHILD_EVENT } from '../lib/activeChildContext';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { checkBaselineCompletion } from '../lib/baselineCompletion';
+import type { LocalAssessmentV2Record } from '../lib/pilotTrackingLocalStorage';
 
-export function useBaselineGate(participantId?: string) {
+export function useBaselineGate(
+  participantId?: string,
+  assessments?: LocalAssessmentV2Record[],
+) {
   const program = readActivePilotProgram();
   const [activeParticipantId, setActiveParticipantId] = useState(
     () => participantId?.trim() || readActiveChildParticipantId(),
@@ -16,10 +20,10 @@ export function useBaselineGate(participantId?: string) {
     const resolvedId = participantId?.trim() || readActiveChildParticipantId();
     setActiveParticipantId(resolvedId);
     setLoading(true);
-    const done = await checkBaselineCompletion(program?.programCode, resolvedId);
+    const done = await checkBaselineCompletion(program?.programCode, resolvedId, assessments);
     setComplete(done);
     setLoading(false);
-  }, [participantId, program?.programCode]);
+  }, [assessments, participantId, program?.programCode]);
 
   useEffect(() => {
     void refresh();

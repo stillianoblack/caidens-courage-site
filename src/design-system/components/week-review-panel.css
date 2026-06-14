@@ -1,0 +1,598 @@
+.weekReviewPanel .weekReviewPanelInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.weekReviewPanelInner--mobile {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop scroll region only */
+.weekReviewPanelScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.weekReviewPanelScroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Solid readable content layer */
+.weekReviewContentPanel {
+  flex: 1;
+  min-height: 0;
+  background: #121c30;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.weekReviewPanelInner--mobile .weekReviewHeroContent {
+  padding-top: 3.25rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.weekReviewPanelInner--mobile .weekReviewBody--mobile {
+  padding: 1rem 1.25rem calc(120px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Hero header */
+.weekReviewHero {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.weekReviewHeroCover {
+  position: relative;
+  min-height: 8.5rem;
+  background: linear-gradient(155deg, #1a2f52 0%, #243e70 48%, #152238 100%);
+  overflow: hidden;
+}
+
+.weekReviewHeroCoverImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.weekReviewHeroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 18, 36, 0.35) 0%,
+    rgba(8, 18, 36, 0.72) 52%,
+    rgba(8, 18, 36, 0.96) 100%
+  );
+}
+
+.weekReviewHeroContent {
+  position: relative;
+  margin-top: -2.5rem;
+  padding: 0 1.75rem 1.15rem;
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0.72) 0%, #121c30 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weekReviewHeroTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.weekReviewHeroMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.weekReviewHeroActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}
+
+.weekReviewHeroThumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.45);
+}
+
+.weekReviewHeroThumbFallback {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.weekReviewHeroCopy {
+  min-width: 0;
+}
+
+.weekReviewEyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e5c06a;
+}
+
+.weekReviewTitle {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.weekReviewSel {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(244, 247, 251, 0.92);
+}
+
+.weekReviewDescription {
+  margin: 0.65rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(244, 247, 251, 0.88);
+}
+
+.weekReviewBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.weekReviewBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f4f7fb;
+}
+
+.weekReviewBadge--complete {
+  background: rgba(52, 211, 153, 0.18);
+  color: #a7f3d0;
+}
+
+.weekReviewB4Guide {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  border: 2px solid #e5c06a;
+  box-shadow: 0 0 0 3px rgba(229, 192, 106, 0.22);
+  overflow: hidden;
+  background: #152238;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 0.2rem;
+  box-sizing: border-box;
+}
+
+.weekReviewB4GuideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Body sections */
+.weekReviewBody {
+  padding: 1.25rem 1.75rem 1.5rem;
+  background: #121c30;
+}
+
+.weekReviewBody--mobile {
+  padding: 1rem 1.5rem 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.weekReviewSection {
+  margin-bottom: 1rem;
+}
+
+.weekReviewBody--mobile .weekReviewSection {
+  margin-bottom: 0;
+}
+
+.weekReviewSection--nextStep {
+  margin-bottom: 0;
+}
+
+.weekReviewSectionTitle {
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e5c06a;
+}
+
+.weekReviewProgressBar {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.weekReviewProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+  transition: width 0.35s ease;
+}
+
+.weekReviewProgressMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+  font-size: 0.8125rem;
+  color: rgba(244, 247, 251, 0.88);
+}
+
+.weekReviewStatGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.weekReviewStat {
+  padding: 0.65rem 0.55rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.weekReviewStatValue {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.weekReviewStatLabel {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.6875rem;
+  color: rgba(244, 247, 251, 0.72);
+}
+
+.weekReviewInsights {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  list-style: none;
+  border-radius: 0.85rem;
+  background: rgba(15, 23, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.weekReviewInsight {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgba(244, 247, 251, 0.92);
+}
+
+.weekReviewMissionList,
+.weekReviewBadgeList,
+.weekReviewActivityList,
+.weekReviewNextList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.weekReviewMissionItem,
+.weekReviewActivityItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.875rem;
+  color: rgba(244, 247, 251, 0.92);
+}
+
+.weekReviewMissionItem--complete {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.weekReviewMissionCharacter {
+  color: rgba(244, 247, 251, 0.62);
+  font-size: 0.8125rem;
+}
+
+.weekReviewMissionStatus {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6ee7b7;
+  flex-shrink: 0;
+}
+
+.weekReviewBadgeItem {
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8125rem;
+  color: rgba(244, 247, 251, 0.92);
+}
+
+.weekReviewRewardCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.85rem;
+  background: rgba(15, 23, 40, 0.85);
+  border: 1px solid rgba(229, 192, 106, 0.28);
+}
+
+.weekReviewRewardIcon {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.weekReviewRewardIconFallback {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 1.35rem;
+}
+
+.weekReviewRewardCopy strong {
+  display: block;
+  font-size: 0.9375rem;
+  color: #fff;
+}
+
+.weekReviewRewardCopy span {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  color: rgba(244, 247, 251, 0.78);
+}
+
+.weekReviewEmpty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(244, 247, 251, 0.72);
+}
+
+.weekReviewNextCopy {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(244, 247, 251, 0.88);
+}
+
+.weekReviewNextList li {
+  position: relative;
+  padding-left: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(244, 247, 251, 0.82);
+}
+
+.weekReviewNextList li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #e5c06a;
+}
+
+.weekReviewActivityLink {
+  color: #e5c06a;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* Accordions (mobile) */
+.weekReviewAccordion {
+  border-radius: 0.85rem;
+  background: #0f1728;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.weekReviewAccordionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.weekReviewAccordionTitle {
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+
+.weekReviewAccordionChevron {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid rgba(244, 247, 251, 0.75);
+  border-bottom: 2px solid rgba(244, 247, 251, 0.75);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.weekReviewAccordion--open .weekReviewAccordionChevron {
+  transform: rotate(-135deg);
+}
+
+.weekReviewAccordionBody {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weekReviewAccordionBody .weekReviewSectionTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.weekReviewAccordionBody .weekReviewSection:first-child .weekReviewSectionTitle {
+  margin-top: 0;
+}
+
+/* Footer — sticky like character profile sheet */
+.weekReviewFooter {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: #0b1220;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  box-shadow: 0 -12px 24px -12px rgba(0, 0, 0, 0.42);
+}
+
+.weekReviewFooter--mobileSticky {
+  margin-top: 0;
+}
+
+.weekReviewBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.weekReviewBtn--primary {
+  background: linear-gradient(145deg, #e5c06a 0%, #c9a84a 100%);
+  color: #1a2f52;
+}
+
+.weekReviewBtn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.weekReviewBtn--tertiary {
+  background: transparent;
+  color: rgba(244, 247, 251, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.weekReviewLoading {
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  color: rgba(244, 247, 251, 0.72);
+}
+
+.weekReviewFooter.ds-sheetFooter {
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: #0b1220;
+}
+
+.weekReviewPanelInner--mobile .weekReviewB4Guide {
+  width: 3.75rem;
+  height: 3.75rem;
+}
+
+@media (min-width: 768px) {
+  .weekReviewHeroCover {
+    min-height: 8.5rem;
+  }
+
+  .weekReviewHeroContent {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .weekReviewB4Guide {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .weekReviewTitle {
+    font-size: 1.25rem;
+  }
+
+  .weekReviewBody {
+    padding: 1rem 1.5rem 7rem;
+  }
+
+  .weekReviewFooter {
+    padding: 1rem 1.5rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -1,10 +1,12 @@
-import React, { Suspense, useCallback, useEffect, useMemo } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
 import FamilyMobileBottomNav from '../components/family-portal/FamilyMobileBottomNav';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
+import '../design-system/components/character-profile-sheet.css';
+import '../design-system/components/weekly-review-sheet.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
 import '../components/family-portal/family-mobile-bottom-nav.css';
@@ -12,6 +14,8 @@ import '../design-system/kids-adventure/kids-adventure-visual-system.css';
 import '../design-system/kids-adventure/kids-adventure-visual-system-desktop.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
+import FamilyPortalDevDiagnosticBanner from '../components/family-portal/FamilyPortalDevDiagnosticBanner';
 import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { FAMILY_HUB_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { clearFamilyPortalSession, readFamilyPortalSession } from '../config/familyPortalAccess';
@@ -49,7 +53,9 @@ export default function FamilyHubLayout() {
   const role = readActivePortalRole();
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
-  const programCode = activeProgram?.programCode ?? '';
+  const [programCode, setProgramCode] = useState(
+    () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
+  );
   const showJourneyRail = isFamilyHubHomePath(location.pathname);
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
@@ -103,10 +109,11 @@ export default function FamilyHubLayout() {
 
   useEffect(() => {
     if (sessionValid) {
-      ensureFamilyPortalProgramSync();
+      const resolved = ensureFamilyPortalProgramSync();
+      setProgramCode(resolved.code ?? resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '');
       prefetchFamilyPortalRoutes();
     }
-  }, [sessionValid]);
+  }, [activeProgram?.programCode, sessionValid]);
 
   useEffect(() => {
     if (sessionValid) {
@@ -157,6 +164,7 @@ export default function FamilyHubLayout() {
           }
           footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
         >
+          <FamilyPortalDevDiagnosticBanner />
           <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
             <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
           </Suspense>

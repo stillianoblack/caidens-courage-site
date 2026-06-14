@@ -21,8 +21,9 @@ create index if not exists adventures_week_number_idx on public.adventures (week
 create index if not exists adventures_status_idx on public.adventures (status);
 create index if not exists adventures_sort_order_idx on public.adventures (sort_order);
 
--- Optional storage bucket (create in Supabase dashboard if needed):
--- adventure-assets (public read for hero/thumbnail URLs)
+-- Optional: featured hero week — run supabase/adventures_is_featured_migration.sql
+
+-- Optional storage bucket — run supabase/adventures_storage_bucket_setup.sql (creates bucket + policies)
 
 ALTER TABLE public.adventures ENABLE ROW LEVEL SECURITY;
 

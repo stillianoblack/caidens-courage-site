@@ -143,7 +143,7 @@ export async function hydrateExistingFamilyChildren(
 
   const allLinks = linksPayload.links;
   const scopedLinks = claimRequired
-    ? []
+    ? allLinks
     : allLinks.filter((link) => linkMatchesParentScope(link, scope));
 
   const familyParticipantsPayload = await fetchStudentParticipantsFromSupabase(code);
@@ -177,16 +177,6 @@ export async function hydrateExistingFamilyChildren(
   const fallbackChildCount = familyParticipants.filter(
     (participant) => !allLinkedIds.includes(participant.id),
   ).length;
-
-  if (claimRequired) {
-    return {
-      ...empty(true),
-      allLinks,
-      linkedChildCount,
-      fallbackChildCount,
-      errors: errors.length ? errors : ['Enter Parent/Guardian Email to Find Your Child.'],
-    };
-  }
 
   const children: HydratedFamilyChild[] = [];
   const seen = new Set<string>();
@@ -262,7 +252,12 @@ export async function hydrateExistingFamilyChildren(
     allowedStudentIds,
     linkedChildCount,
     fallbackChildCount,
-    claimRequired: false,
-    errors,
+    claimRequired,
+    errors:
+      claimRequired && childrenWithLocalGrades.length === 0
+        ? errors.length
+          ? errors
+          : ['Enter Parent/Guardian Email to Find Your Child.']
+        : errors,
   };
 }

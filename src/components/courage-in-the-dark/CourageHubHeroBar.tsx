@@ -4,7 +4,7 @@ import CourageHubControls from './CourageHubControls';
 import CourageHubHeaderCopy from './CourageHubHeaderCopy';
 
 type CourageHubHeroBarProps = {
-  variant: 'overlay' | 'panel';
+  variant: 'overlay' | 'panel' | 'stacked';
   week: number;
   weekTitle: string;
   selFocus?: string;
@@ -13,6 +13,7 @@ type CourageHubHeroBarProps = {
   onViewModeChange: (mode: CourageHubViewMode) => void;
   showQuestsTab?: boolean;
   showActivitiesTab?: boolean;
+  headerTrailing?: React.ReactNode;
 };
 
 export default function CourageHubHeroBar({
@@ -25,19 +26,28 @@ export default function CourageHubHeroBar({
   onViewModeChange,
   showQuestsTab = false,
   showActivitiesTab = true,
+  headerTrailing,
 }: CourageHubHeroBarProps) {
   return (
     <div
       className={[
         'courageHubHeroBar',
-        variant === 'overlay' ? 'courageHubHeroBar--overlay' : 'courageHubHeroBar--panel',
+        variant === 'overlay' ? 'courageHubHeroBar--overlay' : '',
+        variant === 'panel' ? 'courageHubHeroBar--panel' : '',
+        variant === 'stacked' ? 'courageHubHeroBar--stacked' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <CourageHubHeaderCopy week={week} weekTitle={weekTitle} selFocus={selFocus} />
+      <CourageHubHeaderCopy
+        week={week}
+        weekTitle={weekTitle}
+        selFocus={selFocus}
+        variant={variant === 'stacked' ? 'mobile' : 'overlay'}
+        trailing={headerTrailing}
+      />
       <CourageHubControls
-        variant="overlay"
+        variant={variant === 'stacked' ? 'mobileBar' : 'overlay'}
         viewMode={viewMode}
         onViewModeChange={onViewModeChange}
         weekUnlockStatus={weekUnlockStatus}

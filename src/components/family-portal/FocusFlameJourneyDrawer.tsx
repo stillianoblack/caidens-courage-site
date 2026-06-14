@@ -87,8 +87,9 @@ export default function FocusFlameJourneyDrawer({
             step1Complete={onboarding.hasChild}
             step2Complete={onboarding.hasChildGrade}
             step3Complete={onboarding.hasFamilyGoals}
-            step4Complete={onboarding.hasCompletedB4CheckIn}
+            b4CheckInComplete={onboarding.hasCompletedB4CheckIn}
             step5Complete={onboarding.hasChosenPath}
+            b4CheckInAggregateLabel={onboarding.b4CheckInAggregateLabel}
             completedCount={onboarding.completedCount}
             totalSteps={onboarding.totalSteps}
             isComplete={onboarding.isComplete}
@@ -100,6 +101,9 @@ export default function FocusFlameJourneyDrawer({
             childId={childId}
             childName={activeChildSummary?.displayName}
             childGoalsRecord={childGoals.record}
+            profileReadyAvatarSrc={onboarding.profileReadyAvatarSrc}
+            adventuresCompletedCount={onboarding.adventuresCompletedCount}
+            activeParticipantRecord={onboarding.activeParticipantRecord}
             onAddChild={handleAddChild}
             onConfigureGrade={() => navigate(childrenGradeSettingsPath)}
             onPathChosen={() => {

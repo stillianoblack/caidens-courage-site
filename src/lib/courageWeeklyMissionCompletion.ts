@@ -31,13 +31,13 @@ export function resolveWeeklyCourageMissionReward(
     return null;
   }
 
-  const missionId = resolveCourageMissionIdFromPathname(pathname);
+  const context = readWeeklyAdventureRouteContext(search);
+  const week = context.week && context.week > 0 ? context.week : 1;
+  const missionId = resolveCourageMissionIdFromPathname(pathname, week);
   if (!missionId) {
     return null;
   }
 
-  const context = readWeeklyAdventureRouteContext(search);
-  const week = context.week && context.week > 0 ? context.week : 1;
   return buildCourageMissionRewardPayload(missionId, week);
 }
 

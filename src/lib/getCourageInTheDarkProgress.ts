@@ -21,8 +21,10 @@ function weekNumberFromId(weekId: string): number {
 export async function getCourageInTheDarkProgress(
   weekId: string,
   explicitParticipantId?: string,
+  explicitTotalMissions?: number,
 ): Promise<CourageInTheDarkProgressSnapshot> {
-  const totalMissions = totalCourageMissionsForWeek(weekNumberFromId(weekId));
+  const totalMissions =
+    explicitTotalMissions ?? totalCourageMissionsForWeek(weekNumberFromId(weekId));
 
   if (!isSupabaseConfigured() || !supabase) {
     return { ...EMPTY_PROGRESS, totalMissions };

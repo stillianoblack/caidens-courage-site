@@ -36,7 +36,7 @@ export default function B4BaselineStudentForm({
   const canStart = displayName.length > 0 && !submitting;
   const nicknameLabel = familyPortal ? 'Nickname (optional)' : 'Nickname or first name';
   const groupLabel = familyPortal ? 'Group or classroom (optional)' : 'Group or Classroom Name';
-  const startLabel = familyPortal ? 'Start Before Check-In' : 'Start Check';
+  const startLabel = familyPortal ? 'Start B-4 Check-In' : 'Start Check';
 
   return (
     <form

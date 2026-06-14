@@ -62,3 +62,17 @@ export function logLocalDataDebug(payload: LocalDataDebugPayload): void {
     errors: payload.errors?.length ? payload.errors : undefined,
   });
 }
+
+/** Dev-only banner helper when roster is empty but Supabase is configured. */
+export function warnWhenNoChildrenInDevelopment(childCount: number): string | null {
+  if (process.env.NODE_ENV !== 'development') return null;
+  warnSupabaseEnvInDevelopment();
+  if (!isSupabaseConfigReady()) {
+    return 'No child records found for this environment. Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY in .env.local.';
+  }
+  if (childCount === 0) {
+    console.warn('[LOCAL_DATA_DEBUG] No child records found for this environment.');
+    return 'No child records found for this environment.';
+  }
+  return null;
+}

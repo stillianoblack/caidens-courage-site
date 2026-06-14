@@ -15,10 +15,12 @@ type BuildFamilyMissionCoachStepsInput = {
     | 'step1Complete'
     | 'step2Complete'
     | 'step3Complete'
+    | 'b4CheckInComplete'
     | 'step4Complete'
     | 'step5Complete'
     | 'activeStep'
   >;
+  b4CheckInAggregateLabel?: string | null;
   childrenSettingsPath: string;
   childrenGradeSettingsPath: string;
   familyGoalsSettingsPath: string;
@@ -44,6 +46,7 @@ export function buildFamilyMissionCoachSteps(
 ): MissionCoachStep[] {
   const {
     journey,
+    b4CheckInAggregateLabel = null,
     childrenSettingsPath,
     childrenGradeSettingsPath,
     familyGoalsSettingsPath,
@@ -57,7 +60,7 @@ export function buildFamilyMissionCoachSteps(
     journey.step1Complete,
     journey.step2Complete,
     journey.step3Complete,
-    journey.step4Complete,
+    journey.b4CheckInComplete,
     journey.step5Complete,
   ];
 
@@ -89,7 +92,11 @@ export function buildFamilyMissionCoachSteps(
     {
       id: 'b4-check-in',
       label: 'Complete the B-4 Check-In',
-      description: 'Establish your starting baseline.',
+      description:
+        b4CheckInAggregateLabel ??
+        (journey.b4CheckInComplete
+          ? 'B-4 Check-In complete for your selected child.'
+          : 'Establish your starting baseline.'),
       href: baselinePath,
     },
     {

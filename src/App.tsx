@@ -127,6 +127,7 @@ const AdultAssessmentPage = React.lazy(() => import('./pages/AdultAssessmentPage
 const PilotDashboardPage = React.lazy(() => import('./pages/PilotDashboardPage'));
 const FacilitatorPortalEntry = React.lazy(() => import('./pages/FacilitatorPortalEntry'));
 const AdminPortalPage = React.lazy(() => import('./pages/AdminPortalPage'));
+const AdminAdventurePreviewPage = React.lazy(() => import('./pages/AdminAdventurePreviewPage'));
 const AdminRouteLayout = React.lazy(() => import('./pages/AdminRouteLayout'));
 const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
 const ProgramDashboardPage = React.lazy(() => import('./pages/ProgramDashboardPage'));
@@ -447,6 +448,7 @@ const appRouteChildren = (
       {/* Private admin — not linked in public navigation */}
       <Route path={ADMIN_PORTAL_PATH} element={<AdminRouteLayout />}>
         <Route path="design-system" element={<DesignSystemPage />} />
+        <Route path="adventures/:id/preview" element={<AdminAdventurePreviewPage />} />
         <Route index element={<AdminPortalPage />} />
       </Route>
 

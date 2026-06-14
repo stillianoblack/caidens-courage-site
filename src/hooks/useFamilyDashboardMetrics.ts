@@ -66,6 +66,7 @@ export type FamilyDashboardMetrics = {
   assessmentProgress: ProgressCounts;
   overallProgress: ProgressCounts;
   loading: boolean;
+  errors: string[];
   refresh: () => Promise<void>;
   studentParticipants: StudentParticipantRecord[];
 };
@@ -249,6 +250,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       assessmentProgress: metrics.assessments,
       overallProgress: metrics.overall,
       loading,
+      errors: data.errors,
       refresh,
       studentParticipants: data.studentParticipants,
     };

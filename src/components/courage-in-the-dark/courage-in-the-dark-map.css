@@ -41,6 +41,17 @@
   filter: saturate(0.65) brightness(0.82);
 }
 
+.courageMapCanvas--hasImage {
+  background: #0f2848;
+}
+
+.courageMapBg,
+.courageMapBg--placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .courageMapBg {
   display: block;
   width: 100%;
@@ -51,9 +62,21 @@
   user-select: none;
 }
 
+.courageMapBg--placeholder {
+  background:
+    linear-gradient(145deg, rgba(26, 47, 82, 0.12), rgba(59, 130, 246, 0.18)),
+    linear-gradient(145deg, #1a1035 0%, #0f2848 55%, #123a2e 100%);
+}
+
+.courageMapCanvasHeroOverlay {
+  position: absolute;
+  z-index: 3;
+}
+
 .courageMapHotspots {
   position: absolute;
   inset: 0;
+  z-index: 2;
 }
 
 .courageMapHotspot {

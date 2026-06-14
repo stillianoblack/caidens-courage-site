@@ -47,27 +47,105 @@ function writeFamilyChildGoalsLocal(record: FamilyChildGoalsRecord): void {
   );
 }
 
+function normalizeGoalsRow(
+  data: Record<string, unknown>,
+  childName?: string | null,
+  local?: FamilyChildGoalsRecord | null,
+): FamilyChildGoalsRecord {
+  const goals = Array.isArray(data.goals) ? (data.goals as string[]) : [];
+  const strengths = Array.isArray(data.strengths) ? (data.strengths as string[]) : [];
+  const updatedAt = data.updated_at ? String(data.updated_at) : null;
+  let completedAt = data.completed_at ? String(data.completed_at) : null;
+  if (!completedAt && goals.length > 0 && strengths.length > 0) {
+    completedAt = updatedAt ?? local?.completed_at ?? null;
+  }
+
+  return {
+    id: data.id ? String(data.id) : undefined,
+    family_program_code: String(data.family_program_code ?? ''),
+    child_id: data.child_id ? String(data.child_id) : null,
+    child_name: data.child_name ? String(data.child_name) : childName ?? local?.child_name,
+    parent_email: data.parent_email ? String(data.parent_email) : null,
+    goals,
+    strengths,
+    completed_at: completedAt,
+    updated_at: updatedAt,
+  };
+}
+
+function resolveLocalFamilyChildGoals(
+  programCode: string,
+  childId?: string | null,
+): FamilyChildGoalsRecord | null {
+  const childSpecific = readFamilyChildGoalsLocal(programCode, childId);
+  if (childSpecific) return childSpecific;
+  if (childId?.trim()) {
+    return readFamilyChildGoalsLocal(programCode, null);
+  }
+  return null;
+}
+
 export async function fetchFamilyChildGoals(
   programCode: string,
   childId?: string | null,
   childName?: string | null,
 ): Promise<FamilyChildGoalsRecord | null> {
-  const local = readFamilyChildGoalsLocal(programCode, childId);
+  const local = resolveLocalFamilyChildGoals(programCode, childId);
   if (!programCode.trim() || !isSupabaseConfigured() || !supabase) {
     return local;
   }
 
   try {
-    let query = supabase
-      .from('family_child_goals')
-      .select('*')
-      .eq('family_program_code', programCode.trim());
+    const code = programCode.trim();
+    const participantId = childId?.trim() || '';
 
-    if (childId?.trim()) {
-      query = query.eq('child_id', childId.trim());
+    if (participantId) {
+      const { data: childData, error: childError } = await supabase
+        .from('family_child_goals')
+        .select('*')
+        .eq('family_program_code', code)
+        .eq('child_id', participantId)
+        .maybeSingle();
+
+      if (childError) {
+        if (!/family_child_goals|relation/i.test(childError.message)) {
+          console.warn('[family_child_goals] child fetch failed:', childError.message);
+        }
+      } else if (childData) {
+        const record = normalizeGoalsRow(childData as Record<string, unknown>, childName, local);
+        writeFamilyChildGoalsLocal(record);
+        return record;
+      }
+
+      const { data: familyData, error: familyError } = await supabase
+        .from('family_child_goals')
+        .select('*')
+        .eq('family_program_code', code)
+        .is('child_id', null)
+        .maybeSingle();
+
+      if (familyError) {
+        if (!/family_child_goals|relation/i.test(familyError.message)) {
+          console.warn('[family_child_goals] family fetch failed:', familyError.message);
+        }
+        return local;
+      }
+
+      if (familyData) {
+        const record = normalizeGoalsRow(familyData as Record<string, unknown>, childName, local);
+        writeFamilyChildGoalsLocal(record);
+        return record;
+      }
+
+      return local;
     }
 
-    const { data, error } = await query.maybeSingle();
+    const { data, error } = await supabase
+      .from('family_child_goals')
+      .select('*')
+      .eq('family_program_code', code)
+      .is('child_id', null)
+      .maybeSingle();
 
     if (error) {
       if (/family_child_goals|relation/i.test(error.message)) {
@@ -79,17 +157,7 @@ export async function fetchFamilyChildGoals(
 
     if (!data) return local;
 
-    const record: FamilyChildGoalsRecord = {
-      id: data.id,
-      family_program_code: data.family_program_code,
-      child_id: data.child_id,
-      child_name: data.child_name ?? childName ?? local?.child_name,
-      parent_email: data.parent_email,
-      goals: Array.isArray(data.goals) ? (data.goals as string[]) : [],
-      strengths: Array.isArray(data.strengths) ? (data.strengths as string[]) : [],
-      completed_at: data.completed_at,
-      updated_at: data.updated_at,
-    };
+    const record = normalizeGoalsRow(data as Record<string, unknown>, childName, local);
     writeFamilyChildGoalsLocal(record);
     return record;
   } catch (err) {
@@ -124,6 +192,7 @@ export async function saveFamilyChildGoals(
         parent_email: record.parent_email,
         goals: record.goals,
         strengths: record.strengths,
+        completed_at: record.completed_at,
         updated_at: now,
       };
 
@@ -158,5 +227,5 @@ export async function saveFamilyChildGoals(
 }
 
 export function hasFamilyChildGoals(record: FamilyChildGoalsRecord | null): boolean {
-  return Boolean(record?.completed_at && record.goals.length > 0 && record.strengths.length > 0);
+  return Boolean(record && record.goals.length > 0 && record.strengths.length > 0);
 }

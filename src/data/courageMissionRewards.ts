@@ -52,11 +52,40 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
   },
 };
 
+const PATH_MISSION_MATCHERS: Array<{ test: (pathname: string) => boolean; missionId: string }> = [
+  { test: (pathname) => /\/caiden\//.test(pathname), missionId: 'caiden-courage-in-the-dark' },
+  { test: (pathname) => /\/miranda\//.test(pathname), missionId: 'miranda-mystery' },
+  { test: (pathname) => /\/zeke\//.test(pathname), missionId: 'zeke-bridge-challenge' },
+  { test: (pathname) => /\/charlie\//.test(pathname), missionId: 'charlie-discovery-zone' },
+  { test: (pathname) => /\/b4\/check-in/.test(pathname), missionId: 'b4-self-check-in' },
+];
+
+const CHARACTER_PATH_MATCHERS: Array<{ test: (pathname: string) => boolean; character: string }> = [
+  { test: (pathname) => /\/caiden\//.test(pathname), character: 'caiden' },
+  { test: (pathname) => /\/miranda\//.test(pathname), character: 'miranda' },
+  { test: (pathname) => /\/zeke\//.test(pathname), character: 'zeke' },
+  { test: (pathname) => /\/charlie\//.test(pathname), character: 'charlie' },
+  { test: (pathname) => /\/b4\//.test(pathname), character: 'b4' },
+];
+
+const CHARACTER_TO_BASE_MISSION: Record<string, string> = {
+  caiden: 'caiden-courage-in-the-dark',
+  miranda: 'miranda-mystery',
+  zeke: 'zeke-bridge-challenge',
+  charlie: 'charlie-discovery-zone',
+  b4: 'b4-self-check-in',
+};
+
 export function weekIdFromNumber(week: number): string {
   return `week-${week}`;
 }
 
 export function resolveCourageMissionReward(missionId: string): CourageMissionReward | null {
+  const weekScoped = /^(\w+)-week-(\d+)$/.exec(missionId);
+  if (weekScoped) {
+    const baseId = CHARACTER_TO_BASE_MISSION[weekScoped[1]];
+    return baseId ? COURAGE_MISSION_REWARDS[baseId] ?? null : null;
+  }
   return COURAGE_MISSION_REWARDS[missionId] ?? null;
 }
 
@@ -66,9 +95,11 @@ export function buildCourageMissionRewardPayload(
 ): CourageMissionRewardPayload | null {
   const reward = resolveCourageMissionReward(missionId);
   if (!reward) return null;
+  const scopedMissionId = week > 1 ? missionId : reward.mission_id;
   return {
     week_id: weekIdFromNumber(week),
     ...reward,
+    mission_id: scopedMissionId,
   };
 }
 
@@ -86,20 +117,26 @@ export function buildCourageMissionPayload(
   };
 }
 
-export function totalCourageMissionsForWeek(week: number): number {
-  if (week !== 1) return 0;
-  return courageInTheDarkMissions.length;
+export function totalCourageMissionsForWeek(week: number, explicitCount?: number): number {
+  if (typeof explicitCount === 'number' && explicitCount > 0) return explicitCount;
+  if (week === 1) return courageInTheDarkMissions.length;
+  return 5;
 }
 
-const PATH_MISSION_MATCHERS: Array<{ test: (pathname: string) => boolean; missionId: string }> = [
-  { test: (pathname) => /\/caiden\//.test(pathname), missionId: 'caiden-courage-in-the-dark' },
-  { test: (pathname) => /\/miranda\//.test(pathname), missionId: 'miranda-mystery' },
-  { test: (pathname) => /\/zeke\//.test(pathname), missionId: 'zeke-bridge-challenge' },
-  { test: (pathname) => /\/charlie\//.test(pathname), missionId: 'charlie-discovery-zone' },
-  { test: (pathname) => /\/b4\/check-in/.test(pathname), missionId: 'b4-self-check-in' },
-];
+export function resolveWeekScopedMissionId(character: string, week: number): string {
+  if (week <= 1) {
+    return CHARACTER_TO_BASE_MISSION[character] ?? `${character}-week-${week}`;
+  }
+  return `${character}-week-${week}`;
+}
 
-export function resolveCourageMissionIdFromPathname(pathname: string): string | null {
+export function resolveCourageMissionIdFromPathname(pathname: string, week = 1): string | null {
+  if (week > 1) {
+    const characterMatch = CHARACTER_PATH_MATCHERS.find((entry) => entry.test(pathname));
+    if (!characterMatch) return null;
+    return resolveWeekScopedMissionId(characterMatch.character, week);
+  }
+
   const match = PATH_MISSION_MATCHERS.find((entry) => entry.test(pathname));
   return match?.missionId ?? null;
 }

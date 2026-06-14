@@ -48,6 +48,12 @@ export function weeklyAdventureWeekAnchor(week: number): string {
   return `week-${week}`;
 }
 
+export function parseWeeklyAdventureWeekParam(value: string | null | undefined): number | null {
+  if (!value?.trim()) return null;
+  const week = Number.parseInt(value, 10);
+  return Number.isFinite(week) && week > 0 ? week : null;
+}
+
 export const WEEKLY_VIEW_PARAM = 'view';
 export const WEEKLY_VIEW_EXPLORE_VALUE = 'explore';
 export const WEEKLY_VIEW_MISSIONS_VALUE = 'missions';

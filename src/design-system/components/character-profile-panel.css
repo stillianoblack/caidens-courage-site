@@ -1,0 +1,219 @@
+/* Character sheet content — themes, hero, body (shell in character-sheet-panel.css) */
+
+.characterSheetPanelInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: #fff;
+  overflow: hidden;
+}
+
+.characterSheetPanelInner--caiden {
+  background: linear-gradient(180deg, #0d2f67 0%, #081830 100%);
+}
+
+.characterSheetPanelInner--miranda {
+  background: linear-gradient(180deg, #1e1035 0%, #0a0618 100%);
+}
+
+.characterSheetPanelInner--zeke {
+  background: linear-gradient(180deg, #0f766e 0%, #0c1410 100%);
+}
+
+.characterSheetPanelInner--charlie {
+  background: linear-gradient(180deg, #1e40af 0%, #052e16 100%);
+}
+
+.characterSheetPanelInner--b4 {
+  background: linear-gradient(180deg, #082f49 0%, #041a28 100%);
+}
+
+.characterSheetPanelInner--dr-victoria {
+  background: linear-gradient(180deg, #312e81 0%, #1a1035 100%);
+}
+
+.characterSheetPanelInner--uncle-t {
+  background: linear-gradient(180deg, #1a2f52 0%, #0d1a30 100%);
+}
+
+.characterProfileHero {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.characterProfileHeroCover {
+  position: relative;
+  min-height: 7.5rem;
+  overflow: hidden;
+}
+
+.characterProfileHeroCover--caiden {
+  background: linear-gradient(155deg, #a54d16 0%, #0d2f67 100%);
+}
+
+.characterProfileHeroCover--miranda {
+  background: linear-gradient(155deg, #7c3aed 0%, #1e1035 100%);
+}
+
+.characterProfileHeroCover--zeke {
+  background: linear-gradient(155deg, #ea580c 0%, #0f766e 100%);
+}
+
+.characterProfileHeroCover--charlie {
+  background: linear-gradient(155deg, #16a34a 0%, #1e40af 100%);
+}
+
+.characterProfileHeroCover--b4 {
+  background: linear-gradient(155deg, #0ea5e9 0%, #082f49 100%);
+}
+
+.characterProfileHeroCover--dr-victoria {
+  background: linear-gradient(155deg, #7c3aed 0%, #312e81 100%);
+}
+
+.characterProfileHeroCover--uncle-t {
+  background: linear-gradient(155deg, #c9732d 0%, #1a2f52 100%);
+}
+
+.characterProfileHeroCoverImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.55;
+}
+
+.characterProfileHeroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 18, 36, 0.25) 0%,
+    rgba(8, 18, 36, 0.72) 58%,
+    rgba(8, 18, 36, 0.96) 100%
+  );
+}
+
+.characterProfileHeroBar {
+  position: relative;
+  margin-top: -2.75rem;
+  padding: 1.75rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.characterProfilePortrait {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 0.75rem;
+  border: 2px solid #e5c06a;
+  box-shadow:
+    0 0 0 3px rgba(229, 192, 106, 0.22),
+    0 10px 24px -12px rgba(0, 0, 0, 0.45);
+}
+
+.characterProfilePortraitImage {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.characterProfileName {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.characterProfileTagline {
+  margin: 0.4rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 28rem;
+}
+
+.characterSheetPanelBody {
+  padding: 0.5rem 1.5rem 6.5rem;
+  background: rgba(8, 18, 36, 0.42);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.characterSheetPanelBody .characterDetailReward,
+.characterSheetPanelBody .characterDetailUnlockMore {
+  width: 100%;
+}
+
+.characterProfileFooter {
+  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(8, 18, 36, 0.72);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.characterProfileFooter .characterDetailCta {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .characterProfileHeroCover {
+    min-height: 8.5rem;
+  }
+
+  .characterProfileHeroBar {
+    padding: 2rem 2rem 1.15rem;
+  }
+
+  .characterProfilePortrait {
+    width: 5.25rem;
+    height: 5.25rem;
+  }
+
+  .characterSheetPanelBody {
+    padding: 0.75rem 2rem 7rem;
+  }
+
+  .characterProfileFooter {
+    padding: 1rem 2rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.characterSheetPanelBody .characterDetailRewardMissions {
+  font-size: 1rem;
+}
+
+.characterSheetPanelBody .characterDetailRewardUnlock {
+  font-size: 0.9375rem;
+}
+
+.characterSheetPanelBody .characterDetailUnlockMoreText {
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 768px) {
+  .characterSheetPanelBody .characterDetailRewardMissions {
+    font-size: 1.0625rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .characterProfileHeroBar {
+    padding-top: 2rem;
+  }
+
+  .characterProfilePortrait {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}

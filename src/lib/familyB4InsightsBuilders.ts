@@ -59,6 +59,11 @@ function supportingMetrics(input: BuildFamilyB4InsightsInput): B4InsightsPayload
       hint: child?.displayName,
     },
     {
+      label: 'B-4 Check-In',
+      value: child?.b4CheckInStatus ?? '—',
+      hint: child?.displayName,
+    },
+    {
       label: 'Modules completed',
       value: child ? `${child.completedCount} of ${child.totalCount}` : '—',
       hint: 'Weekly adventures & missions',
@@ -204,8 +209,8 @@ export function buildFamilyB4Insights(input: BuildFamilyB4InsightsInput): B4Insi
       ...base,
       title: 'B-4 Check-In Insight',
       summary: `${name}'s check-in helps B-4 understand their starting point for focus, reading, and confidence.${
-        input.child?.baselineStatus === 'Complete'
-          ? ' The baseline is complete — use these results to choose the next best activity.'
+        input.child?.b4CheckInStatus === 'Complete'
+          ? ' The B-4 Check-In is complete — use these results to choose the next best activity.'
           : ' Completing the check-in unlocks clearer recommendations on your dashboard.'
       }`,
       insights: [
@@ -214,6 +219,12 @@ export function buildFamilyB4Insights(input: BuildFamilyB4InsightsInput): B4Insi
           label: 'Baseline status',
           detail: input.child?.baselineStatus ?? 'Not started',
           tone: input.child?.baselineStatus === 'Complete' ? 'strength' : 'attention',
+        },
+        {
+          id: 'b4-check-in-status',
+          label: 'B-4 Check-In',
+          detail: input.child?.b4CheckInStatus ?? 'Not started',
+          tone: input.child?.b4CheckInStatus === 'Complete' ? 'strength' : 'attention',
         },
         ...setupInsights.filter((item) => item.id.includes('baseline') || item.id.includes('goals')),
       ],
@@ -226,7 +237,7 @@ export function buildFamilyB4Insights(input: BuildFamilyB4InsightsInput): B4Insi
         {
           id: 'baseline',
           label:
-            input.child?.baselineStatus === 'Complete' ? 'Review Baseline Details' : 'Complete B-4 Check-In',
+            input.child?.b4CheckInStatus === 'Complete' ? 'Review Check-In Hub' : 'Complete B-4 Check-In',
           href: input.paths.baseline,
           variant: 'primary',
         },

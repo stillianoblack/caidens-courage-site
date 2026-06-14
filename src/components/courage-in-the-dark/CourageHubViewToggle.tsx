@@ -8,6 +8,8 @@ type CourageHubViewToggleProps = {
   onViewModeChange: (mode: CourageHubViewMode) => void;
   showQuestsTab?: boolean;
   showActivitiesTab?: boolean;
+  /** Hide emoji icons on inactive tabs so labels fit (mobile bar). */
+  iconOnActiveOnly?: boolean;
 };
 
 export default function CourageHubViewToggle({
@@ -15,6 +17,7 @@ export default function CourageHubViewToggle({
   onViewModeChange,
   showQuestsTab = false,
   showActivitiesTab = true,
+  iconOnActiveOnly = false,
 }: CourageHubViewToggleProps) {
   const { playClick } = useCourageHubAudio();
 
@@ -26,84 +29,63 @@ export default function CourageHubViewToggle({
     [onViewModeChange, playClick],
   );
 
+  const renderTab = (
+    mode: CourageHubViewMode,
+    tabId: string,
+    panelId: string,
+    icon: string,
+    label: string,
+  ) => {
+    const isActive = viewMode === mode;
+    const showIcon = !iconOnActiveOnly || isActive;
+
+    return (
+      <button
+        type="button"
+        role="tab"
+        id={tabId}
+        aria-selected={isActive}
+        aria-controls={panelId}
+        className={[
+          'courageHubViewToggleBtn',
+          isActive ? 'courageHubViewToggleBtn--active' : '',
+          iconOnActiveOnly ? 'courageHubViewToggleBtn--compact' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        onClick={() => handleSelect(mode)}
+      >
+        {showIcon ? <span className="courageHubViewToggleIcon" aria-hidden="true">{icon}</span> : null}
+        <span className="courageHubViewToggleLabel">{label}</span>
+      </button>
+    );
+  };
+
   return (
     <div
-      className="courageHubViewToggle"
+      className={[
+        'courageHubViewToggle',
+        iconOnActiveOnly ? 'courageHubViewToggle--compact' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       role="tablist"
       aria-label="Weekly adventure view mode"
     >
-      <button
-        type="button"
-        role="tab"
-        id="courage-hub-tab-explore"
-        aria-selected={viewMode === 'explore'}
-        aria-controls="courage-hub-panel-explore"
-        className={[
-          'courageHubViewToggleBtn',
-          viewMode === 'explore' ? 'courageHubViewToggleBtn--active' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        onClick={() => handleSelect('explore')}
-      >
-        <span className="courageHubViewToggleIcon" aria-hidden="true">🗺</span>
-        <span className="courageHubViewToggleLabel">Explore</span>
-      </button>
-      <button
-        type="button"
-        role="tab"
-        id="courage-hub-tab-missions"
-        aria-selected={viewMode === 'missions'}
-        aria-controls="courage-hub-panel-missions"
-        className={[
-          'courageHubViewToggleBtn',
-          viewMode === 'missions' ? 'courageHubViewToggleBtn--active' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        onClick={() => handleSelect('missions')}
-      >
-        <span className="courageHubViewToggleIcon" aria-hidden="true">📋</span>
-        <span className="courageHubViewToggleLabel">Missions</span>
-      </button>
-      {showActivitiesTab ? (
-        <button
-          type="button"
-          role="tab"
-          id="courage-hub-tab-activities"
-          aria-selected={viewMode === 'activities'}
-          aria-controls="courage-hub-panel-activities"
-          className={[
-            'courageHubViewToggleBtn',
-            viewMode === 'activities' ? 'courageHubViewToggleBtn--active' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => handleSelect('activities')}
-        >
-          <span className="courageHubViewToggleIcon" aria-hidden="true">🎨</span>
-          <span className="courageHubViewToggleLabel">Activities</span>
-        </button>
-      ) : null}
-      {showQuestsTab ? (
-        <button
-          type="button"
-          role="tab"
-          id="courage-hub-tab-quests"
-          aria-selected={viewMode === 'quests'}
-          aria-controls="courage-hub-panel-quests"
-          className={[
-            'courageHubViewToggleBtn',
-            viewMode === 'quests' ? 'courageHubViewToggleBtn--active' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() => handleSelect('quests')}
-        >
-          <span className="courageHubViewToggleIcon" aria-hidden="true">🔥</span>
-          <span className="courageHubViewToggleLabel">Quests</span>
-        </button>
-      ) : null}
+      {renderTab('explore', 'courage-hub-tab-explore', 'courage-hub-panel-explore', '🗺', 'Explore')}
+      {renderTab('missions', 'courage-hub-tab-missions', 'courage-hub-panel-missions', '📋', 'Missions')}
+      {showActivitiesTab
+        ? renderTab(
+            'activities',
+            'courage-hub-tab-activities',
+            'courage-hub-panel-activities',
+            '🎨',
+            'Activities',
+          )
+        : null}
+      {showQuestsTab
+        ? renderTab('quests', 'courage-hub-tab-quests', 'courage-hub-panel-quests', '🔥', 'Quests')
+        : null}
     </div>
   );
 }

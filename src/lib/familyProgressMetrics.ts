@@ -1,7 +1,7 @@
 import {
   ADULT_POST_ASSESSMENT_TYPE,
   ADULT_PRE_ASSESSMENT_TYPE,
-  CHILD_BEFORE_CHECK_IN_LABEL,
+  CHILD_B4_CHECK_IN_LABEL,
   isChildBaselineAssessmentType,
 } from '../config/assessmentTypeConstants';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
@@ -76,7 +76,7 @@ function buildRecentActivity(
       const name = answers?.nickname?.trim() || answers?.firstName?.trim();
       const assessmentType = String(row.assessment_type);
       const label = isChildBaselineAssessmentType(assessmentType)
-        ? CHILD_BEFORE_CHECK_IN_LABEL
+        ? CHILD_B4_CHECK_IN_LABEL
         : assessmentType === 'final'
           ? 'Growth Check'
           : assessmentType === ADULT_PRE_ASSESSMENT_TYPE
@@ -104,8 +104,8 @@ function buildRecentActivity(
     .slice(0, 3)
     .map((row) =>
       row.nickname
-        ? `${row.nickname} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
-        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
+        ? `${row.nickname} completed ${CHILD_B4_CHECK_IN_LABEL}`
+        : `${CHILD_B4_CHECK_IN_LABEL} completed`,
     );
 
   return [...adultEvents, ...moduleItems, ...v2Items, ...baselineItems].slice(0, 6);
@@ -429,8 +429,8 @@ export function buildFamilyRecentActivityTimeline(input: {
     items.push({
       id: `v2-baseline-${row.id ?? row.completed_at}`,
       label: name
-        ? `${name} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
-        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
+        ? `${name} completed ${CHILD_B4_CHECK_IN_LABEL}`
+        : `${CHILD_B4_CHECK_IN_LABEL} completed`,
       kind: 'baseline',
       timestamp: row.completed_at,
     });
@@ -442,8 +442,8 @@ export function buildFamilyRecentActivityTimeline(input: {
     items.push({
       id: `legacy-baseline-${row.participantId ?? row.nickname}-${row.completedAt}`,
       label: row.nickname
-        ? `${row.nickname} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
-        : `${CHILD_BEFORE_CHECK_IN_LABEL} completed`,
+        ? `${row.nickname} completed ${CHILD_B4_CHECK_IN_LABEL}`
+        : `${CHILD_B4_CHECK_IN_LABEL} completed`,
       kind: 'baseline',
       timestamp: row.completedAt,
     });

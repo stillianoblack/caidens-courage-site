@@ -10,6 +10,8 @@ type CourageHubControlsProps = {
   weekUnlockStatus?: string;
   showQuestsTab?: boolean;
   showActivitiesTab?: boolean;
+  hideUnlockStatus?: boolean;
+  iconOnActiveOnly?: boolean;
 };
 
 export default function CourageHubControls({
@@ -19,6 +21,8 @@ export default function CourageHubControls({
   weekUnlockStatus,
   showQuestsTab = false,
   showActivitiesTab = true,
+  hideUnlockStatus = false,
+  iconOnActiveOnly = false,
 }: CourageHubControlsProps) {
   return (
     <div
@@ -34,8 +38,9 @@ export default function CourageHubControls({
         onViewModeChange={onViewModeChange}
         showQuestsTab={showQuestsTab}
         showActivitiesTab={showActivitiesTab}
+        iconOnActiveOnly={iconOnActiveOnly}
       />
-      {weekUnlockStatus ? (
+      {weekUnlockStatus && !hideUnlockStatus ? (
         <span className="courageMapCanvasStatus" role="status">
           {weekUnlockStatus}
         </span>

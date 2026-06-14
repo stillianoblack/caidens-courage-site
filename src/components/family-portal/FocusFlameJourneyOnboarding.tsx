@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import type { FocusFlameJourneyStep } from '../../hooks/useFocusFlameJourneyOnboarding';
 import FamilyChildGoalsChecklist from './FamilyChildGoalsChecklist';
+import FocusFlameProfileReadyCard from './FocusFlameProfileReadyCard';
 import type { FamilyChildGoalsRecord } from '../../lib/familyChildGoalsService';
+import type { StudentParticipantRecord } from '../../lib/pilotTrackingService';
 
 type JourneyStepConfig = {
   id: FocusFlameJourneyStep;
@@ -19,8 +21,9 @@ type FocusFlameJourneyOnboardingProps = {
   step1Complete: boolean;
   step2Complete: boolean;
   step3Complete: boolean;
-  step4Complete: boolean;
+  b4CheckInComplete: boolean;
   step5Complete: boolean;
+  b4CheckInAggregateLabel?: string | null;
   completedCount: number;
   totalSteps: number;
   isComplete: boolean;
@@ -32,6 +35,9 @@ type FocusFlameJourneyOnboardingProps = {
   childId?: string | null;
   childName?: string | null;
   childGoalsRecord?: FamilyChildGoalsRecord | null;
+  profileReadyAvatarSrc?: string | null;
+  adventuresCompletedCount?: number;
+  activeParticipantRecord?: StudentParticipantRecord | null;
   onAddChild: () => void;
   onConfigureGrade?: () => void;
   onSetGoals?: () => void;
@@ -61,14 +67,14 @@ function resolveStepComplete(
     step1Complete: boolean;
     step2Complete: boolean;
     step3Complete: boolean;
-    step4Complete: boolean;
+    b4CheckInComplete: boolean;
     step5Complete: boolean;
   },
 ): boolean {
   if (stepId === 1) return flags.step1Complete;
   if (stepId === 2) return flags.step2Complete;
   if (stepId === 3) return flags.step3Complete;
-  if (stepId === 4) return flags.step4Complete;
+  if (stepId === 4) return flags.b4CheckInComplete;
   return flags.step5Complete;
 }
 
@@ -77,8 +83,9 @@ export default function FocusFlameJourneyOnboarding({
   step1Complete,
   step2Complete,
   step3Complete,
-  step4Complete,
+  b4CheckInComplete,
   step5Complete,
+  b4CheckInAggregateLabel = null,
   completedCount,
   totalSteps,
   isComplete,
@@ -90,6 +97,9 @@ export default function FocusFlameJourneyOnboarding({
   childId,
   childName,
   childGoalsRecord,
+  profileReadyAvatarSrc = null,
+  adventuresCompletedCount = 0,
+  activeParticipantRecord = null,
   onAddChild,
   onConfigureGrade,
   onSetGoals,
@@ -140,8 +150,10 @@ export default function FocusFlameJourneyOnboarding({
     {
       id: 4,
       title: 'Complete the B-4 Check-In',
-      body: 'Help B-4 understand your child\u2019s focus, reading, and confidence starting point.',
-      cta: 'Start B-4 Check-In',
+      body: b4CheckInAggregateLabel
+        ? `${b4CheckInAggregateLabel}. Select a child to view their individual check-in status.`
+        : 'Help B-4 understand your child\u2019s focus, reading, and confidence starting point.',
+      cta: b4CheckInComplete ? 'Review B-4 Check-In' : 'Start B-4 Check-In',
       href: baselinePath,
     },
     {
@@ -157,9 +169,22 @@ export default function FocusFlameJourneyOnboarding({
     step1Complete,
     step2Complete,
     step3Complete,
-    step4Complete,
+    b4CheckInComplete,
     step5Complete,
   };
+
+  if (isComplete && childName) {
+    return (
+      <FocusFlameProfileReadyCard
+        childName={childName}
+        avatarSrc={profileReadyAvatarSrc}
+        participant={activeParticipantRecord}
+        adventuresCompletedCount={adventuresCompletedCount}
+        continueLearningPath={continueLearningPath}
+        variant={variant === 'drawer' ? 'compact' : 'inline'}
+      />
+    );
+  }
 
   return (
     <section className={moduleClass} aria-labelledby="ffj-module-title">
@@ -178,9 +203,14 @@ export default function FocusFlameJourneyOnboarding({
             {isComplete ? (
               <span className="ffj-progressActive">Focus Flame Journey Active</span>
             ) : (
-              <span className="ffj-progressCount">
-                {completedCount} of {totalSteps} steps completed
-              </span>
+              <>
+                <span className="ffj-progressCount">
+                  {completedCount} of {totalSteps} steps completed
+                </span>
+                {b4CheckInAggregateLabel ? (
+                  <span className="ffj-progressAggregate">{b4CheckInAggregateLabel}</span>
+                ) : null}
+              </>
             )}
           </p>
         </div>
@@ -248,7 +278,10 @@ export default function FocusFlameJourneyOnboarding({
                 </div>
               ) : null}
 
-              {!showGoalsEditor && (active || (step.id === 3 && complete && !editingGoals)) ? (
+              {!showGoalsEditor &&
+              (active ||
+                (step.id === 3 && complete && !editingGoals) ||
+                (step.id === 4 && b4CheckInComplete)) ? (
                 step.href ? (
                   <Link to={step.href} className="ffj-stepCta">
                     {step.cta}

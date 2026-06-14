@@ -1,40 +1,53 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { ACTIVE_CHILD_EVENT } from '../lib/activeChildContext';
-import { checkBaselineCompletion } from '../lib/baselineCompletion';
+import { checkB4CheckInCompletion } from '../lib/baselineCompletion';
+import {
+  isB4CheckInCompleteLocal,
+  type B4CheckInDisplayStatus,
+} from '../lib/b4CheckInStatus';
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { FAMILY_CHILD_GOALS_SAVED_EVENT } from '../lib/familyChildGoalsService';
+import {
+  computeFocusFlameJourneyStatus,
+  type FocusFlameJourneyStep,
+} from '../lib/focusFlameJourneyStatus';
+import { readJourneyPathChosen, writeJourneyPathChosen } from '../lib/focusFlameJourneyPath';
+import type { LocalAssessmentV2Record } from '../lib/pilotTrackingLocalStorage';
 
-const PATH_CHOSEN_KEY = 'focusFlame:journey:pathChosen';
-
-export type FocusFlameJourneyStep = 1 | 2 | 3 | 4 | 5;
+export type { FocusFlameJourneyStep };
 
 export type FocusFlameJourneyState = {
   step1Complete: boolean;
   step2Complete: boolean;
   step3Complete: boolean;
+  b4CheckInComplete: boolean;
   step4Complete: boolean;
   step5Complete: boolean;
   completedCount: number;
   totalSteps: number;
   activeStep: FocusFlameJourneyStep;
   isComplete: boolean;
+  isProfileReady: boolean;
   loading: boolean;
   refresh: () => Promise<void>;
   markPathChosen: () => void;
 };
 
-export function readJourneyPathChosen(programCode?: string, childId?: string | null): boolean {
-  if (typeof window === 'undefined') return false;
-  const key = `${PATH_CHOSEN_KEY}:${programCode ?? 'default'}:${childId ?? 'default'}`;
-  return localStorage.getItem(key) === 'true';
-}
+export { readJourneyPathChosen, writeJourneyPathChosen };
 
-export function writeJourneyPathChosen(programCode?: string, childId?: string | null): void {
-  if (typeof window === 'undefined') return;
-  const key = `${PATH_CHOSEN_KEY}:${programCode ?? 'default'}:${childId ?? 'default'}`;
-  localStorage.setItem(key, 'true');
-}
+type UseFocusFlameJourneyOnboardingInput = {
+  hasChild: boolean;
+  hasChildGrade: boolean;
+  participantId?: string | null;
+  goalsComplete?: boolean;
+  hasModuleActivity?: boolean;
+  hasWeeklyAdventureActivity?: boolean;
+  programCode?: string;
+  assessments?: LocalAssessmentV2Record[];
+  selectedChildName?: string | null;
+  summaryB4CheckInStatus?: B4CheckInDisplayStatus | null;
+};
 
 export function useFocusFlameJourneyOnboarding(
   hasChild: boolean,
@@ -42,34 +55,101 @@ export function useFocusFlameJourneyOnboarding(
   participantId?: string | null,
   goalsComplete = false,
   hasModuleActivity = false,
+  options: Omit<
+    UseFocusFlameJourneyOnboardingInput,
+    'hasChild' | 'hasChildGrade' | 'participantId' | 'goalsComplete' | 'hasModuleActivity'
+  > = {},
 ): FocusFlameJourneyState {
   const program = readActivePilotProgram();
-  const programCode = program?.programCode;
+  const programCode = options.programCode?.trim() || program?.programCode;
   const resolvedParticipantId = participantId?.trim() || readActiveChildParticipantId();
+  const assessments = options.assessments;
+  const selectedChildName = options.selectedChildName ?? undefined;
+  const summaryB4CheckInStatus = options.summaryB4CheckInStatus ?? null;
+  const hasWeeklyAdventureActivity = options.hasWeeklyAdventureActivity ?? false;
 
-  const [baselineComplete, setBaselineComplete] = useState(false);
-  const [pathChosen, setPathChosen] = useState(() =>
-    readJourneyPathChosen(programCode, resolvedParticipantId),
-  );
+  const [b4CheckInComplete, setB4CheckInComplete] = useState(() => {
+    if (summaryB4CheckInStatus === 'Complete') return true;
+    if (!resolvedParticipantId) return false;
+    return isB4CheckInCompleteLocal({
+      programCode,
+      participantId: resolvedParticipantId,
+      assessments,
+      selectedChildName: selectedChildName ?? undefined,
+    });
+  });
+  const [pathRevision, setPathRevision] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     const childId = participantId?.trim() || readActiveChildParticipantId();
-    setPathChosen(readJourneyPathChosen(programCode, childId));
+    setPathRevision((value) => value + 1);
+
     if (!childId) {
-      setBaselineComplete(false);
+      setB4CheckInComplete(false);
       setLoading(false);
       return;
     }
-    const done = await checkBaselineCompletion(programCode, childId);
-    setBaselineComplete(done);
+
+    if (summaryB4CheckInStatus === 'Complete') {
+      setB4CheckInComplete(true);
+      setLoading(false);
+      return;
+    }
+
+    const localComplete = isB4CheckInCompleteLocal({
+      programCode,
+      participantId: childId,
+      assessments,
+      selectedChildName: selectedChildName ?? undefined,
+    });
+    setB4CheckInComplete(localComplete);
+
+    if (localComplete) {
+      setLoading(false);
+      return;
+    }
+
+    const done = await checkB4CheckInCompletion(
+      programCode,
+      childId,
+      assessments,
+      selectedChildName ?? undefined,
+    );
+    setB4CheckInComplete(done);
     setLoading(false);
-  }, [participantId, programCode]);
+  }, [assessments, participantId, programCode, selectedChildName, summaryB4CheckInStatus]);
+
+  useEffect(() => {
+    if (summaryB4CheckInStatus === 'Complete') {
+      setB4CheckInComplete(true);
+      return;
+    }
+    if (!resolvedParticipantId) {
+      setB4CheckInComplete(false);
+      return;
+    }
+    const localComplete = isB4CheckInCompleteLocal({
+      programCode,
+      participantId: resolvedParticipantId,
+      assessments,
+      selectedChildName: selectedChildName ?? undefined,
+    });
+    if (localComplete) {
+      setB4CheckInComplete(true);
+    }
+  }, [
+    assessments,
+    programCode,
+    resolvedParticipantId,
+    selectedChildName,
+    summaryB4CheckInStatus,
+  ]);
 
   useEffect(() => {
     void refresh();
-  }, [refresh, hasChild, hasChildGrade, goalsComplete]);
+  }, [refresh, hasChild, hasChildGrade, goalsComplete, hasModuleActivity, hasWeeklyAdventureActivity]);
 
   useEffect(() => {
     const onActiveChild = () => void refresh();
@@ -85,46 +165,49 @@ export function useFocusFlameJourneyOnboarding(
     };
   }, [refresh]);
 
-  const step1Complete = hasChild;
-  const step2Complete = step1Complete && hasChildGrade;
-  const step3Complete = step2Complete && goalsComplete;
-  const step4Complete = step3Complete && baselineComplete;
-  const step5Complete = step4Complete && (pathChosen || hasModuleActivity);
-
-  const activeStep: FocusFlameJourneyStep = useMemo(() => {
-    if (!step1Complete) return 1;
-    if (!step2Complete) return 2;
-    if (!step3Complete) return 3;
-    if (!step4Complete) return 4;
-    return 5;
-  }, [step1Complete, step2Complete, step3Complete, step4Complete]);
-
-  const completedCount = [
-    step1Complete,
-    step2Complete,
-    step3Complete,
-    step4Complete,
-    step5Complete,
-  ].filter(Boolean).length;
-
-  const isComplete = step5Complete;
+  const status = useMemo(
+    () =>
+      computeFocusFlameJourneyStatus({
+        participantId: resolvedParticipantId,
+        programCode,
+        hasChild,
+        hasChildGrade,
+        familyGoalsComplete: goalsComplete,
+        b4CheckInComplete,
+        hasModuleActivity,
+        hasWeeklyAdventureActivity,
+      }),
+    [
+      b4CheckInComplete,
+      goalsComplete,
+      hasChild,
+      hasChildGrade,
+      hasModuleActivity,
+      hasWeeklyAdventureActivity,
+      programCode,
+      resolvedParticipantId,
+      pathRevision,
+    ],
+  );
 
   const markPathChosen = useCallback(() => {
     const childId = participantId?.trim() || readActiveChildParticipantId();
     writeJourneyPathChosen(programCode, childId);
-    setPathChosen(true);
+    setPathRevision((value) => value + 1);
   }, [participantId, programCode]);
 
   return {
-    step1Complete,
-    step2Complete,
-    step3Complete,
-    step4Complete,
-    step5Complete,
-    completedCount,
-    totalSteps: 5,
-    activeStep,
-    isComplete,
+    step1Complete: status.step1Complete,
+    step2Complete: status.step2Complete,
+    step3Complete: status.step3Complete,
+    b4CheckInComplete: status.b4CheckInComplete,
+    step4Complete: status.step4Complete,
+    step5Complete: status.step5Complete,
+    completedCount: status.completedCount,
+    totalSteps: status.totalSteps,
+    activeStep: status.activeStep,
+    isComplete: status.isProfileReady,
+    isProfileReady: status.isProfileReady,
     loading,
     refresh,
     markPathChosen,

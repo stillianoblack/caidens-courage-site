@@ -37,5 +37,6 @@ export type AdventureTrailWeekView = {
   weekStatus: 'available' | 'locked';
   unlockStatus: string;
   previewActivities: string[];
+  thumbnailUrl?: string | null;
   nodes: AdventureTrailNodeView[];
 };

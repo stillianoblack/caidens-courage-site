@@ -7,8 +7,11 @@ import './week1-extras-cards.css';
 export type Week1ExtrasPaths = {
   downloadsPath: string;
   certificatesPath: string;
+  weekNumber?: number;
   week1DiscussionHref?: string;
   week1CertificateHref?: string;
+  coloringPageHref?: string | null;
+  comicPdfHref?: string | null;
 };
 
 type Week1ExtrasCardsProps = {
@@ -25,61 +28,81 @@ type ExtraCardConfig = {
   actionLabel: string;
   href: string;
   external?: boolean;
-  comingSoon?: boolean;
+  status: 'available' | 'comingSoon' | 'locked';
 };
+
+function isExternalHref(href: string): boolean {
+  return href.startsWith('http') || href.startsWith('/downloads');
+}
 
 export default function Week1ExtrasCards({
   completedMissionIds,
   paths,
   variant = 'standalone',
 }: Week1ExtrasCardsProps) {
-  const unlocked = isWeek1GameplayComplete(completedMissionIds);
+  const weekNumber = paths.weekNumber ?? 1;
+  const missionUnlocked = isWeek1GameplayComplete(completedMissionIds);
+  const panelMode = variant === 'panel';
   const caidenColoring =
     PORTAL_COLORING_PAGES.find((page) => page.id === 'caiden') ?? PORTAL_COLORING_PAGES[0];
+  const coloringHref = paths.coloringPageHref?.trim() || null;
+  const coloringAvailable = Boolean(coloringHref);
 
   const cards: ExtraCardConfig[] = [
     {
       id: 'family-activity',
-      title: 'Camp / Family Activity',
-      description: 'Open the Week 1 discussion guide and family reflection.',
+      title: 'Camp / Family Activity PDF',
+      description: 'Open the weekly discussion guide and family reflection.',
       emoji: '🏕️',
-      actionLabel: paths.week1DiscussionHref ? 'Open Guide' : 'Coming soon',
+      actionLabel: paths.week1DiscussionHref ? 'Open PDF' : 'Coming Soon',
       href: paths.week1DiscussionHref ?? '#',
-      external: Boolean(paths.week1DiscussionHref?.startsWith('/downloads')),
-      comingSoon: !paths.week1DiscussionHref,
+      external: paths.week1DiscussionHref ? isExternalHref(paths.week1DiscussionHref) : false,
+      status: paths.week1DiscussionHref ? 'available' : 'comingSoon',
     },
     {
       id: 'color-character',
-      title: 'Color Your Character',
-      description: 'Print and color Caiden’s Focus Flame adventure sheet.',
+      title: 'Color Your Character PDF',
+      description: 'Print and color the weekly adventure coloring sheet.',
       emoji: '🎨',
-      actionLabel: caidenColoring.status === 'available' ? 'Download Sheet' : 'Coming soon',
-      href: caidenColoring.status === 'available' ? caidenColoring.href : '#',
-      external: true,
-      comingSoon: caidenColoring.status !== 'available',
+      actionLabel: coloringAvailable ? 'Download PDF' : 'Coming Soon',
+      href: coloringHref ?? '#',
+      external: Boolean(coloringHref),
+      status: coloringAvailable ? 'available' : 'comingSoon',
+    },
+    {
+      id: 'comic',
+      title: 'Comic PDF',
+      description: 'Read the printable comic adventure for this week.',
+      emoji: '📖',
+      actionLabel: paths.comicPdfHref ? 'Open PDF' : 'Coming Soon',
+      href: paths.comicPdfHref ?? '#',
+      external: Boolean(paths.comicPdfHref),
+      status: paths.comicPdfHref ? 'available' : 'comingSoon',
     },
     {
       id: 'certificate',
-      title: 'Week 1 Certificate',
+      title: `Week ${weekNumber} Certificate`,
       description: 'Celebrate courage with a printable Focus Flame certificate.',
       emoji: '✦',
-      actionLabel: paths.week1CertificateHref ? 'Open Certificate' : 'View Certificates',
+      actionLabel: paths.week1CertificateHref ? 'Open Certificate' : 'Coming Soon',
       href: paths.week1CertificateHref ?? paths.certificatesPath,
-      external: Boolean(paths.week1CertificateHref?.startsWith('/downloads')),
-      comingSoon: false,
+      external: paths.week1CertificateHref ? isExternalHref(paths.week1CertificateHref) : false,
+      status: paths.week1CertificateHref ? 'available' : 'comingSoon',
     },
   ];
 
   return (
     <section
-      className={['week1Extras', variant === 'panel' ? 'week1Extras--panel' : ''].filter(Boolean).join(' ')}
-      aria-labelledby={variant === 'standalone' ? 'week1-extras-title' : undefined}
+      className={['week1Extras', panelMode ? 'week1Extras--panel' : ''].filter(Boolean).join(' ')}
+      aria-labelledby={panelMode ? undefined : 'week1-extras-title'}
     >
-      {variant === 'standalone' ? (
+      {!panelMode ? (
         <>
-          <h3 id="week1-extras-title" className="week1ExtrasTitle">Week 1 Bonus Adventures</h3>
+          <h3 id="week1-extras-title" className="week1ExtrasTitle">
+            Week {weekNumber} Bonus Adventures
+          </h3>
           <p className="week1ExtrasIntro">
-            {unlocked
+            {missionUnlocked
               ? 'Great work! These extras stay unlocked all week.'
               : 'Complete all Week 1 missions on the map to unlock these rewards.'}
           </p>
@@ -87,17 +110,16 @@ export default function Week1ExtrasCards({
       ) : null}
       <div className="week1ExtrasGrid">
         {cards.map((card) => {
-          const cardUnlocked = unlocked;
-          const canAct = cardUnlocked && !card.comingSoon && card.href !== '#';
+          const cardUnlocked = panelMode || missionUnlocked;
+          const canAct = cardUnlocked && card.status === 'available' && card.href !== '#';
 
           const action = canAct ? (
             card.external ? (
               <a
                 href={card.href}
                 className="week1ExtrasCardBtn"
-                download={card.id === 'color-character' ? true : undefined}
-                target={card.id === 'certificate' ? '_blank' : undefined}
-                rel={card.id === 'certificate' ? 'noopener noreferrer' : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 {card.actionLabel}
               </a>
@@ -108,7 +130,7 @@ export default function Week1ExtrasCards({
             )
           ) : (
             <span className="week1ExtrasCardBtn week1ExtrasCardBtn--disabled">
-              {cardUnlocked && card.comingSoon ? 'Coming soon' : 'Locked'}
+              {!cardUnlocked ? 'Locked' : card.status === 'comingSoon' ? 'Coming Soon' : 'Locked'}
             </span>
           );
 
@@ -120,13 +142,13 @@ export default function Week1ExtrasCards({
                 cardUnlocked ? 'week1ExtrasCard--unlocked' : 'week1ExtrasCard--locked',
               ].join(' ')}
             >
-              <div className="week1ExtrasCardIcon" aria-hidden="true">{card.emoji}</div>
+              <div className="week1ExtrasCardIcon" aria-hidden="true">
+                {card.emoji}
+              </div>
               <h4 className="week1ExtrasCardTitle">{card.title}</h4>
               <p className="week1ExtrasCardDesc">{card.description}</p>
               {action}
-              {!cardUnlocked ? (
-                <span className="week1ExtrasCardLock" aria-hidden="true">🔒</span>
-              ) : null}
+              {!cardUnlocked ? <span className="week1ExtrasCardLock" aria-hidden="true">🔒</span> : null}
             </article>
           );
         })}

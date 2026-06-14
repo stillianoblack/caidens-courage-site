@@ -8,6 +8,7 @@ import {
   type QuestProgressRow,
 } from '../lib/participantQuestService';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
+import type { WeeklyQuestRewardConfig } from '../lib/adventureWeekAssets';
 
 type UseParticipantQuestsInput = {
   participantId?: string | null;
@@ -15,6 +16,7 @@ type UseParticipantQuestsInput = {
   completedWeekMissions: number;
   monthlyCoinsEarned: number;
   dailyAdventureComplete: boolean;
+  weeklyQuestReward?: WeeklyQuestRewardConfig | null;
 };
 
 export function useParticipantQuests({
@@ -23,6 +25,7 @@ export function useParticipantQuests({
   completedWeekMissions,
   monthlyCoinsEarned,
   dailyAdventureComplete,
+  weeklyQuestReward,
 }: UseParticipantQuestsInput) {
   const [quests, setQuests] = useState<QuestProgressRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +37,7 @@ export function useParticipantQuests({
       completedWeekMissions,
       monthlyCoinsEarned,
       dailyAdventureComplete,
-    });
+    }, weeklyQuestReward);
     setQuests(rows);
     setLoading(false);
   }, [
@@ -43,6 +46,7 @@ export function useParticipantQuests({
     completedWeekMissions,
     monthlyCoinsEarned,
     dailyAdventureComplete,
+    weeklyQuestReward,
   ]);
 
   useEffect(() => {
@@ -65,7 +69,7 @@ export function useParticipantQuests({
     async (questKey: string, period: QuestProgressRow['period']): Promise<QuestClaimResult> => {
       if (!participantId) return { ok: false };
       setClaimingKey(questKey);
-      const result = await claimParticipantQuest(participantId, questKey, period, weekId);
+      const result = await claimParticipantQuest(participantId, questKey, period, weekId, weeklyQuestReward);
       if (result.ok && !result.alreadyClaimed) {
         if (result.coinsAwarded && result.newCoinTotal != null) {
           notifyFocusCoinWalletUpdated(result.newCoinTotal);
@@ -80,7 +84,7 @@ export function useParticipantQuests({
       setClaimingKey(null);
       return result;
     },
-    [participantId, refresh, weekId],
+    [participantId, refresh, weekId, weeklyQuestReward],
   );
 
   return { quests, loading, claimQuest, claimingKey, refresh };

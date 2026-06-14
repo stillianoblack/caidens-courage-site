@@ -1,0 +1,69 @@
+/* WeeklyReviewSheet — narrow desktop rail (matches CharacterProfileSheet), full-screen mobile */
+
+.weeklyReviewSheet.pilot-drawer {
+  padding: 0;
+  background: transparent !important;
+  color: #f4f7fb;
+  box-shadow: -16px 0 40px -20px rgba(26, 47, 82, 0.42);
+}
+
+.weeklyReviewSheetShell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #0b1220;
+  color: #f4f7fb;
+}
+
+.weeklyReviewSheetClose {
+  z-index: 50;
+}
+
+.weeklyReviewSheet--mobile.ds-sheetContent {
+  padding: 0;
+  background: #0b1220;
+  color: #f4f7fb;
+}
+
+@media (min-width: 768px) {
+  .weeklyReviewSheet.pilot-drawer,
+  .ds-slidePanel--weeklyReview.pilot-drawer {
+    top: 24px !important;
+    right: 24px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 48px) !important;
+    width: clamp(360px, 28vw, 420px) !important;
+    max-width: 420px !important;
+    padding: 0;
+    background: transparent !important;
+    box-shadow: -16px 0 40px -20px rgba(26, 47, 82, 0.42);
+    overflow: hidden;
+    border-radius: 1.25rem;
+  }
+
+  .weeklyReviewSheet.pilot-drawer .weeklyReviewSheetShell {
+    max-height: calc(100dvh - 48px);
+    border-radius: 1.25rem;
+  }
+
+  .weeklyReviewSheet.pilot-drawer .weekReviewPanelInner {
+    max-height: calc(100dvh - 48px);
+  }
+
+  .weeklyReviewSheetShell .weekReviewHeroCover {
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+
+  .weeklyReviewSheetClose {
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+.weeklyReviewSheet--mobile.ds-sheetContent .weekReviewPanelInner--mobile {
+  flex: 1;
+  min-height: 0;
+}

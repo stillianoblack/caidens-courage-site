@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveWeeklyAdventureThumbnailSrc } from '../../lib/weeklyAdventureThumbnails';
+import { resolveAdventureThumbnailUrl } from '../../lib/adventureThumbnail';
 import TrailConnector from './TrailConnector';
 import TrailNode from './TrailNode';
 import type { AdventureTrailWeekView } from '../../types/adventureTrail';
@@ -17,7 +17,7 @@ export default function TrailWeekSection({
   baselineLocked = false,
 }: TrailWeekSectionProps) {
   const isWeekLocked = week.weekStatus === 'locked';
-  const thumbnailSrc = resolveWeeklyAdventureThumbnailSrc(week.week);
+  const thumbnailSrc = week.thumbnailUrl ?? resolveAdventureThumbnailUrl(null, week.week);
 
   return (
     <section

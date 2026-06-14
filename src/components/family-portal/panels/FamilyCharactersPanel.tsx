@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { lazy, memo, Suspense, useMemo } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import CharacterAdventureCard from '../CharacterAdventureCard';
-import CharacterDetailPanel from '../CharacterDetailPanel';
 import {
   CHARACTER_HUB_ADULT_SECTION,
   CHARACTER_HUB_KIDS_SECTION,
@@ -20,7 +19,6 @@ import { useActiveChild } from '../../../hooks/useActiveChild';
 import { useBaselineGate } from '../../../hooks/useBaselineGate';
 import { useCharacterModuleProgress } from '../../../hooks/useCharacterModuleProgress';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
-import { useFamilyMobileNav } from '../../../hooks/useFamilyMobileNav';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { getCharacterProgress } from '../../../lib/characterProgressService';
 import { buildCharacterRewardProgress } from '../../../lib/characterRewardProgress';
@@ -28,13 +26,20 @@ import { buildCharacterUnlockMore } from '../../../lib/characterUnlockMore';
 import { useFocusCoinWallet } from '../../../hooks/useFocusCoinWallet';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
+import { familySettingsTabPath } from '../../../lib/familyPortalPaths';
 import { PortalPageIntro } from '../../portal-design-system';
 import '../../../design-system/components/weekly-adventure-card.css';
-import '../character-detail-panel.css';
+import '../../../design-system/components/character-profile-sheet.css';
+import '../../../design-system/components/character-sheet-panel.css';
+import '../../../design-system/components/character-profile-panel.css';
+
+const CharacterProfilePanel = lazy(
+  () => import('../../../design-system/components/CharacterProfilePanel'),
+);
 
 const CHARACTER_QUERY_PARAM = 'character';
 
-function CharacterCardGrid({
+const CharacterCardGrid = memo(function CharacterCardGrid({
   characters,
   baselineComplete,
   hasActiveChild,
@@ -57,9 +62,9 @@ function CharacterCardGrid({
         const gamesLocked = !hasActiveChild || (!baselineComplete && !isB4CheckIn);
         const status =
           isB4CheckIn && !baselineComplete
-            ? 'Start B-4 Baseline First'
+            ? 'Complete B-4 Check-In First'
             : gamesLocked
-              ? 'Start B-4 Baseline First'
+              ? 'Complete B-4 Check-In First'
               : progress?.statusLine || character.status;
 
         const isBaselineLaunch = isB4CheckIn && !baselineComplete;
@@ -71,14 +76,14 @@ function CharacterCardGrid({
             characterId={character.id}
             title={character.title}
             description={character.description}
-            cta={isB4CheckIn && !baselineComplete ? 'Start B-4 Baseline First' : character.cta}
+            cta={isB4CheckIn && !baselineComplete ? 'Start B-4 Check-In' : character.cta}
             href={isBaselineLaunch ? baselinePath : character.href}
             status={status}
             statusTone={gamesLocked ? 'locked' : progress?.statusTone || character.statusTone}
             skillTags={character.skillTags}
             locked={meetLocked}
             lockedLabel={
-              !hasActiveChild ? 'Select your child to begin' : 'Start B-4 Baseline First'
+              !hasActiveChild ? 'Select your child to begin' : 'Complete B-4 Check-In First'
             }
             onMeetClick={
               !meetLocked && !isBaselineLaunch && isCharacterProfileId(character.id)
@@ -90,15 +95,14 @@ function CharacterCardGrid({
       })}
     </div>
   );
-}
+});
 
 export default function FamilyCharactersPanel() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isMobileNav } = useFamilyMobileNav();
   const shellBase = resolveFamilyBasePath(location.pathname);
   const programCode = resolveTrackingProgramCode() ?? undefined;
-  const { visibleChildren, claimRequired, loading } = useFamilyDashboardMetrics(programCode);
+  const { visibleChildren, claimRequired, loading, v2Assessments } = useFamilyDashboardMetrics(programCode);
 
   const selectableChildren = useMemo(
     () =>
@@ -116,6 +120,7 @@ export default function FamilyCharactersPanel() {
     useActiveChild(selectableChildren);
   const { complete: baselineComplete, loading: baselineLoading } = useBaselineGate(
     activeChild?.participantId,
+    v2Assessments,
   );
 
   const kidsCharacters = useMemo(() => buildFamilyKidsCharacters(shellBase), [shellBase]);
@@ -199,6 +204,7 @@ export default function FamilyCharactersPanel() {
               children={selectableChildren}
               activeParticipantId={activeChild?.participantId}
               onSelect={selectChild}
+              addChildHref={familySettingsTabPath('children', location.pathname)}
             />
           ) : null}
 
@@ -250,14 +256,15 @@ export default function FamilyCharactersPanel() {
         </div>
 
         {detailProfile ? (
-          <CharacterDetailPanel
-            profile={detailProfile}
-            variant={isMobileNav ? 'sheet' : 'inspector'}
-            open
-            onClose={closeCharacterDetail}
-            rewardProgress={detailRewardProgress}
-            unlockMore={detailUnlockMore}
-          />
+          <Suspense fallback={null}>
+            <CharacterProfilePanel
+              profile={detailProfile}
+              open
+              onClose={closeCharacterDetail}
+              rewardProgress={detailRewardProgress}
+              unlockMore={detailUnlockMore}
+            />
+          </Suspense>
         ) : null}
       </div>
     </div>

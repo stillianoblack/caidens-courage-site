@@ -71,7 +71,7 @@ export default function AddChildForm({
         </h2>
         {!compact ? (
           <p className="family-panelHelper">
-            Add your child before their Before Check-In so progress shows on your family dashboard.
+            Add your child before their B-4 Check-In so progress shows on your family dashboard.
           </p>
         ) : null}
       </div>

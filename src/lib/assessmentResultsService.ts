@@ -220,7 +220,7 @@ export async function saveStudentAssessmentToSupabase(
     return {
       success: true,
       message: isChildBaselineAssessmentType(input.assessmentType)
-        ? 'Before Check-In saved. Your Weekly Adventures are ready.'
+        ? 'B-4 Check-In saved. Your Weekly Adventures are ready.'
         : 'Growth check saved.',
     };
   } catch (err) {

@@ -8,6 +8,7 @@ import './active-participant-picker.css';
 
 function isGameplayPickerRoute(pathname: string): boolean {
   if (isMobileFamilyGameplayShellRoute(pathname)) return true;
+  if (pathname.includes('/b4/check-in')) return true;
   if (!isKidFacingPortalRoute(pathname)) return false;
   const segments = pathname.split('/').filter(Boolean);
   const last = segments[segments.length - 1] ?? '';

@@ -1,4 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import type { WeeklyQuestRewardConfig } from './adventureWeekAssets';
+import { claimParticipantReward } from './rewardClaimService';
 
 export type QuestPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -94,8 +96,11 @@ export async function loadParticipantQuests(
   participantId: string | null | undefined,
   weekId: string,
   stats: { completedWeekMissions: number; monthlyCoinsEarned: number; dailyAdventureComplete: boolean },
+  weeklyQuestReward?: WeeklyQuestRewardConfig | null,
 ): Promise<QuestProgressRow[]> {
   const defaults = buildDefaultRows(weekId);
+  const weeklyLabel = weeklyQuestReward?.rewardName ?? 'Explorer Chest';
+  const weeklyCoins = weeklyQuestReward?.coinsAwarded ?? 0;
 
   if (!participantId || !isSupabaseConfigured() || !supabase) {
     return defaults.map((row) => {
@@ -105,7 +110,13 @@ export async function loadParticipantQuests(
       }
       if (row.questKey === 'complete_week_missions') {
         const progress = Math.min(stats.completedWeekMissions, row.targetCount);
-        return { ...row, progressCount: progress, claimable: progress >= row.targetCount };
+        return {
+          ...row,
+          progressCount: progress,
+          claimable: progress >= row.targetCount,
+          rewardLabel: weeklyLabel,
+          rewardCoins: weeklyCoins,
+        };
       }
       if (row.questKey === 'earn_monthly_coins') {
         const progress = Math.min(stats.monthlyCoinsEarned, row.targetCount);
@@ -165,8 +176,8 @@ export async function loadParticipantQuests(
       period: def.period,
       progressCount: effectiveProgress,
       targetCount: def.targetCount,
-      rewardLabel: def.rewardLabel,
-      rewardCoins: def.rewardCoins,
+      rewardLabel: def.key === 'complete_week_missions' ? weeklyLabel : def.rewardLabel,
+      rewardCoins: def.key === 'complete_week_missions' ? weeklyCoins : def.rewardCoins,
       icon: def.icon,
       claimed,
       claimable: !claimed && effectiveProgress >= def.targetCount,
@@ -183,6 +194,7 @@ export type QuestClaimResult = {
   rewardLabel?: string;
   rewardKind?: 'coins' | 'chest' | 'badge';
   alreadyClaimed?: boolean;
+  imageSrc?: string | null;
 };
 
 const QUEST_REWARD_MISSION_IDS: Record<string, string> = {
@@ -234,6 +246,7 @@ export async function claimParticipantQuest(
   questKey: string,
   period: QuestPeriod,
   weekId: string,
+  weeklyQuestReward?: WeeklyQuestRewardConfig | null,
 ): Promise<QuestClaimResult> {
   if (!isSupabaseConfigured() || !supabase) {
     return { ok: false };
@@ -281,6 +294,49 @@ export async function claimParticipantQuest(
   if (questKey === 'complete_week_missions') rewardKind = 'chest';
   if (questKey === 'earn_monthly_coins') rewardKind = 'badge';
 
+  const rewardLabel =
+    questKey === 'complete_week_missions' && weeklyQuestReward?.rewardName
+      ? weeklyQuestReward.rewardName
+      : def.rewardLabel;
+  const rewardImage =
+    weeklyQuestReward?.rewardSvgUrl?.trim() ||
+    weeklyQuestReward?.rewardImageUrl?.trim() ||
+    null;
+
+  if (questKey === 'complete_week_missions' && weeklyQuestReward) {
+    const cmsKind =
+      weeklyQuestReward.rewardKind === 'badge'
+        ? 'badge'
+        : weeklyQuestReward.rewardKind === 'coins'
+          ? 'coins'
+          : 'item';
+    if (cmsKind === 'badge') rewardKind = 'badge';
+    else if (cmsKind === 'coins') rewardKind = 'coins';
+    else rewardKind = 'chest';
+
+    const claimResult = await claimParticipantReward({
+      participantId,
+      rewardKey: `weekly-quest-${weekId}`,
+      rewardName: weeklyQuestReward.rewardName,
+      rewardKind: cmsKind,
+      badgeName: cmsKind === 'badge' ? weeklyQuestReward.rewardName : undefined,
+      itemName: cmsKind === 'item' ? weeklyQuestReward.rewardName : undefined,
+      coinsAwarded: weeklyQuestReward.coinsAwarded,
+      weekId,
+      imageSrc: rewardImage,
+    });
+
+    return {
+      ok: claimResult.ok,
+      alreadyClaimed: claimResult.alreadyClaimed,
+      coinsAwarded: claimResult.coinsAwarded,
+      newCoinTotal: claimResult.newCoinTotal,
+      rewardLabel,
+      rewardKind,
+      imageSrc: claimResult.imageSrc ?? rewardImage,
+    };
+  }
+
   if (rewardKind !== 'coins') {
     await grantQuestInventoryReward(participantId, weekId, questKey, def);
   }
@@ -305,10 +361,11 @@ export async function claimParticipantQuest(
       ok: true,
       coinsAwarded: def.rewardCoins,
       newCoinTotal: nextTotal,
-      rewardLabel: def.rewardLabel,
+      rewardLabel,
       rewardKind,
+      imageSrc: rewardImage,
     };
   }
 
-  return { ok: true, coinsAwarded: 0, rewardLabel: def.rewardLabel, rewardKind };
+  return { ok: true, coinsAwarded: 0, rewardLabel, rewardKind, imageSrc: rewardImage };
 }

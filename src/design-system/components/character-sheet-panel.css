@@ -1,0 +1,138 @@
+/* Shared character sheet content tokens (scroll, scan rows, footer) */
+
+.characterSheetPanelShell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.characterSheetPanelClose {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 12;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(8, 18, 36, 0.55);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
+}
+
+.characterSheetPanelClose:hover {
+  background: rgba(8, 18, 36, 0.72);
+}
+
+/* Shared scroll region */
+.characterSheetPanelScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.characterSheetPanelScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.characterSheetPanelScroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.characterSheetPanelScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.characterSheetPanelFooter {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  box-shadow: 0 -12px 24px -12px rgba(0, 0, 0, 0.42);
+}
+
+/* Scan list typography */
+.characterSheetScanRow {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 1.125rem;
+  text-align: left;
+}
+
+.characterSheetScanRow:last-of-type {
+  margin-bottom: 1.35rem;
+}
+
+.characterSheetScanEmoji {
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin-top: 0.1rem;
+}
+
+.characterSheetScanCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.characterSheetScanLabel {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.characterSheetScanValue {
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: rgba(244, 247, 251, 0.95);
+}
+
+@media (max-width: 767px) {
+  .characterSheetPanelScroll {
+    scrollbar-width: none;
+  }
+
+  .characterSheetPanelScroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .characterSheetScanLabel {
+    font-size: 0.875rem;
+  }
+
+  .characterSheetScanValue {
+    font-size: 1.125rem;
+  }
+
+  .characterSheetPanelClose {
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .characterSheetScanValue {
+    font-size: 1.25rem;
+  }
+}

@@ -1346,3 +1346,47 @@
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+.bbc-landing--familyEntry {
+  text-align: center;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.bbc-familyChildPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin: 1.25rem 0;
+}
+
+.bbc-familyChildBtn {
+  min-height: 2.75rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(36, 62, 112, 0.16);
+  background: #fff;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.bbc-familyChildBtn--active {
+  border-color: rgba(232, 191, 79, 0.85);
+  background: linear-gradient(135deg, #f0d078, #e5c06a);
+  color: #1a1035;
+}
+
+.bbc-familyStatusPill {
+  display: inline-flex;
+  margin: 0.75rem 0 1rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  color: var(--family-navy-deep, #1a2f52);
+}

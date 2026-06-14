@@ -1,0 +1,78 @@
+.weeklyWeekRow {
+  margin: 1.25rem 0;
+}
+
+.weeklyWeekRowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.weeklyWeekRowTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.weeklyWeekRowNav {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.weeklyWeekRowNavBtn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  color: #1a2f52;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.weeklyWeekRowTrack {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.weeklyWeekRowItem {
+  min-width: 0;
+}
+
+.weeklyWeekRowEmpty {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  background: rgba(238, 244, 255, 0.75);
+  color: rgba(26, 47, 82, 0.72);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 1100px) {
+  .weeklyWeekRowTrack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .weeklyWeekRowTrack {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding-bottom: 0.35rem;
+    scroll-snap-type: x mandatory;
+  }
+
+  .weeklyWeekRowItem {
+    flex: 0 0 min(78vw, 16rem);
+  }
+
+  .weeklyWeekRowNav {
+    display: none;
+  }
+}

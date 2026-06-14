@@ -17,7 +17,15 @@ import {
   formatWeekUnlockStatus,
   resolveWeekStatus,
 } from '../lib/pilotWeekUnlock';
+import type { AdventureModuleRecord } from '../types/adventureModule';
 import type { AdventureTrailWeekView } from '../types/adventureTrail';
+import { resolveAdventureThumbnailUrl } from '../lib/adventureThumbnail';
+import {
+  formatCmsAdventureUnlockStatus,
+  listCmsTrailAdventures,
+  resolveCmsAdventureWeekStatus,
+  type AdventureVisibilityContext,
+} from '../lib/adventureVisibility';
 
 type WeeklyTrailPaths = {
   kidsBasePath: string;
@@ -25,16 +33,26 @@ type WeeklyTrailPaths = {
   certificatesPath: string;
 };
 
+type WeeklyAdventureTrailOptions = {
+  cmsModules?: AdventureModuleRecord[];
+  visibilityCtx?: AdventureVisibilityContext;
+  /** Map-mission completion by week (from player_progress). Overrides module-based completion for unlock. */
+  mapCompletedWeekNumbers?: number[];
+};
+
 export function useWeeklyAdventureTrail(
   participantId: string | undefined,
   paths: WeeklyTrailPaths,
   gates: { baselineLocked: boolean },
   pilotStartDate: Date | string | null,
+  options: WeeklyAdventureTrailOptions = {},
 ) {
   const programCode = resolveTrackingProgramCode() ?? '';
   const resolvedParticipantId = participantId?.trim() || readActiveChildParticipantId();
   const [remoteModules, setRemoteModules] = useState(loadLocalModuleResults());
   const [loading, setLoading] = useState(false);
+  const cmsModules = options.cmsModules ?? [];
+  const visibilityCtx = options.visibilityCtx ?? { now: new Date() };
 
   const refresh = useCallback(async () => {
     const id = participantId?.trim() || readActiveChildParticipantId();
@@ -79,27 +97,98 @@ export function useWeeklyAdventureTrail(
     [scopedModules],
   );
 
-  const weeks: AdventureTrailWeekView[] = useMemo(
-    () =>
-      FAMILY_WEEKLY_ADVENTURE_WEEKS.filter((week) => week.week <= 8).map((weekMeta) => {
-        const weekStatus = resolveWeekStatus(weekMeta.week, pilotStartDate);
-        const nodes = buildWeeklyTrailNodes(weekMeta.week, paths, weekMeta.title);
+  const completedWeekNumbers = useMemo(() => {
+    if (options.mapCompletedWeekNumbers?.length) {
+      return options.mapCompletedWeekNumbers;
+    }
+    const completed = new Set<number>();
+    FAMILY_WEEKLY_ADVENTURE_WEEKS.forEach((weekMeta) => {
+      const nodes = buildWeeklyTrailNodes(weekMeta.week, paths, weekMeta.title);
+      const allDone = nodes.every((node) =>
+        node.moduleId ? completedModuleIds.has(node.moduleId) : false,
+      );
+      if (allDone && nodes.some((node) => node.moduleId)) {
+        completed.add(weekMeta.week);
+      }
+    });
+    return Array.from(completed);
+  }, [completedModuleIds, options.mapCompletedWeekNumbers, paths]);
+
+  const cmsTrailModules = useMemo(
+    () => listCmsTrailAdventures(cmsModules, visibilityCtx),
+    [cmsModules, visibilityCtx],
+  );
+
+  const weeks: AdventureTrailWeekView[] = useMemo(() => {
+    const staticWeeks = FAMILY_WEEKLY_ADVENTURE_WEEKS.filter((week) => week.week <= 8);
+    const cmsByWeek = new Map(cmsTrailModules.map((row) => [row.week_number, row]));
+    const mergedWeekNumbers = new Set<number>();
+
+    staticWeeks.forEach((weekMeta) => mergedWeekNumbers.add(weekMeta.week));
+    cmsTrailModules.forEach((row) => mergedWeekNumbers.add(row.week_number));
+
+    return Array.from(mergedWeekNumbers)
+      .sort((a, b) => a - b)
+      .map((weekNumber) => {
+        const weekMeta =
+          staticWeeks.find((row) => row.week === weekNumber) ??
+          ({
+            week: weekNumber,
+            title: `Week ${weekNumber} Adventure`,
+            selFocus: 'Focus & Courage',
+            previewActivities: ['Character missions', 'Family activity', 'Downloads'],
+          } as (typeof staticWeeks)[number]);
+        const cmsRow =
+          cmsByWeek.get(weekNumber) ??
+          cmsModules.find((row) => row.week_number === weekNumber);
+
+        let weekStatus: 'available' | 'locked';
+        let unlockStatus: string;
+
+        if (cmsRow) {
+          weekStatus = resolveCmsAdventureWeekStatus(
+            cmsRow,
+            cmsModules,
+            visibilityCtx,
+            completedWeekNumbers,
+          );
+          unlockStatus = formatCmsAdventureUnlockStatus(
+            cmsRow,
+            cmsModules,
+            visibilityCtx,
+            completedWeekNumbers,
+          );
+        } else {
+          weekStatus = resolveWeekStatus(weekNumber, pilotStartDate);
+          unlockStatus = formatWeekUnlockStatus(weekNumber, pilotStartDate);
+        }
+
+        const nodes = buildWeeklyTrailNodes(weekNumber, paths, weekMeta.title);
 
         return {
-          week: weekMeta.week,
-          title: weekMeta.title,
-          selFocus: weekMeta.selFocus,
+          week: weekNumber,
+          title: cmsRow?.title || weekMeta.title,
+          selFocus: cmsRow?.subtitle || weekMeta.selFocus,
           weekStatus,
-          unlockStatus: formatWeekUnlockStatus(weekMeta.week, pilotStartDate),
-          previewActivities: weekMeta.previewActivities,
+          unlockStatus,
+          previewActivities: cmsRow?.preview_activities ?? weekMeta.previewActivities,
+          thumbnailUrl: resolveAdventureThumbnailUrl(cmsRow ?? null, weekNumber),
           nodes: decorateTrailNodes(nodes, completedModuleIds, {
             weekLocked: weekStatus === 'locked',
             baselineLocked: gates.baselineLocked,
           }),
         };
-      }),
-    [paths, completedModuleIds, gates.baselineLocked, pilotStartDate],
-  );
+      });
+  }, [
+    cmsModules,
+    cmsTrailModules,
+    completedWeekNumbers,
+    completedModuleIds,
+    gates.baselineLocked,
+    paths,
+    pilotStartDate,
+    visibilityCtx,
+  ]);
 
-  return { weeks, loading, completedModuleIds, refresh };
+  return { weeks, loading, completedModuleIds, refresh, completedWeekNumbers };
 }

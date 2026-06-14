@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import type { SelectableChild } from '../../hooks/useActiveChild';
 
 type ActiveChildSelectorProps = {
@@ -7,6 +8,7 @@ type ActiveChildSelectorProps = {
   onSelect: (child: SelectableChild) => void;
   title?: string;
   helper?: string;
+  addChildHref?: string;
 };
 
 export default function ActiveChildSelector({
@@ -15,6 +17,7 @@ export default function ActiveChildSelector({
   onSelect,
   title = 'Who is playing?',
   helper = 'Select your child before starting games or check-ins.',
+  addChildHref,
 }: ActiveChildSelectorProps) {
   if (children.length <= 1) return null;
 
@@ -42,6 +45,11 @@ export default function ActiveChildSelector({
             </button>
           );
         })}
+        {addChildHref ? (
+          <Link to={addChildHref} className="family-activeChildAddLink">
+            Add Child
+          </Link>
+        ) : null}
       </div>
     </section>
   );

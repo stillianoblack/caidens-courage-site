@@ -1,0 +1,146 @@
+.weeklyWeekTile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 28px -20px rgba(26, 47, 82, 0.35);
+  text-decoration: none;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.weeklyWeekTile--disabled,
+.weeklyWeekTile--locked {
+  cursor: default;
+  opacity: 0.92;
+}
+
+.weeklyWeekTileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 0.8rem 0.85rem;
+}
+
+.weeklyWeekTileHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.weeklyWeekTileTitleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.weeklyWeekTileThumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  background: rgba(26, 47, 82, 0.06);
+}
+
+.weeklyWeekTileThumb--fallback {
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: rgba(26, 47, 82, 0.45);
+  font-size: 0.85rem;
+}
+
+.weeklyWeekTileTitleBlock {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.weeklyWeekTileEyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyWeekTilePill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.weeklyWeekTilePill--available,
+.weeklyWeekTilePill--adminPreview {
+  background: rgba(22, 121, 74, 0.12);
+  color: #16794a;
+}
+
+.weeklyWeekTilePill--inProgress {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.weeklyWeekTilePill--complete {
+  background: rgba(22, 121, 74, 0.12);
+  color: #16794a;
+}
+
+.weeklyWeekTilePill--locked {
+  background: rgba(26, 47, 82, 0.08);
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.weeklyWeekTileTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1a2f52;
+  line-height: 1.25;
+}
+
+.weeklyWeekTileSel {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.weeklyWeekTileCta {
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #243e70, #3b82f6);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  align-self: flex-start;
+}
+
+.weeklyWeekTile--locked .weeklyWeekTileCta,
+.weeklyWeekTile--disabled .weeklyWeekTileCta {
+  background: rgba(26, 47, 82, 0.08);
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyWeekTile--complete .weeklyWeekTileCta {
+  background: linear-gradient(135deg, #16794a, #22c55e);
+}

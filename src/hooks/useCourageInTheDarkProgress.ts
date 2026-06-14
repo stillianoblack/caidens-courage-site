@@ -19,16 +19,20 @@ const INITIAL_PROGRESS: CourageInTheDarkProgressSnapshot = {
   unlockedBadges: [],
 };
 
-export function useCourageInTheDarkProgress(weekId: string): UseCourageInTheDarkProgressResult {
+export function useCourageInTheDarkProgress(
+  weekId: string,
+  participantId?: string | null,
+  totalMissions?: number,
+): UseCourageInTheDarkProgressResult {
   const [progress, setProgress] = useState<CourageInTheDarkProgressSnapshot>(INITIAL_PROGRESS);
   const [loading, setLoading] = useState(true);
   const refresh = useCallback(async () => {
     setLoading(true);
-    const activeId = readActiveChildParticipantId();
-    const snapshot = await getCourageInTheDarkProgress(weekId, activeId);
+    const activeId = participantId?.trim() || readActiveChildParticipantId();
+    const snapshot = await getCourageInTheDarkProgress(weekId, activeId, totalMissions);
     setProgress(snapshot);
     setLoading(false);
-  }, [weekId]);
+  }, [participantId, totalMissions, weekId]);
 
   useEffect(() => {
     void refresh();

@@ -167,7 +167,7 @@ export function pilotStudentStatusLabel(status: PilotStudentStatus): string {
 export function formatAssessmentTypeLabel(type: string): string {
   switch (type) {
     case 'baseline':
-      return 'Before Check-In';
+      return 'B-4 Check-In';
     case 'final':
       return 'After Check-In';
     default:

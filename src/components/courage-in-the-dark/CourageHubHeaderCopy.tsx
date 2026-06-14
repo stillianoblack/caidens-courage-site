@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatSelFocusLine } from '../../lib/adventureSelFocus';
 
 type CourageHubHeaderCopyProps = {
   week: number;
@@ -29,7 +30,9 @@ export default function CourageHubHeaderCopy({
         <p className="courageMapCanvasEyebrow">Week {week}</p>
         <h2 className="courageMapCanvasTitle">{weekTitle}</h2>
         <p className="courageMapCanvasSubtitle">Choose your adventure.</p>
-        {selFocus ? <p className="courageMapCanvasSelFocus">SEL Focus: {selFocus}</p> : null}
+        {selFocus ? (
+          <p className="courageMapCanvasSelFocus">{formatSelFocusLine(selFocus) ?? selFocus}</p>
+        ) : null}
       </div>
       {trailing ? <div className="courageHubHeaderCopyTrailing">{trailing}</div> : null}
     </div>

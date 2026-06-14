@@ -3,8 +3,14 @@ import { courageInTheDarkMissions } from '../data/courageInTheDarkMap';
 export const RECENTLY_COMPLETED_HOTSPOT_KEY = 'cc-courage-recently-completed-hotspot';
 
 export function missionIdToHotspotId(missionId: string): string | null {
+  const weekScoped = /^(\w+)-week-\d+$/.exec(missionId);
+  if (weekScoped) return weekScoped[1];
+
   const mission = courageInTheDarkMissions.find((entry) => entry.targetGameSlug === missionId);
-  return mission?.id ?? null;
+  if (mission?.id) return mission.id;
+
+  const byId = courageInTheDarkMissions.find((entry) => entry.id === missionId);
+  return byId?.id ?? null;
 }
 
 export function markRecentlyCompletedHotspot(missionId: string): void {

@@ -1,14 +1,20 @@
 import {
-  CHILD_BEFORE_CHECK_IN_LABEL,
+  CHILD_B4_CHECK_IN_LABEL,
   isChildBaselineAssessmentType,
 } from '../config/assessmentTypeConstants';
-import { hasAllBaselineModules } from '../data/b4BaselineCheckContent';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
+import {
+  resolveBaselineDisplayStatusLocal,
+  resolveB4CheckInStatusLocal,
+  toB4CheckInDisplayStatus,
+} from './b4CheckInStatus';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import { getChildActivityProgress } from './familyProgressHelpers';
 
 export type FamilyChildBaselineStatus = 'Complete' | 'In Progress' | 'Not Started';
+
+export type FamilyChildB4CheckInStatus = FamilyChildBaselineStatus;
 
 export type FamilyChildSummary = {
   key: string;
@@ -16,6 +22,7 @@ export type FamilyChildSummary = {
   displayName: string;
   nickname: string | null;
   baselineStatus: FamilyChildBaselineStatus;
+  b4CheckInStatus: FamilyChildB4CheckInStatus;
   latestActivity: string | null;
   lastActivityAt: string | null;
   progressPct: number;
@@ -102,54 +109,39 @@ function resolveBaselineStatus(input: {
   displayName: string;
   legacyBaselines: B4BaselineCheckRecord[];
   assessments: LocalAssessmentV2Record[];
+  programCode?: string;
 }): FamilyChildBaselineStatus {
-  const v2Rows = input.assessments.filter((row) =>
-    matchesV2StudentRow(input.participantId, input.displayName, row),
-  );
-
-  const baselineV2 = v2Rows.filter((row) => isChildBaselineAssessmentType(row.assessment_type));
-  const completeBaselineV2 = baselineV2.find((row) => Boolean(row.participant_id?.trim()));
-  if (completeBaselineV2) {
-    console.info('[CHILD_BASELINE_MATCH]', {
-      display_name: input.displayName,
-      participant_id: input.participantId,
-      match_source: 'assessment_results_v2',
-      assessment_type: completeBaselineV2.assessment_type,
-      matched_rows: baselineV2.length,
-    });
-    return 'Complete';
-  }
-
-  if (baselineV2.length > 0) return 'In Progress';
-
-  const legacyMatch = input.legacyBaselines.filter((row) =>
-    matchesLegacyBaseline(input.participantId, input.displayName, row),
-  );
-
-  if (
-    legacyMatch.some(
-      (row) => Boolean(row.completedAt) && hasAllBaselineModules(row.completedModules),
-    )
-  ) {
-    console.info('[CHILD_BASELINE_MATCH]', {
-      display_name: input.displayName,
-      participant_id: input.participantId,
-      match_source: 'legacy_local_baseline',
-      matched_rows: legacyMatch.length,
-    });
-    return 'Complete';
-  }
-
-  if (legacyMatch.length > 0) return 'In Progress';
-
-  console.info('[CHILD_BASELINE_MATCH]', {
-    display_name: input.displayName,
-    participant_id: input.participantId,
-    match_source: 'none',
-    status: 'Not Started',
+  const status = resolveBaselineDisplayStatusLocal({
+    participantId: input.participantId ?? undefined,
+    assessments: input.assessments,
+    programCode: input.programCode,
+    selectedChildName: input.displayName,
   });
 
-  return 'Not Started';
+  if (process.env.NODE_ENV === 'development' && input.participantId) {
+    console.info('[CHILD_BASELINE_MATCH]', {
+      display_name: input.displayName,
+      participant_id: input.participantId,
+      status,
+    });
+  }
+
+  return status;
+}
+
+function resolveB4CheckInStatus(input: {
+  participantId: string | null;
+  displayName: string;
+  assessments: LocalAssessmentV2Record[];
+  programCode?: string;
+}): FamilyChildB4CheckInStatus {
+  const resolved = resolveB4CheckInStatusLocal({
+    participantId: input.participantId ?? undefined,
+    assessments: input.assessments,
+    programCode: input.programCode,
+    selectedChildName: input.displayName,
+  });
+  return toB4CheckInDisplayStatus(resolved.status);
 }
 
 function collectChildActivityEvents(input: {
@@ -176,7 +168,7 @@ function collectChildActivityEvents(input: {
       events.push({
         at: new Date(row.completed_at).getTime(),
         label: isChildBaselineAssessmentType(row.assessment_type)
-          ? `${input.displayName} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`
+          ? `${input.displayName} completed ${CHILD_B4_CHECK_IN_LABEL}`
           : `${input.displayName} completed ${row.assessment_type.replace(/_/g, ' ')}`,
       });
     });
@@ -193,7 +185,7 @@ function collectChildActivityEvents(input: {
       .forEach((row) => {
         events.push({
           at: new Date(row.completedAt).getTime(),
-          label: `${input.displayName} completed ${CHILD_BEFORE_CHECK_IN_LABEL}`,
+          label: `${input.displayName} completed ${CHILD_B4_CHECK_IN_LABEL}`,
         });
       });
   }
@@ -234,6 +226,7 @@ function buildChildSummary(input: {
   displayName: string;
   nickname?: string | null;
   createdAt: string | null;
+  programCode?: string;
   modules: LocalModuleResultRecord[];
   assessments: LocalAssessmentV2Record[];
   legacyBaselines: B4BaselineCheckRecord[];
@@ -243,6 +236,14 @@ function buildChildSummary(input: {
     displayName: input.displayName,
     legacyBaselines: input.legacyBaselines,
     assessments: input.assessments,
+    programCode: input.programCode,
+  });
+
+  const b4CheckInStatus = resolveB4CheckInStatus({
+    participantId: input.participantId,
+    displayName: input.displayName,
+    assessments: input.assessments,
+    programCode: input.programCode,
   });
 
   const progress = getChildActivityProgress({
@@ -258,6 +259,7 @@ function buildChildSummary(input: {
     nickname: input.nickname?.trim() || null,
     createdAt: input.createdAt,
     baselineStatus,
+    b4CheckInStatus,
     latestActivity: resolveLatestActivity({
       participantId: input.participantId,
       displayName: input.displayName,
@@ -332,6 +334,7 @@ export function computeFamilyChildrenSummaries(input: {
         displayName,
         nickname: participant.nickname,
         createdAt: participant.created_at ?? null,
+        programCode: code,
         modules,
         assessments,
         legacyBaselines,
@@ -363,6 +366,7 @@ export function computeFamilyChildrenSummaries(input: {
         participantId: baseline.anonymousStudentId || null,
         displayName,
         createdAt: baseline.completedAt || null,
+        programCode: code,
         modules,
         assessments,
         legacyBaselines,
@@ -391,6 +395,7 @@ export function computeFamilyChildrenSummaries(input: {
         participantId: assessment.participant_id || null,
         displayName,
         createdAt: assessment.completed_at || null,
+        programCode: code,
         modules,
         assessments,
         legacyBaselines,

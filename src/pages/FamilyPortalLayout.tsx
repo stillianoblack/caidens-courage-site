@@ -1,10 +1,12 @@
-import React, { Suspense, useCallback, useEffect, useMemo } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FamilyDashboardSidebar from '../components/family-portal/FamilyDashboardSidebar';
 import FamilyDashboardTopBar from '../components/family-portal/FamilyDashboardTopBar';
 import FamilyMobileBottomNav from '../components/family-portal/FamilyMobileBottomNav';
 import { AppShell } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
+import '../design-system/components/character-profile-sheet.css';
+import '../design-system/components/weekly-review-sheet.css';
 import '../design-system/components/b4-insights-drawer.css';
 import '../components/portal/portal-header.css';
 import '../components/family-portal/family-dashboard.css';
@@ -13,6 +15,8 @@ import '../design-system/kids-adventure/kids-adventure-visual-system.css';
 import '../design-system/kids-adventure/kids-adventure-visual-system-desktop.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
+import FamilyPortalDevDiagnosticBanner from '../components/family-portal/FamilyPortalDevDiagnosticBanner';
 import { FAMILY_PORTAL_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { readLegacyFamilyPortalSession } from '../config/familyPortalAccess';
@@ -32,6 +36,7 @@ import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
 import { isFamilyPortalHomePath } from '../lib/familyPortalHomeRoute';
 import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
+import { resetPortalInteractionState } from '../lib/resetPortalInteractionState';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
 import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
@@ -46,7 +51,9 @@ export default function FamilyPortalLayout() {
   const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname);
   const activeProgram = readActivePilotProgram();
-  const programCode = activeProgram?.programCode ?? '';
+  const [programCode, setProgramCode] = useState(
+    () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
+  );
   const showJourneyRail = isFamilyPortalHomePath(location.pathname);
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
@@ -90,12 +97,17 @@ export default function FamilyPortalLayout() {
   }, [location.pathname, navigate, searchParams]);
 
   useEffect(() => {
+    resetPortalInteractionState();
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
     document.title = `${FAMILY_PORTAL_TITLE} | Caiden's Courage`;
     if (hasSession) {
-      ensureFamilyPortalProgramSync();
+      const resolved = ensureFamilyPortalProgramSync();
+      setProgramCode(resolved.code ?? resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '');
     }
     prefetchFamilyPortalRoutes();
-  }, [hasSession]);
+  }, [activeProgram?.programCode, hasSession]);
 
   useEffect(() => {
     afterIdle(() => requestGalleryCountsRefresh());
@@ -144,6 +156,7 @@ export default function FamilyPortalLayout() {
             <footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>
           }
         >
+          <FamilyPortalDevDiagnosticBanner />
           <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
             <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
           </Suspense>

@@ -1,9 +1,11 @@
 export const PILOT_TOTAL_WEEKS = 9;
 
 /** Days after pilot start when a week becomes available. Week 1 is day 0. */
+export const WEEK_UNLOCK_INTERVAL_DAYS = 4;
+
 export function getWeekUnlockOffsetDays(weekNumber: number): number {
   if (weekNumber <= 1) return 0;
-  return 7 * (weekNumber - 1) - 1;
+  return WEEK_UNLOCK_INTERVAL_DAYS * (weekNumber - 1);
 }
 
 export function resolvePilotStartDate(program: {

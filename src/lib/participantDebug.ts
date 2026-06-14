@@ -3,7 +3,7 @@ import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActiveChildNickname } from '../config/activeChildNickname';
 import { readActiveChildState } from './activeChildContext';
 import { readGameplayPlayerChipLabel } from './gameplayPlayerIdentity';
-import { checkBaselineCompletion } from './baselineCompletion';
+import { getB4CheckInStatus } from './b4CheckInStatus';
 import { resolveTrackingProgramCode } from './activeProgramContext';
 import { readParticipantGradeSettingsAsync } from './mirandaGradeBandResolver';
 import { hasCanonicalGradeLevel } from './participantGradeDisplay';
@@ -16,6 +16,7 @@ export type ParticipantDebugSnapshot = {
   activeParticipantName: string | null;
   activeParticipantGrade: string | null;
   baselineCompleted: boolean;
+  b4CheckInStatus: string | null;
   walletParticipantId: string | null;
   walletTotalCoins: number | null;
   progressParticipantId: string | null;
@@ -77,9 +78,10 @@ export async function buildParticipantDebugSnapshot(
   const gradeSettings = participantId
     ? await readParticipantGradeSettingsAsync(participantId)
     : { gradeLevel: null, gradeBand: null, allowStretch: false };
-  const baselineCompleted = participantId
-    ? await checkBaselineCompletion(programCode, participantId)
-    : false;
+  const b4Status = participantId
+    ? await getB4CheckInStatus({ programCode, participantId })
+    : null;
+  const baselineCompleted = b4Status?.baselineComplete ?? false;
 
   const state = readActiveChildState();
 
@@ -91,6 +93,7 @@ export async function buildParticipantDebugSnapshot(
       ? gradeSettings.gradeLevel
       : gradeSettings.gradeBand ?? null,
     baselineCompleted,
+    b4CheckInStatus: b4Status?.status ?? null,
     walletParticipantId,
     walletTotalCoins,
     progressParticipantId,

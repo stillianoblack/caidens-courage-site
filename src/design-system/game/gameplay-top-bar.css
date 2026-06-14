@@ -19,6 +19,8 @@
 
 .ds-gameplayTopBar-back {
   min-width: 0;
+  position: relative;
+  z-index: 20;
 }
 
 .ds-gameplayTopBar-back .game-backBtn {
@@ -244,6 +246,10 @@
   background: rgba(255, 255, 255, 0.92);
   color: var(--family-navy-deep, #1a2f52);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 21;
   box-shadow: 0 4px 14px -10px rgba(26, 47, 82, 0.35);
 }
 

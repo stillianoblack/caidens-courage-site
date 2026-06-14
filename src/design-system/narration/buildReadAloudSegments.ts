@@ -84,7 +84,7 @@ export function buildReadAloudSegmentsFromGameQuestion(question: GameQuestion): 
 export type ReadAloudScope = 'full' | 'coach_only';
 
 /**
- * Before Check: scenario, question, choices, and coach hint.
+ * B-4 Check-In quiz: scenario, question, choices, and coach hint.
  * After Check (Continue visible): coach feedback only — no repeating the question.
  */
 export function buildGameplayReadAloudSegments(

@@ -33,6 +33,7 @@ type UseCourageAdventureHubOptions = {
   kidsBasePath?: string;
   baselineLocked?: boolean;
   mapLocked?: boolean;
+  mapMissions?: CourageInTheDarkMission[];
 };
 
 export function useCourageAdventureHub({
@@ -42,13 +43,14 @@ export function useCourageAdventureHub({
   kidsBasePath,
   baselineLocked = false,
   mapLocked = false,
+  mapMissions = courageInTheDarkMissions,
 }: UseCourageAdventureHubOptions) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [selectedHotspot, setSelectedHotspot] = useState<CourageInTheDarkMission | null>(null);
   const [comingSoonSlug, setComingSoonSlug] = useState<string | null>(null);
   const weekId = resolveCourageWeekId(week);
-  const { progress, refresh } = useCourageInTheDarkProgress(weekId);
+  const { progress, refresh } = useCourageInTheDarkProgress(weekId, undefined, mapMissions.length);
   const [animatingHotspotId, setAnimatingHotspotId] = useState<CourageMapHotspotId | null>(null);
   const previousCompletedIdsRef = useRef<string[] | null>(null);
 
@@ -68,12 +70,17 @@ export function useCourageAdventureHub({
 
   const isHotspotComplete = useCallback(
     (hotspot: CourageInTheDarkMission) => {
+      if (progress.completedMissionIds.includes(hotspot.targetGameSlug)) return true;
+      if (progress.completedMissionIds.includes(hotspot.id)) return true;
       if (week === 1) {
-        return isCourageMapHotspotComplete(hotspot.id, progress.completedMissionIds);
+        return isCourageMapHotspotComplete(
+          hotspot.id,
+          progress.completedMissionIds,
+          hotspot.targetGameSlug,
+        );
       }
       const trailNode = resolveTrailNodeForHotspot(hotspot.id, weekNodes);
-      if (trailNode?.state === 'complete') return true;
-      return isCourageMapHotspotComplete(hotspot.id, progress.completedMissionIds);
+      return trailNode?.state === 'complete';
     },
     [progress.completedMissionIds, week, weekNodes],
   );
@@ -120,8 +127,8 @@ export function useCourageAdventureHub({
   }, [progress.completedMissionIds, showToast, week]);
 
   const completedCount = useMemo(
-    () => courageInTheDarkMissions.filter((mission) => isHotspotComplete(mission)).length,
-    [isHotspotComplete],
+    () => mapMissions.filter((mission) => isHotspotComplete(mission)).length,
+    [isHotspotComplete, mapMissions],
   );
 
   const selectHotspot = useCallback(
@@ -139,16 +146,20 @@ export function useCourageAdventureHub({
 
   const targetHref = useMemo(() => {
     if (!selectedHotspot) return null;
-    return resolveCourageMapTargetHref(
-      selectedHotspot.targetGameSlug,
-      resolvedKidsBase,
-      week,
-      weekTitle,
+    return (
+      selectedHotspot.directHref ??
+      resolveCourageMapTargetHref(
+        selectedHotspot.targetGameSlug,
+        resolvedKidsBase,
+        week,
+        weekTitle,
+      )
     );
   }, [resolvedKidsBase, selectedHotspot, week, weekTitle]);
 
   const resolveMissionHref = useCallback(
     (mission: CourageInTheDarkMission) =>
+      mission.directHref ??
       resolveCourageMapTargetHref(mission.targetGameSlug, resolvedKidsBase, week, weekTitle),
     [resolvedKidsBase, week, weekTitle],
   );
@@ -157,7 +168,9 @@ export function useCourageAdventureHub({
     (mission: CourageInTheDarkMission) => {
       if (isHotspotLocked(mission)) return false;
 
-      const href = resolveMissionHref(mission);
+      const href =
+        mission.directHref ??
+        resolveCourageMapTargetHref(mission.targetGameSlug, resolvedKidsBase, week, weekTitle);
 
       if (!href) {
         console.warn(
@@ -171,7 +184,7 @@ export function useCourageAdventureHub({
       navigate(href);
       return true;
     },
-    [isHotspotLocked, navigate, resolveMissionHref],
+    [isHotspotLocked, navigate, resolvedKidsBase, week, weekTitle],
   );
 
   const startAdventure = useCallback(() => {
@@ -183,7 +196,7 @@ export function useCourageAdventureHub({
     selectedHotspot,
     comingSoonSlug,
     completedCount,
-    totalAdventures: progress.totalMissions || courageInTheDarkMissions.length,
+    totalAdventures: progress.totalMissions || mapMissions.length,
     isHotspotComplete,
     isHotspotLocked,
     getMissionUnlockState,
@@ -198,5 +211,6 @@ export function useCourageAdventureHub({
     animatingHotspotId,
     refreshProgress: refresh,
     completedMissionIds: progress.completedMissionIds,
+    mapMissions,
   };
 }

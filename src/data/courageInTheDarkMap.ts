@@ -18,6 +18,8 @@ export type CourageInTheDarkMission = {
   description: string;
   rewardText: string;
   targetGameSlug: string;
+  /** When set, bypasses slug routing and opens this href directly. */
+  directHref?: string;
   locked?: boolean;
 };
 

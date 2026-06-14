@@ -615,6 +615,35 @@
   .ds-drawer--large {
     width: clamp(720px, 54vw, 960px) !important;
   }
+
+  /* Narrow character bio sheet — Character Hub, character review */
+  .pilot-drawer.ds-slidePanel--characterProfile,
+  .pilot-drawer.characterProfileSheet {
+    top: 24px !important;
+    right: 24px !important;
+    width: clamp(360px, 28vw, 420px) !important;
+    max-width: 420px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 48px) !important;
+    background: transparent !important;
+    border-radius: 1.25rem;
+    overflow: hidden;
+  }
+
+  /* Week review — same narrow rail as character profile */
+  .pilot-drawer.ds-slidePanel--weeklyReview,
+  .pilot-drawer.weeklyReviewSheet {
+    top: 24px !important;
+    right: 24px !important;
+    width: clamp(360px, 28vw, 420px) !important;
+    max-width: 420px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 48px) !important;
+    background: transparent !important;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: -16px 0 40px -20px rgba(26, 47, 82, 0.42);
+  }
 }
 
 /* Collapsible card */

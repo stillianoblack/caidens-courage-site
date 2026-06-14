@@ -1,0 +1,123 @@
+.familyChildrenDashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.familyChildrenDashboardGrid--loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .familyChildrenDashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.family-childSummaryCard--activePlayer {
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.family-childSummarySetActiveBtn {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1a2f52;
+  cursor: pointer;
+}
+
+.family-childSummaryGoalsPill--complete {
+  color: #16794a;
+}
+
+.family-childSummaryGoalsPill--pending {
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.family-weeklySetupReminder {
+  margin-top: 1.25rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 247, 237, 0.95);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.family-weeklySetupReminderTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #92400e;
+}
+
+.family-weeklySetupReminderBody {
+  margin: 0 0 0.75rem;
+  font-size: 0.84rem;
+  color: rgba(120, 53, 15, 0.85);
+}
+
+.family-weeklySetupReminderList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.family-weeklySetupReminderChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #92400e;
+  text-decoration: none;
+}
+
+.family-weeklyEnvWarning {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  background: rgba(254, 226, 226, 0.85);
+  color: #991b1b;
+  font-size: 0.88rem;
+}
+
+.family-weeklyTopBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.family-weeklyTopBarTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.family-weeklyChildSwitchShimmer {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.familyMultiChildJourney {
+  margin-bottom: 1rem;
+}
+
+.familyMultiChildJourney--compact .family-panelHelper {
+  display: none;
+}

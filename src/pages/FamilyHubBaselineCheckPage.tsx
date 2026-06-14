@@ -50,7 +50,7 @@ export default function FamilyHubBaselineCheckPage() {
       }
       footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
     >
-      <B4BaselineCheckFlow embedded onExit={() => navigate(getPortalRoute('characters'))} />
+      <B4BaselineCheckFlow embedded familyPortal onExit={() => navigate(getPortalRoute('characters'))} />
     </PortalShell>
   );
 }

@@ -6,7 +6,7 @@ import {
   readParentClaimContext,
   writeParentClaimContext,
 } from '../../../config/parentClaimContext';
-import { formatChildBaselineStatusLabel } from '../../../config/assessmentTypeConstants';
+import { formatB4CheckInStatusLabel } from '../../../config/assessmentTypeConstants';
 import {
   FAMILY_SETTINGS_PAGE,
   FAMILY_SETTINGS_TABS,
@@ -285,7 +285,7 @@ export default function FamilyProgramSettingsPanel() {
                             variant="family"
                           />
                           <p className="family-settingsChildMeta">
-                            B-4 Check-In: {formatChildBaselineStatusLabel(child.baselineStatus)}
+                            {formatB4CheckInStatusLabel(child.b4CheckInStatus)}
                           </p>
                           {child.latestActivity ? (
                             <p className="family-settingsChildMeta">Latest: {child.latestActivity}</p>

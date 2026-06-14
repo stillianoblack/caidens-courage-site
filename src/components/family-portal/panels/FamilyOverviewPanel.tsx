@@ -34,16 +34,16 @@ import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
 import AddChildForm from '../AddChildForm';
 import ActiveChildSelector from '../ActiveChildSelector';
 import { useActiveChild } from '../../../hooks/useActiveChild';
-import FamilyChildrenSection from '../FamilyChildrenSection';
 import B4InsightsDrawer from '../../../design-system/components/B4InsightsDrawer';
-import FamilyChildSummaryCard from '../FamilyChildSummaryCard';
+import FamilyChildrenDashboardGrid from '../FamilyChildrenDashboardGrid';
 import FamilyNeedsAttentionCard from '../FamilyNeedsAttentionCard';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
 import FamilyRecommendedNextCard from '../FamilyRecommendedNextCard';
 import FamilyWeeklyAdventureCtaBanner from '../FamilyWeeklyAdventureCtaBanner';
 import { FamilyJourneyCoachInline } from '../FamilyJourneyCoachPlacement';
-import FamilyOnboardingMobileCard from '../FamilyOnboardingMobileCard';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
+import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDebug';
+import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
 import { resolveSelectableFamilyChildren } from '../../../lib/familyOnboardingUtils';
 import FamilyMissingActionPrompt from '../FamilyMissingActionPrompt';
 import {
@@ -53,6 +53,8 @@ import {
   resolveFamilyChildAvatarSrc,
 } from '../../../lib/familyChildSummaryCard';
 import FocusSkillsSnapshot from '../../focus-skills/FocusSkillsSnapshot';
+import RewardClaimModal from '../../rewards/RewardClaimModal';
+import { claimB4CheckInCompletionReward, type RewardClaimResult } from '../../../lib/rewardClaimService';
 import {
   BaselineOverviewBars,
   MetricCard,
@@ -102,6 +104,9 @@ export default function FamilyOverviewPanel() {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [insightTopic, setInsightTopic] = useState<FamilyB4InsightTopic>('overall');
   const [insightChildId, setInsightChildId] = useState<string | null>(null);
+  const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
+  const [claimRewardLoading, setClaimRewardLoading] = useState(false);
+  const inventoryPath = familyPortalPath('inventory', location.pathname);
   const onboarding = useFamilyOnboardingStatus();
 
   const galleryPendingCount = useMemo(
@@ -344,12 +349,9 @@ export default function FamilyOverviewPanel() {
   const showEmptyHelper = !loading && !metrics.hasChildActivity && metrics.emptyStateMessage;
 
   const childrenGradeSettingsPath = familySettingsChildrenGradePath(location.pathname);
-  const familyGoalsSettingsPath = familyGoalsPath(location.pathname);
 
   const showAddChildForm = !claimRequired && !loading && !onboarding.hasChild;
   const showAddGradePrompt = !claimRequired && !loading && onboarding.hasChild && !onboarding.hasChildGrade;
-  const showSetGoalsPrompt =
-    !claimRequired && !loading && onboarding.hasChild && onboarding.hasChildGrade && !onboarding.hasFamilyGoals;
   const showB4CheckInPrompt =
     !claimRequired &&
     !loading &&
@@ -367,6 +369,15 @@ export default function FamilyOverviewPanel() {
     setInsightTopic(topic);
     setInsightChildId(participantId ?? activeChildSummary?.participantId ?? children[0]?.participantId ?? null);
     setInsightsOpen(true);
+  };
+
+  const handleClaimB4Reward = async () => {
+    const participantId = activeChild?.participantId ?? activeChildSummary?.participantId;
+    if (!participantId) return;
+    setClaimRewardLoading(true);
+    const result = await claimB4CheckInCompletionReward(participantId);
+    setClaimRewardLoading(false);
+    setRewardClaimResult(result);
   };
 
   const insightsPayload = useMemo(
@@ -463,6 +474,18 @@ export default function FamilyOverviewPanel() {
   );
 
   useEffect(() => {
+    if (loading || process.env.NODE_ENV !== 'development') return;
+    warnWhenNoChildrenInDevelopment(children.length);
+    void logFamilyChildProgressDebug({
+      children,
+      activeParticipantId: activeChild?.participantId,
+      studentParticipants,
+      programCode,
+      moduleResults,
+    });
+  }, [activeChild?.participantId, children, loading, moduleResults, programCode, studentParticipants]);
+
+  useEffect(() => {
     if (loading) return;
     const linkedChildFound = familyLinks.some((link) => Boolean(link.student_id?.trim()));
     console.info('[FAMILY_CHILD_SUMMARY]', {
@@ -490,35 +513,26 @@ export default function FamilyOverviewPanel() {
     return () => window.removeEventListener(FOCUS_FLAME_ADD_CHILD_EVENT, handleAddChildFocus);
   }, []);
 
+  useEffect(() => {
+    const handleGoalsSaved = () => {
+      void onboarding.refresh();
+    };
+    window.addEventListener('caidens:family-child-goals-saved', handleGoalsSaved);
+    return () => window.removeEventListener('caidens:family-child-goals-saved', handleGoalsSaved);
+  }, [onboarding]);
+
   return (
     <div className="family-overviewPage">
       <FamilyWeeklyAdventureCtaBanner />
       <FamilyJourneyCoachInline />
-      <FamilyOnboardingMobileCard />
       <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />
 
-      {showChildSummaryCard && activeChildSummary ? (
-        <FamilyChildSummaryCard
-          childName={activeChildSummary.displayName}
+      {showChildSummaryCard && children.some((child) => child.participantId) ? (
+        <FamilyChildrenDashboardGrid
           programName={childSummaryProgramName}
-          baselineStatus={activeChildSummary.baselineStatus}
-          modulesCompleted={childSummaryModuleCounts.completed}
-          modulesTotal={childSummaryModuleCounts.total}
-          lastActivityLabel={childSummaryLastActivity}
-          gradeLevel={activeChildParticipant?.grade_level}
-          gradeBand={activeChildParticipant?.grade_band}
-          avatarSrc={childSummaryAvatarSrc}
-          avatarInitials={resolveChildDisplayInitials(activeChildSummary.displayName)}
-          childOptions={childSummaryOptions}
-          activeParticipantId={activeChild?.participantId ?? activeChildSummary.participantId}
-          onSelectChild={(participantId) => {
-            const match = selectableChildren.find((child) => child.participantId === participantId);
-            if (match) selectChild(match);
-          }}
-          onViewProgress={() => openInsights('child-progress')}
-          onOpenInsights={() => openInsights('child-progress')}
           loading={loading}
+          onViewProgress={(participantId) => openInsights('child-progress', participantId)}
         />
       ) : null}
 
@@ -538,13 +552,6 @@ export default function FamilyOverviewPanel() {
         <FamilyMissingActionPrompt
           kind="add-grade"
           actionHref={childrenGradeSettingsPath}
-        />
-      ) : null}
-
-      {showSetGoalsPrompt ? (
-        <FamilyMissingActionPrompt
-          kind="set-goals"
-          actionHref={familyGoalsSettingsPath}
         />
       ) : null}
 
@@ -591,14 +598,7 @@ export default function FamilyOverviewPanel() {
         />
       ) : null}
 
-      <FamilyChildrenSection
-        childSummaries={children}
-        loading={loading}
-        adultBaselineComplete={adultBaselineComplete}
-        activeParticipantId={activeChild?.participantId}
-        onSelectChild={selectChild}
-        onViewProgress={(participantId) => openInsights('child-progress', participantId)}
-      />
+      {/* Legacy multi-child list — replaced by FamilyChildSummaryCard active player card */}
 
       <section className="family-panelBlock">
         <div className="family-panelBlockHead">
@@ -655,6 +655,11 @@ export default function FamilyOverviewPanel() {
           setInsightChildId(null);
         }}
         {...insightsPayload}
+      />
+      <RewardClaimModal
+        result={rewardClaimResult}
+        inventoryPath={inventoryPath}
+        onClose={() => setRewardClaimResult(null)}
       />
     </div>
   );

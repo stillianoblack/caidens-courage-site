@@ -2,6 +2,17 @@ export { default as AvatarContainer } from './AvatarContainer';
 export type { AvatarContainerProps, AvatarContainerVariant } from './AvatarContainer';
 export { default as MissionCoachCard } from './MissionCoachCard';
 export { default as B4InsightsDrawer } from './B4InsightsDrawer';
+export { default as WeekReviewPanel } from './WeekReviewPanel';
+export type { WeekReviewPanelProps } from './WeekReviewPanel';
+export { default as CharacterProfileSheet } from './CharacterProfileSheet';
+export type { CharacterProfileSheetProps } from './CharacterProfileSheet';
+export { default as WeeklyReviewSheet } from './WeeklyReviewSheet';
+export type { WeeklyReviewSheetProps } from './WeeklyReviewSheet';
+/** @deprecated Use CharacterProfileSheet */
+export { default as CharacterSheetPanel } from './CharacterSheetPanel';
+export type { CharacterSheetPanelProps } from './CharacterSheetPanel';
+export { default as CharacterProfilePanel } from './CharacterProfilePanel';
+export type { CharacterProfilePanelProps } from './CharacterProfilePanel';
 export { default as WeeklyAdventureCard } from './WeeklyAdventureCard';
 export type { WeeklyAdventureCardProps, WeeklyAdventureCardKind } from './WeeklyAdventureCard';
 export { default as ZekePlaceholderAvatar } from './ZekePlaceholderAvatar';

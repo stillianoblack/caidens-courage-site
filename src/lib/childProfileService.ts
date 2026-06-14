@@ -131,7 +131,7 @@ export type EnsureBaselineParticipantResult = {
   source: 'supabase' | 'local';
 };
 
-/** Ensures a student participant row exists before baseline / before check-in starts. */
+/** Ensures a student participant row exists before baseline / B-4 Check-In starts. */
 export async function ensureParticipantForBaseline(
   input: EnsureBaselineParticipantInput,
 ): Promise<EnsureBaselineParticipantResult> {
