@@ -44,6 +44,15 @@ export default function PortalHeader({
       aria-label={mobileFamilySimplified ? pageTitle : undefined}
     >
       <div className="portal-headerLead">
+        {mobileFamilySimplified ? (
+          <img
+            src="/images/icons/favcon_C.svg"
+            alt="Caiden's Courage"
+            className="portal-headerMobileLogo"
+            width={44}
+            height={44}
+          />
+        ) : null}
         {onOpenMobileNav ? (
           <button
             type="button"
@@ -60,12 +69,14 @@ export default function PortalHeader({
             </svg>
           </button>
         ) : null}
-        <div className="portal-headerLeadText">
-          <h1 className="portal-headerTitle">{pageTitle}</h1>
-          {portal === 'family' && linkedCampLabel ? (
-            <FamilyLinkedCampBadge label={linkedCampLabel} className="portal-headerCampBadge" />
-          ) : null}
-        </div>
+        {!mobileFamilySimplified ? (
+          <div className="portal-headerLeadText">
+            <h1 className="portal-headerTitle">{pageTitle}</h1>
+            {portal === 'family' && linkedCampLabel ? (
+              <FamilyLinkedCampBadge label={linkedCampLabel} className="portal-headerCampBadge" />
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <div className="portal-headerTools">
         {mobileFamilySimplified && mobileFamilyChips ? mobileFamilyChips : null}
@@ -105,7 +116,7 @@ export default function PortalHeader({
         {!mobileFamilySimplified ? (
           <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
         ) : null}
-        {!mobileFamilySimplified ? (
+        {!mobileFamilySimplified || portal === 'family' ? (
           <PortalSwitcherDropdown
             className="portal-headerSwitcher"
             linkedCampLabel={portal === 'family' ? linkedCampLabel : undefined}

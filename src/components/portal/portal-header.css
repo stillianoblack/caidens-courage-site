@@ -104,35 +104,6 @@
     position: static;
   }
 
-  .portal-header--familyMobile {
-    min-height: auto;
-    padding: 0.5rem 0.75rem;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'lead tools';
-    gap: 0.35rem;
-  }
-
-  .portal-header--familyMobile .portal-headerLeadText {
-    gap: 0;
-  }
-
-  .portal-header--familyMobile .portal-headerTitle {
-    font-size: 1rem;
-    white-space: nowrap;
-  }
-
-  .portal-header--familyMobile .portal-headerCampBadge {
-    display: none;
-  }
-
-  .portal-header--familyMobile .portal-headerTools {
-    justify-self: end;
-    width: auto;
-    max-width: none;
-    flex-wrap: nowrap;
-    gap: 0.35rem;
-  }
-
   .portal-header {
     min-height: auto;
     padding: 0.75rem 1rem;
@@ -188,6 +159,83 @@
   .portal-headerSwitcher .portal-switcherTrigger {
     flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  /* Family mobile: logo left, coins/player/bell/dropdown right */
+  .portal-header.portal-header--familyMobile {
+    overflow-x: visible;
+    min-height: auto;
+    padding: 0.45rem 0.75rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'lead tools';
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerLead {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .portal-headerMobileLogo {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.65rem;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerLeadText {
+    gap: 0;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerTitle {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerCampBadge {
+    display: none;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerTools {
+    justify-self: end;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .portal-header.portal-header--familyMobile .family-portalMobileChips {
+    order: 0;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .portal-header.portal-header--familyMobile .family-notificationBell {
+    order: 1;
+    flex-shrink: 0;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerSwitcher {
+    order: 2;
+    flex-shrink: 0;
+    margin-left: 0;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-headerSwitcher .portal-switcherTrigger {
+    min-height: 2.75rem;
+    padding: 0 0.65rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.03em;
+  }
+
+  .portal-header.portal-header--familyMobile .portal-switcherChevron {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 }
 

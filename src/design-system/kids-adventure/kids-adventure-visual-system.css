@@ -16,56 +16,39 @@
     gap: 1rem;
   }
 
-  /* —— Icon-only mobile header (no title, no divider) —— */
-  .portal-header--familyMobile {
-    min-height: auto;
-    padding: 0.45rem 0.75rem;
+  /* —— Mobile header visual tweaks inside kids adventure shell —— */
+  .kids-adventure-shell .portal-header.portal-header--familyMobile {
     box-shadow: none;
     backdrop-filter: none;
     background: #faf8f5;
     border-bottom: none;
-    grid-template-columns: 1fr;
-    grid-template-areas: 'tools';
-    gap: 0;
   }
 
-  .portal-header--familyMobile .portal-headerLead {
-    display: none;
-  }
-
-  .portal-header--familyMobile .portal-headerTools {
-    grid-area: tools;
-    justify-self: stretch;
-    justify-content: flex-end;
-    width: 100%;
-    gap: 0.4rem;
-  }
-
-  .portal-header--familyMobile .family-notificationBellBtn {
+  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-notificationBellBtn {
     width: 2.75rem;
     height: 2.75rem;
     min-width: 2.75rem;
     min-height: 2.75rem;
   }
 
-  .portal-header--familyMobile .family-portalMobileChip {
+  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobileChip {
     min-height: 2.75rem;
     padding: 0 0.65rem !important;
     font-size: 0.875rem !important;
   }
 
-  .portal-header--familyMobile .family-portalMobilePlayerChip {
+  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerChip {
     padding: 0;
     max-width: none;
     background: transparent;
     border: none;
   }
 
-  .portal-header--familyMobile .family-portalMobilePlayerName {
+  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerName {
     display: none;
   }
 
-  .portal-header--familyMobile .family-portalMobilePlayerAvatar {
+  .kids-adventure-shell .portal-header.portal-header--familyMobile .family-portalMobilePlayerAvatar {
     width: 2.75rem;
     height: 2.75rem;
     font-size: 1.125rem;
