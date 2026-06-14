@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { createFamilyChildParticipant } from '../../lib/childProfileService';
+import { assignPortalRoute } from '../../lib/portalHardNavigation';
 
 type AddChildFormProps = {
   onAdded?: (result: { participantId?: string; displayName: string }) => void;
@@ -15,7 +15,6 @@ export default function AddChildForm({
   baselinePath,
   routeToBaseline = false,
 }: AddChildFormProps) {
-  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [nickname, setNickname] = useState('');
   const [ageGrade, setAgeGrade] = useState('');
@@ -52,7 +51,7 @@ export default function AddChildForm({
       setAgeGrade('');
       onAdded?.({ participantId: result.participantId, displayName: result.displayName });
       if (routeToBaseline && baselinePath) {
-        navigate(baselinePath);
+        assignPortalRoute(baselinePath);
       }
       return;
     }

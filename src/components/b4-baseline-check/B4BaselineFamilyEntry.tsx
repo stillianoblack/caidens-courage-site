@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { B4_BASELINE_FAMILY_LANDING } from '../../data/b4BaselineCheckContent';
 import { formatB4CheckInStatusLabel } from '../../config/assessmentTypeConstants';
 import type { B4CheckInDisplayStatus } from '../../lib/b4CheckInStatus';
@@ -44,9 +43,9 @@ export default function B4BaselineFamilyEntry({
         <h1 className="bbc-title">{B4_BASELINE_FAMILY_LANDING.title}</h1>
         <B4Avatar size="hero" />
         <p className="bbc-body">Add a child to begin their B-4 Check-In and unlock weekly adventures.</p>
-        <Link to={childrenSettingsPath} className="bbc-primaryBtn bbc-landingCta">
+        <a href={childrenSettingsPath} className="bbc-primaryBtn bbc-landingCta">
           Add Child in Settings
-        </Link>
+        </a>
       </div>
     );
   }
@@ -73,9 +72,9 @@ export default function B4BaselineFamilyEntry({
             );
           })}
         </div>
-        <Link to={childrenSettingsPath} className="bbc-secondaryBtn">
+        <a href={childrenSettingsPath} className="bbc-secondaryBtn">
           Add Child
-        </Link>
+        </a>
       </div>
     );
   }
@@ -95,9 +94,9 @@ export default function B4BaselineFamilyEntry({
         </p>
         <div className="bbc-hubActions">
           {continueLearningPath ? (
-            <Link to={continueLearningPath} className="bbc-primaryBtn bbc-landingCta">
+            <a href={continueLearningPath} className="bbc-primaryBtn bbc-landingCta">
               Continue Weekly Adventures
-            </Link>
+            </a>
           ) : null}
           <button type="button" className="bbc-secondaryBtn" onClick={onStartCheckIn}>
             Review Check-In Hub

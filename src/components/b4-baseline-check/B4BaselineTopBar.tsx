@@ -36,7 +36,6 @@ export default function B4BaselineTopBar({
       hubName={hubName}
       backHref={backHref}
       onBack={hubName && !backHref ? onExit : undefined}
-      onBackClick={backHref ? onExit : undefined}
       progressPercent={progressPct}
       showProgress={showProgress}
       playerName={playerName}

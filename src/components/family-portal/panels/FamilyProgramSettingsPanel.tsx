@@ -16,7 +16,6 @@ import { useActiveChild } from '../../../hooks/useActiveChild';
 import { useFamilyChildGoals } from '../../../hooks/useFamilyChildGoals';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
-import { resolveFamilyHasChild } from '../../../lib/familyOnboardingUtils';
 import type { FamilyChildSummary } from '../../../lib/familyChildrenMetrics';
 import { resolveFamilySettingsTab } from '../../../lib/familyPortalPaths';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
@@ -62,7 +61,6 @@ export default function FamilyProgramSettingsPanel() {
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const {
     children,
-    visibleChildren,
     familyLinks,
     campProgramCode,
     campProgramName,
@@ -72,7 +70,7 @@ export default function FamilyProgramSettingsPanel() {
     refresh,
     studentParticipants,
   } = useFamilyPortalShell(programCode);
-  const canShowAddChild = !claimRequired && !resolveFamilyHasChild(visibleChildren, children);
+  const canShowAddChild = !claimRequired;
   const activeProgram = readActivePilotProgram();
   const role = readActivePortalRole();
   const familyCode = activeProgram?.familyAccessCode?.trim() || '';
@@ -143,6 +141,16 @@ export default function FamilyProgramSettingsPanel() {
       gradeFocusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [activeTab, focusParam, loading, children.length]);
+
+  useEffect(() => {
+    if (activeTab !== 'children' || focusParam !== 'add-child' || loading || !canShowAddChild) {
+      return;
+    }
+    setShowAddChild(true);
+    requestAnimationFrame(() => {
+      addChildRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [activeTab, canShowAddChild, focusParam, loading]);
 
   const selectTab = useCallback(
     (next: FamilySettingsTabId) => {

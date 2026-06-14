@@ -48,6 +48,7 @@ import {
   type BaselineMcQuestion,
   type BaselineModuleId,
 } from '../../data/b4BaselineCheckContent';
+import { resolveB4HubPath } from '../../lib/portalGamePaths';
 import {
   isBaselineFullyComplete,
   loadB4BaselineState,
@@ -61,7 +62,7 @@ import { refreshAnalyticsIdentity, trackEvent } from '../../lib/analytics';
 import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import B4BaselineFamilyEntry from '../b4-baseline-check/B4BaselineFamilyEntry';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
-import { familyPortalPath, familySettingsTabPath } from '../../lib/familyPortalPaths';
+import { familyPortalPath, familySettingsAddChildPath } from '../../lib/familyPortalPaths';
 import B4CheckInStepGraphic from './B4CheckInStepGraphic';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
@@ -172,8 +173,9 @@ export default function B4BaselineCheckFlow({
   } | null>(null);
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
   const programContext = resolveActiveProgramContext();
-  const childrenSettingsPath = familySettingsTabPath('children', location.pathname);
+  const childrenSettingsPath = familySettingsAddChildPath(location.pathname);
   const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
+  const embeddedBackHref = familyPortal ? continueLearningPath : resolveB4HubPath(location.pathname);
   const resolvedParticipantId = contextParticipantId || activeParticipantId;
   const resolvedChildName = useMemo(() => {
     if (contextDisplayName?.trim()) return contextDisplayName.trim();
@@ -848,6 +850,7 @@ export default function B4BaselineCheckFlow({
               progressPct={progressPct}
               onExit={handleExit}
               hubName={embedded ? (familyPortal ? 'Weekly Adventures' : 'B-4 Missions') : undefined}
+              backHref={embedded ? embeddedBackHref : undefined}
               showProgress={view === 'hub'}
               soundEnabled={soundEnabled}
               onToggleSound={toggleSound}

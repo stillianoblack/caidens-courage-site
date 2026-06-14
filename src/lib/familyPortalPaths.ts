@@ -44,6 +44,10 @@ export function familySettingsChildrenGradePath(pathname?: string): string {
   return `${familySettingsTabPath('children', pathname)}&focus=grade`;
 }
 
+export function familySettingsAddChildPath(pathname?: string): string {
+  return `${familySettingsTabPath('children', pathname)}&focus=add-child`;
+}
+
 export function familyGoalsPath(pathname?: string): string {
   return familySettingsTabPath('family-goals', pathname);
 }
