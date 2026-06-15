@@ -30,15 +30,12 @@ import {
 } from './fileAdaptiveMissingClue';
 import {
   MIRANDA_MISSING_LETTERS_FILE,
-  MIRANDA_MISSING_LETTERS_ID,
 } from './fileAdaptiveMissingLetters';
 import {
   MIRANDA_CONTEXT_CLUE_CHALLENGE_FILE,
-  MIRANDA_CONTEXT_CLUE_CHALLENGE_ID,
 } from './fileAdaptiveContextClueChallenge';
 import {
   MIRANDA_DETECTIVE_NOTEBOOK_FILE,
-  MIRANDA_DETECTIVE_NOTEBOOK_ID,
 } from './fileAdaptiveDetectiveNotebook';
 import { MIRANDA_AVATAR_SRC, MIRANDA_HUB, MIRANDA_MISSION_AVATAR } from './sharedAssets';
 

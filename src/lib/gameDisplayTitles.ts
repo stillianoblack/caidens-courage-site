@@ -26,7 +26,7 @@ export function sanitizeMissionGameTitle(rawTitle: string, weekNumber?: number):
   let title = rawTitle.trim();
   if (!title) return title;
 
-  title = title.replace(/^[A-Za-z0-9\-]+\s+Game\s+\d+\s*:\s*/i, '');
+  title = title.replace(/^[A-Za-z0-9-]+\s+Game\s+\d+\s*:\s*/i, '');
   title = title.replace(/^Game\s+\d+\s*•\s*/i, '');
   title = title.replace(/^Game\s+\d+\s*:\s*/i, '');
 

@@ -854,6 +854,7 @@ export default function GameAssessmentFlow({
     config.landing.title,
     introHint,
     landingGuideCharacter,
+    weeklyDisplayTitles?.gameHeader,
   ]);
   const feedbackSpeakerLabel = getFeedbackSpeakerLabel(missionTheme);
   const playerName = readGameplayPlayerDisplayName();
