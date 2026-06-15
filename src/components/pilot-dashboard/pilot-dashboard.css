@@ -340,8 +340,12 @@
 }
 
 .pilot-kpiCard--highlight {
-  border-color: rgba(229, 192, 106, 0.45);
-  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+  border: 2px solid rgba(212, 168, 75, 0.72);
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 251, 235, 0.95) inset,
+    0 6px 28px -16px rgba(212, 168, 75, 0.42),
+    0 4px 20px -16px rgba(36, 62, 112, 0.18);
 }
 
 .pilot-kpiCard--clickable {
