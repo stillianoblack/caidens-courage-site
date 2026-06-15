@@ -1,5 +1,6 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import type { CaidenGradeBand } from '../../types/caidenAdaptiveQuest';
+import type { AdaptiveQuestionSelectionContext } from '../../lib/adaptiveQuestionSelection';
 import {
   buildCaidenAdaptiveConfig,
   CAIDEN_ADAPTIVE_QUEST_REGISTRY,
@@ -113,13 +114,14 @@ export function resolveCaidenQuestDescription(
 export function resolveCaidenQuestConfig(
   questId: string,
   gradeBand: CaidenGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
   const quest = getCaidenQuestById(questId);
   if (!quest) return undefined;
 
   const adaptiveFile = getCaidenAdaptiveQuest(quest.adaptiveQuestId);
   if (adaptiveFile) {
-    return buildCaidenAdaptiveConfig(adaptiveFile, gradeBand);
+    return buildCaidenAdaptiveConfig(adaptiveFile, gradeBand, selectionContext);
   }
 
   return quest.config;

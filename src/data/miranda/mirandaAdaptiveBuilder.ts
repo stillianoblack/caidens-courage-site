@@ -1,5 +1,13 @@
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import { resolveKidGradeBandWithFallback } from '../../lib/gradeBandContentResolver';
+import {
+  finalizeAdaptiveQuestions,
+  type AdaptiveQuestionSelectionContext,
+} from '../../lib/adaptiveQuestionSelection';
+import {
+  applyStagingToQuestions,
+  stagingContentVersionSuffix,
+} from '../../lib/stagingQuestionOverrides';
 import type {
   MirandaAdaptiveFile,
   MirandaAdaptiveQuestion,
@@ -32,7 +40,7 @@ export function resolveMirandaGradeContent(
 }
 
 export function mirandaContentVersionId(fileId: string, band: MirandaGradeBand): string {
-  return `${fileId}::${band}::v1`;
+  return `${fileId}::${band}::${stagingContentVersionSuffix()}`;
 }
 
 function buildQuestion(
@@ -84,9 +92,15 @@ export function buildGradeVariant(
 export function buildMirandaAdaptiveConfig(
   file: MirandaAdaptiveFile,
   gradeBand: MirandaGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
   const content = resolveMirandaGradeContent(file, gradeBand);
-  const variant = buildGradeVariant(gradeBand, content);
+  const selectedQuestions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+    missionId: file.id,
+    gradeBand,
+    ...selectionContext,
+  });
+  const variant = buildGradeVariant(gradeBand, { ...content, questions: selectedQuestions });
 
   return {
     id: file.id,

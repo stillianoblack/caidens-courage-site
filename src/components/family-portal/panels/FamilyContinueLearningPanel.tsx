@@ -23,12 +23,12 @@ import type { CourageHubViewMode } from '../../courage-in-the-dark/CourageHubVie
 import {
   PREVIEW_ADVENTURE_PARAM,
   readAdventureVisibilityContext,
-  resolveFeaturedAdventureModule,
+  isPublishedAdventure,
+  resolveCurrentFeaturedAdventure,
   resolveHeroDisplayWeekNumber,
 } from '../../../lib/adventureVisibility';
+import { logFeaturedAdventureDiagnostics } from '../../../lib/getFeaturedAdventure';
 import { resolveAdventureHeroMapSrc, resolveAdventureMapMissions } from '../../../lib/adventureMapMissions';
-import { resolveAdventureComicThumbnailUrl } from '../../../lib/adventureThumbnail';
-import { normalizeSelFocusLabel } from '../../../lib/adventureSelFocus';
 import {
   countCompletedMapMissions,
   resolveCompletedWeekNumbers,
@@ -44,6 +44,7 @@ import {
 } from '../../../lib/familyChildReadiness';
 import {
   buildCompletedWeeklyAdventureCards,
+  buildHeroWeekView,
   buildUpcomingWeeklyAdventureCards,
 } from '../../../lib/weeklyAdventureWeekCards';
 import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
@@ -197,8 +198,8 @@ export default function FamilyContinueLearningPanel() {
   );
 
   const featuredAdventureModule = useMemo(
-    () => resolveFeaturedAdventureModule(adventureModules, visibilityCtx),
-    [adventureModules, visibilityCtx],
+    () => resolveCurrentFeaturedAdventure(adventureModules, visibilityCtx, mapCompletedWeekNumbers),
+    [adventureModules, mapCompletedWeekNumbers, visibilityCtx],
   );
 
   const heroWeekNumber = useMemo(
@@ -224,23 +225,25 @@ export default function FamilyContinueLearningPanel() {
       const preview = adventureModules.find((row) => row.id === visibilityCtx.previewAdventureId);
       if (preview) return preview;
     }
+    if (featuredAdventureModule?.week_number === heroWeekNumber) {
+      return featuredAdventureModule;
+    }
     return (
       adventureModules.find((row) => row.week_number === heroWeekNumber) ?? featuredAdventureModule
     );
   }, [adventureModules, featuredAdventureModule, heroWeekNumber, visibilityCtx]);
 
-  const heroWeek = useMemo(() => {
-    const base = trailWeeks.find((week) => week.week === heroWeekNumber);
-    if (!base) return undefined;
-    if (!heroCmsModule) return base;
-    return {
-      ...base,
-      title: heroCmsModule.title || base.title,
-      selFocus: normalizeSelFocusLabel(heroCmsModule.subtitle) || base.selFocus,
-      previewActivities: heroCmsModule.preview_activities ?? base.previewActivities,
-      thumbnailUrl: resolveAdventureComicThumbnailUrl(heroCmsModule, heroWeekNumber),
-    };
-  }, [heroCmsModule, heroWeekNumber, trailWeeks]);
+  const heroWeek = useMemo(
+    () =>
+      buildHeroWeekView({
+        heroWeekNumber,
+        trailWeeks,
+        heroCmsModule,
+        featuredAdventure: featuredAdventureModule,
+        paths: trailPaths,
+      }),
+    [featuredAdventureModule, heroCmsModule, heroWeekNumber, trailPaths, trailWeeks],
+  );
 
   const completedWeekNumbers = useMemo(
     () =>
@@ -307,7 +310,11 @@ export default function FamilyContinueLearningPanel() {
   );
 
   const showCourageHero = Boolean(
-    heroWeek && (heroWeek.weekStatus !== 'locked' || visibilityCtx.previewMode === 'admin'),
+    heroWeek &&
+      (heroWeek.weekStatus !== 'locked' ||
+        visibilityCtx.previewMode === 'admin' ||
+        (featuredAdventureModule?.week_number === heroWeekNumber &&
+          isPublishedAdventure(featuredAdventureModule))),
   );
 
   const heroMapNodes = useMemo(() => {
@@ -475,6 +482,11 @@ export default function FamilyContinueLearningPanel() {
     programCode,
     studentParticipants,
   ]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || adventureModules.length === 0) return;
+    logFeaturedAdventureDiagnostics(adventureModules, featuredAdventureModule, heroWeekNumber);
+  }, [adventureModules, featuredAdventureModule, heroWeekNumber]);
 
   useEffect(() => {
     if (!activeChild?.participantId || !showCourageHero) return;

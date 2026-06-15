@@ -5,8 +5,10 @@ import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetr
 import { useFocusCoinWallet } from '../../../hooks/useFocusCoinWallet';
 import FocusCoinWalletBadge from '../../rewards/FocusCoinWalletBadge';
 import { REWARD_SHOP_ITEMS, type RewardShopCategory } from '../../../data/rewardShopItems';
-import { getBadgeArtworkPath, getRewardItemArtworkPath } from '../../../lib/rewardArtwork';
+import { getRewardItemArtworkPath } from '../../../lib/rewardArtwork';
+import { buildInventoryBadgeCatalog } from '../../../lib/cmsBadgeArtwork';
 import { getPlayerInventory, type PlayerInventorySnapshot } from '../../../lib/getPlayerInventory';
+import { useFamilyAdventureModules } from '../../../hooks/useAdventureModules';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { MODULE_COMPLETE_EVENT } from '../../../lib/activeChildContext';
 import { PortalPageIntro } from '../../portal-design-system';
@@ -28,8 +30,8 @@ const BADGE_RARITY: Record<string, InventoryCardRarity> = {
   'Courage Badge': 'Rare',
 };
 
-function resolveBadgeRarity(label: string): InventoryCardRarity {
-  return BADGE_RARITY[label] ?? 'Common';
+function resolveBadgeRarity(label: string, cmsRarity?: InventoryCardRarity): InventoryCardRarity {
+  return cmsRarity ?? BADGE_RARITY[label] ?? 'Common';
 }
 
 function resolveShopState(
@@ -45,7 +47,7 @@ function resolveShopState(
   return 'need_coins';
 }
 
-function InventorySection({
+function InventorySection<T>({
   title,
   emptyLabel,
   items,
@@ -53,8 +55,8 @@ function InventorySection({
 }: {
   title: string;
   emptyLabel: string;
-  items: string[];
-  renderItem: (item: string) => React.ReactNode;
+  items: readonly T[];
+  renderItem: (item: T) => React.ReactNode;
 }) {
   return (
     <section className="inventorySection">
@@ -84,6 +86,7 @@ export default function FamilyInventoryPanel() {
     [visibleChildren],
   );
   const { activeChild, selectChild } = useActiveChild(selectableChildren);
+  const { modules: adventureModules } = useFamilyAdventureModules();
   const [inventory, setInventory] = useState<PlayerInventorySnapshot>({
     badges: [],
     items: [],
@@ -105,8 +108,17 @@ export default function FamilyInventoryPanel() {
       void refreshInventory();
     };
     window.addEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
-    return () => window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
+    window.addEventListener('cc-reward-claimed', handleRefresh);
+    return () => {
+      window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
+      window.removeEventListener('cc-reward-claimed', handleRefresh);
+    };
   }, [refreshInventory]);
+
+  const badgeCatalog = useMemo(
+    () => buildInventoryBadgeCatalog(adventureModules, inventory.badges),
+    [adventureModules, inventory.badges],
+  );
 
   return (
     <div className="inventoryPanel">
@@ -134,18 +146,21 @@ export default function FamilyInventoryPanel() {
       {!loading ? (
         <>
       <InventorySection
-        title="Owned Badges"
+        title="Badges"
         emptyLabel="Complete missions to earn badges."
-        items={inventory.badges}
-        renderItem={(badge) => (
+        items={badgeCatalog}
+        renderItem={(entry) => (
           <InventoryItemCard
-            key={badge}
-            label={badge}
-            imageSrc={getBadgeArtworkPath(badge)}
+            key={entry.key}
+            label={entry.display.name}
+            imageSrc={entry.display.imageUrl}
             variant="badge"
-            themeHint={badge}
-            owned
-            rarity={resolveBadgeRarity(badge)}
+            themeHint={entry.display.name}
+            owned={entry.owned}
+            locked={entry.locked}
+            unlockRequirement={entry.locked ? entry.unlockRequirement : undefined}
+            rarity={resolveBadgeRarity(entry.display.name, entry.display.rarity)}
+            category={entry.display.weekLabel ?? undefined}
           />
         )}
       />

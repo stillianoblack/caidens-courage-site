@@ -14,6 +14,103 @@ import {
   isValidSupabaseParticipantId,
 } from './pilotTrackingService';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import {
+  countCompletedWeekMissions,
+  isWeekFullyComplete,
+  parseWeekNumberFromPayload,
+  resolveWeekBadgeMissionId,
+  resolveWeekMissionsTotal,
+} from './weekBadgeProgression';
+
+async function readWeekMissionIds(participantId: string, weekId: string): Promise<string[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('player_progress')
+    .select('mission_id')
+    .eq('participant_id', participantId)
+    .eq('week_id', weekId);
+  if (error) throw error;
+  return (data ?? [])
+    .map((row) => row.mission_id)
+    .filter((missionId): missionId is string => typeof missionId === 'string' && missionId.trim().length > 0);
+}
+
+async function readWeekBadgeUnlocked(
+  participantId: string,
+  weekId: string,
+  badgeName: string,
+): Promise<boolean> {
+  if (!supabase || !badgeName.trim()) return false;
+  const { data, error } = await supabase
+    .from('player_badges')
+    .select('id')
+    .eq('participant_id', participantId)
+    .eq('week_id', weekId)
+    .eq('badge_name', badgeName.trim())
+    .maybeSingle();
+  if (error) throw error;
+  return Boolean(data?.id);
+}
+
+async function resolveWeekProgressSnapshot(
+  participantId: string,
+  weekId: string,
+  weekNumber: number,
+  badgeName: string,
+  includeMissionId?: string,
+): Promise<{
+  weekMissionsCompleted: number;
+  weekMissionsTotal: number;
+  weekBadgeUnlocked: boolean;
+  completedMissionIds: string[];
+}> {
+  const storedIds = await readWeekMissionIds(participantId, weekId);
+  const completedMissionIds = includeMissionId
+    ? Array.from(new Set([...storedIds, includeMissionId]))
+    : storedIds;
+  const weekMissionsCompleted = countCompletedWeekMissions(weekNumber, completedMissionIds);
+  const weekMissionsTotal = resolveWeekMissionsTotal(weekNumber);
+  const weekBadgeUnlocked = badgeName.trim()
+    ? await readWeekBadgeUnlocked(participantId, weekId, badgeName)
+    : false;
+
+  return {
+    weekMissionsCompleted,
+    weekMissionsTotal,
+    weekBadgeUnlocked,
+    completedMissionIds,
+  };
+}
+
+async function awardWeekBadgeIfComplete(input: {
+  participantId: string;
+  weekId: string;
+  weekNumber: number;
+  badgeName: string;
+  completedMissionIds: string[];
+}): Promise<boolean> {
+  if (!supabase || !input.badgeName.trim()) return false;
+  if (!isWeekFullyComplete(input.weekNumber, input.completedMissionIds)) return false;
+
+  const alreadyUnlocked = await readWeekBadgeUnlocked(
+    input.participantId,
+    input.weekId,
+    input.badgeName,
+  );
+  if (alreadyUnlocked) return false;
+
+  const badgeRow = {
+    participant_id: input.participantId,
+    week_id: input.weekId,
+    mission_id: resolveWeekBadgeMissionId(input.weekId),
+    badge_name: input.badgeName.trim(),
+  };
+  const { error: badgeError } = await supabase.from('player_badges').insert(badgeRow);
+  if (badgeError && badgeError.code !== '23505') {
+    throw badgeError;
+  }
+  return true;
+}
 
 async function readWalletTotal(participantId: string): Promise<number> {
   if (!supabase) return 0;
@@ -179,7 +276,19 @@ export async function completeMissionWithSupabase(
           mission_id: savePayload.mission_id,
         });
       }
-      return { ok: true, alreadyCompleted: true };
+      const weekNumber = parseWeekNumberFromPayload(savePayload.week_id, savePayload.week_number);
+      const { completedMissionIds: _omit, ...weekProgress } = await resolveWeekProgressSnapshot(
+        ensuredParticipantId,
+        savePayload.week_id,
+        weekNumber,
+        savePayload.badge_unlocked,
+      );
+      return {
+        ok: true,
+        alreadyCompleted: true,
+        ...weekProgress,
+        weekBadgeJustUnlocked: false,
+      };
     }
 
     if (!savePayload.mission_id && process.env.NODE_ENV === 'development') {
@@ -189,6 +298,18 @@ export async function completeMissionWithSupabase(
     const oldCoinTotal = await readWalletTotal(ensuredParticipantId);
     const newCoinTotal = oldCoinTotal + savePayload.coins_earned;
 
+    const weekNumber = parseWeekNumberFromPayload(savePayload.week_id, savePayload.week_number);
+    const weekProgressBefore = await resolveWeekProgressSnapshot(
+      ensuredParticipantId,
+      savePayload.week_id,
+      weekNumber,
+      savePayload.badge_unlocked,
+    );
+    const weekCompleteAfterMission = isWeekFullyComplete(weekNumber, [
+      ...weekProgressBefore.completedMissionIds,
+      savePayload.mission_id,
+    ]);
+
     const progressRow = {
       participant_id: ensuredParticipantId,
       week_id: savePayload.week_id,
@@ -197,7 +318,7 @@ export async function completeMissionWithSupabase(
       mission_title: savePayload.mission_title,
       character_name: savePayload.character_name,
       coins_earned: savePayload.coins_earned,
-      badge_unlocked: savePayload.badge_unlocked,
+      badge_unlocked: weekCompleteAfterMission ? savePayload.badge_unlocked : null,
       reward_item: savePayload.reward_item,
     };
 
@@ -215,7 +336,18 @@ export async function completeMissionWithSupabase(
 
     if (progressError) {
       if (progressError.code === '23505') {
-        return { ok: true, alreadyCompleted: true };
+        const { completedMissionIds: _omit, ...weekProgress } = await resolveWeekProgressSnapshot(
+          ensuredParticipantId,
+          savePayload.week_id,
+          weekNumber,
+          savePayload.badge_unlocked,
+        );
+        return {
+          ok: true,
+          alreadyCompleted: true,
+          ...weekProgress,
+          weekBadgeJustUnlocked: false,
+        };
       }
       throw progressError;
     }
@@ -227,29 +359,25 @@ export async function completeMissionWithSupabase(
       newCoinTotal,
     });
 
-    if (savePayload.badge_unlocked) {
-      const badgeRow = {
-        participant_id: ensuredParticipantId,
-        week_id: savePayload.week_id,
-        mission_id: savePayload.mission_id,
-        badge_name: savePayload.badge_unlocked,
-      };
-      const { data: badgeData, error: badgeError } = await supabase
-        .from('player_badges')
-        .insert(badgeRow)
-        .select('id')
-        .maybeSingle();
-
-      console.info('[MISSION_COMPLETE] player_badges insert', {
-        row: badgeRow,
-        data: badgeData,
-        error: badgeError ? formatSupabaseError(badgeError) : null,
-      });
-
-      if (badgeError && badgeError.code !== '23505') {
-        throw badgeError;
-      }
-    }
+    const completedMissionIds = Array.from(
+      new Set([...weekProgressBefore.completedMissionIds, savePayload.mission_id]),
+    );
+    const weekBadgeJustUnlocked = await awardWeekBadgeIfComplete({
+      participantId: ensuredParticipantId,
+      weekId: savePayload.week_id,
+      weekNumber,
+      badgeName: savePayload.badge_unlocked,
+      completedMissionIds,
+    });
+    const weekMissionsCompleted = countCompletedWeekMissions(weekNumber, completedMissionIds);
+    const weekMissionsTotal = resolveWeekMissionsTotal(weekNumber);
+    const weekBadgeUnlocked =
+      weekBadgeJustUnlocked ||
+      (await readWeekBadgeUnlocked(
+        ensuredParticipantId,
+        savePayload.week_id,
+        savePayload.badge_unlocked,
+      ));
 
     if (savePayload.coins_earned > 0) {
       trackMonthlyCoinsEarned(ensuredParticipantId, savePayload.coins_earned);
@@ -261,6 +389,10 @@ export async function completeMissionWithSupabase(
       oldCoinTotal,
       newCoinTotal,
       coinsEarned: savePayload.coins_earned,
+      weekMissionsCompleted,
+      weekMissionsTotal,
+      weekBadgeUnlocked,
+      weekBadgeJustUnlocked,
     };
   } catch (err) {
     const debugError = formatSupabaseError(err);

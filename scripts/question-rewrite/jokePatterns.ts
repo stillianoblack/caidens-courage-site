@@ -1,0 +1,36 @@
+export const JOKE_DISTRACTOR_PATTERNS: RegExp[] = [
+  /\bday of the week\b/i,
+  /\bforgot what games are\b/i,
+  /\blike a superhero\b/i,
+  /\bwater got tired\b/i,
+  /\bwater is broken\b/i,
+  /\bscience is over forever\b/i,
+  /\bbecome an orange\b/i,
+  /\btable disappeared\b/i,
+  /\bfunniest\b/i,
+  /\bposter glitter\b/i,
+  /\bfunniest guess\b/i,
+  /\bonly the volcano name\b/i,
+  /\bhide forever\b/i,
+  /\bcharge (its|his|her) phone\b/i,
+  /\bchooses favorites\b/i,
+  /\bhide tokens in a bush\b/i,
+  /\bdrop all tokens\b/i,
+  /\bclassroom lights\b/i,
+  /\bdepends on luck\b/i,
+  /\bthe silliest guess\b/i,
+  /\bnothing at all\b/i,
+  /\bno feelings at all\b/i,
+  /\bfeelings reset every hour\b/i,
+  /\bonly one feeling is allowed\b/i,
+  /\bnervous means they should quit\b/i,
+  /\bembarrassed means the project is bad\b/i,
+  /\bthe friend deserved it\b/i,
+  /\bhope for the best\b/i,
+  /\bignore the first test\b/i,
+  /\bchanges two things at once\b/i,
+];
+
+export function isJokeOrImpossible(label: string): boolean {
+  return JOKE_DISTRACTOR_PATTERNS.some((pattern) => pattern.test(label));
+}

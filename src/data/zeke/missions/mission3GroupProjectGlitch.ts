@@ -39,8 +39,13 @@ export const ZEKE_MISSION_3_FILE: ZekeAdaptiveMissionFile = {
           {
             id: 'zkm3-k1-q1',
             question: 'What helps the group work together?',
-            choices: ['Take turns talking', 'Everyone yell louder', 'Hide the markers', 'Quit the project'],
-            correctIndex: 0,
+            choices: [
+              'Have one speaker at a time and assign roles',
+              'Take turns talking',
+              'Raise a hand and wait for your turn',
+              'Tear up the project page',
+            ],
+            correctIndex: 1,
             correctFeedback: 'Yes. Taking turns helps everyone be heard.',
             incorrectFeedback: 'Try again. Zeke wants the group to work together.',
             hint: 'What helps people share ideas without chaos?',
@@ -57,7 +62,7 @@ export const ZEKE_MISSION_3_FILE: ZekeAdaptiveMissionFile = {
               'You go first, then me',
               'Fight for the crayons',
               'Nobody gets to color',
-              'Throw the markers away',
+              'Set turns for shared materials',
             ],
             correctIndex: 0,
             correctFeedback: 'Nice. Turn-taking keeps the project calm.',
@@ -119,7 +124,7 @@ export const ZEKE_MISSION_3_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'One draws, one writes title, one gathers supplies',
               'All three draw the same letter at once',
-              'The loudest kid draws everything',
+              'Split sections so each person has a role',
               'Skip the poster and go to recess early',
             ],
             correctIndex: 0,
@@ -162,7 +167,7 @@ export const ZEKE_MISSION_3_FILE: ZekeAdaptiveMissionFile = {
             question: 'The group is stuck because everyone wants the same task. What is the best solution?',
             choices: [
               'Divide roles based on what the project needs',
-              'Let the loudest person choose everything',
+              'Use a quick team vote after hearing each idea',
               'Stop working until the teacher fixes it',
               'Make three people do the same job',
             ],
@@ -200,7 +205,7 @@ export const ZEKE_MISSION_3_FILE: ZekeAdaptiveMissionFile = {
             question: 'One teammate finishes early and has nothing to do. What is a good team move?',
             choices: [
               'Ask what still needs help and reassign if needed',
-              'Tell them to sit quietly forever',
+              'Ask if they can help with the next needed part',
               'Send them to bother another group',
               'Take credit for their finished part',
             ],

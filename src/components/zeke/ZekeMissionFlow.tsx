@@ -6,6 +6,7 @@ import {
   readMirandaGradeBandPreviewParam,
   readParticipantGradeSettings,
 } from '../../lib/mirandaGradeBandResolver';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getZekeMissionById,
   isZekeAdaptiveMission,
@@ -39,6 +40,7 @@ export default function ZekeMissionFlow({
   const mission = getZekeMissionById(missionId);
   const gradeResolution = useZekeGradeBand();
   const gradeSettings = readParticipantGradeSettings();
+  const participantId = readActiveChildParticipantId();
 
   const previewBand = useMemo(() => {
     if (!canPreviewMirandaGradeBand(location.pathname)) return null;
@@ -48,8 +50,12 @@ export default function ZekeMissionFlow({
   const activeGradeBand = previewBand ?? gradeResolution.band;
 
   const config = useMemo(
-    () => resolveZekeMissionConfig(missionId, activeGradeBand),
-    [missionId, activeGradeBand],
+    () =>
+      resolveZekeMissionConfig(missionId, activeGradeBand, {
+        participantId,
+        gradeLevel: gradeSettings.gradeLevel,
+      }),
+    [activeGradeBand, gradeSettings.gradeLevel, missionId, participantId],
   );
 
   const completionContext = useMemo(() => {

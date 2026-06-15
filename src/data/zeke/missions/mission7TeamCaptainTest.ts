@@ -143,7 +143,7 @@ export const ZEKE_MISSION_7_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Help everyone feel they can contribute',
               'Win by leaving people out',
-              'Pick only favorites',
+              'Rotate turns so different teammates contribute',
               'Let one person do everything',
             ],
             correctIndex: 0,
@@ -185,8 +185,8 @@ export const ZEKE_MISSION_7_FILE: ZekeAdaptiveMissionFile = {
             id: 'zkm7-45-q2',
             question: 'Zeke only passes to his closest friends. What is the problem?',
             choices: [
-              'Others never get a chance to contribute',
-              'Friends are always the best players',
+              'It limits the team\'s ideas and growth',
+              'Fair chances help uncover hidden strengths',
               'Fairness does not matter in games',
               'Winning is all that counts',
             ],
@@ -206,7 +206,7 @@ export const ZEKE_MISSION_7_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Ask for their idea and give them a role',
               'Ignore quieter voices',
-              'Let the loudest person decide',
+              'Set a quick structure so each voice is heard',
               'Do everything himself',
             ],
             correctIndex: 0,
@@ -231,7 +231,7 @@ export const ZEKE_MISSION_7_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Creating conditions where everyone can contribute',
               'Winning while ignoring people',
-              'Picking favorites and calling it strategy',
+              'Building clear roles and fair opportunities',
               'Making every decision alone',
             ],
             correctIndex: 0,
@@ -250,7 +250,7 @@ export const ZEKE_MISSION_7_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Create chances for them to contribute and belong',
               'Win while ignoring them',
-              'Pick favorites as strategy',
+              'Design plays that include newer teammates too',
               'Make all decisions alone',
             ],
             correctIndex: 0,

@@ -254,13 +254,13 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
     await refresh();
   };
 
-  const handleSetFeatured = async (id: string) => {
-    const result = await setFeaturedAdventureModule(id);
+  const handleSetFeatured = async (module: AdventureModuleRecord) => {
+    const result = await setFeaturedAdventureModule(module.id);
     if (result.error) {
       setError(result.error);
       return;
     }
-    onCopied?.('Adventure set as featured hero week.');
+    onCopied?.(`Week ${module.week_number} is now the featured hero.`);
     await refresh();
   };
 
@@ -478,12 +478,12 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
                       <button
                         type="button"
                         className="adminPortal-btn adminPortal-btn--ghost"
-                        onClick={() => void handleSetFeatured(module.id)}
+                        onClick={() => void handleSetFeatured(module)}
                       >
                         Set as Featured
                       </button>
                     ) : (
-                      <span className="adminAdventureFeaturedBadge">Featured Hero</span>
+                      <span className="adminAdventureFeaturedBadge">Featured</span>
                     )}
                     {module.status !== 'scheduled' && module.status !== 'active' ? (
                       <button

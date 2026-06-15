@@ -14,6 +14,8 @@ type InventoryItemCardProps = {
   disabled?: boolean;
   themeHint?: string | null;
   owned?: boolean;
+  locked?: boolean;
+  unlockRequirement?: string;
   rarity?: InventoryCardRarity;
   category?: string;
   shopState?: InventoryShopState;
@@ -36,6 +38,8 @@ export default function InventoryItemCard({
   disabled = false,
   themeHint,
   owned = variant !== 'shop',
+  locked = false,
+  unlockRequirement,
   rarity = 'Common',
   category,
   shopState,
@@ -43,7 +47,8 @@ export default function InventoryItemCard({
   const themeId = resolveCharacterThemeId(themeHint ?? label);
   const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
   const shopCta = resolveShopCta(shopState, disabled);
-  const showOwned = owned && variant !== 'shop';
+  const showOwned = owned && !locked && variant !== 'shop';
+  const showLocked = locked && variant === 'badge';
 
   return (
     <article
@@ -52,6 +57,7 @@ export default function InventoryItemCard({
         `kidInventoryCard--${variant}`,
         disabled ? 'kidInventoryCard--disabled' : '',
         showOwned ? 'kidInventoryCard--owned' : '',
+        showLocked ? 'kidInventoryCard--locked' : '',
         shopState ? `kidInventoryCard--shopState-${shopState}` : '',
       ]
         .filter(Boolean)
@@ -64,9 +70,21 @@ export default function InventoryItemCard({
         </span>
       ) : null}
 
+      {showLocked ? (
+        <span className="kidInventoryCardLockedMark" aria-label="Locked">
+          <KidsAdventureIcon name="lock" size={14} filled />
+        </span>
+      ) : null}
+
       <div className="kidInventoryCardArtWrap">
         {imageSrc ? (
-          <img src={imageSrc} alt="" className="kidInventoryCardArt" loading="lazy" decoding="async" />
+          <img
+            src={imageSrc}
+            alt=""
+            className={['kidInventoryCardArt', showLocked ? 'kidInventoryCardArt--locked' : ''].filter(Boolean).join(' ')}
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <span className="kidInventoryCardFallback" aria-hidden="true">
             <KidsAdventureIcon
@@ -84,7 +102,13 @@ export default function InventoryItemCard({
 
       <p className="kidInventoryCardLabel">{label}</p>
 
+      {showLocked ? <p className="kidInventoryCardLockedLabel">Locked</p> : null}
+
       {category ? <p className="kidInventoryCardCategory">{category}</p> : null}
+
+      {unlockRequirement ? <p className="kidInventoryCardDesc">{unlockRequirement}</p> : null}
+
+      {description && !unlockRequirement ? <p className="kidInventoryCardDesc">{description}</p> : null}
 
       {typeof cost === 'number' ? (
         <p className="kidInventoryCardCost">
@@ -92,8 +116,6 @@ export default function InventoryItemCard({
           {cost} Focus Coins
         </p>
       ) : null}
-
-      {description ? <p className="kidInventoryCardDesc">{description}</p> : null}
 
       {shopCta ? <span className="kidInventoryCardShopCta">{shopCta}</span> : null}
     </article>

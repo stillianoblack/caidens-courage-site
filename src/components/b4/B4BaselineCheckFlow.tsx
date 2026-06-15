@@ -70,9 +70,9 @@ import {
   completeWeeklyCourageMission,
   resolveWeeklyCourageMissionPayload,
 } from '../../lib/courageWeeklyMissionCompletion';
-import { readWeeklyAdventureRouteContext,
-  resolveWeeklyAdventureReturnHref,
-} from '../../lib/weeklyAdventureRouteContext';
+import { enrichCourageMissionRewardFromCms } from '../../lib/cmsBadgeArtwork';
+import { useFamilyAdventureModules } from '../../hooks/useAdventureModules';
+import { navigateToGameplayReturnTarget } from '../../lib/mobileGameBackNav';
 import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
 import type {
   CompleteMissionResult,
@@ -126,6 +126,7 @@ export default function B4BaselineCheckFlow({
     selectParticipant,
     loading: participantLoading,
   } = useActiveParticipant();
+  const { modules: adventureModules } = useFamilyAdventureModules();
   const [familyCheckInStatus, setFamilyCheckInStatus] = useState<B4CheckInDisplayStatus>('Not Started');
   const [hubState, setHubState] = useState(() => loadB4BaselineState(activeParticipantId));
   const [view, setView] = useState<View>('landing');
@@ -535,8 +536,9 @@ export default function B4BaselineCheckFlow({
         location.search,
       );
       if (weeklyPayload) {
+        const enrichedPayload = enrichCourageMissionRewardFromCms(weeklyPayload, adventureModules);
         const result = await completeWeeklyCourageMission(location.pathname, location.search);
-        setCourageMissionPayload(weeklyPayload);
+        setCourageMissionPayload(enrichedPayload);
         setCourageMissionResult(
           result ?? {
             ok: false,
@@ -721,11 +723,8 @@ export default function B4BaselineCheckFlow({
   };
 
   const handleReturnToAdventureMap = useCallback(() => {
-    playItemButton();
-    const context = readWeeklyAdventureRouteContext(location.search);
-    const week = context.week && context.week > 0 ? context.week : 1;
-    navigate(resolveWeeklyAdventureReturnHref(location.pathname, week));
-  }, [location.pathname, location.search, navigate, playItemButton]);
+    navigateToGameplayReturnTarget(location.pathname, location.search, playItemButton);
+  }, [location.pathname, location.search, playItemButton]);
 
   const handleIdleEndSession = useCallback(() => {
     endProtectedChildSession(navigate, location.pathname);

@@ -17,6 +17,7 @@ export type ContentDifficulty = KidContentDifficulty | AdultContentDifficulty;
 export type ContentVersionTag =
   | 'legacy_reclassified'
   | 'adaptive_v1'
+  | 'adaptive_v2'
   | 'adaptive_k1_seed'
   | 'static_unbanded'
   | 'adult_normalized';

@@ -31,7 +31,21 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "audit:questions": "tsx scripts/question-audit/index.ts",
+    "audit:publication": "tsx scripts/question-audit/generatePublicationReadiness.ts",
+    "rewrite:staging": "tsx scripts/question-rewrite/generateStaging.ts",
+    "rewrite:final-pass": "tsx scripts/question-rewrite/finalPass.ts",
+    "rewrite:staging:difficulty": "tsx scripts/question-rewrite/difficultyUpgradePass.ts && tsx scripts/question-rewrite/generateV3Audit.ts",
+    "audit:questions:v2": "tsx scripts/question-rewrite/generateV2Audit.ts",
+    "audit:questions:v3": "tsx scripts/question-rewrite/generateV3Audit.ts",
+    "audit:top25": "tsx scripts/question-rewrite/generateTop25Reports.ts",
+    "audit:gold-standard": "tsx scripts/question-rewrite/generateGoldStandardReports.ts",
+    "audit:character-gold": "tsx scripts/question-rewrite/generateCharacterGoldStandardReports.ts",
+    "rewrite:character-alignment": "tsx scripts/question-rewrite/characterAlignmentPass.ts",
+    "report:character-alignment": "tsx scripts/question-rewrite/characterAlignmentPass.ts --report-only",
+    "rewrite:content-variety": "tsx scripts/question-rewrite/contentVarietyPass.ts",
+    "audit:week2-reset": "tsx scripts/pilot-audit/week2ResetImpact.ts"
   },
   "browserslist": {
     "production": [
@@ -46,7 +60,10 @@
     ]
   },
   "devDependencies": {
-    "sharp": "^0.34.5"
+    "@types/pdfkit": "^0.17.6",
+    "pdfkit": "^0.19.1",
+    "sharp": "^0.34.5",
+    "tsx": "^4.22.4"
   },
   "resolutions": {
     "schema-utils@2.7.0/ajv": "6.12.6",

@@ -42,7 +42,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Put his name on the signup sheet',
               'Tear the paper down',
-              'Hide under a table',
+              'Take one breath and ask for support',
               'Say nobody should try',
             ],
             correctIndex: 0,
@@ -59,12 +59,12 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             id: 'zkm6-k1-q2',
             question: 'Zeke\'s stomach feels flip-floppy. What can he do?',
             choices: [
+              'Wait and hope the nerves fade',
               'Take one slow breath and think',
-              'Tear up all the papers',
-              'Hide forever',
-              'Tell everyone to stop trying',
+              'Ask a friend to stand with him at signup',
+              'Rip up the signup sheet',
             ],
-            correctIndex: 0,
+            correctIndex: 1,
             correctFeedback: 'Nice. A breath can help Zeke take the next step.',
             incorrectFeedback: 'Try again. Zeke needs a move that helps, not hides.',
             hint: 'What helps when your body feels nervous?',
@@ -80,7 +80,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Writing his name down',
               'Doing the whole show right now',
-              'Never trying anything new',
+              'Trying one small step even while nervous',
               'Laughing at people who try',
             ],
             correctIndex: 0,
@@ -104,7 +104,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'What helps Zeke feel more ready?',
             choices: [
               'Practice once with someone he trusts',
-              'Never think about it again',
+              'Think of one practice step and schedule it',
               'Tell everyone he is already perfect',
               'Quit before trying',
             ],
@@ -123,7 +123,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'Zeke feels nervous before the talent show. What helps?',
             choices: [
               'Practicing with a trusted friend',
-              'Never thinking about it',
+              'Planning a short practice with a trusted person',
               'Telling everyone he is perfect',
               'Quitting before trying',
             ],
@@ -142,7 +142,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'What does practice do for courage?',
             choices: [
               'Helps courage get warmed up',
-              'Means you can never be nervous',
+              'Can still include nerves while building skill',
               'Makes trying not count',
               'Proves you should not try',
             ],
@@ -168,7 +168,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             choices: [
               'Nervous does not mean stop',
               'Nervous means he will fail',
-              'Brave people never feel nervous',
+              'Brave people can feel nervous and still act',
               'He should only try easy things',
             ],
             correctIndex: 0,
@@ -205,7 +205,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'Nervous feelings show up. What is true?',
             choices: [
               'Brave people can feel nervous and still try',
-              'Nervous always means stop',
+              'Nervous can mean "go slowly" instead of "stop"',
               'Only fearless people try new things',
               'Trying easy things is the only courage',
             ],
@@ -230,7 +230,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'What shows real courage?',
             choices: [
               'Taking a value-based step even while nervous',
-              'Waiting until fear disappears forever',
+              'Choosing a small value-based step now',
               'Acting like nothing matters',
               'Avoiding anything with risk',
             ],
@@ -249,7 +249,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
             question: 'Zeke wants to perform but fear says "skip it." What helps?',
             choices: [
               'Choosing the step that matches what he values',
-              'Waiting until fear is gone forever',
+              'Acting on what matters even while fear is present',
               'Acting like it does not matter',
               'Avoiding every risk',
             ],
@@ -270,7 +270,7 @@ export const ZEKE_MISSION_6_FILE: ZekeAdaptiveMissionFile = {
               'Direction toward what matters, even with fear present',
               'Having zero fear',
               'Performing only for others',
-              'Never feeling nervous again',
+              'Continuing toward goals while managing nerves',
             ],
             correctIndex: 0,
             correctFeedback: 'Exactly. Courage is not fearlessness. It is direction.',

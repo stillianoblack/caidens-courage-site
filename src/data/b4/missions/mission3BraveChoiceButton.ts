@@ -42,7 +42,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             choices: [
               'Help pick them up',
               'Laugh and walk away',
-              'Hide one crayon',
+              'Wait to help until someone else starts',
               'Pretend the floor did it',
             ],
             correctIndex: 0,
@@ -60,7 +60,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             question: 'A classmate looks sad and alone at recess. What is a brave choice?',
             choices: [
               'Ask if they want to play',
-              'Run away faster',
+              'Watch from far away and hope someone else helps',
               'Point and stare',
               'Pretend you did not see them',
             ],
@@ -80,7 +80,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             choices: [
               'Try your best to follow directions',
               'Keep running in circles',
-              'Hide under a desk',
+              'Stay in line and take one small calm breath',
               'Blame the line for being slow',
             ],
             correctIndex: 0,
@@ -186,7 +186,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             question: 'A hard assignment makes a student want to avoid it completely. What brave choice fits?',
             choices: [
               'Open the assignment and do the first small part',
-              'Hide it until it disappears',
+              'Wait and hope it feels easier later',
               'Say homework is illegal',
               'Wait until panic feels fun',
             ],
@@ -206,7 +206,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             choices: [
               'Practice one part before the big moment',
               'Skip every practice on purpose',
-              'Make jokes to hide and never try',
+              'Tell a joke to delay trying the hard part',
               'Hope the performance cancels itself',
             ],
             correctIndex: 0,
@@ -269,7 +269,7 @@ export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
             choices: [
               'Reach out respectfully when ready to talk',
               'Spread rumors about them',
-              'Pretend the friendship never existed',
+              'Wait quietly and hope the problem fades',
               'Wait for the friend to fix everything alone',
             ],
             correctIndex: 0,

@@ -53,7 +53,7 @@ export function makeCaidenQuestion(
       character: 'caiden',
       skillTags,
       skillArea,
-      contentVersion: 'adaptive_v1',
+      contentVersion: 'adaptive_v2',
       sourceId: moduleId,
     },
   };

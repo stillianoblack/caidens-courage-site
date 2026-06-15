@@ -31,18 +31,9 @@
   }
 }
 
-.courageMissionComplete .goldConfetti {
-  position: absolute;
+.courageMissionCompleteModal .goldConfetti {
+  position: fixed;
   inset: 0;
-  z-index: 0;
-}
-
-.courageMissionCompleteInner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-  width: 100%;
+  z-index: 2;
+  pointer-events: none;
 }

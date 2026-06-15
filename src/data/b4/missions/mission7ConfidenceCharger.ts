@@ -43,7 +43,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
               'I can try one more piece',
               'I am bad at everything',
               'This puzzle is my enemy',
-              'I will never try again',
+              'I can take a short break, then try once more',
             ],
             correctIndex: 0,
             correctFeedback: 'Yes. Trying one more piece is brave and helpful.',
@@ -60,7 +60,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'Your block tower fell down. What can B-4 say?',
             choices: [
               'Try again, one block at a time',
-              'Towers are impossible forever',
+              'This tower is hard today, but I can improve',
               'The blocks are being mean',
               'I quit building things',
             ],
@@ -79,7 +79,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'What charges the Confidence Charger?',
             choices: [
               'Trying again even when it is hard',
-              'Never making any mistakes',
+              'Learning from mistakes and trying again',
               'Only doing easy things',
               'Waiting until someone else does it',
             ],
@@ -104,7 +104,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'A student makes a mistake while reading. What self-talk helps?',
             choices: [
               'Mistakes help me learn',
-              'I should stop reading forever',
+              'I can slow down and read one line at a time',
               'Everyone is better than me',
               'The book is rude',
             ],
@@ -123,9 +123,9 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'A math problem feels tricky. What self-talk helps?',
             choices: [
               'I can figure this out step by step',
-              'I am terrible at math forever',
+              'Math is hard right now, but I can improve',
               'Math is my arch-enemy',
-              'I should never ask questions',
+              'I can ask one question after trying a step',
             ],
             correctIndex: 0,
             correctFeedback: 'Good self-talk. Step by step keeps your brain in the game.',
@@ -143,7 +143,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             choices: [
               'I can practice and improve',
               'They are right, so I should quit',
-              'I will never try hard things',
+              'I can try hard things in smaller steps',
               'Only perfect people can learn',
             ],
             correctIndex: 0,
@@ -186,8 +186,8 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'You failed the first attempt at a presentation. What is growth mindset?',
             choices: [
               'Learn from it and practice again',
-              'I am just bad at this forever',
-              'Presentations are impossible for me',
+              'I am still learning this skill',
+              'Presentations feel hard, so I will practice in parts',
               'Pretend it went perfectly',
             ],
             correctIndex: 0,
@@ -205,7 +205,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'Comparing yourself to everyone hurts confidence. What is better?',
             choices: [
               'Notice your own progress',
-              'Quit so you never compare again',
+              'Compare to your own progress from last week',
               'Only do things you already win at',
               'Copy what everyone else does',
             ],
@@ -230,8 +230,8 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'A student thinks, "I always mess up." What is a stronger replacement thought?',
             choices: [
               'This is hard, but I can improve with practice',
-              'I should never try difficult things',
-              'Everyone is judging me forever',
+              'I can try difficult things with support',
+              'Some people may notice, but I can still grow',
               'If I am not perfect, I failed',
             ],
             correctIndex: 0,
@@ -249,7 +249,7 @@ export const B4_MISSION_7_FILE: B4AdaptiveMissionFile = {
             question: 'Thought: "Everyone else gets this except me." What is a better replacement?',
             choices: [
               'I am still learning, and that is okay',
-              'I should never ask questions',
+              'Questions help me learn faster',
               'I must be the only confused person ever',
               'If I struggle, I do not belong here',
             ],

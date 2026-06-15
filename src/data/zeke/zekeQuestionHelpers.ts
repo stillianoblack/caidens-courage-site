@@ -46,7 +46,7 @@ export function makeZekeQuestion(
       audience: 'kid',
       gradeBand,
       difficulty: difficultyForBand(gradeBand),
-      contentVersion: 'adaptive_v1',
+      contentVersion: 'adaptive_v2',
       skillArea,
       skillTags: [skillArea, 'Social Skills', 'Teamwork'],
       character: 'zeke',

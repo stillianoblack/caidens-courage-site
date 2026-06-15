@@ -1,10 +1,12 @@
 import { isCharacterGameRoute } from './familyPortalNav';
+import { assignPortalRoute } from './portalHardNavigation';
 import {
   getPortalReturnFromQuery,
   getPortalReturnPath,
   isValidPortalReturnPath,
   resolvePortalReturnLabel,
 } from './portalReturnNav';
+import { resetPortalInteractionState } from './resetPortalInteractionState';
 import {
   readWeeklyAdventureRouteContext,
   resolveCharacterHubReturnHref,
@@ -58,4 +60,24 @@ export function resolveMobileGameBackTarget(pathname: string, search: string): M
     path: resolveWeeklyAdventuresPanelPath(pathname),
     ariaLabel: 'Back to Weekly Adventures',
   };
+}
+
+export function resolveMissionCompleteReturnLabel(pathname: string, search: string): string {
+  const weeklyCtx = readWeeklyAdventureRouteContext(search);
+  if (weeklyCtx.source === 'weekly') {
+    return 'Continue Adventure';
+  }
+  const { ariaLabel } = resolveMobileGameBackTarget(pathname, search);
+  return `← ${ariaLabel}`;
+}
+
+/** Hard navigation — clears stuck scroll locks and respects weekly vs hub return context. */
+export function navigateToGameplayReturnTarget(
+  pathname: string,
+  search: string,
+  onNavigate?: () => void,
+): void {
+  onNavigate?.();
+  resetPortalInteractionState();
+  assignPortalRoute(resolveMobileGameBackTarget(pathname, search).path);
 }

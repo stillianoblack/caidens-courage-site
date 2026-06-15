@@ -1,5 +1,6 @@
 import React from 'react';
 import { resolveAdventureThumbnailUrl } from '../../lib/adventureThumbnail';
+import { formatWeekHeader } from '../../lib/gameDisplayTitles';
 import TrailConnector from './TrailConnector';
 import TrailNode from './TrailNode';
 import type { AdventureTrailWeekView } from '../../types/adventureTrail';
@@ -45,9 +46,8 @@ export default function TrailWeekSection({
         </div>
 
         <div className="trailWeekSectionHeadText">
-          <p className="trailWeekSectionEyebrow">Week {week.week}</p>
           <h2 id={`trail-week-${week.week}-title`} className="trailWeekSectionTitle">
-            {week.title}
+            {formatWeekHeader(week.week, week.title)}
           </h2>
           <p className="trailWeekSectionSubtitle">SEL Focus: {week.selFocus}</p>
         </div>

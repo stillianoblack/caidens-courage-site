@@ -17,6 +17,16 @@
     margin-top: 3.5rem;
   }
 
+  .kids-adventure-shell .family-panel--characterHub .family-characterHubSection:first-of-type {
+    margin-top: 1.25rem;
+    padding-top: 1.5rem;
+  }
+
+  .kids-adventure-shell .family-panel--characterHub .family-characterHubSection:first-of-type .weeklyAdventureCardGrid {
+    margin-top: 1.75rem;
+    padding-top: 0.5rem;
+  }
+
   /* —— Cinematic adventure cards (Character Hub, quest lists) —— */
   .kids-adventure-shell .weeklyAdventureCard {
     position: relative;

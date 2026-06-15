@@ -47,7 +47,7 @@ export const CAIDEN_QUEST_5_FILE: CaidenAdaptiveQuestFile = {
           scenarioAccent: 'camp-pack',
           options: [
             { id: 'a', label: 'Make a list' },
-            { id: 'b', label: 'Hide his backpack' },
+            { id: 'b', label: 'Check the bag and list missing items' },
             { id: 'c', label: 'Watch TV' },
             { id: 'd', label: 'Forget everything' },
           ],
@@ -65,7 +65,7 @@ export const CAIDEN_QUEST_5_FILE: CaidenAdaptiveQuestFile = {
             { id: 'a', label: 'Water bottle' },
             { id: 'b', label: 'Pillow from bed' },
             { id: 'c', label: 'TV remote' },
-            { id: 'd', label: 'Dirty sock only' },
+            { id: 'd', label: 'A random extra with no plan' },
           ],
           correctAnswer: 'a',
           explanation: 'A water bottle is a practical camp essential.',
@@ -132,8 +132,8 @@ export const CAIDEN_QUEST_5_FILE: CaidenAdaptiveQuestFile = {
           scenarioAccent: 'reflection',
           options: [
             { id: 'a', label: 'It breaks a big task into steps' },
-            { id: 'b', label: 'It makes work disappear' },
-            { id: 'c', label: 'It means mistakes never happen' },
+            { id: 'b', label: 'It helps track what is done and what is next' },
+            { id: 'c', label: 'It makes mistakes easier to catch and fix' },
             { id: 'd', label: 'It lets you skip everything' },
           ],
           correctAnswer: 'a',

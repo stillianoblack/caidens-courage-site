@@ -41,7 +41,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
             question: 'You knocked over someone\'s blocks. What helps repair it?',
             choices: [
               'Say sorry and help rebuild',
-              'Run away',
+              'Wait and hope someone else fixes it',
               'Say the blocks jumped',
               'Laugh at the mess',
             ],
@@ -60,7 +60,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
             question: 'You spilled juice on a friend\'s paper. What helps?',
             choices: [
               'Say sorry and help clean up',
-              'Hide the cup behind your back',
+              'Say nothing and hope nobody notices',
               'Say the juice was thirsty',
               'Walk away really fast',
             ],
@@ -79,7 +79,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
             question: 'What is repair?',
             choices: [
               'Fixing what your mistake hurt',
-              'Pretending it never happened',
+              'Waiting for the mistake to be forgotten',
               'Blaming someone else',
               'Running until everyone forgets',
             ],
@@ -144,7 +144,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
               'No — you still need to apologize',
               'Yes — jokes erase everything',
               'Only if you say it three times',
-              'Yes — if you run away fast',
+              'No — repair still matters after a joke',
             ],
             correctIndex: 0,
             correctFeedback: 'Right. A real apology does not hide behind "just kidding."',
@@ -186,7 +186,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
             question: 'You borrowed something without asking and broke it. Best repair?',
             choices: [
               'Tell them, apologize, and offer to replace or fix it',
-              'Hide the broken piece in your locker',
+              'Put it away and avoid talking about it',
               'Say it was already broken when you found it',
               'Wait and hope they forget',
             ],
@@ -231,7 +231,7 @@ export const B4_MISSION_6_FILE: B4AdaptiveMissionFile = {
             choices: [
               'Accountability focuses on repair and better choices',
               'Accountability means you are a bad person',
-              'Shame always fixes behavior',
+              'Pressure and blame usually build trust',
               'Repair is only needed if adults notice',
             ],
             correctIndex: 0,

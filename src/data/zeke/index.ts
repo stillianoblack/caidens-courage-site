@@ -1,5 +1,6 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import type { ZekeGradeBand } from '../../types/zekeAdaptiveQuest';
+import type { AdaptiveQuestionSelectionContext } from '../../lib/adaptiveQuestionSelection';
 import {
   buildZekeAdaptiveConfig,
   ZEKE_ADAPTIVE_MISSION_REGISTRY,
@@ -55,13 +56,14 @@ export function resolveZekeMissionDescription(missionId: string, gradeBand: Zeke
 export function resolveZekeMissionConfig(
   missionId: string,
   gradeBand: ZekeGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
   const mission = getZekeMissionById(missionId);
   if (!mission) return undefined;
 
   const adaptiveFile = getZekeAdaptiveMission(mission.adaptiveMissionId);
   if (adaptiveFile) {
-    return buildZekeAdaptiveConfig(adaptiveFile, gradeBand);
+    return buildZekeAdaptiveConfig(adaptiveFile, gradeBand, selectionContext);
   }
 
   return mission.config;

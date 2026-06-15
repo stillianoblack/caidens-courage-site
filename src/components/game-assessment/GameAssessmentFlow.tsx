@@ -64,15 +64,19 @@ import {
   completeWeeklyCourageMission,
   resolveWeeklyCourageMissionPayload,
 } from '../../lib/courageWeeklyMissionCompletion';
+import { enrichCourageMissionRewardFromCms } from '../../lib/cmsBadgeArtwork';
+import { useFamilyAdventureModules } from '../../hooks/useAdventureModules';
+import { resolveWeeklyGameDisplayTitles } from '../../lib/gameDisplayTitles';
+import {
+  isWeeklyAdventureSource,
+  readWeeklyAdventureRouteContext,
+} from '../../lib/weeklyAdventureRouteContext';
 import {
   navigateGameExit,
   shouldGameplayExitImmediately,
 } from '../../lib/gameExitNavigation';
 import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
-import {
-  readWeeklyAdventureRouteContext,
-  resolveWeeklyAdventureReturnHref,
-} from '../../lib/weeklyAdventureRouteContext';
+import { navigateToGameplayReturnTarget } from '../../lib/mobileGameBackNav';
 import type {
   CompleteMissionResult,
   CourageMissionRewardPayload,
@@ -255,11 +259,29 @@ export default function GameAssessmentFlow({
   );
   const [sessionFinishing, setSessionFinishing] = useState(false);
   const quizStartedAtRef = useRef<number | null>(null);
+  const { modules: adventureModules } = useFamilyAdventureModules();
 
-  const weeklyCouragePayload = useMemo(
-    () => resolveWeeklyCourageMissionPayload(currentPathname, currentSearch),
-    [currentPathname, currentSearch],
+  const weeklyCouragePayload = useMemo(() => {
+    const base = resolveWeeklyCourageMissionPayload(currentPathname, currentSearch);
+    if (!base) return null;
+    return enrichCourageMissionRewardFromCms(base, adventureModules);
+  }, [currentPathname, currentSearch, adventureModules]);
+
+  const weeklyRouteContext = useMemo(
+    () => readWeeklyAdventureRouteContext(currentSearch),
+    [currentSearch],
   );
+  const weeklyDisplayTitles = useMemo(() => {
+    if (!isWeeklyAdventureSource(currentSearch)) return null;
+    const weekNumber = weeklyRouteContext.week && weeklyRouteContext.week > 0 ? weeklyRouteContext.week : 1;
+    const gameTitle = config.landing.subtitle?.trim() || config.landing.title;
+    return resolveWeeklyGameDisplayTitles({
+      weekNumber,
+      gameTitle,
+      modules: adventureModules,
+      weekTitleHint: weeklyRouteContext.weekTitle,
+    });
+  }, [adventureModules, config.landing.subtitle, config.landing.title, currentSearch, weeklyRouteContext]);
 
   const currentQuestion = config.questions[questionIndex];
 
@@ -396,8 +418,10 @@ export default function GameAssessmentFlow({
   useSetMissionGamePhase(view === 'courage-celebration' ? 'complete' : view);
 
   useEffect(() => {
-    document.title = `${config.landing.title} | Caiden's Courage`;
-  }, [config.landing.title]);
+    document.title = weeklyDisplayTitles
+      ? `${weeklyDisplayTitles.documentTitle} | Caiden's Courage`
+      : `${config.landing.title} | Caiden's Courage`;
+  }, [config.landing.title, weeklyDisplayTitles]);
 
   const emitGameStarted = useCallback(() => {
     const trackingMeta = tracking ?? resolveModuleTracking(config);
@@ -515,11 +539,8 @@ export default function GameAssessmentFlow({
   );
 
   const handleReturnToAdventureMap = useCallback(() => {
-    playItemButton();
-    const context = readWeeklyAdventureRouteContext(currentSearch);
-    const week = context.week && context.week > 0 ? context.week : 1;
-    navigate(resolveWeeklyAdventureReturnHref(currentPathname, week));
-  }, [currentPathname, currentSearch, navigate, playItemButton]);
+    navigateToGameplayReturnTarget(currentPathname, currentSearch, playItemButton);
+  }, [currentPathname, currentSearch, playItemButton]);
 
   const finishGameSession = useCallback(
     (finalAnswers: Record<string, GameAnswerValue>, questionAttempts: QuestionAttemptsMap) => {
@@ -816,7 +837,7 @@ export default function GameAssessmentFlow({
 
   const landingReadAloudSegments = useMemo(() => {
     const missionIntro = buildReadAloudSegmentsFromParts({
-      scenarioTitle: config.landing.title,
+      scenarioTitle: weeklyDisplayTitles?.gameHeader ?? config.landing.title,
       scenarioDescription: [config.landing.subtitle, config.landing.body, introHint]
         .filter(Boolean)
         .join(' '),
@@ -858,7 +879,11 @@ export default function GameAssessmentFlow({
             backHref={showHubBackLink ? hubBackHref : undefined}
             onBackClick={playItemButton}
             onBack={
-              !showHubBackLink && view !== 'courage-celebration' ? handleExit : undefined
+              view === 'courage-celebration'
+                ? handleReturnToAdventureMap
+                : !showHubBackLink
+                  ? handleExit
+                  : undefined
             }
             progressPercent={progressPct}
             showProgress={view === 'quiz' || view === 'complete' || view === 'courage-celebration'}
@@ -917,9 +942,15 @@ export default function GameAssessmentFlow({
                       : ''
                 }${usesCoachingShell ? ' game-landing--focusFlameShell' : ''}`}
               >
-                <p className="bbc-eyebrow">{config.landing.eyebrow}</p>
-                <h1 className="bbc-title">{config.landing.title}</h1>
-                <p className="bbc-subtitle">{config.landing.subtitle}</p>
+                <p className="bbc-eyebrow">
+                  {weeklyDisplayTitles?.weekHeader ?? config.landing.eyebrow}
+                </p>
+                <h1 className="bbc-title">
+                  {weeklyDisplayTitles?.gameHeader ?? config.landing.title}
+                </h1>
+                {!weeklyDisplayTitles ? (
+                  <p className="bbc-subtitle">{config.landing.subtitle}</p>
+                ) : null}
                 <p className="bbc-body">{config.landing.body}</p>
                 {introAvatarSrc ? (
                   useAdultGuideHeader && guideHubTheme ? (

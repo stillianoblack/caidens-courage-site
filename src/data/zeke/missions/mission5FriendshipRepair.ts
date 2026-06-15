@@ -79,7 +79,7 @@ export const ZEKE_MISSION_5_FILE: ZekeAdaptiveMissionFile = {
             question: 'What is repair?',
             choices: [
               'Helping fix the hurt',
-              'Pretending nothing happened',
+              'Checking in and asking what would help now',
               'Blaming the chair',
               'Running away',
             ],
@@ -268,8 +268,8 @@ export const ZEKE_MISSION_5_FILE: ZekeAdaptiveMissionFile = {
             question: 'What shows repair is working?',
             choices: [
               'The friend feels heard and sees change over time',
-              'Everyone pretends it never happened',
-              'Zeke avoids them forever',
+              'Both friends feel heard and notice changed behavior',
+              'Zeke keeps showing up with consistent follow-through',
               'Only words, no changed actions',
             ],
             correctIndex: 0,

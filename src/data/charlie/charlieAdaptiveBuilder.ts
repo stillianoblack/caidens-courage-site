@@ -1,6 +1,14 @@
 import { resolveKidGradeBandWithFallback } from '../../lib/gradeBandContentResolver';
 import { resolveAdaptiveGradeBand } from '../../lib/getGradeBand';
 import { readParticipantGradeSettings } from '../../lib/mirandaGradeBandResolver';
+import {
+  finalizeAdaptiveQuestions,
+  type AdaptiveQuestionSelectionContext,
+} from '../../lib/adaptiveQuestionSelection';
+import {
+  applyStagingToQuestions,
+  stagingContentVersionSuffix,
+} from '../../lib/stagingQuestionOverrides';
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import type { CharlieNatureAccent } from '../../types/gameAssessment';
 import type {
@@ -33,7 +41,7 @@ export function resolveCharlieGradeContent(
 }
 
 export function charlieContentVersionId(missionId: string, band: CharlieGradeBand): string {
-  return `${missionId}::${band}::adaptive_v1`;
+  return `${missionId}::${band}::${stagingContentVersionSuffix()}`;
 }
 
 function buildQuestion(
@@ -73,8 +81,14 @@ function buildQuestion(
 export function buildCharlieAdaptiveConfig(
   mission: CharlieAdaptiveMissionFile,
   gradeBand: CharlieGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
   const content = resolveCharlieGradeContent(mission, gradeBand);
+  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+    missionId: mission.id,
+    gradeBand,
+    ...selectionContext,
+  });
 
   return {
     id: mission.id,
@@ -86,7 +100,7 @@ export function buildCharlieAdaptiveConfig(
     avatarAlt: 'Charlie Perk',
     landing: mission.landing,
     complete: mission.complete,
-    questions: content.questions.map((q) => buildQuestion(q, mission)),
+    questions: questions.map((q) => buildQuestion(q, mission)),
     tracking: undefined,
   };
 }
@@ -117,7 +131,10 @@ export function getCharlieMissionForParticipant(input: {
     allowStretch: settings.allowStretch,
   });
 
-  return buildCharlieAdaptiveConfig(mission, band);
+  return buildCharlieAdaptiveConfig(mission, band, {
+    participantId: input.participantId,
+    gradeLevel: settings.gradeLevel ?? input.gradeLevel,
+  });
 }
 
 export const CHARLIE_ADAPTIVE_MISSION_FEEDBACK = CHARLIE_ADAPTIVE_COACH;

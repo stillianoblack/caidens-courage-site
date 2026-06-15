@@ -4,7 +4,9 @@ import GameAssessmentFlow from '../game-assessment/GameAssessmentFlow';
 import {
   canPreviewMirandaGradeBand,
   readMirandaGradeBandPreviewParam,
+  readParticipantGradeSettings,
 } from '../../lib/mirandaGradeBandResolver';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getMirandaMissionById,
   isMirandaAdaptiveMission,
@@ -39,6 +41,8 @@ export default function MirandaMissionFlow({
   const location = useLocation();
   const mission = getMirandaMissionById(missionId);
   const gradeResolution = useMirandaGradeBand();
+  const gradeSettings = readParticipantGradeSettings();
+  const participantId = readActiveChildParticipantId();
 
   const previewBand = useMemo(() => {
     if (!canPreviewMirandaGradeBand(location.pathname)) return null;
@@ -48,8 +52,12 @@ export default function MirandaMissionFlow({
   const activeGradeBand = previewBand ?? gradeResolution.band;
 
   const config = useMemo(
-    () => resolveMirandaMissionConfig(missionId, activeGradeBand),
-    [missionId, activeGradeBand],
+    () =>
+      resolveMirandaMissionConfig(missionId, activeGradeBand, {
+        participantId,
+        gradeLevel: gradeSettings.gradeLevel,
+      }),
+    [activeGradeBand, gradeSettings.gradeLevel, missionId, participantId],
   );
 
   const completionContext = useMemo(() => {

@@ -22,6 +22,8 @@ import {
   isWeeklyAdventureSource,
   readWeeklyAdventureRouteContext,
 } from './weeklyAdventureRouteContext';
+import { fetchFamilyAdventureModules } from './adventureModuleService';
+import { enrichCourageMissionRewardFromCms } from './cmsBadgeArtwork';
 
 export function resolveWeeklyCourageMissionReward(
   pathname: string,
@@ -57,6 +59,10 @@ export async function completeWeeklyCourageMission(
     return {
       ok: true,
       alreadyCompleted: true,
+      weekMissionsCompleted: 0,
+      weekMissionsTotal: 5,
+      weekBadgeUnlocked: false,
+      weekBadgeJustUnlocked: false,
     };
   }
 
@@ -65,7 +71,13 @@ export async function completeWeeklyCourageMission(
     return null;
   }
 
-  const payload = buildCourageMissionPayload(reward.mission_id, parseWeekNumber(reward.week_id));
+  const { modules } = await fetchFamilyAdventureModules();
+  const enrichedReward = enrichCourageMissionRewardFromCms(reward, modules);
+
+  const payload = buildCourageMissionPayload(
+    enrichedReward.mission_id,
+    parseWeekNumber(enrichedReward.week_id),
+  );
   if (!payload) {
     const context = resolvePlayerParticipantContext();
     logPlayerParticipantContext(context, '[MISSION_COMPLETE] weekly payload build failed');
@@ -82,7 +94,17 @@ export async function completeWeeklyCourageMission(
   void ensureWeekGradeLevel(payload.participant_id, payload.week_id);
   markDailyAdventureComplete(payload.participant_id);
 
-  const result = await completeMissionWithSupabase(payload);
+  const cmsPayload: CourageMissionCompletionPayload = {
+    ...payload,
+    mission_title: enrichedReward.mission_title,
+    badge_unlocked: enrichedReward.badge_unlocked,
+    badge_image_url: enrichedReward.badge_image_url,
+    week_number: enrichedReward.week_number,
+    badge_week_label: enrichedReward.badge_week_label,
+    badge_rarity: enrichedReward.badge_rarity,
+  };
+
+  const result = await completeMissionWithSupabase(cmsPayload);
 
   if (result.ok) {
     if (!result.alreadyCompleted && 'newCoinTotal' in result) {

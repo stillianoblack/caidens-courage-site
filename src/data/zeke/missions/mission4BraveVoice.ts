@@ -39,8 +39,13 @@ export const ZEKE_MISSION_4_FILE: ZekeAdaptiveMissionFile = {
           {
             id: 'zkm4-k1-q1',
             question: 'What can Zeke say?',
-            choices: ['That was not kind', 'Say something mean back', 'Laugh louder', 'Run away and hide forever'],
-            correctIndex: 0,
+            choices: [
+              'Say something mean back',
+              'That was not kind',
+              'Take a breath, then use a calm voice',
+              'Pretend hurting words are funny',
+            ],
+            correctIndex: 1,
             correctFeedback: 'Yes. Zeke can use kind, brave words.',
             incorrectFeedback: 'Try again. Brave words can help someone feel safe.',
             hint: 'What short sentence tells the truth without being mean back?',
@@ -76,7 +81,7 @@ export const ZEKE_MISSION_4_FILE: ZekeAdaptiveMissionFile = {
               'Please stop. That hurts feelings.',
               'Say a bigger mean joke back',
               'Shout until the cafeteria shakes',
-              'Hide under the lunch table',
+              'Take a breath and ask an adult for support if needed',
             ],
             correctIndex: 0,
             correctFeedback: 'Correct. Brave can be calm and clear.',
@@ -181,7 +186,7 @@ export const ZEKE_MISSION_4_FILE: ZekeAdaptiveMissionFile = {
             question: 'The joke-maker says "It was just funny." What is a respectful reply?',
             choices: [
               'Funny can still hurt someone. Let\'s stop.',
-              'You\'re a terrible person forever',
+              'That joke hurt someone; please stop',
               'Fine, keep going then',
               'Laugh harder to avoid conflict',
             ],
@@ -263,7 +268,7 @@ export const ZEKE_MISSION_4_FILE: ZekeAdaptiveMissionFile = {
             question: 'Later, Zeke talks to the student who made the joke. What shows mature courage?',
             choices: [
               'Explain why the joke hurt and ask them to repair it',
-              'Ghost them forever with no conversation',
+              'Take space, then have a respectful follow-up talk',
               'Gather a crowd to confront them again',
               'Pretend nothing happened so popularity stays intact',
             ],

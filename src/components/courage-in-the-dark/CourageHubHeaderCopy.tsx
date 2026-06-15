@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatWeekHeader } from '../../lib/gameDisplayTitles';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
 
 type CourageHubHeaderCopyProps = {
@@ -27,8 +28,7 @@ export default function CourageHubHeaderCopy({
         .join(' ')}
     >
       <div className="courageHubHeaderCopyMain">
-        <p className="courageMapCanvasEyebrow">Week {week}</p>
-        <h2 className="courageMapCanvasTitle">{weekTitle}</h2>
+        <h2 className="courageMapCanvasTitle">{formatWeekHeader(week, weekTitle)}</h2>
         <p className="courageMapCanvasSubtitle">Choose your adventure.</p>
         {selFocus ? (
           <p className="courageMapCanvasSelFocus">{formatSelFocusLine(selFocus) ?? selFocus}</p>

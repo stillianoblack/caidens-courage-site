@@ -1,5 +1,6 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import type { CharlieGradeBand } from '../../types/charlieAdaptiveQuest';
+import type { AdaptiveQuestionSelectionContext } from '../../lib/adaptiveQuestionSelection';
 import {
   buildCharlieAdaptiveConfig,
   CHARLIE_ADAPTIVE_MISSION_REGISTRY,
@@ -58,13 +59,14 @@ export function resolveCharlieMissionDescription(
 export function resolveCharlieMissionConfig(
   missionId: string,
   gradeBand: CharlieGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
   const mission = getCharlieMissionById(missionId);
   if (!mission) return undefined;
 
   const adaptiveFile = getCharlieAdaptiveMission(mission.adaptiveMissionId);
   if (adaptiveFile) {
-    return buildCharlieAdaptiveConfig(adaptiveFile, gradeBand);
+    return buildCharlieAdaptiveConfig(adaptiveFile, gradeBand, selectionContext);
   }
 
   return mission.config;

@@ -1,5 +1,6 @@
 import { readAdminSession } from '../config/adminAccess';
 import type { AdventureModuleRecord } from '../types/adventureModule';
+import { getFeaturedAdventure } from './getFeaturedAdventure';
 
 export const PREVIEW_ADVENTURE_PARAM = 'previewAdventureId';
 export const ADMIN_PREVIEW_PARAM = 'adminPreview';
@@ -200,20 +201,9 @@ export function formatCmsAdventureUnlockStatus(
 
 export function resolveFeaturedAdventureModule(
   modules: AdventureModuleRecord[],
-  ctx: AdventureVisibilityContext,
+  ctx: AdventureVisibilityContext = {},
 ): AdventureModuleRecord | null {
-  const sorted = sortAdventures(modules);
-
-  if (ctx.previewAdventureId && ctx.isAdmin && ctx.previewMode === 'admin') {
-    return sorted.find((row) => row.id === ctx.previewAdventureId) ?? null;
-  }
-
-  const featured = sorted.find((row) => row.is_featured);
-  if (featured && (isFamilyVisibleAdventure(featured, ctx) || isPreviewingAdventure(featured, ctx))) {
-    return featured;
-  }
-
-  return null;
+  return getFeaturedAdventure(modules, ctx);
 }
 
 /** Hero/header week — featured when accessible, otherwise child's playable week. */
@@ -236,20 +226,8 @@ export function resolveHeroDisplayWeekNumber(input: {
   }
 
   const featured = input.featuredAdventure;
-  if (featured) {
-    const featuredWeek = featured.week_number;
-    const status = resolveCmsAdventureWeekStatus(
-      featured,
-      input.cmsModules,
-      input.visibilityCtx,
-      [...input.completedWeekNumbers],
-    );
-    if (status === 'available' && featuredWeek >= input.playableWeekNumber) {
-      if (featuredWeek > input.playableWeekNumber) {
-        return input.playableWeekNumber;
-      }
-      return featuredWeek;
-    }
+  if (featured && isPublishedAdventure(featured)) {
+    return featured.week_number;
   }
 
   return input.playableWeekNumber;

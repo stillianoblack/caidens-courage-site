@@ -4,7 +4,9 @@ import GameAssessmentFlow from '../game-assessment/GameAssessmentFlow';
 import {
   canPreviewMirandaGradeBand,
   readMirandaGradeBandPreviewParam,
+  readParticipantGradeSettings,
 } from '../../lib/mirandaGradeBandResolver';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getCaidenQuestById,
   isCaidenAdaptiveQuest,
@@ -37,6 +39,8 @@ export default function CaidenQuestFlow({
   const location = useLocation();
   const quest = getCaidenQuestById(questId);
   const gradeResolution = useCaidenGradeBand();
+  const gradeSettings = readParticipantGradeSettings();
+  const participantId = readActiveChildParticipantId();
 
   const previewBand = useMemo(() => {
     if (!canPreviewMirandaGradeBand(location.pathname)) return null;
@@ -46,8 +50,12 @@ export default function CaidenQuestFlow({
   const activeGradeBand = previewBand ?? gradeResolution.band;
 
   const config = useMemo(
-    () => resolveCaidenQuestConfig(questId, activeGradeBand),
-    [questId, activeGradeBand],
+    () =>
+      resolveCaidenQuestConfig(questId, activeGradeBand, {
+        participantId,
+        gradeLevel: gradeSettings.gradeLevel,
+      }),
+    [activeGradeBand, gradeSettings.gradeLevel, participantId, questId],
   );
 
   const completionContext = useMemo(() => {

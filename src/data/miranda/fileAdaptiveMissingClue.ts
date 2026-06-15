@@ -154,7 +154,7 @@ export const MIRANDA_MISSING_CLUE_FILE: MirandaAdaptiveFile = {
           question: 'What strategy did Miranda use?',
           options: [
             { id: 'a', label: 'Context clues' },
-            { id: 'b', label: 'Random guessing' },
+            { id: 'b', label: 'Using one clue without checking others' },
             { id: 'c', label: 'Ignoring evidence' },
             { id: 'd', label: 'Asking everyone to stop' },
           ],
@@ -169,7 +169,7 @@ export const MIRANDA_MISSING_CLUE_FILE: MirandaAdaptiveFile = {
           options: [
             { id: 'a', label: 'Planned or meant' },
             { id: 'b', label: 'Forgotten' },
-            { id: 'c', label: 'Hidden forever' },
+            { id: 'c', label: 'Missing from view for now' },
             { id: 'd', label: 'Broken' },
           ],
           correctAnswer: 'a',

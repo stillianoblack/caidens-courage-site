@@ -3,8 +3,8 @@ import type { AdventureModuleRecord } from '../types/adventureModule';
 import {
   fetchAdventureModules,
   fetchFamilyAdventureModules,
-  resolveFeaturedAdventureModule,
 } from '../lib/adventureModuleService';
+import { getFeaturedAdventure } from '../lib/getFeaturedAdventure';
 
 type AdventureModuleScope = 'all' | 'family';
 
@@ -50,7 +50,7 @@ export function useAdventureModules(scope: AdventureModuleScope = 'all') {
     };
   }, [refresh]);
 
-  const featuredModule = resolveFeaturedAdventureModule(modules);
+  const featuredModule = getFeaturedAdventure(modules);
 
   return { modules, activeModule: featuredModule, featuredModule, loading, error, refresh };
 }

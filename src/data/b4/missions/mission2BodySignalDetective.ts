@@ -39,8 +39,13 @@ export const B4_MISSION_2_FILE: B4AdaptiveMissionFile = {
           {
             id: 'b4m2-k1-q1',
             question: 'If your heart beats fast and your body feels jumpy, what can help?',
-            choices: ['Take slow breaths', 'Run into a wall', 'Yell louder', 'Hide your shoes'],
-            correctIndex: 0,
+            choices: [
+              'Ask for help after trying one breath',
+              'Take slow breaths',
+              'Do the easiest calm step first',
+              'Keep making your body more jumpy',
+            ],
+            correctIndex: 1,
             correctFeedback: 'Yes. Slow breaths can help your body calm down.',
             incorrectFeedback: 'Try again. B-4 wants a move that helps the body feel safe.',
             hint: 'What helps a jumpy body slow down?',
@@ -92,7 +97,7 @@ export const B4_MISSION_2_FILE: B4AdaptiveMissionFile = {
           {
             id: 'b4m2-23-q1',
             question: 'A student\'s shoulders are tight before reading aloud. What feeling might match that signal?',
-            choices: ['Nervous', 'Invisible', 'Extra hungry', 'Too sparkly'],
+            choices: ['Nervous', 'Unsure what to do next', 'Extra hungry', 'Too sparkly'],
             correctIndex: 0,
             correctFeedback: 'Correct. Tight shoulders can be a clue that someone feels nervous.',
             incorrectFeedback: 'Not quite. B-4 uses body clues to understand feelings.',
@@ -205,9 +210,9 @@ export const B4_MISSION_2_FILE: B4AdaptiveMissionFile = {
             question: 'Why should someone notice body signals early?',
             choices: [
               'Early signals help prevent a bigger reaction',
-              'Body signals are always wrong',
-              'Feelings disappear if ignored',
-              'It makes the problem someone else\'s job',
+              'Waiting until feelings peak gives more control',
+              'Ignoring signals helps them fade faster',
+              'Body signals only matter after someone else notices',
             ],
             correctIndex: 0,
             correctFeedback: 'Exactly. Early signals give you more choices before emotions take over.',

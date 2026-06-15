@@ -47,7 +47,7 @@ export function makeCharlieQuestion(
       audience: 'kid',
       gradeBand,
       difficulty: difficultyForBand(gradeBand),
-      contentVersion: 'adaptive_v1',
+      contentVersion: 'adaptive_v2',
       skillArea,
       skillTags: [skillArea],
       character: 'charlie',

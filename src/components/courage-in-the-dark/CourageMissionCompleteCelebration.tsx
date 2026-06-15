@@ -1,18 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom';
 import type { CompleteMissionResult, CourageMissionRewardPayload } from '../../types/courageMissionProgress';
-import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
-import { getNextUnlockPreview } from '../../data/rewardShopItems';
-import { getBadgeArtworkPath, getRewardItemArtworkPath } from '../../lib/rewardArtwork';
+import { parseWeekNumberFromWeekId, resolveBadgeDisplay } from '../../lib/cmsBadgeArtwork';
+import { formatWeekHeader, sanitizeMissionGameTitle } from '../../lib/gameDisplayTitles';
+import {
+  resolveBadgeUnlockHint,
+  resolveCmsWeekTitle,
+  resolveMissionsRemainingMessage,
+} from '../../lib/weekBadgeProgression';
+import { useFamilyAdventureModules } from '../../hooks/useAdventureModules';
 import { shareCampAchievement } from '../../lib/shareCampAchievement';
 import { notifyFocusCoinWalletUpdated } from '../../hooks/useFocusCoinWallet';
-import { COURAGE_LOGO_SRC } from '../../config/courageNav';
+import { resolveMissionCompleteReturnLabel } from '../../lib/mobileGameBackNav';
 import FocusCoinIcon from '../rewards/FocusCoinIcon';
 import { resolveCharacterThemeId, CHARACTER_HOTSPOT_IMAGES } from '../../design-system/kids-adventure/characterThemes';
 import GoldConfetti from '../rewards/GoldConfetti';
+import '../../design-system/components/character-sheet-panel.css';
+import '../../design-system/components/character-profile-panel.css';
+import '../../components/family-portal/character-detail-panel.css';
 import './courage-mission-complete.css';
 import '../rewards/gold-confetti.css';
-
-const FOCUS_FLAME_BRAND_SRC = '/images/icons/focus-flame-mark.svg';
 
 type CelebrationSounds = {
   playMissionComplete?: () => void;
@@ -27,89 +35,75 @@ type CourageMissionCompleteCelebrationProps = {
   sounds?: CelebrationSounds;
 };
 
-function buildCoinSteps(from: number, to: number, stepCount = 6): number[] {
-  if (from >= to) return [to];
-  const steps: number[] = [];
-  for (let i = 0; i < stepCount; i += 1) {
-    const progress = i / (stepCount - 1);
-    steps.push(Math.round(from + (to - from) * progress));
-  }
-  return Array.from(new Set(steps));
-}
+type CharacterThemeId = 'caiden' | 'miranda' | 'zeke' | 'charlie' | 'b4';
 
-function useSteppedCoinCounter(
-  from: number,
-  to: number,
-  enabled: boolean,
-  durationMs = 1000,
-  onStep?: (value: number) => void,
-): number {
-  const [displayValue, setDisplayValue] = useState(enabled ? from : to);
-  const lastTickedRef = useRef(from);
-
+function MissionCompleteModalShell({
+  themeId,
+  titleId,
+  onClose,
+  showConfetti = true,
+  children,
+  footer,
+  toastMessage,
+}: {
+  themeId: CharacterThemeId | null;
+  titleId: string;
+  onClose: () => void;
+  showConfetti?: boolean;
+  children: React.ReactNode;
+  footer: React.ReactNode;
+  toastMessage?: string | null;
+}) {
   useEffect(() => {
-    if (!enabled) {
-      setDisplayValue(to);
-      return undefined;
-    }
-
-    const steps = buildCoinSteps(from, to);
-    if (steps.length <= 1) {
-      setDisplayValue(to);
-      onStep?.(to);
-      return undefined;
-    }
-
-    let frameId = 0;
-    let stepIndex = 0;
-    const start = performance.now();
-    lastTickedRef.current = steps[0];
-    setDisplayValue(steps[0]);
-
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / durationMs, 1);
-      const eased = 1 - (1 - progress) ** 3;
-      const targetIndex = Math.min(
-        steps.length - 1,
-        Math.floor(eased * (steps.length - 1)),
-      );
-
-      while (stepIndex < targetIndex) {
-        stepIndex += 1;
-        const nextValue = steps[stepIndex];
-        if (nextValue !== lastTickedRef.current) {
-          lastTickedRef.current = nextValue;
-          setDisplayValue(nextValue);
-          onStep?.(nextValue);
-        }
-      }
-
-      if (progress < 1) {
-        frameId = window.requestAnimationFrame(tick);
-        return;
-      }
-
-      if (lastTickedRef.current !== to) {
-        lastTickedRef.current = to;
-        setDisplayValue(to);
-        onStep?.(to);
-      }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
     };
+  }, []);
 
-    frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [durationMs, enabled, from, onStep, to]);
+  const themeClass = themeId ? `characterSheetPanelInner--${themeId}` : '';
 
-  return displayValue;
-}
-
-function formatShareDate(date: Date): string {
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return createPortal(
+    <div className="courageMissionCompleteModal" role="presentation">
+      <button
+        type="button"
+        className="courageMissionCompleteModalBackdrop"
+        aria-label="Close mission complete celebration"
+        onClick={onClose}
+      />
+      <aside
+        className="courageMissionCompleteModalPanel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
+        <GoldConfetti active={showConfetti} />
+        <div className="characterSheetPanelShell courageMissionCompleteSheet">
+          <div className={`characterSheetPanelInner courageMissionCompleteSheetInner ${themeClass}`}>
+            <button
+              type="button"
+              className="characterSheetPanelClose courageMissionCompleteClose"
+              aria-label="Close and return to adventure map"
+              onClick={onClose}
+            >
+              ×
+            </button>
+            {children}
+            <footer className="characterSheetPanelFooter characterProfileFooter courageMissionCompleteFooter">
+              {footer}
+            </footer>
+          </div>
+        </div>
+        {toastMessage ? (
+          <p className="courageMissionCompleteToast" role="status">
+            {toastMessage}
+          </p>
+        ) : null}
+      </aside>
+    </div>,
+    document.body,
+  );
 }
 
 export default function CourageMissionCompleteCelebration({
@@ -119,34 +113,80 @@ export default function CourageMissionCompleteCelebration({
   sounds,
 }: CourageMissionCompleteCelebrationProps) {
   const captureRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const { modules: adventureModules } = useFamilyAdventureModules();
   const [sharing, setSharing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const shareDate = useMemo(() => new Date(), []);
-  const displayName = readGameplayPlayerDisplayName();
+  const returnLabel = useMemo(
+    () => resolveMissionCompleteReturnLabel(location.pathname, location.search),
+    [location.pathname, location.search],
+  );
+
   const isReplay = result.ok && result.alreadyCompleted;
   const hasCoinReward = result.ok && !result.alreadyCompleted;
-  const oldTotal = hasCoinReward ? result.oldCoinTotal : 0;
-  const newTotal = hasCoinReward ? result.newCoinTotal : 0;
+  const weekProgress = result.ok
+    ? {
+        completed: result.weekMissionsCompleted,
+        total: result.weekMissionsTotal,
+        badgeUnlocked: result.weekBadgeUnlocked,
+        badgeJustUnlocked: result.weekBadgeJustUnlocked,
+      }
+    : null;
 
-  const handleCoinStep = useCallback(() => {
-    sounds?.playCoinTick?.();
-  }, [sounds]);
-
-  const animatedCoins = useSteppedCoinCounter(
-    oldTotal,
-    newTotal,
-    hasCoinReward,
-    1000,
-    handleCoinStep,
+  const weekNumber = payload.week_number ?? parseWeekNumberFromWeekId(payload.week_id);
+  const weekHeader = useMemo(
+    () => formatWeekHeader(weekNumber, resolveCmsWeekTitle(adventureModules, weekNumber)),
+    [adventureModules, weekNumber],
+  );
+  const gameTitle = useMemo(
+    () => sanitizeMissionGameTitle(payload.mission_title, weekNumber),
+    [payload.mission_title, weekNumber],
   );
 
-  const nextUnlock = useMemo(
-    () => (hasCoinReward ? getNextUnlockPreview(newTotal) : null),
-    [hasCoinReward, newTotal],
-  );
+  const badgeDisplay = useMemo(() => {
+    if (payload.badge_image_url) {
+      return {
+        name: payload.badge_unlocked,
+        imageUrl: payload.badge_image_url,
+        weekLabel: payload.badge_week_label ?? null,
+      };
+    }
+    const resolved = resolveBadgeDisplay(payload.badge_unlocked, adventureModules, weekNumber);
+    return {
+      name: resolved.name,
+      imageUrl: resolved.imageUrl,
+      weekLabel: resolved.weekLabel,
+    };
+  }, [adventureModules, payload, weekNumber]);
+
+  const badgeUnlocked =
+    weekProgress?.badgeUnlocked === true || weekProgress?.badgeJustUnlocked === true;
+  const badgeLocked = !badgeUnlocked;
+  const progressPct =
+    weekProgress && weekProgress.total > 0
+      ? Math.round((weekProgress.completed / weekProgress.total) * 100)
+      : 0;
+  const missionsRemainingLabel =
+    weekProgress != null
+      ? resolveMissionsRemainingMessage(weekProgress.completed, weekProgress.total)
+      : '';
+  const progressBadgeStatus =
+    weekProgress != null
+      ? badgeUnlocked
+        ? '🏅 Badge unlocked'
+        : `🔒 ${badgeDisplay.name} — ${resolveBadgeUnlockHint(
+            weekProgress.completed,
+            weekProgress.total,
+            false,
+          )}`
+      : '';
+
   const themeId = resolveCharacterThemeId(payload.character_id ?? payload.character_name);
-  const themeClass = themeId ? `courageMissionComplete--${themeId}` : '';
   const characterHeroSrc = themeId ? CHARACTER_HOTSPOT_IMAGES[themeId] : null;
+  const ctaThemeClass = themeId ? `characterDetailCta--${themeId}` : '';
+  const titleId = 'courage-mission-complete-title';
+  const showWeekBadgeCelebration = !isReplay && weekProgress?.badgeJustUnlocked === true;
 
   useEffect(() => {
     if (!result.ok || result.alreadyCompleted) return;
@@ -157,12 +197,12 @@ export default function CourageMissionCompleteCelebration({
   }, [result, sounds]);
 
   useEffect(() => {
-    if (!result.ok || result.alreadyCompleted || !payload.badge_unlocked) return;
+    if (!result.ok || result.alreadyCompleted || !showWeekBadgeCelebration) return;
     const timer = window.setTimeout(() => {
       sounds?.playBadgeSparkle?.();
-    }, 280);
+    }, 420);
     return () => window.clearTimeout(timer);
-  }, [payload.badge_unlocked, result, sounds]);
+  }, [result, showWeekBadgeCelebration, sounds]);
 
   const handleShareAchievement = useCallback(async () => {
     if (!captureRef.current || sharing) return;
@@ -190,176 +230,176 @@ export default function CourageMissionCompleteCelebration({
     }
   }, [hasCoinReward, payload, result, shareDate, sharing]);
 
+  const footerActions = (
+    <>
+      <button
+        type="button"
+        className={['characterDetailCta', ctaThemeClass, 'courageMissionCompletePrimaryCta'].filter(Boolean).join(' ')}
+        onClick={onReturnToMap}
+      >
+        {returnLabel}
+      </button>
+      <button
+        type="button"
+        className="courageMissionCompleteSecondaryCta"
+        onClick={() => {
+          void handleShareAchievement();
+        }}
+        disabled={sharing}
+      >
+        {sharing ? 'Saving…' : 'Share Achievement'}
+      </button>
+      <p className="courageMissionCompleteShareHint">
+        {showWeekBadgeCelebration
+          ? 'Save your week badge moment for the camp gallery.'
+          : 'Save your mission moment for the camp gallery.'}
+      </p>
+    </>
+  );
+
   if (!result.ok) {
     return (
-      <div className="courageMissionComplete courageMissionComplete--error" role="alert">
-        <div className="courageMissionCompleteBadge" aria-hidden="true">
-          !
+      <MissionCompleteModalShell
+        themeId={themeId}
+        titleId={titleId}
+        onClose={onReturnToMap}
+        showConfetti={false}
+        footer={footerActions}
+        toastMessage={toastMessage}
+      >
+        <div className="courageMissionCompleteHero courageMissionCompleteHero--error">
+          <div className="courageMissionCompleteVictoryRing courageMissionCompleteVictoryRing--error" aria-hidden="true">
+            !
+          </div>
+          <h2 id={titleId} className="characterProfileName">
+            Progress Not Saved
+          </h2>
+          <p className="characterProfileTagline">{result.message}</p>
         </div>
-        <h2 className="courageMissionCompleteTitle">Progress Not Saved</h2>
-        <p className="courageMissionCompleteBody">{result.message}</p>
-        <button type="button" className="courageMissionCompleteBtn" onClick={onReturnToMap}>
-          ← Back to Adventure Map
-        </button>
-      </div>
+      </MissionCompleteModalShell>
     );
   }
 
   return (
-    <div className={['courageMissionComplete', themeClass].filter(Boolean).join(' ')} role="status">
-      <GoldConfetti active={!isReplay} />
-
-      <div ref={captureRef} className="courageMissionCompleteCapture">
-        <div className="courageMissionCompleteInner">
-          {characterHeroSrc ? (
-            <img
-              src={characterHeroSrc}
-              alt=""
-              className="courageMissionCompleteHeroArt"
-            />
-          ) : null}
-
-          <div className="courageMissionCompleteBadge" aria-hidden="true">
-            <img
-              src={FOCUS_FLAME_BRAND_SRC}
-              alt=""
-              className="courageMissionCompleteBadgeIcon"
-              width={40}
-              height={40}
-            />
-          </div>
-
-          <p className="courageMissionCompleteEyebrow">Mission Complete</p>
-          <h2 className="courageMissionCompleteTitle">{payload.mission_title}</h2>
-          <p className="courageMissionCompleteCharacter">{payload.character_name}</p>
-          <p className="courageMissionCompleteBody">
-            {isReplay
-              ? 'Replay complete — you already earned this reward.'
-              : 'Great work! Your rewards are ready.'}
-          </p>
-
-          {!isReplay ? (
-            <>
-              <div className="courageMissionCompleteRewards">
-                <div className="courageMissionCompleteRewardCard courageMissionCompleteRewardCard--coins">
-                  <p className="courageMissionCompleteRewardLabel">Focus Coins</p>
-                  <p className="courageMissionCompleteCoinTotal" aria-live="polite">
-                    <FocusCoinIcon size={22} className="courageMissionCompleteCoinIcon" />
-                    {animatedCoins}
-                  </p>
-                  <p className="courageMissionCompleteCoinEarned">+{result.coinsEarned} earned</p>
-                </div>
-
-                <div className="courageMissionCompleteRewardCard">
-                  <p className="courageMissionCompleteRewardLabel">Badge Unlocked</p>
-                  <img
-                    src={getBadgeArtworkPath(payload.badge_unlocked)}
-                    alt=""
-                    className="courageMissionCompleteArt"
-                  />
-                  <p className="courageMissionCompleteRewardValue">{payload.badge_unlocked}</p>
-                </div>
-
-                {payload.reward_item ? (
-                  <div className="courageMissionCompleteRewardCard courageMissionCompleteRewardCard--item">
-                    <p className="courageMissionCompleteRewardLabel">Reward Item</p>
-                    <img
-                      src={getRewardItemArtworkPath(payload.reward_item)}
-                      alt=""
-                      className="courageMissionCompleteArt"
-                    />
-                    <p className="courageMissionCompleteRewardValue">{payload.reward_item}</p>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="courageMissionCompleteWallet">
-                <p className="courageMissionCompleteWalletLabel">Your Wallet</p>
-                <p className="courageMissionCompleteWalletRow">
-                  <span className="courageMissionCompleteWalletOld">{oldTotal}</span>
-                  <span className="courageMissionCompleteWalletArrow" aria-hidden="true">
-                    →
-                  </span>
-                  <span className="courageMissionCompleteWalletNew">{newTotal}</span>
-                  <span className="courageMissionCompleteWalletUnit">Focus Coins</span>
-                </p>
-              </div>
-            </>
-          ) : (
-            <div className="courageMissionCompleteRewards">
-              <div className="courageMissionCompleteRewardCard">
-                <p className="courageMissionCompleteRewardLabel">Badge</p>
+    <MissionCompleteModalShell
+      themeId={themeId}
+      titleId={titleId}
+      onClose={onReturnToMap}
+      showConfetti={showWeekBadgeCelebration}
+      footer={footerActions}
+      toastMessage={toastMessage}
+    >
+      <div className="characterSheetPanelScroll courageMissionCompleteScroll">
+        <div ref={captureRef} className="courageMissionCompleteContent">
+          <header className="courageMissionCompleteHeroCompact">
+            <div
+              className={[
+                'courageMissionCompletePortrait',
+                'characterDetailPortrait',
+                themeId ? `characterDetailPortrait--${themeId}` : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {characterHeroSrc ? (
                 <img
-                  src={getBadgeArtworkPath(payload.badge_unlocked)}
+                  src={characterHeroSrc}
                   alt=""
-                  className="courageMissionCompleteArt"
+                  className="characterDetailPortraitImage"
+                  width={88}
+                  height={88}
+                  decoding="async"
                 />
-                <p className="courageMissionCompleteRewardValue">{payload.badge_unlocked}</p>
+              ) : (
+                <span className="characterDetailPortraitFallback">
+                  {payload.character_name.charAt(0)}
+                </span>
+              )}
+              {hasCoinReward ? (
+                <span className="courageMissionCompleteCoinChip" aria-label={`+${result.coinsEarned} Focus Coins`}>
+                  <FocusCoinIcon size={16} />
+                  +{result.coinsEarned}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="courageMissionCompleteHeadlines">
+              <h2 id={titleId} className="courageMissionCompleteMainTitle">
+                {isReplay ? 'Replay Complete!' : 'Mission Complete!'}
+              </h2>
+              <p className="courageMissionCompleteWeekEyebrow">{weekHeader}</p>
+              <p className="courageMissionCompleteGameTitle">{gameTitle}</p>
+              {weekProgress ? (
+                <p className="courageMissionCompleteProgressStat" aria-label={`${weekProgress.completed} of ${weekProgress.total} missions complete`}>
+                  🏅 {weekProgress.completed} / {weekProgress.total} Missions Complete
+                </p>
+              ) : null}
+            </div>
+          </header>
+
+          <section
+            className={[
+              'courageMissionCompleteBadgeShowcase',
+              badgeLocked ? 'courageMissionCompleteBadgeShowcase--locked' : 'courageMissionCompleteBadgeShowcase--unlocked',
+              showWeekBadgeCelebration ? 'courageMissionCompleteBadgeShowcase--celebrate' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            aria-label={badgeLocked ? 'Locked week badge preview' : 'Week badge unlocked'}
+          >
+            <div className="courageMissionCompleteBadgeFrame courageMissionCompleteBadgeFrame--hero">
+              <img
+                src={badgeDisplay.imageUrl}
+                alt=""
+                className={[
+                  'courageMissionCompleteBadgeArt',
+                  badgeLocked ? 'courageMissionCompleteBadgeArt--locked' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              />
+              {badgeLocked ? (
+                <span className="courageMissionCompleteBadgeLock" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v3H9V6a3 3 0 0 1 3-3z" />
+                  </svg>
+                </span>
+              ) : null}
+            </div>
+            <p className="courageMissionCompleteBadgeName">{badgeDisplay.name}</p>
+          </section>
+
+          {weekProgress ? (
+            <section className="courageMissionCompleteProgressCard" aria-label="Week progress">
+              <span className="courageMissionCompleteProgressLabel">Week Progress</span>
+              <div
+                className="courageMissionCompleteProgressTrack"
+                role="progressbar"
+                aria-valuenow={weekProgress.completed}
+                aria-valuemin={0}
+                aria-valuemax={weekProgress.total}
+                aria-label={`${weekProgress.completed} of ${weekProgress.total} missions complete`}
+              >
+                <div
+                  className="courageMissionCompleteProgressFill"
+                  style={{ width: `${progressPct}%` }}
+                />
               </div>
-            </div>
-          )}
-
-          <footer className="courageMissionCompleteBrand">
-            <img
-              src={FOCUS_FLAME_BRAND_SRC}
-              alt=""
-              className="courageMissionCompleteBrandLogo"
-            />
-            <img
-              src={COURAGE_LOGO_SRC}
-              alt=""
-              className="courageMissionCompleteBrandMark"
-            />
-            <div>
-              <p className="courageMissionCompleteBrandTitle">Caiden&apos;s Courage</p>
-              <p className="courageMissionCompleteBrandSub">Focus Flame Academy</p>
-            </div>
-            <p className="courageMissionCompleteBrandMeta">
-              {displayName ? `${displayName} · ` : ''}
-              {formatShareDate(shareDate)}
-            </p>
-          </footer>
+              <p className="courageMissionCompleteProgressRemaining">{missionsRemainingLabel}</p>
+              <p
+                className={[
+                  'courageMissionCompleteProgressBadgeStatus',
+                  badgeUnlocked ? 'courageMissionCompleteProgressBadgeStatus--unlocked' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {progressBadgeStatus}
+              </p>
+            </section>
+          ) : null}
         </div>
       </div>
-
-      {!isReplay && nextUnlock ? (
-        <div className="courageMissionCompleteNextUnlock courageMissionCompleteNextUnlock--belowCard">
-          <p className="courageMissionCompleteNextUnlockEyebrow">Next Unlock</p>
-          <div className="courageMissionCompleteNextUnlockBody">
-            <img src={nextUnlock.item.image} alt="" className="courageMissionCompleteNextUnlockArt" />
-            <div>
-              <p className="courageMissionCompleteNextUnlockName">{nextUnlock.item.name}</p>
-              <p className="courageMissionCompleteNextUnlockAway">{nextUnlock.coinsAway} Coins Away</p>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {!isReplay ? (
-        <p className="courageMissionCompleteShareHint">Save your badge moment for the camp gallery.</p>
-      ) : null}
-
-      <div className="courageMissionCompleteActions">
-        <button type="button" className="courageMissionCompleteBtn" onClick={onReturnToMap}>
-          ← Back to Adventure Map
-        </button>
-        <button
-          type="button"
-          className="courageMissionCompleteBtn courageMissionCompleteBtn--secondary"
-          onClick={() => {
-            void handleShareAchievement();
-          }}
-          disabled={sharing}
-        >
-          {sharing ? 'Saving…' : 'Share Achievement'}
-        </button>
-      </div>
-
-      {toastMessage ? (
-        <p className="courageMissionCompleteToast" role="status">
-          {toastMessage}
-        </p>
-      ) : null}
-    </div>
+    </MissionCompleteModalShell>
   );
 }

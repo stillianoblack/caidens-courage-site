@@ -105,8 +105,12 @@ export default function B4MissionFlow({
       : gradeResolution.band);
 
   const config = useMemo(
-    () => resolveB4MissionConfig(missionId, activeGradeBand),
-    [missionId, activeGradeBand],
+    () =>
+      resolveB4MissionConfig(missionId, activeGradeBand, {
+        participantId,
+        gradeLevel: lockedGradeLevel ?? gradeSettings.gradeLevel,
+      }),
+    [activeGradeBand, gradeSettings.gradeLevel, lockedGradeLevel, missionId, participantId],
   );
 
   const completionContext = useMemo(() => {

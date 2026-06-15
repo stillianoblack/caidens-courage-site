@@ -85,6 +85,39 @@
   height: 1.35rem;
 }
 
+.portal-header--familyDesktop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'lead tools';
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.75rem;
+  padding: 0.875rem 1.5rem;
+}
+
+.portal-header--familyDesktop .portal-headerLead {
+  grid-area: lead;
+  min-width: 0;
+}
+
+.portal-header--familyDesktop .portal-headerTools {
+  grid-area: tools;
+  justify-self: end;
+  margin-left: auto;
+}
+
+.portal-headerTools--familyDesktop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
+}
+
+.portal-header--familyDesktop .portal-headerFamilySwitcher {
+  margin-left: 0;
+}
+
 .pilot-shell .portal-header {
   background: rgba(255, 255, 255, 0.88);
 }

@@ -509,7 +509,7 @@ function buildTrailCharacterNode(
     id: `trail-w${week}-${characterId}`,
     kind,
     characterId,
-    title: `${labelPrefix} ${week}: ${mission.title}`,
+    title: `Game ${week} • ${mission.title}`,
     description: mission.description,
     cta: mission.cta,
     href: appendWeeklyAdventureGameContext(baseHref, { week, weekTitle }),

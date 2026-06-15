@@ -1,5 +1,6 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import type { B4GradeBand } from '../../types/b4AdaptiveQuest';
+import type { AdaptiveQuestionSelectionContext } from '../../lib/adaptiveQuestionSelection';
 import {
   buildB4AdaptiveConfig,
   B4_ADAPTIVE_MISSION_REGISTRY,
@@ -55,13 +56,14 @@ export function resolveB4MissionDescription(missionId: string, gradeBand: B4Grad
 export function resolveB4MissionConfig(
   missionId: string,
   gradeBand: B4GradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
   const mission = getB4MissionById(missionId);
   if (!mission) return undefined;
 
   const adaptiveFile = getB4AdaptiveMission(mission.adaptiveMissionId);
   if (adaptiveFile) {
-    return buildB4AdaptiveConfig(adaptiveFile, gradeBand);
+    return buildB4AdaptiveConfig(adaptiveFile, gradeBand, selectionContext);
   }
 
   return mission.config;

@@ -1,7 +1,10 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import type { AdventureTrailWeekView } from '../types/adventureTrail';
 import type { WeeklyAdventureWeekRowItem } from '../design-system/components/WeeklyAdventureWeekRow';
+import { buildWeeklyTrailNodes } from '../data/familyWeeklyAdventures';
+import { decorateTrailNodes } from './adventureTrailState';
 import { resolveAdventureComicThumbnailUrl, resolveWeeklyCardSelFocus } from './adventureThumbnail';
+import { normalizeSelFocusLabel } from './adventureSelFocus';
 import { isUnlockDatePassed, isPublishedAdventure } from './adventureVisibility';
 import { familyPortalPath } from './familyPortalPaths';
 import {
@@ -124,4 +127,75 @@ export function buildCompletedWeeklyAdventureCards(input: {
   }
 
   return cards;
+}
+
+type HeroWeekPaths = {
+  kidsBasePath: string;
+  downloadsPath: string;
+  certificatesPath: string;
+};
+
+function mergeHeroWeekWithCms(
+  base: AdventureTrailWeekView,
+  cmsModule: AdventureModuleRecord | null,
+  heroWeekNumber: number,
+): AdventureTrailWeekView {
+  if (!cmsModule) return base;
+  return {
+    ...base,
+    title: cmsModule.title || base.title,
+    selFocus: normalizeSelFocusLabel(cmsModule.subtitle) || base.selFocus,
+    previewActivities: cmsModule.preview_activities ?? base.previewActivities,
+    thumbnailUrl: resolveAdventureComicThumbnailUrl(cmsModule, heroWeekNumber),
+  };
+}
+
+/** Resolve hero week view from trail + CMS, synthesizing featured weeks missing from the trail. */
+export function buildHeroWeekView(input: {
+  heroWeekNumber: number;
+  trailWeeks: AdventureTrailWeekView[];
+  heroCmsModule: AdventureModuleRecord | null;
+  featuredAdventure: AdventureModuleRecord | null;
+  paths: HeroWeekPaths;
+}): AdventureTrailWeekView | undefined {
+  const trailWeek = input.trailWeeks.find((week) => week.week === input.heroWeekNumber);
+  const cms =
+    input.heroCmsModule ??
+    (input.featuredAdventure?.week_number === input.heroWeekNumber ? input.featuredAdventure : null);
+
+  const isFeaturedHero = Boolean(
+    input.featuredAdventure &&
+      input.featuredAdventure.week_number === input.heroWeekNumber &&
+      isPublishedAdventure(input.featuredAdventure),
+  );
+
+  if (trailWeek) {
+    const merged = mergeHeroWeekWithCms(trailWeek, cms, input.heroWeekNumber);
+    if (!isFeaturedHero || merged.weekStatus === 'available') {
+      return merged;
+    }
+    return {
+      ...merged,
+      weekStatus: 'available',
+      unlockStatus: '',
+    };
+  }
+
+  if (!cms) return undefined;
+
+  const weekTitle = cms.title || `Week ${input.heroWeekNumber} Adventure`;
+  const rawNodes = buildWeeklyTrailNodes(input.heroWeekNumber, input.paths, weekTitle);
+  return {
+    week: input.heroWeekNumber,
+    title: weekTitle,
+    selFocus: normalizeSelFocusLabel(cms.subtitle) || 'Focus & Courage',
+    weekStatus: isFeaturedHero ? 'available' : 'locked',
+    unlockStatus: '',
+    previewActivities: cms.preview_activities ?? [],
+    nodes: decorateTrailNodes(rawNodes, new Set(), {
+      weekLocked: !isFeaturedHero,
+      baselineLocked: false,
+    }),
+    thumbnailUrl: resolveAdventureComicThumbnailUrl(cms, input.heroWeekNumber),
+  };
 }

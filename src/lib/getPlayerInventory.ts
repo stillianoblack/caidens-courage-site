@@ -1,8 +1,15 @@
+import {
+  normalizeOwnedBadges,
+  type NormalizedOwnedBadge,
+  type RawOwnedBadgeRow,
+} from './cmsBadgeArtwork';
 import { resolvePlayerParticipantId } from './resolvePlayerParticipantId';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
+export type OwnedBadge = NormalizedOwnedBadge;
+
 export type PlayerInventorySnapshot = {
-  badges: string[];
+  badges: OwnedBadge[];
   items: string[];
   stickers: string[];
   decorations: string[];
@@ -31,27 +38,47 @@ export async function getPlayerInventory(
     const [badgesResult, progressResult] = await Promise.all([
       supabase
         .from('player_badges')
-        .select('badge_name')
+        .select('badge_name, week_id, mission_id')
         .eq('participant_id', participantId),
       supabase
         .from('player_progress')
-        .select('reward_item, badge_unlocked')
+        .select('reward_item, badge_unlocked, week_id, mission_id')
         .eq('participant_id', participantId),
     ]);
 
     if (badgesResult.error) throw badgesResult.error;
     if (progressResult.error) throw progressResult.error;
 
-    const badgeSet = new Set<string>();
-    for (const row of badgesResult.data ?? []) {
-      if (typeof row.badge_name === 'string' && row.badge_name.trim()) {
-        badgeSet.add(row.badge_name.trim());
-      }
+    type BadgeRow = {
+      badge_name?: string | null;
+      week_id?: string | null;
+      mission_id?: string | null;
+    };
+    type ProgressRow = {
+      reward_item?: string | null;
+      badge_unlocked?: string | null;
+      week_id?: string | null;
+      mission_id?: string | null;
+    };
+
+    const rawBadges: RawOwnedBadgeRow[] = [];
+
+    for (const row of (badgesResult.data ?? []) as BadgeRow[]) {
+      if (typeof row.badge_name !== 'string' || !row.badge_name.trim()) continue;
+      rawBadges.push({
+        name: row.badge_name.trim(),
+        weekId: typeof row.week_id === 'string' ? row.week_id : null,
+        missionId: typeof row.mission_id === 'string' ? row.mission_id : null,
+      });
     }
-    for (const row of progressResult.data ?? []) {
-      if (typeof row.badge_unlocked === 'string' && row.badge_unlocked.trim()) {
-        badgeSet.add(row.badge_unlocked.trim());
-      }
+
+    for (const row of (progressResult.data ?? []) as ProgressRow[]) {
+      if (typeof row.badge_unlocked !== 'string' || !row.badge_unlocked.trim()) continue;
+      rawBadges.push({
+        name: row.badge_unlocked.trim(),
+        weekId: typeof row.week_id === 'string' ? row.week_id : null,
+        missionId: typeof row.mission_id === 'string' ? row.mission_id : null,
+      });
     }
 
     const items = (progressResult.data ?? [])
@@ -65,7 +92,7 @@ export async function getPlayerInventory(
     );
 
     return {
-      badges: Array.from(badgeSet),
+      badges: normalizeOwnedBadges(rawBadges),
       items: ownedItems,
       stickers,
       decorations,

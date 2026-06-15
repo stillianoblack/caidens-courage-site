@@ -7,6 +7,11 @@ export type CourageMissionRewardPayload = {
   coins_earned: number;
   badge_unlocked: string;
   reward_item: string;
+  /** CMS weekly reward artwork when available. */
+  badge_image_url?: string | null;
+  week_number?: number;
+  badge_week_label?: string | null;
+  badge_rarity?: string | null;
 };
 
 export type CourageMissionCompletionPayload = CourageMissionRewardPayload & {
@@ -14,13 +19,24 @@ export type CourageMissionCompletionPayload = CourageMissionRewardPayload & {
 };
 
 export type CompleteMissionSuccess =
-  | { ok: true; alreadyCompleted: true }
+  | {
+      ok: true;
+      alreadyCompleted: true;
+      weekMissionsCompleted: number;
+      weekMissionsTotal: number;
+      weekBadgeUnlocked: boolean;
+      weekBadgeJustUnlocked: boolean;
+    }
   | {
       ok: true;
       alreadyCompleted: false;
       oldCoinTotal: number;
       newCoinTotal: number;
       coinsEarned: number;
+      weekMissionsCompleted: number;
+      weekMissionsTotal: number;
+      weekBadgeUnlocked: boolean;
+      weekBadgeJustUnlocked: boolean;
     };
 
 export type CompleteMissionFailure = {

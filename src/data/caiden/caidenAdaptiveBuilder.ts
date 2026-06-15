@@ -1,4 +1,12 @@
 import { resolveKidGradeBandWithFallback } from '../../lib/gradeBandContentResolver';
+import {
+  finalizeAdaptiveQuestions,
+  type AdaptiveQuestionSelectionContext,
+} from '../../lib/adaptiveQuestionSelection';
+import {
+  applyStagingToQuestions,
+  stagingContentVersionSuffix,
+} from '../../lib/stagingQuestionOverrides';
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import type { CaidenQuestAccent } from '../../types/gameAssessment';
 import type {
@@ -59,7 +67,7 @@ export function resolveCaidenGradeContent(
 }
 
 export function caidenContentVersionId(questId: string, band: CaidenGradeBand): string {
-  return `${questId}::${band}::v1`;
+  return `${questId}::${band}::${stagingContentVersionSuffix()}`;
 }
 
 function buildQuestion(
@@ -101,8 +109,14 @@ function buildQuestion(
 export function buildCaidenAdaptiveConfig(
   quest: CaidenAdaptiveQuestFile,
   gradeBand: CaidenGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
   const content = resolveCaidenGradeContent(quest, gradeBand);
+  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+    missionId: quest.id,
+    gradeBand,
+    ...selectionContext,
+  });
 
   return {
     id: quest.id,
@@ -112,7 +126,7 @@ export function buildCaidenAdaptiveConfig(
     ...CAIDEN_MISSION_AVATAR,
     landing: quest.landing,
     complete: quest.complete,
-    questions: content.questions.map((q, index) => buildQuestion(q, quest.subtitle, index)),
+    questions: questions.map((q, index) => buildQuestion(q, quest.subtitle, index)),
     tracking: undefined,
   };
 }

@@ -64,8 +64,18 @@ export default function FamilyDashboardSidebar({
     >
       <div className="family-railUpper">
         <div className="family-railBrand">
-          <p className="family-railBrandTitle">{brandTitle}</p>
-          <p className="family-railBrandSub">{brandSubtitle}</p>
+          <img
+            src={`${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`}
+            alt=""
+            className="family-railBrandLogo"
+            width={48}
+            height={48}
+            decoding="async"
+          />
+          <div className="family-railBrandCopy">
+            <p className="family-railBrandTitle">{brandTitle}</p>
+            <p className="family-railBrandSub">{brandSubtitle}</p>
+          </div>
         </div>
 
         <nav className="family-railNav" aria-label="Dashboard sections">

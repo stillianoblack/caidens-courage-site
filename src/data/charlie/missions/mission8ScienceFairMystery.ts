@@ -83,7 +83,7 @@ export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
             choices: [
               'That is not strong evidence',
               'It must be true because it sounds exciting',
-              'Posters always tell the truth',
+              'Claims need notes and measurements to be trusted',
               'Snacks prove the result',
             ],
             correctIndex: 0,
@@ -128,7 +128,7 @@ export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
             question: 'Project A gave both plants the same water and light. Project B did not. Which is fairer?',
             choices: [
               'Project A — both plants were treated the same except music',
-              'Project B — random care is more exciting',
+              'Project B is weaker because conditions changed unpredictably',
               'Neither — fair tests do not exist',
               'Both — if the poster is big enough',
             ],
@@ -149,7 +149,7 @@ export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
             choices: [
               'More plants give stronger evidence',
               'Plants perform better in groups for applause',
-              'One plant is always enough',
+              'Larger samples reduce one-plant luck effects',
               'Three plants means three posters',
             ],
             correctIndex: 0,
@@ -261,7 +261,7 @@ export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
             choices: [
               'The music project has stronger sample size and controlled variables',
               'The silence project wins because it is simpler',
-              'Sample size never matters in plant science',
+              'Sample size matters when judging reliability',
               'Window location does not affect plants',
             ],
             correctIndex: 0,
@@ -280,7 +280,7 @@ export const CHARLIE_MISSION_8_FILE: CharlieAdaptiveMissionFile = {
             question: 'A judge says, "I love music, so the music project wins." What should Charlie argue?',
             choices: [
               'Personal preference is not the same as scientific evidence',
-              'Judges should always pick their favorite',
+              'Judges should score based on evidence quality',
               'Loud opinions are better than data',
               'Evidence only matters for grown-ups',
             ],

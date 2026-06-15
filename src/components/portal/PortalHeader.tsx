@@ -30,34 +30,59 @@ export default function PortalHeader({
   const logoSrc = `${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`;
 
   if (portal === 'family') {
-    return (
-      <header
-        className={[
-          'portal-header',
-          'portal-header--familyNav',
-          mobileFamilySimplified ? 'portal-header--familyMobile familyPortalMobileHeader' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-label={pageTitle}
-      >
-        <div className="portal-headerFamilyTools">
-          <img
-            src={logoSrc}
-            alt="Caiden's Courage"
-            className="portal-headerBrandLogo familyPortalMobileHeader-logo"
-            width={56}
-            height={56}
-          />
-          <div className="portal-headerFamilyToolsEnd">
-            <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
-            <FamilyNotificationBell items={notifications} className="portal-headerBell" />
-            <PortalSwitcherDropdown
-              className="portal-headerSwitcher portal-headerFamilySwitcher familyPortalMobileHeader-switcher"
-              linkedCampLabel={linkedCampLabel}
-              familyNav
+    if (mobileFamilySimplified) {
+      return (
+        <header
+          className={[
+            'portal-header',
+            'portal-header--familyNav',
+            'portal-header--familyMobile',
+            'familyPortalMobileHeader',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-label={pageTitle}
+        >
+          <div className="portal-headerFamilyTools">
+            <img
+              src={logoSrc}
+              alt="Caiden's Courage"
+              className="portal-headerBrandLogo familyPortalMobileHeader-logo"
+              width={56}
+              height={56}
             />
+            <div className="portal-headerFamilyToolsEnd">
+              <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
+              <FamilyNotificationBell items={notifications} className="portal-headerBell" />
+              <PortalSwitcherDropdown
+                className="portal-headerSwitcher portal-headerFamilySwitcher familyPortalMobileHeader-switcher"
+                linkedCampLabel={linkedCampLabel}
+                familyNav
+              />
+            </div>
           </div>
+        </header>
+      );
+    }
+
+    return (
+      <header className="portal-header portal-header--familyDesktop" aria-label={pageTitle}>
+        <div className="portal-headerLead">
+          <div className="portal-headerLeadText">
+            <h1 className="portal-headerTitle">{pageTitle}</h1>
+            {linkedCampLabel ? (
+              <p className="portal-headerCampBadge">{linkedCampLabel}</p>
+            ) : null}
+          </div>
+        </div>
+        <div className="portal-headerTools portal-headerTools--familyDesktop">
+          <FocusCoinWalletBadge className="portal-headerCoins" />
+          <FamilyNotificationBell items={notifications} className="portal-headerBell" />
+          <PortalSwitcherDropdown
+            className="portal-headerSwitcher portal-headerFamilySwitcher"
+            linkedCampLabel={linkedCampLabel}
+            familyNav
+          />
         </div>
       </header>
     );

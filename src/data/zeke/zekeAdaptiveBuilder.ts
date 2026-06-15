@@ -1,6 +1,14 @@
 import { resolveKidGradeBandWithFallback } from '../../lib/gradeBandContentResolver';
 import { resolveAdaptiveGradeBand } from '../../lib/getGradeBand';
 import { readParticipantGradeSettings } from '../../lib/mirandaGradeBandResolver';
+import {
+  finalizeAdaptiveQuestions,
+  type AdaptiveQuestionSelectionContext,
+} from '../../lib/adaptiveQuestionSelection';
+import {
+  applyStagingToQuestions,
+  stagingContentVersionSuffix,
+} from '../../lib/stagingQuestionOverrides';
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import type {
   ZekeAdaptiveMissionFile,
@@ -32,7 +40,7 @@ export function resolveZekeGradeContent(
 }
 
 export function zekeContentVersionId(missionId: string, band: ZekeGradeBand): string {
-  return `${missionId}::${band}::adaptive_v1`;
+  return `${missionId}::${band}::${stagingContentVersionSuffix()}`;
 }
 
 function buildQuestion(
@@ -64,8 +72,14 @@ function buildQuestion(
 export function buildZekeAdaptiveConfig(
   mission: ZekeAdaptiveMissionFile,
   gradeBand: ZekeGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
   const content = resolveZekeGradeContent(mission, gradeBand);
+  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+    missionId: mission.id,
+    gradeBand,
+    ...selectionContext,
+  });
 
   return {
     id: mission.id,
@@ -77,7 +91,7 @@ export function buildZekeAdaptiveConfig(
     avatarAlt: 'Zeke',
     landing: mission.landing,
     complete: mission.complete,
-    questions: content.questions.map((q) => buildQuestion(q, mission)),
+    questions: questions.map((q) => buildQuestion(q, mission)),
     tracking: undefined,
   };
 }
@@ -108,7 +122,10 @@ export function getZekeMissionForParticipant(input: {
     allowStretch: settings.allowStretch,
   });
 
-  return buildZekeAdaptiveConfig(mission, band);
+  return buildZekeAdaptiveConfig(mission, band, {
+    participantId: input.participantId,
+    gradeLevel: settings.gradeLevel ?? input.gradeLevel,
+  });
 }
 
 export const ZEKE_ADAPTIVE_MISSION_FEEDBACK = ZEKE_ADAPTIVE_COACH;

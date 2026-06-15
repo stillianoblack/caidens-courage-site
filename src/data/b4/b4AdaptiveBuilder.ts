@@ -1,6 +1,14 @@
 import { resolveKidGradeBandWithFallback } from '../../lib/gradeBandContentResolver';
 import { resolveAdaptiveGradeBand } from '../../lib/getGradeBand';
 import { readParticipantGradeSettings } from '../../lib/mirandaGradeBandResolver';
+import {
+  finalizeAdaptiveQuestions,
+  type AdaptiveQuestionSelectionContext,
+} from '../../lib/adaptiveQuestionSelection';
+import {
+  applyStagingToQuestions,
+  stagingContentVersionSuffix,
+} from '../../lib/stagingQuestionOverrides';
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import type {
   B4AdaptiveMissionFile,
@@ -32,7 +40,7 @@ export function resolveB4GradeContent(
 }
 
 export function b4ContentVersionId(missionId: string, band: B4GradeBand): string {
-  return `${missionId}::${band}::adaptive_v1`;
+  return `${missionId}::${band}::${stagingContentVersionSuffix()}`;
 }
 
 function buildQuestion(
@@ -64,8 +72,14 @@ function buildQuestion(
 export function buildB4AdaptiveConfig(
   mission: B4AdaptiveMissionFile,
   gradeBand: B4GradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
   const content = resolveB4GradeContent(mission, gradeBand);
+  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+    missionId: mission.id,
+    gradeBand,
+    ...selectionContext,
+  });
 
   return {
     id: mission.id,
@@ -77,7 +91,7 @@ export function buildB4AdaptiveConfig(
     avatarAlt: 'B-4',
     landing: mission.landing,
     complete: mission.complete,
-    questions: content.questions.map((q) => buildQuestion(q, mission)),
+    questions: questions.map((q) => buildQuestion(q, mission)),
     tracking: undefined,
   };
 }
@@ -108,7 +122,10 @@ export function getB4MissionForParticipant(input: {
     allowStretch: settings.allowStretch,
   });
 
-  return buildB4AdaptiveConfig(mission, band);
+  return buildB4AdaptiveConfig(mission, band, {
+    participantId: input.participantId,
+    gradeLevel: settings.gradeLevel ?? input.gradeLevel,
+  });
 }
 
 export const B4_ADAPTIVE_MISSION_FEEDBACK = B4_ADAPTIVE_COACH;

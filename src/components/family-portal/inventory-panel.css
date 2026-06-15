@@ -137,3 +137,36 @@
     background-position: -100% 0;
   }
 }
+
+.kidInventoryCard--locked {
+  opacity: 0.92;
+}
+
+.kidInventoryCardLockedMark {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.kidInventoryCardArt--locked {
+  filter: grayscale(1) brightness(0.72);
+  opacity: 0.72;
+}
+
+.kidInventoryCardLockedLabel {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.72);
+}

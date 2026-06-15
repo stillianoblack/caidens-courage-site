@@ -1,5 +1,6 @@
 import type { GameAssessmentConfig } from '../../types/gameAssessment';
 import type { MirandaGradeBand } from '../../types/mirandaAdaptiveQuest';
+import type { AdaptiveQuestionSelectionContext } from '../../lib/adaptiveQuestionSelection';
 import { MIRANDA_FILE_3_CONFIG, MIRANDA_FILE_3_ID } from './file3MissingLetters';
 import { MIRANDA_FILE_4_CONFIG, MIRANDA_FILE_4_ID } from './file4ContextClueChallenge';
 import { MIRANDA_FILE_5_CONFIG, MIRANDA_FILE_5_ID } from './file5DetectiveNotebook';
@@ -11,6 +12,9 @@ import {
 import './fileAdaptiveMissingSchedule';
 import './fileAdaptiveMissingStudent';
 import './fileAdaptiveMissingClue';
+import './fileAdaptiveMissingLetters';
+import './fileAdaptiveContextClueChallenge';
+import './fileAdaptiveDetectiveNotebook';
 import { applyMirandaLegacyK1Bands } from './mirandaApplyLegacyK1Bands';
 import {
   MIRANDA_MISSING_SCHEDULE_FILE,
@@ -24,6 +28,18 @@ import {
   MIRANDA_MISSING_CLUE_FILE,
   MIRANDA_MISSING_CLUE_ID,
 } from './fileAdaptiveMissingClue';
+import {
+  MIRANDA_MISSING_LETTERS_FILE,
+  MIRANDA_MISSING_LETTERS_ID,
+} from './fileAdaptiveMissingLetters';
+import {
+  MIRANDA_CONTEXT_CLUE_CHALLENGE_FILE,
+  MIRANDA_CONTEXT_CLUE_CHALLENGE_ID,
+} from './fileAdaptiveContextClueChallenge';
+import {
+  MIRANDA_DETECTIVE_NOTEBOOK_FILE,
+  MIRANDA_DETECTIVE_NOTEBOOK_ID,
+} from './fileAdaptiveDetectiveNotebook';
 import { MIRANDA_AVATAR_SRC, MIRANDA_HUB, MIRANDA_MISSION_AVATAR } from './sharedAssets';
 
 export type MirandaMissionMeta = {
@@ -133,6 +149,7 @@ export function resolveMirandaMissionDescription(
 export function resolveMirandaMissionConfig(
   missionId: string,
   gradeBand: MirandaGradeBand,
+  selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
   const mission = getMirandaMissionById(missionId);
   if (!mission) return undefined;
@@ -142,7 +159,7 @@ export function resolveMirandaMissionConfig(
     : undefined;
 
   if (adaptiveFile) {
-    return buildMirandaAdaptiveConfig(adaptiveFile, gradeBand);
+    return buildMirandaAdaptiveConfig(adaptiveFile, gradeBand, selectionContext);
   }
 
   return mission.config;
@@ -157,6 +174,9 @@ export const mirandaFiles = [
   MIRANDA_MISSING_SCHEDULE_FILE,
   MIRANDA_MISSING_STUDENT_FILE,
   MIRANDA_MISSING_CLUE_FILE,
+  MIRANDA_MISSING_LETTERS_FILE,
+  MIRANDA_CONTEXT_CLUE_CHALLENGE_FILE,
+  MIRANDA_DETECTIVE_NOTEBOOK_FILE,
 ];
 
 export {

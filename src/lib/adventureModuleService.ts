@@ -5,6 +5,8 @@ import type {
   AdventureSpotRecord,
 } from '../types/adventureModule';
 import { buildDefaultAdventureModuleSeeds } from '../data/adventureModuleSeeds';
+import type { AdventureVisibilityContext } from './adventureVisibility';
+import { getFeaturedAdventure } from './getFeaturedAdventure';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export const ADVENTURE_ASSETS_BUCKET = 'adventure-assets';
@@ -218,6 +220,17 @@ export async function fetchFamilyAdventureModules(): Promise<{
   return { modules: (data ?? []).map((row) => normalizeRow(row as Record<string, unknown>)) };
 }
 
+/** Fetch family adventures and resolve the featured hero row for the current visibility context. */
+export async function fetchFeaturedAdventure(
+  ctx: AdventureVisibilityContext = {},
+): Promise<{ adventure: AdventureModuleRecord | null; error?: string }> {
+  const result = await fetchFamilyAdventureModules();
+  if (result.error) {
+    return { adventure: null, error: result.error };
+  }
+  return { adventure: getFeaturedAdventure(result.modules, ctx) };
+}
+
 export async function createAdventureModule(
   input: AdventureModuleInput,
 ): Promise<{ module?: AdventureModuleRecord; error?: string }> {
@@ -414,20 +427,11 @@ export async function seedDefaultAdventureModules(): Promise<{ count: number; er
   return { count };
 }
 
-export function resolveFeaturedAdventureModule(
-  modules: AdventureModuleRecord[],
-): AdventureModuleRecord | null {
-  const featured = modules.filter((row) => row.is_featured);
-  if (featured.length === 0) return null;
-  return featured.sort((a, b) => {
-    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-    return b.week_number - a.week_number;
-  })[0];
-}
+export { getFeaturedAdventure, logFeaturedAdventureDiagnostics } from './getFeaturedAdventure';
 
-/** @deprecated Use resolveFeaturedAdventureModule — status=active is no longer exclusive. */
+/** @deprecated Use getFeaturedAdventure — status=active is no longer exclusive. */
 export function resolveActiveAdventureModule(
   modules: AdventureModuleRecord[],
 ): AdventureModuleRecord | null {
-  return resolveFeaturedAdventureModule(modules);
+  return getFeaturedAdventure(modules);
 }

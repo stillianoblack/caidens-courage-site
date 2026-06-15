@@ -6,6 +6,7 @@ import {
   readMirandaGradeBandPreviewParam,
   readParticipantGradeSettings,
 } from '../../lib/mirandaGradeBandResolver';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getCharlieMissionById,
   isCharlieAdaptiveMission,
@@ -39,6 +40,7 @@ export default function CharlieMissionFlow({
   const mission = getCharlieMissionById(missionId);
   const gradeResolution = useMirandaGradeBand();
   const gradeSettings = readParticipantGradeSettings();
+  const participantId = readActiveChildParticipantId();
 
   const previewBand = useMemo(() => {
     if (!canPreviewMirandaGradeBand(location.pathname)) return null;
@@ -48,8 +50,12 @@ export default function CharlieMissionFlow({
   const activeGradeBand = previewBand ?? gradeResolution.band;
 
   const config = useMemo(
-    () => resolveCharlieMissionConfig(missionId, activeGradeBand),
-    [missionId, activeGradeBand],
+    () =>
+      resolveCharlieMissionConfig(missionId, activeGradeBand, {
+        participantId,
+        gradeLevel: gradeSettings.gradeLevel,
+      }),
+    [activeGradeBand, gradeSettings.gradeLevel, missionId, participantId],
   );
 
   const completionContext = useMemo(() => {

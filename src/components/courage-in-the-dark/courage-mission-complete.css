@@ -1,239 +1,464 @@
-.courageMissionComplete {
-  position: relative;
+/* Mission complete — character-sheet modal celebration */
+
+.courageMissionCompleteModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-  width: min(100%, 36rem);
-  margin: 0 auto;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
 }
 
-.courageMissionCompleteCapture {
+.courageMissionCompleteModalBackdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(8, 18, 36, 0.72);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  animation: courageMissionBackdropIn 0.35s ease-out;
+}
+
+.courageMissionCompleteModalPanel {
   position: relative;
+  z-index: 1;
   width: 100%;
-  padding: 2rem 1.5rem 1.75rem;
-  border-radius: 1.35rem;
-  background: linear-gradient(165deg, rgba(18, 28, 48, 0.96), rgba(8, 14, 28, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-  text-align: center;
+  max-width: 100%;
+  height: min(100dvh, 100%);
+  max-height: 100dvh;
+  animation: courageMissionPanelIn 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.courageMissionCompleteSheet,
+.courageMissionCompleteSheetInner {
+  height: 100%;
+  max-height: 100dvh;
+  border-radius: 0;
+}
+
+.courageMissionCompleteSheetInner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   overflow: hidden;
 }
 
-.courageMissionCompleteInner {
+.courageMissionCompleteClose {
+  top: calc(0.85rem + env(safe-area-inset-top, 0px));
+  right: 0.85rem;
+}
+
+.courageMissionCompleteHero {
   position: relative;
-  z-index: 1;
 }
 
-.courageMissionCompleteHeroArt {
-  width: min(11rem, 72%);
-  max-height: 9.5rem;
-  object-fit: contain;
-  margin: 0 auto 0.65rem;
-  display: block;
-  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
+.courageMissionCompleteHeroCover {
+  min-height: 9.5rem;
 }
 
-.courageMissionComplete--caiden .courageMissionCompleteCapture {
-  background: linear-gradient(155deg, #b45309 0%, #1a2f52 52%, #0b1220 100%);
-}
+/* —— Compact weekly progression layout —— */
 
-.courageMissionComplete--miranda .courageMissionCompleteCapture {
-  background: linear-gradient(155deg, #7c3aed 0%, #312e81 48%, #0b1220 100%);
-}
-
-.courageMissionComplete--zeke .courageMissionCompleteCapture {
-  background: linear-gradient(155deg, #ea580c 0%, #0f766e 45%, #0b1220 100%);
-}
-
-.courageMissionComplete--charlie .courageMissionCompleteCapture {
-  background: linear-gradient(155deg, #16a34a 0%, #1e40af 50%, #0b1220 100%);
-}
-
-.courageMissionComplete--b4 .courageMissionCompleteCapture {
-  background: linear-gradient(155deg, #0ea5e9 0%, #1e3a8a 50%, #0b1220 100%);
-}
-
-.courageMissionComplete--error {
-  width: min(100%, 36rem);
-  margin: 0 auto;
-  padding: 2rem 1.5rem 1.75rem;
+.courageMissionCompleteContent {
+  display: flex;
+  flex-direction: column;
   gap: 0.85rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(165deg, rgba(18, 28, 48, 0.96), rgba(8, 14, 28, 0.98));
-  border: 1px solid rgba(248, 113, 113, 0.45);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-  text-align: center;
+  padding: 0.35rem 1rem 0.75rem;
 }
 
-.courageMissionCompleteBadge {
-  display: grid;
-  place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
+.courageMissionCompleteHeroCompact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  animation: courageMissionTextIn 0.5s ease-out both;
+}
+
+.courageMissionCompletePortrait {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 999px;
+  overflow: visible;
+  animation: courageMissionPortraitRise 0.65s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.courageMissionCompletePortrait .characterDetailPortraitImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.courageMissionCompleteCoinChip {
+  position: absolute;
+  right: -0.35rem;
+  bottom: -0.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.45rem;
   border-radius: 999px;
   background: linear-gradient(145deg, #fbbf24, #f59e0b);
-  color: #111827;
-  font-size: 2rem;
+  color: #1a1a1a;
+  font-size: 0.72rem;
   font-weight: 800;
-  box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
-  animation: courageMissionBadgePop 0.8s ease-out;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
-.courageMissionComplete--error .courageMissionCompleteBadge {
-  background: linear-gradient(145deg, #f87171, #ef4444);
+.courageMissionCompleteHeadlines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.courageMissionCompleteMainTitle {
+  margin: 0;
+  font-size: clamp(1.35rem, 4.2vw, 1.65rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+}
+
+.courageMissionCompleteWeekEyebrow {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: rgba(251, 191, 36, 0.95);
+}
+
+.courageMissionCompleteGameTitle {
+  margin: 0;
+  font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.96);
+  line-height: 1.25;
+}
+
+.courageMissionCompleteProgressStat {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(251, 191, 36, 0.95);
+  letter-spacing: 0.01em;
+}
+
+.courageMissionCompleteFooterCopy {
+  margin: 0.35rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(191, 219, 254, 0.88);
+}
+
+.courageMissionCompleteBadgeShowcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.85rem 0.75rem 0.65rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: courageMissionRewardIn 0.55s ease-out 0.12s both;
+}
+
+.courageMissionCompleteBadgeShowcase--celebrate {
+  border-color: rgba(251, 191, 36, 0.45);
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.18);
+}
+
+.courageMissionCompleteBadgeFrame--hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 9.5rem;
+  height: 9.5rem;
+  margin: 0 auto;
+  border-radius: 1.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 20px 40px -22px rgba(0, 0, 0, 0.55);
+}
+
+.courageMissionCompleteBadgeShowcase--unlocked .courageMissionCompleteBadgeFrame--hero {
+  animation: courageMissionBadgePop 0.85s ease-out 0.2s both;
+}
+
+.courageMissionCompleteBadgeArt {
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: contain;
+}
+
+.courageMissionCompleteBadgeArt--locked {
+  filter: grayscale(1) brightness(0.7);
+  opacity: 0.72;
+}
+
+.courageMissionCompleteBadgeLock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: rgba(8, 18, 36, 0.28);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(1px);
+}
+
+.courageMissionCompleteBadgeName {
+  margin: 0.45rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
   color: #fff;
 }
 
-.courageMissionCompleteBadgeIcon {
-  width: 2.25rem;
-  height: 2.25rem;
-  object-fit: contain;
+.courageMissionCompleteBadgeStatus {
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(248, 113, 113, 0.9);
 }
 
-@keyframes courageMissionBadgePop {
-  0% {
-    transform: scale(0.4);
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
-  }
-  70% {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 1rem rgba(251, 191, 36, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
-  }
+.courageMissionCompleteBadgeStatus--unlocked {
+  color: rgba(74, 222, 128, 0.95);
+}
+
+.courageMissionCompleteBadgeHint {
+  margin: 0.35rem 0 0;
+  max-width: 16rem;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: rgba(191, 219, 254, 0.9);
+}
+
+.courageMissionCompleteProgressCard {
+  padding: 0.85rem 0.9rem;
+  border-radius: 1rem;
+  background: rgba(30, 58, 95, 0.55);
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  animation: courageMissionRewardIn 0.55s ease-out 0.2s both;
+}
+
+.courageMissionCompleteProgressLabel {
+  display: block;
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.88);
+}
+
+.courageMissionCompleteProgressTrack {
+  width: 100%;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.65);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.courageMissionCompleteProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  transition: width 0.6s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.courageMissionCompleteProgressCount {
+  margin: 0.55rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.courageMissionCompleteProgressRemaining {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(191, 219, 254, 0.82);
+}
+
+.courageMissionCompleteProgressBadgeStatus {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(191, 219, 254, 0.88);
+}
+
+.courageMissionCompleteProgressBadgeStatus--unlocked {
+  color: rgba(74, 222, 128, 0.95);
+  font-weight: 700;
+}
+
+.courageMissionCompleteHeroGlow {
+  position: absolute;
+  inset: auto 10% -2rem;
+  height: 6rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.55) 0%, transparent 72%);
+  filter: blur(18px);
+  animation: courageMissionGlowPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.courageMissionCompleteHeroSparkles {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.35) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 22%, rgba(255, 255, 255, 0.28) 0 2px, transparent 3px),
+    radial-gradient(circle at 84% 62%, rgba(251, 191, 36, 0.45) 0 2px, transparent 3px),
+    radial-gradient(circle at 32% 68%, rgba(255, 255, 255, 0.22) 0 1px, transparent 2px);
+  opacity: 0.85;
+  animation: courageMissionSparkleDrift 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.courageMissionCompleteHeroBar {
+  padding-top: 2.5rem;
+}
+
+.courageMissionCompleteHeroBar .courageMissionCompletePortrait {
+  width: 6.25rem;
+  height: 6.25rem;
+  animation: courageMissionPortraitRise 0.65s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .courageMissionCompleteEyebrow {
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(251, 191, 36, 0.95);
+  animation: courageMissionTextIn 0.55s ease-out 0.08s both;
 }
 
-.courageMissionCompleteTitle {
-  margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.15;
-  color: #fff;
+.courageMissionCompleteMissionTitle {
+  font-size: clamp(1.45rem, 4.5vw, 1.85rem);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  animation: courageMissionTextIn 0.55s ease-out 0.14s both;
 }
 
-.courageMissionCompleteCharacter {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: rgba(251, 191, 36, 0.92);
+.courageMissionCompleteCharacterName {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+  animation: courageMissionTextIn 0.55s ease-out 0.2s both;
 }
 
 .courageMissionCompleteBody {
-  margin: 0;
-  max-width: 28rem;
-  color: rgba(255, 255, 255, 0.82);
+  margin: 0.45rem 0 0;
+  max-width: 24rem;
+  font-size: 0.9375rem;
   line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+  animation: courageMissionTextIn 0.55s ease-out 0.26s both;
+}
+
+.courageMissionCompleteScroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.courageMissionCompleteBodyPanel {
+  padding-bottom: 1rem;
 }
 
 .courageMissionCompleteRewards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   width: 100%;
 }
 
 .courageMissionCompleteRewardCard {
-  padding: 0.9rem 0.75rem;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0;
+  text-align: center;
+  animation: courageMissionRewardIn 0.55s ease-out both;
 }
 
 .courageMissionCompleteRewardCard--coins {
-  background: rgba(251, 191, 36, 0.1);
+  animation-delay: 0.12s;
+  background: rgba(251, 191, 36, 0.12);
   border-color: rgba(251, 191, 36, 0.28);
+}
+
+.courageMissionCompleteRewardCard--badge {
+  animation-delay: 0.2s;
 }
 
 .courageMissionCompleteRewardCard--item {
   grid-column: 1 / -1;
+  animation-delay: 0.28s;
 }
 
-.courageMissionCompleteRewardLabel {
-  margin: 0 0 0.35rem;
+.courageMissionCompleteBadgeFrame {
+  display: grid;
+  place-items: center;
+  width: 5.5rem;
+  height: 5.5rem;
+  margin: 0.35rem auto;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+    0 16px 32px -18px rgba(0, 0, 0, 0.55);
+  animation: courageMissionBadgePop 0.85s ease-out 0.25s both;
+}
+
+.courageMissionCompleteArt {
+  width: 4.25rem;
+  height: 4.25rem;
+  object-fit: contain;
+}
+
+.courageMissionCompleteBadgeWeek {
+  margin: 0.35rem 0 0;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(191, 219, 254, 0.92);
 }
 
-.courageMissionCompleteRewardValue {
-  margin: 0.35rem 0 0;
-  font-size: 0.95rem;
+.courageMissionCompleteWeekProgress {
+  margin: 0.65rem 0 0;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: #fff;
-}
-
-.courageMissionCompleteArt {
-  width: 5.25rem;
-  height: 5.25rem;
-  object-fit: contain;
-  margin: 0 auto;
-  display: block;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.12);
-  padding: 0.45rem;
-  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.45);
+  color: #fbbf24;
 }
 
 .courageMissionCompleteCoinTotal {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  margin: 0;
-  font-size: 1.75rem;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0;
+  font-size: 1.85rem;
   font-weight: 800;
   color: #fbbf24;
   font-variant-numeric: tabular-nums;
 }
 
 .courageMissionCompleteCoinIcon {
-  font-size: 1.35rem;
   animation: courageMissionCoinSpin 1.2s ease-out;
 }
 
-@keyframes courageMissionCoinSpin {
-  0% {
-    transform: rotateY(0deg) scale(0.6);
-  }
-  100% {
-    transform: rotateY(720deg) scale(1);
-  }
-}
-
-.courageMissionCompleteCoinEarned {
-  margin: 0.25rem 0 0;
-  font-size: 0.82rem;
-  color: rgba(251, 191, 36, 0.9);
-}
-
 .courageMissionCompleteWallet {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.courageMissionCompleteWalletLabel {
-  margin: 0 0 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.58);
+  margin-top: 0.75rem;
+  animation: courageMissionRewardIn 0.55s ease-out 0.34s both;
 }
 
 .courageMissionCompleteWalletRow {
@@ -242,7 +467,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.45rem;
-  margin: 0;
+  margin: 0.35rem 0 0;
   font-weight: 800;
 }
 
@@ -268,27 +493,15 @@
 }
 
 .courageMissionCompleteNextUnlock {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  text-align: left;
-}
-
-.courageMissionCompleteNextUnlockEyebrow {
-  margin: 0 0 0.5rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(125, 211, 252, 0.85);
+  margin-top: 0.75rem;
+  animation: courageMissionRewardIn 0.55s ease-out 0.42s both;
 }
 
 .courageMissionCompleteNextUnlockBody {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-top: 0.35rem;
 }
 
 .courageMissionCompleteNextUnlockArt {
@@ -301,103 +514,6 @@
   flex-shrink: 0;
 }
 
-.courageMissionCompleteNextUnlockName {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-.courageMissionCompleteNextUnlockAway {
-  margin: 0.15rem 0 0;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.courageMissionCompleteBtn {
-  margin-top: 0.35rem;
-  min-width: 14rem;
-  padding: 0.8rem 1.25rem;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(145deg, #38bdf8, #2563eb);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.courageMissionCompleteBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
-}
-
-.courageMissionCompleteActions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.55rem;
-  width: 100%;
-}
-
-.courageMissionCompleteBtn--secondary {
-  min-width: 12rem;
-  padding: 0.72rem 1.15rem;
-  background: #1a2f52;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #f8fafc;
-  font-size: 0.9rem;
-  font-weight: 800;
-  box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.45);
-}
-
-.courageMissionCompleteBtn--secondary:hover {
-  background: #243a63;
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 22px -12px rgba(0, 0, 0, 0.5);
-}
-
-.courageMissionCompleteBtn--secondary:disabled {
-  opacity: 0.65;
-  cursor: wait;
-  transform: none;
-}
-
-.courageMissionCompleteShareHint {
-  margin: 0;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.58);
-}
-
-.courageMissionCompleteToast {
-  position: fixed;
-  bottom: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  padding: 0.55rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(34, 197, 94, 0.95);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
-  z-index: 1300;
-  animation: courageMissionToastIn 0.25s ease-out;
-}
-
-@keyframes courageMissionToastIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(0.35rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
 .courageMissionCompleteBrand {
   display: flex;
   flex-wrap: wrap;
@@ -405,26 +521,19 @@
   justify-content: center;
   gap: 0.55rem 0.75rem;
   width: 100%;
-  margin-top: 0.35rem;
+  margin-top: 1rem;
   padding-top: 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.courageMissionCompleteBrandLogo {
-  width: 2.35rem;
-  height: 2.35rem;
-  object-fit: contain;
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.12);
-  padding: 0.2rem;
-}
-
+.courageMissionCompleteBrandLogo,
 .courageMissionCompleteBrandMark {
   width: 2rem;
   height: 2rem;
   object-fit: contain;
-  border-radius: 0.35rem;
-  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.45rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2rem;
 }
 
 .courageMissionCompleteBrandTitle {
@@ -448,13 +557,263 @@
   margin: 0;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.55);
+  text-align: center;
 }
 
-.courageMissionCompleteNextUnlock--belowCard {
+.courageMissionCompleteFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+}
+
+.courageMissionCompletePrimaryCta {
   width: 100%;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.courageMissionCompleteSecondaryCta {
+  width: 100%;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.courageMissionCompleteSecondaryCta:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.courageMissionCompleteSecondaryCta:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.courageMissionCompleteShareHint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.courageMissionCompleteVictoryRing {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 2rem auto 1rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #fbbf24, #f59e0b);
+  color: #111827;
+  font-size: 2rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
+  animation: courageMissionBadgePop 0.8s ease-out;
+}
+
+.courageMissionCompleteVictoryRing--error {
+  background: linear-gradient(145deg, #f87171, #ef4444);
+  color: #fff;
+}
+
+.courageMissionCompleteHero--error {
+  padding: 2rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.courageMissionCompleteToast {
+  position: fixed;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.95);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  z-index: 1600;
+  animation: courageMissionToastIn 0.25s ease-out;
+}
+
+.courageMissionCompleteModal .goldConfetti {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes courageMissionBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes courageMissionPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes courageMissionGlowPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes courageMissionSparkleDrift {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes courageMissionPortraitRise {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes courageMissionTextIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes courageMissionRewardIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes courageMissionBadgePop {
+  0% {
+    transform: scale(0.4);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.55);
+  }
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1rem rgba(251, 191, 36, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
+
+@keyframes courageMissionCoinSpin {
+  0% {
+    transform: rotateY(0deg) scale(0.6);
+  }
+  100% {
+    transform: rotateY(720deg) scale(1);
+  }
+}
+
+@keyframes courageMissionToastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .courageMissionCompleteModal {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .courageMissionCompleteModalPanel {
+    width: clamp(360px, 34vw, 420px);
+    height: auto;
+    max-height: calc(100dvh - 48px);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow:
+      0 32px 80px -24px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  }
+
+  .courageMissionCompleteSheet,
+  .courageMissionCompleteSheetInner {
+    border-radius: 1.25rem;
+    max-height: calc(100dvh - 48px);
+  }
+
+  .courageMissionCompleteHeroCover {
+    min-height: 8.5rem;
+  }
 }
 
 @media (max-width: 520px) {
+  .courageMissionCompleteContent {
+    padding: 0.25rem 0.85rem 0.5rem;
+    gap: 0.7rem;
+  }
+
+  .courageMissionCompleteBadgeFrame--hero {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+
+  .courageMissionCompleteBadgeArt {
+    width: 6.75rem;
+    height: 6.75rem;
+  }
+
   .courageMissionCompleteRewards {
     grid-template-columns: 1fr;
   }

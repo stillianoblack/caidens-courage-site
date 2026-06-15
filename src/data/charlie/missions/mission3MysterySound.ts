@@ -111,7 +111,7 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
               'Notice when it happens',
               'Guess without listening',
               'Make a louder sound',
-              'Leave the room forever',
+              'Take a breath and keep listening for the pattern',
             ],
             correctIndex: 0,
             correctFeedback: 'Timing is a clue! When it squeaks matters.',
@@ -129,7 +129,7 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
             question: 'The squeak happens right after someone opens a cabinet. What should Charlie notice?',
             choices: [
               'The sound might be connected to the cabinet',
-              'Cabinets are always haunted',
+              'The cabinet movement might be connected, so test it',
               'Opening things is illegal in science club',
               'The squeak only happens on Tuesdays in space',
             ],
@@ -195,8 +195,8 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
             question: 'The squeak only happens when the fan wobbles. What is Charlie tracking?',
             choices: [
               'A pattern between movement and sound',
-              'How many pencils are on the table',
-              'Who has the loudest voice',
+              'Whether the fan or cabinet moved right before the squeak',
+              'Whether the same trigger happened each time',
               'Whether ghosts prefer fans',
             ],
             correctIndex: 0,
@@ -241,7 +241,7 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
             question: 'What is the best evidence-based next step?',
             choices: [
               'Test whether the sound stops when the fan is off',
-              'Assume the cabinet is haunted',
+              'Test the likely source before concluding',
               'Ignore the pattern',
               'Ask everyone to talk louder',
             ],
@@ -262,7 +262,7 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
             choices: [
               'The fan was likely connected to the sound',
               'The cabinet ghost took a break',
-              'Science club should never use fans',
+              'The fan setup likely needs adjustment or maintenance',
               'Patterns are not useful',
             ],
             correctIndex: 0,
