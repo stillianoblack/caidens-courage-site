@@ -10,7 +10,7 @@ import {
 
 const BAND_ORDER: MirandaGradeBand[] = ['K-1', '2-3', '4-5', '6-8'];
 
-function stretchBand(band: MirandaGradeBand): MirandaGradeBand {
+export function getStretchedBand(band: MirandaGradeBand): MirandaGradeBand {
   const index = BAND_ORDER.indexOf(band);
   if (index < 0) return '2-3';
   return BAND_ORDER[Math.min(index + 1, BAND_ORDER.length - 1)];
@@ -44,26 +44,45 @@ export function getGradeBandFromStorage(
   return normalized ? getGradeBand(normalized) : null;
 }
 
-function mapFamilyGradeBandToMiranda(
-  band: FamilyGradeBand,
-  allowStretch: boolean,
-): MirandaGradeBand {
-  let resolved: MirandaGradeBand;
+function mapFamilyGradeBandToMiranda(band: FamilyGradeBand): MirandaGradeBand {
   switch (band) {
     case '2–3':
     case '3–4':
-      resolved = '2-3';
-      break;
+      return '2-3';
     case '4–5':
-      resolved = '4-5';
-      break;
+      return '4-5';
     case '5–6':
-      resolved = '6-8';
-      break;
+      return '6-8';
     default:
-      resolved = '2-3';
+      return '2-3';
   }
-  return allowStretch ? stretchBand(resolved) : resolved;
+}
+
+/** Resolve base adaptive band from profile — never applies stretch. */
+export function resolveBaseGradeBand(input: {
+  gradeLevel?: string | null;
+  gradeBand?: string | null;
+  numericGrade?: number | null;
+}): MirandaGradeBand {
+  const fromLevel = getGradeBandFromStorage(input.gradeLevel);
+  if (fromLevel) {
+    return fromLevel;
+  }
+
+  if (typeof input.numericGrade === 'number' && Number.isFinite(input.numericGrade)) {
+    const rounded = Math.round(input.numericGrade);
+    return rounded <= 1 ? 'K-1' : rounded <= 3 ? '2-3' : rounded <= 5 ? '4-5' : '6-8';
+  }
+
+  const band = input.gradeBand?.trim();
+  if (band && isMirandaGradeBand(band)) {
+    return band;
+  }
+  if (band && isFamilyGradeBand(band)) {
+    return mapFamilyGradeBandToMiranda(band);
+  }
+
+  return '2-3';
 }
 
 /** Resolve adaptive band for runtime — prefers grade_level, falls back to stored grade_band */
@@ -73,26 +92,5 @@ export function resolveAdaptiveGradeBand(input: {
   allowStretch?: boolean;
   numericGrade?: number | null;
 }): MirandaGradeBand {
-  const allowStretch = Boolean(input.allowStretch);
-  const fromLevel = getGradeBandFromStorage(input.gradeLevel);
-  if (fromLevel) {
-    return allowStretch ? stretchBand(fromLevel) : fromLevel;
-  }
-
-  if (typeof input.numericGrade === 'number' && Number.isFinite(input.numericGrade)) {
-    const rounded = Math.round(input.numericGrade);
-    const base =
-      rounded <= 1 ? 'K-1' : rounded <= 3 ? '2-3' : rounded <= 5 ? '4-5' : '6-8';
-    return allowStretch ? stretchBand(base) : base;
-  }
-
-  const band = input.gradeBand?.trim();
-  if (band && isMirandaGradeBand(band)) {
-    return allowStretch ? stretchBand(band) : band;
-  }
-  if (band && isFamilyGradeBand(band)) {
-    return mapFamilyGradeBandToMiranda(band, allowStretch);
-  }
-
-  return '2-3';
+  return resolveBaseGradeBand(input);
 }

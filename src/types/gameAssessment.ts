@@ -225,6 +225,13 @@ export type GameQuestionBase = {
   lockInTips?: string[];
   lockInTipsCorrect?: string[];
   lockInTipsIncorrect?: string[];
+  /** Dev diagnostics for adaptive grade/question selection */
+  diagnosticMeta?: {
+    sourceBand?: string;
+    contentBand?: string;
+    difficultyTier?: string;
+    contentVersion?: string;
+  };
 };
 
 export type GameChoiceQuestion = GameQuestionBase & {
@@ -292,6 +299,12 @@ export type GameAssessmentConfig = {
   guideAvatarAlt?: string;
   /** Universal tracking metadata for module_results / assessment_results_v2. */
   tracking?: ModuleTrackingDefinition;
+  /** Resolved adaptive question-pool metadata for diagnostics and completion tracking. */
+  adaptiveMeta?: {
+    contentBand: string;
+    sourceBand: string;
+    usedStretch: boolean;
+  };
 };
 
 export type GameAnswerValue = string | string[] | boolean | null;

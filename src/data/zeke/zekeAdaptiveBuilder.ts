@@ -74,10 +74,10 @@ export function buildZekeAdaptiveConfig(
   gradeBand: ZekeGradeBand,
   selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
-  const content = resolveZekeGradeContent(mission, gradeBand);
-  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+  const selection = finalizeAdaptiveQuestions(mission.gradeContent, {
     missionId: mission.id,
     gradeBand,
+    previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,
   });
 
@@ -91,8 +91,13 @@ export function buildZekeAdaptiveConfig(
     avatarAlt: 'Zeke',
     landing: mission.landing,
     complete: mission.complete,
-    questions: questions.map((q) => buildQuestion(q, mission)),
+    questions: selection.questions.map((q) => buildQuestion(q, mission)),
     tracking: undefined,
+    adaptiveMeta: {
+      contentBand: selection.contentBand,
+      sourceBand: selection.sourceBand,
+      usedStretch: selection.usedStretch,
+    },
   };
 }
 

@@ -1,0 +1,33 @@
+.gradeResolutionLoading {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  padding: 1.5rem;
+}
+
+.gradeResolutionLoadingCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.gradeResolutionLoadingSpinner {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fbbf24;
+  animation: gradeResolutionSpin 0.8s linear infinite;
+}
+
+@keyframes gradeResolutionSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

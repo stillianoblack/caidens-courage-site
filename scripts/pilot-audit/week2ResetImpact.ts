@@ -20,7 +20,7 @@ const CHARACTER_MISSION_IDS = ['caiden', 'miranda', 'zeke', 'charlie', 'b4'].map
 );
 
 /** Typical question count per weekly game when module_results are missing. */
-const ESTIMATED_QUESTIONS_PER_WEEK2_MISSION = 3;
+const ESTIMATED_QUESTIONS_PER_WEEK2_MISSION = 5;
 const WEEK_2_MODULE_IDS = new Set([
   'quest-2',
   'miranda-mystery-file-2',
@@ -503,7 +503,7 @@ async function runAudit(): Promise<AuditReport> {
   const questionsTrackingNote =
     totalQuestions > 0
       ? 'Question counts are from module_results answers_json and question_attempts.'
-      : 'No Week 2 rows in module_results or question_attempts. Mission completions exist in player_progress only; estimated question counts assume 3 questions per completed Week 2 mission.';
+      : 'No Week 2 rows in module_results or question_attempts. Mission completions exist in player_progress only; estimated question counts assume 5 questions per completed Week 2 mission.';
   const averageCompletion =
     pilotStudents.length > 0
       ? Math.round(

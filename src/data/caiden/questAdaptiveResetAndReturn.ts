@@ -1,9 +1,11 @@
 import type { CaidenAdaptiveQuestFile, CaidenGradeContent } from '../../types/caidenAdaptiveQuest';
+import { caidenBandMetadata } from './caidenQuestionHelpers';
 import { registerCaidenAdaptiveQuest } from './caidenAdaptiveBuilder';
 
 export const CAIDEN_QUEST_4_ID = 'quest-4';
 
 const SKILL = 'Emotional Regulation';
+const MODULE_ID = CAIDEN_QUEST_4_ID;
 
 function bandContent(
   dashboardDescription: string,
@@ -95,19 +97,23 @@ export const CAIDEN_QUEST_4_FILE: CaidenAdaptiveQuestFile = {
       [
         {
           id: 'cq4-45-q1',
-          question: 'Caiden loses a game and feels embarrassed. What is the best next step?',
-          scenarioTag: 'NOTICE FEELINGS',
+          scenarioText:
+            'Caiden loses a team challenge and has 10 minutes before the next round. He can review what went wrong (6 min), practice one skill (8 min), or sit quietly and reset (4 min).',
+          question: 'Which recovery plan uses his break time best?',
+          scenarioTag: 'RESET PLAN',
           scenarioAccent: 'focus-reset',
           options: [
-            { id: 'a', label: 'Blame someone else' },
-            { id: 'b', label: 'Notice the feeling and try again calmly' },
-            { id: 'c', label: 'Stop talking all day' },
-            { id: 'd', label: 'Break the rules' },
+            { id: 'a', label: 'Reset 4 minutes, then review 6 minutes — no time to practice' },
+            { id: 'b', label: 'Skip reset and practice the full 8 minutes while still frustrated' },
+            { id: 'c', label: 'Argue about the score for the whole break' },
+            { id: 'd', label: 'Leave the activity and miss the next round' },
           ],
-          correctAnswer: 'b',
-          explanation: 'Naming the feeling and staying calm helps Caiden bounce back.',
-          hint: 'What move respects the feeling without making it worse?',
-          skillTags: [SKILL],
+          correctAnswer: 'a',
+          explanation:
+            'A short reset clears frustration, then review fits in the remaining time before the next round.',
+          hint: 'Add the minutes for each step and compare to the 10-minute break.',
+          skillTags: [SKILL, 'Planning', 'Executive Function'],
+          metadata: caidenBandMetadata('4-5', 'Planning', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq4-45-q2',
@@ -123,23 +129,28 @@ export const CAIDEN_QUEST_4_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'a',
           explanation: 'Listening for one improvement turns feedback into a next step.',
           hint: 'How can feedback help Caiden grow?',
-          skillTags: [SKILL],
+          skillTags: [SKILL, 'Consequence Evaluation'],
+          metadata: caidenBandMetadata('4-5', 'Consequence Evaluation', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq4-45-q3',
-          question: 'Which thought helps Caiden recover?',
-          scenarioTag: 'GROWTH MINDSET',
+          scenarioText:
+            'Caiden\'s comic draft gets tough feedback. He can revise one panel (12 min), start over (30 min), or submit without changes. Camp submissions close in 15 minutes.',
+          question: 'Which choice balances improvement with the deadline?',
+          scenarioTag: 'DEADLINE TRADEOFF',
           scenarioAccent: 'growth-reflection',
           options: [
-            { id: 'a', label: 'I can learn from this' },
-            { id: 'b', label: 'I always fail' },
-            { id: 'c', label: 'Everyone is against me' },
-            { id: 'd', label: 'I should stop trying' },
+            { id: 'a', label: 'Revise one panel and submit on time' },
+            { id: 'b', label: 'Start over even though he cannot finish in 15 minutes' },
+            { id: 'c', label: 'Submit without changes and ignore the feedback' },
+            { id: 'd', label: 'Quit the contest because the feedback felt harsh' },
           ],
           correctAnswer: 'a',
-          explanation: 'A growth mindset turns setbacks into learning opportunities.',
-          hint: 'Which thought keeps Caiden moving forward?',
-          skillTags: [SKILL],
+          explanation:
+            'One focused revision fits the deadline and still responds to feedback without starting over.',
+          hint: 'Compare each option to the 15-minute limit.',
+          skillTags: [SKILL, 'Tradeoffs', 'Planning'],
+          metadata: caidenBandMetadata('4-5', 'Tradeoffs', MODULE_ID, 'advanced'),
         },
       ],
     ),

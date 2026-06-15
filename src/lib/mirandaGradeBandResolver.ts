@@ -9,12 +9,17 @@ import { loadLocalParticipants } from './pilotTrackingLocalStorage';
 import { mergeLocalParticipantGradeOverrides } from './pilotTrackingLocalStorage';
 import { fetchParticipantsByIds } from './studentFamilyLinkService';
 import { hasCanonicalGradeLevel } from './participantGradeDisplay';
-import { resolveAdaptiveGradeBand } from './getGradeBand';
+import { resolveBaseGradeBand } from './getGradeBand';
 
 export type MirandaGradeBandResolution = {
   band: MirandaGradeBand;
+  /** Base content band from grade_level — stretch is applied per-quest during question selection. */
+  baseBand: MirandaGradeBand;
   /** @deprecated Use band */
   bandKey: MirandaGradeBand;
+  gradeLevel: string | null;
+  gradeBand: string | null;
+  loading: boolean;
   missingGrade: boolean;
   needsGradeSelection: boolean;
   familyGradeBand: FamilyGradeBand | null;
@@ -73,28 +78,40 @@ export function readParticipantGradeSettings(participantId?: string): Participan
   return mergeGradeSnapshot(participant ?? {}, participant);
 }
 
-export function resolveMirandaGradeBandForParticipant(
-  participantId?: string,
+function buildGradeResolution(
+  settings: ParticipantGradeSettingsSnapshot,
+  loading: boolean,
 ): MirandaGradeBandResolution {
-  const { gradeLevel, gradeBand, allowStretch } = readParticipantGradeSettings(participantId);
+  const { gradeLevel, gradeBand, allowStretch } = settings;
   const familyGradeBand = gradeBand && isFamilyGradeBand(gradeBand) ? gradeBand : null;
   const hasLevel = hasCanonicalGradeLevel(gradeLevel);
   const hasBand = Boolean(gradeBand?.trim());
 
-  const band = resolveAdaptiveGradeBand({
+  const baseBand = resolveBaseGradeBand({
     gradeLevel,
     gradeBand,
-    allowStretch,
   });
 
   return {
-    band,
-    bandKey: band,
+    band: baseBand,
+    baseBand,
+    bandKey: baseBand,
+    gradeLevel,
+    gradeBand,
+    loading,
     missingGrade: !hasLevel && !hasBand,
     needsGradeSelection: !hasLevel && hasBand,
     familyGradeBand,
     allowStretch,
   };
+}
+
+export function resolveMirandaGradeBandForParticipant(
+  participantId?: string,
+): MirandaGradeBandResolution {
+  const settings = readParticipantGradeSettings(participantId);
+  const id = participantId?.trim() || readActiveChildParticipantId();
+  return buildGradeResolution(settings, Boolean(id));
 }
 
 export function resolveMirandaGradeBandKey(input: {
@@ -103,16 +120,15 @@ export function resolveMirandaGradeBandKey(input: {
   numericGrade?: number | null;
   allowStretch?: boolean;
 }): MirandaGradeBand {
-  return resolveAdaptiveGradeBand({
+  return resolveBaseGradeBand({
     gradeLevel: input.gradeLevel,
     gradeBand: input.familyGradeBand,
     numericGrade: input.numericGrade,
-    allowStretch: input.allowStretch,
   });
 }
 
 export function resolveMirandaBandFromNumericGrade(grade: number): MirandaGradeBand {
-  return resolveAdaptiveGradeBand({ numericGrade: grade });
+  return resolveBaseGradeBand({ numericGrade: grade });
 }
 
 export function canPreviewMirandaGradeBand(pathname: string): boolean {

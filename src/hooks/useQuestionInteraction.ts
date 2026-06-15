@@ -167,7 +167,7 @@ export function useQuestionInteraction(
       final_selected_answer: answer,
       is_correct_first_try: firstAttemptCorrectRef.current ?? finalCorrect,
       is_correct_final: finalCorrect,
-      attempts_count: attemptsCount,
+      attempts_count: Math.max(attemptsCount, 1),
       hints_used_count: hintsUsedCount,
       completed_at: new Date().toISOString(),
     };

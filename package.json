@@ -45,7 +45,9 @@
     "rewrite:character-alignment": "tsx scripts/question-rewrite/characterAlignmentPass.ts",
     "report:character-alignment": "tsx scripts/question-rewrite/characterAlignmentPass.ts --report-only",
     "rewrite:content-variety": "tsx scripts/question-rewrite/contentVarietyPass.ts",
-    "audit:week2-reset": "tsx scripts/pilot-audit/week2ResetImpact.ts"
+    "audit:week2-reset": "tsx scripts/pilot-audit/week2ResetImpact.ts",
+    "verify:grade-routing": "tsx scripts/audit-grade-question-routing.ts",
+    "audit:question-attempts": "tsx scripts/audit-question-attempts.ts"
   },
   "browserslist": {
     "production": [

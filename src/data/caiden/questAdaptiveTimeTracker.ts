@@ -1,9 +1,11 @@
 import type { CaidenAdaptiveQuestFile, CaidenGradeContent } from '../../types/caidenAdaptiveQuest';
+import { caidenBandMetadata } from './caidenQuestionHelpers';
 import { registerCaidenAdaptiveQuest } from './caidenAdaptiveBuilder';
 
 export const CAIDEN_QUEST_3_ID = 'quest-3';
 
 const SKILL = 'Time Management';
+const MODULE_ID = CAIDEN_QUEST_3_ID;
 
 function bandContent(
   dashboardDescription: string,
@@ -109,7 +111,8 @@ export const CAIDEN_QUEST_3_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'a',
           explanation: '20 + 5 = 25 minutes, which fits inside the 30 minutes before the bus.',
           hint: 'Add the task times together and compare to 30.',
-          skillTags: [SKILL],
+          skillTags: [SKILL, 'Time Estimation'],
+          metadata: caidenBandMetadata('4-5', 'Time Estimation', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq3-45-q2',
@@ -126,23 +129,28 @@ export const CAIDEN_QUEST_3_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'b',
           explanation: '15 + 20 = 35 minutes, which is more than the 30 he has.',
           hint: 'Add the minutes for both tasks.',
-          skillTags: [SKILL],
+          skillTags: [SKILL, 'Time Estimation'],
+          metadata: caidenBandMetadata('4-5', 'Time Estimation', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq3-45-q3',
-          question: 'Which is the best time plan?',
-          scenarioTag: 'PLAN AHEAD',
+          scenarioText:
+            'Caiden has 40 minutes before camp. Homework needs 25 minutes, packing needs 10, and he wants a 5-minute snack. A friend invites him to play outside for 20 minutes now.',
+          question: 'Which schedule keeps him on time for camp without skipping essentials?',
+          scenarioTag: 'SCHEDULE TRADEOFF',
           scenarioAccent: 'priority',
           options: [
-            { id: 'a', label: 'Start with the most urgent task' },
-            { id: 'b', label: 'Wait until the last second' },
-            { id: 'c', label: 'Do nothing' },
-            { id: 'd', label: 'Start five things at once' },
+            { id: 'a', label: 'Play 20 minutes, then rush homework and packing in 20 minutes' },
+            { id: 'b', label: 'Snack 5 minutes, homework 25 minutes, then pack 10 minutes' },
+            { id: 'c', label: 'Pack first, play outside, and finish homework on the bus' },
+            { id: 'd', label: 'Skip packing and hope he remembers everything at camp' },
           ],
-          correctAnswer: 'a',
-          explanation: 'Starting with the most urgent task uses limited time wisely.',
-          hint: 'Which plan respects the clock?',
-          skillTags: [SKILL],
+          correctAnswer: 'b',
+          explanation:
+            '5 + 25 + 10 = 40 minutes exactly — all essentials fit without rushing or skipping packing.',
+          hint: 'Add each block and compare the total to 40 minutes.',
+          skillTags: [SKILL, 'Scheduling', 'Planning'],
+          metadata: caidenBandMetadata('4-5', 'Scheduling', MODULE_ID, 'advanced'),
         },
       ],
     ),

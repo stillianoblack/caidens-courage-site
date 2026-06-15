@@ -1,9 +1,11 @@
 import type { CaidenAdaptiveQuestFile, CaidenGradeContent } from '../../types/caidenAdaptiveQuest';
+import { caidenBandMetadata } from './caidenQuestionHelpers';
 import { registerCaidenAdaptiveQuest } from './caidenAdaptiveBuilder';
 
 export const CAIDEN_QUEST_2_ID = 'quest-2';
 
 const SKILL = 'Attention Control';
+const MODULE_ID = CAIDEN_QUEST_2_ID;
 
 function bandContent(
   dashboardDescription: string,
@@ -91,55 +93,67 @@ export const CAIDEN_QUEST_2_FILE: CaidenAdaptiveQuestFile = {
       ],
     ),
     '4-5': bandContent(
-      'Practice attention strategies when phones and screens compete for focus.',
+      'Plan focus blocks, compare distractions, and choose study schedules with tradeoffs.',
       [
         {
           id: 'cq2-45-q1',
-          question: 'Caiden is reading, but his phone keeps buzzing. What is the best choice?',
-          scenarioTag: 'PHONE AWAY',
-          scenarioAccent: 'distraction',
+          scenarioText:
+            'Caiden has 25 minutes before dinner. His science test is tomorrow. He can read notes (10 min), practice problems (15 min), or review vocab (8 min). He cannot finish all three before dinner.',
+          question: 'Which plan helps him focus on the most urgent work without rushing?',
+          scenarioTag: 'STUDY PLAN',
+          scenarioAccent: 'weekly-plan',
           options: [
-            { id: 'a', label: 'Check every message' },
-            { id: 'b', label: 'Put the phone away until finished' },
-            { id: 'c', label: 'Ignore reading' },
-            { id: 'd', label: 'Open social media' },
+            { id: 'a', label: 'Read notes and review vocab — both fit in 18 minutes' },
+            { id: 'b', label: 'Practice problems only — save reading for after dinner' },
+            { id: 'c', label: 'Try all three quickly and switch every 5 minutes' },
+            { id: 'd', label: 'Wait until after dinner when he has more time for everything' },
           ],
           correctAnswer: 'b',
-          explanation: 'Putting the phone away protects reading time from constant interruptions.',
-          hint: 'How can Caiden stop the buzzing from breaking his focus?',
-          skillTags: [SKILL],
+          explanation:
+            'The test is tomorrow, so practice problems matter most. Fifteen minutes fits in 25; the other tasks can wait.',
+          hint: 'Compare deadlines, minutes needed, and how many minutes he has right now.',
+          skillTags: [SKILL, 'Planning', 'Time Management'],
+          metadata: caidenBandMetadata('4-5', 'Planning', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq2-45-q2',
-          question: 'Which is a focus strategy?',
-          scenarioTag: 'STRATEGY',
+          scenarioText:
+            'Caiden earns 12 focus tokens this week. A 20-minute game costs 4 tokens, a snack break costs 2, and saving 8 tokens unlocks a bonus mission.',
+          question: 'Which spending plan protects study time and still leaves room for one reward?',
+          scenarioTag: 'TOKEN BUDGET',
           scenarioAccent: 'timer',
           options: [
-            { id: 'a', label: 'Working in short chunks' },
-            { id: 'b', label: 'Switching tasks every minute' },
-            { id: 'c', label: 'Leaving assignments unfinished' },
-            { id: 'd', label: 'Multitasking constantly' },
+            { id: 'a', label: 'Play the game twice and skip the bonus mission' },
+            { id: 'b', label: 'Take one snack break, save 10 tokens, and skip the game today' },
+            { id: 'c', label: 'Spend all tokens on snacks so he stays energized' },
+            { id: 'd', label: 'Save every token and skip breaks all week' },
           ],
-          correctAnswer: 'a',
-          explanation: 'Short focus chunks help the brain stay engaged without burning out.',
-          hint: 'Which choice keeps attention on one thing for a manageable stretch?',
-          skillTags: [SKILL],
+          correctAnswer: 'b',
+          explanation:
+            'One snack (2 tokens) plus saving 10 leaves a margin for the bonus mission without spending on a long game.',
+          hint: 'Add token costs and see which plan still saves enough for the bonus.',
+          skillTags: [SKILL, 'Budgeting', 'Executive Function'],
+          metadata: caidenBandMetadata('4-5', 'Budgeting', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq2-45-q3',
-          question: 'What happens when distractions increase?',
-          scenarioTag: 'CONSEQUENCES',
-          scenarioAccent: 'reflection',
+          scenarioText:
+            'Caiden must finish a reading log (20 min) and pack his camp bag (10 min) before a 7:30 bus. It is 7:00 now.',
+          question: 'What is the best sequence so he is not rushing at the end?',
+          scenarioTag: 'SEQUENCE',
+          scenarioAccent: 'priority',
           options: [
-            { id: 'a', label: 'Focus improves' },
-            { id: 'b', label: 'Tasks take longer' },
-            { id: 'c', label: 'Memory improves' },
-            { id: 'd', label: 'Nothing changes' },
+            { id: 'a', label: 'Pack first, then read on the bus if time runs out' },
+            { id: 'b', label: 'Start reading, then pack with whatever time remains' },
+            { id: 'c', label: 'Pack the bag first, then read until 7:25' },
+            { id: 'd', label: 'Text friends until 7:20, then try to do both tasks' },
           ],
-          correctAnswer: 'b',
-          explanation: 'More distractions mean more time lost switching attention back and forth.',
-          hint: 'Think about what happens when you keep getting interrupted.',
-          skillTags: [SKILL],
+          correctAnswer: 'c',
+          explanation:
+            'Packing is fixed at 10 minutes. Reading next uses the remaining 20 minutes without risking the bus.',
+          hint: 'Total time is 30 minutes. Which order guarantees both tasks finish?',
+          skillTags: [SKILL, 'Sequencing', 'Planning'],
+          metadata: caidenBandMetadata('4-5', 'Sequencing', MODULE_ID, 'advanced'),
         },
       ],
     ),

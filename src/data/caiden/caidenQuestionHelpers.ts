@@ -4,6 +4,7 @@ import type {
   CaidenGradeContent,
 } from '../../types/caidenAdaptiveQuest';
 import type { ContentDifficulty } from '../../types/gradeBandContentMetadata';
+import type { GradeBandQuestionMetadata } from '../../types/gradeBandContentMetadata';
 
 type ChoiceTuple = readonly [string, string, string, string];
 
@@ -70,6 +71,24 @@ export function bandContent(
     dashboardDescription,
     skillTags,
     questions,
+  };
+}
+
+export function caidenBandMetadata(
+  gradeBand: CaidenGradeBand,
+  skillArea: string,
+  moduleId: string,
+  difficulty?: ContentDifficulty,
+): GradeBandQuestionMetadata {
+  return {
+    audience: 'kid',
+    gradeBand,
+    difficulty: difficulty ?? difficultyForBand(gradeBand),
+    character: 'caiden',
+    skillTags: [skillArea],
+    skillArea,
+    contentVersion: 'adaptive_v2',
+    sourceId: moduleId,
   };
 }
 

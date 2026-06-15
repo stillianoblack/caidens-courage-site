@@ -7,6 +7,12 @@ import type { FamilyChildSummary } from './familyChildrenMetrics';
 import type { FamilyNeedsAttentionItem } from './familyOverviewInsights';
 import type { FamilyProgressSnapshot } from './familyProgressMetrics';
 import type { ProgressCounts } from './familyProgressHelpers';
+import { loadLocalQuestionAttemptsForParticipant } from './questionAttemptLocalStorage';
+import {
+  buildParentAttemptInsightLabels,
+  computeQuestionAttemptMetrics,
+  type QuestionAttemptMetricRow,
+} from './questionAttemptMetrics';
 
 type FamilyOnboardingFlags = {
   hasChild: boolean;
@@ -45,6 +51,40 @@ function childName(child: FamilyChildSummary | null): string {
   return child?.displayName ?? 'your child';
 }
 
+function childAttemptMetrics(participantId: string | null | undefined): QuestionAttemptMetricRow[] {
+  if (!participantId?.trim()) return [];
+  return loadLocalQuestionAttemptsForParticipant(participantId).map((row) => ({
+    participant_id: row.participant_id,
+    program_code: row.program_code,
+    week_number: row.week_number ?? null,
+    mission_id: row.mission_id,
+    character: row.character ?? null,
+    question_id: row.question_id,
+    grade_level: row.grade_level ?? null,
+    grade_band: row.grade_band ?? null,
+    content_version: row.content_version ?? null,
+    is_correct_first_try: row.is_correct_first_try,
+    is_correct_final: row.is_correct_final,
+    used_hint: row.used_hint,
+    attempt_count: row.attempt_count,
+    completed_at: row.completed_at,
+  }));
+}
+
+function attemptInsightMetrics(child: FamilyChildSummary | null): B4InsightsPayload['metrics'] {
+  const rows = childAttemptMetrics(child?.participantId);
+  if (rows.length === 0) return [];
+  const metrics = computeQuestionAttemptMetrics(rows);
+  const labels = buildParentAttemptInsightLabels(metrics);
+  return [
+    { label: 'First-try accuracy', value: `${Math.round(metrics.first_attempt_accuracy * 100)}%`, hint: labels.firstTryLabel },
+    { label: 'Final mission accuracy', value: `${Math.round(metrics.final_accuracy * 100)}%`, hint: labels.completionLabel },
+    { label: 'Improved after support', value: String(metrics.improved_after_support), hint: labels.improvedLabel },
+    { label: 'Needs more practice', value: String(metrics.needs_more_practice), hint: labels.practiceLabel },
+    { label: 'Growth over time', value: 'Tracking', hint: labels.growthLabel },
+  ];
+}
+
 function supportingMetrics(input: BuildFamilyB4InsightsInput): B4InsightsPayload['metrics'] {
   const child = input.child;
   return [
@@ -81,6 +121,7 @@ function supportingMetrics(input: BuildFamilyB4InsightsInput): B4InsightsPayload
       label: 'Certificates earned',
       value: String(input.certificateCount ?? 0),
     },
+    ...attemptInsightMetrics(child),
   ].filter((metric) => metric.value !== '—' || metric.label === 'Baseline status');
 }
 

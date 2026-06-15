@@ -17,7 +17,7 @@ import {
   isGameAnswerComplete,
   isGameAnswerCorrect,
 } from '../../lib/gameAssessmentValidation';
-import { mergeAttemptIntoAnswersJson, scoreFromFirstAttempts } from '../../lib/questionAttemptTracking';
+import { mergeAttemptIntoAnswersJson, scoreFromFinalAttempts } from '../../lib/questionAttemptTracking';
 import type { QuestionAttemptsMap } from '../../types/questionInteraction';
 import GameAssessmentComplete from './GameAssessmentComplete';
 import CharacterSpeechBubble from './shared/CharacterSpeechBubble';
@@ -77,6 +77,9 @@ import {
 } from '../../lib/gameExitNavigation';
 import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
 import { navigateToGameplayReturnTarget } from '../../lib/mobileGameBackNav';
+import GameQuestionGradeDiagnostics, {
+  type GameQuestionGradeDiagnosticsProps,
+} from './GameQuestionGradeDiagnostics';
 import type {
   CompleteMissionResult,
   CourageMissionRewardPayload,
@@ -137,6 +140,7 @@ type GameAssessmentFlowProps = {
     fileId?: string;
     missionId?: string;
   };
+  gradeDiagnostics?: GameQuestionGradeDiagnosticsProps;
 };
 
 function getMissionTheme(flags: {
@@ -228,6 +232,7 @@ export default function GameAssessmentFlow({
   adultMissionId,
   tracking,
   completionContext,
+  gradeDiagnostics,
 }: GameAssessmentFlowProps) {
   const hubContinueLabel = adultHubContinueLabel ?? victoriaHubContinueLabel;
   const navigate = useNavigate();
@@ -518,15 +523,16 @@ export default function GameAssessmentFlow({
         gradeLevelUsed: completionContext?.gradeLevelUsed,
         contentVersionId: completionContext?.contentVersionId,
         fileId: completionContext?.fileId,
+        weekNumber: weeklyRouteContext.week ?? null,
       });
     },
-    [adultGuideId, adultMissionId, completionContext, config, totalQuestions, tracking],
+    [adultGuideId, adultMissionId, completionContext, config, totalQuestions, tracking, weeklyRouteContext.week],
   );
 
   const computeScoreFromAnswers = useCallback(
     (finalAnswers: Record<string, GameAnswerValue>, attempts?: QuestionAttemptsMap) => {
       if (attempts && Object.keys(attempts).length > 0) {
-        return scoreFromFirstAttempts(attempts);
+        return scoreFromFinalAttempts(attempts);
       }
       return config.questions.reduce((sum, question) => {
         const value = finalAnswers[question.id];
@@ -630,11 +636,8 @@ export default function GameAssessmentFlow({
     if (!currentQuestion || !canCheck) return;
 
     playSelect();
-    const wasFirstAttempt = attemptsCount === 0;
-    const correct = isGameAnswerCorrect(currentQuestion, answer);
     submitCheck();
-    if (correct && wasFirstAttempt) {
-      setScore((prev) => prev + 1);
+    if (isGameAnswerCorrect(currentQuestion, answer)) {
       playResultFeelings();
     }
   };
@@ -644,6 +647,9 @@ export default function GameAssessmentFlow({
 
     playContinue();
     const attempt = buildAttemptRecord();
+    if (attempt.is_correct_final) {
+      setScore((prev) => prev + 1);
+    }
     const nextAttempts = { ...attemptsRecord, [currentQuestion.id]: attempt };
     const nextAnswers = { ...answersRecord, [currentQuestion.id]: answer };
 
@@ -1130,6 +1136,13 @@ export default function GameAssessmentFlow({
         ) : null}
         </GameInteractionShell>
       </main>
+
+      {view === 'quiz' && gradeDiagnostics ? (
+        <GameQuestionGradeDiagnostics
+          {...gradeDiagnostics}
+          question={currentQuestion ?? null}
+        />
+      ) : null}
 
       {view === 'quiz' ? (
         <B4BaselineBottomBar

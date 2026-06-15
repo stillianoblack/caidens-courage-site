@@ -1,9 +1,16 @@
+import { MISSION_QUESTIONS_PER_ATTEMPT } from '../config/missionQuestions';
 import { normalizeGradeLevelStorage } from '../data/gradeLevelOptions';
-import type { GradeBandQuestionMetadata } from '../types/gradeBandContentMetadata';
+import type { GradeBandQuestionMetadata, StudentGradeBand } from '../types/gradeBandContentMetadata';
+import { ensureMissionQuestionPoolSize } from './missionQuestionPool';
 
 export type DifficultyTier = 'easy' | 'medium' | 'challenge';
 
 export type GradeDifficultyMix = Record<DifficultyTier, number>;
+
+export type QuestionDifficultySelectionOptions = {
+  count?: number;
+  gradeBand?: StudentGradeBand | null;
+};
 
 export function resolveNumericGradeLevel(gradeLevel: string | null | undefined): number | null {
   const normalized = normalizeGradeLevelStorage(gradeLevel);
@@ -13,7 +20,25 @@ export function resolveNumericGradeLevel(gradeLevel: string | null | undefined):
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-/** Grade-level mix targets for within-band question selection. */
+/** Fixed per-band difficulty counts for five-question missions. */
+export function resolveGradeBandDifficultyCounts(
+  gradeBand: StudentGradeBand,
+): Record<DifficultyTier, number> {
+  switch (gradeBand) {
+    case 'K-1':
+      return { easy: 3, medium: 2, challenge: 0 };
+    case '2-3':
+      return { easy: 2, medium: 2, challenge: 1 };
+    case '4-5':
+      return { easy: 1, medium: 2, challenge: 2 };
+    case '6-8':
+      return { easy: 0, medium: 1, challenge: 4 };
+    default:
+      return { easy: 2, medium: 2, challenge: 1 };
+  }
+}
+
+/** Grade-level mix targets for within-band question selection (legacy ratio fallback). */
 export function resolveGradeDifficultyMix(gradeLevel: string | null | undefined): GradeDifficultyMix {
   const grade = resolveNumericGradeLevel(gradeLevel);
   if (grade == null) {
@@ -44,7 +69,9 @@ export function classifyQuestionDifficultyTier<T extends { id: string; metadata?
   total: number,
 ): DifficultyTier {
   const fromMetadata = metadataDifficultyTier(question.metadata);
-  if (fromMetadata && total <= 1) return fromMetadata;
+  if (fromMetadata) {
+    return fromMetadata;
+  }
 
   if (total <= 1) return 'medium';
 
@@ -85,15 +112,37 @@ function reconcileMixCounts(total: number, mix: GradeDifficultyMix): Record<Diff
 
 export function selectQuestionsByGradeDifficultyMix<
   T extends { id: string; metadata?: GradeBandQuestionMetadata },
->(questions: readonly T[], gradeLevel: string | null | undefined): T[] {
-  if (questions.length <= 1) return [...questions];
+>(
+  questions: readonly T[],
+  gradeLevel: string | null | undefined,
+  options?: QuestionDifficultySelectionOptions,
+): T[] {
+  if (questions.length === 0) return [];
 
-  const mix = resolveGradeDifficultyMix(gradeLevel);
-  const targetCounts = reconcileMixCounts(questions.length, mix);
+  const targetCount = options?.count ?? MISSION_QUESTIONS_PER_ATTEMPT;
+  const expanded = ensureMissionQuestionPoolSize(questions, targetCount);
+  const numericGrade = resolveNumericGradeLevel(gradeLevel);
+  const eligible = expanded.filter((question, index) => {
+    const tier = classifyQuestionDifficultyTier(question, index, expanded.length);
+    if (numericGrade != null && numericGrade >= 4 && tier === 'easy') {
+      const difficulty = question.metadata?.difficulty;
+      if (difficulty === 'beginner' || !question.metadata) {
+        return !isLikelyRecognitionQuestion(question);
+      }
+    }
+    return true;
+  });
+
+  const pool = eligible.length > 0 ? eligible : [...expanded];
+  const targetCounts =
+    options?.gradeBand && ['K-1', '2-3', '4-5', '6-8'].includes(options.gradeBand)
+      ? resolveGradeBandDifficultyCounts(options.gradeBand)
+      : reconcileMixCounts(targetCount, resolveGradeDifficultyMix(gradeLevel));
+
   const buckets: Record<DifficultyTier, T[]> = { easy: [], medium: [], challenge: [] };
 
-  questions.forEach((question, index) => {
-    buckets[classifyQuestionDifficultyTier(question, index, questions.length)].push(question);
+  pool.forEach((question, index) => {
+    buckets[classifyQuestionDifficultyTier(question, index, pool.length)].push(question);
   });
 
   const selected: T[] = [];
@@ -103,10 +152,10 @@ export function selectQuestionsByGradeDifficultyMix<
     selected.push(...buckets[tier].slice(0, targetCounts[tier]));
   }
 
-  if (selected.length < questions.length) {
+  if (selected.length < targetCount) {
     const selectedIds = new Set(selected.map((question) => question.id));
-    for (const question of questions) {
-      if (selected.length >= questions.length) break;
+    for (const question of pool) {
+      if (selected.length >= targetCount) break;
       if (!selectedIds.has(question.id)) {
         selected.push(question);
         selectedIds.add(question.id);
@@ -114,7 +163,14 @@ export function selectQuestionsByGradeDifficultyMix<
     }
   }
 
-  return selected.slice(0, questions.length);
+  return selected.slice(0, targetCount);
+}
+
+function isLikelyRecognitionQuestion<T extends { question?: string; metadata?: GradeBandQuestionMetadata }>(
+  question: T,
+): boolean {
+  const prompt = (question as { question?: string }).question?.trim() ?? '';
+  return /^what is |^which is a |^which helps |^define /i.test(prompt);
 }
 
 export function summarizeQuestionDifficultyTiers<

@@ -83,10 +83,10 @@ export function buildCharlieAdaptiveConfig(
   gradeBand: CharlieGradeBand,
   selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
-  const content = resolveCharlieGradeContent(mission, gradeBand);
-  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+  const selection = finalizeAdaptiveQuestions(mission.gradeContent, {
     missionId: mission.id,
     gradeBand,
+    previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,
   });
 
@@ -100,8 +100,13 @@ export function buildCharlieAdaptiveConfig(
     avatarAlt: 'Charlie Perk',
     landing: mission.landing,
     complete: mission.complete,
-    questions: questions.map((q) => buildQuestion(q, mission)),
+    questions: selection.questions.map((q) => buildQuestion(q, mission)),
     tracking: undefined,
+    adaptiveMeta: {
+      contentBand: selection.contentBand,
+      sourceBand: selection.sourceBand,
+      usedStretch: selection.usedStretch,
+    },
   };
 }
 

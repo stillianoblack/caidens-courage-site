@@ -1,9 +1,11 @@
 import type { CaidenAdaptiveQuestFile, CaidenGradeContent } from '../../types/caidenAdaptiveQuest';
+import { caidenBandMetadata } from './caidenQuestionHelpers';
 import { registerCaidenAdaptiveQuest } from './caidenAdaptiveBuilder';
 
 export const CAIDEN_QUEST_1_ID = 'quest-1';
 
 const SKILL = 'Prioritization';
+const MODULE_ID = CAIDEN_QUEST_1_ID;
 
 function bandContent(
   dashboardDescription: string,
@@ -110,6 +112,7 @@ export const CAIDEN_QUEST_1_FILE: CaidenAdaptiveQuestFile = {
           explanation: '$3 + $6 = $9, which is more than the $8 he has. He needs to choose one or earn more.',
           hint: 'Add both prices and compare to $8.',
           skillTags: [SKILL, 'Math', 'Money'],
+          metadata: caidenBandMetadata('4-5', 'Budgeting', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq1-45-q2',
@@ -128,12 +131,13 @@ export const CAIDEN_QUEST_1_FILE: CaidenAdaptiveQuestFile = {
           explanation: '40 − 25 = 15 minutes left after homework.',
           hint: 'Subtract the homework time from 40.',
           skillTags: [SKILL, 'Math', 'Time'],
+          metadata: caidenBandMetadata('4-5', 'Time Estimation', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq1-45-q3',
           scenarioText:
             'A quiz needs 20 minutes of study tonight. A project due in 5 days needs 45 minutes. Caiden has 30 free minutes tonight.',
-          question: 'What is the smartest first step?',
+          question: 'Which priority order uses his 30 minutes best?',
           scenarioTag: 'URGENT VS LATER',
           scenarioAccent: 'weekly-plan',
           options: [
@@ -145,7 +149,8 @@ export const CAIDEN_QUEST_1_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'a',
           explanation: 'The quiz is sooner. Twenty minutes fits in 30; the 45-minute project cannot be finished tonight anyway.',
           hint: 'Compare deadlines and whether each task fits in 30 minutes.',
-          skillTags: [SKILL, 'Math', 'Planning'],
+          skillTags: [SKILL, 'Planning', 'Prioritization'],
+          metadata: caidenBandMetadata('4-5', 'Prioritization', MODULE_ID, 'advanced'),
         },
       ],
     ),

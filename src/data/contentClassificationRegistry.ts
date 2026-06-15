@@ -261,10 +261,10 @@ export const ADAPTIVE_BAND_COUNTS = {
     extendedQuests: 4,
     extendedQuestionsPerBand: 8,
   },
-  mirandaAdaptive: { files: 3, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 3 },
-  charlieAdaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 3 },
-  b4Adaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 3 },
-  zekeAdaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 3 },
+  mirandaAdaptive: { files: 3, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 5 },
+  charlieAdaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 5 },
+  b4Adaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 5 },
+  zekeAdaptive: { missions: 8, bands: ['K-1', '2-3', '4-5', '6-8'], questionsPerBand: 5 },
 } as const;
 
 export function summarizeClassification(entries: ClassifiedQuestionEntry[]) {

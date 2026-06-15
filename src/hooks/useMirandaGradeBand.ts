@@ -8,25 +8,29 @@ import {
 } from '../lib/mirandaGradeBandResolver';
 import { isFamilyGradeBand } from '../data/familyGradeBandOptions';
 import { hasCanonicalGradeLevel } from '../lib/participantGradeDisplay';
-import { resolveAdaptiveGradeBand } from '../lib/getGradeBand';
+import { resolveBaseGradeBand } from '../lib/getGradeBand';
 
 function resolveFromGradeSettings(
   settings: ParticipantGradeSettingsSnapshot,
+  loading: boolean,
 ): MirandaGradeBandResolution {
   const { gradeLevel, gradeBand, allowStretch } = settings;
   const familyGradeBand = gradeBand && isFamilyGradeBand(gradeBand) ? gradeBand : null;
   const hasLevel = hasCanonicalGradeLevel(gradeLevel);
   const hasBand = Boolean(gradeBand?.trim());
 
-  const band = resolveAdaptiveGradeBand({
+  const baseBand = resolveBaseGradeBand({
     gradeLevel,
     gradeBand,
-    allowStretch,
   });
 
   return {
-    band,
-    bandKey: band,
+    band: baseBand,
+    baseBand,
+    bandKey: baseBand,
+    gradeLevel,
+    gradeBand,
+    loading,
     missingGrade: !hasLevel && !hasBand,
     needsGradeSelection: !hasLevel && hasBand,
     familyGradeBand,
@@ -35,6 +39,7 @@ function resolveFromGradeSettings(
 }
 
 export function useMirandaGradeBand(participantId?: string): MirandaGradeBandResolution {
+  const resolvedParticipantId = participantId?.trim() || readActiveChildParticipantId();
   const [resolution, setResolution] = useState<MirandaGradeBandResolution>(() =>
     resolveMirandaGradeBandForParticipant(participantId),
   );
@@ -42,18 +47,23 @@ export function useMirandaGradeBand(participantId?: string): MirandaGradeBandRes
   const refresh = useCallback(() => {
     const id = participantId?.trim() || readActiveChildParticipantId();
     if (!id) {
-      setResolution(resolveMirandaGradeBandForParticipant(participantId));
+      setResolution(resolveFromGradeSettings(
+        { gradeLevel: null, gradeBand: null, allowStretch: false },
+        false,
+      ));
       return;
     }
 
+    setResolution((previous) => ({ ...previous, loading: true }));
+
     void readParticipantGradeSettingsAsync(id).then((settings) => {
-      setResolution(resolveFromGradeSettings(settings));
+      setResolution(resolveFromGradeSettings(settings, false));
     });
   }, [participantId]);
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+  }, [refresh, resolvedParticipantId]);
 
   useEffect(() => {
     const handleUpdate = () => refresh();

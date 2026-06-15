@@ -5,7 +5,7 @@ import { resolveModuleTracking } from '../data/moduleTrackingRegistry';
 import type { GameAssessmentConfig } from '../types/gameAssessment';
 import type { GameAnswerValue } from '../types/gameAssessment';
 import type { ModuleCompletionAnswers, ModuleTrackingDefinition } from '../types/moduleTracking';
-import type { EnrichedAnswersJson } from '../types/questionInteraction';
+import type { EnrichedAnswersJson, QuestionAttemptsMap } from '../types/questionInteraction';
 import { loadAdultAssessmentSession } from './adultAssessmentStorage';
 import { logTrackingSaveBlocked, resolveTrackingProgramCode } from './activeProgramContext';
 import { notifyModuleComplete } from './activeChildContext';
@@ -17,6 +17,7 @@ import {
   saveAssessmentResult,
   saveModuleResult,
 } from './pilotTrackingService';
+import { saveQuestionAttempts } from './questionAttemptService';
 
 export type RecordInteractiveCompletionInput = {
   config: GameAssessmentConfig;
@@ -32,12 +33,22 @@ export type RecordInteractiveCompletionInput = {
   gradeLevelUsed?: string;
   contentVersionId?: string;
   fileId?: string;
+  weekNumber?: number | null;
 };
 
 function isEnrichedAnswersJson(
   answers: Record<string, GameAnswerValue> | EnrichedAnswersJson,
 ): answers is EnrichedAnswersJson {
   return 'answers' in answers && typeof answers.answers === 'object' && answers.answers !== null;
+}
+
+function extractQuestionAttempts(
+  answers?: Record<string, GameAnswerValue> | EnrichedAnswersJson,
+): QuestionAttemptsMap | null {
+  if (!answers || !isEnrichedAnswersJson(answers) || !answers._attempts) {
+    return null;
+  }
+  return answers._attempts;
 }
 
 function answersToJson(
@@ -221,6 +232,25 @@ export async function recordInteractiveModuleCompletion(
     }
     if (!result.success && result.message) {
       return { warning: result.message };
+    }
+
+    const attempts = extractQuestionAttempts(input.answers);
+    if (attempts && Object.keys(attempts).length > 0) {
+      await saveQuestionAttempts({
+        config: input.config,
+        attempts,
+        context: {
+          participant_id: participantId,
+          program_code: participant.program_code,
+          week_number: input.weekNumber ?? null,
+          mission_id: input.missionId ?? tracking.moduleId,
+          character: tracking.character,
+          grade_level: input.gradeLevelUsed ?? null,
+          grade_band: input.gradeBandUsed ?? null,
+          content_version: input.contentVersionId ?? null,
+          module_id: tracking.moduleId,
+        },
+      });
     }
 
     console.info('[MODULE_SAVE]', {

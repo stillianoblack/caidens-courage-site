@@ -94,13 +94,17 @@ export function buildMirandaAdaptiveConfig(
   gradeBand: MirandaGradeBand,
   selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
-  const content = resolveMirandaGradeContent(file, gradeBand);
-  const selectedQuestions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+  const selection = finalizeAdaptiveQuestions(file.gradeContent, {
     missionId: file.id,
     gradeBand,
+    previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,
   });
-  const variant = buildGradeVariant(gradeBand, { ...content, questions: selectedQuestions });
+  const content = resolveMirandaGradeContent(file, selection.contentBand as MirandaGradeBand);
+  const variant = buildGradeVariant(selection.contentBand as MirandaGradeBand, {
+    ...content,
+    questions: selection.questions,
+  });
 
   return {
     id: file.id,
@@ -117,6 +121,11 @@ export function buildMirandaAdaptiveConfig(
     complete: file.complete,
     questions: variant.questions,
     tracking: undefined,
+    adaptiveMeta: {
+      contentBand: selection.contentBand,
+      sourceBand: selection.sourceBand,
+      usedStretch: selection.usedStretch,
+    },
   };
 }
 

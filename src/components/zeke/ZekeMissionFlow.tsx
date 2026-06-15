@@ -1,20 +1,14 @@
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 import GameAssessmentFlow from '../game-assessment/GameAssessmentFlow';
-import {
-  canPreviewMirandaGradeBand,
-  readMirandaGradeBandPreviewParam,
-  readParticipantGradeSettings,
-} from '../../lib/mirandaGradeBandResolver';
-import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getZekeMissionById,
   isZekeAdaptiveMission,
   resolveZekeMissionConfig,
 } from '../../data/zeke';
 import { zekeContentVersionId } from '../../data/zeke/zekeAdaptiveBuilder';
-import { useZekeGradeBand } from '../../hooks/useZekeGradeBand';
+import { useAdaptiveMissionGrade } from '../../hooks/useAdaptiveMissionGrade';
 import MirandaGradeBandPreview from '../miranda/MirandaGradeBandPreview';
+import GradeResolutionLoading from '../game-assessment/GradeResolutionLoading';
 import '../miranda/miranda-grade-band-preview.css';
 
 type ZekeMissionFlowProps = {
@@ -36,41 +30,53 @@ export default function ZekeMissionFlow({
   skipLanding = false,
   familyPortalPath,
 }: ZekeMissionFlowProps) {
-  const location = useLocation();
   const mission = getZekeMissionById(missionId);
-  const gradeResolution = useZekeGradeBand();
-  const gradeSettings = readParticipantGradeSettings();
-  const participantId = readActiveChildParticipantId();
+  const { grade, previewBand, baseBand, gradeReady, selectionContext, participantId } =
+    useAdaptiveMissionGrade();
 
-  const previewBand = useMemo(() => {
-    if (!canPreviewMirandaGradeBand(location.pathname)) return null;
-    return readMirandaGradeBandPreviewParam(location.search);
-  }, [location.pathname, location.search]);
-
-  const activeGradeBand = previewBand ?? gradeResolution.band;
-
-  const config = useMemo(
-    () =>
-      resolveZekeMissionConfig(missionId, activeGradeBand, {
-        participantId,
-        gradeLevel: gradeSettings.gradeLevel,
-      }),
-    [activeGradeBand, gradeSettings.gradeLevel, missionId, participantId],
-  );
+  const config = useMemo(() => {
+    if (!gradeReady) return null;
+    return resolveZekeMissionConfig(missionId, baseBand, selectionContext);
+  }, [baseBand, gradeReady, missionId, selectionContext]);
 
   const completionContext = useMemo(() => {
     if (!isZekeAdaptiveMission(missionId)) return undefined;
+    const contentBand = config?.adaptiveMeta?.contentBand ?? baseBand;
     return {
-      gradeBandUsed: activeGradeBand,
-      gradeLevelUsed: gradeSettings.gradeLevel ?? undefined,
-      contentVersionId: zekeContentVersionId(missionId, activeGradeBand),
+      gradeBandUsed: contentBand,
+      gradeLevelUsed: grade.gradeLevel ?? undefined,
+      contentVersionId: zekeContentVersionId(missionId, contentBand as typeof baseBand),
       fileId: missionId,
       missionId,
     };
-  }, [activeGradeBand, gradeSettings.gradeLevel, missionId]);
+  }, [baseBand, config?.adaptiveMeta?.contentBand, grade.gradeLevel, missionId]);
 
-  if (!mission || !config) {
+  const gradeDiagnostics = useMemo(
+    () => ({
+      participantId,
+      gradeLevel: grade.gradeLevel,
+      baseBand: grade.baseBand,
+      contentBand: config?.adaptiveMeta?.contentBand ?? baseBand,
+      allowStretch: grade.allowStretch,
+      usedStretch: config?.adaptiveMeta?.usedStretch ?? false,
+    }),
+    [
+      baseBand,
+      config?.adaptiveMeta?.contentBand,
+      config?.adaptiveMeta?.usedStretch,
+      grade.allowStretch,
+      grade.baseBand,
+      grade.gradeLevel,
+      participantId,
+    ],
+  );
+
+  if (!mission) {
     return null;
+  }
+
+  if (!gradeReady || !config) {
+    return <GradeResolutionLoading />;
   }
 
   const showPreviewPill = Boolean(previewBand);
@@ -90,6 +96,7 @@ export default function ZekeMissionFlow({
         skipLanding={skipLanding}
         familyPortalPath={familyPortalPath}
         completionContext={completionContext}
+        gradeDiagnostics={gradeDiagnostics}
       />
     </>
   );

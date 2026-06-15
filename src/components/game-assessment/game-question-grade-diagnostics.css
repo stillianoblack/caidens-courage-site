@@ -1,0 +1,56 @@
+.gameQuestionGradeDiagnostics {
+  position: fixed;
+  right: 0.65rem;
+  bottom: 5.5rem;
+  z-index: 1200;
+  width: min(18rem, calc(100vw - 1.3rem));
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(8, 18, 36, 0.92);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.gameQuestionGradeDiagnosticsTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.95);
+}
+
+.gameQuestionGradeDiagnostics dl {
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.gameQuestionGradeDiagnostics div {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.35rem;
+}
+
+.gameQuestionGradeDiagnostics dt {
+  margin: 0;
+  color: rgba(191, 219, 254, 0.78);
+  font-weight: 700;
+}
+
+.gameQuestionGradeDiagnostics dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-word;
+}
+
+@media (max-width: 520px) {
+  .gameQuestionGradeDiagnostics {
+    bottom: 4.75rem;
+    width: min(16rem, calc(100vw - 1rem));
+  }
+}

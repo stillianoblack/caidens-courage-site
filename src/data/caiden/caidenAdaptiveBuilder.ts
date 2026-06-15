@@ -3,6 +3,7 @@ import {
   finalizeAdaptiveQuestions,
   type AdaptiveQuestionSelectionContext,
 } from '../../lib/adaptiveQuestionSelection';
+import { classifyQuestionDifficultyTier } from '../../lib/questionDifficultySelection';
 import {
   applyStagingToQuestions,
   stagingContentVersionSuffix,
@@ -74,6 +75,12 @@ function buildQuestion(
   question: CaidenAdaptiveQuestion,
   questSubtitle: string,
   index: number,
+  diagnostic?: {
+    sourceBand: string;
+    contentBand: string;
+    difficultyTier: string;
+    contentVersion?: string;
+  },
 ): GameChoiceQuestion {
   const { scenarioText, promptText } = splitCaidenScenarioAndPrompt(question);
   const tag = question.scenarioTag ?? questSubtitle.toUpperCase();
@@ -103,6 +110,7 @@ function buildQuestion(
     lockInTips: [question.hint],
     feedbackDetailCorrect: { whyItMatters: question.explanation },
     feedbackDetailIncorrect: { whyItMatters: question.explanation },
+    diagnosticMeta: diagnostic,
   };
 }
 
@@ -111,10 +119,10 @@ export function buildCaidenAdaptiveConfig(
   gradeBand: CaidenGradeBand,
   selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig {
-  const content = resolveCaidenGradeContent(quest, gradeBand);
-  const questions = finalizeAdaptiveQuestions(applyStagingToQuestions(content.questions), {
+  const selection = finalizeAdaptiveQuestions(quest.gradeContent, {
     missionId: quest.id,
     gradeBand,
+    previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,
   });
 
@@ -126,8 +134,20 @@ export function buildCaidenAdaptiveConfig(
     ...CAIDEN_MISSION_AVATAR,
     landing: quest.landing,
     complete: quest.complete,
-    questions: questions.map((q, index) => buildQuestion(q, quest.subtitle, index)),
+    questions: selection.questions.map((q, index) =>
+      buildQuestion(q, quest.subtitle, index, {
+        sourceBand: selection.sourceBand,
+        contentBand: selection.contentBand,
+        difficultyTier: classifyQuestionDifficultyTier(q, index, selection.questions.length),
+        contentVersion: q.metadata?.contentVersion,
+      }),
+    ),
     tracking: undefined,
+    adaptiveMeta: {
+      contentBand: selection.contentBand,
+      sourceBand: selection.sourceBand,
+      usedStretch: selection.usedStretch,
+    },
   };
 }
 

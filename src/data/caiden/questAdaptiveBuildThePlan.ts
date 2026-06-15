@@ -1,9 +1,11 @@
 import type { CaidenAdaptiveQuestFile, CaidenGradeContent } from '../../types/caidenAdaptiveQuest';
+import { caidenBandMetadata } from './caidenQuestionHelpers';
 import { registerCaidenAdaptiveQuest } from './caidenAdaptiveBuilder';
 
 export const CAIDEN_QUEST_5_ID = 'quest-5';
 
 const SKILL = 'Planning & Organization';
+const MODULE_ID = CAIDEN_QUEST_5_ID;
 
 function bandContent(
   dashboardDescription: string,
@@ -107,7 +109,8 @@ export const CAIDEN_QUEST_5_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'b',
           explanation: 'Every comic starts with a story idea before art or printing.',
           hint: 'What must exist before panels, color, or copies?',
-          skillTags: [SKILL],
+          skillTags: [SKILL, 'Sequencing'],
+          metadata: caidenBandMetadata('4-5', 'Sequencing', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq5-45-q2',
@@ -123,23 +126,28 @@ export const CAIDEN_QUEST_5_FILE: CaidenAdaptiveQuestFile = {
           correctAnswer: 'b',
           explanation: 'Outline first, then sketch, then color — each step builds on the last.',
           hint: 'Which order moves from planning to finishing?',
-          skillTags: [SKILL],
+          skillTags: [SKILL, 'Sequencing'],
+          metadata: caidenBandMetadata('4-5', 'Sequencing', MODULE_ID, 'intermediate'),
         },
         {
           id: 'cq5-45-q3',
-          question: 'Why does a plan help?',
-          scenarioTag: 'WHY PLAN',
-          scenarioAccent: 'reflection',
+          scenarioText:
+            'Caiden\'s science poster is due Friday. Research takes 40 minutes, drafting takes 30, and design takes 25. He has two 45-minute study blocks after school today and Wednesday.',
+          question: 'How should he split the work across the two blocks?',
+          scenarioTag: 'PROJECT SCHEDULE',
+          scenarioAccent: 'weekly-plan',
           options: [
-            { id: 'a', label: 'It breaks a big task into steps' },
-            { id: 'b', label: 'It helps track what is done and what is next' },
-            { id: 'c', label: 'It makes mistakes easier to catch and fix' },
-            { id: 'd', label: 'It lets you skip everything' },
+            { id: 'a', label: 'Block 1: research. Block 2: drafting and as much design as fits.' },
+            { id: 'b', label: 'Block 1: design first. Block 2: research and drafting if time remains.' },
+            { id: 'c', label: 'Do everything in one block and skip the second session' },
+            { id: 'd', label: 'Wait until Thursday night and try all steps at once' },
           ],
           correctAnswer: 'a',
-          explanation: 'Plans turn overwhelming tasks into smaller, doable steps.',
-          hint: 'What does breaking a task into steps do for your brain?',
-          skillTags: [SKILL],
+          explanation:
+            'Research comes first and fills one block. Drafting next leaves design for remaining time in block two.',
+          hint: 'Order the steps and match each to a 45-minute block.',
+          skillTags: [SKILL, 'Planning', 'Scheduling'],
+          metadata: caidenBandMetadata('4-5', 'Planning', MODULE_ID, 'advanced'),
         },
       ],
     ),
