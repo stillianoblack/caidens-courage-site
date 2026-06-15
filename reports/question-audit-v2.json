@@ -1,0 +1,1991 @@
+{
+  "generatedAt": "2026-06-15T03:22:17.823Z",
+  "before": {
+    "generatedAt": "2026-06-15T03:22:17.811Z",
+    "totalQuestions": 512,
+    "averageDifficultyByCharacter": {
+      "b4": 3.59375,
+      "charlie": 3.0208333333333335,
+      "zeke": 3.1354166666666665,
+      "caiden": 2.7180851063829787,
+      "miranda": 2.888888888888889
+    },
+    "flagCounts": {
+      "answer_length_imbalance": 145,
+      "correct_answer_too_obvious": 83,
+      "reading_level_below_band": 57,
+      "too_easy_for_grade_4_plus": 51,
+      "insufficient_scenario_evidence": 44,
+      "joke_or_impossible_distractor": 10,
+      "lacks_reasoning_skill": 25,
+      "caiden_needs_more_math_focus": 28,
+      "guessable_without_scenario": 17
+    },
+    "positionDistributionByCharacter": {
+      "b4": {
+        "A": 91,
+        "B": 5,
+        "C": 0,
+        "D": 0,
+        "total": 96,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie": {
+        "A": 91,
+        "B": 2,
+        "C": 3,
+        "D": 0,
+        "total": 96,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke": {
+        "A": 90,
+        "B": 6,
+        "C": 0,
+        "D": 0,
+        "total": 96,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden": {
+        "A": 156,
+        "B": 25,
+        "C": 7,
+        "D": 0,
+        "total": 188,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "miranda": {
+        "A": 25,
+        "B": 11,
+        "C": 0,
+        "D": 0,
+        "total": 36,
+        "uneven": true,
+        "dominantPosition": "A"
+      }
+    },
+    "positionDistributionByMission": {
+      "b4::b4-mood-scanner": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-body-signal-detective": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-brave-choice-button": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-focus-reset-station": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-calm-down-countdown": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-oops-repair-lab": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-confidence-charger": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "b4::b4-focus-flame-finale": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-mystery-footprints": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-floating-orange": {
+        "A": 8,
+        "B": 1,
+        "C": 3,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-mystery-sound": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-volcano-trouble": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-missing-plant": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-robot-rescue": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-marshmallow-tower": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "charlie::charlie-science-fair-mystery": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-new-table": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-pass-the-ball": {
+        "A": 10,
+        "B": 2,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-group-project-glitch": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-brave-voice": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-friendship-repair": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-courage-challenge": {
+        "A": 11,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-team-captain-test": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "zeke::zeke-final-huddle": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-1": {
+        "A": 7,
+        "B": 3,
+        "C": 2,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-2": {
+        "A": 3,
+        "B": 7,
+        "C": 2,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "B"
+      },
+      "caiden::quest-3": {
+        "A": 7,
+        "B": 4,
+        "C": 1,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-4": {
+        "A": 7,
+        "B": 4,
+        "C": 1,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-5": {
+        "A": 7,
+        "B": 5,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-6": {
+        "A": 31,
+        "B": 1,
+        "C": 0,
+        "D": 0,
+        "total": 32,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-7": {
+        "A": 32,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 32,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-8": {
+        "A": 32,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 32,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "caiden::quest-9": {
+        "A": 30,
+        "B": 1,
+        "C": 1,
+        "D": 0,
+        "total": 32,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "miranda::miranda-mystery-file-1": {
+        "A": 5,
+        "B": 7,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "B"
+      },
+      "miranda::miranda-mystery-file-2": {
+        "A": 8,
+        "B": 4,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      },
+      "miranda::miranda-mystery-file-3": {
+        "A": 12,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "total": 12,
+        "uneven": true,
+        "dominantPosition": "A"
+      }
+    },
+    "topRewriteCandidates": [
+      {
+        "character": "charlie",
+        "missionId": "charlie-mystery-footprints",
+        "missionTitle": "The Mystery Footprints",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "6-8",
+        "questionId": "cm1-68-q1",
+        "scenarioText": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lettuce, and Charlie wants to solve the mystery without blaming the class hamster again.",
+        "questionText": "What makes Charlie's conclusion stronger?",
+        "skillTags": [
+          "Observation"
+        ],
+        "skillArea": "Observation",
+        "questionType": "inference",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Multiple pieces of matching evidence"
+          },
+          {
+            "id": "b",
+            "label": "The funniest theory"
+          },
+          {
+            "id": "c",
+            "label": "The first idea he has"
+          },
+          {
+            "id": "d",
+            "label": "A guess from across the playground"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "Multiple pieces of matching evidence",
+        "correctIndex": 0,
+        "flags": [
+          "joke_or_impossible_distractor",
+          "too_easy_for_grade_4_plus",
+          "insufficient_scenario_evidence"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; thin scenario for inference; too easy for grades 4+; inference at upper band",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Add one more concrete clue to the scenario so inference requires reading, not guessing.",
+        "improvedDistractors": [
+          "Focus on what happened after the main event",
+          "Choose the action someone took rather than physical evidence",
+          "Select a true detail that is less relevant to the problem"
+        ],
+        "suggestedCorrectAnswer": "Multiple pieces of matching evidence",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "charlie",
+        "missionId": "charlie-mystery-footprints",
+        "missionTitle": "The Mystery Footprints",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "6-8",
+        "questionId": "cm1-68-q3",
+        "scenarioText": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lettuce, and Charlie wants to solve the mystery without blaming the class hamster again.",
+        "questionText": "A classmate says, \"Definitely the hamster!\" What should Charlie ask?",
+        "skillTags": [
+          "Observation"
+        ],
+        "skillArea": "Observation",
+        "questionType": "multiple_choice",
+        "choices": [
+          {
+            "id": "a",
+            "label": "What evidence supports that theory?"
+          },
+          {
+            "id": "b",
+            "label": "Who has the funniest guess?"
+          },
+          {
+            "id": "c",
+            "label": "Can we vote on it?"
+          },
+          {
+            "id": "d",
+            "label": "Does the hamster look guilty?"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "What evidence supports that theory?",
+        "correctIndex": 0,
+        "flags": [
+          "joke_or_impossible_distractor",
+          "reading_level_below_band",
+          "too_easy_for_grade_4_plus",
+          "lacks_reasoning_skill"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; limited reasoning demand for band; too easy for grades 4+",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Rephrase to require comparison, prioritization, or best-choice reasoning. Increase vocabulary and sentence complexity to match the grade band.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "What evidence supports that theory?",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "charlie",
+        "missionId": "charlie-volcano-trouble",
+        "missionTitle": "Volcano Trouble",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "6-8",
+        "questionId": "cm4-68-q1",
+        "scenarioText": "Charlie builds a baking soda volcano, but the eruption is tiny. It gives one sad bubble and quits. Charlie refuses to let a volcano be this dramatic and boring.",
+        "questionText": "Charlie wants a stronger eruption. What should he keep the same?",
+        "skillTags": [
+          "Problem Solving / Iteration"
+        ],
+        "skillArea": "Problem Solving / Iteration",
+        "questionType": "inference",
+        "choices": [
+          {
+            "id": "a",
+            "label": "All variables except the one he is testing"
+          },
+          {
+            "id": "b",
+            "label": "Nothing at all"
+          },
+          {
+            "id": "c",
+            "label": "Only the volcano name"
+          },
+          {
+            "id": "d",
+            "label": "The funniest guess"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "All variables except the one he is testing",
+        "correctIndex": 0,
+        "flags": [
+          "correct_answer_too_obvious",
+          "joke_or_impossible_distractor",
+          "reading_level_below_band",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus",
+          "insufficient_scenario_evidence"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; correct answer stands out too easily; thin scenario for inference; too easy for grades 4+; inference at upper band",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Add one more concrete clue to the scenario so inference requires reading, not guessing. Balance option length so the correct answer is not the only long/detailed choice. Increase vocabulary and sentence complexity to match the grade band.",
+        "improvedDistractors": [
+          "Focus on what happened after the main event",
+          "Choose the action someone took rather than physical evidence",
+          "Select a true detail that is less relevant to the problem"
+        ],
+        "suggestedCorrectAnswer": "All variables except the one he is testing",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "charlie",
+        "missionId": "charlie-science-fair-mystery",
+        "missionTitle": "The Great Science Fair Mystery",
+        "missionNumber": 8,
+        "week": 8,
+        "gradeBand": "4-5",
+        "questionId": "cm8-45-q1",
+        "scenarioText": "Two science fair projects claim opposite results. One says plants grow better with music. Another says silence wins. Charlie has to judge the evidence without making the plants perform a concert.",
+        "questionText": "What should Charlie compare?",
+        "skillTags": [
+          "Critical Thinking / Evidence"
+        ],
+        "skillArea": "Critical Thinking / Evidence",
+        "questionType": "sequencing",
+        "choices": [
+          {
+            "id": "a",
+            "label": "The evidence and how each test was done"
+          },
+          {
+            "id": "b",
+            "label": "Poster glitter levels"
+          },
+          {
+            "id": "c",
+            "label": "Who talked louder"
+          },
+          {
+            "id": "d",
+            "label": "Which plant looked cooler"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "The evidence and how each test was done",
+        "correctIndex": 0,
+        "flags": [
+          "correct_answer_too_obvious",
+          "too_easy_for_grade_4_plus",
+          "insufficient_scenario_evidence"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; thin scenario for inference; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Add one more concrete clue to the scenario so inference requires reading, not guessing.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "The evidence and how each test was done",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "zeke",
+        "missionId": "zeke-new-table",
+        "missionTitle": "The New Table",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "4-5",
+        "questionId": "zkm1-45-q1",
+        "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet.",
+        "questionText": "The group is in the middle of a round. What should Zeke do?",
+        "skillTags": [
+          "Joining In / Social Confidence"
+        ],
+        "skillArea": "Joining In / Social Confidence",
+        "questionType": "multiple_choice",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Wait for a pause, then ask to join the next round"
+          },
+          {
+            "id": "b",
+            "label": "Interrupt and demand a turn"
+          },
+          {
+            "id": "c",
+            "label": "Sit down without asking"
+          },
+          {
+            "id": "d",
+            "label": "Say the rules are bad"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "Wait for a pause, then ask to join the next round",
+        "correctIndex": 0,
+        "flags": [
+          "correct_answer_too_obvious",
+          "reading_level_below_band",
+          "too_easy_for_grade_4_plus",
+          "lacks_reasoning_skill"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; limited reasoning demand for band; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Rephrase to require comparison, prioritization, or best-choice reasoning. Increase vocabulary and sentence complexity to match the grade band.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "Wait for a pause, then ask to join the next round",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "zeke",
+        "missionId": "zeke-final-huddle",
+        "missionTitle": "The Final Huddle",
+        "missionNumber": 8,
+        "week": 8,
+        "gradeBand": "4-5",
+        "questionId": "zkm8-45-q1",
+        "scenarioText": "After a tough team challenge, Zeke calls a final huddle. Some teammates are proud, some are frustrated, and one person feels ignored.",
+        "questionText": "One teammate says they felt ignored. What should the team do?",
+        "skillTags": [
+          "Group Reflection / Team Growth"
+        ],
+        "skillArea": "Group Reflection / Team Growth",
+        "questionType": "sequencing",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Listen and plan how to include them next time"
+          },
+          {
+            "id": "b",
+            "label": "Tell them they are wrong"
+          },
+          {
+            "id": "c",
+            "label": "Change the subject"
+          },
+          {
+            "id": "d",
+            "label": "Say winning matters more"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "Listen and plan how to include them next time",
+        "correctIndex": 0,
+        "flags": [
+          "correct_answer_too_obvious",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "Listen and plan how to include them next time",
+        "cognitiveNotes": [
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-2",
+        "missionTitle": "Focus or Distraction?",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "K-1",
+        "questionId": "cq2-k1-q3",
+        "scenarioText": "Caiden feels wiggly during quiet reading time.",
+        "questionText": "What is a healthy focus move?",
+        "skillTags": [
+          "Attention Control"
+        ],
+        "skillArea": "Attention Control",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "run",
+            "label": "Run around the room"
+          },
+          {
+            "id": "breath",
+            "label": "Take a quiet breath and look back at the page"
+          },
+          {
+            "id": "talk",
+            "label": "Talk to a friend"
+          },
+          {
+            "id": "hide",
+            "label": "Hide the book"
+          }
+        ],
+        "correctAnswerId": "breath",
+        "correctAnswerLabel": "Take a quiet breath and look back at the page",
+        "correctIndex": 1,
+        "flags": [
+          "correct_answer_too_obvious",
+          "joke_or_impossible_distractor",
+          "answer_length_imbalance"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; correct answer stands out too easily",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Take a quiet breath and look back at the page",
+        "cognitiveNotes": [
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-2",
+        "missionTitle": "Focus or Distraction?",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "4-5",
+        "questionId": "cq2-45-q1",
+        "scenarioText": "",
+        "questionText": "Caiden is reading, but his phone keeps buzzing. What is the best choice?",
+        "skillTags": [
+          "Attention Control"
+        ],
+        "skillArea": "Attention Control",
+        "questionType": "reading_comprehension",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Check every message"
+          },
+          {
+            "id": "b",
+            "label": "Put the phone away until finished"
+          },
+          {
+            "id": "c",
+            "label": "Ignore reading"
+          },
+          {
+            "id": "d",
+            "label": "Open social media"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Put the phone away until finished",
+        "correctIndex": 1,
+        "flags": [
+          "correct_answer_too_obvious",
+          "guessable_without_scenario",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; guessable without reading scenario; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "Put the phone away until finished",
+        "cognitiveNotes": [
+          "Benefits from inference"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-3",
+        "missionTitle": "Time Tracker",
+        "missionNumber": 3,
+        "week": 3,
+        "gradeBand": "K-1",
+        "questionId": "cq3-k1-q3",
+        "scenarioText": "Caiden still needs to put on shoes and pack his folder.",
+        "questionText": "Camp starts in 15 minutes. What should Caiden do first?",
+        "skillTags": [
+          "Time Management"
+        ],
+        "skillArea": "Time Management",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "cartoon",
+            "label": "Start a cartoon"
+          },
+          {
+            "id": "ready",
+            "label": "Put on shoes and pack his folder"
+          },
+          {
+            "id": "nap",
+            "label": "Take a nap"
+          },
+          {
+            "id": "draw",
+            "label": "Draw a new picture"
+          }
+        ],
+        "correctAnswerId": "ready",
+        "correctAnswerLabel": "Put on shoes and pack his folder",
+        "correctIndex": 1,
+        "flags": [
+          "correct_answer_too_obvious",
+          "guessable_without_scenario",
+          "answer_length_imbalance"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; guessable without reading scenario",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Put on shoes and pack his folder",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-4",
+        "missionTitle": "Reset and Return",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "K-1",
+        "questionId": "cq4-k1-q1",
+        "scenarioText": "Caiden gets frustrated when his answer is wrong. His face feels hot.",
+        "questionText": "What is a strong focus move?",
+        "skillTags": [
+          "Emotional Regulation"
+        ],
+        "skillArea": "Emotional Regulation",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "rip",
+            "label": "Rip the paper"
+          },
+          {
+            "id": "blame",
+            "label": "Blame someone else"
+          },
+          {
+            "id": "breath",
+            "label": "Take a breath and try again"
+          },
+          {
+            "id": "quit",
+            "label": "Quit the activity forever"
+          }
+        ],
+        "correctAnswerId": "breath",
+        "correctAnswerLabel": "Take a breath and try again",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "joke_or_impossible_distractor"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; correct answer stands out too easily",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Take a breath and try again",
+        "cognitiveNotes": [
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      }
+    ],
+    "rewritePriorityCounts": {
+      "high": 138,
+      "medium": 92,
+      "low": 282
+    }
+  },
+  "after": {
+    "generatedAt": "2026-06-15T03:22:17.823Z",
+    "totalQuestions": 512,
+    "averageDifficultyByCharacter": {
+      "b4": 3.59375,
+      "charlie": 3.1875,
+      "zeke": 3.28125,
+      "caiden": 3.297872340425532,
+      "miranda": 3.25
+    },
+    "flagCounts": {
+      "correct_answer_too_obvious": 33,
+      "answer_length_imbalance": 91,
+      "too_easy_for_grade_4_plus": 12,
+      "insufficient_scenario_evidence": 42,
+      "reading_level_below_band": 52,
+      "joke_or_impossible_distractor": 5,
+      "lacks_reasoning_skill": 8,
+      "guessable_without_scenario": 2,
+      "caiden_needs_more_math_focus": 13
+    },
+    "positionDistributionByCharacter": {
+      "b4": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden": {
+        "A": 47,
+        "B": 47,
+        "C": 47,
+        "D": 47,
+        "total": 188,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda": {
+        "A": 9,
+        "B": 9,
+        "C": 9,
+        "D": 9,
+        "total": 36,
+        "uneven": false,
+        "dominantPosition": null
+      }
+    },
+    "positionDistributionByMission": {
+      "b4::b4-mood-scanner": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-body-signal-detective": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-brave-choice-button": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-focus-reset-station": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-calm-down-countdown": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-oops-repair-lab": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-confidence-charger": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-focus-flame-finale": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-mystery-footprints": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-floating-orange": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-mystery-sound": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-volcano-trouble": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-missing-plant": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-robot-rescue": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-marshmallow-tower": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-science-fair-mystery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-new-table": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-pass-the-ball": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-group-project-glitch": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-brave-voice": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-friendship-repair": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-courage-challenge": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-team-captain-test": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-final-huddle": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-1": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-2": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-3": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-4": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-5": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-6": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-7": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-8": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-9": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-1": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-2": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-3": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      }
+    },
+    "topRewriteCandidates": [
+      {
+        "character": "caiden",
+        "missionId": "quest-2",
+        "missionTitle": "Focus or Distraction?",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "4-5",
+        "questionId": "cq2-45-q1",
+        "scenarioText": "Homework will take 35 minutes. Dinner starts in 50 minutes. He also wants 10 minutes to rest.",
+        "questionText": "After homework and rest, will he be late for dinner?",
+        "skillTags": [
+          "Attention Control",
+          "Math",
+          "Time Management",
+          "Planning"
+        ],
+        "skillArea": "Attention Control",
+        "questionType": "reading_comprehension",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Open social media"
+          },
+          {
+            "id": "b",
+            "label": "Check every message"
+          },
+          {
+            "id": "c",
+            "label": "Ignore reading"
+          },
+          {
+            "id": "d",
+            "label": "Put the phone away until finished"
+          }
+        ],
+        "correctAnswerId": "d",
+        "correctAnswerLabel": "Put the phone away until finished",
+        "correctIndex": 3,
+        "flags": [
+          "correct_answer_too_obvious",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "Put the phone away until finished",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-4",
+        "missionTitle": "Reset and Return",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "6-8",
+        "questionId": "cq4-68-q1",
+        "scenarioText": "A camp supply list costs $18 total. Caiden has $14 and can earn $3 per chore. He has time for one chore before the store closes in 25 minutes.",
+        "questionText": "What is the best use of his time and money before the store closes?",
+        "skillTags": [
+          "Emotional Regulation",
+          "Math",
+          "Time Management",
+          "Planning"
+        ],
+        "skillArea": "Emotional Regulation",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "a",
+            "label": "He refuses to participate"
+          },
+          {
+            "id": "b",
+            "label": "He deletes the whole project"
+          },
+          {
+            "id": "c",
+            "label": "He pauses, listens, and chooses one improvement"
+          },
+          {
+            "id": "d",
+            "label": "He argues immediately"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "He pauses, listens, and chooses one improvement",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "He pauses, listens, and chooses one improvement",
+        "cognitiveNotes": [
+          "Benefits from inference"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-4",
+        "missionTitle": "Reset and Return",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "K-1",
+        "questionId": "cq4-k1-q1",
+        "scenarioText": "Caiden gets frustrated when his answer is wrong. His face feels hot. Caiden sees 2 short tasks and 1 long task before recess.",
+        "questionText": "Which task should come before recess?",
+        "skillTags": [
+          "Emotional Regulation",
+          "Math",
+          "Time Management",
+          "Planning"
+        ],
+        "skillArea": "Emotional Regulation",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Blame someone else"
+          },
+          {
+            "id": "b",
+            "label": "Take a breath and try again"
+          },
+          {
+            "id": "c",
+            "label": "Quit the activity forever"
+          },
+          {
+            "id": "d",
+            "label": "Rip the paper"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Take a breath and try again",
+        "correctIndex": 1,
+        "flags": [
+          "correct_answer_too_obvious",
+          "joke_or_impossible_distractor"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; correct answer stands out too easily",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Take a breath and try again",
+        "cognitiveNotes": [
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-4",
+        "missionTitle": "Reset and Return",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "K-1",
+        "questionId": "cq4-k1-q2",
+        "scenarioText": "Caiden notices his attention drifting during reading. Caiden has 3 things to put in his bag: lunch, book, and coat.",
+        "questionText": "What should Caiden pack first?",
+        "skillTags": [
+          "Emotional Regulation",
+          "Math",
+          "Time Management",
+          "Planning"
+        ],
+        "skillArea": "Emotional Regulation",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Hide the book"
+          },
+          {
+            "id": "b",
+            "label": "Close the book forever"
+          },
+          {
+            "id": "c",
+            "label": "Take one breath and…"
+          },
+          {
+            "id": "d",
+            "label": "Talk loudly"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "Take one breath and…",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "joke_or_impossible_distractor"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "joke distractors reduce challenge; correct answer stands out too easily",
+        "recommendedRewrite": "Replace joke/impossible distractors with one obvious-but-not-silly wrong answer and two plausible weaker strategies. Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Take one breath and…",
+        "cognitiveNotes": [
+          "Benefits from sequencing or planning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-7",
+        "missionTitle": "The Camp Supply Mission",
+        "missionNumber": 7,
+        "week": 7,
+        "gradeBand": "4-5",
+        "questionId": "cq7-45-q1",
+        "scenarioText": "Caiden must gather: first-aid kit, team flag, water jugs, and activity cards.",
+        "questionText": "What is the best multi-step plan?",
+        "skillTags": [
+          "Organization & Preparation"
+        ],
+        "skillArea": "Organization",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Safety first, then team items, then cards"
+          },
+          {
+            "id": "b",
+            "label": "Cards first, skip water"
+          },
+          {
+            "id": "c",
+            "label": "Wait until activity starts"
+          },
+          {
+            "id": "d",
+            "label": "Grab random items"
+          }
+        ],
+        "correctAnswerId": "a",
+        "correctAnswerLabel": "Safety first, then team items, then cards",
+        "correctIndex": 0,
+        "flags": [
+          "correct_answer_too_obvious",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Safety first, then team items, then cards",
+        "cognitiveNotes": [
+          "Benefits from inference",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-7",
+        "missionTitle": "The Camp Supply Mission",
+        "missionNumber": 7,
+        "week": 7,
+        "gradeBand": "4-5",
+        "questionId": "cq7-45-q7",
+        "scenarioText": "Two checklists: detailed with times vs vague “bring stuff.” Caiden compares time, cost, and urgency before acting.",
+        "questionText": "Which checklist is stronger?",
+        "skillTags": [
+          "Organization & Preparation"
+        ],
+        "skillArea": "Organization",
+        "questionType": "inference",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Vague list"
+          },
+          {
+            "id": "b",
+            "label": "List of jokes only"
+          },
+          {
+            "id": "c",
+            "label": "Detailed list with times"
+          },
+          {
+            "id": "d",
+            "label": "No list"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "Detailed list with times",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "reading_level_below_band",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus",
+          "insufficient_scenario_evidence"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; thin scenario for inference; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Add one more concrete clue to the scenario so inference requires reading, not guessing. Balance option length so the correct answer is not the only long/detailed choice. Increase vocabulary and sentence complexity to match the grade band.",
+        "improvedDistractors": [
+          "Focus on what happened after the main event",
+          "Choose the action someone took rather than physical evidence",
+          "Select a true detail that is less relevant to the problem"
+        ],
+        "suggestedCorrectAnswer": "Detailed list with times",
+        "cognitiveNotes": [
+          "Consider adding multi-step thinking or scenario-specific evidence"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "caiden",
+        "missionId": "quest-9",
+        "missionTitle": "The Camp Leader Challenge",
+        "missionNumber": 9,
+        "week": 9,
+        "gradeBand": "4-5",
+        "questionId": "cq9-45-q6",
+        "scenarioText": "Caiden disagrees with a counselor’s safety rule. Caiden compares time, cost, and urgency before acting.",
+        "questionText": "What shows maturity?",
+        "skillTags": [
+          "Leadership & Teamwork"
+        ],
+        "skillArea": "Leadership",
+        "questionType": "sel_decision",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Break rule to win"
+          },
+          {
+            "id": "b",
+            "label": "Ask respectfully why, then follow rule"
+          },
+          {
+            "id": "c",
+            "label": "Encourage team to break it"
+          },
+          {
+            "id": "d",
+            "label": "Mock counselor"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Ask respectfully why, then follow rule",
+        "correctIndex": 1,
+        "flags": [
+          "correct_answer_too_obvious",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus",
+          "caiden_needs_more_math_focus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Add numbers (minutes, tokens, quantities) and ask for comparison, estimation, or ordering. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Wait and hope the feeling passes on its own",
+          "Do the easiest part first without a plan",
+          "Ask for help only after trying one small step"
+        ],
+        "suggestedCorrectAnswer": "Ask respectfully why, then follow rule",
+        "cognitiveNotes": [
+          "Recommend adding time management, budgeting, or quantity comparison for Caiden"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "miranda",
+        "missionId": "miranda-mystery-file-3",
+        "missionTitle": "The Missing Clue",
+        "missionNumber": 3,
+        "week": 3,
+        "gradeBand": "6-8",
+        "questionId": "mcl-68-q1",
+        "scenarioText": "Miranda discovered a clue note with a partially smudged location: \"Meet by the ____ after lunch.\" Although the missing word was unreadable, a small sketch beside the sentence showed branches, leaves, and a curved trunk. Miranda used context clues from both the sentence and the drawing to infer that the intended meeting place was the old tree near the playground.",
+        "questionText": "Using the evidence provided, which clue most strongly supports the answer?",
+        "skillTags": [
+          "Evidence",
+          "Analysis"
+        ],
+        "skillArea": "Context Clues, Vocabulary, Inference",
+        "questionType": "sequencing",
+        "choices": [
+          {
+            "id": "a",
+            "label": "The sentence being short"
+          },
+          {
+            "id": "b",
+            "label": "The note being on the floor"
+          },
+          {
+            "id": "c",
+            "label": "The sketch of branches, leaves, and trunk"
+          },
+          {
+            "id": "d",
+            "label": "The word lunch"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "The sketch of branches, leaves, and trunk",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "reading_level_below_band",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 1,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice. Increase vocabulary and sentence complexity to match the grade band.",
+        "improvedDistractors": [
+          "Choose a reasonable step that does not match the scenario best",
+          "Pick a strategy that helps a little but misses the main goal",
+          "Select an option that delays the decision"
+        ],
+        "suggestedCorrectAnswer": "The sketch of branches, leaves, and trunk",
+        "cognitiveNotes": [
+          "Benefits from inference"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "4-5",
+        "questionId": "b4m2-45-q1",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves.",
+        "questionText": "A student feels hot, tense, and ready to argue. What is the best first reset?",
+        "skillTags": [
+          "Body Awareness / Self-Regulation"
+        ],
+        "skillArea": "Body Awareness / Self-Regulation",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Pretend nothing happened"
+          },
+          {
+            "id": "b",
+            "label": "Send the text immediately"
+          },
+          {
+            "id": "c",
+            "label": "Argue faster"
+          },
+          {
+            "id": "d",
+            "label": "Pause and take space before responding"
+          }
+        ],
+        "correctAnswerId": "d",
+        "correctAnswerLabel": "Pause and take space before responding",
+        "correctIndex": 3,
+        "flags": [
+          "correct_answer_too_obvious",
+          "answer_length_imbalance",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 2,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+; includes math thinking",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option. Balance option length so the correct answer is not the only long/detailed choice.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Pause and take space before responding",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from inference",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-focus-flame-finale",
+        "missionTitle": "The Focus Flame Finale",
+        "missionNumber": 8,
+        "week": 8,
+        "gradeBand": "6-8",
+        "questionId": "b4m8-68-q1",
+        "scenarioText": "B-4's Focus Flame glows when the learner combines feeling awareness, body signals, brave choice, calm-down move, and reflection.",
+        "questionText": "Using the evidence provided, which full cycle shows strong self-regulation?",
+        "skillTags": [
+          "Reflection / Integrated SEL"
+        ],
+        "skillArea": "Reflection / Integrated SEL",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "Ignore feeling, push harder, shut down"
+          },
+          {
+            "id": "b",
+            "label": "React fast, explain later, avoid repair"
+          },
+          {
+            "id": "c",
+            "label": "Notice signal, name feeling, pause, choose strategy, reflect"
+          },
+          {
+            "id": "d",
+            "label": "Blame someone, quit, move on"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "Notice signal, name feeling, pause, choose strategy, reflect",
+        "correctIndex": 2,
+        "flags": [
+          "correct_answer_too_obvious",
+          "too_easy_for_grade_4_plus"
+        ],
+        "difficultyScore": 2,
+        "difficultyReason": "correct answer stands out too easily; too easy for grades 4+; includes math thinking",
+        "recommendedRewrite": "Make two distractors realistic alternatives; avoid making the correct answer the only positive option.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Notice signal, name feeling, pause, choose strategy, reflect",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from inference",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "high"
+      }
+    ],
+    "rewritePriorityCounts": {
+      "high": 68,
+      "medium": 92,
+      "low": 352
+    }
+  },
+  "missionDifficultyAfter": {
+    "b4::b4-mood-scanner": 3.6666666666666665,
+    "b4::b4-body-signal-detective": 3.4166666666666665,
+    "b4::b4-brave-choice-button": 3.75,
+    "b4::b4-focus-reset-station": 3.6666666666666665,
+    "b4::b4-calm-down-countdown": 3.5833333333333335,
+    "b4::b4-oops-repair-lab": 3.5833333333333335,
+    "b4::b4-confidence-charger": 3.6666666666666665,
+    "b4::b4-focus-flame-finale": 3.4166666666666665,
+    "charlie::charlie-mystery-footprints": 3.1666666666666665,
+    "charlie::charlie-floating-orange": 3.0833333333333335,
+    "charlie::charlie-mystery-sound": 3.25,
+    "charlie::charlie-volcano-trouble": 3.25,
+    "charlie::charlie-missing-plant": 3.3333333333333335,
+    "charlie::charlie-robot-rescue": 2.9166666666666665,
+    "charlie::charlie-marshmallow-tower": 3.25,
+    "charlie::charlie-science-fair-mystery": 3.25,
+    "zeke::zeke-new-table": 3,
+    "zeke::zeke-pass-the-ball": 3.0833333333333335,
+    "zeke::zeke-group-project-glitch": 3.4166666666666665,
+    "zeke::zeke-brave-voice": 3.4166666666666665,
+    "zeke::zeke-friendship-repair": 3.3333333333333335,
+    "zeke::zeke-courage-challenge": 3.1666666666666665,
+    "zeke::zeke-team-captain-test": 3.4166666666666665,
+    "zeke::zeke-final-huddle": 3.4166666666666665,
+    "caiden::quest-1": 3.5833333333333335,
+    "caiden::quest-2": 3.1666666666666665,
+    "caiden::quest-3": 3.5,
+    "caiden::quest-4": 2.5833333333333335,
+    "caiden::quest-5": 3.3333333333333335,
+    "caiden::quest-6": 3.625,
+    "caiden::quest-7": 3.21875,
+    "caiden::quest-8": 3.375,
+    "caiden::quest-9": 3.09375,
+    "miranda::miranda-mystery-file-1": 3.25,
+    "miranda::miranda-mystery-file-2": 3.3333333333333335,
+    "miranda::miranda-mystery-file-3": 3.1666666666666665
+  },
+  "readingLevelAfter": {
+    "b4": {
+      "flagged": 4,
+      "total": 96
+    },
+    "charlie": {
+      "flagged": 15,
+      "total": 96
+    },
+    "zeke": {
+      "flagged": 12,
+      "total": 96
+    },
+    "caiden": {
+      "flagged": 20,
+      "total": 188
+    },
+    "miranda": {
+      "flagged": 1,
+      "total": 36
+    }
+  }
+}

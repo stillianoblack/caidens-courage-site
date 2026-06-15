@@ -1,0 +1,129 @@
+{
+  "generatedAt": "2026-06-15T20:51:59.333Z",
+  "requiredFields": [
+    "participant_id",
+    "week_number",
+    "mission_id",
+    "character",
+    "question_id",
+    "selected_answer",
+    "first_selected_answer",
+    "is_correct_first_try",
+    "is_correct_final",
+    "used_hint",
+    "attempt_type",
+    "content_version",
+    "completed_at"
+  ],
+  "sampleRow": {
+    "participant_id": "00000000-0000-4000-8000-000000000099",
+    "program_code": "CAMP-BLUERIBBONAB-2026",
+    "week_number": 1,
+    "mission_id": "b4-week-1",
+    "character": "b4",
+    "question_id": "audit-q1",
+    "grade_level": null,
+    "grade_band": null,
+    "content_version": "v3-audit",
+    "selected_answer": "yes",
+    "correct_answer": "yes",
+    "first_selected_answer": "yes",
+    "is_correct_first_try": true,
+    "is_correct_final": true,
+    "attempt_count": 1,
+    "used_hint": false,
+    "attempt_type": "initial",
+    "is_replay": false,
+    "completed_at": "2026-06-14T12:00:00.000Z",
+    "module_id": "b4-week-1"
+  },
+  "fieldChecks": [
+    {
+      "field": "participant_id",
+      "pass": true,
+      "value": "00000000-0000-4000-8000-000000000099"
+    },
+    {
+      "field": "week_number",
+      "pass": true,
+      "value": 1
+    },
+    {
+      "field": "mission_id",
+      "pass": true,
+      "value": "b4-week-1"
+    },
+    {
+      "field": "character",
+      "pass": true,
+      "value": "b4"
+    },
+    {
+      "field": "question_id",
+      "pass": true,
+      "value": "audit-q1"
+    },
+    {
+      "field": "selected_answer",
+      "pass": true,
+      "value": "yes"
+    },
+    {
+      "field": "first_selected_answer",
+      "pass": true,
+      "value": "yes"
+    },
+    {
+      "field": "is_correct_first_try",
+      "pass": true,
+      "value": true
+    },
+    {
+      "field": "is_correct_final",
+      "pass": true,
+      "value": true
+    },
+    {
+      "field": "used_hint",
+      "pass": true,
+      "value": false
+    },
+    {
+      "field": "attempt_type",
+      "pass": true,
+      "value": "initial"
+    },
+    {
+      "field": "content_version",
+      "pass": true,
+      "value": "v3-audit"
+    },
+    {
+      "field": "completed_at",
+      "pass": true,
+      "value": "2026-06-14T12:00:00.000Z"
+    }
+  ],
+  "migrationChecks": [
+    {
+      "name": "attempt_type column migration",
+      "pass": true,
+      "detail": "SQL migration adds attempt_type"
+    },
+    {
+      "name": "is_replay column migration",
+      "pass": true,
+      "detail": "SQL migration adds is_replay"
+    },
+    {
+      "name": "First-try hook tracks immutable first answer",
+      "pass": true,
+      "detail": "useQuestionInteraction preserves first-try state"
+    }
+  ],
+  "summary": {
+    "fieldChecksPassed": 13,
+    "fieldChecksFailed": 0,
+    "migrationChecksPassed": 3
+  }
+}

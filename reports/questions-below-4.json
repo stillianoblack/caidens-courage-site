@@ -1,0 +1,798 @@
+{
+  "generatedAt": "2026-06-15T03:52:12.634Z",
+  "totalBelow4": 56,
+  "needsReview": 2,
+  "k1ExpectedFloor": 54,
+  "questions": [
+    {
+      "questionId": "zkm1-68-q3",
+      "character": "zeke",
+      "missionId": "zeke-new-table",
+      "missionTitle": "The New Table",
+      "gradeBand": "6-8",
+      "difficultyScore": 3,
+      "flags": [
+        "lacks_reasoning_skill"
+      ],
+      "rubricGaps": [
+        "Missing reasoning depth for grade band",
+        "Upper band below gold bar (target 4–5/5)"
+      ],
+      "k1Expected": false,
+      "questionText": "What leadership move helps most without ignoring anyone?"
+    },
+    {
+      "questionId": "zkm6-68-q2",
+      "character": "zeke",
+      "missionId": "zeke-courage-challenge",
+      "missionTitle": "The Courage Challenge",
+      "gradeBand": "6-8",
+      "difficultyScore": 3,
+      "flags": [
+        "lacks_reasoning_skill"
+      ],
+      "rubricGaps": [
+        "Missing reasoning depth for grade band",
+        "Upper band below gold bar (target 4–5/5)"
+      ],
+      "k1Expected": false,
+      "questionText": "What leadership move helps most without ignoring anyone?"
+    },
+    {
+      "questionId": "b4m1-k1-q1",
+      "character": "b4",
+      "missionId": "b4-mood-scanner",
+      "missionTitle": "Mood Scanner",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m1-k1-q2",
+      "character": "b4",
+      "missionId": "b4-mood-scanner",
+      "missionTitle": "Mood Scanner",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m1-k1-q3",
+      "character": "b4",
+      "missionId": "b4-mood-scanner",
+      "missionTitle": "Mood Scanner",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m2-k1-q1",
+      "character": "b4",
+      "missionId": "b4-body-signal-detective",
+      "missionTitle": "Body Signal Detective",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m2-k1-q2",
+      "character": "b4",
+      "missionId": "b4-body-signal-detective",
+      "missionTitle": "Body Signal Detective",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m2-k1-q3",
+      "character": "b4",
+      "missionId": "b4-body-signal-detective",
+      "missionTitle": "Body Signal Detective",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m3-k1-q1",
+      "character": "b4",
+      "missionId": "b4-brave-choice-button",
+      "missionTitle": "The Brave Choice Button",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m3-k1-q2",
+      "character": "b4",
+      "missionId": "b4-brave-choice-button",
+      "missionTitle": "The Brave Choice Button",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m3-k1-q3",
+      "character": "b4",
+      "missionId": "b4-brave-choice-button",
+      "missionTitle": "The Brave Choice Button",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m4-k1-q1",
+      "character": "b4",
+      "missionId": "b4-focus-reset-station",
+      "missionTitle": "Focus Reset Station",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m4-k1-q2",
+      "character": "b4",
+      "missionId": "b4-focus-reset-station",
+      "missionTitle": "Focus Reset Station",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m4-k1-q3",
+      "character": "b4",
+      "missionId": "b4-focus-reset-station",
+      "missionTitle": "Focus Reset Station",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m5-k1-q1",
+      "character": "b4",
+      "missionId": "b4-calm-down-countdown",
+      "missionTitle": "Calm-Down Countdown",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m5-k1-q2",
+      "character": "b4",
+      "missionId": "b4-calm-down-countdown",
+      "missionTitle": "Calm-Down Countdown",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m5-k1-q3",
+      "character": "b4",
+      "missionId": "b4-calm-down-countdown",
+      "missionTitle": "Calm-Down Countdown",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m6-k1-q1",
+      "character": "b4",
+      "missionId": "b4-oops-repair-lab",
+      "missionTitle": "Oops Repair Lab",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m6-k1-q2",
+      "character": "b4",
+      "missionId": "b4-oops-repair-lab",
+      "missionTitle": "Oops Repair Lab",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m6-k1-q3",
+      "character": "b4",
+      "missionId": "b4-oops-repair-lab",
+      "missionTitle": "Oops Repair Lab",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m7-k1-q1",
+      "character": "b4",
+      "missionId": "b4-confidence-charger",
+      "missionTitle": "Confidence Charger",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m7-k1-q2",
+      "character": "b4",
+      "missionId": "b4-confidence-charger",
+      "missionTitle": "Confidence Charger",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m7-k1-q3",
+      "character": "b4",
+      "missionId": "b4-confidence-charger",
+      "missionTitle": "Confidence Charger",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m8-k1-q1",
+      "character": "b4",
+      "missionId": "b4-focus-flame-finale",
+      "missionTitle": "The Focus Flame Finale",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m8-k1-q2",
+      "character": "b4",
+      "missionId": "b4-focus-flame-finale",
+      "missionTitle": "The Focus Flame Finale",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "b4m8-k1-q3",
+      "character": "b4",
+      "missionId": "b4-focus-flame-finale",
+      "missionTitle": "The Focus Flame Finale",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What feeling might B-4 name from these clues?"
+    },
+    {
+      "questionId": "cm1-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-mystery-footprints",
+      "missionTitle": "The Mystery Footprints",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm1-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-mystery-footprints",
+      "missionTitle": "The Mystery Footprints",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm1-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-mystery-footprints",
+      "missionTitle": "The Mystery Footprints",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm3-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-mystery-sound",
+      "missionTitle": "The Mystery Sound",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm3-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-mystery-sound",
+      "missionTitle": "The Mystery Sound",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm3-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-mystery-sound",
+      "missionTitle": "The Mystery Sound",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm4-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-volcano-trouble",
+      "missionTitle": "Volcano Trouble",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm4-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-volcano-trouble",
+      "missionTitle": "Volcano Trouble",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm4-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-volcano-trouble",
+      "missionTitle": "Volcano Trouble",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm5-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-missing-plant",
+      "missionTitle": "The Missing Plant",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm5-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-missing-plant",
+      "missionTitle": "The Missing Plant",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm5-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-missing-plant",
+      "missionTitle": "The Missing Plant",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm6-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-robot-rescue",
+      "missionTitle": "Robot Rescue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm6-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-robot-rescue",
+      "missionTitle": "Robot Rescue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm6-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-robot-rescue",
+      "missionTitle": "Robot Rescue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm7-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-marshmallow-tower",
+      "missionTitle": "The Marshmallow Tower",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm7-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-marshmallow-tower",
+      "missionTitle": "The Marshmallow Tower",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm7-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-marshmallow-tower",
+      "missionTitle": "The Marshmallow Tower",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm8-k1-q1",
+      "character": "charlie",
+      "missionId": "charlie-science-fair-mystery",
+      "missionTitle": "The Great Science Fair Mystery",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm8-k1-q2",
+      "character": "charlie",
+      "missionId": "charlie-science-fair-mystery",
+      "missionTitle": "The Great Science Fair Mystery",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "cm8-k1-q3",
+      "character": "charlie",
+      "missionId": "charlie-science-fair-mystery",
+      "missionTitle": "The Great Science Fair Mystery",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "What should Charlie do next as a scientist?"
+    },
+    {
+      "questionId": "ms-k1-q1",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-1",
+      "missionTitle": "The Missing Schedule",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, what was missing from the board?"
+    },
+    {
+      "questionId": "ms-k1-q2",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-1",
+      "missionTitle": "The Missing Schedule",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, Where does the passage say Miranda found the card?"
+    },
+    {
+      "questionId": "ms-k1-q3",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-1",
+      "missionTitle": "The Missing Schedule",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, Which sentence from the passage best explains why students were confused?"
+    },
+    {
+      "questionId": "mst-k1-q1",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-2",
+      "missionTitle": "The Missing Student",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, who was missing from the line?"
+    },
+    {
+      "questionId": "mst-k1-q2",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-2",
+      "missionTitle": "The Missing Student",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, What did Miranda see on the chair in the passage?"
+    },
+    {
+      "questionId": "mst-k1-q3",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-2",
+      "missionTitle": "The Missing Student",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, Which action in the passage shows Miranda made a safe choice?"
+    },
+    {
+      "questionId": "mcl-k1-q1",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-3",
+      "missionTitle": "The Missing Clue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, what was missing from the note?"
+    },
+    {
+      "questionId": "mcl-k1-q2",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-3",
+      "missionTitle": "The Missing Clue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, What picture helped Miranda according to the passage?"
+    },
+    {
+      "questionId": "mcl-k1-q3",
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-3",
+      "missionTitle": "The Missing Clue",
+      "gradeBand": "K-1",
+      "difficultyScore": 3,
+      "flags": [],
+      "rubricGaps": [
+        "K–1 age-appropriate floor (3/5) — expected, not gold standard"
+      ],
+      "k1Expected": true,
+      "questionText": "According to the passage, Which word completed the note in the passage?"
+    }
+  ]
+}

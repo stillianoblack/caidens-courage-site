@@ -1,0 +1,589 @@
+{
+  "generatedAt": "2026-06-15T06:38:25.552Z",
+  "applied": 34,
+  "violationsBefore": {
+    "caiden": 16,
+    "miranda": 0,
+    "zeke": 2,
+    "charlie": 0,
+    "b4": 16
+  },
+  "violationsAfter": {
+    "caiden": 6,
+    "miranda": 0,
+    "zeke": 0,
+    "charlie": 0,
+    "b4": 10
+  },
+  "violationsRemoved": 18,
+  "difficultyChecks": [
+    {
+      "questionId": "cq1-45-q1",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq2-45-q3",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq3-45-q3",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq4-45-q2",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq5-45-q1",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq6-45-q3",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq6-45-q6",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq7-45-q2",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq7-45-q5",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq7-45-q8",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq8-45-q2",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq8-45-q5",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq8-45-q8",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "cq9-45-q1",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq9-45-q4",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "cq9-45-q7",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m1-45-q3",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m2-45-q2",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m3-45-q1",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m4-45-q3",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m5-45-q3",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m6-45-q2",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m7-45-q1",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m8-45-q3",
+      "before": 4,
+      "after": 4
+    },
+    {
+      "questionId": "b4m1-68-q1",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m2-68-q3",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m3-68-q2",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m4-68-q1",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m5-68-q1",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m6-68-q3",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m7-68-q2",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "b4m8-68-q1",
+      "before": 5,
+      "after": 5
+    },
+    {
+      "questionId": "zkm1-68-q3",
+      "before": 3,
+      "after": 5
+    },
+    {
+      "questionId": "zkm6-68-q2",
+      "before": 3,
+      "after": 5
+    }
+  ],
+  "fixes": [
+    {
+      "questionId": "cq1-45-q1",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq2-45-q3",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq3-45-q3",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq4-45-q2",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq5-45-q1",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq6-45-q3",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq6-45-q6",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq7-45-q2",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq7-45-q5",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq7-45-q8",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq8-45-q2",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq8-45-q5",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq8-45-q8",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq9-45-q1",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq9-45-q4",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "cq9-45-q7",
+      "character": "caiden",
+      "rationale": "Reframes the generic affordability check into a Caiden planning stem with budget and compare cues, without changing choices or correct position.",
+      "before": {
+        "questionText": "Can he afford both items with 10 tokens?"
+      },
+      "after": {
+        "questionText": "Which purchase plan best fits his 10-token budget for both items?"
+      }
+    },
+    {
+      "questionId": "b4m1-45-q3",
+      "character": "b4",
+      "rationale": "Names the regulation step (identify feeling) before strategy comparison.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which feeling might B-4 name when pride and embarrassment show up together?"
+      }
+    },
+    {
+      "questionId": "b4m2-45-q2",
+      "character": "b4",
+      "rationale": "Anchors body-signal awareness and coping strategy selection.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping strategy fits best after naming the restless body signals?"
+      }
+    },
+    {
+      "questionId": "b4m3-45-q1",
+      "character": "b4",
+      "rationale": "Uses regulation comparison framing for the brave-choice mission.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation choice best compares the brave step with the easy choice?"
+      }
+    },
+    {
+      "questionId": "b4m4-45-q3",
+      "character": "b4",
+      "rationale": "Ties stem to coping/regulation at the focus reset station.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping strategy fits best for resetting focus at the homework station?"
+      }
+    },
+    {
+      "questionId": "b4m5-45-q3",
+      "character": "b4",
+      "rationale": "Emphasizes calm-down regulation before action.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which calm-down strategy fits best before making the next move?"
+      }
+    },
+    {
+      "questionId": "b4m6-45-q2",
+      "character": "b4",
+      "rationale": "Compares regulation choices in the oops repair context.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation choice best compares repair steps after someone makes a mistake?"
+      }
+    },
+    {
+      "questionId": "b4m7-45-q1",
+      "character": "b4",
+      "rationale": "Links self-awareness and coping when confidence is low.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping strategy fits best when confidence needs charging?"
+      }
+    },
+    {
+      "questionId": "b4m8-45-q3",
+      "character": "b4",
+      "rationale": "Compares integrated regulation skills from the mission arc.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation choice best compares the combined skills in the focus flame?"
+      }
+    },
+    {
+      "questionId": "b4m1-68-q1",
+      "character": "b4",
+      "rationale": "Self-awareness stem for trigger and intensity identification.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which feeling detail best compares what triggered the reaction and how intense it became?"
+      }
+    },
+    {
+      "questionId": "b4m2-68-q3",
+      "character": "b4",
+      "rationale": "Regulation strategy after reading body signals.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation strategy fits best when body signals buzz before acting?"
+      }
+    },
+    {
+      "questionId": "b4m3-68-q2",
+      "character": "b4",
+      "rationale": "Compares coping alternatives for the brave-choice tradeoff.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping choice best compares declining the easy path with doing their own work?"
+      }
+    },
+    {
+      "questionId": "b4m4-68-q1",
+      "character": "b4",
+      "rationale": "Regulation comparison tied to the focus reset station.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation strategy best compares why a repeatable reset helps the brain?"
+      }
+    },
+    {
+      "questionId": "b4m5-68-q1",
+      "character": "b4",
+      "rationale": "Regulation-before-discussion sequence for calm-down countdown.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation step fits best before discussing the problem?"
+      }
+    },
+    {
+      "questionId": "b4m6-68-q3",
+      "character": "b4",
+      "rationale": "Compares coping/repair strategies in the oops lab.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping strategy best compares ways to repair trust after a mistake?"
+      }
+    },
+    {
+      "questionId": "b4m7-68-q2",
+      "character": "b4",
+      "rationale": "Coping and self-awareness for the confidence charger mission.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which coping strategy fits best when a learning feeling needs kind self-talk?"
+      }
+    },
+    {
+      "questionId": "b4m8-68-q1",
+      "character": "b4",
+      "rationale": "Compares the full regulation sequence from the focus flame.",
+      "before": {
+        "questionText": "What should B-4 try first before choosing a bigger response?"
+      },
+      "after": {
+        "questionText": "Which regulation sequence best compares notice, name, pause, choose, and reflect?"
+      }
+    },
+    {
+      "questionId": "zkm1-68-q3",
+      "character": "zeke",
+      "rationale": "Adds explicit plan/tradeoff comparison in scenario and stem; restores truncated correct choice; clears lacks_reasoning_skill while preserving answer position.",
+      "before": {
+        "questionText": "What leadership move helps most without ignoring anyone?",
+        "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": [
+          "Invite them to ask together or save…",
+          "A kind idea that skips hearing everyone out",
+          "A fast choice that helps one person but not the…",
+          "A choice that shuts teammates out"
+        ]
+      },
+      "after": {
+        "questionText": "Which leadership plan best compares inviting the other student with joining the table?",
+        "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet. Another student hovers nearby too. Zeke compares two plans: ask to join while inviting the other student, or take the seat alone. During the new table, he weighs which leadership tradeoff helps the group without leaving anyone out.",
+        "choices": [
+          "Invite them to ask together or save them a spot if the group says yes",
+          "A kind idea that skips hearing everyone out",
+          "A fast choice that helps one person but not the group",
+          "A choice that shuts teammates out"
+        ]
+      }
+    },
+    {
+      "questionId": "zkm6-68-q2",
+      "character": "zeke",
+      "rationale": "Replaces generic leadership stem with courage tradeoff reasoning; adds compare/plan language and group context for audit reasoning cues.",
+      "before": {
+        "questionText": "What leadership move helps most without ignoring anyone?",
+        "scenarioText": "Zeke wants to try out for the talent show, but his stomach flips when he sees the signup sheet. His brain says, \"Maybe we become invisible today.\" During the courage challenge, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the courage challenge, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": [
+          "A kind idea that skips hearing everyone out",
+          "A fast choice that helps one person but not the group",
+          "A choice that shuts teammates out",
+          "Choosing the step that matches what he values"
+        ]
+      },
+      "after": {
+        "questionText": "Which courageous plan best compares performing on his values with skipping the tryout?",
+        "scenarioText": "Zeke wants to try out for the talent show, but his stomach flips when he sees the signup sheet. Friends in his project group are signing up around him. His brain says, \"Maybe we become invisible today.\" He compares two plans: sign up now while nervous, or skip to protect himself from embarrassment. During the courage challenge, Zeke weighs which tradeoff best matches what he values."
+      }
+    }
+  ]
+}

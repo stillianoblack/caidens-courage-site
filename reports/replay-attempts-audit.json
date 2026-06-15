@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-06-15T20:51:59.025Z",
+  "checks": [
+    {
+      "name": "Initial attempt type default",
+      "pass": true,
+      "detail": "resolveMissionAttemptType => initial"
+    },
+    {
+      "name": "Replay attempt type when previously completed",
+      "pass": true,
+      "detail": "resolveMissionAttemptType => replay"
+    },
+    {
+      "name": "Replay rows flagged",
+      "pass": true,
+      "detail": "buildQuestionAttemptRows sets attempt_type + is_replay"
+    },
+    {
+      "name": "Initial-only filter",
+      "pass": true,
+      "detail": "filterInitialAttemptRows excludes replay rows"
+    },
+    {
+      "name": "Replay helper",
+      "pass": true,
+      "detail": "isReplayAttemptType distinguishes replay"
+    },
+    {
+      "name": "Game flow passes attempt type",
+      "pass": true,
+      "detail": "GameAssessmentFlow wires attemptType into completion save"
+    },
+    {
+      "name": "Reward dedup on replay",
+      "pass": true,
+      "detail": "completeMissionWithSupabase skips duplicate rewards when already completed"
+    }
+  ],
+  "summary": {
+    "checksPassed": 7,
+    "checksFailed": 0
+  },
+  "sampleReplayRows": [
+    {
+      "participant_id": "00000000-0000-4000-8000-000000000001",
+      "program_code": "CAMP-BLUERIBBONAB-2026",
+      "week_number": null,
+      "mission_id": "sample-mission",
+      "character": "caiden",
+      "question_id": "q1",
+      "grade_level": null,
+      "grade_band": null,
+      "content_version": null,
+      "selected_answer": "a",
+      "correct_answer": "a",
+      "first_selected_answer": "a",
+      "is_correct_first_try": true,
+      "is_correct_final": true,
+      "attempt_count": 1,
+      "used_hint": false,
+      "attempt_type": "replay",
+      "is_replay": true,
+      "completed_at": "2026-06-15T20:51:59.024Z",
+      "module_id": "sample-mission"
+    }
+  ]
+}

@@ -42,6 +42,10 @@ import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 import { FacilitatorOverviewCoachProvider } from '../components/pilot-dashboard/coach/FacilitatorOverviewCoachProvider';
+import FacilitatorPortalMobileChrome, {
+  facilitatorMobileNavShellClass,
+} from '../components/pilot-dashboard/FacilitatorPortalMobileChrome';
+import { useFacilitatorMobileNav } from '../hooks/useFacilitatorMobileNav';
 
 const FacilitatorOverviewCoachRail = lazy(
   () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
@@ -76,6 +80,9 @@ export default function ProgramDashboardPage() {
       isPortalRoleAllowed(location.pathname),
   );
   const handleSelectNav = useProgramDashboardNav();
+  const { isMobileNav, moreOpen, openMore, closeMore } = useFacilitatorMobileNav();
+  const showMobileNav = sessionValid && !isKidsRoute;
+  const mobileNavShellClass = facilitatorMobileNavShellClass(showMobileNav, isMobileNav);
 
   const {
     open: goalsOpen,
@@ -163,6 +170,7 @@ export default function ProgramDashboardPage() {
     >
     <AppShell
       variant="facilitator"
+      shellClassName={mobileNavShellClass}
       rightRail={
         showOverviewCoach ? (
           <Suspense fallback={null}>
@@ -171,16 +179,18 @@ export default function ProgramDashboardPage() {
         ) : undefined
       }
       sidebar={
-        <PilotDashboardSidebar
-          activeId={activeNav}
-          onSelect={handleSelectNav}
-          brandTitle={brand.title}
-          brandSubtitle={brand.subtitle}
-          navItems={PROGRAM_SIDEBAR_NAV}
-          programCode={programCode}
-          pricingTier={activeProgram.pricingTier}
-          showSupportCard={false}
-        />
+        showMobileNav && isMobileNav ? null : (
+          <PilotDashboardSidebar
+            activeId={activeNav}
+            onSelect={handleSelectNav}
+            brandTitle={brand.title}
+            brandSubtitle={brand.subtitle}
+            navItems={PROGRAM_SIDEBAR_NAV}
+            programCode={programCode}
+            pricingTier={activeProgram.pricingTier}
+            showSupportCard={false}
+          />
+        )
       }
       topBar={
         <PilotDashboardTopBar
@@ -210,6 +220,15 @@ export default function ProgramDashboardPage() {
         onSave={saveGoals}
         onRemindLater={remindGoalsLater}
         onSkip={skipGoalsForNow}
+      />
+
+      <FacilitatorPortalMobileChrome
+        isMobileNav={showMobileNav && isMobileNav}
+        moreOpen={moreOpen}
+        onOpenMore={openMore}
+        onCloseMore={closeMore}
+        programCode={programCode}
+        pricingTier={activeProgram.pricingTier}
       />
     </AppShell>
     </FacilitatorOverviewCoachProvider>

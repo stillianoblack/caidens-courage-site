@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 
-export type CoachViewportPlacement = 'rail' | 'afterMetrics' | 'footer';
+export type CoachViewportPlacement = 'rail' | 'afterMetrics' | 'afterHero' | 'footer';
 
 function resolveCoachViewportPlacement(): CoachViewportPlacement {
   if (typeof window === 'undefined') return 'rail';
   if (window.matchMedia('(min-width: 1101px)').matches) return 'rail';
   if (window.matchMedia('(min-width: 768px)').matches) return 'afterMetrics';
-  return 'footer';
+  return 'afterHero';
 }
 
-/** One coach surface per viewport: desktop rail, tablet below KPIs, mobile footer. */
+/** One coach surface per viewport: desktop rail, tablet below KPIs, mobile after overview hero. */
 export function useCoachViewportPlacement(): CoachViewportPlacement {
   const [placement, setPlacement] = useState<CoachViewportPlacement>(resolveCoachViewportPlacement);
 

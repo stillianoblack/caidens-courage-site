@@ -16,6 +16,10 @@ type PilotAddStudentDrawerProps = {
   onSuccess: (message: string) => void;
 };
 
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export default function PilotAddStudentDrawer({
   open,
   onClose,
@@ -32,12 +36,7 @@ export default function PilotAddStudentDrawer({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit =
-    childFirstName.trim().length > 0 &&
-    parentLastName.trim().length > 0 &&
-    parentEmail.trim().length > 0 &&
-    programCode.trim().length > 0 &&
-    !submitting;
+  const trimmedProgramCode = programCode.trim();
 
   const resetForm = () => {
     setChildFirstName('');
@@ -57,10 +56,35 @@ export default function PilotAddStudentDrawer({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!canSubmit) return;
+    if (submitting) return;
+    setError(null);
+
+    if (!childFirstName.trim()) {
+      setError('Child first name is required.');
+      return;
+    }
+    if (!parentFirstName.trim()) {
+      setError('Parent/guardian first name is required.');
+      return;
+    }
+    if (!parentLastName.trim()) {
+      setError('Parent/guardian last name is required.');
+      return;
+    }
+    if (!isValidEmail(parentEmail)) {
+      setError('A valid parent/guardian email is required.');
+      return;
+    }
+    if (!isGradeLevel(gradeLevel)) {
+      setError('Grade level is required so missions match the student profile.');
+      return;
+    }
+    if (!trimmedProgramCode) {
+      setError('Program is not loaded yet. Refresh the dashboard and try again.');
+      return;
+    }
 
     setSubmitting(true);
-    setError(null);
 
     const result = await createCampChildWithParentLink({
       childFirstName: childFirstName.trim(),
@@ -69,8 +93,8 @@ export default function PilotAddStudentDrawer({
       parentLastName: parentLastName.trim(),
       parentEmail: parentEmail.trim(),
       parentPhone: parentPhone.trim() || undefined,
-      gradeLevel: isGradeLevel(gradeLevel) ? gradeLevel : undefined,
-      campProgramCode: programCode.trim(),
+      gradeLevel,
+      campProgramCode: trimmedProgramCode,
     });
 
     setSubmitting(false);
@@ -80,8 +104,9 @@ export default function PilotAddStudentDrawer({
       return;
     }
 
+    const successMessage = result.message;
     resetForm();
-    onSuccess(result.message);
+    onSuccess(successMessage);
     onClose();
   };
 
@@ -107,89 +132,106 @@ export default function PilotAddStudentDrawer({
         </button>
       </div>
 
-      <div className="pilot-drawerBody">
-      <form className="pilot-drawerForm" onSubmit={(event) => void handleSubmit(event)}>
-        <label className="pilot-drawerField">
-          <span>Child first name</span>
-          <input
-            type="text"
-            value={childFirstName}
-            onChange={(event) => setChildFirstName(event.target.value)}
-            required
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>Child nickname (optional)</span>
-          <input
-            type="text"
-            value={childNickname}
-            onChange={(event) => setChildNickname(event.target.value)}
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>Parent/Guardian first name</span>
-          <input
-            type="text"
-            value={parentFirstName}
-            onChange={(event) => setParentFirstName(event.target.value)}
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>Parent/Guardian last name</span>
-          <input
-            type="text"
-            value={parentLastName}
-            onChange={(event) => setParentLastName(event.target.value)}
-            required
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>Parent/Guardian email</span>
-          <input
-            type="email"
-            value={parentEmail}
-            onChange={(event) => setParentEmail(event.target.value)}
-            required
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>Parent/Guardian phone (optional)</span>
-          <input
-            type="tel"
-            value={parentPhone}
-            onChange={(event) => setParentPhone(event.target.value)}
-          />
-        </label>
-        <label className="pilot-drawerField">
-          <span>{GRADE_LEVEL_LABEL} (recommended)</span>
-          <select
-            value={gradeLevel}
-            onChange={(event) => {
-              const next = event.target.value;
-              setGradeLevel(isGradeLevel(next) ? next : '');
-            }}
-          >
-            <option value="">Choose grade…</option>
-            {GRADE_LEVEL_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <span className="pilot-drawerFieldHint">{GRADE_LEVEL_ENCOURAGE}</span>
-        </label>
-        {error ? <p className="pilot-syncWarning">{error}</p> : null}
+      <form className="pilot-drawerFormShell" onSubmit={(event) => void handleSubmit(event)}>
+        <div className="pilot-drawerBody pilot-drawerBody--form">
+          <div className="pilot-drawerForm">
+            <label className="pilot-drawerField">
+              <span>Child first name</span>
+              <input
+                type="text"
+                value={childFirstName}
+                onChange={(event) => setChildFirstName(event.target.value)}
+                required
+                autoComplete="given-name"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>Child nickname (optional)</span>
+              <input
+                type="text"
+                value={childNickname}
+                onChange={(event) => setChildNickname(event.target.value)}
+                autoComplete="nickname"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>Parent/Guardian first name</span>
+              <input
+                type="text"
+                value={parentFirstName}
+                onChange={(event) => setParentFirstName(event.target.value)}
+                required
+                autoComplete="given-name"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>Parent/Guardian last name</span>
+              <input
+                type="text"
+                value={parentLastName}
+                onChange={(event) => setParentLastName(event.target.value)}
+                required
+                autoComplete="family-name"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>Parent/Guardian email</span>
+              <input
+                type="email"
+                value={parentEmail}
+                onChange={(event) => setParentEmail(event.target.value)}
+                required
+                autoComplete="email"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>Parent/Guardian phone (optional)</span>
+              <input
+                type="tel"
+                value={parentPhone}
+                onChange={(event) => setParentPhone(event.target.value)}
+                autoComplete="tel"
+              />
+            </label>
+            <label className="pilot-drawerField">
+              <span>{GRADE_LEVEL_LABEL}</span>
+              <select
+                value={gradeLevel}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  setGradeLevel(isGradeLevel(next) ? next : '');
+                }}
+                required
+              >
+                <option value="">Choose grade…</option>
+                {GRADE_LEVEL_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <span className="pilot-drawerFieldHint">{GRADE_LEVEL_ENCOURAGE}</span>
+            </label>
+            {error ? <p className="pilot-syncWarning">{error}</p> : null}
+          </div>
+        </div>
 
-        <div className="pilot-drawerActions">
-          <button type="button" className="pilot-drawerBtnSecondary" onClick={handleClose}>
-            Cancel
-          </button>
-          <button type="submit" className="pilot-drawerBtnPrimary" disabled={!canSubmit}>
-            {submitting ? 'Saving…' : 'Add Student'}
-          </button>
+        <div className="pilot-drawerFooter">
+          <div className="pilot-drawerActions">
+            <button type="button" className="pilot-drawerBtnSecondary" onClick={handleClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="pilot-drawerBtnPrimary"
+              disabled={submitting}
+              aria-disabled={submitting}
+            >
+              {submitting ? 'Saving…' : 'Add Student'}
+            </button>
+          </div>
         </div>
       </form>
-      </div>
     </PilotDrawer>
   );
 }

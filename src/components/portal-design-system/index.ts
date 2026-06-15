@@ -27,3 +27,10 @@ export type { StatusChipVariant } from './StatusChip';
 export { default as EmptyState } from './EmptyState';
 export { default as RecentActivityFeed } from './RecentActivityFeed';
 export type { RecentActivityItem, RecentActivityKind } from './RecentActivityFeed';
+export { MobileDataAccordionItem, MobileDataAccordionList } from './MobileDataAccordion';
+export type { MobileDataAccordionDetail, MobileDataAccordionItemProps } from './MobileDataAccordion';
+export { default as ResponsivePortalTable } from './ResponsivePortalTable';
+export type {
+  ResponsivePortalTableColumn,
+  ResponsivePortalTableMobileRole,
+} from './ResponsivePortalTable';

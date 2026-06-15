@@ -1,0 +1,158 @@
+{
+  "generatedAt": "2026-06-15T03:52:12.634Z",
+  "rubric": {
+    "tiers": [
+      {
+        "score": 5,
+        "title": "Gold standard (5/5)",
+        "summary": "Requires reading the scenario; strong reasoning; no quality flags.",
+        "criteria": [
+          "Scenario typically 75+ words with concrete situational details",
+          "Question stem uses comparison, evidence, planning, or best-choice reasoning",
+          "Zero audit flags (no obvious answer, joke distractors, or guessable-without-scenario)",
+          "Four choices follow: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+          "Choice labels balanced (~46 characters average, low spread)",
+          "Correct answer position varies (not predictable by length or slot pattern)",
+          "Answers cannot be solved from common sense alone — scenario carries necessary clues",
+          "Warm SEL tone; kid-safe language"
+        ]
+      },
+      {
+        "score": 4,
+        "title": "Strong (4/5)",
+        "summary": "Solid grade-band rigor with at most one minor quality note.",
+        "criteria": [
+          "Scenario provides enough context for the grade band (40+ words for 2–3; 55+ for 4–8)",
+          "Requires at least one cognitive step: inference, comparison, sequencing, or calculation",
+          "Distractors are plausible; no joke or throwaway options",
+          "Correct answer is not dramatically longer than other options",
+          "May have one non-critical flag (e.g. reading-level heuristic) without harming fairness",
+          "Character skill focus is clear (math/planning, evidence, science, teamwork, or SEL)"
+        ]
+      },
+      {
+        "score": 3,
+        "title": "Adequate / band floor (3/5)",
+        "summary": "Acceptable for younger bands or as a relative outlier; not gold standard.",
+        "criteria": [
+          "K–1: simple recognition, cause/effect, or matching — difficulty capped for age",
+          "May rely more on recall than multi-step reasoning",
+          "Scenario may be shorter but still present",
+          "Upper bands (4–8) at 3/5 need review — likely missing reasoning depth or have quality flags",
+          "Not publish-blocking for K–1 if tone and safety are intact"
+        ]
+      }
+    ],
+    "antiPatterns": [
+      "Joke or cartoonishly wrong distractors (“the day of the week,” “water is broken”)",
+      "Correct answer is the only long or detailed option",
+      "Correct answer is the only positive SEL option while distractors are extreme negatives",
+      "Question solvable without reading the scenario",
+      "All correct answers in position A (or any single slot)",
+      "Upper-grade questions that are pure recall with no inference or comparison",
+      "Miranda questions guessable without rereading the passage",
+      "Caiden upper-band questions without time, quantity, budgeting, or planning logic",
+      "Zeke questions with selfish “obvious wrong” options instead of plausible tradeoffs",
+      "Charlie questions that change two variables at once without science framing",
+      "Duplicate scenario framing text appended multiple times",
+      "Truncated choice labels (“…”) that reduce readability"
+    ],
+    "distractorGuidelines": [
+      "Use exactly four choices: 1 best, 1 plausible-incomplete, 1 plausible-flawed, 1 clearly-wrong-but-realistic",
+      "Keep choice lengths within ~25% of each other when possible",
+      "Avoid joke answers unless the scenario genuinely makes them plausible",
+      "Make two distractors emotionally or logically plausible for SEL/teamwork questions",
+      "Embed scenario-specific language in at least two options so reading is required",
+      "Rotate correct answer position across A/B/C/D within each mission"
+    ],
+    "gradeBandGuidelines": {
+      "K-1": [
+        "Short scenarios (28–45 words); concrete actions and feelings",
+        "Recognition, matching, simple cause/effect",
+        "Difficulty ceiling ~3/5 by design — not compared to 4–8 gold bar"
+      ],
+      "2-3": [
+        "Scenarios 40–55 words; one clear decision point",
+        "Simple sequencing, basic inference, introductory math/counting for Caiden",
+        "Target 4/5 where possible"
+      ],
+      "4-5": [
+        "Scenarios 55–75 words; compare or plan",
+        "Inference, comparison, evidence from scenario, light multi-step math",
+        "Gold bar: 4–5/5"
+      ],
+      "6-8": [
+        "Scenarios 60–90 words; tradeoffs and evidence evaluation",
+        "Multi-step reasoning, variable thinking, prioritization under constraints",
+        "Gold bar: 4–5/5; 3/5 requires manual review"
+      ]
+    },
+    "characterGuidelines": {
+      "caiden": [
+        "Hardest path: multi-step time, budgeting, sequencing, executive function",
+        "Include numbers (minutes, tokens, costs) in 4–5 and 6–8 scenarios",
+        "Ask which plan fits all constraints, not single-step recall",
+        "Gold examples: 4–5/6–8 math-planning items at difficulty 4–5"
+      ],
+      "miranda": [
+        "Passage-based; answers require rereading evidence",
+        "Stems: “According to the passage…”, “Which clue best supports…?”",
+        "Distractors: related but weaker evidence, off-topic true facts"
+      ],
+      "zeke": [
+        "Team tradeoffs; two emotionally plausible options",
+        "Leadership and communication under group constraints",
+        "Avoid cartoon selfish wrong answers; use realistic group mistakes"
+      ],
+      "charlie": [
+        "Science reasoning: variables, fair tests, predictions, evidence",
+        "Change one thing at a time; observation before conclusion",
+        "Avoid silly science distractors"
+      ],
+      "b4": [
+        "Emotional regulation: body signals → name feeling → compare coping strategies",
+        "Gold top-25 pattern: “Which two strategies compare well for this moment?”",
+        "Close distractors: regulation steps applied at the wrong time or incompletely"
+      ]
+    },
+    "goldPatterns": {
+      "count": 25,
+      "avgScenarioWords": 74.8,
+      "avgQuestionWords": 8.52,
+      "avgChoiceLength": 45.66,
+      "choiceLengthSpread": 2.783199999999998,
+      "zeroFlagsPct": 100,
+      "characterBreakdown": {
+        "b4": 24,
+        "caiden": 1
+      },
+      "gradeBandBreakdown": {
+        "4-5": 8,
+        "6-8": 17
+      },
+      "reasoningTypeBreakdown": {
+        "math": 25
+      },
+      "comparisonStemPct": 100,
+      "mathScenarioPct": 100,
+      "positionDistribution": {
+        "A": 10,
+        "B": 2,
+        "C": 5,
+        "D": 8
+      },
+      "commonStemPatterns": [
+        "Which two strategies compare well for this moment?",
+        "Which coping step fits best after naming the feeling?",
+        "What should [character] check first before acting?",
+        "According to the passage, which answer is best supported?",
+        "Which plan uses the time and constraints in the scenario?"
+      ],
+      "commonDistractorPatterns": [
+        "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+        "Plausible flawed: a strategy that helps a little but ignores an important clue",
+        "Clearly wrong but realistic: an option that does not fit the scenario"
+      ]
+    }
+  }
+}

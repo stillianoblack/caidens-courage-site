@@ -16,6 +16,8 @@ export type QuestionAttemptMetricRow = {
   is_correct_final: boolean;
   used_hint: boolean;
   attempt_count: number;
+  attempt_type?: string | null;
+  is_replay?: boolean;
   completed_at: string;
 };
 
@@ -43,21 +45,27 @@ function safeRate(numerator: number, denominator: number): number {
   return Math.round((numerator / denominator) * 1000) / 1000;
 }
 
-export function computeQuestionAttemptMetrics(rows: QuestionAttemptMetricRow[]): QuestionAttemptMetrics {
-  const questions_attempted = rows.length;
-  const questions_correct_first_try = rows.filter((row) => row.is_correct_first_try).length;
-  const questions_correct_final = rows.filter((row) => row.is_correct_final).length;
+export function computeQuestionAttemptMetrics(
+  rows: QuestionAttemptMetricRow[],
+  options?: { attemptScope?: 'initial' | 'all' },
+): QuestionAttemptMetrics {
+  const scoped =
+    options?.attemptScope === 'initial'
+      ? rows.filter((row) => row.attempt_type !== 'replay' && row.is_replay !== true)
+      : rows;
 
-  const hinted = rows.filter((row) => row.used_hint);
-  const unhinted = rows.filter((row) => !row.used_hint);
+  const questions_attempted = scoped.length;
+  const questions_correct_first_try = scoped.filter((row) => row.is_correct_first_try).length;
+  const questions_correct_final = scoped.filter((row) => row.is_correct_final).length;
 
-  const improved_after_support = rows.filter(
+  const hinted = scoped.filter((row) => row.used_hint);
+  const unhinted = scoped.filter((row) => !row.used_hint);
+
+  const improved_after_support = scoped.filter(
     (row) => !row.is_correct_first_try && row.is_correct_final,
   ).length;
 
-  const needs_more_practice = rows.filter(
-    (row) => !row.is_correct_final,
-  ).length;
+  const needs_more_practice = scoped.filter((row) => !row.is_correct_final).length;
 
   return {
     questions_attempted,

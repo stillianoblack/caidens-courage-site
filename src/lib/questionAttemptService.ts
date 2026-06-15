@@ -25,7 +25,10 @@ export type QuestionAttemptSaveContext = {
   grade_band?: string | null;
   content_version?: string | null;
   module_id?: string | null;
+  attempt_type?: MissionAttemptType;
 };
+
+export type MissionAttemptType = 'initial' | 'replay';
 
 export type QuestionAttemptInsertRow = {
   participant_id: string;
@@ -44,6 +47,8 @@ export type QuestionAttemptInsertRow = {
   is_correct_final: boolean;
   attempt_count: number;
   used_hint: boolean;
+  attempt_type: MissionAttemptType;
+  is_replay: boolean;
   completed_at: string;
   module_id?: string | null;
 };
@@ -67,6 +72,7 @@ export function buildQuestionAttemptRows(input: {
     const correctAnswer = question && question.type === 'multiple_choice'
       ? resolveCorrectAnswer(question as GameChoiceQuestion)
       : null;
+    const attemptType = input.context.attempt_type ?? 'initial';
 
     return {
       participant_id: input.context.participant_id,
@@ -88,6 +94,8 @@ export function buildQuestionAttemptRows(input: {
       is_correct_final: attempt.is_correct_final,
       attempt_count: attempt.attempts_count,
       used_hint: attempt.hints_used_count > 0,
+      attempt_type: attemptType,
+      is_replay: attemptType === 'replay',
       completed_at: attempt.completed_at,
       module_id: input.context.module_id ?? input.context.mission_id,
     };

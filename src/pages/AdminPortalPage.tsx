@@ -7,11 +7,13 @@ import {
   verifyAdminCredentials,
   writeAdminSession,
 } from '../config/adminAccess';
+import AdminAddStudentTab from '../components/admin/tabs/AdminAddStudentTab';
 import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
 import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
 import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
 import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
 import AdminAdventuresTab from '../components/admin/tabs/AdminAdventuresTab';
+import AdminPricingPlansTab from '../components/admin/tabs/AdminPricingPlansTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -121,6 +123,8 @@ export default function AdminPortalPage() {
     switch (activeTab) {
       case 'manage-accounts':
         return <AdminManageAccountsTab programs={programs} onCopied={handleCopied} />;
+      case 'add-student':
+        return <AdminAddStudentTab programs={programs} onCopied={handleCopied} />;
       case 'design-system':
         return <AdminDesignSystemTab />;
       case 'pilot-programs':
@@ -137,6 +141,8 @@ export default function AdminPortalPage() {
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
         return <AdminDataCleanupTab onChanged={() => void loadPrograms()} />;
+      case 'pricing-plans':
+        return <AdminPricingPlansTab onCopied={handleCopied} />;
       default:
         return null;
     }

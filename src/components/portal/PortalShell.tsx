@@ -10,6 +10,7 @@ type PortalShellProps = {
   footer?: React.ReactNode;
   floating?: React.ReactNode;
   rightRail?: React.ReactNode;
+  shellClassName?: string;
   children: React.ReactNode;
 };
 
@@ -20,9 +21,15 @@ export default function PortalShell({
   footer,
   floating,
   rightRail,
+  shellClassName,
   children,
 }: PortalShellProps) {
-  const shellClass = variant === 'family' ? 'family-shell portal-shell' : 'pilot-shell portal-shell';
+  const shellClass = [
+    variant === 'family' ? 'family-shell portal-shell' : 'pilot-shell portal-shell',
+    shellClassName,
+  ]
+    .filter(Boolean)
+    .join(' ');
   const mainClass = variant === 'family' ? 'family-main' : 'pilot-main';
   const contentClass = variant === 'family' ? 'family-content portal-contentFrame' : 'pilot-content portal-contentFrame';
 

@@ -201,6 +201,15 @@
     position: static;
   }
 
+  /* Facilitator portal: same natural scroll — no trapped viewport or nested scroll */
+  .portal-shell.pilot-shell {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
   .portal-shell.pilot-shell .pilot-rail {
     position: relative;
     flex-shrink: 0;
@@ -209,10 +218,24 @@
     overflow: visible;
   }
 
-  .portal-shell .pilot-main {
+  .portal-shell.pilot-shell .pilot-main {
     margin-left: 0;
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .portal-shell.pilot-shell .pilot-content,
+  .portal-shell.pilot-shell .pilot-main:has(.portal-layout--withRail) .pilot-content {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  .portal-shell.pilot-shell .pilot-miniFooter {
+    position: static;
   }
 
   .portal-shell .pilot-railUpper {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
 import { Link, useSearchParams } from 'react-router-dom';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
@@ -7,7 +7,7 @@ import {
   isRosterFilterId,
   ROSTER_FILTER_LABELS,
 } from '../../../lib/pilotOverviewInsights';
-import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
 import { usePilotRosterData } from '../../../hooks/usePilotRosterData';
 import { PortalPageIntro } from '../../portal-design-system';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
@@ -21,10 +21,9 @@ type PilotRosterPanelProps = {
 };
 
 export default function PilotRosterPanel({ programCode, loading: externalLoading }: PilotRosterPanelProps) {
-  const activeProgram = readActivePilotProgram();
-  const resolvedProgramCode = programCode?.trim() || activeProgram?.programCode?.trim() || '';
+  const resolvedProgramCode = resolveFacilitatorRosterProgramCode(programCode);
   const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh, updateParticipantGrade } =
-    usePilotRosterData(resolvedProgramCode, true, activeProgram?.familyAccessCode);
+    usePilotRosterData(resolvedProgramCode, true);
   const [searchParams, setSearchParams] = useSearchParams();
   const rawFilter = searchParams.get('filter');
   const rosterFilter = isRosterFilterId(rawFilter) ? rawFilter : null;
@@ -43,6 +42,14 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     next.delete('filter');
     setSearchParams(next, { replace: true });
   };
+
+  useEffect(() => {
+    if (searchParams.get('addStudent') !== '1') return;
+    setAddStudentOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('addStudent');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   if (showLoading) {
     return (
@@ -114,8 +121,8 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         open={addStudentOpen}
         onClose={() => setAddStudentOpen(false)}
         programCode={resolvedProgramCode}
-        onSuccess={() => {
-          showToast("Student added. I'll keep their progress organized here.", 'success');
+        onSuccess={(message) => {
+          showToast(message || "Student added. I'll keep their progress organized here.", 'success');
           void refresh();
         }}
       />

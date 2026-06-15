@@ -34,6 +34,7 @@ export type RecordInteractiveCompletionInput = {
   contentVersionId?: string;
   fileId?: string;
   weekNumber?: number | null;
+  attemptType?: 'initial' | 'replay';
 };
 
 function isEnrichedAnswersJson(
@@ -249,6 +250,7 @@ export async function recordInteractiveModuleCompletion(
           grade_band: input.gradeBandUsed ?? null,
           content_version: input.contentVersionId ?? null,
           module_id: tracking.moduleId,
+          attempt_type: input.attemptType ?? 'initial',
         },
       });
     }

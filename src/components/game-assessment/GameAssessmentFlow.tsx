@@ -58,6 +58,8 @@ import { readActivePortalRole } from '../../config/portalContext';
 import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
+import { resolveMissionAttemptType } from '../../lib/missionAttemptType';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
 import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
 import {
@@ -524,6 +526,10 @@ export default function GameAssessmentFlow({
         contentVersionId: completionContext?.contentVersionId,
         fileId: completionContext?.fileId,
         weekNumber: weeklyRouteContext.week ?? null,
+        attemptType: resolveMissionAttemptType({
+          participantId: readActiveChildParticipantId(),
+          moduleId: tracking?.moduleId ?? config.id,
+        }),
       });
     },
     [adultGuideId, adultMissionId, completionContext, config, totalQuestions, tracking, weeklyRouteContext.week],

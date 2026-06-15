@@ -16,6 +16,7 @@ import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-shell.css';
 import { FACILITATOR_BASELINE_CHECK_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { resolveFacilitatorRosterProgramCode } from '../lib/resolveFacilitatorRosterProgramCode';
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
   PILOT_DASHBOARD_TITLE,
@@ -26,6 +27,11 @@ import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { B4Assistant } from '../components/portal-design-system';
+import FacilitatorPortalMobileChrome, {
+  facilitatorMobileNavShellClass,
+} from '../components/pilot-dashboard/FacilitatorPortalMobileChrome';
+import { useFacilitatorMobileNav } from '../hooks/useFacilitatorMobileNav';
+import '../components/pilot-dashboard/facilitator-mobile-nav.css';
 
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PILOT_SIDEBAR_NAV.map((item) => [item.id, item.label]),
@@ -113,7 +119,7 @@ export default function PilotDashboardPage() {
 
   const brand = resolvePortalRailBrand();
   const activeProgram = readActivePilotProgram();
-  const programCode = activeProgram?.programCode;
+  const programCode = resolveFacilitatorRosterProgramCode(activeProgram?.programCode);
 
   const activeNav = useMemo<PilotSidebarNavId>(() => {
     const hash = location.hash.replace('#', '') as PilotSidebarNavId;
@@ -168,6 +174,9 @@ export default function PilotDashboardPage() {
     [navigate],
   );
 
+  const { isMobileNav, moreOpen, openMore, closeMore } = useFacilitatorMobileNav();
+  const mobileNavShellClass = facilitatorMobileNavShellClass(true, isMobileNav);
+
   if (!sessionType) {
     return null;
   }
@@ -188,14 +197,16 @@ export default function PilotDashboardPage() {
   };
 
   return (
-    <div className="pilot-shell portal-shell">
-      <PilotDashboardSidebar
-        activeId={activeNav}
-        onSelect={handleSelectNav}
-        brandTitle={brand.title}
-        brandSubtitle={brand.subtitle}
-        programCode={programCode}
-      />
+    <div className={['pilot-shell portal-shell', mobileNavShellClass].filter(Boolean).join(' ')}>
+      {isMobileNav ? null : (
+        <PilotDashboardSidebar
+          activeId={activeNav}
+          onSelect={handleSelectNav}
+          brandTitle={brand.title}
+          brandSubtitle={brand.subtitle}
+          programCode={programCode}
+        />
+      )}
 
       <div className="pilot-main">
         <PilotDashboardTopBar pageTitle={pageTitle} />
@@ -210,6 +221,15 @@ export default function PilotDashboardPage() {
       </div>
 
       <B4Assistant />
+
+      <FacilitatorPortalMobileChrome
+        isMobileNav={isMobileNav}
+        moreOpen={moreOpen}
+        onOpenMore={openMore}
+        onCloseMore={closeMore}
+        programCode={programCode}
+        pricingTier={activeProgram?.pricingTier}
+      />
     </div>
   );
 }

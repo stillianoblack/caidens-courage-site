@@ -1,0 +1,281 @@
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
+/* Responsive portal tables — desktop table + mobile accordion cards */
+
+.responsivePortalTableDesktop {
+  display: block;
+}
+
+.responsivePortalTableMobile {
+  display: none;
+}
+
+.responsivePortalTableEmpty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.mobileDataAccordionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.mobileDataAccordionItem {
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(26, 47, 82, 0.04);
+  overflow: hidden;
+}
+
+.mobileDataAccordionItem--expanded {
+  border-color: rgba(229, 192, 106, 0.45);
+  box-shadow: 0 4px 14px -10px rgba(26, 47, 82, 0.28);
+}
+
+.mobileDataAccordionTrigger {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobileDataAccordionSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 3.25rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.mobileDataAccordionSummaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobileDataAccordionPrimary {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.family-panel .mobileDataAccordionPrimary,
+.family-shell .mobileDataAccordionPrimary {
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.mobileDataAccordionSecondary {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(36, 62, 112, 0.72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileDataAccordionMetric {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--pilot-navy, #243e70);
+  text-align: right;
+}
+
+.mobileDataAccordionChevron {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: rgba(36, 62, 112, 0.45);
+  transition: transform 0.15s ease;
+}
+
+.mobileDataAccordionChevron--expanded {
+  transform: rotate(90deg);
+}
+
+.mobileDataAccordionBody {
+  padding: 0 0.85rem 0.85rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.08);
+}
+
+.mobileDataAccordionFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.75rem 0 0;
+}
+
+.mobileDataAccordionField {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.mobileDataAccordionFieldLabel {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.58);
+}
+
+.mobileDataAccordionFieldValue {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--pilot-navy-deep, #1a2f52);
+  word-break: break-word;
+}
+
+.mobileDataAccordionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.08);
+}
+
+.mobileDataAccordionActions .pilot-studentLinkBtn,
+.mobileDataAccordionActions .pilot-nextCta,
+.mobileDataAccordionActions .pilot-dash-cta,
+.mobileDataAccordionActions button {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.85rem;
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .responsivePortalTableDesktop {
+    display: none;
+  }
+
+  .responsivePortalTableMobile {
+    display: block;
+  }
+
+  .responsivePortalTable .pilot-tableScroll,
+  .responsivePortalTable .pilot-adminTableWrap,
+  .responsivePortalTable .family-resultsTableWrap {
+    overflow: visible;
+  }
+
+  /* Grouped flat list — rows inside a parent section card (one container treatment) */
+  .mobileDataAccordionList--grouped,
+  .pilot-panelBlock .mobileDataAccordionList,
+  .family-panelBlock .mobileDataAccordionList,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionList,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionList {
+    gap: 0;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionItem,
+  .pilot-panelBlock .mobileDataAccordionItem,
+  .family-panelBlock .mobileDataAccordionItem,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionItem,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionItem {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionItem:last-child,
+  .pilot-panelBlock .mobileDataAccordionItem:last-child,
+  .family-panelBlock .mobileDataAccordionItem:last-child,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionItem:last-child,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionItem:last-child {
+    border-bottom: 0;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionItem--expanded,
+  .pilot-panelBlock .mobileDataAccordionItem--expanded,
+  .family-panelBlock .mobileDataAccordionItem--expanded,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionItem--expanded,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionItem--expanded {
+    background: rgba(254, 243, 199, 0.22);
+    border-bottom-color: rgba(36, 62, 112, 0.1);
+    box-shadow: none;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionSummary,
+  .pilot-panelBlock .mobileDataAccordionSummary,
+  .family-panelBlock .mobileDataAccordionSummary,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionSummary,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionSummary {
+    padding-left: 0;
+    padding-right: 0;
+    min-height: 3rem;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionBody,
+  .pilot-panelBlock .mobileDataAccordionBody,
+  .family-panelBlock .mobileDataAccordionBody,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionBody,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionBody {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionItem--expanded .mobileDataAccordionBody,
+  .pilot-panelBlock .mobileDataAccordionItem--expanded .mobileDataAccordionBody,
+  .family-panelBlock .mobileDataAccordionItem--expanded .mobileDataAccordionBody,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionItem--expanded .mobileDataAccordionBody,
+  .pilot-resultsTableWrap--padded .mobileDataAccordionItem--expanded .mobileDataAccordionBody {
+    padding-top: var(--mobile-card-inner-gap);
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionFields,
+  .pilot-panelBlock .mobileDataAccordionFields,
+  .family-panelBlock .mobileDataAccordionFields,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionFields {
+    padding-top: 0;
+  }
+
+  .mobileDataAccordionList--grouped .mobileDataAccordionActions,
+  .pilot-panelBlock .mobileDataAccordionActions,
+  .family-panelBlock .mobileDataAccordionActions,
+  .pilot-settingsMobileSectionBody .mobileDataAccordionActions {
+    margin-top: var(--mobile-card-inner-gap);
+    padding-top: var(--mobile-card-inner-gap);
+  }
+
+  /* Standalone card rows — no outer table wrap border */
+  .mobileDataAccordionList--standalone {
+    gap: var(--mobile-grid-gap);
+  }
+
+  .pilot-panel--roster .pilot-adminTableWrap,
+  .responsivePortalTable:has(.mobileDataAccordionList--standalone) {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Remove inner scroll-wrap borders when parent section card already frames content */
+  .pilot-panelBlock .pilot-tableScroll,
+  .pilot-panelBlock .pilot-resultsTableWrap,
+  .pilot-panelBlock .pilot-adminTableWrap,
+  .family-panelBlock .family-resultsTableWrap {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}

@@ -7,7 +7,7 @@ import {
   PILOT_RESULTS_HEADLINE,
 } from '../../../data/pilotDashboardContent';
 import { baselineRecordsFromAssessmentV2 } from '../../../lib/baselineV2Display';
-import { exportBaselineResultsCsv } from '../../../lib/b4BaselineCheckStorage';
+import { exportBaselineResultsCsv, type B4BaselineCheckRecord } from '../../../lib/b4BaselineCheckStorage';
 import {
   buildParticipantNameLookup,
   resolveParticipantDisplayName,
@@ -17,7 +17,73 @@ import {
   loadPilotTrackingData,
 } from '../../../lib/pilotTrackingService';
 import { PortalPageIntro } from '../../portal-design-system';
+import ResponsivePortalTable, {
+  type ResponsivePortalTableColumn,
+} from '../../portal-design-system/ResponsivePortalTable';
 import '../../b4-baseline-check/b4-results-admin.css';
+
+function formatB4CompletedModules(row: B4BaselineCheckRecord): string {
+  return `${row.completedModules.length}/3`;
+}
+
+const B4_SUBMISSION_COLUMNS: ResponsivePortalTableColumn<B4BaselineCheckRecord>[] = [
+  {
+    id: 'child',
+    header: 'Child',
+    mobileRole: 'primary',
+    render: (row) => row.nickname,
+  },
+  {
+    id: 'program',
+    header: 'Program',
+    mobileRole: 'secondary',
+    render: (row) => row.programCode || '—',
+  },
+  {
+    id: 'modules-progress',
+    header: 'Modules',
+    mobileRole: 'metric',
+    mobileOnly: true,
+    render: (row) => formatB4CompletedModules(row),
+  },
+  {
+    id: 'group',
+    header: 'Group / Classroom',
+    mobileRole: 'detail',
+    render: (row) => row.groupName || '—',
+  },
+  {
+    id: 'modules',
+    header: 'Modules / Completed Sections',
+    mobileRole: 'detail',
+    render: (row) => row.completedModules.join(', '),
+  },
+  {
+    id: 'feelings',
+    header: 'Feelings / Confidence',
+    mobileRole: 'detail',
+    render: (row) => row.feelingsScore,
+  },
+  {
+    id: 'reading',
+    header: 'Reading',
+    mobileRole: 'detail',
+    render: (row) => row.readingScore,
+  },
+  {
+    id: 'focus',
+    header: 'Focus',
+    mobileRole: 'detail',
+    render: (row) => row.focusMovesScore,
+  },
+  {
+    id: 'completed',
+    header: 'Completed Date',
+    mobileRole: 'detail',
+    mobileLabel: 'Submitted',
+    render: (row) => (row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'),
+  },
+];
 
 export default function PilotB4ResultsPanel() {
   const activeProgram = readActivePilotProgram();
@@ -110,39 +176,13 @@ export default function PilotB4ResultsPanel() {
       {!loading && displayRows.length > 0 ? (
         <div className="pilot-resultsTableWrap pilot-resultsTableWrap--padded">
           <h2 className="pilot-panelBlockTitle pilot-resultsTableTitle">All Submissions</h2>
-          <table className="pilot-resultsTable">
-            <thead>
-              <tr>
-                <th scope="col">Child</th>
-                <th scope="col">Program</th>
-                <th scope="col">Group / Classroom</th>
-                <th scope="col">Modules / Completed Sections</th>
-                <th scope="col">Feelings / Confidence</th>
-                <th scope="col">Reading</th>
-                <th scope="col">Focus</th>
-                <th scope="col">Completed Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayRows.map((row) => (
-                <tr key={`${row.participantId ?? row.anonymousStudentId}-${row.completedAt}`}>
-                  <td>
-                    {resolveParticipantDisplayName(
-                      row.participantId ?? row.anonymousStudentId,
-                      participantLookup,
-                    )}
-                  </td>
-                  <td>{row.programCode || '—'}</td>
-                  <td>{row.groupName || '—'}</td>
-                  <td>{row.completedModules.join(', ')}</td>
-                  <td>{row.feelingsScore}</td>
-                  <td>{row.readingScore}</td>
-                  <td>{row.focusMovesScore}</td>
-                  <td>{row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ResponsivePortalTable
+            columns={B4_SUBMISSION_COLUMNS}
+            rows={displayRows}
+            rowKey={(row) => `${row.participantId ?? row.anonymousStudentId}-${row.completedAt}`}
+            tableClassName="pilot-resultsTable"
+            mobileAriaLabel="All baseline submissions"
+          />
           <details className="pilot-drawerDebug pilot-drawerDebug--inline">
             <summary>Debug participant IDs</summary>
             <ul className="pilot-debugIdList">

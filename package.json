@@ -47,7 +47,13 @@
     "rewrite:content-variety": "tsx scripts/question-rewrite/contentVarietyPass.ts",
     "audit:week2-reset": "tsx scripts/pilot-audit/week2ResetImpact.ts",
     "verify:grade-routing": "tsx scripts/audit-grade-question-routing.ts",
-    "audit:question-attempts": "tsx scripts/audit-question-attempts.ts"
+    "audit:question-attempts": "tsx scripts/audit-question-attempts.ts",
+    "audit:add-student-flow": "tsx scripts/audit-add-student-flow.ts",
+    "audit:baseline-growth": "tsx scripts/audit-baseline-growth.ts",
+    "audit:replay-attempts": "tsx scripts/audit-replay-attempts.ts",
+    "audit:first-attempt-tracking": "tsx scripts/audit-first-attempt-tracking.ts",
+    "audit:pilot-archive": "tsx scripts/audit-pilot-archive.ts",
+    "audit:pricing-account-types": "tsx scripts/audit-pricing-account-types.ts"
   },
   "browserslist": {
     "production": [

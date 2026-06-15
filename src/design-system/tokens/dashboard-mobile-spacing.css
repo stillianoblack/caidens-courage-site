@@ -1,0 +1,20 @@
+/* Shared mobile portal spacing tokens — facilitator + family portals */
+
+:root {
+  --mobile-page-padding: 1.5rem;
+  --mobile-section-gap: 1.5rem;
+  --mobile-card-padding: 1.5rem;
+  --mobile-card-inner-gap: 1rem;
+  --mobile-card-title-gap: 0.5rem;
+  --mobile-accordion-inset: 1.5rem;
+  --mobile-grid-gap: 0.75rem;
+  --mobile-bottom-nav-offset: calc(96px + env(safe-area-inset-bottom, 0px));
+
+  /* Legacy aliases — prefer --mobile-* in new rules */
+  --dashboard-mobile-page-padding: var(--mobile-page-padding);
+  --dashboard-mobile-section-gap: var(--mobile-section-gap);
+  --dashboard-mobile-card-padding: var(--mobile-card-padding);
+  --dashboard-mobile-card-inner-gap: var(--mobile-card-inner-gap);
+  --dashboard-mobile-title-gap: var(--mobile-card-title-gap);
+  --dashboard-mobile-grid-gap: var(--mobile-grid-gap);
+}

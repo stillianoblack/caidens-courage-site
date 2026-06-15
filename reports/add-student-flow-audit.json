@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-06-15T20:51:58.364Z",
+  "summary": {
+    "checksPassed": 10,
+    "checksFailed": 0
+  },
+  "checks": [
+    {
+      "name": "Facilitator drawer primary button",
+      "pass": true,
+      "detail": "Primary submit button labeled Add Student"
+    },
+    {
+      "name": "Facilitator drawer sticky footer",
+      "pass": true,
+      "detail": "Actions live in a sticky footer outside the scroll body"
+    },
+    {
+      "name": "Facilitator required field validation",
+      "pass": true,
+      "detail": "Child, parent names, email, and grade level validated before submit"
+    },
+    {
+      "name": "Facilitator roster refresh on success",
+      "pass": true,
+      "detail": "Roster refresh + toast after successful add"
+    },
+    {
+      "name": "Blue Ribbon program fallback",
+      "pass": true,
+      "detail": "Legacy Blue Ribbon unlock resolves to camp program code"
+    },
+    {
+      "name": "Admin emergency add student tab",
+      "pass": true,
+      "detail": "Admin portal exposes Add Student tab"
+    },
+    {
+      "name": "Admin emergency service",
+      "pass": true,
+      "detail": "Admin service creates participant and returns family access code"
+    },
+    {
+      "name": "Parent portal add-child untouched",
+      "pass": true,
+      "detail": "Family add-child still uses createFamilyChildParticipant"
+    },
+    {
+      "name": "Camp onboarding service intact",
+      "pass": true,
+      "detail": "Facilitator flow still creates participant + parent link"
+    },
+    {
+      "name": "Admin tab form fields",
+      "pass": true,
+      "detail": "Admin form includes program, optional group, and notes"
+    }
+  ],
+  "blueRibbonCampProgramCode": ""
+}

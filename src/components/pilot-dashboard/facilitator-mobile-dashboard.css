@@ -1,0 +1,476 @@
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
+/* Facilitator portal — mobile dashboard rhythm + overview simplification */
+
+@media (max-width: 767px) {
+  .portal-shell--facilitatorMobileNav .pilot-content,
+  .portal-shell--facilitatorMobileNav .pilot-main:has(.portal-layout--withRail) .pilot-content {
+    padding: var(--mobile-page-padding);
+    padding-bottom: var(--mobile-bottom-nav-offset);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panel {
+    gap: var(--mobile-section-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlock,
+  .portal-shell--facilitatorMobileNav .facilitator-mobileOverviewHero,
+  .portal-shell--facilitatorMobileNav .pilot-kpiCard,
+  .portal-shell--facilitatorMobileNav .pilot-overviewMiniCard,
+  .portal-shell--facilitatorMobileNav .pilot-nextCard,
+  .portal-shell--facilitatorMobileNav .pilot-programCoach,
+  .portal-shell--facilitatorMobileNav .facilitator-mobileGalleryLink {
+    padding: var(--mobile-card-padding);
+    border-radius: 1rem;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlockHead {
+    margin-bottom: var(--mobile-card-inner-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlockTitle {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlockSub {
+    margin-top: var(--mobile-card-title-gap);
+    margin-bottom: 0;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-needsAttentionGrid,
+  .portal-shell--facilitatorMobileNav .facilitator-mobileOverviewStats,
+  .portal-shell--facilitatorMobileNav .facilitator-mobileOverviewActions,
+  .portal-shell--facilitatorMobileNav .pilot-resultsKpiGrid--compact {
+    gap: var(--mobile-grid-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .facilitator-mobileOverviewHero {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-card-inner-gap);
+    margin-bottom: 0;
+    border: 1px solid rgba(36, 62, 112, 0.12);
+    background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+    box-shadow: 0 6px 28px -20px rgba(36, 62, 112, 0.2);
+  }
+
+  .facilitator-mobileOverviewHeroTitle {
+    margin: 0;
+    font-family: var(--font-display, Nunito, sans-serif);
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--pilot-navy-deep, #1a2f52);
+  }
+
+  .facilitator-mobileOverviewHeroSub {
+    margin: var(--mobile-card-title-gap) 0 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(36, 62, 112, 0.65);
+  }
+
+  .facilitator-mobileOverviewStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--mobile-grid-gap);
+    margin: 0;
+  }
+
+  .facilitator-mobileOverviewStats div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 4.25rem;
+    padding: 0.75rem 0.65rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(36, 62, 112, 0.08);
+  }
+
+  .facilitator-mobileOverviewStats dt {
+    margin: 0;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.25;
+    color: rgba(36, 62, 112, 0.62);
+  }
+
+  .facilitator-mobileOverviewStats dd {
+    margin: var(--mobile-card-title-gap) 0 0;
+    font-family: var(--font-display, Nunito, sans-serif);
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--pilot-navy-deep, #1a2f52);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panel--results .pilot-resultsIntro {
+    margin: 0;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panel--results .pilot-resultsKpiGrid {
+    margin-top: 0;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-resultsKpiSections {
+    gap: var(--mobile-section-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-resultsKpiSection {
+    gap: var(--mobile-card-inner-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-resultsKpiGrid {
+    gap: var(--mobile-grid-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-kpiCard {
+    min-height: 5.75rem;
+    padding: var(--mobile-card-padding);
+  }
+
+  .facilitator-mobileOverviewActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--mobile-grid-gap);
+  }
+
+  .facilitator-mobileOverviewAction {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(36, 62, 112, 0.16);
+    background: #fff;
+    color: var(--pilot-navy, #243e70);
+    font-size: 0.8125rem;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .facilitator-mobileOverviewAction--primary {
+    grid-column: 1 / -1;
+    border-color: var(--pilot-navy, #243e70);
+    background: var(--pilot-navy, #243e70);
+    color: #fff;
+  }
+
+  .facilitator-mobileOverviewAction:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-activityList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mobile-grid-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-activityItem {
+    padding: 0.75rem 0;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-overviewSplit {
+    gap: var(--mobile-section-gap);
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlock--next {
+    margin-bottom: 0;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-panelBlock--next .pilot-nextCard {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .portal-shell--facilitatorMobileNav .pilot-syncWarning {
+    margin-bottom: 0;
+  }
+
+  /* Facilitator mobile — neutral expanded accordion tint (not gold) */
+  .portal-shell--facilitatorMobileNav .mobileDataAccordionItem--expanded,
+  .portal-shell--facilitatorMobileNav .pilot-settingsMobileSection--expanded {
+    background: rgba(36, 62, 112, 0.04);
+  }
+
+  .portal-shell--facilitatorMobileNav .portal-rightRailCoach--inlineHero {
+    margin-top: 0;
+  }
+
+  .pilot-panel--certificates .pilot-dash-grid--2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--mobile-card-padding);
+    border: 1px solid rgba(36, 62, 112, 0.12);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 6px 28px -20px rgba(36, 62, 112, 0.2);
+  }
+
+  .pilot-panel--certificates .pilot-dash-card {
+    height: auto;
+    padding: var(--mobile-card-inner-gap) 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  }
+
+  .pilot-panel--certificates .pilot-dash-card:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .pilot-panel--certificates .pilot-dash-card:first-child {
+    padding-top: 0;
+  }
+
+  .pilot-panel--certificates .pilot-dash-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: rgba(36, 62, 112, 0.1);
+  }
+}
+
+@media (min-width: 768px) {
+  .facilitator-mobileOverviewHero,
+  .facilitator-mobileGalleryLink {
+    display: none;
+  }
+}
+
+.portal-shell--facilitatorMobileNav .pilot-panel--overview #program-access-codes {
+  display: none;
+}
+
+.facilitator-mobileGalleryLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  color: var(--pilot-navy, #243e70);
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 6px 28px -20px rgba(36, 62, 112, 0.2);
+}
+
+.facilitator-mobileGalleryLinkChevron {
+  color: rgba(36, 62, 112, 0.45);
+}
+
+/* Mobile Program Settings — full-page scroll, stacked section cards */
+
+.pilot-drawer--settingsMobile.pilot-drawer {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pilot-drawer--settingsMobile .pilot-drawerHead {
+  position: static;
+  flex-shrink: unset;
+  padding: calc(env(safe-area-inset-top, 0px) + 1rem) var(--mobile-page-padding) 0;
+}
+
+.pilot-drawer--settingsMobile .pilot-drawerBody--settings {
+  flex: none;
+  min-height: auto;
+  overflow: visible;
+  padding: var(--mobile-card-inner-gap) var(--mobile-page-padding) var(--mobile-bottom-nav-offset);
+}
+
+.pilot-settingsMobileHead {
+  align-items: flex-start;
+}
+
+.pilot-settingsMobile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mobile-section-gap);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pilot-settingsMobileSection {
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 1rem;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 6px 28px -20px rgba(36, 62, 112, 0.2);
+}
+
+.pilot-settingsMobileSection--expanded {
+  background: rgba(36, 62, 112, 0.04);
+}
+
+.pilot-settingsMobileSectionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mobile-card-inner-gap);
+  width: 100%;
+  padding: var(--mobile-card-padding);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pilot-settingsMobileSectionText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mobile-card-title-gap);
+  min-width: 0;
+}
+
+.pilot-settingsMobileSectionLabel {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.pilot-settingsMobileSectionHelper {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.pilot-settingsMobileChevron {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: rgba(36, 62, 112, 0.45);
+  transition: transform 0.15s ease;
+}
+
+.pilot-settingsMobileSection--expanded .pilot-settingsMobileChevron {
+  transform: rotate(90deg);
+}
+
+.pilot-settingsMobileSectionBody {
+  padding: 0 var(--mobile-accordion-inset) var(--mobile-accordion-inset);
+  border-top: 1px solid rgba(36, 62, 112, 0.08);
+}
+
+.pilot-settingsMobileSection--expanded .pilot-settingsMobileSectionBody {
+  padding-top: var(--mobile-card-inner-gap);
+}
+
+.pilot-settingsCodes--mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pilot-settingsCodeCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mobile-card-title-gap);
+  padding: var(--mobile-card-inner-gap) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.pilot-settingsCodeCard:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.pilot-settingsCodeCard:first-child {
+  padding-top: 0;
+}
+
+.pilot-settingsCodeCardLabel {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-settingsCodeCardValue {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--pilot-navy-deep, #1a2f52);
+  word-break: break-all;
+}
+
+.pilot-settingsCodeCardCopy {
+  width: 100%;
+}
+
+.pilot-settingsCodeCardCopy .pilot-copyChip,
+.pilot-settingsCodeCardCopy button {
+  width: 100%;
+  justify-content: center;
+  min-height: 2.75rem;
+}
+
+.pilot-settingsCodeCardHelper {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsExportsPanel,
+.pilot-drawer--settingsMobile .pilot-settingsSupport,
+.pilot-drawer--settingsMobile .pilot-settingsGallery {
+  display: grid;
+  gap: var(--mobile-card-inner-gap);
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsExportsPanel button,
+.pilot-drawer--settingsMobile .pilot-drawerBtnPrimary {
+  min-height: 2.75rem;
+}
+
+.pilot-drawer--settingsMobile .pilot-adminTableWrap,
+.pilot-drawer--settingsMobile .responsivePortalTable {
+  overflow: visible;
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsGrid {
+  display: grid;
+  gap: var(--mobile-card-inner-gap);
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsRow {
+  display: grid;
+  gap: var(--mobile-card-title-gap);
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsRow dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.pilot-drawer--settingsMobile .pilot-settingsToggleRow {
+  align-items: flex-start;
+}

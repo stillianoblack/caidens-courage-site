@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-06-15T21:51:13.421Z",
+  "migration": {
+    "file": "supabase/pilot_programs_archive.sql",
+    "exists": true,
+    "includesArchivedAt": true,
+    "includesArchivedBy": true,
+    "includesStatusIndex": true,
+    "includesUpdatePolicy": true
+  },
+  "database": {
+    "configured": false,
+    "archiveColumnsApplied": null,
+    "error": "Supabase env vars not configured"
+  },
+  "codeReferences": [
+    {
+      "file": "src/lib/adminPilotCleanupService.ts",
+      "summary": "Archive/restore service — soft delete via pilot_status + archived_at/by"
+    },
+    {
+      "file": "src/components/admin/AdminPilotProgramRow.tsx",
+      "summary": "Admin program row archive + restore actions"
+    },
+    {
+      "file": "src/components/admin/tabs/AdminPilotProgramsTab.tsx",
+      "summary": "Active vs archived pilot program sections"
+    },
+    {
+      "file": "src/components/admin/tabs/AdminDataCleanupTab.tsx",
+      "summary": "Data cleanup tab archive preview + action"
+    },
+    {
+      "file": "src/components/admin/tabs/AdminAddStudentTab.tsx",
+      "summary": "Add student excludes archived programs"
+    },
+    {
+      "file": "src/lib/pilotProgramService.ts",
+      "summary": "Portal access code lookup excludes archived pilots"
+    },
+    {
+      "file": "src/types/pilotProgram.ts",
+      "summary": "PilotStatus + archived metadata types"
+    },
+    {
+      "file": "supabase/pilot_programs_archive.sql",
+      "summary": "Database migration for archive metadata columns"
+    }
+  ],
+  "softDelete": {
+    "archiveUpdatesStatusOnly": true,
+    "portalLookupFiltersActive": true,
+    "restoreClearsArchiveMetadata": true,
+    "permanentDeleteGated": true,
+    "protectedProgramsConfigured": [
+      "CAMP-BLUERIBBONAB-2026",
+      "FAMILY-MADDOX-2026"
+    ]
+  },
+  "inventory": {
+    "active": [],
+    "archived": [],
+    "safeToArchive": []
+  }
+}

@@ -1,5 +1,7 @@
 /* Focus Flame Academy Family Portal — warmer family dashboard shell */
 
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
 .family-shell {
   --family-navy: #243e70;
   --family-navy-deep: #1a2f52;
@@ -1726,10 +1728,6 @@ a.family-dash-card:hover {
     justify-content: stretch;
   }
 
-  .family-content {
-    padding: 1.5rem 1.25rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
-  }
-
   .family-kpiRow--ds {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1745,6 +1743,22 @@ a.family-dash-card:hover {
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
+  }
+
+  .portal-shell--familyMobileNav .family-panel {
+    gap: var(--mobile-section-gap);
+  }
+
+  .portal-shell--familyMobileNav .family-panelBlock,
+  .portal-shell--familyMobileNav .family-goalsSummaryCard,
+  .portal-shell--familyMobileNav .family-certPreviewCard,
+  .portal-shell--familyMobileNav .family-b4QuickActions {
+    padding: var(--mobile-card-padding);
+    border-radius: 1rem;
+  }
+
+  .portal-shell--familyMobileNav .family-panelBlockHead {
+    margin-bottom: var(--mobile-card-inner-gap);
   }
 }
 

@@ -1,0 +1,193 @@
+{
+  "generated_at": "2026-06-15T05:41:21.822Z",
+  "supabase_project_ref": "bnopaocdqkknjzmmkaen",
+  "pilot_programs": [
+    {
+      "program_code": "CAMP-BLUERIBBONACADEMY-2026",
+      "program_name": "Blue Ribbon Academy Camp",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-BLUERIBBONAB-2026",
+      "program_name": "Blue Ribbon AB",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-BLUERIBBONTESTENVIRONMENT-2026",
+      "program_name": "Blue Ribbon Test Environment",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-TD-2026",
+      "program_name": "TD - Camp",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-DG-2026",
+      "program_name": "Camp DG",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-TESTING-2026",
+      "program_name": "Testing",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-CANDLE-2026",
+      "program_name": "Candle",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-TESTINGIO-2026",
+      "program_name": "Testing IO",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "FAMILY-MADDOX-2026",
+      "program_name": "Maddox",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-BLUERIBBONRESULTSACADEMY-2026",
+      "program_name": "Blue Ribbon Results Academy",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "CAMP-STILLSTESTINGENVIRONMENT-2026",
+      "program_name": "Stills_Testing_Environment",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "FAMILY-STILLSPARENTS-2026",
+      "program_name": "Stills-Parents Family",
+      "pilot_status": "active"
+    },
+    {
+      "program_code": "FAMILY-MENDOZA-2026",
+      "program_name": "Mendoza Family",
+      "pilot_status": "active"
+    }
+  ],
+  "pilot_student_count": 6,
+  "week2_users_fully_complete": 1,
+  "week2_users_with_any_activity": 1,
+  "total_questions_answered_week2": 0,
+  "estimated_questions_from_mission_completions": 15,
+  "questions_tracking_note": "No Week 2 rows in module_results or question_attempts. Mission completions exist in player_progress only; estimated question counts assume 3 questions per completed Week 2 mission.",
+  "average_completion_pct": 17,
+  "average_completion_pct_active_users": 100,
+  "user_summaries": [
+    {
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "label": "Caiden",
+      "program_code": "FAMILY-MADDOX-2026",
+      "group_name": null,
+      "missions_completed": 5,
+      "missions_total": 5,
+      "completion_pct": 100,
+      "week2_fully_complete": true,
+      "questions_answered": 0,
+      "module_result_count": 0
+    },
+    {
+      "participant_id": "a26b56e6-40b6-42e0-a791-4092c0eb9599",
+      "label": "TD-Child",
+      "program_code": "CAMP-STILLSTESTINGENVIRONMENT-2026",
+      "group_name": null,
+      "missions_completed": 0,
+      "missions_total": 5,
+      "completion_pct": 0,
+      "week2_fully_complete": false,
+      "questions_answered": 0,
+      "module_result_count": 0
+    },
+    {
+      "participant_id": "8e5273e4-b226-43e6-bddb-17285e74e9cd",
+      "label": "Justice",
+      "program_code": "CAMP-BLUERIBBONRESULTSACADEMY-2026",
+      "group_name": null,
+      "missions_completed": 0,
+      "missions_total": 5,
+      "completion_pct": 0,
+      "week2_fully_complete": false,
+      "questions_answered": 0,
+      "module_result_count": 0
+    },
+    {
+      "participant_id": "22ed9b2f-e59d-4e81-b957-d9714ab49aff",
+      "label": "Nina",
+      "program_code": "CAMP-BLUERIBBONRESULTSACADEMY-2026",
+      "group_name": null,
+      "missions_completed": 0,
+      "missions_total": 5,
+      "completion_pct": 0,
+      "week2_fully_complete": false,
+      "questions_answered": 0,
+      "module_result_count": 0
+    },
+    {
+      "participant_id": "65dc008f-3ba0-4f05-85a6-39e2ee98a16d",
+      "label": "Londyn",
+      "program_code": "CAMP-BLUERIBBONRESULTSACADEMY-2026",
+      "group_name": null,
+      "missions_completed": 0,
+      "missions_total": 5,
+      "completion_pct": 0,
+      "week2_fully_complete": false,
+      "questions_answered": 0,
+      "module_result_count": 0
+    },
+    {
+      "participant_id": "2d299795-b7e0-451e-a9a4-f0e05c7dba34",
+      "label": "Cadel",
+      "program_code": "CAMP-BLUERIBBONRESULTSACADEMY-2026",
+      "group_name": null,
+      "missions_completed": 0,
+      "missions_total": 5,
+      "completion_pct": 0,
+      "week2_fully_complete": false,
+      "questions_answered": 0,
+      "module_result_count": 0
+    }
+  ],
+  "affected_records": [
+    {
+      "table": "player_progress",
+      "id": "ab59c13b-d978-443f-87db-00846ee20fdd",
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "participant_label": "Caiden",
+      "summary": "zeke-week-2 · week-2 · badge: Brave Bridge Badge"
+    },
+    {
+      "table": "player_progress",
+      "id": "1eae007e-0468-4e64-8c79-ff41b818b65e",
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "participant_label": "Caiden",
+      "summary": "charlie-week-2 · week-2 · badge: Nature Explorer Badge"
+    },
+    {
+      "table": "player_progress",
+      "id": "54621ec8-e56e-46e4-a22e-9e057d2dc277",
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "participant_label": "Caiden",
+      "summary": "b4-week-2 · week-2 · badge: Daily Check-In Spark"
+    },
+    {
+      "table": "player_progress",
+      "id": "29179592-628d-4bed-a32a-2c0016205307",
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "participant_label": "Caiden",
+      "summary": "caiden-week-2 · week-2 · badge: Cave Explorer Badge"
+    },
+    {
+      "table": "player_progress",
+      "id": "0a5a4287-63a2-438f-b5aa-e7d66d8dca1b",
+      "participant_id": "a8586635-67ac-41e5-8278-afe532624d9c",
+      "participant_label": "Caiden",
+      "summary": "miranda-week-2 · week-2 · badge: Mystery Solver Badge"
+    }
+  ],
+  "affected_by_table": {
+    "player_progress": 5
+  }
+}

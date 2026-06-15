@@ -592,6 +592,8 @@
 }
 
 .pilot-drawer {
+  --pilot-navy: #243e70;
+  --pilot-navy-deep: #1a2f52;
   position: fixed;
   top: 0;
   right: 0;

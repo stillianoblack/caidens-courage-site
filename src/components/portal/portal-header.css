@@ -1,3 +1,5 @@
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
 .portal-header {
   display: grid;
   align-items: center;
@@ -500,7 +502,7 @@
 }
 
 .portal-shell--familyMobileNav .family-content {
-  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0));
+  padding-bottom: var(--mobile-bottom-nav-offset);
 }
 
 .portal-shell--familyMobileGame .family-content {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
 import AdminPilotProgramRow from '../AdminPilotProgramRow';
 import type { PilotProgramRecord } from '../../../types/pilotProgram';
@@ -18,43 +18,69 @@ export default function AdminPilotProgramsTab({
   onCopied,
   onChanged,
 }: AdminPilotProgramsTabProps) {
-  const [showArchived, setShowArchived] = useState(true);
-
-  const visiblePrograms = useMemo(() => {
-    if (showArchived) return programs;
-    return programs.filter((program) => program.pilot_status !== 'archived');
-  }, [programs, showArchived]);
+  const activePrograms = useMemo(
+    () => programs.filter((program) => program.pilot_status !== 'archived'),
+    [programs],
+  );
+  const archivedPrograms = useMemo(
+    () => programs.filter((program) => program.pilot_status === 'archived'),
+    [programs],
+  );
 
   return (
     <SettingsCard
       title="Pilot Programs"
-      subtitle="Camp, school, family, and testing pilots. Archive hides programs from active portal unlock while keeping data recoverable."
+      subtitle="Camp, school, family, and testing pilots. Archive hides programs from active portal unlock while keeping all student data recoverable."
     >
-      <label className="adminPortal-toggleRow">
-        <input
-          type="checkbox"
-          checked={showArchived}
-          onChange={(event) => setShowArchived(event.target.checked)}
-        />
-        <span>Show archived pilots</span>
-      </label>
-
       {loading ? <p className="adminPortal-empty">Loading pilot programs…</p> : null}
       {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
-      {!loading && !loadError && visiblePrograms.length === 0 ? (
-        <p className="adminPortal-empty">No pilot programs found.</p>
-      ) : null}
 
-      <div className="adminPortal-programList">
-        {visiblePrograms.map((program) => (
-          <AdminPilotProgramRow
-            key={program.id ?? program.program_code}
-            program={program}
-            onCopied={onCopied}
-            onChanged={onChanged}
-          />
-        ))}
-      </div>
+      {!loading && !loadError ? (
+        <>
+          <section className="adminPortal-programSection" aria-labelledby="admin-active-pilots">
+            <h3 id="admin-active-pilots" className="adminPortal-sectionTitle">
+              Active Pilots ({activePrograms.length})
+            </h3>
+            {activePrograms.length === 0 ? (
+              <p className="adminPortal-empty">No active pilot programs.</p>
+            ) : (
+              <div className="adminPortal-programList">
+                {activePrograms.map((program) => (
+                  <AdminPilotProgramRow
+                    key={program.id ?? program.program_code}
+                    program={program}
+                    onCopied={onCopied}
+                    onChanged={onChanged}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="adminPortal-programSection" aria-labelledby="admin-archived-pilots">
+            <h3 id="admin-archived-pilots" className="adminPortal-sectionTitle">
+              Archived Pilots ({archivedPrograms.length})
+            </h3>
+            <p className="adminPortal-sectionHelper">
+              Archived pilots are hidden from portal unlock. Restore any pilot to make it active again.
+            </p>
+            {archivedPrograms.length === 0 ? (
+              <p className="adminPortal-empty">No archived pilots.</p>
+            ) : (
+              <div className="adminPortal-programList">
+                {archivedPrograms.map((program) => (
+                  <AdminPilotProgramRow
+                    key={program.id ?? program.program_code}
+                    program={program}
+                    onCopied={onCopied}
+                    onChanged={onChanged}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </>
+      ) : null}
     </SettingsCard>
   );
 }

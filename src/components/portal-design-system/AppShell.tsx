@@ -10,6 +10,7 @@ type AppShellProps = {
   topBar: React.ReactNode;
   footer?: React.ReactNode;
   rightRail?: React.ReactNode;
+  shellClassName?: string;
   children: React.ReactNode;
 };
 
@@ -20,6 +21,7 @@ export default function AppShell({
   topBar,
   footer,
   rightRail,
+  shellClassName,
   children,
 }: AppShellProps) {
   const shellVariant = variant === 'kid' ? 'family' : variant;
@@ -31,6 +33,7 @@ export default function AppShell({
       topBar={topBar}
       footer={footer}
       rightRail={rightRail}
+      shellClassName={shellClassName}
       floating={<B4Assistant />}
     >
       {children}

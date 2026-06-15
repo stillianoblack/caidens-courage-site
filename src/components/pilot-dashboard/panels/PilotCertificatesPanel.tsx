@@ -9,7 +9,7 @@ export default function PilotCertificatesPanel() {
   }, []);
 
   return (
-    <div className="pilot-panel">
+    <div className="pilot-panel pilot-panel--certificates">
       <PortalPageIntro>
         Download printable celebration templates for students and facilitators.
       </PortalPageIntro>

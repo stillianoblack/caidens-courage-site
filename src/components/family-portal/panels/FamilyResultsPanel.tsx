@@ -2,6 +2,9 @@ import React from 'react';
 import { useFamilyResults } from '../../../hooks/useFamilyResults';
 import type { FamilyResultEntry } from '../../../lib/familyResultsService';
 import { PortalPageIntro } from '../../portal-design-system';
+import ResponsivePortalTable, {
+  type ResponsivePortalTableColumn,
+} from '../../portal-design-system/ResponsivePortalTable';
 
 function formatCompletedDate(iso: string): string {
   if (!iso) return '—';
@@ -25,42 +28,77 @@ function formatScore(entry: FamilyResultEntry): string {
   return '—';
 }
 
-function ResultsTable({
-  entries,
-  emptyMessage,
-}: {
+function formatCompletionProgress(entry: FamilyResultEntry): string {
+  if (entry.latestScore != null && entry.maxScore != null) {
+    return `${entry.latestScore}/${entry.maxScore}`;
+  }
+  if (entry.percentScore != null) return `${entry.percentScore}%`;
+  return '—';
+}
+
+const RESULT_COLUMNS: ResponsivePortalTableColumn<FamilyResultEntry>[] = [
+  {
+    id: 'name',
+    header: 'Name',
+    mobileRole: 'primary',
+    className: 'family-resultsName',
+    render: (entry) => entry.personName,
+  },
+  {
+    id: 'assessment',
+    header: 'Assessment',
+    mobileRole: 'secondary',
+    render: (entry) => entry.assessmentLabel,
+  },
+  {
+    id: 'score',
+    header: 'Score',
+    mobileRole: 'metric',
+    render: (entry) => formatScore(entry),
+  },
+  {
+    id: 'completed-progress',
+    header: 'Completed',
+    mobileRole: 'detail',
+    mobileLabel: 'Completed',
+    mobileOnly: true,
+    render: (entry) => formatCompletionProgress(entry),
+  },
+  {
+    id: 'submitted',
+    header: 'Completed',
+    mobileRole: 'detail',
+    mobileLabel: 'Submitted',
+    render: (entry) => formatCompletedDate(entry.completedAt),
+  },
+  {
+    id: 'summary',
+    header: 'Summary',
+    mobileRole: 'detail',
+    render: (entry) => entry.progressSummary,
+  },
+];
+
+type ResultsTableProps = {
   entries: FamilyResultEntry[];
   emptyMessage: string;
-}) {
+  ariaLabel: string;
+};
+
+function ResultsTable({ entries, emptyMessage, ariaLabel }: ResultsTableProps) {
   if (entries.length === 0) {
     return <p className="family-panelHelper">{emptyMessage}</p>;
   }
 
   return (
-    <div className="family-resultsTableWrap">
-      <table className="family-resultsTable">
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Assessment</th>
-            <th scope="col">Score</th>
-            <th scope="col">Completed</th>
-            <th scope="col">Summary</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => (
-            <tr key={entry.id}>
-              <td className="family-resultsName">{entry.personName}</td>
-              <td>{entry.assessmentLabel}</td>
-              <td>{formatScore(entry)}</td>
-              <td>{formatCompletedDate(entry.completedAt)}</td>
-              <td>{entry.progressSummary}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ResponsivePortalTable
+      columns={RESULT_COLUMNS}
+      rows={entries}
+      rowKey={(entry) => entry.id}
+      tableClassName="family-resultsTable"
+      wrapClassName="family-resultsTableWrap"
+      mobileAriaLabel={ariaLabel}
+    />
   );
 }
 
@@ -98,6 +136,7 @@ export default function FamilyResultsPanel() {
             <ResultsTable
               entries={data.children}
               emptyMessage="No child assessments yet. Complete a B-4 Check-In to see results here."
+              ariaLabel="Children assessment results"
             />
           </section>
 
@@ -110,6 +149,7 @@ export default function FamilyResultsPanel() {
             <ResultsTable
               entries={data.adults}
               emptyMessage="No adult reflections yet. Complete a Parent/Guardian Baseline or Growth Check to see results here."
+              ariaLabel="Adult assessment results"
             />
           </section>
         </>

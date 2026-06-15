@@ -1,0 +1,16 @@
+{
+  "beforeDuplicates": 51,
+  "beforeTopStems": [
+    { "stem": "What should Charlie do next as a scientist?", "count": 48 },
+    { "stem": "What should Zeke say or do first for the team?", "count": 48 },
+    { "stem": "Does his plan fit if he does all tasks and the break?", "count": 32 },
+    { "stem": "What order finishes everything with time to spare?", "count": 31 },
+    { "stem": "What feeling might B-4 name from these clues?", "count": 24 },
+    { "stem": "Which coping step fits best after naming the feeling?", "count": 24 },
+    { "stem": "Which two strategies compare well for this moment?", "count": 24 },
+    { "stem": "How many minutes are left after shoes and coat?", "count": 24 }
+  ],
+  "afterDuplicates": 0,
+  "deduplicationRewrites": 110,
+  "stemRotations": 168
+}

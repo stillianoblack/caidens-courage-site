@@ -1,0 +1,292 @@
+{
+  "generatedAt": "2026-06-15T22:51:54.184Z",
+  "summary": {
+    "totalEntries": 18,
+    "dynamic": 4,
+    "hardcoded": 7,
+    "missingStripe": 4,
+    "adminTabConfigured": true,
+    "familyModalDynamic": true,
+    "facilitatorModalDynamic": true
+  },
+  "defaultPlans": [
+    {
+      "id": "family-portal",
+      "group": "family",
+      "planName": "Family Portal",
+      "priceLabel": "$79/year",
+      "stripeConfigured": false
+    },
+    {
+      "id": "digital-book-family-portal",
+      "group": "family",
+      "planName": "Digital Book + Family Portal",
+      "priceLabel": "$129/year",
+      "stripeConfigured": false
+    },
+    {
+      "id": "camp-pilot",
+      "group": "small_group",
+      "planName": "Camp Pilot",
+      "priceLabel": "$750",
+      "stripeConfigured": true
+    },
+    {
+      "id": "camp-plus",
+      "group": "small_group",
+      "planName": "Camp Plus",
+      "priceLabel": "$1,000",
+      "stripeConfigured": true
+    },
+    {
+      "id": "school-plan",
+      "group": "large_organization",
+      "planName": "School Plan",
+      "priceLabel": "Custom quote",
+      "stripeConfigured": false
+    },
+    {
+      "id": "district-plan",
+      "group": "large_organization",
+      "planName": "District Plan",
+      "priceLabel": "Custom quote",
+      "stripeConfigured": false
+    }
+  ],
+  "entries": [
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "Family Portal",
+      "price": "$79/year",
+      "stripeUrl": null,
+      "recommendedGroup": "family",
+      "status": "missing_stripe",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "Digital Book + Family Portal",
+      "price": "$129/year",
+      "stripeUrl": null,
+      "recommendedGroup": "family",
+      "status": "missing_stripe",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "Camp Pilot",
+      "price": "$750",
+      "stripeUrl": "https://buy.stripe.com/dRmfZg0rJ1dC4078Ry3Ru05",
+      "recommendedGroup": "small_group",
+      "status": "dynamic",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "Camp Plus",
+      "price": "$1,000",
+      "stripeUrl": "https://buy.stripe.com/6oUcN45M33lK1RZ3xe3Ru06",
+      "recommendedGroup": "small_group",
+      "status": "dynamic",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "School Plan",
+      "price": "Custom quote",
+      "stripeUrl": null,
+      "recommendedGroup": "large_organization",
+      "status": "missing_stripe",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/data/pricingPlansDefaults.ts",
+      "label": "District Plan",
+      "price": "Custom quote",
+      "stripeUrl": null,
+      "recommendedGroup": "large_organization",
+      "status": "missing_stripe",
+      "notes": "Default plan seed — admin overrides via Payment Links tab (localStorage)."
+    },
+    {
+      "location": "src/config/externalLinks.ts",
+      "label": "Limited Edition Pre-order",
+      "price": "Product page pricing",
+      "stripeUrl": "https://buy.stripe.com/9B6bJ03DVe0ogMTaZG3Ru00",
+      "recommendedGroup": "product_shop",
+      "status": "hardcoded",
+      "notes": "Shop / product preorder links — not part of portal upgrade pricing config."
+    },
+    {
+      "location": "src/config/externalLinks.ts",
+      "label": "Hardcover Bundle",
+      "price": "Product page pricing",
+      "stripeUrl": "https://buy.stripe.com/fZufZggqHbSg7cjd7O3Ru04",
+      "recommendedGroup": "product_shop",
+      "status": "hardcoded",
+      "notes": "Shop / product preorder links — not part of portal upgrade pricing config."
+    },
+    {
+      "location": "src/config/externalLinks.ts",
+      "label": "Paperback",
+      "price": "Product page pricing",
+      "stripeUrl": "https://buy.stripe.com/6oU5kCeiz4pO2W3gk03Ru03",
+      "recommendedGroup": "product_shop",
+      "status": "hardcoded",
+      "notes": "Shop / product preorder links — not part of portal upgrade pricing config."
+    },
+    {
+      "location": "src/config/externalLinks.ts",
+      "label": "B-4 Plush",
+      "price": "Product page pricing",
+      "stripeUrl": "https://buy.stripe.com/6oUaEWa2j9K89kr9VC3Ru01",
+      "recommendedGroup": "product_shop",
+      "status": "hardcoded",
+      "notes": "Shop / product preorder links — not part of portal upgrade pricing config."
+    },
+    {
+      "location": "src/config/externalLinks.ts",
+      "label": "T-Shirt",
+      "price": "Product page pricing",
+      "stripeUrl": "https://buy.stripe.com/9B6dR80rJ2hGaov0l23Ru02",
+      "recommendedGroup": "product_shop",
+      "status": "hardcoded",
+      "notes": "Shop / product preorder links — not part of portal upgrade pricing config."
+    },
+    {
+      "location": "src/config/personaPages.ts (marketing)",
+      "label": "Help your child build confidence, focus, and emotional language at home.",
+      "price": "See persona page tier",
+      "stripeUrl": "https://buy.stripe.com/dRmfZg0rJ1dC4078Ry3Ru05",
+      "recommendedGroup": "marketing_only",
+      "status": "hardcoded",
+      "notes": "Public marketing persona page — still hardcoded; align with admin config in a follow-up."
+    },
+    {
+      "location": "src/config/personaPages.ts (marketing)",
+      "label": "Camp Plus",
+      "price": "See persona page tier",
+      "stripeUrl": "https://buy.stripe.com/6oUcN45M33lK1RZ3xe3Ru06",
+      "recommendedGroup": "small_group",
+      "status": "hardcoded",
+      "notes": "Public marketing persona page — still hardcoded; align with admin config in a follow-up."
+    },
+    {
+      "location": "src/components/family-portal/FamilyUpgradePricingModal.tsx",
+      "label": "Family upgrade modal",
+      "price": "From pricing config",
+      "stripeUrl": null,
+      "recommendedGroup": "family",
+      "status": "dynamic",
+      "notes": "Pulls active family plans via usePricingPlansConfig."
+    },
+    {
+      "location": "src/components/pilot-dashboard/PilotUpgradePricingModal.tsx",
+      "label": "Facilitator upgrade modal",
+      "price": "From pricing config by program type",
+      "stripeUrl": null,
+      "recommendedGroup": "small_group",
+      "status": "dynamic",
+      "notes": "Maps program type → family | small_group | large_organization."
+    },
+    {
+      "location": "src/config/personaPages.ts (marketing)",
+      "label": "Families persona pricing",
+      "price": "$79/year, $129/year",
+      "stripeUrl": null,
+      "recommendedGroup": "marketing_only",
+      "status": "contact_only",
+      "notes": "Contact / waitlist CTAs"
+    },
+    {
+      "location": "src/config/personaPages.ts (marketing)",
+      "label": "Teachers persona pricing",
+      "price": "$99/year",
+      "stripeUrl": null,
+      "recommendedGroup": "marketing_only",
+      "status": "contact_only",
+      "notes": "Contact CTA only"
+    },
+    {
+      "location": "src/config/personaPages.ts (marketing)",
+      "label": "Schools persona pricing",
+      "price": "$999–$2,500/year, $1,999–$5,000+",
+      "stripeUrl": null,
+      "recommendedGroup": "marketing_only",
+      "status": "contact_only",
+      "notes": "Contact CTA only"
+    }
+  ],
+  "programTypeMapping": [
+    {
+      "programType": "Independent Family",
+      "pricingGroup": "family"
+    },
+    {
+      "programType": "Camp / Youth Program",
+      "pricingGroup": "small_group"
+    },
+    {
+      "programType": "After-School Program",
+      "pricingGroup": "small_group"
+    },
+    {
+      "programType": "Homeschool Group",
+      "pricingGroup": "small_group"
+    },
+    {
+      "programType": "Teacher / Classroom",
+      "pricingGroup": "small_group"
+    },
+    {
+      "programType": "School",
+      "pricingGroup": "large_organization"
+    },
+    {
+      "programType": "District",
+      "pricingGroup": "large_organization"
+    }
+  ],
+  "qaChecklist": [
+    {
+      "item": "Admin Payment Links tab",
+      "pass": true,
+      "detail": "Admin portal exposes pricing-plans tab"
+    },
+    {
+      "item": "Family Portal upgrade modal uses config",
+      "pass": true,
+      "detail": "No hardcoded Stripe URLs in family modal"
+    },
+    {
+      "item": "Facilitator upgrade modal uses config",
+      "pass": true,
+      "detail": "No hardcoded Stripe URLs in facilitator modal"
+    },
+    {
+      "item": "Missing Stripe link fallback",
+      "pass": true,
+      "detail": "Disabled CTA + message when Stripe URL missing"
+    },
+    {
+      "item": "Camp / After-School share small_group",
+      "pass": true,
+      "detail": "Both program types resolve to small_group pricing"
+    },
+    {
+      "item": "Independent Family uses family plans",
+      "pass": true,
+      "detail": "Independent Family resolves to family pricing group"
+    },
+    {
+      "item": "School / District use large_organization",
+      "pass": true,
+      "detail": "School and District resolve to large_organization plans"
+    },
+    {
+      "item": "Hardcoded Stripe URLs outside defaults",
+      "pass": false,
+      "detail": "src/components/admin/tabs/AdminPricingPlansTab.tsx, src/config/externalLinks.ts, src/config/personaPages.ts"
+    }
+  ]
+}

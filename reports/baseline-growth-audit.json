@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-06-15T20:51:58.696Z",
+  "constants": {
+    "baselineWeek": 1,
+    "growthStartWeek": 2
+  },
+  "sampleReport": {
+    "baselineWeek": 1,
+    "growthStartWeek": 2,
+    "baseline": {
+      "questions_attempted": 2,
+      "questions_correct_first_try": 1,
+      "questions_correct_final": 2,
+      "final_accuracy": 1,
+      "first_attempt_accuracy": 0.5,
+      "hinted_accuracy": null,
+      "unhinted_accuracy": 1,
+      "improved_after_support": 1,
+      "needs_more_practice": 0
+    },
+    "current": {
+      "questions_attempted": 3,
+      "questions_correct_first_try": 3,
+      "questions_correct_final": 3,
+      "final_accuracy": 1,
+      "first_attempt_accuracy": 1,
+      "hinted_accuracy": null,
+      "unhinted_accuracy": 1,
+      "improved_after_support": 0,
+      "needs_more_practice": 0
+    },
+    "growthDelta": {
+      "first_attempt_accuracy": 0.5,
+      "final_accuracy": 0,
+      "questions_attempted": 1
+    },
+    "byCharacter": [
+      {
+        "key": "caiden",
+        "baselineFirstAttemptAccuracy": 0.5,
+        "currentFirstAttemptAccuracy": 1,
+        "growthDelta": 0.5,
+        "baselineQuestions": 2,
+        "currentQuestions": 3
+      }
+    ],
+    "bySkill": [
+      {
+        "key": "caiden",
+        "baselineFirstAttemptAccuracy": 0.5,
+        "currentFirstAttemptAccuracy": 1,
+        "growthDelta": 0.5,
+        "baselineQuestions": 2,
+        "currentQuestions": 3
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "Baseline week constant",
+      "pass": true,
+      "detail": "BASELINE_WEEK=1"
+    },
+    {
+      "name": "Growth start week constant",
+      "pass": true,
+      "detail": "GROWTH_START_WEEK=2"
+    },
+    {
+      "name": "Baseline uses week 1 only",
+      "pass": true,
+      "detail": "baseline questions=2"
+    },
+    {
+      "name": "Current uses week 2+ only",
+      "pass": true,
+      "detail": "current questions=3 (replay excluded)"
+    },
+    {
+      "name": "Replay excluded by default",
+      "pass": true,
+      "detail": "includeReplay adds replay rows to current slice"
+    },
+    {
+      "name": "Growth delta computed",
+      "pass": true,
+      "detail": "growth_delta.first_attempt_accuracy=0.5"
+    },
+    {
+      "name": "Character slices present",
+      "pass": true,
+      "detail": "byCharacter keys=caiden"
+    }
+  ],
+  "summary": {
+    "checksPassed": 7,
+    "checksFailed": 0
+  }
+}

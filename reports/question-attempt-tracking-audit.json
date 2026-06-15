@@ -1,0 +1,716 @@
+{
+  "generatedAt": "2026-06-15T07:15:38.606Z",
+  "missionQuestionTarget": 5,
+  "summary": {
+    "missionsChecked": 39,
+    "missionsPassing": 39,
+    "missionsFailing": 0,
+    "interactionChecksPassed": 5,
+    "interactionChecksFailed": 0
+  },
+  "missionRows": [
+    {
+      "character": "caiden",
+      "missionId": "quest-1",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq1-23-q1",
+        "cq1-23-q2",
+        "cq1-23-q3",
+        "cq1-23-q1__sup1",
+        "cq1-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-2",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq2-23-q1",
+        "cq2-23-q2",
+        "cq2-23-q3",
+        "cq2-23-q1__sup1",
+        "cq2-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-3",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq3-23-q1",
+        "cq3-23-q2",
+        "cq3-23-q3",
+        "cq3-23-q1__sup1",
+        "cq3-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-4",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq4-23-q1",
+        "cq4-23-q2",
+        "cq4-23-q3",
+        "cq4-23-q1__sup1",
+        "cq4-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-5",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq5-23-q1",
+        "cq5-23-q2",
+        "cq5-23-q3",
+        "cq5-23-q1__sup1",
+        "cq5-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-6",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq6-23-q1",
+        "cq6-23-q2",
+        "cq6-23-q3",
+        "cq6-23-q4",
+        "cq6-23-q5"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-7",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq7-23-q1",
+        "cq7-23-q2",
+        "cq7-23-q3",
+        "cq7-23-q4",
+        "cq7-23-q5"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-8",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq8-23-q1",
+        "cq8-23-q2",
+        "cq8-23-q3",
+        "cq8-23-q4",
+        "cq8-23-q5"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "caiden",
+      "missionId": "quest-9",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cq9-23-q1",
+        "cq9-23-q2",
+        "cq9-23-q3",
+        "cq9-23-q4",
+        "cq9-23-q5"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-1",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "ms-23-q1",
+        "ms-23-q2",
+        "ms-23-q3",
+        "ms-23-q1__sup1",
+        "ms-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-2",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "mst-23-q1",
+        "mst-23-q2",
+        "mst-23-q3",
+        "mst-23-q1__sup1",
+        "mst-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "miranda-mystery-file-3",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "mcl-23-q1",
+        "mcl-23-q2",
+        "mcl-23-q3",
+        "mcl-23-q1__sup1",
+        "mcl-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "the-missing-letters",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "mml-23-q1",
+        "mml-23-q2",
+        "mml-23-q3",
+        "mml-23-q1__sup1",
+        "mml-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "the-context-clue-challenge",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "mcc-23-q1",
+        "mcc-23-q2",
+        "mcc-23-q3",
+        "mcc-23-q1__sup1",
+        "mcc-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "miranda",
+      "missionId": "mirandas-detective-notebook",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "mdn-23-q1",
+        "mdn-23-q2",
+        "mdn-23-q3",
+        "mdn-23-q1__sup1",
+        "mdn-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-new-table",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm1-23-q1",
+        "zkm1-23-q2",
+        "zkm1-23-q3",
+        "zkm1-23-q1__sup1",
+        "zkm1-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-pass-the-ball",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm2-23-q1",
+        "zkm2-23-q2",
+        "zkm2-23-q3",
+        "zkm2-23-q1__sup1",
+        "zkm2-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-group-project-glitch",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm3-23-q1",
+        "zkm3-23-q2",
+        "zkm3-23-q3",
+        "zkm3-23-q1__sup1",
+        "zkm3-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-brave-voice",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm4-23-q1",
+        "zkm4-23-q2",
+        "zkm4-23-q3",
+        "zkm4-23-q1__sup1",
+        "zkm4-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-friendship-repair",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm5-23-q1",
+        "zkm5-23-q2",
+        "zkm5-23-q3",
+        "zkm5-23-q1__sup1",
+        "zkm5-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-courage-challenge",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm6-23-q1",
+        "zkm6-23-q2",
+        "zkm6-23-q3",
+        "zkm6-23-q1__sup1",
+        "zkm6-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-team-captain-test",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm7-23-q1",
+        "zkm7-23-q2",
+        "zkm7-23-q3",
+        "zkm7-23-q1__sup1",
+        "zkm7-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "zeke",
+      "missionId": "zeke-final-huddle",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "zkm8-23-q1",
+        "zkm8-23-q2",
+        "zkm8-23-q3",
+        "zkm8-23-q1__sup1",
+        "zkm8-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-mystery-footprints",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm1-23-q1",
+        "cm1-23-q2",
+        "cm1-23-q3",
+        "cm1-23-q1__sup1",
+        "cm1-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-floating-orange",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm2-23-q1",
+        "cm2-23-q2",
+        "cm2-23-q3",
+        "cm2-23-q1__sup1",
+        "cm2-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-mystery-sound",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm3-23-q1",
+        "cm3-23-q2",
+        "cm3-23-q3",
+        "cm3-23-q1__sup1",
+        "cm3-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-volcano-trouble",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm4-23-q1",
+        "cm4-23-q2",
+        "cm4-23-q3",
+        "cm4-23-q1__sup1",
+        "cm4-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-missing-plant",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm5-23-q1",
+        "cm5-23-q2",
+        "cm5-23-q3",
+        "cm5-23-q1__sup1",
+        "cm5-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-robot-rescue",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm6-23-q1",
+        "cm6-23-q2",
+        "cm6-23-q3",
+        "cm6-23-q1__sup1",
+        "cm6-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-marshmallow-tower",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm7-23-q1",
+        "cm7-23-q2",
+        "cm7-23-q3",
+        "cm7-23-q1__sup1",
+        "cm7-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "charlie",
+      "missionId": "charlie-science-fair-mystery",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "cm8-23-q1",
+        "cm8-23-q2",
+        "cm8-23-q3",
+        "cm8-23-q1__sup1",
+        "cm8-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-mood-scanner",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m1-23-q1",
+        "b4m1-23-q2",
+        "b4m1-23-q3",
+        "b4m1-23-q1__sup1",
+        "b4m1-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-body-signal-detective",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m2-23-q1",
+        "b4m2-23-q2",
+        "b4m2-23-q3",
+        "b4m2-23-q1__sup1",
+        "b4m2-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-brave-choice-button",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m3-23-q1",
+        "b4m3-23-q2",
+        "b4m3-23-q3",
+        "b4m3-23-q1__sup1",
+        "b4m3-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-focus-reset-station",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m4-23-q1",
+        "b4m4-23-q2",
+        "b4m4-23-q3",
+        "b4m4-23-q1__sup1",
+        "b4m4-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-calm-down-countdown",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m5-23-q1",
+        "b4m5-23-q2",
+        "b4m5-23-q3",
+        "b4m5-23-q1__sup1",
+        "b4m5-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-oops-repair-lab",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m6-23-q1",
+        "b4m6-23-q2",
+        "b4m6-23-q3",
+        "b4m6-23-q1__sup1",
+        "b4m6-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-confidence-charger",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m7-23-q1",
+        "b4m7-23-q2",
+        "b4m7-23-q3",
+        "b4m7-23-q1__sup1",
+        "b4m7-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    },
+    {
+      "character": "b4",
+      "missionId": "b4-focus-flame-finale",
+      "questionCount": 5,
+      "uniqueIds": true,
+      "questionIds": [
+        "b4m8-23-q1",
+        "b4m8-23-q2",
+        "b4m8-23-q3",
+        "b4m8-23-q1__sup1",
+        "b4m8-23-q2__sup2"
+      ],
+      "pass": true,
+      "notes": []
+    }
+  ],
+  "interactionChecks": [
+    {
+      "name": "first_selected_answer preserved after second try",
+      "pass": true,
+      "detail": "first=b, final=a"
+    },
+    {
+      "name": "is_correct_first_try remains false when wrong then right",
+      "pass": true,
+      "detail": "first_try=false, final=true"
+    },
+    {
+      "name": "hint usage tracked separately",
+      "pass": true,
+      "detail": "hints_used_count=1"
+    },
+    {
+      "name": "final score and first-try score can differ",
+      "pass": true,
+      "detail": "final=1, first_try=0.333"
+    },
+    {
+      "name": "growth metrics computable",
+      "pass": true,
+      "detail": "growth_by_week buckets created"
+    }
+  ],
+  "sampleAttemptRows": [
+    {
+      "participant_id": "00000000-0000-4000-8000-000000000001",
+      "program_code": "audit-program",
+      "week_number": 2,
+      "mission_id": "quest-2",
+      "character": "caiden",
+      "question_id": "sim-q1",
+      "grade_level": "3",
+      "grade_band": "2-3",
+      "content_version": "adaptive_v2",
+      "selected_answer": "a",
+      "correct_answer": null,
+      "first_selected_answer": "b",
+      "is_correct_first_try": false,
+      "is_correct_final": true,
+      "attempt_count": 2,
+      "used_hint": false,
+      "completed_at": "2026-06-15T07:15:38.606Z",
+      "module_id": "quest-2"
+    },
+    {
+      "participant_id": "00000000-0000-4000-8000-000000000001",
+      "program_code": "audit-program",
+      "week_number": 2,
+      "mission_id": "quest-2",
+      "character": "caiden",
+      "question_id": "sim-q2",
+      "grade_level": "3",
+      "grade_band": "2-3",
+      "content_version": "adaptive_v2",
+      "selected_answer": "a",
+      "correct_answer": null,
+      "first_selected_answer": "c",
+      "is_correct_first_try": false,
+      "is_correct_final": true,
+      "attempt_count": 2,
+      "used_hint": true,
+      "completed_at": "2026-06-15T07:15:38.606Z",
+      "module_id": "quest-2"
+    },
+    {
+      "participant_id": "00000000-0000-4000-8000-000000000001",
+      "program_code": "audit-program",
+      "week_number": 2,
+      "mission_id": "quest-2",
+      "character": "caiden",
+      "question_id": "sim-q3",
+      "grade_level": "3",
+      "grade_band": "2-3",
+      "content_version": "adaptive_v2",
+      "selected_answer": "a",
+      "correct_answer": null,
+      "first_selected_answer": "a",
+      "is_correct_first_try": true,
+      "is_correct_final": true,
+      "attempt_count": 1,
+      "used_hint": false,
+      "completed_at": "2026-06-15T07:15:38.606Z",
+      "module_id": "quest-2"
+    }
+  ],
+  "growthPreview": {
+    "byWeek": [
+      {
+        "key": "week-2",
+        "questions_attempted": 3,
+        "first_attempt_accuracy": 0.333,
+        "final_accuracy": 1
+      }
+    ],
+    "byCharacter": [
+      {
+        "key": "caiden",
+        "questions_attempted": 3,
+        "first_attempt_accuracy": 0.333,
+        "final_accuracy": 1
+      }
+    ]
+  },
+  "metricsPreview": {
+    "questions_attempted": 3,
+    "questions_correct_first_try": 1,
+    "questions_correct_final": 3,
+    "final_accuracy": 1,
+    "first_attempt_accuracy": 0.333,
+    "hinted_accuracy": 1,
+    "unhinted_accuracy": 1,
+    "improved_after_support": 2,
+    "needs_more_practice": 0
+  }
+}

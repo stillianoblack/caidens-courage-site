@@ -1,0 +1,180 @@
+/* Shared mobile bottom navigation — Family + Facilitator portals */
+
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
+.mobileBottomNav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  z-index: 130;
+  pointer-events: none;
+}
+
+.mobileBottomNav--family {
+  width: min(92vw, 24rem);
+}
+
+.mobileBottomNav--facilitator {
+  width: min(96vw, 30rem);
+}
+
+.mobileBottomNavList {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.1rem;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  min-height: 4rem;
+  list-style: none;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #152238 0%, #1a2f52 55%, #152238 100%);
+  border: 1px solid rgba(229, 192, 106, 0.22);
+  box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.48);
+  pointer-events: auto;
+}
+
+.mobileBottomNav--facilitator .mobileBottomNavList {
+  min-height: 4.35rem;
+  padding: 0.4rem 0.45rem 0.45rem;
+}
+
+.mobileBottomNavItem {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.mobileBottomNavLink {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  width: 100%;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.3rem 0.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(186, 210, 240, 0.88);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease, filter 0.15s ease;
+}
+
+.mobileBottomNavLink:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.mobileBottomNavIconWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileBottomNav--family .mobileBottomNavLink {
+  min-height: 2.85rem;
+}
+
+.mobileBottomNav--family .mobileBottomNavLabel {
+  display: none;
+}
+
+.mobileBottomNav--facilitator .mobileBottomNavLabel {
+  display: block;
+  max-width: 100%;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(186, 210, 240, 0.78);
+  transition: color 0.15s ease;
+}
+
+.mobileBottomNavLink--active {
+  color: #fde68a;
+}
+
+.mobileBottomNav--family .mobileBottomNavLink--active {
+  background: rgba(240, 208, 120, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.18);
+}
+
+.mobileBottomNav--facilitator .mobileBottomNavLink--active {
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 0 6px rgba(253, 230, 138, 0.35));
+}
+
+.mobileBottomNav--facilitator .mobileBottomNavLink--active .mobileBottomNavLabel {
+  color: #fde68a;
+}
+
+.mobileBottomNavActiveDot {
+  position: absolute;
+  top: 0.15rem;
+  left: 50%;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: #fde68a;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(253, 230, 138, 0.65);
+}
+
+.mobileBottomNavBadge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.45rem;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  line-height: 1.05rem;
+  text-align: center;
+  box-shadow: 0 0 0 2px #1a2f52;
+}
+
+.mobileBottomNav--family .mobileBottomNavIconWrap svg,
+.mobileBottomNav--family .mobileBottomNavIconWrap img {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.mobileBottomNav--facilitator .mobileBottomNavLink .pilot-railIconSvg {
+  color: currentColor;
+  stroke: currentColor;
+}
+
+.mobileBottomNavLink--active .pilot-railIconSvg {
+  stroke-width: 2;
+}
+
+@media (min-width: 768px) {
+  .mobileBottomNav {
+    display: none;
+  }
+}
+
+
+.portal-shell--familyMobileNav .family-content,
+.portal-shell--familyMobileNav .family-main:has(.portal-layout--withRail) .family-content {
+  padding: var(--mobile-page-padding);
+  padding-bottom: var(--mobile-bottom-nav-offset);
+}
+
+.portal-shell--familyMobileGame .family-content {
+  padding-bottom: 0;
+}

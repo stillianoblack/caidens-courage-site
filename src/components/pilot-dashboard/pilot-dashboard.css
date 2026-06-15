@@ -327,6 +327,11 @@
 }
 
 .pilot-kpiCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 6.5rem;
   padding: 1.375rem 1.5rem;
   border-radius: 1rem;
   border: 1px solid var(--pilot-border);
@@ -352,15 +357,19 @@
 }
 
 .pilot-kpiLabel {
+  margin: 0;
+  min-height: 2.4rem;
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  line-height: 1.25;
   color: rgba(36, 62, 112, 0.55);
 }
 
 .pilot-kpiValue {
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
   font-family: var(--font-display, Nunito, sans-serif);
   font-size: 2rem;
   font-weight: 800;
@@ -1296,16 +1305,38 @@
   cursor: not-allowed;
 }
 
+.pilot-resultsKpiSections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.pilot-resultsKpiSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.pilot-resultsKpiSectionTitle {
+  margin: 0;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.58);
+}
+
 .pilot-resultsKpiGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.125rem;
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 
 @media (min-width: 900px) {
   .pilot-resultsKpiGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -2216,10 +2247,14 @@ button.pilot-dash-card:hover {
   max-width: 28rem;
 }
 
-/* Mobile: full nav labels + search + portal switcher */
+/* Mobile: full nav labels + search + portal switcher (scroll fixes in portal-shell.css) */
 @media (max-width: 767px) {
   .pilot-shell {
     flex-direction: column;
+  }
+
+  .pilot-main {
+    min-height: auto;
   }
 
   .pilot-rail {
@@ -2262,6 +2297,8 @@ button.pilot-dash-card:hover {
   }
 
   .pilot-topbar {
+    position: static;
+    top: auto;
     padding: 0.875rem 1rem;
   }
 
@@ -2483,6 +2520,23 @@ button.pilot-dash-card:hover {
   font-weight: 700;
   text-align: center;
   text-decoration: none;
+}
+
+.pilot-pricingCardCta--disabled,
+.pilot-pricingCardCta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.pilot-pricingMissingNote {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(36, 62, 112, 0.62);
+  text-align: center;
 }
 
 .pilotAccessCodes {
@@ -3028,6 +3082,8 @@ a.pilot-overviewMiniCard:hover {
 }
 
 .pilot-drawer {
+  --pilot-navy: #243e70;
+  --pilot-navy-deep: #1a2f52;
   position: fixed;
   top: 0;
   right: 0;
@@ -3062,6 +3118,50 @@ a.pilot-overviewMiniCard:hover {
 
 .pilot-drawerBody--settings {
   padding: 1.25rem 1.75rem 2rem;
+}
+
+.pilot-drawer--form {
+  display: flex;
+  flex-direction: column;
+}
+
+.pilot-drawerFormShell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pilot-drawerBody--form {
+  padding-bottom: 1rem;
+}
+
+.pilot-drawerFooter {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 1rem 1.75rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(36, 62, 112, 0.12);
+  background: #fff;
+  box-shadow: 0 -8px 24px -16px rgba(26, 47, 82, 0.25);
+  z-index: 2;
+}
+
+.pilot-drawerFooter .pilot-drawerActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .pilot-drawerFooter .pilot-drawerActions {
+    grid-template-columns: 1fr;
+  }
+
+  .pilot-drawerFooter .pilot-drawerBtnPrimary {
+    order: -1;
+  }
 }
 
 .pilot-drawerForm {
@@ -3377,20 +3477,22 @@ a.pilot-overviewMiniCard:hover {
 }
 
 .pilot-drawerBtnPrimary {
-  border: 1px solid var(--pilot-navy);
-  background: var(--pilot-navy);
+  border: 1px solid var(--pilot-navy, #243e70);
+  background: var(--pilot-navy, #243e70);
   color: #fff;
 }
 
 .pilot-drawerBtnPrimary:disabled {
-  opacity: 0.55;
+  opacity: 0.72;
   cursor: not-allowed;
+  background: var(--pilot-navy, #243e70);
+  color: #fff;
 }
 
 .pilot-drawerBtnSecondary {
   border: 1px solid rgba(36, 62, 112, 0.18);
   background: #fff;
-  color: var(--pilot-navy);
+  color: var(--pilot-navy, #243e70);
 }
 
 .pilot-panelBlock--baselineOverview .bbc-adminDashboard {

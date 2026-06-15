@@ -97,7 +97,7 @@ export function useFacilitatorOverviewData(): FacilitatorOverviewContextValue | 
 }
 
 type FacilitatorOverviewCoachSlotProps = {
-  slot: 'afterMetrics' | 'footer';
+  slot: 'afterMetrics' | 'afterHero' | 'footer';
 };
 
 /** Renders one inline coach surface for the active tablet/mobile breakpoint only. */
@@ -105,16 +105,15 @@ export function FacilitatorOverviewCoachSlot({ slot }: FacilitatorOverviewCoachS
   const context = useFacilitatorOverviewData();
   if (!context || context.coachPlacement !== slot) return null;
 
+  const placementClass =
+    slot === 'afterMetrics'
+      ? 'portal-rightRailCoach--inlineMetrics'
+      : slot === 'afterHero'
+        ? 'portal-rightRailCoach--inlineHero'
+        : 'portal-rightRailCoach--inlineFooter';
+
   return (
-    <div
-      className={[
-        'portal-rightRailCoach',
-        'portal-rightRailCoach--inline',
-        slot === 'afterMetrics'
-          ? 'portal-rightRailCoach--inlineMetrics'
-          : 'portal-rightRailCoach--inlineFooter',
-      ].join(' ')}
-    >
+    <div className={['portal-rightRailCoach', 'portal-rightRailCoach--inline', placementClass].join(' ')}>
       <FacilitatorProgramCoachPanel model={context.coachModel} loading={context.loading} />
     </div>
   );

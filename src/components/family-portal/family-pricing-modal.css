@@ -146,6 +146,23 @@
   text-decoration: none;
 }
 
+.family-pricingCardCta--disabled,
+.family-pricingCardCta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border: 1px solid rgba(36, 62, 112, 0.16);
+  background: rgba(36, 62, 112, 0.08);
+  color: rgba(36, 62, 112, 0.55);
+}
+
+.family-pricingMissingNote {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(36, 62, 112, 0.62);
+  text-align: center;
+}
+
 .family-pricingModalSecondary {
   display: block;
   width: 100%;

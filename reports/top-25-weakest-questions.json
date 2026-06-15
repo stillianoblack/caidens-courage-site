@@ -1,0 +1,633 @@
+[
+  {
+    "rank": 1,
+    "questionId": "zkm1-68-q3",
+    "character": "zeke",
+    "missionId": "zeke-new-table",
+    "missionTitle": "The New Table",
+    "gradeBand": "6-8",
+    "difficultyScore": 3,
+    "flags": [
+      "lacks_reasoning_skill"
+    ],
+    "weaknessScore": 60,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven",
+      "Limited reasoning requirement for grade band"
+    ],
+    "recommendedReplacement": "Rephrase to require comparison, prioritization, or best-choice reasoning. Suggested distractors: Choose a reasonable step that does not match the scenario best | Pick a strategy that helps a little but misses the main goal | Select an option that delays the decision Present two emotionally plausible team options; ask which tradeoff helps the group most.",
+    "questionText": "What leadership move helps most without ignoring anyone?",
+    "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+    "choices": [
+      "Invite them to ask together or save…",
+      "A kind idea that skips hearing everyone out",
+      "A fast choice that helps one person but not the…",
+      "A choice that shuts teammates out"
+    ],
+    "correctAnswer": "Invite them to ask together or save…"
+  },
+  {
+    "rank": 2,
+    "questionId": "zkm6-68-q2",
+    "character": "zeke",
+    "missionId": "zeke-courage-challenge",
+    "missionTitle": "The Courage Challenge",
+    "gradeBand": "6-8",
+    "difficultyScore": 3,
+    "flags": [
+      "lacks_reasoning_skill"
+    ],
+    "weaknessScore": 60,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven",
+      "Limited reasoning requirement for grade band"
+    ],
+    "recommendedReplacement": "Rephrase to require comparison, prioritization, or best-choice reasoning. Suggested distractors: Choose a reasonable step that does not match the scenario best | Pick a strategy that helps a little but misses the main goal | Select an option that delays the decision Present two emotionally plausible team options; ask which tradeoff helps the group most.",
+    "questionText": "What leadership move helps most without ignoring anyone?",
+    "scenarioText": "Zeke wants to try out for the talent show, but his stomach flips when he sees the signup sheet. His brain says, \"Maybe we become invisible today.\" During the courage challenge, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the courage challenge, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+    "choices": [
+      "A kind idea that skips hearing everyone out",
+      "A fast choice that helps one person but not the group",
+      "A choice that shuts teammates out",
+      "Choosing the step that matches what he values"
+    ],
+    "correctAnswer": "Choosing the step that matches what he values"
+  },
+  {
+    "rank": 3,
+    "questionId": "b4m1-k1-q1",
+    "character": "b4",
+    "missionId": "b4-mood-scanner",
+    "missionTitle": "Mood Scanner",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Angry for this scenario for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Angry for this scenario for this scenario"
+  },
+  {
+    "rank": 4,
+    "questionId": "b4m1-k1-q2",
+    "character": "b4",
+    "missionId": "b4-mood-scanner",
+    "missionTitle": "Mood Scanner",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Happy for this scenario for this scenario",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Happy for this scenario for this scenario"
+  },
+  {
+    "rank": 5,
+    "questionId": "b4m1-k1-q3",
+    "character": "b4",
+    "missionId": "b4-mood-scanner",
+    "missionTitle": "Mood Scanner",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Sad for this scenario for this scenario"
+    ],
+    "correctAnswer": "Sad for this scenario for this scenario"
+  },
+  {
+    "rank": 6,
+    "questionId": "b4m2-k1-q1",
+    "character": "b4",
+    "missionId": "b4-body-signal-detective",
+    "missionTitle": "Body Signal Detective",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Take slow breaths for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Take slow breaths for this scenario"
+  },
+  {
+    "rank": 7,
+    "questionId": "b4m2-k1-q2",
+    "character": "b4",
+    "missionId": "b4-body-signal-detective",
+    "missionTitle": "Body Signal Detective",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "A nervous tummy clue for this scenario",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "A nervous tummy clue for this scenario"
+  },
+  {
+    "rank": 8,
+    "questionId": "b4m2-k1-q3",
+    "character": "b4",
+    "missionId": "b4-body-signal-detective",
+    "missionTitle": "Body Signal Detective",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Tired for this scenario for this scenario"
+    ],
+    "correctAnswer": "Tired for this scenario for this scenario"
+  },
+  {
+    "rank": 9,
+    "questionId": "b4m3-k1-q1",
+    "character": "b4",
+    "missionId": "b4-brave-choice-button",
+    "missionTitle": "The Brave Choice Button",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Help pick them up for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Help pick them up for this scenario"
+  },
+  {
+    "rank": 10,
+    "questionId": "b4m3-k1-q2",
+    "character": "b4",
+    "missionId": "b4-brave-choice-button",
+    "missionTitle": "The Brave Choice Button",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ask if they want to play for this scenario",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Ask if they want to play for this scenario"
+  },
+  {
+    "rank": 11,
+    "questionId": "b4m3-k1-q3",
+    "character": "b4",
+    "missionId": "b4-brave-choice-button",
+    "missionTitle": "The Brave Choice Button",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Try your best to follow directions"
+    ],
+    "correctAnswer": "Try your best to follow directions"
+  },
+  {
+    "rank": 12,
+    "questionId": "b4m4-k1-q1",
+    "character": "b4",
+    "missionId": "b4-focus-reset-station",
+    "missionTitle": "Focus Reset Station",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pick the right reset before jumping back in. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Take one slow breath for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Take one slow breath for this scenario"
+  },
+  {
+    "rank": 13,
+    "questionId": "b4m4-k1-q2",
+    "character": "b4",
+    "missionId": "b4-focus-reset-station",
+    "missionTitle": "Focus Reset Station",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pick the right reset before jumping back in. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Move — a quick stretch or wiggle break",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Move — a quick stretch or wiggle break"
+  },
+  {
+    "rank": 14,
+    "questionId": "b4m4-k1-q3",
+    "character": "b4",
+    "missionId": "b4-focus-reset-station",
+    "missionTitle": "Focus Reset Station",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pick the right reset before jumping back in. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Pick one tiny first step for this scenario"
+    ],
+    "correctAnswer": "Pick one tiny first step for this scenario"
+  },
+  {
+    "rank": 15,
+    "questionId": "b4m5-k1-q1",
+    "character": "b4",
+    "missionId": "b4-calm-down-countdown",
+    "missionTitle": "Calm-Down Countdown",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 starts a calm-down countdown after a big feeling alert. The mission is to choose what helps the body calm before making the next choice. During calm-down countdown, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Count slowly and breathe for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Count slowly and breathe for this scenario"
+  },
+  {
+    "rank": 16,
+    "questionId": "b4m5-k1-q2",
+    "character": "b4",
+    "missionId": "b4-calm-down-countdown",
+    "missionTitle": "Calm-Down Countdown",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 starts a calm-down countdown after a big feeling alert. The mission is to choose what helps the body calm before making the next choice. During calm-down countdown, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Take slow breaths with B-4 for this scenario",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Take slow breaths with B-4 for this scenario"
+  },
+  {
+    "rank": 17,
+    "questionId": "b4m5-k1-q3",
+    "character": "b4",
+    "missionId": "b4-calm-down-countdown",
+    "missionTitle": "Calm-Down Countdown",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 starts a calm-down countdown after a big feeling alert. The mission is to choose what helps the body calm before making the next choice. During calm-down countdown, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "It gives your body time to calm down"
+    ],
+    "correctAnswer": "It gives your body time to calm down"
+  },
+  {
+    "rank": 18,
+    "questionId": "b4m6-k1-q1",
+    "character": "b4",
+    "missionId": "b4-oops-repair-lab",
+    "missionTitle": "Oops Repair Lab",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 opens the Oops Repair Lab after someone makes a mistake. The lab does not erase mistakes. It helps repair them. During oops repair lab, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Say sorry and help rebuild for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Say sorry and help rebuild for this scenario"
+  },
+  {
+    "rank": 19,
+    "questionId": "b4m6-k1-q2",
+    "character": "b4",
+    "missionId": "b4-oops-repair-lab",
+    "missionTitle": "Oops Repair Lab",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 opens the Oops Repair Lab after someone makes a mistake. The lab does not erase mistakes. It helps repair them. During oops repair lab, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Say sorry and help clean up for this scenario",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Say sorry and help clean up for this scenario"
+  },
+  {
+    "rank": 20,
+    "questionId": "b4m6-k1-q3",
+    "character": "b4",
+    "missionId": "b4-oops-repair-lab",
+    "missionTitle": "Oops Repair Lab",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4 opens the Oops Repair Lab after someone makes a mistake. The lab does not erase mistakes. It helps repair them. During oops repair lab, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Fixing what your mistake hurt for this scenario"
+    ],
+    "correctAnswer": "Fixing what your mistake hurt for this scenario"
+  },
+  {
+    "rank": 21,
+    "questionId": "b4m7-k1-q1",
+    "character": "b4",
+    "missionId": "b4-confidence-charger",
+    "missionTitle": "Confidence Charger",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Confidence Charger is low. It charges when someone notices effort, tries again, and uses helpful self-talk. During confidence charger, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "I can try one more piece for this scenario",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "I can try one more piece for this scenario"
+  },
+  {
+    "rank": 22,
+    "questionId": "b4m7-k1-q2",
+    "character": "b4",
+    "missionId": "b4-confidence-charger",
+    "missionTitle": "Confidence Charger",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Confidence Charger is low. It charges when someone notices effort, tries again, and uses helpful self-talk. During confidence charger, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Try again, one block at a time",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Try again, one block at a time"
+  },
+  {
+    "rank": 23,
+    "questionId": "b4m7-k1-q3",
+    "character": "b4",
+    "missionId": "b4-confidence-charger",
+    "missionTitle": "Confidence Charger",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Confidence Charger is low. It charges when someone notices effort, tries again, and uses helpful self-talk. During confidence charger, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going",
+      "Trying again even when it is hard"
+    ],
+    "correctAnswer": "Trying again even when it is hard"
+  },
+  {
+    "rank": 24,
+    "questionId": "b4m8-k1-q1",
+    "character": "b4",
+    "missionId": "b4-focus-flame-finale",
+    "missionTitle": "The Focus Flame Finale",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Focus Flame glows when the learner combines feeling awareness, body signals, brave choice, calm-down move, and reflection. During the focus flame finale, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "Name the feeling and take a breath",
+      "A strategy that helps a little but ignores body signals",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Name the feeling and take a breath"
+  },
+  {
+    "rank": 25,
+    "questionId": "b4m8-k1-q2",
+    "character": "b4",
+    "missionId": "b4-focus-flame-finale",
+    "missionTitle": "The Focus Flame Finale",
+    "gradeBand": "K-1",
+    "difficultyScore": 3,
+    "flags": [],
+    "weaknessScore": 44,
+    "weaknessReasons": [
+      "Below-target difficulty (3/5)",
+      "Distractors may be too weak or uneven"
+    ],
+    "recommendedReplacement": "Suggested distractors: Estimate quickly without adding the numbers | Choose the option that ignores the time limit | Pick the choice that skips checking totals Compare two regulation strategies after naming the feeling; avoid obvious wrong answers.",
+    "questionText": "What feeling might B-4 name from these clues?",
+    "scenarioText": "B-4's Focus Flame glows when the learner combines feeling awareness, body signals, brave choice, calm-down move, and reflection. During the focus flame finale, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+    "choices": [
+      "A calm strategy used before naming the feeling",
+      "A strategy that helps a little but ignores body signals",
+      "Tell a grown-up or take a breath",
+      "Ignore the feeling and keep going"
+    ],
+    "correctAnswer": "Tell a grown-up or take a breath"
+  }
+]

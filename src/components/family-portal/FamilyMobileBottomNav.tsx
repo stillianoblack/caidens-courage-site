@@ -1,9 +1,11 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureIcon';
 import { familyPortalPath, familySettingsPath } from '../../lib/familyPortalPaths';
 import { resolveFamilyBasePath } from '../../lib/familyPortalNav';
-import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureIcon';
-import './family-mobile-bottom-nav.css';
+import MobileBottomNavigation, {
+  type MobileBottomNavigationItem,
+} from '../navigation/MobileBottomNavigation';
 
 export type FamilyMobileBottomNavId =
   | 'home'
@@ -14,13 +16,6 @@ export type FamilyMobileBottomNavId =
 
 type FamilyMobileBottomNavIconId = 'home' | 'adventures' | 'characters' | 'inventory' | 'settings';
 
-type NavItem = {
-  id: FamilyMobileBottomNavId;
-  label: string;
-  path: string;
-  icon: FamilyMobileBottomNavIconId;
-};
-
 const NAV_ICON_MAP: Record<FamilyMobileBottomNavId, FamilyMobileBottomNavIconId> = {
   home: 'home',
   adventures: 'adventures',
@@ -29,34 +24,28 @@ const NAV_ICON_MAP: Record<FamilyMobileBottomNavId, FamilyMobileBottomNavIconId>
   profile: 'settings',
 };
 
-function buildNavItems(basePath: string): NavItem[] {
-  return [
-    { id: 'home', label: 'Home', path: basePath, icon: NAV_ICON_MAP.home },
-    {
-      id: 'adventures',
-      label: 'Adventures',
-      path: familyPortalPath('weekly-adventures', basePath),
-      icon: NAV_ICON_MAP.adventures,
-    },
-    {
-      id: 'characters',
-      label: 'Characters',
-      path: familyPortalPath('characters', basePath),
-      icon: NAV_ICON_MAP.characters,
-    },
-    {
-      id: 'inventory',
-      label: 'Inventory',
-      path: familyPortalPath('inventory', basePath),
-      icon: NAV_ICON_MAP.inventory,
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
-      path: familySettingsPath(basePath),
-      icon: NAV_ICON_MAP.profile,
-    },
+function buildNavItems(basePath: string, activeId: FamilyMobileBottomNavId): MobileBottomNavigationItem[] {
+  const defs: Array<{ id: FamilyMobileBottomNavId; label: string; path: string }> = [
+    { id: 'home', label: 'Home', path: basePath },
+    { id: 'adventures', label: 'Adventures', path: familyPortalPath('weekly-adventures', basePath) },
+    { id: 'characters', label: 'Characters', path: familyPortalPath('characters', basePath) },
+    { id: 'inventory', label: 'Inventory', path: familyPortalPath('inventory', basePath) },
+    { id: 'profile', label: 'Profile', path: familySettingsPath(basePath) },
   ];
+
+  return defs.map((item) => ({
+    id: item.id,
+    label: item.label,
+    href: item.path,
+    icon: (
+      <KidsAdventureIcon
+        name={NAV_ICON_MAP[item.id]}
+        className="mobileBottomNavIcon"
+        size={26}
+        filled={item.id === activeId}
+      />
+    ),
+  }));
 }
 
 function resolveActiveNavId(pathname: string, basePath: string): FamilyMobileBottomNavId {
@@ -99,39 +88,18 @@ function resolveActiveNavId(pathname: string, basePath: string): FamilyMobileBot
 export default function FamilyMobileBottomNav() {
   const location = useLocation();
   const basePath = resolveFamilyBasePath(location.pathname);
-  const items = buildNavItems(basePath);
   const activeId = resolveActiveNavId(location.pathname, basePath);
+  const items = useMemo(
+    () => buildNavItems(basePath, activeId),
+    [activeId, basePath],
+  );
 
   return (
-    <nav className="family-mobileBottomNav" aria-label="Family Portal navigation">
-      <ul className="family-mobileBottomNavList">
-        {items.map((item) => {
-          const active = item.id === activeId;
-          return (
-            <li key={item.id} className="family-mobileBottomNavItem">
-              <Link
-                to={item.path}
-                className={[
-                  'family-mobileBottomNavLink',
-                  active ? 'family-mobileBottomNavLink--active' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-current={active ? 'page' : undefined}
-                aria-label={item.label}
-                title={item.label}
-              >
-                <KidsAdventureIcon
-                  name={item.icon}
-                  className="family-mobileBottomNavIcon"
-                  size={26}
-                  filled={active}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <MobileBottomNavigation
+      items={items}
+      activeItem={activeId}
+      variant="family"
+      ariaLabel="Family Portal navigation"
+    />
   );
 }

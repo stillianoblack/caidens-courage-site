@@ -67,6 +67,8 @@ function childAttemptMetrics(participantId: string | null | undefined): Question
     is_correct_final: row.is_correct_final,
     used_hint: row.used_hint,
     attempt_count: row.attempt_count,
+    attempt_type: row.attempt_type ?? 'initial',
+    is_replay: row.is_replay ?? false,
     completed_at: row.completed_at,
   }));
 }
@@ -74,7 +76,7 @@ function childAttemptMetrics(participantId: string | null | undefined): Question
 function attemptInsightMetrics(child: FamilyChildSummary | null): B4InsightsPayload['metrics'] {
   const rows = childAttemptMetrics(child?.participantId);
   if (rows.length === 0) return [];
-  const metrics = computeQuestionAttemptMetrics(rows);
+  const metrics = computeQuestionAttemptMetrics(rows, { attemptScope: 'initial' });
   const labels = buildParentAttemptInsightLabels(metrics);
   return [
     { label: 'First-try accuracy', value: `${Math.round(metrics.first_attempt_accuracy * 100)}%`, hint: labels.firstTryLabel },

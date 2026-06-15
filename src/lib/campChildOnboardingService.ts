@@ -166,11 +166,20 @@ export async function createCampChildWithParentLink(
   const campProgramCode = input.campProgramCode.trim();
   const displayName = childDisplayName(childFirstName, input.childNickname);
 
-  if (!childFirstName || !parentEmail || !parentLastName || !campProgramCode) {
+  if (!childFirstName || !input.parentFirstName?.trim() || !parentEmail || !parentLastName || !campProgramCode) {
     return {
       success: false,
       displayName,
-      message: 'Child first name, parent last name, and parent email are required.',
+      message:
+        'Child first name, parent/guardian first and last name, parent email, and program are required.',
+    };
+  }
+
+  if (!normalizeGradeLevelStorage(input.gradeLevel)) {
+    return {
+      success: false,
+      displayName,
+      message: 'Grade level is required so missions match the student profile.',
     };
   }
 

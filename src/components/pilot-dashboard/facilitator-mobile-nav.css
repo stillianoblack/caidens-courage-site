@@ -1,0 +1,137 @@
+/* Facilitator portal — More drawer */
+
+@import '../../design-system/tokens/dashboard-mobile-spacing.css';
+
+.facilitator-mobileMoreDrawer.pilot-drawer {
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.facilitator-mobileMoreHead {
+  padding-bottom: 0.5rem;
+}
+
+.facilitator-mobileMoreBody {
+  padding: var(--mobile-page-padding);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 7rem - env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--mobile-page-padding) + env(safe-area-inset-bottom, 0px));
+}
+
+.facilitator-mobileMoreCard {
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 1rem;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 6px 28px -20px rgba(36, 62, 112, 0.2);
+}
+
+.facilitator-mobileMoreList,
+.facilitator-mobileMoreSettingsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.facilitator-mobileMoreRow,
+.facilitator-mobileMoreSettingsBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem var(--mobile-card-padding);
+  border: 0;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.facilitator-mobileMoreList--secondary > li:last-child .facilitator-mobileMoreRow {
+  border-bottom: 0;
+}
+
+.facilitator-mobileMoreRow--active {
+  background: linear-gradient(90deg, rgba(254, 243, 199, 0.45), transparent);
+}
+
+.facilitator-mobileMoreRowIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+  background: #f8fafc;
+  color: var(--pilot-gold-dark, #c9a44a);
+}
+
+.facilitator-mobileMoreRow--active .facilitator-mobileMoreRowIcon {
+  color: var(--pilot-navy, #243e70);
+  background: #fffbeb;
+}
+
+.facilitator-mobileMoreRowText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.facilitator-mobileMoreRowLabel {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+}
+
+.facilitator-mobileMoreRowHelper {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(36, 62, 112, 0.68);
+}
+
+.facilitator-mobileMoreChevron {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: rgba(36, 62, 112, 0.45);
+}
+
+.facilitator-mobileMoreSettings {
+  margin-top: 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.12);
+}
+
+.facilitator-mobileMoreSettingsToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.85rem 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep, #1a2f52);
+  cursor: pointer;
+}
+
+.facilitator-mobileMoreSettingsToggle--expanded .facilitator-mobileMoreChevron {
+  transform: rotate(90deg);
+}
+
+.facilitator-mobileMoreList--secondary {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.facilitator-mobileMoreRow--button {
+  font: inherit;
+}

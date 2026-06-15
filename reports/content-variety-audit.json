@@ -1,0 +1,260 @@
+{
+  "generatedAt": "2026-06-15T04:22:42.776Z",
+  "beforeDuplicates": 51,
+  "afterDuplicates": 0,
+  "beforeTopStems": [
+    {
+      "stem": "What should Charlie do next as a scientist?",
+      "count": 48
+    },
+    {
+      "stem": "What should Zeke say or do first for the team?",
+      "count": 48
+    },
+    {
+      "stem": "Does his plan fit if he does all tasks and the break?",
+      "count": 32
+    },
+    {
+      "stem": "What order finishes everything with time to spare?",
+      "count": 31
+    },
+    {
+      "stem": "What feeling might B-4 name from these clues?",
+      "count": 24
+    },
+    {
+      "stem": "Which coping step fits best after naming the feeling?",
+      "count": 24
+    },
+    {
+      "stem": "Which two strategies compare well for this moment?",
+      "count": 24
+    },
+    {
+      "stem": "How many minutes are left after shoes and coat?",
+      "count": 24
+    }
+  ],
+  "afterTopStems": [
+    {
+      "stem": "According to the passage, which answer is best supported by evidence?",
+      "count": 18
+    },
+    {
+      "stem": "What evidence best supports Charlie’s prediction?",
+      "count": 16
+    },
+    {
+      "stem": "What should Charlie test to compare two ideas fairly?",
+      "count": 16
+    },
+    {
+      "stem": "Which variable should Charlie change while keeping others the same?",
+      "count": 16
+    },
+    {
+      "stem": "Which choice best compares two fair plans for the team?",
+      "count": 16
+    },
+    {
+      "stem": "Which plan balances the team tradeoff best?",
+      "count": 16
+    },
+    {
+      "stem": "Which plan uses his 45 minutes without skipping the break or running late?",
+      "count": 16
+    },
+    {
+      "stem": "What leadership move helps most without ignoring anyone?",
+      "count": 14
+    },
+    {
+      "stem": "How many minutes are left after shoes and coat?",
+      "count": 9
+    },
+    {
+      "stem": "How many items did Caiden pack in total?",
+      "count": 9
+    }
+  ],
+  "dedupChanges": [],
+  "stemChanges": [],
+  "stemRotationsApplied": 168,
+  "deduplicationRewritesApplied": 110,
+  "mirandaCoverage": [
+    {
+      "week": 4,
+      "missionId": "the-missing-letters",
+      "questionCount": 12,
+      "status": "PASS — adaptive question set present"
+    },
+    {
+      "week": 5,
+      "missionId": "the-context-clue-challenge",
+      "questionCount": 12,
+      "status": "PASS — adaptive question set present"
+    },
+    {
+      "week": 6,
+      "missionId": "mirandas-detective-notebook",
+      "questionCount": 12,
+      "status": "PASS — adaptive question set present"
+    }
+  ],
+  "publicationVerdict": "READY WITH NOTES — publish acceptable; review warnings for polish",
+  "publicationStatus": "warning",
+  "totalQuestions": 548,
+  "publicationChecks": [
+    {
+      "id": "inventory",
+      "title": "1. Question inventory (512)",
+      "status": "pass",
+      "summary": "All 548 staging questions loaded and matched to production IDs",
+      "details": [
+        "Character counts: {\"b4\":96,\"charlie\":96,\"zeke\":96,\"caiden\":188,\"miranda\":72}",
+        "Caiden quests 6–9 contain 32 questions each (8 per grade band) by design."
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "character-identity",
+      "title": "2. Character identity consistency",
+      "status": "pass",
+      "summary": "All characters meet character-specific rubric checks",
+      "details": [
+        "caiden: 6 rubric notes (0 critical)",
+        "miranda: 0 rubric notes (0 critical)",
+        "zeke: 0 rubric notes (0 critical)",
+        "charlie: 0 rubric notes (0 critical)",
+        "b4: 10 rubric notes (0 critical)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "grade-band",
+      "title": "3. Grade-band consistency",
+      "status": "pass",
+      "summary": "Grade bands complete across all missions",
+      "details": [
+        "K–1 at 3/5 (expected floor): 64",
+        "Upper-band below 4/5: 0"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "position-distribution",
+      "title": "4. Answer-position distribution",
+      "status": "pass",
+      "summary": "Correct-answer positions balanced across characters (~25% each)",
+      "details": [
+        "b4: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "charlie: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "zeke: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "caiden: A=47 (25%) B=47 (25%) C=47 (25%) D=47 (25%)",
+        "miranda: A=18 (25%) B=18 (25%) C=18 (25%) D=18 (25%)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "distractor-quality",
+      "title": "5. Distractor quality",
+      "status": "warning",
+      "summary": "No critical flags; 1 minor notes",
+      "details": [
+        "Joke distractors: 0",
+        "Obvious correct answers: 0",
+        "Guessable without scenario: 0",
+        "Length imbalance: 0",
+        "Truncated choices: 184",
+        "184 questions have truncated choice labels (…)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "difficulty-distribution",
+      "title": "6. Difficulty distribution",
+      "status": "pass",
+      "summary": "All character difficulty targets met; zero quality flags",
+      "details": [
+        "b4: avg 4.00/5 (target ≥3.8) ✓",
+        "charlie: avg 4.05/5 (target ≥3.8) ✓",
+        "zeke: avg 4.19/5 (target ≥3.8) ✓",
+        "caiden: avg 4.27/5 (target ≥4.2) ✓",
+        "miranda: avg 4.00/5 (target ≥4) ✓",
+        "Score distribution: 1/5=0, 2/5=0, 3/5=64, 4/5=347, 5/5=137"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "duplicate-questions",
+      "title": "7. Duplicate question detection",
+      "status": "warning",
+      "summary": "27 repeated stem clusters (mission templates)",
+      "details": [
+        "18× stem: According to the passage, which answer is best supported by evidence?",
+        "16× stem: What evidence best supports Charlie’s prediction?",
+        "16× stem: What should Charlie test to compare two ideas fairly?",
+        "16× stem: Which variable should Charlie change while keeping others the same?",
+        "16× stem: Which choice best compares two fair plans for the team?",
+        "16× stem: Which plan balances the team tradeoff best?",
+        "16× stem: Which plan uses his 45 minutes without skipping the break or running l",
+        "14× stem: What leadership move helps most without ignoring anyone?"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "duplicate-answers",
+      "title": "8. Duplicate answer detection",
+      "status": "warning",
+      "summary": "34 shared answer-set clusters (often template reuse)",
+      "details": [
+        "7× shared choices (cq1-k1-q1, cq3-k1-q1, cq5-k1-q1…)",
+        "7× shared choices (cq1-k1-q2, cq3-k1-q2, cq5-k1-q2…)",
+        "7× shared choices (cq1-k1-q3, cq3-k1-q3, cq5-k1-q3…)",
+        "6× shared choices (cq2-k1-q1, cq4-k1-q1, cq7-k1-q2…)",
+        "6× shared choices (cq2-k1-q2, cq4-k1-q2, cq7-k1-q3…)",
+        "6× shared choices (cq2-k1-q3, cq4-k1-q3, cq7-k1-q4…)",
+        "5× shared choices (cq1-23-q1, cq5-23-q1, cq7-23-q5…)",
+        "5× shared choices (cq1-23-q2, cq5-23-q2, cq7-23-q6…)",
+        "5× shared choices (cq1-23-q3, cq5-23-q3, cq7-23-q7…)",
+        "5× shared choices (cq1-45-q1, cq5-45-q1, cq7-45-q8…)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "repeated-scenarios",
+      "title": "9. Repeated scenario detection",
+      "status": "warning",
+      "summary": "38 repeated scenario clusters; 164 duplicated-sentence artifacts",
+      "details": [
+        "12× scenario: After the ceremony, Miranda scanned the line and realized Caiden …",
+        "12× scenario: Miranda found a clue note on the floor with one smudged word: \"Me…",
+        "11× scenario: Before Focus Flame began, students kept asking, \"What are we doin…",
+        "9× scenario: Zeke hears someone making a joke that hurts another student's fee…",
+        "6× scenario: B-4's mood scanner starts blinking because someone's feelings are…",
+        "6× scenario: B-4's dashboard lights up with body signals: fast heartbeat, wigg…",
+        "6× scenario: B-4's dashboard lights up with body signals: fast heartbeat, wigg…",
+        "6× scenario: B-4 finds a glowing Brave Choice button. It only works when someo…",
+        "b4m1-23-q1: repeated sentence framing in scenario",
+        "b4m1-23-q2: repeated sentence framing in scenario",
+        "b4m1-23-q3: repeated sentence framing in scenario",
+        "b4m1-45-q1: repeated sentence framing in scenario",
+        "b4m1-45-q2: repeated sentence framing in scenario",
+        "b4m1-45-q3: repeated sentence framing in scenario"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "mission-pacing",
+      "title": "10. Mission progression pacing",
+      "status": "pass",
+      "summary": "Weekly mission order complete; pacing stable",
+      "details": [
+        "Repetitive missions (≥40% shared stem): 0",
+        "Progression dips: 0"
+      ],
+      "criticalIssues": []
+    }
+  ]
+}

@@ -42,6 +42,14 @@ ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS selected_answer text;
 ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS correct_answer text;
 ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS first_selected_answer text;
 ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS used_hint boolean NOT NULL DEFAULT false;
+ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS attempt_type text NOT NULL DEFAULT 'initial';
+ALTER TABLE question_attempts ADD COLUMN IF NOT EXISTS is_replay boolean NOT NULL DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS question_attempts_attempt_type_idx
+  ON question_attempts (attempt_type);
+
+CREATE INDEX IF NOT EXISTS question_attempts_is_replay_idx
+  ON question_attempts (is_replay);
 
 CREATE INDEX IF NOT EXISTS question_attempts_participant_idx
   ON question_attempts (participant_id, completed_at DESC);

@@ -59,6 +59,16 @@ export function formatAssessmentScore(row: LocalAssessmentV2Record): string {
   return parts.length ? parts.join(' · ') : '—';
 }
 
+export function formatAssessmentCompletionProgress(row: LocalAssessmentV2Record): string {
+  if (row.total_score != null && row.max_score) {
+    return `${row.total_score}/${row.max_score}`;
+  }
+  if (row.percent_score != null) {
+    return `${Math.round(row.percent_score)}%`;
+  }
+  return '—';
+}
+
 export function formatModuleScore(row: LocalModuleResultRecord): string {
   if (row.percent_score != null) return `${Math.round(row.percent_score)}%`;
   if (row.max_score > 0) return `${row.score}/${row.max_score}`;

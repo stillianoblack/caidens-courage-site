@@ -1,0 +1,1943 @@
+{
+  "generatedAt": "2026-06-15T04:22:43.199Z",
+  "source": "staging_v4_alignment",
+  "overallStatus": "warning",
+  "overallVerdict": "READY WITH NOTES — publish acceptable; review warnings for polish",
+  "questionCount": 548,
+  "checks": [
+    {
+      "id": "inventory",
+      "title": "1. Question inventory (512)",
+      "status": "pass",
+      "summary": "All 548 staging questions loaded and matched to production IDs",
+      "details": [
+        "Character counts: {\"b4\":96,\"charlie\":96,\"zeke\":96,\"caiden\":188,\"miranda\":72}",
+        "Caiden quests 6–9 contain 32 questions each (8 per grade band) by design."
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "character-identity",
+      "title": "2. Character identity consistency",
+      "status": "pass",
+      "summary": "All characters meet character-specific rubric checks",
+      "details": [
+        "caiden: 6 rubric notes (0 critical)",
+        "miranda: 0 rubric notes (0 critical)",
+        "zeke: 0 rubric notes (0 critical)",
+        "charlie: 0 rubric notes (0 critical)",
+        "b4: 10 rubric notes (0 critical)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "grade-band",
+      "title": "3. Grade-band consistency",
+      "status": "pass",
+      "summary": "Grade bands complete across all missions",
+      "details": [
+        "K–1 at 3/5 (expected floor): 64",
+        "Upper-band below 4/5: 0"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "position-distribution",
+      "title": "4. Answer-position distribution",
+      "status": "pass",
+      "summary": "Correct-answer positions balanced across characters (~25% each)",
+      "details": [
+        "b4: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "charlie: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "zeke: A=24 (25%) B=24 (25%) C=24 (25%) D=24 (25%)",
+        "caiden: A=47 (25%) B=47 (25%) C=47 (25%) D=47 (25%)",
+        "miranda: A=18 (25%) B=18 (25%) C=18 (25%) D=18 (25%)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "distractor-quality",
+      "title": "5. Distractor quality",
+      "status": "warning",
+      "summary": "No critical flags; 1 minor notes",
+      "details": [
+        "Joke distractors: 0",
+        "Obvious correct answers: 0",
+        "Guessable without scenario: 0",
+        "Length imbalance: 0",
+        "Truncated choices: 184",
+        "184 questions have truncated choice labels (…)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "difficulty-distribution",
+      "title": "6. Difficulty distribution",
+      "status": "pass",
+      "summary": "All character difficulty targets met; zero quality flags",
+      "details": [
+        "b4: avg 4.00/5 (target ≥3.8) ✓",
+        "charlie: avg 4.05/5 (target ≥3.8) ✓",
+        "zeke: avg 4.19/5 (target ≥3.8) ✓",
+        "caiden: avg 4.27/5 (target ≥4.2) ✓",
+        "miranda: avg 4.00/5 (target ≥4) ✓",
+        "Score distribution: 1/5=0, 2/5=0, 3/5=64, 4/5=347, 5/5=137"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "duplicate-questions",
+      "title": "7. Duplicate question detection",
+      "status": "warning",
+      "summary": "27 repeated stem clusters (mission templates)",
+      "details": [
+        "18× stem: According to the passage, which answer is best supported by evidence?",
+        "16× stem: What evidence best supports Charlie’s prediction?",
+        "16× stem: What should Charlie test to compare two ideas fairly?",
+        "16× stem: Which variable should Charlie change while keeping others the same?",
+        "16× stem: Which choice best compares two fair plans for the team?",
+        "16× stem: Which plan balances the team tradeoff best?",
+        "16× stem: Which plan uses his 45 minutes without skipping the break or running l",
+        "14× stem: What leadership move helps most without ignoring anyone?"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "duplicate-answers",
+      "title": "8. Duplicate answer detection",
+      "status": "warning",
+      "summary": "34 shared answer-set clusters (often template reuse)",
+      "details": [
+        "7× shared choices (cq1-k1-q1, cq3-k1-q1, cq5-k1-q1…)",
+        "7× shared choices (cq1-k1-q2, cq3-k1-q2, cq5-k1-q2…)",
+        "7× shared choices (cq1-k1-q3, cq3-k1-q3, cq5-k1-q3…)",
+        "6× shared choices (cq2-k1-q1, cq4-k1-q1, cq7-k1-q2…)",
+        "6× shared choices (cq2-k1-q2, cq4-k1-q2, cq7-k1-q3…)",
+        "6× shared choices (cq2-k1-q3, cq4-k1-q3, cq7-k1-q4…)",
+        "5× shared choices (cq1-23-q1, cq5-23-q1, cq7-23-q5…)",
+        "5× shared choices (cq1-23-q2, cq5-23-q2, cq7-23-q6…)",
+        "5× shared choices (cq1-23-q3, cq5-23-q3, cq7-23-q7…)",
+        "5× shared choices (cq1-45-q1, cq5-45-q1, cq7-45-q8…)"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "repeated-scenarios",
+      "title": "9. Repeated scenario detection",
+      "status": "warning",
+      "summary": "38 repeated scenario clusters; 164 duplicated-sentence artifacts",
+      "details": [
+        "12× scenario: After the ceremony, Miranda scanned the line and realized Caiden …",
+        "12× scenario: Miranda found a clue note on the floor with one smudged word: \"Me…",
+        "11× scenario: Before Focus Flame began, students kept asking, \"What are we doin…",
+        "9× scenario: Zeke hears someone making a joke that hurts another student's fee…",
+        "6× scenario: B-4's mood scanner starts blinking because someone's feelings are…",
+        "6× scenario: B-4's dashboard lights up with body signals: fast heartbeat, wigg…",
+        "6× scenario: B-4's dashboard lights up with body signals: fast heartbeat, wigg…",
+        "6× scenario: B-4 finds a glowing Brave Choice button. It only works when someo…",
+        "b4m1-23-q1: repeated sentence framing in scenario",
+        "b4m1-23-q2: repeated sentence framing in scenario",
+        "b4m1-23-q3: repeated sentence framing in scenario",
+        "b4m1-45-q1: repeated sentence framing in scenario",
+        "b4m1-45-q2: repeated sentence framing in scenario",
+        "b4m1-45-q3: repeated sentence framing in scenario"
+      ],
+      "criticalIssues": []
+    },
+    {
+      "id": "mission-pacing",
+      "title": "10. Mission progression pacing",
+      "status": "pass",
+      "summary": "Weekly mission order complete; pacing stable",
+      "details": [
+        "Repetitive missions (≥40% shared stem): 0",
+        "Progression dips: 0"
+      ],
+      "criticalIssues": []
+    }
+  ],
+  "criticalIssues": [],
+  "duplicateQuestions": [
+    {
+      "key": "miranda::according to the passage, which answer is best supported by evidence?",
+      "count": 18,
+      "sampleQuestionIds": [
+        "ms-45-q1",
+        "ms-45-q2",
+        "ms-45-q3",
+        "mst-45-q1",
+        "mst-45-q2"
+      ],
+      "preview": "According to the passage, which answer is best supported by evidence?"
+    },
+    {
+      "key": "charlie::what evidence best supports charlie’s prediction?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "cm1-45-q1",
+        "cm1-68-q2",
+        "cm2-45-q3",
+        "cm2-68-q1",
+        "cm3-45-q2"
+      ],
+      "preview": "What evidence best supports Charlie’s prediction?"
+    },
+    {
+      "key": "charlie::what should charlie test to compare two ideas fairly?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "cm1-45-q2",
+        "cm1-68-q3",
+        "cm2-45-q1",
+        "cm2-68-q2",
+        "cm3-45-q3"
+      ],
+      "preview": "What should Charlie test to compare two ideas fairly?"
+    },
+    {
+      "key": "charlie::which variable should charlie change while keeping others the same?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "cm1-45-q3",
+        "cm1-68-q1",
+        "cm2-45-q2",
+        "cm2-68-q3",
+        "cm3-45-q1"
+      ],
+      "preview": "Which variable should Charlie change while keeping others the same?"
+    },
+    {
+      "key": "zeke::which choice best compares two fair plans for the team?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "zkm1-45-q1",
+        "zkm1-68-q2",
+        "zkm2-45-q3",
+        "zkm2-68-q1",
+        "zkm3-45-q2"
+      ],
+      "preview": "Which choice best compares two fair plans for the team?"
+    },
+    {
+      "key": "zeke::which plan balances the team tradeoff best?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "zkm1-45-q3",
+        "zkm1-68-q1",
+        "zkm2-45-q2",
+        "zkm2-68-q3",
+        "zkm3-45-q1"
+      ],
+      "preview": "Which plan balances the team tradeoff best?"
+    },
+    {
+      "key": "caiden::which plan uses his 45 minutes without skipping the break or running late?",
+      "count": 16,
+      "sampleQuestionIds": [
+        "cq1-68-q1",
+        "cq2-68-q3",
+        "cq3-68-q3",
+        "cq4-68-q2",
+        "cq5-68-q1"
+      ],
+      "preview": "Which plan uses his 45 minutes without skipping the break or running late?"
+    },
+    {
+      "key": "zeke::what leadership move helps most without ignoring anyone?",
+      "count": 14,
+      "sampleQuestionIds": [
+        "zkm1-45-q2",
+        "zkm2-45-q1",
+        "zkm2-68-q2",
+        "zkm3-45-q3",
+        "zkm3-68-q1"
+      ],
+      "preview": "What leadership move helps most without ignoring anyone?"
+    },
+    {
+      "key": "caiden::how many minutes are left after shoes and coat?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-k1-q1",
+        "cq2-k1-q2",
+        "cq3-k1-q1",
+        "cq4-k1-q2",
+        "cq5-k1-q1"
+      ],
+      "preview": "How many minutes are left after shoes and coat?"
+    },
+    {
+      "key": "caiden::how many items did caiden pack in total?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-k1-q2",
+        "cq2-k1-q1",
+        "cq3-k1-q2",
+        "cq4-k1-q1",
+        "cq5-k1-q2"
+      ],
+      "preview": "How many items did Caiden pack in total?"
+    },
+    {
+      "key": "caiden::does his plan fit if he does all tasks and the break?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-23-q1",
+        "cq2-23-q3",
+        "cq3-23-q3",
+        "cq4-23-q2",
+        "cq5-23-q1"
+      ],
+      "preview": "Does his plan fit if he does all tasks and the break?"
+    },
+    {
+      "key": "caiden::can he afford both items with 10 tokens?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-23-q2",
+        "cq2-23-q1",
+        "cq3-23-q1",
+        "cq4-23-q3",
+        "cq5-23-q2"
+      ],
+      "preview": "Can he afford both items with 10 tokens?"
+    },
+    {
+      "key": "caiden::what order finishes everything with time to spare?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-23-q3",
+        "cq2-23-q2",
+        "cq3-23-q2",
+        "cq4-23-q1",
+        "cq5-23-q3"
+      ],
+      "preview": "What order finishes everything with time to spare?"
+    },
+    {
+      "key": "caiden::which purchase plan best fits his 10-token budget for both items?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-45-q1",
+        "cq2-45-q3",
+        "cq3-45-q3",
+        "cq4-45-q2",
+        "cq5-45-q1"
+      ],
+      "preview": "Which purchase plan best fits his 10-token budget for both items?"
+    },
+    {
+      "key": "caiden::what is the smartest purchase plan for today?",
+      "count": 9,
+      "sampleQuestionIds": [
+        "cq1-68-q2",
+        "cq2-68-q1",
+        "cq3-68-q1",
+        "cq4-68-q3",
+        "cq5-68-q2"
+      ],
+      "preview": "What is the smartest purchase plan for today?"
+    }
+  ],
+  "duplicateAnswers": [
+    {
+      "key": "caiden::K-1::10 minutes left for this scena | 3 minutes left — skipped the… | 5 minutes left for this scenar | 7 minutes left — counted only…::B",
+      "count": 7,
+      "sampleQuestionIds": [
+        "cq1-k1-q1",
+        "cq3-k1-q1",
+        "cq5-k1-q1",
+        "cq6-k1-q2",
+        "cq6-k1-q6"
+      ],
+      "preview": "7 minutes left — counted only… | 5 minutes left for this scenar | 3 minutes left — skipped the… | 10 minutes left for this scena"
+    },
+    {
+      "key": "caiden::K-1::1 item only for this scenari | 2 items — he forgot to… | 3 items for this scenario | 4 items — he counted lunch…::C",
+      "count": 7,
+      "sampleQuestionIds": [
+        "cq1-k1-q2",
+        "cq3-k1-q2",
+        "cq5-k1-q2",
+        "cq6-k1-q3",
+        "cq6-k1-q7"
+      ],
+      "preview": "2 items — he forgot to… | 4 items — he counted lunch… | 3 items for this scenario | 1 item only for this scenari"
+    },
+    {
+      "key": "caiden::K-1::10 minutes left for this scena | 3 minutes left — skipped the… | 5 minutes left for this scenar | 7 minutes left — counted only…::D",
+      "count": 7,
+      "sampleQuestionIds": [
+        "cq1-k1-q3",
+        "cq3-k1-q3",
+        "cq5-k1-q3",
+        "cq6-k1-q4",
+        "cq6-k1-q8"
+      ],
+      "preview": "7 minutes left — counted only… | 3 minutes left — skipped the… | 10 minutes left for this scena | 5 minutes left for this scenar"
+    },
+    {
+      "key": "caiden::K-1::1 item only for this scenari | 2 items — he forgot to… | 3 items for this scenario | 4 items — he counted lunch…::B",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cq2-k1-q1",
+        "cq4-k1-q1",
+        "cq7-k1-q2",
+        "cq7-k1-q6",
+        "cq9-k1-q2"
+      ],
+      "preview": "2 items — he forgot to… | 3 items for this scenario | 4 items — he counted lunch… | 1 item only for this scenari"
+    },
+    {
+      "key": "caiden::K-1::10 minutes left for this scena | 3 minutes left — skipped the… | 5 minutes left for this scenar | 7 minutes left — counted only…::C",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cq2-k1-q2",
+        "cq4-k1-q2",
+        "cq7-k1-q3",
+        "cq7-k1-q7",
+        "cq9-k1-q3"
+      ],
+      "preview": "7 minutes left — counted only… | 3 minutes left — skipped the… | 5 minutes left for this scenar | 10 minutes left for this scena"
+    },
+    {
+      "key": "caiden::K-1::1 item only for this scenari | 2 items — he forgot to… | 3 items for this scenario | 4 items — he counted lunch…::D",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cq2-k1-q3",
+        "cq4-k1-q3",
+        "cq7-k1-q4",
+        "cq7-k1-q8",
+        "cq9-k1-q4"
+      ],
+      "preview": "2 items — he forgot to… | 4 items — he counted lunch… | 1 item only for this scenari | 3 items for this scenario"
+    },
+    {
+      "key": "caiden::2-3::do backpack last even if the bus line is long | skip all planning and run at the last second | skip lunch to save 4 minutes only | yes — tasks total 12 minutes plus 5-minute break fits in…::A",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq1-23-q1",
+        "cq5-23-q1",
+        "cq7-23-q5",
+        "cq8-23-q5",
+        "cq9-23-q1"
+      ],
+      "preview": "Yes — tasks total 12 minutes plus 5-minute break fits in… | Skip lunch to save 4 minutes only | Do backpack last even if the bus line is long | Skip all planning and run at the last second"
+    },
+    {
+      "key": "caiden::2-3::buy only the pencil and save the rest | buy the eraser twice to be sure | he needs 15 tokens for both | yes — 4 + 3 = 7 tokens,…::B",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq1-23-q2",
+        "cq5-23-q2",
+        "cq7-23-q6",
+        "cq8-23-q6",
+        "cq9-23-q2"
+      ],
+      "preview": "Buy only the pencil and save the rest | Yes — 4 + 3 = 7 tokens,… | Buy the eraser twice to be sure | He needs 15 tokens for both"
+    },
+    {
+      "key": "caiden::2-3::do homework and table together without timing | homework, feed dog, set table — 30 minutes total | set table first, then homework, skip dog until after dinner | start with the longest break first for this scenario::C",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq1-23-q3",
+        "cq5-23-q3",
+        "cq7-23-q7",
+        "cq8-23-q7",
+        "cq9-23-q3"
+      ],
+      "preview": "Set table first, then homework, skip dog until after dinner | Do homework and table together without timing | Homework, feed dog, set table — 30 minutes total | Start with the longest break first for this scenario"
+    },
+    {
+      "key": "caiden::4-5::buy only the pencil and save the rest | buy the eraser twice to be sure | he needs 15 tokens for both | yes — 4 + 3 = 7 tokens,…::D",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq1-45-q1",
+        "cq5-45-q1",
+        "cq7-45-q8",
+        "cq8-45-q8",
+        "cq9-45-q4"
+      ],
+      "preview": "Buy only the pencil and save the rest | Buy the eraser twice to be sure | He needs 15 tokens for both | Yes — 4 + 3 = 7 tokens,…"
+    },
+    {
+      "key": "caiden::6-8::play first and hope to finish everything later | quiz study (25 min) plus start chores (10 of 15 min) | split 17 minutes on quiz and 18 on project — neither finishes | start the full project (50 min) and finish chores later::A",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq1-68-q3",
+        "cq5-68-q3",
+        "cq6-68-q5",
+        "cq7-68-q1",
+        "cq8-68-q1"
+      ],
+      "preview": "Quiz study (25 min) plus start chores (10 of 15 min) | Start the full project (50 min) and finish chores later | Split 17 minutes on quiz and 18 on project — neither finishes | Play first and hope to finish everything later"
+    },
+    {
+      "key": "caiden::4-5::do backpack last even if the bus line is long | skip all planning and run at the last second | skip lunch to save 4 minutes only | yes — tasks total 12 minutes plus 5-minute break fits in…::A",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq2-45-q2",
+        "cq3-45-q2",
+        "cq6-45-q5",
+        "cq7-45-q1",
+        "cq8-45-q1"
+      ],
+      "preview": "Yes — tasks total 12 minutes plus 5-minute break fits in… | Skip lunch to save 4 minutes only | Do backpack last even if the bus line is long | Skip all planning and run at the last second"
+    },
+    {
+      "key": "caiden::4-5::buy only the pencil and save the rest | buy the eraser twice to be sure | he needs 15 tokens for both | yes — 4 + 3 = 7 tokens,…::B",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq2-45-q3",
+        "cq3-45-q3",
+        "cq6-45-q6",
+        "cq7-45-q2",
+        "cq8-45-q2"
+      ],
+      "preview": "Buy only the pencil and save the rest | Yes — 4 + 3 = 7 tokens,… | Buy the eraser twice to be sure | He needs 15 tokens for both"
+    },
+    {
+      "key": "caiden::6-8::buy all three items today with $14 for this scenario | buy markers ($8) only and skip snack for this scenario | buy notebook ($5) and snack ($3) — $8 total, saves markers for… | buy notebook and markers ($13) with no money left::C",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq2-68-q1",
+        "cq3-68-q1",
+        "cq6-68-q7",
+        "cq7-68-q3",
+        "cq8-68-q3"
+      ],
+      "preview": "Buy markers ($8) only and skip snack for this scenario | Buy notebook and markers ($13) with no money left | Buy notebook ($5) and snack ($3) — $8 total, saves markers for… | Buy all three items today with $14 for this scenario"
+    },
+    {
+      "key": "caiden::6-8::play first and hope to finish everything later | quiz study (25 min) plus start chores (10 of 15 min) | split 17 minutes on quiz and 18 on project — neither finishes | start the full project (50 min) and finish chores later::D",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq2-68-q2",
+        "cq3-68-q2",
+        "cq6-68-q8",
+        "cq7-68-q4",
+        "cq8-68-q4"
+      ],
+      "preview": "Start the full project (50 min) and finish chores later | Split 17 minutes on quiz and 18 on project — neither finishes | Play first and hope to finish everything later | Quiz study (25 min) plus start chores (10 of 15 min)"
+    },
+    {
+      "key": "caiden::6-8::do all tasks at once with no time check | draw first, pack, read, then skip the break to save time | pack (8), draw (12), break (5), read (20) — total 45 minutes | read (20), draw (12), pack (8) — no break planned::A",
+      "count": 5,
+      "sampleQuestionIds": [
+        "cq2-68-q3",
+        "cq3-68-q3",
+        "cq7-68-q5",
+        "cq8-68-q5",
+        "cq9-68-q1"
+      ],
+      "preview": "Pack (8), draw (12), break (5), read (20) — total 45 minutes | Draw first, pack, read, then skip the break to save time | Read (20), draw (12), pack (8) — no break planned | Do all tasks at once with no time check"
+    },
+    {
+      "key": "caiden::4-5::do homework and table together without timing | homework, feed dog, set table — 30 minutes total | set table first, then homework, skip dog until after dinner | start with the longest break first for this scenario::A",
+      "count": 4,
+      "sampleQuestionIds": [
+        "cq1-45-q2",
+        "cq5-45-q2",
+        "cq6-45-q1",
+        "cq9-45-q5"
+      ],
+      "preview": "Homework, feed dog, set table — 30 minutes total | Set table first, then homework, skip dog until after dinner | Do homework and table together without timing | Start with the longest break first for this scenario"
+    },
+    {
+      "key": "caiden::4-5::do backpack last even if the bus line is long | skip all planning and run at the last second | skip lunch to save 4 minutes only | yes — tasks total 12 minutes plus 5-minute break fits in…::B",
+      "count": 4,
+      "sampleQuestionIds": [
+        "cq1-45-q3",
+        "cq5-45-q3",
+        "cq6-45-q2",
+        "cq9-45-q6"
+      ],
+      "preview": "Skip lunch to save 4 minutes only | Yes — tasks total 12 minutes plus 5-minute break fits in… | Do backpack last even if the bus line is long | Skip all planning and run at the last second"
+    },
+    {
+      "key": "caiden::6-8::do all tasks at once with no time check | draw first, pack, read, then skip the break to save time | pack (8), draw (12), break (5), read (20) — total 45 minutes | read (20), draw (12), pack (8) — no break planned::C",
+      "count": 4,
+      "sampleQuestionIds": [
+        "cq1-68-q1",
+        "cq5-68-q1",
+        "cq6-68-q3",
+        "cq9-68-q7"
+      ],
+      "preview": "Draw first, pack, read, then skip the break to save time | Read (20), draw (12), pack (8) — no break planned | Pack (8), draw (12), break (5), read (20) — total 45 minutes | Do all tasks at once with no time check"
+    },
+    {
+      "key": "caiden::6-8::buy all three items today with $14 for this scenario | buy markers ($8) only and skip snack for this scenario | buy notebook ($5) and snack ($3) — $8 total, saves markers for… | buy notebook and markers ($13) with no money left::D",
+      "count": 4,
+      "sampleQuestionIds": [
+        "cq1-68-q2",
+        "cq5-68-q2",
+        "cq6-68-q4",
+        "cq9-68-q8"
+      ],
+      "preview": "Buy markers ($8) only and skip snack for this scenario | Buy notebook and markers ($13) with no money left | Buy all three items today with $14 for this scenario | Buy notebook ($5) and snack ($3) — $8 total, saves markers for…"
+    }
+  ],
+  "repeatedScenarios": [
+    {
+      "key": "after the ceremony, miranda scanned the line and realized caiden was missing. his notebook lay open on a chair, and his water bottle had rolled under the table. miranda heard a faint sound near the hallway but did not run alone. she told the facilitator what she saw, pointed to the belongings, and helped the group retrace the last place caiden had been seen near the stage doors.",
+      "count": 12,
+      "sampleQuestionIds": [
+        "mst-k1-q1",
+        "mst-k1-q2",
+        "mst-k1-q3",
+        "mst-23-q1",
+        "mst-23-q2"
+      ],
+      "preview": "After the ceremony, Miranda scanned the line and realized Caiden was missing. His notebook lay open "
+    },
+    {
+      "key": "miranda found a clue note on the floor with one smudged word: \"meet by the ____ after lunch.\" beside the blank was a small sketch of branches, leaves, and a curved trunk. miranda compared the drawing to places around school—the cafeteria door, the library steps, and the old tree near the playground. the trunk sketch matched the playground tree, and the note mentioned lunch, which happens right before recess at that tree.",
+      "count": 12,
+      "sampleQuestionIds": [
+        "mcl-k1-q1",
+        "mcl-k1-q2",
+        "mcl-k1-q3",
+        "mcl-23-q1",
+        "mcl-23-q2"
+      ],
+      "preview": "Miranda found a clue note on the floor with one smudged word: \"Meet by the ____ after lunch.\" Beside"
+    },
+    {
+      "key": "before focus flame began, students kept asking, \"what are we doing next?\" miranda studied the front board and noticed the morning schedule card was gone. she remembered the teacher carrying a stack of folders from the board area to the reading table. miranda walked to the reading table, lifted the folders carefully, and found one corner of the schedule card tucked underneath. she matched the card to the board space and saw that math workshop came before snack break.",
+      "count": 11,
+      "sampleQuestionIds": [
+        "ms-k1-q2",
+        "ms-k1-q3",
+        "ms-23-q1",
+        "ms-23-q2",
+        "ms-23-q3"
+      ],
+      "preview": "Before Focus Flame began, students kept asking, \"What are we doing next?\" Miranda studied the front "
+    },
+    {
+      "key": "zeke hears someone making a joke that hurts another student's feelings. everyone laughs, but zeke notices the student looking down. during the brave voice, zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. during the brave voice, zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+      "count": 9,
+      "sampleQuestionIds": [
+        "zkm4-23-q1",
+        "zkm4-23-q2",
+        "zkm4-23-q3",
+        "zkm4-45-q1",
+        "zkm4-45-q2"
+      ],
+      "preview": "Zeke hears someone making a joke that hurts another student's feelings. Everyone laughs, but Zeke no"
+    },
+    {
+      "key": "b-4's mood scanner starts blinking because someone's feelings are getting big. b-4 needs help naming the feeling before choosing what to do next. during mood scanner, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during mood scanner, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during mood scanner, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m1-45-q1",
+        "b4m1-45-q2",
+        "b4m1-45-q3",
+        "b4m1-68-q1",
+        "b4m1-68-q2"
+      ],
+      "preview": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming"
+    },
+    {
+      "key": "b-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. b-4 needs help matching signals to support moves. during body signal detective, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m2-k1-q1",
+        "b4m2-k1-q2",
+        "b4m2-k1-q3",
+        "b4m2-23-q1",
+        "b4m2-23-q2"
+      ],
+      "preview": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buz"
+    },
+    {
+      "key": "b-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. b-4 needs help matching signals to support moves. during body signal detective, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during body signal detective, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during body signal detective, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m2-45-q1",
+        "b4m2-45-q2",
+        "b4m2-45-q3",
+        "b4m2-68-q1",
+        "b4m2-68-q2"
+      ],
+      "preview": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buz"
+    },
+    {
+      "key": "b-4 finds a glowing brave choice button. it only works when someone picks the helpful choice, even when the easy choice is tempting. during the brave choice button, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m3-k1-q1",
+        "b4m3-k1-q2",
+        "b4m3-k1-q3",
+        "b4m3-23-q1",
+        "b4m3-23-q2"
+      ],
+      "preview": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even w"
+    },
+    {
+      "key": "b-4 finds a glowing brave choice button. it only works when someone picks the helpful choice, even when the easy choice is tempting. during the brave choice button, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during the brave choice button, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during the brave choice button, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m3-45-q1",
+        "b4m3-45-q2",
+        "b4m3-45-q3",
+        "b4m3-68-q1",
+        "b4m3-68-q2"
+      ],
+      "preview": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even w"
+    },
+    {
+      "key": "b-4's focus reset station has three buttons: breathe, move, and start small. the learner needs to pick the right reset before jumping back in. during focus reset station, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m4-k1-q1",
+        "b4m4-k1-q2",
+        "b4m4-k1-q3",
+        "b4m4-23-q1",
+        "b4m4-23-q2"
+      ],
+      "preview": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pi"
+    },
+    {
+      "key": "b-4's focus reset station has three buttons: breathe, move, and start small. the learner needs to pick the right reset before jumping back in. during focus reset station, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during focus reset station, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during focus reset station, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m4-45-q1",
+        "b4m4-45-q2",
+        "b4m4-45-q3",
+        "b4m4-68-q1",
+        "b4m4-68-q2"
+      ],
+      "preview": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pi"
+    },
+    {
+      "key": "b-4 starts a calm-down countdown after a big feeling alert. the mission is to choose what helps the body calm before making the next choice. during calm-down countdown, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m5-k1-q1",
+        "b4m5-k1-q2",
+        "b4m5-k1-q3",
+        "b4m5-23-q1",
+        "b4m5-23-q2"
+      ],
+      "preview": "B-4 starts a calm-down countdown after a big feeling alert. The mission is to choose what helps the "
+    },
+    {
+      "key": "b-4 starts a calm-down countdown after a big feeling alert. the mission is to choose what helps the body calm before making the next choice. during calm-down countdown, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during calm-down countdown, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during calm-down countdown, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m5-45-q1",
+        "b4m5-45-q2",
+        "b4m5-45-q3",
+        "b4m5-68-q1",
+        "b4m5-68-q2"
+      ],
+      "preview": "B-4 starts a calm-down countdown after a big feeling alert. The mission is to choose what helps the "
+    },
+    {
+      "key": "b-4 opens the oops repair lab after someone makes a mistake. the lab does not erase mistakes. it helps repair them. during oops repair lab, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during oops repair lab, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during oops repair lab, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m6-45-q1",
+        "b4m6-45-q2",
+        "b4m6-45-q3",
+        "b4m6-68-q1",
+        "b4m6-68-q2"
+      ],
+      "preview": "B-4 opens the Oops Repair Lab after someone makes a mistake. The lab does not erase mistakes. It hel"
+    },
+    {
+      "key": "b-4's confidence charger is low. it charges when someone notices effort, tries again, and uses helpful self-talk. during confidence charger, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during confidence charger, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during confidence charger, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m7-45-q1",
+        "b4m7-45-q2",
+        "b4m7-45-q3",
+        "b4m7-68-q1",
+        "b4m7-68-q2"
+      ],
+      "preview": "B-4's Confidence Charger is low. It charges when someone notices effort, tries again, and uses helpf"
+    },
+    {
+      "key": "b-4's focus flame glows when the learner combines feeling awareness, body signals, brave choice, calm-down move, and reflection. during the focus flame finale, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during the focus flame finale, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. during the focus flame finale, b-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "b4m8-45-q1",
+        "b4m8-45-q2",
+        "b4m8-45-q3",
+        "b4m8-68-q1",
+        "b4m8-68-q2"
+      ],
+      "preview": "B-4's Focus Flame glows when the learner combines feeling awareness, body signals, brave choice, cal"
+    },
+    {
+      "key": "charlie discovers strange footprints near the school garden. something has been snacking on the lettuce, and charlie wants to solve the mystery without blaming the class hamster again. during the mystery footprints, charlie observes carefully, changes one variable at a time, and records what the test shows. during the mystery footprints, charlie observes carefully, changes one variable at a time, and records what the test shows.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cm1-45-q1",
+        "cm1-45-q2",
+        "cm1-45-q3",
+        "cm1-68-q1",
+        "cm1-68-q2"
+      ],
+      "preview": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lett"
+    },
+    {
+      "key": "charlie drops an orange into water. it floats. then he peels it, drops it again, and makes a face like the orange just revealed a secret. during the floating orange, charlie observes carefully, changes one variable at a time, and records what the test shows.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cm2-k1-q1",
+        "cm2-k1-q2",
+        "cm2-k1-q3",
+        "cm2-23-q1",
+        "cm2-23-q2"
+      ],
+      "preview": "Charlie drops an orange into water. It floats. Then he peels it, drops it again, and makes a face li"
+    },
+    {
+      "key": "charlie drops an orange into water. it floats. then he peels it, drops it again, and makes a face like the orange just revealed a secret. during the floating orange, charlie observes carefully, changes one variable at a time, and records what the test shows. during the floating orange, charlie observes carefully, changes one variable at a time, and records what the test shows.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cm2-45-q1",
+        "cm2-45-q2",
+        "cm2-45-q3",
+        "cm2-68-q1",
+        "cm2-68-q2"
+      ],
+      "preview": "Charlie drops an orange into water. It floats. Then he peels it, drops it again, and makes a face li"
+    },
+    {
+      "key": "during science club, a weird squeak keeps interrupting the room. charlie wants to investigate before everyone decides the cabinets are haunted. during the mystery sound, charlie observes carefully, changes one variable at a time, and records what the test shows. during the mystery sound, charlie observes carefully, changes one variable at a time, and records what the test shows. during the mystery sound, charlie observes carefully, changes one variable at a time, and records what the test shows.",
+      "count": 6,
+      "sampleQuestionIds": [
+        "cm3-45-q1",
+        "cm3-45-q2",
+        "cm3-45-q3",
+        "cm3-68-q1",
+        "cm3-68-q2"
+      ],
+      "preview": "During science club, a weird squeak keeps interrupting the room. Charlie wants to investigate before"
+    }
+  ],
+  "repetitiveMissions": [],
+  "progressionNotes": [],
+  "auditSummary": {
+    "generatedAt": "2026-06-15T04:22:43.184Z",
+    "totalQuestions": 548,
+    "averageDifficultyByCharacter": {
+      "b4": 4,
+      "charlie": 4.052083333333333,
+      "zeke": 4.1875,
+      "caiden": 4.26595744680851,
+      "miranda": 4
+    },
+    "flagCounts": {},
+    "positionDistributionByCharacter": {
+      "b4": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke": {
+        "A": 24,
+        "B": 24,
+        "C": 24,
+        "D": 24,
+        "total": 96,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden": {
+        "A": 47,
+        "B": 47,
+        "C": 47,
+        "D": 47,
+        "total": 188,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda": {
+        "A": 18,
+        "B": 18,
+        "C": 18,
+        "D": 18,
+        "total": 72,
+        "uneven": false,
+        "dominantPosition": null
+      }
+    },
+    "positionDistributionByMission": {
+      "b4::b4-mood-scanner": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-body-signal-detective": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-brave-choice-button": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-focus-reset-station": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-calm-down-countdown": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-oops-repair-lab": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-confidence-charger": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "b4::b4-focus-flame-finale": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-mystery-footprints": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-floating-orange": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-mystery-sound": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-volcano-trouble": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-missing-plant": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-robot-rescue": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-marshmallow-tower": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "charlie::charlie-science-fair-mystery": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-new-table": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-pass-the-ball": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-group-project-glitch": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-brave-voice": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-friendship-repair": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-courage-challenge": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-team-captain-test": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "zeke::zeke-final-huddle": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-1": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-2": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-3": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-4": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-5": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-6": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-7": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-8": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "caiden::quest-9": {
+        "A": 8,
+        "B": 8,
+        "C": 8,
+        "D": 8,
+        "total": 32,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-1": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-2": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::miranda-mystery-file-3": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::the-missing-letters": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::the-context-clue-challenge": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      },
+      "miranda::mirandas-detective-notebook": {
+        "A": 3,
+        "B": 3,
+        "C": 3,
+        "D": 3,
+        "total": 12,
+        "uneven": false,
+        "dominantPosition": null
+      }
+    },
+    "topRewriteCandidates": [
+      {
+        "character": "b4",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "K-1",
+        "questionId": "b4m1-k1-q1",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "What feeling might be getting bigger?",
+        "skillTags": [
+          "Emotional Awareness",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Emotional Awareness",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "Angry for this scenario for this scenario"
+          },
+          {
+            "id": "c",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Angry for this scenario for this scenario",
+        "correctIndex": 1,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Angry for this scenario for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "K-1",
+        "questionId": "b4m1-k1-q2",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which feeling matches the body signals?",
+        "skillTags": [
+          "Emotional Awareness",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Emotional Awareness",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "Happy for this scenario for this scenario"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "Happy for this scenario for this scenario",
+        "correctIndex": 2,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Happy for this scenario for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "missionNumber": 1,
+        "week": 1,
+        "gradeBand": "K-1",
+        "questionId": "b4m1-k1-q3",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which feeling should B-4 notice first?",
+        "skillTags": [
+          "Emotional Awareness",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Emotional Awareness",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "Ignore the feeling and keep going"
+          },
+          {
+            "id": "d",
+            "label": "Sad for this scenario for this scenario"
+          }
+        ],
+        "correctAnswerId": "d",
+        "correctAnswerLabel": "Sad for this scenario for this scenario",
+        "correctIndex": 3,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Sad for this scenario for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "K-1",
+        "questionId": "b4m2-k1-q1",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which feeling matches the body signals?",
+        "skillTags": [
+          "Body Awareness / Self-Regulation",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Body Awareness / Self-Regulation",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "Take slow breaths for this scenario"
+          },
+          {
+            "id": "c",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Take slow breaths for this scenario",
+        "correctIndex": 1,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Take slow breaths for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "K-1",
+        "questionId": "b4m2-k1-q2",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which feeling should B-4 notice first?",
+        "skillTags": [
+          "Body Awareness / Self-Regulation",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Body Awareness / Self-Regulation",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "A nervous tummy clue for this scenario"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "A nervous tummy clue for this scenario",
+        "correctIndex": 2,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "A nervous tummy clue for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "missionNumber": 2,
+        "week": 2,
+        "gradeBand": "K-1",
+        "questionId": "b4m2-k1-q3",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which body signal should B-4 check first?",
+        "skillTags": [
+          "Body Awareness / Self-Regulation",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Body Awareness / Self-Regulation",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "Ignore the feeling and keep going"
+          },
+          {
+            "id": "d",
+            "label": "Tired for this scenario for this scenario"
+          }
+        ],
+        "correctAnswerId": "d",
+        "correctAnswerLabel": "Tired for this scenario for this scenario",
+        "correctIndex": 3,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Tired for this scenario for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "missionNumber": 3,
+        "week": 3,
+        "gradeBand": "K-1",
+        "questionId": "b4m3-k1-q1",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which feeling should B-4 notice first?",
+        "skillTags": [
+          "Brave Choices / Decision Making",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Brave Choices / Decision Making",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "Help pick them up for this scenario"
+          },
+          {
+            "id": "c",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Help pick them up for this scenario",
+        "correctIndex": 1,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Help pick them up for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "missionNumber": 3,
+        "week": 3,
+        "gradeBand": "K-1",
+        "questionId": "b4m3-k1-q2",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which body signal should B-4 check first?",
+        "skillTags": [
+          "Brave Choices / Decision Making",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Brave Choices / Decision Making",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "Ask if they want to play for this scenario"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "c",
+        "correctAnswerLabel": "Ask if they want to play for this scenario",
+        "correctIndex": 2,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Ask if they want to play for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "missionNumber": 3,
+        "week": 3,
+        "gradeBand": "K-1",
+        "questionId": "b4m3-k1-q3",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "What feeling might be getting bigger?",
+        "skillTags": [
+          "Brave Choices / Decision Making",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Brave Choices / Decision Making",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "c",
+            "label": "Ignore the feeling and keep going"
+          },
+          {
+            "id": "d",
+            "label": "Try your best to follow directions"
+          }
+        ],
+        "correctAnswerId": "d",
+        "correctAnswerLabel": "Try your best to follow directions",
+        "correctIndex": 3,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Try your best to follow directions",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      },
+      {
+        "character": "b4",
+        "missionId": "b4-focus-reset-station",
+        "missionTitle": "Focus Reset Station",
+        "missionNumber": 4,
+        "week": 4,
+        "gradeBand": "K-1",
+        "questionId": "b4m4-k1-q1",
+        "scenarioText": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pick the right reset before jumping back in. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "questionText": "Which body signal should B-4 check first?",
+        "skillTags": [
+          "Focus / Attention Reset",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL",
+          "Self-Regulation",
+          "SEL"
+        ],
+        "skillArea": "Focus / Attention Reset",
+        "questionType": "math",
+        "choices": [
+          {
+            "id": "a",
+            "label": "A calm strategy used before naming the feeling"
+          },
+          {
+            "id": "b",
+            "label": "Take one slow breath for this scenario"
+          },
+          {
+            "id": "c",
+            "label": "A strategy that helps a little but ignores body signals"
+          },
+          {
+            "id": "d",
+            "label": "Ignore the feeling and keep going"
+          }
+        ],
+        "correctAnswerId": "b",
+        "correctAnswerLabel": "Take one slow breath for this scenario",
+        "correctIndex": 1,
+        "flags": [],
+        "difficultyScore": 3,
+        "difficultyReason": "appropriate simplicity for K-1",
+        "recommendedRewrite": "Question meets baseline quality checks. Optional polish: vary correct-answer position in future edits.",
+        "improvedDistractors": [
+          "Estimate quickly without adding the numbers",
+          "Choose the option that ignores the time limit",
+          "Pick the choice that skips checking totals"
+        ],
+        "suggestedCorrectAnswer": "Take one slow breath for this scenario",
+        "cognitiveNotes": [
+          "Uses quantitative reasoning",
+          "Benefits from sequencing or planning",
+          "SEL / emotional reasoning"
+        ],
+        "rewritePriority": "low"
+      }
+    ],
+    "rewritePriorityCounts": {
+      "high": 0,
+      "medium": 0,
+      "low": 548
+    }
+  },
+  "characterAverages": {
+    "b4": 4,
+    "charlie": 4.052083333333333,
+    "zeke": 4.1875,
+    "caiden": 4.26595744680851,
+    "miranda": 4
+  },
+  "positionByCharacter": {
+    "b4": {
+      "A": 24,
+      "B": 24,
+      "C": 24,
+      "D": 24,
+      "total": 96,
+      "uneven": false,
+      "dominantPosition": null
+    },
+    "charlie": {
+      "A": 24,
+      "B": 24,
+      "C": 24,
+      "D": 24,
+      "total": 96,
+      "uneven": false,
+      "dominantPosition": null
+    },
+    "zeke": {
+      "A": 24,
+      "B": 24,
+      "C": 24,
+      "D": 24,
+      "total": 96,
+      "uneven": false,
+      "dominantPosition": null
+    },
+    "caiden": {
+      "A": 47,
+      "B": 47,
+      "C": 47,
+      "D": 47,
+      "total": 188,
+      "uneven": false,
+      "dominantPosition": null
+    },
+    "miranda": {
+      "A": 18,
+      "B": 18,
+      "C": 18,
+      "D": 18,
+      "total": 72,
+      "uneven": false,
+      "dominantPosition": null
+    }
+  }
+}

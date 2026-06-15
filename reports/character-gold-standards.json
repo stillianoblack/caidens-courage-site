@@ -1,0 +1,2006 @@
+{
+  "generatedAt": "2026-06-15T03:56:24.776Z",
+  "top10ByCharacter": {
+    "caiden": [
+      {
+        "rank": 1,
+        "questionId": "cq1-68-q1",
+        "missionId": "quest-1",
+        "missionTitle": "What Comes First?",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During what comes first?, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Read (20), draw (12), pack (8) — no break planned\nC. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓\nD. Do all tasks at once with no time check"
+      },
+      {
+        "rank": 2,
+        "questionId": "cq4-68-q2",
+        "missionId": "quest-4",
+        "missionTitle": "Reset and Return",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During reset and return, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Read (20), draw (12), pack (8) — no break planned\nC. Do all tasks at once with no time check\nD. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓"
+      },
+      {
+        "rank": 3,
+        "questionId": "cq6-68-q3",
+        "missionId": "quest-6",
+        "missionTitle": "The Snack Shop Challenge",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the snack shop challenge, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Read (20), draw (12), pack (8) — no break planned\nC. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓\nD. Do all tasks at once with no time check"
+      },
+      {
+        "rank": 4,
+        "questionId": "cq6-68-q6",
+        "missionId": "quest-6",
+        "missionTitle": "The Snack Shop Challenge",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the snack shop challenge, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓\nC. Read (20), draw (12), pack (8) — no break planned\nD. Do all tasks at once with no time check"
+      },
+      {
+        "rank": 5,
+        "questionId": "cq7-68-q8",
+        "missionId": "quest-7",
+        "missionTitle": "The Camp Supply Mission",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the camp supply mission, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Read (20), draw (12), pack (8) — no break planned\nC. Do all tasks at once with no time check\nD. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓"
+      },
+      {
+        "rank": 6,
+        "questionId": "cq8-68-q2",
+        "missionId": "quest-8",
+        "missionTitle": "The Homework Rescue Plan",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the homework rescue plan, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓\nC. Read (20), draw (12), pack (8) — no break planned\nD. Do all tasks at once with no time check"
+      },
+      {
+        "rank": 7,
+        "questionId": "cq8-68-q8",
+        "missionId": "quest-8",
+        "missionTitle": "The Homework Rescue Plan",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the homework rescue plan, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Draw first, pack, read, then skip the break to save time\nB. Read (20), draw (12), pack (8) — no break planned\nC. Do all tasks at once with no time check\nD. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓"
+      },
+      {
+        "rank": 8,
+        "questionId": "cq9-68-q1",
+        "missionId": "quest-9",
+        "missionTitle": "The Camp Leader Challenge",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Which plan uses his 45 minutes without skipping the break or running late?",
+        "scenarioText": "Caiden has 45 minutes before camp starts. Drawing takes 12 minutes, packing takes 8 minutes, reading takes 20 minutes, and he wants a 5-minute break. He must finish all tasks before leaving. During the camp leader challenge, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Pack (8), draw (12), break (5), read (20) — total 45 minutes ✓\nB. Draw first, pack, read, then skip the break to save time\nC. Read (20), draw (12), pack (8) — no break planned\nD. Do all tasks at once with no time check"
+      },
+      {
+        "rank": 9,
+        "questionId": "cq1-45-q1",
+        "missionId": "quest-1",
+        "missionTitle": "What Comes First?",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "Can he afford both items with 10 tokens?",
+        "scenarioText": "Caiden has 10 tokens. A pencil costs 4 tokens and an eraser costs 3 tokens. He wants both before art class. During what comes first?, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Buy only the pencil and save the rest\nB. Buy the eraser twice to be sure\nC. He needs 15 tokens for both\nD. Yes — 4 + 3 = 7 tokens,… ✓"
+      },
+      {
+        "rank": 10,
+        "questionId": "cq1-45-q2",
+        "missionId": "quest-1",
+        "missionTitle": "What Comes First?",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Caiden executive-function / math focus"
+        ],
+        "questionText": "What order finishes everything with time to spare?",
+        "scenarioText": "Caiden must do homework (15 min), feed the dog (5 min), and set the table (10 min). Dinner is in 35 minutes. During what comes first?, Caiden checks his plan twice, compares time and supplies, and picks the step that keeps camp prep on track.",
+        "choices": "A. Homework, feed dog, set table — 30 minutes total ✓\nB. Set table first, then homework, skip dog until after dinner\nC. Do homework and table together without timing\nD. Start with the longest break first for this scenario"
+      }
+    ],
+    "miranda": [
+      {
+        "rank": 1,
+        "questionId": "ms-45-q1",
+        "missionId": "miranda-mystery-file-1",
+        "missionTitle": "The Missing Schedule",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Before Focus Flame began, students kept asking, \"What are we doing next?\" Miranda studied the front board and noticed the morning schedule card was gone. She remembered the teacher carrying a stack of folders from the board area to the reading table. Miranda walked to the reading table, lifted the folders carefully, and found one corner of the schedule card tucked underneath. She matched the card to the board space and saw that math workshop came before snack break.",
+        "choices": "A. A related detail that is weaker evidence\nB. A clue that sounds right but is off-topic\nC. An answer not stated or supported in the passage\nD. Students were asking what came next ✓"
+      },
+      {
+        "rank": 2,
+        "questionId": "ms-45-q2",
+        "missionId": "miranda-mystery-file-1",
+        "missionTitle": "The Missing Schedule",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Before Focus Flame began, students kept asking, \"What are we doing next?\" Miranda studied the front board and noticed the morning schedule card was gone. She remembered the teacher carrying a stack of folders from the board area to the reading table. Miranda walked to the reading table, lifted the folders carefully, and found one corner of the schedule card tucked underneath. She matched the card to the board space and saw that math workshop came before snack break.",
+        "choices": "A. The teacher carrying folders fr… ✓\nB. A related detail that is weaker evidence\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 3,
+        "questionId": "ms-45-q3",
+        "missionId": "miranda-mystery-file-1",
+        "missionTitle": "The Missing Schedule",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Before Focus Flame began, students kept asking, \"What are we doing next?\" Miranda studied the front board and noticed the morning schedule card was gone. She remembered the teacher carrying a stack of folders from the board area to the reading table. Miranda walked to the reading table, lifted the folders carefully, and found one corner of the schedule card tucked underneath. She matched the card to the board space and saw that math workshop came before snack break.",
+        "choices": "A. A related detail that is weaker evidence\nB. Careful observation for this scenario ✓\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 4,
+        "questionId": "mst-45-q1",
+        "missionId": "miranda-mystery-file-2",
+        "missionTitle": "The Missing Student",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "After the ceremony, Miranda scanned the line and realized Caiden was missing. His notebook lay open on a chair, and his water bottle had rolled under the table. Miranda heard a faint sound near the hallway but did not run alone. She told the facilitator what she saw, pointed to the belongings, and helped the group retrace the last place Caiden had been seen near the stage doors.",
+        "choices": "A. A related detail that is weaker evidence\nB. A clue that sounds right but is off-topic\nC. An answer not stated or supported in the passage\nD. His notebook and water bottl… for this scenario ✓"
+      },
+      {
+        "rank": 5,
+        "questionId": "mst-45-q2",
+        "missionId": "miranda-mystery-file-2",
+        "missionTitle": "The Missing Student",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "After the ceremony, Miranda scanned the line and realized Caiden was missing. His notebook lay open on a chair, and his water bottle had rolled under the table. Miranda heard a faint sound near the hallway but did not run alone. She told the facilitator what she saw, pointed to the belongings, and helped the group retrace the last place Caiden had been seen near the stage doors.",
+        "choices": "A. It was the safest choice for this scenario ✓\nB. A related detail that is weaker evidence\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 6,
+        "questionId": "mst-45-q3",
+        "missionId": "miranda-mystery-file-2",
+        "missionTitle": "The Missing Student",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "After the ceremony, Miranda scanned the line and realized Caiden was missing. His notebook lay open on a chair, and his water bottle had rolled under the table. Miranda heard a faint sound near the hallway but did not run alone. She told the facilitator what she saw, pointed to the belongings, and helped the group retrace the last place Caiden had been seen near the stage doors.",
+        "choices": "A. A related detail that is weaker evidence\nB. Follow back throug… for this scenario ✓\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 7,
+        "questionId": "mcl-45-q1",
+        "missionId": "miranda-mystery-file-3",
+        "missionTitle": "The Missing Clue",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Miranda found a clue note on the floor with one smudged word: \"Meet by the ____ after lunch.\" Beside the blank was a small sketch of branches, leaves, and a curved trunk. Miranda compared the drawing to places around school—the cafeteria door, the library steps, and the old tree near the playground. The trunk sketch matched the playground tree, and the note mentioned lunch, which happens right before recess at that tree.",
+        "choices": "A. A related detail that is weaker evidence\nB. A clue that sounds right but is off-topic\nC. An answer not stated or supported in the passage\nD. The drawing of bra… for this scenario ✓"
+      },
+      {
+        "rank": 8,
+        "questionId": "mcl-45-q2",
+        "missionId": "miranda-mystery-file-3",
+        "missionTitle": "The Missing Clue",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Miranda found a clue note on the floor with one smudged word: \"Meet by the ____ after lunch.\" Beside the blank was a small sketch of branches, leaves, and a curved trunk. Miranda compared the drawing to places around school—the cafeteria door, the library steps, and the old tree near the playground. The trunk sketch matched the playground tree, and the note mentioned lunch, which happens right before recess at that tree.",
+        "choices": "A. Blurry or rubbed away for this scenario ✓\nB. A related detail that is weaker evidence\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 9,
+        "questionId": "mcl-45-q3",
+        "missionId": "miranda-mystery-file-3",
+        "missionTitle": "The Missing Clue",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, which answer is best supported by evidence?",
+        "scenarioText": "Miranda found a clue note on the floor with one smudged word: \"Meet by the ____ after lunch.\" Beside the blank was a small sketch of branches, leaves, and a curved trunk. Miranda compared the drawing to places around school—the cafeteria door, the library steps, and the old tree near the playground. The trunk sketch matched the playground tree, and the note mentioned lunch, which happens right before recess at that tree.",
+        "choices": "A. A related detail that is weaker evidence\nB. The tree near the playground for this scenario ✓\nC. A clue that sounds right but is off-topic\nD. An answer not stated or supported in the passage"
+      },
+      {
+        "rank": 10,
+        "questionId": "ms-23-q3",
+        "missionId": "miranda-mystery-file-1",
+        "missionTitle": "The Missing Schedule",
+        "gradeBand": "2-3",
+        "difficultyScore": 4,
+        "flags": [],
+        "strengthReasons": [
+          "Strong difficulty score (4/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers",
+          "Evidence-based reading comprehension"
+        ],
+        "questionText": "According to the passage, Why were students confused, based on the passage?",
+        "scenarioText": "Before Focus Flame began, students kept asking, \"What are we doing next?\" Miranda studied the front board and noticed the morning schedule card was gone. She remembered the teacher carrying a stack of folders from the board area to the reading table. Miranda walked to the reading table, lifted the folders carefully, and found one corner of the schedule card tucked underneath. She matched the card to the board space and saw that math workshop came before snack break.",
+        "choices": "A. A detail from the wrong sentence\nB. A word that appears but does not answer\nC. They did not know what was next ✓\nD. Something not mentioned in the passage"
+      }
+    ],
+    "zeke": [
+      {
+        "rank": 1,
+        "questionId": "zkm1-45-q3",
+        "missionId": "zeke-new-table",
+        "missionTitle": "The New Table",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. Join in and include that kid with a friendly hello ✓\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 2,
+        "questionId": "zkm1-68-q1",
+        "missionId": "zeke-new-table",
+        "missionTitle": "The New Table",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke walks into lunch and sees a table of kids playing a card game. There is one open seat, but nobody has noticed him yet. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the new table, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. A fast choice that helps one person but not the group\nC. Asking to join without pressuring the group ✓\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 3,
+        "questionId": "zkm2-45-q2",
+        "missionId": "zeke-pass-the-ball",
+        "missionTitle": "Pass the Ball",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "During a team game, Zeke gets the ball. He could try to score alone, but Maya is wide open and ready. During pass the ball, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During pass the ball, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. Pass to whoever has the best chance to score ✓\nB. A kind idea that skips hearing everyone out\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 4,
+        "questionId": "zkm2-68-q3",
+        "missionId": "zeke-pass-the-ball",
+        "missionTitle": "Pass the Ball",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "During a team game, Zeke gets the ball. He could try to score alone, but Maya is wide open and ready. During pass the ball, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During pass the ball, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. Encourage them and stay ready for the next play ✓\nB. A kind idea that skips hearing everyone out\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 5,
+        "questionId": "zkm3-45-q1",
+        "missionId": "zeke-group-project-glitch",
+        "missionTitle": "The Group Project Glitch",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke's group has a poster to finish. Everyone starts talking at once, two kids want to draw, and nobody knows who is writing the title. During the group project glitch, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the group project glitch, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. A fast choice that helps one person but not the group\nC. A choice that shuts teammates out\nD. Divide roles based on what the project needs ✓"
+      },
+      {
+        "rank": 6,
+        "questionId": "zkm3-68-q2",
+        "missionId": "zeke-group-project-glitch",
+        "missionTitle": "The Group Project Glitch",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke's group has a poster to finish. Everyone starts talking at once, two kids want to draw, and nobody knows who is writing the title. During the group project glitch, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the group project glitch, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. A fast choice that helps one person but not the group\nC. A choice that shuts teammates out\nD. Help them name the goal and pick a solution together ✓"
+      },
+      {
+        "rank": 7,
+        "questionId": "zkm4-45-q3",
+        "missionId": "zeke-brave-voice",
+        "missionTitle": "The Brave Voice",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke hears someone making a joke that hurts another student's feelings. Everyone laughs, but Zeke notices the student looking down. During the brave voice, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the brave voice, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. Ask quietly if they want help or company ✓\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 8,
+        "questionId": "zkm4-68-q1",
+        "missionId": "zeke-brave-voice",
+        "missionTitle": "The Brave Voice",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke hears someone making a joke that hurts another student's feelings. Everyone laughs, but Zeke notices the student looking down. During the brave voice, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During the brave voice, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. A kind idea that skips hearing everyone out\nB. A fast choice that helps one person but not the group\nC. Name the harm respectfully and support the student ✓\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 9,
+        "questionId": "zkm5-45-q2",
+        "missionId": "zeke-friendship-repair",
+        "missionTitle": "Friendship Repair",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke forgot to save a seat for his friend, even though he promised. His friend is upset and quiet. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. Owning what he did not do for this scenario ✓\nB. A kind idea that skips hearing everyone out\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      },
+      {
+        "rank": 10,
+        "questionId": "zkm5-68-q3",
+        "missionId": "zeke-friendship-repair",
+        "missionTitle": "Friendship Repair",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which plan balances the team tradeoff best?",
+        "scenarioText": "Zeke forgot to save a seat for his friend, even though he promised. His friend is upset and quiet. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most. During friendship repair, Zeke listens to teammates, weighs two reasonable plans, and chooses the option that helps the group most.",
+        "choices": "A. The friend feels heard and sees change over time ✓\nB. A kind idea that skips hearing everyone out\nC. A fast choice that helps one person but not the group\nD. A choice that shuts teammates out"
+      }
+    ],
+    "charlie": [
+      {
+        "rank": 1,
+        "questionId": "cm1-68-q1",
+        "missionId": "charlie-mystery-footprints",
+        "missionTitle": "The Mystery Footprints",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which variable should Charlie change while keeping others the same?",
+        "scenarioText": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lettuce, and Charlie wants to solve the mystery without blaming the class hamster again. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Multiple pieces of matching evidence ✓\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 2,
+        "questionId": "cm1-68-q2",
+        "missionId": "charlie-mystery-footprints",
+        "missionTitle": "The Mystery Footprints",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What evidence best supports Charlie’s prediction?",
+        "scenarioText": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lettuce, and Charlie wants to solve the mystery without blaming the class hamster again. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Skip testing and guess from memory\nD. All three clues point to the same kind of visitor ✓"
+      },
+      {
+        "rank": 3,
+        "questionId": "cm1-68-q3",
+        "missionId": "charlie-mystery-footprints",
+        "missionTitle": "The Mystery Footprints",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What should Charlie test to compare two ideas fairly?",
+        "scenarioText": "Charlie discovers strange footprints near the school garden. Something has been snacking on the lettuce, and Charlie wants to solve the mystery without blaming the class hamster again. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery footprints, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. What evidence supports that theory? ✓\nB. Observe once without recording the result\nC. Change two variables at the same time\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 4,
+        "questionId": "cm2-68-q1",
+        "missionId": "charlie-floating-orange",
+        "missionTitle": "The Floating Orange",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What evidence best supports Charlie’s prediction?",
+        "scenarioText": "Charlie drops an orange into water. It floats. Then he peels it, drops it again, and makes a face like the orange just revealed a secret. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Whether the orange had a peel ✓\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 5,
+        "questionId": "cm2-68-q2",
+        "missionId": "charlie-floating-orange",
+        "missionTitle": "The Floating Orange",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What should Charlie test to compare two ideas fairly?",
+        "scenarioText": "Charlie drops an orange into water. It floats. Then he peels it, drops it again, and makes a face like the orange just revealed a secret. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Skip testing and guess from memory\nD. The peel helps trap air, which affects whether the orange floats ✓"
+      },
+      {
+        "rank": 6,
+        "questionId": "cm2-68-q3",
+        "missionId": "charlie-floating-orange",
+        "missionTitle": "The Floating Orange",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which variable should Charlie change while keeping others the same?",
+        "scenarioText": "Charlie drops an orange into water. It floats. Then he peels it, drops it again, and makes a face like the orange just revealed a secret. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the floating orange, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. The same bowl, water level, and orange size ✓\nB. Observe once without recording the result\nC. Change two variables at the same time\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 7,
+        "questionId": "cm3-68-q1",
+        "missionId": "charlie-mystery-sound",
+        "missionTitle": "The Mystery Sound",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What should Charlie test to compare two ideas fairly?",
+        "scenarioText": "During science club, a weird squeak keeps interrupting the room. Charlie wants to investigate before everyone decides the cabinets are haunted. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Test whether the sound stops when the fan is off ✓\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 8,
+        "questionId": "cm3-68-q2",
+        "missionId": "charlie-mystery-sound",
+        "missionTitle": "The Mystery Sound",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which variable should Charlie change while keeping others the same?",
+        "scenarioText": "During science club, a weird squeak keeps interrupting the room. Charlie wants to investigate before everyone decides the cabinets are haunted. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Observe once without recording the result\nB. Change two variables at the same time\nC. Skip testing and guess from memory\nD. The fan was likely connected to the sound ✓"
+      },
+      {
+        "rank": 9,
+        "questionId": "cm3-68-q3",
+        "missionId": "charlie-mystery-sound",
+        "missionTitle": "The Mystery Sound",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What evidence best supports Charlie’s prediction?",
+        "scenarioText": "During science club, a weird squeak keeps interrupting the room. Charlie wants to investigate before everyone decides the cabinets are haunted. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows. During the mystery sound, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. Timing helps link the sound to a specific cause ✓\nB. Observe once without recording the result\nC. Change two variables at the same time\nD. Skip testing and guess from memory"
+      },
+      {
+        "rank": 10,
+        "questionId": "cm4-45-q2",
+        "missionId": "charlie-volcano-trouble",
+        "missionTitle": "Volcano Trouble",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "What should Charlie test to compare two ideas fairly?",
+        "scenarioText": "Charlie builds a baking soda volcano, but the eruption is tiny. It gives one sad bubble and quits. Charlie refuses to let a volcano be this dramatic and boring. During volcano trouble, Charlie observes carefully, changes one variable at a time, and records what the test shows. During volcano trouble, Charlie observes carefully, changes one variable at a time, and records what the test shows.",
+        "choices": "A. More baking soda might improve the reaction ✓\nB. Observe once without recording the result\nC. Change two variables at the same time\nD. Skip testing and guess from memory"
+      }
+    ],
+    "b4": [
+      {
+        "rank": 1,
+        "questionId": "b4m1-45-q2",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. Happy and worried at the same time ✓\nB. A calm strategy used before naming the feeling\nC. A strategy that helps a little but ignores body signals\nD. Ignore the feeling and keep going"
+      },
+      {
+        "rank": 2,
+        "questionId": "b4m1-68-q2",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which coping step fits best after naming the feeling?",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. A strategy that helps a little but ignores body signals\nC. Ignore the feeling and keep going for this scenario\nD. Earlier stress can make the next trigger feel bigger ✓"
+      },
+      {
+        "rank": 3,
+        "questionId": "b4m1-68-q3",
+        "missionId": "b4-mood-scanner",
+        "missionTitle": "Mood Scanner",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4's mood scanner starts blinking because someone's feelings are getting big. B-4 needs help naming the feeling before choosing what to do next. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During mood scanner, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. How intense the feeling got and what else was already going on ✓\nB. A calm strategy used before naming the feeling\nC. A strategy that helps a little but ignores body signals\nD. Ignore the feeling and keep going for this scenario"
+      },
+      {
+        "rank": 4,
+        "questionId": "b4m2-45-q1",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. A strategy that helps a little but ignores body signals\nC. Ignore the feeling and keep going\nD. Pause and take space befo… for this scenario ✓"
+      },
+      {
+        "rank": 5,
+        "questionId": "b4m2-68-q1",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which coping step fits best after naming the feeling?",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. A strategy that helps a little but ignores body signals\nC. Early signals help prevent a bigger reaction ✓\nD. Ignore the feeling and keep going"
+      },
+      {
+        "rank": 6,
+        "questionId": "b4m2-68-q2",
+        "missionId": "b4-body-signal-detective",
+        "missionTitle": "Body Signal Detective",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4's dashboard lights up with body signals: fast heartbeat, wiggly legs, tight shoulders, and a buzzing brain. B-4 needs help matching signals to support moves. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During body signal detective, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. A strategy that helps a little but ignores body signals\nC. Ignore the feeling and keep going\nD. An early warning sign before escalation ✓"
+      },
+      {
+        "rank": 7,
+        "questionId": "b4m3-45-q3",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. Practice one part before the big moment ✓\nC. A strategy that helps a little but ignores body signals\nD. Ignore the feeling and keep going"
+      },
+      {
+        "rank": 8,
+        "questionId": "b4m3-68-q1",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. A calm strategy used before naming the feeling\nB. A strategy that helps a little but ignores body signals\nC. Redirect or support the person respectfully ✓\nD. Ignore the feeling and keep going"
+      },
+      {
+        "rank": 9,
+        "questionId": "b4m3-68-q3",
+        "missionId": "b4-brave-choice-button",
+        "missionTitle": "The Brave Choice Button",
+        "gradeBand": "6-8",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which coping step fits best after naming the feeling?",
+        "scenarioText": "B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During the brave choice button, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. Reach out respectfully when ready to talk ✓\nB. A calm strategy used before naming the feeling\nC. A strategy that helps a little but ignores body signals\nD. Ignore the feeling and keep going"
+      },
+      {
+        "rank": 10,
+        "questionId": "b4m4-45-q2",
+        "missionId": "b4-focus-reset-station",
+        "missionTitle": "Focus Reset Station",
+        "gradeBand": "4-5",
+        "difficultyScore": 5,
+        "flags": [],
+        "strengthReasons": [
+          "Maximum difficulty score (5/5)",
+          "No quality flags detected",
+          "Requires inference, comparison, or planning",
+          "Uses quantitative or time-based reasoning",
+          "Rich scenario with scenario-dependent answers"
+        ],
+        "questionText": "Which two strategies compare well for this moment?",
+        "scenarioText": "B-4's Focus Reset Station has three buttons: Breathe, Move, and Start Small. The learner needs to pick the right reset before jumping back in. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting. During focus reset station, B-4 notices body signals, names the feeling, and compares two calm-down strategies before acting.",
+        "choices": "A. Re-read one paragraph and summarize it ✓\nB. A calm strategy used before naming the feeling\nC. A strategy that helps a little but ignores body signals\nD. Ignore the feeling and keep going"
+      }
+    ]
+  },
+  "rubrics": {
+    "caiden": {
+      "character": "caiden",
+      "displayName": "Caiden",
+      "coreSkills": [
+        "planning",
+        "sequencing",
+        "budgeting",
+        "time management",
+        "tradeoff reasoning"
+      ],
+      "successPatterns": [
+        "Average difficulty 5.0/5 across top 10",
+        "100% with zero quality flags",
+        "Scenarios average 54 words",
+        "100% embed planning / sequencing language",
+        "100% use comparison, inference, or best-choice stems",
+        "Grade bands represented: 6-8 (8), 4-5 (2)",
+        "Comparison or best-choice framing is common in gold stems",
+        "Quantitative constraints (time, tokens, totals) appear in most gold scenarios"
+      ],
+      "patternStats": {
+        "count": 10,
+        "avgScenarioWords": 53.5,
+        "avgQuestionWords": 12,
+        "avgChoiceLength": 48.875,
+        "choiceLengthSpread": 3.825,
+        "zeroFlagsPct": 100,
+        "characterBreakdown": {
+          "caiden": 10
+        },
+        "gradeBandBreakdown": {
+          "6-8": 8,
+          "4-5": 2
+        },
+        "reasoningTypeBreakdown": {
+          "math": 9,
+          "inference": 1
+        },
+        "comparisonStemPct": 80,
+        "mathScenarioPct": 100,
+        "positionDistribution": {
+          "A": 2,
+          "B": 2,
+          "C": 2,
+          "D": 4
+        },
+        "commonStemPatterns": [
+          "Which two strategies compare well for this moment?",
+          "Which coping step fits best after naming the feeling?",
+          "What should [character] check first before acting?",
+          "According to the passage, which answer is best supported?",
+          "Which plan uses the time and constraints in the scenario?"
+        ],
+        "commonDistractorPatterns": [
+          "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+          "Plausible flawed: a strategy that helps a little but ignores an important clue",
+          "Clearly wrong but realistic: an option that does not fit the scenario"
+        ],
+        "character": "caiden",
+        "avgDifficulty": 5,
+        "skillKeywordPct": 100,
+        "reasoningStemPct": 100,
+        "commonStems": [
+          "Which plan uses his 45 minutes without skipping the break or (×8)",
+          "Can he afford both items with 10 tokens?",
+          "What order finishes everything with time to spare?"
+        ],
+        "successPatterns": [
+          "Average difficulty 5.0/5 across top 10",
+          "100% with zero quality flags",
+          "Scenarios average 54 words",
+          "100% embed planning / sequencing language",
+          "100% use comparison, inference, or best-choice stems",
+          "Grade bands represented: 6-8 (8), 4-5 (2)",
+          "Comparison or best-choice framing is common in gold stems",
+          "Quantitative constraints (time, tokens, totals) appear in most gold scenarios"
+        ]
+      },
+      "goldCriteria": [
+        "Embeds planning, sequencing, budgeting, time management, tradeoff reasoning in scenario and/or stem",
+        "Scenario ~54+ words with concrete, scenario-specific clues",
+        "Zero quality flags; balanced distractor lengths",
+        "Requires reading — not answerable from generic SEL or common sense alone",
+        "Four-option model: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+        "Correct answer position not predictable by length or slot"
+      ],
+      "fiveOfFive": [
+        "Multi-step plan under time or resource constraints (minutes, tokens, budget)",
+        "Stem asks which plan, order, or tradeoff fits ALL constraints in the scenario",
+        "Distractors: plans that forget one constraint, rush without checking totals, or skip a step",
+        "Hardest character path — difficulty 5/5 with quantitative reasoning"
+      ],
+      "fourOfFive": [
+        "Meets grade-band difficulty (4/5) with clear character skill focus",
+        "At most one minor heuristic flag that does not harm fairness",
+        "Scenario provides enough context; distractors are plausible"
+      ],
+      "threeOfFive": [
+        "K–1: age-appropriate recognition or simple cause/effect (expected floor)",
+        "Upper bands at 3/5: missing character skill depth or quality flags — needs review"
+      ],
+      "neverAppear": [
+        "Upper-band questions with no numbers, time limits, or planning constraints",
+        "Pure emotion/regulation items without executive-function demand",
+        "Single-step recall when grade band expects multi-step tradeoffs",
+        "SEL-only stems with no sequencing, budgeting, or time logic (grades 4+)",
+        "Joke or impossible distractors",
+        "Correct answer dramatically longer than all distractors",
+        "Question solvable without reading the scenario",
+        "Duplicate scenario framing text repeated multiple times"
+      ],
+      "distractorGuidelines": [
+        "One distractor ignores a time or quantity constraint",
+        "One distractor sequences steps in a plausible but wrong order",
+        "One distractor solves an easier sub-problem but misses the full plan"
+      ],
+      "gradeBandNotes": {
+        "K-1": "Simple planning recognition; difficulty ceiling ~3/5",
+        "2-3": "Introduce planning and sequencing with one clear decision",
+        "4-5": "Comparison and inference; target 4–5/5 for Caiden",
+        "6-8": "Multi-step tradeoff reasoning; target 4–5/5"
+      }
+    },
+    "miranda": {
+      "character": "miranda",
+      "displayName": "Miranda",
+      "coreSkills": [
+        "evidence",
+        "clues",
+        "passage analysis",
+        "inference"
+      ],
+      "successPatterns": [
+        "Average difficulty 4.9/5 across top 10",
+        "100% with zero quality flags",
+        "Scenarios average 74 words",
+        "100% embed evidence / clues language",
+        "100% use comparison, inference, or best-choice stems",
+        "Grade bands represented: 4-5 (9), 2-3 (1)",
+        "Comparison or best-choice framing is common in gold stems"
+      ],
+      "patternStats": {
+        "count": 10,
+        "avgScenarioWords": 73.6,
+        "avgQuestionWords": 11.1,
+        "avgChoiceLength": 41.325,
+        "choiceLengthSpread": 1.5449999999999988,
+        "zeroFlagsPct": 100,
+        "characterBreakdown": {
+          "miranda": 10
+        },
+        "gradeBandBreakdown": {
+          "4-5": 9,
+          "2-3": 1
+        },
+        "reasoningTypeBreakdown": {
+          "inference": 8,
+          "sequencing": 1,
+          "reading_comprehension": 1
+        },
+        "comparisonStemPct": 90,
+        "mathScenarioPct": 0,
+        "positionDistribution": {
+          "A": 3,
+          "B": 3,
+          "C": 1,
+          "D": 3
+        },
+        "commonStemPatterns": [
+          "Which two strategies compare well for this moment?",
+          "Which coping step fits best after naming the feeling?",
+          "What should [character] check first before acting?",
+          "According to the passage, which answer is best supported?",
+          "Which plan uses the time and constraints in the scenario?"
+        ],
+        "commonDistractorPatterns": [
+          "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+          "Plausible flawed: a strategy that helps a little but ignores an important clue",
+          "Clearly wrong but realistic: an option that does not fit the scenario"
+        ],
+        "character": "miranda",
+        "avgDifficulty": 4.9,
+        "skillKeywordPct": 100,
+        "reasoningStemPct": 100,
+        "commonStems": [
+          "According to the passage, which answer is best supported by  (×9)",
+          "According to the passage, Why were students confused, based "
+        ],
+        "successPatterns": [
+          "Average difficulty 4.9/5 across top 10",
+          "100% with zero quality flags",
+          "Scenarios average 74 words",
+          "100% embed evidence / clues language",
+          "100% use comparison, inference, or best-choice stems",
+          "Grade bands represented: 4-5 (9), 2-3 (1)",
+          "Comparison or best-choice framing is common in gold stems"
+        ]
+      },
+      "goldCriteria": [
+        "Embeds evidence, clues, passage analysis, inference in scenario and/or stem",
+        "Scenario ~74+ words with concrete, scenario-specific clues",
+        "Zero quality flags; balanced distractor lengths",
+        "Requires reading — not answerable from generic SEL or common sense alone",
+        "Four-option model: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+        "Correct answer position not predictable by length or slot"
+      ],
+      "fiveOfFive": [
+        "Passage with at least two concrete clues supporting the correct inference",
+        "Stem: “According to the passage…” or “Which clue best supports…”",
+        "Distractors: true but weaker evidence, related off-topic facts, plausible misreadings",
+        "Answer changes if a key passage sentence is removed"
+      ],
+      "fourOfFive": [
+        "Meets grade-band difficulty (4/5) with clear character skill focus",
+        "At most one minor heuristic flag that does not harm fairness",
+        "Scenario provides enough context; distractors are plausible"
+      ],
+      "threeOfFive": [
+        "K–1: age-appropriate recognition or simple cause/effect (expected floor)",
+        "Upper bands at 3/5: missing character skill depth or quality flags — needs review"
+      ],
+      "neverAppear": [
+        "Answers guessable without rereading the passage",
+        "Stems that do not reference evidence, clues, or passage details",
+        "Pure “who/where/when” recall at grades 6–8 without inference",
+        "Distractors unrelated to passage content",
+        "Joke or impossible distractors",
+        "Correct answer dramatically longer than all distractors",
+        "Question solvable without reading the scenario",
+        "Duplicate scenario framing text repeated multiple times"
+      ],
+      "distractorGuidelines": [
+        "One distractor cites a true passage detail that does not support the conclusion",
+        "One distractor over-infers beyond what the text says",
+        "One distractor is plausible if the reader skims but not if they reread"
+      ],
+      "gradeBandNotes": {
+        "K-1": "Simple evidence recognition; difficulty ceiling ~3/5",
+        "2-3": "Introduce evidence and clues with one clear decision",
+        "4-5": "Comparison and inference; target 4–5/5 for Miranda",
+        "6-8": "Multi-step inference; target 4–5/5"
+      }
+    },
+    "zeke": {
+      "character": "zeke",
+      "displayName": "Zeke",
+      "coreSkills": [
+        "teamwork",
+        "leadership",
+        "social reasoning",
+        "collaboration tradeoffs"
+      ],
+      "successPatterns": [
+        "Average difficulty 5.0/5 across top 10",
+        "100% with zero quality flags",
+        "Scenarios average 68 words",
+        "100% embed teamwork / leadership language",
+        "100% use comparison, inference, or best-choice stems",
+        "Grade bands represented: 4-5 (5), 6-8 (5)",
+        "Comparison or best-choice framing is common in gold stems"
+      ],
+      "patternStats": {
+        "count": 10,
+        "avgScenarioWords": 68,
+        "avgQuestionWords": 7,
+        "avgChoiceLength": 43.775,
+        "choiceLengthSpread": 0.825,
+        "zeroFlagsPct": 100,
+        "characterBreakdown": {
+          "zeke": 10
+        },
+        "gradeBandBreakdown": {
+          "4-5": 5,
+          "6-8": 5
+        },
+        "reasoningTypeBreakdown": {
+          "multiple_choice": 2,
+          "comparison": 1,
+          "sel_decision": 7
+        },
+        "comparisonStemPct": 100,
+        "mathScenarioPct": 0,
+        "positionDistribution": {
+          "A": 4,
+          "B": 2,
+          "C": 2,
+          "D": 2
+        },
+        "commonStemPatterns": [
+          "Which two strategies compare well for this moment?",
+          "Which coping step fits best after naming the feeling?",
+          "What should [character] check first before acting?",
+          "According to the passage, which answer is best supported?",
+          "Which plan uses the time and constraints in the scenario?"
+        ],
+        "commonDistractorPatterns": [
+          "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+          "Plausible flawed: a strategy that helps a little but ignores an important clue",
+          "Clearly wrong but realistic: an option that does not fit the scenario"
+        ],
+        "character": "zeke",
+        "avgDifficulty": 5,
+        "skillKeywordPct": 100,
+        "reasoningStemPct": 100,
+        "commonStems": [
+          "Which plan balances the team tradeoff best? (×10)"
+        ],
+        "successPatterns": [
+          "Average difficulty 5.0/5 across top 10",
+          "100% with zero quality flags",
+          "Scenarios average 68 words",
+          "100% embed teamwork / leadership language",
+          "100% use comparison, inference, or best-choice stems",
+          "Grade bands represented: 4-5 (5), 6-8 (5)",
+          "Comparison or best-choice framing is common in gold stems"
+        ]
+      },
+      "goldCriteria": [
+        "Embeds teamwork, leadership, social reasoning, collaboration tradeoffs in scenario and/or stem",
+        "Scenario ~68+ words with concrete, scenario-specific clues",
+        "Zero quality flags; balanced distractor lengths",
+        "Requires reading — not answerable from generic SEL or common sense alone",
+        "Four-option model: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+        "Correct answer position not predictable by length or slot"
+      ],
+      "fiveOfFive": [
+        "Group scenario with competing needs; leadership choice affects everyone",
+        "Stem asks which move helps the team without ignoring anyone",
+        "Two distractors are emotionally plausible team mistakes; one is realistic but too narrow",
+        "No cartoon selfish “obvious wrong” options"
+      ],
+      "fourOfFive": [
+        "Meets grade-band difficulty (4/5) with clear character skill focus",
+        "At most one minor heuristic flag that does not harm fairness",
+        "Scenario provides enough context; distractors are plausible"
+      ],
+      "threeOfFive": [
+        "K–1: age-appropriate recognition or simple cause/effect (expected floor)",
+        "Upper bands at 3/5: missing character skill depth or quality flags — needs review"
+      ],
+      "neverAppear": [
+        "Cartoonishly selfish wrong answers (“ignore everyone,” “only care about yourself”)",
+        "Leadership questions with no team or group context",
+        "Only one emotionally plausible option — rest are obvious jokes",
+        "Conflict resolution without a realistic collaboration tradeoff",
+        "Joke or impossible distractors",
+        "Correct answer dramatically longer than all distractors",
+        "Question solvable without reading the scenario",
+        "Duplicate scenario framing text repeated multiple times"
+      ],
+      "distractorGuidelines": [
+        "Two distractors are realistic group-leadership mistakes",
+        "One distractor helps one person but sidelines others",
+        "Avoid making the correct answer the only kind option"
+      ],
+      "gradeBandNotes": {
+        "K-1": "Simple teamwork recognition; difficulty ceiling ~3/5",
+        "2-3": "Introduce teamwork and leadership with one clear decision",
+        "4-5": "Comparison and inference; target 4–5/5 for Zeke",
+        "6-8": "Multi-step collaboration tradeoffs; target 4–5/5"
+      }
+    },
+    "charlie": {
+      "character": "charlie",
+      "displayName": "Charlie",
+      "coreSkills": [
+        "experimentation",
+        "variables",
+        "observation",
+        "scientific thinking"
+      ],
+      "successPatterns": [
+        "Average difficulty 5.0/5 across top 10",
+        "100% with zero quality flags",
+        "Scenarios average 69 words",
+        "100% embed experimentation / variables language",
+        "100% use comparison, inference, or best-choice stems",
+        "Grade bands represented: 6-8 (9), 4-5 (1)",
+        "Comparison or best-choice framing is common in gold stems"
+      ],
+      "patternStats": {
+        "count": 10,
+        "avgScenarioWords": 68.9,
+        "avgQuestionWords": 8.4,
+        "avgChoiceLength": 38.875,
+        "choiceLengthSpread": 1.7,
+        "zeroFlagsPct": 100,
+        "characterBreakdown": {
+          "charlie": 10
+        },
+        "gradeBandBreakdown": {
+          "6-8": 9,
+          "4-5": 1
+        },
+        "reasoningTypeBreakdown": {
+          "inference": 3,
+          "multiple_choice": 2,
+          "science_reasoning": 4,
+          "math": 1
+        },
+        "comparisonStemPct": 70,
+        "mathScenarioPct": 0,
+        "positionDistribution": {
+          "A": 4,
+          "B": 0,
+          "C": 3,
+          "D": 3
+        },
+        "commonStemPatterns": [
+          "Which two strategies compare well for this moment?",
+          "Which coping step fits best after naming the feeling?",
+          "What should [character] check first before acting?",
+          "According to the passage, which answer is best supported?",
+          "Which plan uses the time and constraints in the scenario?"
+        ],
+        "commonDistractorPatterns": [
+          "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+          "Plausible flawed: a strategy that helps a little but ignores an important clue",
+          "Clearly wrong but realistic: an option that does not fit the scenario"
+        ],
+        "character": "charlie",
+        "avgDifficulty": 5,
+        "skillKeywordPct": 100,
+        "reasoningStemPct": 100,
+        "commonStems": [
+          "What should Charlie test to compare two ideas fairly? (×4)",
+          "Which variable should Charlie change while keeping others th (×3)",
+          "What evidence best supports Charlie’s prediction? (×3)"
+        ],
+        "successPatterns": [
+          "Average difficulty 5.0/5 across top 10",
+          "100% with zero quality flags",
+          "Scenarios average 69 words",
+          "100% embed experimentation / variables language",
+          "100% use comparison, inference, or best-choice stems",
+          "Grade bands represented: 6-8 (9), 4-5 (1)",
+          "Comparison or best-choice framing is common in gold stems"
+        ]
+      },
+      "goldCriteria": [
+        "Embeds experimentation, variables, observation, scientific thinking in scenario and/or stem",
+        "Scenario ~69+ words with concrete, scenario-specific clues",
+        "Zero quality flags; balanced distractor lengths",
+        "Requires reading — not answerable from generic SEL or common sense alone",
+        "Four-option model: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+        "Correct answer position not predictable by length or slot"
+      ],
+      "fiveOfFive": [
+        "Fair-test setup: one variable changes, others held constant",
+        "Stem asks what to observe, predict, or change next in the experiment",
+        "Distractors: change wrong variable, skip observation, or draw conclusion too early",
+        "Scientific vocabulary appropriate to grade band"
+      ],
+      "fourOfFive": [
+        "Meets grade-band difficulty (4/5) with clear character skill focus",
+        "At most one minor heuristic flag that does not harm fairness",
+        "Scenario provides enough context; distractors are plausible"
+      ],
+      "threeOfFive": [
+        "K–1: age-appropriate recognition or simple cause/effect (expected floor)",
+        "Upper bands at 3/5: missing character skill depth or quality flags — needs review"
+      ],
+      "neverAppear": [
+        "Silly science distractors (“science is over forever,” magic explanations)",
+        "Changing two variables at once without fair-test framing",
+        "Conclusions before observation",
+        "Non-scientific reasoning dressed as science (pure opinion)",
+        "Joke or impossible distractors",
+        "Correct answer dramatically longer than all distractors",
+        "Question solvable without reading the scenario",
+        "Duplicate scenario framing text repeated multiple times"
+      ],
+      "distractorGuidelines": [
+        "One distractor changes the wrong variable",
+        "One distractor skips the observation step",
+        "One distractor is a common kid misconception, not a joke"
+      ],
+      "gradeBandNotes": {
+        "K-1": "Simple experimentation recognition; difficulty ceiling ~3/5",
+        "2-3": "Introduce experimentation and variables with one clear decision",
+        "4-5": "Comparison and inference; target 4–5/5 for Charlie",
+        "6-8": "Multi-step scientific thinking; target 4–5/5"
+      }
+    },
+    "b4": {
+      "character": "b4",
+      "displayName": "B-4",
+      "coreSkills": [
+        "emotions",
+        "regulation",
+        "self-awareness",
+        "coping strategies"
+      ],
+      "successPatterns": [
+        "Average difficulty 5.0/5 across top 10",
+        "100% with zero quality flags",
+        "Scenarios average 78 words",
+        "100% embed emotions / regulation language",
+        "100% use comparison, inference, or best-choice stems",
+        "Grade bands represented: 4-5 (4), 6-8 (6)",
+        "Comparison or best-choice framing is common in gold stems"
+      ],
+      "patternStats": {
+        "count": 10,
+        "avgScenarioWords": 77.7,
+        "avgQuestionWords": 8.3,
+        "avgChoiceLength": 45.3,
+        "choiceLengthSpread": 2.7799999999999985,
+        "zeroFlagsPct": 100,
+        "characterBreakdown": {
+          "b4": 10
+        },
+        "gradeBandBreakdown": {
+          "4-5": 4,
+          "6-8": 6
+        },
+        "reasoningTypeBreakdown": {
+          "math": 10
+        },
+        "comparisonStemPct": 100,
+        "mathScenarioPct": 100,
+        "positionDistribution": {
+          "A": 4,
+          "B": 1,
+          "C": 2,
+          "D": 3
+        },
+        "commonStemPatterns": [
+          "Which two strategies compare well for this moment?",
+          "Which coping step fits best after naming the feeling?",
+          "What should [character] check first before acting?",
+          "According to the passage, which answer is best supported?",
+          "Which plan uses the time and constraints in the scenario?"
+        ],
+        "commonDistractorPatterns": [
+          "Plausible incomplete: a reasonable step that skips a key part of the scenario",
+          "Plausible flawed: a strategy that helps a little but ignores an important clue",
+          "Clearly wrong but realistic: an option that does not fit the scenario"
+        ],
+        "character": "b4",
+        "avgDifficulty": 5,
+        "skillKeywordPct": 100,
+        "reasoningStemPct": 100,
+        "commonStems": [
+          "Which two strategies compare well for this moment? (×7)",
+          "Which coping step fits best after naming the feeling? (×3)"
+        ],
+        "successPatterns": [
+          "Average difficulty 5.0/5 across top 10",
+          "100% with zero quality flags",
+          "Scenarios average 78 words",
+          "100% embed emotions / regulation language",
+          "100% use comparison, inference, or best-choice stems",
+          "Grade bands represented: 4-5 (4), 6-8 (6)",
+          "Comparison or best-choice framing is common in gold stems"
+        ]
+      },
+      "goldCriteria": [
+        "Embeds emotions, regulation, self-awareness, coping strategies in scenario and/or stem",
+        "Scenario ~78+ words with concrete, scenario-specific clues",
+        "Zero quality flags; balanced distractor lengths",
+        "Requires reading — not answerable from generic SEL or common sense alone",
+        "Four-option model: best / plausible-incomplete / plausible-flawed / realistic-wrong",
+        "Correct answer position not predictable by length or slot"
+      ],
+      "fiveOfFive": [
+        "Body signals → name feeling → compare two regulation strategies",
+        "Stem compares coping steps or strategies for the named feeling",
+        "Distractors: strategy applied too early, helps partially but ignores body signals, or avoids naming",
+        "Warm tone; no shaming language"
+      ],
+      "fourOfFive": [
+        "Meets grade-band difficulty (4/5) with clear character skill focus",
+        "At most one minor heuristic flag that does not harm fairness",
+        "Scenario provides enough context; distractors are plausible"
+      ],
+      "threeOfFive": [
+        "K–1: age-appropriate recognition or simple cause/effect (expected floor)",
+        "Upper bands at 3/5: missing character skill depth or quality flags — needs review"
+      ],
+      "neverAppear": [
+        "Skipping body-signal → name-feeling → strategy sequence (grades 2+)",
+        "Only extreme negative distractors with one obviously positive correct answer",
+        "Regulation strategies applied before naming the feeling (as correct answer)",
+        "Emotion labeling without any coping comparison",
+        "Joke or impossible distractors",
+        "Correct answer dramatically longer than all distractors",
+        "Question solvable without reading the scenario",
+        "Duplicate scenario framing text repeated multiple times"
+      ],
+      "distractorGuidelines": [
+        "One distractor uses a calm strategy before naming the feeling",
+        "One distractor helps a little but ignores body signals",
+        "One distractor avoids the feeling rather than regulating it"
+      ],
+      "gradeBandNotes": {
+        "K-1": "Simple emotions recognition; difficulty ceiling ~3/5",
+        "2-3": "Introduce emotions and regulation with one clear decision",
+        "4-5": "Comparison and inference; target 4–5/5 for B-4",
+        "6-8": "Multi-step coping strategies; target 4–5/5"
+      }
+    }
+  },
+  "violations": {
+    "caiden": {
+      "total": 16,
+      "critical": 0,
+      "review": 16,
+      "items": [
+        {
+          "questionId": "cq2-45-q3",
+          "missionId": "quest-2",
+          "missionTitle": "Focus or Distraction?",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq3-45-q3",
+          "missionId": "quest-3",
+          "missionTitle": "Time Tracker",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq4-45-q2",
+          "missionId": "quest-4",
+          "missionTitle": "Reset and Return",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq5-45-q1",
+          "missionId": "quest-5",
+          "missionTitle": "Build the Plan",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq7-45-q2",
+          "missionId": "quest-7",
+          "missionTitle": "The Camp Supply Mission",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq8-45-q5",
+          "missionId": "quest-8",
+          "missionTitle": "The Homework Rescue Plan",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq9-45-q1",
+          "missionId": "quest-9",
+          "missionTitle": "The Camp Leader Challenge",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq9-45-q4",
+          "missionId": "quest-9",
+          "missionTitle": "The Camp Leader Challenge",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq9-45-q7",
+          "missionId": "quest-9",
+          "missionTitle": "The Camp Leader Challenge",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq1-45-q1",
+          "missionId": "quest-1",
+          "missionTitle": "What Comes First?",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq6-45-q3",
+          "missionId": "quest-6",
+          "missionTitle": "The Snack Shop Challenge",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq6-45-q6",
+          "missionId": "quest-6",
+          "missionTitle": "The Snack Shop Challenge",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq7-45-q5",
+          "missionId": "quest-7",
+          "missionTitle": "The Camp Supply Mission",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq7-45-q8",
+          "missionId": "quest-7",
+          "missionTitle": "The Camp Supply Mission",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq8-45-q2",
+          "missionId": "quest-8",
+          "missionTitle": "The Homework Rescue Plan",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "cq8-45-q8",
+          "missionId": "quest-8",
+          "missionTitle": "The Homework Rescue Plan",
+          "gradeBand": "4-5",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        }
+      ]
+    },
+    "miranda": {
+      "total": 0,
+      "critical": 0,
+      "review": 0,
+      "items": []
+    },
+    "zeke": {
+      "total": 2,
+      "critical": 2,
+      "review": 0,
+      "items": [
+        {
+          "questionId": "zkm1-68-q3",
+          "missionId": "zeke-new-table",
+          "missionTitle": "The New Table",
+          "gradeBand": "6-8",
+          "difficultyScore": 3,
+          "flags": [
+            "lacks_reasoning_skill"
+          ],
+          "violations": [
+            "Audit flag: lacks_reasoning_skill",
+            "Below character gold bar (3/5; target 4–5/5 for 6-8)"
+          ],
+          "severity": "critical"
+        },
+        {
+          "questionId": "zkm6-68-q2",
+          "missionId": "zeke-courage-challenge",
+          "missionTitle": "The Courage Challenge",
+          "gradeBand": "6-8",
+          "difficultyScore": 3,
+          "flags": [
+            "lacks_reasoning_skill"
+          ],
+          "violations": [
+            "Audit flag: lacks_reasoning_skill",
+            "Below character gold bar (3/5; target 4–5/5 for 6-8)"
+          ],
+          "severity": "critical"
+        }
+      ]
+    },
+    "charlie": {
+      "total": 0,
+      "critical": 0,
+      "review": 0,
+      "items": []
+    },
+    "b4": {
+      "total": 16,
+      "critical": 0,
+      "review": 16,
+      "items": [
+        {
+          "questionId": "b4m1-45-q3",
+          "missionId": "b4-mood-scanner",
+          "missionTitle": "Mood Scanner",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m2-45-q2",
+          "missionId": "b4-body-signal-detective",
+          "missionTitle": "Body Signal Detective",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m3-45-q1",
+          "missionId": "b4-brave-choice-button",
+          "missionTitle": "The Brave Choice Button",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m4-45-q3",
+          "missionId": "b4-focus-reset-station",
+          "missionTitle": "Focus Reset Station",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m5-45-q3",
+          "missionId": "b4-calm-down-countdown",
+          "missionTitle": "Calm-Down Countdown",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m6-45-q2",
+          "missionId": "b4-oops-repair-lab",
+          "missionTitle": "Oops Repair Lab",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m7-45-q1",
+          "missionId": "b4-confidence-charger",
+          "missionTitle": "Confidence Charger",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m8-45-q3",
+          "missionId": "b4-focus-flame-finale",
+          "missionTitle": "The Focus Flame Finale",
+          "gradeBand": "4-5",
+          "difficultyScore": 4,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m1-68-q1",
+          "missionId": "b4-mood-scanner",
+          "missionTitle": "Mood Scanner",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m2-68-q3",
+          "missionId": "b4-body-signal-detective",
+          "missionTitle": "Body Signal Detective",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m3-68-q2",
+          "missionId": "b4-brave-choice-button",
+          "missionTitle": "The Brave Choice Button",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m4-68-q1",
+          "missionId": "b4-focus-reset-station",
+          "missionTitle": "Focus Reset Station",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m5-68-q1",
+          "missionId": "b4-calm-down-countdown",
+          "missionTitle": "Calm-Down Countdown",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m6-68-q3",
+          "missionId": "b4-oops-repair-lab",
+          "missionTitle": "Oops Repair Lab",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m7-68-q2",
+          "missionId": "b4-confidence-charger",
+          "missionTitle": "Confidence Charger",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        },
+        {
+          "questionId": "b4m8-68-q1",
+          "missionId": "b4-focus-flame-finale",
+          "missionTitle": "The Focus Flame Finale",
+          "gradeBand": "6-8",
+          "difficultyScore": 5,
+          "flags": [],
+          "violations": [
+            "Stem lacks character-appropriate reasoning cue (compare, evidence, plan, etc.)"
+          ],
+          "severity": "review"
+        }
+      ]
+    }
+  }
+}

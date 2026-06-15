@@ -35,16 +35,17 @@ type PilotProgramSettingsDrawerProps = {
   onClose: () => void;
   onOpenSupport: () => void;
   programCode?: string;
+  layout?: 'desktop' | 'mobile';
 };
 
-const TABS: Array<{ id: ProgramSettingsTabId; label: string }> = [
-  { id: 'program-info', label: 'Program Info' },
-  { id: 'facilitators', label: 'Facilitators' },
-  { id: 'access-codes', label: 'Access Codes' },
-  { id: 'student-data', label: 'Student Data' },
-  { id: 'student-gallery', label: 'Student Gallery' },
-  { id: 'exports', label: 'Exports' },
-  { id: 'support', label: 'Support' },
+const TABS: Array<{ id: ProgramSettingsTabId; label: string; helper: string }> = [
+  { id: 'program-info', label: 'Program Info', helper: 'Program name, cohort, and status.' },
+  { id: 'access-codes', label: 'Access Codes', helper: 'Program, facilitator, and family codes.' },
+  { id: 'facilitators', label: 'Facilitators', helper: 'Lead contacts for this program.' },
+  { id: 'student-data', label: 'Student Data', helper: 'Roster and student records.' },
+  { id: 'student-gallery', label: 'Student Gallery', helper: 'Gallery sharing and approvals.' },
+  { id: 'exports', label: 'Exports', helper: 'Download CSV reports.' },
+  { id: 'support', label: 'Support', helper: 'Help, upgrades, and pilot support.' },
 ];
 
 function formatDate(iso?: string | null): string {
@@ -72,6 +73,7 @@ export default function PilotProgramSettingsDrawer({
   onClose,
   onOpenSupport,
   programCode,
+  layout = 'desktop',
 }: PilotProgramSettingsDrawerProps) {
   const program = readActivePilotProgram();
   const code = programCode?.trim() || program?.programCode?.trim() || '';
@@ -88,6 +90,12 @@ export default function PilotProgramSettingsDrawer({
   const { showToast } = useToast();
   const [gallerySettings, setGallerySettings] = useState<GalleryProgramSettings | null>(null);
   const [gallerySaving, setGallerySaving] = useState(false);
+  const [expandedMobileSection, setExpandedMobileSection] = useState<ProgramSettingsTabId | null>(activeTab);
+
+  useEffect(() => {
+    if (!open) return;
+    setExpandedMobileSection(activeTab);
+  }, [activeTab, open]);
 
   useEffect(() => {
     if (!open || !code) return;
@@ -152,12 +160,12 @@ export default function PilotProgramSettingsDrawer({
     }
   };
 
-  const renderPanel = () => {
+  const renderPanel = (tabId: ProgramSettingsTabId = activeTab) => {
     if (!program) {
       return <p className="pilot-emptyNote">No active program context found.</p>;
     }
 
-    switch (activeTab) {
+    switch (tabId) {
       case 'program-info':
         return (
           <dl className="pilot-settingsGrid">
@@ -187,17 +195,40 @@ export default function PilotProgramSettingsDrawer({
         );
       case 'access-codes':
         return (
-          <div className="pilot-settingsCodes">
+          <div className={`pilot-settingsCodes${layout === 'mobile' ? ' pilot-settingsCodes--mobile' : ''}`}>
             {[
-              { label: 'Program code', value: program.programCode },
-              { label: 'Facilitator code', value: program.facilitatorAccessCode || '—' },
-              { label: 'Family code', value: program.familyAccessCode },
-            ].map((item) => (
-              <div key={item.label} className="pilot-settingsCodeRow">
-                <span className="pilot-settingsCodeLabel">{item.label}</span>
-                <CopyableCompactValue value={String(item.value)} type="code" label={item.label} />
-              </div>
-            ))}
+              {
+                label: 'Program code',
+                value: program.programCode,
+                helper: 'Reference code for this pilot program.',
+              },
+              {
+                label: 'Facilitator code',
+                value: program.facilitatorAccessCode || '—',
+                helper: 'Facilitators use this to open the command center.',
+              },
+              {
+                label: 'Family code',
+                value: program.familyAccessCode,
+                helper: 'Families use this to join the portal.',
+              },
+            ].map((item) =>
+              layout === 'mobile' ? (
+                <article key={item.label} className="pilot-settingsCodeCard">
+                  <h3 className="pilot-settingsCodeCardLabel">{item.label}</h3>
+                  <p className="pilot-settingsCodeCardValue">{item.value}</p>
+                  <div className="pilot-settingsCodeCardCopy">
+                    <CopyableCompactValue value={String(item.value)} type="code" label={item.label} />
+                  </div>
+                  <p className="pilot-settingsCodeCardHelper">{item.helper}</p>
+                </article>
+              ) : (
+                <div key={item.label} className="pilot-settingsCodeRow">
+                  <span className="pilot-settingsCodeLabel">{item.label}</span>
+                  <CopyableCompactValue value={String(item.value)} type="code" label={item.label} />
+                </div>
+              ),
+            )}
           </div>
         );
       case 'student-data':
@@ -283,37 +314,93 @@ export default function PilotProgramSettingsDrawer({
     }
   };
 
+  const isMobileLayout = layout === 'mobile';
+
   return (
     <PilotDrawer
       open={open}
       onClose={onClose}
-      className="pilot-drawer pilot-drawer--settings"
+      className={[
+        'pilot-drawer',
+        'pilot-drawer--settings',
+        isMobileLayout ? 'pilot-drawer--settingsMobile' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       titleId="pilot-settings-drawer-title"
     >
-      <div className="pilot-drawerHead">
-        <h2 id="pilot-settings-drawer-title" className="pilot-drawerTitle">
-          Program Settings
-        </h2>
+      <div className="pilot-drawerHead pilot-settingsMobileHead">
+        <div>
+          <h2 id="pilot-settings-drawer-title" className="pilot-drawerTitle">
+            Program Settings
+          </h2>
+          {isMobileLayout ? (
+            <p className="pilot-drawerSubtitle">
+              Manage access, students, gallery, exports, and support.
+            </p>
+          ) : null}
+        </div>
         <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
           ×
         </button>
       </div>
       <div className="pilot-drawerBody pilot-drawerBody--settings">
-        <div className="pilot-settingsLayout">
-          <nav className="pilot-settingsTabs" aria-label="Settings sections">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`pilot-settingsTab${activeTab === tab.id ? ' pilot-settingsTab--active' : ''}`}
-                onClick={() => onTabChange(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-          <div className="pilot-settingsPanel">{renderPanel()}</div>
-        </div>
+        {isMobileLayout ? (
+          <div className="pilot-settingsMobile">
+            {TABS.map((tab) => {
+              const expanded = expandedMobileSection === tab.id;
+              return (
+                <section
+                  key={tab.id}
+                  className={[
+                    'pilot-settingsMobileSection',
+                    expanded ? 'pilot-settingsMobileSection--expanded' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <button
+                    type="button"
+                    className="pilot-settingsMobileSectionToggle"
+                    aria-expanded={expanded}
+                    onClick={() => {
+                      const nextExpanded = expanded ? null : tab.id;
+                      setExpandedMobileSection(nextExpanded);
+                      if (nextExpanded) onTabChange(nextExpanded);
+                    }}
+                  >
+                    <span className="pilot-settingsMobileSectionText">
+                      <span className="pilot-settingsMobileSectionLabel">{tab.label}</span>
+                      <span className="pilot-settingsMobileSectionHelper">{tab.helper}</span>
+                    </span>
+                    <span className="pilot-settingsMobileChevron" aria-hidden="true">
+                      ›
+                    </span>
+                  </button>
+                  {expanded ? (
+                    <div className="pilot-settingsMobileSectionBody">{renderPanel(tab.id)}</div>
+                  ) : null}
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="pilot-settingsLayout">
+            <nav className="pilot-settingsTabs" aria-label="Settings sections">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`pilot-settingsTab${activeTab === tab.id ? ' pilot-settingsTab--active' : ''}`}
+                  onClick={() => onTabChange(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+            <div className="pilot-settingsPanel">{renderPanel()}</div>
+          </div>
+        )}
       </div>
     </PilotDrawer>
   );

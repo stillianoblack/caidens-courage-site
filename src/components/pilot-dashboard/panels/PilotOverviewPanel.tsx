@@ -39,6 +39,9 @@ import {
   fetchFacilitatorApprovedGalleryItems,
   type StudentGalleryItem,
 } from '../../../lib/studentGalleryService';
+import { useFacilitatorMobileNav } from '../../../hooks/useFacilitatorMobileNav';
+import FacilitatorMobileOverviewHero from '../FacilitatorMobileOverviewHero';
+import { resolvePortalRailBrand } from '../../../lib/portalGamePaths';
 
 type PilotOverviewPanelProps = {
   metrics: PilotTrackingMetrics;
@@ -85,6 +88,8 @@ export default function PilotOverviewPanel({
   activeProgram = readActivePilotProgram(),
 }: PilotOverviewPanelProps) {
   const location = useLocation();
+  const { isMobileNav } = useFacilitatorMobileNav();
+  const brand = resolvePortalRailBrand();
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [insightTopic, setInsightTopic] = useState<FacilitatorB4InsightTopic>('participation');
@@ -207,17 +212,28 @@ export default function PilotOverviewPanel({
   }
 
   return (
-    <div className="pilot-panel pilot-panel--overview">
-      {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
+    <div className={`pilot-panel pilot-panel--overview${isMobileNav ? ' pilot-panel--overviewMobile' : ''}`}>
+      {isMobileNav ? (
+        <FacilitatorMobileOverviewHero
+          activeProgram={activeProgram}
+          metrics={metrics}
+          brandTitle={brand.title}
+          brandSubtitle={brand.subtitle}
+        />
+      ) : null}
+      {isMobileNav ? <FacilitatorOverviewCoachSlot slot="afterHero" /> : null}
+      {!isMobileNav && activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
-      <PilotResultsKpiGrid
-        metrics={metrics}
-        compact
-        onCardClick={(topic) => openInsights(topic)}
-      />
+      {!isMobileNav ? (
+        <PilotResultsKpiGrid
+          metrics={metrics}
+          compact
+          onCardClick={(topic) => openInsights(topic)}
+        />
+      ) : null}
 
-      <FacilitatorOverviewCoachSlot slot="afterMetrics" />
+      {!isMobileNav ? <FacilitatorOverviewCoachSlot slot="afterMetrics" /> : null}
 
       <PilotNeedsAttentionCard counts={needsAttention} />
 
@@ -244,57 +260,65 @@ export default function PilotOverviewPanel({
         )}
       </section>
 
-      <div className="pilot-overviewInsightRow">
-        <PilotOverviewGalleryCard programCode={programCode} />
-        <PilotB4RecommendationCard
-          recommendation={b4Recommendation}
-          onOpenInsights={() =>
-            openInsights(metrics.baselineChecksCompleted === 0 ? 'baseline' : 'modules')
-          }
-        />
-      </div>
+      {!isMobileNav ? (
+        <div className="pilot-overviewInsightRow">
+          <PilotOverviewGalleryCard programCode={programCode} />
+          <PilotB4RecommendationCard
+            recommendation={b4Recommendation}
+            onOpenInsights={() =>
+              openInsights(metrics.baselineChecksCompleted === 0 ? 'baseline' : 'modules')
+            }
+          />
+        </div>
+      ) : null}
 
-      <section className="pilot-panelBlock pilot-characterTracks">
-        <div className="pilot-panelBlockHead">
-          <h2 className="pilot-panelBlockTitle">Character Learning Tracks</h2>
-          <p className="pilot-panelBlockSub pilot-characterTracksNote">{PILOT_CHARACTER_TRACKS_NOTE}</p>
-        </div>
-        <div className="pilot-characterTrackGrid">
-          {PILOT_CHARACTER_TRACKS.map((track) => (
-            <CharacterLearningTrackCard
-              key={track.id}
-              id={track.id}
-              name={track.name}
-              track={track.track}
-              imageSrc={track.imageSrc}
-              previewHref={remapPortalKidsRoute(track.previewHref, location.pathname)}
-              metrics={track.metrics}
-              baselineChecksCompleted={metrics.baselineChecksCompleted}
-            />
-          ))}
-        </div>
-      </section>
+      {!isMobileNav ? (
+        <section className="pilot-panelBlock pilot-characterTracks">
+          <div className="pilot-panelBlockHead">
+            <h2 className="pilot-panelBlockTitle">Character Learning Tracks</h2>
+            <p className="pilot-panelBlockSub pilot-characterTracksNote">{PILOT_CHARACTER_TRACKS_NOTE}</p>
+          </div>
+          <div className="pilot-characterTrackGrid">
+            {PILOT_CHARACTER_TRACKS.map((track) => (
+              <CharacterLearningTrackCard
+                key={track.id}
+                id={track.id}
+                name={track.name}
+                track={track.track}
+                imageSrc={track.imageSrc}
+                previewHref={remapPortalKidsRoute(track.previewHref, location.pathname)}
+                metrics={track.metrics}
+                baselineChecksCompleted={metrics.baselineChecksCompleted}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      <section className="pilot-panelBlock pilot-panelBlock--baselineOverview pilot-panelBlock--compact">
-        <div className="pilot-panelBlockHead">
-          <h2 className="pilot-panelBlockTitle">Baseline Overview</h2>
-          <p className="pilot-panelBlockSub">Live baseline averages for this program.</p>
-        </div>
-        <PilotBaselineOverview
+      {!isMobileNav ? (
+        <section className="pilot-panelBlock pilot-panelBlock--baselineOverview pilot-panelBlock--compact">
+          <div className="pilot-panelBlockHead">
+            <h2 className="pilot-panelBlockTitle">Baseline Overview</h2>
+            <p className="pilot-panelBlockSub">Live baseline averages for this program.</p>
+          </div>
+          <PilotBaselineOverview
+            assessmentResults={assessmentResults}
+            participantLookup={participantLookup}
+          />
+        </section>
+      ) : null}
+
+      {!isMobileNav ? (
+        <PilotTrackingDataTables
           assessmentResults={assessmentResults}
+          moduleResults={moduleResults}
           participantLookup={participantLookup}
+          onStudentClick={(participantId) => openInsights('student-progress', participantId)}
+          assessmentLimit={5}
+          moduleLimit={5}
+          showEmptyStates
         />
-      </section>
-
-      <PilotTrackingDataTables
-        assessmentResults={assessmentResults}
-        moduleResults={moduleResults}
-        participantLookup={participantLookup}
-        onStudentClick={(participantId) => openInsights('student-progress', participantId)}
-        assessmentLimit={5}
-        moduleLimit={5}
-        showEmptyStates
-      />
+      ) : null}
 
       <div className="pilot-overviewSplit">
         <section className="pilot-panelBlock pilot-panelBlock--next">
@@ -325,7 +349,7 @@ export default function PilotOverviewPanel({
         </section>
       </div>
 
-      <FacilitatorOverviewCoachSlot slot="footer" />
+      {!isMobileNav ? <FacilitatorOverviewCoachSlot slot="footer" /> : null}
 
       <B4InsightsDrawer
         isOpen={insightsOpen}

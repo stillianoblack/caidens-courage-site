@@ -6,7 +6,6 @@ import type { ParticipantNameLookup } from '../../../lib/pilotResultsDisplay';
 import type { StudentParticipantRecord } from '../../../lib/pilotTrackingService';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
-import { PilotResultsStatusCopy } from '../PilotLocalNote';
 import PilotBaselineOverview from '../PilotBaselineOverview';
 import PilotResultsExportsBar from '../PilotResultsExportsBar';
 import PilotResultsKpiGrid from '../PilotResultsKpiGrid';
@@ -73,7 +72,6 @@ export default function PilotResultsPanel({
 
   return (
     <div className="pilot-panel pilot-panel--results">
-      <PilotResultsStatusCopy />
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
       <PilotResultsKpiGrid metrics={metrics} />
