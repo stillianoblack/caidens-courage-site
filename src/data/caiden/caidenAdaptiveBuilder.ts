@@ -4,10 +4,7 @@ import {
   type AdaptiveQuestionSelectionContext,
 } from '../../lib/adaptiveQuestionSelection';
 import { classifyQuestionDifficultyTier } from '../../lib/questionDifficultySelection';
-import {
-  applyStagingToQuestions,
-  stagingContentVersionSuffix,
-} from '../../lib/stagingQuestionOverrides';
+import { stagingContentVersionSuffix } from '../../lib/stagingQuestionOverrides';
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../../types/gameAssessment';
 import type { CaidenQuestAccent } from '../../types/gameAssessment';
 import type {

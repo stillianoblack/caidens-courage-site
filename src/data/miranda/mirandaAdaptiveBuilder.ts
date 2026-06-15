@@ -4,10 +4,7 @@ import {
   finalizeAdaptiveQuestions,
   type AdaptiveQuestionSelectionContext,
 } from '../../lib/adaptiveQuestionSelection';
-import {
-  applyStagingToQuestions,
-  stagingContentVersionSuffix,
-} from '../../lib/stagingQuestionOverrides';
+import { stagingContentVersionSuffix } from '../../lib/stagingQuestionOverrides';
 import type {
   MirandaAdaptiveFile,
   MirandaAdaptiveQuestion,
