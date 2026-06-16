@@ -1,8 +1,15 @@
 import type { InventoryCardRarity } from '../design-system/kids-adventure/InventoryItemCard';
 import type { AdventureModuleRecord, AdventureSpotCharacterKey, AdventureSpotRecord } from '../types/adventureModule';
 import type { CourageMissionRewardPayload } from '../types/courageMissionProgress';
-import { resolveWeeklyQuestReward } from './adventureWeekAssets';
-import { getBadgeArtworkPath } from './rewardArtwork';
+import { resolveCharacterDiscoveryForMission } from './characterDiscoveryService';
+import { MONTH_1_CHALLENGE, type MonthlyChallengeProgress } from './monthlyChallengeProgress';
+import {
+  resolveCheckInSpotRewardImage,
+  resolveConfiguredRewardImageUrl,
+  resolveWeeklyRewardDisplay,
+} from './weeklyRewardDisplay';
+import { isWeekFullyComplete } from './weekBadgeProgression';
+import type { WeeklyBadgeEarnedState } from './weeklyBadgeUnlock';
 
 function resolveCmsModuleForWeek(
   modules: AdventureModuleRecord[],
@@ -49,7 +56,7 @@ export function resolveCmsMissionTitle(
 
 export type CmsBadgeDisplay = {
   name: string;
-  imageUrl: string;
+  imageUrl: string | null;
   weekNumber: number | null;
   weekLabel: string | null;
   rarity: InventoryCardRarity;
@@ -70,6 +77,8 @@ const LEGACY_BADGE_WEEK_BY_NAME: Record<string, number> = {
 };
 
 export const CHECK_IN_BADGE_NAME = 'B-4 Check-In Reward';
+
+export const CHECK_IN_BADGE_DISPLAY_NAME = 'B-4 Check-In';
 
 const CHECK_IN_BADGE_NAMES = new Set([
   CHECK_IN_BADGE_NAME,
@@ -174,11 +183,10 @@ export function resolveCheckInBadgeDisplay(modules: AdventureModuleRecord[]): Cm
       const name =
         spot.reward_badge?.trim() ||
         spot.reward_name?.trim() ||
-        CHECK_IN_BADGE_NAME;
-      const imageUrl =
-        spot.reward_image_url?.trim() ||
-        spot.character_image_url?.trim() ||
-        getBadgeArtworkPath('Daily Check-In Spark');
+        CHECK_IN_BADGE_DISPLAY_NAME;
+      const imageUrl = resolveConfiguredRewardImageUrl({
+        rewardImageUrl: spot.reward_image_url,
+      });
 
       return {
         name,
@@ -191,8 +199,8 @@ export function resolveCheckInBadgeDisplay(modules: AdventureModuleRecord[]): Cm
   }
 
   return {
-    name: CHECK_IN_BADGE_NAME,
-    imageUrl: getBadgeArtworkPath('Daily Check-In Spark'),
+    name: CHECK_IN_BADGE_DISPLAY_NAME,
+    imageUrl: resolveCheckInSpotRewardImage(modules),
     weekNumber: null,
     weekLabel: 'Check-In',
     rarity: 'Common',
@@ -238,40 +246,23 @@ export function parseWeekNumberFromWeekIdOrNull(weekId: string | null | undefine
   return Number.isFinite(week) && week > 0 ? week : null;
 }
 
-function resolveCmsRarity(rarity?: string | null): InventoryCardRarity {
-  const normalized = rarity?.trim().toLowerCase();
-  if (normalized === 'epic') return 'Epic';
-  if (normalized === 'rare') return 'Rare';
-  return 'Common';
-}
-
-function resolveCmsImageUrl(
-  rewardSvgUrl?: string | null,
-  rewardImageUrl?: string | null,
-  fallbackName?: string,
-): string {
-  const cmsUrl = rewardSvgUrl?.trim() || rewardImageUrl?.trim() || null;
-  if (cmsUrl) return cmsUrl;
-  return getBadgeArtworkPath(fallbackName ?? '');
-}
-
 export function buildCmsBadgeIndex(modules: AdventureModuleRecord[]): CmsBadgeIndex {
   const byName = new Map<string, CmsBadgeDisplay>();
   const byWeek = new Map<number, CmsBadgeDisplay>();
 
   for (const module of modules) {
-    const reward = resolveWeeklyQuestReward(module);
-    if (!reward?.rewardName) continue;
+    const weekly = resolveWeeklyRewardDisplay(module);
+    if (!weekly) continue;
 
     const display: CmsBadgeDisplay = {
-      name: reward.rewardName,
-      imageUrl: resolveCmsImageUrl(reward.rewardSvgUrl, reward.rewardImageUrl, reward.rewardName),
-      weekNumber: module.week_number,
-      weekLabel: `Week ${module.week_number}`,
-      rarity: resolveCmsRarity(module.weekly_reward_rarity),
+      name: weekly.name,
+      imageUrl: weekly.imageUrl,
+      weekNumber: weekly.weekNumber,
+      weekLabel: weekly.weekLabel,
+      rarity: weekly.rarity,
     };
 
-    byName.set(reward.rewardName, display);
+    byName.set(weekly.name, display);
     byWeek.set(module.week_number, display);
   }
 
@@ -306,11 +297,27 @@ export function resolveBadgeDisplay(
 
   return {
     name: trimmedName,
-    imageUrl: getBadgeArtworkPath(trimmedName),
+    imageUrl: null,
     weekNumber: resolvedWeek,
     weekLabel: resolvedWeek ? `Week ${resolvedWeek}` : null,
     rarity: 'Common',
   };
+}
+
+export function resolveMissionCompleteBadgeDisplay(
+  modules: AdventureModuleRecord[],
+  weekNumber: number,
+  missionId?: string | null,
+  badgeName?: string | null,
+): CmsBadgeDisplay {
+  if (isCheckInMissionId(missionId) || isCheckInBadgeName(badgeName ?? '')) {
+    return resolveCheckInBadgeDisplay(modules);
+  }
+
+  const weekly = resolveWeeklyBadgeDisplay(weekNumber, modules);
+  if (weekly) return weekly;
+
+  return resolveBadgeDisplay(badgeName ?? '', modules, weekNumber);
 }
 
 export function enrichCourageMissionRewardFromCms(
@@ -318,13 +325,19 @@ export function enrichCourageMissionRewardFromCms(
   modules: AdventureModuleRecord[],
 ): CourageMissionRewardPayload {
   const weekNumber = parseWeekNumberFromWeekId(reward.week_id);
-  const display = resolveBadgeDisplay(reward.badge_unlocked, modules, weekNumber);
+  const display = resolveMissionCompleteBadgeDisplay(
+    modules,
+    weekNumber,
+    reward.mission_id,
+    reward.badge_unlocked,
+  );
   const cmsMissionTitle = resolveCmsMissionTitle(
     modules,
     weekNumber,
     reward.character_id,
     reward.mission_id,
   );
+  const discovery = resolveCharacterDiscoveryForMission(reward.mission_id);
 
   return {
     ...reward,
@@ -334,12 +347,15 @@ export function enrichCourageMissionRewardFromCms(
     week_number: weekNumber,
     badge_week_label: display.weekLabel,
     badge_rarity: display.rarity,
+    character_discovery_id: discovery?.id ?? reward.character_discovery_id ?? null,
+    character_discovery_name: discovery?.name ?? reward.character_discovery_name ?? null,
+    character_discovery_image_url: discovery?.imageSrc ?? reward.character_discovery_image_url ?? null,
   };
 }
 
 export type InventoryBadgeCatalogEntry = {
   key: string;
-  kind: 'check-in' | 'weekly';
+  kind: 'check-in' | 'weekly' | 'monthly';
   weekNumber: number | null;
   display: CmsBadgeDisplay;
   owned: boolean;
@@ -347,31 +363,36 @@ export type InventoryBadgeCatalogEntry = {
   unlockRequirement: string;
 };
 
+export function resolveMonthlyBadgeDisplay(
+  monthlyChallenge: MonthlyChallengeProgress,
+): CmsBadgeDisplay {
+  return {
+    name: monthlyChallenge.monthlyBadgeName,
+    imageUrl: null,
+    weekNumber: null,
+    weekLabel: 'Month 1',
+    rarity: 'Epic',
+  };
+}
+
 export function buildInventoryBadgeCatalog(
   modules: AdventureModuleRecord[],
-  ownedBadges: Array<{ kind: 'check-in' | 'weekly'; weekNumber: number | null }>,
+  earned: WeeklyBadgeEarnedState,
+  monthlyChallenge?: MonthlyChallengeProgress,
 ): InventoryBadgeCatalogEntry[] {
-  const ownedWeeklyWeeks = new Set(
-    ownedBadges.filter((badge) => badge.kind === 'weekly' && badge.weekNumber != null).map((b) => b.weekNumber!),
-  );
-  const ownsCheckIn = ownedBadges.some((badge) => badge.kind === 'check-in');
   const entries: InventoryBadgeCatalogEntry[] = [];
-
-  entries.push({
-    key: 'check-in',
-    kind: 'check-in',
-    weekNumber: null,
-    display: resolveCheckInBadgeDisplay(modules),
-    owned: ownsCheckIn,
-    locked: !ownsCheckIn,
-    unlockRequirement: 'Complete the B-4 Check-In to unlock.',
-  });
 
   const sortedModules = [...modules].sort((left, right) => left.week_number - right.week_number);
   for (const module of sortedModules) {
     const weekly = resolveWeeklyBadgeDisplay(module.week_number, modules);
     if (!weekly) continue;
-    const owned = ownedWeeklyWeeks.has(module.week_number);
+
+    const owned = earned.earnedWeeklyWeeks.has(module.week_number);
+    let unlockRequirement = `Complete all Week ${module.week_number} missions to unlock.`;
+    if (!owned && module.week_number > 1 && !isWeekFullyComplete(module.week_number - 1, earned.completedMissionIds)) {
+      unlockRequirement = `Complete Week ${module.week_number - 1} before Week ${module.week_number} unlocks.`;
+    }
+
     entries.push({
       key: `week-${module.week_number}`,
       kind: 'weekly',
@@ -379,9 +400,28 @@ export function buildInventoryBadgeCatalog(
       display: weekly,
       owned,
       locked: !owned,
-      unlockRequirement: `Complete all Week ${module.week_number} missions to unlock.`,
+      unlockRequirement,
     });
   }
+
+  const month = monthlyChallenge ?? {
+    monthNumber: MONTH_1_CHALLENGE.monthNumber,
+    monthlyBadgeName: MONTH_1_CHALLENGE.monthlyBadgeName,
+    monthChallengeCompleted: false,
+    weeksCompleted: 0,
+    weeksTotal: MONTH_1_CHALLENGE.weekNumbers.length,
+  } as MonthlyChallengeProgress;
+
+  const monthlyOwned = month.monthlyBadgeEarned;
+  entries.push({
+    key: `month-${month.monthNumber}`,
+    kind: 'monthly',
+    weekNumber: null,
+    display: resolveMonthlyBadgeDisplay(month),
+    owned: monthlyOwned,
+    locked: !monthlyOwned,
+    unlockRequirement: month.description,
+  });
 
   return entries;
 }

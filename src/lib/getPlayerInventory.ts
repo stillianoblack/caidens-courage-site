@@ -1,18 +1,30 @@
+import type { AdventureModuleRecord } from '../types/adventureModule';
+import { type NormalizedOwnedBadge } from './cmsBadgeArtwork';
+import { loadChildBadgeEarnedState, toNormalizedOwnedBadges } from './childInventoryEarnedState';
 import {
-  normalizeOwnedBadges,
-  type NormalizedOwnedBadge,
-  type RawOwnedBadgeRow,
-} from './cmsBadgeArtwork';
-import { resolvePlayerParticipantId } from './resolvePlayerParticipantId';
-import { supabase, isSupabaseConfigured } from './supabaseClient';
+  loadChildRewardSnapshot,
+  type CharacterDiscoveryCatalogEntry,
+  type ChildRewardSnapshot,
+} from './childRewardSystem';
+import {
+  dedupeEarnedGameplayRewards,
+  loadChildInventoryView,
+  type ChildInventoryView,
+  type EarnedInventoryItem,
+} from './playerInventoryModel';
+import type { MonthlyChallengeProgress } from './monthlyChallengeProgress';
 
 export type OwnedBadge = NormalizedOwnedBadge;
 
+/** @deprecated Prefer ChildRewardSnapshot for the full reward view. */
 export type PlayerInventorySnapshot = {
   badges: OwnedBadge[];
   items: string[];
   stickers: string[];
   decorations: string[];
+  earnedRewards: EarnedInventoryItem[];
+  purchasedShopItemIds: ReadonlySet<string>;
+  rewardSnapshot: ChildRewardSnapshot | null;
 };
 
 const EMPTY_INVENTORY: PlayerInventorySnapshot = {
@@ -20,85 +32,67 @@ const EMPTY_INVENTORY: PlayerInventorySnapshot = {
   items: [],
   stickers: [],
   decorations: [],
+  earnedRewards: [],
+  purchasedShopItemIds: new Set(),
+  rewardSnapshot: null,
 };
+
+function splitLegacyRewardLists(earnedRewards: EarnedInventoryItem[]): {
+  items: string[];
+  stickers: string[];
+  decorations: string[];
+} {
+  const items: string[] = [];
+  const stickers: string[] = [];
+  const decorations: string[] = [];
+
+  for (const reward of earnedRewards) {
+    if (reward.category === 'sticker') stickers.push(reward.label);
+    else if (reward.category === 'decoration') decorations.push(reward.label);
+    else items.push(reward.label);
+  }
+
+  return { items, stickers, decorations };
+}
 
 export async function getPlayerInventory(
   explicitParticipantId?: string,
+  modules: AdventureModuleRecord[] = [],
 ): Promise<PlayerInventorySnapshot> {
-  if (!isSupabaseConfigured() || !supabase) {
-    return EMPTY_INVENTORY;
-  }
-
-  const participantId = resolvePlayerParticipantId(explicitParticipantId);
+  const participantId = explicitParticipantId?.trim() ?? '';
   if (!participantId) {
     return EMPTY_INVENTORY;
   }
 
   try {
-    const [badgesResult, progressResult] = await Promise.all([
-      supabase
-        .from('player_badges')
-        .select('badge_name, week_id, mission_id')
-        .eq('participant_id', participantId),
-      supabase
-        .from('player_progress')
-        .select('reward_item, badge_unlocked, week_id, mission_id')
-        .eq('participant_id', participantId),
+    const [rewardSnapshot, earnedState] = await Promise.all([
+      loadChildRewardSnapshot(participantId, modules),
+      loadChildBadgeEarnedState(participantId),
     ]);
 
-    if (badgesResult.error) throw badgesResult.error;
-    if (progressResult.error) throw progressResult.error;
-
-    type BadgeRow = {
-      badge_name?: string | null;
-      week_id?: string | null;
-      mission_id?: string | null;
-    };
-    type ProgressRow = {
-      reward_item?: string | null;
-      badge_unlocked?: string | null;
-      week_id?: string | null;
-      mission_id?: string | null;
-    };
-
-    const rawBadges: RawOwnedBadgeRow[] = [];
-
-    for (const row of (badgesResult.data ?? []) as BadgeRow[]) {
-      if (typeof row.badge_name !== 'string' || !row.badge_name.trim()) continue;
-      rawBadges.push({
-        name: row.badge_name.trim(),
-        weekId: typeof row.week_id === 'string' ? row.week_id : null,
-        missionId: typeof row.mission_id === 'string' ? row.mission_id : null,
-      });
-    }
-
-    for (const row of (progressResult.data ?? []) as ProgressRow[]) {
-      if (typeof row.badge_unlocked !== 'string' || !row.badge_unlocked.trim()) continue;
-      rawBadges.push({
-        name: row.badge_unlocked.trim(),
-        weekId: typeof row.week_id === 'string' ? row.week_id : null,
-        missionId: typeof row.mission_id === 'string' ? row.mission_id : null,
-      });
-    }
-
-    const items = (progressResult.data ?? [])
-      .map((row) => row.reward_item)
-      .filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
-
-    const stickers = items.filter((item) => /sticker|spark/i.test(item));
-    const decorations = items.filter((item) => /decoration|torch/i.test(item));
-    const ownedItems = items.filter(
-      (item) => !stickers.includes(item) && !decorations.includes(item),
-    );
+    const badges = toNormalizedOwnedBadges(earnedState);
+    const { items, stickers, decorations } = splitLegacyRewardLists(rewardSnapshot.earnedRewards);
 
     return {
-      badges: normalizeOwnedBadges(rawBadges),
-      items: ownedItems,
+      badges,
+      items,
       stickers,
       decorations,
+      earnedRewards: rewardSnapshot.earnedRewards,
+      purchasedShopItemIds: rewardSnapshot.purchasedShopItemIds,
+      rewardSnapshot,
     };
   } catch (err) {
     console.warn('[INVENTORY] Failed to load player inventory', err);
     return EMPTY_INVENTORY;
   }
 }
+
+export { loadChildInventoryView, loadChildRewardSnapshot, dedupeEarnedGameplayRewards };
+export type {
+  ChildInventoryView,
+  ChildRewardSnapshot,
+  CharacterDiscoveryCatalogEntry,
+  EarnedInventoryItem,
+  MonthlyChallengeProgress,
+};

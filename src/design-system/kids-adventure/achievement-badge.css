@@ -1,0 +1,197 @@
+.achievementBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 6.25rem;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  color: #1a2f52;
+}
+
+.achievementBadge--interactive {
+  cursor: pointer;
+  font: inherit;
+}
+
+.achievementBadge--interactive:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.55);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+.achievementBadgeFrame {
+  position: relative;
+  width: 4.75rem;
+  height: 4.75rem;
+  display: grid;
+  place-items: center;
+}
+
+.achievementBadgeFrameRing {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.achievementBadgeRewardWrap {
+  position: relative;
+  z-index: 1;
+  width: 68%;
+  height: 68%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.achievementBadgeRewardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.18));
+}
+
+.achievementBadgeRewardImage--placeholder {
+  width: 72%;
+  height: 72%;
+  opacity: 0.55;
+}
+
+.achievementBadge--locked .achievementBadgeRewardImage:not(.achievementBadgeRewardImage--placeholder) {
+  filter: grayscale(1) brightness(0.82) contrast(0.95);
+}
+
+.achievementBadge--locked .achievementBadgeRewardImage--placeholder {
+  filter: grayscale(1) brightness(0.9);
+  opacity: 0.45;
+}
+
+.achievementBadge--earned .achievementBadgeRewardImage {
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.22));
+}
+
+/* Circle frame */
+.achievementBadge--circle .achievementBadgeFrameRing {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #fde68a 0%, #f59e0b 38%, #b45309 72%, #78350f 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px rgba(120, 53, 15, 0.35),
+    0 4px 10px rgba(15, 23, 42, 0.16);
+}
+
+.achievementBadge--circle .achievementBadgeRewardWrap {
+  border-radius: 50%;
+}
+
+/* Shield frame */
+.achievementBadge--shield .achievementBadgeFrameRing {
+  clip-path: polygon(50% 0%, 92% 18%, 92% 58%, 50% 100%, 8% 58%, 8% 18%);
+  background: linear-gradient(165deg, #fde68a 0%, #f59e0b 42%, #b45309 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.42),
+    0 4px 10px rgba(15, 23, 42, 0.16);
+}
+
+.achievementBadge--shield .achievementBadgeRewardWrap {
+  clip-path: polygon(50% 6%, 86% 22%, 86% 56%, 50% 92%, 14% 56%, 14% 22%);
+}
+
+/* Medal frame — circular, no ribbon layer */
+.achievementBadge--medal .achievementBadgeFrameRing {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e0f2fe 0%, #38bdf8 35%, #0284c7 72%, #0c4a6e 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+    0 4px 10px rgba(15, 23, 42, 0.16);
+}
+
+.achievementBadge--medal .achievementBadgeRewardWrap {
+  border-radius: 50%;
+}
+
+/* Crest frame */
+.achievementBadge--crest .achievementBadgeFrameRing {
+  clip-path: polygon(50% 0%, 82% 8%, 100% 34%, 88% 100%, 50% 84%, 12% 100%, 0 34%, 18% 8%);
+  background: linear-gradient(165deg, #ddd6fe 0%, #8b5cf6 45%, #5b21b6 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.42),
+    0 4px 10px rgba(15, 23, 42, 0.16);
+}
+
+.achievementBadge--crest .achievementBadgeRewardWrap {
+  clip-path: polygon(50% 8%, 78% 16%, 90% 40%, 82% 88%, 50% 76%, 18% 88%, 10% 40%, 22% 16%);
+}
+
+.achievementBadge--locked .achievementBadgeFrameRing {
+  background: linear-gradient(165deg, #e2e8f0 0%, #94a3b8 48%, #64748b 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.35),
+    0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+.achievementBadgeLockMark {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.28);
+}
+
+.achievementBadgeEarnedMark {
+  position: absolute;
+  right: -0.1rem;
+  bottom: -0.1rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.35);
+}
+
+.achievementBadgeLabel {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #1a2f52;
+}
+
+.achievementBadgeCategory {
+  margin: 0;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.58);
+}
+
+.achievementBadgeHint {
+  display: none;
+}
+
+.kids-adventure-shell .achievementBadgeLabel {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.kids-adventure-shell .achievementBadgeCategory,
+.kids-adventure-shell .achievementBadgeHint {
+  color: rgba(255, 255, 255, 0.72);
+}

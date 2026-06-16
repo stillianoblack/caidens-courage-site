@@ -26,8 +26,8 @@ import {
   PROGRAM_GOALS_SAVED_EVENT,
 } from '../../../lib/programGoalsService';
 import type { ProgramGoalsRecord } from '../../../lib/programGoalsService';
-import { normalizeGalleryStatus } from '../../../lib/studentGalleryService';
-import { fetchFamilyGallerySubmissions } from '../../../lib/studentGalleryService';
+import { resolveFamilyPortalDisplayName } from '../../../lib/familyPortalDisplayName';
+import { fetchFamilyGallerySubmissions, normalizeGalleryStatus } from '../../../lib/studentGalleryService';
 import { getFamilyGallerySubmitterKey } from '../../../lib/familyGallerySession';
 import { afterIdle } from '../../../lib/defer';
 import { FOCUS_FLAME_ADD_CHILD_EVENT } from '../../../lib/focusFlameJourney';
@@ -355,8 +355,11 @@ export default function FamilyOverviewPanel() {
 
   const showChildSummaryCard = onboarding.hasChild && Boolean(activeChildSummary);
 
-  const childSummaryProgramName =
-    campProgramName ?? campProgramCode ?? activeProgram?.groupName ?? programCode ?? 'Your Program';
+  const childSummaryProgramName = resolveFamilyPortalDisplayName({
+    program: activeProgram,
+    campProgramName,
+    campProgramCode,
+  });
 
   const openInsights = (topic: FamilyB4InsightTopic, participantId?: string | null) => {
     setInsightTopic(topic);

@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import type { CompleteMissionResult, CourageMissionRewardPayload } from '../../types/courageMissionProgress';
-import { parseWeekNumberFromWeekId, resolveBadgeDisplay } from '../../lib/cmsBadgeArtwork';
+import { parseWeekNumberFromWeekId, resolveMissionCompleteBadgeDisplay } from '../../lib/cmsBadgeArtwork';
+import { GENERIC_BADGE_PLACEHOLDER_SRC } from '../../lib/weeklyRewardDisplay';
+import { getRewardItemArtworkPath } from '../../lib/rewardArtwork';
 import { formatWeekHeader, sanitizeMissionGameTitle } from '../../lib/gameDisplayTitles';
 import {
   resolveBadgeUnlockHint,
@@ -145,21 +147,22 @@ export default function CourageMissionCompleteCelebration({
   );
 
   const badgeDisplay = useMemo(() => {
-    if (payload.badge_image_url) {
-      return {
-        name: payload.badge_unlocked,
-        imageUrl: payload.badge_image_url,
-        weekLabel: payload.badge_week_label ?? null,
-      };
-    }
-    const resolved = resolveBadgeDisplay(payload.badge_unlocked, adventureModules, weekNumber);
+    const resolved = resolveMissionCompleteBadgeDisplay(
+      adventureModules,
+      weekNumber,
+      payload.mission_id,
+      payload.badge_unlocked,
+    );
     return {
       name: resolved.name,
       imageUrl: resolved.imageUrl,
       weekLabel: resolved.weekLabel,
     };
-  }, [adventureModules, payload, weekNumber]);
+  }, [adventureModules, payload.badge_unlocked, payload.mission_id, weekNumber]);
 
+  const discoveryName = payload.character_discovery_name?.trim() || null;
+  const discoveryImage = payload.character_discovery_image_url?.trim() || null;
+  const missionRewardImage = getRewardItemArtworkPath(payload.reward_item);
   const badgeUnlocked =
     weekProgress?.badgeUnlocked === true || weekProgress?.badgeJustUnlocked === true;
   const badgeLocked = !badgeUnlocked;
@@ -337,6 +340,48 @@ export default function CourageMissionCompleteCelebration({
             </div>
           </header>
 
+          {!isReplay && (discoveryName || payload.reward_item) ? (
+            <section className="courageMissionCompleteMissionRewards" aria-label="Mission rewards">
+              {discoveryName ? (
+                <div className="courageMissionCompleteMissionReward">
+                  {discoveryImage ? (
+                    <img
+                      src={discoveryImage}
+                      alt=""
+                      className="courageMissionCompleteMissionRewardArt"
+                    />
+                  ) : null}
+                  <div>
+                    <p className="courageMissionCompleteMissionRewardLabel">Character Discovery</p>
+                    <p className="courageMissionCompleteMissionRewardName">{discoveryName}</p>
+                  </div>
+                </div>
+              ) : null}
+              {payload.reward_item ? (
+                <div className="courageMissionCompleteMissionReward">
+                  {missionRewardImage ? (
+                    <img
+                      src={missionRewardImage}
+                      alt=""
+                      className="courageMissionCompleteMissionRewardArt courageMissionCompleteMissionRewardArt--item"
+                    />
+                  ) : (
+                    <span
+                      className="courageMissionCompleteMissionRewardArt courageMissionCompleteMissionRewardArt--item courageMissionCompleteMissionRewardArt--placeholder"
+                      aria-hidden="true"
+                    >
+                      ★
+                    </span>
+                  )}
+                  <div>
+                    <p className="courageMissionCompleteMissionRewardLabel">Mission Reward</p>
+                    <p className="courageMissionCompleteMissionRewardName">{payload.reward_item}</p>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
           <section
             className={[
               'courageMissionCompleteBadgeShowcase',
@@ -349,10 +394,11 @@ export default function CourageMissionCompleteCelebration({
           >
             <div className="courageMissionCompleteBadgeFrame courageMissionCompleteBadgeFrame--hero">
               <img
-                src={badgeDisplay.imageUrl}
+                src={badgeDisplay.imageUrl ?? GENERIC_BADGE_PLACEHOLDER_SRC}
                 alt=""
                 className={[
                   'courageMissionCompleteBadgeArt',
+                  !badgeDisplay.imageUrl ? 'courageMissionCompleteBadgeArt--placeholder' : '',
                   badgeLocked ? 'courageMissionCompleteBadgeArt--locked' : '',
                 ]
                   .filter(Boolean)

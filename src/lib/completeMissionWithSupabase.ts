@@ -9,6 +9,8 @@ import {
   resolvePlayerParticipantContext,
 } from './resolvePlayerParticipantId';
 import { trackMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
+import { awardCharacterDiscovery } from './characterDiscoveryService';
+import { syncMonthlyChallengeRewards } from './monthlyChallengeProgress';
 import {
   ensureStudentParticipantForSave,
   isValidSupabaseParticipantId,
@@ -70,9 +72,8 @@ async function resolveWeekProgressSnapshot(
     : storedIds;
   const weekMissionsCompleted = countCompletedWeekMissions(weekNumber, completedMissionIds);
   const weekMissionsTotal = resolveWeekMissionsTotal(weekNumber);
-  const weekBadgeUnlocked = badgeName.trim()
-    ? await readWeekBadgeUnlocked(participantId, weekId, badgeName)
-    : false;
+  const weekBadgeUnlocked =
+    Boolean(badgeName.trim()) && isWeekFullyComplete(weekNumber, completedMissionIds);
 
   return {
     weekMissionsCompleted,
@@ -371,17 +372,14 @@ export async function completeMissionWithSupabase(
     });
     const weekMissionsCompleted = countCompletedWeekMissions(weekNumber, completedMissionIds);
     const weekMissionsTotal = resolveWeekMissionsTotal(weekNumber);
-    const weekBadgeUnlocked =
-      weekBadgeJustUnlocked ||
-      (await readWeekBadgeUnlocked(
-        ensuredParticipantId,
-        savePayload.week_id,
-        savePayload.badge_unlocked,
-      ));
+    const weekBadgeUnlocked = isWeekFullyComplete(weekNumber, completedMissionIds);
 
     if (savePayload.coins_earned > 0) {
       trackMonthlyCoinsEarned(ensuredParticipantId, savePayload.coins_earned);
     }
+
+    await awardCharacterDiscovery(ensuredParticipantId, savePayload.mission_id);
+    await syncMonthlyChallengeRewards(ensuredParticipantId, completedMissionIds);
 
     return {
       ok: true,

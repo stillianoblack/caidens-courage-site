@@ -1,18 +1,14 @@
 const BADGE_ART: Record<string, string> = {
-  'Cave Explorer Badge': '/images/icons/focus-flame-mark.svg',
-  'Mystery Solver Badge': '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
-  'Brave Bridge Badge': '/images/characters/zeke_photo_icon_game.webp',
-  'Nature Explorer Badge': '/images/caidenscourage/Game-Hub/characters/charlie-hotspot.webp',
-  'Daily Check-In Spark': '/images/caidenscourage/Game-Hub/characters/b4-hotspot.webp',
+  'Cave Explorer Badge': '/images/caidenscourage/Character Hub/caiden_photo_icon_game.webp',
+  'Mystery Solver Badge': '/images/caidenscourage/Character Hub/miranda_photo_icon_game.webp',
+  'Brave Bridge Badge': '/images/caidenscourage/Character Hub/zeke_photo_icon_game.webp',
+  'Nature Explorer Badge': '/images/characters/charlieperk_photo_icon_game.webp',
+  'Daily Check-In Spark': '/images/caidenscourage/Character Hub/b-4_photo_icon_game.webp',
+  'Focus Flame Explorer Badge': '/images/caidenscourage/Character Hub/caiden_photo_icon_game.webp',
+  'Focus Flame Badge': '/images/caidenscourage/Character Hub/caiden_photo_icon_game.webp',
 };
 
-const ITEM_ART: Record<string, string> = {
-  'Cave Explorer Sticker': '/images/caidenscourage/Game-Hub/characters/caiden-hotspot.webp',
-  'Miranda Clue Sticker': '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
-  'Bridge Builder Sticker': '/images/characters/zeke_photo_icon_game.webp',
-  'Rainforest Discovery Sticker': '/images/caidenscourage/Game-Hub/characters/charlie-hotspot.webp',
-  'Focus Flame Spark': '/images/icons/focus-flame-mark.svg',
-};
+const ITEM_ART: Record<string, string> = {};
 
 const DEFAULT_ART = '/images/icons/focus-flame-mark.svg';
 
@@ -20,6 +16,7 @@ export function getBadgeArtworkPath(badgeName: string): string {
   return BADGE_ART[badgeName] ?? DEFAULT_ART;
 }
 
-export function getRewardItemArtworkPath(rewardItem: string): string {
-  return ITEM_ART[rewardItem] ?? DEFAULT_ART;
+export function getRewardItemArtworkPath(rewardItem: string): string | null {
+  const mapped = ITEM_ART[rewardItem.trim()];
+  return mapped ?? null;
 }

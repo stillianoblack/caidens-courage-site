@@ -11,6 +11,12 @@ import {
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { saveB4BaselineStudentProfile, loadB4BaselineState } from './b4BaselineCheckStorage';
+import {
+  INDEPENDENT_FAMILY_PRICING_TIER,
+  inferProgramTypeFromCode,
+  isIndependentFamilyProgram,
+  isIndependentFamilyType,
+} from './independentFamilyProgram';
 
 const ACTIVE_PORTAL_ROLE_KEY = 'activePortalRole';
 const ACTIVE_FAMILY_CONTEXT_KEY = 'activeFamilyContext';
@@ -29,6 +35,7 @@ type ActiveFamilyContext = {
   programName: string;
   familyAccessCode: string;
   groupName: string;
+  programType?: ActivePilotProgram['programType'];
 };
 
 export type ProgramCodeSource =
@@ -94,24 +101,45 @@ function buildProgramFromFamilyContext(
   context: ActiveFamilyContext,
   existing?: ActivePilotProgram | null,
 ): ActivePilotProgram {
+  const programType =
+    existing?.programType ??
+    context.programType ??
+    inferProgramTypeFromCode(context.programCode);
+  const isIndependent = isIndependentFamilyType(programType);
+
   return {
     id: existing?.id ?? context.programCode,
     programName: context.programName,
     programCode: context.programCode,
-    programType: existing?.programType ?? 'Homeschool Group',
+    programType,
     adminFirstName: existing?.adminFirstName ?? '',
     adminEmail: existing?.adminEmail ?? '',
-    estimatedStudents: existing?.estimatedStudents ?? 0,
+    estimatedStudents: existing?.estimatedStudents ?? (isIndependent ? 1 : 0),
     ageRange: existing?.ageRange ?? 'Mixed Ages',
     groupName: context.groupName,
     familyAccessCode: context.familyAccessCode,
-    facilitatorAccessCode: existing?.facilitatorAccessCode ?? '',
-    pricingTier: existing?.pricingTier ?? 'family_group',
+    facilitatorAccessCode: existing?.facilitatorAccessCode ?? null,
+    pricingTier:
+      existing?.pricingTier ??
+      (isIndependent ? INDEPENDENT_FAMILY_PRICING_TIER : 'family_group'),
     paymentStatus: existing?.paymentStatus ?? 'paid',
     pilotStatus: existing?.pilotStatus ?? 'active',
     agreedAt: existing?.agreedAt ?? '',
     createdAt: existing?.createdAt ?? '',
   };
+}
+
+function shouldUseLastFamilySnapshot(
+  lastFamily: ReturnType<typeof readLastPilotProgramForRole>,
+  familyContext: ActiveFamilyContext | null,
+): boolean {
+  if (!lastFamily) return false;
+  if (!familyContext) {
+    return isIndependentFamilyProgram(lastFamily.program);
+  }
+  return (
+    lastFamily.program_code.trim().toUpperCase() === familyContext.programCode.trim().toUpperCase()
+  );
 }
 
 function syncBaselineProfileToProgram(program: ActivePilotProgram): void {
@@ -182,11 +210,15 @@ function resolveFamilySessionProgramCode(
         program: familyContextProgram,
         source: 'family_context',
       },
-      {
-        code: lastFamily?.program_code,
-        program: lastFamily?.program,
-        source: 'last_pilot_family',
-      },
+      ...(shouldUseLastFamilySnapshot(lastFamily, familyContext)
+        ? [
+            {
+              code: lastFamily?.program_code,
+              program: lastFamily?.program,
+              source: 'last_pilot_family' as const,
+            },
+          ]
+        : []),
       ...(active?.programCode?.toUpperCase().startsWith('FAMILY-')
         ? [{ code: active.programCode, program: active, source: 'active_pilot_program' as const }]
         : []),
@@ -254,7 +286,15 @@ export function resolveCanonicalProgramCode(): CanonicalProgramResolution {
     const resolved =
       firstValidCandidate([
         { code: familyContext?.programCode, program: familyContextProgram, source: 'family_context' },
-        { code: lastFamily?.program_code, program: lastFamily?.program, source: 'last_pilot_family' },
+        ...(shouldUseLastFamilySnapshot(lastFamily, familyContext)
+          ? [
+              {
+                code: lastFamily?.program_code,
+                program: lastFamily?.program,
+                source: 'last_pilot_family' as const,
+              },
+            ]
+          : []),
         { code: active?.programCode, program: active, source: 'active_pilot_program' },
       ]) ?? { code: null, program: null, source: 'none' as const };
 

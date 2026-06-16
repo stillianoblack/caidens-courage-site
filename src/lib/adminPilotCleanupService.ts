@@ -274,6 +274,37 @@ export async function deletePilotProgramPermanently(programCode: string): Promis
   };
 }
 
+export async function updatePilotProgramDisplayName(
+  programCode: string,
+  input: { programName: string; groupName?: string },
+): Promise<PilotArchiveResult> {
+  const code = programCode.trim().toUpperCase();
+  const programName = input.programName.trim();
+  const groupName = input.groupName?.trim() || programName;
+
+  if (!code || !programName) {
+    return { success: false, message: 'Program code and display name are required.' };
+  }
+
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, message: 'Supabase is not configured.' };
+  }
+
+  const { error } = await supabase
+    .from('pilot_programs')
+    .update({
+      program_name: programName,
+      group_name: groupName,
+    })
+    .eq('program_code', code);
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: 'Program display name updated.' };
+}
+
 export function filterProgramsForSearch(
   programs: PilotProgramRecord[],
   query: string,

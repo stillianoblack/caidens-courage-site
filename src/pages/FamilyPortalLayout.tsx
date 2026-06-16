@@ -28,10 +28,10 @@ import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
 import { useFamilyMobileNav } from '../hooks/useFamilyMobileNav';
-import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourneyCoachPlacement';
+import { useFamilyPortalRightRail } from '../hooks/useFamilyPortalRightRail';
+import '../components/family-portal/inventory-help-rail.css';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
-import { isFamilyPortalHomePath } from '../lib/familyPortalHomeRoute';
 import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
 import { resetPortalInteractionState } from '../lib/resetPortalInteractionState';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
@@ -50,12 +50,12 @@ export default function FamilyPortalLayout() {
   const [programCode, setProgramCode] = useState(
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
-  const showJourneyRail = isFamilyPortalHomePath(location.pathname);
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
   const { isMobileNav } = useFamilyMobileNav();
   const isMobileGameRoute =
     isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname);
+  const familyPortalRightRail = useFamilyPortalRightRail(isMobileGameRoute);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname) || isMobileGameRoute;
 
   const sidebarProps = useMemo(
@@ -131,7 +131,7 @@ export default function FamilyPortalLayout() {
       >
         <AppShell
           variant="family"
-          rightRail={showJourneyRail && !isMobileGameRoute ? <FamilyJourneyCoachRail /> : undefined}
+          rightRail={familyPortalRightRail}
           sidebar={!isMobileNav ? <FamilyDashboardSidebar {...sidebarProps} /> : null}
           topBar={
             isMobileGameRoute

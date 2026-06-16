@@ -9,9 +9,11 @@ import {
   archivePilotProgram,
   fetchPilotProgramAdminStats,
   restorePilotProgram,
+  updatePilotProgramDisplayName,
   type PilotCleanupTableCount,
 } from '../../lib/adminPilotCleanupService';
 import {
+  formatAdminProgramCategory,
   fromDbProgramType,
   isIndependentFamilyType,
 } from '../../lib/independentFamilyProgram';
@@ -58,9 +60,14 @@ export default function AdminPilotProgramRow({
   const [statsLoading, setStatsLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [displayNameDraft, setDisplayNameDraft] = useState(program.program_name);
+  const [groupNameDraft, setGroupNameDraft] = useState(program.group_name);
+  const [renameSaving, setRenameSaving] = useState(false);
 
   const activeProgram = recordToActivePilotProgram(program);
   const isIndependentFamily = isIndependentFamilyType(program.program_type);
+  const programCategory = formatAdminProgramCategory(program);
   const protectedProgram = isProtectedPilotProgramCode(program.program_code);
   const isArchived = program.pilot_status === 'archived';
 
@@ -111,12 +118,34 @@ export default function AdminPilotProgramRow({
     }
   };
 
+  const handleSaveDisplayName = async () => {
+    setRenameSaving(true);
+    setActionError(null);
+    setActionMessage(null);
+    const result = await updatePilotProgramDisplayName(program.program_code, {
+      programName: displayNameDraft,
+      groupName: groupNameDraft,
+    });
+    setRenameSaving(false);
+    if (result.success) {
+      setActionMessage(result.message);
+      setEditingName(false);
+      onChanged();
+    } else {
+      setActionError(result.message);
+    }
+  };
+
   return (
     <article className="adminPortal-programCard">
       <div className="adminPortal-programHeader">
         <div>
           <h2 className="adminPortal-programName">{program.program_name}</h2>
-          <p className="adminPortal-programMeta">{fromDbProgramType(program.program_type)}</p>
+          <p className="adminPortal-programMeta">
+            <span className="adminPortal-programCategory">{programCategory}</span>
+            <span className="adminPortal-programMetaDivider"> · </span>
+            {fromDbProgramType(program.program_type)}
+          </p>
         </div>
         <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
       </div>
@@ -132,6 +161,68 @@ export default function AdminPilotProgramRow({
           <span className="adminPortal-detailLabel">Admin Email</span>
           <span className="adminPortal-detailValue">{program.admin_email}</span>
         </div>
+        {expanded ? (
+          <div className="adminPortal-detailItem adminPortal-detailItem--full">
+            <span className="adminPortal-detailLabel">Display Name</span>
+            {editingName ? (
+              <div className="adminPortal-renameForm">
+                <input
+                  type="text"
+                  className="adminPortal-renameInput"
+                  value={displayNameDraft}
+                  onChange={(event) => setDisplayNameDraft(event.target.value)}
+                  aria-label="Program display name"
+                />
+                <input
+                  type="text"
+                  className="adminPortal-renameInput"
+                  value={groupNameDraft}
+                  onChange={(event) => setGroupNameDraft(event.target.value)}
+                  aria-label="Group or family display name"
+                  placeholder="Group / family name"
+                />
+                <div className="adminPortal-renameActions">
+                  <button
+                    type="button"
+                    className="adminPortal-btn adminPortal-btn--primary"
+                    onClick={() => void handleSaveDisplayName()}
+                    disabled={renameSaving || !displayNameDraft.trim()}
+                  >
+                    {renameSaving ? 'Saving…' : 'Save Name'}
+                  </button>
+                  <button
+                    type="button"
+                    className="adminPortal-btn adminPortal-btn--ghost"
+                    onClick={() => {
+                      setEditingName(false);
+                      setDisplayNameDraft(program.program_name);
+                      setGroupNameDraft(program.group_name);
+                    }}
+                    disabled={renameSaving}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="adminPortal-renameDisplay">
+                <span className="adminPortal-detailValue">
+                  {program.program_name}
+                  {program.group_name && program.group_name !== program.program_name
+                    ? ` · ${program.group_name}`
+                    : ''}
+                </span>
+                <button
+                  type="button"
+                  className="adminPortal-btn adminPortal-btn--ghost"
+                  onClick={() => setEditingName(true)}
+                >
+                  Rename
+                </button>
+              </div>
+            )}
+          </div>
+        ) : null}
         {expanded && !statsLoading ? (
           <>
             <div className="adminPortal-detailItem">

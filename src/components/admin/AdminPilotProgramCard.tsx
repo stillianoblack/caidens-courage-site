@@ -6,6 +6,7 @@ import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { copyToClipboard } from '../../lib/copyToClipboard';
 import {
+  formatAdminProgramCategory,
   fromDbProgramType,
   isIndependentFamilyType,
 } from '../../lib/independentFamilyProgram';
@@ -48,6 +49,7 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
   const navigate = useNavigate();
   const activeProgram = recordToActivePilotProgram(program);
   const isIndependentFamily = isIndependentFamilyType(program.program_type);
+  const programCategory = formatAdminProgramCategory(program);
 
   const openFacilitatorDashboard = () => {
     const facilitatorCode = program.facilitator_access_code;
@@ -72,7 +74,11 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
       <div className="adminPortal-programHeader">
         <div>
           <h2 className="adminPortal-programName">{program.program_name}</h2>
-          <p className="adminPortal-programMeta">{formatProgramTypeLabel(program.program_type)}</p>
+          <p className="adminPortal-programMeta">
+            <span className="adminPortal-programCategory">{programCategory}</span>
+            <span className="adminPortal-programMetaDivider"> · </span>
+            {formatProgramTypeLabel(program.program_type)}
+          </p>
         </div>
         <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
       </div>

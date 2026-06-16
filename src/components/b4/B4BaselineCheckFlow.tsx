@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { readActivePilotProgram, resolveActiveProgramContext } from '../../config/activePilotProgram';
+import { readActivePilotProgram } from '../../config/activePilotProgram';
+import { resolveFamilyBaselineGroupName, resolveFamilyProgramContextForForms } from '../../lib/familyPortalDisplayName';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
@@ -173,7 +174,7 @@ export default function B4BaselineCheckFlow({
     values: { programCode: string; groupName: string };
   } | null>(null);
   const landingCopy = familyPortal ? B4_BASELINE_FAMILY_LANDING : B4_BASELINE_LANDING;
-  const programContext = resolveActiveProgramContext();
+  const programContext = resolveFamilyProgramContextForForms();
   const childrenSettingsPath = familySettingsAddChildPath(location.pathname);
   const continueLearningPath = familyPortalPath('continue-learning', location.pathname);
   const embeddedBackHref = familyPortal ? continueLearningPath : resolveB4HubPath(location.pathname);
@@ -354,7 +355,8 @@ export default function B4BaselineCheckFlow({
         nickname: participant.nickname,
         participantId: participant.participantId,
         programCode: resolvedProgramCode || activeProgram?.programCode || values.programCode,
-        groupName: activeProgram?.groupName || values.groupName,
+        groupName:
+          resolveFamilyBaselineGroupName(activeProgram, values.groupName) || values.groupName,
       });
       setHubState(next);
       refreshAnalyticsIdentity();
@@ -466,7 +468,9 @@ export default function B4BaselineCheckFlow({
         firstName,
         nickname,
         participantId: readActiveChildParticipantId() || hubState.profile?.participantId,
-        groupName: readActivePilotProgram()?.groupName || values.groupName,
+        groupName:
+          resolveFamilyBaselineGroupName(readActivePilotProgram(), values.groupName) ||
+          values.groupName,
       });
 
       const gradeSettings = await readParticipantGradeSettingsAsync(participant.participantId);

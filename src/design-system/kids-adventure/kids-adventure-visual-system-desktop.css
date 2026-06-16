@@ -459,60 +459,7 @@
   }
 
   .kids-adventure-shell .kidInventoryCard--badge {
-    aspect-ratio: 5 / 7;
-    max-width: 10.5rem;
-    min-height: 0;
-    padding: 0.65rem 0.55rem 0.55rem;
-    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
-    border: 3px solid rgba(229, 192, 106, 0.55);
-    border-radius: 1.125rem;
-    box-shadow: 0 14px 32px -14px rgba(15, 35, 70, 0.5);
-    gap: 0.35rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme],
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='caiden'],
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='miranda'],
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='zeke'],
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='charlie'],
-  .kids-adventure-shell .kidInventoryCard--badge[data-kid-theme='b4'] {
-    background: linear-gradient(165deg, #38bdf8 0%, #2563eb 38%, #1e3a8a 62%, #0f172a 100%);
-  }
-
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap {
-    width: 100%;
-    height: auto;
-    min-height: 5.75rem;
-    flex: 1;
-    max-width: 100%;
-    border-radius: 0.85rem;
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    padding: 0.15rem;
-  }
-
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArt {
-    max-width: 6.25rem;
-    max-height: 6.5rem;
-    opacity: 1;
-    filter: none;
-  }
-
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardLabel {
-    font-weight: 700;
-    font-size: 0.75rem;
-    color: #fff;
-    line-height: 1.2;
-  }
-
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardRarity {
-    align-self: flex-start;
-    background: rgba(240, 208, 120, 0.28);
-    color: #fde68a;
+    display: none;
   }
 
   .kids-adventure-shell .kidInventoryCard--shop {
@@ -600,6 +547,11 @@
     border: none;
     box-shadow: none;
     padding: 0;
+    margin-bottom: 0;
+  }
+
+  .kids-adventure-shell .inventoryPanelContent {
+    gap: 3.5rem;
   }
 
   .kids-adventure-shell .kidInventoryCardShopCta {
@@ -626,14 +578,12 @@
   }
 
   /* Character glow behind collectible art */
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap,
   .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArtWrap,
   .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArtWrap {
     position: relative;
     isolation: isolate;
   }
 
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArtWrap::before,
   .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArtWrap::before,
   .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArtWrap::before {
     content: '';
@@ -649,10 +599,8 @@
     pointer-events: none;
   }
 
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardArt,
   .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardArt,
   .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardArt,
-  .kids-adventure-shell .kidInventoryCard--badge .kidInventoryCardFallback,
   .kids-adventure-shell .kidInventoryCard--sticker .kidInventoryCardFallback,
   .kids-adventure-shell .kidInventoryCard--shop .kidInventoryCardFallback {
     position: relative;

@@ -16,7 +16,7 @@ import type { CharacterProfileId } from './characterProfiles';
 
 export const FAMILY_PORTAL_BRAND = 'Family Portal';
 export const FAMILY_PORTAL_SUBBRAND = 'FOCUS FLAME ACADEMY';
-export const FAMILY_PORTAL_TAG = 'Blue Ribbon 2026 Family Access';
+export const FAMILY_PORTAL_TAG = 'Family Portal Access';
 export const FAMILY_PORTAL_TITLE = 'Family Portal';
 
 export type FamilySidebarNavId =

@@ -7,4 +7,5 @@ export { default as CharacterAdventureCard } from '../../components/family-porta
 export { default as MissionActionCard } from './MissionActionCard';
 export { default as RewardCard } from './RewardCard';
 export { default as InventoryItemCard } from './InventoryItemCard';
+export { default as AchievementBadgeCard } from './AchievementBadgeCard';
 export { default as BottomSheetMissionCard } from './BottomSheetMissionCard';

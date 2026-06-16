@@ -18,6 +18,7 @@ export type ActiveFamilyContext = {
   programName: string;
   familyAccessCode: string;
   groupName: string;
+  programType?: ActivePilotProgram['programType'];
 };
 
 export const ACTIVE_PORTAL_ROLE_KEY = 'activePortalRole';
@@ -143,6 +144,7 @@ export function applyProgramPortalUnlock(
       programName: program.programName,
       familyAccessCode: program.familyAccessCode,
       groupName: program.groupName,
+      programType: program.programType,
     });
     writeFamilyPortalSession();
     clearPortalSessionUnlock();

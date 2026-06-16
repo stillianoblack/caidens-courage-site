@@ -88,16 +88,19 @@ function resolveWeekCoinsEarned(
 
 function resolveWeekBadges(
   completedMissionIds: readonly string[],
-  progressBadges: readonly string[],
   weeklyQuestReward: WeeklyQuestRewardConfig | null,
   weekFullyComplete: boolean,
 ): string[] {
-  const badges = new Set<string>(progressBadges);
+  if (!weekFullyComplete) {
+    return [];
+  }
+
+  const badges = new Set<string>();
   for (const missionId of completedMissionIds) {
     const reward = resolveCourageMissionReward(missionId);
     if (reward?.badge_unlocked) badges.add(reward.badge_unlocked);
   }
-  if (weekFullyComplete && weeklyQuestReward?.rewardName) {
+  if (weeklyQuestReward?.rewardName) {
     badges.add(weeklyQuestReward.rewardName);
   }
   return Array.from(badges);
@@ -207,7 +210,6 @@ export function buildWeekReviewViewModel(input: {
   );
   const badges = resolveWeekBadges(
     completedMissionIds,
-    input.progress.unlockedBadges,
     input.weeklyQuestReward,
     weekFullyComplete,
   );

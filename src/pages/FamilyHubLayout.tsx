@@ -32,10 +32,10 @@ import { ensureFamilyPortalProgramSync } from '../lib/portalProgramAssignment';
 import { prefetchFamilyPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useFamilyPortalShell } from '../hooks/useFamilyPortalShell';
 import { useFamilyMobileNav } from '../hooks/useFamilyMobileNav';
-import { FamilyJourneyCoachRail } from '../components/family-portal/FamilyJourneyCoachPlacement';
+import { useFamilyPortalRightRail } from '../hooks/useFamilyPortalRightRail';
+import '../components/family-portal/inventory-help-rail.css';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
-import { isFamilyHubHomePath } from '../lib/familyPortalHomeRoute';
 import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
@@ -52,7 +52,6 @@ export default function FamilyHubLayout() {
   const [programCode, setProgramCode] = useState(
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
-  const showJourneyRail = isFamilyHubHomePath(location.pathname);
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
@@ -63,6 +62,7 @@ export default function FamilyHubLayout() {
   const { isMobileNav } = useFamilyMobileNav();
   const isMobileGameRoute =
     isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname, FAMILY_HUB_PATH);
+  const familyPortalRightRail = useFamilyPortalRightRail(isMobileGameRoute);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname, FAMILY_HUB_PATH) || isMobileGameRoute;
 
   const sidebarProps = useMemo(
@@ -141,7 +141,7 @@ export default function FamilyHubLayout() {
       >
         <AppShell
           variant="family"
-          rightRail={showJourneyRail && !isMobileGameRoute ? <FamilyJourneyCoachRail /> : undefined}
+          rightRail={familyPortalRightRail}
           sidebar={!isMobileNav ? <FamilyDashboardSidebar {...sidebarProps} /> : null}
           topBar={
             isMobileGameRoute

@@ -12,6 +12,10 @@ export type CourageMissionRewardPayload = {
   week_number?: number;
   badge_week_label?: string | null;
   badge_rarity?: string | null;
+  /** Character discovery unlocked by this mission. */
+  character_discovery_id?: string | null;
+  character_discovery_name?: string | null;
+  character_discovery_image_url?: string | null;
 };
 
 export type CourageMissionCompletionPayload = CourageMissionRewardPayload & {

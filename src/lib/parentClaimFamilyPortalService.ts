@@ -125,6 +125,7 @@ export function activatePrivateFamilyPortalFromClaim(input: {
     programName: input.familyProgram.programName,
     familyAccessCode: input.familyProgram.familyAccessCode,
     groupName: input.familyProgram.groupName,
+    programType: input.familyProgram.programType,
   });
   writeActivePilotProgram(input.familyProgram);
   syncPortalProgramContext(input.familyProgram);

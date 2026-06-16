@@ -1,4 +1,4 @@
-export type RewardShopCategory = 'decoration' | 'pack' | 'skin' | 'sticker';
+export type RewardShopCategory = 'decoration' | 'pack' | 'skin' | 'sticker' | 'frame' | 'trail' | 'background';
 
 export type RewardShopItem = {
   id: string;
@@ -9,32 +9,8 @@ export type RewardShopItem = {
   description: string;
 };
 
-/** Placeholder shop catalog — purchasing not wired yet. */
+/** Cosmetic shop catalog — purchasing tracked via player_reward_claims (shop:{id}). */
 export const REWARD_SHOP_ITEMS: RewardShopItem[] = [
-  {
-    id: 'charlie-nature-sticker-pack',
-    name: 'Charlie Nature Sticker Pack',
-    category: 'sticker',
-    cost: 75,
-    image: '/images/caidenscourage/Game-Hub/characters/charlie-hotspot.webp',
-    description: 'Rainforest discovery stickers for your adventure journal.',
-  },
-  {
-    id: 'cave-torch-decoration',
-    name: 'Cave Torch Decoration',
-    category: 'decoration',
-    cost: 100,
-    image: '/images/icons/focus-flame-mark.svg',
-    description: 'Light up your map camp with a cozy cave torch.',
-  },
-  {
-    id: 'miranda-hover-pack',
-    name: 'Miranda Hover Pack',
-    category: 'pack',
-    cost: 150,
-    image: '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
-    description: 'Clue-finder tools and mystery badges for Miranda missions.',
-  },
   {
     id: 'b4-blue-skin',
     name: 'B-4 Blue Skin',
@@ -42,6 +18,46 @@ export const REWARD_SHOP_ITEMS: RewardShopItem[] = [
     cost: 200,
     image: '/images/caidenscourage/Game-Hub/characters/b4-hotspot.webp',
     description: 'A cool blue look for B-4 on the adventure map.',
+  },
+  {
+    id: 'caiden-cave-frame',
+    name: 'Caiden Cave Frame',
+    category: 'frame',
+    cost: 150,
+    image: '/images/icons/focus-flame-mark.svg',
+    description: 'Frame your profile with Caiden cave courage art.',
+  },
+  {
+    id: 'miranda-glow-pack',
+    name: 'Miranda Glow Pack',
+    category: 'pack',
+    cost: 175,
+    image: '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
+    description: 'Mystery glow effects for Miranda mission cards.',
+  },
+  {
+    id: 'focus-flame-trail',
+    name: 'Focus Flame Trail',
+    category: 'trail',
+    cost: 125,
+    image: '/images/icons/focus-flame-mark.svg',
+    description: 'Leave a Focus Flame trail on the adventure map.',
+  },
+  {
+    id: 'journal-cover',
+    name: 'Journal Cover',
+    category: 'decoration',
+    cost: 100,
+    image: '/images/icons/focus-flame-mark.svg',
+    description: 'A custom journal cover for your adventure notes.',
+  },
+  {
+    id: 'avatar-background',
+    name: 'Avatar Background',
+    category: 'background',
+    cost: 90,
+    image: '/images/icons/focus-flame-mark.svg',
+    description: 'A cave campfire background for your avatar.',
   },
 ];
 

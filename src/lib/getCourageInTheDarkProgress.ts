@@ -2,6 +2,10 @@ import { totalCourageMissionsForWeek } from '../data/courageMissionRewards';
 import type { CourageInTheDarkProgressSnapshot } from '../types/courageMissionProgress';
 import { resolvePlayerParticipantId } from './resolvePlayerParticipantId';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import {
+  isWeekBadgeEarnedFromState,
+  loadWeeklyBadgeEarnedState,
+} from './weeklyBadgeUnlock';
 
 const EMPTY_PROGRESS: CourageInTheDarkProgressSnapshot = {
   completedMissionIds: [],
@@ -35,8 +39,10 @@ export async function getCourageInTheDarkProgress(
     return { ...EMPTY_PROGRESS, totalMissions };
   }
 
+  const weekNumber = weekNumberFromId(weekId);
+
   try {
-    const [progressResult, walletResult, badgesResult] = await Promise.all([
+    const [progressResult, walletResult, weeklyBadgeState] = await Promise.all([
       supabase
         .from('player_progress')
         .select('mission_id')
@@ -47,11 +53,7 @@ export async function getCourageInTheDarkProgress(
         .select('total_coins')
         .eq('participant_id', participantId)
         .maybeSingle(),
-      supabase
-        .from('player_badges')
-        .select('badge_name')
-        .eq('participant_id', participantId)
-        .eq('week_id', weekId),
+      loadWeeklyBadgeEarnedState(participantId),
     ]);
 
     if (progressResult.error) {
@@ -60,17 +62,34 @@ export async function getCourageInTheDarkProgress(
     if (walletResult.error) {
       throw walletResult.error;
     }
-    if (badgesResult.error) {
-      throw badgesResult.error;
-    }
 
     const completedMissionIds = (progressResult.data ?? [])
       .map((row) => row.mission_id)
       .filter((missionId): missionId is string => typeof missionId === 'string');
 
-    const unlockedBadges = (badgesResult.data ?? [])
-      .map((row) => row.badge_name)
-      .filter((badge): badge is string => typeof badge === 'string');
+    const unlockedBadges: string[] = [];
+    if (isWeekBadgeEarnedFromState(weeklyBadgeState, weekNumber)) {
+      const { data: badgeRows, error: badgesError } = await supabase
+        .from('player_badges')
+        .select('badge_name')
+        .eq('participant_id', participantId)
+        .eq('week_id', weekId);
+
+      if (badgesError) {
+        throw badgesError;
+      }
+
+      for (const row of badgeRows ?? []) {
+        const badgeName = (row as { badge_name?: string | null }).badge_name;
+        if (typeof badgeName === 'string' && badgeName.trim()) {
+          unlockedBadges.push(badgeName.trim());
+        }
+      }
+
+      if (unlockedBadges.length === 0) {
+        unlockedBadges.push(`Week ${weekNumber} Badge`);
+      }
+    }
 
     return {
       completedMissionIds,

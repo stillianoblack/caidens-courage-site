@@ -53,7 +53,6 @@ export function resolveWeeklyQuestReward(
   if (!module?.weekly_reward_name?.trim()) return null;
 
   const rewardType = module.weekly_reward_type ?? 'badge';
-  const imageSrc = module.weekly_reward_svg_url?.trim() || module.weekly_reward_image_url?.trim() || null;
   const coins = module.weekly_reward_coin_value ?? module.reward_value ?? 0;
 
   let rewardKind: WeeklyQuestRewardConfig['rewardKind'] = 'badge';
@@ -64,7 +63,7 @@ export function resolveWeeklyQuestReward(
   return {
     rewardName: module.weekly_reward_name.trim(),
     rewardKind,
-    rewardImageUrl: imageSrc,
+    rewardImageUrl: module.weekly_reward_image_url?.trim() || null,
     rewardSvgUrl: module.weekly_reward_svg_url?.trim() || null,
     coinsAwarded: coins > 0 ? coins : undefined,
     rewardType,

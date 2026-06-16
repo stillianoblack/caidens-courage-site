@@ -3,6 +3,7 @@ import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { writeParentClaimContext } from '../config/parentClaimContext';
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { clearActiveChild } from './activeChildContext';
+import { clearStaleProgramSessionForIndependentSignup } from './clearStaleProgramSession';
 import { isIndependentFamilyProgram } from './independentFamilyProgram';
 
 export type IndependentFamilyPortalUnlockResult =
@@ -49,6 +50,7 @@ export function activateIndependentFamilyPortalSession(input: {
 }): void {
   const accessCode = input.accessCode.trim() || input.program.familyAccessCode;
 
+  clearStaleProgramSessionForIndependentSignup();
   applyProgramPortalUnlock(input.program, 'family', accessCode);
   writeLastPilotProgram(input.program, 'family', input.parentEmail.trim(), accessCode);
   writeParentClaimContext({

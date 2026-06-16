@@ -1,5 +1,6 @@
 import { courageInTheDarkMissions } from './courageInTheDarkMap';
 import type { CourageMissionCompletionPayload, CourageMissionRewardPayload } from '../types/courageMissionProgress';
+import { resolveCharacterDiscoveryForMission } from '../lib/characterDiscoveryService';
 import { resolvePlayerParticipantId } from '../lib/resolvePlayerParticipantId';
 
 type CourageMissionReward = Omit<CourageMissionRewardPayload, 'week_id'>;
@@ -13,6 +14,8 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
     coins_earned: 25,
     badge_unlocked: 'Cave Explorer Badge',
     reward_item: 'Cave Explorer Sticker',
+    character_discovery_id: 'caiden-courage-clue',
+    character_discovery_name: 'Caiden Courage Clue',
   },
   'miranda-mystery': {
     mission_id: 'miranda-mystery',
@@ -22,6 +25,8 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
     coins_earned: 25,
     badge_unlocked: 'Mystery Solver Badge',
     reward_item: 'Miranda Clue Sticker',
+    character_discovery_id: 'miranda-voice-note',
+    character_discovery_name: 'Miranda Voice Note',
   },
   'zeke-bridge-challenge': {
     mission_id: 'zeke-bridge-challenge',
@@ -31,6 +36,8 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
     coins_earned: 25,
     badge_unlocked: 'Brave Bridge Badge',
     reward_item: 'Bridge Builder Sticker',
+    character_discovery_id: 'zeke-teamwork-spark',
+    character_discovery_name: 'Zeke Teamwork Spark',
   },
   'charlie-discovery-zone': {
     mission_id: 'charlie-discovery-zone',
@@ -40,6 +47,8 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
     coins_earned: 25,
     badge_unlocked: 'Nature Explorer Badge',
     reward_item: 'Rainforest Discovery Sticker',
+    character_discovery_id: 'charlie-nature-discovery',
+    character_discovery_name: 'Charlie Nature Discovery',
   },
   'b4-self-check-in': {
     mission_id: 'b4-self-check-in',
@@ -49,6 +58,8 @@ const COURAGE_MISSION_REWARDS: Record<string, CourageMissionReward> = {
     coins_earned: 10,
     badge_unlocked: 'Daily Check-In Spark',
     reward_item: 'Focus Flame Spark',
+    character_discovery_id: 'b4-focus-tip',
+    character_discovery_name: 'B-4 Focus Tip',
   },
 };
 
@@ -96,10 +107,14 @@ export function buildCourageMissionRewardPayload(
   const reward = resolveCourageMissionReward(missionId);
   if (!reward) return null;
   const scopedMissionId = week > 1 ? missionId : reward.mission_id;
+  const discovery = resolveCharacterDiscoveryForMission(scopedMissionId);
   return {
     week_id: weekIdFromNumber(week),
     ...reward,
     mission_id: scopedMissionId,
+    character_discovery_id: discovery?.id ?? reward.character_discovery_id ?? null,
+    character_discovery_name: discovery?.name ?? reward.character_discovery_name ?? null,
+    character_discovery_image_url: discovery?.imageSrc ?? null,
   };
 }
 

@@ -102,6 +102,9 @@ export async function completeWeeklyCourageMission(
     week_number: enrichedReward.week_number,
     badge_week_label: enrichedReward.badge_week_label,
     badge_rarity: enrichedReward.badge_rarity,
+    character_discovery_id: enrichedReward.character_discovery_id,
+    character_discovery_name: enrichedReward.character_discovery_name,
+    character_discovery_image_url: enrichedReward.character_discovery_image_url,
   };
 
   const result = await completeMissionWithSupabase(cmsPayload);

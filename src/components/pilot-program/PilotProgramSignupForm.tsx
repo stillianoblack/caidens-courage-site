@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   PILOT_AGE_RANGE_OPTIONS,
@@ -8,6 +8,7 @@ import {
   type PilotProgramType,
 } from '../../types/pilotProgram';
 import { INDEPENDENT_FAMILY_PROGRAM_TYPE } from '../../lib/independentFamilyProgram';
+import { clearStaleProgramSessionForIndependentSignup } from '../../lib/clearStaleProgramSession';
 import { PILOT_TERMS_PATH } from '../../config/courageRoutes';
 import { trackContactFormStarted } from '../../lib/analytics';
 
@@ -32,6 +33,21 @@ export default function PilotProgramSignupForm({
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const isIndependentFamily = programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
+
+  useEffect(() => {
+    if (programType !== INDEPENDENT_FAMILY_PROGRAM_TYPE) return;
+    clearStaleProgramSessionForIndependentSignup();
+    setProgramName('');
+    setGroupName('');
+  }, [programType]);
+
+  const handleProgramTypeChange = (nextType: PilotProgramType) => {
+    setProgramType(nextType);
+    if (nextType === INDEPENDENT_FAMILY_PROGRAM_TYPE) {
+      setProgramName('');
+      setGroupName('');
+    }
+  };
 
   const orderedProgramTypes = useMemo(() => {
     const options = [...PILOT_PROGRAM_TYPE_OPTIONS];
@@ -84,7 +100,7 @@ export default function PilotProgramSignupForm({
         <select
           id="pilot-program-type"
           value={programType}
-          onChange={(event) => setProgramType(event.target.value as PilotProgramType)}
+          onChange={(event) => handleProgramTypeChange(event.target.value as PilotProgramType)}
           required
         >
           {orderedProgramTypes.map((option) => (
@@ -105,7 +121,7 @@ export default function PilotProgramSignupForm({
           value={programName}
           onChange={(event) => setProgramName(event.target.value)}
           onFocus={() => trackContactFormStarted('/pilot-program-signup')}
-          placeholder={isIndependentFamily ? 'The Martinez Family' : 'Blue Ribbon Camp'}
+          placeholder={isIndependentFamily ? 'The Martinez Family' : 'Sunshine Valley Day Camp'}
           required={!isIndependentFamily}
         />
       </div>
