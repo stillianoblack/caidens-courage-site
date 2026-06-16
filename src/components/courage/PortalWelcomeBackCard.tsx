@@ -2,7 +2,8 @@ import React from 'react';
 import BrandLogo from '../../design-system/components/BrandLogo';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
-import { hasFacilitatorAccessCode } from '../../lib/independentFamilyProgram';
+import { hasFacilitatorAccessCode, isIndependentFamilyProgram } from '../../lib/independentFamilyProgram';
+import { activateIndependentFamilyPortalSession } from '../../lib/independentFamilyPortalSignup';
 import type { LastPilotProgram } from '../../config/lastPilotProgram';
 import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
 import { useCopyToast } from '../shared/useCopyToast';
@@ -25,7 +26,15 @@ export default function PortalWelcomeBackCard({
   const showFacilitatorCode = hasFacilitatorAccessCode(saved.facilitator_access_code);
 
   const handleContinue = () => {
-    applyProgramPortalUnlock(saved.program, role, saved.last_access_code);
+    if (isFamily && isIndependentFamilyProgram(saved.program)) {
+      activateIndependentFamilyPortalSession({
+        program: saved.program,
+        parentEmail: saved.admin_email || saved.program.adminEmail,
+        accessCode: saved.last_access_code,
+      });
+    } else {
+      applyProgramPortalUnlock(saved.program, role, saved.last_access_code);
+    }
     replaceWithPortalRoute(isFamily ? FAMILY_HUB_PATH : PROGRAM_DASHBOARD_PATH);
   };
 

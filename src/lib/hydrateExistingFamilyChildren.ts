@@ -1,5 +1,7 @@
 import { hasCanonicalGradeLevel } from './participantGradeDisplay';
 import { hasConfirmedParentClaim, readParentClaimContext } from '../config/parentClaimContext';
+import { readActivePilotProgram } from '../config/activePilotProgram';
+import { isIndependentFamilyProgram } from './independentFamilyProgram';
 import {
   fetchParticipantsByIds,
   fetchStudentFamilyLinksByFamilyProgram,
@@ -117,6 +119,11 @@ export async function hydrateExistingFamilyChildren(
   const code = familyProgramCode.trim();
   const claimContext = readParentClaimContext();
   const scope = parentScope ?? claimContext ?? undefined;
+  const activeProgram = readActivePilotProgram();
+  const isIndependentFamily =
+    Boolean(activeProgram) &&
+    isIndependentFamilyProgram(activeProgram) &&
+    activeProgram?.programCode?.trim() === code;
   const errors: string[] = [];
   const empty = (claimRequired: boolean): HydrateExistingFamilyChildrenResult => ({
     programCode: code,
@@ -136,7 +143,7 @@ export async function hydrateExistingFamilyChildren(
     return { ...empty(true), errors: ['Missing active program context.'] };
   }
 
-  const claimRequired = !hasConfirmedParentClaim(claimContext);
+  const claimRequired = !isIndependentFamily && !hasConfirmedParentClaim(claimContext);
 
   const linksPayload = await fetchStudentFamilyLinksByFamilyProgram(code);
   if (linksPayload.error) errors.push(linksPayload.error);

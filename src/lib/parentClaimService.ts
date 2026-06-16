@@ -9,8 +9,10 @@ import {
   fetchStudentFamilyLinksByCampProgram,
   fetchStudentFamilyLinksByFamilyProgram,
   markStudentFamilyLinksClaimed,
+  repairCampParentLinksForClaim,
   type StudentFamilyLink,
 } from './studentFamilyLinkService';
+import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { setActiveChild } from './activeChildContext';
 
 export type ParentLookupInput = {
@@ -42,6 +44,78 @@ function normalizePhone(value?: string | null): string {
 
 function normalizeLastName(value?: string | null): string {
   return value?.trim().toLowerCase() ?? '';
+}
+
+type ParentClaimLookupDiagnostics = {
+  accessCode: string;
+  parentEmail: string;
+  campProgramCode?: string;
+  familyProgramCode?: string;
+  candidateLinkCount: number;
+  candidateStudentIds: string[];
+  linksMissingParentEmail: Array<{ linkId: string; studentId: string }>;
+  orphanParticipantIds: string[];
+  repairAttempt?: string;
+};
+
+async function buildParentClaimLookupDiagnostics(input: {
+  accessCode: string;
+  parentEmail: string;
+  campProgramCode?: string;
+  familyProgramCode?: string;
+}): Promise<ParentClaimLookupDiagnostics> {
+  const email = normalizeEmail(input.parentEmail);
+  let links: StudentFamilyLink[] = [];
+
+  if (input.familyProgramCode?.trim()) {
+    const payload = await fetchStudentFamilyLinksByFamilyProgram(input.familyProgramCode.trim());
+    links = payload.links;
+  } else if (input.campProgramCode?.trim()) {
+    const payload = await fetchStudentFamilyLinksByCampProgram(input.campProgramCode.trim());
+    links = payload.links;
+  }
+
+  const linkedStudentIds = new Set(links.map((link) => link.student_id?.trim()).filter(Boolean));
+  let orphanParticipantIds: string[] = [];
+
+  if (input.campProgramCode?.trim()) {
+    const { participants } = await fetchStudentParticipantsFromSupabase(input.campProgramCode.trim());
+    orphanParticipantIds = participants
+      .filter((row) => !linkedStudentIds.has(row.id))
+      .map((row) => row.id);
+  }
+
+  const linksMissingParentEmail = links
+    .filter((link) => !normalizeEmail(link.parent_email))
+    .map((link) => ({ linkId: link.id, studentId: link.student_id }));
+
+  return {
+    accessCode: input.accessCode.trim(),
+    parentEmail: email,
+    campProgramCode: input.campProgramCode ?? undefined,
+    familyProgramCode: input.familyProgramCode ?? undefined,
+    candidateLinkCount: links.length,
+    candidateStudentIds: links.map((link) => link.student_id),
+    linksMissingParentEmail,
+    orphanParticipantIds,
+  };
+}
+
+function logParentClaimLookupFailure(
+  diagnostics: ParentClaimLookupDiagnostics,
+  repairAttempt?: string,
+): void {
+  console.warn('[PARENT_CLAIM_LOOKUP_FAILED]', {
+    access_code: diagnostics.accessCode,
+    parent_email: diagnostics.parentEmail,
+    camp_program_code: diagnostics.campProgramCode ?? null,
+    family_program_code: diagnostics.familyProgramCode ?? null,
+    candidate_link_count: diagnostics.candidateLinkCount,
+    candidate_student_ids: diagnostics.candidateStudentIds,
+    links_missing_parent_email: diagnostics.linksMissingParentEmail,
+    orphan_participant_ids: diagnostics.orphanParticipantIds,
+    repair_attempt: repairAttempt ?? null,
+  });
 }
 
 export async function lookupParentChildLinks(
@@ -149,14 +223,63 @@ export async function claimParentFamilyPortal(input: {
     return { success: false, message: 'Parent/Guardian email is required.' };
   }
 
-  const isCampFamilyEntry = !isIndependentFamilyProgram(input.program);
-  const lookup = await lookupParentChildLinks({
-    campProgramCode: isCampFamilyEntry ? input.program.programCode : undefined,
-    familyProgramCode: isCampFamilyEntry ? undefined : input.program.programCode,
+  if (isIndependentFamilyProgram(input.program)) {
+    console.error('[CAMP_PARENT_CLAIM_BLOCKED]', {
+      reason: 'independent_family_program',
+      program_code: input.program.programCode,
+      access_code: input.accessCode.trim(),
+      parent_email: normalizeEmail(email),
+    });
+    return {
+      success: false,
+      message:
+        'This code is for an independent family account. Use your signup email to open your family portal.',
+    };
+  }
+
+  const campProgramCode = input.program.programCode;
+
+  let lookup = await lookupParentChildLinks({
+    campProgramCode,
     parentEmail: email,
     parentPhone: input.parentPhone,
     parentLastName: input.parentLastName,
   });
+
+  if (!lookup.matches.length && campProgramCode) {
+    const repair = await repairCampParentLinksForClaim({
+      campProgramCode,
+      parentEmail: email,
+      parentPhone: input.parentPhone,
+      parentLastName: input.parentLastName,
+    });
+
+    if (repair.repaired) {
+      console.info('[PARENT_CLAIM_REPAIR]', {
+        access_code: input.accessCode.trim(),
+        parent_email: email,
+        camp_program_code: campProgramCode,
+        reason: repair.reason,
+        link_ids: repair.linkIds ?? [],
+        student_ids: repair.studentIds ?? [],
+      });
+      lookup = await lookupParentChildLinks({
+        campProgramCode,
+        parentEmail: email,
+        parentPhone: input.parentPhone,
+        parentLastName: input.parentLastName,
+      });
+    } else if (repair.reason && repair.reason !== 'no_repair_candidate') {
+      console.info('[PARENT_CLAIM_REPAIR_SKIPPED]', {
+        access_code: input.accessCode.trim(),
+        parent_email: email,
+        camp_program_code: campProgramCode,
+        reason: repair.reason,
+        link_ids: repair.linkIds ?? [],
+        student_ids: repair.studentIds ?? [],
+      });
+    }
+  }
 
   if (lookup.needsLastNameConfirm) {
     return {
@@ -167,6 +290,13 @@ export async function claimParentFamilyPortal(input: {
   }
 
   if (!lookup.matches.length) {
+    const diagnostics = await buildParentClaimLookupDiagnostics({
+      accessCode: input.accessCode,
+      parentEmail: email,
+      campProgramCode,
+    });
+    logParentClaimLookupFailure(diagnostics);
+
     return {
       success: false,
       message:

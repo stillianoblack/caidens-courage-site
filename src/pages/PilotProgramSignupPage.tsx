@@ -7,6 +7,7 @@ import '../components/pilot-program/pilot-program.css';
 import { applyProgramPortalUnlock } from '../config/portalContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
+import { activateIndependentFamilyPortalSession } from '../lib/independentFamilyPortalSignup';
 import { PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
@@ -37,13 +38,12 @@ export default function PilotProgramSignupPage() {
     const isIndependentFamily = isIndependentFamilyProgram(result.program);
 
     if (isIndependentFamily) {
-      applyProgramPortalUnlock(result.program, 'family', result.program.familyAccessCode);
-      writeLastPilotProgram(
-        result.program,
-        'family',
-        input.adminEmail,
-        result.program.familyAccessCode,
-      );
+      activateIndependentFamilyPortalSession({
+        program: result.program,
+        parentEmail: input.adminEmail,
+        accessCode: result.program.familyAccessCode,
+        parentLastName: input.adminFirstName,
+      });
       refreshAnalyticsIdentity();
       trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
       replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());

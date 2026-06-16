@@ -1,6 +1,7 @@
 import { hasConfirmedParentClaim, readParentClaimContext } from '../config/parentClaimContext';
 import { hydrateExistingFamilyChildren } from './hydrateExistingFamilyChildren';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
+import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { isValidSupabaseParticipantId, type StudentParticipantRecord } from './pilotTrackingService';
 
@@ -260,6 +261,168 @@ export async function createCampStudentFamilyLink(input: {
     const message = err instanceof Error ? err.message : 'Could not create camp parent link.';
     return { success: false, error: message };
   }
+}
+
+export async function backfillStudentFamilyLinkParentContact(input: {
+  linkId: string;
+  parentEmail: string;
+  parentPhone?: string;
+  parentLastName?: string;
+  parentFirstName?: string;
+}): Promise<{ success: boolean; link?: StudentFamilyLink; error?: string }> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, error: 'Supabase is not configured.' };
+  }
+
+  const linkId = input.linkId.trim();
+  const parentEmail = input.parentEmail.trim();
+  if (!linkId || !parentEmail) {
+    return { success: false, error: 'Missing link id or parent email.' };
+  }
+
+  const payload: Record<string, string | null> = {
+    parent_email: parentEmail,
+  };
+  if (input.parentPhone?.trim()) payload.parent_phone = input.parentPhone.trim();
+  if (input.parentLastName?.trim()) payload.parent_last_name = input.parentLastName.trim();
+  if (input.parentFirstName?.trim()) payload.parent_first_name = input.parentFirstName.trim();
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase.from('student_family_links').update(payload).eq('id', linkId).select('*').single(),
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      'student_family_link_parent_backfill',
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    const link = data as StudentFamilyLink;
+    console.info('[PARENT_LINK_BACKFILL]', {
+      link_id: link.id,
+      student_id: link.student_id,
+      camp_program_code: link.camp_program_code,
+      parent_email: link.parent_email,
+    });
+    return { success: true, link };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not backfill parent contact.';
+    return { success: false, error: message };
+  }
+}
+
+export type CampParentLinkRepairResult = {
+  repaired: boolean;
+  reason?:
+    | 'backfilled_missing_parent_email'
+    | 'created_orphan_camp_link'
+    | 'ambiguous_missing_email_links'
+    | 'ambiguous_orphan_participants'
+    | 'no_repair_candidate';
+  linkIds?: string[];
+  studentIds?: string[];
+};
+
+/** Repair incomplete camp invite rows before parent email lookup. */
+export async function repairCampParentLinksForClaim(input: {
+  campProgramCode: string;
+  parentEmail: string;
+  parentPhone?: string;
+  parentLastName?: string;
+  parentFirstName?: string;
+}): Promise<CampParentLinkRepairResult> {
+  const campProgramCode = input.campProgramCode.trim();
+  const parentEmail = normalizeEmail(input.parentEmail);
+  if (!campProgramCode || !parentEmail) {
+    return { repaired: false, reason: 'no_repair_candidate' };
+  }
+
+  const { links } = await fetchStudentFamilyLinksByCampProgram(campProgramCode);
+  const parentLastName = normalizeLastName(input.parentLastName);
+
+  const missingEmailLinks = links.filter(
+    (link) => !link.parent_claimed && !normalizeEmail(link.parent_email),
+  );
+
+  if (missingEmailLinks.length > 0) {
+    let candidates = missingEmailLinks;
+    if (parentLastName && candidates.length > 1) {
+      const narrowed = candidates.filter(
+        (link) => normalizeLastName(link.parent_last_name) === parentLastName,
+      );
+      if (narrowed.length) candidates = narrowed;
+    }
+
+    if (candidates.length === 1) {
+      const backfill = await backfillStudentFamilyLinkParentContact({
+        linkId: candidates[0].id,
+        parentEmail: input.parentEmail.trim(),
+        parentPhone: input.parentPhone,
+        parentLastName: input.parentLastName,
+        parentFirstName: input.parentFirstName,
+      });
+      if (backfill.success) {
+        return {
+          repaired: true,
+          reason: 'backfilled_missing_parent_email',
+          linkIds: [candidates[0].id],
+          studentIds: [candidates[0].student_id],
+        };
+      }
+    }
+
+    if (missingEmailLinks.length > 1) {
+      return {
+        repaired: false,
+        reason: 'ambiguous_missing_email_links',
+        linkIds: missingEmailLinks.map((link) => link.id),
+        studentIds: missingEmailLinks.map((link) => link.student_id),
+      };
+    }
+  }
+
+  const linkedStudentIds = new Set(links.map((link) => link.student_id?.trim()).filter(Boolean));
+  const { participants } = await fetchStudentParticipantsFromSupabase(campProgramCode);
+  const orphanParticipants = participants.filter((row) => !linkedStudentIds.has(row.id));
+
+  if (orphanParticipants.length === 1) {
+    const orphan = orphanParticipants[0];
+    const linkResult = await createCampStudentFamilyLink({
+      studentId: orphan.id,
+      campProgramCode,
+      parentFirstName: input.parentFirstName,
+      parentLastName: input.parentLastName?.trim() || 'Family',
+      parentEmail: input.parentEmail.trim(),
+      parentPhone: input.parentPhone,
+      relationship: 'parent',
+    });
+
+    if (linkResult.success && linkResult.link) {
+      console.info('[PARENT_LINK_ORPHAN_REPAIR]', {
+        student_id: orphan.id,
+        camp_program_code: campProgramCode,
+        link_id: linkResult.link.id,
+        parent_email: parentEmail,
+      });
+      return {
+        repaired: true,
+        reason: 'created_orphan_camp_link',
+        linkIds: [linkResult.link.id],
+        studentIds: [orphan.id],
+      };
+    }
+  }
+
+  if (orphanParticipants.length > 1) {
+    return {
+      repaired: false,
+      reason: 'ambiguous_orphan_participants',
+      studentIds: orphanParticipants.map((row) => row.id),
+    };
+  }
+
+  return { repaired: false, reason: 'no_repair_candidate' };
 }
 
 export async function markStudentFamilyLinksClaimed(input: {

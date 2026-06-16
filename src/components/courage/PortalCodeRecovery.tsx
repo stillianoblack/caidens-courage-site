@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { resolveFamilyKidDefaultLandingPath } from '../../lib/familyKidLanding';
+import { activateIndependentFamilyPortalSession } from '../../lib/independentFamilyPortalSignup';
 import { writeLastPilotProgram } from '../../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../../types/pilotProgram';
 import { isIndependentFamilyProgram } from '../../lib/independentFamilyProgram';
@@ -45,8 +46,16 @@ export default function PortalCodeRecovery({ onClose }: PortalCodeRecoveryProps)
 
   const continueAsFamily = () => {
     if (!program) return;
-    applyProgramPortalUnlock(program, 'family', program.familyAccessCode);
-    writeLastPilotProgram(program, 'family', adminEmail.trim(), program.familyAccessCode);
+    if (isIndependentFamily) {
+      activateIndependentFamilyPortalSession({
+        program,
+        parentEmail: adminEmail.trim(),
+        accessCode: program.familyAccessCode,
+      });
+    } else {
+      applyProgramPortalUnlock(program, 'family', program.familyAccessCode);
+      writeLastPilotProgram(program, 'family', adminEmail.trim(), program.familyAccessCode);
+    }
     replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
   };
 

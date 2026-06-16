@@ -16,6 +16,8 @@ import {
   writePortalSessionUnlock,
 } from '../config/portalAccess';
 import { claimParentFamilyPortal } from '../lib/parentClaimService';
+import { unlockIndependentFamilyPortal } from '../lib/independentFamilyPortalSignup';
+import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
 import {
   isLegacyDemoAccessCode,
@@ -93,8 +95,36 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
           if (role === 'family') {
             const email = parentEmail.trim();
             if (!email) {
-              setError('Enter the parent/guardian email used at camp registration.');
+              setError(
+                isIndependentFamilyProgram(program)
+                  ? 'Enter the parent/guardian email for your family account.'
+                  : 'Enter the parent/guardian email used at camp registration.',
+              );
               setSubmitting(false);
+              return;
+            }
+
+            if (isIndependentFamilyProgram(program)) {
+              const unlock = await unlockIndependentFamilyPortal({
+                program,
+                parentEmail: email,
+                parentLastName: parentLastName.trim() || undefined,
+                accessCode: trimmedCode,
+              });
+
+              if (!unlock.success) {
+                setError(unlock.message ?? 'Could not open your family portal.');
+                setSubmitting(false);
+                return;
+              }
+
+              setAccessCode('');
+              setParentEmail('');
+              setParentLastName('');
+              setNeedsLastNameConfirm(false);
+              navigateToPortal(resolveFamilyKidDefaultLandingPath(), 'independent-family-unlock');
+              setSubmitting(false);
+              onUnlock?.();
               return;
             }
 
