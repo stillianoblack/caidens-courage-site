@@ -1,4 +1,5 @@
 import React from 'react';
+import BrandLogo from '../../design-system/components/BrandLogo';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { hasFacilitatorAccessCode } from '../../lib/independentFamilyProgram';
@@ -35,6 +36,9 @@ export default function PortalWelcomeBackCard({
         className="portal-welcomeBack portal-welcomeBack--standalone"
         aria-labelledby="portal-welcome-back-title"
       >
+        <div className="portal-welcomeBackBrand">
+          <BrandLogo variant="facilitator" size="accessCode" decorative />
+        </div>
         <h3 id="portal-welcome-back-title" className="portal-welcomeBackTitle">
           Welcome back
         </h3>

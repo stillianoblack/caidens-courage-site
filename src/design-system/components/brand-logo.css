@@ -1,0 +1,65 @@
+.ds-brandLogo {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.ds-brandLogo--portalIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+}
+
+.ds-brandLogo--portalWordmark {
+  height: 2.75rem;
+  width: auto;
+  max-width: min(100%, 11.5rem);
+}
+
+.ds-brandLogo--marketingHeader {
+  height: 2.5rem;
+  width: auto;
+  max-width: min(100%, 13.5rem);
+}
+
+@media (min-width: 640px) {
+  .ds-brandLogo--marketingHeader {
+    height: 2.75rem;
+    max-width: min(100%, 15rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ds-brandLogo--marketingHeader {
+    height: 3rem;
+    max-width: min(100%, 16.5rem);
+  }
+}
+
+.ds-brandLogo--accessCode {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .ds-brandLogo--accessCode {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .portal-headerBrandLogo.ds-brandLogo--portalIcon,
+  .portal-headerBrandLogo.ds-brandLogo--portalWordmark {
+    width: 2.75rem;
+    height: 2.75rem;
+    max-width: 11rem;
+    border-radius: 0.65rem;
+  }
+
+  .portal-headerBrandLogo.ds-brandLogo--portalWordmark {
+    height: 2.75rem;
+    width: auto;
+  }
+}

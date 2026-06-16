@@ -196,6 +196,7 @@ export default function ProgramDashboardPage() {
         <PilotDashboardTopBar
           pageTitle={pageTitle}
           onOpenProgramGoals={openGoalsDrawer}
+          mobileFacilitatorNav={showMobileNav && isMobileNav}
         />
       }
       footer={<footer className="pilot-miniFooter">© 2026 Caiden&apos;s Courage™ Pilot Materials</footer>}

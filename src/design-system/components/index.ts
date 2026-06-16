@@ -1,4 +1,6 @@
 export { default as AvatarContainer } from './AvatarContainer';
+export { default as BrandLogo } from './BrandLogo';
+export type { BrandLogoProps, BrandLogoSize } from './BrandLogo';
 export type { AvatarContainerProps, AvatarContainerVariant } from './AvatarContainer';
 export { default as MissionCoachCard } from './MissionCoachCard';
 export { default as B4InsightsDrawer } from './B4InsightsDrawer';

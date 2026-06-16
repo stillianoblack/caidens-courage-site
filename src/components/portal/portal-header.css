@@ -124,6 +124,10 @@
   background: rgba(255, 255, 255, 0.88);
 }
 
+.portal-headerTools--facilitatorDesktop {
+  flex-wrap: nowrap;
+}
+
 .portal-headerLead {
   grid-area: lead;
   min-width: 0;
@@ -252,6 +256,17 @@
   .portal-headerSwitcher .portal-switcherTrigger {
     flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  .portal-header--facilitatorMobile .portal-headerTitle {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .portal-header--facilitatorMobile .portal-headerGoalsBtn {
+    display: none;
   }
 
   /* Family mobile: logo left, coins/player/bell/dropdown right */
@@ -408,6 +423,57 @@
   padding: 0 0.65rem;
   font-size: 0.625rem;
   letter-spacing: 0.03em;
+}
+
+/* Facilitator mobile header — logo, title, and dropdown in one row; search below */
+.facilitatorPortalMobileHeader {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 1.5rem;
+  column-gap: 0.5rem;
+  width: 100%;
+  min-height: auto;
+  padding: 2rem 0.75rem 0;
+  overflow: visible;
+  grid-template-columns: unset !important;
+  grid-template-areas: unset !important;
+  box-sizing: border-box;
+}
+
+.facilitatorPortalMobileHeader-logo {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.65rem;
+  flex-shrink: 0;
+  display: block;
+}
+
+.facilitatorPortalMobileHeader-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.facilitatorPortalMobileHeader-switcher {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.facilitatorPortalMobileHeader-switcher .portal-switcherTrigger {
+  min-height: 2.75rem;
+  padding: 0 0.65rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.03em;
+}
+
+.facilitatorPortalMobileHeader-search {
+  flex: 1 1 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem;
 }
 
 .kids-adventure-shell .familyPortalMobileHeader {

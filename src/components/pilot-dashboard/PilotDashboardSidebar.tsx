@@ -9,6 +9,7 @@ import { useFacilitatorGalleryPendingCount } from '../../hooks/useGalleryNavCoun
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
 import { programDashboardTabPath } from '../../lib/programDashboardNav';
 import type { PilotPricingTier } from '../../types/pilotProgram';
+import BrandLogo from '../../design-system/components/BrandLogo';
 import PilotNavIcon from './PilotNavIcon';
 import PilotPartnerSupportCard from './PilotPartnerSupportCard';
 import PilotProgramSettingsCard from './PilotProgramSettingsCard';
@@ -48,8 +49,16 @@ export default function PilotDashboardSidebar({
     <aside className="pilot-rail" aria-label="Pilot dashboard navigation">
       <div className="pilot-railUpper">
         <div className="pilot-railBrand">
-          <p className="pilot-railBrandTitle">{brandTitle}</p>
-          <p className="pilot-railBrandSub">{brandSubtitle}</p>
+          <BrandLogo
+            variant="facilitator"
+            size="portalIcon"
+            className="pilot-railBrandLogo"
+            decorative
+          />
+          <div className="pilot-railBrandCopy">
+            <p className="pilot-railBrandTitle">{brandTitle}</p>
+            <p className="pilot-railBrandSub">{brandSubtitle}</p>
+          </div>
         </div>
 
         <nav className="pilot-railNav" role="tablist" aria-label="Dashboard sections">

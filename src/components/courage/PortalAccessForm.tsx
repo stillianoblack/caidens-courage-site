@@ -1,4 +1,5 @@
 import React, { useId, useRef, useState } from 'react';
+import BrandLogo from '../../design-system/components/BrandLogo';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
 import { readLastPilotProgram, type LastPilotProgram } from '../../config/lastPilotProgram';
@@ -67,8 +68,6 @@ export default function PortalAccessForm({
     ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
     : 'cc-portal-access-form--nav';
 
-  const portalIconSrc = '/images/icons/FocusFlame_Icon.svg';
-
   const handleUseDifferentCode = () => {
     dismissPortalWelcomeBack();
     setHideWelcomeBack(true);
@@ -92,30 +91,20 @@ export default function PortalAccessForm({
 
   return (
     <div id={id} className={cardClass}>
-      {isHero ? (
+      {isHero && showManualEntry ? (
         <div className="flex flex-col items-center text-center">
-          <img
-            src={portalIconSrc}
-            alt=""
-            className="h-14 w-14 object-contain sm:h-[4.5rem] sm:w-[4.5rem]"
-            decoding="async"
-            aria-hidden
-          />
-          {showManualEntry ? (
-            <>
-              {cardAudienceLabel ? (
-                <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-navy-500/70">
-                  {cardAudienceLabel}
-                </p>
-              ) : null}
-              <h2
-                className={`font-display text-lg font-extrabold text-navy-500 sm:text-xl ${cardAudienceLabel ? 'mt-2' : 'mt-4'}`}
-              >
-                Have a Courage Access Code?
-              </h2>
-              <p className="mt-1.5 text-sm text-navy-600">Enter your code to unlock your resources.</p>
-            </>
+          <BrandLogo variant="facilitator" size="accessCode" decorative />
+          {cardAudienceLabel ? (
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-navy-500/70">
+              {cardAudienceLabel}
+            </p>
           ) : null}
+          <h2
+            className={`font-display text-lg font-extrabold text-navy-500 sm:text-xl ${cardAudienceLabel ? 'mt-2' : 'mt-4'}`}
+          >
+            Have a Courage Access Code?
+          </h2>
+          <p className="mt-1.5 text-sm text-navy-600">Enter your code to unlock your resources.</p>
         </div>
       ) : null}
 

@@ -15,6 +15,7 @@ import {
   CAMPS_PATH,
 } from './courageRoutes';
 
+import { MARKETING_LOGO_SRC } from '../design-system/brand/brandLogos';
 import type { PilotInterestType } from '../types/pilotWaitlist';
 
 export type CourageNavLink = {
@@ -42,7 +43,10 @@ export type CourageKidsMegaNav = {
 
 export const COURAGE_HOME_PATH = '/';
 
-export const COURAGE_LOGO_SRC = "/images/icons/caiden%27scourage_logo_1.png";
+/** @deprecated Prefer MARKETING_LOGO_SRC from design-system/brand/brandLogos */
+export const COURAGE_LOGO_SRC = MARKETING_LOGO_SRC;
+
+export { MARKETING_LOGO_SRC, FACILITATOR_LOGO_SRC, FAMILY_LOGO_SRC } from '../design-system/brand/brandLogos';
 
 export {
   SCHOOLS_PATH,

@@ -1,10 +1,12 @@
 import React from 'react';
+import BrandLogo from '../../design-system/components/BrandLogo';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
 import FamilyNotificationBell from '../family-portal/FamilyNotificationBell';
 import FocusCoinWalletBadge from '../rewards/FocusCoinWalletBadge';
 import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifications';
 import '../portal-design-system/portal-design-system.css';
+import '../../design-system/components/brand-logo.css';
 import './portal-header.css';
 
 type PortalHeaderProps = {
@@ -16,7 +18,29 @@ type PortalHeaderProps = {
   onOpenMobileNav?: () => void;
   /** Family mobile: logo left, coins/player/bell/dropdown right. */
   mobileFamilySimplified?: boolean;
+  /** Facilitator mobile: logo + title + dropdown in one row; search below. */
+  mobileFacilitatorNav?: boolean;
 };
+
+function FacilitatorGoalsButton({ onOpenProgramGoals }: { onOpenProgramGoals: () => void }) {
+  return (
+    <button
+      type="button"
+      className="portal-headerGoalsBtn"
+      onClick={onOpenProgramGoals}
+      aria-label="Program Goals"
+    >
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clipRule="evenodd"
+        />
+      </svg>
+      <span>Program Goals</span>
+    </button>
+  );
+}
 
 export default function PortalHeader({
   pageTitle,
@@ -26,9 +50,8 @@ export default function PortalHeader({
   notifications = [],
   onOpenMobileNav,
   mobileFamilySimplified = false,
+  mobileFacilitatorNav = false,
 }: PortalHeaderProps) {
-  const logoSrc = `${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`;
-
   if (portal === 'family') {
     if (mobileFamilySimplified) {
       return (
@@ -44,12 +67,10 @@ export default function PortalHeader({
           aria-label={pageTitle}
         >
           <div className="portal-headerFamilyTools">
-            <img
-              src={logoSrc}
-              alt="Caiden's Courage"
+            <BrandLogo
+              variant="family"
+              size="portalWordmark"
               className="portal-headerBrandLogo familyPortalMobileHeader-logo"
-              width={56}
-              height={56}
             />
             <div className="portal-headerFamilyToolsEnd">
               <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
@@ -88,16 +109,33 @@ export default function PortalHeader({
     );
   }
 
+  if (mobileFacilitatorNav) {
+    return (
+      <header
+        className="portal-header portal-header--facilitatorMobile facilitatorPortalMobileHeader"
+        aria-label={pageTitle}
+      >
+        <BrandLogo
+          variant="facilitator"
+          size="portalIcon"
+          className="portal-headerBrandLogo facilitatorPortalMobileHeader-logo"
+          decorative
+        />
+        <div className="portal-headerLead facilitatorPortalMobileHeader-title">
+          <h1 className="portal-headerTitle">{pageTitle}</h1>
+        </div>
+        <PortalSwitcherDropdown className="portal-headerSwitcher facilitatorPortalMobileHeader-switcher" />
+        <PortalResourceSearch
+          portal={portal}
+          className="portal-headerSearch facilitatorPortalMobileHeader-search"
+          collapsibleOnMobile
+        />
+      </header>
+    );
+  }
+
   return (
-    <header
-      className={[
-        'portal-header',
-        mobileFamilySimplified ? 'portal-header--familyMobile' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      aria-label={mobileFamilySimplified ? pageTitle : undefined}
-    >
+    <header className="portal-header portal-header--facilitatorDesktop" aria-label={pageTitle}>
       <div className="portal-headerLead">
         {onOpenMobileNav ? (
           <button
@@ -115,38 +153,14 @@ export default function PortalHeader({
             </svg>
           </button>
         ) : null}
-        {!mobileFamilySimplified ? (
-          <div className="portal-headerLeadText">
-            <h1 className="portal-headerTitle">{pageTitle}</h1>
-          </div>
-        ) : null}
+        <div className="portal-headerLeadText">
+          <h1 className="portal-headerTitle">{pageTitle}</h1>
+        </div>
       </div>
-      <div className="portal-headerTools">
-        {onOpenProgramGoals && !mobileFamilySimplified ? (
-          <button
-            type="button"
-            className="portal-headerGoalsBtn"
-            onClick={onOpenProgramGoals}
-            aria-label="Program Goals"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>Program Goals</span>
-          </button>
-        ) : null}
-        {!mobileFamilySimplified ? (
-          <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
-        ) : null}
-        {!mobileFamilySimplified ? (
-          <PortalSwitcherDropdown
-            className="portal-headerSwitcher"
-          />
-        ) : null}
+      <div className="portal-headerTools portal-headerTools--facilitatorDesktop">
+        {onOpenProgramGoals ? <FacilitatorGoalsButton onOpenProgramGoals={onOpenProgramGoals} /> : null}
+        <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
+        <PortalSwitcherDropdown className="portal-headerSwitcher" />
       </div>
     </header>
   );

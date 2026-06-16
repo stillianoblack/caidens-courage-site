@@ -8435,6 +8435,12 @@ a.ffl-ctaSecondary {
   width: 100%;
 }
 
+.portal-welcomeBackBrand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
 .portal-welcomeBack--standalone .portal-welcomeBackCodes {
   text-align: left;
 }

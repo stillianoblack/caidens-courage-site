@@ -209,7 +209,10 @@ export default function PilotDashboardPage() {
       )}
 
       <div className="pilot-main">
-        <PilotDashboardTopBar pageTitle={pageTitle} />
+        <PilotDashboardTopBar
+          pageTitle={pageTitle}
+          mobileFacilitatorNav={isMobileNav}
+        />
 
         <div className="pilot-content">
           <div className="pilot-tabPanel" role="tabpanel">

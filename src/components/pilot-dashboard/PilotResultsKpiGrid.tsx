@@ -8,7 +8,6 @@ type KpiCardDef = {
   id: string;
   labelLines: [string] | [string, string];
   value: string;
-  highlight?: boolean;
   topic?: KpiTopic;
   hint?: string;
 };
@@ -40,7 +39,6 @@ function buildFullResultsSections(metrics: PilotTrackingMetrics): KpiSectionDef[
           id: 'overall-baseline',
           labelLines: ['Overall Baseline', 'Average'],
           value: formatAdminPct(metrics.growth.overall),
-          highlight: true,
         },
         {
           id: 'average-reading',
@@ -123,7 +121,6 @@ function buildCompactCards(metrics: PilotTrackingMetrics): KpiCardDef[] {
       id: 'overall-baseline',
       labelLines: ['Overall Baseline', 'Average'],
       value: formatAdminPct(metrics.growth.overall),
-      highlight: true,
       topic: 'baseline',
     },
     {
@@ -169,11 +166,10 @@ function KpiCard({
       type={Tag === 'button' ? 'button' : undefined}
       className={[
         'pilot-kpiCard',
-        card.highlight ? 'pilot-kpiCard--highlight' : '',
-        onCardClick && card.topic ? ' pilot-kpiCard--clickable' : '',
+        onCardClick && card.topic ? 'pilot-kpiCard--clickable' : '',
       ]
         .filter(Boolean)
-        .join('')}
+        .join(' ')}
       onClick={onCardClick && card.topic ? () => onCardClick(card.topic!) : undefined}
     >
       <KpiLabel lines={card.labelLines} />

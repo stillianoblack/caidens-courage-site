@@ -15,6 +15,7 @@ import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCount
 import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
 import { resetPortalScroll } from '../../lib/portalScroll';
 import FamilyNavIcon from './FamilyNavIcon';
+import BrandLogo from '../../design-system/components/BrandLogo';
 import FamilyProgramSettingsRailCard from './FamilyProgramSettingsRailCard';
 import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
@@ -64,13 +65,11 @@ export default function FamilyDashboardSidebar({
     >
       <div className="family-railUpper">
         <div className="family-railBrand">
-          <img
-            src={`${process.env.PUBLIC_URL}/images/icons/favcon_C.svg`}
-            alt=""
+          <BrandLogo
+            variant="family"
+            size="portalWordmark"
             className="family-railBrandLogo"
-            width={48}
-            height={48}
-            decoding="async"
+            decorative
           />
           <div className="family-railBrandCopy">
             <p className="family-railBrandTitle">{brandTitle}</p>
