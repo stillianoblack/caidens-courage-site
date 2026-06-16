@@ -146,14 +146,17 @@ export async function createFamilyChildParticipant(
   const parsedAgeGrade = parseOptionalAgeGradeInput(input.ageGrade);
 
   try {
-    const { participantId, source } = await findOrCreateParticipant({
-      role: 'student',
-      first_name: firstName,
-      nickname: nickname || displayName,
-      program_code: programCode,
-      group_name: undefined,
-      child_age_range: parsedAgeGrade.childAgeRange || undefined,
-    });
+    const { participantId, source } = await findOrCreateParticipant(
+      {
+        role: 'student',
+        first_name: firstName,
+        nickname: nickname || displayName,
+        program_code: programCode,
+        group_name: undefined,
+        child_age_range: parsedAgeGrade.childAgeRange || undefined,
+      },
+      { diagnosticTag: 'child_profile' },
+    );
 
     if (source !== 'supabase') {
       logChildCreateFailure({

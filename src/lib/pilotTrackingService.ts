@@ -28,6 +28,7 @@ import {
   type LocalModuleResultRecord,
   type LocalParticipantRecord,
 } from './pilotTrackingLocalStorage';
+import { readParentClaimContext } from '../config/parentClaimContext';
 import {
   logTrackingSave,
   logTrackingSaveError,
@@ -55,6 +56,18 @@ export type ParticipantPayload = {
   email_opt_in?: boolean;
   /** When known, look up this participant before nickname/first_name matching. */
   participant_id?: string;
+};
+
+export type FindOrCreateParticipantOptions = {
+  /** Enables detailed [PARTICIPANT_UPSERT_DIAGNOSTIC] logs (e.g. child_profile). */
+  diagnosticTag?: string;
+};
+
+type SupabaseErrorFields = {
+  code: string | null;
+  message: string | null;
+  details: string | null;
+  hint: string | null;
 };
 
 export type EnsureStudentParticipantInput = {
@@ -318,11 +331,114 @@ function resolveResultProgramCode(
   return finalProgramCode;
 }
 
-function isMissingAdultRoleColumnError(error: unknown): boolean {
-  if (!error || typeof error !== 'object') return false;
-  const record = error as { message?: string; details?: string; hint?: string; code?: string };
-  const text = `${record.message ?? ''} ${record.details ?? ''} ${record.hint ?? ''}`.toLowerCase();
-  return text.includes('adult_role') || text.includes('schema cache');
+function parseMissingSupabaseColumn(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null;
+  const record = error as { message?: string; details?: string; code?: string };
+  const message = record.message ?? '';
+  if (record.code === 'PGRST204') {
+    const match = message.match(/Could not find the '([^']+)' column/i);
+    if (match?.[1]) return match[1];
+  }
+  const postgresMatch = message.match(/column "([^"]+)" of relation/i);
+  if (postgresMatch?.[1]) return postgresMatch[1];
+  if (/42703/.test(message) && /column/i.test(message)) {
+    const loose = message.match(/column "?([\w_]+)"?/i);
+    if (loose?.[1]) return loose[1];
+  }
+  return null;
+}
+
+function formatSupabaseErrorFields(error: unknown): SupabaseErrorFields {
+  if (!error || typeof error !== 'object') {
+    return {
+      code: null,
+      message: error instanceof Error ? error.message : String(error ?? ''),
+      details: null,
+      hint: null,
+    };
+  }
+  const record = error as { code?: string; message?: string; details?: string; hint?: string };
+  return {
+    code: record.code ?? null,
+    message: record.message ?? null,
+    details: record.details ?? null,
+    hint: record.hint ?? null,
+  };
+}
+
+function logParticipantUpsertDiagnostic(input: {
+  diagnosticTag?: string;
+  operation: 'insert' | 'update' | 'select';
+  programCode: string;
+  payloadKeys: string[];
+  source?: 'supabase' | 'local';
+  participantId?: string;
+  error?: unknown;
+}): void {
+  if (!input.diagnosticTag) return;
+  const parentEmail = readParentClaimContext()?.email?.trim() || null;
+  console.info('[PARTICIPANT_UPSERT_DIAGNOSTIC]', {
+    tag: input.diagnosticTag,
+    parent_email: parentEmail,
+    program_code: input.programCode,
+    operation: input.operation,
+    payload_keys: input.payloadKeys,
+    source: input.source ?? null,
+    participant_id: input.participantId ?? null,
+    supabase_error: input.error ? formatSupabaseErrorFields(input.error) : null,
+  });
+}
+
+async function mutateParticipantRowWithSchemaFallback<T extends Record<string, unknown>>(input: {
+  operation: 'insert' | 'update';
+  payload: T;
+  updateParticipantId?: string;
+}): Promise<{ data: { id: string } | null; error: unknown | null; payloadKeys: string[] }> {
+  if (!supabase) {
+    return { data: null, error: new Error('Supabase client unavailable'), payloadKeys: [] };
+  }
+
+  let payload: Record<string, unknown> = { ...input.payload };
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const payloadKeys = Object.keys(payload);
+    const request =
+      input.operation === 'insert'
+        ? supabase.from('participants').insert(payload).select('id').single()
+        : supabase
+            .from('participants')
+            .update(payload)
+            .eq('id', input.updateParticipantId ?? '')
+            .select('id')
+            .single();
+
+    const { data, error } = await withTimeout(
+      request,
+      DASHBOARD_FETCH_TIMEOUT_MS,
+      input.operation === 'insert' ? 'participant_insert' : 'participant_update',
+    );
+
+    if (!error && data && typeof (data as { id?: string }).id === 'string') {
+      return { data: data as { id: string }, error: null, payloadKeys };
+    }
+
+    lastError = error;
+    const missingColumn = parseMissingSupabaseColumn(error);
+    if (missingColumn && Object.prototype.hasOwnProperty.call(payload, missingColumn)) {
+      const nextPayload = { ...payload };
+      delete nextPayload[missingColumn];
+      payload = nextPayload;
+      continue;
+    }
+    break;
+  }
+
+  return {
+    data: null,
+    error: lastError,
+    payloadKeys: Object.keys(payload),
+  };
 }
 
 function participantToLocalRow(
@@ -362,7 +478,9 @@ function applyStudentGroupFilter<T extends { eq: (col: string, val: string) => T
 
 export async function findOrCreateParticipant(
   payload: ParticipantPayload,
+  options?: FindOrCreateParticipantOptions,
 ): Promise<{ participantId: string; source: 'supabase' | 'local' }> {
+  const diagnosticTag = options?.diagnosticTag;
   const programCode = resolveTrackingProgramCode('participant_upsert');
   if (!programCode) {
     logTrackingSaveBlocked('findOrCreateParticipant requires active program context');
@@ -489,14 +607,16 @@ export async function findOrCreateParticipant(
         if (programName) updatePayload.program_name = programName;
         if (payload.group_name?.trim()) updatePayload.group_name = payload.group_name.trim();
 
-        const { error: updateError } =
+        const updateResult =
           Object.keys(updatePayload).length > 0
-            ? await withTimeout(
-                supabase.from('participants').update(updatePayload).eq('id', participantId),
-                DASHBOARD_FETCH_TIMEOUT_MS,
-                'participant_update',
-              )
-            : { error: null };
+            ? await mutateParticipantRowWithSchemaFallback({
+                operation: 'update',
+                payload: updatePayload,
+                updateParticipantId: participantId,
+              })
+            : { data: { id: participantId }, error: null, payloadKeys: [] as string[] };
+
+        const updateError = updateResult.error;
 
         if (updateError) {
           logTrackingSaveError({
@@ -506,6 +626,13 @@ export async function findOrCreateParticipant(
             participantName: payload.nickname || payload.first_name,
             role: payload.role,
             programCode,
+            error: updateError,
+          });
+          logParticipantUpsertDiagnostic({
+            diagnosticTag,
+            operation: 'update',
+            programCode,
+            payloadKeys: updateResult.payloadKeys,
             error: updateError,
           });
         } else {
@@ -521,6 +648,14 @@ export async function findOrCreateParticipant(
         }
 
         saveLocalParticipant(participantToLocalRow(normalizedPayload, participantId, programCode));
+        logParticipantUpsertDiagnostic({
+          diagnosticTag,
+          operation: 'update',
+          programCode,
+          payloadKeys: updateResult.payloadKeys,
+          source: 'supabase',
+          participantId,
+        });
         return { participantId, source: 'supabase' };
       }
 
@@ -541,23 +676,12 @@ export async function findOrCreateParticipant(
         insertPayload.adult_role = payload.adult_role.trim();
       }
 
-      let { data, error } = await withTimeout(
-        supabase.from('participants').insert(insertPayload).select('id').single(),
-        DASHBOARD_FETCH_TIMEOUT_MS,
-        'participant_insert',
-      );
-
-      if (error && 'adult_role' in insertPayload && isMissingAdultRoleColumnError(error)) {
-        const retryPayload = { ...insertPayload };
-        delete retryPayload.adult_role;
-        const retry = await withTimeout(
-          supabase.from('participants').insert(retryPayload).select('id').single(),
-          DASHBOARD_FETCH_TIMEOUT_MS,
-          'participant_insert_without_adult_role',
-        );
-        data = retry.data;
-        error = retry.error;
-      }
+      const insertResult = await mutateParticipantRowWithSchemaFallback({
+        operation: 'insert',
+        payload: insertPayload,
+      });
+      const data = insertResult.data;
+      const error = insertResult.error;
 
       if (!error && data?.id) {
         const participantId = data.id as string;
@@ -571,6 +695,14 @@ export async function findOrCreateParticipant(
           programCode,
           response: data,
         });
+        logParticipantUpsertDiagnostic({
+          diagnosticTag,
+          operation: 'insert',
+          programCode,
+          payloadKeys: insertResult.payloadKeys,
+          source: 'supabase',
+          participantId,
+        });
         return { participantId, source: 'supabase' };
       }
 
@@ -580,6 +712,13 @@ export async function findOrCreateParticipant(
         participantName: payload.nickname || payload.first_name,
         role: payload.role,
         programCode,
+        error,
+      });
+      logParticipantUpsertDiagnostic({
+        diagnosticTag,
+        operation: 'insert',
+        programCode,
+        payloadKeys: insertResult.payloadKeys,
         error,
       });
     } catch (err) {
@@ -602,6 +741,15 @@ export async function findOrCreateParticipant(
       participantName: payload.nickname || payload.first_name,
       role: payload.role,
       programCode,
+      error: 'using cached local participant id',
+    });
+    logParticipantUpsertDiagnostic({
+      diagnosticTag,
+      operation: 'insert',
+      programCode,
+      payloadKeys: Object.keys(payload),
+      source: 'local',
+      participantId: existingLocal.id,
       error: 'using cached local participant id',
     });
     return { participantId: existingLocal.id, source: 'local' };
@@ -628,6 +776,15 @@ export async function findOrCreateParticipant(
     participantName: payload.nickname || payload.first_name,
     role: payload.role,
     programCode,
+    error: 'saved locally only',
+  });
+  logParticipantUpsertDiagnostic({
+    diagnosticTag,
+    operation: 'insert',
+    programCode,
+    payloadKeys: Object.keys(payload),
+    source: 'local',
+    participantId: localParticipant.id,
     error: 'saved locally only',
   });
   return { participantId: localParticipant.id, source: 'local' };
