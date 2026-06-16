@@ -111,23 +111,20 @@ export function ActiveParticipantProvider({
   }, [refreshRoster]);
 
   useEffect(() => {
-    const handleRefresh = () => {
-      refreshParticipant();
-    };
     const handleRosterRefresh = () => {
       void refreshRoster();
     };
 
-    window.addEventListener(ACTIVE_CHILD_EVENT, handleRefresh);
+    window.addEventListener(ACTIVE_CHILD_EVENT, handleRosterRefresh);
     window.addEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRosterRefresh);
     window.addEventListener(MODULE_COMPLETE_EVENT, handleRosterRefresh);
 
     return () => {
-      window.removeEventListener(ACTIVE_CHILD_EVENT, handleRefresh);
+      window.removeEventListener(ACTIVE_CHILD_EVENT, handleRosterRefresh);
       window.removeEventListener(CHILD_PROFILE_UPDATED_EVENT, handleRosterRefresh);
       window.removeEventListener(MODULE_COMPLETE_EVENT, handleRosterRefresh);
     };
-  }, [refreshParticipant, refreshRoster]);
+  }, [refreshRoster]);
 
   const selectParticipant = useCallback((entry: ActiveParticipantRosterEntry) => {
     const next = syncActiveParticipantStorage(

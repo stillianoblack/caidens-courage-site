@@ -122,6 +122,20 @@ export function validateStoredParticipantAgainstRoster(
   }
 
   if (!isParticipantInRoster(storedId, roster)) {
+    // Roster may still be loading, or a child was just saved — keep the stored selection.
+    if (roster.length === 0) {
+      const state = readActiveChildState();
+      if (state?.participantId === storedId) {
+        return {
+          participantId: state.participantId,
+          displayName: state.displayName.trim() || 'Player',
+          firstName: state.firstName,
+          gradeLevel: null,
+        };
+      }
+      return null;
+    }
+
     console.warn('[ACTIVE_PARTICIPANT] clearing invalid stored participant', {
       stored_participant_id: storedId,
       roster_ids: roster.map((row) => row.participantId),

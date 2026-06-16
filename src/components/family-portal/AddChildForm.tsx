@@ -19,21 +19,30 @@ export default function AddChildForm({
   const [nickname, setNickname] = useState('');
   const [ageGrade, setAgeGrade] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = firstName.trim().length > 0 && !submitting;
+  const trimmedFirstName = firstName.trim();
+  const canSubmit = trimmedFirstName.length > 0 && !submitting;
+  const showFirstNameError = attemptedSubmit && !trimmedFirstName;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!canSubmit) return;
-
-    setSubmitting(true);
+    setAttemptedSubmit(true);
     setMessage(null);
     setError(null);
 
+    if (!trimmedFirstName) {
+      return;
+    }
+
+    if (submitting) return;
+
+    setSubmitting(true);
+
     const result = await createFamilyChildParticipant({
-      firstName: firstName.trim(),
+      firstName: trimmedFirstName,
       nickname: nickname.trim() || undefined,
       ageGrade: ageGrade.trim() || undefined,
     });
@@ -41,6 +50,7 @@ export default function AddChildForm({
     setSubmitting(false);
 
     if (result.success) {
+      setAttemptedSubmit(false);
       setMessage(
         routeToBaseline && baselinePath
           ? `${result.message} Starting B-4 Check-In…`
@@ -85,9 +95,14 @@ export default function AddChildForm({
             onChange={(event) => setFirstName(event.target.value)}
             autoComplete="off"
             maxLength={32}
-            required
             placeholder="Alex"
+            aria-invalid={showFirstNameError}
           />
+          {showFirstNameError ? (
+            <span className="family-addChildMessage family-addChildMessage--error" role="alert">
+              First name is required.
+            </span>
+          ) : null}
         </label>
 
         <label className="family-addChildField">
@@ -127,7 +142,7 @@ export default function AddChildForm({
           </p>
         ) : null}
 
-        <button type="submit" className="family-addChildBtn" disabled={!canSubmit}>
+        <button type="submit" className="family-addChildBtn" disabled={!canSubmit} aria-disabled={!canSubmit}>
           {submitting ? 'Saving…' : 'Add Child'}
         </button>
       </form>

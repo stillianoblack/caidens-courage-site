@@ -19,3 +19,17 @@ export async function dedupePortalFetch<T>(key: string, fetcher: () => Promise<T
   inFlight.set(key, promise);
   return promise;
 }
+
+/** Drop cached in-flight portal loads so the next refresh fetches fresh data. */
+export function invalidatePortalFetch(keyPrefix?: string): void {
+  if (!keyPrefix?.trim()) {
+    inFlight.clear();
+    return;
+  }
+  const prefix = keyPrefix.trim();
+  Array.from(inFlight.keys()).forEach((key) => {
+    if (key.startsWith(prefix)) {
+      inFlight.delete(key);
+    }
+  });
+}

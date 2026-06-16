@@ -1,4 +1,5 @@
 import type { ActivePilotProgram, PilotProgramType } from '../types/pilotProgram';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 
 /** UI / app-layer program type label. */
 export const INDEPENDENT_FAMILY_PROGRAM_TYPE = 'Independent Family' as const satisfies PilotProgramType;
@@ -19,6 +20,18 @@ export function isIndependentFamilyProgram(
   program: Pick<ActivePilotProgram, 'programType'> | null | undefined,
 ): boolean {
   return Boolean(program && isIndependentFamilyType(program.programType));
+}
+
+/** True when the active independent family program matches the hydrated program code. */
+export function isIndependentFamilyProgramCode(
+  familyProgramCode: string,
+  program: Pick<ActivePilotProgram, 'programType' | 'programCode'> | null = readActivePilotProgram(),
+): boolean {
+  if (!isIndependentFamilyProgram(program)) return false;
+  const activeCode = program?.programCode?.trim();
+  const targetCode = familyProgramCode.trim();
+  if (!activeCode || !targetCode) return false;
+  return activeCode.toUpperCase() === targetCode.toUpperCase();
 }
 
 export function isLegacyIndependentFamilyFacilitatorCode(code: string | null | undefined): boolean {
