@@ -232,6 +232,8 @@ export type GameQuestionBase = {
     difficultyTier?: string;
     contentVersion?: string;
   };
+  /** Optional reflection prompt for hard/challenge questions */
+  whyPrompt?: string;
 };
 
 export type GameChoiceQuestion = GameQuestionBase & {

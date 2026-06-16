@@ -9,8 +9,11 @@ function asset(path: string): string {
 /** Caiden's Courage icon + wordmark — marketing site, family portal, public brand. */
 export const MARKETING_LOGO_SRC = asset('/images/icons/marketing_page_logo.svg');
 
-/** Gold Focus Flame in navy rounded square — facilitator portal + access codes. */
+/** Square Focus Flame icon — facilitator portal shell branding. */
 export const FACILITATOR_LOGO_SRC = asset('/images/icons/Facilitator_logo.svg');
+
+/** Wide Focus Flame wordmark — marketing/access contexts only. */
+export const FACILITATOR_WORDMARK_SRC = asset('/images/icons/Focus-Flame.svg');
 
 /** Family portal uses the consumer Caiden's Courage wordmark. */
 export const FAMILY_LOGO_SRC = MARKETING_LOGO_SRC;
@@ -23,7 +26,13 @@ export const BRAND_LOGO_ALTS: Record<BrandLogoVariant, string> = {
   facilitator: 'Focus Flame Academy',
 };
 
-export function resolveBrandLogoSrc(variant: BrandLogoVariant): string {
-  if (variant === 'facilitator') return FACILITATOR_LOGO_SRC;
+export function resolveBrandLogoSrc(
+  variant: BrandLogoVariant,
+  size?: 'portalIcon' | 'portalWordmark' | 'marketingHeader' | 'accessCode',
+): string {
+  if (variant === 'facilitator') {
+    if (size === 'portalWordmark') return FACILITATOR_WORDMARK_SRC;
+    return FACILITATOR_LOGO_SRC;
+  }
   return MARKETING_LOGO_SRC;
 }

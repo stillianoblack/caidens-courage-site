@@ -1,9 +1,11 @@
 import React from 'react';
-import BrandLogo from '../../design-system/components/BrandLogo';
 import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
 import FamilyNotificationBell from '../family-portal/FamilyNotificationBell';
 import FocusCoinWalletBadge from '../rewards/FocusCoinWalletBadge';
+import MobilePortalHeaderLead from './MobilePortalHeaderLead';
+import { getMobilePortalBranding } from '../../lib/getMobilePortalBranding';
+import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import type { FamilyPortalNotification } from '../../hooks/useFamilyPortalNotifications';
 import '../portal-design-system/portal-design-system.css';
 import '../../design-system/components/brand-logo.css';
@@ -52,8 +54,16 @@ export default function PortalHeader({
   mobileFamilySimplified = false,
   mobileFacilitatorNav = false,
 }: PortalHeaderProps) {
+  const playerChip = useGameplayPlayerChip();
+  const familyMobileBranding = mobileFamilySimplified
+    ? getMobilePortalBranding({ familyDisplayName: playerChip.displayName, role: 'family' })
+    : null;
+  const facilitatorMobileBranding = mobileFacilitatorNav
+    ? getMobilePortalBranding({ role: 'facilitator' })
+    : null;
+
   if (portal === 'family') {
-    if (mobileFamilySimplified) {
+    if (mobileFamilySimplified && familyMobileBranding) {
       return (
         <header
           className={[
@@ -67,10 +77,9 @@ export default function PortalHeader({
           aria-label={pageTitle}
         >
           <div className="portal-headerFamilyTools">
-            <BrandLogo
-              variant="family"
-              size="portalWordmark"
-              className="portal-headerBrandLogo familyPortalMobileHeader-logo"
+            <MobilePortalHeaderLead
+              logoSrc={familyMobileBranding.logoSrc}
+              className="familyPortalMobileHeader-lead"
             />
             <div className="portal-headerFamilyToolsEnd">
               <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
@@ -79,6 +88,7 @@ export default function PortalHeader({
                 className="portal-headerSwitcher portal-headerFamilySwitcher familyPortalMobileHeader-switcher"
                 linkedCampLabel={linkedCampLabel}
                 familyNav
+                mobileVariant="family"
               />
             </div>
           </div>
@@ -109,22 +119,22 @@ export default function PortalHeader({
     );
   }
 
-  if (mobileFacilitatorNav) {
+  if (mobileFacilitatorNav && facilitatorMobileBranding) {
     return (
       <header
         className="portal-header portal-header--facilitatorMobile facilitatorPortalMobileHeader"
         aria-label={pageTitle}
       >
-        <BrandLogo
-          variant="facilitator"
-          size="portalIcon"
-          className="portal-headerBrandLogo facilitatorPortalMobileHeader-logo"
-          decorative
-        />
-        <div className="portal-headerLead facilitatorPortalMobileHeader-title">
-          <h1 className="portal-headerTitle">{pageTitle}</h1>
+        <div className="facilitatorPortalMobileHeader-row">
+          <MobilePortalHeaderLead
+            logoSrc={facilitatorMobileBranding.logoSrc}
+            className="facilitatorPortalMobileHeader-lead"
+          />
+          <PortalSwitcherDropdown
+            className="portal-headerSwitcher facilitatorPortalMobileHeader-switcher"
+            mobileVariant="facilitator"
+          />
         </div>
-        <PortalSwitcherDropdown className="portal-headerSwitcher facilitatorPortalMobileHeader-switcher" />
         <PortalResourceSearch
           portal={portal}
           className="portal-headerSearch facilitatorPortalMobileHeader-search"

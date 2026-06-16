@@ -51,7 +51,12 @@ export function computeQuestionAttemptMetrics(
 ): QuestionAttemptMetrics {
   const scoped =
     options?.attemptScope === 'initial'
-      ? rows.filter((row) => row.attempt_type !== 'replay' && row.is_replay !== true)
+      ? rows.filter(
+          (row) =>
+            row.attempt_type !== 'replay' &&
+            row.attempt_type !== 'challenge' &&
+            row.is_replay !== true,
+        )
       : rows;
 
   const questions_attempted = scoped.length;

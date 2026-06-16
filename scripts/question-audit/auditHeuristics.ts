@@ -3,10 +3,12 @@ import type {
   AuditedQuestion,
   AuditReport,
   AuditSummary,
+  BankAuditSummary,
   NormalizedQuestion,
   PositionDistribution,
   RewritePriority,
 } from './types';
+import { runQuestionBankAudit } from './questionBankAudit';
 import { indexToLetter } from './collectQuestions';
 
 const JOKE_DISTRACTOR_PATTERNS: RegExp[] = [
@@ -36,6 +38,13 @@ const JOKE_DISTRACTOR_PATTERNS: RegExp[] = [
 
 const POSITIVE_SEL_WORDS = /\b(safe|help|calm|trust|team|kind|responsible|breath|plan|ask for help|notice)\b/i;
 const NEGATIVE_EXTREME = /\b(never|forever|ignore|hide|yell|punch|blame|quit|broken|afraid|hate)\b/i;
+
+const OBVIOUS_MORAL_PATTERNS = [
+  /\bwhat should\b/i,
+  /\bwhich is best\b/i,
+  /\bwhat is the right thing\b/i,
+  /\bwhich choice is best\b/i,
+];
 
 const REASONING_KEYWORDS =
   /\b(why|best|infer|evidence|compare|stronger|most likely|should happen first|hypothesis|variable|plan|order|priorit)\b/i;
@@ -379,9 +388,20 @@ function resolvePriority(difficultyScore: number, flags: AuditFlag[]): RewritePr
   return 'low';
 }
 
+function hasObviousMoralPattern(question: NormalizedQuestion): boolean {
+  return OBVIOUS_MORAL_PATTERNS.some((pattern) => pattern.test(question.questionText));
+}
+
+function hasWeakDistractorSet(question: NormalizedQuestion): boolean {
+  const distractors = question.choices.filter((c) => c.id !== question.correctAnswerId);
+  const jokeCount = distractors.filter((d) => JOKE_DISTRACTOR_PATTERNS.some((p) => p.test(d.label))).length;
+  return jokeCount >= 2;
+}
+
 function auditQuestion(question: NormalizedQuestion): AuditedQuestion {
   const flags: AuditFlag[] = [];
 
+  if (hasObviousMoralPattern(question)) flags.push('potentially_obvious_answer');
   if (isCorrectTooObvious(question)) flags.push('correct_answer_too_obvious');
   if (hasJokeDistractor(question.choices, question.correctAnswerLabel)) {
     flags.push('joke_or_impossible_distractor');
@@ -398,6 +418,7 @@ function auditQuestion(question: NormalizedQuestion): AuditedQuestion {
   if (lacksScenarioEvidence(question)) flags.push('insufficient_scenario_evidence');
   if (lacksReasoningSkill(question)) flags.push('lacks_reasoning_skill');
   if (caidenNeedsMath(question)) flags.push('caiden_needs_more_math_focus');
+  if (hasWeakDistractorSet(question)) flags.push('weak_distractor_set');
 
   const { score, reason } = scoreDifficulty(question, flags);
   const improvedDistractors = buildImprovedDistractors(question);
@@ -405,6 +426,9 @@ function auditQuestion(question: NormalizedQuestion): AuditedQuestion {
   return {
     ...question,
     flags: [...new Set(flags)],
+    bankFindings: [],
+    canonicalSkill: 'Other',
+    weakDistractorReasons: [],
     difficultyScore: score,
     difficultyReason: reason,
     recommendedRewrite: buildRecommendedRewrite(question, flags),
@@ -432,7 +456,11 @@ function buildPositionDistribution(questions: AuditedQuestion[]): PositionDistri
   return counts;
 }
 
-export function auditAllQuestions(questions: NormalizedQuestion[]): AuditReport {
+export function auditAllQuestions(
+  questions: NormalizedQuestion[],
+  bankAudit?: BankAuditSummary,
+): AuditReport {
+  const resolvedBankAudit = bankAudit ?? runQuestionBankAudit(questions);
   const audited = questions.map(auditQuestion);
 
   const flagCounts = {} as Record<AuditFlag, number>;
@@ -477,6 +505,10 @@ export function auditAllQuestions(questions: NormalizedQuestion[]): AuditReport 
   const summary: AuditSummary = {
     generatedAt: new Date().toISOString(),
     totalQuestions: audited.length,
+    questionHealthScore: resolvedBankAudit.healthScore,
+    healthScores: resolvedBankAudit.healthScores,
+    sourcesScanned: resolvedBankAudit.sourcesScanned,
+    issuesFound: resolvedBankAudit.issueCounts,
     averageDifficultyByCharacter,
     flagCounts,
     positionDistributionByCharacter,
@@ -485,7 +517,12 @@ export function auditAllQuestions(questions: NormalizedQuestion[]): AuditReport 
     rewritePriorityCounts,
   };
 
-  return { summary, questions: audited };
+  return {
+    summary,
+    bankAudit: resolvedBankAudit,
+    recommendations: resolvedBankAudit.recommendations,
+    questions: audited,
+  };
 }
 
 export { buildPositionDistribution };

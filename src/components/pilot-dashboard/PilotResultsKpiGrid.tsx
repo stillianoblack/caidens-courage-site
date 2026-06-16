@@ -1,4 +1,6 @@
 import React from 'react';
+import InfoTooltip from '../ui/InfoTooltip';
+import { formatGrowthDelta } from '../../lib/formatGrowthDelta';
 import { formatAdminPct } from '../../lib/b4BaselineAdminStats';
 import type { PilotTrackingMetrics } from '../../lib/pilotTrackingMetrics';
 
@@ -15,6 +17,7 @@ type KpiCardDef = {
 type KpiSectionDef = {
   id: string;
   title: string;
+  tooltip?: string;
   cards: KpiCardDef[];
 };
 
@@ -24,42 +27,106 @@ type PilotResultsKpiGridProps = {
   onCardClick?: (topic: KpiTopic) => void;
 };
 
-function formatAdultGrowthDelta(value: number | null | undefined): string {
-  if (value == null) return '—';
-  return value >= 0 ? `+${value}` : String(value);
-}
+const SECTION_TOOLTIPS: Record<string, string> = {
+  'baseline-overview':
+    "Average starting score from each student's first completed B-4 Baseline Check.",
+  'current-progress':
+    "Average score from each student's current weekly missions. Retakes and practice replays are excluded.",
+  'growth-since-baseline':
+    'Difference between current weekly performance and baseline. Positive numbers show improvement. Negative numbers may indicate students are working through more difficult material.',
+  participation:
+    'Counts active students, completed baselines, completed modules, and unique modules attempted.',
+  'adult-growth':
+    'Tracks facilitator or parent pre/post assessments when available.',
+};
 
 function buildFullResultsSections(metrics: PilotTrackingMetrics): KpiSectionDef[] {
   return [
     {
-      id: 'student-outcomes',
-      title: 'Student Outcomes',
+      id: 'baseline-overview',
+      title: 'Baseline Overview',
+      tooltip: SECTION_TOOLTIPS['baseline-overview'],
       cards: [
         {
           id: 'overall-baseline',
           labelLines: ['Overall Baseline', 'Average'],
-          value: formatAdminPct(metrics.growth.overall),
+          value: formatAdminPct(metrics.baselineScores.overall),
         },
         {
           id: 'average-reading',
           labelLines: ['Average', 'Reading'],
-          value: formatAdminPct(metrics.growth.reading),
+          value: formatAdminPct(metrics.baselineScores.reading),
         },
         {
           id: 'average-feelings',
           labelLines: ['Average', 'Feelings'],
-          value: formatAdminPct(metrics.growth.confidence),
+          value: formatAdminPct(metrics.baselineScores.confidence),
         },
         {
           id: 'average-focus-moves',
           labelLines: ['Average', 'Focus Moves'],
-          value: formatAdminPct(metrics.growth.focus),
+          value: formatAdminPct(metrics.baselineScores.focus),
+        },
+      ],
+    },
+    {
+      id: 'current-progress',
+      title: 'Current Progress',
+      tooltip: SECTION_TOOLTIPS['current-progress'],
+      cards: [
+        {
+          id: 'current-overall',
+          labelLines: ['Current', 'Overall'],
+          value: formatAdminPct(metrics.currentScores.overall),
+        },
+        {
+          id: 'current-reading',
+          labelLines: ['Current', 'Reading'],
+          value: formatAdminPct(metrics.currentScores.reading),
+        },
+        {
+          id: 'current-feelings',
+          labelLines: ['Current', 'Feelings'],
+          value: formatAdminPct(metrics.currentScores.confidence),
+        },
+        {
+          id: 'current-focus',
+          labelLines: ['Current', 'Focus Moves'],
+          value: formatAdminPct(metrics.currentScores.focus),
+        },
+      ],
+    },
+    {
+      id: 'growth-since-baseline',
+      title: 'Growth Since Baseline',
+      tooltip: SECTION_TOOLTIPS['growth-since-baseline'],
+      cards: [
+        {
+          id: 'growth-overall',
+          labelLines: ['Growth', 'Overall'],
+          value: formatGrowthDelta(metrics.growthSinceBaseline.overall),
+        },
+        {
+          id: 'growth-reading',
+          labelLines: ['Growth', 'Reading'],
+          value: formatGrowthDelta(metrics.growthSinceBaseline.reading),
+        },
+        {
+          id: 'growth-feelings',
+          labelLines: ['Growth', 'Feelings'],
+          value: formatGrowthDelta(metrics.growthSinceBaseline.confidence),
+        },
+        {
+          id: 'growth-focus',
+          labelLines: ['Growth', 'Focus Moves'],
+          value: formatGrowthDelta(metrics.growthSinceBaseline.focus),
         },
       ],
     },
     {
       id: 'participation',
       title: 'Participation',
+      tooltip: SECTION_TOOLTIPS.participation,
       cards: [
         { id: 'participation', labelLines: ['Participation'], value: String(metrics.studentsEnrolled) },
         {
@@ -82,6 +149,7 @@ function buildFullResultsSections(metrics: PilotTrackingMetrics): KpiSectionDef[
     {
       id: 'adult-growth',
       title: 'Adult Growth',
+      tooltip: SECTION_TOOLTIPS['adult-growth'],
       cards: [
         {
           id: 'adult-pre',
@@ -96,7 +164,7 @@ function buildFullResultsSections(metrics: PilotTrackingMetrics): KpiSectionDef[
         {
           id: 'adult-delta',
           labelLines: ['Adult Growth', 'Delta'],
-          value: formatAdultGrowthDelta(metrics.adultGrowthDeltaAvg),
+          value: formatGrowthDelta(metrics.adultGrowthDeltaAvg),
         },
       ],
     },
@@ -120,7 +188,7 @@ function buildCompactCards(metrics: PilotTrackingMetrics): KpiCardDef[] {
     {
       id: 'overall-baseline',
       labelLines: ['Overall Baseline', 'Average'],
-      value: formatAdminPct(metrics.growth.overall),
+      value: formatAdminPct(metrics.baselineScores.overall),
       topic: 'baseline',
     },
     {
@@ -201,7 +269,10 @@ export default function PilotResultsKpiGrid({
     <div className="pilot-resultsKpiSections">
       {sections.map((section) => (
         <section key={section.id} className="pilot-resultsKpiSection">
-          <h3 className="pilot-resultsKpiSectionTitle">{section.title}</h3>
+          <h3 className="pilot-resultsKpiSectionTitle">
+            <span>{section.title}</span>
+            {section.tooltip ? <InfoTooltip label={section.tooltip} alignEnd /> : null}
+          </h3>
           <div className="pilot-resultsKpiGrid">
             {section.cards.map((card) => (
               <KpiCard key={card.id} card={card} />

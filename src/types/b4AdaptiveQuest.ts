@@ -16,6 +16,7 @@ export type B4AdaptiveQuestion = {
   incorrectFeedback: string;
   hint: string;
   skillTags: string[];
+  whyPrompt?: string;
   metadata?: GradeBandQuestionMetadata;
 };
 

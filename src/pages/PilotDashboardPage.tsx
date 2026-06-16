@@ -25,7 +25,6 @@ import {
 } from '../data/pilotDashboardContent';
 import { usePilotTrackingResults } from '../hooks/usePilotTrackingResults';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
-import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { B4Assistant } from '../components/portal-design-system';
 import FacilitatorPortalMobileChrome, {
   facilitatorMobileNavShellClass,
@@ -117,7 +116,6 @@ export default function PilotDashboardPage() {
   const sessionType = readPilotDashboardSession();
   const [resultsVersion, setResultsVersion] = useState(0);
 
-  const brand = resolvePortalRailBrand();
   const activeProgram = readActivePilotProgram();
   const programCode = resolveFacilitatorRosterProgramCode(activeProgram?.programCode);
 
@@ -202,8 +200,6 @@ export default function PilotDashboardPage() {
         <PilotDashboardSidebar
           activeId={activeNav}
           onSelect={handleSelectNav}
-          brandTitle={brand.title}
-          brandSubtitle={brand.subtitle}
           programCode={programCode}
         />
       )}

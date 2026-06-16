@@ -45,19 +45,162 @@ ${question.improvedDistractors.map((d) => `- ${d}`).join('\n')}
 }
 
 export function generateMarkdownReport(report: AuditReport): string {
-  const { summary, questions } = report;
+  const { summary, bankAudit, recommendations, questions } = report;
   const lines: string[] = [];
 
-  lines.push('# Caiden\'s Courage — Question Quality Audit');
+  lines.push('# Caiden\'s Courage — Question Bank Audit');
   lines.push('');
   lines.push(`Generated: ${summary.generatedAt}`);
   lines.push('');
-  lines.push('## Executive Summary');
+  lines.push('## Dashboard Summary');
   lines.push('');
+  lines.push(`**Question Health Score: ${summary.questionHealthScore}**`);
+  lines.push('');
+  lines.push('### Health Scores');
+  lines.push('');
+  lines.push(`| Score | Value |`);
+  lines.push(`| --- | ---: |`);
+  lines.push(`| Overall Question Health | ${bankAudit.healthScores.overall} |`);
+  lines.push(`| Production Content Health | ${bankAudit.healthScores.productionContent} |`);
+  lines.push(`| Metadata Completeness | ${bankAudit.healthScores.metadataCompleteness} |`);
+  lines.push(`| Distractor Quality | ${bankAudit.healthScores.distractorQuality} |`);
+  lines.push(`| Scenario Variety | ${bankAudit.healthScores.scenarioVariety} |`);
+  lines.push('');
+  lines.push(`- **Production questions:** ${bankAudit.productionQuestionCount}`);
+  lines.push(`- **Staging overrides:** ${bankAudit.stagingQuestionCount}`);
   lines.push(`- **Total questions audited:** ${summary.totalQuestions}`);
+  lines.push(`- **Sources scanned:** ${summary.sourcesScanned.join(', ')}`);
   lines.push(`- **High rewrite priority:** ${summary.rewritePriorityCounts.high}`);
   lines.push(`- **Medium rewrite priority:** ${summary.rewritePriorityCounts.medium}`);
   lines.push(`- **Low rewrite priority:** ${summary.rewritePriorityCounts.low}`);
+  lines.push('');
+  lines.push('### Issues Found (Production)');
+  lines.push('');
+  lines.push(`- ${bankAudit.classifiedCounts.production.duplicateQuestions} duplicate question groups`);
+  lines.push(`- ${bankAudit.classifiedCounts.production.duplicateScenarios} duplicate scenario groups`);
+  lines.push(`- ${bankAudit.classifiedCounts.production.caidenSpellingIssues} Caiden spelling issues`);
+  lines.push(`- ${bankAudit.classifiedCounts.weakDistractor} weak distractor warnings`);
+  lines.push(`- ${bankAudit.classifiedCounts.metadataOnly} metadata-only issues`);
+  lines.push(`- ${bankAudit.classifiedCounts.trueDuplicate} true duplicate content findings`);
+  lines.push(`- ${bankAudit.classifiedCounts.production.highScenarioDuplication} high scenario duplication stems`);
+  lines.push(`- ${bankAudit.classifiedCounts.production.skillsUnderMinimum} skills below minimum coverage (10 questions)`);
+  lines.push('');
+  lines.push('### Staging (excluded from production health score)');
+  lines.push('');
+  lines.push(`- ${bankAudit.duplicateActionPlan.filter((g) => g.action === 'staging_duplicate_only').length} staging duplicate groups`);
+  lines.push('');
+
+  lines.push('## Recommendations');
+  lines.push('');
+  for (const item of recommendations) {
+    lines.push(`- ${item}`);
+  }
+  lines.push('');
+
+  lines.push('## Difficulty Balance');
+  lines.push('');
+  for (const band of ['K-1', '2-3', '4-5', '6-8']) {
+    const bandCounts = bankAudit.difficultyCounts[band];
+    if (!bandCounts) continue;
+    const totals = { easy: 0, medium: 0, hard: 0, unknown: 0 };
+    for (const bucket of Object.values(bandCounts)) {
+      totals.easy += bucket.easy ?? 0;
+      totals.medium += bucket.medium ?? 0;
+      totals.hard += bucket.hard ?? 0;
+      totals.unknown += bucket.unknown ?? 0;
+    }
+    lines.push(`### Grade ${band}`);
+    lines.push('');
+    lines.push(`- Easy: ${totals.easy}`);
+    lines.push(`- Medium: ${totals.medium}`);
+    lines.push(`- Hard: ${totals.hard}`);
+    if (totals.unknown) lines.push(`- Unknown: ${totals.unknown}`);
+    lines.push('');
+
+    const characters = Object.keys(bandCounts).filter((key) => !key.startsWith('skill::')).sort();
+    if (characters.length) {
+      lines.push('| Character | Easy | Medium | Hard | Unknown |');
+      lines.push('| --- | ---: | ---: | ---: | ---: |');
+      for (const character of characters) {
+        const c = bandCounts[character];
+        lines.push(
+          `| ${character} | ${c.easy ?? 0} | ${c.medium ?? 0} | ${c.hard ?? 0} | ${c.unknown ?? 0} |`,
+        );
+      }
+      lines.push('');
+    }
+
+    const skills = Object.keys(bandCounts).filter((key) => key.startsWith('skill::')).sort();
+    if (skills.length) {
+      lines.push('**By skill:**');
+      lines.push('');
+      lines.push('| Skill | Easy | Medium | Hard | Unknown |');
+      lines.push('| --- | ---: | ---: | ---: | ---: |');
+      for (const skillKey of skills) {
+        const c = bandCounts[skillKey];
+        const label = skillKey.replace('skill::', '');
+        lines.push(`| ${label} | ${c.easy ?? 0} | ${c.medium ?? 0} | ${c.hard ?? 0} | ${c.unknown ?? 0} |`);
+      }
+      lines.push('');
+    }
+  }
+
+  lines.push('## Skill Coverage');
+  lines.push('');
+  lines.push('| Skill | Total Questions | Status |');
+  lines.push('| --- | ---: | --- |');
+  const skillOrder = [
+    'Executive Function',
+    'Self Regulation',
+    'Communication',
+    'Teamwork',
+    'Problem Solving',
+    'Empathy',
+    'Focus Recovery',
+    'Courage',
+    'Reading Comprehension',
+    'Math Reasoning',
+    'Other',
+  ] as const;
+  for (const skill of skillOrder) {
+    const count = bankAudit.skillTotals[skill] ?? 0;
+    const status = skill !== 'Other' && count < 10 ? '**Below minimum**' : 'OK';
+    lines.push(`| ${skill} | ${count} | ${status} |`);
+  }
+  lines.push('');
+
+  const topSkillCharacter = bankAudit.skillCoverage.slice(0, 20);
+  if (topSkillCharacter.length) {
+    lines.push('### Coverage by Character × Skill (top 20)');
+    lines.push('');
+    lines.push('| Character | Skill | Count |');
+    lines.push('| --- | --- | ---: |');
+    for (const row of topSkillCharacter) {
+      lines.push(`| ${row.character} | ${row.skill} | ${row.count} |`);
+    }
+    lines.push('');
+  }
+
+  if (bankAudit.highDuplicationScenarios.length) {
+    lines.push('## High Scenario Duplication');
+    lines.push('');
+    for (const row of bankAudit.highDuplicationScenarios.slice(0, 15)) {
+      lines.push(`- **HIGH DUPLICATION WARNING** — appears ${row.count} times: "${row.sample}…"`);
+    }
+    lines.push('');
+  }
+
+  if (bankAudit.duplicateQuestions.length) {
+    lines.push('## Duplicate Questions');
+    lines.push('');
+    for (const group of bankAudit.duplicateQuestions.slice(0, 20)) {
+      lines.push(`- ${group.questionIds.length} IDs share: "${group.sampleText.slice(0, 100)}…"`);
+      lines.push(`  - IDs: ${group.questionIds.slice(0, 8).join(', ')}${group.questionIds.length > 8 ? '…' : ''}`);
+    }
+    lines.push('');
+  }
+
+  lines.push('## Executive Summary (Quality Heuristics)');
   lines.push('');
 
   lines.push('### Average Difficulty by Character');

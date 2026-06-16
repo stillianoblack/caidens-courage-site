@@ -1,3 +1,4 @@
+import { formatGrowthDelta } from './formatGrowthDelta';
 import { B4_AVATAR_SRC } from '../data/b4/avatar';
 import type {
   B4InsightsPayload,
@@ -73,17 +74,43 @@ function childAttemptMetrics(participantId: string | null | undefined): Question
   }));
 }
 
-function attemptInsightMetrics(child: FamilyChildSummary | null): B4InsightsPayload['metrics'] {
+function growthInsightValue(
+  metrics: FamilyProgressSnapshot,
+  key: 'executive' | 'selfRegulation' | 'focusRecovery' | 'overall',
+): string {
+  const skill = metrics.focusSkillsGrowth.find((row) => row.key === key);
+  if (!skill?.baselinePct) return 'Baseline needed';
+  if (skill.currentPct == null) return 'Complete Week 1 or Week 2 to compare';
+  if (skill.growthPct == null) return '—';
+  return formatGrowthDelta(skill.growthPct, { suffix: '%' });
+}
+
+function attemptInsightMetrics(
+  child: FamilyChildSummary | null,
+  metrics: FamilyProgressSnapshot,
+): B4InsightsPayload['metrics'] {
   const rows = childAttemptMetrics(child?.participantId);
-  if (rows.length === 0) return [];
-  const metrics = computeQuestionAttemptMetrics(rows, { attemptScope: 'initial' });
-  const labels = buildParentAttemptInsightLabels(metrics);
+  if (rows.length === 0) {
+    return [
+      {
+        label: 'Growth over time',
+        value: growthInsightValue(metrics, 'overall'),
+        hint: 'Uses earliest B-4 baseline vs first valid weekly mission scores.',
+      },
+    ];
+  }
+  const attemptMetrics = computeQuestionAttemptMetrics(rows, { attemptScope: 'initial' });
+  const labels = buildParentAttemptInsightLabels(attemptMetrics);
   return [
-    { label: 'First-try accuracy', value: `${Math.round(metrics.first_attempt_accuracy * 100)}%`, hint: labels.firstTryLabel },
-    { label: 'Final mission accuracy', value: `${Math.round(metrics.final_accuracy * 100)}%`, hint: labels.completionLabel },
-    { label: 'Improved after support', value: String(metrics.improved_after_support), hint: labels.improvedLabel },
-    { label: 'Needs more practice', value: String(metrics.needs_more_practice), hint: labels.practiceLabel },
-    { label: 'Growth over time', value: 'Tracking', hint: labels.growthLabel },
+    { label: 'First-try accuracy', value: `${Math.round(attemptMetrics.first_attempt_accuracy * 100)}%`, hint: labels.firstTryLabel },
+    { label: 'Final mission accuracy', value: `${Math.round(attemptMetrics.final_accuracy * 100)}%`, hint: labels.completionLabel },
+    { label: 'Improved after support', value: String(attemptMetrics.improved_after_support), hint: labels.improvedLabel },
+    { label: 'Needs more practice', value: String(attemptMetrics.needs_more_practice), hint: labels.practiceLabel },
+    {
+      label: 'Growth over time',
+      value: growthInsightValue(metrics, 'overall'),
+      hint: 'Canonical baseline vs weekly mission comparison (replays excluded).',
+    },
   ];
 }
 
@@ -123,7 +150,7 @@ function supportingMetrics(input: BuildFamilyB4InsightsInput): B4InsightsPayload
       label: 'Certificates earned',
       value: String(input.certificateCount ?? 0),
     },
-    ...attemptInsightMetrics(child),
+    ...attemptInsightMetrics(child, input.metrics),
   ].filter((metric) => metric.value !== '—' || metric.label === 'Baseline status');
 }
 

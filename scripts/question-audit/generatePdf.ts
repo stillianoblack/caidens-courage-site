@@ -32,10 +32,11 @@ function bodyText(doc: PDFKit.PDFDocument, text: string, options?: { bold?: bool
 }
 
 function renderSummary(doc: PDFKit.PDFDocument, report: AuditReport): void {
-  const { summary } = report;
+  const { summary, bankAudit, recommendations } = report;
+  const scores = bankAudit.healthScores;
 
   doc.font('Helvetica-Bold').fontSize(26).fillColor('#1a365d').text("Caiden's Courage", MARGIN, 120);
-  doc.fontSize(20).text('Question Quality Audit', MARGIN, doc.y + 4);
+  doc.fontSize(20).text('Question Bank Audit', MARGIN, doc.y + 4);
   doc
     .font('Helvetica')
     .fontSize(11)
@@ -43,12 +44,35 @@ function renderSummary(doc: PDFKit.PDFDocument, report: AuditReport): void {
     .text(`Generated ${new Date(summary.generatedAt).toLocaleString()}`, MARGIN, doc.y + 12);
 
   doc.addPage();
-  sectionTitle(doc, 'Summary Statistics');
-  bodyText(doc, `Total questions audited: ${summary.totalQuestions}`);
+  sectionTitle(doc, 'Dashboard Summary');
+  bodyText(doc, `Overall Question Health: ${scores.overall} / 100`, { bold: true });
+  bodyText(doc, `Production Content Health: ${scores.productionContent}`);
+  bodyText(doc, `Metadata Completeness: ${scores.metadataCompleteness}`);
+  bodyText(doc, `Distractor Quality: ${scores.distractorQuality}`);
+  bodyText(doc, `Scenario Variety: ${scores.scenarioVariety}`);
+  bodyText(doc, `Total questions audited: ${summary.totalQuestions} (${bankAudit.productionQuestionCount} production)`);
+  bodyText(doc, `Sources scanned: ${summary.sourcesScanned.join(', ')}`);
   bodyText(doc, `High priority rewrites: ${summary.rewritePriorityCounts.high}`);
   bodyText(doc, `Medium priority rewrites: ${summary.rewritePriorityCounts.medium}`);
   bodyText(doc, `Low priority rewrites: ${summary.rewritePriorityCounts.low}`);
   doc.moveDown(0.5);
+
+  sectionTitle(doc, 'Issues Found');
+  bodyText(doc, `${bankAudit.issueCounts.duplicateQuestions} duplicate question groups`);
+  bodyText(doc, `${bankAudit.issueCounts.duplicateScenarios} duplicate scenario groups`);
+  bodyText(doc, `${bankAudit.issueCounts.caidenSpellingIssues} Caiden spelling issues`);
+  bodyText(doc, `${bankAudit.issueCounts.weakDistractorWarnings} weak distractor warnings`);
+  bodyText(doc, `${bankAudit.issueCounts.missingMetadata} missing metadata fields`);
+  bodyText(doc, `${bankAudit.issueCounts.highScenarioDuplication} high scenario duplication stems`);
+  doc.moveDown(0.5);
+
+  if (recommendations.length) {
+    sectionTitle(doc, 'Recommendations');
+    for (const item of recommendations.slice(0, 12)) {
+      bodyText(doc, `• ${item}`);
+    }
+    doc.moveDown(0.5);
+  }
 
   sectionTitle(doc, 'Average Difficulty by Character');
   for (const [character, avg] of Object.entries(summary.averageDifficultyByCharacter).sort()) {

@@ -568,10 +568,16 @@ export default function FamilyOverviewPanel() {
 
       <FocusSkillsSnapshot
         className="family-overviewSkills"
-        skills={metrics.focusSkills}
+        skills={metrics.focusSkillsGrowth}
         hasActivity={metrics.hasActivity}
         hasChildActivity={metrics.hasChildActivity}
         adultBaselineComplete={adultBaselineComplete}
+        childName={activeChildSummary?.displayName ?? 'your child'}
+        participantId={activeChildSummary?.participantId ?? null}
+        moduleResults={moduleResults}
+        recentActivity={recentActivityItems}
+        recommendedNext={recommendedNext}
+        fromPath={location.pathname}
       />
 
       <div className="family-overviewSplit">

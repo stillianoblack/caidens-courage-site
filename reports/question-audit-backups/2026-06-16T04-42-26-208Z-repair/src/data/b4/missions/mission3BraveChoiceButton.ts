@@ -1,0 +1,290 @@
+import type { B4AdaptiveMissionFile } from '../../../types/b4AdaptiveQuest';
+import { registerB4AdaptiveMission } from '../b4AdaptiveBuilder';
+import { makeB4Question, bandContent } from '../b4QuestionHelpers';
+
+export const B4_MISSION_3_ID = 'b4-brave-choice-button';
+
+const MODULE_ID = B4_MISSION_3_ID;
+const MODULE_TITLE = 'The Brave Choice Button';
+const SKILL = 'Brave Choices / Decision Making';
+
+export const B4_MISSION_3_FILE: B4AdaptiveMissionFile = {
+  id: MODULE_ID,
+  title: 'B-4 Focus Missions',
+  subtitle: MODULE_TITLE,
+  character: 'b4',
+  missionNumber: 3,
+  skillArea: SKILL,
+  skillFocus: ['Brave Choices', 'Decision Making', 'Courage'],
+  storySetup:
+    'B-4 finds a glowing Brave Choice button. It only works when someone picks the helpful choice, even when the easy choice is tempting.',
+  missionB4Tip: 'Brave choices can be small. Small kindness still counts.',
+  landing: {
+    eyebrow: 'MISSION 3',
+    title: 'B-4 Focus Missions',
+    subtitle: MODULE_TITLE,
+    body: 'The Brave Choice button is glowing — pick the helpful move, even when the easy one whispers louder.',
+    cta: 'Start Mission',
+  },
+  complete: {
+    title: 'Brave Choice Activated!',
+    message: 'You powered up B-4\'s button with choices that help, even when they took a little courage.',
+    badges: ['Brave Chooser', 'Kindness Operator', 'Courage Builder'],
+  },
+  gradeContent: {
+    'K-1': bandContent(
+      'Choose kind and helpful actions, even when it is not the easiest path.',
+      [
+        makeB4Question(
+          {
+            id: 'b4m3-k1-q1',
+            question: 'A friend drops their crayons. What is a brave choice?',
+            choices: [
+              'Help pick them up',
+              'Laugh and walk away',
+              'Wait to help until someone else starts',
+              'Pretend the floor did it',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. Helping is a brave and kind choice.',
+            incorrectFeedback: 'Try again. B-4 is looking for the choice that helps.',
+            hint: 'What choice would help your friend?',
+          },
+          SKILL,
+          MODULE_ID,
+          'K-1',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-k1-q2',
+            question: 'A classmate looks sad and alone at recess. What is a brave choice?',
+            choices: [
+              'Ask if they want to play',
+              'Watch from far away and hope someone else helps',
+              'Point and stare',
+              'Pretend you did not see them',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Nice. A small hello can be a brave kindness.',
+            incorrectFeedback: 'Try again. B-4 wants the choice that helps someone feel included.',
+            hint: 'What kind move could help a lonely classmate?',
+          },
+          SKILL,
+          MODULE_ID,
+          'K-1',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-k1-q3',
+            question: 'The teacher asks everyone to line up quietly. What is a brave choice?',
+            choices: [
+              'Try your best to follow directions',
+              'Keep running in circles',
+              'Stay in line and take one small calm breath',
+              'Blame the line for being slow',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. Following directions helps everyone — that counts as brave too.',
+            incorrectFeedback: 'Not quite. B-4 is looking for the helpful choice.',
+            hint: 'What choice helps the whole class?',
+          },
+          SKILL,
+          MODULE_ID,
+          'K-1',
+        ),
+      ],
+      SKILL,
+    ),
+    '2-3': bandContent(
+      'Do the right thing even when you feel nervous.',
+      [
+        makeB4Question(
+          {
+            id: 'b4m3-23-q1',
+            question: 'You do not understand the directions. What is a brave choice?',
+            choices: [
+              'Ask for help',
+              'Guess and feel upset',
+              'Push the paper away',
+              'Say the directions are broken',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Correct. Asking for help is brave and smart.',
+            incorrectFeedback: 'Not quite. Brave choices help you move forward.',
+            hint: 'What choice gets you unstuck?',
+          },
+          SKILL,
+          MODULE_ID,
+          '2-3',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-23-q2',
+            question: 'You feel nervous about trying a new activity. What is a brave choice?',
+            choices: [
+              'Try one small part of it',
+              'Quit before you start',
+              'Make fun of the activity',
+              'Wait for someone else to do everything',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. One small try is brave — you do not need zero nerves.',
+            incorrectFeedback: 'Try again. B-4 wants a choice that moves you forward.',
+            hint: 'What is one tiny step you could take?',
+          },
+          SKILL,
+          MODULE_ID,
+          '2-3',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-23-q3',
+            question: 'You see a classmate struggling with a task. What is a brave choice?',
+            choices: [
+              'Offer to help or get a grown-up',
+              'Walk away quickly',
+              'Laugh because it looks hard',
+              'Copy their work instead',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Correct. Offering help takes courage and care.',
+            incorrectFeedback: 'Not quite. B-4 powers up choices that support others.',
+            hint: 'What choice helps without making fun?',
+          },
+          SKILL,
+          MODULE_ID,
+          '2-3',
+        ),
+      ],
+      SKILL,
+    ),
+    '4-5': bandContent(
+      'Choose courage over avoidance when something feels hard.',
+      [
+        makeB4Question(
+          {
+            id: 'b4m3-45-q1',
+            question: 'A student is afraid to try because they might be wrong. What brave choice helps most?',
+            choices: [
+              'Try one small step first',
+              'Quit before starting',
+              'Make fun of the activity',
+              'Wait for someone else to do it',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. A small step can unlock courage.',
+            incorrectFeedback: 'Try again. B-4 wants a choice that moves forward without pretending fear is gone.',
+            hint: 'What is the smallest step forward?',
+          },
+          SKILL,
+          MODULE_ID,
+          '4-5',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-45-q2',
+            question: 'A hard assignment makes a student want to avoid it completely. What brave choice fits?',
+            choices: [
+              'Open the assignment and do the first small part',
+              'Wait and hope it feels easier later',
+              'Say homework is illegal',
+              'Wait until panic feels fun',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Right. Starting small beats avoiding forever.',
+            incorrectFeedback: 'Not quite. B-4 wants courage that moves you one step in.',
+            hint: 'What is the tiniest way to begin?',
+          },
+          SKILL,
+          MODULE_ID,
+          '4-5',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-45-q3',
+            question: 'A student feels nervous about performing in front of the class. What brave choice helps?',
+            choices: [
+              'Practice one part before the big moment',
+              'Skip every practice on purpose',
+              'Tell a joke to delay trying the hard part',
+              'Hope the performance cancels itself',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. Practice is a brave step — fear can stay in the room while you prepare.',
+            incorrectFeedback: 'Try again. B-4 looks for forward motion, not avoidance.',
+            hint: 'What prep move builds confidence?',
+          },
+          SKILL,
+          MODULE_ID,
+          '4-5',
+        ),
+      ],
+      SKILL,
+    ),
+    '6-8': bandContent(
+      'Make value-based decisions when pressure shows up.',
+      [
+        makeB4Question(
+          {
+            id: 'b4m3-68-q1',
+            question: 'A group is laughing at someone\'s mistake. What brave choice matches your values?',
+            choices: [
+              'Redirect or support the person respectfully',
+              'Join in so you fit in',
+              'Stay silent even if it feels wrong',
+              'Record it for later',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Correct. Brave choices often protect people, not popularity.',
+            incorrectFeedback: 'Not quite. A brave choice should match respect and responsibility.',
+            hint: 'What choice protects someone\'s dignity?',
+          },
+          SKILL,
+          MODULE_ID,
+          '6-8',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-68-q2',
+            question: 'Friends pressure a student to copy answers on a quiz. What brave choice fits their values?',
+            choices: [
+              'Decline and do their own work',
+              'Copy quickly so nobody notices',
+              'Blame the teacher for making quizzes',
+              'Pretend the quiz is optional',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Yes. Integrity under pressure is a real kind of bravery.',
+            incorrectFeedback: 'Try again. B-4 wants the choice that matches honesty and respect.',
+            hint: 'What choice aligns with doing your own honest work?',
+          },
+          SKILL,
+          MODULE_ID,
+          '6-8',
+        ),
+        makeB4Question(
+          {
+            id: 'b4m3-68-q3',
+            question: 'After a fight, a student wants to ghost a friend instead of talking. What brave choice helps repair?',
+            choices: [
+              'Reach out respectfully when ready to talk',
+              'Spread rumors about them',
+              'Wait quietly and hope the problem fades',
+              'Wait for the friend to fix everything alone',
+            ],
+            correctIndex: 0,
+            correctFeedback: 'Correct. Repair takes courage — reaching out is a brave value-based move.',
+            incorrectFeedback: 'Not quite. B-4 looks for choices that match respect and responsibility.',
+            hint: 'What choice opens the door to repair?',
+          },
+          SKILL,
+          MODULE_ID,
+          '6-8',
+        ),
+      ],
+      SKILL,
+    ),
+  },
+};
+
+registerB4AdaptiveMission(B4_MISSION_3_FILE);

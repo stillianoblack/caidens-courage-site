@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
@@ -11,6 +11,8 @@ import {
 } from '../../lib/familyPortalPaths';
 import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import { copyToClipboard } from '../../lib/copyToClipboard';
+import { getMobilePortalBranding } from '../../lib/getMobilePortalBranding';
+import { resolvePortalSwitcherLabels } from '../../lib/portalGamePaths';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
 import './portal-switcher.css';
 
@@ -18,14 +20,9 @@ type PortalSwitcherDropdownProps = {
   className?: string;
   linkedCampLabel?: string | null;
   familyNav?: boolean;
+  /** Mobile portal header: family title-case names, facilitator uppercase org labels. */
+  mobileVariant?: 'family' | 'facilitator';
 };
-
-function resolvePortalLabel(): string {
-  const role = readActivePortalRole();
-  if (role === 'facilitator') return 'Facilitator Portal';
-  if (role === 'family') return 'Family Portal';
-  return 'Portal';
-}
 
 const MENU_GAP_PX = 6;
 const MENU_Z_INDEX = 12000;
@@ -34,19 +31,36 @@ export default function PortalSwitcherDropdown({
   className = '',
   linkedCampLabel = null,
   familyNav = false,
+  mobileVariant,
 }: PortalSwitcherDropdownProps) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({ visibility: 'hidden' });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
-  const currentLabel = resolvePortalLabel();
   const role = readActivePortalRole();
   const playerChip = useGameplayPlayerChip();
+  const mobileBranding = useMemo(
+    () =>
+      mobileVariant
+        ? getMobilePortalBranding({
+            familyDisplayName: playerChip.displayName,
+            role: mobileVariant === 'family' ? 'family' : 'facilitator',
+          })
+        : null,
+    [mobileVariant, playerChip.displayName],
+  );
+  const desktopLabels = useMemo(
+    () => resolvePortalSwitcherLabels({ familyDisplayName: playerChip.displayName }),
+    [playerChip.displayName],
+  );
+  const fullLabel = mobileBranding?.dropdownLabel ?? desktopLabels.full;
+  const displayLabel = mobileBranding?.dropdownLabel ?? desktopLabels.display;
   const familyCode = readActivePilotProgram()?.familyAccessCode;
   const programName = readActivePilotProgram()?.programName?.trim() || null;
   const showFamilyNav = familyNav && role === 'family';
-  const avatarLetter = playerChip.avatarLetter || '?';
+  const avatarLetter =
+    mobileVariant === 'family' ? 'C' : playerChip.avatarLetter || '?';
 
   const familyNavItems = showFamilyNav
     ? [
@@ -184,6 +198,8 @@ export default function PortalSwitcherDropdown({
       className={[
         'portal-switcher',
         showFamilyNav ? 'portal-switcher--familyNav' : '',
+        mobileVariant === 'family' ? 'portal-switcher--mobileFamily' : '',
+        mobileVariant === 'facilitator' ? 'portal-switcher--mobileFacilitator' : '',
         className,
       ]
         .filter(Boolean)
@@ -195,11 +211,15 @@ export default function PortalSwitcherDropdown({
         className={[
           'portal-switcherTrigger',
           showFamilyNav ? 'portal-switcherTrigger--familyNav' : '',
+          mobileVariant === 'family' ? 'portal-switcherTrigger--mobileFamily' : '',
+          mobileVariant === 'facilitator' ? 'portal-switcherTrigger--mobileFacilitator' : '',
         ]
           .filter(Boolean)
           .join(' ')}
         aria-haspopup="menu"
         aria-expanded={open}
+        title={fullLabel}
+        aria-label={`${fullLabel} menu`}
         onClick={() => setOpen((value) => !value)}
       >
         {showFamilyNav ? (
@@ -207,7 +227,9 @@ export default function PortalSwitcherDropdown({
             {avatarLetter}
           </span>
         ) : null}
-        <span className="portal-switcherLabel">{currentLabel}</span>
+        <span className="portal-switcherLabel" title={fullLabel}>
+          {displayLabel}
+        </span>
         <svg className="portal-switcherChevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path
             fillRule="evenodd"

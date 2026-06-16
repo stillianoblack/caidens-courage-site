@@ -362,8 +362,6 @@
   .portal-header.portal-header--familyMobile .portal-headerSwitcher .portal-switcherTrigger {
     min-height: 2.75rem;
     padding: 0 0.65rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.03em;
   }
 
   .portal-header.portal-header--familyMobile .portal-switcherChevron {
@@ -397,19 +395,7 @@
   justify-content: flex-end;
 }
 
-.familyPortalMobileHeader-logo {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 0.65rem;
-  flex-shrink: 0;
-  display: block;
-}
-
-.familyPortalMobileHeader-tools {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
+.familyPortalMobileHeader-lead {
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -418,35 +404,82 @@
   flex-shrink: 0;
 }
 
-.familyPortalMobileHeader-switcher .portal-switcherTrigger {
+.familyPortalMobileHeader-switcher .portal-switcherTrigger,
+.facilitatorPortalMobileHeader-switcher .portal-switcherTrigger {
   min-height: 2.75rem;
   padding: 0 0.65rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.03em;
 }
 
-/* Facilitator mobile header — logo, title, and dropdown in one row; search below */
+/* Facilitator mobile header — logo | page title + dropdown; search below */
 .facilitatorPortalMobileHeader {
   display: flex !important;
-  flex-wrap: wrap;
-  align-items: center;
-  row-gap: 1.5rem;
-  column-gap: 0.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
   width: 100%;
   min-height: auto;
-  padding: 2rem 0.75rem 0;
+  padding: 0.65rem 0.75rem 0.75rem;
   overflow: visible;
   grid-template-columns: unset !important;
   grid-template-areas: unset !important;
   box-sizing: border-box;
 }
 
-.facilitatorPortalMobileHeader-logo {
+.facilitatorPortalMobileHeader-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.facilitatorPortalMobileHeader-lead {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.portal-headerMobileLead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.portal-headerMobileLeadLogo {
   width: 2.75rem;
   height: 2.75rem;
+  flex: 0 0 2.75rem;
   border-radius: 0.65rem;
-  flex-shrink: 0;
   display: block;
+  object-fit: contain;
+}
+
+.portal-headerMobileLeadDivider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 2.25rem;
+  margin: 0.2rem 0;
+  background: rgba(36, 62, 112, 0.22);
+  flex-shrink: 0;
+}
+
+.portal-headerMobileLeadTitle {
+  margin: 0;
+  min-width: 0;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 1.625rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--family-navy-deep, var(--pilot-navy-deep, #121f37));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.facilitatorPortalMobileHeader-switcher {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .facilitatorPortalMobileHeader-title {
@@ -456,24 +489,12 @@
   align-items: center;
 }
 
-.facilitatorPortalMobileHeader-switcher {
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.facilitatorPortalMobileHeader-switcher .portal-switcherTrigger {
-  min-height: 2.75rem;
-  padding: 0 0.65rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.03em;
-}
-
 .facilitatorPortalMobileHeader-search {
   flex: 1 1 100%;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
 }
 
 .kids-adventure-shell .familyPortalMobileHeader {
@@ -481,6 +502,12 @@
   backdrop-filter: none;
   background: #faf8f5;
   border-bottom: none;
+}
+
+@media (max-width: 1023px) {
+  .portal-headerMobileLeadTitle {
+    font-size: clamp(1.375rem, 5vw, 1.625rem);
+  }
 }
 
 @media (max-width: 767px) {

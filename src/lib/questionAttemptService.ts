@@ -1,5 +1,8 @@
 import type { GameAssessmentConfig, GameChoiceQuestion } from '../types/gameAssessment';
 import type { QuestionAttemptRecord } from '../types/questionInteraction';
+import type { AttemptScope } from './canonicalAttemptRules';
+import { resolveAttemptScope } from './canonicalAttemptRules';
+import type { MissionAttemptType } from './missionAttemptType';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { serializeGameAnswer } from './questionAttemptTracking';
 import {
@@ -26,9 +29,10 @@ export type QuestionAttemptSaveContext = {
   content_version?: string | null;
   module_id?: string | null;
   attempt_type?: MissionAttemptType;
+  attempt_scope?: AttemptScope;
 };
 
-export type MissionAttemptType = 'initial' | 'replay';
+export type { MissionAttemptType };
 
 export type QuestionAttemptInsertRow = {
   participant_id: string;
@@ -48,6 +52,7 @@ export type QuestionAttemptInsertRow = {
   attempt_count: number;
   used_hint: boolean;
   attempt_type: MissionAttemptType;
+  attempt_scope?: AttemptScope | null;
   is_replay: boolean;
   completed_at: string;
   module_id?: string | null;
@@ -73,6 +78,9 @@ export function buildQuestionAttemptRows(input: {
       ? resolveCorrectAnswer(question as GameChoiceQuestion)
       : null;
     const attemptType = input.context.attempt_type ?? 'initial';
+    const attemptScope =
+      input.context.attempt_scope ??
+      resolveAttemptScope(attemptType === 'initial' ? 'weekly' : attemptType);
 
     return {
       participant_id: input.context.participant_id,
@@ -95,7 +103,8 @@ export function buildQuestionAttemptRows(input: {
       attempt_count: attempt.attempts_count,
       used_hint: attempt.hints_used_count > 0,
       attempt_type: attemptType,
-      is_replay: attemptType === 'replay',
+      attempt_scope: attemptScope,
+      is_replay: attemptType === 'replay' || attemptType === 'challenge',
       completed_at: attempt.completed_at,
       module_id: input.context.module_id ?? input.context.mission_id,
     };

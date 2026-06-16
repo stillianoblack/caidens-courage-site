@@ -1,8 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  FAMILY_PORTAL_BRAND,
-  FAMILY_PORTAL_SUBBRAND,
   FAMILY_SIDEBAR_NAV,
   type FamilySidebarNavItem,
 } from '../../data/familyPortalContent';
@@ -21,8 +19,6 @@ import FamilyUpgradeRailCard from './FamilyUpgradeRailCard';
 
 type FamilyDashboardSidebarProps = {
   navItems?: FamilySidebarNavItem[];
-  brandTitle?: string;
-  brandSubtitle?: string;
   programCode?: string;
   showUpgradeCard?: boolean;
   variant?: 'rail' | 'drawer';
@@ -32,8 +28,6 @@ type FamilyDashboardSidebarProps = {
 
 export default function FamilyDashboardSidebar({
   navItems = FAMILY_SIDEBAR_NAV,
-  brandTitle = FAMILY_PORTAL_BRAND,
-  brandSubtitle = FAMILY_PORTAL_SUBBRAND,
   programCode,
   showUpgradeCard = true,
   variant = 'rail',
@@ -71,10 +65,6 @@ export default function FamilyDashboardSidebar({
             className="family-railBrandLogo"
             decorative
           />
-          <div className="family-railBrandCopy">
-            <p className="family-railBrandTitle">{brandTitle}</p>
-            <p className="family-railBrandSub">{brandSubtitle}</p>
-          </div>
         </div>
 
         <nav className="family-railNav" aria-label="Dashboard sections">

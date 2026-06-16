@@ -21,7 +21,6 @@ import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import { readLegacyFamilyPortalSession } from '../config/familyPortalAccess';
 import { afterIdle } from '../lib/defer';
 import { FAMILY_PORTAL_TITLE, FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
-import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { resolvePortalPageTitle, isMobileFamilyGameplayShellRoute } from '../lib/familyPortalNav';
 import { isKidFacingPortalRoute } from '../lib/kidFacingPortalRoutes';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
@@ -46,7 +45,6 @@ export default function FamilyPortalLayout() {
   const hasSession = readLegacyFamilyPortalSession();
   const adminPreviewAccess = isAdminAdventurePreviewActive(location.search);
   const canAccessShell = hasSession || adminPreviewAccess;
-  const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname);
   const activeProgram = readActivePilotProgram();
   const [programCode, setProgramCode] = useState(
@@ -63,11 +61,9 @@ export default function FamilyPortalLayout() {
   const sidebarProps = useMemo(
     () => ({
       navItems: FAMILY_SIDEBAR_NAV,
-      brandTitle: brand.title,
-      brandSubtitle: brand.subtitle,
       programCode,
     }),
-    [brand.subtitle, brand.title, programCode],
+    [programCode],
   );
 
   const openFamilyGoalsSettings = useCallback(() => {

@@ -5,6 +5,7 @@ import CoachActionLink from './CoachActionLink';
 import CoachChecklistItem from './CoachChecklistItem';
 import CoachInsightCard from './CoachInsightCard';
 import CoachProgressBar from './CoachProgressBar';
+import CoachReadinessItem from './CoachReadinessItem';
 import './facilitator-program-coach.css';
 
 export type FacilitatorProgramCoachPanelProps = {
@@ -54,6 +55,17 @@ export default function FacilitatorProgramCoachPanel({
       </header>
 
       <CoachProgressBar label="Focus Flame Journey" percent={model.progressPercent} />
+
+      <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-readiness-heading">
+        <h3 id="pilot-coach-readiness-heading" className="pilot-programCoachSectionTitle">
+          Camp Readiness Summary
+        </h3>
+        <ul className="pilot-coachReadinessList">
+          {model.campReadiness.items.map((item) => (
+            <CoachReadinessItem key={item.id} {...item} />
+          ))}
+        </ul>
+      </section>
 
       <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-checklist-heading">
         <h3 id="pilot-coach-checklist-heading" className="pilot-programCoachSectionTitle">

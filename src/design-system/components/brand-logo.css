@@ -8,6 +8,8 @@
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 0.875rem;
+  object-fit: cover;
+  object-position: center;
 }
 
 .ds-brandLogo--portalWordmark {

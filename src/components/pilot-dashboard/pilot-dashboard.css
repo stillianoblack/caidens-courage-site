@@ -57,9 +57,9 @@
 
 .pilot-railBrandLogo {
   flex-shrink: 0;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 0.875rem;
+  width: auto;
+  height: 2.5rem;
+  max-width: 10.5rem;
   display: block;
   object-fit: contain;
   object-position: left center;
@@ -1332,6 +1332,10 @@
 }
 
 .pilot-resultsKpiSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
   margin: 0;
   font-family: var(--font-display, Nunito, sans-serif);
   font-size: 0.8125rem;

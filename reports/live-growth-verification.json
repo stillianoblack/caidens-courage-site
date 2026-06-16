@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-06-16T05:18:41.960Z",
+  "supabase_project_ref": "bnopaocdqkknjzmmkaen",
+  "summary": {
+    "active_students": 0,
+    "missing_baselines": 0,
+    "week1_complete": 0,
+    "week2_complete": 0,
+    "dashboard_math_mismatches": 0,
+    "replay_in_growth_risk": 0,
+    "challenge_in_growth_risk": 0,
+    "duplicate_baseline_students": 0,
+    "flags_total": 0,
+    "flags_critical": 0
+  },
+  "program_metrics": {
+    "dashboard": {
+      "baseline": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      },
+      "current": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      },
+      "growth": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      },
+      "participation": {
+        "students_enrolled": 4,
+        "baseline_checks_completed": 5,
+        "module_completions": 36,
+        "unique_modules_completed": 8
+      }
+    },
+    "canonical": {
+      "baseline": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      },
+      "current": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      },
+      "growth": {
+        "confidence": 0,
+        "reading": 0,
+        "focus": 0,
+        "overall": 0
+      }
+    },
+    "growth_mismatches": []
+  },
+  "camp_readiness": {
+    "studentCount": 0,
+    "requiresFollowUp": 0,
+    "items": [
+      {
+        "id": "missing-baseline",
+        "label": "Missing Baseline",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/results"
+      },
+      {
+        "id": "missing-week-1",
+        "label": "Missing Week 1",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/weekly-modules"
+      },
+      {
+        "id": "missing-week-2",
+        "label": "Missing Week 2",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/weekly-modules"
+      },
+      {
+        "id": "certificates-ready",
+        "label": "Certificates Ready",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/certificates"
+      },
+      {
+        "id": "inactive-7-plus",
+        "label": "Inactive 7+ Days",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/roster"
+      },
+      {
+        "id": "requires-follow-up",
+        "label": "Requires Follow-up",
+        "count": 0,
+        "status": "complete",
+        "href": "/program-dashboard/roster"
+      }
+    ]
+  },
+  "students": [],
+  "flags": []
+}

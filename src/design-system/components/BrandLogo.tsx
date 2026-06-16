@@ -18,7 +18,8 @@ export type BrandLogoProps = {
 
 function resolveSize(variant: BrandLogoVariant, size?: BrandLogoSize): BrandLogoSize {
   if (size) return size;
-  return variant === 'facilitator' ? 'portalIcon' : 'portalWordmark';
+  if (variant === 'facilitator') return 'portalIcon';
+  return 'portalWordmark';
 }
 
 export default function BrandLogo({
@@ -29,7 +30,7 @@ export default function BrandLogo({
   decorative = false,
 }: BrandLogoProps) {
   const resolvedSize = resolveSize(variant, size);
-  const src = resolveBrandLogoSrc(variant);
+  const src = resolveBrandLogoSrc(variant, resolvedSize);
   const label = alt ?? BRAND_LOGO_ALTS[variant];
 
   return (

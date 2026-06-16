@@ -20,7 +20,6 @@ import { FAMILY_HUB_PATH, PORTAL_PATH } from '../config/courageRoutes';
 import { clearFamilyPortalSession, readFamilyPortalSession } from '../config/familyPortalAccess';
 import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { afterIdle } from '../lib/defer';
-import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
 import {
   resolvePortalPageTitle,
@@ -49,7 +48,6 @@ export default function FamilyHubLayout() {
   const activeProgram = readActivePilotProgram();
   const hasSession = readFamilyPortalSession();
   const role = readActivePortalRole();
-  const brand = resolvePortalRailBrand();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
   const [programCode, setProgramCode] = useState(
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
@@ -70,11 +68,9 @@ export default function FamilyHubLayout() {
   const sidebarProps = useMemo(
     () => ({
       navItems: PROGRAM_FAMILY_SIDEBAR_NAV,
-      brandTitle: brand.title,
-      brandSubtitle: brand.subtitle,
       programCode,
     }),
-    [brand.subtitle, brand.title, programCode],
+    [programCode],
   );
 
   const openFamilyGoalsSettings = useCallback(() => {

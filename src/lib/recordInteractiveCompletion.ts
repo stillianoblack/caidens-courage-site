@@ -17,7 +17,10 @@ import {
   saveAssessmentResult,
   saveModuleResult,
 } from './pilotTrackingService';
+import { resolveAttemptScope } from './canonicalAttemptRules';
+import { resolveMissionAttemptType } from './missionAttemptType';
 import { saveQuestionAttempts } from './questionAttemptService';
+import type { MissionAttemptType } from './questionAttemptService';
 
 export type RecordInteractiveCompletionInput = {
   config: GameAssessmentConfig;
@@ -34,7 +37,7 @@ export type RecordInteractiveCompletionInput = {
   contentVersionId?: string;
   fileId?: string;
   weekNumber?: number | null;
-  attemptType?: 'initial' | 'replay';
+  attemptType?: MissionAttemptType;
 };
 
 function isEnrichedAnswersJson(
@@ -61,6 +64,8 @@ function answersToJson(
     fileId?: string;
     missionId?: string;
     moduleId?: string;
+    attemptType?: MissionAttemptType;
+    attemptScope?: string;
   },
 ): Record<string, unknown> | undefined {
   const trackingMeta: Record<string, unknown> = {};
@@ -70,6 +75,8 @@ function answersToJson(
   if (meta?.fileId) trackingMeta.file_id = meta.fileId;
   if (meta?.missionId) trackingMeta.mission_id = meta.missionId;
   if (meta?.moduleId) trackingMeta.module_id = meta.moduleId;
+  if (meta?.attemptType) trackingMeta.attempt_type = meta.attemptType;
+  if (meta?.attemptScope) trackingMeta.attempt_scope = meta.attemptScope;
 
   if (!answers && !Object.keys(trackingMeta).length) return undefined;
 
@@ -196,6 +203,16 @@ export async function recordInteractiveModuleCompletion(
     const participant =
       tracking.role === 'student' ? resolveStudentParticipant() : resolveAdultParticipant();
     const groupName = 'group_name' in participant ? participant.group_name : undefined;
+    const resolvedAttemptType =
+      input.attemptType ??
+      resolveMissionAttemptType({
+        participantId,
+        moduleId: tracking.moduleId,
+        weekNumber: input.weekNumber ?? null,
+      });
+    const resolvedAttemptScope = resolveAttemptScope(
+      resolvedAttemptType === 'initial' ? 'weekly' : resolvedAttemptType,
+    );
 
     const result = await saveModuleResult({
       participant_id: participantId,
@@ -217,6 +234,8 @@ export async function recordInteractiveModuleCompletion(
         fileId: input.fileId,
         missionId: input.missionId,
         moduleId: tracking.moduleId,
+        attemptType: resolvedAttemptType,
+        attemptScope: resolvedAttemptScope,
       }),
     });
 
@@ -250,7 +269,8 @@ export async function recordInteractiveModuleCompletion(
           grade_band: input.gradeBandUsed ?? null,
           content_version: input.contentVersionId ?? null,
           module_id: tracking.moduleId,
-          attempt_type: input.attemptType ?? 'initial',
+          attempt_type: resolvedAttemptType,
+          attempt_scope: resolvedAttemptScope,
         },
       });
     }

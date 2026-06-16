@@ -33,7 +33,6 @@ import {
   programDashboardTabPath,
   resolveProgramDashboardTab,
 } from '../lib/programDashboardNav';
-import { resolvePortalRailBrand } from '../lib/portalGamePaths';
 import { useProgramDashboardNav } from '../hooks/useProgramDashboardNav';
 import { resolvePortalOutletKey } from '../lib/portalOutletKey';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
@@ -67,7 +66,6 @@ export default function ProgramDashboardPage() {
   const isKidsRoute = isProgramDashboardKidsPath(location.pathname);
   const activeNav = resolveProgramDashboardTab(location.pathname);
   const showOverviewCoach = !isKidsRoute && activeNav === 'overview';
-  const brand = resolvePortalRailBrand();
   const programCode = activeProgram?.programCode;
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
@@ -183,8 +181,6 @@ export default function ProgramDashboardPage() {
           <PilotDashboardSidebar
             activeId={activeNav}
             onSelect={handleSelectNav}
-            brandTitle={brand.title}
-            brandSubtitle={brand.subtitle}
             navItems={PROGRAM_SIDEBAR_NAV}
             programCode={programCode}
             pricingTier={activeProgram.pricingTier}

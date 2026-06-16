@@ -5,7 +5,7 @@ import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardS
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
+import { readActivePilotProgram } from '../config/activePilotProgram';
 import { forcePortalRoleForRoute } from '../config/portalContext';
 import {
   FACILITATOR_PORTAL_PATH,
@@ -17,8 +17,6 @@ import { programDashboardTabPath } from '../lib/programDashboardNav';
 
 import { readPilotDashboardSession } from '../config/pilotDashboardAccess';
 import {
-  BLUE_RIBBON_PILOT_BRAND,
-  BLUE_RIBBON_PILOT_SUBBRAND,
   PILOT_SIDEBAR_NAV,
   PROGRAM_SIDEBAR_NAV,
   type PilotSidebarNavId,
@@ -33,9 +31,6 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
   const isProgram = variant === 'program';
   const activeProgram = readActivePilotProgram();
   const sessionType = readPilotDashboardSession();
-  const brand = isProgram
-    ? resolveProgramDashboardBrand(activeProgram)
-    : { title: BLUE_RIBBON_PILOT_BRAND, subtitle: BLUE_RIBBON_PILOT_SUBBRAND };
   const exitPath = isProgram
     ? programDashboardTabPath('assessments')
     : `${FACILITATOR_PORTAL_PATH}#assessments`;
@@ -67,8 +62,6 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
       <PilotDashboardSidebar
         activeId="assessments"
         onSelect={handleSelectNav}
-        brandTitle={brand.title}
-        brandSubtitle={brand.subtitle}
         navItems={isProgram ? PROGRAM_SIDEBAR_NAV : PILOT_SIDEBAR_NAV}
         pricingTier={isProgram ? activeProgram?.pricingTier : undefined}
         showSupportCard={isProgram}

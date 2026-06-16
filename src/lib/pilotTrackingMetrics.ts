@@ -3,6 +3,7 @@ import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 import type { PilotActivityItem, PilotGrowthMetrics } from './pilotDashboardMetrics';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import { computePilotDashboardMetrics, type PilotDashboardMetrics } from './pilotDashboardMetrics';
+import { getStudentGrowthMetrics } from './analytics/getStudentGrowthMetrics';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 
 export type PilotTrackingMetrics = PilotDashboardMetrics & {
@@ -14,6 +15,12 @@ export type PilotTrackingMetrics = PilotDashboardMetrics & {
   adultGrowthDeltaAvg: number | null;
   studentBaselineV2: number;
   studentFinalV2: number;
+  /** Earliest canonical B-4 baseline averages per student. */
+  baselineScores: PilotGrowthMetrics;
+  /** Latest canonical weekly mission averages per student. */
+  currentScores: PilotGrowthMetrics;
+  /** Current minus baseline when both exist. */
+  growthSinceBaseline: PilotGrowthMetrics;
 };
 
 function average(values: number[]): number {
@@ -134,6 +141,12 @@ export function computePilotTrackingMetrics(input: {
   );
 
   const v2Growth = computeGrowthFromBaselineV2(assessmentV2);
+  const growthMetrics = getStudentGrowthMetrics({
+    participants,
+    assessments: assessmentV2,
+    moduleResults,
+    legacyBaselines: input.legacyBaselines ?? [],
+  });
   const growth = studentBaselineV2 > 0 ? v2Growth : legacy.growth;
   const trackingActivity = buildTrackingActivity({
     assessmentV2,
@@ -161,5 +174,8 @@ export function computePilotTrackingMetrics(input: {
     adultGrowthDeltaAvg: computeAdultGrowthDelta(assessmentV2),
     studentBaselineV2,
     studentFinalV2,
+    baselineScores: growthMetrics.baselineScores,
+    currentScores: growthMetrics.currentScores,
+    growthSinceBaseline: growthMetrics.growthSinceBaseline,
   };
 }

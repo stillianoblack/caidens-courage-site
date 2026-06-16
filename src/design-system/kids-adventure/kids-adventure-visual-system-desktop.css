@@ -427,6 +427,15 @@
     z-index: 2;
   }
 
+  .kids-adventure-shell .family-panel--characterHub .weeklyAdventureCardFoot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
   /* —— Inventory collectible cards —— */
   .kids-adventure-shell .kidInventoryCard {
     padding: 0.85rem 0.65rem;

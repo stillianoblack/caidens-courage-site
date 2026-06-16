@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  BLUE_RIBBON_PILOT_BRAND,
-  BLUE_RIBBON_PILOT_SUBBRAND,
   PILOT_SIDEBAR_NAV,
   type PilotSidebarNavId,
 } from '../../data/pilotDashboardContent';
@@ -23,8 +21,6 @@ type PilotSidebarNavItem = {
 type PilotDashboardSidebarProps = {
   activeId: PilotSidebarNavId;
   onSelect: (id: PilotSidebarNavId) => void;
-  brandTitle?: string;
-  brandSubtitle?: string;
   navItems?: PilotSidebarNavItem[];
   programCode?: string;
   pricingTier?: PilotPricingTier;
@@ -35,8 +31,6 @@ type PilotDashboardSidebarProps = {
 export default function PilotDashboardSidebar({
   activeId,
   onSelect,
-  brandTitle = BLUE_RIBBON_PILOT_BRAND,
-  brandSubtitle = BLUE_RIBBON_PILOT_SUBBRAND,
   navItems = PILOT_SIDEBAR_NAV,
   programCode,
   pricingTier,
@@ -51,14 +45,10 @@ export default function PilotDashboardSidebar({
         <div className="pilot-railBrand">
           <BrandLogo
             variant="facilitator"
-            size="portalIcon"
+            size="portalWordmark"
             className="pilot-railBrandLogo"
             decorative
           />
-          <div className="pilot-railBrandCopy">
-            <p className="pilot-railBrandTitle">{brandTitle}</p>
-            <p className="pilot-railBrandSub">{brandSubtitle}</p>
-          </div>
         </div>
 
         <nav className="pilot-railNav" role="tablist" aria-label="Dashboard sections">

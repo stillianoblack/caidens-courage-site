@@ -91,6 +91,7 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
     '/guide',
     '/parent-corner',
     '/characters',
+    '/inventory',
     '/settings',
   ]);
 
@@ -127,6 +128,7 @@ export function resolvePortalNavId(
     { id: 'continue-learning', segment: `${basePath}/weekly-adventures` },
     { id: 'continue-learning', segment: `${basePath}/continue-learning` },
     { id: 'character-hub', segment: `${basePath}/characters` },
+    { id: 'inventory', segment: `${basePath}/inventory` },
     { id: 'downloads', segment: `${basePath}/downloads` },
     { id: 'gallery', segment: `${basePath}/gallery` },
     { id: 'certificates', segment: `${basePath}/certificates` },

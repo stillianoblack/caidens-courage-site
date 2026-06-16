@@ -12,7 +12,6 @@ import { countAvailableCharlieMissions } from './charlie';
 import { countAvailableB4Missions } from './b4';
 import { countAvailableZekeMissions } from './zeke';
 import { CAIDEN_QUEST_RANK } from './caiden/missionBoardData';
-import { readActivePilotProgram, resolveProgramDashboardBrand } from '../config/activePilotProgram';
 import type { CharacterProfileId } from './characterProfiles';
 
 export const FAMILY_PORTAL_BRAND = 'Family Portal';
@@ -78,19 +77,12 @@ export const FAMILY_SIDEBAR_NAV = buildFamilySidebarNav(FAMILY_PORTAL_PATH);
 export const PROGRAM_FAMILY_SIDEBAR_NAV = buildFamilySidebarNav(FAMILY_HUB_PATH);
 
 export function resolveFamilyPortalBrand(isProgramHub: boolean): { title: string; subtitle: string } {
-  const program = readActivePilotProgram();
-  if (program?.programName) {
-    return {
-      title: program.programName,
-      subtitle: 'Focus Flame Academy',
-    };
-  }
   if (isProgramHub) {
-    return resolveProgramDashboardBrand(null);
+    return { title: '', subtitle: '' };
   }
   return {
-    title: FAMILY_PORTAL_BRAND,
-    subtitle: FAMILY_PORTAL_SUBBRAND,
+    title: '',
+    subtitle: '',
   };
 }
 

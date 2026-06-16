@@ -61,6 +61,7 @@ function buildQuestion(
     incorrectFeedback: question.incorrectFeedback,
     hints: [question.hint],
     lockInTips: [mission.missionB4Tip],
+    whyPrompt: question.whyPrompt,
     feedbackDetailCorrect: { whyItMatters: question.explanation },
     feedbackDetailIncorrect: { whyItMatters: question.explanation },
   };

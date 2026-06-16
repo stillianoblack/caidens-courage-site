@@ -5,13 +5,21 @@
   background: linear-gradient(180deg, #fff 0%, #fffbeb 100%);
 }
 
+.focusSkillsSnapshotHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
 .focusSkillsSnapshotTitle {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-family: var(--font-display, Nunito, sans-serif);
   font-size: 1.0625rem;
   font-weight: 800;
   color: #1a2f52;
-  text-align: center;
+  text-align: left;
 }
 
 .focusSkillsSnapshotHelper {
@@ -19,10 +27,7 @@
   font-size: 0.8125rem;
   line-height: 1.55;
   color: rgba(36, 62, 112, 0.68);
-  text-align: center;
-  max-width: 32rem;
-  margin-left: auto;
-  margin-right: auto;
+  text-align: left;
 }
 
 .focusSkillsSnapshotGrid {
@@ -31,41 +36,231 @@
 }
 
 .focusSkillsSnapshotCard {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: 0.35rem 0.75rem;
-  align-items: center;
-  padding: 0.625rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
   border-radius: 0.875rem;
   background: #fff;
   border: 1px solid rgba(36, 62, 112, 0.08);
 }
 
+.focusSkillsSnapshotCard--expanded {
+  border-color: rgba(229, 192, 106, 0.45);
+  box-shadow: 0 8px 20px -16px rgba(26, 47, 82, 0.28);
+}
+
+.focusSkillsSnapshotCardToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.focusSkillsSnapshotCardToggle:focus-visible {
+  outline: 2px solid rgba(26, 47, 82, 0.25);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
+
 .focusSkillsSnapshotLabel {
   font-size: 0.8125rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #243e70;
 }
 
-.focusSkillsSnapshotBar {
-  grid-column: 1 / -1;
-  height: 0.5rem;
-  border-radius: 9999px;
+.focusSkillsSnapshotCardChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
   background: rgba(36, 62, 112, 0.08);
-  overflow: hidden;
+  color: #243e70;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.focusSkillsSnapshotFill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #243e70, #e5c06a 70%, #f97316);
+.focusSkillsSnapshotMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
 }
 
-.focusSkillsSnapshotValue {
+.focusSkillsSnapshotMetric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.focusSkillsSnapshotMetricLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.focusSkillsSnapshotMetricValue {
   font-size: 0.8125rem;
   font-weight: 800;
   color: #92400e;
+  line-height: 1.25;
+}
+
+.focusSkillsSnapshotMetricValue--growth {
+  color: #1a2f52;
+}
+
+.focusSkillsSnapshotExpanded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(36, 62, 112, 0.08);
+}
+
+.focusSkillsSnapshotExpandedScores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.focusSkillsSnapshotExpandedLabel {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+  margin-bottom: 0.15rem;
+}
+
+.focusSkillsSnapshotExpandedBlock {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 251, 235, 0.85);
+  border: 1px solid rgba(229, 192, 106, 0.2);
+}
+
+.focusSkillsSnapshotExpandedTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.focusSkillsSnapshotExpandedBlock p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #1a2f52;
+}
+
+.focusSkillsSnapshotMissionList {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #243e70;
+}
+
+.focusSkillsSnapshotInsight {
+  background: rgba(36, 62, 112, 0.05);
+  border-color: rgba(36, 62, 112, 0.1);
+}
+
+.focusSkillsSnapshotConversation {
+  background: rgba(61, 155, 106, 0.08);
+  border-color: rgba(61, 155, 106, 0.18);
+}
+
+.focusSkillsRecentGrowth {
+  margin-top: 1rem;
+  padding: 0.875rem;
+  border-radius: 0.875rem;
+  background: #fff;
+  border: 1px solid rgba(36, 62, 112, 0.08);
+}
+
+.focusSkillsRecentGrowthTitle {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.focusSkillsRecentGrowthGrid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.focusSkillsRecentGrowthItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 251, 235, 0.7);
+  border: 1px solid rgba(229, 192, 106, 0.18);
+}
+
+.focusSkillsRecentGrowthItem--recommended {
+  background: rgba(36, 62, 112, 0.04);
+  border-color: rgba(36, 62, 112, 0.1);
+}
+
+.focusSkillsRecentGrowthLabel {
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.focusSkillsRecentGrowthValue {
+  font-size: 0.875rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #1a2f52;
+}
+
+.focusSkillsRecentGrowthCopy {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.focusSkillsRecentGrowthCta {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: #243e70;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.focusSkillsRecentGrowthCta:hover {
+  background: #1a2f52;
 }
 
 .focusSkillsSnapshot--compact .focusSkillsSnapshotTitle {
@@ -75,5 +270,20 @@
 @media (min-width: 640px) {
   .focusSkillsSnapshotGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .focusSkillsRecentGrowthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .focusSkillsRecentGrowthItem--recommended {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .focusSkillsSnapshotMetrics,
+  .focusSkillsSnapshotExpandedScores {
+    grid-template-columns: 1fr;
   }
 }

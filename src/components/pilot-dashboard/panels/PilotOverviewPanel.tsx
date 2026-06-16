@@ -41,7 +41,6 @@ import {
 } from '../../../lib/studentGalleryService';
 import { useFacilitatorMobileNav } from '../../../hooks/useFacilitatorMobileNav';
 import FacilitatorMobileOverviewHero from '../FacilitatorMobileOverviewHero';
-import { resolvePortalRailBrand } from '../../../lib/portalGamePaths';
 
 type PilotOverviewPanelProps = {
   metrics: PilotTrackingMetrics;
@@ -89,7 +88,6 @@ export default function PilotOverviewPanel({
 }: PilotOverviewPanelProps) {
   const location = useLocation();
   const { isMobileNav } = useFacilitatorMobileNav();
-  const brand = resolvePortalRailBrand();
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [insightTopic, setInsightTopic] = useState<FacilitatorB4InsightTopic>('participation');
@@ -217,8 +215,6 @@ export default function PilotOverviewPanel({
         <FacilitatorMobileOverviewHero
           activeProgram={activeProgram}
           metrics={metrics}
-          brandTitle={brand.title}
-          brandSubtitle={brand.subtitle}
         />
       ) : null}
       {isMobileNav ? <FacilitatorOverviewCoachSlot slot="afterHero" /> : null}

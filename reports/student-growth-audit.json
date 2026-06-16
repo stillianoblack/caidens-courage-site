@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-06-16T03:10:13.026Z",
+  "supabase_project_ref": "bnopaocdqkknjzmmkaen",
+  "target_student_names": [
+    "caden",
+    "caiden",
+    "maddox"
+  ],
+  "students_audited": [],
+  "global_warnings": [
+    {
+      "code": "target_student_not_found",
+      "severity": "warning",
+      "message": "No students matched name hints: caden, caiden, maddox"
+    }
+  ],
+  "summary": {
+    "students_found": 0,
+    "students_with_multiple_baselines": 0,
+    "students_with_multiple_week1": 0,
+    "students_with_multiple_week2": 0,
+    "students_with_replay_in_growth_risk": 0
+  }
+}

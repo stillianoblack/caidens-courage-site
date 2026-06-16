@@ -1,5 +1,6 @@
 import { isChildBaselineAssessmentType } from '../config/assessmentTypeConstants';
 import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { getCampReadiness, type CampReadinessSummary } from './campReadiness';
 import type { PilotTrackingMetrics } from './pilotTrackingMetrics';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import { computeNeedsAttention, type PilotNeedsAttentionCounts } from './pilotStudentProgress';
@@ -39,6 +40,7 @@ export type FacilitatorProgramCoachModel = {
   progressChecksComplete: number;
   progressChecksTotal: number;
   checklist: FacilitatorCoachChecklistItemModel[];
+  campReadiness: CampReadinessSummary;
   insights: FacilitatorCoachInsightModel[];
   showSuccessState: boolean;
   quickActions: FacilitatorCoachQuickAction[];
@@ -46,8 +48,11 @@ export type FacilitatorProgramCoachModel = {
     studentCount: number;
     missingGradeCount: number;
     missingBaselineCount: number;
+    missingWeek1Count: number;
+    missingWeek2Count: number;
     inactive7PlusDays: number;
     certificateReady: number;
+    requiresFollowUp: number;
   };
 };
 
@@ -123,6 +128,17 @@ export function buildFacilitatorProgramCoachModel(input: {
   const resultsPath = `${PROGRAM_DASHBOARD_PATH}/results`;
   const weeklyModulesPath = `${PROGRAM_DASHBOARD_PATH}/weekly-modules`;
   const certificatesPath = `${PROGRAM_DASHBOARD_PATH}/certificates`;
+
+  const campReadiness = getCampReadiness({
+    participants: input.participants,
+    assessments: input.assessments,
+    modules: input.modules,
+    rosterPath,
+    resultsPath,
+    weeklyModulesPath,
+    certificatesPath,
+    onCopyFamilyCode: input.onCopyFamilyCode,
+  });
 
   const checklist: FacilitatorCoachChecklistItemModel[] = [
     {
@@ -224,24 +240,21 @@ export function buildFacilitatorProgramCoachModel(input: {
   const showSuccessState = insights.length === 0;
 
   const quickActions: FacilitatorCoachQuickAction[] = [
-    { id: 'roster', label: 'View Roster', href: rosterPath },
-    { id: 'results', label: 'Review Results', href: resultsPath },
-    { id: 'weekly', label: 'Open Weekly Modules', href: weeklyModulesPath },
+    { id: 'roster', label: 'Open Roster', href: rosterPath },
+    ...(input.activeProgram?.familyAccessCode?.trim() && input.onCopyFamilyCode
+      ? [{ id: 'copy-family-code', label: 'Copy Family Code', onClick: input.onCopyFamilyCode }]
+      : []),
+    { id: 'week-1-modules', label: 'Open Week 1 Modules', href: weeklyModulesPath },
+    { id: 'week-2-modules', label: 'Open Week 2 Modules', href: weeklyModulesPath },
+    { id: 'results', label: 'View Student Results', href: resultsPath },
   ];
-
-  if (input.activeProgram?.familyAccessCode?.trim() && input.onCopyFamilyCode) {
-    quickActions.push({
-      id: 'copy-family-code',
-      label: 'Copy Family Code',
-      onClick: input.onCopyFamilyCode,
-    });
-  }
 
   return {
     progressPercent,
     progressChecksComplete,
     progressChecksTotal: progressChecks.length,
     checklist,
+    campReadiness,
     insights: insights.slice(0, 4),
     showSuccessState,
     quickActions,
@@ -249,8 +262,13 @@ export function buildFacilitatorProgramCoachModel(input: {
       studentCount,
       missingGradeCount,
       missingBaselineCount: needsAttention.missingBaseline,
+      missingWeek1Count:
+        campReadiness.items.find((item) => item.id === 'missing-week-1')?.count ?? 0,
+      missingWeek2Count:
+        campReadiness.items.find((item) => item.id === 'missing-week-2')?.count ?? 0,
       inactive7PlusDays: needsAttention.inactive7PlusDays,
       certificateReady: needsAttention.certificateReady,
+      requiresFollowUp: campReadiness.requiresFollowUp,
     },
   };
 }

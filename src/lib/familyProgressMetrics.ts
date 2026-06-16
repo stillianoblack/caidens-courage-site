@@ -16,6 +16,8 @@ import {
   partitionChildAssessments,
   type ProgressCounts,
 } from './familyProgressHelpers';
+import type { FamilyFocusSkillGrowth } from './studentGrowthMetrics';
+import { computeFamilyFocusSkillsGrowth } from './studentGrowthMetrics';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 
@@ -36,6 +38,8 @@ export type FamilyFocusSkill = {
   value: number;
 };
 
+export type { FamilyFocusSkillGrowth };
+
 export type FamilyRecentActivityItem = {
   id: string;
   label: string;
@@ -46,6 +50,7 @@ export type FamilyRecentActivityItem = {
 export type FamilyProgressSnapshot = {
   rows: FamilyProgressRow[];
   focusSkills: FamilyFocusSkill[];
+  focusSkillsGrowth: FamilyFocusSkillGrowth[];
   recentActivity: string[];
   hasActivity: boolean;
   hasChildActivity: boolean;
@@ -134,6 +139,7 @@ export function computeFamilyProgressSnapshot(input: {
   adultBaselineComplete?: boolean;
   adultGrowthComplete?: boolean;
   children?: FamilyChildSummary[];
+  allowedStudentIds?: string[];
 }): FamilyProgressSnapshot {
   const programCode = input.programCode?.trim() ?? '';
   const modules = input.moduleResults ?? [];
@@ -208,6 +214,13 @@ export function computeFamilyProgressSnapshot(input: {
     value: row.sampleCount > 0 ? row.value : 0,
   }));
 
+  const focusSkillsGrowth = computeFamilyFocusSkillsGrowth({
+    allowedStudentIds: input.allowedStudentIds ?? children.map((child) => child.participantId).filter(Boolean) as string[],
+    v2Assessments: partitionChildAssessments(assessments),
+    legacyBaselines: baselines,
+    moduleResults: studentModules,
+  });
+
   const overallPct = overall.percent;
   const emptyStateMessage = resolveEmptyStateMessage({
     adultBaselineComplete,
@@ -219,6 +232,7 @@ export function computeFamilyProgressSnapshot(input: {
     return {
       rows: categoryRows,
       focusSkills,
+      focusSkillsGrowth,
       recentActivity: [],
       hasActivity: false,
       hasChildActivity: false,
@@ -232,6 +246,7 @@ export function computeFamilyProgressSnapshot(input: {
   return {
     rows: categoryRows,
     focusSkills,
+    focusSkillsGrowth,
     recentActivity: buildRecentActivity(studentModules, baselines, assessments, adultEvents),
     hasActivity: true,
     hasChildActivity,

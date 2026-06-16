@@ -189,6 +189,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
           adultBaselineComplete,
           adultGrowthComplete,
           children,
+          allowedStudentIds: data.allowedStudentIds,
         })
       : EMPTY_SNAPSHOT;
 

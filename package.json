@@ -33,6 +33,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "audit:questions": "tsx scripts/question-audit/index.ts",
+    "repair:questions": "tsx scripts/question-audit/repairQuestions.ts",
+    "quality:pass": "tsx scripts/question-audit/applyProductionQualityPass.ts",
     "audit:publication": "tsx scripts/question-audit/generatePublicationReadiness.ts",
     "rewrite:staging": "tsx scripts/question-rewrite/generateStaging.ts",
     "rewrite:final-pass": "tsx scripts/question-rewrite/finalPass.ts",
@@ -53,7 +55,11 @@
     "audit:replay-attempts": "tsx scripts/audit-replay-attempts.ts",
     "audit:first-attempt-tracking": "tsx scripts/audit-first-attempt-tracking.ts",
     "audit:pilot-archive": "tsx scripts/audit-pilot-archive.ts",
-    "audit:pricing-account-types": "tsx scripts/audit-pricing-account-types.ts"
+    "audit:pricing-account-types": "tsx scripts/audit-pricing-account-types.ts",
+    "audit:student-growth": "tsx scripts/audit-student-growth.ts",
+    "verify:live-growth": "tsx scripts/verifyLiveGrowthMath.ts",
+    "analytics:questions": "tsx scripts/buildQuestionAnalytics.ts",
+    "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts"
   },
   "browserslist": {
     "production": [

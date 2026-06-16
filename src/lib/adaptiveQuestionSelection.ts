@@ -12,6 +12,7 @@ import {
   type QuestionPoolSelection,
 } from './gradeBandQuestionSelection';
 import { applyStagingToQuestions } from './stagingQuestionOverrides';
+import { applyProductionQualityToQuestions } from './productionQualityPass';
 import { MISSION_QUESTIONS_PER_ATTEMPT } from '../config/missionQuestions';
 import { assertUniqueQuestionIds } from './missionQuestionPool';
 
@@ -70,8 +71,11 @@ export function finalizeAdaptiveQuestions<T extends AdaptiveQuestion>(
       : (applyStagingToQuestions(
           pool.questions as unknown as Parameters<typeof applyStagingToQuestions>[0],
         ) as unknown as T[]);
+  const productionPolished = applyProductionQualityToQuestions(
+    staged as unknown as Parameters<typeof applyProductionQualityToQuestions>[0],
+  ) as unknown as T[];
   const contentBand = pool.contentBand as StudentGradeBand;
-  const selected = selectQuestionsByGradeDifficultyMix(staged, ctx.gradeLevel, {
+  const selected = selectQuestionsByGradeDifficultyMix(productionPolished, ctx.gradeLevel, {
     count: MISSION_QUESTIONS_PER_ATTEMPT,
     gradeBand: contentBand,
   });
