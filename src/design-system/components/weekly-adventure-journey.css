@@ -1,0 +1,350 @@
+.weeklyJourneyMonth {
+  margin-top: 1.5rem;
+  padding: 1rem 0 0.25rem;
+}
+
+.weeklyJourneyMonth--comingSoon {
+  opacity: 0.72;
+}
+
+.weeklyJourneyMonthHeader {
+  margin-bottom: 1rem;
+}
+
+.weeklyJourneyMonthTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.weeklyJourneyMonthTitle {
+  margin: 0;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.weeklyJourneyMonthCount {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.weeklyJourneyMonthSoonPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  background: rgba(26, 47, 82, 0.08);
+  color: rgba(26, 47, 82, 0.65);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.weeklyJourneyMonthProgressTrack {
+  margin-top: 0.65rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(26, 47, 82, 0.08);
+  overflow: hidden;
+}
+
+.weeklyJourneyMonthProgressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #16794a, #22c55e);
+  transition: width 0.35s ease;
+}
+
+.weeklyJourneyMonthProgressCopy {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(26, 47, 82, 0.78);
+  line-height: 1.45;
+}
+
+.weeklyJourneyMonthProgressCopy--muted {
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyJourneyProgressLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.weeklyJourneyProgressStep {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.5rem;
+  flex: 1 1 0;
+  text-align: center;
+}
+
+.weeklyJourneyProgressMarker {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: rgba(26, 47, 82, 0.08);
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyJourneyProgressStep--completed .weeklyJourneyProgressMarker {
+  background: rgba(22, 121, 74, 0.15);
+  color: #16794a;
+}
+
+.weeklyJourneyProgressStep--current .weeklyJourneyProgressMarker {
+  background: rgba(234, 179, 8, 0.2);
+  color: #b45309;
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.35);
+}
+
+.weeklyJourneyProgressStep--locked .weeklyJourneyProgressMarker {
+  filter: grayscale(0.35);
+}
+
+.weeklyJourneyProgressLabel {
+  margin-top: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.65);
+}
+
+.weeklyJourneyProgressConnector {
+  position: absolute;
+  top: 0.85rem;
+  left: calc(50% + 0.9rem);
+  width: calc(100% - 1.8rem);
+  height: 2px;
+  background: rgba(26, 47, 82, 0.12);
+  pointer-events: none;
+}
+
+.weeklyJourneyProgressStep--completed .weeklyJourneyProgressConnector {
+  background: rgba(22, 121, 74, 0.35);
+}
+
+.weeklyJourneyMonthGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.weeklyJourneyCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 12px 32px -24px rgba(26, 47, 82, 0.4);
+  text-decoration: none;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.weeklyJourneyCard--locked,
+.weeklyJourneyCard--disabled {
+  cursor: default;
+  filter: grayscale(0.45);
+  opacity: 0.88;
+}
+
+.weeklyJourneyCard--current {
+  border-color: rgba(234, 179, 8, 0.55);
+  box-shadow:
+    0 12px 32px -24px rgba(26, 47, 82, 0.4),
+    0 0 0 2px rgba(234, 179, 8, 0.25);
+}
+
+.weeklyJourneyCard--complete {
+  filter: none;
+  opacity: 1;
+}
+
+.weeklyJourneyCardMedia {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: rgba(26, 47, 82, 0.06);
+}
+
+.weeklyJourneyCardThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.weeklyJourneyCardThumb--fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: rgba(26, 47, 82, 0.35);
+}
+
+.weeklyJourneyCardPill {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+
+.weeklyJourneyCardPill--available,
+.weeklyJourneyCardPill--adminPreview,
+.weeklyJourneyCardPill--complete {
+  background: rgba(22, 121, 74, 0.88);
+  color: #fff;
+}
+
+.weeklyJourneyCardPill--inProgress {
+  background: rgba(37, 99, 235, 0.88);
+  color: #fff;
+}
+
+.weeklyJourneyCardPill--locked {
+  background: rgba(26, 47, 82, 0.72);
+  color: #fff;
+}
+
+.weeklyJourneyCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.8rem 0.85rem 0.95rem;
+  min-width: 0;
+}
+
+.weeklyJourneyCardEyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyJourneyCardTitle {
+  margin: 0;
+  font-size: clamp(0.92rem, 1.6vw, 1.02rem);
+  font-weight: 800;
+  color: #1a2f52;
+  line-height: 1.25;
+}
+
+.weeklyJourneyCardSel {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(26, 47, 82, 0.72);
+  line-height: 1.35;
+}
+
+.weeklyJourneyCardReward {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+  min-width: 0;
+}
+
+.weeklyJourneyCardRewardIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.weeklyJourneyCardRewardDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(234, 179, 8, 0.85);
+  flex-shrink: 0;
+}
+
+.weeklyJourneyCardRewardText {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.68);
+  line-height: 1.3;
+}
+
+.weeklyJourneyCardCta {
+  margin-top: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #243e70, #3b82f6);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  align-self: stretch;
+}
+
+.weeklyJourneyCard--locked .weeklyJourneyCardCta,
+.weeklyJourneyCard--disabled .weeklyJourneyCardCta {
+  background: rgba(26, 47, 82, 0.08);
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.weeklyJourneyCard--complete .weeklyJourneyCardCta {
+  background: linear-gradient(135deg, #16794a, #22c55e);
+}
+
+@media (max-width: 1024px) {
+  .weeklyJourneyMonthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .weeklyJourneyMonthGrid {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding-bottom: 0.35rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+
+  .weeklyJourneyCard {
+    flex: 0 0 min(88vw, 18rem);
+    scroll-snap-align: start;
+  }
+
+  .weeklyJourneyProgressLine {
+    display: none;
+  }
+}

@@ -22,6 +22,10 @@ import {
 import { suggestFamilyProgramCode } from './studentFamilyLinkService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { ActivePilotProgram, PilotProgramRecord } from '../types/pilotProgram';
+import { INDEPENDENT_FAMILY_STUDENT_COUNT_RANGE } from '../types/pilotProgram';
+import { mapAgeGradeBandToLegacyAgeRange } from './pilotProgramAgeGrade';
+import { resolveDefaultPilotFeatureFlags } from './pilotProgramFeatureFlags';
+import { resolvePilotPortalPrep } from './pilotProgramPortalPrep';
 
 async function fetchPilotProgramByCode(programCode: string): Promise<ActivePilotProgram | null> {
   if (!isSupabaseConfigured() || !supabase) return null;
@@ -80,6 +84,8 @@ export async function createOrResolveFamilyProgramForParent(input: {
     input.parentFirstName?.trim() || input.parentLastName.trim(),
   );
 
+  const portalPrep = resolvePilotPortalPrep(INDEPENDENT_FAMILY_PROGRAM_TYPE);
+
   const payload: Omit<PilotProgramRecord, 'id' | 'created_at'> = {
     program_name: programName,
     program_code: familyProgramCode,
@@ -87,7 +93,16 @@ export async function createOrResolveFamilyProgramForParent(input: {
     admin_first_name: input.parentFirstName?.trim() || input.parentLastName.trim(),
     admin_email: input.parentEmail.trim(),
     estimated_students: 1,
-    age_range: 'Mixed Ages',
+    estimated_student_count_range: INDEPENDENT_FAMILY_STUDENT_COUNT_RANGE,
+    account_context: portalPrep.account_context,
+    portal_type: portalPrep.portal_type,
+    age_grade_band: 'Mixed Ages',
+    age_grade_notes: null,
+    feature_flags: resolveDefaultPilotFeatureFlags({
+      portalType: portalPrep.portal_type,
+      programType: INDEPENDENT_FAMILY_PROGRAM_TYPE,
+    }),
+    age_range: mapAgeGradeBandToLegacyAgeRange('Mixed Ages'),
     group_name: programName,
     family_access_code: `${familyProgramCode}-FAMILY`,
     facilitator_access_code: null,

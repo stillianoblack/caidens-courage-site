@@ -217,6 +217,72 @@
   color: rgba(36, 62, 112, 0.72);
 }
 
+.adminPortal-programSummary {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.68);
+  line-height: 1.45;
+}
+
+.adminPortal-programSummaryLabel {
+  font-weight: 700;
+}
+
+.adminPortal-programSummary code {
+  font-size: 0.8125rem;
+}
+
+.adminPortal-programScale {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(36, 62, 112, 0.78);
+  line-height: 1.45;
+}
+
+.adminPortal-programScaleLine {
+  margin: 0.15rem 0 0;
+}
+
+.adminPortal-programScaleLabel {
+  font-weight: 700;
+}
+
+.adminPortal-programScaleRecommendation {
+  margin: 0.35rem 0 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.5rem;
+  background: rgba(212, 168, 75, 0.14);
+  color: #7a5a12;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.adminPortal-linkBtn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #2f5ea8;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.adminPortal-featureFlags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+.adminPortal-featureFlag {
+  font-size: 0.75rem;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.adminPortal-detailItem--wide {
+  grid-column: 1 / -1;
+}
+
 .adminPortal-status {
   display: inline-flex;
   align-items: center;
@@ -982,7 +1048,291 @@
   color: rgba(36, 62, 112, 0.82);
 }
 
+.adminPortal-modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(16, 28, 48, 0.55);
+}
+
+.adminPortal-modal {
+  position: relative;
+  width: min(100%, 28rem);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(16, 28, 48, 0.22);
+}
+
+.adminPortal-modalClose {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: 0;
+  background: transparent;
+  color: rgba(36, 62, 112, 0.65);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.adminPortal-modalTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.adminPortal-modalDescription {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.adminPortal-modalForm {
+  display: grid;
+  gap: 1rem;
+}
+
+.adminPortal-modalField {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.adminPortal-modalLabel {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.adminPortal-modalInput {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.625rem;
+  font-size: 0.9375rem;
+  color: #1a2f52;
+}
+
+.adminPortal-modalInput:focus {
+  outline: 2px solid rgba(36, 62, 112, 0.25);
+  outline-offset: 1px;
+}
+
+.adminPortal-modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.adminAdventuresLegacyTable {
+  margin-top: 1rem;
+}
+
+.adminAdventuresLegacyTable summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.72);
+  margin-bottom: 0.5rem;
+}
+
+.adminAdventureMonths {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.adminAdventureMonthBlock {
+  border: 1px solid rgba(26, 47, 82, 0.1);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+}
+
+.adminAdventureMonthToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.adminAdventureMonthToggleTitle {
+  font-weight: 800;
+  color: #1a2f52;
+}
+
+.adminAdventureMonthToggleMeta {
+  font-size: 0.75rem;
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.adminAdventureMonthBody {
+  padding: 0 1rem 1rem;
+}
+
+.adminAdventureMonthSummary {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.adminAdventureMonthHeroPreview {
+  aspect-ratio: 16 / 9;
+  border-radius: 0.65rem;
+  overflow: hidden;
+  background: rgba(26, 47, 82, 0.06);
+}
+
+.adminAdventureMonthHeroPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.adminAdventureMonthHeroPlaceholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.75rem;
+  color: rgba(26, 47, 82, 0.45);
+}
+
+.adminAdventureMonthMeta p {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+}
+
+.adminAdventureMonthProgressPreview {
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.adminAdventureMonthForm {
+  margin: 0.75rem 0 1rem;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(26, 47, 82, 0.08);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.adminAdventureMonthWeekList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.adminAdventureMonthWeekItem {
+  border: 1px solid rgba(26, 47, 82, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.adminAdventureMonthWeekItem--editing {
+  border-color: rgba(36, 62, 112, 0.35);
+  box-shadow: 0 0 0 2px rgba(36, 62, 112, 0.08);
+}
+
+.adminAdventureWeekInlineEditor {
+  margin-top: 0.85rem;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.adminAdventureWeekInlineEditorActions {
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.adminAdventuresLegacyEditor {
+  margin-top: 1.25rem;
+}
+
+.adminAdventuresLegacyEditor summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.72);
+  margin-bottom: 0.75rem;
+}
+
+.adminPortal-btn--active {
+  background: rgba(36, 62, 112, 0.1);
+}
+
+.adminAdventureMonthWeekMain {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.adminAdventureMonthWeekCopy {
+  min-width: 0;
+}
+
+.adminAdventureMonthWeekLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.adminAdventureMonthWeekReward {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: rgba(26, 47, 82, 0.62);
+}
+
+.adminAdventureMonthWeekStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.72rem;
+  color: rgba(26, 47, 82, 0.62);
+  text-align: right;
+}
+
+.adminAdventureMonthWeekActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
 @media (max-width: 640px) {
+  .adminAdventureMonthSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .adminAdventureMonthWeekMain {
+    grid-template-columns: auto 1fr;
+  }
+
+  .adminAdventureMonthWeekStatus {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
   .adminPortal-form--grid {
     grid-template-columns: 1fr;
   }

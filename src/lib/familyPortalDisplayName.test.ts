@@ -6,7 +6,7 @@ import {
 import { INDEPENDENT_FAMILY_PROGRAM_TYPE } from './independentFamilyProgram';
 
 describe('familyPortalDisplayName', () => {
-  it('falls back to Family Portal for independent families without a name', () => {
+  it('falls back to Family Portal when no display name is saved', () => {
     expect(
       resolveFamilyPortalDisplayName({
         program: {
@@ -19,17 +19,17 @@ describe('familyPortalDisplayName', () => {
     ).toBe(FAMILY_PORTAL_FALLBACK_DISPLAY_NAME);
   });
 
-  it('never surfaces Blue Ribbon branding for independent families', () => {
+  it('shows user-entered display names including camp-like labels', () => {
     expect(
       resolveFamilyPortalDisplayName({
         program: {
           programType: INDEPENDENT_FAMILY_PROGRAM_TYPE,
-          programName: 'Blue Ribbon Camp',
-          groupName: 'Blue Ribbon 2026',
+          programName: 'Blue Ribbon',
+          groupName: 'Blue Ribbon',
           programCode: 'FAMILY-HOME-2026',
         },
       }),
-    ).toBe(FAMILY_PORTAL_FALLBACK_DISPLAY_NAME);
+    ).toBe('Blue Ribbon');
   });
 
   it('uses the family display name when provided', () => {
@@ -45,7 +45,7 @@ describe('familyPortalDisplayName', () => {
     ).toBe("Jordan's Family");
   });
 
-  it('detects legacy camp brand labels', () => {
+  it('detects legacy camp brand labels in stale session storage', () => {
     expect(isLegacyCampBrandLabel('Blue Ribbon Camp')).toBe(true);
     expect(isLegacyCampBrandLabel('blueribbon2026')).toBe(true);
     expect(isLegacyCampBrandLabel('Sunshine Valley Camp')).toBe(false);

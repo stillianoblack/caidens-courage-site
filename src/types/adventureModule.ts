@@ -39,6 +39,9 @@ export type AdventureModuleRecord = {
   subtitle: string | null;
   description: string | null;
   week_number: number;
+  /** Parent month (1-based). Defaults from week_number when unset. */
+  month_number?: number | null;
+  adventure_month_id?: string | null;
   status: AdventureModuleStatus;
   cta_text: string | null;
   /** Large weekly map / interactive header image (Supabase CMS). */
@@ -85,6 +88,8 @@ export type AdventureModuleInput = {
   subtitle?: string | null;
   description?: string | null;
   week_number: number;
+  month_number?: number | null;
+  adventure_month_id?: string | null;
   status: AdventureModuleStatus;
   cta_text?: string | null;
   interactive_header_url?: string | null;

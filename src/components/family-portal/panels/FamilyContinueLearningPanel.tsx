@@ -3,7 +3,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import PlayingAsSelector from '../PlayingAsSelector';
 import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
-import WeeklyAdventureWeekRow from '../../../design-system/components/WeeklyAdventureWeekRow';
+import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { CAMP_PILOT_UNLOCK_ALL } from '../../../lib/week1MissionUnlock';
@@ -28,10 +28,11 @@ import {
   resolveHeroDisplayWeekNumber,
 } from '../../../lib/adventureVisibility';
 import { logFeaturedAdventureDiagnostics } from '../../../lib/getFeaturedAdventure';
-import { resolveAdventureHeroMapSrc, resolveAdventureMapMissions } from '../../../lib/adventureMapMissions';
+import { resolveAdventureMapMissions } from '../../../lib/adventureMapMissions';
+import { resolveAdventureMonthHeroSrc } from '../../../lib/adventureMonthHero';
+import { resolveMonthForWeek } from '../../../lib/adventureMonthService';
 import {
   countCompletedMapMissions,
-  resolveCompletedWeekNumbers,
   resolveFullyCompletedWeekNumbers,
 } from '../../../lib/adventureWeekCompletion';
 import {
@@ -43,10 +44,10 @@ import {
   resolveChildrenNeedingSetup,
 } from '../../../lib/familyChildReadiness';
 import {
-  buildCompletedWeeklyAdventureCards,
   buildHeroWeekView,
-  buildUpcomingWeeklyAdventureCards,
+  buildJourneyWeeklyAdventureCards,
 } from '../../../lib/weeklyAdventureWeekCards';
+import { buildAdventureJourneyMonthViews } from '../../../lib/weeklyAdventureJourneyMonths';
 import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
 import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDebug';
 import { useActiveChild, type SelectableChild } from '../../../hooks/useActiveChild';
@@ -57,6 +58,7 @@ import { useWeeklyAdventureTrail } from '../../../hooks/useWeeklyAdventureTrail'
 import { useCourageInTheDarkProgress } from '../../../hooks/useCourageInTheDarkProgress';
 import { useParticipantQuests } from '../../../hooks/useParticipantQuests';
 import { useAdventureModules } from '../../../hooks/useAdventureModules';
+import { useAdventureMonths } from '../../../hooks/useAdventureMonths';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
@@ -72,6 +74,7 @@ import { questResultToRewardClaim, type RewardClaimResult } from '../../../lib/r
 import '../../courage-in-the-dark/courage-adventure-hub.css';
 import '../../courage-in-the-dark/courage-in-the-dark-map.css';
 import '../family-children-dashboard-grid.css';
+import '../../../design-system/components/weekly-adventure-journey.css';
 import '../../../design-system/components/week-review-panel.css';
 
 const WeekReviewPanel = lazy(
@@ -149,6 +152,10 @@ export default function FamilyContinueLearningPanel() {
     !hasActiveChild || (!baselineComplete && !CAMP_PILOT_UNLOCK_ALL && visibilityCtx.previewMode !== 'admin');
 
   const { modules: adventureModules } = useAdventureModules(
+    visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
+  );
+
+  const { months: adventureMonths } = useAdventureMonths(
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
 
@@ -245,54 +252,45 @@ export default function FamilyContinueLearningPanel() {
     [featuredAdventureModule, heroCmsModule, heroWeekNumber, trailPaths, trailWeeks],
   );
 
-  const completedWeekNumbers = useMemo(
+  const journeyMonths = useMemo(
     () =>
-      resolveCompletedWeekNumbers({
+      buildAdventureJourneyMonthViews({
+        trailWeeks,
         completedByWeek,
+        mapCompletedWeekNumbers,
         cmsModules: adventureModules,
-        heroWeekNumber,
-        paths: trailPaths,
+        cmsMonths: adventureMonths,
       }),
-    [adventureModules, completedByWeek, heroWeekNumber, trailPaths],
+    [adventureModules, adventureMonths, completedByWeek, mapCompletedWeekNumbers, trailWeeks],
   );
 
-  const upcomingWeekCards = useMemo(
+  const journeyMonthSections = useMemo(
     () =>
-      buildUpcomingWeeklyAdventureCards({
-        weeks: trailWeeks,
-        heroWeekNumber,
-        completedWeekNumbers: mapCompletedWeekNumbers,
-        cmsModules: adventureModules,
-        pathname: location.pathname,
-        adminPreview: visibilityCtx.previewMode === 'admin',
-      }),
+      journeyMonths.map((month) => ({
+        month,
+        cards: buildJourneyWeeklyAdventureCards({
+          weekNumbers: month.weekNumbers,
+          weeks: trailWeeks,
+          heroWeekNumber,
+          mapCompletedWeekNumbers,
+          cmsModules: adventureModules,
+          pathname: location.pathname,
+          adminPreview: visibilityCtx.previewMode === 'admin',
+          pilotStartDate,
+          onReviewWeek: handleReviewWeek,
+          monthComingSoon: month.comingSoon,
+        }),
+      })),
     [
       adventureModules,
+      handleReviewWeek,
       heroWeekNumber,
+      journeyMonths,
       location.pathname,
       mapCompletedWeekNumbers,
+      pilotStartDate,
       trailWeeks,
       visibilityCtx.previewMode,
-    ],
-  );
-
-  const completedWeekCards = useMemo(
-    () =>
-      buildCompletedWeeklyAdventureCards({
-        weeks: trailWeeks,
-        completedWeekNumbers,
-        cmsModules: adventureModules,
-        pathname: location.pathname,
-        participantId: activeChild?.participantId,
-        onReviewWeek: handleReviewWeek,
-      }),
-    [
-      activeChild?.participantId,
-      adventureModules,
-      completedWeekNumbers,
-      handleReviewWeek,
-      location.pathname,
-      trailWeeks,
     ],
   );
 
@@ -396,10 +394,34 @@ export default function FamilyContinueLearningPanel() {
     [certificatesPath, downloadsPath, heroCmsModule],
   );
 
-  const mapBackgroundSrc = useMemo(
-    () => resolveAdventureHeroMapSrc(heroCmsModule, heroWeekNumber),
-    [heroCmsModule, heroWeekNumber],
+  const heroMonth = useMemo(
+    () =>
+      resolveMonthForWeek(
+        heroWeekNumber,
+        adventureMonths,
+        heroCmsModule?.month_number ?? featuredAdventureModule?.month_number,
+      ),
+    [adventureMonths, featuredAdventureModule?.month_number, heroCmsModule?.month_number, heroWeekNumber],
   );
+
+  const mapBackgroundSrc = useMemo(() => {
+    const resolution = resolveAdventureMonthHeroSrc({
+      month: heroMonth,
+      heroWeekModule: heroCmsModule,
+      featuredWeekModule: featuredAdventureModule,
+      weekNumber: heroWeekNumber,
+    });
+    if (process.env.NODE_ENV === 'development') {
+      console.info('[WEEKLY_ADVENTURE_MONTH_HERO_SOURCE]', {
+        week: heroWeekNumber,
+        month: heroMonth?.month_number ?? null,
+        url: resolution.url,
+        source: resolution.source,
+        fallbackReason: resolution.fallbackReason ?? null,
+      });
+    }
+    return resolution.url;
+  }, [featuredAdventureModule, heroCmsModule, heroMonth, heroWeekNumber]);
 
   const reviewWeekContext = useMemo(() => {
     if (!reviewWeekNumber) return null;
@@ -587,17 +609,11 @@ export default function FamilyContinueLearningPanel() {
         </section>
       ) : null}
 
-      <WeeklyAdventureWeekRow
-        title="Upcoming Weeks"
-        items={upcomingWeekCards}
-        emptyMessage="More adventures coming soon."
-      />
-
-      <WeeklyAdventureWeekRow
-        title="Completed Weeks"
-        items={completedWeekCards}
-        emptyMessage="Complete your first weekly adventure to see it here."
-      />
+      <div className="weeklyJourneySections" aria-label="Monthly adventure journey">
+        {journeyMonthSections.map(({ month, cards }) => (
+          <WeeklyAdventureJourneyMonth key={month.monthNumber} month={month} cards={cards} />
+        ))}
+      </div>
 
       {!allChildrenPlayReady && childrenNeedingSetup.length > 0 ? (
         <WeeklySetupReminderCard

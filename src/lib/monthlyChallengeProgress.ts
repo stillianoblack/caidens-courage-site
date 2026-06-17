@@ -1,4 +1,5 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
+import type { AdventureMonthRecord } from '../types/adventureMonth';
 import { isWeekFullyComplete } from './weekBadgeProgression';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -106,12 +107,35 @@ export function deriveMonthlyChallengeProgress(
   };
 }
 
-export function resolveMonthChallengeConfig(monthNumber = 1): MonthlyChallengeConfig {
+export function resolveMonthChallengeConfig(
+  monthNumber = 1,
+  cmsMonth?: AdventureMonthRecord | null,
+): MonthlyChallengeConfig {
+  if (cmsMonth && cmsMonth.month_number === monthNumber) {
+    const requiredWeeks = cmsMonth.certificate_required_weeks || 4;
+    const weekNumbers = Array.from({ length: requiredWeeks }, (_, index) => {
+      return (monthNumber - 1) * requiredWeeks + index + 1;
+    });
+    return {
+      monthNumber,
+      weekNumbers,
+      title: `Month ${monthNumber} Challenge`,
+      tagline: cmsMonth.month_subtitle || `Month ${monthNumber}`,
+      description:
+        cmsMonth.month_description ||
+        `Complete all ${requiredWeeks} weekly adventures to earn your ${cmsMonth.certificate_title || 'monthly certificate'}.`,
+      monthlyBadgeName: cmsMonth.certificate_reward_name || `Month ${monthNumber} Badge`,
+      certificateName: cmsMonth.certificate_title || `Month ${monthNumber} Certificate`,
+      bonusCoins: monthNumber === 1 ? MONTH_1_CHALLENGE.bonusCoins : 0,
+    };
+  }
+
   if (monthNumber === 1) return MONTH_1_CHALLENGE;
   return {
     ...MONTH_1_CHALLENGE,
     monthNumber,
     title: `Month ${monthNumber} Challenge`,
+    weekNumbers: Array.from({ length: 4 }, (_, index) => (monthNumber - 1) * 4 + index + 1),
   };
 }
 

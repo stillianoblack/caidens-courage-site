@@ -15,6 +15,10 @@ import {
   resolveIndependentFamilyProgramName,
   toDbProgramType,
 } from './independentFamilyProgram';
+import { mapAgeGradeBandToLegacyAgeRange } from './pilotProgramAgeGrade';
+import { resolveDefaultPilotFeatureFlags } from './pilotProgramFeatureFlags';
+import { deriveEstimatedStudentsFromRange } from './pilotProgramStudentRange';
+import { resolvePilotPortalPrep } from './pilotProgramPortalPrep';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
@@ -264,6 +268,18 @@ function buildProgramRecord(input: PilotProgramSignupInput): PilotProgramRecord 
     : input.programName.trim();
   const codes = generateProgramCodes(input.programType, resolvedProgramName);
   const agreedAt = new Date().toISOString();
+  const studentCountRange = isIndependentFamily
+    ? input.estimatedStudentCountRange ?? '1 child'
+    : input.estimatedStudentCountRange;
+  const portalPrep = resolvePilotPortalPrep(input.programType);
+  const legacyAgeRange = mapAgeGradeBandToLegacyAgeRange(input.ageGradeBand);
+  const ageGradeNotes = input.ageGradeNotes.trim() || null;
+  const estimatedStudents =
+    studentCountRange != null
+      ? input.estimatedStudents ?? deriveEstimatedStudentsFromRange(studentCountRange)
+      : isIndependentFamily
+        ? 1
+        : input.estimatedStudents ?? 0;
 
   return {
     program_name: resolvedProgramName,
@@ -271,8 +287,17 @@ function buildProgramRecord(input: PilotProgramSignupInput): PilotProgramRecord 
     program_type: toDbProgramType(input.programType) as PilotProgramRecord['program_type'],
     admin_first_name: input.adminFirstName.trim(),
     admin_email: input.adminEmail.trim(),
-    estimated_students: isIndependentFamily ? 1 : input.estimatedStudents,
-    age_range: input.ageRange,
+    estimated_students: estimatedStudents,
+    estimated_student_count_range: studentCountRange,
+    account_context: portalPrep.account_context,
+    portal_type: portalPrep.portal_type,
+    age_grade_band: input.ageGradeBand,
+    age_grade_notes: ageGradeNotes,
+    feature_flags: resolveDefaultPilotFeatureFlags({
+      portalType: portalPrep.portal_type,
+      programType: input.programType,
+    }),
+    age_range: legacyAgeRange,
     group_name: isIndependentFamily
       ? input.groupName.trim() || resolvedProgramName
       : input.groupName.trim(),
@@ -365,7 +390,7 @@ export async function submitPilotProgramSignup(
         return {
           success: false,
           message:
-            'A program with a similar name already exists. Try a slightly different program name.',
+            'A program with this internal code already exists. Try again or contact support.',
         };
       }
       return {

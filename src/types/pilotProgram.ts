@@ -9,6 +9,34 @@ export type PilotProgramType =
 
 export type PilotAgeRange = 'Ages 5–7' | 'Ages 8–10' | 'Ages 11–13' | 'Mixed Ages';
 
+export type AgeGradeBand =
+  | 'Pre-K/K'
+  | '1st–2nd'
+  | '3rd–5th'
+  | '6th–8th'
+  | 'Mixed Ages'
+  | 'Other';
+
+export const AGE_GRADE_BAND_OPTIONS: AgeGradeBand[] = [
+  'Pre-K/K',
+  '1st–2nd',
+  '3rd–5th',
+  '6th–8th',
+  'Mixed Ages',
+  'Other',
+];
+
+export type PilotProgramFeatureFlags = {
+  can_manage_students: boolean;
+  can_invite_families: boolean;
+  can_view_group_progress: boolean;
+  can_print_modules: boolean;
+  can_upload_homework: boolean;
+  can_manage_certificates: boolean;
+  can_send_notifications: boolean;
+  can_access_facilitator_portal: boolean;
+};
+
 export type PilotPricingTier =
   | 'camp_pilot'
   | 'teacher'
@@ -21,12 +49,36 @@ export type PilotPaymentStatus = 'pending' | 'paid' | 'waived';
 
 export type PilotStatus = 'active' | 'paused' | 'completed' | 'archived' | 'testing';
 
+export type EstimatedStudentCountRange =
+  | '1 child'
+  | '2–4 children'
+  | '5–10 students'
+  | '11–25 students'
+  | '26–50 students'
+  | '50+ students';
+
+export const ESTIMATED_STUDENT_COUNT_RANGE_OPTIONS: EstimatedStudentCountRange[] = [
+  '1 child',
+  '2–4 children',
+  '5–10 students',
+  '11–25 students',
+  '26–50 students',
+  '50+ students',
+];
+
+export const INDEPENDENT_FAMILY_STUDENT_COUNT_RANGE: EstimatedStudentCountRange = '1 child';
+
 export type PilotProgramSignupInput = {
   programType: PilotProgramType;
   programName: string;
   adminFirstName: string;
   adminEmail: string;
-  estimatedStudents: number;
+  /** @deprecated Legacy numeric estimate — derived from range when provided. */
+  estimatedStudents: number | null;
+  estimatedStudentCountRange: EstimatedStudentCountRange | null;
+  ageGradeBand: AgeGradeBand;
+  ageGradeNotes: string;
+  /** @deprecated Legacy column — mapped from ageGradeBand on insert. */
   ageRange: PilotAgeRange;
   groupName: string;
   agreedToTerms: boolean;
@@ -41,6 +93,12 @@ export type PilotProgramRecord = {
   admin_first_name: string;
   admin_email: string;
   estimated_students: number;
+  estimated_student_count_range?: string | null;
+  account_context?: string | null;
+  portal_type?: string | null;
+  age_grade_band?: string | null;
+  age_grade_notes?: string | null;
+  feature_flags?: PilotProgramFeatureFlags | null;
   age_range: PilotAgeRange;
   group_name: string;
   family_access_code: string;

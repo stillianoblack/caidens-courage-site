@@ -7,6 +7,7 @@ import type {
 import { buildDefaultAdventureModuleSeeds } from '../data/adventureModuleSeeds';
 import type { AdventureVisibilityContext } from './adventureVisibility';
 import { getFeaturedAdventure } from './getFeaturedAdventure';
+import { resolveDefaultMonthNumber } from './adventureMonthService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export const ADVENTURE_ASSETS_BUCKET = 'adventure-assets';
@@ -47,6 +48,10 @@ function buildAdventurePayload(input: Partial<AdventureModuleInput>): Record<str
   if (input.subtitle !== undefined) payload.subtitle = input.subtitle?.trim() || null;
   if (input.description !== undefined) payload.description = input.description?.trim() || null;
   if (input.week_number !== undefined) payload.week_number = input.week_number;
+  if (input.month_number !== undefined) payload.month_number = input.month_number;
+  if (input.adventure_month_id !== undefined) {
+    payload.adventure_month_id = input.adventure_month_id || null;
+  }
   if (input.status !== undefined) payload.status = input.status;
   if (input.cta_text !== undefined) payload.cta_text = input.cta_text?.trim() || null;
   if (input.comic_thumbnail_url !== undefined) {
@@ -130,6 +135,11 @@ function normalizeRow(row: Record<string, unknown>): AdventureModuleRecord {
     subtitle: row.subtitle ? String(row.subtitle) : null,
     description: row.description ? String(row.description) : null,
     week_number: Number(row.week_number ?? 0),
+    month_number:
+      row.month_number != null
+        ? Number(row.month_number)
+        : resolveDefaultMonthNumber(Number(row.week_number ?? 0)),
+    adventure_month_id: optionalString(row.adventure_month_id),
     status: (row.status as AdventureModuleStatus) ?? 'draft',
     cta_text: row.cta_text ? String(row.cta_text) : null,
     interactive_header_url: mapBackground,
@@ -241,6 +251,7 @@ export async function createAdventureModule(
   const now = new Date().toISOString();
   const payload = {
     ...buildAdventurePayload(input),
+    month_number: input.month_number ?? resolveDefaultMonthNumber(input.week_number),
     updated_at: now,
   };
 

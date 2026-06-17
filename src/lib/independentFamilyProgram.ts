@@ -1,5 +1,9 @@
 import type { ActivePilotProgram, PilotProgramRecord, PilotProgramType } from '../types/pilotProgram';
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import {
+  formatPilotPortalTypeLabel,
+  resolvePilotPortalPrep,
+} from './pilotProgramPortalPrep';
 
 /** UI / app-layer program type label. */
 export const INDEPENDENT_FAMILY_PROGRAM_TYPE = 'Independent Family' as const satisfies PilotProgramType;
@@ -67,14 +71,14 @@ export function resolveIndependentFamilyProgramName(
 export type AdminProgramCategory =
   | 'Independent Family'
   | 'Camp / Youth Program'
-  | 'School'
-  | 'Testing';
+  | 'School Program'
+  | 'Testing Pilot';
 
-/** Admin-facing program category — compact labels for pilot list cards. */
-export function formatAdminProgramCategory(
+/** Single normalized label for admin pilot list cards — no duplicate type lines. */
+export function resolveAdminPilotTypeLabel(
   program: Pick<PilotProgramRecord, 'program_type' | 'pilot_status'>,
 ): AdminProgramCategory {
-  if (program.pilot_status === 'testing') return 'Testing';
+  if (program.pilot_status === 'testing') return 'Testing Pilot';
 
   const type = fromDbProgramType(program.program_type);
   if (isIndependentFamilyType(program.program_type) || type === 'Homeschool Group') {
@@ -84,9 +88,43 @@ export function formatAdminProgramCategory(
     return 'Camp / Youth Program';
   }
   if (type === 'School' || type === 'District' || type === 'Teacher / Classroom') {
-    return 'School';
+    return 'School Program';
   }
   return 'Camp / Youth Program';
+}
+
+/** @deprecated Use resolveAdminPilotTypeLabel — kept for search/filter compatibility. */
+export function formatAdminProgramCategory(
+  program: Pick<PilotProgramRecord, 'program_type' | 'pilot_status'>,
+): AdminProgramCategory {
+  return resolveAdminPilotTypeLabel(program);
+}
+
+/** Single admin meta line: program type · student range · portal (no duplicate labels). */
+export function resolveAdminPilotProgramMeta(
+  program: Pick<
+    PilotProgramRecord,
+    'program_type' | 'pilot_status' | 'estimated_student_count_range' | 'portal_type'
+  >,
+): string {
+  if (program.pilot_status === 'testing') return 'Testing Pilot';
+
+  const typeLabel = fromDbProgramType(program.program_type);
+  const parts: string[] = [typeLabel];
+
+  const range = program.estimated_student_count_range?.trim();
+  if (range) {
+    parts.push(range);
+  } else if (isIndependentFamilyType(program.program_type)) {
+    parts.push('1 child');
+  }
+
+  const portalType =
+    program.portal_type?.trim() ||
+    resolvePilotPortalPrep(fromDbProgramType(program.program_type)).portal_type;
+  parts.push(formatPilotPortalTypeLabel(portalType));
+
+  return parts.join(' · ');
 }
 
 export function inferProgramTypeFromCode(programCode: string): PilotProgramType {

@@ -6,9 +6,8 @@ import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
 import { copyToClipboard } from '../../lib/copyToClipboard';
 import {
-  formatAdminProgramCategory,
-  fromDbProgramType,
   isIndependentFamilyType,
+  resolveAdminPilotProgramMeta,
 } from '../../lib/independentFamilyProgram';
 import type { PilotProgramRecord } from '../../types/pilotProgram';
 import AdminCopyField from './AdminCopyField';
@@ -41,15 +40,11 @@ function statusClass(status: string): string {
   return 'adminPortal-status';
 }
 
-function formatProgramTypeLabel(programType: PilotProgramRecord['program_type']): string {
-  return fromDbProgramType(programType);
-}
-
 export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotProgramCardProps) {
   const navigate = useNavigate();
   const activeProgram = recordToActivePilotProgram(program);
   const isIndependentFamily = isIndependentFamilyType(program.program_type);
-  const programCategory = formatAdminProgramCategory(program);
+  const programMetaLabel = resolveAdminPilotProgramMeta(program);
 
   const openFacilitatorDashboard = () => {
     const facilitatorCode = program.facilitator_access_code;
@@ -75,9 +70,7 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
         <div>
           <h2 className="adminPortal-programName">{program.program_name}</h2>
           <p className="adminPortal-programMeta">
-            <span className="adminPortal-programCategory">{programCategory}</span>
-            <span className="adminPortal-programMetaDivider"> · </span>
-            {formatProgramTypeLabel(program.program_type)}
+            <span className="adminPortal-programCategory">{programMetaLabel}</span>
           </p>
         </div>
         <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
@@ -95,7 +88,9 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
         <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
         <div className="adminPortal-detailItem">
           <span className="adminPortal-detailLabel">Estimated Students</span>
-          <span className="adminPortal-detailValue">{program.estimated_students ?? '—'}</span>
+          <span className="adminPortal-detailValue">
+            {program.estimated_student_count_range ?? program.estimated_students ?? '—'}
+          </span>
         </div>
         <div className="adminPortal-detailItem">
           <span className="adminPortal-detailLabel">Age Range</span>

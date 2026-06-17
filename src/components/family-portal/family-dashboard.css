@@ -1088,6 +1088,19 @@
   outline-offset: 1px;
 }
 
+.family-addChildHint {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.family-settingsDisplayName {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--family-navy-deep);
+}
+
 .family-addChildBtn {
   padding: 0.625rem 1.125rem;
   border: none;

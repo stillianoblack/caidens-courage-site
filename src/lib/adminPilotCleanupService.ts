@@ -1,6 +1,7 @@
 import { getConfiguredAdminEmail } from '../config/adminAccess';
 import { isProtectedPilotProgramCode } from '../config/adminProtectedPrograms';
 import type { PilotProgramRecord } from '../types/pilotProgram';
+import { updateProgramDisplayNameByCode } from './familyProgramDisplayNameService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type PilotCleanupTableCount = {
@@ -278,31 +279,41 @@ export async function updatePilotProgramDisplayName(
   programCode: string,
   input: { programName: string; groupName?: string },
 ): Promise<PilotArchiveResult> {
-  const code = programCode.trim().toUpperCase();
-  const programName = input.programName.trim();
-  const groupName = input.groupName?.trim() || programName;
+  const result = await updateProgramDisplayNameByCode(programCode, {
+    displayName: input.programName,
+    groupName: input.groupName,
+  });
+  if (!result.success) {
+    return { success: false, message: result.message };
+  }
+  return { success: true, message: 'Program name updated successfully.' };
+}
 
-  if (!code || !programName) {
-    return { success: false, message: 'Program code and display name are required.' };
+export async function updatePilotProgramEstimatedRange(
+  programCode: string,
+  estimatedStudentCountRange: string | null,
+): Promise<PilotArchiveResult> {
+  const code = programCode.trim().toUpperCase();
+  if (!code) {
+    return { success: false, message: 'Program code is required.' };
   }
 
   if (!isSupabaseConfigured() || !supabase) {
     return { success: false, message: 'Supabase is not configured.' };
   }
 
+  const range = estimatedStudentCountRange?.trim() || null;
+
   const { error } = await supabase
     .from('pilot_programs')
-    .update({
-      program_name: programName,
-      group_name: groupName,
-    })
+    .update({ estimated_student_count_range: range })
     .eq('program_code', code);
 
   if (error) {
     return { success: false, message: error.message };
   }
 
-  return { success: true, message: 'Program display name updated.' };
+  return { success: true, message: 'Estimated student range updated.' };
 }
 
 export function filterProgramsForSearch(

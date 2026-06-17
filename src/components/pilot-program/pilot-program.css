@@ -88,6 +88,13 @@
   outline-offset: 1px;
 }
 
+.pilotSignup-fieldHint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(36, 62, 112, 0.68);
+}
+
 .pilotSignup-terms {
   margin-top: 0.25rem;
 }

@@ -32,6 +32,7 @@ import FamilyUpgradePricingModal from '../FamilyUpgradePricingModal';
 import SettingsCard from '../settings/SettingsCard';
 import SettingsPageLayout from '../settings/SettingsPageLayout';
 import FamilySettingsOverviewTab from '../settings/FamilySettingsOverviewTab';
+import FamilyDisplayNameEditor from '../FamilyDisplayNameEditor';
 import { CopyableCompactValue, StatusChip } from '../../portal-design-system';
 
 function SettingsRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -191,10 +192,18 @@ export default function FamilyProgramSettingsPanel() {
     switch (activeTab) {
       case 'overview':
         return (
-          <FamilySettingsOverviewTab
-            onAddChild={scrollToAddChild}
-            onSetGoals={() => selectTab('family-goals')}
-          />
+          <>
+            <FamilyDisplayNameEditor
+              programCode={programCodeValue}
+              campProgramName={campProgramName}
+              campProgramCode={campProgramCode}
+              onSaved={() => void refresh()}
+            />
+            <FamilySettingsOverviewTab
+              onAddChild={scrollToAddChild}
+              onSetGoals={() => selectTab('family-goals')}
+            />
+          </>
         );
 
       case 'family-goals':
