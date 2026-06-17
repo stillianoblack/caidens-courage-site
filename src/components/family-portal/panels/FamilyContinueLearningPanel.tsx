@@ -6,7 +6,11 @@ import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInThe
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
-import { CAMP_PILOT_UNLOCK_ALL } from '../../../lib/week1MissionUnlock';
+import {
+  BASELINE_GATE_MESSAGE,
+  launchWeeklyMission,
+  resolveLaunchMissionForWeek,
+} from '../../../lib/launchWeeklyMission';
 import {
   WEEKLY_VIEW_ACTIVITIES_VALUE,
   WEEKLY_VIEW_EXPLORE_VALUE,
@@ -92,7 +96,7 @@ const WeekReviewPanel = lazy(
   () => import('../../../design-system/components/WeekReviewPanel'),
 );
 
-const BASELINE_LOCKED_LABEL = 'Complete B-4 Check-In to unlock';
+const BASELINE_LOCKED_LABEL = BASELINE_GATE_MESSAGE;
 const WEEK_ONE_MISSION_KINDS = ['caiden', 'miranda', 'b4', 'charlie', 'zeke'] as const;
 
 export default function FamilyContinueLearningPanel() {
@@ -160,7 +164,7 @@ export default function FamilyContinueLearningPanel() {
   );
 
   const adventuresLocked =
-    !hasActiveChild || (!baselineComplete && !CAMP_PILOT_UNLOCK_ALL && visibilityCtx.previewMode !== 'admin');
+    !hasActiveChild || (!baselineComplete && visibilityCtx.previewMode !== 'admin');
 
   const { modules: adventureModules } = useAdventureModules(
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
@@ -412,15 +416,12 @@ export default function FamilyContinueLearningPanel() {
   );
 
   const heroMapNodes = useMemo(() => {
-    const nodes =
+    return (
       heroWeek?.nodes.filter((node) =>
         WEEK_ONE_MISSION_KINDS.includes(node.kind as typeof WEEK_ONE_MISSION_KINDS[number]),
-      ) ?? [];
-    if (heroWeekNumber === 1 && !baselineComplete && !CAMP_PILOT_UNLOCK_ALL) {
-      return nodes.filter((node) => node.kind !== 'b4');
-    }
-    return nodes;
-  }, [baselineComplete, heroWeek?.nodes, heroWeekNumber]);
+      ) ?? []
+    );
+  }, [heroWeek?.nodes]);
 
   const heroWeekId = resolveCourageWeekId(heroWeekNumber);
 
@@ -440,6 +441,100 @@ export default function FamilyContinueLearningPanel() {
     heroWeekId,
     activeChild?.participantId,
     mapMissions.length,
+  );
+
+  const resolveWeekLaunchContext = useCallback(
+    (weekNumber: number) => {
+      const selectable = resolveSelectableWeekNumber(weekNumber, trailWeeks, visibilityCtx);
+      if (!selectable) return null;
+
+      const trailWeek = trailWeeks.find((row) => row.week === selectable);
+      if (!trailWeek || trailWeek.weekStatus === 'locked') return null;
+
+      const cmsModule = adventureModules.find((row) => row.week_number === selectable) ?? null;
+      const weekTitle = cmsModule?.title?.trim() || trailWeek.title || `Week ${selectable}`;
+      const weekNodes = trailWeek.nodes.filter((node) =>
+        WEEK_ONE_MISSION_KINDS.includes(node.kind as typeof WEEK_ONE_MISSION_KINDS[number]),
+      );
+      const missions = resolveAdventureMapMissions({
+        week: selectable,
+        weekTitle,
+        cmsModule,
+        weekNodes,
+        paths: trailPaths,
+      });
+      const completedMissionIds =
+        completedByWeek[selectable] ??
+        (selectable === heroWeekNumber ? heroWeekProgress.completedMissionIds : []);
+
+      return {
+        weekNumber: selectable,
+        weekTitle,
+        monthId: cmsModule?.month_number ?? null,
+        missions,
+        completedMissionIds,
+      };
+    },
+    [
+      adventureModules,
+      completedByWeek,
+      heroWeekNumber,
+      heroWeekProgress.completedMissionIds,
+      trailPaths,
+      trailWeeks,
+      visibilityCtx,
+    ],
+  );
+
+  const handleLaunchWeek = useCallback(
+    (weekNumber: number, source: 'week-card' | 'week-card-cta') => {
+      if (!hasActiveChild) return false;
+
+      const context = resolveWeekLaunchContext(weekNumber);
+      if (!context) return false;
+
+      if (adventuresLocked && context.weekNumber !== 1) {
+        return false;
+      }
+
+      const mission = resolveLaunchMissionForWeek(context.missions, {
+        week: context.weekNumber,
+        baselineLocked: adventuresLocked,
+        completedMissionIds: context.completedMissionIds,
+      });
+      if (!mission) return false;
+
+      if (context.weekNumber !== heroWeekNumber) {
+        handleSelectWeek(context.weekNumber);
+      }
+
+      return launchWeeklyMission({
+        mission,
+        weekId: context.weekNumber,
+        monthId: context.monthId,
+        weekTitle: context.weekTitle,
+        kidsBasePath: kidsBase,
+        pathname: location.pathname,
+        characterId: mission.id,
+        missionId: mission.targetGameSlug,
+        selectedChildId: activeChild?.participantId,
+        source,
+        baselineLocked: adventuresLocked,
+        completedMissionIds: context.completedMissionIds,
+        navigate,
+      });
+    },
+    [
+      activeChild?.participantId,
+      adventuresLocked,
+      handleSelectWeek,
+      hasActiveChild,
+      heroWeekNumber,
+      kidsBase,
+      location.pathname,
+      navigate,
+      resolveWeekLaunchContext,
+    ],
   );
 
   const completedWeekMissions = useMemo(
@@ -562,14 +657,10 @@ export default function FamilyContinueLearningPanel() {
 
   const reviewWeekMapNodes = useMemo(() => {
     if (!reviewWeekTrail) return [];
-    const nodes = reviewWeekTrail.nodes.filter((node) =>
+    return reviewWeekTrail.nodes.filter((node) =>
       WEEK_ONE_MISSION_KINDS.includes(node.kind as typeof WEEK_ONE_MISSION_KINDS[number]),
     );
-    if (reviewWeekNumber === 1 && !baselineComplete && !CAMP_PILOT_UNLOCK_ALL) {
-      return nodes.filter((node) => node.kind !== 'b4');
-    }
-    return nodes;
-  }, [baselineComplete, reviewWeekNumber, reviewWeekTrail]);
+  }, [reviewWeekTrail]);
 
   const reviewMapMissions = useMemo(() => {
     if (!reviewWeekNumber || !reviewWeekContext) return [];
@@ -668,6 +759,7 @@ export default function FamilyContinueLearningPanel() {
       focusCoins,
       focusCoinsLoading,
       weekLabel: `Week ${monthSlot}`,
+      baselineGateMessage: adventuresLocked ? BASELINE_GATE_MESSAGE : null,
       children: selectableChildren,
       activeParticipantId: activeChild.participantId,
       onSelectChild: handleSelectChild,
@@ -675,6 +767,7 @@ export default function FamilyContinueLearningPanel() {
     };
   }, [
     activeChild,
+    adventuresLocked,
     baselineLoading,
     childSwitchLoading,
     focusCoins,
@@ -748,6 +841,7 @@ export default function FamilyContinueLearningPanel() {
             questPanel={questPanel}
             mapBackgroundSrc={mapBackgroundSrc}
             mapMissions={mapMissions}
+            kidsBasePath={kidsBase}
             adminPreview={visibilityCtx.previewMode === 'admin'}
             comicThumbnailUrl={heroWeek.thumbnailUrl}
             headerTrailing={
@@ -767,6 +861,7 @@ export default function FamilyContinueLearningPanel() {
             onWeekSelectorSelectWeek={handleSelectWeek}
             onWeekPillSelectWeek={handleHighlightWeek}
             onWeekSelectorReviewWeek={handleReviewWeek}
+            onWeekSelectorLaunchWeek={handleLaunchWeek}
           />
         </section>
       ) : null}

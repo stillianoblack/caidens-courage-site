@@ -7,9 +7,11 @@ import { useCourageHubAudio } from './CourageHubAudioContext';
 type CourageHubHudExploreWeekStripProps = {
   cards: WeeklyAdventureJourneyCardItem[];
   selectedWeekNumber: number;
+  baselineLocked?: boolean;
   onSelectWeek: (weekNumber: number) => void;
   onPillSelectWeek?: (weekNumber: number) => void;
   onReviewWeek: (weekNumber: number) => void;
+  onLaunchWeek?: (weekNumber: number, source: 'week-card' | 'week-card-cta') => boolean;
 };
 
 function resolveMonthSlot(weekNumber: number): number {
@@ -27,23 +29,62 @@ function resolveStatusLabel(card: WeeklyAdventureJourneyCardItem, isSelected: bo
 export default function CourageHubHudExploreWeekStrip({
   cards,
   selectedWeekNumber,
+  baselineLocked = false,
   onSelectWeek,
   onPillSelectWeek,
   onReviewWeek,
+  onLaunchWeek,
 }: CourageHubHudExploreWeekStripProps) {
   const { playClick } = useCourageHubAudio();
+
+  const isLaunchableCard = useCallback(
+    (card: WeeklyAdventureJourneyCardItem) => {
+      if (card.variant === 'locked' || card.disabled) return false;
+      if (card.variant === 'complete') return false;
+      if (baselineLocked && card.weekNumber !== 1) return false;
+      return true;
+    },
+    [baselineLocked],
+  );
+
+  const tryLaunchWeek = useCallback(
+    (card: WeeklyAdventureJourneyCardItem, source: 'week-card' | 'week-card-cta') => {
+      if (!onLaunchWeek || !isLaunchableCard(card)) return false;
+      return onLaunchWeek(card.weekNumber, source);
+    },
+    [isLaunchableCard, onLaunchWeek],
+  );
 
   const handlePillSelect = useCallback(
     (card: WeeklyAdventureJourneyCardItem) => {
       if (card.variant === 'locked' || card.disabled) return;
       playClick();
-      if (onPillSelectWeek) {
-        onPillSelectWeek(card.weekNumber);
+      if (card.variant === 'complete') {
+        onReviewWeek(card.weekNumber);
         return;
       }
-      onSelectWeek(card.weekNumber);
+      if (baselineLocked && card.weekNumber !== 1) return;
+
+      const isSelected = card.weekNumber === selectedWeekNumber;
+      if (!isSelected) {
+        if (onPillSelectWeek) {
+          onPillSelectWeek(card.weekNumber);
+        } else {
+          onSelectWeek(card.weekNumber);
+        }
+      }
+
+      tryLaunchWeek(card, 'week-card');
     },
-    [onPillSelectWeek, onSelectWeek, playClick],
+    [
+      baselineLocked,
+      onPillSelectWeek,
+      onReviewWeek,
+      onSelectWeek,
+      playClick,
+      selectedWeekNumber,
+      tryLaunchWeek,
+    ],
   );
 
   const handleCta = useCallback(
@@ -55,9 +96,11 @@ export default function CourageHubHudExploreWeekStrip({
         onReviewWeek(card.weekNumber);
         return;
       }
+      if (baselineLocked && card.weekNumber !== 1) return;
+      if (tryLaunchWeek(card, 'week-card-cta')) return;
       onSelectWeek(card.weekNumber);
     },
-    [onReviewWeek, onSelectWeek, playClick],
+    [baselineLocked, onReviewWeek, onSelectWeek, playClick, tryLaunchWeek],
   );
 
   return (
@@ -70,7 +113,7 @@ export default function CourageHubHudExploreWeekStrip({
         const locked = card.variant === 'locked' || card.disabled;
         const complete = card.variant === 'complete';
         const statusLabel = resolveStatusLabel(card, isSelected);
-        const ctaDisabled = locked;
+        const ctaDisabled = locked || (baselineLocked && card.weekNumber !== 1);
 
         return (
           <li key={card.weekNumber}>
@@ -80,7 +123,9 @@ export default function CourageHubHudExploreWeekStrip({
                 'courageHubHudCard--explore',
                 isSelected ? 'courageHubHudCard--selected' : '',
                 complete ? 'courageHubHudCard--complete' : '',
-                locked ? 'courageHubHudCard--locked' : '',
+                locked || (baselineLocked && card.weekNumber !== 1)
+                  ? 'courageHubHudCard--locked'
+                  : '',
               ]
                 .filter(Boolean)
                 .join(' ')}

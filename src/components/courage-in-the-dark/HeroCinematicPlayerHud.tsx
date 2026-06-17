@@ -7,6 +7,7 @@ export type HeroCinematicPlayerHudProps = {
   focusCoins: number;
   focusCoinsLoading?: boolean;
   weekLabel?: string | null;
+  baselineGateMessage?: string | null;
   children?: SelectableChild[];
   activeParticipantId?: string;
   onSelectChild?: (child: SelectableChild) => void;
@@ -24,6 +25,7 @@ export default function HeroCinematicPlayerHud({
   focusCoins,
   focusCoinsLoading = false,
   weekLabel,
+  baselineGateMessage = null,
   children = [],
   activeParticipantId = '',
   onSelectChild,
@@ -84,6 +86,11 @@ export default function HeroCinematicPlayerHud({
             <p className="heroCinematicPlayerHudName">{displayName}</p>
           )}
           {weekLabel ? <p className="heroCinematicPlayerHudWeek">{weekLabel}</p> : null}
+          {baselineGateMessage ? (
+            <p className="heroCinematicPlayerHudGate" role="status">
+              {baselineGateMessage}
+            </p>
+          ) : null}
         </div>
         <div className="heroCinematicPlayerHudCoins" aria-label={`${focusCoins} Focus Coins`}>
           <span className="heroCinematicPlayerHudCoinIcon" aria-hidden="true" />

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../components/portal-design-system/ToastProvider';
 import {
   courageInTheDarkMissions,
@@ -7,13 +7,18 @@ import {
   type CourageMapHotspotId,
 } from '../data/courageInTheDarkMap';
 import { readAndClearRecentlyCompletedHotspot } from '../lib/courageMapReturnFeedback';
-import { resolveCourageMapTargetHref } from '../lib/courageInTheDarkRoutes';
 import { isCourageMapHotspotComplete, resolveCourageWeekId } from '../lib/courageInTheDarkProgress';
+import {
+  launchWeeklyMission,
+  resolveWeeklyMissionRoute,
+  resolveWeeklyMissionUnlockReason,
+  isWeeklyMissionLocked,
+  type WeeklyMissionLaunchSource,
+} from '../lib/launchWeeklyMission';
 import { resolvePortalKidsBasePath } from '../lib/portalGamePaths';
 import {
   CAMP_PILOT_UNLOCK_ALL,
   detectNewlyUnlockedWeek1Missions,
-  getWeek1MissionUnlockState,
   type Week1MissionUnlockState,
 } from '../lib/week1MissionUnlock';
 import type { AdventureTrailNodeView } from '../types/adventureTrail';
@@ -46,6 +51,7 @@ export function useCourageAdventureHub({
   mapMissions = courageInTheDarkMissions,
 }: UseCourageAdventureHubOptions) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const [selectedHotspot, setSelectedHotspot] = useState<CourageInTheDarkMission | null>(null);
   const [comingSoonSlug, setComingSoonSlug] = useState<string | null>(null);
@@ -85,25 +91,27 @@ export function useCourageAdventureHub({
     [progress.completedMissionIds, week, weekNodes],
   );
 
-  const getMissionUnlockState = useCallback(
-    (mission: CourageInTheDarkMission): Week1MissionUnlockState => {
-      if (week === 1) {
-        if (!CAMP_PILOT_UNLOCK_ALL && (mapLocked || baselineLocked)) {
-          return { unlocked: false, reason: 'Complete check-in to begin' };
-        }
-        return getWeek1MissionUnlockState(mission.targetGameSlug, progress.completedMissionIds);
-      }
-      if (mapLocked || baselineLocked) {
-        return { unlocked: false, reason: 'Complete check-in to begin' };
-      }
-      return { unlocked: !mission.locked, reason: mission.locked ? 'Locked' : 'Available now' };
-    },
+  const missionUnlockOptions = useMemo(
+    () => ({
+      week,
+      baselineLocked,
+      mapLocked,
+      completedMissionIds: progress.completedMissionIds,
+    }),
     [baselineLocked, mapLocked, progress.completedMissionIds, week],
   );
 
+  const getMissionUnlockState = useCallback(
+    (mission: CourageInTheDarkMission): Week1MissionUnlockState => ({
+      unlocked: !isWeeklyMissionLocked(mission, missionUnlockOptions),
+      reason: resolveWeeklyMissionUnlockReason(mission, missionUnlockOptions),
+    }),
+    [missionUnlockOptions],
+  );
+
   const isHotspotLocked = useCallback(
-    (hotspot: CourageInTheDarkMission) => !getMissionUnlockState(hotspot).unlocked,
-    [getMissionUnlockState],
+    (hotspot: CourageInTheDarkMission) => isWeeklyMissionLocked(hotspot, missionUnlockOptions),
+    [missionUnlockOptions],
   );
 
   useEffect(() => {
@@ -146,45 +154,64 @@ export function useCourageAdventureHub({
 
   const targetHref = useMemo(() => {
     if (!selectedHotspot) return null;
-    return (
-      selectedHotspot.directHref ??
-      resolveCourageMapTargetHref(
-        selectedHotspot.targetGameSlug,
-        resolvedKidsBase,
-        week,
-        weekTitle,
-      )
-    );
-  }, [resolvedKidsBase, selectedHotspot, week, weekTitle]);
+    return resolveWeeklyMissionRoute({
+      mission: selectedHotspot,
+      weekId: week,
+      weekTitle,
+      kidsBasePath: resolvedKidsBase,
+      pathname: location.pathname,
+    });
+  }, [location.pathname, resolvedKidsBase, selectedHotspot, week, weekTitle]);
 
   const resolveMissionHref = useCallback(
     (mission: CourageInTheDarkMission) =>
-      mission.directHref ??
-      resolveCourageMapTargetHref(mission.targetGameSlug, resolvedKidsBase, week, weekTitle),
-    [resolvedKidsBase, week, weekTitle],
+      resolveWeeklyMissionRoute({
+        mission,
+        weekId: week,
+        weekTitle,
+        kidsBasePath: resolvedKidsBase,
+        pathname: location.pathname,
+      }),
+    [location.pathname, resolvedKidsBase, week, weekTitle],
   );
 
   const launchMission = useCallback(
-    (mission: CourageInTheDarkMission) => {
-      if (isHotspotLocked(mission)) return false;
+    (mission: CourageInTheDarkMission, source: WeeklyMissionLaunchSource = 'character-hotspot') => {
+      const launched = launchWeeklyMission({
+        mission,
+        weekId: week,
+        weekTitle,
+        kidsBasePath: resolvedKidsBase,
+        pathname: location.pathname,
+        characterId: mission.id,
+        missionId: mission.targetGameSlug,
+        source,
+        baselineLocked,
+        mapLocked,
+        completedMissionIds: progress.completedMissionIds,
+        navigate,
+      });
 
-      const href =
-        mission.directHref ??
-        resolveCourageMapTargetHref(mission.targetGameSlug, resolvedKidsBase, week, weekTitle);
-
-      if (!href) {
-        console.warn(
-          '[COURAGE_MAP] Adventure coming soon — missing route for slug:',
-          mission.targetGameSlug,
-        );
-        setComingSoonSlug(mission.targetGameSlug);
+      if (!launched) {
+        if (!isHotspotLocked(mission)) {
+          setComingSoonSlug(mission.targetGameSlug);
+        }
         return false;
       }
 
-      navigate(href);
       return true;
     },
-    [isHotspotLocked, navigate, resolvedKidsBase, week, weekTitle],
+    [
+      baselineLocked,
+      isHotspotLocked,
+      location.pathname,
+      mapLocked,
+      navigate,
+      progress.completedMissionIds,
+      resolvedKidsBase,
+      week,
+      weekTitle,
+    ],
   );
 
   const startAdventure = useCallback(() => {

@@ -29,6 +29,7 @@ import {
 } from './CourageHubBottomHudStrips';
 import CourageHubHudExploreWeekStrip from './CourageHubHudExploreWeekStrip';
 import HeroExploreOverlay from './HeroExploreOverlay';
+import { BASELINE_GATE_MESSAGE } from '../../lib/launchWeeklyMission';
 import { ENABLE_BOTTOM_HUD_TRAY } from '../../config/weeklyAdventureFeatures';
 import type { HeroCinematicPlayerHudProps } from './HeroCinematicPlayerHud';
 import type { WeeklyAdventureJourneyCardItem } from '../../lib/weeklyAdventureWeekCards';
@@ -92,6 +93,10 @@ type CourageInTheDarkAdventureHubProps = {
   onWeekSelectorSelectWeek?: (weekNumber: number) => void;
   onWeekPillSelectWeek?: (weekNumber: number) => void;
   onWeekSelectorReviewWeek?: (weekNumber: number) => void;
+  onWeekSelectorLaunchWeek?: (
+    weekNumber: number,
+    source: 'week-card' | 'week-card-cta',
+  ) => boolean;
   /** @deprecated Legacy large Explore overlay — use cinematicWeekSelectorEnabled */
   heroExploreOverlayEnabled?: boolean;
   exploreOverlayWeekCards?: WeeklyAdventureJourneyCardItem[];
@@ -108,7 +113,7 @@ export default function CourageInTheDarkAdventureHub({
   comicThumbnailUrl,
   kidsBasePath,
   baselineLocked = false,
-  baselineLockedLabel = 'Complete B-4 Check-In to unlock',
+  baselineLockedLabel = BASELINE_GATE_MESSAGE,
   mapLocked = false,
   mapBackgroundSrc,
   adminPreview = false,
@@ -126,6 +131,7 @@ export default function CourageInTheDarkAdventureHub({
   onWeekSelectorSelectWeek,
   onWeekPillSelectWeek,
   onWeekSelectorReviewWeek,
+  onWeekSelectorLaunchWeek,
   heroExploreOverlayEnabled = false,
   exploreOverlayWeekCards,
   onExploreSelectWeek,
@@ -302,7 +308,7 @@ export default function CourageInTheDarkAdventureHub({
       }
 
       if (exploreDirectLaunch || cinematicAdventureMode) {
-        const launched = launchMission(mission);
+        const launched = launchMission(mission, 'character-hotspot');
         if (!launched) {
           if (exploreDirectLaunch) {
             showToast('Adventure coming soon.', 'info');
@@ -337,7 +343,7 @@ export default function CourageInTheDarkAdventureHub({
   const handleLaunchFromList = useCallback(
     (mission: CourageInTheDarkMission) => {
       setListComingSoonId(null);
-      const launched = launchMission(mission);
+      const launched = launchMission(mission, 'mission-list');
       if (!launched && !isHotspotLocked(mission)) {
         setListComingSoonId(mission.id);
       }
@@ -424,6 +430,7 @@ export default function CourageInTheDarkAdventureHub({
         weekTitle={weekTitle}
         mapLocked={mapLocked}
         baselineLocked={baselineLocked}
+        requiredHotspotId={baselineLocked ? 'b4' : null}
         selectedHotspotId={selectedHotspot?.id ?? null}
         heroBar={null}
         mapBackgroundSrc={mapBackgroundSrc}
@@ -464,14 +471,26 @@ export default function CourageInTheDarkAdventureHub({
       onWeekSelectorReviewWeek,
   );
 
+  const handleWeekCardLaunch = useCallback(
+    (weekNumber: number, source: 'week-card' | 'week-card-cta') => {
+      if (onWeekSelectorLaunchWeek?.(weekNumber, source)) {
+        return true;
+      }
+      return false;
+    },
+    [onWeekSelectorLaunchWeek],
+  );
+
   const exploreWeekStrip =
     showCinematicSelector && weekSelectorCards && onWeekSelectorSelectWeek && onWeekSelectorReviewWeek ? (
       <CourageHubHudExploreWeekStrip
         cards={weekSelectorCards}
         selectedWeekNumber={week}
+        baselineLocked={baselineLocked}
         onSelectWeek={onWeekSelectorSelectWeek}
         onPillSelectWeek={onWeekPillSelectWeek}
         onReviewWeek={onWeekSelectorReviewWeek}
+        onLaunchWeek={onWeekSelectorLaunchWeek ? handleWeekCardLaunch : undefined}
       />
     ) : null;
 

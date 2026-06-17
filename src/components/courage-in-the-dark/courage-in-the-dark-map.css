@@ -660,3 +660,19 @@
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+.courageMapCanvas--baselineGate .courageMapHotspot--locked {
+  opacity: 0.42;
+  filter: saturate(0.55);
+}
+
+.courageMapHotspot--required {
+  opacity: 1;
+  filter: none;
+  z-index: 3;
+}
+
+.courageMapHotspot--required .courageMapHotspotRing {
+  animation-duration: 1.8s;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, rgba(59, 130, 246, 0.2) 55%, transparent 72%);
+}

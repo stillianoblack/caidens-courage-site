@@ -15,6 +15,7 @@ type CourageMapCanvasProps = {
   selFocus?: string;
   mapLocked?: boolean;
   baselineLocked?: boolean;
+  requiredHotspotId?: string | null;
   selectedHotspotId?: string | null;
   heroBar?: React.ReactNode;
   mapBackgroundSrc?: string;
@@ -36,6 +37,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
     weekTitle = 'Courage in the Dark',
     mapLocked = false,
     baselineLocked = false,
+    requiredHotspotId = null,
     selectedHotspotId = null,
     heroBar,
     mapBackgroundSrc,
@@ -107,6 +109,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
         isHub && mapSize === 'split' ? 'courageMapCanvas--hubSplit' : '',
         showImage ? 'courageMapCanvas--hasImage' : '',
         mapLocked || baselineLocked ? 'courageMapCanvas--locked' : '',
+        baselineLocked ? 'courageMapCanvas--baselineGate' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -142,6 +145,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
       <div className="courageMapHotspots">
         {mapMissions.map((hotspot) => {
           const locked = isHotspotLocked(hotspot);
+          const required = baselineLocked && requiredHotspotId === hotspot.id;
           const complete = isHotspotComplete(hotspot);
           const selected = selectedHotspotId === hotspot.id;
           const justCompleted = animatingHotspotId === hotspot.id;
@@ -156,6 +160,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
                 selected ? 'courageMapHotspot--selected' : '',
                 complete ? 'courageMapHotspot--complete' : '',
                 locked ? 'courageMapHotspot--locked' : '',
+                required ? 'courageMapHotspot--required' : '',
                 justCompleted ? 'courageMapHotspot--justComplete' : '',
               ]
                 .filter(Boolean)
