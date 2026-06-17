@@ -4,7 +4,6 @@ import { resolveAdventureHeroMapSrc, resolveAdventureImageUrl } from './adventur
 
 export type AdventureMonthHeroSource =
   | 'month_hero_image'
-  | 'featured_week_hero'
   | 'week_hero_map'
   | 'week1_static';
 
@@ -14,15 +13,13 @@ export type AdventureMonthHeroResolution = {
   fallbackReason?: string;
 };
 
-/** Large hero prefers month-level image; falls back to featured/current week map background. */
+/** Large hero: month image → current week map/hero → static default. */
 export function resolveAdventureMonthHeroSrc(input: {
   month?: AdventureMonthRecord | null;
   heroWeekModule?: AdventureModuleRecord | null;
-  featuredWeekModule?: AdventureModuleRecord | null;
   weekNumber?: number;
 }): AdventureMonthHeroResolution {
-  const weekNumber =
-    input.weekNumber ?? input.heroWeekModule?.week_number ?? input.featuredWeekModule?.week_number ?? 1;
+  const weekNumber = input.weekNumber ?? input.heroWeekModule?.week_number ?? 1;
 
   const monthHero = resolveAdventureImageUrl(
     input.month?.month_hero_image_url,
@@ -30,15 +27,6 @@ export function resolveAdventureMonthHeroSrc(input: {
   );
   if (monthHero) {
     return { url: monthHero, source: 'month_hero_image' };
-  }
-
-  const featuredHero = resolveAdventureHeroMapSrc(input.featuredWeekModule, weekNumber);
-  if (featuredHero) {
-    return {
-      url: featuredHero,
-      source: 'featured_week_hero',
-      fallbackReason: 'No month hero image — using featured week map background.',
-    };
   }
 
   const weekHero = resolveAdventureHeroMapSrc(input.heroWeekModule, weekNumber);

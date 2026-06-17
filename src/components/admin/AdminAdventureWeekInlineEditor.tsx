@@ -146,14 +146,6 @@ export default function AdminAdventureWeekInlineEditor({
         <label className="adminPortal-field adminPortal-field--checkbox">
           <input
             type="checkbox"
-            checked={Boolean(form.is_featured)}
-            onChange={(event) => onChange({ is_featured: event.target.checked })}
-          />
-          <span>Featured hero week</span>
-        </label>
-        <label className="adminPortal-field adminPortal-field--checkbox">
-          <input
-            type="checkbox"
             checked={Boolean(form.is_admin_preview)}
             onChange={(event) => onChange({ is_admin_preview: event.target.checked })}
           />

@@ -48,6 +48,11 @@ export function weeklyAdventureWeekAnchor(week: number): string {
   return `week-${week}`;
 }
 
+/** Scroll target for the hero hub at the top of Weekly Adventures. */
+export function weeklyAdventureHeroAnchor(week: number): string {
+  return `week-hero-${week}`;
+}
+
 export function parseWeeklyAdventureWeekParam(value: string | null | undefined): number | null {
   if (!value?.trim()) return null;
   const week = Number.parseInt(value, 10);

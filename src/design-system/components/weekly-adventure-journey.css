@@ -176,6 +176,60 @@
     0 0 0 2px rgba(234, 179, 8, 0.25);
 }
 
+/* Week accent tokens — used on selected ring/glow + eyebrow marker */
+.weeklyJourneyCard[data-week-accent='week1'] {
+  --week-accent-ring: rgba(37, 99, 235, 0.42);
+  --week-accent-glow: rgba(37, 99, 235, 0.22);
+  --week-accent-eyebrow: #2563eb;
+}
+
+.weeklyJourneyCard[data-week-accent='week2'] {
+  --week-accent-ring: rgba(217, 119, 6, 0.45);
+  --week-accent-glow: rgba(217, 119, 6, 0.24);
+  --week-accent-eyebrow: #d97706;
+}
+
+.weeklyJourneyCard[data-week-accent='week3'] {
+  --week-accent-ring: rgba(124, 58, 237, 0.42);
+  --week-accent-glow: rgba(124, 58, 237, 0.22);
+  --week-accent-eyebrow: #7c3aed;
+}
+
+.weeklyJourneyCard[data-week-accent='week4'] {
+  --week-accent-ring: rgba(22, 163, 74, 0.42);
+  --week-accent-glow: rgba(22, 163, 74, 0.22);
+  --week-accent-eyebrow: #16a34a;
+}
+
+.weeklyJourneyCard--selected {
+  position: relative;
+  z-index: 1;
+  border: 2px solid rgba(240, 208, 120, 0.92);
+  box-shadow:
+    0 0 0 1px var(--week-accent-ring, rgba(240, 208, 120, 0.35)),
+    0 10px 28px -14px var(--week-accent-glow, rgba(240, 208, 120, 0.38)),
+    0 16px 36px -20px rgba(26, 47, 82, 0.28);
+}
+
+.weeklyJourneyCard--selected .weeklyJourneyCardEyebrow {
+  color: var(--week-accent-eyebrow, rgba(26, 47, 82, 0.72));
+}
+
+.weeklyJourneyCardPill--selected {
+  background: linear-gradient(135deg, #f0d078 0%, #d97706 100%);
+  color: #1a1035;
+}
+
+.weeklyJourneyCard--selected .weeklyJourneyCardPill--inProgress {
+  background: rgba(37, 99, 235, 0.92);
+  color: #fff;
+}
+
+.weeklyJourneyCard--selected .weeklyJourneyCardPill--available {
+  background: linear-gradient(135deg, #f0d078 0%, #d97706 100%);
+  color: #1a1035;
+}
+
 .weeklyJourneyCard--complete {
   filter: none;
   opacity: 1;
@@ -220,7 +274,11 @@
 }
 
 .weeklyJourneyCardPill--available,
-.weeklyJourneyCardPill--adminPreview,
+.weeklyJourneyCardPill--adminPreview {
+  background: rgba(26, 47, 82, 0.12);
+  color: rgba(26, 47, 82, 0.78);
+}
+
 .weeklyJourneyCardPill--complete {
   background: rgba(22, 121, 74, 0.88);
   color: #fff;
@@ -334,14 +392,23 @@
     display: flex;
     overflow-x: auto;
     gap: 0.75rem;
-    padding-bottom: 0.35rem;
+    padding: 0.15rem 0.1rem 0.35rem;
     scroll-snap-type: x mandatory;
     scrollbar-width: thin;
+    overflow-y: visible;
   }
 
   .weeklyJourneyCard {
     flex: 0 0 min(88vw, 18rem);
     scroll-snap-align: start;
+    max-width: 100%;
+  }
+
+  .weeklyJourneyCard--selected {
+    box-shadow:
+      inset 0 0 0 1px var(--week-accent-ring, rgba(240, 208, 120, 0.35)),
+      0 8px 22px -12px var(--week-accent-glow, rgba(240, 208, 120, 0.32)),
+      0 12px 28px -16px rgba(26, 47, 82, 0.24);
   }
 
   .weeklyJourneyProgressLine {

@@ -7,6 +7,7 @@ import type {
 import { buildDefaultAdventureModuleSeeds } from '../data/adventureModuleSeeds';
 import type { AdventureVisibilityContext } from './adventureVisibility';
 import { getFeaturedAdventure } from './getFeaturedAdventure';
+import { isBlobPreviewUrl } from './adventureImageUpload';
 import { resolveDefaultMonthNumber } from './adventureMonthService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -42,6 +43,13 @@ function optionalNumber(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
+function optionalDbUrl(value: unknown): string | null {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed || isBlobPreviewUrl(trimmed)) return null;
+  return trimmed;
+}
+
 function buildAdventurePayload(input: Partial<AdventureModuleInput>): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
   if (input.title !== undefined) payload.title = input.title.trim();
@@ -55,28 +63,28 @@ function buildAdventurePayload(input: Partial<AdventureModuleInput>): Record<str
   if (input.status !== undefined) payload.status = input.status;
   if (input.cta_text !== undefined) payload.cta_text = input.cta_text?.trim() || null;
   if (input.comic_thumbnail_url !== undefined) {
-    const url = input.comic_thumbnail_url?.trim() || null;
+    const url = optionalDbUrl(input.comic_thumbnail_url);
     payload.comic_thumbnail_url = url;
     payload.thumbnail_image_url = url;
     payload.thumbnail_url = url;
   }
   if (input.map_background_url !== undefined) {
-    payload.map_background_url = input.map_background_url?.trim() || null;
+    payload.map_background_url = optionalDbUrl(input.map_background_url);
   }
   if (input.thumbnail_image_url !== undefined && input.comic_thumbnail_url === undefined) {
-    const url = input.thumbnail_image_url?.trim() || null;
+    const url = optionalDbUrl(input.thumbnail_image_url);
     payload.comic_thumbnail_url = url;
     payload.thumbnail_image_url = url;
     payload.thumbnail_url = url;
   }
   if (input.thumbnail_url !== undefined && input.comic_thumbnail_url === undefined) {
-    const url = input.thumbnail_url?.trim() || null;
+    const url = optionalDbUrl(input.thumbnail_url);
     payload.comic_thumbnail_url = url;
     payload.thumbnail_url = url;
     payload.thumbnail_image_url = url;
   }
   if (input.background_image_url !== undefined && input.map_background_url === undefined) {
-    payload.map_background_url = input.background_image_url?.trim() || null;
+    payload.map_background_url = optionalDbUrl(input.background_image_url);
   }
   if (input.reward_value !== undefined) payload.reward_value = input.reward_value;
   if (input.unlock_date !== undefined) payload.unlock_date = input.unlock_date || null;
@@ -321,9 +329,9 @@ export async function scheduleAdventureForTomorrow(id: string): Promise<{ error?
   return scheduleAdventureModule(id, tomorrow.toISOString());
 }
 
-/** Publish an adventure — multiple weeks can be published (status=active) at once. */
+/** Publish an adventure — sets active + live on family site. */
 export async function publishAdventureModule(id: string): Promise<{ error?: string }> {
-  const result = await updateAdventureModule(id, { status: 'active' });
+  const result = await updateAdventureModule(id, { status: 'active', is_live: true });
   return { error: result.error };
 }
 

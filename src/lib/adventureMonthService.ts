@@ -1,6 +1,8 @@
 import { DEFAULT_ADVENTURE_MONTH_SEEDS } from '../data/adventureMonthSeeds';
 import type { AdventureMonthInput, AdventureMonthRecord, CertificateAssetType } from '../types/adventureMonth';
+import { normalizeReleaseMode } from './weekAvailability';
 import { ADVENTURE_ASSETS_BUCKET } from './adventureModuleService';
+import { isBlobPreviewUrl } from './adventureImageUpload';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 const WEEKS_PER_MONTH_DEFAULT = 4;
@@ -39,6 +41,12 @@ function normalizeMonthRow(row: Record<string, unknown>): AdventureMonthRecord {
     certificate_asset_type:
       (optionalString(row.certificate_asset_type) as CertificateAssetType | null) ?? 'image',
     is_published: Boolean(row.is_published),
+    release_mode: normalizeReleaseMode(optionalString(row.release_mode)),
+    release_interval_days:
+      row.release_interval_days == null || row.release_interval_days === ''
+        ? null
+        : optionalNumber(row.release_interval_days, 0) || null,
+    release_start_at: optionalString(row.release_start_at),
     sort_order: optionalNumber(row.sort_order, Number(row.month_number ?? 0)),
     created_at: String(row.created_at ?? ''),
     updated_at: String(row.updated_at ?? ''),
@@ -60,6 +68,9 @@ function fallbackMonthsFromSeeds(): AdventureMonthRecord[] {
     certificate_asset_url: null,
     certificate_asset_type: 'image' as const,
     is_published: Boolean(seed.is_published),
+    release_mode: seed.release_mode ?? 'all_available',
+    release_interval_days: seed.release_interval_days ?? null,
+    release_start_at: seed.release_start_at ?? null,
     sort_order: seed.sort_order ?? seed.month_number,
     created_at: now,
     updated_at: now,
@@ -75,7 +86,8 @@ function buildMonthPayload(input: Partial<AdventureMonthInput>): Record<string, 
     payload.month_description = input.month_description?.trim() || null;
   }
   if (input.month_hero_image_url !== undefined) {
-    payload.month_hero_image_url = input.month_hero_image_url?.trim() || null;
+    const url = input.month_hero_image_url?.trim() || null;
+    payload.month_hero_image_url = url && !isBlobPreviewUrl(url) ? url : null;
   }
   if (input.certificate_title !== undefined) {
     payload.certificate_title = input.certificate_title?.trim() || null;
@@ -87,12 +99,23 @@ function buildMonthPayload(input: Partial<AdventureMonthInput>): Record<string, 
     payload.certificate_required_weeks = Math.max(1, input.certificate_required_weeks);
   }
   if (input.certificate_asset_url !== undefined) {
-    payload.certificate_asset_url = input.certificate_asset_url?.trim() || null;
+    const url = input.certificate_asset_url?.trim() || null;
+    payload.certificate_asset_url = url && !isBlobPreviewUrl(url) ? url : null;
   }
   if (input.certificate_asset_type !== undefined) {
     payload.certificate_asset_type = input.certificate_asset_type || 'image';
   }
   if (input.is_published !== undefined) payload.is_published = Boolean(input.is_published);
+  if (input.release_mode !== undefined) {
+    payload.release_mode = normalizeReleaseMode(input.release_mode);
+  }
+  if (input.release_interval_days !== undefined) {
+    payload.release_interval_days =
+      input.release_interval_days == null ? null : Math.max(1, input.release_interval_days);
+  }
+  if (input.release_start_at !== undefined) {
+    payload.release_start_at = input.release_start_at?.trim() || null;
+  }
   if (input.sort_order !== undefined) payload.sort_order = input.sort_order;
   return payload;
 }
@@ -283,6 +306,9 @@ export function groupModulesByMonth<T extends { week_number: number; month_numbe
         certificate_asset_url: null,
         certificate_asset_type: 'image',
         is_published: false,
+        release_mode: 'all_available',
+        release_interval_days: null,
+        release_start_at: null,
         sort_order: monthNumber,
         created_at: '',
         updated_at: '',

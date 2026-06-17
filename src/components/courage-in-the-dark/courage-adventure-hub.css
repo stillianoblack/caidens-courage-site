@@ -813,7 +813,9 @@
 
 .courageAdventureHubMobileList .courageMissionListPanel {
   min-height: auto;
+  height: auto;
   max-height: none;
+  overflow: visible;
 }
 
 .courageHubViewToggle {
@@ -1667,9 +1669,20 @@
     gap: 0.85rem;
   }
 
+  .courageAdventureHub--mobileStack .courageMissionListPanel,
+  .courageAdventureHub--mobileStack .courageActivitiesPanel,
+  .courageAdventureHub--mobileStack .courageQuestListPanel {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .courageMissionListPanel {
     min-height: auto;
+    height: auto;
     max-height: none;
+    overflow: visible;
   }
 
   .courageMissionListPanelHeader {
@@ -1680,9 +1693,19 @@
     padding: 0 1.25rem 1rem;
   }
 
-  .courageMissionListRows {
-    padding: 0.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px) + 4.5rem);
+  .courageMissionListRows,
+  .courageAdventureHub--mobileStack .courageMissionListRows {
+    overflow-y: visible;
+    flex: none;
+    min-height: auto;
+    padding: 0.25rem 1.25rem 1.25rem;
     gap: 1rem;
+  }
+
+  .courageAdventureHub--mobileStack .courageActivitiesPanel .week1Extras {
+    overflow-y: visible;
+    flex: none;
+    min-height: auto;
   }
 
   .courageMissionListPanel .courageMissionListRow--compact {

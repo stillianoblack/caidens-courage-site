@@ -11,11 +11,20 @@ import {
   publishAdventureModule,
   scheduleAdventureForTomorrow,
   seedDefaultAdventureModules,
-  setFeaturedAdventureModule,
   updateAdventureModule,
   uploadAdventureAsset,
   type AdventureAssetUploadKind,
 } from '../../../lib/adventureModuleService';
+import {
+  ADVENTURE_IMAGE_UPLOAD_WARNING,
+  findBlobFieldsInModuleInput,
+  findBlobFieldsInMonthInput,
+  logAdventureImageUpload,
+  resolveAdventureAssetDbField,
+  resolveAdventureAssetUploadKind,
+  stripBlobUrlsFromModuleInput,
+  stripBlobUrlsFromMonthInput,
+} from '../../../lib/adventureImageUpload';
 import {
   fetchAdventureMonths,
   resolveDefaultMonthNumber,
@@ -190,9 +199,22 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
     event.preventDefault();
     if (!editingMonthId || !monthForm) return;
 
+    if (uploadingMonthHero || uploadingMonthCertificate) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
+    const blobFields = findBlobFieldsInMonthInput(monthForm);
+    if (blobFields.length > 0) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
     setSavingMonth(true);
     setError(null);
-    const result = await updateAdventureMonth(editingMonthId, monthForm);
+    const result = await updateAdventureMonth(editingMonthId, stripBlobUrlsFromMonthInput(monthForm));
     setSavingMonth(false);
 
     if (result.error) {
@@ -255,6 +277,15 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
         });
         if (saveResult.error) {
           setError(`Upload succeeded but month save failed: ${saveResult.error}`);
+          logAdventureImageUpload({
+            uploadType: 'month_hero',
+            fileName: file.name,
+            publicUrl: result.url,
+            dbField: 'certificate_asset_url',
+            savePayloadUrl: result.url,
+            success: false,
+            failure: saveResult.error,
+          });
           return;
         }
         await refresh();
@@ -263,6 +294,15 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
           '[ADVENTURE_MONTHS] Certificate asset uploaded but not persisted — run migration.',
         );
       }
+
+      logAdventureImageUpload({
+        uploadType: 'month_hero',
+        fileName: file.name,
+        publicUrl: result.url,
+        dbField: 'certificate_asset_url',
+        savePayloadUrl: result.url,
+        success: true,
+      });
 
       onCopied?.('Certificate asset updated.');
     } finally {
@@ -275,11 +315,24 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
     event.preventDefault();
     if (!inlineEditingId || !inlineForm) return;
 
+    if (uploadingInlineKind) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
+    const blobFields = findBlobFieldsInModuleInput(inlineForm);
+    if (blobFields.length > 0) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
     setSavingInline(true);
     setError(null);
 
     const payload: AdventureModuleInput = {
-      ...inlineForm,
+      ...stripBlobUrlsFromModuleInput(inlineForm),
       month_number: inlineForm.month_number ?? resolveDefaultMonthNumber(inlineForm.week_number),
       unlock_date: inlineForm.unlock_date || null,
     };
@@ -289,10 +342,6 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
       setSavingInline(false);
       setError(result.error);
       return;
-    }
-
-    if (inlineForm.is_featured) {
-      await setFeaturedAdventureModule(inlineEditingId);
     }
 
     setSavingInline(false);
@@ -331,10 +380,28 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
         });
         if (saveResult.error) {
           setError(`Upload succeeded but month save failed: ${saveResult.error}`);
+          logAdventureImageUpload({
+            uploadType: 'month_hero',
+            fileName: file.name,
+            publicUrl: result.url,
+            dbField: 'month_hero_image_url',
+            savePayloadUrl: result.url,
+            success: false,
+            failure: saveResult.error,
+          });
           return;
         }
         await refresh();
       }
+
+      logAdventureImageUpload({
+        uploadType: 'month_hero',
+        fileName: file.name,
+        publicUrl: result.url,
+        dbField: 'month_hero_image_url',
+        savePayloadUrl: result.url,
+        success: true,
+      });
 
       onCopied?.('Month hero image updated.');
     } finally {
@@ -400,11 +467,25 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (uploadingKind) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
+    const blobFields = findBlobFieldsInModuleInput(form);
+    if (blobFields.length > 0) {
+      setError(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      onCopied?.(ADVENTURE_IMAGE_UPLOAD_WARNING);
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
     const payload: AdventureModuleInput = {
-      ...form,
+      ...stripBlobUrlsFromModuleInput(form),
       month_number: form.month_number ?? resolveDefaultMonthNumber(form.week_number),
       unlock_date: form.unlock_date || null,
     };
@@ -448,16 +529,6 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
       return;
     }
     onCopied?.('Adventure published — other weeks stay available.');
-    await refresh();
-  };
-
-  const handleSetFeatured = async (module: AdventureModuleRecord) => {
-    const result = await setFeaturedAdventureModule(module.id);
-    if (result.error) {
-      setError(result.error);
-      return;
-    }
-    onCopied?.(`Week ${module.week_number} is now the featured hero.`);
     await refresh();
   };
 
@@ -523,6 +594,15 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
             : '';
         setError(`${result.error}${bucketHelp}`);
         onCopied?.(`Upload failed: ${result.error}`);
+        logAdventureImageUpload({
+          uploadType: resolveAdventureAssetUploadKind(kind),
+          fileName: file.name,
+          publicUrl: null,
+          dbField: resolveAdventureAssetDbField(kind, field),
+          savePayloadUrl: null,
+          success: false,
+          failure: result.error,
+        });
         setActiveForm((prev) => {
           const next = { ...prev };
           if ('map_background_url' in previewPatch) next.map_background_url = '';
@@ -550,6 +630,15 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
         if (saveResult.error) {
           setError(`Image uploaded to storage but database update failed: ${saveResult.error}`);
           onCopied?.('Warning: Image uploaded but database update failed.');
+          logAdventureImageUpload({
+            uploadType: resolveAdventureAssetUploadKind(kind),
+            fileName: file.name,
+            publicUrl: url,
+            dbField: resolveAdventureAssetDbField(kind, field),
+            savePayloadUrl: url,
+            success: false,
+            failure: saveResult.error,
+          });
           return;
         }
         if (saveResult.module) {
@@ -562,10 +651,27 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
               merged.comic_thumbnail_url || patch.comic_thumbnail_url || prev.comic_thumbnail_url,
           }));
         }
+        logAdventureImageUpload({
+          uploadType: resolveAdventureAssetUploadKind(kind),
+          fileName: file.name,
+          publicUrl: url,
+          dbField: resolveAdventureAssetDbField(kind, field),
+          savePayloadUrl: url,
+          success: true,
+        });
         await refresh();
         onCopied?.('Adventure images updated.');
         return;
       }
+
+      logAdventureImageUpload({
+        uploadType: resolveAdventureAssetUploadKind(kind),
+        fileName: file.name,
+        publicUrl: url,
+        dbField: resolveAdventureAssetDbField(kind, field),
+        savePayloadUrl: url,
+        success: true,
+      });
 
       onCopied?.('Image uploaded. Save the adventure to persist for new records.');
     } finally {
@@ -643,7 +749,6 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
         onPreviewLive={openPreviewLive}
         onPreviewAdmin={openPreviewAdmin}
         onPublish={(id) => void handlePublish(id)}
-        onSetFeatured={(module) => void handleSetFeatured(module)}
       />
 
       <details className="adminAdventuresLegacyTable">
@@ -690,9 +795,6 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
                     <span className={`adminAdventureStatus adminAdventureStatus--${module.status}`}>
                       {formatAdminAdventureStatus(module.status)}
                     </span>
-                    {module.is_featured ? (
-                      <span className="adminAdventureFeaturedBadge">Featured</span>
-                    ) : null}
                   </div>
                 </td>
                 <td>{formatUnlockDate(module.unlock_date)}</td>
@@ -727,17 +829,6 @@ export default function AdminAdventuresTab({ onCopied }: AdminAdventuresTabProps
                       </button>
                     ) : (
                       <span className="adminAdventurePublishedBadge">Published</span>
-                    )}
-                    {!module.is_featured ? (
-                      <button
-                        type="button"
-                        className="adminPortal-btn adminPortal-btn--ghost"
-                        onClick={() => void handleSetFeatured(module)}
-                      >
-                        Set as Featured
-                      </button>
-                    ) : (
-                      <span className="adminAdventureFeaturedBadge">Featured</span>
                     )}
                     {module.status !== 'scheduled' && module.status !== 'active' ? (
                       <button

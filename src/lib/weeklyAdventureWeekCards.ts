@@ -1,5 +1,7 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
+import type { AdventureMonthRecord } from '../types/adventureMonth';
 import type { AdventureTrailWeekView } from '../types/adventureTrail';
+import type { AdventureVisibilityContext } from './adventureVisibility';
 import type { WeeklyAdventureWeekRowItem } from '../design-system/components/WeeklyAdventureWeekRow';
 import type { WeeklyAdventureWeekTileVariant } from '../design-system/components/WeeklyAdventureWeekTile';
 import { FAMILY_WEEKLY_ADVENTURE_WEEKS, buildWeeklyTrailNodes } from '../data/familyWeeklyAdventures';
@@ -8,7 +10,8 @@ import { resolveAdventureComicThumbnailUrl, resolveWeeklyCardSelFocus } from './
 import { normalizeSelFocusLabel } from './adventureSelFocus';
 import { isUnlockDatePassed, isPublishedAdventure } from './adventureVisibility';
 import { familyPortalPath } from './familyPortalPaths';
-import { formatWeekUnlockStatus } from './pilotWeekUnlock';
+import { resolveDefaultMonthNumber, resolveMonthForWeek } from './adventureMonthService';
+import { resolveWeekAvailability } from './weekAvailability';
 import { resolveWeeklyQuestReward } from './adventureWeekAssets';
 import {
   logWeeklyAdventureThumbnailSource,
@@ -27,6 +30,7 @@ export type WeeklyAdventureJourneyCardItem = WeeklyAdventureWeekRowItem & {
   rewardImageUrl?: string | null;
   journeyState: 'completed' | 'current' | 'locked';
   thumbnailSource: WeeklyAdventureThumbnailSource;
+  isSelected?: boolean;
 };
 
 function resolveWeekTileVariant(
@@ -34,10 +38,11 @@ function resolveWeekTileVariant(
   isHeroWeek: boolean,
   isCompleted: boolean,
   adminPreview: boolean,
+  hasWeekProgress = false,
 ): WeeklyAdventureWeekRowItem['variant'] {
   if (adminPreview) return 'adminPreview';
   if (isCompleted) return 'complete';
-  if (isHeroWeek && week.weekStatus === 'available') return 'inProgress';
+  if (isHeroWeek && week.weekStatus === 'available' && hasWeekProgress) return 'inProgress';
   if (week.weekStatus === 'locked') return 'locked';
   return 'available';
 }
@@ -48,13 +53,18 @@ function resolveWeekStatusLabel(
   isCompleted: boolean,
   cmsModule: AdventureModuleRecord | null,
   monthComingSoon?: boolean,
+  hasWeekProgress = false,
 ): string {
   if (isCompleted) return 'Complete';
-  if (isHeroWeek && week.weekStatus === 'available') return 'In Progress';
+  if (isHeroWeek && week.weekStatus === 'available' && hasWeekProgress) return 'In Progress';
+  if (isHeroWeek && week.weekStatus === 'available') return 'Selected';
   if (week.weekStatus === 'available') return 'Available';
   if (monthComingSoon) return 'Coming soon';
   const unlockStatus = week.unlockStatus?.trim() ?? '';
   if (unlockStatus.toLowerCase().includes('unlocks in')) {
+    return unlockStatus;
+  }
+  if (unlockStatus.toLowerCase().includes('unlocks after')) {
     return unlockStatus;
   }
   if (week.weekStatus === 'locked' && cmsModule && isPublishedAdventure(cmsModule)) {
@@ -65,7 +75,7 @@ function resolveWeekStatusLabel(
     ) {
       return 'Available soon in your journey';
     }
-    return 'Complete earlier adventures first';
+    return unlockStatus || 'Locked';
   }
   return unlockStatus || 'Locked';
 }
@@ -127,16 +137,47 @@ function resolveRewardPreview(cmsModule: AdventureModuleRecord | null): {
 function synthesizeTrailWeek(
   weekNumber: number,
   cmsModule: AdventureModuleRecord | null,
-  pilotStartDate: Date | null | undefined,
+  input: {
+    cmsMonths: AdventureMonthRecord[];
+    cmsModules: AdventureModuleRecord[];
+    completedWeekNumbers: number[];
+    pilotStartDate?: Date | null;
+    visibilityCtx?: AdventureVisibilityContext;
+  },
 ): AdventureTrailWeekView {
   const staticMeta = FAMILY_WEEKLY_ADVENTURE_WEEKS.find((row) => row.week === weekNumber);
-  const unlockStatus = formatWeekUnlockStatus(weekNumber, pilotStartDate);
+  const month = resolveMonthForWeek(
+    weekNumber,
+    input.cmsMonths,
+    cmsModule?.month_number ?? null,
+  );
+  const weekNumbersInMonth = input.cmsModules
+    .filter(
+      (row) =>
+        (row.month_number ?? resolveDefaultMonthNumber(row.week_number)) ===
+        (month?.month_number ?? resolveDefaultMonthNumber(weekNumber)),
+    )
+    .map((row) => row.week_number)
+    .sort((a, b) => a - b);
+  const availability = resolveWeekAvailability({
+    adventure: cmsModule,
+    weekNumber,
+    month,
+    weekNumbersInMonth:
+      weekNumbersInMonth.length > 0
+        ? weekNumbersInMonth
+        : [weekNumber],
+    completedWeekNumbers: input.completedWeekNumbers,
+    visibilityCtx: input.visibilityCtx,
+    pilotStartDate: input.pilotStartDate,
+  });
+
   return {
     week: weekNumber,
     title: cmsModule?.title || staticMeta?.title || `Week ${weekNumber} Adventure`,
     selFocus: cmsModule?.subtitle || staticMeta?.selFocus || 'Focus & Courage',
-    weekStatus: unlockStatus === 'Available now' ? 'available' : 'locked',
-    unlockStatus,
+    weekStatus: availability.weekStatus,
+    unlockStatus: availability.unlockStatus,
     previewActivities: cmsModule?.preview_activities ?? staticMeta?.previewActivities ?? [],
     thumbnailUrl: resolveAdventureComicThumbnailUrl(cmsModule, weekNumber),
     nodes: [],
@@ -149,25 +190,37 @@ export function buildJourneyWeeklyAdventureCards(input: {
   heroWeekNumber: number;
   mapCompletedWeekNumbers: number[];
   cmsModules: AdventureModuleRecord[];
+  cmsMonths?: AdventureMonthRecord[];
   pathname: string;
   adminPreview?: boolean;
   pilotStartDate?: Date | null;
+  visibilityCtx?: AdventureVisibilityContext;
   onReviewWeek?: (weekNumber: number) => void;
+  onSelectWeek?: (weekNumber: number) => void;
   monthComingSoon?: boolean;
+  completedByWeek?: Record<number, readonly string[]>;
 }): WeeklyAdventureJourneyCardItem[] {
   return input.weekNumbers.map((weekNumber) => {
     const cmsModule = input.cmsModules.find((row) => row.week_number === weekNumber) ?? null;
     const trailWeek =
       input.weeks.find((row) => row.week === weekNumber) ??
-      synthesizeTrailWeek(weekNumber, cmsModule, input.pilotStartDate);
+      synthesizeTrailWeek(weekNumber, cmsModule, {
+        cmsMonths: input.cmsMonths ?? [],
+        cmsModules: input.cmsModules,
+        completedWeekNumbers: input.mapCompletedWeekNumbers,
+        pilotStartDate: input.pilotStartDate,
+        visibilityCtx: input.visibilityCtx,
+      });
 
     const isHeroWeek = weekNumber === input.heroWeekNumber;
     const isFullyComplete = input.mapCompletedWeekNumbers.includes(weekNumber);
+    const hasWeekProgress = Boolean(input.completedByWeek?.[weekNumber]?.length);
     const variant = resolveWeekTileVariant(
       trailWeek,
       isHeroWeek,
       isFullyComplete,
       Boolean(input.adminPreview),
+      hasWeekProgress,
     );
     const thumbnailResolution = resolveWeeklyAdventureThumbnail({
       cmsModule,
@@ -180,20 +233,23 @@ export function buildJourneyWeeklyAdventureCards(input: {
       resolution: thumbnailResolution,
     });
 
+    const reward = resolveRewardPreview(cmsModule);
+    const effectiveVariant: WeeklyAdventureWeekTileVariant =
+      input.monthComingSoon && variant === 'locked' ? 'locked' : variant;
+
     const params = new URLSearchParams();
     params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
     params.set(WEEKLY_WEEK_PARAM, String(weekNumber));
-    const href = `${familyPortalPath('continue-learning', input.pathname)}?${params.toString()}#${weeklyAdventureWeekAnchor(weekNumber)}`;
+    const href =
+      effectiveVariant === 'locked' || input.onSelectWeek
+        ? undefined
+        : `${familyPortalPath('continue-learning', input.pathname)}?${params.toString()}#${weeklyAdventureWeekAnchor(weekNumber)}`;
 
-    const reward = resolveRewardPreview(cmsModule);
     const journeyState: WeeklyAdventureJourneyCardItem['journeyState'] = isFullyComplete
       ? 'completed'
-      : isHeroWeek && variant !== 'locked'
-        ? 'current'
-        : 'locked';
-
-    const effectiveVariant: WeeklyAdventureWeekTileVariant =
-      input.monthComingSoon && variant === 'locked' ? 'locked' : variant;
+      : effectiveVariant === 'locked'
+        ? 'locked'
+        : 'current';
 
     return {
       id: weekNumber,
@@ -208,15 +264,19 @@ export function buildJourneyWeeklyAdventureCards(input: {
         isFullyComplete,
         cmsModule,
         input.monthComingSoon && effectiveVariant === 'locked',
+        hasWeekProgress,
       ),
       variant: effectiveVariant,
       ctaLabel: resolveWeekCtaLabel(effectiveVariant, isFullyComplete),
-      href: effectiveVariant === 'locked' ? undefined : href,
+      href,
       disabled: effectiveVariant === 'locked',
       onAction:
         effectiveVariant === 'complete' && input.onReviewWeek
           ? () => input.onReviewWeek?.(weekNumber)
-          : undefined,
+          : effectiveVariant !== 'locked' && input.onSelectWeek
+            ? () => input.onSelectWeek?.(weekNumber)
+            : undefined,
+      isSelected: isHeroWeek && !isFullyComplete && effectiveVariant !== 'locked',
       rewardPreview: reward.label,
       rewardImageUrl: reward.imageUrl,
       journeyState: input.monthComingSoon && effectiveVariant === 'locked' ? 'locked' : journeyState,

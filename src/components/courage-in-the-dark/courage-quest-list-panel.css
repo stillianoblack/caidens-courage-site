@@ -185,6 +185,14 @@
 }
 
 @media (max-width: 767px) {
+  .courageQuestListPanel,
+  .courageAdventureHub--mobileStack .courageQuestListPanel {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .courageAdventureHubMobileQuests .courageQuestListPanel {
     border-radius: 1.15rem;
     box-shadow: 0 10px 28px -18px rgba(15, 35, 70, 0.28);

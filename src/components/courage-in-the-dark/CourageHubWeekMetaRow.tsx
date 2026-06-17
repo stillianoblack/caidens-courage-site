@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
+import { resolveWeeklyAdventureWeekAccent } from '../../lib/weeklyAdventureWeekAccent';
 import './courage-hub-week-meta-row.css';
 
 type CourageHubWeekMetaRowProps = {
@@ -20,22 +21,25 @@ export default function CourageHubWeekMetaRow({
   subtitle,
 }: CourageHubWeekMetaRowProps) {
   const selFocusLine = selFocus ? formatSelFocusLine(selFocus) ?? selFocus : null;
+  const weekAccent = resolveWeeklyAdventureWeekAccent(week);
 
   return (
-    <div className="courageHubWeekMetaRow">
-      {comicThumbnailUrl ? (
-        <img
-          src={comicThumbnailUrl}
-          alt=""
-          className="courageHubWeekMetaRowThumb"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <div className="courageHubWeekMetaRowThumb courageHubWeekMetaRowThumb--fallback" aria-hidden="true">
-          W{week}
-        </div>
-      )}
+    <div className="courageHubWeekMetaRow" data-week-accent={weekAccent}>
+      <div className="courageHubWeekMetaRowCover" aria-hidden={comicThumbnailUrl ? undefined : true}>
+        {comicThumbnailUrl ? (
+          <img
+            src={comicThumbnailUrl}
+            alt=""
+            className="courageHubWeekMetaRowCoverArt"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="courageHubWeekMetaRowCoverArt courageHubWeekMetaRowCoverArt--fallback">
+            <span className="courageHubWeekMetaRowCoverFallbackLabel">Week {week}</span>
+          </div>
+        )}
+      </div>
       <div className="courageHubWeekMetaRowCopy">
         <p className="courageHubWeekMetaRowEyebrow">Week {week}</p>
         <h2 className="courageHubWeekMetaRowTitle">{weekTitle}</h2>

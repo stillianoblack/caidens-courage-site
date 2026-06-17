@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import PlayingAsSelector from '../PlayingAsSelector';
 import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
@@ -17,13 +17,16 @@ import {
   WEEKLY_VIEW_PARAM,
   WEEKLY_WEEK_PARAM,
   parseWeeklyAdventureWeekParam,
+  weeklyAdventureHeroAnchor,
 } from '../../../lib/weeklyAdventureRouteContext';
+import { resolveSelectableWeekNumber } from '../../../lib/resolveSelectableWeekNumber';
+import { logWeekSelectionDebug } from '../../../lib/weekSelectionDebug';
+import { resolveAdventureComicThumbnailUrl } from '../../../lib/adventureThumbnail';
 import { resolveHeroWeekNumber } from '../../../lib/resolveHeroWeekNumber';
 import type { CourageHubViewMode } from '../../courage-in-the-dark/CourageHubViewToggle';
 import {
   PREVIEW_ADVENTURE_PARAM,
   readAdventureVisibilityContext,
-  isPublishedAdventure,
   resolveCurrentFeaturedAdventure,
   resolveHeroDisplayWeekNumber,
 } from '../../../lib/adventureVisibility';
@@ -66,7 +69,7 @@ import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGa
 import type { QuestPeriod } from '../../../lib/participantQuestService';
 import { resolveReviewWeekContext } from '../../../lib/weekReviewPanelData';
 import { resolveCourageWeekId } from '../../../lib/courageInTheDarkProgress';
-import { getUnlockedWeek, resolvePilotStartDate } from '../../../lib/pilotWeekUnlock';
+import { resolvePilotStartDate } from '../../../lib/pilotWeekUnlock';
 import { ensureWeekGradeLevel } from '../../../lib/participantWeekGradeService';
 import { isDailyAdventureComplete } from '../../../lib/courageWeeklyMissionCompletion';
 import { readMonthlyCoinsEarned } from '../../../lib/monthlyCoinsEarnedTracking';
@@ -86,11 +89,11 @@ const WEEK_ONE_MISSION_KINDS = ['caiden', 'miranda', 'b4', 'charlie', 'zeke'] as
 
 export default function FamilyContinueLearningPanel() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeProgram = readActivePilotProgram();
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const pilotStartDate = resolvePilotStartDate(activeProgram);
-  const unlockedWeek = getUnlockedWeek(pilotStartDate);
   const {
     visibleChildren,
     claimRequired,
@@ -187,12 +190,22 @@ export default function FamilyContinueLearningPanel() {
     pilotStartDate,
     {
       cmsModules: adventureModules,
+      cmsMonths: adventureMonths,
       visibilityCtx,
       mapCompletedWeekNumbers,
+      pilotStartDate,
     },
   );
 
   const requestedWeek = parseWeeklyAdventureWeekParam(searchParams.get(WEEKLY_WEEK_PARAM));
+
+  const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(requestedWeek);
+
+  useEffect(() => {
+    if (requestedWeek) {
+      setSelectedWeekNumber(requestedWeek);
+    }
+  }, [requestedWeek]);
 
   const playableWeekNumber = useMemo(
     () =>
@@ -209,6 +222,16 @@ export default function FamilyContinueLearningPanel() {
     [adventureModules, mapCompletedWeekNumbers, visibilityCtx],
   );
 
+  const explicitSelectedWeek = useMemo(
+    () =>
+      resolveSelectableWeekNumber(
+        selectedWeekNumber ?? requestedWeek,
+        trailWeeks,
+        visibilityCtx,
+      ),
+    [requestedWeek, selectedWeekNumber, trailWeeks, visibilityCtx],
+  );
+
   const heroWeekNumber = useMemo(
     () =>
       resolveHeroDisplayWeekNumber({
@@ -217,12 +240,69 @@ export default function FamilyContinueLearningPanel() {
         cmsModules: adventureModules,
         visibilityCtx,
         completedWeekNumbers: mapCompletedWeekNumbers,
+        selectedWeek: explicitSelectedWeek,
       }),
     [
       adventureModules,
+      explicitSelectedWeek,
       featuredAdventureModule,
       mapCompletedWeekNumbers,
       playableWeekNumber,
+      visibilityCtx,
+    ],
+  );
+
+  const handleSelectWeek = useCallback(
+    (weekNumber: number) => {
+      const selectable = resolveSelectableWeekNumber(weekNumber, trailWeeks, visibilityCtx);
+      if (!selectable) return;
+
+      const previousSelectedWeek = selectedWeekNumber ?? explicitSelectedWeek ?? heroWeekNumber;
+      const cmsModule = adventureModules.find((row) => row.week_number === selectable) ?? null;
+      const trailWeek = trailWeeks.find((row) => row.week === selectable);
+      const headerTitle = cmsModule?.title?.trim() || trailWeek?.title || `Week ${selectable}`;
+      const headerThumbnail = resolveAdventureComicThumbnailUrl(cmsModule, selectable);
+
+      setSelectedWeekNumber(selectable);
+
+      const params = new URLSearchParams(searchParams);
+      params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
+      params.set(WEEKLY_WEEK_PARAM, String(selectable));
+      const heroHash = weeklyAdventureHeroAnchor(selectable);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: `?${params.toString()}`,
+          hash: heroHash,
+        },
+        { replace: false },
+      );
+
+      requestAnimationFrame(() => {
+        const target = document.getElementById(heroHash);
+        const scrollTriggered = Boolean(target);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        logWeekSelectionDebug({
+          clickedWeek: weekNumber,
+          previousSelectedWeek,
+          newSelectedWeek: selectable,
+          headerTitle,
+          headerThumbnail,
+          scrollTriggered,
+        });
+      });
+    },
+    [
+      adventureModules,
+      explicitSelectedWeek,
+      heroWeekNumber,
+      location.pathname,
+      navigate,
+      searchParams,
+      selectedWeekNumber,
+      trailWeeks,
       visibilityCtx,
     ],
   );
@@ -232,13 +312,8 @@ export default function FamilyContinueLearningPanel() {
       const preview = adventureModules.find((row) => row.id === visibilityCtx.previewAdventureId);
       if (preview) return preview;
     }
-    if (featuredAdventureModule?.week_number === heroWeekNumber) {
-      return featuredAdventureModule;
-    }
-    return (
-      adventureModules.find((row) => row.week_number === heroWeekNumber) ?? featuredAdventureModule
-    );
-  }, [adventureModules, featuredAdventureModule, heroWeekNumber, visibilityCtx]);
+    return adventureModules.find((row) => row.week_number === heroWeekNumber) ?? null;
+  }, [adventureModules, heroWeekNumber, visibilityCtx]);
 
   const heroWeek = useMemo(
     () =>
@@ -274,23 +349,30 @@ export default function FamilyContinueLearningPanel() {
           heroWeekNumber,
           mapCompletedWeekNumbers,
           cmsModules: adventureModules,
+          cmsMonths: adventureMonths,
           pathname: location.pathname,
           adminPreview: visibilityCtx.previewMode === 'admin',
           pilotStartDate,
+          visibilityCtx,
           onReviewWeek: handleReviewWeek,
+          onSelectWeek: handleSelectWeek,
           monthComingSoon: month.comingSoon,
+          completedByWeek,
         }),
       })),
     [
       adventureModules,
+      adventureMonths,
       handleReviewWeek,
+      handleSelectWeek,
       heroWeekNumber,
       journeyMonths,
       location.pathname,
       mapCompletedWeekNumbers,
+      completedByWeek,
       pilotStartDate,
       trailWeeks,
-      visibilityCtx.previewMode,
+      visibilityCtx,
     ],
   );
 
@@ -309,10 +391,7 @@ export default function FamilyContinueLearningPanel() {
 
   const showCourageHero = Boolean(
     heroWeek &&
-      (heroWeek.weekStatus !== 'locked' ||
-        visibilityCtx.previewMode === 'admin' ||
-        (featuredAdventureModule?.week_number === heroWeekNumber &&
-          isPublishedAdventure(featuredAdventureModule))),
+      (heroWeek.weekStatus !== 'locked' || visibilityCtx.previewMode === 'admin'),
   );
 
   const heroMapNodes = useMemo(() => {
@@ -399,16 +478,15 @@ export default function FamilyContinueLearningPanel() {
       resolveMonthForWeek(
         heroWeekNumber,
         adventureMonths,
-        heroCmsModule?.month_number ?? featuredAdventureModule?.month_number,
+        heroCmsModule?.month_number,
       ),
-    [adventureMonths, featuredAdventureModule?.month_number, heroCmsModule?.month_number, heroWeekNumber],
+    [adventureMonths, heroCmsModule?.month_number, heroWeekNumber],
   );
 
   const mapBackgroundSrc = useMemo(() => {
     const resolution = resolveAdventureMonthHeroSrc({
       month: heroMonth,
       heroWeekModule: heroCmsModule,
-      featuredWeekModule: featuredAdventureModule,
       weekNumber: heroWeekNumber,
     });
     if (process.env.NODE_ENV === 'development') {
@@ -421,7 +499,7 @@ export default function FamilyContinueLearningPanel() {
       });
     }
     return resolution.url;
-  }, [featuredAdventureModule, heroCmsModule, heroMonth, heroWeekNumber]);
+  }, [heroCmsModule, heroMonth, heroWeekNumber]);
 
   const reviewWeekContext = useMemo(() => {
     if (!reviewWeekNumber) return null;
@@ -517,12 +595,12 @@ export default function FamilyContinueLearningPanel() {
 
   useEffect(() => {
     const hash = location.hash.replace(/^#/, '');
-    if (!hash.startsWith('week-')) return;
+    if (!hash.startsWith('week-hero-') && !hash.startsWith('week-')) return;
     const target = document.getElementById(hash);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [location.hash, trailWeeks.length]);
+  }, [location.hash, heroWeekNumber, trailWeeks.length]);
 
   const hasChildren = selectableChildren.length > 0;
   const showClaimPrompt = !childrenLoading && claimRequired;
@@ -573,7 +651,7 @@ export default function FamilyContinueLearningPanel() {
 
       {showCourageHero && heroWeek ? (
         <section
-          id={`week-${heroWeekNumber}`}
+          id={weeklyAdventureHeroAnchor(heroWeekNumber)}
           className="courageMapHubSection"
           aria-label={`Week ${heroWeekNumber} adventure hub`}
         >
@@ -622,11 +700,6 @@ export default function FamilyContinueLearningPanel() {
         />
       ) : null}
 
-      {unlockedWeek === 1 ? (
-        <p className="family-emptyNote" role="status">
-          Week 2 unlocks every 4 days or when Week 1 is fully complete.
-        </p>
-      ) : null}
       <RewardClaimModal
         result={rewardClaimResult}
         inventoryPath={inventoryPath}

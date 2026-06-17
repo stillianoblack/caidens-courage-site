@@ -105,6 +105,9 @@ export function adventureMonthToForm(month: AdventureMonthRecord): AdventureMont
     certificate_asset_url: month.certificate_asset_url ?? '',
     certificate_asset_type: month.certificate_asset_type ?? 'image',
     is_published: month.is_published,
+    release_mode: month.release_mode,
+    release_interval_days: month.release_interval_days,
+    release_start_at: month.release_start_at ?? '',
     sort_order: month.sort_order,
   };
 }

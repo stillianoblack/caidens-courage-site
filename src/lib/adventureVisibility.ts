@@ -1,6 +1,7 @@
 import { readAdminSession } from '../config/adminAccess';
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import { getFeaturedAdventure } from './getFeaturedAdventure';
+import { resolveWeekAvailability } from './weekAvailability';
 
 export const PREVIEW_ADVENTURE_PARAM = 'previewAdventureId';
 export const ADMIN_PREVIEW_PARAM = 'adminPreview';
@@ -14,8 +15,6 @@ export type AdventureVisibilityContext = {
   previewMode?: AdventurePreviewMode | null;
   now?: Date;
 };
-
-const CMS_EARLY_UNLOCK_INTERVAL_DAYS = 4;
 
 export function readAdventurePreviewMode(search: string): AdventurePreviewMode | null {
   const params = new URLSearchParams(search);
@@ -127,57 +126,24 @@ export function sortAdventures(modules: AdventureModuleRecord[]): AdventureModul
   });
 }
 
-function findAdventureForWeek(
-  modules: AdventureModuleRecord[],
-  weekNumber: number,
-): AdventureModuleRecord | null {
-  return sortAdventures(modules).find((row) => row.week_number === weekNumber) ?? null;
-}
-
-function addDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
-/** CMS unlock: active now, scheduled until unlock_date, early unlock on prior week completion or 4-day cadence. */
+/** @deprecated Use resolveWeekAvailability with month release_mode. */
 export function resolveCmsAdventureWeekStatus(
   adventure: AdventureModuleRecord,
   modules: AdventureModuleRecord[],
   ctx: AdventureVisibilityContext,
   completedWeekNumbers: number[] = [],
 ): 'available' | 'locked' {
-  if (isPreviewingAdventure(adventure, ctx)) return 'available';
-
-  if (adventure.status === 'draft' || adventure.status === 'archived') {
-    return 'locked';
-  }
-
-  if (adventure.status === 'active') {
-    if (adventure.week_number === 1) return 'available';
-    return isUnlockDatePassed(adventure.unlock_date, ctx.now) ? 'available' : 'locked';
-  }
-
-  if (adventure.status === 'scheduled') {
-    if (isUnlockDatePassed(adventure.unlock_date, ctx.now)) return 'available';
-  }
-
-  const prevWeek = adventure.week_number - 1;
-  if (prevWeek >= 1 && completedWeekNumbers.includes(prevWeek)) {
-    return 'available';
-  }
-
-  const previousAdventure = findAdventureForWeek(modules, prevWeek);
-  if (previousAdventure?.unlock_date && ctx.now) {
-    const cadenceUnlock = addDays(new Date(previousAdventure.unlock_date), CMS_EARLY_UNLOCK_INTERVAL_DAYS);
-    if (cadenceUnlock <= ctx.now) return 'available';
-  }
-
-  if (adventure.status === 'scheduled' && adventure.unlock_date && ctx.now) {
-    return isUnlockDatePassed(adventure.unlock_date, ctx.now) ? 'available' : 'locked';
-  }
-
-  return 'locked';
+  const result = resolveWeekAvailability({
+    adventure,
+    weekNumber: adventure.week_number,
+    month: null,
+    weekNumbersInMonth: modules
+      .map((row) => row.week_number)
+      .sort((a, b) => a - b),
+    completedWeekNumbers,
+    visibilityCtx: ctx,
+  });
+  return result.weekStatus;
 }
 
 export function formatCmsAdventureUnlockStatus(
@@ -186,17 +152,18 @@ export function formatCmsAdventureUnlockStatus(
   ctx: AdventureVisibilityContext,
   completedWeekNumbers: number[] = [],
 ): string {
-  const status = resolveCmsAdventureWeekStatus(adventure, modules, ctx, completedWeekNumbers);
-  if (status === 'available') return 'Available now';
-
-  if (adventure.unlock_date) {
-    const unlock = new Date(adventure.unlock_date);
-    if (!Number.isNaN(unlock.getTime())) {
-      return `Unlocks ${unlock.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
-    }
-  }
-
-  return 'Locked';
+  const result = resolveWeekAvailability({
+    adventure,
+    weekNumber: adventure.week_number,
+    month: null,
+    weekNumbersInMonth: modules
+      .map((row) => row.week_number)
+      .sort((a, b) => a - b),
+    completedWeekNumbers,
+    visibilityCtx: ctx,
+  });
+  if (result.weekStatus === 'available') return 'Available now';
+  return result.unlockStatus;
 }
 
 export function resolveFeaturedAdventureModule(
@@ -206,14 +173,19 @@ export function resolveFeaturedAdventureModule(
   return getFeaturedAdventure(modules, ctx);
 }
 
-/** Hero/header week — featured when accessible, otherwise child's playable week. */
+/** Hero/header week — explicit user selection, then playable week (not legacy featured flag). */
 export function resolveHeroDisplayWeekNumber(input: {
   playableWeekNumber: number;
-  featuredAdventure: AdventureModuleRecord | null;
+  featuredAdventure?: AdventureModuleRecord | null;
   cmsModules: AdventureModuleRecord[];
   visibilityCtx: AdventureVisibilityContext;
   completedWeekNumbers: readonly number[];
+  selectedWeek?: number | null;
 }): number {
+  if (input.selectedWeek && input.selectedWeek > 0) {
+    return input.selectedWeek;
+  }
+
   if (
     input.visibilityCtx.previewAdventureId &&
     input.visibilityCtx.isAdmin &&
@@ -223,11 +195,6 @@ export function resolveHeroDisplayWeekNumber(input: {
       (row) => row.id === input.visibilityCtx.previewAdventureId,
     );
     if (preview) return preview.week_number;
-  }
-
-  const featured = input.featuredAdventure;
-  if (featured && isPublishedAdventure(featured)) {
-    return featured.week_number;
   }
 
   return input.playableWeekNumber;

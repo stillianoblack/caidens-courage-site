@@ -3,6 +3,11 @@ import AdminImageField from './AdminImageField';
 import AdminAdventureWeekInlineEditor from './AdminAdventureWeekInlineEditor';
 import type { AdventureModuleInput, AdventureModuleRecord } from '../../types/adventureModule';
 import type { AdventureMonthInput, AdventureMonthRecord } from '../../types/adventureMonth';
+import {
+  ADVENTURE_MONTH_RELEASE_MODE_OPTIONS,
+  type AdventureMonthReleaseMode,
+} from '../../types/adventureMonth';
+import { RELEASE_MODE_LABELS } from '../../lib/weekAvailability';
 import type { AdventureAssetUploadKind } from '../../lib/adventureModuleService';
 import {
   formatAdventureMonthLabel,
@@ -47,7 +52,6 @@ type AdminAdventureMonthAccordionProps = {
   onPreviewLive: (id: string) => void;
   onPreviewAdmin: (id: string) => void;
   onPublish: (id: string) => void;
-  onSetFeatured: (module: AdventureModuleRecord) => void;
 };
 
 function formatUnlockDate(value: string | null): string {
@@ -90,7 +94,6 @@ export default function AdminAdventureMonthAccordion({
   onPreviewLive,
   onPreviewAdmin,
   onPublish,
-  onSetFeatured,
 }: AdminAdventureMonthAccordionProps) {
   const grouped = useMemo(() => groupModulesByMonth(modules, months), [modules, months]);
   const [openMonths, setOpenMonths] = useState<Record<number, boolean>>({ 1: true });
@@ -266,6 +269,63 @@ export default function AdminAdventureMonthAccordion({
                       </label>
                     </div>
 
+                    <fieldset className="adminAdventureReleaseSchedule">
+                      <legend>Release Schedule</legend>
+                      <label className="adminPortal-field adminPortal-field--full">
+                        <span>How weeks unlock in this month</span>
+                        <select
+                          value={monthForm.release_mode ?? 'all_available'}
+                          onChange={(event) =>
+                            onMonthFormChange({
+                              release_mode: event.target.value as AdventureMonthReleaseMode,
+                            })
+                          }
+                        >
+                          {ADVENTURE_MONTH_RELEASE_MODE_OPTIONS.map((mode) => (
+                            <option key={mode} value={mode}>
+                              {RELEASE_MODE_LABELS[mode]}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {monthForm.release_mode === 'timed_interval' ? (
+                        <label className="adminPortal-field">
+                          <span>Release interval (days)</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={90}
+                            value={monthForm.release_interval_days ?? 4}
+                            onChange={(event) =>
+                              onMonthFormChange({
+                                release_interval_days: Number(event.target.value) || 4,
+                              })
+                            }
+                          />
+                        </label>
+                      ) : null}
+                      {monthForm.release_mode === 'timed_interval' ? (
+                        <label className="adminPortal-field">
+                          <span>Release start (optional)</span>
+                          <input
+                            type="datetime-local"
+                            value={
+                              monthForm.release_start_at
+                                ? monthForm.release_start_at.slice(0, 16)
+                                : ''
+                            }
+                            onChange={(event) =>
+                              onMonthFormChange({
+                                release_start_at: event.target.value
+                                  ? new Date(event.target.value).toISOString()
+                                  : null,
+                              })
+                            }
+                          />
+                        </label>
+                      ) : null}
+                    </fieldset>
+
                     <AdminImageField
                       label="Month hero / world image"
                       hint="Large hero background for this month on Weekly Adventures."
@@ -361,9 +421,6 @@ export default function AdminAdventureMonthAccordion({
                             </span>
                             <span>Live: {isVisibleOnLiveSite(module, liveCtx) ? 'Yes' : 'No'}</span>
                             <span>Sort: {module.sort_order}</span>
-                            {module.is_featured ? (
-                              <span className="adminAdventureFeaturedBadge">Featured</span>
-                            ) : null}
                           </div>
                         </div>
 
@@ -416,15 +473,6 @@ export default function AdminAdventureMonthAccordion({
                                   onClick={() => onPublish(module.id)}
                                 >
                                   Publish
-                                </button>
-                              ) : null}
-                              {!module.is_featured ? (
-                                <button
-                                  type="button"
-                                  className="adminPortal-btn adminPortal-btn--ghost"
-                                  onClick={() => onSetFeatured(module)}
-                                >
-                                  Set Featured
                                 </button>
                               ) : null}
                             </>

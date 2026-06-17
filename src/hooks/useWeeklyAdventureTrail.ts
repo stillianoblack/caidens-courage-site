@@ -13,19 +13,16 @@ import {
 } from '../data/familyWeeklyAdventures';
 import { fetchModuleResultsForParticipants } from '../lib/pilotTrackingService';
 import { loadLocalModuleResults } from '../lib/pilotTrackingLocalStorage';
-import {
-  formatWeekUnlockStatus,
-  resolveWeekStatus,
-} from '../lib/pilotWeekUnlock';
 import type { AdventureModuleRecord } from '../types/adventureModule';
+import type { AdventureMonthRecord } from '../types/adventureMonth';
 import type { AdventureTrailWeekView } from '../types/adventureTrail';
 import { resolveAdventureThumbnailUrl } from '../lib/adventureThumbnail';
 import {
-  formatCmsAdventureUnlockStatus,
   listCmsTrailAdventures,
-  resolveCmsAdventureWeekStatus,
   type AdventureVisibilityContext,
 } from '../lib/adventureVisibility';
+import { resolveDefaultMonthNumber, resolveMonthForWeek } from '../lib/adventureMonthService';
+import { logWeekAvailabilityDebug, resolveWeekAvailability } from '../lib/weekAvailability';
 
 type WeeklyTrailPaths = {
   kidsBasePath: string;
@@ -35,10 +32,34 @@ type WeeklyTrailPaths = {
 
 type WeeklyAdventureTrailOptions = {
   cmsModules?: AdventureModuleRecord[];
+  cmsMonths?: AdventureMonthRecord[];
   visibilityCtx?: AdventureVisibilityContext;
   /** Map-mission completion by week (from player_progress). Overrides module-based completion for unlock. */
   mapCompletedWeekNumbers?: number[];
+  pilotStartDate?: Date | string | null;
 };
+
+function resolveWeekNumbersInMonth(
+  weekNumber: number,
+  cmsModules: AdventureModuleRecord[],
+): number[] {
+  const monthNumber =
+    cmsModules.find((row) => row.week_number === weekNumber)?.month_number ??
+    resolveDefaultMonthNumber(weekNumber);
+
+  const fromModules = cmsModules
+    .filter(
+      (row) => (row.month_number ?? resolveDefaultMonthNumber(row.week_number)) === monthNumber,
+    )
+    .map((row) => row.week_number);
+
+  if (fromModules.length > 0) {
+    return Array.from(new Set(fromModules)).sort((a, b) => a - b);
+  }
+
+  const startWeek = (monthNumber - 1) * 4 + 1;
+  return [startWeek, startWeek + 1, startWeek + 2, startWeek + 3];
+}
 
 export function useWeeklyAdventureTrail(
   participantId: string | undefined,
@@ -55,10 +76,15 @@ export function useWeeklyAdventureTrail(
     () => options.cmsModules ?? [],
     [options.cmsModules],
   );
+  const cmsMonths = useMemo(
+    () => options.cmsMonths ?? [],
+    [options.cmsMonths],
+  );
   const visibilityCtx = useMemo(
     () => options.visibilityCtx ?? { now: new Date() },
     [options.visibilityCtx],
   );
+  const resolvedPilotStartDate = options.pilotStartDate ?? pilotStartDate;
 
   const refresh = useCallback(async () => {
     const id = participantId?.trim() || readActiveChildParticipantId();
@@ -146,28 +172,33 @@ export function useWeeklyAdventureTrail(
           } as (typeof staticWeeks)[number]);
         const cmsRow =
           cmsByWeek.get(weekNumber) ??
-          cmsModules.find((row) => row.week_number === weekNumber);
+          cmsModules.find((row) => row.week_number === weekNumber) ??
+          null;
 
-        let weekStatus: 'available' | 'locked';
-        let unlockStatus: string;
+        const month = resolveMonthForWeek(
+          weekNumber,
+          cmsMonths,
+          cmsRow?.month_number ?? null,
+        );
+        const weekNumbersInMonth = resolveWeekNumbersInMonth(weekNumber, cmsModules);
+        const availability = resolveWeekAvailability({
+          adventure: cmsRow,
+          weekNumber,
+          month,
+          weekNumbersInMonth,
+          completedWeekNumbers,
+          visibilityCtx,
+          pilotStartDate: resolvedPilotStartDate,
+        });
 
-        if (cmsRow) {
-          weekStatus = resolveCmsAdventureWeekStatus(
-            cmsRow,
-            cmsModules,
-            visibilityCtx,
-            completedWeekNumbers,
-          );
-          unlockStatus = formatCmsAdventureUnlockStatus(
-            cmsRow,
-            cmsModules,
-            visibilityCtx,
-            completedWeekNumbers,
-          );
-        } else {
-          weekStatus = resolveWeekStatus(weekNumber, pilotStartDate);
-          unlockStatus = formatWeekUnlockStatus(weekNumber, pilotStartDate);
-        }
+        logWeekAvailabilityDebug({
+          weekNumber,
+          title: cmsRow?.title || weekMeta.title,
+          adventure: cmsRow,
+          month,
+          completed: completedWeekNumbers.includes(weekNumber),
+          result: availability,
+        });
 
         const nodes = buildWeeklyTrailNodes(weekNumber, paths, weekMeta.title);
 
@@ -175,24 +206,25 @@ export function useWeeklyAdventureTrail(
           week: weekNumber,
           title: cmsRow?.title || weekMeta.title,
           selFocus: cmsRow?.subtitle || weekMeta.selFocus,
-          weekStatus,
-          unlockStatus,
+          weekStatus: availability.weekStatus,
+          unlockStatus: availability.unlockStatus,
           previewActivities: cmsRow?.preview_activities ?? weekMeta.previewActivities,
           thumbnailUrl: resolveAdventureThumbnailUrl(cmsRow ?? null, weekNumber),
           nodes: decorateTrailNodes(nodes, completedModuleIds, {
-            weekLocked: weekStatus === 'locked',
+            weekLocked: availability.weekStatus === 'locked',
             baselineLocked: gates.baselineLocked,
           }),
         };
       });
   }, [
     cmsModules,
+    cmsMonths,
     cmsTrailModules,
     completedWeekNumbers,
     completedModuleIds,
     gates.baselineLocked,
     paths,
-    pilotStartDate,
+    resolvedPilotStartDate,
     visibilityCtx,
   ]);
 

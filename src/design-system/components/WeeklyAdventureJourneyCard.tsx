@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
+import { resolveWeeklyAdventureWeekAccent } from '../../lib/weeklyAdventureWeekAccent';
 import type { WeeklyAdventureWeekTileVariant } from './WeeklyAdventureWeekTile';
 import './weekly-adventure-journey.css';
 
@@ -18,6 +19,7 @@ export type WeeklyAdventureJourneyCardProps = {
   href?: string;
   onAction?: () => void;
   disabled?: boolean;
+  isSelected?: boolean;
   className?: string;
 };
 
@@ -35,14 +37,19 @@ export default function WeeklyAdventureJourneyCard({
   href,
   onAction,
   disabled = false,
+  isSelected = false,
   className = '',
 }: WeeklyAdventureJourneyCardProps) {
   const selFocusLine = formatSelFocusLine(selFocus) ?? selFocus;
+  const weekAccent = resolveWeeklyAdventureWeekAccent(weekNumber);
+  const pillVariant =
+    isSelected && variant === 'available' ? 'selected' : variant;
 
   const cardClass = [
     'weeklyJourneyCard',
     `weeklyJourneyCard--${variant}`,
     `weeklyJourneyCard--${journeyState}`,
+    isSelected ? 'weeklyJourneyCard--selected' : '',
     disabled ? 'weeklyJourneyCard--disabled' : '',
     className,
   ]
@@ -65,7 +72,9 @@ export default function WeeklyAdventureJourneyCard({
             W{weekNumber}
           </div>
         )}
-        <span className={`weeklyJourneyCardPill weeklyJourneyCardPill--${variant}`}>{statusLabel}</span>
+        <span className={`weeklyJourneyCardPill weeklyJourneyCardPill--${pillVariant}`}>
+          {statusLabel}
+        </span>
       </div>
 
       <div className="weeklyJourneyCardBody">
@@ -89,7 +98,11 @@ export default function WeeklyAdventureJourneyCard({
 
   if (disabled || variant === 'locked') {
     return (
-      <article className={cardClass} id={`week-${weekNumber}`}>
+      <article
+        className={cardClass}
+        id={`journey-week-${weekNumber}`}
+        data-week-accent={weekAccent}
+      >
         {body}
       </article>
     );
@@ -97,7 +110,14 @@ export default function WeeklyAdventureJourneyCard({
 
   if (onAction) {
     return (
-      <button type="button" className={cardClass} id={`week-${weekNumber}`} onClick={onAction}>
+      <button
+        type="button"
+        className={cardClass}
+        id={`journey-week-${weekNumber}`}
+        data-week-accent={weekAccent}
+        onClick={onAction}
+        aria-current={isSelected ? 'true' : undefined}
+      >
         {body}
       </button>
     );
@@ -105,14 +125,24 @@ export default function WeeklyAdventureJourneyCard({
 
   if (href) {
     return (
-      <Link to={href} className={cardClass} id={`week-${weekNumber}`}>
+      <Link
+        to={href}
+        className={cardClass}
+        id={`journey-week-${weekNumber}`}
+        data-week-accent={weekAccent}
+        aria-current={isSelected ? 'true' : undefined}
+      >
         {body}
       </Link>
     );
   }
 
   return (
-    <article className={cardClass} id={`week-${weekNumber}`}>
+    <article
+      className={cardClass}
+      id={`journey-week-${weekNumber}`}
+      data-week-accent={weekAccent}
+    >
       {body}
     </article>
   );

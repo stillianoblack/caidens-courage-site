@@ -45,3 +45,20 @@
 .courageActivitiesPanel .week1ExtrasGrid {
   grid-template-columns: 1fr;
 }
+
+@media (max-width: 767px) {
+  .courageActivitiesPanel,
+  .courageAdventureHub--mobileStack .courageActivitiesPanel {
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .courageActivitiesPanel .week1Extras,
+  .courageAdventureHub--mobileStack .courageActivitiesPanel .week1Extras {
+    overflow-y: visible;
+    flex: none;
+    min-height: auto;
+  }
+}

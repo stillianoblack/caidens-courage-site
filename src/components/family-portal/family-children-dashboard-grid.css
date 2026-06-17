@@ -114,6 +114,12 @@
   transition: opacity 0.2s ease;
 }
 
+@media (max-width: 767px) {
+  .portal-shell--familyMobileNav .family-content:has(.family-panel--courageHub) {
+    padding-bottom: calc(var(--bottom-nav-height, 96px) + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+}
+
 .familyMultiChildJourney {
   margin-bottom: 1rem;
 }
