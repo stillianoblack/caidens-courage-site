@@ -13,15 +13,20 @@ import type { AdventureTrailNodeView } from '../types/adventureTrail';
 
 const CHARACTER_ASSET_DIR = '/images/caidenscourage/Game-Hub/characters';
 
+/**
+ * Default hotspot layout (% of map canvas). Coordinates are not admin-configurable yet.
+ * TODO(future): Support admin-configurable hotspot positions per adventure month/week via CMS.
+ * TODO(future): Support hero art variants with character cluster shifted right for overlay clearance.
+ */
 const DEFAULT_LAYOUT: Record<
   AdventureSpotRecord['character_key'],
   { x: number; y: number; width: number; height: number; color: CourageMapHotspotColor; accentClass: string }
 > = {
-  caiden: { x: 36, y: 32, width: 17, height: 25, color: 'gold', accentClass: 'from-yellow-300 to-blue-500' },
-  miranda: { x: 17, y: 54, width: 17, height: 25, color: 'purple', accentClass: 'from-purple-400 to-fuchsia-500' },
-  zeke: { x: 67, y: 48, width: 18, height: 26, color: 'orange', accentClass: 'from-orange-300 to-amber-600' },
-  charlie: { x: 79, y: 65, width: 17, height: 25, color: 'green', accentClass: 'from-emerald-300 to-green-600' },
-  b4: { x: 50, y: 62, width: 16, height: 24, color: 'blue', accentClass: 'from-sky-300 to-blue-600' },
+  caiden: { x: 36, y: 29.5, width: 17, height: 25, color: 'gold', accentClass: 'from-yellow-300 to-blue-500' },
+  miranda: { x: 17, y: 51.5, width: 17, height: 25, color: 'purple', accentClass: 'from-purple-400 to-fuchsia-500' },
+  zeke: { x: 65, y: 45.5, width: 18, height: 26, color: 'orange', accentClass: 'from-orange-300 to-amber-600' },
+  charlie: { x: 84, y: 62.5, width: 17, height: 25, color: 'green', accentClass: 'from-emerald-300 to-green-600' },
+  b4: { x: 50, y: 59.5, width: 16, height: 24, color: 'blue', accentClass: 'from-sky-300 to-blue-600' },
 };
 
 const CHARACTER_NAMES: Record<AdventureSpotRecord['character_key'], string> = {

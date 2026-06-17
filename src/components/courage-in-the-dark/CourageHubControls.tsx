@@ -11,6 +11,7 @@ type CourageHubControlsProps = {
   showQuestsTab?: boolean;
   showActivitiesTab?: boolean;
   hideUnlockStatus?: boolean;
+  hideCoinBadge?: boolean;
   iconOnActiveOnly?: boolean;
 };
 
@@ -22,6 +23,7 @@ export default function CourageHubControls({
   showQuestsTab = false,
   showActivitiesTab = true,
   hideUnlockStatus = false,
+  hideCoinBadge = false,
   iconOnActiveOnly = false,
 }: CourageHubControlsProps) {
   return (
@@ -46,7 +48,7 @@ export default function CourageHubControls({
         </span>
       ) : null}
       <div className="courageHubControlsTrailing">
-        <FocusCoinWalletBadge compact />
+        {!hideCoinBadge ? <FocusCoinWalletBadge compact /> : null}
         <CourageHubSoundToggle />
       </div>
     </div>

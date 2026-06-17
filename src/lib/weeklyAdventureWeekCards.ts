@@ -31,7 +31,27 @@ export type WeeklyAdventureJourneyCardItem = WeeklyAdventureWeekRowItem & {
   journeyState: 'completed' | 'current' | 'locked';
   thumbnailSource: WeeklyAdventureThumbnailSource;
   isSelected?: boolean;
+  description?: string | null;
+  missionsCount?: number;
+  activitiesCount?: number;
+  downloadsCount?: number;
 };
+
+function countWeekDownloads(cmsModule: AdventureModuleRecord | null): number {
+  if (!cmsModule) return 0;
+  return [
+    cmsModule.coloring_page_pdf_url,
+    cmsModule.weekly_module_pdf_url,
+    cmsModule.comic_pdf_url,
+    cmsModule.facilitator_kit_pdf_url,
+    cmsModule.certificate_pdf_or_image_url,
+  ].filter((url) => Boolean(url?.trim())).length;
+}
+
+function resolveWeekMissionsCount(cmsModule: AdventureModuleRecord | null): number {
+  const hotspots = cmsModule?.hotspots?.length ?? 0;
+  return hotspots > 0 ? hotspots : 5;
+}
 
 function resolveWeekTileVariant(
   week: AdventureTrailWeekView,
@@ -276,10 +296,14 @@ export function buildJourneyWeeklyAdventureCards(input: {
           : effectiveVariant !== 'locked' && input.onSelectWeek
             ? () => input.onSelectWeek?.(weekNumber)
             : undefined,
-      isSelected: isHeroWeek && !isFullyComplete && effectiveVariant !== 'locked',
+      isSelected: isHeroWeek && effectiveVariant !== 'locked',
       rewardPreview: reward.label,
       rewardImageUrl: reward.imageUrl,
       journeyState: input.monthComingSoon && effectiveVariant === 'locked' ? 'locked' : journeyState,
+      description: cmsModule?.description?.trim() || cmsModule?.subtitle?.trim() || null,
+      missionsCount: resolveWeekMissionsCount(cmsModule),
+      activitiesCount: cmsModule?.preview_activities?.length ?? trailWeek.previewActivities?.length ?? 0,
+      downloadsCount: countWeekDownloads(cmsModule),
     };
   });
 }

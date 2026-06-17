@@ -78,6 +78,14 @@
   flex-direction: column;
 }
 
+.portal-shell .portal-contentFrame:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.portal-shell .family-content:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  max-width: none;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .portal-gameFrame.bbc-app--game-active.bbc-app--coachingShell {
   flex: 1;
   min-height: 0;
@@ -215,7 +223,6 @@
 
 /* Compact desktop gameplay — keep questions and answers above the fold */
 @media (min-width: 768px) {
-  .shared-mission-game:not(.shared-mission-game--coachingRail) .bbc-main--quiz,
   .bbc-app--game-active:not(.portal-gameFrame) .bbc-main--quiz {
     padding-top: 1.5rem;
     max-width: 47.5rem;
@@ -231,6 +238,17 @@
     width: 100%;
     margin-left: 0;
     margin-right: 0;
+  }
+
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    overflow-y: hidden;
+    flex: 1 1 0;
+    min-height: 0;
   }
 
   .bbc-app--coachingShell.bbc-app--game-active .mission-quizLayout--coachingRail {
@@ -366,5 +384,151 @@
 
   .portal-gameFrame.bbc-app--game-active .bbc-main--quiz {
     padding-top: 0.25rem;
+  }
+}
+
+/* Cinematic missions — lock viewport height (mission routes: family-content is direct child of family-main) */
+.portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.kids-adventure-shell .portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) > .portal-header,
+.kids-adventure-shell .portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) > .portal-header {
+  flex-shrink: 0;
+}
+
+.portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) > .family-content,
+.portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) > .pilot-content,
+.portal-shell .family-content:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.portal-shell .pilot-content:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.kids-adventure-shell .portal-shell .family-main:has(.bbc-app--cinematicMission.bbc-app--game-active) > .family-content,
+.kids-adventure-shell .portal-shell .family-content:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Home/inventory routes that still use the two-column portal layout */
+.portal-shell .portal-layout--withRail:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  align-items: stretch;
+  padding-top: 0.25rem;
+  padding-bottom: 0;
+}
+
+.portal-shell .portal-layout--withRail:has(.bbc-app--cinematicMission.bbc-app--game-active) .portal-layoutMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.portal-gameFrame.bbc-app--coachingShell.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .ds-gameplayTopBar,
+.bbc-app--cinematicMission.bbc-app--game-active .ds-gameplayTopBar--cinematicHud,
+.bbc-app--cinematicMission.bbc-app--game-active .caiden-topBar,
+.bbc-app--cinematicMission.bbc-app--game-active .miranda-topBar {
+  flex-shrink: 0;
+}
+
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz,
+.portal-gameFrame.bbc-app--coachingShell.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: auto;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar {
+  position: relative;
+  bottom: auto;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  margin-top: 0 !important;
+  z-index: 30;
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--coachingShell.bbc-app--game-active > .bbc-main--quiz {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShell.shared-mission-game--cinematic,
+  .bbc-app--cinematicMission.bbc-app--game-active .shared-mission-game--cinematic,
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShellInner,
+  .bbc-app--cinematicMission.bbc-app--game-active .mission-quizLayout--cinematic,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShellContent {
+    flex: 1 1 0;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionGrid {
+    flex: 1 1 0;
+    height: 100%;
+    min-height: 0;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: var(--cinematic-grid-cols);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionGrid > * {
+    height: 100%;
+    min-height: 0;
   }
 }

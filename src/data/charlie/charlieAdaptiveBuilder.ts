@@ -82,6 +82,7 @@ export function buildCharlieAdaptiveConfig(
 ): GameAssessmentConfig {
   const selection = finalizeAdaptiveQuestions(mission.gradeContent, {
     missionId: mission.id,
+    characterId: mission.character,
     gradeBand,
     previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,

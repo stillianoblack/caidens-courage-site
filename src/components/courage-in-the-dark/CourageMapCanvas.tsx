@@ -1,5 +1,6 @@
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { useCourageHubAudio } from './CourageHubAudioContext';
+import CourageMapHotspotTooltip from './CourageMapHotspotTooltip';
 import {
   courageInTheDarkMissions,
   type CourageInTheDarkMission,
@@ -21,7 +22,9 @@ type CourageMapCanvasProps = {
   mapMissions?: CourageInTheDarkMission[];
   isHotspotComplete: (hotspot: CourageInTheDarkMission) => boolean;
   isHotspotLocked: (hotspot: CourageInTheDarkMission) => boolean;
+  getHotspotLockedReason?: (hotspot: CourageInTheDarkMission) => string | undefined;
   animatingHotspotId?: string | null;
+  enableHotspotTooltips?: boolean;
   onSelectHotspot: (hotspot: CourageInTheDarkMission) => void;
 };
 
@@ -40,7 +43,9 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
     mapMissions = courageInTheDarkMissions,
     isHotspotComplete,
     isHotspotLocked,
+    getHotspotLockedReason,
     animatingHotspotId = null,
+    enableHotspotTooltips = false,
     onSelectHotspot,
   },
   ref,
@@ -48,6 +53,9 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
   const isHub = variant === 'hub';
   const { playClick } = useCourageHubAudio();
   const [imageFailed, setImageFailed] = useState(false);
+  const [hoveredHotspotId, setHoveredHotspotId] = useState<string | null>(null);
+  const [focusedHotspotId, setFocusedHotspotId] = useState<string | null>(null);
+  const tooltipCloseTimerRef = useRef<number | null>(null);
   const resolvedBackground = mapBackgroundSrc?.trim() ?? '';
   const showImage = Boolean(resolvedBackground) && !imageFailed;
 
@@ -69,6 +77,26 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
     },
     [onSelectHotspot, playClick],
   );
+
+  const clearTooltipCloseTimer = useCallback(() => {
+    if (tooltipCloseTimerRef.current !== null) {
+      window.clearTimeout(tooltipCloseTimerRef.current);
+      tooltipCloseTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleTooltipClose = useCallback(() => {
+    clearTooltipCloseTimer();
+    tooltipCloseTimerRef.current = window.setTimeout(() => {
+      setHoveredHotspotId(null);
+    }, 180);
+  }, [clearTooltipCloseTimer]);
+
+  useEffect(() => () => clearTooltipCloseTimer(), [clearTooltipCloseTimer]);
+
+  const tooltipHotspot = enableHotspotTooltips
+    ? mapMissions.find((row) => row.id === (hoveredHotspotId ?? focusedHotspotId)) ?? null
+    : null;
 
   return (
     <div
@@ -117,6 +145,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
           const complete = isHotspotComplete(hotspot);
           const selected = selectedHotspotId === hotspot.id;
           const justCompleted = animatingHotspotId === hotspot.id;
+          const tooltipId = `courage-map-hotspot-tip-${hotspot.id}`;
 
           return (
             <button
@@ -138,15 +167,27 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
                 width: `${hotspot.size.width}%`,
               }}
               onClick={() => handleHotspotClick(hotspot)}
+              onMouseEnter={() => {
+                if (!enableHotspotTooltips) return;
+                clearTooltipCloseTimer();
+                setHoveredHotspotId(hotspot.id);
+              }}
+              onMouseLeave={() => {
+                if (!enableHotspotTooltips) return;
+                scheduleTooltipClose();
+              }}
+              onFocus={() => {
+                if (!enableHotspotTooltips) return;
+                setFocusedHotspotId(hotspot.id);
+              }}
+              onBlur={() => {
+                if (!enableHotspotTooltips) return;
+                setFocusedHotspotId((current) => (current === hotspot.id ? null : current));
+              }}
               aria-label={`${hotspot.label}${complete ? ', completed' : ''}${locked ? ', locked' : ''}`}
               aria-pressed={selected}
-              title={
-                locked
-                  ? undefined
-                  : complete
-                    ? 'Mission Complete — Reward Earned'
-                    : hotspot.label
-              }
+              aria-describedby={enableHotspotTooltips ? tooltipId : undefined}
+              title={enableHotspotTooltips ? undefined : locked ? undefined : complete ? 'Mission Complete — Reward Earned' : hotspot.label}
             >
               <span
                 className={[
@@ -195,6 +236,18 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
             </button>
           );
         })}
+        {tooltipHotspot ? (
+          <CourageMapHotspotTooltip
+            hotspot={tooltipHotspot}
+            complete={isHotspotComplete(tooltipHotspot)}
+            locked={isHotspotLocked(tooltipHotspot)}
+            lockedReason={getHotspotLockedReason?.(tooltipHotspot)}
+            style={{
+              left: `${tooltipHotspot.position.x}%`,
+              top: `${tooltipHotspot.position.y}%`,
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );

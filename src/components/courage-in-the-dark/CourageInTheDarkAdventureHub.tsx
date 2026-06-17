@@ -19,7 +19,24 @@ import CourageMissionListPanel from './CourageMissionListPanel';
 import CourageQuestListPanel from './CourageQuestListPanel';
 import { type Week1ExtrasPaths } from './Week1ExtrasCards';
 import { CourageHubAudioProvider } from './CourageHubAudioContext';
+import HeroCinematicPlayerHud from './HeroCinematicPlayerHud';
+import CourageHubMissionControlOverlay from './CourageHubMissionControlOverlay';
+import CourageHubBottomHudTray from './CourageHubBottomHudTray';
+import {
+  CourageHubHudActivitiesStrip,
+  CourageHubHudMissionStrip,
+  CourageHubHudQuestStrip,
+} from './CourageHubBottomHudStrips';
+import CourageHubHudExploreWeekStrip from './CourageHubHudExploreWeekStrip';
+import HeroExploreOverlay from './HeroExploreOverlay';
+import { ENABLE_BOTTOM_HUD_TRAY } from '../../config/weeklyAdventureFeatures';
+import type { HeroCinematicPlayerHudProps } from './HeroCinematicPlayerHud';
+import type { WeeklyAdventureJourneyCardItem } from '../../lib/weeklyAdventureWeekCards';
 import './courage-hub-week-meta-row.css';
+import './hero-cinematic-player-hud.css';
+import './courage-hub-mission-control.css';
+import './courage-hub-bottom-hud-tray.css';
+import './hero-explore-overlay.css';
 import './courage-in-the-dark-map.css';
 import './courage-adventure-hub.css';
 import './courage-b4-welcome.css';
@@ -67,6 +84,19 @@ type CourageInTheDarkAdventureHubProps = {
   questPanel?: CourageHubQuestPanelProps;
   mapMissions?: CourageInTheDarkMission[];
   headerTrailing?: React.ReactNode;
+  cinematicWeekSelectorEnabled?: boolean;
+  cinematicAdventureMode?: boolean;
+  bottomHudTrayEnabled?: boolean;
+  playerHud?: HeroCinematicPlayerHudProps | null;
+  weekSelectorCards?: WeeklyAdventureJourneyCardItem[];
+  onWeekSelectorSelectWeek?: (weekNumber: number) => void;
+  onWeekPillSelectWeek?: (weekNumber: number) => void;
+  onWeekSelectorReviewWeek?: (weekNumber: number) => void;
+  /** @deprecated Legacy large Explore overlay — use cinematicWeekSelectorEnabled */
+  heroExploreOverlayEnabled?: boolean;
+  exploreOverlayWeekCards?: WeeklyAdventureJourneyCardItem[];
+  onExploreSelectWeek?: (weekNumber: number) => void;
+  onExploreReviewWeek?: (weekNumber: number) => void;
 };
 
 export default function CourageInTheDarkAdventureHub({
@@ -88,6 +118,18 @@ export default function CourageInTheDarkAdventureHub({
   questPanel,
   mapMissions,
   headerTrailing,
+  cinematicWeekSelectorEnabled = false,
+  cinematicAdventureMode = false,
+  bottomHudTrayEnabled = ENABLE_BOTTOM_HUD_TRAY,
+  playerHud = null,
+  weekSelectorCards,
+  onWeekSelectorSelectWeek,
+  onWeekPillSelectWeek,
+  onWeekSelectorReviewWeek,
+  heroExploreOverlayEnabled = false,
+  exploreOverlayWeekCards,
+  onExploreSelectWeek,
+  onExploreReviewWeek,
 }: CourageInTheDarkAdventureHubProps) {
   const isMobileLayout = useMobileHubLayout();
   const { showToast } = useToast();
@@ -153,6 +195,8 @@ export default function CourageInTheDarkAdventureHub({
     setViewMode(mode);
   }, []);
 
+  const showPlayerHud = Boolean(cinematicAdventureMode && playerHud);
+
   const desktopMapPills = useMemo(
     () => (
       <CourageHubControls
@@ -162,12 +206,14 @@ export default function CourageInTheDarkAdventureHub({
         showQuestsTab={showQuestsTab}
         showActivitiesTab={showActivitiesTab}
         hideUnlockStatus={embeddedInFamilyPortal}
+        hideCoinBadge={showPlayerHud}
       />
     ),
     [
       embeddedInFamilyPortal,
       handleViewModeChange,
       showActivitiesTab,
+      showPlayerHud,
       showQuestsTab,
       viewMode,
     ],
@@ -182,6 +228,7 @@ export default function CourageInTheDarkAdventureHub({
         showQuestsTab={showQuestsTab}
         showActivitiesTab={showActivitiesTab}
         hideUnlockStatus={embeddedInFamilyPortal}
+        hideCoinBadge={showPlayerHud}
         iconOnActiveOnly
       />
     ),
@@ -189,6 +236,7 @@ export default function CourageInTheDarkAdventureHub({
       embeddedInFamilyPortal,
       handleViewModeChange,
       showActivitiesTab,
+      showPlayerHud,
       showQuestsTab,
       viewMode,
     ],
@@ -235,21 +283,51 @@ export default function CourageInTheDarkAdventureHub({
     updateCardAnchor(selectedHotspot);
   }, [selectedHotspot, updateCardAnchor]);
 
+  const exploreDirectLaunch = Boolean(cinematicAdventureMode && viewMode === 'explore');
+  const showHotspotTooltips = Boolean(exploreDirectLaunch && !isMobileLayout);
+
   const handleSelectMission = useCallback(
     (mission: CourageInTheDarkMission) => {
       setListComingSoonId(null);
-      selectHotspot(mission);
+
       if (isHotspotLocked(mission)) {
         showToast(getMissionUnlockState(mission).reason, 'info');
+        if (!exploreDirectLaunch) {
+          selectHotspot(mission);
+          if (!isMobileLayout && !cinematicAdventureMode) {
+            updateCardAnchor(mission);
+          }
+        }
+        return;
       }
+
+      if (exploreDirectLaunch || cinematicAdventureMode) {
+        const launched = launchMission(mission);
+        if (!launched) {
+          if (exploreDirectLaunch) {
+            showToast('Adventure coming soon.', 'info');
+            return;
+          }
+          selectHotspot(mission);
+          if (!isMobileLayout) {
+            updateCardAnchor(mission);
+          }
+        }
+        return;
+      }
+
+      selectHotspot(mission);
       if (!isMobileLayout) {
         updateCardAnchor(mission);
       }
     },
     [
+      cinematicAdventureMode,
+      exploreDirectLaunch,
       getMissionUnlockState,
       isHotspotLocked,
       isMobileLayout,
+      launchMission,
       selectHotspot,
       showToast,
       updateCardAnchor,
@@ -271,8 +349,10 @@ export default function CourageInTheDarkAdventureHub({
   const locked = selectedHotspot ? isHotspotLocked(selectedHotspot) : false;
   const lockedReason = selectedHotspot ? getMissionUnlockState(selectedHotspot).reason : undefined;
 
+  const showMissionCard = Boolean(selectedHotspot && !exploreDirectLaunch);
+
   const missionCard = useMemo(() => {
-    if (!selectedHotspot) return null;
+    if (!showMissionCard || !selectedHotspot) return null;
 
     return (
       <CourageMapMissionCard
@@ -294,6 +374,7 @@ export default function CourageInTheDarkAdventureHub({
     locked,
     lockedReason,
     selectedHotspot,
+    showMissionCard,
     targetHref,
   ]);
 
@@ -350,7 +431,9 @@ export default function CourageInTheDarkAdventureHub({
         mapMissions={resolvedMapMissions}
         isHotspotComplete={isHotspotComplete}
         isHotspotLocked={isHotspotLocked}
+        getHotspotLockedReason={(mission) => getMissionUnlockState(mission).reason}
         animatingHotspotId={animatingHotspotId}
+        enableHotspotTooltips={showHotspotTooltips}
         onSelectHotspot={handleSelectMission}
       />
     ),
@@ -361,25 +444,196 @@ export default function CourageInTheDarkAdventureHub({
       handleSelectMission,
       isHotspotComplete,
       isHotspotLocked,
+      getMissionUnlockState,
       mapBackgroundSrc,
       mapLocked,
       resolvedMapMissions,
       selectedHotspot?.id,
+      showHotspotTooltips,
       week,
       weekTitle,
     ],
   );
 
+  const showCinematicSelector = Boolean(
+    cinematicWeekSelectorEnabled &&
+      weekSelectorCards &&
+      weekSelectorCards.length > 0 &&
+      viewMode === 'explore' &&
+      onWeekSelectorSelectWeek &&
+      onWeekSelectorReviewWeek,
+  );
+
+  const exploreWeekStrip =
+    showCinematicSelector && weekSelectorCards && onWeekSelectorSelectWeek && onWeekSelectorReviewWeek ? (
+      <CourageHubHudExploreWeekStrip
+        cards={weekSelectorCards}
+        selectedWeekNumber={week}
+        onSelectWeek={onWeekSelectorSelectWeek}
+        onPillSelectWeek={onWeekPillSelectWeek}
+        onReviewWeek={onWeekSelectorReviewWeek}
+      />
+    ) : null;
+
+  const bottomHudTrayContent =
+    viewMode === 'explore'
+      ? exploreWeekStrip
+      : viewMode === 'missions'
+        ? (
+            <CourageHubHudMissionStrip
+              mapMissions={resolvedMapMissions}
+              isMissionComplete={isHotspotComplete}
+              isMissionLocked={isHotspotLocked}
+              getMissionHref={resolveMissionHref}
+              onLaunchMission={handleLaunchFromList}
+              comingSoonMissionId={listComingSoonId}
+            />
+          )
+        : viewMode === 'activities' && week1ExtrasPaths
+          ? (
+              <CourageHubHudActivitiesStrip
+                completedMissionIds={completedMissionIds}
+                paths={week1ExtrasPaths}
+              />
+            )
+          : viewMode === 'quests' && questPanel
+            ? (
+                <CourageHubHudQuestStrip
+                  quests={questPanel.quests}
+                  loading={questPanel.loading}
+                  claimingKey={questPanel.claimingKey}
+                  onClaim={questPanel.onClaim}
+                />
+              )
+            : null;
+
+  const missionControlContent =
+    viewMode === 'missions'
+      ? missionListPanel
+      : viewMode === 'activities' && week1ExtrasPaths
+        ? activitiesPanel
+        : viewMode === 'quests' && questListPanel
+          ? questListPanel
+          : null;
+
+  const showBottomHudTray = Boolean(
+    bottomHudTrayEnabled &&
+      cinematicAdventureMode &&
+      !isMobileLayout &&
+      bottomHudTrayContent,
+  );
+
+  const showMissionControlOverlay = Boolean(
+    !bottomHudTrayEnabled &&
+      cinematicAdventureMode &&
+      !isMobileLayout &&
+      viewMode !== 'explore' &&
+      missionControlContent,
+  );
+
+  const missionControlTitle =
+    viewMode === 'missions'
+      ? 'Mission Control'
+      : viewMode === 'activities'
+        ? 'Activities & Resources'
+        : viewMode === 'quests'
+          ? 'Focus Quests'
+          : '';
+
+  const missionControlSubtitle =
+    viewMode === 'missions'
+      ? `${completedCount}/${totalAdventures} complete`
+      : undefined;
+
+  const hudPillAriaLabel =
+    viewMode === 'explore'
+      ? 'Week adventures'
+      : viewMode === 'missions'
+        ? 'Week missions'
+        : viewMode === 'activities'
+          ? 'Week activities'
+          : viewMode === 'quests'
+            ? 'Focus quests'
+            : '';
+
+  const useHudPills = Boolean(bottomHudTrayEnabled && cinematicAdventureMode);
+
+  const showExploreOverlay = Boolean(
+    !cinematicWeekSelectorEnabled &&
+      heroExploreOverlayEnabled &&
+      exploreOverlayWeekCards &&
+      exploreOverlayWeekCards.length > 0 &&
+      viewMode === 'explore' &&
+      onExploreSelectWeek &&
+      onExploreReviewWeek,
+  );
+
+  const exploreOverlayPanel =
+    showExploreOverlay && exploreOverlayWeekCards && onExploreSelectWeek && onExploreReviewWeek ? (
+      <HeroExploreOverlay
+        cards={exploreOverlayWeekCards}
+        selectedWeekNumber={week}
+        onSelectWeek={onExploreSelectWeek}
+        onReviewWeek={onExploreReviewWeek}
+        layout={isMobileLayout ? 'stacked' : 'overlay'}
+      />
+    ) : null;
+
+  const hideWeekMetaHeader = showCinematicSelector || (cinematicAdventureMode && showPlayerHud);
+
   const mapWrap = (
-    <div className="courageAdventureHubMapWrap">
+    <div
+      className={[
+        'courageAdventureHubMapWrap',
+        cinematicAdventureMode ? 'courageAdventureHubMapWrap--cinematic' : '',
+        showCinematicSelector ? 'courageAdventureHubMapWrap--cinematic' : '',
+        showBottomHudTray ? 'courageAdventureHubMapWrap--bottomTray' : '',
+        showExploreOverlay && !isMobileLayout ? 'courageAdventureHubMapWrap--exploreOverlay' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {sharedMapCanvas}
       {!isMobileLayout ? (
         <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--pillsOnly">
           {desktopMapPills}
         </div>
       ) : null}
+      {showPlayerHud && playerHud ? (
+        <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--playerHud">
+          <HeroCinematicPlayerHud {...playerHud} />
+        </div>
+      ) : null}
+      {!showPlayerHud && hideWeekMetaHeader && headerTrailing ? (
+        <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--playingAs">
+          {headerTrailing}
+        </div>
+      ) : null}
       <CourageB4WelcomeOverlay open={showWelcome && !mapLocked && !baselineLocked} onDismiss={dismissWelcome} />
-      {!isMobileLayout && cardLayout !== 'sheet' ? missionCard : null}
+      {!isMobileLayout &&
+      cardLayout !== 'sheet' &&
+      showMissionCard &&
+      (!cinematicAdventureMode || (selectedHotspot && (locked || comingSoon)))
+        ? missionCard
+        : null}
+      {showExploreOverlay && !isMobileLayout ? exploreOverlayPanel : null}
+      {showBottomHudTray && bottomHudTrayContent ? (
+        <CourageHubBottomHudTray
+          ariaLabel={hudPillAriaLabel}
+          className={viewMode === 'explore' ? 'courageHubHudPillDock--explore' : ''}
+        >
+          {bottomHudTrayContent}
+        </CourageHubBottomHudTray>
+      ) : null}
+      {showMissionControlOverlay && missionControlContent ? (
+        <CourageHubMissionControlOverlay
+          title={missionControlTitle}
+          subtitle={missionControlSubtitle}
+          onBackToExplore={() => handleViewModeChange('explore')}
+        >
+          {missionControlContent}
+        </CourageHubMissionControlOverlay>
+      ) : null}
     </div>
   );
 
@@ -390,7 +644,7 @@ export default function CourageInTheDarkAdventureHub({
   ) : null;
 
   const desktopSidePanel =
-    viewMode === 'missions' ? (
+    cinematicAdventureMode || viewMode === 'explore' ? null : viewMode === 'missions' ? (
       missionListPanel
     ) : viewMode === 'activities' && week1ExtrasPaths ? (
       activitiesPanel
@@ -420,15 +674,16 @@ export default function CourageInTheDarkAdventureHub({
             ? 'courage-hub-tab-quests'
             : undefined;
 
-  const weekMetaRow = (
-    <CourageHubWeekMetaRow
-      week={week}
-      weekTitle={weekTitle}
-      selFocus={selFocus}
-      comicThumbnailUrl={comicThumbnailUrl}
-      headerTrailing={headerTrailing}
-    />
-  );
+  const weekMetaRow =
+    hideWeekMetaHeader ? null : (
+      <CourageHubWeekMetaRow
+        week={week}
+        weekTitle={weekTitle}
+        selFocus={selFocus}
+        comicThumbnailUrl={comicThumbnailUrl}
+        headerTrailing={headerTrailing}
+      />
+    );
 
   return (
     <CourageHubAudioProvider>
@@ -436,6 +691,8 @@ export default function CourageInTheDarkAdventureHub({
         className={[
           'courageAdventureHub',
           'portal-gameFrame',
+          cinematicWeekSelectorEnabled || cinematicAdventureMode ? 'courageAdventureHub--cinematic' : '',
+          cinematicAdventureMode ? 'courageAdventureHub--adventureMode' : '',
           isMobileLayout ? 'courageAdventureHub--mobileStack' : '',
         ]
           .filter(Boolean)
@@ -452,19 +709,38 @@ export default function CourageInTheDarkAdventureHub({
                 className="courageAdventureHubView courageAdventureHubView--map"
               >
                 {mapWrap}
-                {cardLayout === 'sheet' ? missionCard : null}
+                {showMissionCard && cardLayout === 'sheet' ? missionCard : null}
               </div>
 
               {mobileControlsBar}
+
+              {showExploreOverlay ? exploreOverlayPanel : null}
+
+              {viewMode === 'explore' && showCinematicSelector && exploreWeekStrip ? (
+                <div
+                  id="courage-hub-panel-explore"
+                  role="tabpanel"
+                  aria-labelledby="courage-hub-tab-explore"
+                  className="courageHubMobileHudPills courageHubMobileHudPills--explore"
+                >
+                  {exploreWeekStrip}
+                </div>
+              ) : null}
 
               {viewMode === 'missions' ? (
                 <div
                   id="courage-hub-panel-missions"
                   role="tabpanel"
                   aria-labelledby="courage-hub-tab-missions"
-                  className="courageAdventureHubMobileList"
+                  className={
+                    useHudPills
+                      ? 'courageHubMobileHudPills'
+                      : cinematicAdventureMode
+                        ? 'courageHubMobileDarkSection'
+                        : 'courageAdventureHubMobileList'
+                  }
                 >
-                  {missionListPanel}
+                  {useHudPills ? bottomHudTrayContent : missionListPanel}
                 </div>
               ) : null}
 
@@ -473,20 +749,32 @@ export default function CourageInTheDarkAdventureHub({
                   id="courage-hub-panel-activities"
                   role="tabpanel"
                   aria-labelledby="courage-hub-tab-activities"
-                  className="courageAdventureHubMobileActivities"
+                  className={
+                    useHudPills
+                      ? 'courageHubMobileHudPills'
+                      : cinematicAdventureMode
+                        ? 'courageHubMobileDarkSection'
+                        : 'courageAdventureHubMobileActivities'
+                  }
                 >
-                  {activitiesPanel}
+                  {useHudPills ? bottomHudTrayContent : activitiesPanel}
                 </div>
               ) : null}
 
-              {viewMode === 'quests' && questListPanel ? (
+              {viewMode === 'quests' && (useHudPills ? bottomHudTrayContent : questListPanel) ? (
                 <div
                   id="courage-hub-panel-quests"
                   role="tabpanel"
                   aria-labelledby="courage-hub-tab-quests"
-                  className="courageAdventureHubMobileQuests"
+                  className={
+                    useHudPills
+                      ? 'courageHubMobileHudPills'
+                      : cinematicAdventureMode
+                        ? 'courageHubMobileDarkSection'
+                        : 'courageAdventureHubMobileQuests'
+                  }
                 >
-                  {questListPanel}
+                  {useHudPills ? bottomHudTrayContent : questListPanel}
                 </div>
               ) : null}
 
@@ -499,7 +787,10 @@ export default function CourageInTheDarkAdventureHub({
               aria-labelledby={desktopPanelLabelledBy}
               className={[
                 'courageAdventureHubSplit',
-                viewMode === 'explore' ? 'courageAdventureHubSplit--mapOnly' : '',
+                viewMode === 'explore' || cinematicAdventureMode
+                  ? 'courageAdventureHubSplit--mapOnly'
+                  : '',
+                cinematicAdventureMode ? 'courageAdventureHubSplit--cinematic' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -507,7 +798,7 @@ export default function CourageInTheDarkAdventureHub({
             >
               <div className="courageAdventureHubSplitMap">
                 {mapWrap}
-                {cardLayout === 'sheet' ? missionCard : null}
+                {showMissionCard && cardLayout === 'sheet' ? missionCard : null}
               </div>
               {desktopSidePanel}
             </div>

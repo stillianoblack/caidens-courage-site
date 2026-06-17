@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GameAnswerValue } from '../types/gameAssessment';
 import type { QuestionAttemptRecord, QuestionInteractionState } from '../types/questionInteraction';
 
@@ -158,6 +158,10 @@ export function useQuestionInteraction(
     firstSelectedRef.current = null;
     firstAttemptCorrectRef.current = null;
   }, []);
+
+  useEffect(() => {
+    reset();
+  }, [questionId, reset]);
 
   const buildAttemptRecord = useCallback((): QuestionAttemptRecord => {
     const finalCorrect = isAnswerCorrect(answer);

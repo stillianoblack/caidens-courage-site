@@ -1,13 +1,18 @@
 import React from 'react';
 import WeeklyAdventureJourneyCard from './WeeklyAdventureJourneyCard';
+import WeeklyAdventureRecentlyCompleted from './WeeklyAdventureRecentlyCompleted';
 import type { WeeklyAdventureJourneyCardItem } from '../../lib/weeklyAdventureWeekCards';
 import type { AdventureJourneyMonthView } from '../../lib/weeklyAdventureJourneyMonths';
 import './weekly-adventure-journey.css';
+import './weekly-adventure-journey-dark.css';
 
 type WeeklyAdventureJourneyMonthProps = {
   month: AdventureJourneyMonthView;
   cards: WeeklyAdventureJourneyCardItem[];
   className?: string;
+  hideWeekSelectorGrid?: boolean;
+  recentlyCompletedCards?: WeeklyAdventureJourneyCardItem[];
+  darkGlass?: boolean;
 };
 
 function JourneyProgressLine({ cards }: { cards: WeeklyAdventureJourneyCardItem[] }) {
@@ -38,6 +43,9 @@ export default function WeeklyAdventureJourneyMonth({
   month,
   cards,
   className = '',
+  hideWeekSelectorGrid = false,
+  recentlyCompletedCards = [],
+  darkGlass = false,
 }: WeeklyAdventureJourneyMonthProps) {
   const progressPercent =
     month.progress.weeksTotal > 0
@@ -54,6 +62,7 @@ export default function WeeklyAdventureJourneyMonth({
       className={[
         'weeklyJourneyMonth',
         month.comingSoon ? 'weeklyJourneyMonth--comingSoon' : '',
+        darkGlass ? 'weeklyJourneyMonth--darkGlass' : '',
         className,
       ]
         .filter(Boolean)
@@ -99,11 +108,17 @@ export default function WeeklyAdventureJourneyMonth({
         )}
       </header>
 
-      <div className="weeklyJourneyMonthGrid">
-        {cards.map((card) => (
-          <WeeklyAdventureJourneyCard key={card.id} {...card} />
-        ))}
-      </div>
+      {hideWeekSelectorGrid && recentlyCompletedCards.length > 0 ? (
+        <WeeklyAdventureRecentlyCompleted cards={recentlyCompletedCards} />
+      ) : null}
+
+      {!hideWeekSelectorGrid ? (
+        <div className="weeklyJourneyMonthGrid">
+          {cards.map((card) => (
+            <WeeklyAdventureJourneyCard key={card.id} {...card} />
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

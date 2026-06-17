@@ -1,0 +1,519 @@
+/* Floating HUD pills over hero — no tray/panel background */
+
+.courageHubHudPillDock {
+  position: absolute;
+  left: 0.65rem;
+  right: 0.65rem;
+  bottom: 0.08rem;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.courageHubHudPillDock--explore {
+  bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  transform: translateY(3.25rem);
+}
+
+.courageHubHudStripRow--explore {
+  row-gap: 0.75rem;
+}
+
+.courageHubHudPillDock > * {
+  pointer-events: auto;
+}
+
+/* Pill row — flex to fit; scroll only when overflow class set */
+.courageHubHudStripRow {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.courageHubHudStripRow > li {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+}
+
+.courageHubHudStripRow--scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent;
+  padding-bottom: 0.2rem;
+}
+
+.courageHubHudStripRow--scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.courageHubHudStripRow--scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 999px;
+}
+
+.courageHubHudStripRow--scroll > li {
+  flex: 0 0 calc((100% - 2.6rem) / 5);
+  min-width: 9.75rem;
+}
+
+.courageHubHudStripEmpty {
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  color: rgba(226, 232, 240, 0.88);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+/* Shared glass pill */
+.courageHubHudCard {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 4.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 15, 30, 0.46);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.45);
+}
+
+.courageHubHudCard--locked {
+  opacity: 0.72;
+}
+
+.courageHubHudCard--complete {
+  border-color: rgba(74, 222, 128, 0.24);
+}
+
+.courageHubHudCard--ready {
+  border-color: rgba(251, 191, 36, 0.32);
+}
+
+/* Mission pills */
+.courageHubHudCard--mission {
+  min-height: 5.5rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.courageHubHudCardThumb {
+  flex-shrink: 0;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 0.65rem;
+  background-size: cover;
+  background-position: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.courageHubHudCardCopy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.courageHubHudCardTitle {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.courageHubHudCardSub {
+  margin: 0.12rem 0 0;
+  font-size: 0.66rem;
+  color: rgba(226, 232, 240, 0.8);
+  line-height: 1.25;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.courageHubHudCardReward {
+  margin: 0.14rem 0 0;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(250, 204, 21, 0.9);
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Activity pills */
+.courageHubHudCardIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 1.25rem;
+  border: none;
+}
+
+/* Quest pills — taller with full-width progress */
+.courageHubHudCard--quest {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-height: 5.25rem;
+  min-width: 12rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 1.15rem;
+}
+
+.courageHubHudCardQuestHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.courageHubHudCardPeriod {
+  flex-shrink: 0;
+  padding: 0.14rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.94);
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(147, 197, 253, 0.2);
+  white-space: nowrap;
+}
+
+.courageHubHudCard--quest .courageHubHudCardCopy {
+  flex: 1 1 auto;
+}
+
+.courageHubHudCardQuestProgress {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.22rem;
+  width: 100%;
+}
+
+.courageHubHudCardBar {
+  width: 100%;
+  height: 0.56rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.courageHubHudCardBarFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.95), rgba(129, 140, 248, 0.95));
+}
+
+.courageHubHudCardProgress {
+  align-self: flex-end;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: rgba(226, 232, 240, 0.92);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.courageHubHudCardLock {
+  flex-shrink: 0;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.courageHubHudCardCta {
+  flex-shrink: 0;
+  min-height: 1.85rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.courageHubHudCard--quest .courageHubHudCardCta {
+  margin-left: auto;
+}
+
+.courageHubHudCardCta--link:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.courageHubHudCardCta--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.courageHubHudCardCta--claim {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.16);
+  color: #fde68a;
+}
+
+.courageHubHudCardCta--claim:hover:not(:disabled) {
+  background: rgba(251, 191, 36, 0.24);
+}
+
+/* Mission Start/Replay — larger, character accent or gold */
+.courageHubHudCard .kidMissionActionCard {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0.42rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 999px;
+  border: none;
+  color: #1a1035;
+  background: linear-gradient(135deg, #fde68a 0%, #e5c06a 100%);
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.courageHubHudCard .kidMissionActionCard[data-kid-theme='caiden'] {
+  background: linear-gradient(135deg, #fde68a 0%, #e8bf4f 100%);
+  color: #1a1035;
+}
+
+.courageHubHudCard .kidMissionActionCard[data-kid-theme='miranda'] {
+  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 100%);
+  color: #fff;
+}
+
+.courageHubHudCard .kidMissionActionCard[data-kid-theme='zeke'] {
+  background: linear-gradient(135deg, #fdba74 0%, #f97316 100%);
+  color: #1a1035;
+}
+
+.courageHubHudCard .kidMissionActionCard[data-kid-theme='charlie'] {
+  background: linear-gradient(135deg, #86efac 0%, #22c55e 100%);
+  color: #052e16;
+}
+
+.courageHubHudCard .kidMissionActionCard[data-kid-theme='b4'] {
+  background: linear-gradient(135deg, #67e8f9 0%, #0ea5e9 100%);
+  color: #082f49;
+}
+
+.courageHubHudCard .kidMissionActionCard:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Mobile — stacked pills below hero */
+.courageHubMobileHudPills {
+  width: 100%;
+  min-width: 0;
+  padding: 0 0.15rem;
+}
+
+.courageHubMobileHudPills .courageHubHudStripRow {
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.courageHubMobileHudPills .courageHubHudStripRow > li {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.courageHubMobileHudPills .courageHubHudCard--quest {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .courageHubHudCardThumb {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .courageHubHudCardThumb {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+/* Desktop hover — subtle pill expansion */
+@media (hover: hover) and (pointer: fine) {
+  .courageHubHudStripRow > li {
+    transition: flex 0.24s ease;
+  }
+
+  .courageHubHudCard {
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      border-color 0.22s ease;
+  }
+
+  .courageHubHudStripRow > li:hover {
+    flex: 1.28 1 0;
+    z-index: 2;
+  }
+
+  .courageHubHudCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px -12px rgba(0, 0, 0, 0.52);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .courageHubHudCard:hover .courageHubHudCardTitle,
+  .courageHubHudCard:hover .courageHubHudCardSub,
+  .courageHubHudCard:hover .courageHubHudCardReward {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courageHubHudStripRow > li,
+  .courageHubHudCard {
+    transition: none;
+  }
+}
+
+/* Explore week pills */
+.courageHubHudStripRow--explore > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.courageHubHudCard--explore {
+  cursor: pointer;
+  min-height: 5.25rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.courageHubHudCard--explore.courageHubHudCard--locked {
+  cursor: not-allowed;
+}
+
+.courageHubHudCard--explore[data-week-accent='week1'] {
+  --week-accent-glow: rgba(37, 99, 235, 0.45);
+}
+
+.courageHubHudCard--explore[data-week-accent='week2'] {
+  --week-accent-glow: rgba(217, 119, 6, 0.5);
+}
+
+.courageHubHudCard--explore[data-week-accent='week3'] {
+  --week-accent-glow: rgba(124, 58, 237, 0.45);
+}
+
+.courageHubHudCard--explore[data-week-accent='week4'] {
+  --week-accent-glow: rgba(22, 163, 74, 0.45);
+}
+
+.courageHubHudCard--explore.courageHubHudCard--selected {
+  border-color: color-mix(in srgb, var(--week-accent-glow, rgba(147, 197, 253, 0.45)) 70%, white);
+  box-shadow:
+    0 10px 28px -14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px color-mix(in srgb, var(--week-accent-glow, rgba(147, 197, 253, 0.35)) 55%, transparent),
+    0 0 20px -4px var(--week-accent-glow, rgba(96, 165, 250, 0.35));
+}
+
+.courageHubHudCardStatus {
+  margin: 0.14rem 0 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.88);
+  line-height: 1.2;
+}
+
+.courageHubHudCard--explore.courageHubHudCard--selected .courageHubHudCardStatus {
+  color: color-mix(in srgb, var(--week-accent-glow, #93c5fd) 75%, white);
+}
+
+.courageHubHudCard--explore.courageHubHudCard--complete .courageHubHudCardStatus {
+  color: rgba(74, 222, 128, 0.92);
+}
+
+.courageHubHudCardCheck {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  position: relative;
+}
+
+.courageHubHudCardCheck::after {
+  content: '';
+  position: absolute;
+  left: 0.38rem;
+  top: 0.18rem;
+  width: 0.35rem;
+  height: 0.62rem;
+  border: solid #4ade80;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.courageHubHudCard--explore .courageHubHudCardCta:not(.courageHubHudCardCta--disabled):not(.courageHubHudCardCta--review) {
+  border: none;
+  background: linear-gradient(135deg, #fde68a 0%, #e5c06a 100%);
+  color: #1a1035;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
+}
+
+.courageHubHudCardCta--review {
+  border-color: rgba(74, 222, 128, 0.35);
+  background: rgba(34, 197, 94, 0.14);
+  color: #bbf7d0;
+}
+
+.courageHubMobileHudPills .courageHubHudStripRow--explore {
+  flex-direction: column;
+}
+
+.courageHubMobileHudPills .courageHubHudCard--explore {
+  border-radius: 1rem;
+}
+
+.courageHubMobileHudPills.courageHubMobileHudPills--explore {
+  margin-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .courageHubHudCard--explore:not(.courageHubHudCard--locked):hover .courageHubHudCardStatus {
+    color: rgba(226, 232, 240, 0.95);
+  }
+}

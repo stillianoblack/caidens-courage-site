@@ -36,6 +36,8 @@ export type GameplayTopBarProps = {
   /** Fallback when no backHref (e.g. baseline check exit) */
   onBack?: () => void;
   progressPercent?: number;
+  /** e.g. "Question 2 of 5" — shown under the progress bar during quiz */
+  questionProgressLabel?: string;
   showProgress?: boolean;
   playerName?: string;
   playerIndex?: number;
@@ -48,6 +50,8 @@ export type GameplayTopBarProps = {
   readAloudSegments?: string[];
   readAloudResetKey?: string;
   readAloudAriaLabel?: string;
+  /** Optional control rendered in the right-side HUD cluster (e.g. cinematic theme toggle). */
+  trailingControl?: React.ReactNode;
   className?: string;
 };
 
@@ -107,6 +111,7 @@ export default function GameplayTopBar({
   onBackClick,
   onBack,
   progressPercent = 0,
+  questionProgressLabel,
   showProgress = true,
   playerName,
   playerIndex = 1,
@@ -118,6 +123,7 @@ export default function GameplayTopBar({
   readAloudSegments,
   readAloudResetKey,
   readAloudAriaLabel = 'Read aloud',
+  trailingControl,
   className = '',
 }: GameplayTopBarProps) {
   const [isMobileGameBack, setIsMobileGameBack] = useState(resolveIsMobileGameBack);
@@ -211,6 +217,9 @@ export default function GameplayTopBar({
       <div className="ds-gameplayTopBar-progress">
         {showProgress ? (
           <div className="ds-gameplayTopBar-progressGlow">
+            {questionProgressLabel ? (
+              <p className="ds-gameplayTopBar-questionProgress">{questionProgressLabel}</p>
+            ) : null}
             <div
               className="ds-gameplayTopBar-progressTrack"
               role="progressbar"
@@ -250,6 +259,7 @@ export default function GameplayTopBar({
         ) : onToggleSound ? (
           <SoundToggleButton soundEnabled={soundEnabled} onToggle={onToggleSound} className="ds-gameplayTopBar-soundBtn" />
         ) : null}
+        {trailingControl}
       </div>
     </header>
   );

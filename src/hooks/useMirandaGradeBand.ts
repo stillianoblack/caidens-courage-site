@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { readActiveChildParticipantId, CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
 import {
+  readParticipantGradeSettings,
   readParticipantGradeSettingsAsync,
   resolveMirandaGradeBandForParticipant,
   type MirandaGradeBandResolution,
@@ -40,8 +41,16 @@ function resolveFromGradeSettings(
 
 export function useMirandaGradeBand(participantId?: string): MirandaGradeBandResolution {
   const resolvedParticipantId = participantId?.trim() || readActiveChildParticipantId();
+  const syncSettings = readParticipantGradeSettings(resolvedParticipantId ?? undefined);
+  const needsAsyncHydration =
+    Boolean(resolvedParticipantId) &&
+    !hasCanonicalGradeLevel(syncSettings.gradeLevel) &&
+    !syncSettings.gradeBand?.trim();
+
   const [resolution, setResolution] = useState<MirandaGradeBandResolution>(() =>
-    resolveMirandaGradeBandForParticipant(participantId),
+    needsAsyncHydration
+      ? resolveFromGradeSettings(syncSettings, true)
+      : resolveMirandaGradeBandForParticipant(participantId),
   );
 
   const refresh = useCallback(() => {
@@ -54,8 +63,15 @@ export function useMirandaGradeBand(participantId?: string): MirandaGradeBandRes
       return;
     }
 
-    setResolution((previous) => ({ ...previous, loading: true }));
+    const localSync = readParticipantGradeSettings(id);
+    const awaitingRemote =
+      !hasCanonicalGradeLevel(localSync.gradeLevel) && !localSync.gradeBand?.trim();
+    if (awaitingRemote) {
+      setResolution(resolveFromGradeSettings(localSync, true));
+    }
 
+    // Stale-while-revalidate: keep the current band visible during background refresh
+    // so active missions are not unmounted (questionIndex would reset to 0).
     void readParticipantGradeSettingsAsync(id).then((settings) => {
       setResolution(resolveFromGradeSettings(settings, false));
     });

@@ -1,11 +1,7 @@
 import type { StudentGradeBand } from '../types/gradeBandContentMetadata';
 import { resolveKidGradeBandWithFallback } from './gradeBandContentResolver';
 import { getStretchedBand, resolveBaseGradeBand } from './getGradeBand';
-import {
-  filterQuestionsForGradeProfile,
-  passesReasoningDepthCheck,
-  type ReasoningDepthQuestion,
-} from './reasoningDepthFilter';
+import type { ReasoningDepthQuestion } from './reasoningDepthFilter';
 
 export type GradeContentPool<T> = Partial<Record<StudentGradeBand, { questions: readonly T[] }>>;
 
@@ -63,20 +59,16 @@ export function selectAdaptiveQuestionPool<T extends ReasoningDepthQuestion>(
   });
 
   const basePool = resolveQuestionsForBand(gradeContent, baseBand);
-  const filteredBase = filterQuestionsForGradeProfile(basePool.questions, input.gradeLevel);
 
   const allowStretch = Boolean(input.allowStretch);
   const stretchedBand = getStretchedBand(baseBand);
 
   if (allowStretch && stretchedBand !== baseBand) {
     const stretchPool = resolveQuestionsForBand(gradeContent, stretchedBand);
-    const stretchCandidates = stretchPool.questions.filter((question) =>
-      passesReasoningDepthCheck(question, input.gradeLevel),
-    );
 
-    if (stretchCandidates.length > 0) {
+    if (stretchPool.questions.length > 0) {
       return {
-        questions: stretchCandidates,
+        questions: stretchPool.questions,
         contentBand: stretchPool.resolvedBand,
         sourceBand: stretchPool.resolvedBand,
         usedStretch: true,
@@ -85,7 +77,7 @@ export function selectAdaptiveQuestionPool<T extends ReasoningDepthQuestion>(
   }
 
   return {
-    questions: filteredBase,
+    questions: basePool.questions,
     contentBand: basePool.resolvedBand,
     sourceBand: basePool.resolvedBand,
     usedStretch: false,

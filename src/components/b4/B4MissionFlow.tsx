@@ -16,6 +16,7 @@ import {
 } from '../../data/b4';
 import { b4ContentVersionId } from '../../data/b4/b4AdaptiveBuilder';
 import { useB4GradeBand } from '../../hooks/useB4GradeBand';
+import { useStableAdaptiveMissionConfig } from '../../hooks/useStableAdaptiveMissionConfig';
 import MirandaGradeBandPreview from '../miranda/MirandaGradeBandPreview';
 import B4BaselineGradeGate from '../b4-baseline-check/B4BaselineGradeGate';
 import { readActiveChildParticipantId, CHILD_PROFILE_UPDATED_EVENT } from '../../config/activeChildParticipant';
@@ -64,7 +65,6 @@ export default function B4MissionFlow({
       return;
     }
 
-    setGradeReady(false);
     const settings = await readParticipantGradeSettingsAsync(participantId);
     const weekGrade = await ensureWeekGradeLevel(participantId, weekId);
     setGradeSettings(settings);
@@ -104,13 +104,41 @@ export default function B4MissionFlow({
         })
       : gradeResolution.band);
 
-  const config = useMemo(
+  const resolvedConfig = useMemo(
     () =>
       resolveB4MissionConfig(missionId, activeGradeBand, {
         participantId,
         gradeLevel: lockedGradeLevel ?? gradeSettings.gradeLevel,
       }),
     [activeGradeBand, gradeSettings.gradeLevel, lockedGradeLevel, missionId, participantId],
+  );
+  const config = useStableAdaptiveMissionConfig(resolvedConfig);
+
+  const gradeDiagnostics = useMemo(
+    () => ({
+      participantId,
+      gradeLevel: lockedGradeLevel ?? gradeSettings.gradeLevel,
+      familyGradeBand: gradeSettings.gradeBand,
+      baseBand: lockedGradeLevel
+        ? resolveMirandaGradeBandKey({
+            gradeLevel: lockedGradeLevel,
+            familyGradeBand: gradeSettings.gradeBand,
+          })
+        : activeGradeBand,
+      contentBand: config?.adaptiveMeta?.contentBand ?? activeGradeBand,
+      allowStretch: gradeSettings.allowStretch,
+      usedStretch: config?.adaptiveMeta?.usedStretch ?? false,
+    }),
+    [
+      activeGradeBand,
+      config?.adaptiveMeta?.contentBand,
+      config?.adaptiveMeta?.usedStretch,
+      gradeSettings.allowStretch,
+      gradeSettings.gradeBand,
+      gradeSettings.gradeLevel,
+      lockedGradeLevel,
+      participantId,
+    ],
   );
 
   const completionContext = useMemo(() => {
@@ -124,21 +152,25 @@ export default function B4MissionFlow({
     };
   }, [activeGradeBand, gradeSettings.gradeLevel, lockedGradeLevel, missionId]);
 
-  if (!mission || !config) {
+  if (!mission) {
     return null;
   }
 
-  const showPreviewPill = Boolean(previewBand);
-  const needsGradeGate =
-    skipLanding && embedded && !showPreviewPill && participantId && gradeReady && !hasGrade;
-
-  if (skipLanding && embedded && !showPreviewPill && !gradeReady) {
+  if (!config && !gradeReady) {
     return (
       <div className={themeClassName}>
         <p className="bbc-fieldHint" role="status">Loading mission…</p>
       </div>
     );
   }
+
+  if (!config) {
+    return null;
+  }
+
+  const showPreviewPill = Boolean(previewBand);
+  const needsGradeGate =
+    skipLanding && embedded && !showPreviewPill && participantId && gradeReady && !hasGrade;
 
   if (needsGradeGate) {
     return (
@@ -168,6 +200,8 @@ export default function B4MissionFlow({
         skipLanding={skipLanding || hasGrade}
         familyPortalPath={familyPortalPath}
         completionContext={completionContext}
+        gradeDiagnostics={gradeDiagnostics}
+        missionCharacterId="b4"
       />
     </>
   );

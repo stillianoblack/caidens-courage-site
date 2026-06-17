@@ -12,6 +12,9 @@ type GameQuestionRendererProps = {
   answer: GameAnswerValue;
   checked: boolean;
   onPlaySelect?: () => void;
+  onHoverChoice?: () => void;
+  answerListClassName?: string;
+  answerVariant?: 'default' | 'cinematic';
   onSelectChoice: (id: string) => void;
   onSelectTrueFalse: (value: boolean) => void;
   onSequenceTap: (id: string) => void;
@@ -27,6 +30,9 @@ export default function GameQuestionRenderer({
   answer,
   checked,
   onPlaySelect,
+  onHoverChoice,
+  answerListClassName,
+  answerVariant = 'default',
   onSelectChoice,
   onSelectTrueFalse,
   onSequenceTap,
@@ -132,12 +138,14 @@ export default function GameQuestionRenderer({
 
     return (
       <AnswerChoiceList
-        className="bbc-answers"
+        className={['bbc-answers', answerListClassName].filter(Boolean).join(' ')}
+        variant={answerVariant}
         options={question.options}
         selectedId={selectedId}
         correctId={question.correctId}
         checked={checked}
         showLetterPrefix={showLetterPrefix}
+        onHoverChoice={onHoverChoice}
         onSelect={(id) => {
           playSelect();
           onSelectChoice(id);

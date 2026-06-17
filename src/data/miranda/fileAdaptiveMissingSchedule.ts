@@ -79,6 +79,36 @@ export const MIRANDA_MISSING_SCHEDULE_FILE: MirandaAdaptiveFile = {
           hint: 'Think about what a schedule helps students know.',
           skillTags: ['Inference'],
         },
+        {
+          id: 'ms-23-q4',
+          question: 'What happened before Miranda found the schedule card?',
+          options: [
+            { id: 'a', label: 'Miranda hung a new card on the board' },
+            { id: 'b', label: 'Focus Flame ended for the day' },
+            { id: 'c', label: 'The teacher carried folders from the board area' },
+            { id: 'd', label: 'Students packed up for lunch' },
+          ],
+          correctAnswer: 'c',
+          explanation:
+            'The passage says Miranda remembered the teacher carrying folders before she found the card underneath.',
+          hint: 'Think about the order of events in the story.',
+          skillTags: ['Sequencing'],
+        },
+        {
+          id: 'ms-23-q5',
+          question: 'What did Miranda do to solve the problem?',
+          options: [
+            { id: 'a', label: 'She asked every student to search outside' },
+            { id: 'b', label: 'She erased the board and started over' },
+            { id: 'c', label: 'She waited until lunch to look again' },
+            { id: 'd', label: 'She checked near the folders at the reading table' },
+          ],
+          correctAnswer: 'd',
+          explanation:
+            'Miranda checked near the folders by the reading table and found the schedule card tucked underneath.',
+          hint: 'Where did Miranda search after remembering the folders?',
+          skillTags: ['Reading Comprehension', 'Inference'],
+        },
       ],
     },
     '4-5': {
@@ -134,6 +164,36 @@ export const MIRANDA_MISSING_SCHEDULE_FILE: MirandaAdaptiveFile = {
           hint: 'Think about what detectives do.',
           skillTags: ['Inference', 'Character'],
         },
+        {
+          id: 'ms-45-q4',
+          question: 'What activity were students about to begin?',
+          options: [
+            { id: 'a', label: 'Lunch' },
+            { id: 'b', label: 'Recess' },
+            { id: 'c', label: 'Focus Flame' },
+            { id: 'd', label: 'A field trip' },
+          ],
+          correctAnswer: 'c',
+          explanation:
+            'The passage says the Focus Flame activity was about to begin when Miranda noticed the problem.',
+          hint: 'Look at the first sentence for the activity name.',
+          skillTags: ['Reading Comprehension'],
+        },
+        {
+          id: 'ms-45-q5',
+          question: 'Why did Miranda scan the room quietly?',
+          options: [
+            { id: 'a', label: 'She was afraid of getting in trouble' },
+            { id: 'b', label: 'She wanted to surprise the teacher' },
+            { id: 'c', label: 'She did not think the schedule mattered' },
+            { id: 'd', label: 'She did not want to interrupt the class' },
+          ],
+          correctAnswer: 'd',
+          explanation:
+            'Miranda scanned the room instead of interrupting the class while the activity was starting.',
+          hint: 'Think about what was happening when she looked for the card.',
+          skillTags: ['Inference', 'Character'],
+        },
       ],
     },
     '6-8': {
@@ -187,6 +247,36 @@ export const MIRANDA_MISSING_SCHEDULE_FILE: MirandaAdaptiveFile = {
           explanation: 'Miranda used clues from the room to figure out what likely happened.',
           hint: 'Detectives infer when they combine clues.',
           skillTags: ['Vocabulary', 'Inference'],
+        },
+        {
+          id: 'ms-68-q4',
+          question: 'What sequence did Miranda reconstruct?',
+          options: [
+            { id: 'a', label: 'Students left, then returned with the card' },
+            { id: 'b', label: 'The teacher gathered materials, carried folders, then started the activity' },
+            { id: 'c', label: 'Miranda erased the board, then posted a new schedule' },
+            { id: 'd', label: 'Lunch ended, then recess began' },
+          ],
+          correctAnswer: 'b',
+          explanation:
+            'Miranda reconstructed that the teacher gathered materials, carried folders to the reading table, and then started the activity.',
+          hint: 'Look for the order of events Miranda pieced together.',
+          skillTags: ['Sequencing', 'Analysis'],
+        },
+        {
+          id: 'ms-68-q5',
+          question: 'What can readers infer about how the card was moved?',
+          options: [
+            { id: 'a', label: 'Someone hid it on purpose' },
+            { id: 'b', label: 'It was moved accidentally when folders were carried' },
+            { id: 'c', label: 'It was never posted that day' },
+            { id: 'd', label: 'A student took it home' },
+          ],
+          correctAnswer: 'b',
+          explanation:
+            'Miranda inferred the schedule card had been moved accidentally when the teacher carried the folders.',
+          hint: 'What does Miranda conclude from the evidence?',
+          skillTags: ['Inference', 'Evidence'],
         },
       ],
     },

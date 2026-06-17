@@ -93,6 +93,7 @@ export function buildMirandaAdaptiveConfig(
 ): GameAssessmentConfig {
   const selection = finalizeAdaptiveQuestions(file.gradeContent, {
     missionId: file.id,
+    characterId: file.character,
     gradeBand,
     previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,

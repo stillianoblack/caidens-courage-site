@@ -110,8 +110,7 @@ export function resolveMirandaGradeBandForParticipant(
   participantId?: string,
 ): MirandaGradeBandResolution {
   const settings = readParticipantGradeSettings(participantId);
-  const id = participantId?.trim() || readActiveChildParticipantId();
-  return buildGradeResolution(settings, Boolean(id));
+  return buildGradeResolution(settings, false);
 }
 
 export function resolveMirandaGradeBandKey(input: {

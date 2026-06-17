@@ -1,0 +1,334 @@
+/* Dark glass Explore overlay — desktop on-map + mobile stacked section */
+
+.heroExploreOverlay--onMap {
+  position: absolute;
+  inset: 0.85rem auto 0.85rem 0.85rem;
+  width: min(28rem, 52%);
+  max-width: calc(100% - 1.7rem);
+  z-index: 4;
+  pointer-events: none;
+  display: flex;
+  align-items: stretch;
+}
+
+.heroExploreOverlay--stacked {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0.5rem;
+}
+
+.heroExploreOverlayPanel {
+  pointer-events: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1rem 1rem 1.1rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 20, 38, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 18px 48px -20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.heroExploreOverlay--onMap .heroExploreOverlayPanel {
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.heroExploreOverlayTitle {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.heroExploreOverlayBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.heroExploreOverlayWeekList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.heroExploreOverlayWeekRow {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.heroExploreOverlayWeekRow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.heroExploreOverlayWeekRow--active {
+  border-color: rgba(240, 208, 120, 0.65);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px var(--week-accent-glow, rgba(240, 208, 120, 0.35));
+}
+
+.heroExploreOverlayWeekRow--locked {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.heroExploreOverlayWeekRow[data-week-accent='week1'] {
+  --week-accent-glow: rgba(37, 99, 235, 0.45);
+}
+
+.heroExploreOverlayWeekRow[data-week-accent='week2'] {
+  --week-accent-glow: rgba(217, 119, 6, 0.5);
+}
+
+.heroExploreOverlayWeekRow[data-week-accent='week3'] {
+  --week-accent-glow: rgba(124, 58, 237, 0.45);
+}
+
+.heroExploreOverlayWeekRow[data-week-accent='week4'] {
+  --week-accent-glow: rgba(22, 163, 74, 0.45);
+}
+
+.heroExploreOverlayWeekBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.85rem;
+  min-height: 1.85rem;
+  padding: 0 0.35rem;
+  border-radius: 0.45rem;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.heroExploreOverlayWeekThumbWrap {
+  width: 2.35rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.heroExploreOverlayWeekThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.heroExploreOverlayWeekThumb--fallback {
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.heroExploreOverlayWeekCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.heroExploreOverlayWeekTitle {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.heroExploreOverlayWeekSel {
+  font-size: 0.68rem;
+  color: rgba(248, 250, 252, 0.72);
+  line-height: 1.3;
+}
+
+.heroExploreOverlayWeekPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.heroExploreOverlayWeekPill--complete {
+  background: rgba(22, 163, 74, 0.9);
+  color: #fff;
+}
+
+.heroExploreOverlayWeekPill--inProgress,
+.heroExploreOverlayWeekPill--selected {
+  background: rgba(37, 99, 235, 0.92);
+  color: #fff;
+}
+
+.heroExploreOverlayWeekPill--available {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.heroExploreOverlayWeekPill--locked {
+  background: rgba(15, 23, 42, 0.65);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.heroExploreOverlayDetail {
+  padding: 0.85rem 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.heroExploreOverlayDetail[data-week-accent='week1'] {
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+.heroExploreOverlayDetail[data-week-accent='week2'] {
+  border-color: rgba(217, 119, 6, 0.38);
+}
+
+.heroExploreOverlayDetail[data-week-accent='week3'] {
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.heroExploreOverlayDetail[data-week-accent='week4'] {
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+.heroExploreOverlayDetailEyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.62);
+}
+
+.heroExploreOverlayDetailTitle {
+  margin: 0.2rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.heroExploreOverlayDetailSel {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(191, 219, 254, 0.92);
+}
+
+.heroExploreOverlayDetailDesc {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(248, 250, 252, 0.78);
+}
+
+.heroExploreOverlayDetailReward {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(240, 208, 120, 0.95);
+}
+
+.heroExploreOverlayDetailStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(248, 250, 252, 0.68);
+}
+
+.heroExploreOverlayCta {
+  margin-top: 0.7rem;
+  width: 100%;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.heroExploreOverlayCta--complete {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.heroExploreOverlayCta--locked {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  cursor: default;
+}
+
+@media (min-width: 900px) {
+  .heroExploreOverlayBody {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .heroExploreOverlayWeekList {
+    flex: 1 1 52%;
+    min-width: 0;
+  }
+
+  .heroExploreOverlayDetail {
+    flex: 1 1 48%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .heroExploreOverlay--stacked .heroExploreOverlayPanel {
+    border-radius: 1rem;
+    background: rgba(12, 20, 38, 0.88);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroExploreOverlayWeekRow {
+    transition: none;
+  }
+}

@@ -1,0 +1,338 @@
+/* Dark glass mission-control overlay — sits on hero (desktop/tablet) */
+
+.courageHubMissionControlOverlay {
+  position: absolute;
+  top: 3.85rem;
+  left: 0.75rem;
+  right: auto;
+  bottom: 0.75rem;
+  z-index: 5;
+  width: min(46vw, 32.5rem);
+  max-width: min(calc(100% - 1.5rem), 32.5rem);
+  min-width: min(26.25rem, calc(100% - 1.5rem));
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.courageHubMissionControlOverlayHeader {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem 1rem 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: none;
+  background: rgba(10, 16, 32, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.courageHubMissionControlOverlayHeading {
+  min-width: 0;
+}
+
+.courageHubMissionControlOverlayTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.courageHubMissionControlOverlaySubtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(191, 219, 254, 0.85);
+}
+
+.courageHubMissionControlOverlayBack {
+  flex-shrink: 0;
+  min-height: 1.85rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.9);
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.courageHubMissionControlOverlayBack:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.courageHubMissionControlOverlayBody {
+  pointer-events: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 0 0 1rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 14, 28, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 18px 48px -20px rgba(0, 0, 0, 0.6);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.courageHubMissionControlOverlayBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.courageHubMissionControlOverlayBody::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
+
+/* Glass overrides for panels inside overlay */
+.courageHubMissionControlOverlay .courageMissionListPanel,
+.courageHubMissionControlOverlay .courageActivitiesPanel,
+.courageHubMissionControlOverlay .courageQuestListPanel {
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanelHeader,
+.courageHubMissionControlOverlay .courageActivitiesPanelHeader,
+.courageHubMissionControlOverlay .courageQuestListPanelHeader {
+  display: none;
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanelIntro,
+.courageHubMissionControlOverlay .courageActivitiesPanelIntro,
+.courageHubMissionControlOverlay .courageQuestListPanelIntro,
+.courageHubMissionControlOverlay .courageMissionListPanelProgressLabel,
+.courageHubMissionControlOverlay .courageMissionListPanelProgressCount,
+.courageHubMissionControlOverlay .courageMissionListPanelProgressMeta {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanelProgress {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  padding: 0.65rem 1rem 0.85rem;
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanelProgressTrack {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.courageHubMissionControlOverlay .courageMissionListRows {
+  overflow-y: visible;
+  flex: none;
+  padding: 0.35rem 1rem 1.15rem;
+  gap: 0.85rem;
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanel .courageMissionListRowTitle {
+  color: #fff;
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanel .courageMissionListRowCharacter,
+.courageHubMissionControlOverlay .courageMissionListPanel .courageMissionListRowReward,
+.courageHubMissionControlOverlay .courageMissionListPanel .courageMissionListRowMeta {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.courageHubMissionControlOverlay .courageMissionListPanel .courageMissionListRow--compact {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Activities — dark glass resource cards */
+.courageHubMissionControlOverlay .courageActivitiesPanel .week1Extras,
+.courageHubMobileDarkSection .courageActivitiesPanel .week1Extras {
+  overflow: visible;
+  padding: 0.35rem 0.85rem 1rem;
+}
+
+.courageHubMissionControlOverlay .week1ExtrasTitle,
+.courageHubMobileDarkSection .week1ExtrasTitle {
+  color: #f8fafc;
+}
+
+.courageHubMissionControlOverlay .week1ExtrasIntro,
+.courageHubMobileDarkSection .week1ExtrasIntro {
+  color: rgba(191, 219, 254, 0.78);
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCard,
+.courageHubMobileDarkSection .week1ExtrasCard {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.55);
+  min-height: auto;
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCard--locked,
+.courageHubMobileDarkSection .week1ExtrasCard--locked {
+  background: rgba(255, 255, 255, 0.03);
+  opacity: 0.62;
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCardIcon,
+.courageHubMobileDarkSection .week1ExtrasCardIcon {
+  background: linear-gradient(145deg, rgba(240, 208, 120, 0.22), rgba(15, 23, 42, 0.55));
+  border: 1px solid rgba(240, 208, 120, 0.22);
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCardTitle,
+.courageHubMobileDarkSection .week1ExtrasCardTitle {
+  color: #f8fafc;
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCardDesc,
+.courageHubMobileDarkSection .week1ExtrasCardDesc {
+  color: rgba(191, 219, 254, 0.72);
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCardBtn,
+.courageHubMobileDarkSection .week1ExtrasCardBtn {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.98));
+  color: #fff;
+  border: 1px solid rgba(147, 197, 253, 0.25);
+}
+
+.courageHubMissionControlOverlay .week1ExtrasCardBtn--disabled,
+.courageHubMobileDarkSection .week1ExtrasCardBtn--disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(226, 232, 240, 0.45);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Quests — dark glass cards */
+.courageHubMissionControlOverlay .courageQuestListPanel {
+  padding: 0.65rem 0.85rem 1rem;
+  gap: 0.65rem;
+  overflow: visible;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCard,
+.courageHubMobileDarkSection .courageQuestListCard {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCard--ready,
+.courageHubMobileDarkSection .courageQuestListCard--ready {
+  border-color: rgba(240, 208, 120, 0.45);
+  background: rgba(240, 208, 120, 0.08);
+  box-shadow: 0 0 0 1px rgba(240, 208, 120, 0.12);
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardTitle,
+.courageHubMobileDarkSection .courageQuestListCardTitle {
+  color: #f8fafc;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardDesc,
+.courageHubMissionControlOverlay .courageQuestListCardProgress,
+.courageHubMobileDarkSection .courageQuestListCardDesc,
+.courageHubMobileDarkSection .courageQuestListCardProgress {
+  color: rgba(191, 219, 254, 0.72);
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardReward,
+.courageHubMobileDarkSection .courageQuestListCardReward {
+  color: #f0d078;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardIcon,
+.courageHubMobileDarkSection .courageQuestListCardIcon {
+  background: rgba(240, 208, 120, 0.16);
+  border: 1px solid rgba(240, 208, 120, 0.22);
+  color: #f0d078;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardBar,
+.courageHubMobileDarkSection .courageQuestListCardBar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardClaimBtn,
+.courageHubMobileDarkSection .courageQuestListCardClaimBtn {
+  background: linear-gradient(135deg, rgba(240, 208, 120, 0.95), rgba(229, 192, 106, 0.98));
+  color: #1a1035;
+}
+
+.courageHubMissionControlOverlay .courageQuestListCardClaimed,
+.courageHubMobileDarkSection .courageQuestListCardClaimed {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+.courageHubMissionControlOverlay .courageQuestListPanelReady,
+.courageHubMobileDarkSection .courageQuestListPanelReady {
+  background: rgba(240, 208, 120, 0.14);
+  color: #f0d078;
+}
+
+/* Mobile dark sections below hero */
+.courageHubMobileDarkSection {
+  width: 100%;
+  min-width: 0;
+}
+
+.courageHubMobileDarkSection .courageMissionListPanel,
+.courageHubMobileDarkSection .courageActivitiesPanel,
+.courageHubMobileDarkSection .courageQuestListPanel {
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 16, 32, 0.92);
+  box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.45);
+}
+
+.courageHubMobileDarkSection .courageMissionListPanelTitle,
+.courageHubMobileDarkSection .courageActivitiesPanelTitle,
+.courageHubMobileDarkSection .courageQuestListPanelTitle {
+  color: #fff;
+}
+
+.courageHubMobileDarkSection .courageMissionListPanelIntro,
+.courageHubMobileDarkSection .courageActivitiesPanelIntro,
+.courageHubMobileDarkSection .courageQuestListPanelIntro {
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.courageHubMobileDarkSection .courageMissionListRows {
+  overflow-y: visible;
+}
+
+@media (max-width: 1100px) {
+  .courageHubMissionControlOverlay {
+    width: min(52vw, 30rem);
+    min-width: min(22rem, calc(100% - 1.5rem));
+  }
+}
+
+@media (max-width: 900px) {
+  .courageHubMissionControlOverlay {
+    width: min(58vw, 28rem);
+    min-width: min(20rem, calc(100% - 1.25rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courageHubMissionControlOverlayBack {
+    transition: none;
+  }
+}

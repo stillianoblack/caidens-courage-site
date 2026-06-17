@@ -53,7 +53,7 @@ describe('grade 4 stretch routing', () => {
     }
   });
 
-  test('grade 4 + stretch on only returns 6-8 when reasoning-depth passes', () => {
+  test('grade 4 + stretch on may serve stretch-band inventory when present', () => {
     const result = finalizeAdaptiveQuestions(quest2.gradeContent, {
       missionId: 'quest-2',
       gradeLevel: '4',
@@ -61,10 +61,15 @@ describe('grade 4 stretch routing', () => {
       allowStretch: true,
     });
 
-    for (const question of result.questions) {
-      const sourceBand = resolveQuestionSourceBand(quest2.gradeContent, question.id);
-      if (sourceBand === '6-8') {
-        expect(passesReasoningDepthCheck(question, '4')).toBe(true);
+    if (result.usedStretch) {
+      for (const question of result.questions) {
+        const sourceBand = resolveQuestionSourceBand(quest2.gradeContent, question.id);
+        expect(sourceBand).toBe('6-8');
+      }
+    } else {
+      for (const question of result.questions) {
+        const sourceBand = resolveQuestionSourceBand(quest2.gradeContent, question.id);
+        expect(sourceBand).not.toBe('6-8');
       }
     }
   });
@@ -92,21 +97,43 @@ describe('mission flows use async Supabase grade settings', () => {
     'src/components/charlie/CharlieMissionFlow.tsx',
   ];
 
-  test.each(adaptiveFlowFiles)('%s waits on async grade resolution', (relativePath) => {
+  test.each(adaptiveFlowFiles)('%s delegates to shared adaptive mission shell', (relativePath) => {
     const source = fs.readFileSync(path.join(process.cwd(), relativePath), 'utf8');
-    expect(source).toMatch(/useAdaptiveMissionGrade/);
-    expect(source).toMatch(/gradeReady/);
-    expect(source).toMatch(/GradeResolutionLoading/);
+    expect(source).toMatch(/AdaptiveMissionGameFlow/);
+    expect(source).toMatch(/resolveConfig=/);
     expect(source).not.toMatch(/readParticipantGradeSettings\(\)/);
   });
 
-  test('B4MissionFlow loads grade settings from Supabase async', () => {
+  test('AdaptiveMissionGameFlow waits on async grade resolution + frozen config', () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/mission-game/AdaptiveMissionGameFlow.tsx'),
+      'utf8',
+    );
+    expect(source).toMatch(/useAdaptiveMissionFlowConfig/);
+    expect(source).toMatch(/GradeResolutionLoading/);
+    expect(source).toMatch(/missionCharacterId=/);
+  });
+
+  test('useAdaptiveMissionFlowConfig latches grade + freezes mission config', () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), 'src/hooks/useAdaptiveMissionFlowConfig.ts'),
+      'utf8',
+    );
+    expect(source).toMatch(/useAdaptiveMissionGrade/);
+    expect(source).toMatch(/useStableAdaptiveMissionConfig/);
+    expect(source).toMatch(/gradeDiagnostics/);
+  });
+
+  test('B4MissionFlow loads grade settings from Supabase async and freezes config', () => {
     const source = fs.readFileSync(
       path.join(process.cwd(), 'src/components/b4/B4MissionFlow.tsx'),
       'utf8',
     );
     expect(source).toMatch(/useB4GradeBand/);
     expect(source).toMatch(/readParticipantGradeSettingsAsync/);
+    expect(source).toMatch(/useStableAdaptiveMissionConfig/);
+    expect(source).toMatch(/gradeDiagnostics/);
+    expect(source).toMatch(/missionCharacterId="b4"/);
   });
 
   test('useMirandaGradeBand fetches grade settings asynchronously', () => {

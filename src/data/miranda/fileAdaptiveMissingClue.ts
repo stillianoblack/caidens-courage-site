@@ -73,6 +73,36 @@ export const MIRANDA_MISSING_CLUE_FILE: MirandaAdaptiveFile = {
           hint: 'Match the picture to the blank.',
           skillTags: ['Vocabulary'],
         },
+        {
+          id: 'mcl-23-q4',
+          question: 'When were they supposed to meet?',
+          options: [
+            { id: 'a', label: 'Before school' },
+            { id: 'b', label: 'After lunch' },
+            { id: 'c', label: 'At bedtime' },
+            { id: 'd', label: 'During math class' },
+          ],
+          correctAnswer: 'b',
+          explanation:
+            'The note says "Meet by the ____ after lunch," so the meeting time is after lunch.',
+          hint: 'Read the end of the sentence on the note.',
+          skillTags: ['Reading Comprehension'],
+        },
+        {
+          id: 'mcl-23-q5',
+          question: 'How did Miranda figure out the missing word?',
+          options: [
+            { id: 'a', label: 'She picked a word at random' },
+            { id: 'b', label: 'She asked everyone to vote' },
+            { id: 'c', label: 'She matched the picture to the blank' },
+            { id: 'd', label: 'She threw the note away' },
+          ],
+          correctAnswer: 'c',
+          explanation:
+            'Miranda looked at the tree picture beside the note and matched it to the blank.',
+          hint: 'What clue was right next to the sentence?',
+          skillTags: ['Context Clues', 'Inference'],
+        },
       ],
     },
     '4-5': {
@@ -125,6 +155,36 @@ export const MIRANDA_MISSING_CLUE_FILE: MirandaAdaptiveFile = {
           hint: 'Where would branches and leaves be found?',
           skillTags: ['Inference'],
         },
+        {
+          id: 'mcl-45-q4',
+          question: 'What did Miranda compare the drawing to?',
+          options: [
+            { id: 'a', label: 'Sounds in the hallway' },
+            { id: 'b', label: 'Places around the school' },
+            { id: 'c', label: 'Her lunch tray' },
+            { id: 'd', label: 'A math worksheet' },
+          ],
+          correctAnswer: 'b',
+          explanation:
+            'Miranda compared the drawing to places around the school to find the meeting spot.',
+          hint: 'How did she connect the picture to a real location?',
+          skillTags: ['Context Clues', 'Inference'],
+        },
+        {
+          id: 'mcl-45-q5',
+          question: 'What kind of word fits the blank in "Meet by the ____"?',
+          options: [
+            { id: 'a', label: 'A number' },
+            { id: 'b', label: 'A color' },
+            { id: 'c', label: 'A person\'s name only' },
+            { id: 'd', label: 'A place word' },
+          ],
+          correctAnswer: 'd',
+          explanation:
+            'The blank needs a place word because the sentence tells where to meet.',
+          hint: 'Think about what "meet by" is asking for.',
+          skillTags: ['Vocabulary', 'Context Clues'],
+        },
       ],
     },
     '6-8': {
@@ -176,6 +236,36 @@ export const MIRANDA_MISSING_CLUE_FILE: MirandaAdaptiveFile = {
           explanation: 'Intended means the place someone planned to meet.',
           hint: 'Think about what the note writer meant to say.',
           skillTags: ['Vocabulary'],
+        },
+        {
+          id: 'mcl-68-q4',
+          question: 'Why was the missing word hard to read?',
+          options: [
+            { id: 'a', label: 'The note was torn in half' },
+            { id: 'b', label: 'It was partially smudged' },
+            { id: 'c', label: 'Miranda lost her glasses' },
+            { id: 'd', label: 'The classroom lights were off' },
+          ],
+          correctAnswer: 'b',
+          explanation:
+            'The passage describes the location word as partially smudged and unreadable.',
+          hint: 'Look for how the text describes the blank word.',
+          skillTags: ['Vocabulary', 'Reading Comprehension'],
+        },
+        {
+          id: 'mcl-68-q5',
+          question: 'What two clues did Miranda combine?',
+          options: [
+            { id: 'a', label: 'A bell and a backpack' },
+            { id: 'b', label: 'A shoe and a clock' },
+            { id: 'c', label: 'The sentence and the drawing' },
+            { id: 'd', label: 'Lunch and recess schedules' },
+          ],
+          correctAnswer: 'c',
+          explanation:
+            'Miranda used context clues from both the sentence and the sketch to infer the meeting place.',
+          hint: 'She did not rely on just one piece of evidence.',
+          skillTags: ['Context Clues', 'Analysis'],
         },
       ],
     },

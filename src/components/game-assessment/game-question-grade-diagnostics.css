@@ -1,5 +1,5 @@
 .gameQuestionGradeDiagnostics {
-  position: fixed;
+  position: fixed !important;
   right: 0.65rem;
   bottom: 5.5rem;
   z-index: 1200;

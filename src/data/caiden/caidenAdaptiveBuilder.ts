@@ -118,6 +118,7 @@ export function buildCaidenAdaptiveConfig(
 ): GameAssessmentConfig {
   const selection = finalizeAdaptiveQuestions(quest.gradeContent, {
     missionId: quest.id,
+    characterId: quest.character,
     gradeBand,
     previewBand: selectionContext?.previewBand ?? null,
     ...selectionContext,

@@ -1,0 +1,323 @@
+/* Horizontal cinematic Explore HUD — lower hero */
+
+.heroCinematicWeekSelector--lowerThird {
+  position: absolute;
+  left: 0.65rem;
+  right: 32%;
+  bottom: 0.12rem;
+  z-index: 4;
+  max-width: none;
+  pointer-events: none;
+}
+
+.heroCinematicWeekSelector--stacked {
+  width: 100%;
+  min-width: 0;
+  margin-top: 0.65rem;
+}
+
+.heroCinematicWeekSelectorCard {
+  position: relative;
+  pointer-events: auto;
+  padding: 0.5rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 15, 30, 0.46);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.45);
+  color: #f8fafc;
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week1'] {
+  border-color: rgba(147, 197, 253, 0.28);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week2'] {
+  border-color: rgba(253, 186, 116, 0.3);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week3'] {
+  border-color: rgba(196, 181, 253, 0.28);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week4'] {
+  border-color: rgba(134, 239, 172, 0.28);
+}
+
+.heroCinematicWeekSelectorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.heroCinematicWeekSelectorEyebrow {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.88);
+  background: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week1'] .heroCinematicWeekSelectorEyebrow {
+  color: rgba(147, 197, 253, 0.95);
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week2'] .heroCinematicWeekSelectorEyebrow {
+  color: rgba(253, 186, 116, 0.95);
+  background: rgba(217, 119, 6, 0.14);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week3'] .heroCinematicWeekSelectorEyebrow {
+  color: rgba(196, 181, 253, 0.95);
+  background: rgba(124, 58, 237, 0.14);
+}
+
+.heroCinematicWeekSelectorCard[data-week-accent='week4'] .heroCinematicWeekSelectorEyebrow {
+  color: rgba(134, 239, 172, 0.95);
+  background: rgba(22, 163, 74, 0.14);
+}
+
+.heroCinematicWeekSelectorTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heroCinematicWeekSelectorSel {
+  flex-shrink: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: rgba(191, 219, 254, 0.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
+}
+
+.heroCinematicWeekSelectorReward {
+  flex-shrink: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(250, 204, 21, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.38);
+}
+
+.heroCinematicWeekSelectorCta {
+  flex-shrink: 0;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.98));
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px -10px rgba(37, 99, 235, 0.75);
+}
+
+.heroCinematicWeekSelectorCta--complete {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.heroCinematicWeekSelectorCta--locked {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  cursor: default;
+}
+
+.heroCinematicWeekSelectorChips {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.3rem;
+}
+
+.heroCinematicWeekChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 2.1rem;
+  min-height: 1.85rem;
+  padding: 0.18rem 0.38rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.heroCinematicWeekChip:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+.heroCinematicWeekChip--active {
+  border-color: rgba(240, 208, 120, 0.7);
+  box-shadow:
+    0 0 0 1px var(--week-chip-glow, rgba(240, 208, 120, 0.35)),
+    0 0 14px -4px var(--week-chip-glow, rgba(240, 208, 120, 0.35));
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.heroCinematicWeekChip[data-week-accent='week1'] {
+  --week-chip-glow: rgba(37, 99, 235, 0.45);
+}
+
+.heroCinematicWeekChip[data-week-accent='week2'] {
+  --week-chip-glow: rgba(217, 119, 6, 0.5);
+}
+
+.heroCinematicWeekChip[data-week-accent='week3'] {
+  --week-chip-glow: rgba(124, 58, 237, 0.45);
+}
+
+.heroCinematicWeekChip[data-week-accent='week4'] {
+  --week-chip-glow: rgba(22, 163, 74, 0.45);
+}
+
+.heroCinematicWeekChip--locked {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.heroCinematicWeekChipLabel {
+  letter-spacing: 0.04em;
+}
+
+.heroCinematicWeekChipIcon {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+}
+
+.heroCinematicWeekChip--complete .heroCinematicWeekChipIcon {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 50%;
+  background: #22c55e;
+  position: relative;
+}
+
+.heroCinematicWeekChip--complete .heroCinematicWeekChipIcon::after {
+  content: '';
+  position: absolute;
+  left: 0.12rem;
+  top: 0.07rem;
+  width: 0.2rem;
+  height: 0.32rem;
+  border: solid #fff;
+  border-width: 0 0.1rem 0.1rem 0;
+  transform: rotate(45deg);
+}
+
+.heroCinematicWeekChip--available .heroCinematicWeekChipIcon,
+.heroCinematicWeekChip--inProgress .heroCinematicWeekChipIcon {
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.heroCinematicWeekChip--inProgress .heroCinematicWeekChipIcon {
+  background: rgba(250, 204, 21, 0.95);
+}
+
+.heroCinematicWeekChip--selected .heroCinematicWeekChipIcon {
+  border-radius: 50%;
+  background: rgba(192, 132, 252, 0.95);
+  box-shadow: 0 0 0 2px rgba(240, 208, 120, 0.5);
+}
+
+.heroCinematicWeekChip--locked .heroCinematicWeekChipIcon {
+  width: 0.45rem;
+  height: 0.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 0.12rem;
+  background: transparent;
+  position: relative;
+}
+
+.heroCinematicWeekChip--locked .heroCinematicWeekChipIcon::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -0.24rem;
+  width: 0.3rem;
+  height: 0.24rem;
+  margin-left: -0.15rem;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-bottom: none;
+  border-radius: 0.18rem 0.18rem 0 0;
+}
+
+@media (max-width: 1100px) {
+  .heroCinematicWeekSelector--lowerThird {
+    right: 24%;
+  }
+
+  .heroCinematicWeekSelectorSel,
+  .heroCinematicWeekSelectorReward {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .heroCinematicWeekSelector--stacked .heroCinematicWeekSelectorCard {
+    border-radius: 0.95rem;
+  }
+
+  .heroCinematicWeekSelector--stacked .heroCinematicWeekSelectorRow {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+  }
+
+  .heroCinematicWeekSelector--stacked .heroCinematicWeekSelectorTitle {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+
+  .heroCinematicWeekSelector--stacked .heroCinematicWeekSelectorSel,
+  .heroCinematicWeekSelector--stacked .heroCinematicWeekSelectorReward {
+    display: block;
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroCinematicWeekChip {
+    transition: none;
+  }
+}

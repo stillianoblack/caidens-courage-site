@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './idle-session-guard.css';
 
 const DEFAULT_IDLE_MS = 2 * 60 * 1000;
@@ -123,9 +124,18 @@ export default function IdleSessionGuard({
     };
   }, [endSessionNow, open]);
 
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!enabled || !open) return null;
 
-  return (
+  return createPortal(
     <div className="ds-idleGuardOverlay" role="presentation">
       <div
         className="ds-idleGuardModal"
@@ -154,6 +164,7 @@ export default function IdleSessionGuard({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -57,6 +57,7 @@
     "audit:pilot-archive": "tsx scripts/audit-pilot-archive.ts",
     "audit:pricing-account-types": "tsx scripts/audit-pricing-account-types.ts",
     "audit:student-growth": "tsx scripts/audit-student-growth.ts",
+    "audit:mission-content-gaps": "tsx scripts/audit-mission-content-gaps.ts",
     "verify:live-growth": "tsx scripts/verifyLiveGrowthMath.ts",
     "analytics:questions": "tsx scripts/buildQuestionAnalytics.ts",
     "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts"

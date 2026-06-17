@@ -8,7 +8,7 @@ import { classifyQuestionDifficultyTier } from './questionDifficultySelection';
 describe('grade band question selection', () => {
   const quest2 = CAIDEN_ADAPTIVE_QUEST_REGISTRY['quest-2'];
 
-  test('grade 4 without stretch serves 4-5 inventory only', () => {
+  test('grade 4 without stretch serves full 4-5 authored inventory', () => {
     const result = finalizeAdaptiveQuestions(quest2.gradeContent, {
       missionId: 'quest-2',
       gradeLevel: '4',
@@ -18,12 +18,12 @@ describe('grade band question selection', () => {
 
     expect(result.contentBand).toBe('4-5');
     expect(result.usedStretch).toBe(false);
-    expect(result.questions).toHaveLength(5);
-    expect(result.questions.every((question) => question.id.includes('45') || question.id.includes('__sup'))).toBe(true);
+    expect(result.questions.length).toBe(quest2.gradeContent['4-5']!.questions.length);
+    expect(result.questions.every((question) => !question.id.includes('__sup'))).toBe(true);
     expect(result.questions.some((question) => question.id === 'cq2-68-q1')).toBe(false);
   });
 
-  test('grade 4 with stretch does not serve recognition-only 6-8 questions', () => {
+  test('grade 4 with stretch serves full stretch-band authored inventory', () => {
     const result = finalizeAdaptiveQuestions(quest2.gradeContent, {
       missionId: 'quest-2',
       gradeLevel: '4',
@@ -31,14 +31,10 @@ describe('grade band question selection', () => {
       allowStretch: true,
     });
 
-    expect(result.questions.some((question) => question.id === 'cq2-68-q1')).toBe(false);
-    if (result.usedStretch) {
-      result.questions.forEach((question) => {
-        expect(passesReasoningDepthCheck(question, '4')).toBe(true);
-      });
-    } else {
-      expect(result.contentBand).toBe('4-5');
-    }
+    expect(result.usedStretch).toBe(true);
+    expect(result.contentBand).toBe('6-8');
+    expect(result.questions.length).toBe(quest2.gradeContent['6-8']!.questions.length);
+    expect(result.questions.every((question) => !question.id.includes('__sup'))).toBe(true);
   });
 
   test('cq2-68-q1 fails reasoning-depth filter for grade 4', () => {
@@ -70,7 +66,8 @@ describe('grade band question selection', () => {
 
     expect(config.adaptiveMeta?.contentBand).toBe('4-5');
     expect(config.questions.some((question) => question.id === 'cq2-68-q1')).toBe(false);
-    expect(config.questions).toHaveLength(5);
+    expect(config.questions.length).toBe(quest2.gradeContent['4-5']!.questions.length);
+    expect(config.questions.every((question) => !question.id.includes('__sup'))).toBe(true);
     expect(config.questions[0]?.diagnosticMeta?.contentBand).toBe('4-5');
   });
 });

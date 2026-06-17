@@ -1,0 +1,118 @@
+/* Dark glass month progression cards — scoped under dark center */
+
+.weeklyJourneyMonth--darkGlass {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthTitle {
+  color: #f8fafc;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthCount,
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthProgressCopy,
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthProgressCopy--muted {
+  color: rgba(191, 219, 254, 0.78);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthProgressTrack {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyProgressLabel {
+  color: rgba(226, 232, 240, 0.65);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyProgressMarker {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.55);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyProgressConnector {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthHeader {
+  margin-bottom: 1.5rem;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyMonthGrid {
+  gap: 1rem;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(12, 20, 38, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 14px 36px -20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard--locked,
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard--disabled {
+  opacity: 0.55;
+  filter: grayscale(0.25);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCardEyebrow {
+  color: rgba(191, 219, 254, 0.75);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCardTitle {
+  color: #fff;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCardSel {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCardRewardText {
+  color: #f0d078;
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCardCta {
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard--selected {
+  border-color: rgba(240, 208, 120, 0.65);
+  box-shadow:
+    0 0 0 1px var(--week-accent-glow, rgba(240, 208, 120, 0.35)),
+    0 16px 40px -18px rgba(0, 0, 0, 0.6);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard[data-week-accent='week1'] {
+  --week-accent-glow: rgba(37, 99, 235, 0.45);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard[data-week-accent='week2'] {
+  --week-accent-glow: rgba(217, 119, 6, 0.5);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard[data-week-accent='week3'] {
+  --week-accent-glow: rgba(124, 58, 237, 0.45);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyCard[data-week-accent='week4'] {
+  --week-accent-glow: rgba(22, 163, 74, 0.45);
+}
+
+.weeklyJourneyMonth--darkGlass .weeklyJourneyRecentlyCompletedTitle {
+  color: #f8fafc;
+}
+
+@media (max-width: 767px) {
+  .weeklyJourneyMonth--darkGlass .weeklyJourneyMonthGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .weeklyJourneyMonth--darkGlass .weeklyJourneyCard {
+    width: 100%;
+    max-width: 100%;
+  }
+}

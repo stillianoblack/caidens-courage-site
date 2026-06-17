@@ -1,0 +1,2072 @@
+/* Cinematic mission mode — Explore-world dark glass layout for all kid missions */
+
+:root {
+  --cinematic-bg-blur: 1px;
+  --cinematic-scrim-dark: rgba(5, 10, 22, 0.32);
+  --cinematic-glass-bg: rgba(8, 13, 28, 0.44);
+  --cinematic-glass-border: rgba(255, 255, 255, 0.1);
+  --cinematic-glass-blur: 14px;
+  --cinematic-grid-max: 100%;
+  --cinematic-grid-gap: 14px;
+  --cinematic-grid-pad-x: 0.65rem;
+  --cinematic-grid-pad-y: 0.2rem;
+  --cinematic-grid-cols: minmax(0, 0.88fr) minmax(0, 1.28fr) minmax(0, 0.84fr);
+  --cinematic-text-bright: #f8fafc;
+  --cinematic-text-muted: rgba(226, 232, 240, 0.9);
+  --cinematic-navy-mount: rgba(5, 8, 18, 0.92);
+  --cinematic-character-art-lift: -12px;
+  --cinematic-action-bar-reserve: 7.4rem;
+  --cinematic-hud-reserve: 4.85rem;
+}
+
+/* Neutralize legacy coaching-shell width caps while cinematic mode is active */
+.bbc-app--cinematicMission,
+.bbc-app--cinematicMission.bbc-app--coachingShell {
+  --game-shell-layout-max: 100%;
+  --game-main-column-max: 100%;
+}
+
+.cinematicMissionShell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cinematicMissionShellBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--cinematic-bg-blur));
+  transform: scale(1.02);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.cinematicMissionShellScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 22, 0.15) 0%,
+      var(--cinematic-scrim-dark) 48%,
+      rgba(2, 5, 12, 0.35) 100%
+    ),
+    radial-gradient(ellipse 95% 75% at 50% 18%, rgba(37, 99, 235, 0.06), transparent 58%);
+  pointer-events: none;
+}
+
+.cinematicMissionShellContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cinematicMissionGrid {
+  display: grid;
+  grid-template-columns: var(--cinematic-grid-cols);
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--cinematic-grid-gap);
+  align-items: stretch;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 auto;
+  padding: var(--cinematic-grid-pad-y) var(--cinematic-grid-pad-x);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.cinematicMissionGrid > * {
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  height: 100%;
+  align-self: stretch;
+}
+
+.cinematicMissionCharacterPanel--compact {
+  display: none !important;
+}
+
+.cinematicMissionCharacterPanel {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.cinematicMissionGameplayPanel,
+.cinematicMissionQuestionPanel {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  animation: cinematicMissionPanelIn 0.34s ease;
+}
+
+.cinematicMissionCoachPanel,
+.cinematicB4CoachPanel {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+/* —— Character hero zone (left) —— */
+.cinematicMissionCharacterPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-width: 100%;
+  padding: 0.55rem 0.55rem 0.75rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--cinematic-glass-border);
+  background: rgba(8, 13, 28, 0.44);
+  backdrop-filter: blur(var(--cinematic-glass-blur));
+  -webkit-backdrop-filter: blur(var(--cinematic-glass-blur));
+  box-shadow: 0 8px 24px -18px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.cinematicMissionCharacterStage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  padding: 0.35rem 0.1rem 0;
+  overflow: hidden;
+}
+
+.cinematicMissionCharacterGlow {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: min(92%, 17rem);
+  height: 52%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--cinematic-character-accent, #60a5fa) 38%, transparent) 0%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.cinematicMissionCharacterArtWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  margin-top: 0;
+  padding-bottom: 0.2rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.cinematicMissionCharacterSparkle {
+  position: absolute;
+  left: 50%;
+  bottom: 28%;
+  width: 4.5rem;
+  height: 4.5rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.55) 0%, transparent 68%);
+}
+
+.cinematicMissionCharacterArt {
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  background: transparent;
+  border: none;
+  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.42));
+  transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1);
+}
+
+.cinematicMissionCharacterCopy {
+  position: static;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  margin-top: 0.1rem;
+  padding: 0.45rem 0.45rem 0.1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.cinematicMissionCharacterName {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--cinematic-text-bright);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+.cinematicMissionCharacterFocus,
+.cinematicMissionCharacterMission,
+.cinematicMissionCharacterReward {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.32;
+  color: var(--cinematic-text-muted);
+}
+
+.cinematicMissionCharacterMission span {
+  font-weight: 700;
+  color: var(--cinematic-text-bright);
+}
+
+.cinematicMissionCharacterReward {
+  font-weight: 700;
+  color: rgba(250, 204, 21, 0.95);
+}
+
+/* —— Center question zone (single glass surface) —— */
+.cinematicMissionQuestionPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0.85rem 0.95rem 0.8rem;
+  border-radius: 1.15rem;
+  border: 1px solid var(--cinematic-glass-border);
+  background: rgba(8, 13, 28, 0.52);
+  backdrop-filter: blur(var(--cinematic-glass-blur));
+  -webkit-backdrop-filter: blur(var(--cinematic-glass-blur));
+  box-shadow: 0 14px 34px -24px rgba(0, 0, 0, 0.28);
+  animation: cinematicMissionPanelIn 0.34s ease;
+}
+
+.cinematicMissionQuestionBlock {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  gap: 0.5rem;
+  overflow: visible;
+}
+
+.cinematicMissionQuestionBlock .mission-quizLayoutScenario {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+.cinematicMissionQuestionBlock .mission-questionText,
+.cinematicMissionQuestionBlock .bbc-questionText {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.cinematicMissionQuestionBlock .cinematicMissionAnswersBlock {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-top: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.cinematicMissionQuestionPanel .mission-questionText,
+.cinematicMissionQuestionPanel .bbc-questionText {
+  margin: 0;
+}
+
+.cinematicMissionQuestionPanel .mission-questionText + .cinematicMissionAnswersBlock,
+.cinematicMissionQuestionPanel .bbc-questionText + .cinematicMissionAnswersBlock {
+  margin-top: 0;
+}
+
+.cinematicMissionAnswersBlock {
+  min-height: 0;
+}
+
+.cinematicMissionQuestionSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* —— B-4 coach zone (single glass surface) —— */
+.cinematicB4CoachPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  padding: 0.85rem 0.8rem 0.75rem;
+  border-radius: 1.15rem;
+  border: 1px solid var(--cinematic-glass-border);
+  background: rgba(8, 13, 28, 0.48);
+  backdrop-filter: blur(var(--cinematic-glass-blur));
+  -webkit-backdrop-filter: blur(var(--cinematic-glass-blur));
+  box-shadow: 0 12px 30px -22px rgba(0, 0, 0, 0.26);
+}
+
+.cinematicB4CoachPanel .mission-quizLayoutAsideInner {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 0.65rem;
+  min-height: auto;
+  padding-left: 0;
+  position: static;
+  top: auto;
+  overflow: visible;
+}
+
+/* Reset legacy coaching-rail layout when cinematic */
+.mission-quizLayout--cinematic {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-height: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.mission-quizLayout--cinematic > .cinematicMissionShell {
+  flex: 1 1 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.game-interactionShell.shared-mission-game--cinematic,
+.shared-mission-game--cinematic.game-interactionShell,
+.shared-mission-game--cinematic .game-interactionShell,
+.bbc-app--cinematicMission .game-interactionShell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.shared-mission-game--cinematic,
+.bbc-app--cinematicMission .shared-mission-game--cinematic {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.shared-mission-game--cinematic .game-interactionShellInner,
+.bbc-app--cinematicMission .game-interactionShellInner,
+.bbc-app--cinematicMission.bbc-app--coachingShell .game-interactionShellInner,
+.shared-mission-game--cinematic.shared-mission-game--coachingRail .game-interactionShellInner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  height: 100%;
+  min-height: 0;
+  max-width: 100%;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  overflow: hidden;
+}
+
+.shared-mission-game--cinematic .mission-questionText,
+.shared-mission-game--cinematic .bbc-questionText,
+.shared-mission-game--cinematic .bbc-answers,
+.shared-mission-game--cinematic .ds-answerList,
+.shared-mission-game--cinematic .bbc-answerCard,
+.shared-mission-game--cinematic .ds-answerChoice,
+.shared-mission-game--cinematic .mission-quizLayoutScenario .ds-questionCard--gameScenario {
+  max-width: none;
+  width: 100%;
+}
+
+.bbc-app--cinematicMission.bbc-app--coachingShell .bbc-main--quiz,
+.bbc-app--cinematicMission.bbc-app--coachingShell {
+  background: transparent;
+}
+
+/* Shell + portal frame — let monthly world show through */
+.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.kids-adventure-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-shell--familyMobileGame .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  background: transparent !important;
+}
+
+.kids-adventure-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-shell--familyMobileGame .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  background: transparent !important;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz {
+  background: transparent;
+  padding-top: 0;
+}
+
+.portal-shell .portal-contentFrame:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.portal-shell .family-content:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.portal-shell .pilot-content:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  background: transparent !important;
+  max-width: none;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Keep portal chrome white — only the in-mission gameplay HUD floats over the world */
+.portal-shell:has(.bbc-app--cinematicMission.bbc-app--game-active) .portal-header,
+.portal-shell:has(.bbc-app--cinematicMission.bbc-app--game-active) .familyPortalMobileHeader {
+  background: rgba(255, 252, 247, 0.92) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--family-border, rgba(36, 62, 112, 0.12));
+  box-shadow:
+    0 1px 0 var(--family-border, rgba(36, 62, 112, 0.1)),
+    0 6px 16px -12px rgba(26, 47, 82, 0.18);
+}
+
+.portal-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.kids-adventure-shell .portal-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-shell--familyMobileGame .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.kids-adventure-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-shell--familyMobileGame .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  background: transparent !important;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active .bbc-main--quiz,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--coachingShell.bbc-app--game-active .bbc-main--quiz {
+  background: transparent !important;
+  padding-top: 0;
+  overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  overflow: hidden;
+  max-width: 100%;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar,
+.portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar {
+  position: relative;
+  bottom: auto;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  margin-top: 0;
+  z-index: 30;
+  width: 100%;
+}
+
+/* App-level backdrop covers HUD — avoid nested fixed bg inside scrollable main */
+.bbc-app--cinematicMission .cinematicMissionShellBg,
+.bbc-app--cinematicMission .cinematicMissionShellScrim {
+  display: none;
+}
+
+.bbc-app--cinematicMission .cinematicMissionShell,
+.bbc-app--cinematicMission .cinematicMissionShellContent {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Miranda legacy quiz width cap must not constrain cinematic grid */
+.miranda-game .game-quizWrap.mission-quizLayout--cinematic,
+.bbc-app--cinematicMission.miranda-game .game-quizWrap {
+  max-width: none;
+  width: 100%;
+}
+
+/* Full-viewport cinematic backdrop — hero extends behind mission HUD row */
+.bbc-app--cinematicMission.bbc-app--game-active {
+  position: relative;
+  background: transparent !important;
+}
+
+.cinematicMissionAppBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--cinematic-bg-blur));
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.cinematicMissionAppScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 10, 22, 0.15) 0%,
+      var(--cinematic-scrim-dark) 48%,
+      rgba(2, 5, 12, 0.35) 100%
+    );
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active
+  > :not(.cinematicMissionAppBackdrop):not(.cinematicMissionAppScrim):not(.bbc-bottomBar):not(.gameQuestionGradeDiagnostics) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Do not override fixed portal overlays */
+.ds-idleGuardOverlay {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+.kids-adventure-shell .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active,
+.portal-shell--familyMobileGame .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+  background: transparent !important;
+}
+
+/* Cinematic dark — separate question prompt always light (all characters) */
+.bbc-app--cinematicMission .bbc-questionText,
+.bbc-app--cinematicMission .mission-questionText,
+.bbc-app--cinematicMission .shared-mission-game--coachingRail .bbc-questionText,
+.bbc-app--cinematicMission .shared-mission-game--coachingRail .mission-questionText,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .bbc-questionText,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .mission-questionText,
+.bbc-app--cinematicMission .cinematicMissionGameplayPanel .bbc-questionText,
+.shared-mission-game--cinematic .bbc-questionText,
+.shared-mission-game--cinematic .mission-questionText {
+  color: var(--cinematic-text-bright) !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* —— Cinematic HUD top nav (dark mode quiz only) —— */
+.bbc-app--cinematicMission .ds-gameplayTopBar,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud {
+  position: relative;
+  z-index: 12;
+  background: transparent !important;
+  border: none;
+  box-shadow: none !important;
+  max-width: var(--cinematic-grid-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: max(0.35rem, env(safe-area-inset-top));
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-progressGlow,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-progressGlow {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 13, 28, 0.42) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-questionProgress,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-questionProgress {
+  color: rgba(226, 232, 240, 0.88);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .portal-breadcrumb--game,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .portal-breadcrumb--game,
+.bbc-app--cinematicMission .ds-gameplayTopBar .portal-breadcrumb,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .portal-breadcrumb,
+.bbc-app--cinematicMission .ds-gameplayTopBar .portal-breadcrumb-label,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .portal-breadcrumb-label,
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-backText,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-backText,
+.bbc-app--cinematicMission .ds-gameplayTopBar-back a,
+.bbc-app--cinematicMission .ds-gameplayTopBar-back button,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-back a,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-back button {
+  color: rgba(248, 250, 252, 0.94) !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .portal-breadcrumb-icon,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .portal-breadcrumb-icon {
+  color: rgba(248, 250, 252, 0.94) !important;
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-progressTrack,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-progressTrack {
+  height: 0.5625rem;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .focusCoinWalletBadge,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .focusCoinWalletBadge {
+  background: rgba(8, 13, 28, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(253, 224, 71, 0.95) !important;
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-playerChip,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-playerChip {
+  padding: 0.22rem 0.55rem 0.22rem 0.22rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 13, 28, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.35);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-playerAvatar,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-playerAvatar {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(124, 58, 237, 0.85));
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-playerName,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-playerName {
+  color: rgba(248, 250, 252, 0.94);
+  font-weight: 800;
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-flames,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-flames {
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 13, 28, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-soundBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-readAloudBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar .cinematicMissionThemeToggle,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-soundBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-readAloudBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .cinematicMissionThemeToggle {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(8, 13, 28, 0.5) !important;
+  color: rgba(248, 250, 252, 0.94) !important;
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-backIconBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar .game-backBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-backIconBtn,
+.bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .game-backBtn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 13, 28, 0.5);
+  color: rgba(248, 250, 252, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 719px) {
+  .bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-controls .family-portalMobilePlayerAvatar,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-controls .family-portalMobilePlayerAvatar {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(124, 58, 237, 0.85));
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-controls .family-portalMobileChip,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-controls .family-portalMobileChip {
+    background: rgba(8, 13, 28, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: rgba(253, 224, 71, 0.95) !important;
+  }
+
+  .bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-controls .ds-gameplayTopBar-soundBtn,
+  .bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-controls .ds-gameplayTopBar-readAloudBtn,
+  .bbc-app--cinematicMission .ds-gameplayTopBar .ds-gameplayTopBar-controls .cinematicMissionThemeToggle,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-controls .ds-gameplayTopBar-soundBtn,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-controls .ds-gameplayTopBar-readAloudBtn,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud .ds-gameplayTopBar-controls .cinematicMissionThemeToggle {
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(8, 13, 28, 0.5) !important;
+    color: rgba(248, 250, 252, 0.94) !important;
+  }
+}
+
+/* —— Character celebration animation hooks (CSS first; Lottie/Rive later) —— */
+.cinematicMissionCharacterPanel[data-character-state='thinking'] .cinematicMissionCharacterArt {
+  animation: cinematicCharacterThinking 1.6s ease-in-out infinite;
+}
+
+.cinematicMissionCharacterPanel[data-character-state='success'] .cinematicMissionCharacterArt {
+  animation: cinematicCharacterSuccess 1s ease;
+}
+
+.cinematicMissionCharacterPanel[data-character-state='success'] .cinematicMissionCharacterGlow {
+  animation: cinematicCharacterGlowPulse 1s ease;
+}
+
+.cinematicMissionCharacterPanel[data-character-state='success'] .cinematicMissionCharacterSparkle {
+  animation: cinematicCharacterCoinSparkle 1s ease;
+}
+
+.cinematicMissionCharacterPanel[data-character-state='incorrect'] .cinematicMissionCharacterArt {
+  animation: cinematicCharacterIncorrect 0.85s ease;
+}
+
+@keyframes cinematicCharacterSuccess {
+  0% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) scale(1);
+  }
+  35% {
+    transform: translateY(calc(var(--cinematic-character-art-lift) - 6px)) scaleX(-1) scale(1.04);
+  }
+  65% {
+    transform: translateY(calc(var(--cinematic-character-art-lift) - 2px)) scaleX(-1) scale(1.02);
+  }
+  100% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) scale(1);
+  }
+}
+
+@keyframes cinematicCharacterGlowPulse {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+
+@keyframes cinematicCharacterCoinSparkle {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.6);
+  }
+  40% {
+    opacity: 0.9;
+    transform: translateX(-50%) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.35);
+  }
+}
+
+@keyframes cinematicCharacterThinking {
+  0%,
+  100% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1);
+  }
+  50% {
+    transform: translateY(calc(var(--cinematic-character-art-lift) - 2px)) scaleX(-1);
+  }
+}
+
+@keyframes cinematicCharacterIncorrect {
+  0%,
+  100% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) translateX(0);
+  }
+  20% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) translateX(-4px);
+  }
+  40% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) translateX(4px);
+  }
+  60% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) translateX(-3px);
+  }
+  80% {
+    transform: translateY(var(--cinematic-character-art-lift)) scaleX(-1) translateX(2px);
+  }
+}
+
+/* Scenario card — dark glass */
+.cinematicMissionGameplayPanel .mission-quizLayoutScenario,
+.cinematicMissionQuestionPanel .mission-quizLayoutScenario {
+  margin: 0;
+}
+
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 0.75rem;
+}
+
+/* Hide scenario thumbnail in cinematic center — hero lives in left column */
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-characterScenarioImage,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCardAvatar,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCardHeroImage,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCardHeroPanel {
+  display: none !important;
+}
+
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--withSceneImage,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario {
+  display: block;
+}
+
+.cinematicMissionGameplayPanel .ds-questionCard--gameScenario .ds-questionCardLabel,
+.cinematicMissionQuestionPanel .ds-questionCard--gameScenario .ds-questionCardLabel,
+.bbc-app--cinematicMission .ds-questionCard--gameScenario .ds-questionCardLabel {
+  color: rgba(251, 191, 36, 0.9);
+}
+
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario .ds-questionCardText {
+  font-size: clamp(0.94rem, 1.75vw, 1.08rem);
+  line-height: 1.42;
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario .ds-questionCardTag {
+  font-size: 0.9rem;
+}
+
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .mission-questionText {
+  font-size: clamp(1.05rem, 2.1vw, 1.28rem);
+  line-height: 1.32;
+}
+
+.cinematicMissionGameplayPanel .ds-characterScenarioImage,
+.cinematicMissionQuestionPanel .ds-characterScenarioImage,
+.bbc-app--cinematicMission .ds-characterScenarioImage {
+  max-width: 4.75rem;
+  max-height: 4.25rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  object-fit: contain;
+}
+
+.cinematicMissionGameplayPanel .mission-questionText,
+.cinematicMissionQuestionPanel .mission-questionText,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .bbc-questionText,
+.bbc-app--cinematicMission .cinematicMissionGameplayPanel .bbc-questionText,
+.shared-mission-game--cinematic .cinematicMissionQuestionPanel .bbc-questionText,
+.shared-mission-game--cinematic .cinematicMissionQuestionPanel .mission-questionText,
+.bbc-app--cinematicMission.shared-mission-game--coachingRail .cinematicMissionQuestionPanel .bbc-questionText,
+.bbc-app--cinematicMission .shared-mission-game--coachingRail .cinematicMissionQuestionPanel .bbc-questionText {
+  margin: 0;
+  font-size: clamp(1.02rem, 2.05vw, 1.24rem);
+  font-weight: 800;
+  color: var(--cinematic-text-bright);
+  line-height: 1.32;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* Answer choices — dark glass cards */
+.cinematicMissionGameplayPanel .ds-answerList,
+.cinematicMissionGameplayPanel .cinematicMissionAnswerList,
+.cinematicMissionAnswersBlock .ds-answerList,
+.cinematicMissionAnswersBlock .cinematicMissionAnswerList {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 0.42rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 0;
+}
+
+.cinematicMissionAnswersBlock .ds-answerList > li,
+.cinematicMissionAnswersBlock .cinematicMissionAnswerList > li {
+  display: flex;
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+}
+
+/* Answer choices — override global white bbc-answerCard styles */
+.bbc-app--cinematicMission .cinematicAnswerChoice,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-answerChoice,
+.bbc-app--cinematicMission .cinematicMissionQuestionPanel .bbc-answerCard {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 2.75rem;
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: rgba(8, 14, 28, 0.5) !important;
+  color: var(--cinematic-text-bright) !important;
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.32;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transform: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bbc-app--cinematicMission .cinematicAnswerChoice:hover:not(:disabled),
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice:hover:not(:disabled),
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard:hover:not(:disabled) {
+  border-color: rgba(96, 165, 250, 0.6) !important;
+  background: rgba(37, 99, 235, 0.22) !important;
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.25),
+    0 0 22px -8px rgba(59, 130, 246, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.bbc-app--cinematicMission .cinematicAnswerChoice--selected,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice--selected,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard--selected {
+  border-color: rgba(251, 191, 36, 0.65) !important;
+  background: rgba(251, 191, 36, 0.18) !important;
+  box-shadow:
+    0 0 0 1px rgba(251, 191, 36, 0.3),
+    0 0 24px -6px rgba(251, 191, 36, 0.45) !important;
+  color: #fffbeb !important;
+}
+
+.bbc-app--cinematicMission .cinematicAnswerChoice--correct,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice--correct,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard--correct {
+  border-color: rgba(74, 222, 128, 0.58) !important;
+  background: rgba(34, 197, 94, 0.2) !important;
+  box-shadow: 0 0 18px -8px rgba(34, 197, 94, 0.4) !important;
+}
+
+.bbc-app--cinematicMission .cinematicAnswerChoice--incorrect,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice--incorrect,
+.bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard--wrong {
+  border-color: rgba(248, 113, 113, 0.52) !important;
+  background: rgba(239, 68, 68, 0.16) !important;
+  opacity: 1;
+}
+
+.cinematicMissionGameplayPanel .game-seqOrderItem,
+.cinematicMissionGameplayPanel .game-seqClear,
+.cinematicMissionQuestionPanel .game-seqOrderItem,
+.cinematicMissionQuestionPanel .game-seqClear {
+  color: #e2e8f0;
+}
+
+.bbc-app--cinematicMission .bbc-answers--inline .bbc-answerCard {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 14, 28, 0.45);
+  color: var(--cinematic-text-bright);
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholder,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-learningMoment {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* B-4 coaching rail — dark glass */
+.bbc-app--cinematicMission .ds-coachingRailPlaceholder {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 14, 28, 0.42);
+  border-style: solid;
+  padding: 0.85rem 0.95rem;
+}
+
+.bbc-app--cinematicMission .ds-coachingRailPlaceholderBadge {
+  color: rgba(147, 197, 253, 0.9);
+}
+
+.bbc-app--cinematicMission .ds-coachingRailPlaceholderText {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.bbc-app--cinematicMission .ds-coachingRailCaret {
+  border-right-color: rgba(8, 14, 28, 0.72);
+  filter: drop-shadow(-1px 0 0 rgba(255, 255, 255, 0.08));
+}
+
+.bbc-app--cinematicMission .ds-learningMoment {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 14, 28, 0.5);
+  color: var(--cinematic-text-bright);
+}
+
+.bbc-app--cinematicMission .ds-learningMomentHeadline,
+.bbc-app--cinematicMission .ds-learningMomentBody,
+.bbc-app--cinematicMission .ds-learningMomentSectionText,
+.bbc-app--cinematicMission .ds-learningMomentTips,
+.bbc-app--cinematicMission .ds-learningMomentTipsLabel,
+.bbc-app--cinematicMission .ds-learningMomentSectionTitle {
+  color: rgba(248, 250, 252, 0.94) !important;
+}
+
+.bbc-app--cinematicMission .ds-learningMomentBadge {
+  color: rgba(253, 224, 71, 0.92) !important;
+}
+
+/* B-4 post-answer feedback — light readable copy, semantic borders only */
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-learningMoment {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(8, 13, 28, 0.52) !important;
+  color: rgba(248, 250, 252, 0.96) !important;
+  box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.35) !important;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedback--success .ds-guideFeedbackCard,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-learningMoment--B4_LOCK_IN.ds-guideFeedbackCard {
+  border-color: rgba(52, 211, 153, 0.42) !important;
+  background: rgba(8, 20, 18, 0.58) !important;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedback--incorrect .ds-guideFeedbackCard {
+  border-color: rgba(251, 191, 36, 0.38) !important;
+  background: rgba(18, 14, 8, 0.58) !important;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentHeadline,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentBody,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentSectionText,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentTips,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentTipsLabel,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentSectionTitle,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholderText,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholderBadge {
+  color: rgba(248, 250, 252, 0.94) !important;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-guideFeedbackCard .ds-learningMomentBadge,
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholderBadge {
+  color: rgba(253, 224, 71, 0.9) !important;
+}
+
+.bbc-app--cinematicMission .ds-circleAvatar--b4,
+.bbc-app--cinematicMission .ds-circleAvatar--default {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: transparent;
+  border: none;
+  overflow: visible;
+  box-shadow: none;
+}
+
+.bbc-app--cinematicMission .ds-circleAvatar--b4 {
+  background-image: var(--cinematic-b4-coach-art);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+}
+
+.bbc-app--cinematicMission .ds-circleAvatar--b4 .ds-circleAvatarImg {
+  opacity: 0;
+}
+
+.bbc-app--cinematicMission .ds-circleAvatar--b4 .ds-circleAvatarImg,
+.bbc-app--cinematicMission .ds-circleAvatar--default .ds-circleAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-readAloud {
+  margin-top: 0.65rem;
+  flex-shrink: 0;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .mission-quizLayoutAsideInner {
+  gap: 0.65rem;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailShell {
+  flex-shrink: 0;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-learningMomentB4Top {
+  margin-bottom: 0.45rem;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholderText {
+  margin-top: 0.35rem;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel .ds-coachingRailPlaceholder {
+  flex-shrink: 0;
+  padding-bottom: 0.15rem;
+}
+
+.bbc-app--cinematicMission .cinematicB4CoachPanel > .cinematicMissionPlayerRewardCard {
+  margin-top: auto;
+}
+
+/* Player / reward summary card — game HUD chips */
+.cinematicMissionPlayerRewardCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.55rem 0.58rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 13, 28, 0.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.cinematicMissionPlayerRewardCardHud {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.55rem 0.65rem;
+}
+
+.cinematicMissionPlayerRewardCardAvatar {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 0.92rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(124, 58, 237, 0.85));
+  color: #fff;
+}
+
+.cinematicMissionPlayerRewardCardEyebrow {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.58);
+}
+
+.cinematicMissionPlayerRewardCardName {
+  margin: 0.06rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.cinematicMissionPlayerRewardCardWeek {
+  margin: 0.12rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(191, 219, 254, 0.86);
+}
+
+.cinematicMissionPlayerRewardCardCoins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.28rem 0.48rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cinematicMissionPlayerRewardCardCoinIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinematicMissionPlayerRewardCardCoinIconSvg {
+  display: block;
+}
+
+.cinematicMissionPlayerRewardCardCoinValue {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #fde68a;
+}
+
+.cinematicMissionPlayerRewardCardChips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cinematicMissionPlayerRewardCardChip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.38rem 0.42rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cinematicMissionPlayerRewardCardChipIcon {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cinematicMissionPlayerRewardCardChipIcon--coin {
+  background: rgba(251, 191, 36, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+}
+
+.cinematicMissionPlayerRewardCardChipIcon--badge {
+  background: linear-gradient(145deg, rgba(59, 130, 246, 0.35), rgba(37, 99, 235, 0.2));
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  clip-path: polygon(50% 0%, 92% 16%, 78% 100%, 22% 100%, 8% 16%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.cinematicMissionPlayerRewardCardChipIcon--progress {
+  --cinematic-progress-pct: 0%;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  background:
+    conic-gradient(rgba(96, 165, 250, 0.95) var(--cinematic-progress-pct), rgba(255, 255, 255, 0.08) 0);
+  box-shadow: inset 0 0 0 2px rgba(8, 13, 28, 0.85);
+}
+
+.cinematicMissionPlayerRewardCardChipCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.cinematicMissionPlayerRewardCardChipLabel {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.72);
+}
+
+.cinematicMissionPlayerRewardCardChipValue {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.32;
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.cinematicMissionPlayerRewardCardRows {
+  display: none;
+}
+
+.cinematicMissionPlayerRewardCardRow {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.45rem;
+  align-items: baseline;
+}
+
+.cinematicMissionPlayerRewardCardRow dt {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.72);
+}
+
+.cinematicMissionPlayerRewardCardRow dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+/* Bottom action bar — align with gameplay grid right column */
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBar .game-interactionShellInner {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding-left: var(--cinematic-grid-pad-x);
+  padding-right: var(--cinematic-grid-pad-x);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: var(--cinematic-grid-cols);
+  gap: var(--cinematic-grid-gap);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBarInner {
+  grid-column: 3;
+  justify-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  padding-right: 0.8rem;
+  box-sizing: border-box;
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBarActions {
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Bottom action bar — deep navy game mount */
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBar {
+  background: var(--cinematic-navy-mount);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cinematic-text-bright);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.32);
+}
+
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBar--success,
+.bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBar--try {
+  background: var(--cinematic-navy-mount);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.bbc-app--cinematicMission .bbc-skipBtn {
+  min-height: 3.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 1rem;
+  background: rgba(8, 13, 28, 0.72) !important;
+  color: rgba(248, 250, 252, 0.88) !important;
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.45) !important;
+}
+
+.bbc-app--cinematicMission .bbc-skipBtn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+}
+
+.bbc-app--cinematicMission .bbc-checkBtn {
+  min-height: 3.25rem;
+  border: 1px solid rgba(96, 165, 250, 0.45) !important;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.88), rgba(29, 78, 216, 0.95)) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 6px 18px -8px rgba(37, 99, 235, 0.55) !important;
+}
+
+.bbc-app--cinematicMission .bbc-checkBtn:disabled {
+  opacity: 0.45;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(15, 23, 42, 0.55) !important;
+  color: rgba(248, 250, 252, 0.5) !important;
+  box-shadow: none !important;
+}
+
+.bbc-app--cinematicMission .bbc-checkBtn--continue {
+  border-color: rgba(52, 211, 153, 0.45) !important;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.88), rgba(5, 150, 105, 0.95)) !important;
+  box-shadow: 0 6px 18px -8px rgba(16, 185, 129, 0.45) !important;
+}
+
+.bbc-app--cinematicMission .ds-readAloud {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 14, 28, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.bbc-app--cinematicMission .ds-readAloud-title {
+  color: var(--cinematic-text-bright);
+}
+
+.bbc-app--cinematicMission .ds-readAloud-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cinematic-text-bright);
+}
+
+.bbc-app--cinematicMission .ds-readAloud-btn:hover {
+  border-color: rgba(147, 197, 253, 0.45);
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.bbc-app--cinematicMission .ds-readAloud-btn--primary {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(37, 99, 235, 0.22);
+}
+
+.portal-shell .family-content:has(.bbc-app--cinematicMission.bbc-app--game-active),
+.portal-shell .pilot-content:has(.bbc-app--cinematicMission.bbc-app--game-active) {
+  overflow: hidden;
+  padding: 0;
+  max-height: none;
+}
+
+.bbc-app--cinematicMission .bbc-main--quiz {
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bbc-app--cinematicMission .bbc-main--quiz > .game-interactionShell {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop — full-width, full-height panels between HUD and action bar */
+@media (min-width: 720px) {
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--coachingShell.bbc-app--game-active > .bbc-main--quiz {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .game-interactionShellInner {
+    gap: 0;
+  }
+
+  .bbc-app--cinematicMission .ds-gameplayTopBar,
+  .bbc-app--cinematicMission .ds-gameplayTopBar--cinematicHud {
+    padding-top: max(0.1rem, env(safe-area-inset-top));
+    padding-bottom: 0.05rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionGrid {
+    --cinematic-grid-pad-y: 0.08rem;
+    flex: 1 1 0;
+    height: 100%;
+    align-items: stretch;
+    align-content: stretch;
+    grid-template-columns: var(--cinematic-grid-cols);
+    grid-template-rows: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: var(--cinematic-grid-pad-y) var(--cinematic-grid-pad-x);
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionGrid > * {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionCharacterPanel,
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel,
+  .bbc-app--cinematicMission .cinematicB4CoachPanel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionCharacterPanel {
+    justify-content: flex-end;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel {
+    gap: 0.42rem;
+    padding: 0.65rem 0.85rem 0.6rem;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .cinematicMissionQuestionBlock {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .mission-quizLayoutScenario,
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario {
+    flex: 0 1 auto;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .mission-questionText,
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .bbc-questionText {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .cinematicMissionAnswersBlock {
+    flex: 1 1 0;
+    margin-top: 0;
+    min-height: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.38rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionCharacterArt {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+
+  .bbc-app--cinematicMission .cinematicB4CoachPanel {
+    gap: 0.5rem;
+    padding: 0.7rem 0.75rem 0.65rem;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionPlayerRewardCard {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 0.48rem 0.52rem;
+    gap: 0.32rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicB4CoachPanel .mission-quizLayoutAsideInner {
+    flex: 0 0 auto;
+    gap: 0.5rem;
+    overflow: visible;
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  .bbc-app--cinematicMission .cinematicB4CoachPanel .ds-readAloud {
+    margin-top: 0.45rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionPlayerRewardCardChips {
+    gap: 0.28rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerList,
+  .bbc-app--cinematicMission .cinematicMissionAnswersBlock .cinematicMissionAnswerList {
+    gap: 0.3rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario {
+    gap: 0.32rem;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionQuestionPanel .ds-questionCard--gameScenario .ds-questionCardText {
+    line-height: 1.38;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionAnswersBlock .ds-answerChoice,
+  .bbc-app--cinematicMission .cinematicMissionAnswersBlock .bbc-answerCard {
+    padding: 0.62rem 0.8rem;
+    font-size: 0.94rem;
+    line-height: 1.28;
+  }
+
+  /* Height contract: main quiz column fills space between HUD and bottom bar */
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz .game-interactionShell,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz .game-interactionShellInner,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz .mission-quizLayout--cinematic,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz .cinematicMissionShell,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz .cinematicMissionShellContent {
+    flex: 1 1 0;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 719px) {
+  .cinematicMissionQuestionPanel .mission-questionText + .cinematicMissionAnswersBlock,
+  .cinematicMissionQuestionPanel .bbc-questionText + .cinematicMissionAnswersBlock {
+    margin-top: 1.25rem;
+  }
+}
+
+.cinematicMissionThemeToggle {
+  position: static;
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 13, 28, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #f8fafc;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px -10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.bbc-app--cinematicMission .ds-gameplayTopBar-controls .cinematicMissionThemeToggle {
+  margin: 0;
+}
+
+.cinematicMissionThemeToggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(147, 197, 253, 0.45);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+}
+
+.cinematicMissionThemeToggle:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.8);
+  outline-offset: 2px;
+}
+
+.cinematicMissionThemeToggleIcon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+@keyframes cinematicMissionPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 719px) {
+  .cinematicMissionGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-width: none;
+    padding: 1.25rem 0.7rem 0.4rem;
+  }
+
+  .cinematicMissionCharacterPanel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    order: 4;
+    max-height: none;
+    min-height: 0;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .cinematicMissionCharacterStage {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 0;
+  }
+
+  .cinematicMissionCharacterGlow {
+    display: none;
+  }
+
+  .cinematicMissionCharacterArtWrap {
+    min-height: 0;
+    flex-shrink: 0;
+    margin-top: 0;
+    padding-bottom: 0;
+  }
+
+  .cinematicMissionCharacterArt {
+    max-height: 5.75rem;
+    max-width: 5.75rem;
+    transform: none;
+  }
+
+  .cinematicMissionCharacterCopy {
+    position: static;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    margin-top: 0;
+    border-top: none;
+    background: transparent;
+    pointer-events: auto;
+  }
+
+  .cinematicMissionPlayerRewardCard {
+    margin-top: 0.5rem;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBar .game-interactionShellInner {
+    display: block;
+    max-width: none;
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .bbc-bottomBarInner {
+    grid-column: auto;
+    justify-content: center;
+  }
+
+  .cinematicMissionQuestionPanel {
+    display: contents;
+    animation: none;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .cinematicMissionQuestionBlock {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.9rem 0.85rem 1rem;
+    border-radius: 1.1rem;
+    border: 1px solid var(--cinematic-glass-border);
+    background: var(--cinematic-glass-bg);
+    backdrop-filter: blur(var(--cinematic-glass-blur));
+    -webkit-backdrop-filter: blur(var(--cinematic-glass-blur));
+    box-shadow: 0 14px 34px -22px rgba(0, 0, 0, 0.38);
+  }
+
+  .cinematicMissionAnswersBlock {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .cinematicMissionCoachPanel,
+  .cinematicB4CoachPanel {
+    order: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematicMissionGameplayPanel,
+  .cinematicMissionQuestionPanel {
+    animation: none;
+  }
+
+  .cinematicAnswerChoice,
+  .cinematicMissionGameplayPanel .ds-answerChoice,
+  .cinematicMissionGameplayPanel .bbc-answerCard,
+  .cinematicMissionAnswersBlock .ds-answerChoice,
+  .cinematicMissionAnswersBlock .bbc-answerCard {
+    transition: none;
+  }
+
+  .cinematicMissionCharacterPanel[data-character-state] .cinematicMissionCharacterArt,
+  .cinematicMissionCharacterPanel[data-character-state] .cinematicMissionCharacterGlow,
+  .cinematicMissionCharacterPanel[data-character-state] .cinematicMissionCharacterSparkle {
+    animation: none !important;
+  }
+}
+
+/* Final cinematic layout contract */
+@media (min-width: 720px) {
+  .bbc-app--cinematicMission.bbc-app--game-active,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .ds-gameplayTopBar,
+  .bbc-app--cinematicMission.bbc-app--game-active .ds-gameplayTopBar--cinematicHud {
+    flex: 0 0 auto;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--coachingShell.bbc-app--game-active > .bbc-main--quiz {
+    flex: 1 1 0;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShellInner,
+  .bbc-app--cinematicMission.bbc-app--game-active .mission-quizLayout--cinematic,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShellContent {
+    flex: 1 1 0;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionGrid {
+    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: var(--cinematic-grid-cols);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionGrid > *,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionCharacterPanel,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionPanel,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicB4CoachPanel {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar {
+    position: relative;
+    bottom: auto;
+    flex: 0 0 auto;
+    margin-top: 0 !important;
+    width: 100%;
+    z-index: 30;
+  }
+}
+
+@media (max-width: 719px) {
+  .bbc-app--cinematicMission.bbc-app--game-active,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-main--quiz,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--coachingShell.bbc-app--game-active > .bbc-main--quiz {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .game-interactionShellInner,
+  .bbc-app--cinematicMission.bbc-app--game-active .mission-quizLayout--cinematic,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShell,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionShellContent {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionGrid {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0.75rem 0.7rem;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionPanel {
+    order: 1;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0.85rem;
+    border: 1px solid var(--cinematic-glass-border);
+    background: var(--cinematic-glass-bg);
+    box-shadow: 0 14px 34px -22px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(var(--cinematic-glass-blur));
+    -webkit-backdrop-filter: blur(var(--cinematic-glass-blur));
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionBlock,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionPanel .cinematicMissionQuestionBlock,
+  .bbc-app--cinematicMission.bbc-app--game-active .mission-quizLayoutScenario,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionPanel .mission-quizLayoutScenario,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionAnswersBlock,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionQuestionPanel .cinematicMissionAnswersBlock,
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionAnswerList,
+  .bbc-app--cinematicMission.bbc-app--game-active .ds-answerList,
+  .bbc-app--cinematicMission.bbc-app--game-active .bbc-answers {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .mission-questionText,
+  .bbc-app--cinematicMission.bbc-app--game-active .bbc-questionText {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    margin: 0;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicB4CoachPanel {
+    order: 2;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active .cinematicMissionCharacterPanel {
+    order: 3;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar,
+  .portal-gameFrame.bbc-app--cinematicMission.bbc-app--game-active > .bbc-bottomBar {
+    position: relative !important;
+    bottom: auto !important;
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    z-index: 30 !important;
+  }
+
+  .gameQuestionGradeDiagnostics {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1100px) {
+  .bbc-app--cinematicMission .cinematicMissionCharacterArt {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+
+  .bbc-app--cinematicMission .cinematicMissionCharacterStage {
+    min-height: 0;
+    flex: 1 1 0;
+  }
+}

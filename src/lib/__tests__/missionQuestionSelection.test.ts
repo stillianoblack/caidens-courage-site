@@ -13,17 +13,18 @@ import type { QuestionAttemptRecord } from '../../types/questionInteraction';
 describe('mission question selection', () => {
   const quest2 = CAIDEN_ADAPTIVE_QUEST_REGISTRY['quest-2'];
 
-  test('weekly missions serve five questions', () => {
+  test('weekly missions serve up to five unique authored questions', () => {
     const config = buildCaidenAdaptiveConfig(quest2, '4-5', {
       gradeLevel: '4',
       allowStretch: false,
     });
 
-    expect(config.questions).toHaveLength(MISSION_QUESTIONS_PER_ATTEMPT);
+    expect(config.questions.length).toBeGreaterThan(0);
+    expect(config.questions.length).toBeLessThanOrEqual(MISSION_QUESTIONS_PER_ATTEMPT);
     expect(assertUniqueQuestionIds(config.questions)).toBe(true);
   });
 
-  test('grade 4 without stretch still serves five 4-5 questions', () => {
+  test('grade 4 without stretch serves all authored unique questions', () => {
     const result = finalizeAdaptiveQuestions(quest2.gradeContent, {
       missionId: 'quest-2',
       gradeLevel: '4',
@@ -31,9 +32,10 @@ describe('mission question selection', () => {
       allowStretch: false,
     });
 
-    expect(result.questions).toHaveLength(5);
-    expect(result.questions.every((question) => question.id.includes('45') || question.id.includes('__sup'))).toBe(
-      true,
+    expect(result.questions.length).toBe(quest2.gradeContent['4-5']!.questions.length);
+    expect(result.questions.every((question) => !question.id.includes('__sup'))).toBe(true);
+    expect(new Set(result.questions.map((question) => question.id)).size).toBe(
+      result.questions.length,
     );
   });
 
@@ -43,14 +45,15 @@ describe('mission question selection', () => {
     expect(counts).toEqual({ easy: 2, medium: 2, challenge: 1 });
   });
 
-  test('selectQuestionsByGradeDifficultyMix returns five unique IDs', () => {
+  test('selectQuestionsByGradeDifficultyMix returns unique IDs without padding duplicates', () => {
     const pool = quest2.gradeContent['2-3']!.questions;
     const selected = selectQuestionsByGradeDifficultyMix(pool, '3', {
       count: 5,
       gradeBand: '2-3',
     });
-    expect(selected).toHaveLength(5);
-    expect(new Set(selected.map((question) => question.id)).size).toBe(5);
+    expect(selected.length).toBe(pool.length);
+    expect(new Set(selected.map((question) => question.id)).size).toBe(selected.length);
+    expect(selected.every((question) => !question.id.includes('__sup'))).toBe(true);
   });
 });
 

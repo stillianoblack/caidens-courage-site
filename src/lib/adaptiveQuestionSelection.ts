@@ -1,6 +1,5 @@
 import {
   resolveGradeDifficultyMix,
-  selectQuestionsByGradeDifficultyMix,
   summarizeQuestionDifficultyTiers,
 } from './questionDifficultySelection';
 import type { GradeBandQuestionMetadata } from '../types/gradeBandContentMetadata';
@@ -26,6 +25,7 @@ type AdaptiveQuestion = {
 
 export type AdaptiveQuestionSelectionContext = {
   missionId: string;
+  characterId?: string | null;
   participantId?: string | null;
   activeChildName?: string | null;
   gradeLevel?: string | null;
@@ -75,11 +75,34 @@ export function finalizeAdaptiveQuestions<T extends AdaptiveQuestion>(
     staged as unknown as Parameters<typeof applyProductionQualityToQuestions>[0],
   ) as unknown as T[];
   const contentBand = pool.contentBand as StudentGradeBand;
-  const selected = selectQuestionsByGradeDifficultyMix(productionPolished, ctx.gradeLevel, {
-    count: MISSION_QUESTIONS_PER_ATTEMPT,
-    gradeBand: contentBand,
-  });
-  const questions = selected.slice(0, MISSION_QUESTIONS_PER_ATTEMPT);
+  const authoredCount = gradeContent[contentBand]?.questions?.length ?? productionPolished.length;
+  const questions = productionPolished.slice(
+    0,
+    Math.min(MISSION_QUESTIONS_PER_ATTEMPT, productionPolished.length),
+  );
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      '[MISSION_POOL_AUDIT]',
+      ctx.characterId ?? 'unknown',
+      ctx.missionId,
+      contentBand,
+      authoredCount,
+      questions.length,
+      questions.map((question) => question.id),
+    );
+  }
+
+  if (process.env.NODE_ENV === 'development' && authoredCount < MISSION_QUESTIONS_PER_ATTEMPT) {
+    console.warn(
+      '[MISSION_CONTENT_GAP]',
+      ctx.characterId ?? 'unknown',
+      ctx.missionId,
+      contentBand,
+      authoredCount,
+      MISSION_QUESTIONS_PER_ATTEMPT,
+    );
+  }
 
   if (process.env.NODE_ENV === 'development' && !assertUniqueQuestionIds(questions)) {
     console.warn('[QUESTION_DIFFICULTY_AUDIT] duplicate question IDs in mission selection', {

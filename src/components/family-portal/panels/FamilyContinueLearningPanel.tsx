@@ -21,6 +21,13 @@ import {
 } from '../../../lib/weeklyAdventureRouteContext';
 import { resolveSelectableWeekNumber } from '../../../lib/resolveSelectableWeekNumber';
 import { logWeekSelectionDebug } from '../../../lib/weekSelectionDebug';
+import {
+  ENABLE_CINEMATIC_ADVENTURE_MODE,
+  ENABLE_CINEMATIC_WEEK_SELECTOR,
+  ENABLE_DARK_ADVENTURE_CENTER,
+  ENABLE_LEGACY_WEEK_GRID,
+} from '../../../config/weeklyAdventureFeatures';
+import { useFocusCoinWallet } from '../../../hooks/useFocusCoinWallet';
 import { resolveAdventureComicThumbnailUrl } from '../../../lib/adventureThumbnail';
 import { resolveHeroWeekNumber } from '../../../lib/resolveHeroWeekNumber';
 import type { CourageHubViewMode } from '../../courage-in-the-dark/CourageHubViewToggle';
@@ -54,6 +61,7 @@ import { buildAdventureJourneyMonthViews } from '../../../lib/weeklyAdventureJou
 import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
 import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDebug';
 import { useActiveChild, type SelectableChild } from '../../../hooks/useActiveChild';
+import '../weekly-adventure-dark-center.css';
 import { useBaselineGate } from '../../../hooks/useBaselineGate';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { useAdventureWeekCompletions } from '../../../hooks/useAdventureWeekCompletions';
@@ -307,6 +315,15 @@ export default function FamilyContinueLearningPanel() {
     ],
   );
 
+  const handleHighlightWeek = useCallback(
+    (weekNumber: number) => {
+      const selectable = resolveSelectableWeekNumber(weekNumber, trailWeeks, visibilityCtx);
+      if (!selectable) return;
+      setSelectedWeekNumber(selectable);
+    },
+    [trailWeeks, visibilityCtx],
+  );
+
   const heroCmsModule = useMemo(() => {
     if (visibilityCtx.previewAdventureId && visibilityCtx.isAdmin) {
       const preview = adventureModules.find((row) => row.id === visibilityCtx.previewAdventureId);
@@ -483,11 +500,41 @@ export default function FamilyContinueLearningPanel() {
     [adventureMonths, heroCmsModule?.month_number, heroWeekNumber],
   );
 
+  const heroMonthStableWeekModule = useMemo(() => {
+    if (!heroMonth) return heroCmsModule;
+    const monthSection = journeyMonthSections.find(
+      (section) => section.month.monthNumber === heroMonth.month_number,
+    );
+    const firstWeekNumber = monthSection?.month.weekNumbers[0] ?? heroWeekNumber;
+    return (
+      adventureModules.find((row) => row.week_number === firstWeekNumber) ?? heroCmsModule
+    );
+  }, [adventureModules, heroCmsModule, heroMonth, heroWeekNumber, journeyMonthSections]);
+
+  const heroMonthExploreCards = useMemo(() => {
+    if (!ENABLE_CINEMATIC_WEEK_SELECTOR || !heroMonth) return [];
+    const section = journeyMonthSections.find(
+      (row) => row.month.monthNumber === heroMonth.month_number,
+    );
+    return section?.cards ?? [];
+  }, [heroMonth, journeyMonthSections]);
+
+  const hideLegacyWeekGrid =
+    ENABLE_CINEMATIC_WEEK_SELECTOR && !ENABLE_LEGACY_WEEK_GRID && !ENABLE_DARK_ADVENTURE_CENTER;
+  const showDarkBottomWeekCards =
+    ENABLE_DARK_ADVENTURE_CENTER && ENABLE_CINEMATIC_WEEK_SELECTOR && !ENABLE_LEGACY_WEEK_GRID;
+
   const mapBackgroundSrc = useMemo(() => {
+    const weekModuleForHero = ENABLE_CINEMATIC_WEEK_SELECTOR
+      ? heroMonthStableWeekModule
+      : heroCmsModule;
+    const weekNumberForHero = ENABLE_CINEMATIC_WEEK_SELECTOR
+      ? (heroMonthStableWeekModule?.week_number ?? heroWeekNumber)
+      : heroWeekNumber;
     const resolution = resolveAdventureMonthHeroSrc({
       month: heroMonth,
-      heroWeekModule: heroCmsModule,
-      weekNumber: heroWeekNumber,
+      heroWeekModule: weekModuleForHero,
+      weekNumber: weekNumberForHero,
     });
     if (process.env.NODE_ENV === 'development') {
       console.info('[WEEKLY_ADVENTURE_MONTH_HERO_SOURCE]', {
@@ -499,7 +546,7 @@ export default function FamilyContinueLearningPanel() {
       });
     }
     return resolution.url;
-  }, [heroCmsModule, heroMonth, heroWeekNumber]);
+  }, [heroCmsModule, heroMonth, heroMonthStableWeekModule, heroWeekNumber]);
 
   const reviewWeekContext = useMemo(() => {
     if (!reviewWeekNumber) return null;
@@ -605,25 +652,55 @@ export default function FamilyContinueLearningPanel() {
   const hasChildren = selectableChildren.length > 0;
   const showClaimPrompt = !childrenLoading && claimRequired;
   const showAddChildPrompt = !childrenLoading && !claimRequired && !hasChildren;
-  const handleSelectChild = (child: SelectableChild) => {
+  const handleSelectChild = useCallback((child: SelectableChild) => {
     if (child.participantId === activeChild?.participantId) return;
     setChildSwitchLoading(true);
     selectChild(child);
-  };
+  }, [activeChild?.participantId, selectChild]);
+
+  const { totalCoins: focusCoins, loading: focusCoinsLoading } = useFocusCoinWallet();
+
+  const heroPlayerHud = useMemo(() => {
+    if (!ENABLE_CINEMATIC_ADVENTURE_MODE || !activeChild) return null;
+    const monthSlot = ((Math.max(1, heroWeekNumber) - 1) % 4) + 1;
+    return {
+      displayName: activeChild.displayName,
+      focusCoins,
+      focusCoinsLoading,
+      weekLabel: `Week ${monthSlot}`,
+      children: selectableChildren,
+      activeParticipantId: activeChild.participantId,
+      onSelectChild: handleSelectChild,
+      childSwitchLoading: childSwitchLoading || baselineLoading,
+    };
+  }, [
+    activeChild,
+    baselineLoading,
+    childSwitchLoading,
+    focusCoins,
+    focusCoinsLoading,
+    heroWeekNumber,
+    selectableChildren,
+    handleSelectChild,
+  ]);
 
   return (
     <div
       className={[
         'family-panel',
         showCourageHero ? 'family-panel--courageHub' : '',
+        ENABLE_DARK_ADVENTURE_CENTER && showCourageHero ? 'family-panel--darkAdventureCenter' : '',
+        ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero ? 'family-panel--cinematicAdventure' : '',
         childSwitchLoading ? 'family-weeklyChildSwitchShimmer' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="family-weeklyTopBar">
-        <h1 className="family-weeklyTopBarTitle">Weekly Adventures</h1>
-      </div>
+      {!(ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero) ? (
+        <div className="family-weeklyTopBar">
+          <h1 className="family-weeklyTopBarTitle">Weekly Adventures</h1>
+        </div>
+      ) : null}
 
       {envWarning ? (
         <p className="family-weeklyEnvWarning" role="status">
@@ -674,23 +751,51 @@ export default function FamilyContinueLearningPanel() {
             adminPreview={visibilityCtx.previewMode === 'admin'}
             comicThumbnailUrl={heroWeek.thumbnailUrl}
             headerTrailing={
-              hasChildren ? (
+              ENABLE_CINEMATIC_ADVENTURE_MODE || !hasChildren ? null : (
                 <PlayingAsSelector
                   children={selectableChildren}
                   activeParticipantId={activeChild?.participantId}
                   onSelect={handleSelectChild}
                   loading={childSwitchLoading || baselineLoading}
                 />
-              ) : null
+              )
             }
+            cinematicAdventureMode={ENABLE_CINEMATIC_ADVENTURE_MODE}
+            playerHud={heroPlayerHud}
+            cinematicWeekSelectorEnabled={ENABLE_CINEMATIC_WEEK_SELECTOR}
+            weekSelectorCards={heroMonthExploreCards}
+            onWeekSelectorSelectWeek={handleSelectWeek}
+            onWeekPillSelectWeek={handleHighlightWeek}
+            onWeekSelectorReviewWeek={handleReviewWeek}
           />
         </section>
       ) : null}
 
-      <div className="weeklyJourneySections" aria-label="Monthly adventure journey">
-        {journeyMonthSections.map(({ month, cards }) => (
-          <WeeklyAdventureJourneyMonth key={month.monthNumber} month={month} cards={cards} />
-        ))}
+      <div
+        className={[
+          'weeklyJourneySections',
+          showDarkBottomWeekCards ? 'weeklyJourneySections--darkCenter' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-label="Monthly adventure journey"
+      >
+        {journeyMonthSections.map(({ month, cards }) => {
+          const recentlyCompletedCards =
+            hideLegacyWeekGrid && !showDarkBottomWeekCards
+              ? cards.filter((card) => card.variant === 'complete')
+              : [];
+          return (
+            <WeeklyAdventureJourneyMonth
+              key={month.monthNumber}
+              month={month}
+              cards={cards}
+              hideWeekSelectorGrid={hideLegacyWeekGrid}
+              recentlyCompletedCards={recentlyCompletedCards}
+              darkGlass={showDarkBottomWeekCards}
+            />
+          );
+        })}
       </div>
 
       {!allChildrenPlayReady && childrenNeedingSetup.length > 0 ? (

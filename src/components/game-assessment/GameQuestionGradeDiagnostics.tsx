@@ -5,6 +5,7 @@ import './game-question-grade-diagnostics.css';
 export type GameQuestionGradeDiagnosticsProps = {
   participantId?: string | null;
   gradeLevel?: string | null;
+  familyGradeBand?: string | null;
   baseBand?: string | null;
   contentBand?: string | null;
   allowStretch?: boolean;
@@ -15,6 +16,7 @@ export type GameQuestionGradeDiagnosticsProps = {
 export default function GameQuestionGradeDiagnostics({
   participantId,
   gradeLevel,
+  familyGradeBand,
   baseBand,
   contentBand,
   allowStretch,
@@ -40,12 +42,20 @@ export default function GameQuestionGradeDiagnostics({
           <dd>{gradeLevel ?? '—'}</dd>
         </div>
         <div>
+          <dt>family grade band</dt>
+          <dd>{familyGradeBand ?? '—'}</dd>
+        </div>
+        <div>
           <dt>base band</dt>
           <dd>{baseBand ?? '—'}</dd>
         </div>
         <div>
           <dt>content band</dt>
           <dd>{contentBand ?? diagnostic?.contentBand ?? '—'}</dd>
+        </div>
+        <div>
+          <dt>question source</dt>
+          <dd>{diagnostic?.sourceBand ?? diagnostic?.contentBand ?? '—'}</dd>
         </div>
         <div>
           <dt>allow_stretch</dt>

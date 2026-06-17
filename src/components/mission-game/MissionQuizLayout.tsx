@@ -21,9 +21,14 @@ import {
 import type { ModuleTrackingDefinition } from '../../types/moduleTracking';
 import GameQuestionRenderer from '../game-assessment/GameQuestionRenderer';
 import MissionCardContent, { questionHasMissionCard } from './MissionCardContent';
+import MissionQuestionCenter from './MissionQuestionCenter';
 import MissionFeedbackCard from './MissionFeedbackCard';
 import MissionSpeechRow, { type MissionGameTheme } from './MissionSpeechRow';
 import { resolveGameplayQuestionPrompt } from '../../lib/gameplayQuestionDisplay';
+import { CinematicMissionLayout, CinematicMissionPlayerRewardCard } from '../../design-system/game/cinematic';
+import type { CinematicMissionCompanionMeta } from '../../lib/cinematicMissionCompanion';
+import type { CinematicMissionPlayerRewardMeta } from '../../lib/cinematicMissionPlayerReward';
+import { useCinematicCharacterAnimationState } from '../../hooks/useCinematicCharacterAnimationState';
 import './mission-game.css';
 
 type MissionQuizLayoutProps = {
@@ -72,6 +77,11 @@ type MissionQuizLayoutProps = {
   onSelectTrueFalse: (value: boolean) => void;
   onSequenceTap: (id: string) => void;
   onSequenceClear: () => void;
+  cinematicMode?: boolean;
+  cinematicBackgroundSrc?: string | null;
+  cinematicBackgroundSource?: string;
+  cinematicCompanion?: CinematicMissionCompanionMeta | null;
+  cinematicPlayerReward?: CinematicMissionPlayerRewardMeta | null;
 };
 
 export default function MissionQuizLayout({
@@ -119,6 +129,11 @@ export default function MissionQuizLayout({
   onSelectTrueFalse,
   onSequenceTap,
   onSequenceClear,
+  cinematicMode = false,
+  cinematicBackgroundSrc,
+  cinematicBackgroundSource,
+  cinematicCompanion,
+  cinematicPlayerReward,
 }: MissionQuizLayoutProps) {
   const answersWrapRef = useRef<HTMLDivElement>(null);
   const railShellRef = useRef<HTMLDivElement>(null);
@@ -156,6 +171,13 @@ export default function MissionQuizLayout({
   const useCoachingRail = lockInEnabled || useAdultLearningRhythm;
   const hasAnswer = isGameAnswerComplete(question, answer);
   const answerIsCorrect = checked && isGameAnswerCorrect(question, answer);
+  const cinematicCharacterState = useCinematicCharacterAnimationState({
+    enabled: cinematicMode,
+    questionKey: question.id,
+    checked,
+    feedbackTone,
+    hasAnswer,
+  });
   /** Lock-in tips only after Check — never on select (commit-before-feedback). */
   const showLockInTip = Boolean(checked && lockInEnabled);
   const showFacilitatorInsight = Boolean(checked && feedback && useAdultLearningRhythm);
@@ -241,8 +263,9 @@ export default function MissionQuizLayout({
     'bbc-quizWrap',
     'game-quizWrap',
     'mission-quizLayout',
-    useCoachingRail ? 'mission-quizLayout--coachingRail' : '',
+    useCoachingRail && !cinematicMode ? 'mission-quizLayout--coachingRail' : '',
     hasMissionCard && !useCoachingRail ? 'mission-quizLayout--hasMission' : '',
+    cinematicMode ? 'mission-quizLayout--cinematic' : '',
     quizWrapModifier,
   ]
     .filter(Boolean)
@@ -343,6 +366,93 @@ export default function MissionQuizLayout({
     />
   );
 
+  const centerGameplay = (
+    <div className={cinematicMode ? 'cinematicMissionQuestionBlock' : 'mission-questionCenter'}>
+      <MissionQuestionCenter
+        question={question}
+        questionPrompt={questionPrompt}
+        cinematicMode={cinematicMode}
+        answersRef={answersWrapRef}
+        answerListClassName={cinematicMode ? 'cinematicMissionAnswerList' : undefined}
+        answerVariant={cinematicMode ? 'cinematic' : undefined}
+        rendererProps={{
+          answer,
+          checked,
+          onPlaySelect,
+          onSelectChoice,
+          onSelectTrueFalse,
+          onSequenceTap,
+          onSequenceClear,
+        }}
+        {...cardFlags}
+      />
+      {showLegacyFeedback ? (
+        <MissionFeedbackCard
+          theme={theme}
+          avatarSrc={feedbackAvatarSrc}
+          avatarAlt={feedbackAvatarAlt}
+          speakerLabel={speakerLabel}
+          message={feedback!}
+          tone={feedbackTone}
+          detail={useVictoriaHeader || useUncleTHeader || useCharlieHeader ? detail : undefined}
+        />
+      ) : null}
+    </div>
+  );
+
+  const coachRail = cinematicMode ? (
+    <>
+      {/*
+        TODO(floatingHud): Future mode — replace fixed right column with floating HUD chips:
+        - B-4 circular coach icon (popover on click)
+        - Read Aloud speaker chip
+        - Player/badge reward bubble
+        Keep current B4CoachPanel rail until floating HUD flag ships.
+      */}
+      <GameCoachingRailAside
+        asideInnerRef={railShellRef}
+        coachContent={coachingRailContent}
+        readAloudSegments={readAloudSegments}
+        readAloudResetKey={readAloudResetKey}
+        readAloudPlayAriaLabel={checked ? 'Read coach feedback aloud' : 'Read this question aloud'}
+        showReadAloud={!compactMobile}
+      />
+      {cinematicPlayerReward ? (
+        <CinematicMissionPlayerRewardCard {...cinematicPlayerReward} />
+      ) : null}
+    </>
+  ) : (
+    <GameCoachingRailAside
+      asideInnerRef={railShellRef}
+      coachContent={coachingRailContent}
+      readAloudSegments={readAloudSegments}
+      readAloudResetKey={readAloudResetKey}
+      readAloudPlayAriaLabel={checked ? 'Read coach feedback aloud' : 'Read this question aloud'}
+      showReadAloud={!compactMobile}
+    />
+  );
+
+  if (
+    cinematicMode &&
+    useCoachingRail &&
+    cinematicCompanion &&
+    cinematicBackgroundSrc
+  ) {
+    return (
+      <div className={layoutClass}>
+        <CinematicMissionLayout
+          backgroundSrc={cinematicBackgroundSrc}
+          backgroundSource={cinematicBackgroundSource}
+          companion={cinematicCompanion}
+          questionKey={question.id}
+          characterState={cinematicCharacterState}
+          center={centerGameplay}
+          coach={coachRail}
+        />
+      </div>
+    );
+  }
+
   if (!useCoachingRail) {
     return (
       <div className={layoutClass}>
@@ -355,6 +465,7 @@ export default function MissionQuizLayout({
           {questionPrompt}
         </h2>
         <GameQuestionRenderer
+          key={question.id}
           question={question}
           answer={answer}
           checked={checked}
@@ -390,51 +501,10 @@ export default function MissionQuizLayout({
       ) : null}
 
       <div className="mission-quizLayoutLearning">
-        {useCoachingRail && hasMissionCard ? (
-          <div className="mission-quizLayoutScenario">
-            <MissionCardContent question={question} useCoachingRail {...cardFlags} />
-          </div>
-        ) : null}
-        <h2 className="bbc-questionText mission-questionText" id="game-question">
-          {questionPrompt}
-        </h2>
-        <div className="mission-quizLayoutAnswers" ref={answersWrapRef}>
-          <GameQuestionRenderer
-            question={question}
-            answer={answer}
-            checked={checked}
-            onPlaySelect={onPlaySelect}
-            onSelectChoice={onSelectChoice}
-            onSelectTrueFalse={onSelectTrueFalse}
-            onSequenceTap={onSequenceTap}
-            onSequenceClear={onSequenceClear}
-          />
-        </div>
-        {showLegacyFeedback ? (
-          <MissionFeedbackCard
-            theme={theme}
-            avatarSrc={feedbackAvatarSrc}
-            avatarAlt={feedbackAvatarAlt}
-            speakerLabel={speakerLabel}
-            message={feedback!}
-            tone={feedbackTone}
-            detail={useVictoriaHeader || useUncleTHeader || useCharlieHeader ? detail : undefined}
-          />
-        ) : null}
+        {centerGameplay}
       </div>
 
-      <aside className="mission-quizLayoutAside">
-        <GameCoachingRailAside
-          asideInnerRef={railShellRef}
-          coachContent={coachingRailContent}
-          readAloudSegments={readAloudSegments}
-          readAloudResetKey={readAloudResetKey}
-          readAloudPlayAriaLabel={
-            checked ? 'Read coach feedback aloud' : 'Read this question aloud'
-          }
-          showReadAloud={!compactMobile}
-        />
-      </aside>
+      <aside className="mission-quizLayoutAside">{coachRail}</aside>
     </div>
   );
 }

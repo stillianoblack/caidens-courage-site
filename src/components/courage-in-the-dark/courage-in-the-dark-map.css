@@ -298,6 +298,67 @@
   font-size: 0.75rem;
 }
 
+/* Compact hover/focus tooltip — Explore direct-launch mode */
+.courageMapHotspotTooltip {
+  position: absolute;
+  z-index: 3;
+  width: min(11.5rem, 42vw);
+  padding: 0.5rem 0.62rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 15, 30, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.55);
+  transform: translate(-50%, calc(-100% - 4.25rem));
+  pointer-events: none;
+  text-align: left;
+}
+
+.courageMapHotspotTooltipEyebrow {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.9);
+  line-height: 1.2;
+}
+
+.courageMapHotspotTooltipTitle {
+  margin: 0.12rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.courageMapHotspotTooltipReward {
+  margin: 0.2rem 0 0;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: rgba(250, 204, 21, 0.92);
+  line-height: 1.2;
+}
+
+.courageMapHotspotTooltipCta {
+  margin: 0.22rem 0 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(226, 232, 240, 0.82);
+  line-height: 1.2;
+}
+
+.courageMapHotspotTooltip--locked .courageMapHotspotTooltipCta {
+  color: rgba(248, 113, 113, 0.9);
+}
+
+.courageMapHotspotTooltip--complete .courageMapHotspotTooltipCta {
+  color: rgba(134, 239, 172, 0.92);
+}
+
 /* Mission preview */
 .courageMapPreviewBackdrop {
   position: fixed;
@@ -426,7 +487,11 @@
 }
 
 .family-panel--courageHub {
-  gap: 1rem;
+  gap: 0.65rem;
+}
+
+.family-panel--courageHub .family-weeklyTopBar {
+  margin-bottom: 0.35rem;
 }
 
 .portal-shell .family-content:has(.family-panel--courageHub) {

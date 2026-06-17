@@ -1,7 +1,6 @@
 import { MISSION_QUESTIONS_PER_ATTEMPT } from '../config/missionQuestions';
 import { normalizeGradeLevelStorage } from '../data/gradeLevelOptions';
 import type { GradeBandQuestionMetadata, StudentGradeBand } from '../types/gradeBandContentMetadata';
-import { ensureMissionQuestionPoolSize } from './missionQuestionPool';
 
 export type DifficultyTier = 'easy' | 'medium' | 'challenge';
 
@@ -119,11 +118,14 @@ export function selectQuestionsByGradeDifficultyMix<
 ): T[] {
   if (questions.length === 0) return [];
 
-  const targetCount = options?.count ?? MISSION_QUESTIONS_PER_ATTEMPT;
-  const expanded = ensureMissionQuestionPoolSize(questions, targetCount);
+  const requestedCount = options?.count ?? MISSION_QUESTIONS_PER_ATTEMPT;
+  const targetCount = Math.min(requestedCount, questions.length);
+  if (targetCount === 0) return [];
+
+  const sourcePool = [...questions];
   const numericGrade = resolveNumericGradeLevel(gradeLevel);
-  const eligible = expanded.filter((question, index) => {
-    const tier = classifyQuestionDifficultyTier(question, index, expanded.length);
+  const eligible = sourcePool.filter((question, index) => {
+    const tier = classifyQuestionDifficultyTier(question, index, sourcePool.length);
     if (numericGrade != null && numericGrade >= 4 && tier === 'easy') {
       const difficulty = question.metadata?.difficulty;
       if (difficulty === 'beginner' || !question.metadata) {
@@ -133,7 +135,7 @@ export function selectQuestionsByGradeDifficultyMix<
     return true;
   });
 
-  const pool = eligible.length > 0 ? eligible : [...expanded];
+  const pool = eligible.length > 0 ? eligible : sourcePool;
   const targetCounts =
     options?.gradeBand && ['K-1', '2-3', '4-5', '6-8'].includes(options.gradeBand)
       ? resolveGradeBandDifficultyCounts(options.gradeBand)

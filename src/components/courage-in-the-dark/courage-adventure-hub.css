@@ -36,6 +36,105 @@
   --courage-hub-map-height: clamp(620px, 76vh, 860px);
 }
 
+.courageAdventureHubMapWrap--exploreOverlay .courageMapHotspot {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.courageAdventureHubMapWrap--exploreOverlay .courageMapHotspot--selected {
+  opacity: 0.2;
+}
+
+.courageAdventureHub--cinematic .courageAdventureHubMapCol,
+.courageAdventureHub--adventureMode .courageAdventureHubMapCol {
+  gap: 0.2rem;
+}
+
+.courageAdventureHub--cinematic .courageAdventureHubMapWrap,
+.courageAdventureHub--adventureMode .courageAdventureHubMapWrap {
+  --courage-hub-map-height: clamp(580px, 80vh, 960px);
+}
+
+.courageAdventureHubSplit--cinematic {
+  --courage-hub-map-height: clamp(580px, 80vh, 960px);
+}
+
+.courageAdventureHubMapWrap--cinematic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    transparent 32%,
+    rgba(5, 10, 22, 0.58) 64%,
+    rgba(2, 5, 12, 0.97) 100%
+  );
+}
+
+.courageAdventureHubMapWrap--bottomTray.courageAdventureHubMapWrap--cinematic {
+  overflow: visible;
+}
+
+.courageAdventureHubMapWrap--bottomTray.courageAdventureHubMapWrap--cinematic::after {
+  background: linear-gradient(
+    to bottom,
+    transparent 24%,
+    rgba(5, 10, 22, 0.66) 58%,
+    rgba(2, 5, 12, 0.99) 100%
+  );
+}
+
+.courageAdventureHubMapWrap--cinematic .courageMapCanvas--hasImage {
+  background: #050810;
+}
+
+.courageAdventureHubMapWrap--cinematic .courageMapBg {
+  object-fit: cover;
+  object-position: center 40%;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  transform: scale(1.08);
+  transform-origin: center center;
+}
+
+.courageAdventureHub--adventureMode .courageAdventureHubMapWrap,
+.courageAdventureHub--cinematic .courageAdventureHubMapWrap {
+  border-radius: 0.85rem;
+}
+
+.courageAdventureHub--adventureMode .courageMapCanvas--hub,
+.courageAdventureHub--cinematic .courageMapCanvas--hub {
+  border-radius: 0.85rem;
+}
+
+.courageAdventureHubMapWrap .courageMapCanvasHeroOverlay--playerHud,
+.courageAdventureHubMapWrap .courageMapCanvasHeroOverlay--pillsOnly {
+  background: none;
+}
+
+.courageMapCanvasHeroOverlay--playerHud {
+  inset: auto;
+  left: 1rem;
+  top: 1rem;
+  right: auto;
+  bottom: auto;
+  width: auto;
+  display: block;
+  padding: 0;
+  background: none;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.courageMapCanvasHeroOverlay--playerHud > * {
+  pointer-events: auto;
+}
+
 .courageMapCanvas--hub {
   width: 100%;
   min-height: var(--courage-hub-map-height);
@@ -825,6 +924,14 @@
   background: rgba(26, 16, 53, 0.55);
   border: 1px solid rgba(229, 192, 106, 0.32);
   box-shadow: 0 6px 18px -12px rgba(0, 0, 0, 0.45);
+}
+
+.courageAdventureHub--adventureMode .courageHubControls--overlay .courageHubViewToggle {
+  background: rgba(8, 15, 30, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.5);
 }
 
 .courageHubHeroBar--panel .courageHubViewToggle {

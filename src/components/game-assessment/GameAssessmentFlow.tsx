@@ -1,6 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  buildMissionQuestionSessionKey,
+  clearMissionQuestionIndex,
+  readMissionQuestionIndex,
+  writeMissionQuestionIndex,
+} from '../../lib/missionQuestionProgressSession';
+import { migrateMissionQuestionIndex } from '../../lib/missionQuestionSessionMigrate';
+import { shuffleMissionQuestionChoices } from '../../lib/missionAnswerShuffle';
+import { MISSION_QUESTIONS_PER_ATTEMPT } from '../../config/missionQuestions';
 import { useQuestionInteraction } from '../../hooks/useQuestionInteraction';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import '../b4-baseline-check/b4-baseline-check.css';
 import './miranda-game.css';
@@ -49,6 +59,8 @@ import {
 import { resolveB4PortalType } from '../../design-system/game/getB4LockInTip';
 import { patternClassName, resolveGameUIPattern } from '../../design-system/game/patterns/gameUIPatterns';
 import SharedMissionGameLayout from '../mission-game/SharedMissionGameLayout';
+import { useStableAdaptiveMissionConfig } from '../../hooks/useStableAdaptiveMissionConfig';
+import type { AdaptiveMissionCharacterId } from '../mission-game/AdaptiveMissionGameFlow';
 import { getMissionIntroHint } from '../mission-game/missionIntroHints';
 import type { MissionGameTheme } from '../mission-game/MissionSpeechRow';
 import { getCaidenNextQuest } from '../../data/caiden/progression';
@@ -58,7 +70,6 @@ import { readActivePortalRole } from '../../config/portalContext';
 import { readGameplayPlayerDisplayName } from '../../lib/gameplayPlayerIdentity';
 import { resolveModuleTracking } from '../../data/moduleTrackingRegistry';
 import { trackEvent } from '../../lib/analytics';
-import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import { resolveMissionAttemptType } from '../../lib/missionAttemptType';
 import { recordInteractiveModuleCompletion } from '../../lib/recordInteractiveCompletion';
 import CourageMissionCompleteCelebration from '../courage-in-the-dark/CourageMissionCompleteCelebration';
@@ -68,6 +79,13 @@ import {
 } from '../../lib/courageWeeklyMissionCompletion';
 import { enrichCourageMissionRewardFromCms } from '../../lib/cmsBadgeArtwork';
 import { useFamilyAdventureModules } from '../../hooks/useAdventureModules';
+import { ENABLE_CINEMATIC_MISSION_MODE } from '../../config/missionFeatures';
+import { useCinematicMissionHeroBackground } from '../../hooks/useCinematicMissionHeroBackground';
+import { useCinematicMissionThemePreference } from '../../hooks/useCinematicMissionThemePreference';
+import { useFocusCoinWallet } from '../../hooks/useFocusCoinWallet';
+import { resolveCinematicMissionCompanionMeta } from '../../lib/cinematicMissionCompanion';
+import { resolveCinematicMissionPlayerRewardMeta } from '../../lib/cinematicMissionPlayerReward';
+import { CinematicMissionThemeToggle } from '../../design-system/game/cinematic';
 import { resolveWeeklyGameDisplayTitles } from '../../lib/gameDisplayTitles';
 import {
   isWeeklyAdventureSource,
@@ -143,6 +161,8 @@ type GameAssessmentFlowProps = {
     missionId?: string;
   };
   gradeDiagnostics?: GameQuestionGradeDiagnosticsProps;
+  /** Stable character id for mission debug + analytics */
+  missionCharacterId?: AdaptiveMissionCharacterId | 'b4' | 'adult';
 };
 
 function getMissionTheme(flags: {
@@ -212,7 +232,7 @@ function getFeedbackSpeakerLabel(theme: MissionGameTheme): string {
 }
 
 export default function GameAssessmentFlow({
-  config,
+  config: configProp,
   themeClassName = '',
   exitPath = '/',
   useMirandaHeader = false,
@@ -235,12 +255,20 @@ export default function GameAssessmentFlow({
   tracking,
   completionContext,
   gradeDiagnostics,
+  missionCharacterId: missionCharacterIdProp,
 }: GameAssessmentFlowProps) {
   const hubContinueLabel = adultHubContinueLabel ?? victoriaHubContinueLabel;
   const navigate = useNavigate();
   const location = useLocation();
   const { pathname: currentPathname, search: currentSearch } = location;
+  const config = useStableAdaptiveMissionConfig(configProp) ?? configProp;
   const totalQuestions = config.questions.length;
+  const activeParticipantId = readActiveChildParticipantId();
+  const missionSessionKey = useMemo(
+    () => buildMissionQuestionSessionKey(config.id, activeParticipantId),
+    [activeParticipantId, config.id],
+  );
+  const sessionParticipantRef = useRef<string | null>(activeParticipantId);
   const {
     soundEnabled,
     toggleSound,
@@ -255,7 +283,58 @@ export default function GameAssessmentFlow({
   } = useBaselineCheckSounds();
 
   const [view, setView] = useState<GameView>(skipLanding ? 'quiz' : 'landing');
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(() =>
+    readMissionQuestionIndex(missionSessionKey),
+  );
+
+  useEffect(() => {
+    const merged = migrateMissionQuestionIndex(
+      config.id,
+      sessionParticipantRef.current,
+      activeParticipantId,
+    );
+    sessionParticipantRef.current = activeParticipantId;
+    setQuestionIndex((prev) => Math.max(prev, merged));
+  }, [activeParticipantId, config.id]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    if (totalQuestions >= MISSION_QUESTIONS_PER_ATTEMPT) return;
+
+    const characterId =
+      missionCharacterIdProp ??
+      (useCaidenHeader
+        ? 'caiden'
+        : useMirandaHeader
+          ? 'miranda'
+          : useCharlieHeader
+            ? 'charlie'
+            : useZekeHeader
+              ? 'zeke'
+              : useB4Header
+                ? 'b4'
+                : 'adult');
+
+    console.warn(
+      '[MISSION_CONTENT_GAP]',
+      characterId,
+      config.id,
+      gradeDiagnostics?.contentBand ?? config.adaptiveMeta?.contentBand ?? '—',
+      totalQuestions,
+      MISSION_QUESTIONS_PER_ATTEMPT,
+    );
+  }, [
+    config.adaptiveMeta?.contentBand,
+    config.id,
+    gradeDiagnostics?.contentBand,
+    missionCharacterIdProp,
+    totalQuestions,
+    useB4Header,
+    useCaidenHeader,
+    useCharlieHeader,
+    useMirandaHeader,
+    useZekeHeader,
+  ]);
   const [score, setScore] = useState(0);
   const [answersRecord, setAnswersRecord] = useState<Record<string, GameAnswerValue>>({});
   const [attemptsRecord, setAttemptsRecord] = useState<QuestionAttemptsMap>({});
@@ -278,6 +357,14 @@ export default function GameAssessmentFlow({
     () => readWeeklyAdventureRouteContext(currentSearch),
     [currentSearch],
   );
+  const cinematicWeekNumber =
+    weeklyRouteContext.week && weeklyRouteContext.week > 0
+      ? weeklyRouteContext.week
+      : weeklyCouragePayload?.week_number ?? 1;
+  const cinematicHero = useCinematicMissionHeroBackground(cinematicWeekNumber);
+  const { theme: cinematicTheme, toggleTheme: toggleCinematicTheme, isDark: cinematicDark } =
+    useCinematicMissionThemePreference();
+  const { totalCoins: focusCoins, loading: focusCoinsLoading } = useFocusCoinWallet();
   const weeklyDisplayTitles = useMemo(() => {
     if (!isWeeklyAdventureSource(currentSearch)) return null;
     const weekNumber = weeklyRouteContext.week && weeklyRouteContext.week > 0 ? weeklyRouteContext.week : 1;
@@ -292,15 +379,24 @@ export default function GameAssessmentFlow({
 
   const currentQuestion = config.questions[questionIndex];
 
+  const displayQuestion = useMemo(() => {
+    if (!currentQuestion) return undefined;
+    return shuffleMissionQuestionChoices(currentQuestion, {
+      childId: activeParticipantId ?? 'anon',
+      missionId: config.id,
+      questionId: currentQuestion.id,
+    });
+  }, [activeParticipantId, config.id, currentQuestion]);
+
   const interaction = useQuestionInteraction({
     questionId: currentQuestion?.id ?? '',
     hints: currentQuestion?.hints,
     explainMore: currentQuestion?.explainMore,
     maxAttempts: 2,
     isAnswerComplete: (value) =>
-      currentQuestion ? isGameAnswerComplete(currentQuestion, value) : false,
+      displayQuestion ? isGameAnswerComplete(displayQuestion, value) : false,
     isAnswerCorrect: (value) =>
-      currentQuestion ? isGameAnswerCorrect(currentQuestion, value) : false,
+      displayQuestion ? isGameAnswerCorrect(displayQuestion, value) : false,
     getCorrectFeedback: () =>
       currentQuestion ? getCorrectFeedbackMessage(currentQuestion) : '',
     getIncorrectFeedback: () =>
@@ -333,8 +429,88 @@ export default function GameAssessmentFlow({
   } = interaction;
 
   useEffect(() => {
+    writeMissionQuestionIndex(missionSessionKey, questionIndex);
+  }, [missionSessionKey, questionIndex]);
+
+  useEffect(() => {
     resetInteraction();
   }, [questionIndex, resetInteraction]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || view !== 'quiz' || !currentQuestion) {
+      return;
+    }
+
+    const characterId =
+      missionCharacterIdProp ??
+      (useCaidenHeader
+        ? 'caiden'
+        : useMirandaHeader
+          ? 'miranda'
+          : useCharlieHeader
+            ? 'charlie'
+            : useZekeHeader
+              ? 'zeke'
+              : useB4Header
+                ? 'b4'
+                : 'adult');
+
+    const questionSource =
+      currentQuestion.diagnosticMeta?.sourceBand ??
+      currentQuestion.diagnosticMeta?.contentBand ??
+      gradeDiagnostics?.contentBand ??
+      completionContext?.gradeBandUsed ??
+      'unknown';
+
+    console.info(
+      '[MISSION_QUESTION_SOURCE]',
+      characterId,
+      config.id,
+      gradeDiagnostics?.contentBand ?? completionContext?.gradeBandUsed ?? '—',
+      questionIndex,
+      currentQuestion.id,
+      questionSource,
+      totalQuestions,
+    );
+
+    console.info(
+      '[MISSION_PROGRESS_DEBUG]',
+      characterId,
+      config.id,
+      questionIndex,
+      totalQuestions,
+    );
+
+    console.info('[MISSION_GRADE_DEBUG]', {
+      grade_level: gradeDiagnostics?.gradeLevel ?? null,
+      family_grade_band: gradeDiagnostics?.familyGradeBand ?? null,
+      resolved_base_band: gradeDiagnostics?.baseBand ?? null,
+      resolved_content_band: gradeDiagnostics?.contentBand ?? completionContext?.gradeBandUsed ?? null,
+      allow_stretch: gradeDiagnostics?.allowStretch ?? false,
+      used_stretch: gradeDiagnostics?.usedStretch ?? false,
+      question_source: questionSource,
+    });
+  }, [
+    completionContext?.gradeBandUsed,
+    config.id,
+    currentQuestion,
+    gradeDiagnostics?.allowStretch,
+    gradeDiagnostics?.baseBand,
+    gradeDiagnostics?.contentBand,
+    gradeDiagnostics?.familyGradeBand,
+    gradeDiagnostics?.gradeLevel,
+    gradeDiagnostics?.usedStretch,
+    missionCharacterIdProp,
+    questionIndex,
+    totalQuestions,
+    useB4Header,
+    useCaidenHeader,
+    useCharlieHeader,
+    useMirandaHeader,
+    useZekeHeader,
+    view,
+  ]);
+
   const quizAvatarSrc = config.quizAvatarSrc ?? config.avatarSrc ?? '';
   const introAvatarSrc = quizAvatarSrc || config.avatarSrc || '';
   const decorVariant =
@@ -395,6 +571,33 @@ export default function GameAssessmentFlow({
     useCharlieHeader,
     useMirandaHeader,
     useZekeHeader,
+  ]);
+
+  const cinematicCompanion = useMemo(() => {
+    if (!ENABLE_CINEMATIC_MISSION_MODE || useAdultGuideHeader) return null;
+    const weekModule =
+      adventureModules.find((row) => row.week_number === cinematicWeekNumber) ?? null;
+    return resolveCinematicMissionCompanionMeta({
+      characterId: gameplayCharacterId,
+      missionTitle:
+        weeklyDisplayTitles?.gameTitle ??
+        weeklyCouragePayload?.mission_title ??
+        config.landing.subtitle ??
+        config.landing.title,
+      weekModule,
+      weeklyReward: weeklyCouragePayload,
+      fallbackAvatarSrc: quizAvatarSrc,
+    });
+  }, [
+    adventureModules,
+    cinematicWeekNumber,
+    config.landing.subtitle,
+    config.landing.title,
+    gameplayCharacterId,
+    quizAvatarSrc,
+    useAdultGuideHeader,
+    weeklyCouragePayload,
+    weeklyDisplayTitles?.gameTitle,
   ]);
 
   const gameplayBreadcrumb = useMemo(
@@ -470,6 +673,12 @@ export default function GameAssessmentFlow({
     resetInteraction();
   }, [resetInteraction]);
 
+  const clearMissionProgress = useCallback(() => {
+    clearMissionQuestionIndex(missionSessionKey);
+    setQuestionIndex(0);
+    resetQuestionState();
+  }, [missionSessionKey, resetQuestionState]);
+
   const handleIdleEndSession = useCallback(() => {
     endProtectedChildSession(navigate, currentPathname);
   }, [currentPathname, navigate]);
@@ -485,9 +694,8 @@ export default function GameAssessmentFlow({
 
     if (view === 'quiz') {
       setView('landing');
-      setQuestionIndex(0);
       setScore(0);
-      resetQuestionState();
+      clearMissionProgress();
       return;
     }
 
@@ -497,7 +705,7 @@ export default function GameAssessmentFlow({
     embedded,
     navigate,
     playItemButton,
-    resetQuestionState,
+    clearMissionProgress,
     resolvedExitPath,
     skipLanding,
     view,
@@ -601,7 +809,7 @@ export default function GameAssessmentFlow({
           );
           setSessionFinishing(false);
           setView('courage-celebration');
-          resetQuestionState();
+          clearMissionProgress();
         })();
         return;
       }
@@ -609,18 +817,18 @@ export default function GameAssessmentFlow({
       void persistModuleCompletion(finalScore, mergedAnswers);
       setSessionFinishing(false);
       setView('complete');
-      resetQuestionState();
+      clearMissionProgress();
     },
     [
       adultGuideId,
       adultMissionId,
+      clearMissionProgress,
       computeScoreFromAnswers,
       config,
       currentPathname,
       currentSearch,
       persistModuleCompletion,
       playModuleWin,
-      resetQuestionState,
       tracking,
       weeklyCouragePayload,
     ],
@@ -633,17 +841,18 @@ export default function GameAssessmentFlow({
     setAnswersRecord({});
     setAttemptsRecord({});
     setView('quiz');
-    setQuestionIndex(0);
     setScore(0);
+    clearMissionQuestionIndex(missionSessionKey);
+    setQuestionIndex(0);
     resetQuestionState();
   };
 
   const handleCheck = () => {
-    if (!currentQuestion || !canCheck) return;
+    if (!currentQuestion || !displayQuestion || !canCheck) return;
 
     playSelect();
     submitCheck();
-    if (isGameAnswerCorrect(currentQuestion, answer)) {
+    if (isGameAnswerCorrect(displayQuestion, answer)) {
       playResultFeelings();
     }
   };
@@ -669,6 +878,7 @@ export default function GameAssessmentFlow({
 
     setAnswersRecord(nextAnswers);
     setAttemptsRecord(nextAttempts);
+    resetInteraction();
     setQuestionIndex((index) => index + 1);
   };
 
@@ -686,6 +896,7 @@ export default function GameAssessmentFlow({
     }
 
     setAnswersRecord(nextAnswers);
+    resetInteraction();
     setQuestionIndex((index) => index + 1);
   };
 
@@ -702,10 +913,14 @@ export default function GameAssessmentFlow({
   const handlePlayAgain = () => {
     playItemButton();
     setView('landing');
-    setQuestionIndex(0);
     setScore(0);
-    resetQuestionState();
+    clearMissionProgress();
   };
+
+  const questionProgressLabel =
+    view === 'quiz' && totalQuestions > 0
+      ? `Question ${questionIndex + 1} of ${totalQuestions}`
+      : undefined;
 
   const showTopBar = view !== 'landing';
   const revealCorrectAnswer = checked && (isCorrect || attemptsCount >= 2);
@@ -759,6 +974,43 @@ export default function GameAssessmentFlow({
       useZekeHeader,
     ],
   );
+
+  const cinematicPlayerReward = useMemo(() => {
+    if (!cinematicCompanion) return null;
+    const weekModule =
+      adventureModules.find((row) => row.week_number === cinematicWeekNumber) ?? null;
+    return resolveCinematicMissionPlayerRewardMeta({
+      characterName: cinematicCompanion.characterName,
+      focusCoins,
+      focusCoinsLoading,
+      weekNumber: cinematicWeekNumber,
+      weekTitle: weeklyDisplayTitles?.gameHeader ?? weeklyRouteContext.weekTitle,
+      weekModule,
+      weeklyReward: weeklyCouragePayload,
+      missionProgressPct: progressPct,
+      focusCategoryLabel: cinematicCompanion.focusLabel,
+    });
+  }, [
+    adventureModules,
+    cinematicCompanion,
+    cinematicWeekNumber,
+    focusCoins,
+    focusCoinsLoading,
+    progressPct,
+    weeklyCouragePayload,
+    weeklyDisplayTitles?.gameHeader,
+    weeklyRouteContext.weekTitle,
+  ]);
+
+  const cinematicMissionEligible = Boolean(
+    ENABLE_CINEMATIC_MISSION_MODE &&
+      usesCoachingShell &&
+      !useAdultGuideHeader &&
+      cinematicCompanion &&
+      cinematicHero.url,
+  );
+
+  const cinematicMissionMode = cinematicMissionEligible && cinematicDark;
 
   const topBarVariant = resolveGameplayTopBarVariant(missionTheme, headerFlags);
   const topBarFlames = resolveGameplayTopBarFlames(topBarVariant, headerFlags);
@@ -827,6 +1079,7 @@ export default function GameAssessmentFlow({
     embedded ? 'portal-gameFrame' : '',
     usesCoachingShell ? 'bbc-app--coachingShell' : '',
     view === 'quiz' ? 'bbc-app--game-active' : '',
+    cinematicMissionMode && view === 'quiz' ? 'bbc-app--cinematicMission' : '',
     patternClassName(gamePattern.id),
   ]
     .filter(Boolean)
@@ -872,17 +1125,29 @@ export default function GameAssessmentFlow({
   const playerName = readGameplayPlayerDisplayName();
 
   const topBarReadAloudSegments = useMemo(() => {
-    if (view !== 'quiz' || !currentQuestion) return [];
-    return buildReadAloudSegmentsFromGameQuestion(currentQuestion);
-  }, [currentQuestion, view]);
+    if (view !== 'quiz' || !displayQuestion) return [];
+    return buildReadAloudSegmentsFromGameQuestion(displayQuestion);
+  }, [displayQuestion, view]);
 
-  const topBarReadAloudKey = currentQuestion
-    ? `${config.id}::${currentQuestion.id}::${questionIndex}`
+  const topBarReadAloudKey = displayQuestion
+    ? `${config.id}::${displayQuestion.id}::${questionIndex}`
     : config.id;
 
   return (
     <div className={shellClass}>
-      <GameBackgroundDecor variant={decorVariant} />
+      {cinematicMissionMode && view === 'quiz' ? (
+        <>
+          <div
+            className="cinematicMissionAppBackdrop"
+            style={{ backgroundImage: `url("${cinematicHero.url}")` }}
+            aria-hidden="true"
+          />
+          <div className="cinematicMissionAppScrim" aria-hidden="true" />
+        </>
+      ) : null}
+      {!(cinematicMissionMode && view === 'quiz') ? (
+        <GameBackgroundDecor variant={decorVariant} />
+      ) : null}
 
       {showTopBar ? (
         usesCoachingShell ? (
@@ -899,6 +1164,7 @@ export default function GameAssessmentFlow({
                   : undefined
             }
             progressPercent={progressPct}
+            questionProgressLabel={questionProgressLabel}
             showProgress={view === 'quiz' || view === 'complete' || view === 'courage-celebration'}
             playerName={playerName}
             showFlameStatus={!useAdultGuideHeader}
@@ -907,6 +1173,17 @@ export default function GameAssessmentFlow({
             readAloudSegments={topBarReadAloudSegments}
             readAloudResetKey={topBarReadAloudKey}
             readAloudAriaLabel="Read this question aloud"
+            className={
+              cinematicMissionMode && view === 'quiz' ? 'ds-gameplayTopBar--cinematicHud' : ''
+            }
+            trailingControl={
+              view === 'quiz' && cinematicMissionEligible ? (
+                <CinematicMissionThemeToggle
+                  theme={cinematicTheme}
+                  onToggle={toggleCinematicTheme}
+                />
+              ) : undefined
+            }
           />
         ) : (
           <GameHeader
@@ -1005,15 +1282,16 @@ export default function GameAssessmentFlow({
           </div>
         ) : null}
 
-        {view === 'quiz' && currentQuestion ? (
+        {view === 'quiz' && displayQuestion && currentQuestion ? (
           <SharedMissionGameLayout
+            key={`${config.id}::${questionIndex}::${currentQuestion.id}`}
             theme={missionTheme}
             avatarSrc={quizAvatarSrc}
             avatarAlt={config.avatarAlt}
             guideAvatarSrc={config.guideAvatarSrc}
             guideAvatarAlt={config.guideAvatarAlt ?? config.avatarAlt}
             speakerLabel={feedbackSpeakerLabel}
-            question={currentQuestion}
+            question={displayQuestion}
             questionIndex={questionIndex}
             answer={answer}
             checked={checked}
@@ -1021,6 +1299,11 @@ export default function GameAssessmentFlow({
             feedbackTone={feedbackTone}
             quizWrapModifier={quizWrapModifier}
             useCoachingRail={usesCoachingShell}
+            cinematicMode={cinematicMissionMode}
+            cinematicBackgroundSrc={cinematicHero.url}
+            cinematicBackgroundSource={cinematicHero.source}
+            cinematicCompanion={cinematicCompanion}
+            cinematicPlayerReward={cinematicMissionMode ? cinematicPlayerReward : null}
             patternId={gamePattern.id}
             useLockInFeedback={
               usesCoachingShell && !useAdultGuideHeader
@@ -1143,10 +1426,10 @@ export default function GameAssessmentFlow({
         </GameInteractionShell>
       </main>
 
-      {view === 'quiz' && gradeDiagnostics ? (
+      {view === 'quiz' && gradeDiagnostics && process.env.NODE_ENV === 'development' ? (
         <GameQuestionGradeDiagnostics
           {...gradeDiagnostics}
-          question={currentQuestion ?? null}
+          question={displayQuestion ?? null}
         />
       ) : null}
 
