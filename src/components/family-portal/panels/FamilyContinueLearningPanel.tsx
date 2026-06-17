@@ -504,10 +504,6 @@ export default function FamilyContinueLearningPanel() {
       });
       if (!mission) return false;
 
-      if (context.weekNumber !== heroWeekNumber) {
-        handleSelectWeek(context.weekNumber);
-      }
-
       return launchWeeklyMission({
         mission,
         weekId: context.weekNumber,
@@ -527,9 +523,7 @@ export default function FamilyContinueLearningPanel() {
     [
       activeChild?.participantId,
       adventuresLocked,
-      handleSelectWeek,
       hasActiveChild,
-      heroWeekNumber,
       kidsBase,
       location.pathname,
       navigate,

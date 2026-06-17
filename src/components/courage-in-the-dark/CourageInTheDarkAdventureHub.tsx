@@ -473,12 +473,20 @@ export default function CourageInTheDarkAdventureHub({
 
   const handleWeekCardLaunch = useCallback(
     (weekNumber: number, source: 'week-card' | 'week-card-cta') => {
+      if (isMobileLayout) {
+        if (weekNumber !== week) {
+          onWeekSelectorSelectWeek?.(weekNumber);
+        }
+        setViewMode('missions');
+        return true;
+      }
+
       if (onWeekSelectorLaunchWeek?.(weekNumber, source)) {
         return true;
       }
       return false;
     },
-    [onWeekSelectorLaunchWeek],
+    [isMobileLayout, onWeekSelectorLaunchWeek, onWeekSelectorSelectWeek, week],
   );
 
   const exploreWeekStrip =
@@ -503,7 +511,6 @@ export default function CourageInTheDarkAdventureHub({
               mapMissions={resolvedMapMissions}
               isMissionComplete={isHotspotComplete}
               isMissionLocked={isHotspotLocked}
-              getMissionHref={resolveMissionHref}
               onLaunchMission={handleLaunchFromList}
               comingSoonMissionId={listComingSoonId}
             />

@@ -904,6 +904,40 @@
   margin-left: auto;
 }
 
+.courageAdventureHub--cinematic .courageHubControls--mobileBar,
+.courageAdventureHub--adventureMode .courageHubControls--mobileBar {
+  background: rgba(5, 10, 22, 0.72);
+  border-color: rgba(229, 192, 106, 0.18);
+  box-shadow:
+    0 18px 40px -24px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.courageAdventureHub--cinematic .courageHubControls--mobileBar .courageHubViewToggle,
+.courageAdventureHub--adventureMode .courageHubControls--mobileBar .courageHubViewToggle {
+  background: rgba(8, 15, 30, 0.72);
+  border-color: rgba(229, 192, 106, 0.2);
+}
+
+.courageAdventureHub--cinematic .courageHubControls--mobileBar .courageHubViewToggleBtn,
+.courageAdventureHub--adventureMode .courageHubControls--mobileBar .courageHubViewToggleBtn {
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.courageAdventureHub--cinematic .courageHubControls--mobileBar .courageHubViewToggleBtn--active,
+.courageAdventureHub--adventureMode .courageHubControls--mobileBar .courageHubViewToggleBtn--active {
+  color: #1a1035;
+}
+
+.courageAdventureHub--cinematic .courageHubControls--mobileBar .courageHubSoundToggle,
+.courageAdventureHub--adventureMode .courageHubControls--mobileBar .courageHubSoundToggle {
+  background: rgba(8, 15, 30, 0.8);
+  border-color: rgba(229, 192, 106, 0.18);
+  color: rgba(248, 250, 252, 0.9);
+}
+
 .courageAdventureHubMobileQuests {
   width: 100%;
   min-width: 0;
