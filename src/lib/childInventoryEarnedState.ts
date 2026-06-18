@@ -1,23 +1,29 @@
+import type { AdventureModuleRecord } from '../types/adventureModule';
 import type { NormalizedOwnedBadge } from './cmsBadgeArtwork';
 import { isCheckInMissionId } from './cmsBadgeArtwork';
-import { isSupabaseConfigured, supabase } from './supabaseClient';
+import {
+  loadChildProgressStatus,
+  type WeekProgressPaths,
+} from './childProgressStatus';
 import { isWeekFullyComplete } from './weekBadgeProgression';
+import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
   EMPTY_WEEKLY_BADGE_EARNED,
-  loadWeeklyBadgeEarnedState,
   type WeeklyBadgeEarnedState,
 } from './weeklyBadgeUnlock';
 
 export type ChildBadgeEarnedInput = WeeklyBadgeEarnedState & {
   ownsCheckIn: boolean;
+  baselineComplete: boolean;
 };
 
 const EMPTY_EARNED: ChildBadgeEarnedInput = {
   ownsCheckIn: false,
+  baselineComplete: false,
   ...EMPTY_WEEKLY_BADGE_EARNED,
 };
 
-function isCheckInMissionComplete(missionId: string): boolean {
+export function isCheckInMissionComplete(missionId: string): boolean {
   const id = missionId.trim();
   if (!id) return false;
   return isCheckInMissionId(id) || /^b4-check-in/i.test(id);
@@ -26,7 +32,10 @@ function isCheckInMissionComplete(missionId: string): boolean {
 async function resolveCheckInOwned(
   participantId: string,
   completedMissionIds: readonly string[],
+  baselineComplete: boolean,
 ): Promise<boolean> {
+  if (baselineComplete) return true;
+
   const ownsCheckInFromMissions = completedMissionIds.some(isCheckInMissionComplete);
   if (ownsCheckInFromMissions) return true;
 
@@ -44,13 +53,19 @@ async function resolveCheckInOwned(
   return (data ?? []).some((row) => {
     const missionId = (row as { mission_id?: string | null }).mission_id;
     const badgeName = (row as { badge_name?: string | null }).badge_name?.trim() ?? '';
-    return isCheckInMissionComplete(missionId ?? '') || /check-in|daily check-in/i.test(badgeName);
+    return isCheckInMissionComplete(missionId ?? '') || /check-in|daily check-in|baseline/i.test(badgeName);
   });
 }
+
+export type ChildBadgeEarnedLoadOptions = {
+  cmsModules?: readonly AdventureModuleRecord[];
+  paths?: WeekProgressPaths;
+};
 
 export async function loadChildBadgeEarnedState(
   participantIdInput?: string,
   activeWeekNumbers?: readonly number[],
+  options: ChildBadgeEarnedLoadOptions = {},
 ): Promise<ChildBadgeEarnedInput> {
   const participantId = participantIdInput?.trim() ?? '';
   if (!participantId) {
@@ -58,20 +73,18 @@ export async function loadChildBadgeEarnedState(
   }
 
   try {
-    const weeklyState = await loadWeeklyBadgeEarnedState(participantId, activeWeekNumbers);
-    if (weeklyState.completedMissionIds.length === 0) {
-      const ownsCheckIn = await resolveCheckInOwned(participantId, []);
-      return {
-        ownsCheckIn,
-        completedMissionIds: [],
-        earnedWeeklyWeeks: new Set(),
-      };
-    }
+    const progress = await loadChildProgressStatus(participantId, options);
+    const weeklyState = progress.weeklyBadgeState;
+    const ownsCheckIn = await resolveCheckInOwned(
+      participantId,
+      weeklyState.completedMissionIds,
+      progress.baselineComplete,
+    );
 
-    const ownsCheckIn = await resolveCheckInOwned(participantId, weeklyState.completedMissionIds);
     return {
       ...weeklyState,
       ownsCheckIn,
+      baselineComplete: progress.baselineComplete,
     };
   } catch (err) {
     console.warn('[INVENTORY] Failed to load child badge earned state', err);
@@ -86,6 +99,15 @@ export {
   loadWeeklyBadgeEarnedState,
   resolveActiveWeekNumbersFromModules,
 } from './weeklyBadgeUnlock';
+
+export {
+  getBaselineCompletionStatus,
+  getCharacterDiscoveryStatus,
+  getEarnedBadges,
+  getWeekCompletionStatus,
+  loadChildProgressStatus,
+  logInventoryBadgeDebug,
+} from './childProgressStatus';
 
 export function toNormalizedOwnedBadges(input: ChildBadgeEarnedInput): NormalizedOwnedBadge[] {
   const badges: NormalizedOwnedBadge[] = [];
@@ -115,6 +137,7 @@ export function resolveLockedBadgeGuidance(
     unlockRequirement: string;
   },
   earned: ChildBadgeEarnedInput,
+  options: ChildBadgeEarnedLoadOptions = {},
 ): LockedBadgeGuidance | null {
   if (entry.kind === 'monthly') {
     return {
@@ -135,7 +158,10 @@ export function resolveLockedBadgeGuidance(
   if (!weekNumber || weekNumber < 1) return null;
   if (earned.earnedWeeklyWeeks.has(weekNumber)) return null;
 
-  if (weekNumber > 1 && !isWeekFullyComplete(weekNumber - 1, earned.completedMissionIds)) {
+  if (
+    weekNumber > 1 &&
+    !isWeekFullyComplete(weekNumber - 1, earned.completedMissionIds, options)
+  ) {
     return {
       action: 'blocked',
       message: `Complete Week ${weekNumber - 1} before Week ${weekNumber} unlocks.`,

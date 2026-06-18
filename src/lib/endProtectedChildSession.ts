@@ -6,10 +6,16 @@ import {
   PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
-import { clearStalePortalRouteState, readActivePortalRole } from '../config/portalContext';
+import { clearLastPilotProgram } from '../config/lastPilotProgram';
+import { clearStalePortalRouteState, readActivePortalRole, signOutPortal } from '../config/portalContext';
 import { clearActiveChild } from './activeChildContext';
 import { RECENTLY_COMPLETED_HOTSPOT_KEY } from './courageMapReturnFeedback';
+import {
+  logInactivityContext,
+  resolveInactivitySessionContext,
+} from './inactivitySessionContext';
 import { getPortalBasePath } from './portalGamePaths';
+import { PORTAL_RETURN_KEY } from './portalReturnNav';
 
 /** Clears in-memory child session state without touching Supabase progress or rewards. */
 export function clearChildSessionMemory(): void {
@@ -18,12 +24,20 @@ export function clearChildSessionMemory(): void {
   if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.removeItem(RECENTLY_COMPLETED_HOTSPOT_KEY);
+    window.sessionStorage.removeItem(PORTAL_RETURN_KEY);
   } catch {
     /* sessionStorage unavailable */
   }
 }
 
-/** Safest portal landing screen after idle timeout — home/child select, not Character Hub. */
+/** Full shared-device sign-out — access-code gate with no remembered quick return. */
+export function clearSharedDevicePortalSession(): void {
+  clearChildSessionMemory();
+  signOutPortal();
+  clearLastPilotProgram();
+}
+
+/** Safest portal landing screen after idle timeout for home/family quick-return users. */
 export function resolveProtectedSessionExitPath(pathname?: string): string {
   const path = pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '');
 
@@ -47,11 +61,26 @@ export function resolveProtectedSessionExitPath(pathname?: string): string {
   return PORTAL_PATH;
 }
 
-/** End the active child gameplay session and return to a protected portal entry screen. */
+/** End the active child gameplay session using context-aware portal rules. */
 export function endProtectedChildSession(
   navigate: NavigateFunction,
   pathname?: string,
+  reason: 'idle_timeout' | 'manual' = 'idle_timeout',
 ): void {
+  const context = resolveInactivitySessionContext();
+  logInactivityContext('INACTIVITY_END_SESSION', context, { reason });
+
+  if (context.requiresAccessCodeReset) {
+    clearSharedDevicePortalSession();
+    navigate(PORTAL_PATH, {
+      replace: true,
+      state: {
+        portalMessage: 'Your session ended due to inactivity. Enter your access code to continue.',
+      },
+    });
+    return;
+  }
+
   clearChildSessionMemory();
   navigate(resolveProtectedSessionExitPath(pathname), { replace: true });
 }

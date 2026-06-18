@@ -1,5 +1,8 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import type { AdventureMonthRecord } from '../types/adventureMonth';
+import type { WeekProgressOptions } from './weekBadgeProgression';
+import { resolveFullyCompletedWeekNumbers } from './adventureWeekCompletion';
+import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
 import { isWeekFullyComplete } from './weekBadgeProgression';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -64,11 +67,15 @@ export function deriveMonthlyChallengeProgress(
   monthConfig: MonthlyChallengeConfig,
   completedMissionIds: readonly string[],
   earnedClaimKeys: ReadonlySet<string> = new Set(),
+  options: WeekProgressOptions = {},
+  completedWeekNumbers?: readonly number[],
 ): MonthlyChallengeProgress {
-  const completedWeekNumbers = monthConfig.weekNumbers.filter((week) =>
-    isWeekFullyComplete(week, completedMissionIds),
-  );
-  const weeksCompleted = completedWeekNumbers.length;
+  const resolvedCompletedWeekNumbers =
+    completedWeekNumbers ??
+    monthConfig.weekNumbers.filter((week) =>
+      isWeekFullyComplete(week, completedMissionIds, options),
+    );
+  const weeksCompleted = resolvedCompletedWeekNumbers.length;
   const weeksTotal = monthConfig.weekNumbers.length;
   const hasMonthMissionActivity = completedMissionIds.some((missionId) => {
     const weekMatch = /-week-(\d+)$/.exec(missionId);
@@ -103,7 +110,7 @@ export function deriveMonthlyChallengeProgress(
     monthChallengeCompleted,
     certificateEarned,
     monthlyBadgeEarned,
-    completedWeekNumbers,
+    completedWeekNumbers: [...resolvedCompletedWeekNumbers],
   };
 }
 
@@ -175,14 +182,19 @@ export async function getMonthlyChallengeProgress(
   childId: string,
   monthNumber = 1,
   completedMissionIds?: readonly string[],
+  options: WeekProgressOptions & { cmsModules?: AdventureModuleRecord[] } = {},
 ): Promise<MonthlyChallengeProgress> {
   const participantId = childId.trim();
   const config = resolveMonthChallengeConfig(monthNumber);
   if (!participantId) {
-    return deriveMonthlyChallengeProgress(config, [], new Set());
+    return deriveMonthlyChallengeProgress(config, [], new Set(), options);
   }
 
-  const [missionIds, claimKeys] = await Promise.all([
+  const paths = options.paths;
+  const cmsModules = options.cmsModules ?? [];
+
+  const [completedByWeek, missionIds, claimKeys] = await Promise.all([
+    fetchCompletedMissionIdsByWeek(participantId),
     completedMissionIds
       ? Promise.resolve([...completedMissionIds])
       : import('./weeklyBadgeUnlock').then((mod) =>
@@ -191,7 +203,23 @@ export async function getMonthlyChallengeProgress(
     fetchMonthClaimKeys(participantId),
   ]);
 
-  return deriveMonthlyChallengeProgress(config, missionIds, claimKeys);
+  const resolvedMissionIds = completedMissionIds ?? missionIds;
+  const completedWeekNumbers =
+    cmsModules.length > 0 && paths
+      ? resolveFullyCompletedWeekNumbers({
+          completedByWeek,
+          cmsModules: [...cmsModules],
+          paths,
+        }).filter((week) => config.weekNumbers.includes(week))
+      : undefined;
+
+  return deriveMonthlyChallengeProgress(
+    config,
+    resolvedMissionIds,
+    claimKeys,
+    options,
+    completedWeekNumbers,
+  );
 }
 
 export async function syncMonthlyChallengeRewards(

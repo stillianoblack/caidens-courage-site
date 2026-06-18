@@ -1,5 +1,5 @@
 import { courageInTheDarkMissions, type CourageInTheDarkMission } from '../data/courageInTheDarkMap';
-import { weekIdFromNumber } from '../data/courageMissionRewards';
+import { CHARACTER_TO_BASE_MISSION, weekIdFromNumber } from '../data/courageMissionRewards';
 
 /** @deprecated Mission completion is stored in Supabase — use useCourageInTheDarkProgress instead. */
 export function readCourageMapCompletedHotspots(): string[] {
@@ -17,7 +17,15 @@ export function isMapMissionComplete(
 ): boolean {
   const slug = mission.targetGameSlug?.trim();
   if (slug && completedMissionIds.includes(slug)) return true;
-  return completedMissionIds.includes(mission.id);
+  if (completedMissionIds.includes(mission.id)) return true;
+
+  const baseMissionId = CHARACTER_TO_BASE_MISSION[mission.id];
+  if (baseMissionId && completedMissionIds.includes(baseMissionId)) return true;
+
+  const weekScoped = `${mission.id}-week-`;
+  if (completedMissionIds.some((missionId) => missionId.startsWith(weekScoped))) return true;
+
+  return false;
 }
 
 /** @deprecated Prefer isMapMissionComplete with the full mission object. */

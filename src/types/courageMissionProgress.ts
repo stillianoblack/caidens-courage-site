@@ -22,26 +22,28 @@ export type CourageMissionCompletionPayload = CourageMissionRewardPayload & {
   participant_id: string;
 };
 
+export type CompleteMissionSuccessBase = {
+  ok: true;
+  weekMissionsCompleted: number;
+  weekMissionsTotal: number;
+  weekBadgeUnlocked: boolean;
+  weekBadgeJustUnlocked: boolean;
+  /** True when mission progress is saved but coins/badges/discovery await claim. */
+  rewardPending: boolean;
+  /** True when mission reward has been claimed (or legacy auto-award). */
+  rewardClaimed: boolean;
+};
+
 export type CompleteMissionSuccess =
-  | {
-      ok: true;
+  | (CompleteMissionSuccessBase & {
       alreadyCompleted: true;
-      weekMissionsCompleted: number;
-      weekMissionsTotal: number;
-      weekBadgeUnlocked: boolean;
-      weekBadgeJustUnlocked: boolean;
-    }
-  | {
-      ok: true;
+    })
+  | (CompleteMissionSuccessBase & {
       alreadyCompleted: false;
-      oldCoinTotal: number;
-      newCoinTotal: number;
       coinsEarned: number;
-      weekMissionsCompleted: number;
-      weekMissionsTotal: number;
-      weekBadgeUnlocked: boolean;
-      weekBadgeJustUnlocked: boolean;
-    };
+      oldCoinTotal?: number;
+      newCoinTotal?: number;
+    });
 
 export type CompleteMissionFailure = {
   ok: false;

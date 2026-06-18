@@ -1,6 +1,11 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import type { WeeklyQuestRewardConfig } from './adventureWeekAssets';
 import { claimParticipantReward } from './rewardClaimService';
+import { countMissionsCompletedToday } from './missionRewardClaimService';
+import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
+import { countCompletedMapMissions } from './adventureWeekCompletion';
+import { resolveWeekMapMissionsForProgress } from './childProgressStatus';
+import { readMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
 
 export type QuestPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -78,7 +83,53 @@ function resolvePeriodAnchor(period: QuestPeriod, weekId: string): string {
   return weeklyAnchor(weekId);
 }
 
-function buildDefaultRows(weekId: string): QuestProgressRow[] {
+function weekNumberFromId(weekId: string): number {
+  const match = /^week-(\d+)$/.exec(weekId.trim());
+  if (!match) return 1;
+  const week = Number.parseInt(match[1], 10);
+  return Number.isFinite(week) && week > 0 ? week : 1;
+}
+
+export type QuestProgressStats = {
+  dailyAdventureComplete: boolean;
+  completedWeekMissions: number;
+  monthlyCoinsEarned: number;
+};
+
+export async function fetchQuestProgressStats(
+  participantId: string,
+  weekId: string,
+): Promise<QuestProgressStats> {
+  const weekNumber = weekNumberFromId(weekId);
+  const [dailyCount, completedByWeek] = await Promise.all([
+    countMissionsCompletedToday(participantId),
+    fetchCompletedMissionIdsByWeek(participantId),
+  ]);
+
+  const completedMissionIds = completedByWeek[weekNumber] ?? [];
+  const mapMissions = resolveWeekMapMissionsForProgress(weekNumber);
+  const completedWeekMissions = countCompletedMapMissions(mapMissions, completedMissionIds);
+  const monthlyCoinsEarned = readMonthlyCoinsEarned(participantId);
+
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[QUEST_PROGRESS_WRITE]', {
+      participantId,
+      weekId,
+      dailyCount,
+      completedWeekMissions,
+      monthlyCoinsEarned,
+      completedMissionIds,
+    });
+  }
+
+  return {
+    dailyAdventureComplete: dailyCount >= 1,
+    completedWeekMissions,
+    monthlyCoinsEarned,
+  };
+}
+
+function buildDefaultRows(_weekId: string): QuestProgressRow[] {
   return QUEST_DEFINITIONS.map((def) => ({
     questKey: def.key,
     period: def.period,
@@ -95,21 +146,30 @@ function buildDefaultRows(weekId: string): QuestProgressRow[] {
 export async function loadParticipantQuests(
   participantId: string | null | undefined,
   weekId: string,
-  stats: { completedWeekMissions: number; monthlyCoinsEarned: number; dailyAdventureComplete: boolean },
+  stats?: { completedWeekMissions: number; monthlyCoinsEarned: number; dailyAdventureComplete: boolean },
   weeklyQuestReward?: WeeklyQuestRewardConfig | null,
 ): Promise<QuestProgressRow[]> {
   const defaults = buildDefaultRows(weekId);
   const weeklyLabel = weeklyQuestReward?.rewardName ?? 'Explorer Chest';
   const weeklyCoins = weeklyQuestReward?.coinsAwarded ?? 0;
 
+  const resolvedStats =
+    participantId && isSupabaseConfigured()
+      ? await fetchQuestProgressStats(participantId, weekId)
+      : stats ?? {
+          completedWeekMissions: 0,
+          monthlyCoinsEarned: 0,
+          dailyAdventureComplete: false,
+        };
+
   if (!participantId || !isSupabaseConfigured() || !supabase) {
     return defaults.map((row) => {
       if (row.questKey === 'complete_one_adventure') {
-        const progress = stats.dailyAdventureComplete ? 1 : 0;
+        const progress = resolvedStats.dailyAdventureComplete ? 1 : 0;
         return { ...row, progressCount: progress, claimable: progress >= 1 };
       }
       if (row.questKey === 'complete_week_missions') {
-        const progress = Math.min(stats.completedWeekMissions, row.targetCount);
+        const progress = Math.min(resolvedStats.completedWeekMissions, row.targetCount);
         return {
           ...row,
           progressCount: progress,
@@ -119,7 +179,7 @@ export async function loadParticipantQuests(
         };
       }
       if (row.questKey === 'earn_monthly_coins') {
-        const progress = Math.min(stats.monthlyCoinsEarned, row.targetCount);
+        const progress = Math.min(resolvedStats.monthlyCoinsEarned, row.targetCount);
         return { ...row, progressCount: progress, claimable: progress >= row.targetCount };
       }
       return row;
@@ -133,11 +193,11 @@ export async function loadParticipantQuests(
     let progressCount = 0;
 
     if (def.key === 'complete_one_adventure') {
-      progressCount = stats.dailyAdventureComplete ? 1 : 0;
+      progressCount = resolvedStats.dailyAdventureComplete ? 1 : 0;
     } else if (def.key === 'complete_week_missions') {
-      progressCount = Math.min(stats.completedWeekMissions, def.targetCount);
+      progressCount = Math.min(resolvedStats.completedWeekMissions, def.targetCount);
     } else if (def.key === 'earn_monthly_coins') {
-      progressCount = Math.min(stats.monthlyCoinsEarned, def.targetCount);
+      progressCount = Math.min(resolvedStats.monthlyCoinsEarned, def.targetCount);
     }
 
     const { data } = await supabase
@@ -169,6 +229,16 @@ export async function loadParticipantQuests(
         },
         { onConflict: 'participant_id,quest_period,quest_key,period_anchor' },
       );
+
+      if (process.env.NODE_ENV === 'development') {
+        console.info('[QUEST_PROGRESS_WRITE]', {
+          participantId,
+          questKey: def.key,
+          periodAnchor,
+          progressCount: effectiveProgress,
+          targetCount: def.targetCount,
+        });
+      }
     }
 
     rows.push({

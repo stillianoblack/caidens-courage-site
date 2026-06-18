@@ -3,7 +3,6 @@ import { REWARD_SHOP_ITEMS, type RewardShopItem } from '../data/rewardShopItems'
 import type { InventoryShopState } from '../design-system/kids-adventure/InventoryItemCard';
 import {
   buildCharacterDiscoveryCatalog,
-  getEarnedCharacterDiscoveries,
   type CharacterDiscoveryCatalogEntry,
   type EarnedCharacterDiscovery,
 } from './characterDiscoveryService';
@@ -13,6 +12,11 @@ import {
   resolveCertificateImageUrl,
   type MonthlyChallengeProgress,
 } from './monthlyChallengeProgress';
+import {
+  DEFAULT_WEEK_PROGRESS_PATHS,
+  loadChildProgressStatus,
+  type WeekProgressPaths,
+} from './childProgressStatus';
 import {
   dedupeEarnedGameplayRewards,
   loadChildInventoryView,
@@ -31,6 +35,8 @@ import {
 
 export type ChildRewardSnapshot = {
   weeklyBadgeState: WeeklyBadgeEarnedState;
+  ownsCheckIn: boolean;
+  baselineComplete: boolean;
   badgeCatalog: InventoryBadgeCatalogEntry[];
   monthlyChallenge: MonthlyChallengeProgress;
   certificateImageUrl: string | null;
@@ -43,6 +49,8 @@ export type ChildRewardSnapshot = {
 
 const EMPTY_SNAPSHOT: ChildRewardSnapshot = {
   weeklyBadgeState: { completedMissionIds: [], earnedWeeklyWeeks: new Set() },
+  ownsCheckIn: false,
+  baselineComplete: false,
   badgeCatalog: [],
   monthlyChallenge: {
     monthNumber: 1,
@@ -71,28 +79,38 @@ const EMPTY_SNAPSHOT: ChildRewardSnapshot = {
 export async function loadChildRewardSnapshot(
   childIdInput?: string,
   modules: AdventureModuleRecord[] = [],
+  paths: WeekProgressPaths = DEFAULT_WEEK_PROGRESS_PATHS,
 ): Promise<ChildRewardSnapshot> {
   const childId = childIdInput?.trim() ?? '';
   if (!childId) return EMPTY_SNAPSHOT;
 
-  const activeWeekNumbers = resolveActiveWeekNumbersFromModules(modules);
+  const progressOptions = { cmsModules: modules, paths };
 
-  const [weeklyBadgeState, inventoryView, earnedDiscoveries, monthlyChallenge] = await Promise.all([
-    loadWeeklyBadgeEarnedState(childId, activeWeekNumbers),
+  const [progress, inventoryView, monthlyChallenge] = await Promise.all([
+    loadChildProgressStatus(childId, progressOptions),
     loadChildInventoryView(childId, modules),
-    getEarnedCharacterDiscoveries(childId),
-    getMonthlyChallengeProgress(childId, 1),
+    getMonthlyChallengeProgress(childId, 1, undefined, { ...progressOptions, cmsModules: modules }),
   ]);
 
-  const badgeCatalog = buildInventoryBadgeCatalog(modules, weeklyBadgeState, monthlyChallenge);
-  const discoveryCatalog = buildCharacterDiscoveryCatalog(earnedDiscoveries);
+  const weeklyBadgeState = progress.weeklyBadgeState;
+  const badgeCatalog = buildInventoryBadgeCatalog(
+    modules,
+    weeklyBadgeState,
+    monthlyChallenge,
+    progress.ownsCheckIn,
+    progressOptions,
+    childId,
+  );
+  const discoveryCatalog = buildCharacterDiscoveryCatalog(progress.earnedDiscoveries);
 
   return {
     weeklyBadgeState,
+    ownsCheckIn: progress.ownsCheckIn,
+    baselineComplete: progress.baselineComplete,
     badgeCatalog,
     monthlyChallenge,
     certificateImageUrl: resolveCertificateImageUrl(modules, 1),
-    earnedDiscoveries,
+    earnedDiscoveries: progress.earnedDiscoveries,
     discoveryCatalog,
     earnedRewards: inventoryView.earnedRewards,
     purchasedShopItemIds: inventoryView.purchasedShopItemIds,
@@ -138,6 +156,7 @@ export async function getNextRewardToEarn(
   const nextWeek = await getNextBadgeToEarn(
     childId,
     resolveActiveWeekNumbersFromModules(modules),
+    { cmsModules: modules, paths: DEFAULT_WEEK_PROGRESS_PATHS },
   );
   if (nextWeek != null) {
     return { kind: 'weekly-badge', weekNumber: nextWeek };

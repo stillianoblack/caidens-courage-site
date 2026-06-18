@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import {
+  logInactivityContext,
+  resolveInactivitySessionContext,
+} from '../../lib/inactivitySessionContext';
 import './idle-session-guard.css';
 
 const DEFAULT_IDLE_MS = 2 * 60 * 1000;
@@ -26,6 +30,7 @@ export default function IdleSessionGuard({
   const idleTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const onEndSessionRef = useRef(onEndSession ?? onReturn);
+  const warnedRef = useRef(false);
 
   onEndSessionRef.current = onEndSession ?? onReturn;
 
@@ -42,6 +47,7 @@ export default function IdleSessionGuard({
 
   const closeModal = useCallback(() => {
     setOpen(false);
+    warnedRef.current = false;
     setSecondsLeft(Math.ceil(warningMs / 1000));
     if (countdownTimerRef.current != null) {
       window.clearInterval(countdownTimerRef.current);
@@ -50,15 +56,17 @@ export default function IdleSessionGuard({
   }, [warningMs]);
 
   const scheduleIdleTimer = useCallback(() => {
-    if (!enabled) return;
+    if (!enabled || open) return;
     clearTimers();
     idleTimerRef.current = window.setTimeout(() => {
       setOpen(true);
       setSecondsLeft(Math.ceil(warningMs / 1000));
     }, idleMs);
-  }, [clearTimers, enabled, idleMs, warningMs]);
+  }, [clearTimers, enabled, idleMs, open, warningMs]);
 
   const continuePlaying = useCallback(() => {
+    const context = resolveInactivitySessionContext();
+    logInactivityContext('INACTIVITY_CONTINUE', context);
     closeModal();
     scheduleIdleTimer();
   }, [closeModal, scheduleIdleTimer]);
@@ -95,16 +103,33 @@ export default function IdleSessionGuard({
       window.addEventListener(eventName, markActivity, { passive: true });
     }
 
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        markActivity();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       clearTimers();
       for (const eventName of events) {
         window.removeEventListener(eventName, markActivity);
       }
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [clearTimers, closeModal, enabled, open, scheduleIdleTimer]);
 
   useEffect(() => {
     if (!open) return undefined;
+
+    if (!warnedRef.current) {
+      warnedRef.current = true;
+      const context = resolveInactivitySessionContext();
+      logInactivityContext('INACTIVITY_WARNING_SHOWN', context, {
+        warningSeconds: Math.ceil(warningMs / 1000),
+      });
+      logInactivityContext('INACTIVITY_CONTEXT', context);
+    }
 
     countdownTimerRef.current = window.setInterval(() => {
       setSecondsLeft((prev) => {
@@ -122,7 +147,7 @@ export default function IdleSessionGuard({
         countdownTimerRef.current = null;
       }
     };
-  }, [endSessionNow, open]);
+  }, [endSessionNow, open, warningMs]);
 
   useEffect(() => {
     if (!open || typeof document === 'undefined') return undefined;
@@ -152,8 +177,7 @@ export default function IdleSessionGuard({
           info.
         </p>
         <p className="ds-idleGuardCountdown" role="status" aria-live="polite">
-          Ending session in {secondsLeft} second{secondsLeft === 1 ? '' : 's'} to protect your
-          progress.
+          Ending session in {secondsLeft} second{secondsLeft === 1 ? '' : 's'}.
         </p>
         <div className="ds-idleGuardActions">
           <button type="button" className="ds-idleGuardBtn ds-idleGuardBtn--primary" onClick={continuePlaying}>

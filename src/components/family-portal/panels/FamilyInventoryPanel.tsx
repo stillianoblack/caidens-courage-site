@@ -32,8 +32,10 @@ import { useFamilyAdventureModules } from '../../../hooks/useAdventureModules';
 import { useInventoryHelpPlacement } from '../../../hooks/useInventoryHelpPlacement';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { MODULE_COMPLETE_EVENT } from '../../../lib/activeChildContext';
+import { clearInventoryNewRewards } from '../../../lib/inventoryNotificationService';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
-import { getPortalRoute } from '../../../lib/portalGamePaths';
+import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
+import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { WEEKLY_SOURCE_VALUE, WEEKLY_WEEK_PARAM } from '../../../lib/weeklyAdventureRouteContext';
 import { PortalPageIntro } from '../../portal-design-system';
 import AchievementBadgeCard from '../../../design-system/kids-adventure/AchievementBadgeCard';
@@ -57,6 +59,7 @@ const SHOP_CATEGORY_LABELS: Record<RewardShopCategory, string> = {
 
 const EMPTY_EARNED: ChildBadgeEarnedInput = {
   ownsCheckIn: false,
+  baselineComplete: false,
   earnedWeeklyWeeks: new Set(),
   completedMissionIds: [],
 };
@@ -164,6 +167,22 @@ export default function FamilyInventoryPanel() {
     () => resolveActiveWeekNumbersFromModules(adventureModules),
     [adventureModules],
   );
+  const progressPaths = useMemo(() => {
+    const basePath = resolveFamilyBasePath(location.pathname);
+    const kidsBase = resolvePortalKidsBasePath(location.pathname);
+    return {
+      kidsBasePath: kidsBase,
+      downloadsPath: `${basePath}/downloads`,
+      certificatesPath: familyPortalPath('certificates', location.pathname),
+    };
+  }, [location.pathname]);
+  const progressOptions = useMemo(
+    () => ({
+      cmsModules: adventureModules,
+      paths: progressPaths,
+    }),
+    [adventureModules, progressPaths],
+  );
   const [inventory, setInventory] = useState<PlayerInventorySnapshot>(EMPTY_INVENTORY);
   const [earned, setEarned] = useState<ChildBadgeEarnedInput>(EMPTY_EARNED);
   const [loading, setLoading] = useState(true);
@@ -187,15 +206,19 @@ export default function FamilyInventoryPanel() {
 
     setLoading(true);
     const [snapshot, earnedState] = await Promise.all([
-      getPlayerInventory(participantId, adventureModules),
-      loadChildBadgeEarnedState(participantId, activeWeekNumbers),
+      getPlayerInventory(participantId, adventureModules, progressPaths),
+      loadChildBadgeEarnedState(participantId, activeWeekNumbers, progressOptions),
     ]);
     setInventory(snapshot);
     setEarned(earnedState);
     setLoading(false);
-  }, [activeChild?.participantId, activeWeekNumbers, adventureModules]);
+  }, [activeChild?.participantId, activeWeekNumbers, adventureModules, progressOptions, progressPaths]);
 
   useEffect(() => {
+    const participantId = activeChild?.participantId?.trim();
+    if (participantId) {
+      clearInventoryNewRewards(participantId);
+    }
     void refreshInventory();
     const handleRefresh = () => {
       void refreshInventory();
@@ -206,7 +229,7 @@ export default function FamilyInventoryPanel() {
       window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
       window.removeEventListener('cc-reward-claimed', handleRefresh);
     };
-  }, [refreshInventory]);
+  }, [activeChild?.participantId, refreshInventory]);
 
   useEffect(() => {
     if (!showHelpSheet) {
@@ -268,7 +291,7 @@ export default function FamilyInventoryPanel() {
         return;
       }
 
-      const guidance = resolveLockedBadgeGuidance(entry, earned);
+      const guidance = resolveLockedBadgeGuidance(entry, earned, progressOptions);
       if (!guidance) return;
 
       if (guidance.action === 'navigate_baseline') {
@@ -284,7 +307,7 @@ export default function FamilyInventoryPanel() {
         navigate(`${familyPortalPath('continue-learning', location.pathname)}?${params.toString()}`);
       }
     },
-    [earned, location.pathname, navigate, showHelpSheet],
+    [earned, location.pathname, navigate, progressOptions, showHelpSheet],
   );
 
   const handleEarnedBadgeClick = useCallback((entry: (typeof badgeRows)[number]) => {

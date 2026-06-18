@@ -1,11 +1,13 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import { type NormalizedOwnedBadge } from './cmsBadgeArtwork';
-import { loadChildBadgeEarnedState, toNormalizedOwnedBadges } from './childInventoryEarnedState';
+import { toNormalizedOwnedBadges } from './childInventoryEarnedState';
 import {
   loadChildRewardSnapshot,
   type CharacterDiscoveryCatalogEntry,
   type ChildRewardSnapshot,
 } from './childRewardSystem';
+import type { WeekProgressPaths } from './childProgressStatus';
+import { DEFAULT_WEEK_PROGRESS_PATHS } from './childProgressStatus';
 import {
   dedupeEarnedGameplayRewards,
   loadChildInventoryView,
@@ -58,6 +60,7 @@ function splitLegacyRewardLists(earnedRewards: EarnedInventoryItem[]): {
 export async function getPlayerInventory(
   explicitParticipantId?: string,
   modules: AdventureModuleRecord[] = [],
+  paths: WeekProgressPaths = DEFAULT_WEEK_PROGRESS_PATHS,
 ): Promise<PlayerInventorySnapshot> {
   const participantId = explicitParticipantId?.trim() ?? '';
   if (!participantId) {
@@ -65,11 +68,12 @@ export async function getPlayerInventory(
   }
 
   try {
-    const [rewardSnapshot, earnedState] = await Promise.all([
-      loadChildRewardSnapshot(participantId, modules),
-      loadChildBadgeEarnedState(participantId),
-    ]);
-
+    const rewardSnapshot = await loadChildRewardSnapshot(participantId, modules, paths);
+    const earnedState = {
+      ownsCheckIn: rewardSnapshot.ownsCheckIn,
+      baselineComplete: rewardSnapshot.baselineComplete,
+      ...rewardSnapshot.weeklyBadgeState,
+    };
     const badges = toNormalizedOwnedBadges(earnedState);
     const { items, stickers, decorations } = splitLegacyRewardLists(rewardSnapshot.earnedRewards);
 

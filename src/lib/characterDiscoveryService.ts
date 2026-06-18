@@ -6,7 +6,6 @@ import {
   resolveCharacterDiscoveryForMission,
   type CharacterDiscoveryDefinition,
 } from '../data/characterDiscoveryDefinitions';
-import { fetchParticipantCompletedMissionIds } from './weeklyBadgeUnlock';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type EarnedCharacterDiscovery = {
@@ -48,36 +47,21 @@ export async function getEarnedCharacterDiscoveries(
   if (!participantId) return [];
 
   try {
-    const [rows, completedMissionIds] = await Promise.all([
-      fetchDiscoveryClaimRows(participantId),
-      fetchParticipantCompletedMissionIds(participantId),
-    ]);
+    const rows = await fetchDiscoveryClaimRows(participantId);
     const earned: EarnedCharacterDiscovery[] = [];
     const seen = new Set<string>();
-    const earnedAtById = new Map<string, string | null>();
 
     for (const row of rows) {
+      if (!row.claimed_at) continue;
       const discoveryId = parseDiscoveryIdFromRewardKey(row.reward_key);
-      if (!discoveryId) continue;
-      earnedAtById.set(discoveryId, row.claimed_at);
-    }
-
-    for (const missionId of completedMissionIds) {
-      const discovery = resolveCharacterDiscoveryForMission(missionId);
-      if (discovery) {
-        earnedAtById.set(discovery.id, earnedAtById.get(discovery.id) ?? null);
-      }
-    }
-
-    for (const [discoveryId, earnedAt] of Array.from(earnedAtById.entries())) {
-      if (seen.has(discoveryId)) continue;
+      if (!discoveryId || seen.has(discoveryId)) continue;
       const definition = resolveCharacterDiscoveryById(discoveryId);
       if (!definition) continue;
       seen.add(discoveryId);
       earned.push({
         id: discoveryId,
         definition,
-        earnedAt,
+        earnedAt: row.claimed_at,
       });
     }
 

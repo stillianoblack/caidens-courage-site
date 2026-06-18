@@ -50,6 +50,13 @@ async function writeWalletTotal(participantId: string, total: number): Promise<n
   return total;
 }
 
+export async function hasExistingRewardClaim(
+  participantId: string,
+  rewardKey: string,
+): Promise<boolean> {
+  return hasExistingClaim(participantId, rewardKey);
+}
+
 async function hasExistingClaim(participantId: string, rewardKey: string): Promise<boolean> {
   if (!supabase) return false;
 
@@ -76,6 +83,14 @@ async function hasExistingClaim(participantId: string, rewardKey: string): Promi
   }
 
   return false;
+}
+
+export async function recordRewardClaim(
+  participantId: string,
+  rewardKey: string,
+  rewardName: string,
+): Promise<void> {
+  return recordClaim(participantId, rewardKey, rewardName);
 }
 
 async function recordClaim(participantId: string, rewardKey: string, rewardName: string): Promise<void> {

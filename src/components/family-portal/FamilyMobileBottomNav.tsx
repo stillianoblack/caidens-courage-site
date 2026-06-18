@@ -1,8 +1,12 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureIcon';
+import { useActiveChild } from '../../hooks/useActiveChild';
+import { useFamilyDashboardMetrics } from '../../hooks/useFamilyDashboardMetrics';
+import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
 import { familyPortalPath, familySettingsPath } from '../../lib/familyPortalPaths';
 import { resolveFamilyBasePath } from '../../lib/familyPortalNav';
+import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import MobileBottomNavigation, {
   type MobileBottomNavigationItem,
 } from '../navigation/MobileBottomNavigation';
@@ -24,7 +28,11 @@ const NAV_ICON_MAP: Record<FamilyMobileBottomNavId, FamilyMobileBottomNavIconId>
   profile: 'settings',
 };
 
-function buildNavItems(basePath: string, activeId: FamilyMobileBottomNavId): MobileBottomNavigationItem[] {
+function buildNavItems(
+  basePath: string,
+  activeId: FamilyMobileBottomNavId,
+  inventoryBadgeCount: number,
+): MobileBottomNavigationItem[] {
   const defs: Array<{ id: FamilyMobileBottomNavId; label: string; path: string }> = [
     { id: 'home', label: 'Home', path: basePath },
     { id: 'adventures', label: 'Adventures', path: familyPortalPath('weekly-adventures', basePath) },
@@ -37,6 +45,7 @@ function buildNavItems(basePath: string, activeId: FamilyMobileBottomNavId): Mob
     id: item.id,
     label: item.label,
     href: item.path,
+    badgeCount: item.id === 'inventory' ? inventoryBadgeCount : undefined,
     icon: (
       <KidsAdventureIcon
         name={NAV_ICON_MAP[item.id]}
@@ -89,9 +98,24 @@ export default function FamilyMobileBottomNav() {
   const location = useLocation();
   const basePath = resolveFamilyBasePath(location.pathname);
   const activeId = resolveActiveNavId(location.pathname, basePath);
+  const programCode = resolveTrackingProgramCode() ?? undefined;
+  const { visibleChildren } = useFamilyDashboardMetrics(programCode);
+  const selectableChildren = useMemo(
+    () =>
+      visibleChildren
+        .map((child) => ({
+          participantId: child.studentId,
+          displayName: child.displayName,
+          firstName: child.displayName,
+        }))
+        .filter((child) => Boolean(child.participantId)),
+    [visibleChildren],
+  );
+  const { activeChild } = useActiveChild(selectableChildren);
+  const inventoryBadgeCount = useInventoryNotificationBadge(activeChild?.participantId);
   const items = useMemo(
-    () => buildNavItems(basePath, activeId),
-    [activeId, basePath],
+    () => buildNavItems(basePath, activeId, inventoryBadgeCount),
+    [activeId, basePath, inventoryBadgeCount],
   );
 
   return (

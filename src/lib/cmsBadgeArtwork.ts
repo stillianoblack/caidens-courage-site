@@ -9,7 +9,9 @@ import {
   resolveWeeklyRewardDisplay,
 } from './weeklyRewardDisplay';
 import { isWeekFullyComplete } from './weekBadgeProgression';
+import type { WeekProgressOptions } from './weekBadgeProgression';
 import type { WeeklyBadgeEarnedState } from './weeklyBadgeUnlock';
+import { logInventoryBadgeDebug } from './childProgressStatus';
 
 function resolveCmsModuleForWeek(
   modules: AdventureModuleRecord[],
@@ -379,8 +381,21 @@ export function buildInventoryBadgeCatalog(
   modules: AdventureModuleRecord[],
   earned: WeeklyBadgeEarnedState,
   monthlyChallenge?: MonthlyChallengeProgress,
+  ownsCheckIn = false,
+  progressOptions: WeekProgressOptions = {},
+  childId = '',
 ): InventoryBadgeCatalogEntry[] {
   const entries: InventoryBadgeCatalogEntry[] = [];
+
+  entries.push({
+    key: 'check-in',
+    kind: 'check-in',
+    weekNumber: null,
+    display: resolveCheckInBadgeDisplay(modules),
+    owned: ownsCheckIn,
+    locked: !ownsCheckIn,
+    unlockRequirement: 'Complete the B-4 Check-In to earn this badge.',
+  });
 
   const sortedModules = [...modules].sort((left, right) => left.week_number - right.week_number);
   for (const module of sortedModules) {
@@ -389,8 +404,24 @@ export function buildInventoryBadgeCatalog(
 
     const owned = earned.earnedWeeklyWeeks.has(module.week_number);
     let unlockRequirement = `Complete all Week ${module.week_number} missions to unlock.`;
-    if (!owned && module.week_number > 1 && !isWeekFullyComplete(module.week_number - 1, earned.completedMissionIds)) {
+    if (
+      !owned &&
+      module.week_number > 1 &&
+      !isWeekFullyComplete(module.week_number - 1, earned.completedMissionIds, progressOptions)
+    ) {
       unlockRequirement = `Complete Week ${module.week_number - 1} before Week ${module.week_number} unlocks.`;
+    }
+
+    if (childId && process.env.NODE_ENV === 'development') {
+      logInventoryBadgeDebug({
+        childId,
+        weekNumber: module.week_number,
+        weeklyComplete: owned,
+        badgeUnlocked: owned,
+        sourceTable: 'player_progress',
+        sourceQuery: 'buildInventoryBadgeCatalog',
+        completedMissionIds: earned.completedMissionIds,
+      });
     }
 
     entries.push({

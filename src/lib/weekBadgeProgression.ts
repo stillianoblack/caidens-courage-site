@@ -1,30 +1,68 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import { parseWeekNumberFromWeekId } from './cmsBadgeArtwork';
+import {
+  countCompletedMapMissions,
+  isMapWeekFullyComplete,
+} from './adventureWeekCompletion';
+import {
+  DEFAULT_WEEK_PROGRESS_PATHS,
+  resolveWeekMapMissionsForProgress,
+  type WeekProgressOptions,
+} from './childProgressStatus';
 
 const WEEK_CHARACTER_KEYS = ['caiden', 'miranda', 'zeke', 'charlie', 'b4'] as const;
 
-export function resolveWeekCharacterMissionIds(weekNumber: number): string[] {
-  return WEEK_CHARACTER_KEYS.map((character) => `${character}-week-${weekNumber}`);
+export type { WeekProgressOptions };
+
+export function resolveWeekCharacterMissionIds(
+  weekNumber: number,
+  options?: WeekProgressOptions,
+): string[] {
+  return resolveWeekMapMissionsForProgress(
+    weekNumber,
+    options?.cmsModules ?? [],
+    options?.paths ?? DEFAULT_WEEK_PROGRESS_PATHS,
+  ).map((mission) => mission.targetGameSlug);
 }
 
-export function resolveWeekMissionsTotal(_weekNumber: number): number {
-  return WEEK_CHARACTER_KEYS.length;
+export function resolveWeekMissionsTotal(
+  weekNumber: number,
+  options?: WeekProgressOptions,
+): number {
+  const mapMissions = resolveWeekMapMissionsForProgress(
+    weekNumber,
+    options?.cmsModules ?? [],
+    options?.paths ?? DEFAULT_WEEK_PROGRESS_PATHS,
+  );
+  return mapMissions.filter((mission) =>
+    WEEK_CHARACTER_KEYS.includes(mission.id as (typeof WEEK_CHARACTER_KEYS)[number]),
+  ).length;
 }
 
 export function countCompletedWeekMissions(
   weekNumber: number,
   completedMissionIds: readonly string[],
+  options?: WeekProgressOptions,
 ): number {
-  const required = resolveWeekCharacterMissionIds(weekNumber);
-  const completed = new Set(completedMissionIds);
-  return required.filter((missionId) => completed.has(missionId)).length;
+  const mapMissions = resolveWeekMapMissionsForProgress(
+    weekNumber,
+    options?.cmsModules ?? [],
+    options?.paths ?? DEFAULT_WEEK_PROGRESS_PATHS,
+  );
+  return countCompletedMapMissions(mapMissions, completedMissionIds);
 }
 
 export function isWeekFullyComplete(
   weekNumber: number,
   completedMissionIds: readonly string[],
+  options?: WeekProgressOptions,
 ): boolean {
-  return countCompletedWeekMissions(weekNumber, completedMissionIds) >= resolveWeekMissionsTotal(weekNumber);
+  const mapMissions = resolveWeekMapMissionsForProgress(
+    weekNumber,
+    options?.cmsModules ?? [],
+    options?.paths ?? DEFAULT_WEEK_PROGRESS_PATHS,
+  );
+  return isMapWeekFullyComplete(mapMissions, completedMissionIds);
 }
 
 export function resolveWeekBadgeMissionId(weekId: string): string {

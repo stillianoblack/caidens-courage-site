@@ -1,4 +1,11 @@
-import { isSupabaseConfigured, supabase } from './supabaseClient';
+import type { AdventureModuleRecord } from '../types/adventureModule';
+import { resolveFullyCompletedWeekNumbers } from './adventureWeekCompletion';
+import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
+import {
+  DEFAULT_WEEK_PROGRESS_PATHS,
+  logInventoryBadgeDebug,
+  type WeekProgressPaths,
+} from './childProgressStatus';
 import { isWeekFullyComplete } from './weekBadgeProgression';
 
 /** Upper bound when active weekly modules are not supplied. */
@@ -14,13 +21,24 @@ export const EMPTY_WEEKLY_BADGE_EARNED: WeeklyBadgeEarnedState = {
   earnedWeeklyWeeks: new Set(),
 };
 
+export type WeeklyBadgeLoadOptions = {
+  cmsModules?: readonly AdventureModuleRecord[];
+  paths?: WeekProgressPaths;
+};
+
 export function deriveEarnedWeeklyWeekNumbers(
   completedMissionIds: readonly string[],
   activeWeekNumbers: readonly number[] = defaultActiveWeekNumbers(),
+  options: WeeklyBadgeLoadOptions = {},
 ): ReadonlySet<number> {
   const earned = new Set<number>();
+  const progressOptions = {
+    cmsModules: options.cmsModules ?? [],
+    paths: options.paths ?? DEFAULT_WEEK_PROGRESS_PATHS,
+  };
+
   for (const weekNumber of activeWeekNumbers) {
-    if (weekNumber > 0 && isWeekFullyComplete(weekNumber, completedMissionIds)) {
+    if (weekNumber > 0 && isWeekFullyComplete(weekNumber, completedMissionIds, progressOptions)) {
       earned.add(weekNumber);
     }
   }
@@ -35,27 +53,18 @@ export async function fetchParticipantCompletedMissionIds(
   participantIdInput?: string,
 ): Promise<string[]> {
   const participantId = participantIdInput?.trim() ?? '';
-  if (!participantId || !isSupabaseConfigured() || !supabase) {
+  if (!participantId) {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('player_progress')
-    .select('mission_id')
-    .eq('participant_id', participantId);
-
-  if (error) {
-    throw error;
-  }
-
-  return (data ?? [])
-    .map((row) => (row as { mission_id?: string | null }).mission_id?.trim() ?? '')
-    .filter(Boolean);
+  const completedByWeek = await fetchCompletedMissionIdsByWeek(participantId);
+  return Object.values(completedByWeek).flat();
 }
 
 export async function loadWeeklyBadgeEarnedState(
   participantIdInput?: string,
   activeWeekNumbers: readonly number[] = defaultActiveWeekNumbers(),
+  options: WeeklyBadgeLoadOptions = {},
 ): Promise<WeeklyBadgeEarnedState> {
   const participantId = participantIdInput?.trim() ?? '';
   if (!participantId) {
@@ -63,14 +72,40 @@ export async function loadWeeklyBadgeEarnedState(
   }
 
   try {
-    const completedMissionIds = await fetchParticipantCompletedMissionIds(participantId);
+    const completedByWeek = await fetchCompletedMissionIdsByWeek(participantId);
+    const completedMissionIds = Object.values(completedByWeek).flat();
     if (completedMissionIds.length === 0) {
       return EMPTY_WEEKLY_BADGE_EARNED;
     }
 
+    const cmsModules = options.cmsModules ?? [];
+    const paths = options.paths ?? DEFAULT_WEEK_PROGRESS_PATHS;
+    const earnedWeeklyWeeks =
+      cmsModules.length > 0
+        ? new Set(
+            resolveFullyCompletedWeekNumbers({
+              completedByWeek,
+              cmsModules: [...cmsModules],
+              paths,
+            }).filter((weekNumber) => activeWeekNumbers.includes(weekNumber)),
+          )
+        : deriveEarnedWeeklyWeekNumbers(completedMissionIds, activeWeekNumbers, options);
+
+    for (const weekNumber of Array.from(earnedWeeklyWeeks)) {
+      logInventoryBadgeDebug({
+        childId: participantId,
+        weekNumber,
+        weeklyComplete: true,
+        badgeUnlocked: true,
+        sourceTable: 'player_progress',
+        sourceQuery: 'loadWeeklyBadgeEarnedState',
+        completedMissionIds: completedByWeek[weekNumber] ?? [],
+      });
+    }
+
     return {
       completedMissionIds,
-      earnedWeeklyWeeks: deriveEarnedWeeklyWeekNumbers(completedMissionIds, activeWeekNumbers),
+      earnedWeeklyWeeks,
     };
   } catch (err) {
     console.warn('[WEEKLY_BADGE_UNLOCK] Failed to load earned weekly badges', err);
@@ -86,8 +121,9 @@ export function getEarnedWeeklyBadgesFromState(state: WeeklyBadgeEarnedState): n
 export async function getEarnedWeeklyBadges(
   childId: string,
   activeWeekNumbers?: readonly number[],
+  options?: WeeklyBadgeLoadOptions,
 ): Promise<number[]> {
-  const state = await loadWeeklyBadgeEarnedState(childId, activeWeekNumbers);
+  const state = await loadWeeklyBadgeEarnedState(childId, activeWeekNumbers, options);
   return getEarnedWeeklyBadgesFromState(state);
 }
 
@@ -99,8 +135,12 @@ export function isWeekBadgeEarnedFromState(
   return state.earnedWeeklyWeeks.has(weekNumber);
 }
 
-export async function isWeekBadgeEarned(childId: string, weekNumber: number): Promise<boolean> {
-  const state = await loadWeeklyBadgeEarnedState(childId);
+export async function isWeekBadgeEarned(
+  childId: string,
+  weekNumber: number,
+  options?: WeeklyBadgeLoadOptions,
+): Promise<boolean> {
+  const state = await loadWeeklyBadgeEarnedState(childId, defaultActiveWeekNumbers(), options);
   return isWeekBadgeEarnedFromState(state, weekNumber);
 }
 
@@ -121,9 +161,10 @@ export function getNextBadgeToEarnFromState(
 export async function getNextBadgeToEarn(
   childId: string,
   activeWeekNumbers?: readonly number[],
+  options?: WeeklyBadgeLoadOptions,
 ): Promise<number | null> {
   const weeks = activeWeekNumbers ?? defaultActiveWeekNumbers();
-  const state = await loadWeeklyBadgeEarnedState(childId, weeks);
+  const state = await loadWeeklyBadgeEarnedState(childId, weeks, options);
   return getNextBadgeToEarnFromState(state, weeks);
 }
 

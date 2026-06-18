@@ -10,7 +10,6 @@ import type {
 } from '../types/courageMissionProgress';
 import { notifyModuleComplete } from './activeChildContext';
 import { markRecentlyCompletedHotspot } from './courageMapReturnFeedback';
-import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
 import { completeMissionWithSupabase } from './completeMissionWithSupabase';
 import { ensureWeekGradeLevel } from './participantWeekGradeService';
 import {
@@ -63,6 +62,8 @@ export async function completeWeeklyCourageMission(
       weekMissionsTotal: 5,
       weekBadgeUnlocked: false,
       weekBadgeJustUnlocked: false,
+      rewardPending: false,
+      rewardClaimed: true,
     };
   }
 
@@ -110,8 +111,7 @@ export async function completeWeeklyCourageMission(
   const result = await completeMissionWithSupabase(cmsPayload);
 
   if (result.ok) {
-    if (!result.alreadyCompleted && 'newCoinTotal' in result) {
-      notifyFocusCoinWalletUpdated(result.newCoinTotal);
+    if (!result.alreadyCompleted) {
       markRecentlyCompletedHotspot(payload.mission_id);
     }
     notifyModuleComplete({
@@ -119,8 +119,7 @@ export async function completeWeeklyCourageMission(
       week_id: payload.week_id,
       participant_id: payload.participant_id,
       already_completed: result.alreadyCompleted,
-      new_coin_total:
-        !result.alreadyCompleted && 'newCoinTotal' in result ? result.newCoinTotal : undefined,
+      new_coin_total: result.rewardClaimed && 'newCoinTotal' in result ? result.newCoinTotal : undefined,
     });
   }
 

@@ -79,7 +79,7 @@ const CHARACTER_PATH_MATCHERS: Array<{ test: (pathname: string) => boolean; char
   { test: (pathname) => /\/b4\//.test(pathname), character: 'b4' },
 ];
 
-const CHARACTER_TO_BASE_MISSION: Record<string, string> = {
+export const CHARACTER_TO_BASE_MISSION: Record<string, string> = {
   caiden: 'caiden-courage-in-the-dark',
   miranda: 'miranda-mystery',
   zeke: 'zeke-bridge-challenge',
