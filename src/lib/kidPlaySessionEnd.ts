@@ -19,6 +19,7 @@ import {
 import type { KidPlayResumePayload } from './kidPlaySessionResume';
 import { triggerParentPush } from './parentPushNotify';
 import { buildSessionPausedPushDedupeKey } from './parentPushNotifyDedupe';
+import { kidShellAwareNavigate } from './kidShellNav';
 
 export type EndKidPlayShellSessionOptions = {
   sessionId: string;
@@ -62,7 +63,7 @@ export async function endKidPlayFacilitatorShellSession(
 
   clearChildSessionMemory();
   setKidPlayRosterLocked(true);
-  navigate(programDashboardTabPath('roster'), { replace: true });
+  kidShellAwareNavigate(navigate, programDashboardTabPath('roster'), { replace: true });
 }
 
 /**
@@ -97,7 +98,7 @@ export async function endKidPlayFamilyShellSession(
     childId: options.childId,
     dedupeKey: buildSessionPausedPushDedupeKey(sessionId),
   });
-  navigate(pausePath, { replace: true });
+  kidShellAwareNavigate(navigate, pausePath, { replace: true });
 }
 
 /** Ends kid play shell using device_mode policy from the active session row. */

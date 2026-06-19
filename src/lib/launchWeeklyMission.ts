@@ -1,6 +1,9 @@
+import type { NavigateFunction } from 'react-router-dom';
 import type { CourageInTheDarkMission } from '../data/courageInTheDarkMap';
 import { isMapMissionComplete } from './courageInTheDarkProgress';
 import { resolveCourageMapTargetHref } from './courageInTheDarkRoutes';
+import { isKidPlayShellPath } from './kidPlayShellRoutes';
+import { kidPlayShellNavigate } from './kidShellNav';
 import { remapPortalKidsRoute } from './portalGamePaths';
 import {
   CAMP_PILOT_UNLOCK_ALL,
@@ -128,7 +131,7 @@ export type LaunchWeeklyMissionInput = {
   baselineLocked?: boolean;
   mapLocked?: boolean;
   completedMissionIds?: readonly string[];
-  navigate: (to: string) => void;
+  navigate: NavigateFunction | ((to: string) => void);
 };
 
 export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
@@ -168,18 +171,22 @@ export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
     return false;
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    console.info('[WEEKLY_MISSION_LAUNCH]', {
-      weekId: input.weekId,
-      monthId: input.monthId ?? null,
-      characterId,
-      missionId,
-      route,
-      source: input.source,
-      selectedChildId: input.selectedChildId ?? null,
-    });
-  }
+  console.info('[WEEKLY_MISSION_LAUNCH]', {
+    weekId: input.weekId,
+    monthId: input.monthId ?? null,
+    characterId,
+    missionId,
+    route,
+    source: input.source,
+    selectedChildId: input.selectedChildId ?? null,
+  });
 
-  input.navigate(route);
+  const navigateFn = input.navigate as NavigateFunction;
+
+  if (isKidPlayShellPath(input.pathname)) {
+    kidPlayShellNavigate(navigateFn, route);
+  } else {
+    navigateFn(route);
+  }
   return true;
 }

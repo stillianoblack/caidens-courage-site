@@ -19,6 +19,7 @@ import {
   applyKidPlaySessionResume,
   parseKidPlayResumePayload,
 } from '../lib/kidPlaySessionResume';
+import { kidPlayShellNavigate } from '../lib/kidShellNav';
 import {
   getKidPlayShellRoute,
   logKidShellIdle,
@@ -62,7 +63,9 @@ export default function KidPlaySessionLayout() {
       const row = await getKidPlaySessionById(sessionId);
       if (!row || row.status !== 'active') {
         if (!cancelled) {
-          navigate(resolveKidPlaySessionExitPath(row?.session_source), { replace: true });
+          kidPlayShellNavigate(navigate, resolveKidPlaySessionExitPath(row?.session_source), {
+            replace: true,
+          });
         }
         return;
       }
@@ -100,7 +103,9 @@ export default function KidPlaySessionLayout() {
         const resume = parseKidPlayResumePayload(row.resume_payload);
         const restored = applyKidPlaySessionResume(navigate, row, resume);
         if (!restored) {
-          navigate(getKidPlayShellRoute(sessionId, 'weekly-adventures'), { replace: true });
+          kidPlayShellNavigate(navigate, getKidPlayShellRoute(sessionId, 'weekly-adventures'), {
+            replace: true,
+          });
         }
       }
     }

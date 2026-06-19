@@ -4,6 +4,7 @@ import {
   type KidPlayShellModuleId,
 } from './kidPlayShellRoutes';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
+import { kidPlayShellNavigate } from './kidShellNav';
 
 export type KidPlayResumePayload = {
   route?: string;
@@ -39,16 +40,14 @@ export function applyKidPlaySessionResume(
   const sessionId = session.id;
 
   if (resume?.route?.startsWith(`/play/session/${sessionId}`)) {
-    if (process.env.NODE_ENV === 'development') {
-      console.info('[KID_SHELL_RESUME]', {
-        sessionId,
-        restored: true,
-        reason: 'route',
-        route: resume.route,
-        module: resume.module ?? null,
-      });
-    }
-    navigate(resume.route, { replace: true });
+    console.info('[KID_SHELL_RESUME]', {
+      sessionId,
+      restored: true,
+      reason: 'route',
+      route: resume.route,
+      module: resume.module ?? null,
+    });
+    kidPlayShellNavigate(navigate, resume.route, { replace: true });
     return true;
   }
 
@@ -57,16 +56,14 @@ export function applyKidPlaySessionResume(
       characterId: resume.characterId,
       missionId: resume.missionId,
     });
-    if (process.env.NODE_ENV === 'development') {
-      console.info('[KID_SHELL_RESUME]', {
-        sessionId,
-        restored: true,
-        reason: 'kids_mission',
-        route,
-        module: 'kids',
-      });
-    }
-    navigate(route, { replace: true });
+    console.info('[KID_SHELL_RESUME]', {
+      sessionId,
+      restored: true,
+      reason: 'kids_mission',
+      route,
+      module: 'kids',
+    });
+    kidPlayShellNavigate(navigate, route, { replace: true });
     return true;
   }
 
@@ -75,27 +72,23 @@ export function applyKidPlaySessionResume(
       week: resume.week,
       search: resume.week ? `?week=${resume.week}` : undefined,
     });
-    if (process.env.NODE_ENV === 'development') {
-      console.info('[KID_SHELL_RESUME]', {
-        sessionId,
-        restored: true,
-        reason: 'module',
-        route,
-        module: resume.module,
-      });
-    }
-    navigate(route, { replace: true });
+    console.info('[KID_SHELL_RESUME]', {
+      sessionId,
+      restored: true,
+      reason: 'module',
+      route,
+      module: resume.module,
+    });
+    kidPlayShellNavigate(navigate, route, { replace: true });
     return true;
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    console.info('[KID_SHELL_RESUME]', {
-      sessionId,
-      restored: false,
-      reason: 'fallback_weekly',
-      route: getKidPlayShellRoute(sessionId, 'weekly-adventures'),
-      module: 'weekly-adventures',
-    });
-  }
+  console.info('[KID_SHELL_RESUME]', {
+    sessionId,
+    restored: false,
+    reason: 'fallback_weekly',
+    route: getKidPlayShellRoute(sessionId, 'weekly-adventures'),
+    module: 'weekly-adventures',
+  });
   return false;
 }

@@ -8,6 +8,7 @@ import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInThe
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import { kidPlayShellNavigate } from '../../../lib/kidShellNav';
 import {
   BASELINE_GATE_MESSAGE,
   launchWeeklyMission,
@@ -296,14 +297,17 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
       params.set(WEEKLY_WEEK_PARAM, String(selectable));
       const heroHash = weeklyAdventureHeroAnchor(selectable);
-      navigate(
-        {
-          pathname: location.pathname,
-          search: `?${params.toString()}`,
-          hash: heroHash,
-        },
-        { replace: false },
-      );
+      const nextLocation = {
+        pathname: location.pathname,
+        search: `?${params.toString()}`,
+        hash: heroHash,
+      };
+
+      if (kidPlayShell) {
+        kidPlayShellNavigate(navigate, nextLocation);
+      } else {
+        navigate(nextLocation, { replace: false });
+      }
 
       requestAnimationFrame(() => {
         const target = document.getElementById(heroHash);
@@ -325,6 +329,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       adventureModules,
       explicitSelectedWeek,
       heroWeekNumber,
+      kidPlayShell,
       location.pathname,
       navigate,
       searchParams,

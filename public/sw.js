@@ -1,13 +1,27 @@
 /**
  * Minimal service worker — installability + web push display.
- * Network-first: no aggressive caching that could break production deploys.
+ * Network-first: no fetch caching. Purge legacy caches on activate after deploys.
  */
+const SW_MESSAGE_SKIP_WAITING = 'SKIP_WAITING';
+
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      await self.clients.claim();
+    })(),
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === SW_MESSAGE_SKIP_WAITING) {
+    event.waitUntil(self.skipWaiting());
+  }
 });
 
 self.addEventListener('push', (event) => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
 import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
@@ -60,7 +61,7 @@ export default function KidPlayShellNav({
                     .join(' ')}
                   onClick={() => {
                     if (!item.available) return;
-                    navigate(getKidPlayShellRoute(sessionId, item.id));
+                    kidPlayShellNavigate(navigate, getKidPlayShellRoute(sessionId, item.id));
                   }}
                   disabled={!item.available}
                   aria-current={isActive ? 'page' : undefined}

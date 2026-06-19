@@ -1,6 +1,7 @@
-import { readActivePilotProgram } from '../config/activePilotProgram';
+import { readActivePilotProgram, writeActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readParentClaimContext } from '../config/parentClaimContext';
+import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type PushReminderStatus =
   | 'unavailable'
@@ -23,14 +24,61 @@ export type PushSubscriptionState = {
   error: string | null;
 };
 
-/** Family/parent account id for push_subscriptions.user_id (pilot_programs.id). */
-export function resolveFamilyPushUserId(): string | null {
-  return readActivePilotProgram()?.id?.trim() || null;
+export type PushReminderActionResult = {
+  ok: boolean;
+  message?: string;
+  cloudSyncFailed?: boolean;
+};
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const CLOUD_SYNC_FAILED_MESSAGE =
+  'Reminders enabled on this browser, but cloud sync failed. Try again.';
+
+function isUuid(value: string | null | undefined): boolean {
+  return Boolean(value?.trim() && UUID_RE.test(value.trim()));
 }
 
-/** Optional child scope for push_subscriptions.child_id. */
+/** Family/parent account id for push_subscriptions.user_id (pilot_programs.id). */
+export function resolveFamilyPushUserId(): string | null {
+  const id = readActivePilotProgram()?.id?.trim();
+  return isUuid(id) ? id! : null;
+}
+
+/** Optional child scope for push notification triggers (not saved on subscription row). */
 export function resolveFamilyPushChildId(): string | null {
-  return readActiveChildParticipantId()?.trim() || null;
+  const childId = readActiveChildParticipantId()?.trim();
+  return isUuid(childId) ? childId : null;
+}
+
+/** Backfill pilot_programs.id into session when legacy localStorage entries omit it. */
+export async function ensureFamilyPushUserId(): Promise<string | null> {
+  const cached = resolveFamilyPushUserId();
+  if (cached) return cached;
+
+  const program = readActivePilotProgram();
+  const programCode = program?.programCode?.trim();
+  if (!programCode || !isSupabaseConfigured() || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('pilot_programs')
+      .select('id')
+      .eq('program_code', programCode)
+      .maybeSingle();
+
+    if (error || !data?.id || !isUuid(String(data.id))) {
+      return null;
+    }
+
+    const userId = String(data.id).trim();
+    if (!program) return userId;
+    writeActivePilotProgram({ ...program, id: userId });
+    return userId;
+  } catch {
+    return null;
+  }
 }
 
 export function getWebPushPublicKey(): string | null {
@@ -129,21 +177,25 @@ export async function resolvePushReminderStatus(): Promise<PushReminderStatusRes
 }
 
 function logPushSubscriptionStatus(result: PushReminderStatusResult): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.info('[PUSH_SUBSCRIPTION_STATUS]', {
-      status: result.status,
-      label: result.label,
-      permission: result.permission,
-      subscribed: result.subscribed,
-      userId: resolveFamilyPushUserId(),
-    });
-  }
+  console.info('[PUSH_SUBSCRIPTION_STATUS]', {
+    status: result.status,
+    label: result.label,
+    permission: result.permission,
+    subscribed: result.subscribed,
+    userId: resolveFamilyPushUserId(),
+  });
+}
+
+function logPushSaveRequest(detail: Record<string, unknown>): void {
+  console.info('[PUSH_SAVE_REQUEST]', detail);
 }
 
 function logPushSaveResult(ok: boolean, detail: Record<string, unknown>): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.info('[PUSH_SAVE_RESULT]', { ok, ...detail });
-  }
+  console.info('[PUSH_SAVE_RESULT]', { ok, ...detail });
+}
+
+function logPushSaveError(detail: Record<string, unknown>): void {
+  console.info('[PUSH_SAVE_ERROR]', detail);
 }
 
 /** @deprecated use readPushSubscriptionActive */
@@ -151,10 +203,81 @@ export async function readPushEnabledForCurrentParent(): Promise<boolean> {
   return readPushSubscriptionActive();
 }
 
-export async function enablePushReminders(): Promise<{ ok: boolean; message?: string }> {
+async function savePushSubscriptionToCloud(input: {
+  userId: string;
+  programCode: string;
+  subscription: PushSubscriptionJSON;
+  enabled: boolean;
+}): Promise<PushReminderActionResult> {
+  const payload = {
+    userId: input.userId,
+    programCode: input.programCode,
+    subscription: input.subscription,
+    enabled: input.enabled,
+    childId: null,
+  };
+
+  logPushSaveRequest({
+    userId: input.userId,
+    programCode: input.programCode,
+    enabled: input.enabled,
+    endpoint: input.subscription.endpoint,
+  });
+
+  let response: Response;
+  try {
+    response = await fetch('/.netlify/functions/save-push-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    logPushSaveError({
+      reason: 'network_error',
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      ok: false,
+      cloudSyncFailed: true,
+      message: CLOUD_SYNC_FAILED_MESSAGE,
+    };
+  }
+
+  const responseBody = (await response.json().catch(() => ({}))) as {
+    error?: string;
+    detail?: string;
+  };
+
+  logPushSaveResult(response.ok, {
+    userId: input.userId,
+    programCode: input.programCode,
+    enabled: input.enabled,
+    status: response.status,
+    body: responseBody,
+  });
+
+  if (!response.ok) {
+    logPushSaveError({
+      reason: 'server_rejected',
+      status: response.status,
+      error: responseBody.error || null,
+      detail: responseBody.detail || null,
+    });
+    return {
+      ok: false,
+      cloudSyncFailed: true,
+      message: CLOUD_SYNC_FAILED_MESSAGE,
+    };
+  }
+
+  return { ok: true };
+}
+
+export async function enablePushReminders(): Promise<PushReminderActionResult> {
   const publicKey = getWebPushPublicKey();
-  const userId = resolveFamilyPushUserId();
-  const childId = resolveFamilyPushChildId();
+  const program = readActivePilotProgram();
+  const programCode = program?.programCode?.trim() || '';
+  const userId = await ensureFamilyPushUserId();
   const hasParentContact = Boolean(readParentClaimContext()?.email?.trim());
 
   if (!isPushSupportedInBrowser()) {
@@ -166,7 +289,7 @@ export async function enablePushReminders(): Promise<{ ok: boolean; message?: st
   if (!hasParentContact) {
     return { ok: false, message: 'Add your parent email in settings before enabling reminders.' };
   }
-  if (!userId) {
+  if (!userId || !programCode) {
     return {
       ok: false,
       message: 'Family account is not fully loaded. Refresh the portal and try again.',
@@ -191,36 +314,25 @@ export async function enablePushReminders(): Promise<{ ok: boolean; message?: st
     });
   }
 
-  const response = await fetch('/.netlify/functions/save-push-subscription', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId,
-      childId,
-      subscription: subscription.toJSON(),
-      enabled: true,
-    }),
-  });
-
-  const responseBody = await response.json().catch(() => ({}));
-  logPushSaveResult(response.ok, {
-    userId,
-    childId,
-    enabled: true,
-    status: response.status,
-    body: responseBody,
-  });
-
-  if (!response.ok) {
-    return { ok: false, message: 'Could not save your notification subscription.' };
+  const subscriptionJson = subscription.toJSON();
+  if (!subscriptionJson.endpoint) {
+    logPushSaveError({ reason: 'missing_browser_subscription_endpoint' });
+    return { ok: false, message: 'Could not create a browser push subscription.' };
   }
 
-  return { ok: true };
+  return savePushSubscriptionToCloud({
+    userId,
+    programCode,
+    subscription: subscriptionJson,
+    enabled: true,
+  });
 }
 
-export async function disablePushReminders(): Promise<{ ok: boolean; message?: string }> {
-  const userId = resolveFamilyPushUserId();
-  if (!userId) {
+export async function disablePushReminders(): Promise<PushReminderActionResult> {
+  const program = readActivePilotProgram();
+  const programCode = program?.programCode?.trim() || '';
+  const userId = await ensureFamilyPushUserId();
+  if (!userId || !programCode) {
     return { ok: false, message: 'Family account is not loaded.' };
   }
 
@@ -228,27 +340,23 @@ export async function disablePushReminders(): Promise<{ ok: boolean; message?: s
     const registration = await getServiceWorkerRegistration();
     const subscription = await registration?.pushManager.getSubscription();
     if (subscription) {
-      const response = await fetch('/.netlify/functions/save-push-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const subscriptionJson = subscription.toJSON();
+      if (subscriptionJson.endpoint) {
+        await savePushSubscriptionToCloud({
           userId,
-          childId: resolveFamilyPushChildId(),
-          subscription: subscription.toJSON(),
+          programCode,
+          subscription: subscriptionJson,
           enabled: false,
-        }),
-      });
-      const responseBody = await response.json().catch(() => ({}));
-      logPushSaveResult(response.ok, {
-        userId,
-        enabled: false,
-        status: response.status,
-        body: responseBody,
-      });
+        });
+      }
       await subscription.unsubscribe();
     }
     return { ok: true };
-  } catch {
+  } catch (error) {
+    logPushSaveError({
+      reason: 'disable_failed',
+      message: error instanceof Error ? error.message : String(error),
+    });
     return { ok: false, message: 'Could not disable push reminders.' };
   }
 }

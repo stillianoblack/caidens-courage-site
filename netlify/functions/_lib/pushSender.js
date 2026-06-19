@@ -18,14 +18,36 @@ function configureWebPush() {
   return { ok: true };
 }
 
+function resolveSupabaseUrl() {
+  return (
+    process.env.SUPABASE_URL ||
+    process.env.REACT_APP_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    ''
+  ).trim();
+}
+
+function resolveSupabaseServiceKey() {
+  return (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    ''
+  ).trim();
+}
+
 function getServiceSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url?.trim() || !serviceKey?.trim()) {
+  const url = resolveSupabaseUrl();
+  const serviceKey = resolveSupabaseServiceKey();
+  if (!url || !serviceKey) {
+    console.info('[PUSH_SAVE_ERROR]', {
+      reason: 'supabase_env_missing',
+      hasUrl: Boolean(url),
+      hasServiceKey: Boolean(serviceKey),
+    });
     return null;
   }
   const { createClient } = require('@supabase/supabase-js');
-  return createClient(url.trim(), serviceKey.trim(), {
+  return createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

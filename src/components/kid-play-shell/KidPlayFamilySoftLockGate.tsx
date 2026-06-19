@@ -8,6 +8,7 @@ import {
   setKidPlayFamilySoftLocked,
 } from '../../lib/kidPlayFamilySoftLock';
 import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
+import { kidShellAwareNavigate } from '../../lib/kidShellNav';
 import { familyPortalPath } from '../../lib/familyPortalPaths';
 import { readKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
 import { resumeFamilyKidPlayShell } from '../../lib/resumeFamilyKidPlayShell';
@@ -58,7 +59,9 @@ export default function KidPlayFamilySoftLockGate({
       clearKidPlayFamilyResumePayload();
       setEmail('');
       onUnlocked();
-      navigate(familyPortalPath('weekly-adventures', location.pathname), { replace: true });
+      kidShellAwareNavigate(navigate, familyPortalPath('weekly-adventures', location.pathname), {
+        replace: true,
+      });
     },
     [email, location.pathname, navigate, onUnlocked],
   );
@@ -105,7 +108,7 @@ export default function KidPlayFamilySoftLockGate({
     });
     setSubmitting(false);
     onUnlocked();
-    navigate(PORTAL_PATH, {
+    kidShellAwareNavigate(navigate, PORTAL_PATH, {
       replace: true,
       state: { portalMessage: 'Session ended. Enter your access code to continue.' },
     });

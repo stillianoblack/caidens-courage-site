@@ -15,6 +15,7 @@ import { useFocusCoinWallet } from '../../hooks/useFocusCoinWallet';
 import { getCharacterProgress } from '../../lib/characterProgressService';
 import { buildCharacterRewardProgress } from '../../lib/characterRewardProgress';
 import { buildCharacterUnlockMore } from '../../lib/characterUnlockMore';
+import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { getPortalRoute, resolvePortalKidsBasePath } from '../../lib/portalGamePaths';
 import { resolveFamilyBasePath } from '../../lib/familyPortalNav';
 import {
@@ -129,14 +130,14 @@ export default function KidPlayCharacterCollectionPanel() {
     (characterId: KidCharacterId) => {
       const isB4 = characterId === 'b4';
       if (!baselineComplete && !isB4) {
-        navigate(getPortalRoute('baseline-check', location.pathname));
+        kidPlayShellNavigate(navigate, getPortalRoute('baseline-check', location.pathname));
         return;
       }
       if (isCharacterProfileId(characterId)) {
         openCharacterDetail(characterId);
         return;
       }
-      navigate(`${kidsBase}/${characterId}`);
+      kidPlayShellNavigate(navigate, `${kidsBase}/${characterId}`);
     },
     [baselineComplete, kidsBase, location.pathname, navigate, openCharacterDetail],
   );
