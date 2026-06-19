@@ -6,7 +6,7 @@ import React from 'react';
  */
 const NavigationLoader: React.FC = () => (
   <div
-    className="fixed inset-0 z-[9999] flex flex-col bg-white"
+    className="fixed inset-0 z-[9999] flex flex-col bg-white pointer-events-none"
     aria-live="polite"
     aria-label="Loading"
   >

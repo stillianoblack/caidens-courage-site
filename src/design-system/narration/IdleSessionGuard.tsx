@@ -4,6 +4,7 @@ import {
   logInactivityContext,
   resolveInactivitySessionContext,
 } from '../../lib/inactivitySessionContext';
+import { logOverlayActive } from '../../lib/portalClickDebug';
 import './idle-session-guard.css';
 
 const DEFAULT_IDLE_MS = 2 * 60 * 1000;
@@ -150,6 +151,10 @@ export default function IdleSessionGuard({
       }
     };
   }, [endSessionNow, open, warningMs]);
+
+  useEffect(() => {
+    logOverlayActive('IdleSessionGuard', open);
+  }, [open]);
 
   useEffect(() => {
     if (!open || typeof document === 'undefined') return undefined;

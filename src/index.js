@@ -5,6 +5,7 @@ import './index.css';
 import { initAnalytics } from './lib/analytics';
 import { logAppVersion } from './lib/appVersion';
 import { installInternalLinkReloadFallback } from './lib/internalLinkReloadFallback';
+import { installPortalClickDebug } from './lib/portalClickDebug';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
@@ -23,6 +24,7 @@ function initAnalyticsAfterFirstPaint() {
 }
 
 installInternalLinkReloadFallback();
+installPortalClickDebug();
 initAnalyticsAfterFirstPaint();
 logAppVersion();
 

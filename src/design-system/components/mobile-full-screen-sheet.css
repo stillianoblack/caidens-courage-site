@@ -7,6 +7,10 @@
   pointer-events: none;
 }
 
+.ds-sheetRoot[data-state='open'] {
+  pointer-events: auto;
+}
+
 .ds-sheetOverlay {
   position: fixed;
   inset: 0;

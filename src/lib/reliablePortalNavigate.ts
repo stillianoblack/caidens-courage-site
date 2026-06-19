@@ -1,12 +1,9 @@
 import type { NavigateFunction, To } from 'react-router-dom';
-import { isKidPlayShellPath } from './kidPlayShellRoutes';
 import { logNavTest } from './portalClickDebug';
 
-export type KidShellNavigateOptions = {
+export type ReliableNavigateOptions = {
   replace?: boolean;
   state?: unknown;
-  /** Skip router attempt and load the route directly. */
-  forceAssign?: boolean;
 };
 
 const NAV_VERIFY_MS = 150;
@@ -37,41 +34,24 @@ function currentPath(): string {
   return normalizePath(window.location.pathname + window.location.search);
 }
 
-export function logKidShellNav(from: string, to: string, method: 'router' | 'assign'): void {
-  console.info('[KID_SHELL_NAV]', `${from} -> ${to}`, { method });
-}
-
 function assignPath(from: string, targetPath: string): void {
-  const targetNorm = normalizePath(targetPath);
-  logKidShellNav(from, targetNorm, 'assign');
-  logNavTest(from, targetNorm, { method: 'assign', scope: 'kid-shell' });
+  logNavTest(from, normalizePath(targetPath), { method: 'assign' });
   window.location.assign(targetPath);
 }
 
 /**
- * Reliable navigation for kid play shell actions.
- * Prefers React Router, then falls back to a full route load when navigation stalls.
+ * Router-first navigation with full-page fallback when navigation stalls.
  */
-export function kidPlayShellNavigate(
+export function reliablePortalNavigate(
   navigate: NavigateFunction,
   to: To,
-  options: KidShellNavigateOptions = {},
+  options: ReliableNavigateOptions = {},
 ): void {
   const from = currentPath();
   const targetPath = resolveAbsolutePath(to);
   const targetNorm = normalizePath(targetPath);
-  const inShell = isKidPlayShellPath(from);
-  const targetInShell = isKidPlayShellPath(targetNorm);
 
-  if (inShell || targetInShell) {
-    logKidShellNav(from, targetNorm, 'router');
-    logNavTest(from, targetNorm, { method: 'router', scope: 'kid-shell' });
-  }
-
-  if (options.forceAssign) {
-    assignPath(from, targetPath);
-    return;
-  }
+  logNavTest(from, targetNorm, { method: 'router' });
 
   if (typeof window === 'undefined') {
     navigate(to, { replace: options.replace, state: options.state });
@@ -81,10 +61,8 @@ export function kidPlayShellNavigate(
   try {
     navigate(to, { replace: options.replace, state: options.state });
   } catch (error) {
-    console.warn('[KID_SHELL_NAV] router navigation failed', error);
-    if (inShell || targetInShell) {
-      assignPath(from, targetPath);
-    }
+    console.warn('[NAV_TEST] router navigation failed', error);
+    assignPath(from, targetPath);
     return;
   }
 
@@ -106,21 +84,4 @@ export function kidPlayShellNavigate(
       assignPath(from, targetPath);
     }
   }, NAV_VERIFY_MS);
-}
-
-/** Navigate into or within the kid shell from family portal entry points. */
-export function kidShellAwareNavigate(
-  navigate: NavigateFunction,
-  to: To,
-  options: KidShellNavigateOptions = {},
-): void {
-  const from = currentPath();
-  const targetNorm = normalizePath(resolveAbsolutePath(to));
-
-  if (isKidPlayShellPath(from) || isKidPlayShellPath(targetNorm)) {
-    kidPlayShellNavigate(navigate, to, options);
-    return;
-  }
-
-  navigate(to, { replace: options.replace, state: options.state });
 }

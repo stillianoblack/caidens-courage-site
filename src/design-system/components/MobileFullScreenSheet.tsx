@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { logOverlayActive } from '../../lib/portalClickDebug';
 import './mobile-full-screen-sheet.css';
 
 export type MobileFullScreenSheetProps = {
@@ -20,6 +21,10 @@ export default function MobileFullScreenSheet({
   className = '',
   children,
 }: MobileFullScreenSheetProps) {
+  useEffect(() => {
+    logOverlayActive('MobileFullScreenSheet', open);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;

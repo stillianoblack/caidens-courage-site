@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ActiveParticipantRosterEntry } from '../../types/activeParticipant';
+import { logOverlayActive } from '../../lib/portalClickDebug';
 
 type ActiveParticipantPickerModalProps = {
   open: boolean;
@@ -12,6 +13,10 @@ export default function ActiveParticipantPickerModal({
   roster,
   onSelect,
 }: ActiveParticipantPickerModalProps) {
+  useEffect(() => {
+    logOverlayActive('ActiveParticipantPickerModal', open);
+  }, [open]);
+
   if (!open) return null;
 
   return (

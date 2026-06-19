@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { logOverlayActive } from '../../lib/portalClickDebug';
 import './kid-play-shell-exit.css';
 
 type KidPlayShellExitModalProps = {
@@ -13,6 +14,10 @@ export default function KidPlayShellExitModal({
   onCancel,
   onConfirm,
 }: KidPlayShellExitModalProps) {
+  useEffect(() => {
+    logOverlayActive('KidPlayShellExitModal', open);
+  }, [open]);
+
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(

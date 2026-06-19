@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { readActivePortalRole } from '../../../config/portalContext';
 import {
@@ -18,6 +18,7 @@ import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import type { FamilyChildSummary } from '../../../lib/familyChildrenMetrics';
 import { resolveFamilySettingsTab } from '../../../lib/familyPortalPaths';
+import { reliablePortalNavigate } from '../../../lib/reliablePortalNavigate';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import { formatFamilyRelativeActivityDate } from '../../../lib/familyChildSummaryCard';
@@ -55,7 +56,8 @@ function resolveChildLink(
 
 export default function FamilyProgramSettingsPanel() {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const focusParam = searchParams.get('focus');
   const [activeTab, setActiveTab] = useState<FamilySettingsTabId>(resolveFamilySettingsTab(tabParam));
@@ -163,9 +165,17 @@ export default function FamilyProgramSettingsPanel() {
       } else {
         nextParams.set('tab', next);
       }
-      setSearchParams(nextParams, { replace: true });
+      const search = nextParams.toString();
+      reliablePortalNavigate(
+        navigate,
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : '',
+        },
+        { replace: true },
+      );
     },
-    [searchParams, setSearchParams],
+    [location.pathname, navigate, searchParams],
   );
 
   const scrollToAddChild = () => {

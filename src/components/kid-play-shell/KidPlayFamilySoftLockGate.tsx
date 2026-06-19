@@ -1,4 +1,4 @@
-import React, { useCallback, useState, type FormEvent } from 'react';
+import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
 import { PORTAL_PATH } from '../../config/courageRoutes';
@@ -9,6 +9,7 @@ import {
 } from '../../lib/kidPlayFamilySoftLock';
 import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
 import { kidShellAwareNavigate } from '../../lib/kidShellNav';
+import { logOverlayActive } from '../../lib/portalClickDebug';
 import { familyPortalPath } from '../../lib/familyPortalPaths';
 import { readKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
 import { resumeFamilyKidPlayShell } from '../../lib/resumeFamilyKidPlayShell';
@@ -113,6 +114,10 @@ export default function KidPlayFamilySoftLockGate({
       state: { portalMessage: 'Session ended. Enter your access code to continue.' },
     });
   }, [navigate, onUnlocked, roster]);
+
+  useEffect(() => {
+    logOverlayActive('KidPlayFamilySoftLockGate', open);
+  }, [open]);
 
   if (!open) return null;
 
