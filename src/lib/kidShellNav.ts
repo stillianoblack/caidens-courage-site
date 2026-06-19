@@ -96,8 +96,15 @@ export function kidShellAwareNavigate(
 ): void {
   const from = currentPath();
   const targetNorm = normalizePath(resolveAbsolutePath(to));
+  const fromShell = isKidPlayShellPath(from);
+  const targetShell = isKidPlayShellPath(targetNorm);
 
-  if (isKidPlayShellPath(from) || isKidPlayShellPath(targetNorm)) {
+  if (targetShell && !fromShell) {
+    kidPlayShellNavigate(navigate, to, { ...options, forceAssign: true });
+    return;
+  }
+
+  if (fromShell || targetShell) {
     kidPlayShellNavigate(navigate, to, options);
     return;
   }

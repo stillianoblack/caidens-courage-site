@@ -6,7 +6,7 @@ import {
   remapKidPlayResumeRoute,
 } from './kidPlayFamilyResume';
 import { setKidPlayFamilySoftLocked } from './kidPlayFamilySoftLock';
-import { kidPlayShellNavigate } from './kidShellNav';
+import { kidShellAwareNavigate } from './kidShellNav';
 import { getKidPlayShellRoute, writeKidPlayFamilyReturnBase } from './kidPlayShellRoutes';
 
 export type ResumeFamilyKidPlayShellResult =
@@ -47,7 +47,7 @@ export async function resumeFamilyKidPlayShell(
   });
 
   clearKidPlayFamilyResumePayload();
-  kidPlayShellNavigate(navigate, remappedRoute ?? fallbackRoute, { replace: true });
+  kidShellAwareNavigate(navigate, remappedRoute ?? fallbackRoute, { replace: true });
 
   console.info('[KID_PLAY_FAMILY_RESUME]', {
     sessionId,

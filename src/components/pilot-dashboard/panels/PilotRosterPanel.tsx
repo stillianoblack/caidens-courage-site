@@ -14,6 +14,7 @@ import { buildStudentLoginInstructions } from '../../../lib/familyClaimCode';
 import { resetStudentPinViaFunction } from '../../../lib/studentPinService';
 import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
 import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
+import { kidShellAwareNavigate } from '../../../lib/kidShellNav';
 import { usePilotRosterData, type PilotRosterRow } from '../../../hooks/usePilotRosterData';
 import FacilitatorMoveSessionModal from '../../kid-play-shell/FacilitatorMoveSessionModal';
 import KidPlayRosterLockGate from '../../kid-play-shell/KidPlayRosterLockGate';
@@ -153,7 +154,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
         setKidPlayRosterLocked(false);
         setRosterLocked(false);
-        navigate(kidPlaySessionPath(result.session.id));
+        kidShellAwareNavigate(navigate, kidPlaySessionPath(result.session.id));
       } finally {
         setLaunchSessionLoadingId(null);
       }
