@@ -1,0 +1,168 @@
+/* Collections — dark game cards inside the kid play shell */
+
+.kid-play-shell .inventoryPanel {
+  gap: 1rem;
+}
+
+.kid-play-shell .inventoryPanelHeader {
+  align-items: center;
+}
+
+.kid-play-shell .inventoryPanelKidIntro {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #9eb0d8;
+}
+
+.kid-play-shell .inventoryPanelContent {
+  gap: 2.5rem;
+}
+
+.kid-play-shell .inventorySection,
+.kid-play-shell .inventoryShop {
+  padding: 1.15rem 1.2rem;
+  border-radius: 1rem;
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.94) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+}
+
+.kid-play-shell .inventorySectionTitle {
+  color: #f1f5f9;
+  font-size: 1.05rem;
+}
+
+.kid-play-shell .inventoryEarnedSummary {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .inventoryEmptyHero {
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+}
+
+.kid-play-shell .inventoryEmptyHeroTitle {
+  color: #f8fafc;
+}
+
+.kid-play-shell .inventoryEmptyHeroDesc {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .inventorySectionPlaceholder {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
+.kid-play-shell .inventoryEarnedRewardsCallout {
+  background: linear-gradient(160deg, rgba(30, 58, 138, 0.35) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(91, 140, 255, 0.28);
+}
+
+.kid-play-shell .inventoryEarnedRewardsCalloutText {
+  color: #dbeafe;
+}
+
+.kid-play-shell .inventoryInfoButton {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+}
+
+.kid-play-shell .inventorySkeletonCard {
+  background: linear-gradient(
+    110deg,
+    rgba(148, 163, 184, 0.08) 8%,
+    rgba(148, 163, 184, 0.16) 18%,
+    rgba(148, 163, 184, 0.08) 33%
+  );
+}
+
+.kid-play-shell .kidInventoryCard {
+  padding: 1rem 0.85rem;
+  border-radius: 1rem;
+  background: linear-gradient(155deg, #1e293b 0%, #0f172a 55%, #070b14 100%);
+  border: 1px solid rgba(229, 192, 106, 0.32);
+  box-shadow: 0 10px 28px -14px rgba(2, 6, 23, 0.65);
+  color: #f8fafc;
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardLabel,
+.kid-play-shell .inventoryPanel .kidInventoryCardCategory,
+.kid-play-shell .inventoryPanel .kidInventoryCardDesc,
+.kid-play-shell .inventoryPanel .kidInventoryCardCost {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardCategory {
+  color: rgba(203, 213, 225, 0.78);
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardDesc {
+  color: rgba(203, 213, 225, 0.72);
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardArtWrap {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardFallback {
+  background: rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardFooter {
+  border-top-color: rgba(148, 163, 184, 0.18);
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardRarity {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fde68a;
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCardShopCta {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1200;
+}
+
+.kid-play-shell .inventoryPanel .kidInventoryCard--shopState-owned .kidInventoryCardShopCta {
+  background: rgba(34, 197, 94, 0.88);
+  color: #ecfdf5;
+}
+
+.kid-play-shell .inventoryPanel .achievementBadgeLabel {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .inventoryMonthChallenge,
+.kid-play-shell .inventoryCertificateCard {
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.kid-play-shell .inventoryMonthChallengeProgressLabel,
+.kid-play-shell .inventoryCertificateCardLabel {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .inventoryHelpSheetPanel,
+.kid-play-shell .inventoryBadgeSheetPanel,
+.kid-play-shell .inventoryShopUnlockSheetPanel {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  color: #f1f5f9;
+}
+
+.kid-play-shell .inventoryBadgeSheetTitle,
+.kid-play-shell .inventoryShopUnlockSheetTitle {
+  color: #f8fafc;
+}
+
+.kid-play-shell .inventoryBadgeSheetSubtitle,
+.kid-play-shell .inventoryBadgeSheetEarned,
+.kid-play-shell .inventoryShopUnlockSheetBody {
+  color: #cbd5e1;
+}

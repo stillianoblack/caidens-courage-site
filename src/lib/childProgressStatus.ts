@@ -13,6 +13,7 @@ import type { AdventureTrailWeekView } from '../types/adventureTrail';
 import { isCheckInMissionId } from './cmsBadgeArtwork';
 import type { WeeklyBadgeEarnedState } from './weeklyBadgeUnlock';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { isWeekFullyComplete } from './weekBadgeProgression';
 
 export type WeekProgressPaths = {
   kidsBasePath: string;
@@ -87,7 +88,7 @@ function weekNumberFromWeekId(weekId: string): number | null {
   return Number.isFinite(week) && week > 0 ? week : null;
 }
 
-async function fetchEarnedWeeklyWeeksFromBadges(participantId: string): Promise<Set<number>> {
+export async function fetchClaimedWeeklyWeeksFromBadges(participantId: string): Promise<Set<number>> {
   const earned = new Set<number>();
   if (!isSupabaseConfigured() || !supabase) return earned;
 
@@ -107,6 +108,10 @@ async function fetchEarnedWeeklyWeeksFromBadges(participantId: string): Promise<
   }
 
   return earned;
+}
+
+async function fetchEarnedWeeklyWeeksFromBadges(participantId: string): Promise<Set<number>> {
+  return fetchClaimedWeeklyWeeksFromBadges(participantId);
 }
 
 export function logInventoryBadgeDebug(input: {
@@ -204,7 +209,7 @@ export async function loadChildProgressStatus(
     };
   }
 
-  const [completedByWeek, baselineComplete, earnedDiscoveries, earnedWeeklyWeeks] = await Promise.all([
+  const [completedByWeek, baselineComplete, earnedDiscoveries, claimedWeeklyWeeks] = await Promise.all([
     fetchCompletedMissionIdsByWeek(participantId),
     checkBaselineCompletion(undefined, participantId),
     getEarnedCharacterDiscoveries(participantId),
@@ -218,8 +223,25 @@ export async function loadChildProgressStatus(
   });
 
   const completedMissionIds = Object.values(completedByWeek).flat();
+  const progressOptions = { cmsModules, paths };
+  const earnedWeeklyWeeks = new Set<number>();
+  for (const weekNumber of completedWeekNumbers) {
+    if (isWeekFullyComplete(weekNumber, completedMissionIds, progressOptions)) {
+      earnedWeeklyWeeks.add(weekNumber);
+    }
+  }
 
-  for (const weekNumber of Array.from(earnedWeeklyWeeks)) {
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[INVENTORY_SYNC_DEBUG]', {
+      childId: participantId,
+      completedWeekNumbers,
+      earnedWeeklyWeeks: Array.from(earnedWeeklyWeeks),
+      claimedWeeklyWeeks: Array.from(claimedWeeklyWeeks),
+      completedMissionIds,
+    });
+  }
+
+  for (const weekNumber of Array.from(claimedWeeklyWeeks)) {
     logInventoryBadgeDebug({
       childId: participantId,
       weekNumber,
@@ -242,6 +264,7 @@ export async function loadChildProgressStatus(
     weeklyBadgeState: {
       completedMissionIds,
       earnedWeeklyWeeks,
+      claimedWeeklyWeeks,
     },
     baselineComplete,
     ownsCheckIn,

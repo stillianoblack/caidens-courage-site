@@ -102,3 +102,11 @@ export const LEGACY_BRAVE_MINDS_PATH = '/braveminds';
 export const LEGACY_B4_TOOLS_PATH = '/b4-tools';
 export const LEGACY_COMICBOOK_PATH = '/comicbook';
 export const LEGACY_CHARACTERS_PATH = '/characters';
+
+/** Facilitator-launched shared-device kid play shell (no portal chrome). */
+export const KID_PLAY_SESSION_PATH = '/play/session';
+
+export function kidPlaySessionPath(sessionId: string): string {
+  const id = sessionId.trim();
+  return id ? `${KID_PLAY_SESSION_PATH}/${id}` : KID_PLAY_SESSION_PATH;
+}

@@ -11,11 +11,22 @@ import {
   PROGRAM_DASHBOARD_KIDS_BASE,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
+import {
+  getKidPlayShellKidsBase,
+  isKidPlayShellPath,
+  parseKidPlayShellPath,
+  remapRouteToKidPlayShell,
+} from './kidPlayShellRoutes';
 
 /** Resolves the active portal shell base path from role + URL. */
 export function getPortalBasePath(pathname?: string): string {
   const path =
     pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '');
+
+  const shell = parseKidPlayShellPath(path);
+  if (shell) {
+    return `/play/session/${shell.sessionId}`;
+  }
 
   if (path.startsWith(FAMILY_PORTAL_PATH)) {
     return FAMILY_PORTAL_PATH;
@@ -39,13 +50,33 @@ export function getPortalBasePath(pathname?: string): string {
 
 /** Builds a route inside the current portal shell. Example: getPortalRoute('kids/caiden') */
 export function getPortalRoute(subPath: string, pathname?: string): string {
-  const base = getPortalBasePath(pathname);
+  const path =
+    pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '');
+  const shell = parseKidPlayShellPath(path);
   const clean = subPath.replace(/^\/+/, '');
+
+  if (shell) {
+    const shellBase = `/play/session/${shell.sessionId}`;
+    if (!clean || clean === 'continue-learning' || clean === 'weekly-adventures') {
+      return `${shellBase}/weekly-adventures`;
+    }
+    if (clean === 'inventory') {
+      return `${shellBase}/collections`;
+    }
+    return `${shellBase}/${clean}`;
+  }
+
+  const base = getPortalBasePath(pathname);
   return clean ? `${base}/${clean}` : base;
 }
 
 /** Resolves the kids game base path for the current portal shell. */
 export function resolvePortalKidsBasePath(pathname: string): string {
+  const shell = parseKidPlayShellPath(pathname);
+  if (shell) {
+    return getKidPlayShellKidsBase(shell.sessionId);
+  }
+
   const role = readActivePortalRole();
 
   if (role === 'facilitator' || pathname.startsWith(PROGRAM_DASHBOARD_PATH)) {
@@ -74,6 +105,9 @@ export function resolvePortalKidsBasePath(pathname: string): string {
 
 /** Rewrites legacy /portal/kids routes to stay inside the active portal shell. */
 export function remapPortalKidsRoute(route: string, pathname: string): string {
+  if (isKidPlayShellPath(pathname)) {
+    return remapRouteToKidPlayShell(route, pathname);
+  }
   if (!route.startsWith(KIDS_PORTAL_PATH)) return route;
   const kidsBase = resolvePortalKidsBasePath(pathname);
   return `${kidsBase}${route.slice(KIDS_PORTAL_PATH.length)}`;

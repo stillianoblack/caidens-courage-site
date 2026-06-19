@@ -37,7 +37,7 @@ function buildNavItems(
     { id: 'home', label: 'Home', path: basePath },
     { id: 'adventures', label: 'Adventures', path: familyPortalPath('weekly-adventures', basePath) },
     { id: 'characters', label: 'Characters', path: familyPortalPath('characters', basePath) },
-    { id: 'inventory', label: 'Inventory', path: familyPortalPath('inventory', basePath) },
+    { id: 'inventory', label: 'Collections', path: familyPortalPath('collections', basePath) },
     { id: 'profile', label: 'Profile', path: familySettingsPath(basePath) },
   ];
 
@@ -76,7 +76,7 @@ function resolveActiveNavId(pathname: string, basePath: string): FamilyMobileBot
     return 'characters';
   }
 
-  if (remainder.startsWith('inventory')) {
+  if (remainder.startsWith('inventory') || remainder.startsWith('collections')) {
     return 'inventory';
   }
 

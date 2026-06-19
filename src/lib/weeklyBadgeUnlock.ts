@@ -3,6 +3,7 @@ import { resolveFullyCompletedWeekNumbers } from './adventureWeekCompletion';
 import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
 import {
   DEFAULT_WEEK_PROGRESS_PATHS,
+  fetchClaimedWeeklyWeeksFromBadges,
   logInventoryBadgeDebug,
   type WeekProgressPaths,
 } from './childProgressStatus';
@@ -13,7 +14,10 @@ export const MAX_TRACKED_WEEKLY_BADGES = 12;
 
 export type WeeklyBadgeEarnedState = {
   completedMissionIds: readonly string[];
+  /** Weeks with all map missions complete (mission progress source of truth). */
   earnedWeeklyWeeks: ReadonlySet<number>;
+  /** Weeks with a row in player_badges (claimed/unlocked in inventory). */
+  claimedWeeklyWeeks?: ReadonlySet<number>;
 };
 
 export const EMPTY_WEEKLY_BADGE_EARNED: WeeklyBadgeEarnedState = {
@@ -91,6 +95,8 @@ export async function loadWeeklyBadgeEarnedState(
           )
         : deriveEarnedWeeklyWeekNumbers(completedMissionIds, activeWeekNumbers, options);
 
+    const claimedWeeklyWeeks = await fetchClaimedWeeklyWeeksFromBadges(participantId);
+
     for (const weekNumber of Array.from(earnedWeeklyWeeks)) {
       logInventoryBadgeDebug({
         childId: participantId,
@@ -106,6 +112,7 @@ export async function loadWeeklyBadgeEarnedState(
     return {
       completedMissionIds,
       earnedWeeklyWeeks,
+      claimedWeeklyWeeks,
     };
   } catch (err) {
     console.warn('[WEEKLY_BADGE_UNLOCK] Failed to load earned weekly badges', err);

@@ -16,6 +16,8 @@ type PilotAdminStudentTableProps = {
   variant: PilotAdminStudentTableVariant;
   onStudentClick?: (participantId: string) => void;
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void;
+  onLaunchStudentSession?: (row: PilotRosterRow) => void;
+  launchSessionLoadingId?: string | null;
 };
 
 function formatCompactActivityDate(iso: string | null): string {
@@ -86,6 +88,8 @@ function buildRosterColumns(
   isRoster: boolean,
   onStudentClick?: (participantId: string) => void,
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void,
+  onLaunchStudentSession?: (row: PilotRosterRow) => void,
+  launchSessionLoadingId?: string | null,
 ): ResponsivePortalTableColumn<PilotRosterRow>[] {
   const columns: ResponsivePortalTableColumn<PilotRosterRow>[] = [
     {
@@ -193,6 +197,22 @@ function buildRosterColumns(
       mobileRole: 'metric',
       render: (row) => <PilotStatusChip status={row.status} />,
     });
+    columns.push({
+      id: 'launch-session',
+      header: 'Session',
+      mobileRole: 'detail',
+      className: 'pilot-adminCellAction',
+      render: (row) => (
+        <button
+          type="button"
+          className="pilot-rosterLaunchBtn"
+          onClick={() => onLaunchStudentSession?.(row)}
+          disabled={!onLaunchStudentSession || launchSessionLoadingId === row.participantId}
+        >
+          {launchSessionLoadingId === row.participantId ? 'Launching…' : 'Launch Student Session'}
+        </button>
+      ),
+    });
   }
 
   return columns;
@@ -203,22 +223,45 @@ export default function PilotAdminStudentTable({
   variant,
   onStudentClick,
   onGradeSaved,
+  onLaunchStudentSession,
+  launchSessionLoadingId,
 }: PilotAdminStudentTableProps) {
   const isRoster = variant === 'roster';
   const columns = useMemo(
-    () => buildRosterColumns(isRoster, onStudentClick, onGradeSaved),
-    [isRoster, onGradeSaved, onStudentClick],
+    () =>
+      buildRosterColumns(
+        isRoster,
+        onStudentClick,
+        onGradeSaved,
+        onLaunchStudentSession,
+        launchSessionLoadingId,
+      ),
+    [isRoster, launchSessionLoadingId, onGradeSaved, onLaunchStudentSession, onStudentClick],
   );
 
   const expandedActions = onStudentClick
     ? (row: PilotRosterRow) => (
-        <button
-          type="button"
-          className="pilot-nextCta"
-          onClick={() => onStudentClick(row.participantId)}
-        >
-          View student details
-        </button>
+        <>
+          <button
+            type="button"
+            className="pilot-nextCta"
+            onClick={() => onStudentClick(row.participantId)}
+          >
+            View student details
+          </button>
+          {onLaunchStudentSession ? (
+            <button
+              type="button"
+              className="pilot-nextCta"
+              onClick={() => onLaunchStudentSession(row)}
+              disabled={launchSessionLoadingId === row.participantId}
+            >
+              {launchSessionLoadingId === row.participantId
+                ? 'Launching…'
+                : 'Launch Student Session'}
+            </button>
+          ) : null}
+        </>
       )
     : undefined;
 

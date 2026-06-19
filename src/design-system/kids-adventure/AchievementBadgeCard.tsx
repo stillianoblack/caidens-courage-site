@@ -13,6 +13,7 @@ export type AchievementBadgeCardProps = {
   frameShape?: BadgeFrameShape;
   earned: boolean;
   locked: boolean;
+  pendingClaim?: boolean;
   category?: string;
   themeHint?: string | null;
   onLockedClick?: () => void;
@@ -27,6 +28,7 @@ export default function AchievementBadgeCard({
   frameShape,
   earned,
   locked,
+  pendingClaim = false,
   category,
   themeHint,
   onLockedClick,
@@ -44,6 +46,7 @@ export default function AchievementBadgeCard({
     `achievementBadge--${resolvedFrame}`,
     earned ? 'achievementBadge--earned' : '',
     locked ? 'achievementBadge--locked' : '',
+    pendingClaim ? 'achievementBadge--pendingClaim' : '',
     isInteractive ? 'achievementBadge--interactive' : '',
   ]
     .filter(Boolean)

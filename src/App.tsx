@@ -119,7 +119,9 @@ import {
   MIRANDA_FIRST_DAY_PATH,
   STUDENT_GALLERY_SUBMIT_PATH,
   STUDENT_GALLERY_PUBLIC_PATH,
+  KID_PLAY_SESSION_PATH,
 } from './config/courageRoutes';
+import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
 
 const Portal = React.lazy(() => import('./pages/Portal'));
 const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
@@ -133,6 +135,7 @@ const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
 const ProgramDashboardPage = React.lazy(() => import('./pages/ProgramDashboardPage'));
 const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
+const KidPlaySessionLayout = React.lazy(() => import('./pages/KidPlaySessionLayout'));
 
 const ProgramOverviewTabRoute = React.lazy(() =>
   import('./routes/programDashboardTabRoutes').then((module) => ({
@@ -215,6 +218,9 @@ const FamilyGuidePanel = React.lazy(() =>
 const FamilyProgramSettingsPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyProgramSettingsPanel'),
 );
+const FamilyPlayPausePage = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyPlayPausePage'),
+);
 const FamilyAdultAssessmentPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyAdultAssessmentPanel'),
 );
@@ -240,7 +246,7 @@ const RootRoute: React.FC = () => {
 const appRouteChildren = (
   <>
       <Route path="/" element={<RootRoute />} />
-      <Route path="/inventory" element={<Navigate to={`${FAMILY_HUB_PATH}/inventory`} replace />} />
+      <Route path="/inventory" element={<Navigate to={`${FAMILY_HUB_PATH}/collections`} replace />} />
 
       {/* Story world */}
       <Route path={STORY_PATH} element={<StoryHubPage />} />
@@ -259,6 +265,11 @@ const appRouteChildren = (
       <Route path={WEEK_0_ASSESSMENT_PATH} element={<Week0AssessmentPage />} />
       <Route path={B4_GUIDE_PATH} element={<B4GuidePage />} />
       <Route path="/focus-flame-lab" element={<FocusFlameLabPage />} />
+
+      {/* Facilitator / family kid play shell (no portal chrome) */}
+      <Route path={`${KID_PLAY_SESSION_PATH}/:kidPlaySessionId`} element={<KidPlaySessionLayout />}>
+        {kidPlayShellChildRoutes}
+      </Route>
 
       {/* Focus Flame Academy */}
       <Route
@@ -334,7 +345,9 @@ const appRouteChildren = (
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
           <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
-          <Route path="inventory" element={<FamilyInventoryPanel />} />
+          <Route path="play-pause" element={<FamilyPlayPausePage />} />
+          <Route path="collections" element={<FamilyInventoryPanel />} />
+          <Route path="inventory" element={<Navigate to="collections" replace />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
             <Route index element={<FamilyCharactersPanel />} />
@@ -390,8 +403,10 @@ const appRouteChildren = (
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
-          <Route path="inventory" element={<FamilyInventoryPanel />} />
+          <Route path="collections" element={<FamilyInventoryPanel />} />
+          <Route path="inventory" element={<Navigate to="collections" replace />} />
           <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
+          <Route path="play-pause" element={<FamilyPlayPausePage />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
             <Route index element={<FamilyCharactersPanel />} />
@@ -501,7 +516,11 @@ const AppLayout: React.FC = () => {
     location.pathname === MIRANDA_MYSTERY_FILES_PATH ||
     location.pathname.startsWith(`${MIRANDA_MYSTERY_FILES_PATH}/`) ||
     location.pathname === MIRANDA_FIRST_DAY_PATH;
+  const isKidPlayShell =
+    location.pathname === KID_PLAY_SESSION_PATH ||
+    location.pathname.startsWith(`${KID_PLAY_SESSION_PATH}/`);
   const isImmersiveKidsGame =
+    isKidPlayShell ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
     location.pathname === B4_GUIDE_PATH ||
@@ -522,6 +541,7 @@ const AppLayout: React.FC = () => {
     location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);
   /** Hide global Ask B-4 during gameplay and on portal shells (AppShell mounts B4Assistant). */
   const hideAskB4Chat =
+    isKidPlayShell ||
     !ENABLE_B4_CHAT ||
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||

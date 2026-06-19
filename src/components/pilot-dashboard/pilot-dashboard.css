@@ -3443,6 +3443,23 @@ a.pilot-overviewMiniCard:hover {
   cursor: not-allowed;
 }
 
+.pilot-rosterLaunchBtn {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(36, 58, 110, 0.2);
+  border-radius: 0.5rem;
+  background: #eef3ff;
+  color: var(--pilot-navy);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pilot-rosterLaunchBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .pilot-rosterSuccess {
   margin: 0 0 0.75rem;
   padding: 0.65rem 0.75rem;

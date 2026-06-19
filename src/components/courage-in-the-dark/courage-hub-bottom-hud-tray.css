@@ -4,14 +4,14 @@
   position: absolute;
   left: 0.65rem;
   right: 0.65rem;
-  bottom: 0.08rem;
+  bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  transform: translateY(3.25rem);
   z-index: 4;
   pointer-events: none;
 }
 
 .courageHubHudPillDock--explore {
-  bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
-  transform: translateY(3.25rem);
+  /* Kept for layout hooks; shares unified bottom anchor with missions/quests. */
 }
 
 .courageHubHudStripRow--explore {
@@ -335,7 +335,8 @@
 .courageHubMobileHudPills {
   width: 100%;
   min-width: 0;
-  padding: 0 0.15rem;
+  margin-top: 0.35rem;
+  padding: 0 0.15rem 0.35rem;
 }
 
 .courageHubMobileHudPills .courageHubHudStripRow {
@@ -508,8 +509,7 @@
 }
 
 .courageHubMobileHudPills.courageHubMobileHudPills--explore {
-  margin-top: 0.35rem;
-  padding-bottom: 0.35rem;
+  /* Shares unified mobile bottom spacing with missions/quests. */
 }
 
 @media (hover: hover) and (pointer: fine) {

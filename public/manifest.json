@@ -1,5 +1,5 @@
 {
-  "short_name": "Caiden's Courage",
+  "short_name": "Caiden",
   "name": "Caiden's Courage",
   "icons": [
     {
@@ -20,8 +20,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/family-hub/play-pause",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#070b14",
+  "background_color": "#070b14"
 }

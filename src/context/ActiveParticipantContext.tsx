@@ -200,7 +200,70 @@ export function useActiveParticipantContext(): ActiveParticipantContextValue {
   return ctx;
 }
 
-/** Safe hook when provider may be absent (marketing routes). */
 export function useOptionalActiveParticipantContext(): ActiveParticipantContextValue | null {
   return useContext(ActiveParticipantContext);
+}
+
+/** Single-child provider for facilitator-launched kid play shell sessions. */
+export function KidPlaySessionParticipantProvider({
+  participantId,
+  displayName,
+  children,
+}: {
+  participantId: string;
+  displayName: string;
+  children: ReactNode;
+}) {
+  const roster = useMemo<ActiveParticipantRosterEntry[]>(
+    () => [
+      {
+        participantId,
+        displayName,
+        firstName: displayName,
+        gradeLevel: null,
+        gradeLabel: null,
+      },
+    ],
+    [displayName, participantId],
+  );
+
+  const participant = useMemo<ActiveParticipantState>(
+    () => ({
+      participantId,
+      displayName,
+      firstName: displayName,
+    }),
+    [displayName, participantId],
+  );
+
+  useEffect(() => {
+    syncActiveParticipantStorage(participant);
+    setGameplayPlayerIdentity({
+      participantId,
+      displayName,
+      playerLabel: displayName,
+    });
+  }, [displayName, participant, participantId]);
+
+  const value = useMemo<ActiveParticipantContextValue>(
+    () => ({
+      roster,
+      participant,
+      participantId,
+      displayName,
+      playerLabel: displayName,
+      hasActiveParticipant: true,
+      needsSelection: false,
+      claimRequired: false,
+      loading: false,
+      selectParticipant: () => undefined,
+      refreshRoster: async () => undefined,
+      refreshParticipant: () => undefined,
+    }),
+    [displayName, participant, participantId, roster],
+  );
+
+  return (
+    <ActiveParticipantContext.Provider value={value}>{children}</ActiveParticipantContext.Provider>
+  );
 }

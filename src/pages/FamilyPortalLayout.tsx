@@ -33,10 +33,13 @@ import '../components/family-portal/inventory-help-rail.css';
 import { OPEN_FOCUS_FLAME_JOURNEY_EVENT } from '../lib/focusFlameJourney';
 import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths';
 import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
+import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 import { resetPortalInteractionState } from '../lib/resetPortalInteractionState';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
 import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
-import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
+import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
+import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
+import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
@@ -50,6 +53,11 @@ export default function FamilyPortalLayout() {
   const [programCode, setProgramCode] = useState(
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
+  const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
+
+  useEffect(() => {
+    setFamilySoftLocked(isKidPlayFamilySoftLocked());
+  }, [location.pathname]);
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
   const { isMobileNav } = useFamilyMobileNav();
@@ -57,6 +65,7 @@ export default function FamilyPortalLayout() {
     isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname);
   const familyPortalRightRail = useFamilyPortalRightRail(isMobileGameRoute);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname) || isMobileGameRoute;
+  const isPlayPauseRoute = location.pathname.endsWith('/play-pause');
 
   const sidebarProps = useMemo(
     () => ({
@@ -108,6 +117,13 @@ export default function FamilyPortalLayout() {
   }, []);
 
   useEffect(() => {
+    const launchPath = resolvePwaStandaloneLaunchPath(location.pathname, hasSession);
+    if (launchPath) {
+      navigate(launchPath, { replace: true });
+    }
+  }, [hasSession, location.pathname, navigate]);
+
+  useEffect(() => {
     if (!canAccessShell) {
       navigate(PORTAL_PATH, { replace: true, state: { redirect: FAMILY_PORTAL_PATH } });
     }
@@ -117,9 +133,23 @@ export default function FamilyPortalLayout() {
     return null;
   }
 
+  if (isPlayPauseRoute) {
+    return (
+      <ActiveParticipantProvider programCode={programCode}>
+        <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
+          <Outlet />
+        </Suspense>
+      </ActiveParticipantProvider>
+    );
+  }
+
   return (
     <ActiveParticipantProvider programCode={programCode}>
       <ActiveParticipantPickerGate />
+      <KidPlayFamilySoftLockGate
+        open={familySoftLocked && !isPlayPauseRoute}
+        onUnlocked={() => setFamilySoftLocked(false)}
+      />
       <div
         className={[
           isMobileNav ? 'portal-shell--familyMobileNav' : '',

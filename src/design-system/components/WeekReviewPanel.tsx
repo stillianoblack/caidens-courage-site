@@ -252,7 +252,7 @@ function WeekReviewRewardsSection({ viewModel }: { viewModel: WeekReviewViewMode
                 <span>{viewModel.weeklyReward.coins} bonus coins</span>
               ) : null}
               {viewModel.weeklyReward.storedInInventory ? (
-                <span>Stored in Inventory</span>
+                <span>Stored in Collections</span>
               ) : null}
             </div>
           </div>

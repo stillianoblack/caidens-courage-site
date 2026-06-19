@@ -12,6 +12,7 @@ export type CharacterProfileSheetProps = {
   panelClassName?: string;
   closeLabel?: string;
   children: React.ReactNode;
+  variant?: 'portal' | 'kidShell';
 };
 
 function CharacterProfileSheetClose({
@@ -54,12 +55,14 @@ export default function CharacterProfileSheet({
   panelClassName = '',
   closeLabel,
   children,
+  variant = 'portal',
 }: CharacterProfileSheetProps) {
   const isMobile = useMobileViewport();
 
   if (!open) return null;
 
   const shellClass = ['characterSheetPanelShell', panelClassName].filter(Boolean).join(' ');
+  const kidShellClass = variant === 'kidShell' ? 'characterProfileSheet--kidShell' : '';
 
   if (isMobile) {
     return (
@@ -68,7 +71,13 @@ export default function CharacterProfileSheet({
         onClose={onClose}
         titleId={titleId}
         closeLabel={closeLabel}
-        className="characterProfileSheet characterProfileSheet--mobile"
+        className={[
+          'characterProfileSheet',
+          'characterProfileSheet--mobile',
+          kidShellClass,
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <div className={shellClass}>{children}</div>
       </MobileFullScreenSheet>
@@ -81,7 +90,14 @@ export default function CharacterProfileSheet({
       onClose={onClose}
       titleId={titleId}
       size="standard"
-      className="pilot-drawer characterProfileSheet ds-slidePanel--characterProfile"
+      className={[
+        'pilot-drawer',
+        'characterProfileSheet',
+        'ds-slidePanel--characterProfile',
+        kidShellClass,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <div className={shellClass}>
         <CharacterProfileSheetClose onClose={onClose} closeLabel={closeLabel} />

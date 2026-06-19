@@ -1,0 +1,123 @@
+.kid-play-shell {
+  min-height: 100dvh;
+  background: #070b14;
+  color: #f4f7ff;
+  overflow-x: hidden;
+}
+
+.kid-play-shell .family-panel {
+  min-height: 100dvh;
+  padding: 0;
+  background: transparent;
+}
+
+.kid-play-shell .family-panel--darkAdventureCenter {
+  background: transparent;
+}
+
+.kid-play-shellLoader {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #070b14;
+  color: #c8d4ef;
+}
+
+.kidPlayShellPage {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem clamp(1rem, 3vw, 1.75rem) calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .kidPlayShellPage {
+    padding-top: 1.25rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+.kidPlayShellPageTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+/* Weekly Adventures / Explore — full-bleed world layout inside kid shell */
+.kid-play-shell .family-panel--kidPlayShellWorld {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.25rem;
+}
+
+.kid-play-shell .family-panel--kidPlayShellWorld .courageMapHubSection {
+  margin: 0;
+  padding: 0 0 3.5rem;
+}
+
+.kid-play-shell .family-panel--kidPlayShellWorld .courageAdventureHub {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+.kid-play-shell .family-panel--kidPlayShellWorld .courageAdventureHubMapWrap,
+.kid-play-shell .family-panel--kidPlayShellWorld .courageAdventureHubMapCol {
+  max-width: none;
+}
+
+.kid-play-shell .family-panel--kidPlayShellWorld .courageAdventureHub--cinematic .courageAdventureHubMapWrap {
+  border-radius: 0;
+}
+
+.kid-play-shell .family-panel--kidPlayShellWorld .weeklyJourneySections--darkCenter {
+  margin-top: 4.5rem;
+  padding: 1rem clamp(0.75rem, 2.5vw, 1.25rem) calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 767px) {
+  .kid-play-shell .family-panel--kidPlayShellWorld .weeklyJourneySections--darkCenter {
+    margin-top: 2.75rem;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Week card CTA — stable pill sizing in kid shell weekly adventures */
+.kid-play-shell .weeklyJourneyCardCta {
+  align-self: flex-end;
+  width: auto;
+  min-width: 88px;
+  height: 42px;
+  min-height: 42px;
+  padding-inline: 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.kid-play-shell .courageHubHudCard--explore .courageHubHudCardCta {
+  min-width: 88px;
+  height: 42px;
+  min-height: 42px;
+  padding-inline: 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .kid-play-shell .weeklyJourneyCardCta,
+  .kid-play-shell .courageHubHudCard--explore .courageHubHudCardCta {
+    min-width: 76px;
+    height: 38px;
+    min-height: 38px;
+  }
+}

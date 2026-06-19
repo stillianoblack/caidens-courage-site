@@ -2,10 +2,17 @@ import { supabase, isSupabaseConfigured } from './supabaseClient';
 import type { WeeklyQuestRewardConfig } from './adventureWeekAssets';
 import { claimParticipantReward } from './rewardClaimService';
 import { countMissionsCompletedToday } from './missionRewardClaimService';
+import { triggerParentPush } from './parentPushNotify';
+import { buildRewardReadyPushDedupeKey } from './parentPushNotifyDedupe';
 import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
 import { countCompletedMapMissions } from './adventureWeekCompletion';
 import { resolveWeekMapMissionsForProgress } from './childProgressStatus';
 import { readMonthlyCoinsEarned } from './monthlyCoinsEarnedTracking';
+import {
+  isDailyAdventureComplete,
+  isDailyQuestClaimed,
+  markDailyQuestClaimed,
+} from './courageWeeklyMissionCompletion';
 
 export type QuestPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -123,7 +130,7 @@ export async function fetchQuestProgressStats(
   }
 
   return {
-    dailyAdventureComplete: dailyCount >= 1,
+    dailyAdventureComplete: dailyCount >= 1 || isDailyAdventureComplete(participantId),
     completedWeekMissions,
     monthlyCoinsEarned,
   };
@@ -166,7 +173,13 @@ export async function loadParticipantQuests(
     return defaults.map((row) => {
       if (row.questKey === 'complete_one_adventure') {
         const progress = resolvedStats.dailyAdventureComplete ? 1 : 0;
-        return { ...row, progressCount: progress, claimable: progress >= 1 };
+        const claimed = isDailyQuestClaimed(participantId);
+        return {
+          ...row,
+          progressCount: progress,
+          claimable: !claimed && progress >= 1,
+          claimed,
+        };
       }
       if (row.questKey === 'complete_week_missions') {
         const progress = Math.min(resolvedStats.completedWeekMissions, row.targetCount);
@@ -209,7 +222,9 @@ export async function loadParticipantQuests(
       .eq('period_anchor', periodAnchor)
       .maybeSingle();
 
-    const claimed = Boolean(data?.claimed_at);
+    const claimed =
+      Boolean(data?.claimed_at) ||
+      (def.key === 'complete_one_adventure' && isDailyQuestClaimed(participantId));
     const storedProgress = data?.progress_count ?? progressCount;
     const effectiveProgress = Math.max(storedProgress, progressCount);
 
@@ -267,11 +282,6 @@ export type QuestClaimResult = {
   imageSrc?: string | null;
 };
 
-const QUEST_REWARD_MISSION_IDS: Record<string, string> = {
-  complete_week_missions: 'quest-weekly-explorer-chest',
-  earn_monthly_coins: 'quest-monthly-focus-flame-badge',
-};
-
 async function grantQuestInventoryReward(
   participantId: string,
   weekId: string,
@@ -311,6 +321,88 @@ async function grantQuestInventoryReward(
   }
 }
 
+const QUEST_REWARD_MISSION_IDS: Record<string, string> = {
+  complete_week_missions: 'quest-weekly-explorer-chest',
+  earn_monthly_coins: 'quest-monthly-focus-flame-badge',
+};
+
+async function claimDailyAdventureQuest(
+  participantId: string,
+  def: QuestDefinition,
+  periodAnchor: string,
+  weekId: string,
+): Promise<QuestClaimResult> {
+  if (isDailyQuestClaimed(participantId)) {
+    return {
+      ok: true,
+      coinsAwarded: 0,
+      alreadyClaimed: true,
+      rewardLabel: def.rewardLabel,
+      rewardKind: 'coins',
+    };
+  }
+
+  const supabaseComplete =
+    isSupabaseConfigured() && (await countMissionsCompletedToday(participantId)) >= 1;
+  const localComplete = isDailyAdventureComplete(participantId);
+  if (!supabaseComplete && !localComplete) {
+    return { ok: false };
+  }
+
+  if (isSupabaseConfigured() && supabase) {
+    const rewardKey = `daily-quest-${periodAnchor}`;
+    const claimResult = await claimParticipantReward({
+      participantId,
+      rewardKey,
+      rewardName: def.rewardLabel,
+      rewardKind: 'coins',
+      coinsAwarded: def.rewardCoins,
+      weekId,
+    });
+
+    if (!claimResult.ok && !claimResult.alreadyClaimed) {
+      return { ok: false };
+    }
+
+    const now = new Date().toISOString();
+    await supabase.from('participant_quests').upsert(
+      {
+        participant_id: participantId,
+        quest_period: 'daily',
+        quest_key: def.key,
+        period_anchor: periodAnchor,
+        progress_count: 1,
+        target_count: def.targetCount,
+        reward_type: def.icon,
+        reward_value: def.rewardLabel,
+        reward_coins: def.rewardCoins,
+        claimed_at: now,
+        updated_at: now,
+      },
+      { onConflict: 'participant_id,quest_period,quest_key,period_anchor' },
+    );
+
+    markDailyQuestClaimed(participantId);
+
+    return {
+      ok: true,
+      alreadyClaimed: Boolean(claimResult.alreadyClaimed),
+      coinsAwarded: claimResult.alreadyClaimed ? 0 : def.rewardCoins,
+      newCoinTotal: claimResult.newCoinTotal,
+      rewardLabel: def.rewardLabel,
+      rewardKind: 'coins',
+    };
+  }
+
+  markDailyQuestClaimed(participantId);
+  return {
+    ok: true,
+    coinsAwarded: def.rewardCoins,
+    rewardLabel: def.rewardLabel,
+    rewardKind: 'coins',
+  };
+}
+
 export async function claimParticipantQuest(
   participantId: string,
   questKey: string,
@@ -326,6 +418,10 @@ export async function claimParticipantQuest(
   if (!def) return { ok: false };
 
   const periodAnchor = resolvePeriodAnchor(period, weekId);
+
+  if (questKey === 'complete_one_adventure') {
+    return claimDailyAdventureQuest(participantId, def, periodAnchor, weekId);
+  }
 
   const { data: existing } = await supabase
     .from('participant_quests')
@@ -395,6 +491,14 @@ export async function claimParticipantQuest(
       weekId,
       imageSrc: rewardImage,
     });
+
+    if (claimResult.ok && !claimResult.alreadyClaimed) {
+      triggerParentPush({
+        trigger: 'reward_ready_to_claim',
+        childId: participantId,
+        dedupeKey: buildRewardReadyPushDedupeKey(participantId, `weekly-quest:${weekId}`),
+      });
+    }
 
     return {
       ok: claimResult.ok,

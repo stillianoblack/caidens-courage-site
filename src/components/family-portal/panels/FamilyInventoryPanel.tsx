@@ -8,6 +8,7 @@ import InventoryEarnedRewardsCallout from '../InventoryEarnedRewardsCallout';
 import InventoryHelpCard from '../InventoryHelpCard';
 import InventoryShopUnlockSheet from '../InventoryShopUnlockSheet';
 import { useActiveChild } from '../../../hooks/useActiveChild';
+import { useActiveParticipant } from '../../../hooks/useActiveParticipant';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { useFocusCoinWallet } from '../../../hooks/useFocusCoinWallet';
 import FocusCoinWalletBadge from '../../rewards/FocusCoinWalletBadge';
@@ -28,6 +29,7 @@ import {
 import { resolveShopItemState } from '../../../lib/playerInventoryModel';
 import { resolveShopItemImage } from '../../../lib/inventoryRewardImage';
 import { GENERIC_BADGE_PLACEHOLDER_SRC } from '../../../lib/weeklyRewardDisplay';
+import type { InventoryBadgeCatalogEntry } from '../../../lib/cmsBadgeArtwork';
 import { useFamilyAdventureModules } from '../../../hooks/useAdventureModules';
 import { useInventoryHelpPlacement } from '../../../hooks/useInventoryHelpPlacement';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
@@ -142,9 +144,10 @@ function InventoryEmptyHero({ onStartWeek1 }: { onStartWeek1: () => void }) {
   );
 }
 
-export default function FamilyInventoryPanel() {
+export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlayShell?: boolean }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const shellParticipant = useActiveParticipant();
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const { visibleChildren } = useFamilyDashboardMetrics(programCode);
   const { totalCoins } = useFocusCoinWallet();
@@ -160,6 +163,12 @@ export default function FamilyInventoryPanel() {
     [visibleChildren],
   );
   const { activeChild, selectChild } = useActiveChild(selectableChildren);
+  const resolvedParticipantId = kidPlayShell
+    ? shellParticipant.participantId
+    : activeChild?.participantId;
+  const resolvedDisplayName = kidPlayShell
+    ? shellParticipant.displayName
+    : activeChild?.displayName ?? 'Your player';
   const { modules: adventureModules } = useFamilyAdventureModules();
   const helpPlacement = useInventoryHelpPlacement();
   const showHelpSheet = helpPlacement === 'sheet';
@@ -196,7 +205,7 @@ export default function FamilyInventoryPanel() {
   const rewardSnapshot = inventory.rewardSnapshot;
 
   const refreshInventory = useCallback(async () => {
-    const participantId = activeChild?.participantId?.trim();
+    const participantId = resolvedParticipantId?.trim();
     if (!participantId) {
       setInventory(EMPTY_INVENTORY);
       setEarned(EMPTY_EARNED);
@@ -212,13 +221,10 @@ export default function FamilyInventoryPanel() {
     setInventory(snapshot);
     setEarned(earnedState);
     setLoading(false);
-  }, [activeChild?.participantId, activeWeekNumbers, adventureModules, progressOptions, progressPaths]);
+    clearInventoryNewRewards(participantId);
+  }, [resolvedParticipantId, activeWeekNumbers, adventureModules, progressOptions, progressPaths]);
 
   useEffect(() => {
-    const participantId = activeChild?.participantId?.trim();
-    if (participantId) {
-      clearInventoryNewRewards(participantId);
-    }
     void refreshInventory();
     const handleRefresh = () => {
       void refreshInventory();
@@ -229,7 +235,7 @@ export default function FamilyInventoryPanel() {
       window.removeEventListener(MODULE_COMPLETE_EVENT, handleRefresh);
       window.removeEventListener('cc-reward-claimed', handleRefresh);
     };
-  }, [activeChild?.participantId, refreshInventory]);
+  }, [resolvedParticipantId, refreshInventory]);
 
   useEffect(() => {
     if (!showHelpSheet) {
@@ -262,7 +268,7 @@ export default function FamilyInventoryPanel() {
     [earnedBadgeCount, inventory],
   );
 
-  const badgeRows = useMemo(() => {
+  const badgeRows = useMemo((): InventoryBadgeCatalogEntry[] => {
     if (badgeCatalog.length > 0) return badgeCatalog;
     const preview = resolveWeek1BadgePreviewDisplay();
     return [
@@ -270,7 +276,11 @@ export default function FamilyInventoryPanel() {
         key: 'week-1-preview',
         kind: 'weekly' as const,
         weekNumber: 1,
-        display: preview,
+        display: {
+          ...preview,
+          weekNumber: 1,
+          rarity: 'Common' as const,
+        },
         owned: false,
         locked: true,
         unlockRequirement: '',
@@ -278,9 +288,18 @@ export default function FamilyInventoryPanel() {
     ];
   }, [badgeCatalog]);
 
-  const startWeek1 = useCallback(() => {
-    navigate(resolveWeek1AdventureHref(location.pathname));
-  }, [location.pathname, navigate]);
+  const checkInBadgeRows = useMemo(
+    () => badgeRows.filter((entry) => entry.kind === 'check-in'),
+    [badgeRows],
+  );
+  const weeklyBadgeRows = useMemo(
+    () => badgeRows.filter((entry) => entry.kind === 'weekly'),
+    [badgeRows],
+  );
+  const monthlyBadgeRows = useMemo(
+    () => badgeRows.filter((entry) => entry.kind === 'monthly'),
+    [badgeRows],
+  );
 
   const handleLockedBadgeClick = useCallback(
     (entry: (typeof badgeRows)[number]) => {
@@ -318,6 +337,27 @@ export default function FamilyInventoryPanel() {
     });
   }, []);
 
+  const renderBadgeCard = (entry: (typeof badgeRows)[number]) => (
+    <AchievementBadgeCard
+      key={entry.key}
+      label={entry.display.name}
+      kind={entry.kind}
+      weekNumber={entry.weekNumber}
+      imageSrc={entry.display.imageUrl}
+      themeHint={entry.display.name}
+      earned={entry.owned}
+      locked={entry.locked}
+      pendingClaim={entry.pendingClaim}
+      category={entry.display.weekLabel ?? undefined}
+      onLockedClick={entry.locked ? () => handleLockedBadgeClick(entry) : undefined}
+      onEarnedClick={entry.owned ? () => handleEarnedBadgeClick(entry) : undefined}
+    />
+  );
+
+  const startWeek1 = useCallback(() => {
+    navigate(resolveWeek1AdventureHref(location.pathname));
+  }, [location.pathname, navigate]);
+
   const handleShopUnlockClick = useCallback(
     (item: RewardShopItem, shopState: InventoryShopState) => {
       if (shopState === 'owned' || shopState === 'locked') return;
@@ -332,12 +372,25 @@ export default function FamilyInventoryPanel() {
   }, [location.pathname, navigate]);
 
   return (
-    <div className="inventoryPanel">
+    <div
+      className={['inventoryPanel', kidPlayShell ? 'inventoryPanel--kidShell' : '']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="inventoryPanelHeader">
         <div className="inventoryPanelHeaderCopy">
-          <PortalPageIntro>
-            Collect badges, discoveries, and rewards as you explore Courage in the Dark.
-          </PortalPageIntro>
+          {kidPlayShell ? (
+            <header>
+              <h1 className="kidPlayShellPageTitle">Collections</h1>
+              <p className="inventoryPanelKidIntro">
+                Your Collections hold badges, discoveries, and rewards from every adventure.
+              </p>
+            </header>
+          ) : (
+            <PortalPageIntro>
+              Collect badges, discoveries, and rewards as you explore Courage in the Dark.
+            </PortalPageIntro>
+          )}
         </div>
         <div className="inventoryPanelHeaderActions">
           {showHelpSheet ? (
@@ -352,20 +405,22 @@ export default function FamilyInventoryPanel() {
         </div>
       </div>
 
-      <ActiveChildSelector
-        children={selectableChildren}
-        activeParticipantId={activeChild?.participantId}
-        onSelect={selectChild}
-      />
+      {!kidPlayShell ? (
+        <ActiveChildSelector
+          children={selectableChildren}
+          activeParticipantId={activeChild?.participantId}
+          onSelect={selectChild}
+        />
+      ) : null}
 
       <div className="inventoryPanelContent">
-          {!loading && activeChild?.participantId && hasEarnedContent ? (
+          {!loading && resolvedParticipantId && hasEarnedContent ? (
             <p className="inventoryEarnedSummary" role="status">
-              {`${activeChild.displayName} has earned ${earnedBadgeCount} badge${earnedBadgeCount === 1 ? '' : 's'} and ${earnedDiscoveryCount} character discover${earnedDiscoveryCount === 1 ? 'y' : 'ies'}.`}
+              {`${resolvedDisplayName} has earned ${earnedBadgeCount} badge${earnedBadgeCount === 1 ? '' : 's'} and ${earnedDiscoveryCount} character discover${earnedDiscoveryCount === 1 ? 'y' : 'ies'}.`}
             </p>
           ) : null}
 
-          {!loading && activeChild?.participantId && !hasEarnedContent ? (
+          {!loading && resolvedParticipantId && !hasEarnedContent ? (
             <InventoryEmptyHero onStartWeek1={startWeek1} />
           ) : null}
 
@@ -379,25 +434,29 @@ export default function FamilyInventoryPanel() {
 
           {!loading ? (
             <>
-              <InventorySection title="Badges">
-                <div className="inventoryCardGrid inventoryCardGrid--badges">
-                  {badgeRows.map((entry) => (
-                    <AchievementBadgeCard
-                      key={entry.key}
-                      label={entry.display.name}
-                      kind={entry.kind}
-                      weekNumber={entry.weekNumber}
-                      imageSrc={entry.display.imageUrl}
-                      themeHint={entry.display.name}
-                      earned={entry.owned}
-                      locked={entry.locked}
-                      category={entry.display.weekLabel ?? undefined}
-                      onLockedClick={entry.locked ? () => handleLockedBadgeClick(entry) : undefined}
-                      onEarnedClick={entry.owned ? () => handleEarnedBadgeClick(entry) : undefined}
-                    />
-                  ))}
-                </div>
-              </InventorySection>
+              {checkInBadgeRows.length > 0 ? (
+                <InventorySection title="B-4 Check-In">
+                  <div className="inventoryCardGrid inventoryCardGrid--badges">
+                    {checkInBadgeRows.map(renderBadgeCard)}
+                  </div>
+                </InventorySection>
+              ) : null}
+
+              {weeklyBadgeRows.length > 0 ? (
+                <InventorySection title="Weekly Adventure Badges">
+                  <div className="inventoryCardGrid inventoryCardGrid--badges">
+                    {weeklyBadgeRows.map(renderBadgeCard)}
+                  </div>
+                </InventorySection>
+              ) : null}
+
+              {monthlyBadgeRows.length > 0 ? (
+                <InventorySection title="Monthly Challenge">
+                  <div className="inventoryCardGrid inventoryCardGrid--badges">
+                    {monthlyBadgeRows.map(renderBadgeCard)}
+                  </div>
+                </InventorySection>
+              ) : null}
 
               <InventorySection title="Character Discoveries">
                 {discoveryCatalog.length > 0 ? (

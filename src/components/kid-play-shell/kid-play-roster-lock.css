@@ -1,0 +1,107 @@
+.kidPlayRosterLock {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(6, 10, 18, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.kidPlayRosterLockCard {
+  width: min(100%, 28rem);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background: #101828;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+.kidPlayRosterLockTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fbff;
+}
+
+.kidPlayRosterLockBody {
+  margin: 0 0 1rem;
+  color: #c5d0e6;
+  line-height: 1.5;
+}
+
+.kidPlayRosterLockForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kidPlayRosterLockLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #dce6fa;
+}
+
+.kidPlayRosterLockInput {
+  width: 100%;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0b1220;
+  color: #f4f7ff;
+  padding: 0.65rem 0.75rem;
+}
+
+.kidPlayRosterLockError {
+  margin: 0;
+  color: #ffb4b4;
+  font-size: 0.875rem;
+}
+
+.kidPlayRosterLockSubmit {
+  border: 0;
+  border-radius: 0.625rem;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  background: #4f7cff;
+  color: #fff;
+  cursor: pointer;
+}
+
+.kidPlayRosterLockSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.kidPlayFamilySoftLockPicker {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.kidPlayRosterLock--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  min-height: 100dvh;
+  background: #070b14;
+}
+
+.kidPlayRosterLockEndSession {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.625rem;
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  background: transparent;
+  color: #c5d0e6;
+  cursor: pointer;
+  width: 100%;
+}
+
+.kidPlayRosterLockEndSession:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.familyPlayPausePage {
+  min-height: 100dvh;
+  background: #070b14;
+}

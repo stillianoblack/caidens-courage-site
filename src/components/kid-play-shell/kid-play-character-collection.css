@@ -1,0 +1,205 @@
+.kidPlayCharacterCollection {
+  min-width: 0;
+}
+
+.kidPlayCharacterCollectionHeader {
+  margin-bottom: 1.25rem;
+}
+
+.kidPlayCharacterCollectionSubtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #9eb0d8;
+  line-height: 1.45;
+}
+
+.kidPlayCharacterCollectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kidPlayCharacterCollectionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.96) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+}
+
+.kidPlayCharacterCollectionCard--locked {
+  opacity: 0.72;
+}
+
+.kidPlayCharacterCollectionCard--complete {
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.2), 0 8px 24px rgba(2, 6, 23, 0.35);
+}
+
+.kidPlayCharacterCollectionCard--caiden {
+  --kid-card-spotlight: rgba(232, 191, 79, 0.2);
+}
+
+.kidPlayCharacterCollectionCard--miranda {
+  --kid-card-spotlight: rgba(139, 92, 246, 0.22);
+}
+
+.kidPlayCharacterCollectionCard--b4 {
+  --kid-card-spotlight: rgba(14, 165, 233, 0.2);
+}
+
+.kidPlayCharacterCollectionCard--charlie {
+  --kid-card-spotlight: rgba(34, 197, 94, 0.2);
+}
+
+.kidPlayCharacterCollectionCard--zeke {
+  --kid-card-spotlight: rgba(249, 115, 22, 0.2);
+}
+
+.kidPlayCharacterCollectionArtWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 168px;
+  border-radius: 0.85rem;
+  background: radial-gradient(circle at 50% 38%, var(--kid-card-spotlight, rgba(255, 255, 255, 0.1)), transparent 72%);
+  overflow: hidden;
+}
+
+.kidPlayCharacterCollectionArtWrap::before {
+  content: '';
+  position: absolute;
+  inset: 12% 18% 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--kid-card-spotlight, rgba(255, 255, 255, 0.12)) 0%, transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.kidPlayCharacterCollectionArt {
+  position: relative;
+  z-index: 1;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.42));
+}
+
+.kidPlayCharacterCollectionArtFallback {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.2);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.kidPlayCharacterCollectionCompleteMark {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #052e16;
+  font-size: 0.95rem;
+  font-weight: 900;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.45);
+}
+
+.kidPlayCharacterCollectionLockMark {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.kidPlayCharacterCollectionName {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.kidPlayCharacterCollectionNameBtn {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kidPlayCharacterCollectionNameBtn:hover {
+  color: #fde68a;
+}
+
+.kidPlayCharacterCollectionNameBtn:focus-visible {
+  outline: 2px solid rgba(91, 140, 255, 0.55);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.kidPlayCharacterCollectionDesc {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.kidPlayCharacterCollectionStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.kidPlayCharacterCollectionDiscoveryStat {
+  color: #fbbf24;
+}
+
+.kidPlayCharacterCollectionCta {
+  margin-top: 0.25rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1200;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.kidPlayCharacterCollectionCta:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kidPlayCharacterCollectionSessionHint {
+  display: none;
+}

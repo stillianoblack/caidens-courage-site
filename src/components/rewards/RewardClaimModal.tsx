@@ -7,6 +7,7 @@ import './reward-claim-modal.css';
 export type RewardClaimModalProps = {
   result: RewardClaimResult | null;
   inventoryPath?: string;
+  inventoryLabel?: string;
   onClose: () => void;
 };
 
@@ -18,7 +19,7 @@ function resolveBody(result: RewardClaimResult): string {
     return `+${result.coinsAwarded} Focus Coins added to your wallet.`;
   }
   if (result.rewardKind === 'chest') {
-    return `${result.rewardName ?? 'Reward'} added to your Inventory.`;
+    return `${result.rewardName ?? 'Reward'} added to your Collections.`;
   }
   if (result.rewardKind === 'badge') {
     const coinLine =
@@ -33,6 +34,7 @@ function resolveBody(result: RewardClaimResult): string {
 export default function RewardClaimModal({
   result,
   inventoryPath,
+  inventoryLabel,
   onClose,
 }: RewardClaimModalProps) {
   const playedRef = useRef(false);
@@ -50,6 +52,7 @@ export default function RewardClaimModal({
   if (!result?.ok) return null;
 
   const title = result.alreadyClaimed ? 'Reward Already Claimed' : 'Reward Claimed!';
+  const viewLabel = inventoryLabel ?? 'Collections';
 
   return (
     <div className="rewardClaimBackdrop" role="presentation" onClick={onClose}>
@@ -85,7 +88,7 @@ export default function RewardClaimModal({
         <div className="rewardClaimActions">
           {inventoryPath ? (
             <Link to={inventoryPath} className="rewardClaimBtn rewardClaimBtn--primary">
-              View Inventory
+              View {viewLabel}
             </Link>
           ) : null}
           <button type="button" className="rewardClaimBtn" onClick={onClose}>

@@ -139,6 +139,10 @@ function dailyQuestStorageKey(participantId: string): string {
   return `cc-daily-quest-${participantId}-${new Date().toISOString().slice(0, 10)}`;
 }
 
+function dailyQuestClaimStorageKey(participantId: string): string {
+  return `cc-daily-quest-claim-${participantId}-${new Date().toISOString().slice(0, 10)}`;
+}
+
 export function markDailyAdventureComplete(participantId: string): void {
   if (typeof window === 'undefined') return;
   try {
@@ -152,6 +156,24 @@ export function isDailyAdventureComplete(participantId: string | null | undefine
   if (!participantId || typeof window === 'undefined') return false;
   try {
     return window.localStorage.getItem(dailyQuestStorageKey(participantId)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markDailyQuestClaimed(participantId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(dailyQuestClaimStorageKey(participantId), '1');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isDailyQuestClaimed(participantId: string | null | undefined): boolean {
+  if (!participantId || typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(dailyQuestClaimStorageKey(participantId)) === '1';
   } catch {
     return false;
   }

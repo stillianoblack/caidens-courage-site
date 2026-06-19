@@ -14,6 +14,8 @@ export type CharacterProfilePanelProps = {
   onClose: () => void;
   rewardProgress: CharacterRewardProgress;
   unlockMore: CharacterUnlockMore;
+  /** Kid play shell — wider game sheet + dark backdrop */
+  variant?: 'portal' | 'kidShell';
 };
 
 /** Character Hub profile — narrow CharacterProfileSheet for all character bios. */
@@ -23,6 +25,7 @@ export default memo(function CharacterProfilePanel({
   onClose,
   rewardProgress,
   unlockMore,
+  variant = 'portal',
 }: CharacterProfilePanelProps) {
   return (
     <CharacterProfileSheet
@@ -31,6 +34,7 @@ export default memo(function CharacterProfilePanel({
       titleId="character-profile-title"
       panelClassName={`characterSheetPanel--${profile.theme}`}
       closeLabel={`Close ${profile.name} profile`}
+      variant={variant}
     >
       <CharacterProfilePanelContent
         profile={profile}

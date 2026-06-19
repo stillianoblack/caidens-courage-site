@@ -40,6 +40,9 @@ import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
 import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
+import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
+import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
+import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -52,6 +55,10 @@ export default function FamilyHubLayout() {
   const [programCode, setProgramCode] = useState(
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
+  const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
+  useEffect(() => {
+    setFamilySoftLocked(isKidPlayFamilySoftLocked());
+  }, [location.pathname]);
   const sessionValid = Boolean(
     activeProgram && hasSession && role === 'family' && isPortalRoleAllowed(location.pathname),
   );
@@ -64,6 +71,7 @@ export default function FamilyHubLayout() {
     isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname, FAMILY_HUB_PATH);
   const familyPortalRightRail = useFamilyPortalRightRail(isMobileGameRoute);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname, FAMILY_HUB_PATH) || isMobileGameRoute;
+  const isPlayPauseRoute = location.pathname.endsWith('/play-pause');
 
   const sidebarProps = useMemo(
     () => ({
@@ -116,6 +124,13 @@ export default function FamilyHubLayout() {
   }, [sessionValid]);
 
   useEffect(() => {
+    const launchPath = resolvePwaStandaloneLaunchPath(location.pathname, sessionValid);
+    if (launchPath) {
+      navigate(launchPath, { replace: true });
+    }
+  }, [location.pathname, navigate, sessionValid]);
+
+  useEffect(() => {
     if (!canAccessShell) {
       clearProgramPortalContext();
       clearFamilyPortalSession();
@@ -127,9 +142,23 @@ export default function FamilyHubLayout() {
     return null;
   }
 
+  if (isPlayPauseRoute) {
+    return (
+      <ActiveParticipantProvider programCode={programCode}>
+        <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
+          <Outlet />
+        </Suspense>
+      </ActiveParticipantProvider>
+    );
+  }
+
   return (
     <ActiveParticipantProvider programCode={programCode}>
       <ActiveParticipantPickerGate />
+      <KidPlayFamilySoftLockGate
+        open={familySoftLocked && !isPlayPauseRoute}
+        onUnlocked={() => setFamilySoftLocked(false)}
+      />
       <div
         className={[
           isMobileNav ? 'portal-shell--familyMobileNav' : '',

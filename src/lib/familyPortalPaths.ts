@@ -4,8 +4,13 @@ import {
   DEFAULT_FAMILY_SETTINGS_TAB,
   type FamilySettingsTabId,
 } from '../data/familySettingsContent';
+import { isKidPlayShellPath, parseKidPlayShellPath } from './kidPlayShellRoutes';
 
 export function resolveFamilyPortalBase(pathname?: string): string {
+  if (pathname && isKidPlayShellPath(pathname)) {
+    const ctx = parseKidPlayShellPath(pathname);
+    if (ctx) return `/play/session/${ctx.sessionId}`;
+  }
   if (pathname?.startsWith(FAMILY_PORTAL_PATH)) return FAMILY_PORTAL_PATH;
   return FAMILY_HUB_PATH;
 }

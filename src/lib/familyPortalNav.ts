@@ -7,11 +7,16 @@ import {
   KIDS_PORTAL_PATH,
   PROGRAM_DASHBOARD_KIDS_BASE,
 } from '../config/courageRoutes';
+import { isKidPlayShellPath, parseKidPlayShellPath } from './kidPlayShellRoutes';
 import { resolveCharacterProfileTitle } from '../data/characterProfiles';
 import { FAMILY_NAV_TITLE, type FamilySidebarNavId } from '../data/familyPortalContent';
 import { isWeeklyAdventureSource } from './weeklyAdventureRouteContext';
 
 export function resolveFamilyBasePath(pathname: string): string {
+  if (isKidPlayShellPath(pathname)) {
+    const ctx = parseKidPlayShellPath(pathname);
+    if (ctx) return `/play/session/${ctx.sessionId}`;
+  }
   if (pathname.startsWith(FAMILY_HUB_PATH)) return FAMILY_HUB_PATH;
   return FAMILY_PORTAL_PATH;
 }
@@ -92,6 +97,7 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
     '/parent-corner',
     '/characters',
     '/inventory',
+    '/collections',
     '/settings',
   ]);
 
@@ -128,6 +134,7 @@ export function resolvePortalNavId(
     { id: 'continue-learning', segment: `${basePath}/weekly-adventures` },
     { id: 'continue-learning', segment: `${basePath}/continue-learning` },
     { id: 'character-hub', segment: `${basePath}/characters` },
+    { id: 'inventory', segment: `${basePath}/collections` },
     { id: 'inventory', segment: `${basePath}/inventory` },
     { id: 'downloads', segment: `${basePath}/downloads` },
     { id: 'gallery', segment: `${basePath}/gallery` },

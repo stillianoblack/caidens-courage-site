@@ -32,6 +32,7 @@ import FamilyUpgradePricingModal from '../FamilyUpgradePricingModal';
 import SettingsCard from '../settings/SettingsCard';
 import SettingsPageLayout from '../settings/SettingsPageLayout';
 import FamilySettingsOverviewTab from '../settings/FamilySettingsOverviewTab';
+import FamilyPushNotificationsCard from '../settings/FamilyPushNotificationsCard';
 import FamilyDisplayNameEditor from '../FamilyDisplayNameEditor';
 import { CopyableCompactValue, StatusChip } from '../../portal-design-system';
 
@@ -517,24 +518,9 @@ export default function FamilyProgramSettingsPanel() {
         return (
           <SettingsCard
             title="Notifications & Reminders"
-            subtitle="B-4 daily reminders are coming soon."
+            subtitle="Parent-only updates about missions, rewards, and shared device sessions."
           >
-            <p className="family-settingsComingSoon">
-              Coming soon — notification preferences are not available during the pilot.
-            </p>
-            <div className="family-settingsNotifications" aria-disabled="true">
-              {[
-                'Morning reminder',
-                'After-school reminder',
-                'Evening reminder',
-                'Parent/Guardian completion updates',
-              ].map((label) => (
-                <label key={label} className="family-settingsToggleRow family-settingsToggleRow--disabled">
-                  <input type="checkbox" disabled />
-                  <span>{label}</span>
-                </label>
-              ))}
-            </div>
+            <FamilyPushNotificationsCard />
           </SettingsCard>
         );
 

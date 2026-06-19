@@ -12,6 +12,11 @@ import { supabase, isSupabaseConfigured } from './supabaseClient';
 import { markInventoryHasNewRewards } from './inventoryNotificationService';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
 import { notifyModuleComplete } from './activeChildContext';
+import { triggerParentPush } from './parentPushNotify';
+import {
+  buildMissionCompletePushDedupeKey,
+  buildRewardReadyPushDedupeKey,
+} from './parentPushNotifyDedupe';
 
 export function missionRewardClaimKey(missionId: string): string {
   return `mission-reward:${missionId.trim()}`;
@@ -222,11 +227,13 @@ export async function claimMissionReward(
       badgeUnlocked: weekBadgeJustUnlocked,
       discoveryId: payload.character_discovery_id ?? null,
     });
-    console.info('[REWARD_CLAIM_STATE]', {
+    console.info('[REWARD_CLAIM_DEBUG]', {
       participantId,
       missionId,
+      weekId: payload.week_id,
+      coinsAwarded,
+      weekBadgeJustUnlocked,
       rewardKey,
-      state: 'claimed',
     });
   }
 
@@ -244,6 +251,33 @@ export async function claimMissionReward(
     window.dispatchEvent(
       new CustomEvent('cc-reward-claimed', { detail: { participantId, rewardKey } }),
     );
+  }
+
+  triggerParentPush({
+    trigger: 'child_completed_weekly_mission',
+    childId: participantId,
+    childName: payload.character_name,
+    detail: payload.mission_title,
+    dedupeKey: buildMissionCompletePushDedupeKey(participantId, missionId),
+  });
+
+  if (weekBadgeJustUnlocked) {
+    triggerParentPush({
+      trigger: 'reward_ready_to_claim',
+      childId: participantId,
+      childName: payload.character_name,
+      dedupeKey: buildRewardReadyPushDedupeKey(participantId, `week-badge:${payload.week_id}`),
+    });
+  } else if (payload.character_discovery_name) {
+    triggerParentPush({
+      trigger: 'reward_ready_to_claim',
+      childId: participantId,
+      childName: payload.character_name,
+      dedupeKey: buildRewardReadyPushDedupeKey(
+        participantId,
+        `discovery:${payload.character_discovery_id || payload.mission_id}`,
+      ),
+    });
   }
 
   return {

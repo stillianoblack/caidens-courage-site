@@ -1,0 +1,137 @@
+.kidPlayShellNavBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 3.25rem 0.35rem 0.75rem;
+  background: linear-gradient(180deg, rgba(7, 11, 20, 0.98) 0%, rgba(7, 11, 20, 0.88) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.kidPlayShellNav {
+  flex: 1;
+  min-width: 0;
+}
+
+.kidPlayShellNavList {
+  display: flex;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.kidPlayShellNavList::-webkit-scrollbar {
+  display: none;
+}
+
+.kidPlayShellNavBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d7e2fb;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.kidPlayShellNavBtn--active {
+  background: rgba(91, 140, 255, 0.22);
+  border-color: rgba(91, 140, 255, 0.55);
+  color: #f4f7ff;
+}
+
+.kidPlayShellNavBtn--placeholder {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.kidPlayShellNavSoon {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9eb0d8;
+}
+
+.kidPlayShellNavBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1a1200;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.kidPlayShellComingSoon {
+  min-height: 50vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 2rem 1.25rem;
+}
+
+.kidPlayShellComingSoonTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  color: #f4f7ff;
+}
+
+.kidPlayShellComingSoonBody {
+  margin: 0;
+  color: #b7c5e6;
+}
+
+.kidPlayShellPowerBtn {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 192, 106, 0.35);
+  background: rgba(26, 16, 53, 0.55);
+  color: #fff8e8;
+  cursor: pointer;
+  flex: none;
+  flex-grow: 0;
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kidPlayShellPowerBtn:hover {
+  transform: scale(1.05);
+  border-color: rgba(229, 192, 106, 0.55);
+}
+
+.kidPlayShellPowerBtn:focus-visible {
+  outline: 2px solid rgba(91, 140, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.kidPlayShellPowerBtnIcon {
+  font-size: 1rem;
+  line-height: 1;
+}

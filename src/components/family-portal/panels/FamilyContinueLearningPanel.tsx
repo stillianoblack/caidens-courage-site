@@ -1,6 +1,8 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import PlayingAsSelector from '../PlayingAsSelector';
+import StartChildGameButton from '../StartChildGameButton';
+import '../start-child-game-button.css';
 import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
@@ -71,12 +73,14 @@ import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetr
 import { useAdventureWeekCompletions } from '../../../hooks/useAdventureWeekCompletions';
 import { useWeeklyAdventureTrail } from '../../../hooks/useWeeklyAdventureTrail';
 import { useCourageInTheDarkProgress } from '../../../hooks/useCourageInTheDarkProgress';
+import { useChildRewardCompletion } from '../../../hooks/useChildRewardCompletion';
 import { useParticipantQuests } from '../../../hooks/useParticipantQuests';
 import { useAdventureModules } from '../../../hooks/useAdventureModules';
 import { useAdventureMonths } from '../../../hooks/useAdventureMonths';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
+import { resolveWeekMissionProgressFromSnapshot } from '../../../lib/childRewardCompletionSnapshot';
 import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
 import type { QuestPeriod } from '../../../lib/participantQuestService';
 import { resolveReviewWeekContext } from '../../../lib/weekReviewPanelData';
@@ -99,7 +103,12 @@ const WeekReviewPanel = lazy(
 const BASELINE_LOCKED_LABEL = BASELINE_GATE_MESSAGE;
 const WEEK_ONE_MISSION_KINDS = ['caiden', 'miranda', 'b4', 'charlie', 'zeke'] as const;
 
-export default function FamilyContinueLearningPanel() {
+type FamilyContinueLearningPanelProps = {
+  /** Facilitator shared-device kid play shell — weekly adventures only, no family portal chrome. */
+  kidPlayShell?: boolean;
+};
+
+export default function FamilyContinueLearningPanel({ kidPlayShell = false }: FamilyContinueLearningPanelProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -170,6 +179,12 @@ export default function FamilyContinueLearningPanel() {
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
 
+  const { snapshot: rewardSnapshot } = useChildRewardCompletion({
+    participantId: activeChild?.participantId,
+    cmsModules: adventureModules,
+    paths: trailPaths,
+  });
+
   const { months: adventureMonths } = useAdventureMonths(
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
@@ -190,7 +205,7 @@ export default function FamilyContinueLearningPanel() {
     const view = searchParams.get(WEEKLY_VIEW_PARAM);
     if (view === WEEKLY_VIEW_EXPLORE_VALUE || view === WEEKLY_VIEW_MAP_VALUE) return 'explore';
     if (view === WEEKLY_VIEW_MISSIONS_VALUE || view === WEEKLY_VIEW_LIST_VALUE) return 'missions';
-    if (view === WEEKLY_VIEW_ACTIVITIES_VALUE) return 'activities';
+    if (view === WEEKLY_VIEW_ACTIVITIES_VALUE) return kidPlayShell ? 'explore' : 'activities';
     if (view === WEEKLY_VIEW_QUESTS_VALUE) return 'quests';
     return undefined;
   })();
@@ -531,10 +546,12 @@ export default function FamilyContinueLearningPanel() {
     ],
   );
 
-  const completedWeekMissions = useMemo(
-    () => countCompletedMapMissions(mapMissions, heroWeekProgress.completedMissionIds),
-    [heroWeekProgress.completedMissionIds, mapMissions],
-  );
+  const completedWeekMissions = useMemo(() => {
+    if (rewardSnapshot) {
+      return resolveWeekMissionProgressFromSnapshot(rewardSnapshot, heroWeekNumber).completed;
+    }
+    return countCompletedMapMissions(mapMissions, heroWeekProgress.completedMissionIds);
+  }, [heroWeekNumber, heroWeekProgress.completedMissionIds, mapMissions, rewardSnapshot]);
 
   const dailyAdventureComplete = isDailyAdventureComplete(activeChild?.participantId);
   const monthlyCoinsEarned = readMonthlyCoinsEarned(activeChild?.participantId);
@@ -554,7 +571,22 @@ export default function FamilyContinueLearningPanel() {
   });
 
   const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
-  const inventoryPath = familyPortalPath('inventory', location.pathname);
+  const inventoryPath = familyPortalPath('collections', location.pathname);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development' || !activeChild?.participantId) return;
+    const daily = quests.find((quest) => quest.period === 'daily');
+    const weekly = quests.find((quest) => quest.period === 'weekly');
+    const monthly = quests.find((quest) => quest.period === 'monthly');
+    console.info('[QUEST_PROGRESS_DEBUG]', {
+      childId: activeChild.participantId,
+      weekId: heroWeekId,
+      completedMissionIds: completedWeekMissions,
+      daily: daily?.progressCount ?? 0,
+      weekly: weekly?.progressCount ?? 0,
+      monthly: monthly?.progressCount ?? 0,
+    });
+  }, [activeChild?.participantId, completedWeekMissions, heroWeekId, quests]);
 
   const handleClaimQuest = async (questKey: string, period: QuestPeriod) => {
     const result = await claimQuest(questKey, period);
@@ -754,9 +786,9 @@ export default function FamilyContinueLearningPanel() {
       focusCoinsLoading,
       weekLabel: `Week ${monthSlot}`,
       baselineGateMessage: adventuresLocked ? BASELINE_GATE_MESSAGE : null,
-      children: selectableChildren,
+      children: kidPlayShell ? [] : selectableChildren,
       activeParticipantId: activeChild.participantId,
-      onSelectChild: handleSelectChild,
+      onSelectChild: kidPlayShell ? undefined : handleSelectChild,
       childSwitchLoading: childSwitchLoading || baselineLoading,
     };
   }, [
@@ -767,6 +799,7 @@ export default function FamilyContinueLearningPanel() {
     focusCoins,
     focusCoinsLoading,
     heroWeekNumber,
+    kidPlayShell,
     selectableChildren,
     handleSelectChild,
   ]);
@@ -775,39 +808,61 @@ export default function FamilyContinueLearningPanel() {
     <div
       className={[
         'family-panel',
-        showCourageHero ? 'family-panel--courageHub' : '',
-        ENABLE_DARK_ADVENTURE_CENTER && showCourageHero ? 'family-panel--darkAdventureCenter' : '',
-        ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero ? 'family-panel--cinematicAdventure' : '',
+        kidPlayShell ? 'family-panel--kidPlayShellWorld' : '',
+        showCourageHero || kidPlayShell ? 'family-panel--courageHub' : '',
+        (ENABLE_DARK_ADVENTURE_CENTER && showCourageHero) || kidPlayShell
+          ? 'family-panel--darkAdventureCenter'
+          : '',
+        (ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero) || kidPlayShell
+          ? 'family-panel--cinematicAdventure'
+          : '',
         childSwitchLoading ? 'family-weeklyChildSwitchShimmer' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      {!(ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero) ? (
-        <div className="family-weeklyTopBar">
+      {!(ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero) && !kidPlayShell ? (
+        <div className="family-weeklyTopBar family-weeklyTopBar--withChildLaunch">
           <h1 className="family-weeklyTopBarTitle">Weekly Adventures</h1>
+          {hasActiveChild && activeChild ? (
+            <div className="family-weeklyTopBarActions">
+              <StartChildGameButton
+                participantId={activeChild.participantId}
+                displayName={activeChild.displayName}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
-      {envWarning ? (
+      {ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero && !kidPlayShell && hasActiveChild && activeChild ? (
+        <div className="family-weeklyTopBarActions family-weeklyTopBarActions--cinematic">
+          <StartChildGameButton
+            participantId={activeChild.participantId}
+            displayName={activeChild.displayName}
+          />
+        </div>
+      ) : null}
+
+      {envWarning && !kidPlayShell ? (
         <p className="family-weeklyEnvWarning" role="status">
           {envWarning}
         </p>
       ) : null}
 
-      {showClaimPrompt ? (
+      {showClaimPrompt && !kidPlayShell ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
           Enter Parent/Guardian Email to Find Your Child.
         </p>
       ) : null}
 
-      {showAddChildPrompt ? (
+      {showAddChildPrompt && !kidPlayShell ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
           Add your child to begin.
         </p>
       ) : null}
 
-      {!hasActiveChild && hasChildren ? (
+      {!hasActiveChild && hasChildren && !kidPlayShell ? (
         <p className="family-panelHelper family-panelHelper--prominent" role="status">
           Choose your active player to save mission progress and rewards.
         </p>
@@ -830,6 +885,8 @@ export default function FamilyContinueLearningPanel() {
               !hasActiveChild ? 'Select your child to begin' : BASELINE_LOCKED_LABEL
             }
             embeddedInFamilyPortal
+            hideActivitiesTab={kidPlayShell}
+            kidPlayShell={kidPlayShell}
             initialViewMode={initialHubView}
             week1ExtrasPaths={weekExtrasPaths}
             questPanel={questPanel}
@@ -839,7 +896,7 @@ export default function FamilyContinueLearningPanel() {
             adminPreview={visibilityCtx.previewMode === 'admin'}
             comicThumbnailUrl={heroWeek.thumbnailUrl}
             headerTrailing={
-              ENABLE_CINEMATIC_ADVENTURE_MODE || !hasChildren ? null : (
+              kidPlayShell || ENABLE_CINEMATIC_ADVENTURE_MODE || !hasChildren ? null : (
                 <PlayingAsSelector
                   children={selectableChildren}
                   activeParticipantId={activeChild?.participantId}
@@ -848,7 +905,7 @@ export default function FamilyContinueLearningPanel() {
                 />
               )
             }
-            cinematicAdventureMode={ENABLE_CINEMATIC_ADVENTURE_MODE}
+            cinematicAdventureMode={kidPlayShell || ENABLE_CINEMATIC_ADVENTURE_MODE}
             playerHud={heroPlayerHud}
             cinematicWeekSelectorEnabled={ENABLE_CINEMATIC_WEEK_SELECTOR}
             weekSelectorCards={heroMonthExploreCards}
@@ -887,7 +944,7 @@ export default function FamilyContinueLearningPanel() {
         })}
       </div>
 
-      {!allChildrenPlayReady && childrenNeedingSetup.length > 0 ? (
+      {!kidPlayShell && !allChildrenPlayReady && childrenNeedingSetup.length > 0 ? (
         <WeeklySetupReminderCard
           childrenNeedingSetup={childrenNeedingSetup}
           baselinePath={baselinePath}
@@ -897,6 +954,7 @@ export default function FamilyContinueLearningPanel() {
       <RewardClaimModal
         result={rewardClaimResult}
         inventoryPath={inventoryPath}
+        inventoryLabel="Collections"
         onClose={() => setRewardClaimResult(null)}
       />
 

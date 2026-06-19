@@ -1,0 +1,277 @@
+/* Kid shell — dark glass overrides for character mission hub pages */
+
+.kid-play-shell .character-dashboard--portalInset,
+.kid-play-shell .character-dashboard--standalone {
+  padding: 1rem clamp(0.85rem, 2.5vw, 1.5rem) calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.kid-play-shell .character-dashboard-breadcrumb {
+  padding-top: 0.35rem;
+}
+
+.kid-play-shell .portal-backBtn,
+.kid-play-shell .portal-breadcrumb {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .portal-backBtn:hover {
+  color: #f8fafc;
+}
+
+.kid-play-shell .char-questSectionTitle,
+.kid-play-shell .char-heroCard-name,
+.kid-play-shell .char-heroCard-subtitle,
+.kid-play-shell .char-heroCard-desc,
+.kid-play-shell .char-heroCard-count {
+  color: #f1f5f9;
+}
+
+.kid-play-shell .char-heroCard-subtitle,
+.kid-play-shell .char-heroCard-desc,
+.kid-play-shell .char-heroCard-count {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .char-heroCard,
+.kid-play-shell .char-heroCard--caiden,
+.kid-play-shell .char-heroCard--miranda,
+.kid-play-shell .char-heroCard--charlie,
+.kid-play-shell .char-heroCard--zeke,
+.kid-play-shell .char-heroCard--b4,
+.kid-play-shell .char-heroCard--victoria,
+.kid-play-shell .char-heroCard--uncle-t {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(91, 140, 255, 0.12), transparent 42%),
+    linear-gradient(155deg, rgba(30, 41, 59, 0.82) 0%, rgba(15, 23, 42, 0.94) 52%, rgba(7, 11, 20, 0.98) 100%);
+  box-shadow:
+    0 14px 32px rgba(2, 6, 23, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.kid-play-shell .family-charCard,
+.kid-play-shell .family-charCard--caiden,
+.kid-play-shell .family-charCard--miranda,
+.kid-play-shell .family-charCard--charlie,
+.kid-play-shell .family-charCard--zeke,
+.kid-play-shell .family-charCard--b4,
+.kid-play-shell .family-charCard--dr-victoria,
+.kid-play-shell .family-charCard--uncle-t {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.92) 100%);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.kid-play-shell .family-charCardTitle,
+.kid-play-shell .family-charCardDesc,
+.kid-play-shell .family-charCardTags,
+.kid-play-shell .family-charCta,
+.kid-play-shell .family-charStatusPill {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .family-charCardDesc,
+.kid-play-shell .family-charCardTags {
+  color: #94a3b8;
+}
+
+.kid-play-shell .family-charCard:hover {
+  border-color: rgba(91, 140, 255, 0.35);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.45);
+}
+
+/* Mission board (folder cards, headers, surfaces) */
+.kid-play-shell .characterMissionBoard {
+  padding: 0 clamp(0.85rem, 2.5vw, 1.5rem) calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.kid-play-shell .mission-boardEyebrow,
+.kid-play-shell .mission-boardTitle,
+.kid-play-shell .mission-boardSubtitle,
+.kid-play-shell .mission-boardIntro {
+  color: #f1f5f9;
+}
+
+.kid-play-shell .mission-boardSubtitle,
+.kid-play-shell .mission-boardIntro {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .mission-boardProgressHint,
+.kid-play-shell .mission-boardStatusPill {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.72) 0%, rgba(15, 23, 42, 0.9) 100%);
+  color: #e2e8f0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.kid-play-shell .detective-rankPill {
+  border-color: rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.35) 0%, rgba(30, 41, 59, 0.85) 100%);
+}
+
+.kid-play-shell .detective-rankPillTitle,
+.kid-play-shell .detective-rankPillStatus {
+  color: #e9d5ff;
+}
+
+.kid-play-shell .mission-folderPaper {
+  border-color: rgba(148, 163, 184, 0.22);
+  background-color: rgba(15, 23, 42, 0.82);
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 1.375rem,
+      rgba(148, 163, 184, 0.08) 1.375rem,
+      rgba(148, 163, 184, 0.08) 1.4375rem
+    ),
+    linear-gradient(135deg, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.42);
+}
+
+.kid-play-shell .mission-folderTitle,
+.kid-play-shell .mission-folderDesc,
+.kid-play-shell .mission-folderFileNum {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .mission-folderDesc {
+  color: #94a3b8;
+}
+
+.kid-play-shell .mission-folderCta {
+  border-color: rgba(91, 140, 255, 0.35);
+  background: rgba(91, 140, 255, 0.12);
+  color: #dbeafe;
+}
+
+.kid-play-shell .mission-preview,
+.kid-play-shell .mission-preview--case-file {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.kid-play-shell .mission-previewLine,
+.kid-play-shell .mission-previewStrip,
+.kid-play-shell .mission-previewWord,
+.kid-play-shell .mission-previewNote {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .mission-previewTile {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+}
+
+.kid-play-shell .mission-previewHighlight {
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.35) 0%, rgba(245, 158, 11, 0.28) 100%);
+  color: #fef3c7;
+}
+
+.kid-play-shell .mission-boardBackBtn {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+  color: #e2e8f0;
+}
+
+.kid-play-shell .mission-boardBackBtn:hover {
+  border-color: rgba(91, 140, 255, 0.45);
+  background: rgba(91, 140, 255, 0.14);
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.38);
+}
+
+@media (min-width: 1024px) and (orientation: landscape) {
+  .kid-play-shell .mission-boardSurface {
+    border-color: rgba(148, 163, 184, 0.2);
+    background-color: rgba(15, 23, 42, 0.75);
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 1.625rem,
+        rgba(148, 163, 184, 0.06) 1.625rem,
+        rgba(148, 163, 184, 0.06) 1.6875rem
+      ),
+      radial-gradient(circle at 18% 22%, rgba(91, 140, 255, 0.08) 0%, transparent 42%);
+  }
+
+  .kid-play-shell .mission-boardDeco--note-a {
+    background: rgba(30, 41, 59, 0.55);
+    border-color: rgba(148, 163, 184, 0.12);
+  }
+}
+
+/* Caiden quest hub */
+.kid-play-shell .caiden-focusQuestHubRank,
+.kid-play-shell .caiden-skillTrackerHeading {
+  color: #e2e8f0;
+}
+
+.kid-play-shell .characterMissionBoard--caiden .mission-boardEyebrow {
+  color: #fcd34d;
+}
+
+.kid-play-shell .characterMissionBoard--caiden .mission-boardTitle {
+  color: #f8fafc;
+}
+
+.kid-play-shell .characterMissionBoard--caiden .mission-boardSubtitle {
+  color: #cbd5e1;
+}
+
+.kid-play-shell .characterMissionBoard--caiden .mission-boardStatusPill {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.45) 0%, rgba(30, 41, 59, 0.85) 100%);
+  color: #fde68a;
+}
+
+.kid-play-shell .caiden-skillQuestCard {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.92) 100%);
+  color: #e2e8f0;
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.35);
+}
+
+/* B-4 portal hub */
+.kid-play-shell .b4-portalHubEyebrow,
+.kid-play-shell .b4-portalHubTitle,
+.kid-play-shell .b4-portalHubSubtitle,
+.kid-play-shell .b4-portalMissionCardTitle,
+.kid-play-shell .b4-portalMissionCardDesc {
+  color: #f1f5f9;
+}
+
+.kid-play-shell .b4-portalHubSubtitle,
+.kid-play-shell .b4-portalMissionCardDesc {
+  color: #94a3b8;
+}
+
+.kid-play-shell .b4-portalMissionCard {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.92) 100%);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.kid-play-shell .b4-portalMissionCard:hover {
+  border-color: rgba(91, 140, 255, 0.4);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.45);
+}
+
+.kid-play-shell .miranda-game--embedded.bbc-app {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: linear-gradient(160deg, rgba(30, 41, 59, 0.78) 0%, rgba(15, 23, 42, 0.92) 100%);
+}
+
+.kid-play-shell .mission-folderComingNext {
+  background: rgba(91, 140, 255, 0.14);
+  color: #bfdbfe;
+}

@@ -75,6 +75,17 @@
   filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.22));
 }
 
+.achievementBadge--pendingClaim .achievementBadgeFrameRing {
+  box-shadow:
+    0 0 0 2px rgba(245, 158, 11, 0.85),
+    0 0 12px rgba(245, 158, 11, 0.45);
+}
+
+.achievementBadge--pendingClaim .achievementBadgeRewardImage {
+  filter: none;
+  opacity: 1;
+}
+
 /* Circle frame */
 .achievementBadge--circle .achievementBadgeFrameRing {
   border-radius: 50%;

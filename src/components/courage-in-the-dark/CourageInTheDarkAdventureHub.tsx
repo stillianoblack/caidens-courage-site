@@ -81,6 +81,9 @@ type CourageInTheDarkAdventureHubProps = {
   adminPreview?: boolean;
   initialViewMode?: CourageHubViewMode;
   embeddedInFamilyPortal?: boolean;
+  hideActivitiesTab?: boolean;
+  /** @deprecated Use hideActivitiesTab */
+  kidPlayShell?: boolean;
   week1ExtrasPaths?: Week1ExtrasPaths;
   questPanel?: CourageHubQuestPanelProps;
   mapMissions?: CourageInTheDarkMission[];
@@ -136,6 +139,8 @@ export default function CourageInTheDarkAdventureHub({
   exploreOverlayWeekCards,
   onExploreSelectWeek,
   onExploreReviewWeek,
+  hideActivitiesTab = false,
+  kidPlayShell = false,
 }: CourageInTheDarkAdventureHubProps) {
   const isMobileLayout = useMobileHubLayout();
   const { showToast } = useToast();
@@ -180,7 +185,8 @@ export default function CourageInTheDarkAdventureHub({
   }, [initialViewMode]);
 
   const showQuestsTab = Boolean(questPanel);
-  const showActivitiesTab = embeddedInFamilyPortal || Boolean(week1ExtrasPaths);
+  const showActivitiesTab =
+    !hideActivitiesTab && !kidPlayShell && (embeddedInFamilyPortal || Boolean(week1ExtrasPaths));
 
   useEffect(() => {
     if (viewMode === 'quests' && !showQuestsTab) {

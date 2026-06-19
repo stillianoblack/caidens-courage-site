@@ -362,6 +362,8 @@ export type InventoryBadgeCatalogEntry = {
   display: CmsBadgeDisplay;
   owned: boolean;
   locked: boolean;
+  pendingClaim?: boolean;
+  claimStatus?: 'locked' | 'earned_unclaimed' | 'unlocked';
   unlockRequirement: string;
 };
 
@@ -394,30 +396,50 @@ export function buildInventoryBadgeCatalog(
     display: resolveCheckInBadgeDisplay(modules),
     owned: ownsCheckIn,
     locked: !ownsCheckIn,
+    claimStatus: ownsCheckIn ? 'unlocked' : 'locked',
     unlockRequirement: 'Complete the B-4 Check-In to earn this badge.',
   });
+
+  const claimedWeeks = earned.claimedWeeklyWeeks ?? new Set<number>();
 
   const sortedModules = [...modules].sort((left, right) => left.week_number - right.week_number);
   for (const module of sortedModules) {
     const weekly = resolveWeeklyBadgeDisplay(module.week_number, modules);
     if (!weekly) continue;
 
-    const owned = earned.earnedWeeklyWeeks.has(module.week_number);
-    let unlockRequirement = `Complete all Week ${module.week_number} missions to unlock.`;
-    if (
-      !owned &&
+    const weekComplete = isWeekFullyComplete(
+      module.week_number,
+      earned.completedMissionIds,
+      progressOptions,
+    );
+    const claimed = claimedWeeks.has(module.week_number);
+    const prerequisiteLocked =
+      !weekComplete &&
       module.week_number > 1 &&
-      !isWeekFullyComplete(module.week_number - 1, earned.completedMissionIds, progressOptions)
-    ) {
+      !isWeekFullyComplete(module.week_number - 1, earned.completedMissionIds, progressOptions);
+
+    let claimStatus: 'locked' | 'earned_unclaimed' | 'unlocked' = 'locked';
+    if (claimed) {
+      claimStatus = 'unlocked';
+    } else if (weekComplete) {
+      claimStatus = 'earned_unclaimed';
+    } else if (!prerequisiteLocked && !weekComplete) {
+      claimStatus = 'locked';
+    }
+
+    let unlockRequirement = `Complete all Week ${module.week_number} missions to unlock.`;
+    if (prerequisiteLocked) {
       unlockRequirement = `Complete Week ${module.week_number - 1} before Week ${module.week_number} unlocks.`;
+    } else if (claimStatus === 'earned_unclaimed') {
+      unlockRequirement = 'Badge earned — claim your reward from Weekly Adventures.';
     }
 
     if (childId && process.env.NODE_ENV === 'development') {
       logInventoryBadgeDebug({
         childId,
         weekNumber: module.week_number,
-        weeklyComplete: owned,
-        badgeUnlocked: owned,
+        weeklyComplete: weekComplete,
+        badgeUnlocked: claimed,
         sourceTable: 'player_progress',
         sourceQuery: 'buildInventoryBadgeCatalog',
         completedMissionIds: earned.completedMissionIds,
@@ -429,8 +451,10 @@ export function buildInventoryBadgeCatalog(
       kind: 'weekly',
       weekNumber: module.week_number,
       display: weekly,
-      owned,
-      locked: !owned,
+      owned: weekComplete || claimed,
+      locked: claimStatus === 'locked',
+      pendingClaim: claimStatus === 'earned_unclaimed',
+      claimStatus,
       unlockRequirement,
     });
   }

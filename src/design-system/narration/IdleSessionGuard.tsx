@@ -16,6 +16,7 @@ export type IdleSessionGuardProps = {
   onEndSession: () => void;
   /** @deprecated Use onEndSession */
   onReturn?: () => void;
+  endSessionLabel?: string;
 };
 
 export default function IdleSessionGuard({
@@ -24,6 +25,7 @@ export default function IdleSessionGuard({
   warningMs = DEFAULT_WARNING_MS,
   onEndSession,
   onReturn,
+  endSessionLabel = 'End Session Now',
 }: IdleSessionGuardProps) {
   const [open, setOpen] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(Math.ceil(warningMs / 1000));
@@ -184,7 +186,7 @@ export default function IdleSessionGuard({
             Continue Playing
           </button>
           <button type="button" className="ds-idleGuardBtn" onClick={endSessionNow}>
-            End Session Now
+            {endSessionLabel}
           </button>
         </div>
       </div>

@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { kidPlaySessionPath } from '../../../config/courageRoutes';
+import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import {
   filterRosterRows,
@@ -8,7 +10,11 @@ import {
   ROSTER_FILTER_LABELS,
 } from '../../../lib/pilotOverviewInsights';
 import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
-import { usePilotRosterData } from '../../../hooks/usePilotRosterData';
+import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
+import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
+import { usePilotRosterData, type PilotRosterRow } from '../../../hooks/usePilotRosterData';
+import FacilitatorMoveSessionModal from '../../kid-play-shell/FacilitatorMoveSessionModal';
+import KidPlayRosterLockGate from '../../kid-play-shell/KidPlayRosterLockGate';
 import { PortalPageIntro } from '../../portal-design-system';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import PilotAddStudentDrawer from '../PilotAddStudentDrawer';
@@ -21,6 +27,7 @@ type PilotRosterPanelProps = {
 };
 
 export default function PilotRosterPanel({ programCode, loading: externalLoading }: PilotRosterPanelProps) {
+  const navigate = useNavigate();
   const resolvedProgramCode = resolveFacilitatorRosterProgramCode(programCode);
   const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh, updateParticipantGrade } =
     usePilotRosterData(resolvedProgramCode, true);
@@ -29,6 +36,12 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const rosterFilter = isRosterFilterId(rawFilter) ? rawFilter : null;
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [rosterLocked, setRosterLocked] = useState(() => isKidPlayRosterLocked());
+  const [launchSessionLoadingId, setLaunchSessionLoadingId] = useState<string | null>(null);
+  const [movePrompt, setMovePrompt] = useState<{
+    row: PilotRosterRow;
+    existingSessionId: string;
+  } | null>(null);
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
 
@@ -50,6 +63,63 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     next.delete('addStudent');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    setRosterLocked(isKidPlayRosterLocked());
+  }, []);
+
+  const completeLaunch = useCallback(
+    async (row: PilotRosterRow, moveFromExistingSessionId?: string) => {
+      setLaunchSessionLoadingId(row.participantId);
+      try {
+        const program = readActivePilotProgram();
+        const result = await resolveFacilitatorKidPlayLaunch({
+          childId: row.participantId,
+          childName: row.childName,
+          organizationId: program?.id ?? null,
+          moveFromExistingSessionId,
+        });
+
+        if (result.kind === 'error') {
+          showToast(result.message, 'error');
+          return;
+        }
+
+        if (result.kind === 'conflict') {
+          setMovePrompt({
+            row,
+            existingSessionId: result.conflict.existingSession.id,
+          });
+          return;
+        }
+
+        setKidPlayRosterLocked(false);
+        setRosterLocked(false);
+        navigate(kidPlaySessionPath(result.session.id));
+      } finally {
+        setLaunchSessionLoadingId(null);
+      }
+    },
+    [navigate, showToast],
+  );
+
+  const handleLaunchStudentSession = useCallback(
+    (row: PilotRosterRow) => {
+      if (rosterLocked) {
+        showToast('This shared device is locked. Enter facilitator email to continue.', 'error');
+        return;
+      }
+      void completeLaunch(row);
+    },
+    [completeLaunch, rosterLocked, showToast],
+  );
+
+  const handleMoveSessionHere = useCallback(() => {
+    if (!movePrompt) return;
+    void completeLaunch(movePrompt.row, movePrompt.existingSessionId).finally(() => {
+      setMovePrompt(null);
+    });
+  }, [completeLaunch, movePrompt]);
 
   if (showLoading) {
     return (
@@ -103,6 +173,8 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           variant="roster"
           onStudentClick={setDrawerParticipantId}
           onGradeSaved={updateParticipantGrade}
+          onLaunchStudentSession={handleLaunchStudentSession}
+          launchSessionLoadingId={launchSessionLoadingId}
         />
       )}
 
@@ -133,6 +205,19 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           <Link to={programDashboardTabPath('roster')}>View full roster</Link>
         </p>
       ) : null}
+
+      <KidPlayRosterLockGate
+        open={rosterLocked}
+        onUnlocked={() => setRosterLocked(false)}
+      />
+
+      <FacilitatorMoveSessionModal
+        open={Boolean(movePrompt)}
+        childName={movePrompt?.row.childName ?? 'This student'}
+        loading={Boolean(launchSessionLoadingId)}
+        onCancel={() => setMovePrompt(null)}
+        onMoveHere={handleMoveSessionHere}
+      />
     </div>
   );
 }

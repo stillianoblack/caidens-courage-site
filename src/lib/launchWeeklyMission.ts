@@ -1,7 +1,6 @@
 import type { CourageInTheDarkMission } from '../data/courageInTheDarkMap';
 import { isMapMissionComplete } from './courageInTheDarkProgress';
 import { resolveCourageMapTargetHref } from './courageInTheDarkRoutes';
-import { assignPortalRoute } from './portalHardNavigation';
 import { remapPortalKidsRoute } from './portalGamePaths';
 import {
   CAMP_PILOT_UNLOCK_ALL,
@@ -181,10 +180,6 @@ export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
     });
   }
 
-  if (route.startsWith('/family-hub/kids/')) {
-    assignPortalRoute(route);
-  } else {
-    input.navigate(route);
-  }
+  input.navigate(route);
   return true;
 }

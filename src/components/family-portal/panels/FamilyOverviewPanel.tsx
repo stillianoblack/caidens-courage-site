@@ -99,7 +99,7 @@ export default function FamilyOverviewPanel() {
   const [insightTopic, setInsightTopic] = useState<FamilyB4InsightTopic>('overall');
   const [insightChildId, setInsightChildId] = useState<string | null>(null);
   const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
-  const inventoryPath = familyPortalPath('inventory', location.pathname);
+  const inventoryPath = familyPortalPath('collections', location.pathname);
   const onboarding = useFamilyOnboardingStatus();
 
   const galleryPendingCount = useMemo(

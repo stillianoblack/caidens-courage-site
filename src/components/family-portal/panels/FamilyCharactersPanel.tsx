@@ -93,7 +93,7 @@ const CharacterCardGrid = memo(function CharacterCardGrid({
   );
 });
 
-export default function FamilyCharactersPanel() {
+export default function FamilyCharactersPanel({ kidPlayShell = false }: { kidPlayShell?: boolean }) {
   const location = useLocation();
   const shellBase = resolveFamilyBasePath(location.pathname);
   const programCode = resolveTrackingProgramCode() ?? undefined;
@@ -216,7 +216,7 @@ export default function FamilyCharactersPanel() {
             </p>
           ) : null}
 
-          {needsChildSelection ? (
+          {!kidPlayShell && needsChildSelection ? (
             <ActiveChildSelector
               children={selectableChildren}
               activeParticipantId={activeChild?.participantId}
@@ -242,6 +242,7 @@ export default function FamilyCharactersPanel() {
             />
           </section>
 
+          {!kidPlayShell ? (
           <section className="family-characterHubSection" aria-labelledby="adult-guides-heading">
             <header className="family-characterHubSectionHead">
               <h3 id="adult-guides-heading" className="family-characterHubSectionTitle">
@@ -270,6 +271,7 @@ export default function FamilyCharactersPanel() {
               ))}
             </div>
           </section>
+          ) : null}
         </div>
 
         {detailProfile ? (

@@ -1,0 +1,44 @@
+/* Kid shell character sheet — game overlay (portaled to body) */
+
+.pilot-drawerBackdrop:has(.characterProfileSheet--kidShell) {
+  background: rgba(4, 8, 18, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (min-width: 768px) {
+  .characterProfileSheet--kidShell.pilot-drawer,
+  .characterProfileSheet--kidShell.ds-slidePanel--characterProfile.pilot-drawer {
+    width: clamp(520px, 38vw, 620px) !important;
+    max-width: 620px !important;
+    box-shadow:
+      -20px 0 48px -16px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(148, 163, 184, 0.12);
+  }
+
+  .characterProfileSheet--kidShell .characterSheetPanelShell {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .characterProfileSheet--kidShell .characterSheetPanelScroll {
+    overflow-y: visible;
+    flex: 0 0 auto;
+  }
+}
+
+.ds-sheetRoot:has(.characterProfileSheet--kidShell) .ds-sheetOverlay {
+  background: rgba(4, 8, 18, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.characterProfileSheet--kidShell.characterProfileSheet--mobile.ds-sheetContent {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0;
+}
+
+.characterProfileSheet--kidShell .characterSheetPanelInner {
+  background: linear-gradient(180deg, #0f172a 0%, #070b14 100%);
+}
