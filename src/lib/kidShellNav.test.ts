@@ -1,6 +1,6 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { kidPlaySessionStartPath } from '../config/courageRoutes';
-import { kidPlayShellNavigate } from './kidShellNav';
+import { kidPlayShellNavigate, resolveKidShellNavigationMethod } from './kidShellNav';
 
 describe('kidPlayShellNavigate', () => {
   afterEach(() => {
@@ -8,14 +8,29 @@ describe('kidPlayShellNavigate', () => {
     jest.restoreAllMocks();
   });
 
-  it('uses router navigation without scheduling a timed reload fallback', () => {
-    window.history.pushState({}, '', '/play/session/session-123/weekly-adventures');
+  it('uses direct loads for kid shell route changes', () => {
+    expect(
+      resolveKidShellNavigationMethod(
+        '/play/session/session-123/weekly-adventures',
+        '/play/session/session-123/collections',
+      ),
+    ).toBe('assign');
+    expect(
+      resolveKidShellNavigationMethod(
+        '/family-hub/weekly-adventures',
+        '/play/session/session-123/weekly-adventures',
+      ),
+    ).toBe('assign');
+  });
+
+  it('keeps ordinary non-shell navigation on the router', () => {
+    window.history.pushState({}, '', '/family-hub/weekly-adventures');
     const navigate = jest.fn() as unknown as NavigateFunction;
     const setTimeoutSpy = jest.spyOn(window, 'setTimeout');
 
-    kidPlayShellNavigate(navigate, '/play/session/session-123/collections');
+    kidPlayShellNavigate(navigate, '/family-hub/collections');
 
-    expect(navigate).toHaveBeenCalledWith('/play/session/session-123/collections', {
+    expect(navigate).toHaveBeenCalledWith('/family-hub/collections', {
       replace: undefined,
       state: undefined,
     });

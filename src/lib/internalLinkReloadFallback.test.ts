@@ -1,4 +1,4 @@
-import { installInternalLinkReloadFallback } from './internalLinkReloadFallback';
+import { shouldForceInternalLinkReload } from './internalLinkReloadFallback';
 
 describe('installInternalLinkReloadFallback', () => {
   beforeEach(() => {
@@ -11,23 +11,35 @@ describe('installInternalLinkReloadFallback', () => {
     document.body.innerHTML = '';
   });
 
-  it('does not force reloads for links inside the kid play shell', () => {
+  it('force-loads route-changing links inside the kid play shell', () => {
     window.history.pushState({}, '', '/play/session/session-123/weekly-adventures');
-
-    installInternalLinkReloadFallback();
 
     const link = document.createElement('a');
     link.href = '/play/session/session-123/kids/b4/mission-1';
     document.body.appendChild(link);
 
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      button: 0,
-    });
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/play/session/session-123/weekly-adventures',
+      ),
+    ).toBe(true);
+  });
 
-    link.dispatchEvent(event);
+  it('does not force-load the current shell route', () => {
+    window.history.pushState({}, '', '/play/session/session-123/weekly-adventures');
 
-    expect(event.defaultPrevented).toBe(false);
+    const link = document.createElement('a');
+    link.href = '/play/session/session-123/weekly-adventures';
+    document.body.appendChild(link);
+
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/play/session/session-123/weekly-adventures',
+      ),
+    ).toBe(false);
   });
 });

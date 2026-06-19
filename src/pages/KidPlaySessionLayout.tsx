@@ -185,7 +185,7 @@ export default function KidPlaySessionLayout() {
             onExitClick={() => setExitOpen(true)}
           />
           <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
-            <Outlet />
+            <Outlet key={`${location.pathname}${location.search}`} />
           </Suspense>
           <KidPlayShellExitModal
             open={exitOpen}

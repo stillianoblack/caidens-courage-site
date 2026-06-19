@@ -39,6 +39,10 @@ export function logKidShellNav(from: string, to: string, method: 'router' | 'ass
   console.info('[KID_SHELL_NAV]', `${from} -> ${to}`, { method });
 }
 
+export function resolveKidShellNavigationMethod(from: string, to: string): 'router' | 'assign' {
+  return isKidPlayShellPath(from) || isKidPlayShellPath(to) ? 'assign' : 'router';
+}
+
 function assignPath(from: string, targetPath: string): void {
   const targetNorm = normalizePath(targetPath);
   logKidShellNav(from, targetNorm, 'assign');
@@ -48,8 +52,9 @@ function assignPath(from: string, targetPath: string): void {
 
 /**
  * Reliable navigation for kid play shell actions.
- * Prefers React Router. Full route loads are reserved for explicit recovery or
- * router failures so code-split production routes can finish loading normally.
+ * The kid shell crosses several lazy portal/game panels. In production, soft
+ * router transitions can leave the visible shell on stale content until a
+ * manual refresh. Shell actions therefore load the final URL directly.
  */
 export function kidPlayShellNavigate(
   navigate: NavigateFunction,
@@ -61,13 +66,14 @@ export function kidPlayShellNavigate(
   const targetNorm = normalizePath(targetPath);
   const inShell = isKidPlayShellPath(from);
   const targetInShell = isKidPlayShellPath(targetNorm);
+  const method = resolveKidShellNavigationMethod(from, targetNorm);
 
-  if (inShell || targetInShell) {
-    logKidShellNav(from, targetNorm, 'router');
-    logNavTest(from, targetNorm, { method: 'router', scope: 'kid-shell' });
+  if ((inShell || targetInShell) && method === 'router') {
+    logKidShellNav(from, targetNorm, method);
+    logNavTest(from, targetNorm, { method, scope: 'kid-shell' });
   }
 
-  if (options.forceAssign) {
+  if (options.forceAssign || method === 'assign') {
     assignPath(from, targetPath);
     return;
   }

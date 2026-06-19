@@ -4,23 +4,24 @@ declare global {
   }
 }
 
-const KID_PLAY_SESSION_PREFIX = '/play/session/';
-
 function isPlainLeftClick(event: MouseEvent) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-function isKidPlayShellUrl(url: URL) {
-  return url.pathname.startsWith(KID_PLAY_SESSION_PREFIX);
+export function shouldForceInternalLinkReload(
+  anchor: HTMLAnchorElement,
+  url: URL,
+  currentPathname = typeof window !== 'undefined' ? window.location.pathname : '/',
+) {
+  if (anchor.target && anchor.target !== '_self') return false;
+  if (anchor.hasAttribute('download')) return false;
+  if (url.origin !== window.location.origin) return false;
+  if (url.pathname === currentPathname && url.search === window.location.search) return false;
+  return true;
 }
 
 function shouldLetBrowserHandleNormally(anchor: HTMLAnchorElement, url: URL) {
-  if (anchor.target && anchor.target !== '_self') return true;
-  if (anchor.hasAttribute('download')) return true;
-  if (url.origin !== window.location.origin) return true;
-  if (isKidPlayShellUrl(url) || window.location.pathname.startsWith(KID_PLAY_SESSION_PREFIX)) return true;
-  if (url.pathname === window.location.pathname && url.search === window.location.search) return true;
-  return false;
+  return !shouldForceInternalLinkReload(anchor, url);
 }
 
 /**
