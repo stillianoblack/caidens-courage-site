@@ -1,8 +1,10 @@
 import type { NavigateFunction } from 'react-router-dom';
+import { kidPlaySessionStartPath } from '../config/courageRoutes';
 import { kidPlayShellNavigate } from './kidShellNav';
 
 describe('kidPlayShellNavigate', () => {
   afterEach(() => {
+    window.history.pushState({}, '', '/');
     jest.restoreAllMocks();
   });
 
@@ -18,5 +20,11 @@ describe('kidPlayShellNavigate', () => {
       state: undefined,
     });
     expect(setTimeoutSpy).not.toHaveBeenCalled();
+  });
+
+  it('uses the weekly adventures route as the canonical session start path', () => {
+    expect(kidPlaySessionStartPath(' session-123 ')).toBe(
+      '/play/session/session-123/weekly-adventures',
+    );
   });
 });

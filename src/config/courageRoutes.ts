@@ -111,3 +111,8 @@ export function kidPlaySessionPath(sessionId: string): string {
   const id = sessionId.trim();
   return id ? `${KID_PLAY_SESSION_PATH}/${id}` : KID_PLAY_SESSION_PATH;
 }
+
+export function kidPlaySessionStartPath(sessionId: string): string {
+  const id = sessionId.trim();
+  return id ? `${KID_PLAY_SESSION_PATH}/${id}/weekly-adventures` : KID_PLAY_SESSION_PATH;
+}

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { kidPlaySessionPath } from '../../config/courageRoutes';
+import { kidPlaySessionStartPath } from '../../config/courageRoutes';
 import { resolveFamilyKidPlayLaunch } from '../../lib/familyKidPlayLaunch';
 import { setKidPlayFamilySoftLocked } from '../../lib/kidPlayFamilySoftLock';
 import { kidShellAwareNavigate } from '../../lib/kidShellNav';
@@ -38,7 +38,7 @@ export default function StartChildGameButton({
 
       setKidPlayFamilySoftLocked(false);
       writeKidPlayFamilyReturnBase(location.pathname);
-      kidShellAwareNavigate(navigate, kidPlaySessionPath(result.session.id), {
+      kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id), {
         state: { fromFamilyPortal: location.pathname },
       });
     } finally {

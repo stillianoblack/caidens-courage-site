@@ -25,7 +25,7 @@ import KidPlayShellPage from '../components/kid-play-shell/KidPlayShellPage';
 /** Nested kid play shell routes — missions stay under /play/session/:id/kids/... */
 export const kidPlayShellChildRoutes = (
   <>
-    <Route index element={<Navigate to="weekly-adventures" replace />} />
+    <Route index element={<FamilyContinueLearningPanel kidPlayShell />} />
     <Route path="weekly-adventures" element={<FamilyContinueLearningPanel kidPlayShell />} />
     <Route
       path="collections"

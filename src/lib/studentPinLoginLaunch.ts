@@ -1,4 +1,4 @@
-import { kidPlaySessionPath } from '../config/courageRoutes';
+import { kidPlaySessionStartPath } from '../config/courageRoutes';
 import { setActiveChild } from './activeChildContext';
 import { createKidPlaySession, findActiveKidPlaySessionForChild, readLocalKidPlaySessionId } from './kidPlaySessionService';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
@@ -44,7 +44,7 @@ export async function launchStudentPinKidPlay(input: {
     return {
       kind: 'resume',
       session: existing,
-      path: kidPlaySessionPath(existing.id),
+      path: kidPlaySessionStartPath(existing.id),
     };
   }
 
@@ -69,6 +69,6 @@ export async function launchStudentPinKidPlay(input: {
   return {
     kind: 'session',
     session,
-    path: kidPlaySessionPath(session.id),
+    path: kidPlaySessionStartPath(session.id),
   };
 }

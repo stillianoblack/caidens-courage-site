@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { kidPlaySessionPath } from '../../../config/courageRoutes';
+import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import {
@@ -154,7 +154,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
         setKidPlayRosterLocked(false);
         setRosterLocked(false);
-        kidShellAwareNavigate(navigate, kidPlaySessionPath(result.session.id));
+        kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id));
       } finally {
         setLaunchSessionLoadingId(null);
       }
