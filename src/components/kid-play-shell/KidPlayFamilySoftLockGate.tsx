@@ -8,14 +8,13 @@ import {
   setKidPlayFamilySoftLocked,
 } from '../../lib/kidPlayFamilySoftLock';
 import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
-import { kidShellAwareNavigate } from '../../lib/kidShellNav';
 import { logOverlayActive } from '../../lib/portalClickDebug';
-import { familyPortalPath } from '../../lib/familyPortalPaths';
 import { readKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
 import { resumeFamilyKidPlayShell } from '../../lib/resumeFamilyKidPlayShell';
 import { triggerParentPush } from '../../lib/parentPushNotify';
 import { buildSessionEndedPushDedupeKey } from '../../lib/parentPushNotifyDedupe';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
+import { assignPortalRoute } from '../../lib/portalHardNavigation';
 import '../kid-play-shell/kid-play-roster-lock.css';
 
 type KidPlayFamilySoftLockGateProps = {
@@ -60,11 +59,9 @@ export default function KidPlayFamilySoftLockGate({
       clearKidPlayFamilyResumePayload();
       setEmail('');
       onUnlocked();
-      kidShellAwareNavigate(navigate, familyPortalPath('weekly-adventures', location.pathname), {
-        replace: true,
-      });
+      assignPortalRoute(`${readKidPlayFamilyReturnBase()}/weekly-adventures`);
     },
-    [email, location.pathname, navigate, onUnlocked],
+    [email, onUnlocked],
   );
 
   const handleSelectChild = useCallback(
@@ -109,11 +106,8 @@ export default function KidPlayFamilySoftLockGate({
     });
     setSubmitting(false);
     onUnlocked();
-    kidShellAwareNavigate(navigate, PORTAL_PATH, {
-      replace: true,
-      state: { portalMessage: 'Session ended. Enter your access code to continue.' },
-    });
-  }, [navigate, onUnlocked, roster]);
+    assignPortalRoute(PORTAL_PATH);
+  }, [onUnlocked, roster]);
 
   useEffect(() => {
     logOverlayActive('KidPlayFamilySoftLockGate', open);

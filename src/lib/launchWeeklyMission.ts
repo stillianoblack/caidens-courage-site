@@ -4,6 +4,7 @@ import { isMapMissionComplete } from './courageInTheDarkProgress';
 import { resolveCourageMapTargetHref } from './courageInTheDarkRoutes';
 import { isKidPlayShellPath } from './kidPlayShellRoutes';
 import { kidPlayShellNavigate } from './kidShellNav';
+import { assignPortalRoute } from './portalHardNavigation';
 import { remapPortalKidsRoute } from './portalGamePaths';
 import {
   CAMP_PILOT_UNLOCK_ALL,
@@ -185,6 +186,8 @@ export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
 
   if (isKidPlayShellPath(input.pathname)) {
     kidPlayShellNavigate(navigateFn, route);
+  } else if (typeof window !== 'undefined') {
+    assignPortalRoute(route);
   } else {
     navigateFn(route);
   }

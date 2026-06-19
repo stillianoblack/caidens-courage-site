@@ -78,6 +78,39 @@
   padding-top: 1.75rem;
 }
 
+.weeklyJourneySections--darkCenter .weeklyJourneyMonthHeader {
+  display: none;
+}
+
+.family-panel--darkAdventureCenter .courageHubControls--mobileBar {
+  background: rgba(5, 10, 22, 0.72);
+  border-color: rgba(229, 192, 106, 0.18);
+  box-shadow:
+    0 18px 40px -24px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.family-panel--darkAdventureCenter .courageHubControls--mobileBar .courageHubViewToggle {
+  background: rgba(8, 15, 30, 0.72);
+  border-color: rgba(229, 192, 106, 0.2);
+}
+
+.family-panel--darkAdventureCenter .courageHubControls--mobileBar .courageHubViewToggleBtn {
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.family-panel--darkAdventureCenter .courageHubControls--mobileBar .courageHubViewToggleBtn--active {
+  color: #1a1035;
+}
+
+.family-panel--darkAdventureCenter .courageHubControls--mobileBar .courageHubSoundToggle {
+  background: rgba(8, 15, 30, 0.8);
+  border-color: rgba(229, 192, 106, 0.18);
+  color: rgba(248, 250, 252, 0.9);
+}
+
 .courageHubMobilePlayerHud {
   width: 100%;
   min-width: 0;
