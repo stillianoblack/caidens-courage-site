@@ -4,14 +4,21 @@ declare global {
   }
 }
 
+const KID_PLAY_SESSION_PREFIX = '/play/session/';
+
 function isPlainLeftClick(event: MouseEvent) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
+
+function isKidPlayShellUrl(url: URL) {
+  return url.pathname.startsWith(KID_PLAY_SESSION_PREFIX);
 }
 
 function shouldLetBrowserHandleNormally(anchor: HTMLAnchorElement, url: URL) {
   if (anchor.target && anchor.target !== '_self') return true;
   if (anchor.hasAttribute('download')) return true;
   if (url.origin !== window.location.origin) return true;
+  if (isKidPlayShellUrl(url) || window.location.pathname.startsWith(KID_PLAY_SESSION_PREFIX)) return true;
   if (url.pathname === window.location.pathname && url.search === window.location.search) return true;
   return false;
 }
