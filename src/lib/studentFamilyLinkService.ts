@@ -198,7 +198,7 @@ export async function createCampStudentFamilyLink(input: {
   campProgramCode: string;
   parentFirstName?: string;
   parentLastName: string;
-  parentEmail: string;
+  parentEmail?: string;
   parentPhone?: string;
   relationship?: string;
 }): Promise<{ success: boolean; link?: StudentFamilyLink; error?: string }> {
@@ -219,10 +219,12 @@ export async function createCampStudentFamilyLink(input: {
     };
   }
 
+  const parentEmail = input.parentEmail?.trim() || null;
+
   console.info('[CAMP_CHILD_LINK_INSERT_START]', {
     student_id: studentId,
     camp_program_code: input.campProgramCode.trim(),
-    parent_email: input.parentEmail.trim(),
+    parent_email: parentEmail,
   });
 
   const payload = {
@@ -230,7 +232,7 @@ export async function createCampStudentFamilyLink(input: {
     camp_program_code: input.campProgramCode.trim(),
     family_program_code: null,
     parent_first_name: input.parentFirstName?.trim() || null,
-    parent_email: input.parentEmail.trim(),
+    parent_email: parentEmail,
     parent_last_name: input.parentLastName.trim(),
     parent_phone: input.parentPhone?.trim() || null,
     relationship: input.relationship?.trim() || 'parent',

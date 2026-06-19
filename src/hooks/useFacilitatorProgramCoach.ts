@@ -22,6 +22,8 @@ type UseFacilitatorProgramCoachOptions = {
   activeProgram?: ActivePilotProgram | null;
   familyLinks?: StudentFamilyLink[];
   onCopyFamilyCode?: () => void;
+  parentNotConnectedCount?: number;
+  missingPinCount?: number;
   /** Reuse goals already loaded for onboarding instead of fetching again. */
   sharedProgramGoals?: ProgramGoalsRecord | null;
 };
@@ -34,6 +36,8 @@ export function useFacilitatorProgramCoach({
   activeProgram,
   familyLinks = [],
   onCopyFamilyCode,
+  parentNotConnectedCount = 0,
+  missingPinCount = 0,
   sharedProgramGoals,
 }: UseFacilitatorProgramCoachOptions): FacilitatorProgramCoachModel {
   const programCode = activeProgram?.programCode?.trim() ?? '';
@@ -70,6 +74,8 @@ export function useFacilitatorProgramCoach({
         activeProgram,
         programGoals,
         familyLinksCount: familyLinks.length,
+        parentNotConnectedCount,
+        missingPinCount,
         onOpenAccessCodes: openFacilitatorAccessCodes,
         onCopyFamilyCode,
       }),
@@ -77,6 +83,8 @@ export function useFacilitatorProgramCoach({
       activeProgram,
       assessments,
       familyLinks.length,
+      missingPinCount,
+      parentNotConnectedCount,
       metrics,
       modules,
       onCopyFamilyCode,

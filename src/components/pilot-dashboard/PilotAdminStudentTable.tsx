@@ -18,6 +18,9 @@ type PilotAdminStudentTableProps = {
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void;
   onLaunchStudentSession?: (row: PilotRosterRow) => void;
   launchSessionLoadingId?: string | null;
+  onResetPin?: (row: PilotRosterRow) => void;
+  onCopyLoginInstructions?: (row: PilotRosterRow) => void;
+  onCopyClaimLink?: (row: PilotRosterRow) => void;
 };
 
 function formatCompactActivityDate(iso: string | null): string {
@@ -90,6 +93,9 @@ function buildRosterColumns(
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void,
   onLaunchStudentSession?: (row: PilotRosterRow) => void,
   launchSessionLoadingId?: string | null,
+  onResetPin?: (row: PilotRosterRow) => void,
+  onCopyLoginInstructions?: (row: PilotRosterRow) => void,
+  onCopyClaimLink?: (row: PilotRosterRow) => void,
 ): ResponsivePortalTableColumn<PilotRosterRow>[] {
   const columns: ResponsivePortalTableColumn<PilotRosterRow>[] = [
     {
@@ -119,6 +125,51 @@ function buildRosterColumns(
       className: 'pilot-adminCellParent',
       render: (row) => <ParentGuardianCell row={row} />,
     },
+    ...(isRoster
+      ? [
+          {
+            id: 'parent-status',
+            header: 'Parent Status',
+            mobileRole: 'detail' as const,
+            className: 'pilot-adminCellText',
+            render: (row: PilotRosterRow) => row.parentConnectionLabel,
+          },
+          {
+            id: 'student-access',
+            header: 'Student Access',
+            mobileRole: 'detail' as const,
+            className: 'pilot-adminCellAction',
+            render: (row: PilotRosterRow) => (
+              <div className="pilot-rosterAccessActions">
+                <span>{row.hasPin ? 'PIN ready' : 'Missing PIN'}</span>
+                {onResetPin ? (
+                  <button type="button" className="pilot-rosterLaunchBtn" onClick={() => onResetPin(row)}>
+                    Reset PIN
+                  </button>
+                ) : null}
+                {onCopyLoginInstructions ? (
+                  <button
+                    type="button"
+                    className="pilot-rosterLaunchBtn"
+                    onClick={() => onCopyLoginInstructions(row)}
+                  >
+                    Copy login
+                  </button>
+                ) : null}
+                {onCopyClaimLink && row.familyClaimUrl ? (
+                  <button
+                    type="button"
+                    className="pilot-rosterLaunchBtn"
+                    onClick={() => onCopyClaimLink(row)}
+                  >
+                    Copy claim link
+                  </button>
+                ) : null}
+              </div>
+            ),
+          },
+        ]
+      : []),
     ...(isRoster
       ? [
           {
@@ -225,6 +276,9 @@ export default function PilotAdminStudentTable({
   onGradeSaved,
   onLaunchStudentSession,
   launchSessionLoadingId,
+  onResetPin,
+  onCopyLoginInstructions,
+  onCopyClaimLink,
 }: PilotAdminStudentTableProps) {
   const isRoster = variant === 'roster';
   const columns = useMemo(
@@ -235,8 +289,20 @@ export default function PilotAdminStudentTable({
         onGradeSaved,
         onLaunchStudentSession,
         launchSessionLoadingId,
+        onResetPin,
+        onCopyLoginInstructions,
+        onCopyClaimLink,
       ),
-    [isRoster, launchSessionLoadingId, onGradeSaved, onLaunchStudentSession, onStudentClick],
+    [
+      isRoster,
+      launchSessionLoadingId,
+      onCopyClaimLink,
+      onCopyLoginInstructions,
+      onGradeSaved,
+      onLaunchStudentSession,
+      onResetPin,
+      onStudentClick,
+    ],
   );
 
   const expandedActions = onStudentClick

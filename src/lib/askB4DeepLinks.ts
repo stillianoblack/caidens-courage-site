@@ -2,6 +2,7 @@ import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { familyDownloadsTabPath, familyGoalsPath, familyPortalPath } from './familyPortalPaths';
 import type { ActivityCategoryId } from '../data/pilotDashboardContent';
 import { programDashboardTabPath } from './programDashboardNav';
+import type { RosterFilterId } from './pilotOverviewInsights';
 
 const ACTIVITY_TAB_IDS = new Set<ActivityCategoryId>([
   'coloring-pages',
@@ -20,9 +21,7 @@ export function activitiesLibraryTabPath(tab: ActivityCategoryId): string {
   return `${programDashboardTabPath('activities-library')}?tab=${encodeURIComponent(tab)}`;
 }
 
-export function rosterFilterPath(
-  filter: 'missing-baseline' | 'inactive' | 'no-modules' | 'certificate-ready',
-): string {
+export function rosterFilterPath(filter: RosterFilterId): string {
   return `${programDashboardTabPath('roster')}?filter=${encodeURIComponent(filter)}`;
 }
 

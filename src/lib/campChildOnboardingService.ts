@@ -5,13 +5,22 @@ import { isValidSupabaseParticipantId } from './pilotTrackingService';
 import { saveParticipantGradeLevel } from './participantGradeService';
 import { createCampStudentFamilyLink } from './studentFamilyLinkService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import {
+  assignStudentPinToParticipant,
+  buildStudentPinBootstrapFields,
+  ensureFamilyClaimCodeForParticipant,
+  type ParentConnectionStatus,
+} from './studentPinService';
+import { buildFamilyClaimUrl } from './familyClaimCode';
 
 export type CampChildOnboardingInput = {
   childFirstName: string;
+  childLastName?: string;
   childNickname?: string;
-  parentFirstName: string;
-  parentLastName: string;
-  parentEmail: string;
+  connectParentLater?: boolean;
+  parentFirstName?: string;
+  parentLastName?: string;
+  parentEmail?: string;
   parentPhone?: string;
   gradeLevel?: GradeLevel;
   campProgramCode: string;
@@ -23,29 +32,39 @@ export type CampChildOnboardingResult = {
   linkId?: string;
   displayName: string;
   message: string;
+  studentPin?: string;
+  familyClaimCode?: string;
+  familyClaimUrl?: string;
+  parentConnectionStatus?: ParentConnectionStatus;
 };
 
-function childDisplayName(firstName: string, nickname?: string): string {
-  return nickname?.trim() || firstName.trim();
+function childDisplayName(firstName: string, nickname?: string, lastName?: string): string {
+  if (nickname?.trim()) return nickname.trim();
+  const parts = [firstName.trim(), lastName?.trim()].filter(Boolean);
+  return parts.join(' ') || firstName.trim();
 }
 
-function buildStudentLookupOrFilter(nickname: string, firstName: string): string | null {
+function buildStudentLookupOrFilter(nickname: string, firstName: string, lastName?: string): string | null {
   const names = new Set<string>();
   if (nickname) names.add(nickname);
   if (firstName) names.add(firstName);
+  if (lastName) names.add(lastName);
   if (!names.size) return null;
   return Array.from(names)
-    .flatMap((name) => [`nickname.eq.${name}`, `first_name.eq.${name}`])
+    .flatMap((name) => [`nickname.eq.${name}`, `first_name.eq.${name}`, `last_name.eq.${name}`])
     .join(',');
 }
 
 async function insertCampChildParticipant(input: {
   firstName: string;
+  lastName?: string;
   nickname: string;
   campProgramCode: string;
   gradeLevel?: GradeLevel;
+  pinBootstrap?: Record<string, unknown>;
 }): Promise<{ participantId: string } | { error: string }> {
   const firstName = input.firstName.trim();
+  const lastName = input.lastName?.trim() || null;
   const nickname = input.nickname.trim();
   const campProgramCode = input.campProgramCode.trim();
   const gradeLevel = normalizeGradeLevelStorage(input.gradeLevel) ?? undefined;
@@ -53,6 +72,7 @@ async function insertCampChildParticipant(input: {
 
   console.info('[CAMP_CHILD_INSERT_START]', {
     first_name: firstName,
+    last_name: lastName,
     nickname,
     camp_program_code: campProgramCode,
   });
@@ -69,7 +89,7 @@ async function insertCampChildParticipant(input: {
       .eq('role', 'student')
       .is('group_name', null);
 
-    const orFilter = buildStudentLookupOrFilter(nickname, firstName);
+    const orFilter = buildStudentLookupOrFilter(nickname, firstName, lastName ?? undefined);
     if (orFilter) {
       query = query.or(orFilter);
     }
@@ -90,9 +110,11 @@ async function insertCampChildParticipant(input: {
         return { error: 'Existing participant id is not a valid UUID.' };
       }
 
-      const updatePayload: Record<string, string> = {
+      const updatePayload: Record<string, unknown> = {
         nickname,
         first_name: firstName,
+        ...(lastName ? { last_name: lastName } : {}),
+        ...(input.pinBootstrap ?? {}),
       };
       if (gradeLevel) {
         updatePayload.grade_level = gradeLevel;
@@ -117,12 +139,14 @@ async function insertCampChildParticipant(input: {
       return { participantId };
     }
 
-    const insertPayload: Record<string, string | null> = {
+    const insertPayload: Record<string, unknown> = {
       role: 'student',
       nickname,
       first_name: firstName,
       program_code: campProgramCode,
       group_name: null,
+      ...(lastName ? { last_name: lastName } : {}),
+      ...(input.pinBootstrap ?? {}),
     };
     if (gradeLevel) {
       insertPayload.grade_level = gradeLevel;
@@ -157,22 +181,50 @@ async function insertCampChildParticipant(input: {
   }
 }
 
+/** Backward-compatible entry — parent email still required unless connectParentLater is set. */
 export async function createCampChildWithParentLink(
   input: CampChildOnboardingInput,
 ): Promise<CampChildOnboardingResult> {
-  const childFirstName = input.childFirstName.trim();
-  const parentEmail = input.parentEmail.trim();
-  const parentLastName = input.parentLastName.trim();
-  const campProgramCode = input.campProgramCode.trim();
-  const displayName = childDisplayName(childFirstName, input.childNickname);
+  return createCampChildWithOptionalParent(input);
+}
 
-  if (!childFirstName || !input.parentFirstName?.trim() || !parentEmail || !parentLastName || !campProgramCode) {
+export async function createCampChildWithOptionalParent(
+  input: CampChildOnboardingInput,
+): Promise<CampChildOnboardingResult> {
+  const childFirstName = input.childFirstName.trim();
+  const childLastName = input.childLastName?.trim();
+  const parentEmail = input.parentEmail?.trim() || '';
+  const parentLastName = input.parentLastName?.trim() || '';
+  const parentFirstName = input.parentFirstName?.trim() || '';
+  const campProgramCode = input.campProgramCode.trim();
+  const connectParentLater = Boolean(input.connectParentLater);
+  const displayName = childDisplayName(childFirstName, input.childNickname, childLastName);
+
+  if (!childFirstName || !campProgramCode) {
     return {
       success: false,
       displayName,
-      message:
-        'Child first name, parent/guardian first and last name, parent email, and program are required.',
+      message: 'Child first name and program are required.',
     };
+  }
+
+  if (!childLastName && !input.childNickname?.trim()) {
+    return {
+      success: false,
+      displayName,
+      message: 'Add a last name or nickname for the student.',
+    };
+  }
+
+  if (!connectParentLater) {
+    if (!parentFirstName || !parentEmail || !parentLastName) {
+      return {
+        success: false,
+        displayName,
+        message:
+          'Child first name, parent/guardian first and last name, parent email, and program are required.',
+      };
+    }
   }
 
   if (!normalizeGradeLevelStorage(input.gradeLevel)) {
@@ -183,12 +235,33 @@ export async function createCampChildWithParentLink(
     };
   }
 
+  const hasParentEmail = Boolean(parentEmail);
+  const parentConnectionStatus: ParentConnectionStatus = hasParentEmail ? 'invited' : 'unclaimed';
+
   try {
+    let studentPin: string | undefined;
+    let familyClaimCode: string | undefined;
+    let pinBootstrap: Record<string, unknown> | undefined;
+
+    if (!hasParentEmail) {
+      const bootstrap = await buildStudentPinBootstrapFields({
+        programCode: campProgramCode,
+        parentConnectionStatus,
+        guardianEmail: null,
+        guardianPhone: input.parentPhone?.trim() || null,
+      });
+      studentPin = bootstrap.pin;
+      familyClaimCode = bootstrap.claimCode;
+      pinBootstrap = bootstrap.fields;
+    }
+
     const participantResult = await insertCampChildParticipant({
       firstName: childFirstName,
+      lastName: childLastName,
       nickname: displayName,
       campProgramCode,
       gradeLevel: normalizeGradeLevelStorage(input.gradeLevel) ?? undefined,
+      pinBootstrap,
     });
 
     if ('error' in participantResult) {
@@ -201,44 +274,103 @@ export async function createCampChildWithParentLink(
 
     const { participantId } = participantResult;
 
-    const linkResult = await createCampStudentFamilyLink({
-      studentId: participantId,
-      campProgramCode,
-      parentFirstName: input.parentFirstName.trim(),
-      parentLastName,
-      parentEmail,
-      parentPhone: input.parentPhone?.trim(),
-      relationship: 'parent',
-    });
-
-    if (!linkResult.success) {
-      return {
-        success: false,
+    if (hasParentEmail) {
+      const pinResult = await assignStudentPinToParticipant({
         participantId,
-        displayName,
-        message: linkResult.error ?? 'Child saved but parent link failed.',
-      };
-    }
+        programCode: campProgramCode,
+      });
+      if ('pin' in pinResult) {
+        studentPin = pinResult.pin;
+      }
 
-    console.info('[CAMP_CHILD_ONBOARDED]', {
-      participant_id: participantId,
-      camp_program_code: campProgramCode,
-      parent_email: parentEmail,
-      parent_last_name: parentLastName,
-      link_id: linkResult.link?.id ?? null,
-      grade_level: input.gradeLevel ?? null,
-    });
+      const claimResult = await ensureFamilyClaimCodeForParticipant({ participantId });
+      if ('code' in claimResult) {
+        familyClaimCode = claimResult.code;
+      }
+
+      if (parentFirstName && parentLastName) {
+        const linkResult = await createCampStudentFamilyLink({
+          studentId: participantId,
+          campProgramCode,
+          parentFirstName,
+          parentLastName,
+          parentEmail,
+          parentPhone: input.parentPhone?.trim(),
+          relationship: 'parent',
+        });
+
+        if (!linkResult.success) {
+          return {
+            success: false,
+            participantId,
+            displayName,
+            message: linkResult.error ?? 'Child saved but parent link failed.',
+          };
+        }
+
+        if (isSupabaseConfigured() && supabase) {
+          await supabase
+            .from('participants')
+            .update({
+              parent_connection_status: 'invited',
+              guardian_email: parentEmail,
+              guardian_phone: input.parentPhone?.trim() || null,
+            })
+            .eq('id', participantId);
+        }
+
+        console.info('[CAMP_CHILD_ONBOARDED]', {
+          participant_id: participantId,
+          camp_program_code: campProgramCode,
+          parent_email: parentEmail,
+          parent_last_name: parentLastName,
+          link_id: linkResult.link?.id ?? null,
+          grade_level: input.gradeLevel ?? null,
+        });
+
+        if (input.gradeLevel && normalizeGradeLevelStorage(input.gradeLevel)) {
+          await saveParticipantGradeLevel(participantId, normalizeGradeLevelStorage(input.gradeLevel)!);
+        }
+
+        const familyClaimUrl = familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : undefined;
+
+        return {
+          success: true,
+          participantId,
+          linkId: linkResult.link?.id,
+          displayName,
+          studentPin,
+          familyClaimCode,
+          familyClaimUrl,
+          parentConnectionStatus: 'invited',
+          message: `${displayName} was added to camp. Parent can claim access later with the family code and ${parentEmail}.`,
+        };
+      }
+    }
 
     if (input.gradeLevel && normalizeGradeLevelStorage(input.gradeLevel)) {
       await saveParticipantGradeLevel(participantId, normalizeGradeLevelStorage(input.gradeLevel)!);
     }
 
+    const familyClaimUrl = familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : undefined;
+
+    console.info('[CAMP_CHILD_ONBOARDED_STUDENT_ONLY]', {
+      participant_id: participantId,
+      camp_program_code: campProgramCode,
+      parent_connection_status: parentConnectionStatus,
+      has_pin: Boolean(studentPin),
+      has_claim_code: Boolean(familyClaimCode),
+    });
+
     return {
       success: true,
       participantId,
-      linkId: linkResult.link?.id,
       displayName,
-      message: `${displayName} was added to camp. Parent can claim access later with the family code and ${parentEmail}.`,
+      studentPin,
+      familyClaimCode,
+      familyClaimUrl,
+      parentConnectionStatus,
+      message: `${displayName} was added. Share the student PIN for game login. Parent can connect later with the family claim link.`,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not onboard child.';

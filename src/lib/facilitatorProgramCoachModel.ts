@@ -50,6 +50,8 @@ export type FacilitatorProgramCoachModel = {
     missingBaselineCount: number;
     missingWeek1Count: number;
     missingWeek2Count: number;
+    parentNotConnectedCount: number;
+    missingPinCount: number;
     inactive7PlusDays: number;
     certificateReady: number;
     requiresFollowUp: number;
@@ -90,6 +92,8 @@ export function buildFacilitatorProgramCoachModel(input: {
   activeProgram?: ActivePilotProgram | null;
   programGoals?: ProgramGoalsRecord | null;
   familyLinksCount?: number;
+  parentNotConnectedCount?: number;
+  missingPinCount?: number;
   onOpenAccessCodes?: () => void;
   onCopyFamilyCode?: () => void;
 }): FacilitatorProgramCoachModel {
@@ -217,6 +221,29 @@ export function buildFacilitatorProgramCoachModel(input: {
     });
   }
 
+  const parentNotConnectedCount = input.parentNotConnectedCount ?? 0;
+  const missingPinCount = input.missingPinCount ?? 0;
+
+  if (parentNotConnectedCount > 0) {
+    insights.push({
+      id: 'parent-not-connected',
+      title: 'Parents not connected',
+      message: `${parentNotConnectedCount} students can play now; parents can claim later.`,
+      tone: 'info',
+      href: `${rosterPath}?filter=parent-not-connected`,
+    });
+  }
+
+  if (missingPinCount > 0) {
+    insights.push({
+      id: 'missing-pin',
+      title: 'Missing student PINs',
+      message: `${missingPinCount} students still need a login PIN.`,
+      tone: 'warning',
+      href: `${rosterPath}?filter=missing-pin`,
+    });
+  }
+
   if (needsAttention.inactive7PlusDays > 0) {
     insights.push({
       id: 'inactive-students',
@@ -241,6 +268,13 @@ export function buildFacilitatorProgramCoachModel(input: {
 
   const quickActions: FacilitatorCoachQuickAction[] = [
     { id: 'roster', label: 'Open Roster', href: rosterPath },
+    { id: 'student-login', label: 'Copy Student Login Info', href: rosterPath },
+    ...(parentNotConnectedCount > 0
+      ? [{ id: 'family-claim-links', label: 'Copy Family Claim Links', href: `${rosterPath}?filter=parent-not-connected` }]
+      : []),
+    ...(missingPinCount > 0
+      ? [{ id: 'reset-missing-pins', label: 'Reset Missing PINs', href: `${rosterPath}?filter=missing-pin` }]
+      : []),
     ...(input.activeProgram?.familyAccessCode?.trim() && input.onCopyFamilyCode
       ? [{ id: 'copy-family-code', label: 'Copy Family Code', onClick: input.onCopyFamilyCode }]
       : []),
@@ -266,6 +300,8 @@ export function buildFacilitatorProgramCoachModel(input: {
         campReadiness.items.find((item) => item.id === 'missing-week-1')?.count ?? 0,
       missingWeek2Count:
         campReadiness.items.find((item) => item.id === 'missing-week-2')?.count ?? 0,
+      parentNotConnectedCount,
+      missingPinCount,
       inactive7PlusDays: needsAttention.inactive7PlusDays,
       certificateReady: needsAttention.certificateReady,
       requiresFollowUp: campReadiness.requiresFollowUp,

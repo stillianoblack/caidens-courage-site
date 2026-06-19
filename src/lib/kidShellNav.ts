@@ -9,8 +9,6 @@ export type KidShellNavigateOptions = {
   forceAssign?: boolean;
 };
 
-const NAV_VERIFY_MS = 150;
-
 function resolveAbsolutePath(to: To): string {
   if (typeof to === 'string') {
     return to.startsWith('/') ? to : `/${to}`;
@@ -50,7 +48,8 @@ function assignPath(from: string, targetPath: string): void {
 
 /**
  * Reliable navigation for kid play shell actions.
- * Prefers React Router, then falls back to a full route load when navigation stalls.
+ * Prefers React Router. Full route loads are reserved for explicit recovery or
+ * router failures so code-split production routes can finish loading normally.
  */
 export function kidPlayShellNavigate(
   navigate: NavigateFunction,
@@ -87,25 +86,6 @@ export function kidPlayShellNavigate(
     }
     return;
   }
-
-  window.setTimeout(() => {
-    const current = currentPath();
-    if (current === targetNorm) return;
-
-    const fromPath = from.split('?')[0];
-    const targetPathOnly = targetNorm.split('?')[0];
-    const currentPathOnly = current.split('?')[0];
-
-    const pathnameStuck = currentPathOnly === fromPath && targetPathOnly !== fromPath;
-    const searchStuck =
-      currentPathOnly === fromPath &&
-      targetPathOnly === fromPath &&
-      current !== targetNorm;
-
-    if (pathnameStuck || searchStuck) {
-      assignPath(from, targetPath);
-    }
-  }, NAV_VERIFY_MS);
 }
 
 /** Navigate into or within the kid shell from family portal entry points. */

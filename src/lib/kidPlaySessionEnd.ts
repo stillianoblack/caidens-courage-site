@@ -1,6 +1,7 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { readActivePortalRole } from '../config/portalContext';
-import { programDashboardTabPath } from './programDashboardNav';
+import { STUDENT_PIN_LOGIN_PATH } from '../config/courageRoutes';
+import { clearStudentPinSession } from './studentPinSession';
 import { familyPortalPath } from './familyPortalPaths';
 import { readKidPlayFamilyReturnBase } from './kidPlayShellRoutes';
 import { clearChildSessionMemory } from './endProtectedChildSession';
@@ -20,6 +21,7 @@ import type { KidPlayResumePayload } from './kidPlaySessionResume';
 import { triggerParentPush } from './parentPushNotify';
 import { buildSessionPausedPushDedupeKey } from './parentPushNotifyDedupe';
 import { kidShellAwareNavigate } from './kidShellNav';
+import { programDashboardTabPath } from './programDashboardNav';
 
 export type EndKidPlayShellSessionOptions = {
   sessionId: string;
@@ -101,6 +103,25 @@ export async function endKidPlayFamilyShellSession(
   kidShellAwareNavigate(navigate, pausePath, { replace: true });
 }
 
+/** Student PIN end — clear PIN session and return to kid login. */
+export async function endKidPlayStudentPinShellSession(
+  navigate: NavigateFunction,
+  options: EndKidPlayShellSessionOptions,
+): Promise<void> {
+  const sessionId = options.sessionId.trim();
+  if (!sessionId) return;
+
+  await persistKidPlaySessionEnd(
+    sessionId,
+    options.reason ?? 'signed_out',
+    options.resumePayload,
+  );
+
+  clearChildSessionMemory();
+  clearStudentPinSession();
+  kidShellAwareNavigate(navigate, STUDENT_PIN_LOGIN_PATH, { replace: true });
+}
+
 /** Ends kid play shell using device_mode policy from the active session row. */
 export async function endKidPlayShellSession(
   navigate: NavigateFunction,
@@ -125,6 +146,10 @@ export async function endKidPlayShellSession(
   }
 
   if (behavior.softReturn) {
+    if (session.session_source === 'future_child_pin') {
+      await endKidPlayStudentPinShellSession(navigate, payload);
+      return;
+    }
     await endKidPlayFamilyShellSession(navigate, payload);
     return;
   }
@@ -139,6 +164,10 @@ export function resolveKidPlaySessionExitPath(
 
   if (sessionSource === 'family_home') {
     return familyPortalPath('weekly-adventures', familyBase);
+  }
+
+  if (sessionSource === 'future_child_pin') {
+    return STUDENT_PIN_LOGIN_PATH;
   }
 
   if (readActivePortalRole() === 'family') {

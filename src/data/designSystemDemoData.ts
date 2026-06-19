@@ -31,6 +31,11 @@ export const DEMO_ROSTER_ROWS: PilotRosterRow[] = [
     lastActivityAt: '2026-06-08T14:22:00.000Z',
     gradeLevel: '3',
     gradeBand: '2-3',
+    parentConnectionStatus: 'connected',
+    parentConnectionLabel: 'Connected',
+    hasPin: true,
+    familyClaimCode: 'CLAIM-DEMO-001',
+    familyClaimUrl: 'https://example.com/portal/family/claim?code=CLAIM-DEMO-001',
   },
   {
     participantId: 'demo-student-002',
@@ -52,6 +57,11 @@ export const DEMO_ROSTER_ROWS: PilotRosterRow[] = [
     lastActivityAt: null,
     gradeLevel: null,
     gradeBand: null,
+    parentConnectionStatus: 'unclaimed',
+    parentConnectionLabel: 'Parent not connected',
+    hasPin: false,
+    familyClaimCode: null,
+    familyClaimUrl: null,
   },
 ];
 

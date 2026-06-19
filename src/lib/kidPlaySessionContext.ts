@@ -73,7 +73,7 @@ export function inferDeviceModeFromSessionSource(
   switch (sessionSource) {
     case 'family_home':
     case 'future_child_pin':
-      return 'home_device';
+      return 'child_owned_device';
     case 'camp_roster_launch':
       return 'shared_camp_device';
     case 'facilitator_roster_launch':

@@ -8,11 +8,26 @@ import {
 } from './pilotStudentProgress';
 import type { StudentGalleryItem } from './studentGalleryService';
 import type { StudentParticipantRecord } from './pilotTrackingService';
+import { BASELINE_WEEK, GROWTH_START_WEEK } from '../config/pilotBaselineWeeks';
+import { isChildBaselineAssessmentType } from '../config/assessmentTypeConstants';
+import { selectCanonicalModuleResultsForWeek } from './canonicalAttemptRules';
 
-export type RosterFilterId = 'missing-baseline' | 'inactive' | 'no-modules' | 'certificate-ready';
+export type RosterFilterId =
+  | 'missing-baseline'
+  | 'inactive'
+  | 'no-modules'
+  | 'certificate-ready'
+  | 'parent-not-connected'
+  | 'missing-pin'
+  | 'missing-week-1'
+  | 'missing-week-2';
 
 export const ROSTER_FILTER_IDS: RosterFilterId[] = [
   'missing-baseline',
+  'missing-pin',
+  'parent-not-connected',
+  'missing-week-1',
+  'missing-week-2',
   'inactive',
   'no-modules',
   'certificate-ready',
@@ -20,6 +35,10 @@ export const ROSTER_FILTER_IDS: RosterFilterId[] = [
 
 export const ROSTER_FILTER_LABELS: Record<RosterFilterId, string> = {
   'missing-baseline': 'Missing Baseline',
+  'missing-pin': 'Missing PIN',
+  'parent-not-connected': 'Parent Not Connected',
+  'missing-week-1': 'Missing Week 1',
+  'missing-week-2': 'Missing Week 2',
   inactive: 'Inactive 7+ Days',
   'no-modules': 'No Modules Completed',
   'certificate-ready': 'Certificate Ready',
@@ -29,12 +48,54 @@ export function isRosterFilterId(value: string | null): value is RosterFilterId 
   return value !== null && ROSTER_FILTER_IDS.includes(value as RosterFilterId);
 }
 
-export function filterRosterRows(rows: PilotRosterRow[], filter: RosterFilterId | null): PilotRosterRow[] {
+function hasBaselineComplete(participantId: string, assessments: LocalAssessmentV2Record[]): boolean {
+  return assessments.some(
+    (row) =>
+      row.participant_id === participantId &&
+      isChildBaselineAssessmentType(row.assessment_type) &&
+      Boolean(row.completed_at),
+  );
+}
+
+function hasWeekComplete(
+  participantId: string,
+  modules: LocalModuleResultRecord[],
+  weekNumber: number,
+): boolean {
+  const studentModules = modules.filter(
+    (row) => row.participant_id === participantId && row.role === 'student',
+  );
+  return selectCanonicalModuleResultsForWeek(studentModules, weekNumber).length > 0;
+}
+
+export function filterRosterRows(
+  rows: PilotRosterRow[],
+  filter: RosterFilterId | null,
+  context?: {
+    assessments?: LocalAssessmentV2Record[];
+    modules?: LocalModuleResultRecord[];
+  },
+): PilotRosterRow[] {
   if (!filter) return rows;
 
   switch (filter) {
     case 'missing-baseline':
       return rows.filter((row) => row.baselineStatus !== 'Complete');
+    case 'missing-pin':
+      return rows.filter((row) => !row.hasPin);
+    case 'parent-not-connected':
+      return rows.filter((row) => row.parentConnectionStatus === 'unclaimed');
+    case 'missing-week-1':
+      return rows.filter((row) => {
+        if (!context?.modules) return false;
+        return !hasWeekComplete(row.participantId, context.modules, BASELINE_WEEK);
+      });
+    case 'missing-week-2':
+      return rows.filter((row) => {
+        if (!context?.modules || !context.assessments) return false;
+        if (!hasBaselineComplete(row.participantId, context.assessments)) return false;
+        return !hasWeekComplete(row.participantId, context.modules, GROWTH_START_WEEK);
+      });
     case 'inactive':
       return rows.filter((row) => isInactiveBeyondDays(row.lastActivityAt, PILOT_INACTIVE_DAYS));
     case 'no-modules':
@@ -175,4 +236,20 @@ export function buildB4Recommendation(input: {
     message: 'Review student progress and celebrate completed modules.',
     cta: 'Ask B-4',
   };
+}
+
+export function countRosterRowsByFilter(
+  rows: PilotRosterRow[],
+  context?: {
+    assessments?: LocalAssessmentV2Record[];
+    modules?: LocalModuleResultRecord[];
+  },
+): Record<RosterFilterId, number> {
+  return ROSTER_FILTER_IDS.reduce(
+    (acc, filterId) => {
+      acc[filterId] = filterRosterRows(rows, filterId, context).length;
+      return acc;
+    },
+    {} as Record<RosterFilterId, number>,
+  );
 }

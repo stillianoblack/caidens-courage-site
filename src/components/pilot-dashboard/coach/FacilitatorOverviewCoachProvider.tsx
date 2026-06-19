@@ -3,6 +3,7 @@ import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { useCoachViewportPlacement, type CoachViewportPlacement } from '../../../hooks/useCoachViewportPlacement';
 import { useFacilitatorProgramCoach } from '../../../hooks/useFacilitatorProgramCoach';
 import { usePilotTrackingResults } from '../../../hooks/usePilotTrackingResults';
+import { usePilotRosterData } from '../../../hooks/usePilotRosterData';
 import type { FacilitatorProgramCoachModel } from '../../../lib/facilitatorProgramCoachModel';
 import type { ParticipantNameLookup } from '../../../lib/pilotResultsDisplay';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../../../lib/pilotTrackingLocalStorage';
@@ -57,6 +58,11 @@ export function FacilitatorOverviewCoachProvider({
     loading,
     warning,
   } = usePilotTrackingResults(0, resolvedProgramCode, enabled);
+  const { rows: rosterRows } = usePilotRosterData(resolvedProgramCode, enabled);
+  const parentNotConnectedCount = rosterRows.filter(
+    (row) => row.parentConnectionStatus === 'unclaimed',
+  ).length;
+  const missingPinCount = rosterRows.filter((row) => !row.hasPin).length;
   const { copyWithToast } = useCopyToast();
 
   const coachModel = useFacilitatorProgramCoach({
@@ -66,6 +72,8 @@ export function FacilitatorOverviewCoachProvider({
     metrics,
     activeProgram,
     familyLinks,
+    parentNotConnectedCount,
+    missingPinCount,
     sharedProgramGoals: enabled ? sharedProgramGoals : undefined,
     onCopyFamilyCode: activeProgram?.familyAccessCode
       ? () => void copyWithToast(activeProgram.familyAccessCode)

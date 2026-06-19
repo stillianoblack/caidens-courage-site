@@ -18,6 +18,14 @@ import {
   type StudentFamilyLink,
 } from '../lib/studentFamilyLinkService';
 import { resolveSyncWarningMessage } from '../lib/syncWarningMessages';
+import {
+  fetchStudentAccessFieldsByIds,
+  parentConnectionStatusLabel,
+  resolveParentConnectionStatus,
+  type ParentConnectionStatus,
+  type StudentAccessFields,
+} from '../lib/studentPinService';
+import { buildFamilyClaimUrl } from '../lib/familyClaimCode';
 
 export type PilotRosterRow = {
   participantId: string;
@@ -39,6 +47,11 @@ export type PilotRosterRow = {
   lastActivityAt: string | null;
   gradeLevel: string | null;
   gradeBand: string | null;
+  parentConnectionStatus: ParentConnectionStatus;
+  parentConnectionLabel: string;
+  hasPin: boolean;
+  familyClaimCode: string | null;
+  familyClaimUrl: string | null;
 };
 
 export function usePilotRosterData(
@@ -51,6 +64,9 @@ export function usePilotRosterData(
   const [links, setLinks] = useState<StudentFamilyLink[]>([]);
   const [assessmentResults, setAssessmentResults] = useState<LocalAssessmentV2Record[]>([]);
   const [moduleResults, setModuleResults] = useState<LocalModuleResultRecord[]>([]);
+  const [accessByParticipant, setAccessByParticipant] = useState<Map<string, StudentAccessFields>>(
+    new Map(),
+  );
   const [warning, setWarning] = useState<string | undefined>();
 
   const refresh = useCallback(async () => {
@@ -60,6 +76,7 @@ export function usePilotRosterData(
       setLinks([]);
       setAssessmentResults([]);
       setModuleResults([]);
+      setAccessByParticipant(new Map());
       return;
     }
 
@@ -71,11 +88,15 @@ export function usePilotRosterData(
       ]);
 
       const directoryPayload = await loadProgramParticipantDirectory(code);
+      const accessMap = await fetchStudentAccessFieldsByIds(
+        directoryPayload.participants.map((row) => row.id),
+      );
 
       setParticipants(directoryPayload.participants);
       setLinks(linksPayload.links);
       setAssessmentResults(trackingPayload.assessmentResults);
       setModuleResults(trackingPayload.moduleResults);
+      setAccessByParticipant(accessMap);
       setWarning(
         resolveSyncWarningMessage(
           directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || undefined,
@@ -100,6 +121,7 @@ export function usePilotRosterData(
     return participants
       .map((participant) => {
         const link = linkByStudent.get(participant.id);
+        const access = accessByParticipant.get(participant.id);
         const moduleCompletions = moduleResults.filter(
           (row) => row.participant_id === participant.id,
         ).length;
@@ -109,6 +131,13 @@ export function usePilotRosterData(
         const parentGuardianName = [parentFirst, parentLast].filter(Boolean).join(' ') || '—';
         const familyAccessCode =
           link?.family_program_code?.trim() || programFamilyAccessCode?.trim() || '—';
+        const parentEmail = link?.parent_email?.trim() || '—';
+        const parentConnectionStatus = resolveParentConnectionStatus({
+          parentConnectionStatus: access?.parent_connection_status,
+          linkClaimed: Boolean(link?.parent_claimed),
+          hasParentEmail: parentEmail !== '—',
+        });
+        const familyClaimCode = access?.family_claim_code ?? null;
 
         return {
           participantId: participant.id,
@@ -118,7 +147,7 @@ export function usePilotRosterData(
           parentGuardianShort: formatParentGuardianShort(parentFirst, parentLast),
           parentFirstName: parentFirst || '—',
           parentLastName: parentLast || '—',
-          parentEmail: link?.parent_email?.trim() || '—',
+          parentEmail,
           parentPhone: link?.parent_phone?.trim() || '—',
           emergencyContact: '—',
           campProgramCode: link?.camp_program_code?.trim() || code,
@@ -139,17 +168,30 @@ export function usePilotRosterData(
           }),
           gradeLevel: normalizeGradeLevelStorage(participant.grade_level),
           gradeBand: participant.grade_band?.trim() || null,
+          parentConnectionStatus,
+          parentConnectionLabel: parentConnectionStatusLabel(parentConnectionStatus),
+          hasPin: Boolean(access?.hasPin),
+          familyClaimCode,
+          familyClaimUrl: familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : null,
         };
       })
       .sort((a, b) => a.childName.localeCompare(b.childName));
-  }, [assessmentResults, links, moduleResults, participants, programCode, programFamilyAccessCode]);
+  }, [
+    accessByParticipant,
+    assessmentResults,
+    links,
+    moduleResults,
+    participants,
+    programCode,
+    programFamilyAccessCode,
+  ]);
 
   const participantLookup = useMemo(() => buildParticipantNameLookup(participants), [participants]);
 
   const updateParticipantGrade = useCallback((participantId: string, gradeLevel: GradeLevel) => {
     const gradeBand = getGradeBand(gradeLevel);
-    setParticipants((prev) =>
-      prev.map((row) =>
+    setParticipants((current) =>
+      current.map((row) =>
         row.id === participantId
           ? { ...row, grade_level: gradeLevel, grade_band: gradeBand }
           : row,
@@ -163,12 +205,12 @@ export function usePilotRosterData(
     familyLinks: links,
     assessmentResults,
     moduleResults,
-    participantLookup,
-    loading: enabled && loading,
+    loading,
     warning,
     refresh,
     updateParticipantGrade,
-    resolveName: (participantId: string) =>
+    participantLookup,
+    resolveDisplayName: (participantId: string) =>
       resolveParticipantDisplayName(participantId, participantLookup),
   };
 }

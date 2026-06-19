@@ -42,6 +42,7 @@ export function familyDrVictoriaMissionPath(missionId: string): string {
   return `${FAMILY_DR_VICTORIA_MISSION_BASE}/${missionId}`;
 }
 export const KIDS_PORTAL_PATH = '/portal/kids';
+export const STUDENT_PIN_LOGIN_PATH = '/kids/login';
 export const CAIDEN_QUEST_HUB_PATH = `${KIDS_PORTAL_PATH}/caiden`;
 export const CAIDEN_QUEST_1_PATH = `${CAIDEN_QUEST_HUB_PATH}/quest-1`;
 

@@ -61,7 +61,9 @@
     "audit:mission-content-gaps": "tsx scripts/audit-mission-content-gaps.ts",
     "verify:live-growth": "tsx scripts/verifyLiveGrowthMath.ts",
     "analytics:questions": "tsx scripts/buildQuestionAnalytics.ts",
-    "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts"
+    "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts",
+    "backfill:student-pins": "tsx scripts/backfillStudentPins.ts",
+    "export:student-login-cards": "tsx scripts/exportStudentLoginCards.ts"
   },
   "browserslist": {
     "production": [

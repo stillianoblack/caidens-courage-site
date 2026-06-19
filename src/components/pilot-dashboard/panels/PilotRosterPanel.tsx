@@ -10,6 +10,8 @@ import {
   ROSTER_FILTER_LABELS,
 } from '../../../lib/pilotOverviewInsights';
 import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
+import { buildStudentLoginInstructions } from '../../../lib/familyClaimCode';
+import { resetStudentPinViaFunction } from '../../../lib/studentPinService';
 import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
 import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
 import { usePilotRosterData, type PilotRosterRow } from '../../../hooks/usePilotRosterData';
@@ -42,12 +44,68 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     row: PilotRosterRow;
     existingSessionId: string;
   } | null>(null);
+  const [pinReveal, setPinReveal] = useState<{ childName: string; pin: string } | null>(null);
+  const program = readActivePilotProgram();
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
 
+  const handleCopyLoginInstructions = useCallback(
+    async (row: PilotRosterRow) => {
+      const instructions = buildStudentLoginInstructions({
+        studentName: row.childName,
+        programName: program?.programName?.trim() || row.campProgramCode,
+        programCode: row.campProgramCode,
+        pin: 'Ask facilitator for PIN',
+      });
+      try {
+        await navigator.clipboard.writeText(instructions);
+        showToast('Login instructions copied.', 'success');
+      } catch {
+        showToast('Copy failed.', 'error');
+      }
+    },
+    [program?.programName, showToast],
+  );
+
+  const handleCopyClaimLink = useCallback(
+    async (row: PilotRosterRow) => {
+      if (!row.familyClaimUrl) {
+        showToast('No family claim link yet.', 'error');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(row.familyClaimUrl);
+        showToast('Family claim link copied.', 'success');
+      } catch {
+        showToast('Copy failed.', 'error');
+      }
+    },
+    [showToast],
+  );
+
+  const handleResetPin = useCallback(
+    async (row: PilotRosterRow) => {
+      const result = await resetStudentPinViaFunction({
+        participantId: row.participantId,
+        programCode: row.campProgramCode,
+      });
+      if (!('pin' in result)) {
+        showToast(result.error, 'error');
+        return;
+      }
+      setPinReveal({ childName: row.childName, pin: result.pin });
+      void refresh();
+    },
+    [refresh, showToast],
+  );
+
   const displayRows = useMemo(
-    () => filterRosterRows(rows, rosterFilter),
-    [rows, rosterFilter],
+    () =>
+      filterRosterRows(rows, rosterFilter, {
+        assessments: assessmentResults,
+        modules: moduleResults,
+      }),
+    [assessmentResults, moduleResults, rosterFilter, rows],
   );
 
   const clearFilter = () => {
@@ -175,6 +233,9 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           onGradeSaved={updateParticipantGrade}
           onLaunchStudentSession={handleLaunchStudentSession}
           launchSessionLoadingId={launchSessionLoadingId}
+          onResetPin={(row) => void handleResetPin(row)}
+          onCopyLoginInstructions={(row) => void handleCopyLoginInstructions(row)}
+          onCopyClaimLink={(row) => void handleCopyClaimLink(row)}
         />
       )}
 
@@ -193,11 +254,33 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         open={addStudentOpen}
         onClose={() => setAddStudentOpen(false)}
         programCode={resolvedProgramCode}
+        programName={program?.programName}
         onSuccess={(message) => {
           showToast(message || "Student added. I'll keep their progress organized here.", 'success');
           void refresh();
         }}
       />
+
+      {pinReveal ? (
+        <div className="pilot-rosterFilterBanner">
+          <span>
+            New PIN for {pinReveal.childName}: <strong>{pinReveal.pin}</strong> (shown once)
+          </span>
+          <button
+            type="button"
+            className="pilot-rosterFilterClear"
+            onClick={() => {
+              void navigator.clipboard.writeText(pinReveal.pin);
+              showToast('PIN copied.', 'success');
+            }}
+          >
+            Copy PIN
+          </button>
+          <button type="button" className="pilot-rosterFilterClear" onClick={() => setPinReveal(null)}>
+            Dismiss
+          </button>
+        </div>
+      ) : null}
 
       {rows.length > 0 && rosterFilter ? (
         <p className="pilot-rosterFilterMeta">
