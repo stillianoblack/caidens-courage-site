@@ -1,4 +1,5 @@
 import type { NavigateFunction, To } from 'react-router-dom';
+import { navigateWithPageTransition } from './pageTransition';
 import { logNavTest } from './portalClickDebug';
 
 export type ReliableNavigateOptions = {
@@ -36,7 +37,7 @@ function currentPath(): string {
 
 function assignPath(from: string, targetPath: string): void {
   logNavTest(from, normalizePath(targetPath), { method: 'assign' });
-  window.location.assign(targetPath);
+  navigateWithPageTransition(targetPath);
 }
 
 /**

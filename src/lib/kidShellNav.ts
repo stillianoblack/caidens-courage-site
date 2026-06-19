@@ -1,5 +1,6 @@
 import type { NavigateFunction, To } from 'react-router-dom';
 import { isKidPlayShellPath } from './kidPlayShellRoutes';
+import { navigateWithPageTransition } from './pageTransition';
 import { logNavTest } from './portalClickDebug';
 
 export type KidShellNavigateOptions = {
@@ -47,7 +48,7 @@ function assignPath(from: string, targetPath: string): void {
   const targetNorm = normalizePath(targetPath);
   logKidShellNav(from, targetNorm, 'assign');
   logNavTest(from, targetNorm, { method: 'assign', scope: 'kid-shell' });
-  window.location.assign(targetPath);
+  navigateWithPageTransition(targetPath);
 }
 
 /**

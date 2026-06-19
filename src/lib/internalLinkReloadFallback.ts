@@ -1,3 +1,5 @@
+import { navigateWithPageTransition } from './pageTransition';
+
 declare global {
   interface Window {
     __ccInternalLinkReloadFallbackInstalled?: boolean;
@@ -51,7 +53,7 @@ export function installInternalLinkReloadFallback() {
       if (shouldLetBrowserHandleNormally(anchor, url)) return;
 
       event.preventDefault();
-      window.location.assign(url.href);
+      navigateWithPageTransition(url.href);
     },
     true,
   );
