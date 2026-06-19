@@ -63,7 +63,8 @@
     "analytics:questions": "tsx scripts/buildQuestionAnalytics.ts",
     "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts",
     "backfill:student-pins": "tsx scripts/backfillStudentPins.ts",
-    "export:student-login-cards": "tsx scripts/exportStudentLoginCards.ts"
+    "export:student-login-cards": "tsx scripts/exportStudentLoginCards.ts",
+    "audit:emails": "node scripts/auditEmails.js"
   },
   "browserslist": {
     "production": [

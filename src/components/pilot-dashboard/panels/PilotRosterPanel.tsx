@@ -41,31 +41,37 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [rosterLocked, setRosterLocked] = useState(() => isKidPlayRosterLocked());
   const [launchSessionLoadingId, setLaunchSessionLoadingId] = useState<string | null>(null);
+  const [launcherParticipantId, setLauncherParticipantId] = useState<string>('');
   const [movePrompt, setMovePrompt] = useState<{
     row: PilotRosterRow;
     existingSessionId: string;
   } | null>(null);
-  const [pinReveal, setPinReveal] = useState<{ childName: string; pin: string } | null>(null);
+  const [pinReveal, setPinReveal] = useState<{ participantId: string; childName: string; pin: string } | null>(null);
   const program = readActivePilotProgram();
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
 
   const handleCopyLoginInstructions = useCallback(
     async (row: PilotRosterRow) => {
+      const revealedPin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
+      if (!revealedPin) {
+        showToast(`Reset or generate a PIN for ${row.childName} before copying login instructions.`, 'error');
+        return;
+      }
       const instructions = buildStudentLoginInstructions({
         studentName: row.childName,
         programName: program?.programName?.trim() || row.campProgramCode,
         programCode: row.campProgramCode,
-        pin: 'Ask facilitator for PIN',
+        pin: revealedPin,
       });
       try {
         await navigator.clipboard.writeText(instructions);
-        showToast('Login instructions copied.', 'success');
+        showToast(`Login instructions copied for ${row.childName}.`, 'success');
       } catch {
         showToast('Copy failed.', 'error');
       }
     },
-    [program?.programName, showToast],
+    [pinReveal, program?.programName, showToast],
   );
 
   const handleCopyClaimLink = useCallback(
@@ -94,7 +100,8 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         showToast(result.error, 'error');
         return;
       }
-      setPinReveal({ childName: row.childName, pin: result.pin });
+      setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
+      setDrawerParticipantId(row.participantId);
       void refresh();
     },
     [refresh, showToast],
@@ -114,6 +121,17 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     next.delete('filter');
     setSearchParams(next, { replace: true });
   };
+
+  useEffect(() => {
+    if (!launcherParticipantId && displayRows[0]) {
+      setLauncherParticipantId(displayRows[0].participantId);
+    }
+  }, [displayRows, launcherParticipantId]);
+
+  const launcherRow = useMemo(
+    () => displayRows.find((row) => row.participantId === launcherParticipantId) ?? displayRows[0] ?? null,
+    [displayRows, launcherParticipantId],
+  );
 
   useEffect(() => {
     if (searchParams.get('addStudent') !== '1') return;
@@ -220,6 +238,48 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
+      {displayRows.length > 0 ? (
+        <section className="pilot-rosterLauncherCard" aria-labelledby="student-session-launcher-title">
+          <div>
+            <h3 id="student-session-launcher-title">Student Session Launcher</h3>
+            <p>Select a student, launch Kid Shell, or copy login instructions after a PIN reset.</p>
+          </div>
+          <label className="pilot-rosterLauncherField">
+            <span>Select student</span>
+            <select
+              value={launcherRow?.participantId ?? ''}
+              onChange={(event) => setLauncherParticipantId(event.target.value)}
+            >
+              {displayRows.map((row) => (
+                <option key={row.participantId} value={row.participantId}>
+                  {row.childName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="pilot-rosterLauncherActions">
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              disabled={!launcherRow || launchSessionLoadingId === launcherRow.participantId}
+              onClick={() => launcherRow && handleLaunchStudentSession(launcherRow)}
+            >
+              {launcherRow && launchSessionLoadingId === launcherRow.participantId
+                ? 'Launching…'
+                : 'Launch Student Session'}
+            </button>
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              disabled={!launcherRow}
+              onClick={() => launcherRow && void handleCopyLoginInstructions(launcherRow)}
+            >
+              Copy login instructions
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {displayRows.length === 0 ? (
         <p className="pilot-emptyNote">
           {rosterFilter
@@ -234,9 +294,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           onGradeSaved={updateParticipantGrade}
           onLaunchStudentSession={handleLaunchStudentSession}
           launchSessionLoadingId={launchSessionLoadingId}
-          onResetPin={(row) => void handleResetPin(row)}
-          onCopyLoginInstructions={(row) => void handleCopyLoginInstructions(row)}
-          onCopyClaimLink={(row) => void handleCopyClaimLink(row)}
         />
       )}
 
@@ -249,6 +306,29 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         assessmentResults={assessmentResults}
         moduleResults={moduleResults}
         programCode={resolvedProgramCode}
+        hasPin={displayRows.find((row) => row.participantId === drawerParticipantId)?.hasPin}
+        familyClaimCode={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimCode}
+        familyClaimUrl={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimUrl}
+        oneTimePin={pinReveal?.participantId === drawerParticipantId ? pinReveal.pin : null}
+        pinActionLoading={launchSessionLoadingId === drawerParticipantId}
+        onResetPin={() => {
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (row) void handleResetPin(row);
+        }}
+        onRevealPin={() => undefined}
+        onCopyPin={() => {
+          if (!pinReveal?.pin) return;
+          void navigator.clipboard.writeText(pinReveal.pin);
+          showToast('PIN copied.', 'success');
+        }}
+        onCopyLoginInstructions={() => {
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (row) void handleCopyLoginInstructions(row);
+        }}
+        onCopyClaimLink={() => {
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (row) void handleCopyClaimLink(row);
+        }}
       />
 
       <PilotAddStudentDrawer
@@ -261,27 +341,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           void refresh();
         }}
       />
-
-      {pinReveal ? (
-        <div className="pilot-rosterFilterBanner">
-          <span>
-            New PIN for {pinReveal.childName}: <strong>{pinReveal.pin}</strong> (shown once)
-          </span>
-          <button
-            type="button"
-            className="pilot-rosterFilterClear"
-            onClick={() => {
-              void navigator.clipboard.writeText(pinReveal.pin);
-              showToast('PIN copied.', 'success');
-            }}
-          >
-            Copy PIN
-          </button>
-          <button type="button" className="pilot-rosterFilterClear" onClick={() => setPinReveal(null)}>
-            Dismiss
-          </button>
-        </div>
-      ) : null}
 
       {rows.length > 0 && rosterFilter ? (
         <p className="pilot-rosterFilterMeta">

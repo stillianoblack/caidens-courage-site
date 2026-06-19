@@ -12,6 +12,7 @@ import {
   type ParentConnectionStatus,
 } from './studentPinService';
 import { buildFamilyClaimUrl } from './familyClaimCode';
+import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type CampChildOnboardingInput = {
   childFirstName: string;
@@ -333,6 +334,17 @@ export async function createCampChildWithOptionalParent(
         }
 
         const familyClaimUrl = familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : undefined;
+        void queueWelcomeEmail({
+          parentEmail,
+          parentFirstName,
+          familyOrProgramName: campProgramCode,
+          familyAccessCode: familyClaimCode,
+          childName: displayName,
+          studentPin,
+          loginUrl: undefined,
+          relatedStudentId: participantId,
+          relatedProgramId: campProgramCode,
+        });
 
         return {
           success: true,

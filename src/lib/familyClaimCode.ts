@@ -28,10 +28,10 @@ export function buildStudentLoginInstructions(input: {
   origin?: string;
 }): string {
   return [
-    `${input.studentName}'s login`,
-    `Program: ${input.programName} (${input.programCode})`,
-    `PIN: ${input.pin}`,
-    `Open: ${buildStudentLoginUrl(input.origin)}`,
-    'Enter program code + PIN to start.',
+    `Student: ${input.studentName}`,
+    `Program: ${input.programName}`,
+    `Program Code: ${input.programCode}`,
+    `Student PIN: ${input.pin}`,
+    `Login Link: ${buildStudentLoginUrl(input.origin)}`,
   ].join('\n');
 }

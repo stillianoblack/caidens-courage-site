@@ -23,6 +23,16 @@ type PilotStudentDetailDrawerProps = {
   assessmentResults: LocalAssessmentV2Record[];
   moduleResults: LocalModuleResultRecord[];
   programCode?: string;
+  hasPin?: boolean;
+  familyClaimCode?: string | null;
+  familyClaimUrl?: string | null;
+  oneTimePin?: string | null;
+  onRevealPin?: () => void;
+  onCopyPin?: () => void;
+  onResetPin?: () => void;
+  onCopyLoginInstructions?: () => void;
+  onCopyClaimLink?: () => void;
+  pinActionLoading?: boolean;
 };
 
 function formatDate(iso: string | null): string {
@@ -43,6 +53,16 @@ export default function PilotStudentDetailDrawer({
   assessmentResults,
   moduleResults,
   programCode,
+  hasPin = false,
+  familyClaimCode,
+  familyClaimUrl,
+  oneTimePin,
+  onRevealPin,
+  onCopyPin,
+  onResetPin,
+  onCopyLoginInstructions,
+  onCopyClaimLink,
+  pinActionLoading = false,
 }: PilotStudentDetailDrawerProps) {
   const snapshot = useMemo(() => {
     if (!participantId) return null;
@@ -67,7 +87,7 @@ export default function PilotStudentDetailDrawer({
           <h2 id="pilot-student-drawer-title" className="pilot-drawerTitle">
             {snapshot.childName}
           </h2>
-          <p className="pilot-drawerSubtitle">Student progress summary</p>
+          <p className="pilot-drawerSubtitle">Student access and progress summary</p>
         </div>
         <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
           ×
@@ -81,6 +101,90 @@ export default function PilotStudentDetailDrawer({
             <span className="pilot-drawerBadge">Certificate Ready</span>
           ) : null}
         </div>
+
+        <section className="pilot-studentAccessPanel" aria-labelledby="pilot-student-access-title">
+          <div className="pilot-studentAccessHead">
+            <div>
+              <h3 id="pilot-student-access-title" className="pilot-studentAccessTitle">
+                Student Access
+              </h3>
+              <p className="pilot-studentAccessCopy">
+                PINs are masked after creation. Reset to show a new PIN once.
+              </p>
+            </div>
+            <span className="pilot-studentAccessStatus">{hasPin ? 'PIN ready' : 'Missing PIN'}</span>
+          </div>
+
+          <dl className="pilot-drawerGrid pilot-studentAccessGrid">
+            <div>
+              <dt>Student PIN</dt>
+              <dd>
+                {oneTimePin ? (
+                  <span className="pilot-studentPinReveal">
+                    New PIN for {snapshot.childName}: <strong>{oneTimePin}</strong>. This is shown once.
+                  </span>
+                ) : hasPin ? (
+                  <span className="pilot-resultsMono">••••</span>
+                ) : (
+                  'Not generated'
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt>Family Claim Code</dt>
+              <dd>
+                <CopyableCompactValue value={familyClaimCode || snapshot.familyAccessCode} type="code" />
+              </dd>
+            </div>
+            <div>
+              <dt>Family Claim Link</dt>
+              <dd>
+                {familyClaimUrl ? (
+                  <CopyableCompactValue value={familyClaimUrl} type="text" label="Claim link" />
+                ) : (
+                  '—'
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="pilot-studentAccessActions">
+            {oneTimePin ? (
+              <button type="button" className="pilot-rosterLaunchBtn" onClick={onCopyPin}>
+                Copy PIN
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="pilot-rosterLaunchBtn"
+                onClick={onRevealPin}
+                disabled
+                title="Raw PINs are not stored. Reset PIN to reveal a new one."
+              >
+                Reveal PIN
+              </button>
+            )}
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onResetPin}
+              disabled={pinActionLoading}
+            >
+              {pinActionLoading ? 'Resetting…' : 'Reset PIN'}
+            </button>
+            <button type="button" className="pilot-rosterLaunchBtn" onClick={onCopyLoginInstructions}>
+              Copy Login Instructions
+            </button>
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onCopyClaimLink}
+              disabled={!familyClaimUrl}
+            >
+              Copy Family Claim Link
+            </button>
+          </div>
+        </section>
 
         <dl className="pilot-drawerGrid">
           <div>
@@ -145,6 +249,10 @@ export default function PilotStudentDetailDrawer({
           <div>
             <dt>Modules Completed</dt>
             <dd>{snapshot.modulesCompleted}</dd>
+          </div>
+          <div>
+            <dt>Current Week</dt>
+            <dd>Week {Math.max(1, snapshot.modulesCompleted || 1)}</dd>
           </div>
           <div>
             <dt>Last Assessment</dt>

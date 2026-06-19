@@ -3460,6 +3460,57 @@ a.pilot-overviewMiniCard:hover {
   cursor: not-allowed;
 }
 
+.pilot-rosterLauncherCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(14rem, 0.7fr) auto;
+  align-items: end;
+  gap: 1rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 0.875rem;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  box-shadow: 0 14px 36px -30px rgba(36, 62, 112, 0.45);
+}
+
+.pilot-rosterLauncherCard h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-rosterLauncherCard p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-rosterLauncherField {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(36, 62, 112, 0.78);
+}
+
+.pilot-rosterLauncherField select {
+  min-height: 2.35rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(36, 62, 112, 0.2);
+  background: #fff;
+  color: var(--pilot-navy-deep);
+  font-weight: 700;
+}
+
+.pilot-rosterLauncherActions,
+.pilot-studentAccessActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .pilot-rosterSuccess {
   margin: 0 0 0.75rem;
   padding: 0.65rem 0.75rem;
@@ -3921,4 +3972,56 @@ a.pilot-overviewMiniCard:hover {
 
 .pilot-drawerGrid dd .pilot-copyChip {
   margin-top: 0.15rem;
+}
+
+.pilot-studentAccessPanel {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0 0 1rem;
+  padding: 0.95rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 0.875rem;
+  background: #f8fbff;
+}
+
+.pilot-studentAccessHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pilot-studentAccessTitle {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--pilot-navy-deep);
+}
+
+.pilot-studentAccessCopy {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.pilot-studentAccessStatus {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  color: var(--pilot-navy);
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pilot-studentPinReveal {
+  display: inline-block;
+  color: #166534;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .pilot-rosterLauncherCard {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-06-19T23:19:37.810Z",
+  "configured": false,
+  "error": "Supabase env missing. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+  "summary": {
+    "welcomeEmailsSent": 0,
+    "notificationEmailsSent": 0,
+    "failedEmails": 0,
+    "skippedEmails": 0,
+    "usersWithNotificationsEnabledButNoEmailsSent": 0
+  },
+  "failed": [],
+  "skipped": []
+}

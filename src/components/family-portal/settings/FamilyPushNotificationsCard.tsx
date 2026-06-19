@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  FAMILY_NOTIFICATION_PREFERENCES,
+  readFamilyNotificationPreferences,
+  writeFamilyNotificationPreferences,
+  type FamilyNotificationPreferenceId,
+  type FamilyNotificationPreferencesState,
+} from '../../../lib/familyNotificationPreferences';
+import {
   disablePushReminders,
   enablePushReminders,
   isPushSupportedInBrowser,
@@ -20,6 +27,10 @@ export default function FamilyPushNotificationsCard() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [preferences, setPreferences] = useState<FamilyNotificationPreferencesState>(() =>
+    readFamilyNotificationPreferences(),
+  );
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -67,12 +78,36 @@ export default function FamilyPushNotificationsCard() {
     status.status !== 'not_configured' &&
     status.permission !== 'denied';
 
+  const handleToggle = useCallback((id: FamilyNotificationPreferenceId) => {
+    setSaved(false);
+    setPreferences((current) => ({ ...current, [id]: !current[id] }));
+  }, []);
+
+  const handleSavePreferences = useCallback(() => {
+    writeFamilyNotificationPreferences(preferences);
+    setSaved(true);
+  }, [preferences]);
+
   return (
     <div className="family-settingsPushCard">
       <p className="family-settingsPushLead">
-        Get notified when your child completes a weekly mission, earns a reward, or when a shared
-        device session pauses or ends. We never send reminders directly to kids.
+        Choose which updates you want to receive. We never send parent reminders directly to kids.
       </p>
+      <p className="family-settingsPushCopy">
+        These preferences are for parent/guardian notifications only.
+      </p>
+      <div className="family-settingsNotifications">
+        {FAMILY_NOTIFICATION_PREFERENCES.map((preference) => (
+          <label key={preference.id} className="family-settingsToggleRow">
+            <input
+              type="checkbox"
+              checked={preferences[preference.id]}
+              onChange={() => handleToggle(preference.id)}
+            />
+            <span>{preference.label}</span>
+          </label>
+        ))}
+      </div>
       <dl className="family-settingsGrid">
         <div className="family-settingsRow">
           <dt>Status</dt>
@@ -91,6 +126,13 @@ export default function FamilyPushNotificationsCard() {
       </dl>
       {message ? <p className="family-settingsPushMessage">{message}</p> : null}
       <div className="family-settingsActions">
+        <button
+          type="button"
+          className="family-settingsPrimaryBtn"
+          onClick={handleSavePreferences}
+        >
+          Save Preferences
+        </button>
         {!remindersEnabled ? (
           <button
             type="button"
@@ -111,6 +153,7 @@ export default function FamilyPushNotificationsCard() {
           </button>
         )}
       </div>
+      {saved ? <p className="family-settingsPushMessage">Preferences saved.</p> : null}
     </div>
   );
 }
