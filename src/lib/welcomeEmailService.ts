@@ -39,6 +39,10 @@ export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
   ].join('\n');
 }
 
+export function buildWelcomePortalLink(input: WelcomeEmailInput): string {
+  return input.loginUrl || `${window.location.origin}/portal`;
+}
+
 export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<void> {
   const recipientEmail = input.parentEmail?.trim();
   if (!recipientEmail) return;
@@ -48,6 +52,11 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<void>
     emailType: 'welcome',
     subject: "Welcome to Caiden's Courage",
     body: buildWelcomeEmailBody(input),
+    childName: input.childName,
+    studentName: input.childName,
+    programName: input.familyOrProgramName,
+    familyAccessCode: input.familyAccessCode ?? null,
+    portalLink: buildWelcomePortalLink(input),
     relatedStudentId: input.relatedStudentId ?? null,
     relatedFamilyId: input.relatedFamilyId ?? null,
     relatedProgramId: input.relatedProgramId ?? null,
@@ -60,14 +69,14 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<void>
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      console.info('[WELCOME_EMAIL_SKIPPED]', {
+      console.info('[WELCOME_EMAIL_FAILED]', {
         recipient_email: recipientEmail,
         related_student_id: input.relatedStudentId ?? null,
         reason: 'send_function_failed',
       });
     }
   } catch {
-    console.info('[WELCOME_EMAIL_SKIPPED]', {
+    console.info('[WELCOME_EMAIL_FAILED]', {
       recipient_email: recipientEmail,
       related_student_id: input.relatedStudentId ?? null,
       reason: 'send_function_unavailable',

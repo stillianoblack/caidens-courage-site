@@ -33,6 +33,7 @@ async function assignUniquePin(supabase, programCode, participantId, maxAttempts
       .update({
         student_pin_hash: hash,
         student_pin_fingerprint: fingerprint,
+        student_pin_reveal_value: pin,
         student_pin_enabled: true,
         student_pin_last_rotated_at: now,
       })

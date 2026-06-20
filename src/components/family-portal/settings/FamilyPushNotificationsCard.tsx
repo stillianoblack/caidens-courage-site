@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FAMILY_NOTIFICATION_PREFERENCES,
   readFamilyNotificationPreferences,
@@ -6,77 +6,20 @@ import {
   type FamilyNotificationPreferenceId,
   type FamilyNotificationPreferencesState,
 } from '../../../lib/familyNotificationPreferences';
-import {
-  disablePushReminders,
-  enablePushReminders,
-  isPushSupportedInBrowser,
-  resolvePushReminderStatus,
-  type PushReminderStatusResult,
-} from '../../../lib/pushSubscriptionService';
 
-const INITIAL_STATUS: PushReminderStatusResult = {
-  status: 'off',
-  label: 'Checking…',
-  permission: 'unsupported',
-  subscribed: false,
-};
+function emailNotificationsConfigured(): boolean {
+  return (
+    process.env.REACT_APP_EMAIL_NOTIFICATIONS_ACTIVE === 'true' ||
+    process.env.REACT_APP_RESEND_CONFIGURED === 'true'
+  );
+}
 
 export default function FamilyPushNotificationsCard() {
-  const supported = isPushSupportedInBrowser();
-  const [status, setStatus] = useState<PushReminderStatusResult>(INITIAL_STATUS);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [preferences, setPreferences] = useState<FamilyNotificationPreferencesState>(() =>
     readFamilyNotificationPreferences(),
   );
-
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    const next = await resolvePushReminderStatus();
-    setStatus(next);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  const handleEnable = useCallback(async () => {
-    setSubmitting(true);
-    setMessage(null);
-    const result = await enablePushReminders();
-    setSubmitting(false);
-    if (!result.ok) {
-      setMessage(result.message ?? 'Could not enable reminders.');
-      await refresh();
-      return;
-    }
-    setMessage('Reminders enabled — we will notify you about mission progress and session updates.');
-    await refresh();
-  }, [refresh]);
-
-  const handleDisable = useCallback(async () => {
-    setSubmitting(true);
-    setMessage(null);
-    const result = await disablePushReminders();
-    setSubmitting(false);
-    if (!result.ok) {
-      setMessage(result.message ?? 'Could not disable reminders.');
-      return;
-    }
-    setMessage('Reminders off.');
-    await refresh();
-  }, [refresh]);
-
-  const statusLabel = loading ? 'Checking…' : status.label;
-  const remindersEnabled = status.status === 'enabled';
-  const canEnable =
-    supported &&
-    status.status !== 'unavailable' &&
-    status.status !== 'not_configured' &&
-    status.permission !== 'denied';
+  const showEmailStatus = emailNotificationsConfigured();
 
   const handleToggle = useCallback((id: FamilyNotificationPreferenceId) => {
     setSaved(false);
@@ -108,23 +51,18 @@ export default function FamilyPushNotificationsCard() {
           </label>
         ))}
       </div>
-      <dl className="family-settingsGrid">
-        <div className="family-settingsRow">
-          <dt>Status</dt>
-          <dd>
-            <span
-              className={
-                remindersEnabled
-                  ? 'family-settingsPushStatus family-settingsPushStatus--on'
-                  : 'family-settingsPushStatus'
-              }
-            >
-              {statusLabel}
-            </span>
-          </dd>
-        </div>
-      </dl>
-      {message ? <p className="family-settingsPushMessage">{message}</p> : null}
+      {showEmailStatus ? (
+        <dl className="family-settingsGrid">
+          <div className="family-settingsRow">
+            <dt>Status</dt>
+            <dd>
+              <span className="family-settingsPushStatus family-settingsPushStatus--on">
+                Email notifications active
+              </span>
+            </dd>
+          </div>
+        </dl>
+      ) : null}
       <div className="family-settingsActions">
         <button
           type="button"
@@ -133,25 +71,6 @@ export default function FamilyPushNotificationsCard() {
         >
           Save Preferences
         </button>
-        {!remindersEnabled ? (
-          <button
-            type="button"
-            className="family-settingsPrimaryBtn"
-            disabled={!canEnable || submitting || loading}
-            onClick={() => void handleEnable()}
-          >
-            Enable reminders
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="family-settingsGhostBtn"
-            disabled={submitting}
-            onClick={() => void handleDisable()}
-          >
-            Disable reminders
-          </button>
-        )}
       </div>
       {saved ? <p className="family-settingsPushMessage">Preferences saved.</p> : null}
     </div>

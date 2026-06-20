@@ -11,7 +11,7 @@ import {
 } from '../../../lib/pilotOverviewInsights';
 import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
 import { buildStudentLoginInstructions } from '../../../lib/familyClaimCode';
-import { resetStudentPinViaFunction } from '../../../lib/studentPinService';
+import { resetStudentPinViaFunction, revealStudentPinViaFunction } from '../../../lib/studentPinService';
 import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
 import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
 import { kidShellAwareNavigate } from '../../../lib/kidShellNav';
@@ -41,6 +41,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [rosterLocked, setRosterLocked] = useState(() => isKidPlayRosterLocked());
   const [launchSessionLoadingId, setLaunchSessionLoadingId] = useState<string | null>(null);
+  const [pinActionLoadingId, setPinActionLoadingId] = useState<string | null>(null);
   const [launcherParticipantId, setLauncherParticipantId] = useState<string>('');
   const [movePrompt, setMovePrompt] = useState<{
     row: PilotRosterRow;
@@ -53,10 +54,18 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
   const handleCopyLoginInstructions = useCallback(
     async (row: PilotRosterRow) => {
-      const revealedPin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
+      let revealedPin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
       if (!revealedPin) {
-        showToast(`Reset or generate a PIN for ${row.childName} before copying login instructions.`, 'error');
-        return;
+        const result = await revealStudentPinViaFunction({
+          participantId: row.participantId,
+          programCode: row.campProgramCode,
+        });
+        if (!('pin' in result)) {
+          showToast(result.error, 'error');
+          return;
+        }
+        revealedPin = result.pin;
+        setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
       }
       const instructions = buildStudentLoginInstructions({
         studentName: row.childName,
@@ -92,10 +101,12 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
   const handleResetPin = useCallback(
     async (row: PilotRosterRow) => {
+      setPinActionLoadingId(row.participantId);
       const result = await resetStudentPinViaFunction({
         participantId: row.participantId,
         programCode: row.campProgramCode,
       });
+      setPinActionLoadingId(null);
       if (!('pin' in result)) {
         showToast(result.error, 'error');
         return;
@@ -105,6 +116,24 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       void refresh();
     },
     [refresh, showToast],
+  );
+
+  const handleRevealPin = useCallback(
+    async (row: PilotRosterRow) => {
+      setPinActionLoadingId(row.participantId);
+      const result = await revealStudentPinViaFunction({
+        participantId: row.participantId,
+        programCode: row.campProgramCode,
+      });
+      setPinActionLoadingId(null);
+      if (!('pin' in result)) {
+        showToast(result.error, 'error');
+        return;
+      }
+      setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
+      setDrawerParticipantId(row.participantId);
+    },
+    [showToast],
   );
 
   const displayRows = useMemo(
@@ -242,7 +271,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         <section className="pilot-rosterLauncherCard" aria-labelledby="student-session-launcher-title">
           <div>
             <h3 id="student-session-launcher-title">Student Session Launcher</h3>
-            <p>Select a student, launch Kid Shell, or copy login instructions after a PIN reset.</p>
+            <p>Select a student, launch Kid Shell, or copy login instructions.</p>
           </div>
           <label className="pilot-rosterLauncherField">
             <span>Select student</span>
@@ -300,7 +329,10 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       <PilotStudentDetailDrawer
         open={Boolean(drawerParticipantId)}
         participantId={drawerParticipantId}
-        onClose={() => setDrawerParticipantId(null)}
+        onClose={() => {
+          setDrawerParticipantId(null);
+          setPinReveal(null);
+        }}
         participants={participants}
         familyLinks={familyLinks}
         assessmentResults={assessmentResults}
@@ -310,16 +342,36 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         familyClaimCode={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimCode}
         familyClaimUrl={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimUrl}
         oneTimePin={pinReveal?.participantId === drawerParticipantId ? pinReveal.pin : null}
-        pinActionLoading={launchSessionLoadingId === drawerParticipantId}
+        pinActionLoading={pinActionLoadingId === drawerParticipantId}
         onResetPin={() => {
           const row = rows.find((item) => item.participantId === drawerParticipantId);
           if (row) void handleResetPin(row);
         }}
-        onRevealPin={() => undefined}
+        onRevealPin={() => {
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (row) void handleRevealPin(row);
+        }}
         onCopyPin={() => {
-          if (!pinReveal?.pin) return;
-          void navigator.clipboard.writeText(pinReveal.pin);
-          showToast('PIN copied.', 'success');
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (!row) return;
+          const copy = async () => {
+            let pin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
+            if (!pin) {
+              const result = await revealStudentPinViaFunction({
+                participantId: row.participantId,
+                programCode: row.campProgramCode,
+              });
+              if (!('pin' in result)) {
+                showToast(result.error, 'error');
+                return;
+              }
+              pin = result.pin;
+              setPinReveal({ participantId: row.participantId, childName: row.childName, pin });
+            }
+            await navigator.clipboard.writeText(pin);
+            showToast('PIN copied.', 'success');
+          };
+          void copy();
         }}
         onCopyLoginInstructions={() => {
           const row = rows.find((item) => item.participantId === drawerParticipantId);

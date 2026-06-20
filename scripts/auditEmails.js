@@ -13,13 +13,14 @@ function emptyReport(error) {
     error,
     summary: {
       welcomeEmailsSent: 0,
+      welcomeEmailsDelivered: 0,
       notificationEmailsSent: 0,
+      notificationEmailsDelivered: 0,
       failedEmails: 0,
-      skippedEmails: 0,
       usersWithNotificationsEnabledButNoEmailsSent: 0,
     },
     failed: [],
-    skipped: [],
+    delivered: [],
   };
 }
 
@@ -39,9 +40,10 @@ function writeReports(report) {
     '## Summary',
     '',
     `- Welcome emails sent: ${summary.welcomeEmailsSent || 0}`,
+    `- Welcome emails delivered: ${summary.welcomeEmailsDelivered || 0}`,
     `- Notification emails sent: ${summary.notificationEmailsSent || 0}`,
+    `- Notification emails delivered: ${summary.notificationEmailsDelivered || 0}`,
     `- Failed emails: ${summary.failedEmails || 0}`,
-    `- Skipped emails: ${summary.skippedEmails || 0}`,
     `- Users with notifications enabled but no emails sent: ${
       summary.usersWithNotificationsEnabledButNoEmailsSent || 0
     }`,
@@ -82,15 +84,20 @@ async function main() {
       welcomeEmailsSent: rows.filter(
         (row) => row.email_type === 'welcome' && row.status === 'sent',
       ).length,
+      welcomeEmailsDelivered: rows.filter(
+        (row) => row.email_type === 'welcome' && row.status === 'delivered',
+      ).length,
       notificationEmailsSent: rows.filter(
         (row) => row.email_type !== 'welcome' && row.status === 'sent',
       ).length,
+      notificationEmailsDelivered: rows.filter(
+        (row) => row.email_type !== 'welcome' && row.status === 'delivered',
+      ).length,
       failedEmails: rows.filter((row) => row.status === 'failed').length,
-      skippedEmails: rows.filter((row) => row.status === 'skipped').length,
       usersWithNotificationsEnabledButNoEmailsSent: 0,
     },
     failed: rows.filter((row) => row.status === 'failed'),
-    skipped: rows.filter((row) => row.status === 'skipped'),
+    delivered: rows.filter((row) => row.status === 'delivered'),
   });
 }
 

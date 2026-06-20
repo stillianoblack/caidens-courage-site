@@ -151,22 +151,22 @@ export default function PortalAccessForm({
               htmlFor={`${formId}-parent-email`}
               className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
             >
-              Parent/Guardian email
+              Parent / Guardian Email or Student PIN
             </label>
             <input
               id={`${formId}-parent-email`}
               name="parentEmail"
-              type="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="off"
               value={parentEmail}
               onChange={(event) => onParentEmailChange?.(event.target.value)}
-              placeholder="parent@email.com"
+              placeholder="Email or student PIN"
               className={`cc-portal-code-input mt-1.5 w-full rounded-xl border border-navy-200/80 bg-[#FAF9F7] font-medium text-navy-600 placeholder:text-navy-400/70 focus:border-golden-500 focus:outline-none focus:ring-2 focus:ring-golden-500/30 ${
                 isHero ? 'px-4 py-3.5 text-base' : 'px-3 py-2.5 text-sm'
               }`}
             />
             <p className="mt-1 text-xs text-navy-500/80">
-              Required for family access codes so we can show only your linked children.
+              Use parent email for adult access or a student PIN to continue the adventure.
             </p>
           </div>
 

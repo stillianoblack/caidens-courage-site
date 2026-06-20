@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { sendWelcomeEmail } = require('./_lib/emailProvider');
 
 function json(statusCode, body) {
   return {
@@ -23,7 +24,7 @@ async function logEmailAttempt(payload, status, detail = {}) {
     return { logged: false, reason: 'supabase_env_missing' };
   }
 
-  const { error } = await supabase.from('email_delivery_logs').insert({
+  const record = {
     recipient_email: payload.recipientEmail,
     email_type: payload.emailType || 'welcome',
     related_student_id: payload.relatedStudentId || null,
@@ -33,10 +34,37 @@ async function logEmailAttempt(payload, status, detail = {}) {
     provider_message_id: detail.providerMessageId || null,
     error_message: detail.errorMessage || null,
     sent_at: status === 'sent' ? new Date().toISOString() : null,
-  });
+    delivered_at: status === 'delivered' ? new Date().toISOString() : null,
+  };
+
+  const { data, error } = await supabase
+    .from('email_delivery_logs')
+    .insert(record)
+    .select('id')
+    .maybeSingle();
 
   if (error) return { logged: false, reason: error.message };
-  return { logged: true };
+  return { logged: true, id: data?.id || null };
+}
+
+async function updateEmailAttempt(logId, status, detail = {}) {
+  const supabase = getSupabase();
+  if (!supabase || !logId) {
+    return { logged: false, reason: supabase ? 'missing_log_id' : 'supabase_env_missing' };
+  }
+
+  const now = new Date().toISOString();
+  const patch = {
+    status,
+    provider_message_id: detail.providerMessageId || null,
+    error_message: detail.errorMessage || null,
+    sent_at: status === 'sent' ? now : null,
+    delivered_at: status === 'delivered' ? now : null,
+  };
+
+  const { error } = await supabase.from('email_delivery_logs').update(patch).eq('id', logId);
+  if (error) return { logged: false, reason: error.message };
+  return { logged: true, id: logId };
 }
 
 exports.handler = async (event) => {
@@ -55,25 +83,39 @@ exports.handler = async (event) => {
     return json(400, { success: false, error: 'Missing email payload.' });
   }
 
-  if (!process.env.RESEND_API_KEY && !process.env.EMAIL_PROVIDER_API_KEY) {
-    const log = await logEmailAttempt(payload, 'skipped', {
-      errorMessage: 'Email provider not configured.',
+  const queuedLog = await logEmailAttempt(payload, 'queued');
+  if (!process.env.RESEND_API_KEY) {
+    const log = await updateEmailAttempt(queuedLog.id, 'failed', {
+      errorMessage: 'RESEND_API_KEY is not configured.',
     });
-    return json(200, {
-      success: true,
-      status: 'skipped',
+    return json(503, {
+      success: false,
+      status: 'failed',
       log,
-      message: 'Welcome email logged as skipped because no provider is configured.',
+      error: 'Email delivery is not configured.',
     });
   }
 
-  const log = await logEmailAttempt(payload, 'skipped', {
-    errorMessage: 'Provider adapter not implemented.',
+  const result = await sendWelcomeEmail(payload);
+  if (!result.success) {
+    const log = await updateEmailAttempt(queuedLog.id, 'failed', {
+      errorMessage: result.error,
+    });
+    return json(502, {
+      success: false,
+      status: 'failed',
+      log,
+      error: result.error,
+    });
+  }
+
+  const log = await updateEmailAttempt(queuedLog.id, 'sent', {
+    providerMessageId: result.providerMessageId,
   });
   return json(200, {
     success: true,
-    status: 'skipped',
+    status: 'sent',
+    providerMessageId: result.providerMessageId,
     log,
-    message: 'Welcome email logged as skipped until provider adapter is implemented.',
   });
 };

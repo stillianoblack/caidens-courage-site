@@ -109,7 +109,7 @@ export default function PilotStudentDetailDrawer({
                 Student Access
               </h3>
               <p className="pilot-studentAccessCopy">
-                PINs are masked after creation. Reset to show a new PIN once.
+                Reveal, copy, or reset the student PIN. Reset only when an adult wants a new PIN.
               </p>
             </div>
             <span className="pilot-studentAccessStatus">{hasPin ? 'PIN ready' : 'Missing PIN'}</span>
@@ -121,7 +121,7 @@ export default function PilotStudentDetailDrawer({
               <dd>
                 {oneTimePin ? (
                   <span className="pilot-studentPinReveal">
-                    New PIN for {snapshot.childName}: <strong>{oneTimePin}</strong>. This is shown once.
+                    PIN for {snapshot.childName}: <strong>{oneTimePin}</strong>
                   </span>
                 ) : hasPin ? (
                   <span className="pilot-resultsMono">••••</span>
@@ -149,21 +149,22 @@ export default function PilotStudentDetailDrawer({
           </dl>
 
           <div className="pilot-studentAccessActions">
-            {oneTimePin ? (
-              <button type="button" className="pilot-rosterLaunchBtn" onClick={onCopyPin}>
-                Copy PIN
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="pilot-rosterLaunchBtn"
-                onClick={onRevealPin}
-                disabled
-                title="Raw PINs are not stored. Reset PIN to reveal a new one."
-              >
-                Reveal PIN
-              </button>
-            )}
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onRevealPin}
+              disabled={!hasPin || pinActionLoading}
+            >
+              {pinActionLoading ? 'Revealing…' : 'Reveal PIN'}
+            </button>
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onCopyPin}
+              disabled={!hasPin || pinActionLoading}
+            >
+              Copy PIN
+            </button>
             <button
               type="button"
               className="pilot-rosterLaunchBtn"

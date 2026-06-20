@@ -29,10 +29,13 @@ import { logPortalRedirect } from '../lib/portalDebug';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
+import { verifyStudentPinLogin } from '../lib/studentPinService';
+import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
 
 const BASELINE_RESULTS_CODES = new Set(['results', 'result']);
+const STUDENT_PIN_RE = /^\d{4,8}$/;
 
 function isBlueRibbonPilotCode(raw: string): boolean {
   const normalized = raw.trim().toLowerCase().replace(/\s+/g, '');
@@ -101,6 +104,39 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
                   : 'Enter the parent/guardian email used at camp registration.',
               );
               setSubmitting(false);
+              return;
+            }
+
+            if (STUDENT_PIN_RE.test(email)) {
+              const verified = await verifyStudentPinLogin({
+                programCode: program.programCode,
+                pin: email,
+              });
+              if (!verified.success) {
+                setError(verified.error);
+                setSubmitting(false);
+                return;
+              }
+
+              const launch = await launchStudentPinKidPlay({
+                participantId: verified.participantId,
+                programCode: verified.programCode,
+                displayName: verified.displayName,
+                organizationId: program.id,
+              });
+              if (launch.kind === 'error') {
+                setError(launch.message);
+                setSubmitting(false);
+                return;
+              }
+
+              setAccessCode('');
+              setParentEmail('');
+              setParentLastName('');
+              setNeedsLastNameConfirm(false);
+              navigateToPortal(launch.path, 'student-pin-portal-login');
+              setSubmitting(false);
+              onUnlock?.();
               return;
             }
 

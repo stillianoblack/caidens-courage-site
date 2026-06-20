@@ -91,6 +91,7 @@ export async function assignStudentPinToParticipant(input: {
         .update({
           student_pin_hash: assignment.hash,
           student_pin_fingerprint: assignment.fingerprint,
+          student_pin_reveal_value: assignment.pin,
           student_pin_enabled: true,
           student_pin_last_rotated_at: now,
         })
@@ -195,6 +196,31 @@ export async function resetStudentPinViaFunction(input: {
     return { pin: payload.pin };
   } catch {
     return assignStudentPinToParticipant(input);
+  }
+}
+
+export async function revealStudentPinViaFunction(input: {
+  participantId: string;
+  programCode: string;
+}): Promise<{ pin: string } | { error: string }> {
+  try {
+    const response = await fetch('/.netlify/functions/reveal-student-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        participantId: input.participantId.trim(),
+        programCode: input.programCode.trim(),
+      }),
+    });
+
+    const payload = (await response.json()) as { success?: boolean; pin?: string; error?: string };
+    if (!response.ok || !payload.success || !payload.pin) {
+      return { error: payload.error || 'Could not reveal PIN.' };
+    }
+
+    return { pin: payload.pin };
+  } catch {
+    return { error: 'Could not reveal PIN. Try again.' };
   }
 }
 
@@ -307,6 +333,7 @@ export async function fetchStudentAccessFieldsByIds(
 export type StudentPinBootstrapPayload = {
   student_pin_hash: string;
   student_pin_fingerprint: string;
+  student_pin_reveal_value: string;
   student_pin_enabled: boolean;
   student_pin_last_rotated_at: string;
   family_claim_code?: string;
@@ -332,6 +359,7 @@ export async function buildStudentPinBootstrapFields(input: {
     fields: {
       student_pin_hash: assignment.hash,
       student_pin_fingerprint: assignment.fingerprint,
+      student_pin_reveal_value: assignment.pin,
       student_pin_enabled: true,
       student_pin_last_rotated_at: now,
       family_claim_code: claimCode,

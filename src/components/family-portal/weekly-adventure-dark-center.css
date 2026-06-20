@@ -82,6 +82,17 @@
   display: none;
 }
 
+.family-panel--darkAdventureCenter .weeklyJourneyMonthHeader,
+.family-panel--darkAdventureCenter .weeklyJourneyProgressLine,
+.family-panel--darkAdventureCenter .weeklyJourneyMonthProgressTrack,
+.family-panel--darkAdventureCenter .weeklyJourneyMonthProgressCopy,
+.family-panel--kidPlayShellWorld .weeklyJourneyMonthHeader,
+.family-panel--kidPlayShellWorld .weeklyJourneyProgressLine,
+.family-panel--kidPlayShellWorld .weeklyJourneyMonthProgressTrack,
+.family-panel--kidPlayShellWorld .weeklyJourneyMonthProgressCopy {
+  display: none;
+}
+
 .family-panel--darkAdventureCenter .courageHubControls--mobileBar {
   background: rgba(5, 10, 22, 0.72);
   border-color: rgba(229, 192, 106, 0.18);
