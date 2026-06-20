@@ -1,5 +1,6 @@
 import React from 'react';
 import KidsAdventureIcon from './KidsAdventureIcon';
+import CharacterArtImage from './CharacterArtImage';
 import type { CharacterDiscoveryCatalogEntry } from '../../lib/characterDiscoveryService';
 import { resolveCharacterThemeId, themeDataAttributes } from './characterThemes';
 
@@ -11,6 +12,7 @@ export default function CharacterDiscoveryCard({ entry }: CharacterDiscoveryCard
   const { definition, earned } = entry;
   const themeId = resolveCharacterThemeId(definition.characterId);
   const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
+  const unlockLabel = earned ? 'Discovered' : `Unlock: ${definition.discoveryTypeLabel}`;
 
   const className = [
     'characterDiscoveryCard',
@@ -22,12 +24,11 @@ export default function CharacterDiscoveryCard({ entry }: CharacterDiscoveryCard
   return (
     <article className={className} {...themeAttrs}>
       <div className="characterDiscoveryCardArtWrap" aria-hidden="true">
-        <img
+        <CharacterArtImage
+          characterId={definition.characterId}
           src={definition.imageSrc}
-          alt=""
-          className="characterDiscoveryCardArt"
-          loading="lazy"
-          decoding="async"
+          variant="discovery"
+          locked={!earned}
         />
         {!earned ? (
           <span className="characterDiscoveryCardLock">
@@ -41,7 +42,7 @@ export default function CharacterDiscoveryCard({ entry }: CharacterDiscoveryCard
       </div>
       <div className="characterDiscoveryCardLabels">
         <p className="characterDiscoveryCardName">{definition.characterLabel}</p>
-        <p className="characterDiscoveryCardType">{definition.discoveryTypeLabel}</p>
+        <p className="characterDiscoveryCardType">{unlockLabel}</p>
       </div>
     </article>
   );

@@ -19,10 +19,10 @@ import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { getPortalRoute, resolvePortalKidsBasePath } from '../../lib/portalGamePaths';
 import { resolveFamilyBasePath } from '../../lib/familyPortalNav';
 import {
-  CHARACTER_HOTSPOT_IMAGES,
   resolveCharacterThemeId,
   type CharacterThemeId,
 } from '../../design-system/kids-adventure/characterThemes';
+import CharacterArtImage from '../../design-system/kids-adventure/CharacterArtImage';
 import './kid-play-character-collection.css';
 import './kid-play-character-sheet.css';
 
@@ -163,7 +163,6 @@ export default function KidPlayCharacterCollectionPanel() {
               const isB4 = characterId === 'b4';
               const locked = !baselineComplete && !isB4;
               const isComplete = progress.statusTone === 'complete';
-              const heroSrc = themeId ? CHARACTER_HOTSPOT_IMAGES[themeId] : null;
 
               const completionLabel =
                 progress.completedCount > 0
@@ -186,19 +185,12 @@ export default function KidPlayCharacterCollectionPanel() {
                   role="listitem"
                 >
                   <div className="kidPlayCharacterCollectionArtWrap">
-                    {heroSrc ? (
-                      <img
-                        src={heroSrc}
-                        alt=""
-                        className="kidPlayCharacterCollectionArt"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <span className="kidPlayCharacterCollectionArtFallback" aria-hidden="true">
-                        {card.title.charAt(0)}
-                      </span>
-                    )}
+                    <CharacterArtImage
+                      characterId={characterId}
+                      variant="discovery"
+                      locked={locked}
+                      className="kidPlayCharacterCollectionArt"
+                    />
                     {isComplete ? (
                       <span
                         className="kidPlayCharacterCollectionCompleteMark"

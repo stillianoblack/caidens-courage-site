@@ -3799,6 +3799,26 @@ a.pilot-overviewMiniCard:hover {
   max-width: 9rem;
 }
 
+.pilot-adminTableWrap--roster {
+  overflow-x: visible;
+}
+
+.pilot-adminContactCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.pilot-adminCellContact {
+  min-width: 0;
+  max-width: 11rem;
+}
+
+.pilot-adminCellMuted {
+  color: var(--pilot-muted, #64748b);
+}
+
 .pilot-adminTableWrap {
   border-radius: 1rem;
   border: 1px solid var(--pilot-border);

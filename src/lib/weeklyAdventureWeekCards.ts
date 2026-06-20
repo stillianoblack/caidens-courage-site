@@ -18,6 +18,7 @@ import {
   resolveWeeklyAdventureThumbnail,
   type WeeklyAdventureThumbnailSource,
 } from './weeklyAdventureThumbnail';
+import { isKidShellDisplayImageUrl } from './kidShellDisplayImages';
 import {
   WEEKLY_VIEW_EXPLORE_VALUE,
   WEEKLY_VIEW_PARAM,
@@ -242,11 +243,17 @@ export function buildJourneyWeeklyAdventureCards(input: {
       Boolean(input.adminPreview),
       hasWeekProgress,
     );
-    const thumbnailResolution = resolveWeeklyAdventureThumbnail({
-      cmsModule,
-      weekNumber,
-      title: resolveJourneyWeekTitle(cmsModule, trailWeek, weekNumber),
-    });
+    const comicThumbnailUrl = resolveAdventureComicThumbnailUrl(cmsModule, weekNumber);
+    const thumbnailResolution = comicThumbnailUrl
+      ? {
+          url: comicThumbnailUrl,
+          source: 'cms_comic_thumbnail' as const,
+        }
+      : resolveWeeklyAdventureThumbnail({
+          cmsModule,
+          weekNumber,
+          title: resolveJourneyWeekTitle(cmsModule, trailWeek, weekNumber),
+        });
     logWeeklyAdventureThumbnailSource({
       weekNumber,
       title: resolveJourneyWeekTitle(cmsModule, trailWeek, weekNumber),
@@ -276,7 +283,9 @@ export function buildJourneyWeeklyAdventureCards(input: {
       weekNumber,
       title: resolveJourneyWeekTitle(cmsModule, trailWeek, weekNumber),
       selFocus: resolveWeeklyCardSelFocus(cmsModule, trailWeek.selFocus),
-      thumbnailUrl: thumbnailResolution.url,
+      thumbnailUrl: isKidShellDisplayImageUrl(thumbnailResolution.url)
+        ? thumbnailResolution.url
+        : null,
       thumbnailSource: thumbnailResolution.source,
       statusLabel: resolveWeekStatusLabel(
         trailWeek,

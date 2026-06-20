@@ -1,0 +1,76 @@
+.characterArtImage {
+  display: block;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.characterArtImage--token {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(30vh, 12.5rem);
+  filter: drop-shadow(0 8px 16px rgba(15, 10, 35, 0.45));
+}
+
+.characterArtImage--thumb {
+  width: 100%;
+  height: 100%;
+  object-position: center center;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+.characterArtImage--discovery {
+  width: 100%;
+  height: 100%;
+  object-position: center bottom;
+  filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.16));
+}
+
+.characterArtImage--locked {
+  filter: grayscale(1) brightness(0.88) contrast(0.95);
+  opacity: 0.82;
+}
+
+.characterArtImageSilhouette {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 0.65rem;
+  background: linear-gradient(155deg, rgba(15, 23, 42, 0.94) 0%, rgba(7, 11, 20, 0.98) 100%);
+  border: 1px solid rgba(51, 65, 85, 0.42);
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.characterArtImage--caiden .characterArtImageSilhouette {
+  background: linear-gradient(155deg, rgba(146, 64, 14, 0.35) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(251, 191, 36, 0.35);
+  color: #fde68a;
+}
+
+.characterArtImage--miranda .characterArtImageSilhouette {
+  background: linear-gradient(155deg, rgba(91, 33, 182, 0.35) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #ddd6fe;
+}
+
+.characterArtImage--zeke .characterArtImageSilhouette {
+  background: linear-gradient(155deg, rgba(194, 65, 12, 0.35) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(251, 146, 60, 0.35);
+  color: #fed7aa;
+}
+
+.characterArtImage--charlie .characterArtImageSilhouette {
+  background: linear-gradient(155deg, rgba(21, 128, 61, 0.35) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: #bbf7d0;
+}
+
+.characterArtImage--b4 .characterArtImageSilhouette {
+  background: linear-gradient(155deg, rgba(3, 105, 161, 0.35) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #bae6fd;
+}

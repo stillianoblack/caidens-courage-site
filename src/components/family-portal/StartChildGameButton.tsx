@@ -1,10 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { kidPlaySessionStartPath } from '../../config/courageRoutes';
-import { resolveFamilyKidPlayLaunch } from '../../lib/familyKidPlayLaunch';
-import { setKidPlayFamilySoftLocked } from '../../lib/kidPlayFamilySoftLock';
-import { kidShellAwareNavigate } from '../../lib/kidShellNav';
-import { writeKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
+import { launchFamilyKidPlay } from '../../lib/launchFamilyKidPlay';
 import { useToast } from '../portal-design-system/ToastProvider';
 import './start-child-game-button.css';
 
@@ -30,17 +26,14 @@ export default function StartChildGameButton({
 
     setLoading(true);
     try {
-      const result = await resolveFamilyKidPlayLaunch({ childId });
-      if (result.kind === 'error') {
-        showToast(result.message, 'error');
-        return;
-      }
-
-      setKidPlayFamilySoftLocked(false);
-      writeKidPlayFamilyReturnBase(location.pathname);
-      kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id), {
-        state: { fromFamilyPortal: location.pathname },
+      const result = await launchFamilyKidPlay({
+        childId,
+        returnPath: location.pathname,
+        navigate,
       });
+      if (!result.ok) {
+        showToast(result.message, 'error');
+      }
     } finally {
       setLoading(false);
     }

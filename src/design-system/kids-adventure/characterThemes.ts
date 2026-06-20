@@ -93,13 +93,22 @@ export function themeDataAttributes(themeId: CharacterThemeId): Record<string, s
   return { 'data-kid-theme': themeId };
 }
 
-/** Transparent character art for cinematic card backgrounds (mobile). */
+/** Transparent character art for cinematic map hotspots. */
 export const CHARACTER_HOTSPOT_IMAGES: Record<CharacterThemeId, string> = {
   caiden: '/images/caidenscourage/Game-Hub/characters/caiden-hotspot.webp',
   miranda: '/images/caidenscourage/Game-Hub/characters/miranda-hotspot.webp',
   zeke: '/images/caidenscourage/Game-Hub/characters/zeke-hotspot.webp',
   charlie: '/images/caidenscourage/Game-Hub/characters/charlie-hotspot.webp',
   b4: '/images/caidenscourage/Game-Hub/characters/b4-hotspot.webp',
+};
+
+/** Comic/game portrait icons for mission cards and list rows. */
+export const CHARACTER_COMIC_ICONS: Record<CharacterThemeId, string> = {
+  caiden: '/images/characters/caiden_photo_icon_game.webp',
+  miranda: '/images/characters/miranda_photo_icon_game.webp',
+  zeke: '/images/characters/zeke_photo_icon_game.webp',
+  charlie: '/images/characters/charlieperk_photo_icon_game.webp',
+  b4: '/images/characters/b-4_photo_icon_game.webp',
 };
 
 /** Solid collectible card fills keyed by character. */
@@ -114,4 +123,73 @@ export const CHARACTER_COLLECTIBLE_SOLID: Record<CharacterThemeId, string> = {
 export function resolveHotspotImage(themeId: CharacterThemeId | null): string | null {
   if (!themeId) return null;
   return CHARACTER_HOTSPOT_IMAGES[themeId] ?? null;
+}
+
+const UNUSABLE_CHARACTER_IMAGE_MARKERS = [
+  'focus-flame-mark',
+  'focus-flame.svg',
+  'focus-flame-badge',
+  'generic-badge',
+];
+
+/** Reject empty URLs, logo placeholders, and other non-character artwork. */
+export function isUnusableCharacterImageUrl(url: string | null | undefined): boolean {
+  const trimmed = url?.trim() ?? '';
+  if (!trimmed) return true;
+  const lower = trimmed.toLowerCase();
+  return UNUSABLE_CHARACTER_IMAGE_MARKERS.some((marker) => lower.includes(marker));
+}
+
+/** Resolve map hotspot art — transparent full-body character PNGs. */
+export function resolveCharacterMapTokenUrl(
+  characterId: CharacterThemeId | string | null | undefined,
+  candidate?: string | null,
+): string {
+  const themeId =
+    typeof characterId === 'string' ? resolveCharacterThemeId(characterId) : characterId ?? null;
+  const candidateTrimmed = candidate?.trim();
+  if (candidateTrimmed && !isUnusableCharacterImageUrl(candidateTrimmed)) {
+    const lower = candidateTrimmed.toLowerCase();
+    if (!lower.includes('photo_icon') && !lower.includes('photo-icon')) {
+      return candidateTrimmed;
+    }
+  }
+  if (themeId) {
+    return CHARACTER_HOTSPOT_IMAGES[themeId];
+  }
+  return '';
+}
+
+/** Resolve comic portrait icons for mission cards and HUD pills. */
+export function resolveCharacterComicIconUrl(
+  characterId: CharacterThemeId | string | null | undefined,
+  candidate?: string | null,
+): string {
+  const themeId =
+    typeof characterId === 'string' ? resolveCharacterThemeId(characterId) : characterId ?? null;
+  const candidateTrimmed = candidate?.trim();
+  if (candidateTrimmed && !isUnusableCharacterImageUrl(candidateTrimmed)) {
+    return candidateTrimmed;
+  }
+  if (themeId) {
+    return CHARACTER_COMIC_ICONS[themeId];
+  }
+  return '';
+}
+
+/** Resolve map/inventory character art — CMS override when valid, else Game-Hub hotspot. */
+export function resolveCharacterAssetUrl(
+  characterId: CharacterThemeId | string | null | undefined,
+  candidate?: string | null,
+): string {
+  const themeId =
+    typeof characterId === 'string' ? resolveCharacterThemeId(characterId) : characterId ?? null;
+  const candidateTrimmed = candidate?.trim();
+  if (candidateTrimmed && !isUnusableCharacterImageUrl(candidateTrimmed)) {
+    return candidateTrimmed;
+  }
+  if (themeId) {
+    return CHARACTER_HOTSPOT_IMAGES[themeId];
+  }
+  return '';
 }

@@ -1,5 +1,9 @@
 import React, { useCallback } from 'react';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
+import {
+  isKidShellDisplayImageUrl,
+  resolveHudThumbBackgroundStyle,
+} from '../../lib/kidShellDisplayImages';
 import { resolveWeeklyAdventureWeekAccent } from '../../lib/weeklyAdventureWeekAccent';
 import type { WeeklyAdventureJourneyCardItem } from '../../lib/weeklyAdventureWeekCards';
 import { useCourageHubAudio } from './CourageHubAudioContext';
@@ -114,6 +118,7 @@ export default function CourageHubHudExploreWeekStrip({
         const complete = card.variant === 'complete';
         const statusLabel = resolveStatusLabel(card, isSelected);
         const ctaDisabled = locked || (baselineLocked && card.weekNumber !== 1);
+        const hasThumbnail = isKidShellDisplayImageUrl(card.thumbnailUrl);
 
         return (
           <li key={card.weekNumber}>
@@ -143,15 +148,13 @@ export default function CourageHubHudExploreWeekStrip({
                 }
               }}
             >
-              <div
-                className="courageHubHudCardThumb courageHubHudCardThumb--explore"
-                style={
-                  card.thumbnailUrl
-                    ? { backgroundImage: `url("${card.thumbnailUrl}")` }
-                    : undefined
-                }
-                aria-hidden="true"
-              />
+              {hasThumbnail ? (
+                <div
+                  className="courageHubHudCardThumb courageHubHudCardThumb--explore courageHubHudCardThumb--hasImage"
+                  style={resolveHudThumbBackgroundStyle(card.thumbnailUrl)}
+                  aria-hidden="true"
+                />
+              ) : null}
               <div className="courageHubHudCardCopy">
                 <p className="courageHubHudCardTitle">
                   Week {monthSlot} · {card.title}

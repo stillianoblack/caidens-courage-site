@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import FamilyCertificatesPanel from './panels/FamilyCertificatesPanel';
 import FamilyCharactersPanel from './panels/FamilyCharactersPanel';
-import FamilyContinueLearningPanel from './panels/FamilyContinueLearningPanel';
+import FamilyWeeklyAdventuresLauncher from './panels/FamilyWeeklyAdventuresLauncher';
 import FamilyDownloadsPanel from './panels/FamilyDownloadsPanel';
 import FamilyGalleryPanel from './panels/FamilyGalleryPanel';
 import FamilyGuidePanel from './panels/FamilyGuidePanel';
@@ -18,7 +18,7 @@ type FamilyPortalDashboardContentProps = {
 function renderActivePanel(activeNav: FamilySidebarNavId): React.ReactNode {
   switch (activeNav) {
     case 'continue-learning':
-      return <FamilyContinueLearningPanel />;
+      return <FamilyWeeklyAdventuresLauncher />;
     case 'character-hub':
       return <FamilyCharactersPanel />;
     case 'downloads':

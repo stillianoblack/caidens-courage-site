@@ -4,6 +4,7 @@ import './hero-cinematic-player-hud.css';
 
 export type HeroCinematicPlayerHudProps = {
   displayName: string;
+  firstName?: string;
   focusCoins: number;
   focusCoinsLoading?: boolean;
   weekLabel?: string | null;
@@ -22,6 +23,7 @@ function resolveInitial(name: string): string {
 
 export default function HeroCinematicPlayerHud({
   displayName,
+  firstName,
   focusCoins,
   focusCoinsLoading = false,
   weekLabel,
@@ -62,7 +64,7 @@ export default function HeroCinematicPlayerHud({
         aria-label="Player status"
       >
         <div className="heroCinematicPlayerHudAvatar" aria-hidden="true">
-          {resolveInitial(displayName)}
+          {resolveInitial(firstName || displayName)}
         </div>
         <div className="heroCinematicPlayerHudCopy">
           <p className="heroCinematicPlayerHudEyebrow">Playing as</p>

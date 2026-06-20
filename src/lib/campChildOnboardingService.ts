@@ -182,7 +182,7 @@ async function insertCampChildParticipant(input: {
   }
 }
 
-/** Backward-compatible entry — parent email still required unless connectParentLater is set. */
+/** Backward-compatible entry — parent email optional; omit email to create an unclaimed student with PIN. */
 export async function createCampChildWithParentLink(
   input: CampChildOnboardingInput,
 ): Promise<CampChildOnboardingResult> {
@@ -198,7 +198,7 @@ export async function createCampChildWithOptionalParent(
   const parentLastName = input.parentLastName?.trim() || '';
   const parentFirstName = input.parentFirstName?.trim() || '';
   const campProgramCode = input.campProgramCode.trim();
-  const connectParentLater = Boolean(input.connectParentLater);
+  const hasParentEmail = Boolean(parentEmail);
   const displayName = childDisplayName(childFirstName, input.childNickname, childLastName);
 
   if (!childFirstName || !campProgramCode) {
@@ -217,15 +217,12 @@ export async function createCampChildWithOptionalParent(
     };
   }
 
-  if (!connectParentLater) {
-    if (!parentFirstName || !parentEmail || !parentLastName) {
-      return {
-        success: false,
-        displayName,
-        message:
-          'Child first name, parent/guardian first and last name, parent email, and program are required.',
-      };
-    }
+  if (hasParentEmail && (!parentFirstName || !parentLastName)) {
+    return {
+      success: false,
+      displayName,
+      message: 'Parent/guardian first and last name are required when adding a parent email.',
+    };
   }
 
   if (!normalizeGradeLevelStorage(input.gradeLevel)) {
@@ -236,7 +233,6 @@ export async function createCampChildWithOptionalParent(
     };
   }
 
-  const hasParentEmail = Boolean(parentEmail);
   const parentConnectionStatus: ParentConnectionStatus = hasParentEmail ? 'invited' : 'unclaimed';
 
   try {

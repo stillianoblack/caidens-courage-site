@@ -11,6 +11,7 @@ import { ENABLE_B4_CHAT } from './config/featureFlags';
 import { shouldMountPortalB4Assistant } from './lib/portalB4Routes';
 import CourageToolsPopup from './components/CourageToolsPopup';
 import NavigationLoader from './components/NavigationLoader';
+import KidPlayShellLoader from './components/kid-play-shell/KidPlayShellLoader';
 import PortalRouteLoader from './components/portal/PortalRouteLoader';
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary';
 import { resolveAppOutletKey } from './lib/portalOutletKey';
@@ -191,8 +192,8 @@ const FamilyOverviewPanel = React.lazy(() =>
 const FamilyResultsPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyResultsPanel'),
 );
-const FamilyContinueLearningPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyContinueLearningPanel'),
+const FamilyWeeklyAdventuresLauncher = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyWeeklyAdventuresLauncher'),
 );
 const FamilyInventoryPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyInventoryPanel'),
@@ -347,8 +348,8 @@ const appRouteChildren = (
           <Route index element={<FamilyOverviewPanel />} />
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
-          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
-          <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
+          <Route path="continue-learning" element={<FamilyWeeklyAdventuresLauncher />} />
+          <Route path="weekly-adventures" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="play-pause" element={<FamilyPlayPausePage />} />
           <Route path="collections" element={<FamilyInventoryPanel />} />
           <Route path="inventory" element={<Navigate to="collections" replace />} />
@@ -407,10 +408,10 @@ const appRouteChildren = (
           <Route index element={<FamilyOverviewPanel />} />
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
-          <Route path="continue-learning" element={<FamilyContinueLearningPanel />} />
+          <Route path="continue-learning" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="collections" element={<FamilyInventoryPanel />} />
           <Route path="inventory" element={<Navigate to="collections" replace />} />
-          <Route path="weekly-adventures" element={<FamilyContinueLearningPanel />} />
+          <Route path="weekly-adventures" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="play-pause" element={<FamilyPlayPausePage />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
@@ -569,7 +570,9 @@ const AppLayout: React.FC = () => {
       <ChunkErrorBoundary>
         <Suspense
           fallback={
-            isPortalShellRoute ? (
+            isKidPlayShell ? (
+              <KidPlayShellLoader />
+            ) : isPortalShellRoute ? (
               <PortalRouteLoader message={resolvePortalRouteLoaderMessage(location.pathname)} />
             ) : (
               <NavigationLoader />

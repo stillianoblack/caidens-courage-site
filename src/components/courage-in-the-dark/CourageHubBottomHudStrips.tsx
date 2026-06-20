@@ -8,6 +8,10 @@ import {
 } from '../../data/courageInTheDarkMap';
 import type { QuestProgressRow } from '../../lib/participantQuestService';
 import { QUEST_DEFINITIONS } from '../../lib/participantQuestService';
+import {
+  isKidShellDisplayImageUrl,
+  resolveHudThumbBackgroundStyle,
+} from '../../lib/kidShellDisplayImages';
 import { isWeek1GameplayComplete } from '../../lib/week1ExtrasUnlock';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 import type { Week1ExtrasPaths } from './Week1ExtrasCards';
@@ -49,6 +53,7 @@ export function CourageHubHudMissionStrip({
         const comingSoon = comingSoonMissionId === mission.id;
         const href = !locked && !comingSoon ? getMissionHref?.(mission) ?? null : null;
         const startLabel = complete ? 'Replay' : 'Start';
+        const hasThumbnail = isKidShellDisplayImageUrl(mission.thumbnail);
 
         return (
           <li key={mission.id}>
@@ -63,11 +68,13 @@ export function CourageHubHudMissionStrip({
                 .join(' ')}
               data-color={mission.color}
             >
-              <div
-                className="courageHubHudCardThumb"
-                style={{ backgroundImage: `url("${mission.thumbnail}")` }}
-                aria-hidden="true"
-              />
+              {hasThumbnail ? (
+                <div
+                  className="courageHubHudCardThumb courageHubHudCardThumb--hasImage"
+                  style={resolveHudThumbBackgroundStyle(mission.thumbnail)}
+                  aria-hidden="true"
+                />
+              ) : null}
               <div className="courageHubHudCardCopy">
                 <p className="courageHubHudCardTitle">{mission.label}</p>
                 <p className="courageHubHudCardSub">{mission.characterName}</p>

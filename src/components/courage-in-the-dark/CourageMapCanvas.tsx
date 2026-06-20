@@ -1,10 +1,28 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 import CourageMapHotspotTooltip from './CourageMapHotspotTooltip';
+import { isKidShellDisplayImageUrl } from '../../lib/kidShellDisplayImages';
 import {
   courageInTheDarkMissions,
   type CourageInTheDarkMission,
 } from '../../data/courageInTheDarkMap';
+
+function MapHotspotToken({ src, className }: { src: string; className: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!isKidShellDisplayImageUrl(src) || failed) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      className={className}
+      width={120}
+      height={180}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 type CourageMapCanvasProps = {
   variant?: 'hub' | 'embedded';
@@ -211,15 +229,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
                     data-color={hotspot.color}
                     aria-hidden="true"
                   />
-                  <img
-                    src={hotspot.token}
-                    alt=""
-                    className="courageMapHotspotToken"
-                    width={120}
-                    height={180}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <MapHotspotToken src={hotspot.token} className="courageMapHotspotToken" />
                   {complete ? (
                     <>
                       <span className="courageMapHotspotBadge" aria-hidden="true">

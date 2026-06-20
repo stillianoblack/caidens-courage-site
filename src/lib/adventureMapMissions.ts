@@ -10,8 +10,12 @@ import {
 } from '../data/familyWeeklyAdventures';
 import type { AdventureModuleRecord, AdventureSpotRecord } from '../types/adventureModule';
 import type { AdventureTrailNodeView } from '../types/adventureTrail';
-
-const CHARACTER_ASSET_DIR = '/images/caidenscourage/Game-Hub/characters';
+import {
+  CHARACTER_COMIC_ICONS,
+  CHARACTER_HOTSPOT_IMAGES,
+  resolveCharacterComicIconUrl,
+  resolveCharacterMapTokenUrl,
+} from '../design-system/kids-adventure/characterThemes';
 
 /**
  * Default hotspot layout (% of map canvas). Coordinates are not admin-configurable yet.
@@ -38,11 +42,19 @@ const CHARACTER_NAMES: Record<AdventureSpotRecord['character_key'], string> = {
 };
 
 const DEFAULT_THUMBNAILS: Record<AdventureSpotRecord['character_key'], string> = {
-  caiden: `${CHARACTER_ASSET_DIR}/caiden-hotspot.webp`,
-  miranda: `${CHARACTER_ASSET_DIR}/miranda-hotspot.webp`,
-  zeke: '/images/characters/zeke_photo_icon_game.webp',
-  charlie: `${CHARACTER_ASSET_DIR}/charlie-hotspot.webp`,
-  b4: `${CHARACTER_ASSET_DIR}/b4-hotspot.webp`,
+  caiden: CHARACTER_COMIC_ICONS.caiden,
+  miranda: CHARACTER_COMIC_ICONS.miranda,
+  zeke: CHARACTER_COMIC_ICONS.zeke,
+  charlie: CHARACTER_COMIC_ICONS.charlie,
+  b4: CHARACTER_COMIC_ICONS.b4,
+};
+
+const DEFAULT_MAP_TOKENS: Record<AdventureSpotRecord['character_key'], string> = {
+  caiden: CHARACTER_HOTSPOT_IMAGES.caiden,
+  miranda: CHARACTER_HOTSPOT_IMAGES.miranda,
+  zeke: CHARACTER_HOTSPOT_IMAGES.zeke,
+  charlie: CHARACTER_HOTSPOT_IMAGES.charlie,
+  b4: CHARACTER_HOTSPOT_IMAGES.b4,
 };
 
 /** Append cache-busting query from CMS updated_at so image swaps appear immediately. */
@@ -75,12 +87,19 @@ function spotToMission(
   const badge = normalized.reward_badge || normalized.reward_name
     ? ` • ${normalized.reward_badge ?? normalized.reward_name}`
     : '';
+  const cmsArt = normalized.character_image_url ?? normalized.reward_image_url ?? null;
+  const token =
+    resolveCharacterMapTokenUrl(normalized.character_key, cmsArt) ||
+    DEFAULT_MAP_TOKENS[normalized.character_key];
+  const thumbnail =
+    resolveCharacterComicIconUrl(normalized.character_key, cmsArt) ||
+    DEFAULT_THUMBNAILS[normalized.character_key];
   return {
     id: normalized.character_key,
     characterName: CHARACTER_NAMES[normalized.character_key],
     label: normalized.label_text,
-    token: normalized.character_image_url ?? normalized.reward_image_url ?? DEFAULT_THUMBNAILS[normalized.character_key],
-    thumbnail: normalized.character_image_url ?? normalized.reward_image_url ?? DEFAULT_THUMBNAILS[normalized.character_key],
+    token,
+    thumbnail,
     color: layout.color,
     accentClass: layout.accentClass,
     position: {

@@ -99,6 +99,16 @@
   border-color: rgba(251, 191, 36, 0.32);
 }
 
+.courageHubHudCardThumb--hasImage {
+  background-color: rgba(7, 11, 20, 0.55);
+}
+
+.courageHubHudCardThumb--explore {
+  width: 3.35rem;
+  height: 4.35rem;
+  border-radius: 0.4rem;
+}
+
 /* Mission pills */
 .courageHubHudCard--mission {
   min-height: 5.5rem;
@@ -113,6 +123,7 @@
   background-size: cover;
   background-position: center;
   background-color: transparent;
+  background-repeat: no-repeat;
   border: none;
   box-shadow: none;
 }

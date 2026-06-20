@@ -1,0 +1,45 @@
+.logo--vale {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+  /* Blue Vale SVG → brand gold on dark story-world surfaces */
+  filter: brightness(0) saturate(100%) invert(85%) sepia(29%) saturate(1127%) hue-rotate(340deg)
+    brightness(101%) contrast(92%);
+  transition: filter 220ms ease, opacity 220ms ease;
+}
+
+.logo--vale--header {
+  height: 1.375rem;
+  max-width: min(100%, 13.5rem);
+}
+
+@media (min-width: 768px) {
+  .logo--vale--header {
+    height: 1.625rem;
+  }
+}
+
+.logo--vale--footer {
+  height: 2.25rem;
+  max-width: min(100%, 12rem);
+}
+
+@media (min-width: 640px) {
+  .logo--vale--footer {
+    height: 2.5rem;
+    max-width: min(100%, 14rem);
+  }
+}
+
+.logo--valeLink {
+  display: inline-flex;
+  align-items: center;
+  transition: filter 220ms ease;
+}
+
+.logo--valeLink:hover .logo--vale,
+.logo--vale:hover {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(32%) saturate(1200%) hue-rotate(340deg)
+    brightness(108%) contrast(92%) drop-shadow(0 0 12px rgba(236, 196, 83, 0.45));
+}

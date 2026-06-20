@@ -787,14 +787,15 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     const monthSlot = ((Math.max(1, heroWeekNumber) - 1) % 4) + 1;
     return {
       displayName: activeChild.displayName,
+      firstName: activeChild.firstName,
       focusCoins,
-      focusCoinsLoading,
+      focusCoinsLoading: kidPlayShell ? false : focusCoinsLoading,
       weekLabel: `Week ${monthSlot}`,
       baselineGateMessage: adventuresLocked ? BASELINE_GATE_MESSAGE : null,
       children: kidPlayShell ? [] : selectableChildren,
       activeParticipantId: activeChild.participantId,
       onSelectChild: kidPlayShell ? undefined : handleSelectChild,
-      childSwitchLoading: childSwitchLoading || baselineLoading,
+      childSwitchLoading: kidPlayShell ? false : childSwitchLoading || baselineLoading,
     };
   }, [
     activeChild,
@@ -821,7 +822,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
         (ENABLE_CINEMATIC_ADVENTURE_MODE && showCourageHero) || kidPlayShell
           ? 'family-panel--cinematicAdventure'
           : '',
-        childSwitchLoading ? 'family-weeklyChildSwitchShimmer' : '',
+        !kidPlayShell && childSwitchLoading ? 'family-weeklyChildSwitchShimmer' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -922,32 +923,34 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
         </section>
       ) : null}
 
-      <div
-        className={[
-          'weeklyJourneySections',
-          showDarkBottomWeekCards ? 'weeklyJourneySections--darkCenter' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-label="Monthly adventure journey"
-      >
-        {journeyMonthSections.map(({ month, cards }) => {
-          const recentlyCompletedCards =
-            hideLegacyWeekGrid && !showDarkBottomWeekCards
-              ? cards.filter((card) => card.variant === 'complete')
-              : [];
-          return (
-            <WeeklyAdventureJourneyMonth
-              key={month.monthNumber}
-              month={month}
-              cards={cards}
-              hideWeekSelectorGrid={hideLegacyWeekGrid}
-              recentlyCompletedCards={recentlyCompletedCards}
-              darkGlass={showDarkBottomWeekCards}
-            />
-          );
-        })}
-      </div>
+      {!kidPlayShell ? (
+        <div
+          className={[
+            'weeklyJourneySections',
+            showDarkBottomWeekCards ? 'weeklyJourneySections--darkCenter' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-label="Monthly adventure journey"
+        >
+          {journeyMonthSections.map(({ month, cards }) => {
+            const recentlyCompletedCards =
+              hideLegacyWeekGrid && !showDarkBottomWeekCards
+                ? cards.filter((card) => card.variant === 'complete')
+                : [];
+            return (
+              <WeeklyAdventureJourneyMonth
+                key={month.monthNumber}
+                month={month}
+                cards={cards}
+                hideWeekSelectorGrid={hideLegacyWeekGrid}
+                recentlyCompletedCards={recentlyCompletedCards}
+                darkGlass={showDarkBottomWeekCards}
+              />
+            );
+          })}
+        </div>
+      ) : null}
 
       {!kidPlayShell && !allChildrenPlayReady && childrenNeedingSetup.length > 0 ? (
         <WeeklySetupReminderCard

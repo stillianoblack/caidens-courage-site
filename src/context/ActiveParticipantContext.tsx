@@ -208,32 +208,36 @@ export function useOptionalActiveParticipantContext(): ActiveParticipantContextV
 export function KidPlaySessionParticipantProvider({
   participantId,
   displayName,
+  firstName,
   children,
 }: {
   participantId: string;
   displayName: string;
+  firstName?: string;
   children: ReactNode;
 }) {
+  const resolvedFirstName = firstName?.trim() || displayName.split(/\s+/)[0] || displayName;
+
   const roster = useMemo<ActiveParticipantRosterEntry[]>(
     () => [
       {
         participantId,
         displayName,
-        firstName: displayName,
+        firstName: resolvedFirstName,
         gradeLevel: null,
         gradeLabel: null,
       },
     ],
-    [displayName, participantId],
+    [displayName, participantId, resolvedFirstName],
   );
 
   const participant = useMemo<ActiveParticipantState>(
     () => ({
       participantId,
       displayName,
-      firstName: displayName,
+      firstName: resolvedFirstName,
     }),
-    [displayName, participantId],
+    [displayName, participantId, resolvedFirstName],
   );
 
   useEffect(() => {

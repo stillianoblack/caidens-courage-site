@@ -38,7 +38,6 @@ export default function PilotAddStudentDrawer({
   onSuccess,
 }: PilotAddStudentDrawerProps) {
   const { showToast } = useToast();
-  const [connectParentLater, setConnectParentLater] = useState(false);
   const [childFirstName, setChildFirstName] = useState('');
   const [childLastName, setChildLastName] = useState('');
   const [childNickname, setChildNickname] = useState('');
@@ -54,7 +53,6 @@ export default function PilotAddStudentDrawer({
   const trimmedProgramCode = programCode.trim();
 
   const resetForm = () => {
-    setConnectParentLater(false);
     setChildFirstName('');
     setChildLastName('');
     setChildNickname('');
@@ -86,6 +84,8 @@ export default function PilotAddStudentDrawer({
     if (submitting) return;
     setError(null);
 
+    const trimmedParentEmail = parentEmail.trim();
+
     if (!childFirstName.trim()) {
       setError('Child first name is required.');
       return;
@@ -94,20 +94,16 @@ export default function PilotAddStudentDrawer({
       setError('Add a last name or nickname for the student.');
       return;
     }
-    if (!connectParentLater) {
-      if (!parentFirstName.trim()) {
-        setError('Parent/guardian first name is required.');
+    if (trimmedParentEmail) {
+      if (!parentFirstName.trim() || !parentLastName.trim()) {
+        setError('Parent/guardian first and last name are required when adding a parent email.');
         return;
       }
-      if (!parentLastName.trim()) {
-        setError('Parent/guardian last name is required.');
+      if (!isValidEmail(trimmedParentEmail)) {
+        setError('Enter a valid parent/guardian email or leave it blank.');
         return;
       }
-      if (!isValidEmail(parentEmail)) {
-        setError('A valid parent/guardian email is required.');
-        return;
-      }
-    } else if (parentEmail.trim() && !isValidEmail(parentEmail)) {
+    } else if (parentEmail.trim() && !isValidEmail(trimmedParentEmail)) {
       setError('Enter a valid parent email or leave it blank.');
       return;
     }
@@ -126,10 +122,10 @@ export default function PilotAddStudentDrawer({
       childFirstName: childFirstName.trim(),
       childLastName: childLastName.trim() || undefined,
       childNickname: childNickname.trim() || undefined,
-      connectParentLater,
+      connectParentLater: !trimmedParentEmail,
       parentFirstName: parentFirstName.trim() || undefined,
       parentLastName: parentLastName.trim() || undefined,
-      parentEmail: parentEmail.trim() || undefined,
+      parentEmail: trimmedParentEmail || undefined,
       parentPhone: parentPhone.trim() || undefined,
       gradeLevel,
       campProgramCode: trimmedProgramCode,
@@ -245,8 +241,7 @@ export default function PilotAddStudentDrawer({
             Add Student
           </h2>
           <p className="pilot-drawerSubtitle">
-            Creates a student profile for this program. Parent email is optional when connecting
-            later.
+            Creates a student profile for this program. Parent contact is optional.
           </p>
         </div>
         <button type="button" className="pilot-drawerClose" onClick={handleClose} aria-label="Close">
@@ -257,14 +252,6 @@ export default function PilotAddStudentDrawer({
       <form className="pilot-drawerFormShell" onSubmit={(event) => void handleSubmit(event)}>
         <div className="pilot-drawerBody pilot-drawerBody--form">
           <div className="pilot-drawerForm">
-            <label className="pilot-drawerField pilot-drawerField--checkbox">
-              <input
-                type="checkbox"
-                checked={connectParentLater}
-                onChange={(event) => setConnectParentLater(event.target.checked)}
-              />
-              <span>Add student now, connect parent later</span>
-            </label>
             <label className="pilot-drawerField">
               <span>Child first name</span>
               <input
@@ -293,33 +280,34 @@ export default function PilotAddStudentDrawer({
                 autoComplete="nickname"
               />
             </label>
+            <p className="pilot-drawerFieldHint">
+              You can add a student now and connect a parent later. A student PIN will be created for
+              kid access.
+            </p>
             <label className="pilot-drawerField">
-              <span>Parent/Guardian first name{connectParentLater ? ' (optional)' : ''}</span>
+              <span>Parent/Guardian first name (optional)</span>
               <input
                 type="text"
                 value={parentFirstName}
                 onChange={(event) => setParentFirstName(event.target.value)}
-                required={!connectParentLater}
                 autoComplete="given-name"
               />
             </label>
             <label className="pilot-drawerField">
-              <span>Parent/Guardian last name{connectParentLater ? ' (optional)' : ''}</span>
+              <span>Parent/Guardian last name (optional)</span>
               <input
                 type="text"
                 value={parentLastName}
                 onChange={(event) => setParentLastName(event.target.value)}
-                required={!connectParentLater}
                 autoComplete="family-name"
               />
             </label>
             <label className="pilot-drawerField">
-              <span>Parent/Guardian email{connectParentLater ? ' (optional)' : ''}</span>
+              <span>Parent/Guardian email (optional)</span>
               <input
                 type="email"
                 value={parentEmail}
                 onChange={(event) => setParentEmail(event.target.value)}
-                required={!connectParentLater}
                 autoComplete="email"
               />
             </label>

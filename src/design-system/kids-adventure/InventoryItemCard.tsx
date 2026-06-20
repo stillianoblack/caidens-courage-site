@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import KidsAdventureIcon from './KidsAdventureIcon';
 import { resolveCharacterThemeId, themeDataAttributes } from './characterThemes';
 
@@ -56,6 +56,7 @@ export default function InventoryItemCard({
   onLockedClick,
   onShopCtaClick,
 }: InventoryItemCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
   const themeId = resolveCharacterThemeId(themeHint ?? label);
   const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
   const shopCta = resolveShopCta(shopState, disabled);
@@ -67,7 +68,7 @@ export default function InventoryItemCard({
     isShop &&
     Boolean(onShopCtaClick) &&
     (shopState === 'available' || shopState === 'need_coins');
-  const hasImage = Boolean(imageSrc?.trim());
+  const hasImage = Boolean(imageSrc?.trim()) && !imageFailed;
 
   const className = [
     'kidInventoryCard',
@@ -91,6 +92,7 @@ export default function InventoryItemCard({
           className={['kidInventoryCardArt', showLocked ? 'kidInventoryCardArt--locked' : ''].filter(Boolean).join(' ')}
           loading="lazy"
           decoding="async"
+          onError={() => setImageFailed(true)}
         />
       ) : (
         <span className="kidInventoryCardFallback" aria-hidden="true">

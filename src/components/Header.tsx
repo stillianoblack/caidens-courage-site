@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, CAIDEN_VALE_HOME_PATH, handleAnchorClick, NavItem } from '../config/nav';
-import { MARKETING_LOGO_SRC } from '../config/courageNav';
+import ValeLogo from './marketing/ValeLogo';
 import { SAFE_MODE } from '../lib/safeMode';
 
 const DISABLE_HEADER_ANIMATIONS = process.env.REACT_APP_DISABLE_HEADER_ANIMATIONS === 'true';
@@ -440,12 +440,11 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   </svg>
                 </button>
                 
-                <Link to={CAIDEN_VALE_HOME_PATH} className="header-logo-link flex items-center flex-shrink-0">
-                  <img
-                    src={MARKETING_LOGO_SRC}
-                    alt="Caiden's Courage"
-                    className="header-logo-img h-[22px] md:h-[26px] w-auto max-w-[min(100%,13.5rem)] object-contain object-left"
-                  />
+                <Link
+                  to={CAIDEN_VALE_HOME_PATH}
+                  className="header-logo-link logo--valeLink flex items-center flex-shrink-0"
+                >
+                  <ValeLogo size="header" />
                 </Link>
               </div>
               
@@ -536,12 +535,8 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                 <div
                   className="flex items-center justify-center px-6"
                 >
-                  <Link to={CAIDEN_VALE_HOME_PATH} className="header-logo-link flex items-center">
-                    <img
-                      src={MARKETING_LOGO_SRC}
-                      alt="Caiden's Courage"
-                      className="header-logo-img h-[26px] w-auto max-w-[min(100%,15rem)] object-contain object-left"
-                    />
+                  <Link to={CAIDEN_VALE_HOME_PATH} className="header-logo-link logo--valeLink flex items-center">
+                    <ValeLogo size="header" />
                   </Link>
                 </div>
 

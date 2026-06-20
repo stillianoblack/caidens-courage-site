@@ -21,6 +21,35 @@
   place-items: center;
   background: #070b14;
   color: #c8d4ef;
+  padding: 1.5rem;
+}
+
+.kid-play-shellLoader--error {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Child play — hide monthly progress rails; keep map + active week explore UI */
+.kid-play-shell .weeklyJourneySections,
+.kid-play-shell .weeklyJourneyMonth,
+.kid-play-shell .weeklyJourneyRecentlyCompleted,
+.kid-play-shell .weeklyJourneyMonthHeader,
+.kid-play-shell .weeklyJourneyProgressLine,
+.kid-play-shell .weeklyJourneyMonthProgressTrack,
+.kid-play-shell .weeklyJourneyMonthProgressCopy,
+.kid-play-shell .weeklyJourneyMonthGrid,
+.kid-play-shell .weeklyJourneyMonth--comingSoon {
+  display: none !important;
+}
+
+/* No avatar portrait ring on player HUD during kid shell load transitions */
+.kid-play-shell .heroCinematicPlayerHud--loading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kid-play-shell .heroCinematicPlayerHud--loading .heroCinematicPlayerHudAvatar {
+  visibility: hidden;
 }
 
 .kidPlayShellPage {

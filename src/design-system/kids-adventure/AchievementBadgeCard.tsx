@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import KidsAdventureIcon from './KidsAdventureIcon';
 import { resolveBadgeFrameShape, type BadgeFrameShape } from '../../lib/badgeFrameArtwork';
 import { GENERIC_BADGE_PLACEHOLDER_SRC } from '../../lib/weeklyRewardDisplay';
-import { resolveCharacterThemeId, themeDataAttributes } from './characterThemes';
+import { isUnusableCharacterImageUrl, resolveCharacterThemeId, themeDataAttributes } from './characterThemes';
 import './achievement-badge.css';
 
 export type AchievementBadgeCardProps = {
@@ -34,8 +34,12 @@ export default function AchievementBadgeCard({
   onLockedClick,
   onEarnedClick,
 }: AchievementBadgeCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
   const resolvedFrame = frameShape ?? resolveBadgeFrameShape(kind, weekNumber);
-  const rewardImageUrl = imageSrc?.trim() || null;
+  const rewardImageUrl =
+    imageSrc?.trim() && !isUnusableCharacterImageUrl(imageSrc) && !imageFailed
+      ? imageSrc.trim()
+      : null;
   const themeId = resolveCharacterThemeId(themeHint ?? label);
   const themeAttrs = themeId ? themeDataAttributes(themeId) : {};
   const isInteractive =
@@ -64,6 +68,7 @@ export default function AchievementBadgeCard({
               className="achievementBadgeRewardImage"
               loading="lazy"
               decoding="async"
+              onError={() => setImageFailed(true)}
             />
           ) : (
             <span className="achievementBadgePlaceholder" aria-hidden="true">

@@ -65,3 +65,8 @@
     width: auto;
   }
 }
+
+/* Marketing footer — sizing lives in index.css (.courage-footer-logo-img) for global load */
+.ds-brandLogo--marketingFooter {
+  filter: none;
+}

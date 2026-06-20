@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useActiveParticipant } from '../../hooks/useActiveParticipant';
+import { useNavigate } from 'react-router-dom';
 import { PORTAL_PATH } from '../../config/courageRoutes';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { programDashboardTabPath } from '../../lib/programDashboardNav';
@@ -12,7 +11,6 @@ import {
 import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
 import { logOverlayActive } from '../../lib/portalClickDebug';
 import { readKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
-import { resumeFamilyKidPlayShell } from '../../lib/resumeFamilyKidPlayShell';
 import { triggerParentPush } from '../../lib/parentPushNotify';
 import { buildSessionEndedPushDedupeKey } from '../../lib/parentPushNotifyDedupe';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
@@ -21,7 +19,14 @@ import { verifyStudentPinLogin } from '../../lib/studentPinService';
 import { launchStudentPinKidPlay } from '../../lib/studentPinLoginLaunch';
 import { kidShellAwareNavigate } from '../../lib/kidShellNav';
 import { clearKidPlayRosterLockWithEmail } from '../../lib/kidPlayRosterLock';
+import {
+  KID_PLAY_RETURN_ACCESS_ERROR,
+  STUDENT_PIN_INPUT_RE,
+  verifyKidPlayReturnAccessCode,
+} from '../../lib/kidPlayReturnUnlock';
 import '../kid-play-shell/kid-play-roster-lock.css';
+
+const FOCUS_FLAME_MARK_SRC = '/images/icons/focus-flame-mark.svg';
 
 type KidPlayFamilySoftLockGateProps = {
   open: boolean;
@@ -36,133 +41,93 @@ export default function KidPlayFamilySoftLockGate({
   fullscreen = false,
 }: KidPlayFamilySoftLockGateProps) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { roster, selectParticipant } = useActiveParticipant();
-  const [email, setEmail] = useState('');
-  const [studentPin, setStudentPin] = useState('');
-  const [facilitatorEmail, setFacilitatorEmail] = useState('');
+  const [accessCode, setAccessCode] = useState('');
+  const [emailOrPin, setEmailOrPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleEmailSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setError(null);
-
-      const trimmed = email.trim();
-      if (!trimmed) {
-        setError('Enter your parent/guardian email to continue.');
-        return;
-      }
-
-      setSubmitting(true);
-      const ok = clearKidPlayFamilySoftLockWithEmail(trimmed);
-      setSubmitting(false);
-
-      if (!ok) {
-        setError('Email does not match your family portal account.');
-        return;
-      }
-
-      clearKidPlayFamilyResumePayload();
-      setEmail('');
-      onUnlocked();
-      assignPortalRoute(`${readKidPlayFamilyReturnBase()}/weekly-adventures`);
-    },
-    [email, onUnlocked],
-  );
-
-  const handleStudentPinSubmit = useCallback(
+  const handleContinue = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setError(null);
-      const programCode = readActivePilotProgram()?.programCode?.trim();
-      const pin = studentPin.trim();
-      if (!programCode || !pin) {
-        setError('Enter the student PIN to return to the game.');
+
+      const trimmedCode = accessCode.trim();
+      const trimmedSecond = emailOrPin.trim();
+
+      if (!trimmedCode || !trimmedSecond) {
+        setError(KID_PLAY_RETURN_ACCESS_ERROR);
         return;
       }
 
       setSubmitting(true);
-      const verified = await verifyStudentPinLogin({ programCode, pin });
-      if (!verified.success) {
+      const codeOk = await verifyKidPlayReturnAccessCode(trimmedCode);
+      if (!codeOk) {
         setSubmitting(false);
-        setError(verified.error);
+        setError(KID_PLAY_RETURN_ACCESS_ERROR);
         return;
       }
 
-      const launch = await launchStudentPinKidPlay({
-        participantId: verified.participantId,
-        programCode: verified.programCode,
-        displayName: verified.displayName,
-        organizationId: readActivePilotProgram()?.id ?? null,
-      });
-      setSubmitting(false);
-      if (launch.kind === 'error') {
-        setError(launch.message);
+      if (STUDENT_PIN_INPUT_RE.test(trimmedSecond)) {
+        const programCode = readActivePilotProgram()?.programCode?.trim();
+        if (!programCode) {
+          setSubmitting(false);
+          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          return;
+        }
+
+        const verified = await verifyStudentPinLogin({ programCode, pin: trimmedSecond });
+        if (!verified.success) {
+          setSubmitting(false);
+          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          return;
+        }
+
+        const launch = await launchStudentPinKidPlay({
+          participantId: verified.participantId,
+          programCode: verified.programCode,
+          displayName: verified.displayName,
+          organizationId: readActivePilotProgram()?.id ?? null,
+        });
+        setSubmitting(false);
+        if (launch.kind === 'error') {
+          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          return;
+        }
+
+        setKidPlayFamilySoftLocked(false);
+        clearKidPlayFamilyResumePayload();
+        setAccessCode('');
+        setEmailOrPin('');
+        onUnlocked();
+        kidShellAwareNavigate(navigate, launch.path, { replace: true });
         return;
       }
 
-      setKidPlayFamilySoftLocked(false);
-      clearKidPlayFamilyResumePayload();
-      setStudentPin('');
-      onUnlocked();
-      kidShellAwareNavigate(navigate, launch.path, { replace: true });
-    },
-    [navigate, onUnlocked, studentPin],
-  );
-
-  const handleFacilitatorSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setError(null);
-      const trimmed = facilitatorEmail.trim();
-      if (!trimmed) {
-        setError('Enter facilitator email to return to the roster.');
+      if (clearKidPlayRosterLockWithEmail(trimmedSecond)) {
+        setSubmitting(false);
+        setKidPlayFamilySoftLocked(false);
+        clearKidPlayFamilyResumePayload();
+        setAccessCode('');
+        setEmailOrPin('');
+        onUnlocked();
+        assignPortalRoute(programDashboardTabPath('roster'));
         return;
       }
 
-      setSubmitting(true);
-      const ok = clearKidPlayRosterLockWithEmail(trimmed);
-      setSubmitting(false);
-      if (!ok) {
-        setError('Email does not match this program facilitator account.');
+      if (clearKidPlayFamilySoftLockWithEmail(trimmedSecond)) {
+        setSubmitting(false);
+        clearKidPlayFamilyResumePayload();
+        setAccessCode('');
+        setEmailOrPin('');
+        onUnlocked();
+        assignPortalRoute(`${readKidPlayFamilyReturnBase()}/weekly-adventures`);
         return;
       }
-
-      setKidPlayFamilySoftLocked(false);
-      clearKidPlayFamilyResumePayload();
-      setFacilitatorEmail('');
-      onUnlocked();
-      assignPortalRoute(programDashboardTabPath('roster'));
-    },
-    [facilitatorEmail, onUnlocked],
-  );
-
-  const handleSelectChild = useCallback(
-    async (participantId: string) => {
-      const match = roster.find((row) => row.participantId === participantId);
-      if (!match || submitting) return;
-
-      setError(null);
-      setSubmitting(true);
-      selectParticipant(match);
-
-      const result = await resumeFamilyKidPlayShell(navigate, {
-        childId: participantId,
-        familyReturnPath: readKidPlayFamilyReturnBase() || location.pathname,
-      });
 
       setSubmitting(false);
-
-      if (!result.ok) {
-        setError(result.message);
-        return;
-      }
-
-      onUnlocked();
+      setError(KID_PLAY_RETURN_ACCESS_ERROR);
     },
-    [location.pathname, navigate, onUnlocked, roster, selectParticipant, submitting],
+    [accessCode, emailOrPin, navigate, onUnlocked],
   );
 
   const handleEndSession = useCallback(() => {
@@ -170,19 +135,17 @@ export default function KidPlayFamilySoftLockGate({
     clearKidPlayFamilyResumePayload();
     setKidPlayFamilySoftLocked(false);
     clearSharedDevicePortalSession();
-    const endedChild = roster.length === 1 ? roster[0].displayName : undefined;
-    const endedChildId = roster.length === 1 ? roster[0].participantId : undefined;
     const sessionId = readLocalKidPlaySessionId() || 'manual-end';
     triggerParentPush({
       trigger: 'child_session_ended',
-      childName: endedChild,
-      childId: endedChildId,
       dedupeKey: buildSessionEndedPushDedupeKey(sessionId),
     });
     setSubmitting(false);
+    setAccessCode('');
+    setEmailOrPin('');
     onUnlocked();
     assignPortalRoute(PORTAL_PATH);
-  }, [onUnlocked, roster]);
+  }, [onUnlocked]);
 
   useEffect(() => {
     logOverlayActive('KidPlayFamilySoftLockGate', open);
@@ -200,112 +163,67 @@ export default function KidPlayFamilySoftLockGate({
   return (
     <div className={shellClass} role="presentation">
       <div
-        className="kidPlayRosterLockCard"
+        className="kidPlayRosterLockCard kidPlayReturnSessionCard"
         role="dialog"
         aria-modal="true"
         aria-labelledby="kid-play-family-soft-lock-title"
       >
+        <div className="kidPlayReturnSessionMarkWrap" aria-hidden="true">
+          <img className="kidPlayReturnSessionMark" src={FOCUS_FLAME_MARK_SRC} alt="" decoding="async" />
+        </div>
+
         <h2 id="kid-play-family-soft-lock-title" className="kidPlayRosterLockTitle">
           Return To Session
         </h2>
         <p className="kidPlayRosterLockBody">
-          Choose who is returning. Student PIN resumes the game; adult email returns to the right
-          portal.
+          Enter your access code and use a parent/guardian email, facilitator email, or student PIN to
+          continue.
         </p>
 
-        {roster.length === 1 ? (
-          <div className="kidPlayRosterLockForm">
-            <button
-              type="button"
-              className="kidPlayRosterLockSubmit"
+        <form className="kidPlayRosterLockForm kidPlayReturnSessionForm" onSubmit={(event) => void handleContinue(event)}>
+          <div className="kidPlayReturnSessionField">
+            <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-access-code">
+              Access Code
+            </label>
+            <input
+              id="kid-play-return-access-code"
+              className="kidPlayRosterLockInput"
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              value={accessCode}
+              onChange={(event) => setAccessCode(event.target.value)}
+              placeholder="Enter your code"
               disabled={submitting}
-              onClick={() => void handleSelectChild(roster[0].participantId)}
-            >
-              Continue as {roster[0].displayName}
-            </button>
+            />
           </div>
-        ) : null}
 
-        {roster.length > 1 ? (
-          <div className="kidPlayRosterLockForm">
-            <p className="kidPlayRosterLockLabel">Choose player</p>
-            <div className="kidPlayFamilySoftLockPicker">
-              {roster.map((child) => (
-                <button
-                  key={child.participantId}
-                  type="button"
-                  className="kidPlayRosterLockSubmit"
-                  disabled={submitting}
-                  onClick={() => void handleSelectChild(child.participantId)}
-                >
-                  {child.displayName}
-                </button>
-              ))}
-            </div>
+          <div className="kidPlayReturnSessionField">
+            <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-email-or-pin">
+              Email or Student PIN
+            </label>
+            <input
+              id="kid-play-return-email-or-pin"
+              className="kidPlayRosterLockInput"
+              type="text"
+              autoComplete="off"
+              value={emailOrPin}
+              onChange={(event) => setEmailOrPin(event.target.value)}
+              placeholder="Email or student PIN"
+              disabled={submitting}
+            />
           </div>
-        ) : null}
 
-        <form className="kidPlayRosterLockForm" onSubmit={handleEmailSubmit}>
-          <label className="kidPlayRosterLockLabel" htmlFor="kid-play-family-soft-lock-email">
-            Parent / Guardian Email
-          </label>
-          <input
-            id="kid-play-family-soft-lock-email"
-            className="kidPlayRosterLockInput"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={submitting}
-          />
           {error ? (
-            <p className="kidPlayRosterLockError" role="alert">
+            <p className="kidPlayRosterLockError kidPlayReturnSessionError" role="alert">
               {error}
             </p>
           ) : null}
-          <button type="submit" className="kidPlayRosterLockSubmit" disabled={submitting}>
-            Continue to Family Portal
-          </button>
-        </form>
 
-        <form className="kidPlayRosterLockForm" onSubmit={(event) => void handleStudentPinSubmit(event)}>
-          <label className="kidPlayRosterLockLabel" htmlFor="kid-play-family-soft-lock-pin">
-            Student PIN
-          </label>
-          <input
-            id="kid-play-family-soft-lock-pin"
-            className="kidPlayRosterLockInput"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            value={studentPin}
-            onChange={(event) => setStudentPin(event.target.value)}
-            disabled={submitting}
-          />
           <button type="submit" className="kidPlayRosterLockSubmit" disabled={submitting}>
-            Return to Game
+            {submitting ? 'Continuing…' : 'Continue'}
           </button>
-        </form>
 
-        <form className="kidPlayRosterLockForm" onSubmit={handleFacilitatorSubmit}>
-          <label className="kidPlayRosterLockLabel" htmlFor="kid-play-family-soft-lock-facilitator-email">
-            Facilitator Email
-          </label>
-          <input
-            id="kid-play-family-soft-lock-facilitator-email"
-            className="kidPlayRosterLockInput"
-            type="email"
-            autoComplete="email"
-            value={facilitatorEmail}
-            onChange={(event) => setFacilitatorEmail(event.target.value)}
-            disabled={submitting}
-          />
-          <button type="submit" className="kidPlayRosterLockSubmit" disabled={submitting}>
-            Continue to Roster
-          </button>
-        </form>
-
-        <div className="kidPlayRosterLockForm">
           <button
             type="button"
             className="kidPlayRosterLockEndSession"
@@ -314,7 +232,7 @@ export default function KidPlayFamilySoftLockGate({
           >
             End Session
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );

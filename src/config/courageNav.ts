@@ -46,7 +46,7 @@ export const COURAGE_HOME_PATH = '/';
 /** @deprecated Prefer MARKETING_LOGO_SRC from design-system/brand/brandLogos */
 export const COURAGE_LOGO_SRC = MARKETING_LOGO_SRC;
 
-export { MARKETING_LOGO_SRC, FACILITATOR_LOGO_SRC, FAMILY_LOGO_SRC } from '../design-system/brand/brandLogos';
+export { MARKETING_LOGO_SRC, FACILITATOR_LOGO_SRC, FAMILY_LOGO_SRC, CAIDEN_VALE_LOGO_SRC } from '../design-system/brand/brandLogos';
 
 export {
   SCHOOLS_PATH,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import BrandLogo from '../../design-system/components/BrandLogo';
+import CourageFooterLogo from '../marketing/CourageFooterLogo';
 import {
   BMC_COLORING_PATH,
   BMC_RESET_TOOLS_PATH,
@@ -78,13 +78,13 @@ export default function CourageFooter() {
   return (
     <footer className="border-t border-navy-100 bg-[#050B18] py-12 text-white sm:py-14">
       <div className="cc-site-container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-left">
+        <div className="mb-6 text-left">
           <Link
             to="/"
-            className="inline-flex rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/60"
+            className="courageFooterLogoLink inline-flex rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/60"
             aria-label="Caiden's Courage home"
           >
-            <BrandLogo variant="marketing" size="marketingHeader" className="brightness-0 invert" />
+            <CourageFooterLogo />
           </Link>
         </div>
 

@@ -47,6 +47,8 @@ import InventoryItemCard, {
   type InventoryShopState,
 } from '../../../design-system/kids-adventure/InventoryItemCard';
 import '../../../design-system/kids-adventure/character-discovery.css';
+import '../../../design-system/kids-adventure/character-art-image.css';
+import KidPlayShellLoader from '../../kid-play-shell/KidPlayShellLoader';
 import '../inventory-panel.css';
 
 const SHOP_CATEGORY_LABELS: Record<RewardShopCategory, string> = {
@@ -80,11 +82,25 @@ function InventorySection({
   title,
   infoControl,
   children,
+  unified = false,
 }: {
   title: string;
   infoControl?: React.ReactNode;
   children: React.ReactNode;
+  unified?: boolean;
 }) {
+  if (unified) {
+    return (
+      <section className="inventoryCollectionSection">
+        <div className="inventoryCollectionSectionHeader">
+          <h3 className="inventoryCollectionSectionTitle">{title}</h3>
+          {infoControl}
+        </div>
+        {children}
+      </section>
+    );
+  }
+
   return (
     <section className="inventorySection">
       <div className="inventorySectionHeader">
@@ -382,9 +398,6 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
           {kidPlayShell ? (
             <header>
               <h1 className="kidPlayShellPageTitle">Collections</h1>
-              <p className="inventoryPanelKidIntro">
-                Your Collections hold badges, discoveries, and rewards from every adventure.
-              </p>
             </header>
           ) : (
             <PortalPageIntro>
@@ -414,43 +427,85 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
       ) : null}
 
       <div className="inventoryPanelContent">
-          {!loading && resolvedParticipantId && hasEarnedContent ? (
-            <p className="inventoryEarnedSummary" role="status">
-              {`${resolvedDisplayName} has earned ${earnedBadgeCount} badge${earnedBadgeCount === 1 ? '' : 's'} and ${earnedDiscoveryCount} character discover${earnedDiscoveryCount === 1 ? 'y' : 'ies'}.`}
-            </p>
-          ) : null}
-
           {!loading && resolvedParticipantId && !hasEarnedContent ? (
             <InventoryEmptyHero onStartWeek1={startWeek1} />
           ) : null}
 
           {loading ? (
-            <div className="inventoryCardGrid inventoryCardGrid--skeleton" aria-hidden="true">
-              {Array.from({ length: 4 }, (_, index) => (
-                <div key={index} className="inventorySkeletonCard" />
-              ))}
-            </div>
+            kidPlayShell ? (
+              <KidPlayShellLoader fullScreen={false} />
+            ) : (
+              <div className="inventoryCardGrid inventoryCardGrid--skeleton" aria-hidden="true">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div key={index} className="inventorySkeletonCard" />
+                ))}
+              </div>
+            )
           ) : null}
 
           {!loading ? (
-            <>
-              {checkInBadgeRows.length > 0 ? (
-                <InventorySection title="B-4 Check-In">
-                  <div className="inventoryCardGrid inventoryCardGrid--badges">
-                    {checkInBadgeRows.map(renderBadgeCard)}
-                  </div>
-                </InventorySection>
+            <article className={kidPlayShell ? 'inventoryCollectionPanel' : undefined}>
+              {kidPlayShell ? (
+                <header className="inventoryCollectionPanelHead">
+                  <h2 className="inventoryCollectionPanelTitle">Your Focus Flame Collection</h2>
+                  {resolvedParticipantId && hasEarnedContent ? (
+                    <p className="inventoryCollectionPanelSummary" role="status">
+                      {`${resolvedDisplayName} has earned ${earnedBadgeCount} badge${earnedBadgeCount === 1 ? '' : 's'} and ${earnedDiscoveryCount} character discover${earnedDiscoveryCount === 1 ? 'y' : 'ies'}.`}
+                    </p>
+                  ) : (
+                    <p className="inventoryCollectionPanelSummary">
+                      Badges, discoveries, and rewards from every adventure live here.
+                    </p>
+                  )}
+                </header>
+              ) : resolvedParticipantId && hasEarnedContent ? (
+                <p className="inventoryEarnedSummary" role="status">
+                  {`${resolvedDisplayName} has earned ${earnedBadgeCount} badge${earnedBadgeCount === 1 ? '' : 's'} and ${earnedDiscoveryCount} character discover${earnedDiscoveryCount === 1 ? 'y' : 'ies'}.`}
+                </p>
               ) : null}
 
-              {weeklyBadgeRows.length > 0 ? (
-                <InventorySection title="Weekly Adventure Badges">
-                  <div className="inventoryCardGrid inventoryCardGrid--badges">
-                    {weeklyBadgeRows.map(renderBadgeCard)}
-                  </div>
-                </InventorySection>
-              ) : null}
+              <div className={kidPlayShell ? 'inventoryCollectionPanelBody' : undefined}>
+              {kidPlayShell ? (
+                checkInBadgeRows.length > 0 || weeklyBadgeRows.length > 0 ? (
+                  <InventorySection title="Weekly Adventure Badges" unified>
+                    <div className="inventoryCardGrid inventoryCardGrid--badges">
+                      {[...checkInBadgeRows, ...weeklyBadgeRows].map(renderBadgeCard)}
+                    </div>
+                  </InventorySection>
+                ) : null
+              ) : (
+                <>
+                  {checkInBadgeRows.length > 0 ? (
+                    <InventorySection title="B-4 Check-In">
+                      <div className="inventoryCardGrid inventoryCardGrid--badges">
+                        {checkInBadgeRows.map(renderBadgeCard)}
+                      </div>
+                    </InventorySection>
+                  ) : null}
+                  {weeklyBadgeRows.length > 0 ? (
+                    <InventorySection title="Weekly Adventure Badges">
+                      <div className="inventoryCardGrid inventoryCardGrid--badges">
+                        {weeklyBadgeRows.map(renderBadgeCard)}
+                      </div>
+                    </InventorySection>
+                  ) : null}
+                </>
+              )}
 
-              {monthlyBadgeRows.length > 0 ? (
+              {kidPlayShell ? (
+                monthlyBadgeRows.length > 0 || monthlyChallenge ? (
+                  <InventorySection title="Monthly Challenge" unified>
+                    {monthlyBadgeRows.length > 0 ? (
+                      <div className="inventoryCardGrid inventoryCardGrid--badges">
+                        {monthlyBadgeRows.map(renderBadgeCard)}
+                      </div>
+                    ) : null}
+                    {monthlyChallenge && !monthlyChallenge.certificateEarned ? (
+                      <MonthChallengeProgressCard progress={monthlyChallenge} />
+                    ) : null}
+                  </InventorySection>
+                ) : null
+              ) : monthlyBadgeRows.length > 0 ? (
                 <InventorySection title="Monthly Challenge">
                   <div className="inventoryCardGrid inventoryCardGrid--badges">
                     {monthlyBadgeRows.map(renderBadgeCard)}
@@ -458,7 +513,7 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
                 </InventorySection>
               ) : null}
 
-              <InventorySection title="Character Discoveries">
+              <InventorySection title="Character Discoveries" unified={kidPlayShell}>
                 {discoveryCatalog.length > 0 ? (
                   <div className="inventoryCardGrid inventoryCardGrid--discoveries">
                     {discoveryCatalog.map((entry) => (
@@ -472,7 +527,7 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
                 )}
               </InventorySection>
 
-              <InventorySection title="Earned Rewards">
+              <InventorySection title="Earned Rewards" unified={kidPlayShell}>
                 {displayableEarnedRewards.length > 0 ? (
                   <div className="inventoryCardGrid inventoryCardGrid--collectibles">
                     {displayableEarnedRewards.map((reward) => (
@@ -491,20 +546,29 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
                 )}
               </InventorySection>
 
-              <InventorySection title="Certificates">
+              <InventorySection title="Certificates" unified={kidPlayShell}>
                 {monthlyChallenge?.certificateEarned ? (
                   <div className="inventoryCertificateCard inventoryCertificateCard--earned">
                     <img
                       src={rewardSnapshot?.certificateImageUrl ?? GENERIC_BADGE_PLACEHOLDER_SRC}
                       alt=""
                       className="inventoryCertificateCardArt"
+                      onError={(event) => {
+                        event.currentTarget.style.visibility = 'hidden';
+                      }}
                     />
                     <p className="inventoryCertificateCardLabel">
                       {monthlyChallenge.certificateName}
                     </p>
                   </div>
                 ) : monthlyChallenge ? (
-                  <MonthChallengeProgressCard progress={monthlyChallenge} />
+                  kidPlayShell && monthlyBadgeRows.length > 0 ? (
+                    <InventoryPlaceholderMessage>
+                      Complete all 4 weeks in Month 1 to earn your certificate.
+                    </InventoryPlaceholderMessage>
+                  ) : (
+                    <MonthChallengeProgressCard progress={monthlyChallenge} />
+                  )
                 ) : (
                   <InventoryPlaceholderMessage>
                     Complete all 4 weeks in Month 1 to earn your certificate.
@@ -512,38 +576,41 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
                 )}
               </InventorySection>
 
-              <section className="inventoryShop">
-                <div className="inventorySectionHeader">
-                  <h3 className="inventorySectionTitle">Reward Shop</h3>
-                </div>
-                <p className="inventoryShopNote">Unlock cosmetic extras with Focus Coins you earn on adventures.</p>
-                <div className="inventoryCardGrid inventoryCardGrid--shop">
-                  {shopItems.map((item) => {
-                    const shopState = resolveShopItemState(
-                      item,
-                      totalCoins,
-                      inventory.purchasedShopItemIds,
-                    );
-                    return (
-                      <InventoryItemCard
-                        key={item.id}
-                        label={item.name}
-                        imageSrc={resolveShopItemImage(item.id, item.image)}
-                        variant="shop"
-                        cost={item.cost}
-                        description={item.description.split('.')[0]}
-                        themeHint={item.name}
-                        category={SHOP_CATEGORY_LABELS[item.category]}
-                        shopState={shopState}
-                        owned={shopState === 'owned'}
-                        rarity={item.cost >= 150 ? 'Epic' : item.cost >= 100 ? 'Rare' : 'Common'}
-                        onShopCtaClick={() => handleShopUnlockClick(item, shopState)}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            </>
+              {!kidPlayShell ? (
+                <section className="inventoryShop">
+                  <div className="inventorySectionHeader">
+                    <h3 className="inventorySectionTitle">Reward Shop</h3>
+                  </div>
+                  <p className="inventoryShopNote">Unlock cosmetic extras with Focus Coins you earn on adventures.</p>
+                  <div className="inventoryCardGrid inventoryCardGrid--shop">
+                    {shopItems.map((item) => {
+                      const shopState = resolveShopItemState(
+                        item,
+                        totalCoins,
+                        inventory.purchasedShopItemIds,
+                      );
+                      return (
+                        <InventoryItemCard
+                          key={item.id}
+                          label={item.name}
+                          imageSrc={resolveShopItemImage(item.id, item.image)}
+                          variant="shop"
+                          cost={item.cost}
+                          description={item.description.split('.')[0]}
+                          themeHint={item.name}
+                          category={SHOP_CATEGORY_LABELS[item.category]}
+                          shopState={shopState}
+                          owned={shopState === 'owned'}
+                          rarity={item.cost >= 150 ? 'Epic' : item.cost >= 100 ? 'Rare' : 'Common'}
+                          onShopCtaClick={() => handleShopUnlockClick(item, shopState)}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+              </div>
+            </article>
           ) : null}
       </div>
 

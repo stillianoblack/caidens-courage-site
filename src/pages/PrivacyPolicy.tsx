@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
+import ValeLogo from '../components/marketing/ValeLogo';
+import { CAIDEN_VALE_HOME_PATH } from '../config/nav';
 
 const PrivacyPolicy: React.FC = () => {
   const location = useLocation();
@@ -168,10 +170,9 @@ const PrivacyPolicy: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <span className="font-display text-xl font-extrabold">
-                <span className="text-white">Caiden's</span>
-                <span className="text-golden-400">Courage</span>
-              </span>
+              <Link to={CAIDEN_VALE_HOME_PATH} className="logo--valeLink inline-flex" aria-label="Caiden Vale home">
+                <ValeLogo size="footer" />
+              </Link>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
               <Link to="/mission" className="text-white/70 hover:text-white transition-colors">Mission</Link>

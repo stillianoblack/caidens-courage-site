@@ -1,5 +1,6 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import { normalizeSelFocusLabel } from './adventureSelFocus';
+import { resolveAdventureImageUrl } from './adventureMapMissions';
 
 const WEEK1_FALLBACK_THUMB = '/images/caidenscourage/Game-Hub/courage-in-the-dark.webp';
 
@@ -14,7 +15,9 @@ export function resolveAdventureComicThumbnailUrl(
     cmsModule?.thumbnail_image_url?.trim() ||
     null;
 
-  if (cmsThumb) return cmsThumb;
+  if (cmsThumb) {
+    return resolveAdventureImageUrl(cmsThumb, cmsModule?.updated_at) ?? cmsThumb;
+  }
   if (weekNumber === 1) return WEEK1_FALLBACK_THUMB;
   return null;
 }

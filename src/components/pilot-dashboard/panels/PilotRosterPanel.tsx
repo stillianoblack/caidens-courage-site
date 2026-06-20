@@ -321,8 +321,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           variant="roster"
           onStudentClick={setDrawerParticipantId}
           onGradeSaved={updateParticipantGrade}
-          onLaunchStudentSession={handleLaunchStudentSession}
-          launchSessionLoadingId={launchSessionLoadingId}
         />
       )}
 

@@ -9664,9 +9664,26 @@ code {
   /* Keep logo white on desktop hover; glow is applied on the link wrapper above. */
 }
 
+.courage-footer-logo-img {
+  display: block;
+  flex-shrink: 0;
+  height: 48px;
+  width: auto;
+  max-width: 9.5rem;
+  object-fit: contain;
+  filter: none;
+}
+
+.courageFooterLogoLink:hover .courage-footer-logo-img,
+.courage-footer-logo-img:hover {
+  filter: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* Legacy alias */
 .footer-logo-img {
-  /* Turn the blue SVG into brand gold for footer only */
-  filter: brightness(0) saturate(100%) invert(85%) sepia(29%) saturate(1127%) hue-rotate(340deg) brightness(101%) contrast(92%);
+  filter: none;
 }
 
 /* Decorative circle styles */

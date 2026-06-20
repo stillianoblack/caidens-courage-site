@@ -12,13 +12,7 @@ function isGameplayPickerRoute(pathname: string): boolean {
   if (!isKidFacingPortalRoute(pathname)) return false;
   const segments = pathname.split('/').filter(Boolean);
   const last = segments[segments.length - 1] ?? '';
-  return [
-    'weekly-adventures',
-    'characters',
-    'inventory',
-    'baseline-check',
-    'continue-learning',
-  ].includes(last);
+  return ['characters', 'inventory', 'baseline-check'].includes(last);
 }
 
 export default function ActiveParticipantPickerGate() {

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { CourageMapHotspot } from '../../data/courageInTheDarkMap';
 import type { CourageMissionCardAnchor } from '../../lib/courageMapCardPosition';
+import { isKidShellDisplayImageUrl } from '../../lib/kidShellDisplayImages';
 import { resolveCharacterThemeId, themeDataAttributes } from '../../design-system/kids-adventure/characterThemes';
 import { useCourageHubAudio } from './CourageHubAudioContext';
 
@@ -17,6 +18,16 @@ type CourageMapMissionCardProps = {
   startHref?: string | null;
   onClose: () => void;
 };
+
+function MissionCardPortrait({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!isKidShellDisplayImageUrl(src) || failed) return null;
+  return (
+    <div className="courageMissionCardPortrait">
+      <img src={src} alt="" width={96} height={96} decoding="async" onError={() => setFailed(true)} />
+    </div>
+  );
+}
 
 function MissionCardContent({
   hotspot,
@@ -73,15 +84,7 @@ function MissionCardContent({
         ×
       </button>
 
-      <div className="courageMissionCardPortrait">
-        <img
-          src={hotspot.thumbnail}
-          alt=""
-          width={96}
-          height={96}
-          decoding="async"
-        />
-      </div>
+      <MissionCardPortrait src={hotspot.thumbnail} />
 
       <h3 id={`courage-mission-card-${hotspot.id}`} className="courageMissionCardTitle">
         {hotspot.label}

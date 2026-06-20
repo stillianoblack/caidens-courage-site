@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
+import { isKidShellDisplayImageUrl } from '../../lib/kidShellDisplayImages';
 import { resolveWeeklyAdventureWeekAccent } from '../../lib/weeklyAdventureWeekAccent';
 import type { WeeklyAdventureJourneyCardItem } from '../../lib/weeklyAdventureWeekCards';
 import './hero-explore-overlay.css';
@@ -14,6 +15,23 @@ type HeroExploreOverlayProps = {
   layout: HeroExploreOverlayLayout;
   className?: string;
 };
+
+function WeekRowThumb({ src }: { src?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  if (!isKidShellDisplayImageUrl(src) || failed) return null;
+  return (
+    <span className="heroExploreOverlayWeekThumbWrap">
+      <img
+        src={src}
+        alt=""
+        className="heroExploreOverlayWeekThumb"
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
+    </span>
+  );
+}
 
 export default function HeroExploreOverlay({
   cards,
@@ -87,21 +105,7 @@ export default function HeroExploreOverlay({
                     aria-current={isActive ? 'true' : undefined}
                   >
                     <span className="heroExploreOverlayWeekBadge">W{card.weekNumber}</span>
-                    <span className="heroExploreOverlayWeekThumbWrap">
-                      {card.thumbnailUrl ? (
-                        <img
-                          src={card.thumbnailUrl}
-                          alt=""
-                          className="heroExploreOverlayWeekThumb"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <span className="heroExploreOverlayWeekThumb heroExploreOverlayWeekThumb--fallback">
-                          {card.weekNumber}
-                        </span>
-                      )}
-                    </span>
+                    <WeekRowThumb src={card.thumbnailUrl} />
                     <span className="heroExploreOverlayWeekCopy">
                       <span className="heroExploreOverlayWeekTitle">{card.title}</span>
                       <span className="heroExploreOverlayWeekSel">

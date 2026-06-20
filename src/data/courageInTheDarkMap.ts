@@ -1,5 +1,6 @@
+import { CHARACTER_COMIC_ICONS, CHARACTER_HOTSPOT_IMAGES } from '../design-system/kids-adventure/characterThemes';
+
 export const COURAGE_IN_THE_DARK_BG = '/images/caidenscourage/Game-Hub/courage-in-the-dark.webp';
-const CHARACTER_ASSET_DIR = '/images/caidenscourage/Game-Hub/characters';
 
 export type CourageMapHotspotId = 'caiden' | 'miranda' | 'zeke' | 'charlie' | 'b4';
 export type CourageMapHotspotColor = 'gold' | 'purple' | 'green' | 'orange' | 'blue';
@@ -35,8 +36,8 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
     id: 'caiden',
     characterName: 'Caiden',
     label: 'Courage by the Bridge',
-    token: `${CHARACTER_ASSET_DIR}/caiden-hotspot.webp`,
-    thumbnail: `${CHARACTER_ASSET_DIR}/caiden-hotspot.webp`,
+    token: CHARACTER_HOTSPOT_IMAGES.caiden,
+    thumbnail: CHARACTER_COMIC_ICONS.caiden,
     color: 'gold',
     accentClass: 'from-yellow-300 to-blue-500',
     position: { x: 36, y: 29.5 },
@@ -50,8 +51,8 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
     id: 'miranda',
     characterName: 'Miranda',
     label: "Miranda's Mystery",
-    token: `${CHARACTER_ASSET_DIR}/miranda-hotspot.webp`,
-    thumbnail: `${CHARACTER_ASSET_DIR}/miranda-hotspot.webp`,
+    token: CHARACTER_HOTSPOT_IMAGES.miranda,
+    thumbnail: CHARACTER_COMIC_ICONS.miranda,
     color: 'purple',
     accentClass: 'from-purple-400 to-fuchsia-500',
     position: { x: 17, y: 51.5 },
@@ -65,8 +66,8 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
     id: 'zeke',
     characterName: 'Zeke',
     label: "Zeke's Cave Challenge",
-    token: '/images/characters/zeke_photo_icon_game.webp',
-    thumbnail: '/images/characters/zeke_photo_icon_game.webp',
+    token: CHARACTER_HOTSPOT_IMAGES.zeke,
+    thumbnail: CHARACTER_COMIC_ICONS.zeke,
     color: 'orange',
     accentClass: 'from-orange-300 to-amber-600',
     position: { x: 65, y: 45.5 },
@@ -80,8 +81,8 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
     id: 'charlie',
     characterName: 'Charlie Perk',
     label: "Charlie's Discovery Zone",
-    token: `${CHARACTER_ASSET_DIR}/charlie-hotspot.webp`,
-    thumbnail: `${CHARACTER_ASSET_DIR}/charlie-hotspot.webp`,
+    token: CHARACTER_HOTSPOT_IMAGES.charlie,
+    thumbnail: CHARACTER_COMIC_ICONS.charlie,
     color: 'green',
     accentClass: 'from-emerald-300 to-green-600',
     position: { x: 84, y: 62.5 },
@@ -95,8 +96,8 @@ export const courageInTheDarkMissions: CourageInTheDarkMission[] = [
     id: 'b4',
     characterName: 'B-4',
     label: 'B-4 Check-In Station',
-    token: `${CHARACTER_ASSET_DIR}/b4-hotspot.webp`,
-    thumbnail: `${CHARACTER_ASSET_DIR}/b4-hotspot.webp`,
+    token: CHARACTER_HOTSPOT_IMAGES.b4,
+    thumbnail: CHARACTER_COMIC_ICONS.b4,
     color: 'blue',
     accentClass: 'from-sky-300 to-blue-600',
     position: { x: 50, y: 59.5 },

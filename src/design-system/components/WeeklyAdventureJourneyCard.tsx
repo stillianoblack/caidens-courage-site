@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatSelFocusLine } from '../../lib/adventureSelFocus';
+import { isKidShellDisplayImageUrl } from '../../lib/kidShellDisplayImages';
 import { resolveWeeklyAdventureWeekAccent } from '../../lib/weeklyAdventureWeekAccent';
 import type { WeeklyAdventureWeekTileVariant } from './WeeklyAdventureWeekTile';
 import './weekly-adventure-journey.css';
@@ -22,6 +23,21 @@ export type WeeklyAdventureJourneyCardProps = {
   isSelected?: boolean;
   className?: string;
 };
+
+function JourneyCardThumb({ src }: { src?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  if (!isKidShellDisplayImageUrl(src) || failed) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      className="weeklyJourneyCardThumb"
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export default function WeeklyAdventureJourneyCard({
   weekNumber,
@@ -59,19 +75,7 @@ export default function WeeklyAdventureJourneyCard({
   const body = (
     <>
       <div className="weeklyJourneyCardMedia">
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt=""
-            className="weeklyJourneyCardThumb"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="weeklyJourneyCardThumb weeklyJourneyCardThumb--fallback" aria-hidden="true">
-            W{weekNumber}
-          </div>
-        )}
+        <JourneyCardThumb src={thumbnailUrl} />
         <span className={`weeklyJourneyCardPill weeklyJourneyCardPill--${pillVariant}`}>
           {statusLabel}
         </span>

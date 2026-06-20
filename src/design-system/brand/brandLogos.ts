@@ -9,6 +9,12 @@ function asset(path: string): string {
 /** Caiden's Courage icon + wordmark — marketing site, family portal, public brand. */
 export const MARKETING_LOGO_SRC = asset('/images/icons/marketing_page_logo.svg');
 
+/** Dark-footer variant: white icon square + gold mark + gold wordmark (marketing footer only). */
+export const MARKETING_FOOTER_LOGO_SRC = asset('/images/icons/marketing_footer_logo.svg');
+
+/** Caiden Vale story-world wordmark — Vale marketing pages only (not portals). */
+export const CAIDEN_VALE_LOGO_SRC = asset('/images/logos/CaidenVale_Logo_Web.svg');
+
 /** Square Focus Flame icon — facilitator portal shell branding. */
 export const FACILITATOR_LOGO_SRC = asset('/images/icons/Facilitator_logo.svg');
 

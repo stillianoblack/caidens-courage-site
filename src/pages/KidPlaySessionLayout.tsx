@@ -27,10 +27,11 @@ import {
   resolveKidPlayShellModule,
   type KidPlayShellModuleId,
 } from '../lib/kidPlayShellRoutes';
-import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import KidPlayShellLoader from '../components/kid-play-shell/KidPlayShellLoader';
 import { IdleSessionGuard } from '../design-system/narration';
 import KidPlayShellNav from '../components/kid-play-shell/KidPlayShellNav';
 import KidPlayShellExitModal from '../components/kid-play-shell/KidPlayShellExitModal';
+import '../design-system/kids-adventure/character-art-image.css';
 import '../components/kid-play-shell/kid-play-shell.css';
 import '../components/kid-play-shell/kid-play-shell-nav.css';
 import '../components/kid-play-shell/kid-play-shell-exit.css';
@@ -44,7 +45,10 @@ export default function KidPlaySessionLayout() {
   const location = useLocation();
   const [session, setSession] = useState<KidPlaySessionRow | null>(null);
   const [displayName, setDisplayName] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [bootError, setBootError] = useState<string | null>(null);
+  const [showBootLoader, setShowBootLoader] = useState(true);
+  const [bootLoaderExiting, setBootLoaderExiting] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
   const resumeHandledRef = useRef(false);
   const initialPathRef = useRef(location.pathname);
@@ -52,6 +56,11 @@ export default function KidPlaySessionLayout() {
   useEffect(() => {
     let cancelled = false;
     resumeHandledRef.current = false;
+    setShowBootLoader(true);
+    setBootLoaderExiting(false);
+    setSession(null);
+    setDisplayName('');
+    setFirstName('');
 
     async function boot() {
       const sessionId = kidPlaySessionId.trim();
@@ -76,11 +85,13 @@ export default function KidPlaySessionLayout() {
       const name = participant
         ? resolveParticipantDisplayName(participant.id, buildParticipantNameLookup([participant]))
         : 'Player';
+      const legalFirstName = participant?.first_name?.trim() || name.split(/\s+/)[0] || name;
 
       if (cancelled) return;
 
       setSession(row);
       setDisplayName(name);
+      setFirstName(legalFirstName);
       void updateKidPlaySessionActivity(row.id);
 
       const behavior = resolveKidPlaySessionBehaviorFromRow(row);
@@ -116,6 +127,16 @@ export default function KidPlaySessionLayout() {
       cancelled = true;
     };
   }, [kidPlaySessionId, navigate]);
+
+  const isBooting = !session || !displayName;
+  const showLoaderOverlay = isBooting || showBootLoader;
+
+  useEffect(() => {
+    if (isBooting || !showBootLoader) return;
+    setBootLoaderExiting(true);
+    const timer = window.setTimeout(() => setShowBootLoader(false), 460);
+    return () => window.clearTimeout(timer);
+  }, [displayName, isBooting, session, showBootLoader]);
 
   useEffect(() => {
     if (!session) return;
@@ -159,16 +180,8 @@ export default function KidPlaySessionLayout() {
 
   if (bootError) {
     return (
-      <div className="kid-play-shellLoader" role="alert">
+      <div className="kid-play-shellLoader kid-play-shellLoader--error" role="alert">
         {bootError}
-      </div>
-    );
-  }
-
-  if (!session || !displayName) {
-    return (
-      <div className="kid-play-shellLoader">
-        <PortalRouteLoader message="Loading adventure..." />
       </div>
     );
   }
@@ -176,29 +189,40 @@ export default function KidPlaySessionLayout() {
   const activeModule = (resolveKidPlayShellModule(location.pathname) ?? 'weekly-adventures') as KidPlayShellModuleId;
 
   return (
-    <KidPlaySessionParticipantProvider participantId={session.child_id} displayName={displayName}>
-      <KidPlaySessionProvider session={session}>
-        <div className="kid-play-shell">
-          <KidPlayShellNav
-            sessionId={session.id}
-            activeModule={activeModule}
-            onExitClick={() => setExitOpen(true)}
-          />
-          <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
-            <Outlet key={`${location.pathname}${location.search}`} />
-          </Suspense>
-          <KidPlayShellExitModal
-            open={exitOpen}
-            onCancel={() => setExitOpen(false)}
-            onConfirm={handleConfirmExit}
-          />
-          <IdleSessionGuard
-            enabled
-            onEndSession={() => handleEndSession('idle_timeout')}
-            endSessionLabel="End Session"
-          />
-        </div>
-      </KidPlaySessionProvider>
-    </KidPlaySessionParticipantProvider>
+    <>
+      {!showLoaderOverlay && session ? (
+        <KidPlaySessionParticipantProvider
+          participantId={session.child_id}
+          displayName={displayName}
+          firstName={firstName}
+        >
+          <KidPlaySessionProvider session={session}>
+            <div className="kid-play-shell">
+              <KidPlayShellNav
+                sessionId={session.id}
+                activeModule={activeModule}
+                onExitClick={() => setExitOpen(true)}
+              />
+              <Suspense fallback={null}>
+                <Outlet key={`${location.pathname}${location.search}`} />
+              </Suspense>
+              <KidPlayShellExitModal
+                open={exitOpen}
+                onCancel={() => setExitOpen(false)}
+                onConfirm={handleConfirmExit}
+              />
+              <IdleSessionGuard
+                enabled
+                onEndSession={() => handleEndSession('idle_timeout')}
+                endSessionLabel="End Session"
+              />
+            </div>
+          </KidPlaySessionProvider>
+        </KidPlaySessionParticipantProvider>
+      ) : null}
+      {showLoaderOverlay ? (
+        <KidPlayShellLoader fullScreen exiting={!isBooting && bootLoaderExiting} />
+      ) : null}
+    </>
   );
 }

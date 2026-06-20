@@ -1,6 +1,6 @@
 import type { AdventureModuleRecord } from '../types/adventureModule';
 import { resolveAdventureComicThumbnailUrl } from './adventureThumbnail';
-import { resolveAdventureHeroMapSrc } from './adventureMapMissions';
+import { resolveAdventureHeroMapSrc, resolveAdventureImageUrl } from './adventureMapMissions';
 
 export type WeeklyAdventureThumbnailSource =
   | 'cms_comic_thumbnail'
@@ -17,7 +17,6 @@ export type WeeklyAdventureThumbnailResolution = {
   fallbackReason?: string;
 };
 
-const GENERIC_PLACEHOLDER = '/images/icons/focus-flame-mark.svg';
 const WEEK1_STATIC = '/images/caidenscourage/Game-Hub/courage-in-the-dark.webp';
 
 function firstMissionImageUrl(module: AdventureModuleRecord | null | undefined): string | null {
@@ -43,7 +42,10 @@ export function resolveWeeklyAdventureThumbnail(input: {
 
   const comicUrl = cms?.comic_thumbnail_url?.trim();
   if (comicUrl) {
-    return { url: comicUrl, source: 'cms_comic_thumbnail' };
+    return {
+      url: resolveAdventureImageUrl(comicUrl, cms?.updated_at) ?? comicUrl,
+      source: 'cms_comic_thumbnail',
+    };
   }
 
   const aliasUrl =
@@ -51,7 +53,10 @@ export function resolveWeeklyAdventureThumbnail(input: {
     cms?.thumbnail_image_url?.trim() ||
     null;
   if (aliasUrl) {
-    return { url: aliasUrl, source: 'cms_thumbnail_alias' };
+    return {
+      url: resolveAdventureImageUrl(aliasUrl, cms?.updated_at) ?? aliasUrl,
+      source: 'cms_thumbnail_alias',
+    };
   }
 
   const legacyComic = resolveAdventureComicThumbnailUrl(cms, weekNumber);
@@ -95,9 +100,9 @@ export function resolveWeeklyAdventureThumbnail(input: {
   }
 
   return {
-    url: GENERIC_PLACEHOLDER,
+    url: '',
     source: 'generic_placeholder',
-    fallbackReason: 'No CMS thumbnail or map image — using generic placeholder.',
+    fallbackReason: 'No CMS thumbnail or map image configured for this week.',
   };
 }
 
