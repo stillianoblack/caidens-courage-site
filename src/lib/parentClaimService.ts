@@ -15,6 +15,7 @@ import {
 import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { setActiveChild } from './activeChildContext';
 import { trackKitParentSignup } from './kitIntegration';
+import { revealStudentPinViaFunction } from './studentPinService';
 
 export type ParentLookupInput = {
   campProgramCode?: string;
@@ -343,8 +344,10 @@ export async function claimParentFamilyPortal(input: {
   });
 
   const matchedStudentIds = lookup.matches.map((row) => row.link.student_id);
+  let participants: Awaited<ReturnType<typeof fetchParticipantsByIds>>['participants'] = [];
   if (matchedStudentIds.length >= 1) {
-    const { participants } = await fetchParticipantsByIds(matchedStudentIds);
+    const payload = await fetchParticipantsByIds(matchedStudentIds);
+    participants = payload.participants;
     const first = participants[0];
     if (first) {
       setActiveChild({
@@ -362,12 +365,43 @@ export async function claimParentFamilyPortal(input: {
     link_count: linkIds.length,
   });
 
+  const firstParticipant = participants.find((row) => matchedStudentIds.includes(row.id));
+  const childName =
+    firstParticipant?.nickname?.trim() ||
+    firstParticipant?.first_name?.trim() ||
+    'Your child';
+
+  let studentPin: string | undefined;
+  if (matchedStudentIds[0]) {
+    try {
+      const pinResult = await revealStudentPinViaFunction({
+        participantId: matchedStudentIds[0],
+        programCode: familyProgram.programCode,
+        parentEmail: email,
+        actorRole: 'parent',
+      });
+      if ('pin' in pinResult) {
+        studentPin = pinResult.pin;
+      }
+    } catch {
+      /* PIN optional in welcome email */
+    }
+  }
+
   trackKitParentSignup({
     parentEmail: email,
     eventName: 'parent_claim',
     metadata: {
       family_program_code: familyProgram.programCode,
       matched_student_count: matchedStudentIds.length,
+    },
+    welcomeEmail: {
+      parentEmail: email,
+      familyOrProgramName: familyProgram.programName ?? familyProgram.programCode,
+      familyAccessCode: input.accessCode,
+      childName,
+      studentPin,
+      relatedStudentId: matchedStudentIds[0] ?? null,
     },
   });
 

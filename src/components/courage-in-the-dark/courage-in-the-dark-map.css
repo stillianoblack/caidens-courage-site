@@ -670,9 +670,11 @@
   opacity: 1;
   filter: none;
   z-index: 3;
+  transform: scale(1.04);
 }
 
 .courageMapHotspot--required .courageMapHotspotRing {
-  animation-duration: 1.8s;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.5) 0%, rgba(59, 130, 246, 0.2) 55%, transparent 72%);
+  animation-duration: 1.2s;
+  background: radial-gradient(circle, rgba(96, 210, 255, 0.72) 0%, rgba(59, 130, 246, 0.35) 55%, transparent 72%);
+  box-shadow: 0 0 28px rgba(56, 189, 248, 0.55);
 }

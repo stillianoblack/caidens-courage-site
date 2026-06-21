@@ -1,6 +1,6 @@
 # Portal Auth Audit
 
-Generated: 2026-06-21T15:33:13.384Z
+Generated: 2026-06-21T16:05:21.101Z
 
 **Status:** PASS
 

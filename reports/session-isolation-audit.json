@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-06-21T15:33:13.652Z",
+  "generatedAt": "2026-06-21T16:05:20.785Z",
   "passed": true,
   "summary": {
-    "sourceFilesScanned": 1273,
-    "storageKeysFound": 316,
+    "sourceFilesScanned": 1274,
+    "storageKeysFound": 317,
     "scopedKeys": 10,
     "legacyUnsafeKeys": 6,
     "identityRelatedKeys": 23,

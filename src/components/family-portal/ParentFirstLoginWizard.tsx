@@ -1,20 +1,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
+import { readActiveAccessCode } from '../../config/portalContext';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
-import { familyPortalPath } from '../../lib/familyPortalPaths';
 import {
   dismissParentOnboardingLater,
-  markParentOnboardingComplete,
   PARENT_ONBOARDING_GOAL_OPTIONS,
 } from '../../lib/parentOnboardingState';
-import { saveProgramGoals } from '../../lib/programGoalsService';
+import { familyPortalPath } from '../../lib/familyPortalPaths';
+import { submitParentOnboarding } from '../../lib/parentOnboardingSubmit';
 import './parent-first-login-wizard.css';
 
 type ParentFirstLoginWizardProps = {
   open: boolean;
   initialEmail?: string;
-  onFinished: () => void;
+  campProgramCode?: string | null;
+  onFinished: () => void | Promise<void>;
 };
 
 type WizardStep = 1 | 2 | 3 | 4 | 5;
@@ -22,6 +23,7 @@ type WizardStep = 1 | 2 | 3 | 4 | 5;
 export default function ParentFirstLoginWizard({
   open,
   initialEmail = '',
+  campProgramCode = null,
   onFinished,
 }: ParentFirstLoginWizardProps) {
   const navigate = useNavigate();
@@ -32,6 +34,8 @@ export default function ParentFirstLoginWizard({
   const [childName, setChildName] = useState(activeChild?.displayName ?? '');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const childProgramLabel = useMemo(() => {
     const parts = [program?.programName, program?.groupName].filter(Boolean);
@@ -53,29 +57,31 @@ export default function ParentFirstLoginWizard({
         parentEmail: email.trim(),
       });
     }
-    onFinished();
+    void onFinished();
   }, [email, onFinished, program?.programCode]);
 
   const handleComplete = useCallback(async () => {
-    if (!program?.programCode) return;
+    if (!program?.programCode || !activeChild?.participantId) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      if (selectedGoals.length) {
-        await saveProgramGoals({
-          program_code: program.programCode,
-          portal_type: 'family',
-          selected_goals: selectedGoals,
-          completed_at: new Date().toISOString(),
-        });
-      }
-      markParentOnboardingComplete({
+      const result = await submitParentOnboarding({
         programCode: program.programCode,
-        parentEmail: email.trim() || initialEmail.trim() || 'parent@family.local',
-        familyGoals: selectedGoals,
-        childParticipantId: activeChild?.participantId,
-        childDisplayName: childName.trim() || activeChild?.displayName,
+        campProgramCode,
+        parentEmail: email.trim() || initialEmail.trim(),
+        childParticipantId: activeChild.participantId,
+        childDisplayName: childName.trim() || activeChild.displayName,
+        selectedGoals,
+        accessCode: readActiveAccessCode(),
       });
-      onFinished();
+
+      if (!result.success) {
+        setSubmitError(result.message);
+        return;
+      }
+
+      setSaved(true);
+      await onFinished();
       navigate(familyPortalPath('', window.location.pathname));
     } finally {
       setSubmitting(false);
@@ -83,6 +89,7 @@ export default function ParentFirstLoginWizard({
   }, [
     activeChild?.displayName,
     activeChild?.participantId,
+    campProgramCode,
     childName,
     email,
     initialEmail,
@@ -212,18 +219,34 @@ export default function ParentFirstLoginWizard({
 
         {step === 5 ? (
           <>
-            <h2 className="parentOnboardingTitle">You&apos;re all set</h2>
-            <p className="parentOnboardingBody">
-              Your child can keep playing with their Student PIN, and you can track progress here.
-            </p>
+            {saved ? (
+              <>
+                <h2 className="parentOnboardingTitle">You&apos;re all set</h2>
+                <p className="parentOnboardingBody">
+                  Your child can keep playing with their Student PIN, and you can track progress here.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="parentOnboardingTitle">Finish your family setup</h2>
+                <p className="parentOnboardingBody">
+                  We&apos;ll save your parent email, family goals, and child connection for this program.
+                </p>
+                {submitError ? (
+                  <p className="parentOnboardingError" role="alert">
+                    {submitError}
+                  </p>
+                ) : null}
+              </>
+            )}
             <div className="parentOnboardingActions">
               <button
                 type="button"
                 className="parentOnboardingPrimary"
-                disabled={submitting}
+                disabled={submitting || saved}
                 onClick={() => void handleComplete()}
               >
-                {submitting ? 'Saving…' : 'Go to Family Overview'}
+                {saved ? 'Saved' : submitting ? 'Saving…' : 'Save and go to Family Overview'}
               </button>
             </div>
           </>

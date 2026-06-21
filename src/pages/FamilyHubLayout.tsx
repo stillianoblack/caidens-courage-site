@@ -82,13 +82,19 @@ export default function FamilyHubLayout() {
     );
   }, [canAccessShell, parentClaim?.email, programCode]);
 
-  const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
+  const { linkedCampLabel, notifications, refresh: refreshFamilyPortal, campProgramCode } =
+    useFamilyPortalShell(programCode);
   const { isMobileNav } = useFamilyMobileNav();
   const isMobileGameRoute =
     isMobileNav && isMobileFamilyGameplayShellRoute(location.pathname, FAMILY_HUB_PATH);
   const familyPortalRightRail = useFamilyPortalRightRail(isMobileGameRoute);
   const kidFacingRoute = isKidFacingPortalRoute(location.pathname, FAMILY_HUB_PATH) || isMobileGameRoute;
   const isPlayPauseRoute = location.pathname.endsWith('/play-pause');
+
+  const handleParentOnboardingFinished = useCallback(async () => {
+    setShowParentOnboarding(false);
+    await refreshFamilyPortal();
+  }, [refreshFamilyPortal]);
 
   const sidebarProps = useMemo(
     () => ({
@@ -179,7 +185,8 @@ export default function FamilyHubLayout() {
       <ParentFirstLoginWizard
         open={showParentOnboarding && !kidFacingRoute}
         initialEmail={parentClaim?.email ?? ''}
-        onFinished={() => setShowParentOnboarding(false)}
+        campProgramCode={campProgramCode}
+        onFinished={handleParentOnboardingFinished}
       />
       <div
         className={[

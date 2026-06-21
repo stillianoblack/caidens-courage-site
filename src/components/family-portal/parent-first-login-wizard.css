@@ -30,6 +30,13 @@
   line-height: 1.5;
 }
 
+.parentOnboardingError {
+  margin: 0 0 1rem;
+  color: #b42318;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .parentOnboardingField {
   display: grid;
   gap: 0.35rem;

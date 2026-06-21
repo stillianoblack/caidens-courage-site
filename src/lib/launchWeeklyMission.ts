@@ -1,6 +1,10 @@
 import type { NavigateFunction } from 'react-router-dom';
 import type { CourageInTheDarkMission } from '../data/courageInTheDarkMap';
-import { coerceBaselineLockedMission } from './baselineCheckInMission';
+import {
+  appendBaselineCheckInSource,
+  BASELINE_CHECKIN_SOURCE_WEEKLY,
+  coerceBaselineLockedMission,
+} from './baselineCheckInMission';
 import { isMapMissionComplete } from './courageInTheDarkProgress';
 import { resolveCourageMapTargetHref } from './courageInTheDarkRoutes';
 import { isKidPlayShellPath } from './kidPlayShellRoutes';
@@ -177,12 +181,17 @@ export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
     return false;
   }
 
+  const finalRoute =
+    baselineLocked && input.mission.id === 'b4'
+      ? appendBaselineCheckInSource(route, BASELINE_CHECKIN_SOURCE_WEEKLY)
+      : route;
+
   console.info('[WEEKLY_MISSION_LAUNCH]', {
     weekId: input.weekId,
     monthId: input.monthId ?? null,
     characterId,
     missionId,
-    route,
+    route: finalRoute,
     source: input.source,
     selectedChildId: input.selectedChildId ?? null,
   });
@@ -190,11 +199,11 @@ export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
   const navigateFn = input.navigate as NavigateFunction;
 
   if (isKidPlayShellPath(input.pathname)) {
-    kidPlayShellNavigate(navigateFn, route);
+    kidPlayShellNavigate(navigateFn, finalRoute);
   } else if (typeof window !== 'undefined') {
-    assignPortalRoute(route);
+    assignPortalRoute(finalRoute);
   } else {
-    navigateFn(route);
+    navigateFn(finalRoute);
   }
   return true;
 }

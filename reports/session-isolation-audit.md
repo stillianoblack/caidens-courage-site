@@ -1,13 +1,13 @@
 # Session Isolation Audit
 
-Generated: 2026-06-21T15:33:13.652Z
+Generated: 2026-06-21T16:05:20.785Z
 
 **Status:** PASS
 
 ## Summary
 
-- Source files scanned: 1273
-- Storage keys found: 316
+- Source files scanned: 1274
+- Storage keys found: 317
 - Scoped identity keys: 10
 - Legacy unsafe keys still referenced: 6
 - High severity findings: 0

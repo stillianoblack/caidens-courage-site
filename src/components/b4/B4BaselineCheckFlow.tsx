@@ -97,6 +97,7 @@ type B4BaselineCheckFlowProps = {
   embedded?: boolean;
   familyPortal?: boolean;
   facilitatorMode?: boolean;
+  exitBackLabel?: string;
   onExit?: () => void;
 };
 
@@ -104,6 +105,7 @@ export default function B4BaselineCheckFlow({
   embedded = false,
   familyPortal = false,
   facilitatorMode = false,
+  exitBackLabel = 'Back to B-4 Missions',
   onExit,
 }: B4BaselineCheckFlowProps) {
   const navigate = useNavigate();
@@ -935,7 +937,7 @@ export default function B4BaselineCheckFlow({
             <>
               {embedded && onExit && !showTopBar ? (
                 <button type="button" className="bbc-embeddedBack" onClick={onExit}>
-                  ← Back to Adventure Map
+                  ← {exitBackLabel}
                 </button>
               ) : null}
               {profileError ? (
@@ -961,7 +963,7 @@ export default function B4BaselineCheckFlow({
           <div className="bbc-landing">
             {embedded && onExit && !showTopBar ? (
               <button type="button" className="bbc-embeddedBack" onClick={onExit}>
-                ← Back to B-4 Missions
+                ← {exitBackLabel}
               </button>
             ) : null}
             <p className="bbc-eyebrow">{landingCopy.eyebrow}</p>
