@@ -476,6 +476,7 @@ export default function FamilyProgramSettingsPanel() {
                               participantId: child.participantId,
                               parentLink: link,
                               parentClaim,
+                              settingsParentEmail: parentEmail,
                             });
                             return (
                               <FamilyChildPinAccessCard
@@ -485,7 +486,6 @@ export default function FamilyProgramSettingsPanel() {
                                 familyProgramCode={programCodeValue}
                                 hasPin={accessByParticipant.get(child.participantId)?.hasPin ?? true}
                                 parentEmail={pinAccess.parentEmail}
-                                parentConnected={pinAccess.parentConnected}
                                 parentLink={link}
                                 scrollAnchorId={familyStudentAccessAnchorId(child.participantId)}
                                 scrollAnchorRef={

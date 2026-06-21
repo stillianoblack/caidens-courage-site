@@ -187,6 +187,32 @@ describe('family pin access on mobile settings', () => {
     expect(access.parentConnected).toBe(true);
   });
 
+  test('child link email enables pin access without logged-in session', () => {
+    const access = resolveFamilyPinAccessContext({
+      programCode: 'FAMILY-RIVER',
+      participantId: 'child-caiden',
+      parentLink: baseLink({
+        student_id: 'child-caiden',
+        parent_email: 'v.maddox2015@gmail.com',
+        parent_claimed: false,
+      }),
+    });
+
+    expect(access.parentEmail).toBe('v.maddox2015@gmail.com');
+    expect(access.parentConnected).toBe(true);
+  });
+
+  test('settings profile email enables pin access when session email is missing', () => {
+    const access = resolveFamilyPinAccessContext({
+      programCode: 'FAMILY-RIVER',
+      participantId: 'child-caiden',
+      settingsParentEmail: 'v.maddox2015@gmail.com',
+    });
+
+    expect(access.parentEmail).toBe('v.maddox2015@gmail.com');
+    expect(access.parentConnected).toBe(true);
+  });
+
   test('copyTextToClipboard uses execCommand fallback', () => {
     document.execCommand = jest.fn(() => true);
     expect(copyTextToClipboard('4319')).toBe(true);

@@ -15,6 +15,8 @@ export function resolveFamilyPinAccessContext(input: {
   participantId: string;
   parentLink?: StudentFamilyLink | null;
   parentClaim?: ParentClaimContext | null;
+  /** Parent email from Family Settings profile (fallback when session storage is empty). */
+  settingsParentEmail?: string | null;
 }): { parentEmail: string; parentConnected: boolean } {
   const programCode = input.programCode.trim();
   const participantId = input.participantId.trim();
@@ -23,6 +25,7 @@ export function resolveFamilyPinAccessContext(input: {
   const parentLink = input.parentLink ?? null;
   const linkEmail = normalizePortalEmail(parentLink?.parent_email);
   const loggedInEmail = resolveLoggedInParentEmail({ programCode, parentClaim });
+  const settingsEmail = normalizePortalEmail(input.settingsParentEmail);
 
   const fromSources = resolveParentEmailFromSources({
     programCode,
@@ -30,21 +33,17 @@ export function resolveFamilyPinAccessContext(input: {
     parentLink,
   });
 
-  let parentEmail = fromSources || loggedInEmail || linkEmail;
+  const linkMatchesChild =
+    Boolean(linkEmail) && parentLink?.student_id === participantId;
 
-  if (linkEmail && loggedInEmail && linkEmail === loggedInEmail) {
-    parentEmail = linkEmail;
-  }
-
-  const emailOnChildLink =
-    Boolean(linkEmail) &&
-    parentLink?.student_id === participantId &&
-    normalizePortalEmail(parentEmail) === linkEmail;
+  const parentEmail = linkEmail || fromSources || loggedInEmail || settingsEmail;
 
   const parentConnected =
     isParentConnectedForLink(parentLink) ||
-    emailOnChildLink ||
-    Boolean(fromSources && linkEmail && normalizePortalEmail(fromSources) === linkEmail);
+    linkMatchesChild ||
+    Boolean(fromSources) ||
+    Boolean(loggedInEmail) ||
+    Boolean(settingsEmail);
 
   return { parentEmail, parentConnected };
 }

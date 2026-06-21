@@ -344,6 +344,12 @@
   background: #fff;
 }
 
+.family-settingsChildMain {
+  flex: 1 1 100%;
+  min-width: 0;
+  width: 100%;
+}
+
 .family-settingsChildName {
   margin: 0;
   font-size: 1rem;
@@ -369,6 +375,8 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--family-border);
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .family-settingsStudentAccessTitle {
@@ -425,6 +433,7 @@
     justify-content: center;
     min-height: 2.75rem;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(36, 62, 112, 0.12);
   }
 }
 
@@ -468,6 +477,19 @@
   border: 1px solid rgba(36, 62, 112, 0.18);
   background: #fff;
   color: var(--family-navy);
+}
+
+.family-settingsPrimaryBtn:disabled,
+.family-settingsGhostBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .family-settingsChildItem > .family-settingsGhostBtn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
 }
 
 .family-settingsAddChild {
