@@ -70,6 +70,13 @@ import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDeb
 import { useActiveChild, type SelectableChild } from '../../../hooks/useActiveChild';
 import '../weekly-adventure-dark-center.css';
 import { useBaselineGate } from '../../../hooks/useBaselineGate';
+import { isB4CheckInCompleteLocal } from '../../../lib/b4CheckInStatus';
+import {
+  resolveWeeklyAdventureBaselineLocked,
+  resolveWeeklyAdventurePlayerHudGateMessage,
+  resolveWeeklyAdventurePlayerHudWeekLabel,
+  resolveWeeklyAdventureProgressSignal,
+} from '../../../lib/weeklyAdventureBaselineGate';
 import { useFamilyDashboardMetrics } from '../../../hooks/useFamilyDashboardMetrics';
 import { useAdventureWeekCompletions } from '../../../hooks/useAdventureWeekCompletions';
 import { useWeeklyAdventureTrail } from '../../../hooks/useWeeklyAdventureTrail';
@@ -173,20 +180,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     [location.search, previewAdventureId],
   );
 
-  const adventuresLocked =
-    !hasActiveChild || (!baselineComplete && visibilityCtx.previewMode !== 'admin');
-
   const { modules: adventureModules } = useAdventureModules(
-    visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
-  );
-
-  const { snapshot: rewardSnapshot } = useChildRewardCompletion({
-    participantId: activeChild?.participantId,
-    cmsModules: adventureModules,
-    paths: trailPaths,
-  });
-
-  const { months: adventureMonths } = useAdventureMonths(
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
 
@@ -200,6 +194,60 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
         paths: trailPaths,
       }),
     [adventureModules, completedByWeek, trailPaths],
+  );
+
+  const requestedWeek = parseWeeklyAdventureWeekParam(searchParams.get(WEEKLY_WEEK_PARAM));
+
+  const b4CheckInCompleteLocal = useMemo(
+    () =>
+      isB4CheckInCompleteLocal({
+        participantId: activeChild?.participantId,
+        programCode,
+        assessments: v2Assessments,
+      }),
+    [activeChild?.participantId, programCode, v2Assessments],
+  );
+
+  const adventureProgress = useMemo(
+    () =>
+      resolveWeeklyAdventureProgressSignal({
+        completedByWeek,
+        completedWeekNumbers: mapCompletedWeekNumbers,
+        requestedWeek,
+      }),
+    [completedByWeek, mapCompletedWeekNumbers, requestedWeek],
+  );
+
+  const adventuresLocked = useMemo(
+    () =>
+      resolveWeeklyAdventureBaselineLocked({
+        hasActiveChild,
+        baselineComplete,
+        b4CheckInComplete: b4CheckInCompleteLocal,
+        isAdminPreview: visibilityCtx.previewMode === 'admin',
+        completedWeekCount: adventureProgress.completedWeekCount,
+        currentWeek: adventureProgress.currentWeek,
+        hasAnyMissionCompletion: adventureProgress.hasAnyMissionCompletion,
+      }),
+    [
+      adventureProgress.completedWeekCount,
+      adventureProgress.currentWeek,
+      adventureProgress.hasAnyMissionCompletion,
+      baselineComplete,
+      b4CheckInCompleteLocal,
+      hasActiveChild,
+      visibilityCtx.previewMode,
+    ],
+  );
+
+  const { snapshot: rewardSnapshot } = useChildRewardCompletion({
+    participantId: activeChild?.participantId,
+    cmsModules: adventureModules,
+    paths: trailPaths,
+  });
+
+  const { months: adventureMonths } = useAdventureMonths(
+    visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
 
   const initialHubView = ((): CourageHubViewMode | undefined => {
@@ -224,8 +272,6 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       pilotStartDate,
     },
   );
-
-  const requestedWeek = parseWeeklyAdventureWeekParam(searchParams.get(WEEKLY_WEEK_PARAM));
 
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number | null>(requestedWeek);
 
@@ -784,14 +830,18 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
 
   const heroPlayerHud = useMemo(() => {
     if (!ENABLE_CINEMATIC_ADVENTURE_MODE || !activeChild) return null;
-    const monthSlot = ((Math.max(1, heroWeekNumber) - 1) % 4) + 1;
     return {
       displayName: activeChild.displayName,
       firstName: activeChild.firstName,
       focusCoins,
       focusCoinsLoading: kidPlayShell ? false : focusCoinsLoading,
-      weekLabel: `Week ${monthSlot}`,
-      baselineGateMessage: adventuresLocked ? BASELINE_GATE_MESSAGE : null,
+      weekLabel: resolveWeeklyAdventurePlayerHudWeekLabel({
+        weekNumber: heroWeekNumber,
+        baselineLocked: adventuresLocked,
+      }),
+      baselineGateMessage: resolveWeeklyAdventurePlayerHudGateMessage({
+        baselineLocked: adventuresLocked,
+      }),
       children: kidPlayShell ? [] : selectableChildren,
       activeParticipantId: activeChild.participantId,
       onSelectChild: kidPlayShell ? undefined : handleSelectChild,
