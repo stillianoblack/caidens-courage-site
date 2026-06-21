@@ -1,6 +1,19 @@
-import { hasConfirmedParentClaim, type ParentClaimContext } from '../config/parentClaimContext';
+import {
+  hasConfirmedParentClaim,
+  readParentClaimContext,
+  type ParentClaimContext,
+} from '../config/parentClaimContext';
+import { readLastPilotProgramForRole } from '../config/lastPilotProgram';
 import { hasFamilyChildGoals, readFamilyChildGoalsLocal } from './familyChildGoalsService';
-import { isParentConnected, isParentConnectedForLink, resolveParentEmailFromSources } from './portalIdentity';
+import {
+  isParentConnected,
+  isParentConnectedForLink,
+  normalizePortalEmail,
+  resolveParentEmailFromSources,
+} from './portalIdentity';
+import { programScopesMatch } from './portalProgramScope';
+import { trackKitParentSignup } from './kitIntegration';
+import { readRememberedDeviceSession } from './rememberedDeviceSession';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
 
 const STORAGE_PREFIX = 'cc-family-onboarding-complete';
@@ -166,6 +179,105 @@ export function dismissParentOnboardingLater(input: {
   });
 }
 
+export type FamilyParentSession = {
+  parentEmail?: string | null;
+  parentClaim?: ParentClaimContext | null;
+};
+
+export type FamilyActiveChildContext = {
+  participantId?: string | null;
+  displayName?: string | null;
+};
+
+/** Email from the current parent portal login — not Kit tags or onboarding localStorage. */
+export function resolveLoggedInParentEmail(input?: {
+  programCode?: string;
+  parentClaim?: ParentClaimContext | null;
+}): string {
+  const programCode = input?.programCode?.trim();
+  const parentClaim =
+    input?.parentClaim ??
+    (programCode ? readParentClaimContext({ programCode }) : readParentClaimContext());
+
+  if (parentClaim?.email?.trim()) {
+    return normalizePortalEmail(parentClaim.email);
+  }
+
+  const lastFamily = readLastPilotProgramForRole('family');
+  if (lastFamily?.admin_email?.trim()) {
+    if (!programCode || programScopesMatch(lastFamily.program_code, programCode)) {
+      return normalizePortalEmail(lastFamily.admin_email);
+    }
+  }
+
+  const device = readRememberedDeviceSession();
+  if (device?.user_type === 'parent' && device.parent_id?.trim()) {
+    if (!programCode || programScopesMatch(device.program_code, programCode)) {
+      return normalizePortalEmail(device.parent_id);
+    }
+  }
+
+  return '';
+}
+
+/** True when the child link already stores this parent email (claimed or invited). */
+export function isParentEmailLinkedToChild(input: {
+  parentEmail: string;
+  participantId: string;
+  familyLinks: StudentFamilyLink[];
+}): boolean {
+  const email = normalizePortalEmail(input.parentEmail);
+  const participantId = input.participantId.trim();
+  if (!email || !participantId) return false;
+
+  return input.familyLinks.some(
+    (link) =>
+      link.student_id === participantId && normalizePortalEmail(link.parent_email) === email,
+  );
+}
+
+/** Clear stale onboarding localStorage when DB already links parent + child. */
+export function clearStaleFamilyOnboardingForLinkedParent(input: {
+  programCode: string;
+  participantId: string;
+  parentEmail: string;
+}): void {
+  const programCode = input.programCode.trim();
+  const participantId = input.participantId.trim();
+  const parentEmail = normalizePortalEmail(input.parentEmail);
+  if (!programCode || !participantId || !parentEmail) return;
+
+  const existing = readFamilyOnboardingRecord(programCode, participantId, parentEmail);
+  if (existing?.complete) return;
+
+  markFamilyOnboardingComplete({
+    programCode,
+    participantId,
+    parentEmail,
+    familyGoals: existing?.familyGoals ?? [],
+  });
+}
+
+/** Silent Kit parent tag — never drives onboarding UI. */
+export function syncLinkedParentKitSilently(input: {
+  parentEmail: string;
+  programCode: string;
+  participantId: string;
+}): void {
+  const parentEmail = normalizePortalEmail(input.parentEmail);
+  if (!parentEmail) return;
+
+  trackKitParentSignup({
+    parentEmail,
+    eventName: 'parent_login',
+    metadata: {
+      family_program_code: input.programCode.trim(),
+      participant_id: input.participantId.trim(),
+      source: 'linked_parent_login',
+    },
+  });
+}
+
 function resolveScopedParentLink(
   familyLinks: StudentFamilyLink[],
   participantId: string,
@@ -235,50 +347,89 @@ export type FamilyOnboardingVisibility = {
   goalsOnly: boolean;
 };
 
-export function resolveFamilyOnboardingVisibility(input: {
-  programCode: string;
-  participantId?: string | null;
-  parentEmail?: string | null;
-  parentClaim?: ParentClaimContext | null;
+export function shouldShowFamilyOnboarding(input: {
+  parentSession: FamilyParentSession;
   familyLinks: StudentFamilyLink[];
+  activeChild: FamilyActiveChildContext;
+  programCode: string;
   childDisplayName?: string;
 }): FamilyOnboardingVisibility {
-  const programCode = input.programCode?.trim();
-  const participantId = input.participantId?.trim();
+  const programCode = input.programCode.trim();
+  const participantId = input.activeChild.participantId?.trim();
   if (!programCode || !participantId) {
     return { show: false, goalsOnly: false };
   }
 
-  const parentClaim = input.parentClaim ?? null;
+  const parentClaim = input.parentSession.parentClaim ?? null;
   const parentLink = resolveScopedParentLink(input.familyLinks, participantId, parentClaim);
+  const loggedInEmail =
+    normalizePortalEmail(input.parentSession.parentEmail) ||
+    resolveLoggedInParentEmail({ programCode, parentClaim });
+  const resolvedLinkEmail = parentLink?.parent_email?.trim()
+    ? normalizePortalEmail(parentLink.parent_email)
+    : '';
+
+  const emailLinkedOnRecord =
+    (loggedInEmail &&
+      isParentEmailLinkedToChild({
+        parentEmail: loggedInEmail,
+        participantId,
+        familyLinks: input.familyLinks,
+      })) ||
+    (resolvedLinkEmail &&
+      isParentConnectedForLink(parentLink) &&
+      Boolean(resolvedLinkEmail));
+
+  if (emailLinkedOnRecord) {
+    const emailForStorage = loggedInEmail || resolvedLinkEmail;
+    if (emailForStorage) {
+      clearStaleFamilyOnboardingForLinkedParent({
+        programCode,
+        participantId,
+        parentEmail: emailForStorage,
+      });
+    }
+    return { show: false, goalsOnly: false };
+  }
+
+  if (
+    isParentConnected({
+      programCode,
+      familyLinks: input.familyLinks,
+      parentClaim,
+      participantId,
+    })
+  ) {
+    const emailForStorage =
+      loggedInEmail ||
+      resolveParentEmailFromSources({ programCode, parentClaim, parentLink });
+    if (emailForStorage) {
+      clearStaleFamilyOnboardingForLinkedParent({
+        programCode,
+        participantId,
+        parentEmail: emailForStorage,
+      });
+    }
+    return { show: false, goalsOnly: false };
+  }
+
   const parentEmail =
-    input.parentEmail?.trim() ||
+    loggedInEmail ||
     resolveParentEmailFromSources({
       programCode,
       parentClaim,
       parentLink,
     });
 
-  const connected = isParentConnected({
-    programCode,
-    familyLinks: input.familyLinks,
-    parentClaim,
-    participantId,
-  });
-
-  if (connected && parentEmail) {
-    if (
-      !readFamilyOnboardingRecord(programCode, participantId, parentEmail)?.complete &&
-      !readFamilyOnboardingRecord(programCode, participantId, parentEmail)?.skipped
-    ) {
-      markFamilyOnboardingComplete({
-        programCode,
-        participantId,
-        parentEmail,
-        familyGoals: [],
-      });
+  if (parentEmail) {
+    const record = readFamilyOnboardingRecord(programCode, participantId, parentEmail);
+    if (record?.complete || record?.skipped) {
+      return { show: false, goalsOnly: false };
     }
-    return { show: false, goalsOnly: false };
+  }
+
+  if (!parentLink) {
+    return { show: true, goalsOnly: false };
   }
 
   if (!parentEmail) {
@@ -286,9 +437,6 @@ export function resolveFamilyOnboardingVisibility(input: {
   }
 
   const record = readFamilyOnboardingRecord(programCode, participantId, parentEmail);
-  if (record?.complete || record?.skipped) {
-    return { show: false, goalsOnly: false };
-  }
 
   const goalsComplete = hasFamilyChildGoals(
     readFamilyChildGoalsLocal(programCode, participantId),
@@ -327,6 +475,29 @@ export function resolveFamilyOnboardingVisibility(input: {
   }
 
   return { show: false, goalsOnly: false };
+}
+
+export function resolveFamilyOnboardingVisibility(input: {
+  programCode: string;
+  participantId?: string | null;
+  parentEmail?: string | null;
+  parentClaim?: ParentClaimContext | null;
+  familyLinks: StudentFamilyLink[];
+  childDisplayName?: string;
+}): FamilyOnboardingVisibility {
+  return shouldShowFamilyOnboarding({
+    programCode: input.programCode,
+    parentSession: {
+      parentEmail: input.parentEmail,
+      parentClaim: input.parentClaim,
+    },
+    familyLinks: input.familyLinks,
+    activeChild: {
+      participantId: input.participantId,
+      displayName: input.childDisplayName,
+    },
+    childDisplayName: input.childDisplayName,
+  });
 }
 
 /** @deprecated Use resolveFamilyOnboardingVisibility. */

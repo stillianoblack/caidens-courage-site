@@ -19,6 +19,7 @@ export function kitTagForCompletedWeek(weekNumber: number): string | null {
 
 export type KitEventName =
   | 'parent_signup'
+  | 'parent_login'
   | 'parent_claim'
   | 'parent_onboarding_complete'
   | 'parent_claim_by_code'

@@ -1,8 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { readParentClaimContext } from '../../config/parentClaimContext';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
 import type { FamilyChildSummary } from '../../lib/familyChildrenMetrics';
-import { resolveFamilyOnboardingVisibility } from '../../lib/parentOnboardingState';
+import {
+  isParentEmailLinkedToChild,
+  resolveLoggedInParentEmail,
+  shouldShowFamilyOnboarding,
+  syncLinkedParentKitSilently,
+} from '../../lib/parentOnboardingState';
 import type { StudentFamilyLink } from '../../lib/studentFamilyLinkService';
 import { linkMatchesParentScope } from '../../lib/studentFamilyLinkService';
 import { resolveParentEmailFromSources } from '../../lib/portalIdentity';
@@ -43,51 +48,91 @@ export default function FamilyParentOnboardingGate({
     activeChild?.participantId?.trim() || children[0]?.participantId?.trim() || '';
   const childDisplayName =
     activeChild?.displayName?.trim() || children[0]?.displayName?.trim() || undefined;
+  const kitSyncedRef = useRef(false);
 
   const parentLink = useMemo(
     () => resolveParentLink(familyLinks, participantId, parentClaim),
     [familyLinks, parentClaim, participantId],
   );
 
+  const loggedInEmail = useMemo(
+    () => resolveLoggedInParentEmail({ programCode, parentClaim }),
+    [parentClaim, programCode],
+  );
+
   const hydratedEmail = useMemo(
     () =>
+      loggedInEmail ||
       resolveParentEmailFromSources({
         programCode,
         parentClaim,
         parentLink,
       }),
-    [parentClaim, parentLink, programCode],
+    [loggedInEmail, parentClaim, parentLink, programCode],
   );
 
   const [visibility, setVisibility] = useState(() =>
-    resolveFamilyOnboardingVisibility({
+    shouldShowFamilyOnboarding({
       programCode,
-      participantId,
-      parentEmail: hydratedEmail || parentClaim?.email,
-      parentClaim,
+      parentSession: { parentEmail: loggedInEmail, parentClaim },
       familyLinks,
+      activeChild: { participantId, displayName: childDisplayName },
       childDisplayName,
     }),
   );
 
   useEffect(() => {
     setVisibility(
-      resolveFamilyOnboardingVisibility({
+      shouldShowFamilyOnboarding({
         programCode,
-        participantId,
-        parentEmail: hydratedEmail || parentClaim?.email,
-        parentClaim,
+        parentSession: { parentEmail: loggedInEmail, parentClaim },
         familyLinks,
+        activeChild: { participantId, displayName: childDisplayName },
         childDisplayName,
       }),
     );
   }, [
     childDisplayName,
     familyLinks,
-    hydratedEmail,
+    loggedInEmail,
     parentClaim,
     participantId,
     programCode,
+  ]);
+
+  useEffect(() => {
+    if (visibility.show || kidFacingRoute || kitSyncedRef.current) return;
+    if (!loggedInEmail || !participantId) return;
+
+    const linked =
+      isParentEmailLinkedToChild({
+        parentEmail: loggedInEmail,
+        participantId,
+        familyLinks,
+      }) ||
+      Boolean(
+        parentLink?.parent_email?.trim() &&
+          parentLink.parent_claimed &&
+          resolveParentEmailFromSources({ programCode, parentClaim, parentLink }),
+      );
+
+    if (!linked) return;
+
+    kitSyncedRef.current = true;
+    syncLinkedParentKitSilently({
+      parentEmail: loggedInEmail,
+      programCode,
+      participantId,
+    });
+  }, [
+    familyLinks,
+    kidFacingRoute,
+    loggedInEmail,
+    parentClaim,
+    parentLink,
+    participantId,
+    programCode,
+    visibility.show,
   ]);
 
   return (
