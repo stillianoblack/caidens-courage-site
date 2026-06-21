@@ -27,6 +27,38 @@ describe('installInternalLinkReloadFallback', () => {
     ).toBe(true);
   });
 
+  it('does not force-load normal public navigation links', () => {
+    window.history.pushState({}, '', '/');
+
+    const link = document.createElement('a');
+    link.href = '/kids';
+    document.body.appendChild(link);
+
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/',
+      ),
+    ).toBe(false);
+  });
+
+  it('force-loads links entering the kid play shell', () => {
+    window.history.pushState({}, '', '/family-hub/weekly-adventures');
+
+    const link = document.createElement('a');
+    link.href = '/play/session/session-123/weekly-adventures';
+    document.body.appendChild(link);
+
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/family-hub/weekly-adventures',
+      ),
+    ).toBe(true);
+  });
+
   it('does not force-load the current shell route', () => {
     window.history.pushState({}, '', '/play/session/session-123/weekly-adventures');
 

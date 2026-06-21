@@ -10,6 +10,10 @@ function isPlainLeftClick(event: MouseEvent) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
+function isKidPlayShellPath(pathname: string) {
+  return pathname === '/play/session' || pathname.startsWith('/play/session/');
+}
+
 export function shouldForceInternalLinkReload(
   anchor: HTMLAnchorElement,
   url: URL,
@@ -19,7 +23,7 @@ export function shouldForceInternalLinkReload(
   if (anchor.hasAttribute('download')) return false;
   if (url.origin !== window.location.origin) return false;
   if (url.pathname === currentPathname && url.search === window.location.search) return false;
-  return true;
+  return isKidPlayShellPath(currentPathname) || isKidPlayShellPath(url.pathname);
 }
 
 function shouldLetBrowserHandleNormally(anchor: HTMLAnchorElement, url: URL) {
