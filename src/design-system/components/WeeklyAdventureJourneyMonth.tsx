@@ -52,7 +52,7 @@ export default function WeeklyAdventureJourneyMonth({
       ? Math.round((month.progress.weeksCompleted / month.progress.weeksTotal) * 100)
       : 0;
 
-  const progressCopy = month.progress.monthChallengeCompleted
+  const progressCopy = month.progress.certificateEarned
     ? 'Month Challenge Complete — Certificate earned'
     : month.progress.description ||
       'Complete all 4 weeks to earn your monthly certificate.';

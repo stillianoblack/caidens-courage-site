@@ -25,18 +25,34 @@ export function familySettingsPath(pathname?: string): string {
   return familyPortalPath('settings', pathname);
 }
 
-export function resolveFamilySettingsTab(value: string | null): FamilySettingsTabId {
-  const match = [
-    'overview',
-    'family-goals',
-    'children',
-    'parent-guardian',
-    'family-access',
-    'notifications',
-    'plan',
-    'privacy',
-  ].find((tab) => tab === value);
-  return (match as FamilySettingsTabId | undefined) ?? DEFAULT_FAMILY_SETTINGS_TAB;
+const FAMILY_SETTINGS_TAB_IDS: FamilySettingsTabId[] = [
+  'overview',
+  'family-goals',
+  'children',
+  'parent-guardian',
+  'family-access',
+  'notifications',
+  'plan',
+  'privacy',
+];
+
+export function resolveFamilySettingsTab(
+  tab: string | null,
+  section?: string | null,
+): FamilySettingsTabId {
+  const value = tab ?? section;
+  const match = FAMILY_SETTINGS_TAB_IDS.find((id) => id === value);
+  return match ?? DEFAULT_FAMILY_SETTINGS_TAB;
+}
+
+export function familyStudentAccessAnchorId(participantId: string): string {
+  return `family-student-access-${participantId.trim()}`;
+}
+
+/** Settings → Children with Student Access focus (Updates "Manage PINs" CTA). */
+export function familySettingsChildrenStudentAccessPath(pathname?: string): string {
+  const base = familySettingsPath(pathname);
+  return `${base}?section=children&focus=student-access`;
 }
 
 export function familySettingsTabPath(tab: FamilySettingsTabId, pathname?: string): string {

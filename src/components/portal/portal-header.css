@@ -438,6 +438,21 @@
   min-width: 0;
 }
 
+.facilitatorPortalMobileHeader-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.portal-headerUpdates {
+  flex-shrink: 0;
+}
+
+.portal-headerFamilyToolsEnd .portal-headerUpdates {
+  flex-shrink: 0;
+}
+
 .portal-headerMobileLead {
   display: inline-flex;
   align-items: center;

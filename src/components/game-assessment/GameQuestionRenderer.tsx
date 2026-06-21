@@ -134,7 +134,8 @@ export default function GameQuestionRenderer({
 
   if (isChoiceQuestion(question) && choiceUsesCards(question.type)) {
     const selectedId = typeof answer === 'string' ? answer : null;
-    const showLetterPrefix = question.type === 'missing_letter' || question.type === 'context_clue';
+    // Word-restoration answers are full words; letter badges belong on context-clue items only.
+    const showLetterPrefix = question.type === 'context_clue';
 
     return (
       <AnswerChoiceList

@@ -3,6 +3,7 @@ import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { writeParentClaimContext } from '../config/parentClaimContext';
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { clearActiveChild } from './activeChildContext';
+import { trackKitParentSignup } from './kitIntegration';
 import { clearStaleProgramSessionForIndependentSignup } from './clearStaleProgramSession';
 import { isIndependentFamilyProgram } from './independentFamilyProgram';
 
@@ -77,5 +78,10 @@ export async function unlockIndependentFamilyPortal(input: {
   if (!verified.success) return verified;
 
   activateIndependentFamilyPortalSession(input);
+  trackKitParentSignup({
+    parentEmail: input.parentEmail,
+    eventName: 'independent_family_signup',
+    metadata: { program_code: input.program.programCode },
+  });
   return { success: true };
 }

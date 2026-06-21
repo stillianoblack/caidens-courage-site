@@ -1,4 +1,4 @@
-import { readParentClaimContext } from '../config/parentClaimContext';
+import { detectReturnSessionParentEmailMatch } from './kidPlayReturnSessionVerify';
 
 const FAMILY_SOFT_LOCK_KEY = 'cc-kid-play-family-soft-lock';
 
@@ -25,11 +25,7 @@ export function isKidPlayFamilySoftLocked(): boolean {
 }
 
 export function verifyFamilySoftLockParentEmail(email: string): boolean {
-  const claim = readParentClaimContext();
-  const expected = claim?.email?.trim().toLowerCase();
-  const entered = email.trim().toLowerCase();
-  if (!expected || !entered) return false;
-  return entered === expected;
+  return detectReturnSessionParentEmailMatch(email);
 }
 
 export function clearKidPlayFamilySoftLockWithEmail(email: string): boolean {

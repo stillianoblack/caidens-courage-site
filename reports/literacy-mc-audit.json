@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-06-20T19:53:34.884Z",
+  "summary": {
+    "questionsScanned": 295,
+    "choicesScanned": 1180,
+    "questionsWithIssues": 0,
+    "choicesWithIssues": 0,
+    "issuesByCode": {
+      "letter_prefix_in_label": 0,
+      "option_id_concatenated": 0,
+      "label_equals_id": 0,
+      "label_exposes_internal_id": 0,
+      "empty_label": 0
+    },
+    "priorityMissionsScanned": [
+      "the-missing-letters",
+      "zeke-brave-voice",
+      "charlie-volcano-trouble",
+      "quest-4",
+      "b4-focus-reset-station"
+    ],
+    "priorityMissionsWithIssues": []
+  },
+  "fixesApplied": [
+    "Added src/lib/gameChoiceDisplay.ts to sanitize labels and detect letter/id concatenation.",
+    "AnswerChoiceList now renders sanitized display text separate from option id and letter badge.",
+    "Removed decorative A/B/C/D tiles from MirandaMissingLetterCard (clue card only).",
+    "Disabled letter prefix badges for missing_letter answers (full words shown without A/B/C/D)."
+  ],
+  "affectedFiles": [
+    "src/lib/gameChoiceDisplay.ts",
+    "src/lib/__tests__/gameChoiceDisplay.test.ts",
+    "src/design-system/game/AnswerChoiceList.tsx",
+    "src/components/miranda/MirandaMissingLetterCard.tsx",
+    "src/components/game-assessment/GameQuestionRenderer.tsx",
+    "scripts/audit-mc-choice-labels.ts"
+  ],
+  "affectedMissions": [],
+  "questionsWithIssues": []
+}

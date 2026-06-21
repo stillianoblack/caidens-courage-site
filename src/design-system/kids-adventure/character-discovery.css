@@ -239,6 +239,33 @@
   background: rgba(240, 253, 244, 0.9);
 }
 
+.inventoryCertificateCard--locked {
+  align-items: flex-start;
+  max-width: 100%;
+  border-style: dashed;
+  border-color: rgba(100, 116, 139, 0.35);
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.inventoryCertificateCardLockIcon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.inventoryCertificateCardHint,
+.inventoryCertificateCardProgress {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  text-align: left;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.inventoryCertificateCardProgress {
+  font-weight: 700;
+  color: rgba(26, 47, 82, 0.82);
+}
+
 .inventoryCertificateCardArt {
   width: 5.5rem;
   height: 4rem;

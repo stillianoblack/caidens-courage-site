@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import KidPlayFamilySoftLockGate from '../../kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../../../lib/kidPlayFamilySoftLock';
 import { readKidPlayFamilyResumePayload } from '../../../lib/kidPlayFamilyResume';
+import { hasKidPlayReturnSessionContext } from '../../../lib/kidPlayReturnUnlock';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
 import { PORTAL_PATH } from '../../../config/courageRoutes';
-import { readLegacyFamilyPortalSession } from '../../../config/familyPortalAccess';
 import {
   hasActiveChildPlaySession,
   isStandaloneDisplayMode,
@@ -22,7 +22,7 @@ export default function FamilyPlayPausePage() {
   }, []);
 
   useEffect(() => {
-    if (!readLegacyFamilyPortalSession()) {
+    if (!hasKidPlayReturnSessionContext()) {
       navigate(PORTAL_PATH, { replace: true });
       return;
     }
@@ -49,7 +49,7 @@ export default function FamilyPlayPausePage() {
         open
         fullscreen
         onUnlocked={() => {
-          navigate(familyPortalPath('weekly-adventures'), { replace: true });
+          /* Routing is handled inside KidPlayFamilySoftLockGate. */
         }}
       />
     </div>

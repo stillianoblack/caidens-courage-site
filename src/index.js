@@ -28,6 +28,18 @@ installPortalClickDebug();
 initAnalyticsAfterFirstPaint();
 logAppVersion();
 
+function installKidShellBackForwardRecovery() {
+  if (typeof window === 'undefined') return;
+
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    if (!window.location.pathname.startsWith('/play/session/')) return;
+    window.location.reload();
+  });
+}
+
+installKidShellBackForwardRecovery();
+
 function installChunkLoadRecovery() {
   if (typeof window === 'undefined') return;
 

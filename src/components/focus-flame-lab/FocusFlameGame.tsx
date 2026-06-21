@@ -5,6 +5,7 @@ import CompactB4HudCard from './CompactB4HudCard';
 import GameHudPanel from './GameHudPanel';
 import FocusFlameMark from '../FocusFlameMark';
 import FocusFlameBootLoader from './FocusFlameBootLoader';
+import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLogos';
 import AdventureFlowLayout from './AdventureFlowLayout';
 import FocusFlameRewardThreeZone from './FocusFlameRewardThreeZone';
 import FocusFlameSoundGate from './FocusFlameSoundGate';
@@ -640,7 +641,7 @@ export default function FocusFlameGame({
     (a, b) => SCENE_MISSION_ORDER.indexOf(a.id) - SCENE_MISSION_ORDER.indexOf(b.id)
   );
 
-  const focusFlameMarkSrc = `${process.env.PUBLIC_URL || ''}/images/icons/focus-flame-mark.svg`;
+  const focusFlameMarkSrc = FOCUS_FLAME_ACADEMY_MARK_SRC;
 
   const adventureStatusMode =
     screen === 'sceneMoment' && sceneMomentPhase === 'watch' ? 'mission' : 'story';
@@ -652,7 +653,7 @@ export default function FocusFlameGame({
       <div className="ffl-gameStageWrap">
         {!bootDone ? (
           <FocusFlameBootLoader
-            markSrc={`${process.env.PUBLIC_URL || ''}/images/icons/focus-flame-mark.svg`}
+            markSrc={FOCUS_FLAME_ACADEMY_MARK_SRC}
             reduceMotion={reduceMotion}
             onDone={() => setBootDone(true)}
           />

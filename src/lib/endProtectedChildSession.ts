@@ -7,6 +7,7 @@ import {
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
 import { clearLastPilotProgram } from '../config/lastPilotProgram';
+import { clearRememberedDeviceSession } from './rememberedDeviceSession';
 import { clearStalePortalRouteState, readActivePortalRole, signOutPortal } from '../config/portalContext';
 import { clearActiveChild } from './activeChildContext';
 import { RECENTLY_COMPLETED_HOTSPOT_KEY } from './courageMapReturnFeedback';
@@ -35,6 +36,7 @@ export function clearSharedDevicePortalSession(): void {
   clearChildSessionMemory();
   signOutPortal();
   clearLastPilotProgram();
+  clearRememberedDeviceSession('shared_device_sign_out');
 }
 
 /** Safest portal landing screen after idle timeout for home/family quick-return users. */

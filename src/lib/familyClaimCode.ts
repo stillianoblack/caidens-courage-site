@@ -39,6 +39,6 @@ export function buildStudentLoginInstructions(input: {
     'Open:',
     buildStudentLoginUrl(input.origin),
     '',
-    'Enter your PIN and continue your adventure.',
+    'Enter your student PIN to continue your adventure.',
   ].join('\n');
 }

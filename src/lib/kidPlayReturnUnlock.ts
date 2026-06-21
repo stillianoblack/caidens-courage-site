@@ -1,11 +1,23 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveAccessCode } from '../config/portalContext';
+import { readLegacyFamilyPortalSession } from '../config/familyPortalAccess';
+import { hasRememberedProgramAccess } from './rememberedProgramAccess';
+import { hasActiveStudentPinSession } from './studentPinSession';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
 import { lookupPilotProgramByAccessCodeDetailed } from './pilotProgramService';
 import { isSupabaseConfigured } from './supabaseClient';
 
 export const KID_PLAY_RETURN_ACCESS_ERROR =
   "We couldn't find that access. Please check your code and try again.";
+
+/** True when play-pause / Return To Session can run without sending users to /portal. */
+export function hasKidPlayReturnSessionContext(): boolean {
+  return (
+    readLegacyFamilyPortalSession() ||
+    hasRememberedProgramAccess() ||
+    hasActiveStudentPinSession()
+  );
+}
 
 export const STUDENT_PIN_INPUT_RE = /^\d{4,8}$/;
 

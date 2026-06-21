@@ -50,6 +50,7 @@ export type PilotRosterRow = {
   parentConnectionStatus: ParentConnectionStatus;
   parentConnectionLabel: string;
   hasPin: boolean;
+  pinLastRotatedAt: string | null;
   familyClaimCode: string | null;
   familyClaimUrl: string | null;
 };
@@ -171,6 +172,7 @@ export function usePilotRosterData(
           parentConnectionStatus,
           parentConnectionLabel: parentConnectionStatusLabel(parentConnectionStatus),
           hasPin: Boolean(access?.hasPin),
+          pinLastRotatedAt: access?.pinLastRotatedAt ?? null,
           familyClaimCode,
           familyClaimUrl: familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : null,
         };

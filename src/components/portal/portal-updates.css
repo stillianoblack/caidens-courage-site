@@ -1,0 +1,272 @@
+.portalUpdatesPill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 62, 112, 0.14);
+  background: rgba(36, 62, 112, 0.05);
+  color: var(--family-navy-deep, #1a2f52);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.portalUpdatesPill:hover {
+  background: rgba(36, 62, 112, 0.09);
+  border-color: rgba(36, 62, 112, 0.22);
+}
+
+.portalUpdatesPill:focus-visible {
+  outline: 2px solid rgba(229, 192, 106, 0.85);
+  outline-offset: 2px;
+}
+
+.portalUpdatesPill--unread {
+  border-color: rgba(229, 192, 106, 0.55);
+  background: rgba(229, 192, 106, 0.14);
+}
+
+.portalUpdatesPillIcon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+}
+
+.portalUpdatesPillCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #243e70;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.portalUpdatesPill--compact .portalUpdatesPillLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.portalUpdatesPill--compact {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+}
+
+.portalUpdatesDrawer.pilot-drawer {
+  display: flex;
+  flex-direction: column;
+}
+
+.portalUpdatesDrawer .pilot-drawerBody {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.portalUpdatesDrawerHead {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(36, 62, 112, 0.08);
+  background: #fff;
+}
+
+.portalUpdatesDrawerTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.portalUpdatesDrawerSubtext {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(26, 47, 82, 0.72);
+}
+
+.portalUpdatesDrawerClose {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  color: var(--family-navy-deep, #1a2f52);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.portalUpdatesDrawerBody {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 1.25rem 2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.portalUpdatesSection + .portalUpdatesSection {
+  margin-top: 1.25rem;
+}
+
+.portalUpdatesSectionTitle {
+  margin: 0 0 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26, 47, 82, 0.55);
+}
+
+.portalUpdatesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.portalUpdateItem {
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(36, 62, 112, 0.1);
+  background: #fff;
+}
+
+.portalUpdateItem--unread {
+  border-color: rgba(229, 192, 106, 0.45);
+  background: linear-gradient(180deg, rgba(229, 192, 106, 0.08) 0%, #fff 100%);
+}
+
+.portalUpdateItemHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.portalUpdateType {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.portalUpdateType--feature {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.portalUpdateType--fix {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.portalUpdateType--reminder {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.portalUpdateType--program {
+  background: rgba(139, 92, 246, 0.12);
+  color: #6d28d9;
+}
+
+.portalUpdateDate {
+  font-size: 0.75rem;
+  color: rgba(26, 47, 82, 0.55);
+  white-space: nowrap;
+}
+
+.portalUpdateTitle {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--family-navy-deep, #1a2f52);
+}
+
+.portalUpdateDescription {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(26, 47, 82, 0.78);
+}
+
+.portalUpdateCta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.75rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.08);
+  color: var(--family-navy-deep, #1a2f52);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.portalUpdateCta:hover {
+  background: rgba(36, 62, 112, 0.14);
+}
+
+.portalUpdatesEmpty {
+  margin: 0;
+  padding: 1rem 0;
+  font-size: 0.9375rem;
+  color: rgba(26, 47, 82, 0.7);
+}
+
+@media (max-width: 767px) {
+  .portalUpdatesDrawer.pilot-drawer {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .portal-header--familyMobile .portalUpdatesPill,
+  .facilitatorPortalMobileHeader-row .portalUpdatesPill {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .portalUpdatesDrawer.pilot-drawer {
+    width: min(100vw, 28rem);
+  }
+}

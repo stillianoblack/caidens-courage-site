@@ -24,6 +24,9 @@ type PilotStudentDetailDrawerProps = {
   moduleResults: LocalModuleResultRecord[];
   programCode?: string;
   hasPin?: boolean;
+  pinLastRotatedAt?: string | null;
+  lastStudentLoginAt?: string | null;
+  parentConnectionLabel?: string;
   familyClaimCode?: string | null;
   familyClaimUrl?: string | null;
   oneTimePin?: string | null;
@@ -54,6 +57,9 @@ export default function PilotStudentDetailDrawer({
   moduleResults,
   programCode,
   hasPin = false,
+  pinLastRotatedAt = null,
+  lastStudentLoginAt = null,
+  parentConnectionLabel,
   familyClaimCode,
   familyClaimUrl,
   oneTimePin,
@@ -131,6 +137,18 @@ export default function PilotStudentDetailDrawer({
               </dd>
             </div>
             <div>
+              <dt>Last PIN reset</dt>
+              <dd>{formatDate(pinLastRotatedAt)}</dd>
+            </div>
+            <div>
+              <dt>Last student login</dt>
+              <dd>{formatDate(lastStudentLoginAt)}</dd>
+            </div>
+            <div>
+              <dt>Parent connected</dt>
+              <dd>{parentConnectionLabel || '—'}</dd>
+            </div>
+            <div>
               <dt>Family Claim Code</dt>
               <dd>
                 <CopyableCompactValue value={familyClaimCode || snapshot.familyAccessCode} type="code" />
@@ -170,6 +188,7 @@ export default function PilotStudentDetailDrawer({
               className="pilot-rosterLaunchBtn"
               onClick={onResetPin}
               disabled={pinActionLoading}
+              title="Resetting this PIN replaces the child's old login PIN."
             >
               {pinActionLoading ? 'Resetting…' : 'Reset PIN'}
             </button>

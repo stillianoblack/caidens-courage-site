@@ -5,8 +5,6 @@ import MirandaClueAccentIcon from './MirandaClueAccentIcon';
 
 type MirandaMissingLetterCardProps = Pick<MirandaClueCardData, 'label' | 'tag' | 'text' | 'clueWord'>;
 
-const LETTER_TILES = ['A', 'B', 'C', 'D'];
-
 function renderSentenceWithWord(sentence: string, clueWord: string) {
   const index = sentence.indexOf(clueWord);
   if (index === -1) {
@@ -33,13 +31,6 @@ export default function MirandaMissingLetterCard({
 }: MirandaMissingLetterCardProps) {
   return (
     <article className="miranda-missingLetterCard" aria-label={`${label}: ${tag}`}>
-      <div className="miranda-missingLetterTiles" aria-hidden="true">
-        {LETTER_TILES.map((letter) => (
-          <span key={letter} className="miranda-missingLetterTile">
-            {letter}
-          </span>
-        ))}
-      </div>
       <div className="miranda-missingLetterPage">
         <span className="miranda-missingLetterAccent" aria-hidden="true">
           <MirandaClueAccentIcon accent="magnifier" />

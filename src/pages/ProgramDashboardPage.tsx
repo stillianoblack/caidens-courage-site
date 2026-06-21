@@ -202,7 +202,10 @@ export default function ProgramDashboardPage() {
       ) : null}
       <Suspense
         fallback={
-          <PortalRouteLoader message={isKidsRoute ? 'Loading game...' : 'Loading dashboard...'} />
+          <PortalRouteLoader
+            message={isKidsRoute ? 'Loading game...' : 'Loading dashboard...'}
+            academy={isKidsRoute}
+          />
         }
       >
         <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />

@@ -13,6 +13,7 @@ import { markInventoryHasNewRewards } from './inventoryNotificationService';
 import { notifyFocusCoinWalletUpdated } from '../hooks/useFocusCoinWallet';
 import { notifyModuleComplete } from './activeChildContext';
 import { triggerParentPush } from './parentPushNotify';
+import { trackKitWeeklyCompletionForStudent } from './kitIntegration';
 import {
   buildMissionCompletePushDedupeKey,
   buildRewardReadyPushDedupeKey,
@@ -262,6 +263,17 @@ export async function claimMissionReward(
   });
 
   if (weekBadgeJustUnlocked) {
+    if (weekNumber >= 1 && weekNumber <= 4) {
+      void trackKitWeeklyCompletionForStudent({
+        participantId,
+        weekNumber,
+        metadata: {
+          week_id: payload.week_id,
+          source: 'mission_reward_claim',
+        },
+      });
+    }
+
     triggerParentPush({
       trigger: 'reward_ready_to_claim',
       childId: participantId,

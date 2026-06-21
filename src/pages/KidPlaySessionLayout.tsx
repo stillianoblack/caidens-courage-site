@@ -20,6 +20,7 @@ import {
   parseKidPlayResumePayload,
 } from '../lib/kidPlaySessionResume';
 import { kidPlayShellNavigate } from '../lib/kidShellNav';
+import { clearPageTransitionOverlay } from '../lib/pageTransition';
 import {
   getKidPlayShellRoute,
   logKidShellIdle,
@@ -52,6 +53,10 @@ export default function KidPlaySessionLayout() {
   const [exitOpen, setExitOpen] = useState(false);
   const resumeHandledRef = useRef(false);
   const initialPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    clearPageTransitionOverlay();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

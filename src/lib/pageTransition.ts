@@ -1,7 +1,7 @@
 import './pageTransition.css';
+import { FOCUS_FLAME_ICON_SRC } from '../design-system/brand/brandLogos';
 
 const TRANSITION_ID = 'cc-page-transition';
-const GENESIS_MARK_SRC = '/images/icons/Genesis@4x-100.webp';
 const TRANSITION_DELAY_MS = 170;
 
 function prefersReducedMotion(): boolean {
@@ -21,9 +21,7 @@ export function showPageTransition(): number {
     overlay.setAttribute('aria-live', 'polite');
     overlay.setAttribute('aria-label', 'Opening next adventure');
     overlay.innerHTML = `
-      <div class="cc-pageTransitionMark" aria-hidden="true">
-        <img src="${GENESIS_MARK_SRC}" alt="" decoding="async" />
-      </div>
+      <img class="focusFlameMark focusFlameMark--animate" src="${FOCUS_FLAME_ICON_SRC}" alt="" decoding="async" />
     `;
     document.body.appendChild(overlay);
   }
@@ -57,4 +55,9 @@ export function navigateWithPageTransition(
   }
 
   window.setTimeout(navigate, delay);
+}
+
+export function clearPageTransitionOverlay(): void {
+  if (typeof document === 'undefined') return;
+  document.getElementById(TRANSITION_ID)?.remove();
 }

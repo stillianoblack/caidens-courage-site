@@ -142,6 +142,31 @@ function InventoryPlaceholderMessage({ children }: { children: React.ReactNode }
   return <p className="inventorySectionPlaceholder">{children}</p>;
 }
 
+function InventoryLockedCertificateCard({
+  certificateName,
+  weeksCompleted,
+  weeksTotal,
+}: {
+  certificateName: string;
+  weeksCompleted: number;
+  weeksTotal: number;
+}) {
+  return (
+    <div className="inventoryCertificateCard inventoryCertificateCard--locked" role="status">
+      <span className="inventoryCertificateCardLockIcon" aria-hidden="true">
+        🔒
+      </span>
+      <p className="inventoryCertificateCardLabel">{certificateName}</p>
+      <p className="inventoryCertificateCardHint">
+        Complete all 4 Week 1–4 adventures to unlock.
+      </p>
+      <p className="inventoryCertificateCardProgress">
+        Progress: {weeksCompleted} / {weeksTotal} complete
+      </p>
+    </div>
+  );
+}
+
 function InventoryEmptyHero({ onStartWeek1 }: { onStartWeek1: () => void }) {
   return (
     <section className="inventoryEmptyHero" aria-labelledby="inventory-empty-hero-title">
@@ -562,13 +587,11 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
                     </p>
                   </div>
                 ) : monthlyChallenge ? (
-                  kidPlayShell && monthlyBadgeRows.length > 0 ? (
-                    <InventoryPlaceholderMessage>
-                      Complete all 4 weeks in Month 1 to earn your certificate.
-                    </InventoryPlaceholderMessage>
-                  ) : (
-                    <MonthChallengeProgressCard progress={monthlyChallenge} />
-                  )
+                  <InventoryLockedCertificateCard
+                    certificateName={monthlyChallenge.certificateName}
+                    weeksCompleted={monthlyChallenge.weeksCompleted}
+                    weeksTotal={monthlyChallenge.weeksTotal}
+                  />
                 ) : (
                   <InventoryPlaceholderMessage>
                     Complete all 4 weeks in Month 1 to earn your certificate.

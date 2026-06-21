@@ -1,6 +1,6 @@
 import type { NavigateFunction, To } from 'react-router-dom';
-import { isKidPlayShellPath } from './kidPlayShellRoutes';
-import { navigateWithPageTransition } from './pageTransition';
+import { isKidPlayShellPath, parseKidPlayShellPath } from './kidPlayShellRoutes';
+import { clearPageTransitionOverlay, navigateWithPageTransition } from './pageTransition';
 import { logNavTest } from './portalClickDebug';
 
 export type KidShellNavigateOptions = {
@@ -44,11 +44,37 @@ export function resolveKidShellNavigationMethod(from: string, to: string): 'rout
   return isKidPlayShellPath(from) || isKidPlayShellPath(to) ? 'assign' : 'router';
 }
 
-function assignPath(from: string, targetPath: string): void {
+/** Same play session tab/module changes must hard-load immediately — no transition delay. */
+export function shouldUseImmediateShellAssign(from: string, to: string): boolean {
+  const fromCtx = parseKidPlayShellPath(from);
+  const toCtx = parseKidPlayShellPath(to);
+  return Boolean(fromCtx && toCtx && fromCtx.sessionId === toCtx.sessionId);
+}
+
+function assignPath(
+  from: string,
+  targetPath: string,
+  mode: 'assign' | 'replace' = 'assign',
+): void {
   const targetNorm = normalizePath(targetPath);
   logKidShellNav(from, targetNorm, 'assign');
   logNavTest(from, targetNorm, { method: 'assign', scope: 'kid-shell' });
-  navigateWithPageTransition(targetPath);
+
+  if (typeof window === 'undefined') return;
+
+  const href = new URL(targetPath, window.location.origin).href;
+
+  if (shouldUseImmediateShellAssign(from, targetNorm)) {
+    clearPageTransitionOverlay();
+    if (mode === 'replace') {
+      window.location.replace(href);
+      return;
+    }
+    window.location.assign(href);
+    return;
+  }
+
+  navigateWithPageTransition(targetPath, mode);
 }
 
 /**
@@ -68,6 +94,7 @@ export function kidPlayShellNavigate(
   const inShell = isKidPlayShellPath(from);
   const targetInShell = isKidPlayShellPath(targetNorm);
   const method = resolveKidShellNavigationMethod(from, targetNorm);
+  const assignMode = options.replace ? 'replace' : 'assign';
 
   if ((inShell || targetInShell) && method === 'router') {
     logKidShellNav(from, targetNorm, method);
@@ -75,7 +102,7 @@ export function kidPlayShellNavigate(
   }
 
   if (options.forceAssign || method === 'assign') {
-    assignPath(from, targetPath);
+    assignPath(from, targetPath, assignMode);
     return;
   }
 
@@ -89,7 +116,7 @@ export function kidPlayShellNavigate(
   } catch (error) {
     console.warn('[KID_SHELL_NAV] router navigation failed', error);
     if (inShell || targetInShell) {
-      assignPath(from, targetPath);
+      assignPath(from, targetPath, assignMode);
     }
     return;
   }

@@ -9,7 +9,7 @@
 .inventoryPanelContent {
   display: flex;
   flex-direction: column;
-  gap: 3.5rem;
+  gap: 1.75rem;
   min-width: 0;
   width: 100%;
 }
@@ -43,11 +43,16 @@
 
 .inventorySection,
 .inventoryShop {
-  padding: 1.15rem 1.2rem;
-  margin-bottom: 0;
+  padding: 1.35rem 1.5rem;
+  margin-bottom: 1.75rem;
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(26, 47, 82, 0.08);
+}
+
+.inventorySection:last-child,
+.inventoryShop:last-child {
+  margin-bottom: 0;
 }
 
 .inventorySectionHeader {

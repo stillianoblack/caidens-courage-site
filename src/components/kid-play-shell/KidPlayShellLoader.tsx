@@ -1,7 +1,6 @@
 import React from 'react';
+import { FOCUS_FLAME_ICON_SRC } from '../../design-system/brand/brandLogos';
 import './kid-play-shell-loader.css';
-
-const FOCUS_FLAME_MARK_SRC = '/images/icons/focus-flame-mark.svg';
 
 type KidPlayShellLoaderProps = {
   /** Cover the full viewport including shell chrome (boot + route transitions). */
@@ -23,7 +22,12 @@ export default function KidPlayShellLoader({ fullScreen = true, exiting = false 
       aria-busy={!exiting}
       aria-label="Loading your adventure"
     >
-      <img className="kidPlayShellLoaderMark" src={FOCUS_FLAME_MARK_SRC} alt="" decoding="async" />
+      <img
+        className="focusFlameMark focusFlameMark--animate kidPlayShellLoaderMark"
+        src={FOCUS_FLAME_ICON_SRC}
+        alt=""
+        decoding="async"
+      />
       <p className="kidPlayShellLoaderText">Loading your adventure…</p>
     </div>
   );

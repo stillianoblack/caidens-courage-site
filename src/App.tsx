@@ -562,6 +562,8 @@ const AppLayout: React.FC = () => {
     location.pathname === PROGRAM_DASHBOARD_PATH ||
     location.pathname.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
     location.pathname === FAMILY_PORTAL_PATH;
+  const portalLoaderMessage = resolvePortalRouteLoaderMessage(location.pathname);
+  const portalLoaderAcademy = portalLoaderMessage.includes('Focus Flame Academy');
   return (
     <>
       <ScrollToTop />
@@ -573,7 +575,7 @@ const AppLayout: React.FC = () => {
             isKidPlayShell ? (
               <KidPlayShellLoader />
             ) : isPortalShellRoute ? (
-              <PortalRouteLoader message={resolvePortalRouteLoaderMessage(location.pathname)} />
+              <PortalRouteLoader message={portalLoaderMessage} academy={portalLoaderAcademy} />
             ) : (
               <NavigationLoader />
             )

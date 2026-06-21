@@ -10,15 +10,14 @@ describe('showPageTransition', () => {
     });
   });
 
-  it('renders the Genesis transition mark before hard navigation', () => {
+  it('renders the Focus Flame transition mark before hard navigation', () => {
     expect(showPageTransition()).toBeGreaterThan(0);
 
     const overlay = document.getElementById('cc-page-transition');
     expect(overlay).not.toBeNull();
     expect(overlay?.getAttribute('data-active')).toBe('true');
-    expect(overlay?.querySelector('img')?.getAttribute('src')).toBe(
-      '/images/icons/Genesis@4x-100.webp',
-    );
+    expect(overlay?.querySelector('img')?.getAttribute('src')).toContain('focus-flame-mark.svg');
+    expect(overlay?.querySelector('img')?.classList.contains('focusFlameMark')).toBe(true);
   });
 
   it('does not animate for reduced motion users', () => {

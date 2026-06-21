@@ -11,6 +11,7 @@ import { activateIndependentFamilyPortalSession } from '../lib/independentFamily
 import { PILOT_PROGRAM_SIGNUP_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
+import { trackKitFacilitatorSignup, trackKitParentSignup } from '../lib/kitIntegration';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
@@ -44,6 +45,11 @@ export default function PilotProgramSignupPage() {
         accessCode: result.program.familyAccessCode,
         parentLastName: input.adminFirstName,
       });
+      trackKitParentSignup({
+        parentEmail: input.adminEmail,
+        eventName: 'independent_family_signup',
+        metadata: { program_code: result.program.programCode, source: 'pilot_signup' },
+      });
       refreshAnalyticsIdentity();
       trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
       replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
@@ -58,6 +64,11 @@ export default function PilotProgramSignupPage() {
     }
     applyProgramPortalUnlock(result.program, 'facilitator', facilitatorCode);
     writeLastPilotProgram(result.program, 'facilitator', input.adminEmail, facilitatorCode);
+    trackKitFacilitatorSignup({
+      facilitatorEmail: input.adminEmail,
+      eventName: 'facilitator_signup',
+      metadata: { program_code: result.program.programCode, source: 'pilot_signup' },
+    });
     refreshAnalyticsIdentity();
     trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
     replaceWithPortalRoute(`${PROGRAM_DASHBOARD_PATH}?welcome=1`);

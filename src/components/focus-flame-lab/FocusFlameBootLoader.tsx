@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLogos';
 
 type Phase = 'in' | 'out' | 'done';
 
 export default function FocusFlameBootLoader({
-  markSrc,
+  markSrc = FOCUS_FLAME_ACADEMY_MARK_SRC,
   reduceMotion,
   onDone,
 }: {

@@ -52,7 +52,7 @@ export default function MonthChallengeProgressCard({ progress }: MonthChallengeP
         </div>
       </div>
 
-      {progress.monthChallengeCompleted ? (
+      {progress.certificateEarned ? (
         <p className="inventoryMonthChallengeComplete" role="status">
           Challenge complete! Your {progress.certificateName} is ready.
         </p>

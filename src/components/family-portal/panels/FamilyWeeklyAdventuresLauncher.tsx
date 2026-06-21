@@ -98,7 +98,7 @@ export default function FamilyWeeklyAdventuresLauncher() {
 
   return (
     <>
-      <PortalRouteLoader message={statusMessage} />
+      <PortalRouteLoader message={statusMessage} academy />
       <ActiveParticipantPickerModal
         open={pickerOpen}
         roster={roster}

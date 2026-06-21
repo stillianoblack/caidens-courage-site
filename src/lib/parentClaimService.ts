@@ -14,6 +14,7 @@ import {
 } from './studentFamilyLinkService';
 import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { setActiveChild } from './activeChildContext';
+import { trackKitParentSignup } from './kitIntegration';
 
 export type ParentLookupInput = {
   campProgramCode?: string;
@@ -359,6 +360,15 @@ export async function claimParentFamilyPortal(input: {
     family_program_code: familyProgram.programCode,
     matched_student_ids: matchedStudentIds,
     link_count: linkIds.length,
+  });
+
+  trackKitParentSignup({
+    parentEmail: email,
+    eventName: 'parent_claim',
+    metadata: {
+      family_program_code: familyProgram.programCode,
+      matched_student_count: matchedStudentIds.length,
+    },
   });
 
   return {

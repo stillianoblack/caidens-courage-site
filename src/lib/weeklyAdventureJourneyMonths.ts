@@ -154,10 +154,15 @@ export function buildAdventureJourneyMonthViews(input: {
       ...resolveMonthChallengeConfig(definition.monthNumber, definition.cmsMonth),
       weekNumbers: definition.weekNumbers,
     };
-    const progress = deriveMonthlyChallengeProgress(monthConfig, completedMissionIds);
-
     const completedWeekNumbers = definition.weekNumbers.filter((week) =>
       input.mapCompletedWeekNumbers.includes(week),
+    );
+    const progress = deriveMonthlyChallengeProgress(
+      monthConfig,
+      completedMissionIds,
+      new Set(),
+      {},
+      completedWeekNumbers,
     );
 
     const hasPublishedCms = definition.weekNumbers.some((week) =>
@@ -188,6 +193,7 @@ export function buildAdventureJourneyMonthViews(input: {
       comingSoon,
       progress: {
         ...progress,
+        weeksCompleted: completedWeekNumbers.length,
         weeksTotal: definition.weekNumbers.length,
         description:
           definition.cmsMonth?.month_description ||

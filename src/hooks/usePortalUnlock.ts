@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
   B4_RESULTS_ADMIN_PATH,
   BLUE_RIBBON_PILOT_PATH,
@@ -31,6 +31,19 @@ import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 import { verifyStudentPinLogin } from '../lib/studentPinService';
 import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
+import {
+  defaultRememberDeviceForUserType,
+  readRememberedDeviceSession,
+  writeRememberedDeviceSession,
+  type RememberedDeviceUserType,
+} from '../lib/rememberedDeviceSession';
+import {
+  hasRememberedProgramAccess,
+  readRememberedProgramAccessCode,
+  writeRememberedProgramAccess,
+} from '../lib/rememberedProgramAccess';
+import type { ActivePilotProgram } from '../types/pilotProgram';
+import { trackKitFacilitatorSignup } from '../lib/kitIntegration';
 
 export type PortalUnlockVariant = 'nav' | 'hero';
 
@@ -58,20 +71,58 @@ function navigateToPortal(destination: string, reason: string): void {
   replaceWithPortalRoute(destination);
 }
 
+function persistRememberedDevice(input: {
+  rememberDevice: boolean;
+  userType: RememberedDeviceUserType;
+  accessCode: string;
+  program: ActivePilotProgram;
+  studentId?: string;
+  parentId?: string;
+  facilitatorId?: string;
+  displayName?: string;
+}): void {
+  writeRememberedProgramAccess(input.accessCode, input.program);
+  if (!input.rememberDevice) return;
+  writeRememberedDeviceSession({
+    access_code: input.accessCode,
+    program_id: input.program.id ?? null,
+    program_code: input.program.programCode,
+    user_type: input.userType,
+    student_id: input.studentId,
+    parent_id: input.parentId,
+    facilitator_id: input.facilitatorId,
+    display_name: input.displayName,
+    program: input.program,
+  });
+}
+
 export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
-  const [accessCode, setAccessCode] = useState('');
+  const remembered = readRememberedDeviceSession();
+  const rememberedAccessCode = readRememberedProgramAccessCode() || remembered?.access_code || '';
+  const hasRememberedProgram = hasRememberedProgramAccess();
+
+  const [accessCode, setAccessCode] = useState(() => rememberedAccessCode);
   const [parentEmail, setParentEmail] = useState('');
   const [parentLastName, setParentLastName] = useState('');
   const [needsLastNameConfirm, setNeedsLastNameConfirm] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(() =>
+    remembered ? true : defaultRememberDeviceForUserType('parent'),
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (rememberedAccessCode && !accessCode.trim()) {
+      setAccessCode(rememberedAccessCode);
+    }
+  }, [accessCode, rememberedAccessCode]);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       setError(null);
 
-      const trimmedCode = accessCode.trim();
+      const trimmedCode = (accessCode.trim() || rememberedAccessCode).trim();
       const normalizedCode = trimmedCode.toLowerCase().replace(/\s+/g, '');
 
       if (!trimmedCode) {
@@ -130,6 +181,15 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
                 return;
               }
 
+              persistRememberedDevice({
+                rememberDevice,
+                userType: 'student',
+                accessCode: trimmedCode,
+                program,
+                studentId: verified.participantId,
+                displayName: verified.displayName,
+              });
+
               setAccessCode('');
               setParentEmail('');
               setParentLastName('');
@@ -153,6 +213,14 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
                 setSubmitting(false);
                 return;
               }
+
+              persistRememberedDevice({
+                rememberDevice,
+                userType: 'parent',
+                accessCode: trimmedCode,
+                program,
+                parentId: email.trim().toLowerCase(),
+              });
 
               setAccessCode('');
               setParentEmail('');
@@ -182,6 +250,14 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
               writeLastPilotProgram(claim.familyProgram, 'family', email, trimmedCode);
             }
 
+            persistRememberedDevice({
+              rememberDevice,
+              userType: 'parent',
+              accessCode: trimmedCode,
+              program: claim.familyProgram ?? program,
+              parentId: email.trim().toLowerCase(),
+            });
+
             setAccessCode('');
             setParentEmail('');
             setParentLastName('');
@@ -194,6 +270,20 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
 
           applyProgramPortalUnlock(program, role, trimmedCode);
           writeLastPilotProgram(program, role, program.adminEmail, trimmedCode);
+          if (role === 'facilitator' && program.adminEmail?.trim()) {
+            trackKitFacilitatorSignup({
+              facilitatorEmail: program.adminEmail,
+              eventName: 'facilitator_unlock',
+              metadata: { program_code: program.programCode, source: 'portal_unlock' },
+            });
+          }
+          persistRememberedDevice({
+            rememberDevice,
+            userType: 'facilitator',
+            accessCode: trimmedCode,
+            program,
+            facilitatorId: program.adminEmail?.trim().toLowerCase() || undefined,
+          });
           setAccessCode('');
           const destination = PROGRAM_DASHBOARD_PATH;
           navigateToPortal(destination, `program-code-${role}`);
@@ -223,7 +313,6 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         return;
       }
 
-      // Legacy demo codes only — never for program-shaped codes.
       if (isLegacyDemoAccessCode(trimmedCode) && isBlueRibbonPilotCode(trimmedCode)) {
         writePortalSessionUnlock('pilot');
         writeBlueRibbonUnlock();
@@ -258,7 +347,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       onUnlock?.();
       navigateToPortal(getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, onUnlock, parentEmail, parentLastName],
+    [accessCode, onUnlock, parentEmail, parentLastName, rememberDevice, rememberedAccessCode],
   );
 
   const handleAccessCodeChange = useCallback(
@@ -274,6 +363,9 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
     parentEmail,
     parentLastName,
     needsLastNameConfirm,
+    rememberDevice,
+    hasRememberedProgram,
+    rememberedSession: remembered,
     error,
     submitting,
     handleSubmit,
@@ -281,11 +373,17 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
     onParentEmailChange: (value: string) => {
       setParentEmail(value);
       if (error) setError(null);
+      if (STUDENT_PIN_RE.test(value.trim())) {
+        setRememberDevice(false);
+      } else if (value.trim()) {
+        setRememberDevice(defaultRememberDeviceForUserType('parent'));
+      }
     },
     onParentLastNameChange: (value: string) => {
       setParentLastName(value);
       if (error) setError(null);
     },
+    onRememberDeviceChange: setRememberDevice,
     clearAccessCode: () => setAccessCode(''),
     setError,
   };

@@ -17,13 +17,18 @@ import { useFamilyChildGoals } from '../../../hooks/useFamilyChildGoals';
 import { useFamilyPortalShell } from '../../../hooks/useFamilyPortalShell';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import type { FamilyChildSummary } from '../../../lib/familyChildrenMetrics';
-import { resolveFamilySettingsTab } from '../../../lib/familyPortalPaths';
+import { resolveFamilySettingsTab, familyStudentAccessAnchorId } from '../../../lib/familyPortalPaths';
 import { reliablePortalNavigate } from '../../../lib/reliablePortalNavigate';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import { formatFamilyRelativeActivityDate } from '../../../lib/familyChildSummaryCard';
+import {
+  fetchStudentAccessFieldsByIds,
+  type StudentAccessFields,
+} from '../../../lib/studentPinService';
 import AddChildForm from '../AddChildForm';
 import FamilyChildGradeConfig from '../FamilyChildGradeConfig';
+import FamilyChildPinAccessCard from '../FamilyChildPinAccessCard';
 import ParticipantGradeMeta from '../../shared/ParticipantGradeMeta';
 import '../../shared/participant-grade-meta.css';
 import { hasCanonicalGradeLevel } from '../../../lib/participantGradeDisplay';
@@ -59,8 +64,11 @@ export default function FamilyProgramSettingsPanel() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
+  const sectionParam = searchParams.get('section');
   const focusParam = searchParams.get('focus');
-  const [activeTab, setActiveTab] = useState<FamilySettingsTabId>(resolveFamilySettingsTab(tabParam));
+  const [activeTab, setActiveTab] = useState<FamilySettingsTabId>(
+    resolveFamilySettingsTab(tabParam, sectionParam),
+  );
 
   const programCode = resolveTrackingProgramCode() ?? undefined;
   const {
@@ -104,6 +112,21 @@ export default function FamilyProgramSettingsPanel() {
   const addChildRef = useRef<HTMLDivElement | null>(null);
   const gradeFocusRef = useRef<HTMLDivElement | null>(null);
   const gradeFocusScrolledRef = useRef(false);
+  const studentAccessFocusRef = useRef<HTMLElement | null>(null);
+  const studentAccessFocusScrolledRef = useRef(false);
+  const [accessByParticipant, setAccessByParticipant] = useState<Map<string, StudentAccessFields>>(
+    new Map(),
+  );
+
+  const participantIds = useMemo(
+    () =>
+      children
+        .map((child) => child.participantId)
+        .filter((id): id is string => Boolean(id)),
+    [children],
+  );
+
+  const firstPinChildParticipantId = participantIds[0] ?? null;
 
   const participantById = useMemo(
     () => new Map(studentParticipants.map((row) => [row.id, row])),
@@ -127,8 +150,31 @@ export default function FamilyProgramSettingsPanel() {
   const [editingParent, setEditingParent] = useState(false);
 
   useEffect(() => {
-    setActiveTab(resolveFamilySettingsTab(tabParam));
-  }, [tabParam]);
+    setActiveTab(resolveFamilySettingsTab(tabParam, sectionParam));
+  }, [tabParam, sectionParam]);
+
+  useEffect(() => {
+    if (focusParam !== 'student-access') {
+      studentAccessFocusScrolledRef.current = false;
+    }
+  }, [focusParam]);
+
+  useEffect(() => {
+    if (activeTab !== 'children' || !participantIds.length) {
+      return;
+    }
+
+    let cancelled = false;
+    void fetchStudentAccessFieldsByIds(participantIds).then((map) => {
+      if (!cancelled) {
+        setAccessByParticipant(map);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, participantIds]);
 
   useEffect(() => {
     if (focusParam !== 'grade') {
@@ -143,6 +189,21 @@ export default function FamilyProgramSettingsPanel() {
     gradeFocusScrolledRef.current = true;
     requestAnimationFrame(() => {
       gradeFocusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [activeTab, focusParam, loading, children.length]);
+
+  useEffect(() => {
+    if (
+      activeTab !== 'children' ||
+      focusParam !== 'student-access' ||
+      loading ||
+      studentAccessFocusScrolledRef.current
+    ) {
+      return;
+    }
+    studentAccessFocusScrolledRef.current = true;
+    requestAnimationFrame(() => {
+      studentAccessFocusRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [activeTab, focusParam, loading, children.length]);
 
@@ -329,6 +390,27 @@ export default function FamilyProgramSettingsPanel() {
                               {link.parent_claimed ? 'Linked' : 'Pending confirmation'}
                             </p>
                           ) : null}
+                          {child.participantId ? (() => {
+                            const pinProgramCode =
+                              participant?.program_code?.trim() ||
+                              campProgramCode ||
+                              programCodeValue;
+                            if (!pinProgramCode) return null;
+                            return (
+                              <FamilyChildPinAccessCard
+                                participantId={child.participantId}
+                                displayName={child.displayName}
+                                programCode={pinProgramCode}
+                                hasPin={accessByParticipant.get(child.participantId)?.hasPin ?? true}
+                                scrollAnchorId={familyStudentAccessAnchorId(child.participantId)}
+                                scrollAnchorRef={
+                                  child.participantId === firstPinChildParticipantId
+                                    ? studentAccessFocusRef
+                                    : undefined
+                                }
+                              />
+                            );
+                          })() : null}
                         </div>
                         {child.participantId ? (
                           <button

@@ -1,8 +1,9 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { readActivePortalRole } from '../config/portalContext';
 import { STUDENT_PIN_LOGIN_PATH } from '../config/courageRoutes';
-import { clearStudentPinSession } from './studentPinSession';
 import { familyPortalPath } from './familyPortalPaths';
+import { hasKidPlayReturnSessionContext } from './kidPlayReturnUnlock';
+import { clearStudentPinSession } from './studentPinSession';
 import { readKidPlayFamilyReturnBase } from './kidPlayShellRoutes';
 import { clearChildSessionMemory } from './endProtectedChildSession';
 import {
@@ -146,10 +147,6 @@ export async function endKidPlayShellSession(
   }
 
   if (behavior.softReturn) {
-    if (session.session_source === 'future_child_pin') {
-      await endKidPlayStudentPinShellSession(navigate, payload);
-      return;
-    }
     await endKidPlayFamilyShellSession(navigate, payload);
     return;
   }
@@ -167,6 +164,9 @@ export function resolveKidPlaySessionExitPath(
   }
 
   if (sessionSource === 'future_child_pin') {
+    if (hasKidPlayReturnSessionContext()) {
+      return familyPortalPath('play-pause', familyBase);
+    }
     return STUDENT_PIN_LOGIN_PATH;
   }
 

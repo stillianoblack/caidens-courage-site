@@ -5,6 +5,7 @@ import { resolveFullyCompletedWeekNumbers } from './adventureWeekCompletion';
 import { fetchCompletedMissionIdsByWeek } from './adventureWeekProgress';
 import { isWeekFullyComplete } from './weekBadgeProgression';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { trackKitMonth1GraduateForStudent } from './kitIntegration';
 
 export const MONTH_CHALLENGE_REWARD_KEY_PREFIX = 'month:';
 
@@ -77,6 +78,7 @@ export function deriveMonthlyChallengeProgress(
     );
   const weeksCompleted = resolvedCompletedWeekNumbers.length;
   const weeksTotal = monthConfig.weekNumbers.length;
+  const allCanonicalWeeksComplete = weeksCompleted >= weeksTotal;
   const hasMonthMissionActivity = completedMissionIds.some((missionId) => {
     const weekMatch = /-week-(\d+)$/.exec(missionId);
     if (weekMatch) {
@@ -88,14 +90,11 @@ export function deriveMonthlyChallengeProgress(
   const monthChallengeStarted =
     earnedClaimKeys.has(monthChallengeStartedKey(monthConfig.monthNumber)) ||
     hasMonthMissionActivity;
-  const monthChallengeCompleted =
-    weeksCompleted >= weeksTotal ||
-    earnedClaimKeys.has(monthChallengeCompletedKey(monthConfig.monthNumber));
-  const certificateEarned =
-    monthChallengeCompleted ||
-    earnedClaimKeys.has(monthCertificateKey(monthConfig.monthNumber));
-  const monthlyBadgeEarned =
-    monthChallengeCompleted || earnedClaimKeys.has(monthBadgeKey(monthConfig.monthNumber));
+  // Certificate + month completion follow canonical weekly adventure completion only.
+  // Claim keys may exist from legacy sync but must not unlock the certificate early.
+  const monthChallengeCompleted = allCanonicalWeeksComplete;
+  const certificateEarned = allCanonicalWeeksComplete;
+  const monthlyBadgeEarned = allCanonicalWeeksComplete;
 
   return {
     monthNumber: monthConfig.monthNumber,
@@ -233,6 +232,8 @@ export async function syncMonthlyChallengeRewards(
   if (!isSupabaseConfigured() || !supabase) return progress;
 
   const claimsToWrite: Array<{ reward_key: string; reward_name: string }> = [];
+  const certificateNewlyEarned =
+    progress.certificateEarned && !claimKeys.has(monthCertificateKey(config.monthNumber));
 
   if (progress.monthChallengeStarted && !claimKeys.has(monthChallengeStartedKey(config.monthNumber))) {
     claimsToWrite.push({
@@ -275,6 +276,16 @@ export async function syncMonthlyChallengeRewards(
     if (error && error.code !== '23505') {
       console.warn('[MONTHLY_CHALLENGE] Failed to write claim', error);
     }
+  }
+
+  if (certificateNewlyEarned) {
+    void trackKitMonth1GraduateForStudent({
+      participantId,
+      metadata: {
+        month_number: config.monthNumber,
+        source: 'sync_monthly_challenge_rewards',
+      },
+    });
   }
 
   if (progress.monthChallengeCompleted && config.bonusCoins > 0) {

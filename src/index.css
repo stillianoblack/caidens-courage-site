@@ -3310,6 +3310,7 @@ body.ffl-debug-grid .ffl-app .ffl-screen.ffl-grid::before {
 .flame-svg {
   width: 64%;
   height: auto;
+  object-fit: contain;
   color: var(--flame-color);
   filter:
     drop-shadow(0 26px 60px rgba(0, 0, 0, 0.55))

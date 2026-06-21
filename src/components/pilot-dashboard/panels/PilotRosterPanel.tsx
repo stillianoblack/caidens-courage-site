@@ -11,7 +11,7 @@ import {
 } from '../../../lib/pilotOverviewInsights';
 import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
 import { buildStudentLoginInstructions } from '../../../lib/familyClaimCode';
-import { resetStudentPinViaFunction, revealStudentPinViaFunction } from '../../../lib/studentPinService';
+import { resetStudentPinViaFunction, revealStudentPinViaFunction, copyStudentPinWithAudit } from '../../../lib/studentPinService';
 import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
 import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
 import { kidShellAwareNavigate } from '../../../lib/kidShellNav';
@@ -101,6 +101,11 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
   const handleResetPin = useCallback(
     async (row: PilotRosterRow) => {
+      const confirmed = window.confirm(
+        'Resetting this PIN replaces the child\'s old login PIN. Continue?',
+      );
+      if (!confirmed) return;
+
       setPinActionLoadingId(row.participantId);
       const result = await resetStudentPinViaFunction({
         participantId: row.participantId,
@@ -113,6 +118,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       }
       setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
       setDrawerParticipantId(row.participantId);
+      showToast(`New PIN for ${row.childName}: ${result.pin}`, 'success');
       void refresh();
     },
     [refresh, showToast],
@@ -337,6 +343,15 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         moduleResults={moduleResults}
         programCode={resolvedProgramCode}
         hasPin={displayRows.find((row) => row.participantId === drawerParticipantId)?.hasPin}
+        pinLastRotatedAt={
+          displayRows.find((row) => row.participantId === drawerParticipantId)?.pinLastRotatedAt ?? null
+        }
+        lastStudentLoginAt={
+          displayRows.find((row) => row.participantId === drawerParticipantId)?.lastActivityAt ?? null
+        }
+        parentConnectionLabel={
+          displayRows.find((row) => row.participantId === drawerParticipantId)?.parentConnectionLabel
+        }
         familyClaimCode={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimCode}
         familyClaimUrl={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimUrl}
         oneTimePin={pinReveal?.participantId === drawerParticipantId ? pinReveal.pin : null}
@@ -366,8 +381,12 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
               pin = result.pin;
               setPinReveal({ participantId: row.participantId, childName: row.childName, pin });
             }
-            await navigator.clipboard.writeText(pin);
-            showToast('PIN copied.', 'success');
+            const copied = await copyStudentPinWithAudit({
+              pin,
+              participantId: row.participantId,
+              programCode: row.campProgramCode,
+            });
+            showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
           };
           void copy();
         }}

@@ -13,6 +13,7 @@ import {
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import { setActiveChild } from './activeChildContext';
+import { trackKitParentSignup } from './kitIntegration';
 
 export type FamilyClaimByCodeLookup = {
   participantId: string;
@@ -228,6 +229,15 @@ export async function claimStudentWithFamilyClaimCode(input: {
     participant_id: participantId,
     family_program_code: familyProgram.programCode,
     parent_email: parentEmail,
+  });
+
+  trackKitParentSignup({
+    parentEmail,
+    eventName: 'parent_claim_by_code',
+    metadata: {
+      participant_id: participantId,
+      family_program_code: familyProgram.programCode,
+    },
   });
 
   return {

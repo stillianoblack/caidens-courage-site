@@ -1,6 +1,6 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { kidPlaySessionStartPath } from '../config/courageRoutes';
-import { kidPlayShellNavigate, resolveKidShellNavigationMethod } from './kidShellNav';
+import { kidPlayShellNavigate, resolveKidShellNavigationMethod, shouldUseImmediateShellAssign } from './kidShellNav';
 
 describe('kidPlayShellNavigate', () => {
   afterEach(() => {
@@ -21,6 +21,21 @@ describe('kidPlayShellNavigate', () => {
         '/play/session/session-123/weekly-adventures',
       ),
     ).toBe('assign');
+  });
+
+  it('hard-loads in-shell tab changes immediately without the transition overlay', () => {
+    expect(
+      shouldUseImmediateShellAssign(
+        '/play/session/session-123/weekly-adventures',
+        '/play/session/session-123/collections',
+      ),
+    ).toBe(true);
+    expect(
+      shouldUseImmediateShellAssign(
+        '/family-hub/weekly-adventures',
+        '/play/session/session-123/weekly-adventures',
+      ),
+    ).toBe(false);
   });
 
   it('keeps ordinary non-shell navigation on the router', () => {

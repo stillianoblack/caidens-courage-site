@@ -3,6 +3,7 @@ import PortalResourceSearch from '../shared/PortalResourceSearch';
 import PortalSwitcherDropdown from '../shared/PortalSwitcherDropdown';
 import FamilyNotificationBell from '../family-portal/FamilyNotificationBell';
 import FocusCoinWalletBadge from '../rewards/FocusCoinWalletBadge';
+import PortalUpdatesPill from './PortalUpdatesPill';
 import MobilePortalHeaderLead from './MobilePortalHeaderLead';
 import { getMobilePortalBranding } from '../../lib/getMobilePortalBranding';
 import { useGameplayPlayerChip } from '../../hooks/useGameplayPlayerChip';
@@ -83,6 +84,7 @@ export default function PortalHeader({
             />
             <div className="portal-headerFamilyToolsEnd">
               <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
+              <PortalUpdatesPill portal="family" compact className="portal-headerUpdates" />
               <FamilyNotificationBell items={notifications} className="portal-headerBell" />
               <PortalSwitcherDropdown
                 className="portal-headerSwitcher portal-headerFamilySwitcher familyPortalMobileHeader-switcher"
@@ -108,6 +110,7 @@ export default function PortalHeader({
         </div>
         <div className="portal-headerTools portal-headerTools--familyDesktop">
           <FocusCoinWalletBadge className="portal-headerCoins" />
+          <PortalUpdatesPill portal="family" className="portal-headerUpdates" />
           <FamilyNotificationBell items={notifications} className="portal-headerBell" />
           <PortalSwitcherDropdown
             className="portal-headerSwitcher portal-headerFamilySwitcher"
@@ -130,10 +133,13 @@ export default function PortalHeader({
             logoSrc={facilitatorMobileBranding.logoSrc}
             className="facilitatorPortalMobileHeader-lead"
           />
-          <PortalSwitcherDropdown
-            className="portal-headerSwitcher facilitatorPortalMobileHeader-switcher"
-            mobileVariant="facilitator"
-          />
+          <div className="facilitatorPortalMobileHeader-tools">
+            <PortalUpdatesPill portal="facilitator" compact className="portal-headerUpdates" />
+            <PortalSwitcherDropdown
+              className="portal-headerSwitcher facilitatorPortalMobileHeader-switcher"
+              mobileVariant="facilitator"
+            />
+          </div>
         </div>
         <PortalResourceSearch
           portal={portal}
@@ -169,6 +175,7 @@ export default function PortalHeader({
       </div>
       <div className="portal-headerTools portal-headerTools--facilitatorDesktop">
         {onOpenProgramGoals ? <FacilitatorGoalsButton onOpenProgramGoals={onOpenProgramGoals} /> : null}
+        <PortalUpdatesPill portal="facilitator" className="portal-headerUpdates" />
         <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />
         <PortalSwitcherDropdown className="portal-headerSwitcher" />
       </div>

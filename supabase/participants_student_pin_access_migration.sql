@@ -13,6 +13,7 @@ alter table public.participants add column if not exists family_claim_code_used_
 alter table public.participants add column if not exists guardian_email text;
 alter table public.participants add column if not exists guardian_phone text;
 alter table public.participants add column if not exists family_account_id uuid;
+alter table public.participants add column if not exists student_pin_reveal_value text;
 
 alter table public.participants drop constraint if exists participants_parent_connection_status_check;
 alter table public.participants add constraint participants_parent_connection_status_check
@@ -32,5 +33,7 @@ create index if not exists participants_parent_connection_status_idx
 
 comment on column public.participants.student_pin_hash is 'PBKDF2 hash of student PIN; raw PIN shown once at creation/reset.';
 comment on column public.participants.student_pin_fingerprint is 'Program-scoped SHA-256 fingerprint for PIN uniqueness lookup.';
+comment on column public.participants.student_pin_reveal_value is
+  'Current student PIN for authorized adult reveal/copy workflows. Student login still verifies against student_pin_hash.';
 comment on column public.participants.parent_connection_status is 'unclaimed | invited | connected';
 comment on column public.participants.family_claim_code is 'Non-guessable code for parent to link later without duplicating student.';

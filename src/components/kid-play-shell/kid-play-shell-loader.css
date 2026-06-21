@@ -1,3 +1,5 @@
+@import '../../design-system/components/focus-flame-mark.css';
+
 .kidPlayShellLoader {
   display: flex;
   flex-direction: column;
@@ -34,14 +36,6 @@
   pointer-events: none;
 }
 
-.kidPlayShellLoaderMark {
-  width: clamp(3.25rem, 12vw, 4.5rem);
-  height: clamp(3.25rem, 12vw, 4.5rem);
-  object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.28));
-  animation: kidPlayShellLoaderMarkIn 1.1s ease-out both;
-}
-
 .kidPlayShellLoaderText {
   margin: 0;
   font-size: 1rem;
@@ -49,17 +43,6 @@
   letter-spacing: 0.01em;
   color: rgba(226, 232, 240, 0.92);
   animation: kidPlayShellLoaderTextIn 0.8s ease-out 0.12s both;
-}
-
-@keyframes kidPlayShellLoaderMarkIn {
-  from {
-    opacity: 0;
-    transform: scale(0.88);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 @keyframes kidPlayShellLoaderTextIn {
@@ -70,5 +53,11 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kidPlayShellLoaderText {
+    animation: none !important;
   }
 }

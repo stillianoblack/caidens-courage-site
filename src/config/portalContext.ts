@@ -9,6 +9,8 @@ import { syncPortalProgramContext } from '../lib/activeProgramContext';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { writeFamilyPortalSession, clearFamilyPortalSession } from './familyPortalAccess';
 import { clearLastPilotProgram } from './lastPilotProgram';
+import { clearRememberedProgramAccess, writeRememberedProgramAccess } from '../lib/rememberedProgramAccess';
+import { clearRememberedDeviceSession } from '../lib/rememberedDeviceSession';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 
 export type PortalRole = 'facilitator' | 'family';
@@ -137,6 +139,7 @@ export function applyProgramPortalUnlock(
   syncPortalProgramContext(program);
   writeActivePortalRole(resolvedRole);
   writeActiveAccessCode(resolvedCode);
+  writeRememberedProgramAccess(resolvedCode, program);
 
   if (resolvedRole === 'family') {
     writeActiveFamilyContext({
@@ -186,4 +189,6 @@ export function signOutPortal(): void {
   clearFamilyPortalSession();
   clearPortalSessionUnlock();
   clearStalePortalRouteState();
+  clearRememberedProgramAccess();
+  clearRememberedDeviceSession('sign_out');
 }

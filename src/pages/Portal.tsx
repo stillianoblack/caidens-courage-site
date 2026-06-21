@@ -31,12 +31,16 @@ const Portal: React.FC = () => {
     parentEmail,
     parentLastName,
     needsLastNameConfirm,
+    rememberDevice,
+    hasRememberedProgram,
+    rememberedSession,
     error,
     submitting,
     handleSubmit,
     onAccessCodeChange,
     onParentEmailChange,
     onParentLastNameChange,
+    onRememberDeviceChange,
     clearAccessCode,
     setError,
   } = usePortalUnlock('hero');
@@ -78,11 +82,15 @@ const Portal: React.FC = () => {
         parentEmail={parentEmail}
         parentLastName={parentLastName}
         needsLastNameConfirm={needsLastNameConfirm}
+        rememberDevice={rememberDevice}
+        hasRememberedProgram={hasRememberedProgram}
+        rememberedSession={rememberedSession}
         error={error}
         submitting={submitting}
         onAccessCodeChange={onAccessCodeChange}
         onParentEmailChange={onParentEmailChange}
         onParentLastNameChange={onParentLastNameChange}
+        onRememberDeviceChange={onRememberDeviceChange}
         onSubmit={handleSubmit}
         onUseDifferentCode={clearAccessCode}
       />

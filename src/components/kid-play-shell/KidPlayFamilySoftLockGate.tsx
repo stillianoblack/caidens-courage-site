@@ -2,31 +2,47 @@ import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PORTAL_PATH } from '../../config/courageRoutes';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
-import { programDashboardTabPath } from '../../lib/programDashboardNav';
-import { clearSharedDevicePortalSession } from '../../lib/endProtectedChildSession';
+import {
+  hasRememberedProgramAccess,
+  readRememberedProgramAccessCode,
+  readRememberedProgramForContext,
+  switchRememberedProgram,
+} from '../../lib/rememberedProgramAccess';
+import { clearChildSessionMemory } from '../../lib/endProtectedChildSession';
 import {
   clearKidPlayFamilySoftLockWithEmail,
   setKidPlayFamilySoftLocked,
 } from '../../lib/kidPlayFamilySoftLock';
 import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
 import { logOverlayActive } from '../../lib/portalClickDebug';
-import { readKidPlayFamilyReturnBase } from '../../lib/kidPlayShellRoutes';
 import { triggerParentPush } from '../../lib/parentPushNotify';
 import { buildSessionEndedPushDedupeKey } from '../../lib/parentPushNotifyDedupe';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
-import { assignPortalRoute } from '../../lib/portalHardNavigation';
+import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
 import { verifyStudentPinLogin } from '../../lib/studentPinService';
 import { launchStudentPinKidPlay } from '../../lib/studentPinLoginLaunch';
 import { kidShellAwareNavigate } from '../../lib/kidShellNav';
 import { clearKidPlayRosterLockWithEmail } from '../../lib/kidPlayRosterLock';
 import {
+  familyReturnSessionPath,
+  facilitatorReturnSessionPath,
+  resolveKidPlayReturnSessionDestination,
+  studentReturnSessionPath,
+  type KidPlayReturnSessionRole,
+} from '../../lib/kidPlayReturnSessionRoute';
+import {
+  detectReturnSessionFacilitatorEmailMatch,
+  detectReturnSessionParentEmailMatch,
+  readPreferredReturnSessionRole,
+} from '../../lib/kidPlayReturnSessionVerify';
+import {
   KID_PLAY_RETURN_ACCESS_ERROR,
-  STUDENT_PIN_INPUT_RE,
   verifyKidPlayReturnAccessCode,
 } from '../../lib/kidPlayReturnUnlock';
+import { clearStudentPinSession } from '../../lib/studentPinSession';
 import '../kid-play-shell/kid-play-roster-lock.css';
 
-const FOCUS_FLAME_MARK_SRC = '/images/icons/focus-flame-mark.svg';
+import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLogos';
 
 type KidPlayFamilySoftLockGateProps = {
   open: boolean;
@@ -45,30 +61,76 @@ export default function KidPlayFamilySoftLockGate({
   const [emailOrPin, setEmailOrPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [hideAccessCodeField, setHideAccessCodeField] = useState(() => hasRememberedProgramAccess());
+  const [showRolePicker, setShowRolePicker] = useState(false);
+  const rememberedAccessCode = readRememberedProgramAccessCode();
 
-  const handleContinue = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setError(null);
+  const handleSwitchProgram = useCallback(() => {
+    switchRememberedProgram(true);
+    setHideAccessCodeField(false);
+    setAccessCode('');
+    setEmailOrPin('');
+    setError(null);
+    setShowRolePicker(false);
+  }, []);
 
-      const trimmedCode = accessCode.trim();
-      const trimmedSecond = emailOrPin.trim();
+  const finishUnlock = useCallback(() => {
+    setAccessCode('');
+    setEmailOrPin('');
+    setShowRolePicker(false);
+    onUnlocked();
+  }, [onUnlocked]);
 
-      if (!trimmedCode || !trimmedSecond) {
-        setError(KID_PLAY_RETURN_ACCESS_ERROR);
-        return;
-      }
+  const routeToFamilyPortal = useCallback(() => {
+    setKidPlayFamilySoftLocked(false);
+    clearKidPlayFamilyResumePayload();
+    finishUnlock();
+    replaceWithPortalRoute(familyReturnSessionPath());
+  }, [finishUnlock]);
 
-      setSubmitting(true);
-      const codeOk = await verifyKidPlayReturnAccessCode(trimmedCode);
-      if (!codeOk) {
+  const routeToFacilitatorPortal = useCallback(() => {
+    setKidPlayFamilySoftLocked(false);
+    clearKidPlayFamilyResumePayload();
+    finishUnlock();
+    replaceWithPortalRoute(facilitatorReturnSessionPath());
+  }, [finishUnlock]);
+
+  const routeToKidShell = useCallback(
+    (sessionId: string) => {
+      setKidPlayFamilySoftLocked(false);
+      clearKidPlayFamilyResumePayload();
+      finishUnlock();
+      kidShellAwareNavigate(navigate, studentReturnSessionPath(sessionId), { replace: true });
+    },
+    [finishUnlock, navigate],
+  );
+
+  const completeReturnSession = useCallback(
+    async (input: {
+      trimmedSecond: string;
+      preferredRole?: KidPlayReturnSessionRole | null;
+    }) => {
+      const { trimmedSecond, preferredRole } = input;
+
+      const destination = resolveKidPlayReturnSessionDestination({
+        emailOrPin: trimmedSecond,
+        parentEmailMatches: detectReturnSessionParentEmailMatch(trimmedSecond),
+        facilitatorEmailMatches: detectReturnSessionFacilitatorEmailMatch(trimmedSecond),
+        preferredRole: preferredRole ?? readPreferredReturnSessionRole(),
+      });
+
+      if (destination === 'role_picker') {
         setSubmitting(false);
-        setError(KID_PLAY_RETURN_ACCESS_ERROR);
+        setShowRolePicker(true);
+        setError(null);
         return;
       }
 
-      if (STUDENT_PIN_INPUT_RE.test(trimmedSecond)) {
-        const programCode = readActivePilotProgram()?.programCode?.trim();
+      if (destination === 'kid_shell') {
+        const programCode =
+          readActivePilotProgram()?.programCode?.trim() ||
+          readRememberedProgramForContext()?.programCode?.trim() ||
+          '';
         if (!programCode) {
           setSubmitting(false);
           setError(KID_PLAY_RETURN_ACCESS_ERROR);
@@ -86,7 +148,8 @@ export default function KidPlayFamilySoftLockGate({
           participantId: verified.participantId,
           programCode: verified.programCode,
           displayName: verified.displayName,
-          organizationId: readActivePilotProgram()?.id ?? null,
+          organizationId:
+            readActivePilotProgram()?.id ?? readRememberedProgramForContext()?.id ?? null,
         });
         setSubmitting(false);
         if (launch.kind === 'error') {
@@ -94,47 +157,77 @@ export default function KidPlayFamilySoftLockGate({
           return;
         }
 
-        setKidPlayFamilySoftLocked(false);
-        clearKidPlayFamilyResumePayload();
-        setAccessCode('');
-        setEmailOrPin('');
-        onUnlocked();
-        kidShellAwareNavigate(navigate, launch.path, { replace: true });
+        routeToKidShell(launch.session.id);
         return;
       }
 
-      if (clearKidPlayRosterLockWithEmail(trimmedSecond)) {
-        setSubmitting(false);
-        setKidPlayFamilySoftLocked(false);
-        clearKidPlayFamilyResumePayload();
-        setAccessCode('');
-        setEmailOrPin('');
-        onUnlocked();
-        assignPortalRoute(programDashboardTabPath('roster'));
-        return;
+      if (destination === 'facilitator_portal') {
+        if (clearKidPlayRosterLockWithEmail(trimmedSecond)) {
+          setSubmitting(false);
+          routeToFacilitatorPortal();
+          return;
+        }
       }
 
-      if (clearKidPlayFamilySoftLockWithEmail(trimmedSecond)) {
-        setSubmitting(false);
-        clearKidPlayFamilyResumePayload();
-        setAccessCode('');
-        setEmailOrPin('');
-        onUnlocked();
-        assignPortalRoute(`${readKidPlayFamilyReturnBase()}/weekly-adventures`);
-        return;
+      if (destination === 'family_portal') {
+        if (clearKidPlayFamilySoftLockWithEmail(trimmedSecond)) {
+          setSubmitting(false);
+          routeToFamilyPortal();
+          return;
+        }
       }
 
       setSubmitting(false);
       setError(KID_PLAY_RETURN_ACCESS_ERROR);
     },
-    [accessCode, emailOrPin, navigate, onUnlocked],
+    [routeToFacilitatorPortal, routeToFamilyPortal, routeToKidShell],
+  );
+
+  const handleContinue = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setError(null);
+      setShowRolePicker(false);
+
+      const trimmedCode = (accessCode.trim() || rememberedAccessCode).trim();
+      const trimmedSecond = emailOrPin.trim();
+
+      if ((!hideAccessCodeField && !trimmedCode) || !trimmedSecond) {
+        setError(KID_PLAY_RETURN_ACCESS_ERROR);
+        return;
+      }
+
+      setSubmitting(true);
+      const codeOk = await verifyKidPlayReturnAccessCode(trimmedCode);
+      if (!codeOk) {
+        setSubmitting(false);
+        setError(KID_PLAY_RETURN_ACCESS_ERROR);
+        return;
+      }
+
+      await completeReturnSession({ trimmedSecond });
+    },
+    [accessCode, completeReturnSession, emailOrPin, hideAccessCodeField, rememberedAccessCode],
+  );
+
+  const handleRoleChoice = useCallback(
+    (role: KidPlayReturnSessionRole) => {
+      setError(null);
+      setSubmitting(true);
+
+      const trimmedSecond = emailOrPin.trim();
+
+      void completeReturnSession({ trimmedSecond, preferredRole: role });
+    },
+    [completeReturnSession, emailOrPin],
   );
 
   const handleEndSession = useCallback(() => {
     setSubmitting(true);
     clearKidPlayFamilyResumePayload();
     setKidPlayFamilySoftLocked(false);
-    clearSharedDevicePortalSession();
+    clearChildSessionMemory();
+    clearStudentPinSession();
     const sessionId = readLocalKidPlaySessionId() || 'manual-end';
     triggerParentPush({
       trigger: 'child_session_ended',
@@ -143,8 +236,9 @@ export default function KidPlayFamilySoftLockGate({
     setSubmitting(false);
     setAccessCode('');
     setEmailOrPin('');
+    setShowRolePicker(false);
     onUnlocked();
-    assignPortalRoute(PORTAL_PATH);
+    replaceWithPortalRoute(PORTAL_PATH);
   }, [onUnlocked]);
 
   useEffect(() => {
@@ -169,70 +263,118 @@ export default function KidPlayFamilySoftLockGate({
         aria-labelledby="kid-play-family-soft-lock-title"
       >
         <div className="kidPlayReturnSessionMarkWrap" aria-hidden="true">
-          <img className="kidPlayReturnSessionMark" src={FOCUS_FLAME_MARK_SRC} alt="" decoding="async" />
+          <img className="kidPlayReturnSessionMark" src={FOCUS_FLAME_ACADEMY_MARK_SRC} alt="" decoding="async" />
         </div>
 
         <h2 id="kid-play-family-soft-lock-title" className="kidPlayRosterLockTitle">
           Return To Session
         </h2>
         <p className="kidPlayRosterLockBody">
-          Enter your access code and use a parent/guardian email, facilitator email, or student PIN to
-          continue.
+          {showRolePicker
+            ? 'This email is linked to more than one role. Choose how you want to continue.'
+            : hideAccessCodeField
+              ? 'Enter a parent/guardian email, facilitator email, or student PIN to continue.'
+              : 'Enter your access code and use a parent/guardian email, facilitator email, or student PIN to continue.'}
         </p>
 
-        <form className="kidPlayRosterLockForm kidPlayReturnSessionForm" onSubmit={(event) => void handleContinue(event)}>
-          <div className="kidPlayReturnSessionField">
-            <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-access-code">
-              Access Code
-            </label>
-            <input
-              id="kid-play-return-access-code"
-              className="kidPlayRosterLockInput"
-              type="text"
-              autoComplete="off"
-              spellCheck={false}
-              value={accessCode}
-              onChange={(event) => setAccessCode(event.target.value)}
-              placeholder="Enter your code"
+        {showRolePicker ? (
+          <div className="kidPlayFamilySoftLockPicker" role="group" aria-label="Choose your role">
+            <button
+              type="button"
+              className="kidPlayRosterLockSubmit"
               disabled={submitting}
-            />
-          </div>
-
-          <div className="kidPlayReturnSessionField">
-            <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-email-or-pin">
-              Email or Student PIN
-            </label>
-            <input
-              id="kid-play-return-email-or-pin"
-              className="kidPlayRosterLockInput"
-              type="text"
-              autoComplete="off"
-              value={emailOrPin}
-              onChange={(event) => setEmailOrPin(event.target.value)}
-              placeholder="Email or student PIN"
+              onClick={() => handleRoleChoice('parent')}
+            >
+              Continue as parent/guardian
+            </button>
+            <button
+              type="button"
+              className="kidPlayRosterLockEndSession"
               disabled={submitting}
-            />
+              onClick={() => handleRoleChoice('facilitator')}
+            >
+              Continue as facilitator
+            </button>
+            <button
+              type="button"
+              className="portal-welcomeBackLink kidPlayReturnSessionSwitchProgram"
+              disabled={submitting}
+              onClick={() => {
+                setShowRolePicker(false);
+                setError(null);
+              }}
+            >
+              Back
+            </button>
           </div>
+        ) : (
+          <form className="kidPlayRosterLockForm kidPlayReturnSessionForm" onSubmit={(event) => void handleContinue(event)}>
+            {!hideAccessCodeField ? (
+              <div className="kidPlayReturnSessionField">
+                <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-access-code">
+                  Access Code
+                </label>
+                <input
+                  id="kid-play-return-access-code"
+                  className="kidPlayRosterLockInput"
+                  type="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={accessCode}
+                  onChange={(event) => setAccessCode(event.target.value)}
+                  placeholder="Enter your code"
+                  disabled={submitting}
+                />
+              </div>
+            ) : null}
 
-          {error ? (
-            <p className="kidPlayRosterLockError kidPlayReturnSessionError" role="alert">
-              {error}
-            </p>
-          ) : null}
+            <div className="kidPlayReturnSessionField">
+              <label className="kidPlayRosterLockLabel" htmlFor="kid-play-return-email-or-pin">
+                Email or Student PIN
+              </label>
+              <input
+                id="kid-play-return-email-or-pin"
+                className="kidPlayRosterLockInput"
+                type="text"
+                autoComplete="off"
+                value={emailOrPin}
+                onChange={(event) => setEmailOrPin(event.target.value)}
+                placeholder="Email or student PIN"
+                disabled={submitting}
+              />
+            </div>
 
-          <button type="submit" className="kidPlayRosterLockSubmit" disabled={submitting}>
-            {submitting ? 'Continuing…' : 'Continue'}
-          </button>
+            {error ? (
+              <p className="kidPlayRosterLockError kidPlayReturnSessionError" role="alert">
+                {error}
+              </p>
+            ) : null}
 
-          <button
-            type="button"
-            className="kidPlayRosterLockEndSession"
-            disabled={submitting}
-            onClick={handleEndSession}
-          >
-            End Session
-          </button>
-        </form>
+            <button type="submit" className="kidPlayRosterLockSubmit" disabled={submitting}>
+              {submitting ? 'Continuing…' : 'Continue'}
+            </button>
+
+            {hideAccessCodeField ? (
+              <button
+                type="button"
+                className="portal-welcomeBackLink kidPlayReturnSessionSwitchProgram"
+                disabled={submitting}
+                onClick={handleSwitchProgram}
+              >
+                Not your program? Switch program
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              className="kidPlayRosterLockEndSession"
+              disabled={submitting}
+              onClick={handleEndSession}
+            >
+              End Session
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { GameChoiceOption } from '../../types/gameAssessment';
+import { optionLetter, sanitizeChoiceDisplayLabel } from '../../lib/gameChoiceDisplay';
 import AnswerChoiceCard from './cinematic/AnswerChoiceCard';
 
 export type AnswerChoiceListProps = {
@@ -14,8 +15,6 @@ export type AnswerChoiceListProps = {
   onSelect: (id: string) => void;
   onHoverChoice?: () => void;
 };
-
-const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export default function AnswerChoiceList({
   options,
@@ -39,14 +38,15 @@ export default function AnswerChoiceList({
         const isSelected = selectedId === choice.id;
         const isCorrect = checked && correctId === choice.id;
         const isWrong = checked && isSelected && correctId !== choice.id;
-        const prefix = OPTION_LETTERS[index] ?? String(index + 1);
+        const prefix = optionLetter(index);
+        const displayLabel = sanitizeChoiceDisplayLabel(choice.label, choice.id, index);
 
         return (
           <li key={choice.id}>
             {variant === 'cinematic' ? (
               <AnswerChoiceCard
                 answerId={choice.id}
-                label={choice.label}
+                label={displayLabel}
                 selected={isSelected}
                 correct={isCorrect}
                 incorrect={isWrong}
@@ -78,10 +78,10 @@ export default function AnswerChoiceList({
                 {showLetterPrefix ? (
                   <>
                     <span className="bbc-answerLetter">{prefix}</span>
-                    <span>{choice.label}</span>
+                    <span>{displayLabel}</span>
                   </>
                 ) : (
-                  choice.label
+                  displayLabel
                 )}
               </button>
             )}

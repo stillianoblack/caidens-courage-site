@@ -1,3 +1,5 @@
+@import '../../design-system/components/focus-flame-mark.css';
+
 .portal-routeLoader {
   padding: 0.5rem 0 1.5rem;
   min-height: 12rem;
@@ -49,4 +51,24 @@
   100% {
     background-position: -100% 0;
   }
+}
+
+.portal-routeLoader--academy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: min(70vh, 28rem);
+  text-align: center;
+}
+
+.portal-routeLoaderMark {
+  width: clamp(3.25rem, 12vw, 4.5rem);
+  height: clamp(3.25rem, 12vw, 4.5rem);
+}
+
+.portal-routeLoaderMessage--academy {
+  margin: 0;
+  color: #4e6a86;
 }

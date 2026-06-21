@@ -8,11 +8,15 @@ type PortalHeroProps = {
   parentEmail?: string;
   parentLastName?: string;
   needsLastNameConfirm?: boolean;
+  rememberDevice?: boolean;
+  hasRememberedProgram?: boolean;
+  rememberedSession?: import('../../lib/rememberedDeviceSession').RememberedDeviceSession | null;
   error: string | null;
   submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
   onParentEmailChange?: (value: string) => void;
   onParentLastNameChange?: (value: string) => void;
+  onRememberDeviceChange?: (value: boolean) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   onUseDifferentCode?: () => void;
 };
@@ -23,11 +27,15 @@ export default function PortalHero({
   parentEmail,
   parentLastName,
   needsLastNameConfirm,
+  rememberDevice,
+  hasRememberedProgram,
+  rememberedSession,
   error,
   submitting = false,
   onAccessCodeChange,
   onParentEmailChange,
   onParentLastNameChange,
+  onRememberDeviceChange,
   onSubmit,
   onUseDifferentCode,
 }: PortalHeroProps) {
@@ -66,11 +74,15 @@ export default function PortalHero({
               parentEmail={parentEmail}
               parentLastName={parentLastName}
               needsLastNameConfirm={needsLastNameConfirm}
+              rememberDevice={rememberDevice}
+              hasRememberedProgram={hasRememberedProgram}
+              rememberedSession={rememberedSession}
               error={error}
               submitting={submitting}
               onAccessCodeChange={onAccessCodeChange}
               onParentEmailChange={onParentEmailChange}
               onParentLastNameChange={onParentLastNameChange}
+              onRememberDeviceChange={onRememberDeviceChange}
               onSubmit={onSubmit}
               onUseDifferentCode={onUseDifferentCode}
             />

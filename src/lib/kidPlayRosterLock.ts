@@ -1,4 +1,4 @@
-import { readActivePilotProgram } from '../config/activePilotProgram';
+import { detectReturnSessionFacilitatorEmailMatch } from './kidPlayReturnSessionVerify';
 
 const ROSTER_LOCK_KEY = 'cc-kid-play-roster-locked';
 
@@ -25,11 +25,7 @@ export function isKidPlayRosterLocked(): boolean {
 }
 
 export function verifyFacilitatorRosterUnlockEmail(email: string): boolean {
-  const program = readActivePilotProgram();
-  const expected = program?.adminEmail?.trim().toLowerCase();
-  const entered = email.trim().toLowerCase();
-  if (!expected || !entered) return false;
-  return entered === expected;
+  return detectReturnSessionFacilitatorEmailMatch(email);
 }
 
 export function clearKidPlayRosterLockWithEmail(email: string): boolean {
