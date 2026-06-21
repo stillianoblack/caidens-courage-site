@@ -17,6 +17,7 @@ type PilotAdminStudentTableProps = {
   variant: PilotAdminStudentTableVariant;
   onStudentClick?: (participantId: string) => void;
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void;
+  onInviteParent?: (row: PilotRosterRow) => void;
   showBaselineActions?: boolean;
 };
 
@@ -104,6 +105,7 @@ function buildRosterColumns(
   isRoster: boolean,
   onStudentClick?: (participantId: string) => void,
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void,
+  onInviteParent?: (row: PilotRosterRow) => void,
   showBaselineActions = false,
 ): ResponsivePortalTableColumn<PilotRosterRow>[] {
   const columns: ResponsivePortalTableColumn<PilotRosterRow>[] = [
@@ -164,6 +166,25 @@ function buildRosterColumns(
             className: 'pilot-adminCellText',
             render: (row: PilotRosterRow) => (row.hasPin ? 'PIN ready' : 'Missing PIN'),
           },
+          ...(onInviteParent
+            ? [
+                {
+                  id: 'invite-parent',
+                  header: 'Family',
+                  mobileRole: 'detail' as const,
+                  className: 'pilot-adminCellText',
+                  render: (row: PilotRosterRow) => (
+                    <button
+                      type="button"
+                      className="pilot-studentLinkBtn"
+                      onClick={() => onInviteParent(row)}
+                    >
+                      Invite Parent
+                    </button>
+                  ),
+                },
+              ]
+            : []),
         ]
       : []),
     ...(isRoster
@@ -209,7 +230,12 @@ function buildRosterColumns(
       header: 'Family Code',
       mobileRole: 'detail',
       className: 'pilot-adminCellChip',
-      render: (row) => <CopyableCompactValue value={row.familyAccessCode} type="code" />,
+      render: (row) => (
+        <CopyableCompactValue
+          value={row.familyClaimCode || (row.familyAccessCode !== '—' ? row.familyAccessCode : '—')}
+          type="code"
+        />
+      ),
     },
     ...(isRoster
       ? []
@@ -239,12 +265,14 @@ export default function PilotAdminStudentTable({
   variant,
   onStudentClick,
   onGradeSaved,
+  onInviteParent,
   showBaselineActions = false,
 }: PilotAdminStudentTableProps) {
   const isRoster = variant === 'roster';
   const columns = useMemo(
-    () => buildRosterColumns(isRoster, onStudentClick, onGradeSaved, showBaselineActions),
-    [isRoster, onGradeSaved, onStudentClick, showBaselineActions],
+    () =>
+      buildRosterColumns(isRoster, onStudentClick, onGradeSaved, onInviteParent, showBaselineActions),
+    [isRoster, onGradeSaved, onInviteParent, onStudentClick, showBaselineActions],
   );
 
   const expandedActions = onStudentClick

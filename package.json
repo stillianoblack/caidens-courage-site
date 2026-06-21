@@ -63,12 +63,14 @@
     "analytics:questions": "tsx scripts/buildQuestionAnalytics.ts",
     "report:pilot-readiness": "tsx scripts/buildPilotReadinessReport.ts",
     "backfill:student-pins": "tsx scripts/backfillStudentPins.ts",
+    "backfill:student-access": "tsx scripts/backfillStudentAccess.ts",
     "export:student-login-cards": "tsx scripts/exportStudentLoginCards.ts",
     "audit:emails": "node scripts/auditEmails.js",
     "audit:kit": "node scripts/auditKitIntegration.js",
     "audit:session-isolation": "node scripts/auditSessionIsolation.js",
     "audit:portal-auth": "node scripts/auditPortalAuth.js",
     "audit:portal-identity": "node scripts/auditPortalIdentity.js",
+    "audit:family-claim-flow": "node scripts/auditFamilyClaimFlow.js",
     "audit:mc-labels": "REACT_APP_SUPABASE_URL= REACT_APP_SUPABASE_ANON_KEY= tsx scripts/audit-mc-choice-labels.ts"
   },
   "browserslist": {

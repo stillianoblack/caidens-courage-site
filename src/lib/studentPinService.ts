@@ -587,13 +587,10 @@ export function resolveParentConnectionStatus(input: {
   linkClaimed?: boolean;
   hasParentEmail?: boolean;
 }): ParentConnectionStatus {
-  if (input.linkClaimed || input.parentConnectionStatus === 'connected') {
+  if (input.linkClaimed && input.hasParentEmail) {
     return 'connected';
   }
-  if (input.parentConnectionStatus === 'invited') {
-    return 'invited';
-  }
-  if (input.hasParentEmail && !input.linkClaimed) {
+  if (input.hasParentEmail) {
     return 'invited';
   }
   return 'unclaimed';

@@ -14,6 +14,7 @@ import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import { setActiveChild } from './activeChildContext';
 import { trackKitParentSignup } from './kitIntegration';
+import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 
 export type FamilyClaimByCodeLookup = {
   participantId: string;
@@ -30,10 +31,6 @@ export type FamilyClaimByCodeResult = {
   familyProgramCode?: string;
   participantId?: string;
 };
-
-function childDisplayName(firstName?: string | null, nickname?: string | null): string {
-  return nickname?.trim() || firstName?.trim() || 'Child';
-}
 
 export async function lookupStudentByFamilyClaimCode(
   claimCode: string,
@@ -82,7 +79,10 @@ export async function lookupStudentByFamilyClaimCode(
     return {
       student: {
         participantId: String(data.id),
-        childDisplayName: childDisplayName(data.first_name, data.nickname),
+        childDisplayName: resolveStudentDisplayNameOrFallback(
+          { nickname: data.nickname, first_name: data.first_name },
+          'Student',
+        ),
         programCode,
         programName,
         parentConnectionStatus: String(data.parent_connection_status || 'unclaimed'),

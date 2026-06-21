@@ -265,6 +265,30 @@ export async function createCampStudentFamilyLink(input: {
   }
 }
 
+/** Ensure every camp student has a student_family_links row for parent claim flows. */
+export async function ensureCampStudentFamilyLink(input: {
+  studentId: string;
+  campProgramCode: string;
+}): Promise<{ success: boolean; link?: StudentFamilyLink; error?: string }> {
+  const studentId = input.studentId.trim();
+  const campProgramCode = input.campProgramCode.trim();
+  if (!studentId || !campProgramCode) {
+    return { success: false, error: 'Missing student or program.' };
+  }
+
+  const { links } = await fetchStudentFamilyLinksByCampProgram(campProgramCode);
+  const existing = links.find((link) => link.student_id === studentId);
+  if (existing) {
+    return { success: true, link: existing };
+  }
+
+  return createCampStudentFamilyLink({
+    studentId,
+    campProgramCode,
+    parentLastName: 'Pending',
+  });
+}
+
 export async function backfillStudentFamilyLinkParentContact(input: {
   linkId: string;
   parentEmail: string;

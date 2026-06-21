@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-21T16:55:09.533Z",
+  "generatedAt": "2026-06-21T17:22:47.300Z",
   "passed": true,
   "summary": {
-    "sourceFilesScanned": 1275,
+    "sourceFilesScanned": 1281,
     "findings": 19,
     "highSeverityFindings": 0
   },

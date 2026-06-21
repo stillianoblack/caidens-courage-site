@@ -2,6 +2,8 @@ import React, { useId, useRef, useState } from 'react';
 import BrandLogo from '../../design-system/components/BrandLogo';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
+import type { PortalLoginIntent } from '../../config/portalLoginIntent';
+import { PORTAL_LOGIN_INTENTS } from '../../config/portalLoginIntent';
 import { readLastPilotProgram, type LastPilotProgram } from '../../config/lastPilotProgram';
 import {
   dismissPortalWelcomeBack,
@@ -32,6 +34,8 @@ type PortalAccessFormProps = {
   onRememberDeviceChange?: (value: boolean) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   onUseDifferentCode?: () => void;
+  portalIntent?: PortalLoginIntent;
+  onPortalIntentChange?: (intent: PortalLoginIntent) => void;
   id?: string;
   cardAudienceLabel?: string;
 };
@@ -53,6 +57,8 @@ export default function PortalAccessForm({
   onRememberDeviceChange,
   onSubmit,
   onUseDifferentCode,
+  portalIntent = 'student',
+  onPortalIntentChange,
   id,
   cardAudienceLabel,
 }: PortalAccessFormProps) {
@@ -83,7 +89,11 @@ export default function PortalAccessForm({
     !hasActivePortalProgramSession();
   const hideAccessCodeField = hasRememberedProgram;
   const isStudentPinEntry = /^\d{4,8}$/.test(parentEmail.trim());
-  const showRememberCheckbox = !isStudentPinEntry;
+  const showRememberCheckbox = !isStudentPinEntry && portalIntent !== 'student';
+  const intentConfig =
+    PORTAL_LOGIN_INTENTS.find((item) => item.id === portalIntent) ?? PORTAL_LOGIN_INTENTS[0];
+  const credentialAutoComplete =
+    portalIntent === 'student' ? 'off' : portalIntent === 'facilitator' ? 'email' : 'email';
 
   const cardClass = isHero
     ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
@@ -129,9 +139,32 @@ export default function PortalAccessForm({
           </h2>
           <p className="mt-1.5 text-sm text-navy-600">
             {hasRememberedProgram
-              ? 'Enter your email or student PIN to continue.'
+              ? portalIntent === 'student'
+                ? 'Enter your student PIN to continue.'
+                : 'Enter your email to continue.'
               : 'Enter your code to unlock your resources.'}
           </p>
+        </div>
+      ) : null}
+
+      {showManualEntry && onPortalIntentChange ? (
+        <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Portal access type">
+          {PORTAL_LOGIN_INTENTS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={portalIntent === item.id}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                portalIntent === item.id
+                  ? 'bg-golden-500 text-white'
+                  : 'bg-navy-100 text-navy-600 hover:bg-navy-200'
+              }`}
+              onClick={() => onPortalIntentChange(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       ) : null}
 
@@ -190,23 +223,21 @@ export default function PortalAccessForm({
               htmlFor={`${formId}-parent-email`}
               className={`block font-semibold text-navy-600 ${isHero ? 'text-sm' : 'text-xs'}`}
             >
-              Parent / Guardian Email or Student PIN
+              {intentConfig.credentialLabel}
             </label>
             <input
               id={`${formId}-parent-email`}
               name="parentEmail"
               type="text"
-              autoComplete="off"
+              autoComplete={credentialAutoComplete}
               value={parentEmail}
               onChange={(event) => onParentEmailChange?.(event.target.value)}
-              placeholder="Email or student PIN"
+              placeholder={intentConfig.credentialPlaceholder}
               className={`cc-portal-code-input mt-1.5 w-full rounded-xl border border-navy-200/80 bg-[#FAF9F7] font-medium text-navy-600 placeholder:text-navy-400/70 focus:border-golden-500 focus:outline-none focus:ring-2 focus:ring-golden-500/30 ${
                 isHero ? 'px-4 py-3.5 text-base' : 'px-3 py-2.5 text-sm'
               }`}
             />
-            <p className="mt-1 text-xs text-navy-500/80">
-              Use parent email for adult access or a student PIN to continue the adventure.
-            </p>
+            <p className="mt-1 text-xs text-navy-500/80">{intentConfig.credentialHint}</p>
           </div>
 
           {needsLastNameConfirm ? (

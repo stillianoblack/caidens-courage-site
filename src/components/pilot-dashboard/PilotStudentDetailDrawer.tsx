@@ -35,6 +35,7 @@ type PilotStudentDetailDrawerProps = {
   onResetPin?: () => void;
   onCopyLoginInstructions?: () => void;
   onCopyClaimLink?: () => void;
+  onInviteParent?: () => void;
   pinActionLoading?: boolean;
 };
 
@@ -68,6 +69,7 @@ export default function PilotStudentDetailDrawer({
   onResetPin,
   onCopyLoginInstructions,
   onCopyClaimLink,
+  onInviteParent,
   pinActionLoading = false,
 }: PilotStudentDetailDrawerProps) {
   const snapshot = useMemo(() => {
@@ -199,10 +201,15 @@ export default function PilotStudentDetailDrawer({
               type="button"
               className="pilot-rosterLaunchBtn"
               onClick={onCopyClaimLink}
-              disabled={!familyClaimUrl}
+              disabled={!onCopyClaimLink}
             >
               Copy Family Claim Link
             </button>
+            {onInviteParent ? (
+              <button type="button" className="pilot-rosterLaunchBtn" onClick={onInviteParent}>
+                Invite Parent
+              </button>
+            ) : null}
           </div>
         </section>
 

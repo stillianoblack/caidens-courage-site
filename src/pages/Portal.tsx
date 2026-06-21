@@ -3,7 +3,9 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import PortalHero from '../components/courage/PortalHero';
+import ParentClaimViaPinModal from '../components/courage/ParentClaimViaPinModal';
 import { parsePortalAudienceParam, type PortalAudienceTab } from '../config/portalAudience';
+import { defaultPortalLoginIntent } from '../config/portalLoginIntent';
 import { usePortalUnlock } from '../hooks/usePortalUnlock';
 import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
 import { PORTAL_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
@@ -26,29 +28,41 @@ const Portal: React.FC = () => {
     [location.state],
   );
 
+  const audienceParam = searchParams.get('audience');
+  const audience: PortalAudienceTab | null = audienceParam
+    ? parsePortalAudienceParam(audienceParam)
+    : null;
+  const initialIntent = defaultPortalLoginIntent(audience);
+
   const {
     accessCode,
     parentEmail,
     parentLastName,
+    parentFirstName,
+    parentPhone,
     needsLastNameConfirm,
+    portalIntent,
+    pendingParentPinClaim,
+    claimSubmitting,
+    claimError,
     rememberDevice,
     hasRememberedProgram,
     rememberedSession,
     error,
     submitting,
     handleSubmit,
+    completePendingParentPinClaim,
+    cancelPendingParentPinClaim,
     onAccessCodeChange,
+    onPortalIntentChange,
     onParentEmailChange,
+    onParentFirstNameChange,
     onParentLastNameChange,
+    onParentPhoneChange,
     onRememberDeviceChange,
     clearAccessCode,
     setError,
-  } = usePortalUnlock('hero');
-
-  const audienceParam = searchParams.get('audience');
-  const audience: PortalAudienceTab | null = audienceParam
-    ? parsePortalAudienceParam(audienceParam)
-    : null;
+  } = usePortalUnlock('hero', undefined, initialIntent);
 
   useEffect(() => {
     document.title = "Caiden's Courage Portal";
@@ -82,17 +96,36 @@ const Portal: React.FC = () => {
         parentEmail={parentEmail}
         parentLastName={parentLastName}
         needsLastNameConfirm={needsLastNameConfirm}
+        portalIntent={portalIntent}
         rememberDevice={rememberDevice}
         hasRememberedProgram={hasRememberedProgram}
         rememberedSession={rememberedSession}
         error={error}
         submitting={submitting}
         onAccessCodeChange={onAccessCodeChange}
+        onPortalIntentChange={onPortalIntentChange}
         onParentEmailChange={onParentEmailChange}
         onParentLastNameChange={onParentLastNameChange}
         onRememberDeviceChange={onRememberDeviceChange}
         onSubmit={handleSubmit}
         onUseDifferentCode={clearAccessCode}
+      />
+
+      <ParentClaimViaPinModal
+        open={Boolean(pendingParentPinClaim)}
+        childDisplayName={pendingParentPinClaim?.childDisplayName ?? 'your child'}
+        submitting={claimSubmitting}
+        error={claimError}
+        parentEmail={parentEmail}
+        parentFirstName={parentFirstName}
+        parentLastName={parentLastName}
+        parentPhone={parentPhone}
+        onParentEmailChange={onParentEmailChange}
+        onParentFirstNameChange={onParentFirstNameChange}
+        onParentLastNameChange={onParentLastNameChange}
+        onParentPhoneChange={onParentPhoneChange}
+        onCancel={cancelPendingParentPinClaim}
+        onSubmit={completePendingParentPinClaim}
       />
 
       <CourageFooter />

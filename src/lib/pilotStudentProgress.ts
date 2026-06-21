@@ -3,6 +3,7 @@ import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTr
 import { formatAssessmentScore } from './pilotResultsDisplay';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
+import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 
 export const PILOT_CERTIFICATE_MIN_MODULES = 1;
 export const PILOT_ACTIVE_DAYS = 7;
@@ -216,7 +217,13 @@ export function buildStudentDetailSnapshot(input: {
 
   return {
     participantId: participant.id,
-    childName: participant.first_name?.trim() || participant.nickname?.trim() || 'Unknown Student',
+    childName: resolveStudentDisplayNameOrFallback(
+      {
+        nickname: participant.nickname,
+        first_name: participant.first_name,
+      },
+      'Student',
+    ),
     nickname: participant.nickname?.trim() || '—',
     parentName,
     parentEmail: link?.parent_email?.trim() || '—',

@@ -48,6 +48,110 @@ function clearAttempts(key) {
   attemptStore.delete(key);
 }
 
+async function resolveProgramCode(supabase, rawProgramCode) {
+  const trimmed = String(rawProgramCode || '').trim();
+  if (!trimmed) return null;
+
+  const { data: directMatch } = await supabase
+    .from('pilot_programs')
+    .select('program_code')
+    .eq('program_code', trimmed)
+    .eq('pilot_status', 'active')
+    .maybeSingle();
+
+  if (directMatch?.program_code) {
+    return String(directMatch.program_code);
+  }
+
+  const { data: accessMatch } = await supabase
+    .from('pilot_programs')
+    .select('program_code')
+    .or(`family_access_code.eq.${trimmed},facilitator_access_code.eq.${trimmed}`)
+    .eq('pilot_status', 'active')
+    .limit(1)
+    .maybeSingle();
+
+  if (accessMatch?.program_code) {
+    return String(accessMatch.program_code);
+  }
+
+  return trimmed;
+}
+
+async function logPinVerificationFailure(supabase, programCode, pin) {
+  const fingerprint = buildPinFingerprint(programCode, pin);
+
+  const { data: programRows } = await supabase
+    .from('pilot_programs')
+    .select('program_code')
+    .eq('program_code', programCode)
+    .eq('pilot_status', 'active')
+    .limit(1);
+
+  if (!programRows?.length) {
+    console.warn('[VERIFY_STUDENT_PIN]', { reason: 'no_program_match', program_code: programCode });
+    return;
+  }
+
+  const { data: fingerprintRows } = await supabase
+    .from('participants')
+    .select('id, student_pin_hash, student_pin_enabled, student_pin_fingerprint')
+    .eq('program_code', programCode)
+    .eq('role', 'student')
+    .eq('student_pin_fingerprint', fingerprint)
+    .limit(5);
+
+  if (!fingerprintRows?.length) {
+    const { count } = await supabase
+      .from('participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('program_code', programCode)
+      .eq('role', 'student');
+
+    console.warn('[VERIFY_STUDENT_PIN]', {
+      reason: 'no_participant_match',
+      program_code: programCode,
+      student_count: count ?? 0,
+    });
+    return;
+  }
+
+  const row = fingerprintRows[0];
+  if (!row.student_pin_hash || !row.student_pin_fingerprint) {
+    console.warn('[VERIFY_STUDENT_PIN]', {
+      reason: 'missing_pin_hash_or_fingerprint',
+      program_code: programCode,
+      participant_id: row.id,
+    });
+    return;
+  }
+
+  if (row.student_pin_enabled === false) {
+    console.warn('[VERIFY_STUDENT_PIN]', {
+      reason: 'pin_disabled',
+      program_code: programCode,
+      participant_id: row.id,
+    });
+    return;
+  }
+
+  const hashOk = verifyStudentPinHash(programCode, pin, row.student_pin_hash);
+  if (!hashOk) {
+    console.warn('[VERIFY_STUDENT_PIN]', {
+      reason: 'pin_hash_mismatch',
+      program_code: programCode,
+      participant_id: row.id,
+    });
+    return;
+  }
+
+  console.warn('[VERIFY_STUDENT_PIN]', {
+    reason: 'no_participant_match',
+    program_code: programCode,
+    participant_id: row.id,
+  });
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
@@ -60,15 +164,15 @@ exports.handler = async (event) => {
     return jsonResponse({ error: 'Invalid request.' }, 400);
   }
 
-  const programCode = String(body.programCode || '').trim();
+  const rawProgramCode = String(body.programCode || '').trim();
   const pin = String(body.pin || '').trim();
   const firstNameHint = String(body.firstNameHint || '').trim().toLowerCase();
 
-  if (!programCode || !pin) {
+  if (!rawProgramCode || !pin) {
     return jsonResponse({ error: 'Program code and PIN are required.' }, 400);
   }
 
-  const lockKey = clientKey(event, programCode);
+  const lockKey = clientKey(event, rawProgramCode);
   const lockout = checkLockout(lockKey);
   if (lockout.locked) {
     return jsonResponse({ error: 'Too many attempts. Try again later.' }, 429);
@@ -77,6 +181,13 @@ exports.handler = async (event) => {
   const supabase = getServiceSupabase();
   if (!supabase) {
     return jsonResponse({ error: 'Service unavailable.' }, 503);
+  }
+
+  const programCode = await resolveProgramCode(supabase, rawProgramCode);
+  if (!programCode) {
+    console.warn('[VERIFY_STUDENT_PIN]', { reason: 'no_program_match', program_code: rawProgramCode });
+    recordFailure(lockKey);
+    return jsonResponse({ error: 'Program code or PIN did not match.' }, 401);
   }
 
   const fingerprint = buildPinFingerprint(programCode, pin);
@@ -100,6 +211,7 @@ exports.handler = async (event) => {
   );
 
   if (!candidates.length) {
+    await logPinVerificationFailure(supabase, programCode, pin);
     recordFailure(lockKey);
     return jsonResponse({ error: 'Program code or PIN did not match.' }, 401);
   }
@@ -117,7 +229,7 @@ exports.handler = async (event) => {
   clearAttempts(lockKey);
 
   const displayName =
-    String(match.nickname || '').trim() || String(match.first_name || '').trim() || 'Player';
+    String(match.nickname || '').trim() || String(match.first_name || '').trim() || 'Student';
 
   return jsonResponse({
     success: true,

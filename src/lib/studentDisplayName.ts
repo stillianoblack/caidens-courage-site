@@ -4,15 +4,21 @@ export type StudentNameFields = {
   firstName?: string | null;
   last_name?: string | null;
   displayName?: string | null;
+  display_name?: string | null;
+  child_name?: string | null;
+  childName?: string | null;
 };
 
-/** Preferred student label: nickname → first name → optional display name. */
+/** Preferred student label: nickname → first name → display name → child name. */
 export function resolveStudentDisplayName(fields: StudentNameFields): string | null {
   return (
     fields.nickname?.trim() ||
     fields.first_name?.trim() ||
     fields.firstName?.trim() ||
     fields.displayName?.trim() ||
+    fields.display_name?.trim() ||
+    fields.child_name?.trim() ||
+    fields.childName?.trim() ||
     null
   );
 }

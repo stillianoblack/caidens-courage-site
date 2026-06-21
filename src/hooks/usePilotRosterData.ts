@@ -18,11 +18,11 @@ import {
   fetchStudentFamilyLinksByCampProgram,
   type StudentFamilyLink,
 } from '../lib/studentFamilyLinkService';
+import { isParentConnectedForLink } from '../lib/portalIdentity';
 import { resolveSyncWarningMessage } from '../lib/syncWarningMessages';
 import {
   fetchStudentAccessFieldsByIds,
   parentConnectionStatusLabel,
-  resolveParentConnectionStatus,
   type ParentConnectionStatus,
   type StudentAccessFields,
 } from '../lib/studentPinService';
@@ -134,18 +134,18 @@ export function usePilotRosterData(
         const familyAccessCode =
           link?.family_program_code?.trim() || programFamilyAccessCode?.trim() || '—';
         const parentEmail = link?.parent_email?.trim() || '—';
-        const parentConnectionStatus = resolveParentConnectionStatus({
-          parentConnectionStatus: access?.parent_connection_status,
-          linkClaimed: Boolean(link?.parent_claimed),
-          hasParentEmail: parentEmail !== '—',
-        });
+        const parentConnectionStatus: ParentConnectionStatus = isParentConnectedForLink(link)
+          ? 'connected'
+          : parentEmail !== '—'
+            ? 'invited'
+            : 'unclaimed';
         const familyClaimCode = access?.family_claim_code ?? null;
 
         return {
           participantId: participant.id,
           childName: resolveStudentDisplayNameOrFallback(
             { nickname: participant.nickname, first_name: participant.first_name },
-            'Child',
+            'Student',
           ),
           nickname: participant.nickname?.trim() || '—',
           parentGuardianName,

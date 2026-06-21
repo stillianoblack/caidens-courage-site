@@ -1,12 +1,12 @@
 # Portal Identity Audit
 
-Generated: 2026-06-21T16:55:09.533Z
+Generated: 2026-06-21T17:22:47.300Z
 
 **Status:** PASS
 
 ## Summary
 
-- Source files scanned: 1275
+- Source files scanned: 1281
 - Findings: 19
 - High severity findings: 0
 

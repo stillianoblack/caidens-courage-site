@@ -24,6 +24,8 @@ import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import PilotAddStudentDrawer from '../PilotAddStudentDrawer';
 import PilotAdminStudentTable from '../PilotAdminStudentTable';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
+import PilotInviteParentModal from '../PilotInviteParentModal';
+import { inviteParentForStudent } from '../../../lib/inviteParentForStudent';
 
 type PilotRosterPanelProps = {
   programCode?: string;
@@ -49,6 +51,9 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     existingSessionId: string;
   } | null>(null);
   const [pinReveal, setPinReveal] = useState<{ participantId: string; childName: string; pin: string } | null>(null);
+  const [inviteParentRow, setInviteParentRow] = useState<PilotRosterRow | null>(null);
+  const [inviteParentSubmitting, setInviteParentSubmitting] = useState(false);
+  const [inviteParentError, setInviteParentError] = useState<string | null>(null);
   const program = readActivePilotProgram();
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
@@ -98,6 +103,36 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       }
     },
     [showToast],
+  );
+
+  const handleInviteParentSubmit = useCallback(
+    async (input: {
+      parentEmail: string;
+      parentFirstName?: string;
+      parentLastName?: string;
+      sendWelcomeEmail: boolean;
+    }) => {
+      if (!inviteParentRow) return;
+      setInviteParentSubmitting(true);
+      setInviteParentError(null);
+      const result = await inviteParentForStudent({
+        participantId: inviteParentRow.participantId,
+        campProgramCode: inviteParentRow.campProgramCode,
+        parentEmail: input.parentEmail,
+        parentFirstName: input.parentFirstName,
+        parentLastName: input.parentLastName,
+        sendWelcomeEmail: input.sendWelcomeEmail,
+      });
+      setInviteParentSubmitting(false);
+      if (!result.success) {
+        setInviteParentError(result.message);
+        return;
+      }
+      showToast(result.message, 'success');
+      setInviteParentRow(null);
+      void refresh();
+    },
+    [inviteParentRow, refresh, showToast],
   );
 
   const handleResetPin = useCallback(
@@ -333,6 +368,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           variant="roster"
           onStudentClick={setDrawerParticipantId}
           onGradeSaved={updateParticipantGrade}
+          onInviteParent={setInviteParentRow}
           showBaselineActions={rosterFilter === 'missing-baseline'}
         />
       )}
@@ -405,6 +441,22 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           const row = rows.find((item) => item.participantId === drawerParticipantId);
           if (row) void handleCopyClaimLink(row);
         }}
+        onInviteParent={() => {
+          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          if (row) setInviteParentRow(row);
+        }}
+      />
+
+      <PilotInviteParentModal
+        open={Boolean(inviteParentRow)}
+        childName={inviteParentRow?.childName ?? 'Student'}
+        submitting={inviteParentSubmitting}
+        error={inviteParentError}
+        onClose={() => {
+          setInviteParentRow(null);
+          setInviteParentError(null);
+        }}
+        onSubmit={(input) => void handleInviteParentSubmit(input)}
       />
 
       <PilotAddStudentDrawer

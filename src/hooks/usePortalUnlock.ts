@@ -17,7 +17,12 @@ import {
 import { claimParentFamilyPortal } from '../lib/parentClaimService';
 import { unlockIndependentFamilyPortal } from '../lib/independentFamilyPortalSignup';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
-import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
+import { lookupPortalProgramByAccessCodeDetailed } from '../lib/portalAccessResolve';
+import {
+  completeParentClaimViaStudentPin,
+  type ParentClaimViaStudentPinInput,
+} from '../lib/parentClaimViaStudentPin';
+import type { PortalLoginIntent } from '../config/portalLoginIntent';
 import { isLegacyDemoUnlockAllowed } from '../lib/portalAuthConfig';
 import { verifyFacilitatorProgramEmail } from '../lib/portalFacilitatorAuth';
 import { facilitatorReturnSessionPath } from '../lib/kidPlayReturnSessionRoute';
@@ -57,6 +62,14 @@ export type PortalUnlockVariant = 'nav' | 'hero';
 
 const BASELINE_RESULTS_CODES = new Set(['results', 'result']);
 const STUDENT_PIN_RE = /^\d{4,8}$/;
+
+export type PendingParentPinClaim = {
+  program: ActivePilotProgram;
+  accessCode: string;
+  participantId: string;
+  childDisplayName: string;
+  programCode: string;
+};
 
 function isBlueRibbonPilotCode(raw: string): boolean {
   const normalized = raw.trim().toLowerCase().replace(/\s+/g, '');
@@ -105,7 +118,11 @@ function persistRememberedDevice(input: {
   }
 }
 
-export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
+export function usePortalUnlock(
+  _variant: PortalUnlockVariant,
+  onUnlock?: () => void,
+  initialIntent: PortalLoginIntent = 'student',
+) {
   const remembered = readRememberedDeviceSession();
   const rememberedAccessCode = readRememberedProgramAccessCode() || remembered?.access_code || '';
   const hasRememberedProgram = hasRememberedProgramAccess();
@@ -113,7 +130,15 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
   const [accessCode, setAccessCode] = useState(() => rememberedAccessCode);
   const [parentEmail, setParentEmail] = useState('');
   const [parentLastName, setParentLastName] = useState('');
+  const [parentFirstName, setParentFirstName] = useState('');
+  const [parentPhone, setParentPhone] = useState('');
   const [needsLastNameConfirm, setNeedsLastNameConfirm] = useState(false);
+  const [portalIntent, setPortalIntent] = useState<PortalLoginIntent>(initialIntent);
+  const [pendingParentPinClaim, setPendingParentPinClaim] = useState<PendingParentPinClaim | null>(
+    null,
+  );
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
   const [rememberDevice, setRememberDevice] = useState(() =>
     remembered ? true : defaultRememberDeviceForUserType('parent'),
   );
@@ -150,7 +175,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
 
       if (isSupabaseConfigReady()) {
         setSubmitting(true);
-        const lookup = await lookupPilotProgramByAccessCodeDetailed(trimmedCode);
+        const lookup = await lookupPortalProgramByAccessCodeDetailed(trimmedCode);
 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
@@ -159,10 +184,20 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
             const credential = parentEmail.trim();
             if (!credential) {
               setError(
-                isIndependentFamilyProgram(program)
-                  ? 'Enter the parent/guardian email for your family account.'
-                  : 'Enter the parent/guardian email or student PIN for this program.',
+                portalIntent === 'student'
+                  ? 'Enter your student PIN to continue.'
+                  : portalIntent === 'facilitator'
+                    ? 'Facilitator access requires a facilitator access code and email.'
+                    : isIndependentFamilyProgram(program)
+                      ? 'Enter the parent/guardian email for your family account.'
+                      : 'Enter the parent/guardian email or student PIN for this program.',
               );
+              setSubmitting(false);
+              return;
+            }
+
+            if (portalIntent === 'facilitator') {
+              setError('This access code is for families. Use your facilitator access code and email.');
               setSubmitting(false);
               return;
             }
@@ -179,6 +214,24 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
                     ? PORTAL_PIN_MISMATCH_MESSAGE
                     : verified.error,
                 );
+                setSubmitting(false);
+                return;
+              }
+
+              if (portalIntent === 'parent') {
+                setPendingParentPinClaim({
+                  program,
+                  accessCode: trimmedCode,
+                  participantId: lookup.claimCodeContext?.participantId ?? verified.participantId,
+                  childDisplayName:
+                    lookup.claimCodeContext?.childDisplayName ?? verified.displayName,
+                  programCode: verified.programCode,
+                });
+                setParentEmail('');
+                setParentFirstName('');
+                setParentLastName('');
+                setParentPhone('');
+                setClaimError(null);
                 setSubmitting(false);
                 return;
               }
@@ -211,6 +264,12 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
               navigateToPortal(launch.path, 'student-pin-portal-login');
               setSubmitting(false);
               onUnlock?.();
+              return;
+            }
+
+            if (portalIntent === 'student') {
+              setError('Students should enter a student PIN, not a parent email.');
+              setSubmitting(false);
               return;
             }
 
@@ -289,6 +348,16 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
           }
 
           if (role === 'facilitator') {
+            if (portalIntent === 'student' || portalIntent === 'parent') {
+              setError(
+                portalIntent === 'student'
+                  ? 'Student PINs use family access codes. Switch to Parent / Guardian or use your family access code.'
+                  : 'This access code is for facilitators. Switch to Facilitator or use your family access code.',
+              );
+              setSubmitting(false);
+              return;
+            }
+
             const email = parentEmail.trim();
             if (!email) {
               setError('Enter your facilitator email to continue.');
@@ -399,7 +468,71 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       onUnlock?.();
       navigateToPortal(getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, onUnlock, parentEmail, parentLastName, rememberDevice, rememberedAccessCode],
+    [accessCode, onUnlock, parentEmail, parentLastName, portalIntent, rememberDevice, rememberedAccessCode],
+  );
+
+  const cancelPendingParentPinClaim = useCallback(() => {
+    setPendingParentPinClaim(null);
+    setClaimError(null);
+    setParentEmail('');
+    setParentFirstName('');
+    setParentLastName('');
+    setParentPhone('');
+  }, []);
+
+  const completePendingParentPinClaim = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      if (!pendingParentPinClaim) return;
+
+      setClaimError(null);
+      setClaimSubmitting(true);
+
+      const payload: ParentClaimViaStudentPinInput = {
+        program: pendingParentPinClaim.program,
+        accessCode: pendingParentPinClaim.accessCode,
+        participantId: pendingParentPinClaim.participantId,
+        childDisplayName: pendingParentPinClaim.childDisplayName,
+        parentEmail,
+        parentFirstName: parentFirstName.trim() || undefined,
+        parentLastName: parentLastName.trim() || undefined,
+        parentPhone: parentPhone.trim() || undefined,
+      };
+
+      const result = await completeParentClaimViaStudentPin(payload);
+      if (!result.success) {
+        setClaimError(result.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
+        setClaimSubmitting(false);
+        return;
+      }
+
+      persistRememberedDevice({
+        rememberDevice,
+        userType: 'parent',
+        accessCode: pendingParentPinClaim.accessCode,
+        program: result.familyProgram ?? pendingParentPinClaim.program,
+        parentId: parentEmail.trim().toLowerCase(),
+      });
+
+      setPendingParentPinClaim(null);
+      setAccessCode('');
+      setParentEmail('');
+      setParentFirstName('');
+      setParentLastName('');
+      setParentPhone('');
+      setClaimSubmitting(false);
+      navigateToPortal(result.overviewPath ?? resolveFamilyPortalOverviewPath(), 'parent-claim-via-pin');
+      onUnlock?.();
+    },
+    [
+      onUnlock,
+      parentEmail,
+      parentFirstName,
+      parentLastName,
+      parentPhone,
+      pendingParentPinClaim,
+      rememberDevice,
+    ],
   );
 
   const handleAccessCodeChange = useCallback(
@@ -414,14 +547,29 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
     accessCode,
     parentEmail,
     parentLastName,
+    parentFirstName,
+    parentPhone,
     needsLastNameConfirm,
+    portalIntent,
+    pendingParentPinClaim,
+    claimSubmitting,
+    claimError,
     rememberDevice,
     hasRememberedProgram,
     rememberedSession: remembered,
     error,
     submitting,
     handleSubmit,
+    completePendingParentPinClaim,
+    cancelPendingParentPinClaim,
     onAccessCodeChange: handleAccessCodeChange,
+    onPortalIntentChange: (intent: PortalLoginIntent) => {
+      setPortalIntent(intent);
+      setError(null);
+      setParentEmail('');
+      setParentLastName('');
+      setNeedsLastNameConfirm(false);
+    },
     onParentEmailChange: (value: string) => {
       setParentEmail(value);
       if (error) setError(null);
@@ -431,6 +579,8 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         setRememberDevice(defaultRememberDeviceForUserType('parent'));
       }
     },
+    onParentFirstNameChange: setParentFirstName,
+    onParentPhoneChange: setParentPhone,
     onParentLastNameChange: (value: string) => {
       setParentLastName(value);
       if (error) setError(null);

@@ -1,6 +1,7 @@
 import React from 'react';
 import PortalAccessForm from './PortalAccessForm';
 import { getPortalAudienceIdentity, type PortalAudienceTab } from '../../config/portalAudience';
+import type { PortalLoginIntent } from '../../config/portalLoginIntent';
 
 type PortalHeroProps = {
   audience: PortalAudienceTab | null;
@@ -8,12 +9,14 @@ type PortalHeroProps = {
   parentEmail?: string;
   parentLastName?: string;
   needsLastNameConfirm?: boolean;
+  portalIntent?: PortalLoginIntent;
   rememberDevice?: boolean;
   hasRememberedProgram?: boolean;
   rememberedSession?: import('../../lib/rememberedDeviceSession').RememberedDeviceSession | null;
   error: string | null;
   submitting?: boolean;
   onAccessCodeChange: (value: string) => void;
+  onPortalIntentChange?: (intent: PortalLoginIntent) => void;
   onParentEmailChange?: (value: string) => void;
   onParentLastNameChange?: (value: string) => void;
   onRememberDeviceChange?: (value: boolean) => void;
@@ -27,12 +30,14 @@ export default function PortalHero({
   parentEmail,
   parentLastName,
   needsLastNameConfirm,
+  portalIntent,
   rememberDevice,
   hasRememberedProgram,
   rememberedSession,
   error,
   submitting = false,
   onAccessCodeChange,
+  onPortalIntentChange,
   onParentEmailChange,
   onParentLastNameChange,
   onRememberDeviceChange,
@@ -74,12 +79,14 @@ export default function PortalHero({
               parentEmail={parentEmail}
               parentLastName={parentLastName}
               needsLastNameConfirm={needsLastNameConfirm}
+              portalIntent={portalIntent}
               rememberDevice={rememberDevice}
               hasRememberedProgram={hasRememberedProgram}
               rememberedSession={rememberedSession}
               error={error}
               submitting={submitting}
               onAccessCodeChange={onAccessCodeChange}
+              onPortalIntentChange={onPortalIntentChange}
               onParentEmailChange={onParentEmailChange}
               onParentLastNameChange={onParentLastNameChange}
               onRememberDeviceChange={onRememberDeviceChange}
