@@ -134,8 +134,10 @@ export function activatePrivateFamilyPortalFromClaim(input: {
   familyProgram: ActivePilotProgram;
   accessCode: string;
   parentEmail: string;
+  parentFirstName?: string;
   parentPhone?: string;
   parentLastName?: string;
+  campProgramCode?: string;
 }): void {
   const existing = readActivePilotProgram();
   if (
@@ -166,10 +168,12 @@ export function activatePrivateFamilyPortalFromClaim(input: {
   writeFamilyPortalSession();
   writeParentClaimContext({
     email: input.parentEmail,
+    firstName: input.parentFirstName,
     phone: input.parentPhone,
     lastName: input.parentLastName,
     confirmed: true,
     programCode: input.familyProgram.programCode,
+    campProgramCode: input.campProgramCode?.trim() || undefined,
     accessCode: input.accessCode.trim(),
   });
 }

@@ -5,6 +5,7 @@ import {
   createOrResolveFamilyProgramForParent,
 } from './parentClaimFamilyPortalService';
 import {
+  backfillStudentFamilyLinkParentContact,
   createCampStudentFamilyLink,
   fetchParticipantsByIds,
   fetchStudentFamilyLinksByCampProgram,
@@ -14,7 +15,9 @@ import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import { setActiveChild } from './activeChildContext';
 import { trackKitParentSignup } from './kitIntegration';
-import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
+import { resolveStudentDisplayNameOrFallback, isPlaceholderParentName } from './studentDisplayName';
+import { buildFamilyClaimUrl } from './familyClaimCode';
+import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type FamilyClaimByCodeLookup = {
   participantId: string;
@@ -23,6 +26,10 @@ export type FamilyClaimByCodeLookup = {
   programName?: string;
   parentConnectionStatus: string;
   alreadyClaimed: boolean;
+  invitedParentEmail?: string;
+  parentFirstName?: string;
+  parentLastName?: string;
+  parentPhone?: string;
 };
 
 export type FamilyClaimByCodeResult = {
@@ -30,6 +37,7 @@ export type FamilyClaimByCodeResult = {
   message: string;
   familyProgramCode?: string;
   participantId?: string;
+  welcomeEmailSkipped?: boolean;
 };
 
 export async function lookupStudentByFamilyClaimCode(
@@ -45,12 +53,13 @@ export async function lookupStudentByFamilyClaimCode(
   }
 
   try {
+    const selectColumns =
+      'id, first_name, nickname, program_code, parent_connection_status, family_claim_code_used_at, family_account_id, guardian_email, guardian_phone';
+
     const { data, error } = await withTimeout(
       supabase
         .from('participants')
-        .select(
-          'id, first_name, nickname, program_code, parent_connection_status, family_claim_code_used_at, family_account_id',
-        )
+        .select(selectColumns)
         .eq('family_claim_code', code)
         .eq('role', 'student')
         .maybeSingle(),
@@ -76,17 +85,54 @@ export async function lookupStudentByFamilyClaimCode(
       programName = programRow?.program_name ? String(programRow.program_name) : undefined;
     }
 
+    let parentFirstName: string | undefined;
+    let parentLastName: string | undefined;
+    let parentPhone: string | undefined;
+    let invitedParentEmail: string | undefined;
+
+    const guardianEmail = String(data.guardian_email || '').trim();
+    if (guardianEmail) {
+      invitedParentEmail = guardianEmail;
+    }
+    const guardianPhone = String(data.guardian_phone || '').trim();
+    if (guardianPhone) {
+      parentPhone = guardianPhone;
+    }
+
+    const { data: linkRow } = await supabase
+      .from('student_family_links')
+      .select('parent_email, parent_first_name, parent_last_name, parent_phone')
+      .eq('student_id', data.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (linkRow) {
+      if (!invitedParentEmail && linkRow.parent_email?.trim()) {
+        invitedParentEmail = linkRow.parent_email.trim();
+      }
+      if (linkRow.parent_first_name?.trim()) parentFirstName = linkRow.parent_first_name.trim();
+      if (linkRow.parent_last_name?.trim() && !isPlaceholderParentName(linkRow.parent_last_name)) {
+        parentLastName = linkRow.parent_last_name.trim();
+      }
+      if (!parentPhone && linkRow.parent_phone?.trim()) parentPhone = linkRow.parent_phone.trim();
+    }
+
     return {
       student: {
         participantId: String(data.id),
-        childDisplayName: resolveStudentDisplayNameOrFallback(
-          { nickname: data.nickname, first_name: data.first_name },
-          'Student',
-        ),
+        childDisplayName: resolveStudentDisplayNameOrFallback({
+          nickname: data.nickname,
+          first_name: data.first_name,
+        }),
         programCode,
         programName,
         parentConnectionStatus: String(data.parent_connection_status || 'unclaimed'),
         alreadyClaimed: Boolean(data.family_claim_code_used_at || data.family_account_id),
+        invitedParentEmail,
+        parentFirstName,
+        parentLastName,
+        parentPhone,
       },
     };
   } catch {
@@ -107,13 +153,29 @@ export async function claimStudentWithFamilyClaimCode(input: {
   const parentLastName = input.parentLastName.trim();
   const parentFirstName = input.parentFirstName.trim();
 
-  if (!claimCode || !parentEmail || !parentLastName || !parentFirstName) {
-    return { success: false, message: 'Claim code, parent name, and email are required.' };
+  if (!claimCode || !parentEmail) {
+    return { success: false, message: 'Claim code and parent email are required.' };
   }
 
   const lookup = await lookupStudentByFamilyClaimCode(claimCode);
   if (lookup.error || !lookup.student) {
     return { success: false, message: lookup.error || 'Claim code not found.' };
+  }
+
+  const resolvedLastName =
+    parentLastName ||
+    (lookup.student.parentLastName?.trim() && !isPlaceholderParentName(lookup.student.parentLastName)
+      ? lookup.student.parentLastName.trim()
+      : '');
+  const resolvedFirstName =
+    parentFirstName || lookup.student.parentFirstName?.trim() || '';
+
+  if (!resolvedFirstName) {
+    return { success: false, message: 'Enter your first name to continue.' };
+  }
+
+  if (!resolvedLastName) {
+    return { success: false, message: 'Enter your last name to continue.' };
   }
 
   if (lookup.student.alreadyClaimed) {
@@ -138,8 +200,8 @@ export async function claimStudentWithFamilyClaimCode(input: {
 
   const familyProgram = await createOrResolveFamilyProgramForParent({
     parentEmail,
-    parentLastName,
-    parentFirstName,
+    parentLastName: resolvedLastName,
+    parentFirstName: resolvedFirstName || undefined,
     campProgram: campProgram ?? undefined,
   });
 
@@ -156,8 +218,8 @@ export async function claimStudentWithFamilyClaimCode(input: {
     const linkResult = await createCampStudentFamilyLink({
       studentId: participantId,
       campProgramCode,
-      parentFirstName,
-      parentLastName,
+      parentFirstName: resolvedFirstName,
+      parentLastName: resolvedLastName,
       parentEmail,
       parentPhone: input.parentPhone,
       relationship: 'parent',
@@ -170,6 +232,21 @@ export async function claimStudentWithFamilyClaimCode(input: {
       };
     }
     link = linkResult.link;
+  } else {
+    const backfill = await backfillStudentFamilyLinkParentContact({
+      linkId: link.id,
+      parentEmail,
+      parentFirstName: resolvedFirstName,
+      parentLastName: resolvedLastName,
+      parentPhone: input.parentPhone,
+    });
+    if (!backfill.success) {
+      return {
+        success: false,
+        message: backfill.error ?? 'Could not save parent contact for this student.',
+      };
+    }
+    if (backfill.link) link = backfill.link;
   }
 
   const claimResult = await markStudentFamilyLinksClaimed({
@@ -177,7 +254,8 @@ export async function claimStudentWithFamilyClaimCode(input: {
     familyProgramCode: familyProgram.programCode,
     parentEmail,
     parentPhone: input.parentPhone,
-    parentLastName,
+    parentFirstName: resolvedFirstName || undefined,
+    parentLastName: resolvedLastName,
   });
 
   if (!claimResult.success) {
@@ -210,8 +288,10 @@ export async function claimStudentWithFamilyClaimCode(input: {
     familyProgram,
     accessCode,
     parentEmail,
+    parentFirstName: resolvedFirstName || undefined,
     parentPhone: input.parentPhone,
-    parentLastName,
+    parentLastName: resolvedLastName,
+    campProgramCode: campProgramCode,
   });
 
   const { participants } = await fetchParticipantsByIds([participantId]);
@@ -231,19 +311,65 @@ export async function claimStudentWithFamilyClaimCode(input: {
     parent_email: parentEmail,
   });
 
-  trackKitParentSignup({
+  const familyClaimUrl = buildFamilyClaimUrl(claimCode);
+  let welcomeEmailSkipped = false;
+  const emailResult = await trackKitParentSignupWithEmail({
     parentEmail,
-    eventName: 'parent_claim_by_code',
-    metadata: {
-      participant_id: participantId,
-      family_program_code: familyProgram.programCode,
-    },
+    parentFirstName: resolvedFirstName || undefined,
+    childName: lookup.student.childDisplayName,
+    familyProgram,
+    familyClaimUrl,
+    claimCode,
+    participantId,
   });
+  welcomeEmailSkipped = emailResult.skipped;
 
   return {
     success: true,
     message: `${lookup.student.childDisplayName} is now connected to your family portal. Existing progress is preserved.`,
     familyProgramCode: familyProgram.programCode,
     participantId,
+    welcomeEmailSkipped,
   };
+}
+
+async function trackKitParentSignupWithEmail(input: {
+  parentEmail: string;
+  parentFirstName?: string;
+  childName: string;
+  familyProgram: { programCode: string; programName?: string; familyAccessCode?: string };
+  familyClaimUrl: string;
+  claimCode: string;
+  participantId: string;
+}): Promise<{ skipped: boolean }> {
+  trackKitParentSignup({
+    parentEmail: input.parentEmail,
+    eventName: 'parent_claim_by_code',
+    metadata: {
+      participant_id: input.participantId,
+      family_program_code: input.familyProgram.programCode,
+      claim_code: input.claimCode,
+    },
+  });
+
+  const emailResult = await queueWelcomeEmail({
+    parentEmail: input.parentEmail,
+    parentFirstName: input.parentFirstName,
+    familyOrProgramName: input.familyProgram.programName ?? input.familyProgram.programCode,
+    familyAccessCode: input.claimCode,
+    childName: input.childName,
+    loginUrl: input.familyClaimUrl,
+    relatedStudentId: input.participantId,
+    relatedProgramId: input.familyProgram.programCode,
+  });
+
+  console.info('[FAMILY_CLAIM_EMAIL]', {
+    provider: emailResult.provider,
+    recipient_email: input.parentEmail,
+    success: emailResult.success,
+    skipped: emailResult.skipped,
+    reason: emailResult.reason ?? null,
+  });
+
+  return { skipped: emailResult.skipped };
 }

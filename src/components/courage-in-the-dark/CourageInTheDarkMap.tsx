@@ -206,7 +206,8 @@ export default function CourageInTheDarkMap({
         className={[
           'courageMapCanvas',
           isHero ? 'courageMapCanvas--hero' : '',
-          mapLocked || baselineLocked ? 'courageMapCanvas--locked' : '',
+          mapLocked && !baselineLocked ? 'courageMapCanvas--locked' : '',
+          baselineLocked ? 'courageMapCanvas--baselineGate' : '',
         ]
           .filter(Boolean)
           .join(' ')}

@@ -1,8 +1,10 @@
 import { readScopedActiveChildRecord, rejectLegacyActiveChildStorage } from '../lib/portalSessionIsolation';
+import {
+  ACTIVE_CHILD_PARTICIPANT_ID_KEY,
+  CHILD_PROFILE_UPDATED_EVENT,
+} from './activeChildEvents';
 
-export const ACTIVE_CHILD_PARTICIPANT_ID_KEY = 'activeChildParticipantId';
-
-export const CHILD_PROFILE_UPDATED_EVENT = 'cc-child-profile-updated';
+export { ACTIVE_CHILD_PARTICIPANT_ID_KEY, CHILD_PROFILE_UPDATED_EVENT };
 
 export function readActiveChildParticipantId(): string {
   rejectLegacyActiveChildStorage();

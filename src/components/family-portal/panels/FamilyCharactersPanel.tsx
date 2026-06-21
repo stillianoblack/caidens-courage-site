@@ -55,16 +55,18 @@ const CharacterCardGrid = memo(function CharacterCardGrid({
       {characters.map((character) => {
         const isB4CheckIn = character.id === 'b4';
         const progress = getCharacterProgress(character.id, modules);
-        const gamesLocked = !hasActiveChild || (!baselineComplete && !isB4CheckIn);
+        const baselineGateLocked = !baselineComplete && !isB4CheckIn;
+        const noChildLocked = !hasActiveChild;
+        const gamesLocked = noChildLocked || baselineGateLocked;
         const status =
           isB4CheckIn && !baselineComplete
-            ? 'Complete B-4 Check-In First'
+            ? 'Start B-4 Check-In'
             : gamesLocked
               ? 'Complete B-4 Check-In First'
               : progress?.statusLine || character.status;
 
-        const isBaselineLaunch = isB4CheckIn && !baselineComplete;
-        const meetLocked = gamesLocked && !isBaselineLaunch;
+        const isBaselineLaunch = isB4CheckIn && !baselineComplete && hasActiveChild;
+        const meetLocked = noChildLocked || (baselineGateLocked && !isB4CheckIn);
 
         return (
           <CharacterAdventureCard
@@ -75,12 +77,15 @@ const CharacterCardGrid = memo(function CharacterCardGrid({
             cta={isB4CheckIn && !baselineComplete ? 'Start B-4 Check-In' : character.cta}
             href={isBaselineLaunch ? baselinePath : character.href}
             status={status}
-            statusTone={gamesLocked ? 'locked' : progress?.statusTone || character.statusTone}
-            skillTags={character.skillTags}
-            locked={meetLocked}
+            statusTone={gamesLocked && !isBaselineLaunch ? 'locked' : progress?.statusTone || character.statusTone}
+            locked={noChildLocked}
+            softLocked={hasActiveChild && baselineGateLocked}
+            featured={isBaselineLaunch}
+            startHereLabel={isBaselineLaunch ? 'Start here' : undefined}
             lockedLabel={
               !hasActiveChild ? 'Select your child to begin' : 'Complete B-4 Check-In First'
             }
+            skillTags={character.skillTags}
             onMeetClick={
               !meetLocked && !isBaselineLaunch && isCharacterProfileId(character.id)
                 ? () => onMeetCharacter(character.id)
@@ -233,7 +238,14 @@ export default function FamilyCharactersPanel({ kidPlayShell = false }: { kidPla
               <p className="family-characterHubSectionDesc">{CHARACTER_HUB_KIDS_SECTION.description}</p>
             </header>
             <CharacterCardGrid
-              characters={kidsCharacters}
+              characters={
+                !baselineLoading && !baselineComplete && hasActiveChild
+                  ? [
+                      ...kidsCharacters.filter((c) => c.id === 'b4'),
+                      ...kidsCharacters.filter((c) => c.id !== 'b4'),
+                    ]
+                  : kidsCharacters
+              }
               baselineComplete={!baselineLoading && baselineComplete}
               hasActiveChild={hasActiveChild}
               modules={modules}

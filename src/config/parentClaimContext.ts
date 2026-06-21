@@ -14,10 +14,13 @@ export const SCOPED_PARENT_CLAIM_KEY = 'cc-scoped-parent-claim';
 
 export type ParentClaimContext = {
   email: string;
+  firstName?: string;
   phone?: string;
   lastName?: string;
   confirmed: boolean;
   programCode: string;
+  /** Camp program where student PINs + roster rows live (differs from family programCode). */
+  campProgramCode?: string;
   accessCode?: string;
   familyId?: string;
   createdAt?: string;
@@ -66,10 +69,12 @@ export function readScopedParentClaimRecord(): ParentClaimContext | null {
     }
     return {
       email,
+      firstName: parsed.firstName?.trim() || undefined,
       phone: phone || undefined,
       lastName: parsed.lastName?.trim() || undefined,
       confirmed: parsed.confirmed === true,
       programCode,
+      campProgramCode: parsed.campProgramCode?.trim() || undefined,
       accessCode: parsed.accessCode?.trim() || undefined,
       familyId: parsed.familyId?.trim() || undefined,
       createdAt: parsed.createdAt?.trim() || undefined,
@@ -88,10 +93,12 @@ export function writeScopedParentClaimRecord(context: ParentClaimContext): void 
       JSON.stringify({
         ...context,
         email: context.email.trim(),
+        firstName: context.firstName?.trim() || undefined,
         phone: context.phone?.trim() || undefined,
         lastName: context.lastName?.trim() || undefined,
-        programCode: context.programCode.trim(),
-        accessCode: context.accessCode?.trim() || undefined,
+      programCode: context.programCode.trim(),
+      campProgramCode: context.campProgramCode?.trim() || undefined,
+      accessCode: context.accessCode?.trim() || undefined,
         familyId: context.familyId?.trim() || undefined,
         createdAt: context.createdAt?.trim() || new Date().toISOString(),
       }),
@@ -147,6 +154,7 @@ export function hasConfirmedParentClaim(scope?: ParentClaimContext | null): bool
 export function writeParentClaimContext(
   input: Omit<ParentClaimContext, 'programCode' | 'createdAt'> & {
     programCode?: string;
+    campProgramCode?: string;
     accessCode?: string;
     familyId?: string;
   },
@@ -162,10 +170,12 @@ export function writeParentClaimContext(
 
   writeScopedParentClaimRecord({
     email: input.email.trim(),
+    firstName: input.firstName?.trim() || undefined,
     phone: input.phone?.trim() || undefined,
     lastName: input.lastName?.trim() || undefined,
     confirmed: input.confirmed,
     programCode,
+    campProgramCode: input.campProgramCode?.trim() || undefined,
     accessCode: input.accessCode?.trim() || scope?.accessCode,
     familyId: input.familyId?.trim() || scope?.familyId,
     createdAt: new Date().toISOString(),

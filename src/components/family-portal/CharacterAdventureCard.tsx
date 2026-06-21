@@ -14,6 +14,9 @@ export type CharacterAdventureCardProps = {
   statusTone?: 'available' | 'locked' | 'complete' | 'review';
   layout?: 'vertical' | 'horizontal';
   locked?: boolean;
+  softLocked?: boolean;
+  featured?: boolean;
+  startHereLabel?: string;
   lockedLabel?: string;
   skillTags?: string;
   linkState?: LinkProps['state'];
@@ -31,6 +34,9 @@ export default function CharacterAdventureCard({
   href,
   status,
   locked = false,
+  softLocked = false,
+  featured = false,
+  startHereLabel,
   lockedLabel = 'Complete B-4 Check-In to unlock',
   skillTags,
   linkState,
@@ -38,6 +44,7 @@ export default function CharacterAdventureCard({
   onMeetClick,
 }: CharacterAdventureCardProps) {
   const isExternal = href.startsWith('/downloads') || href.startsWith('http');
+  const isBlocked = locked || softLocked;
   const resolvedHref = useMemo(() => {
     if (!useCharacterHubLaunch || isExternal || href === '#') {
       return href;
@@ -45,7 +52,7 @@ export default function CharacterAdventureCard({
     return appendCharacterHubGameContext(href);
   }, [href, isExternal, useCharacterHubLaunch]);
 
-  const useMeetPanel = Boolean(onMeetClick) && !locked && !isExternal;
+  const useMeetPanel = Boolean(onMeetClick) && !isBlocked && !isExternal;
 
   return (
     <WeeklyAdventureCard
@@ -57,6 +64,9 @@ export default function CharacterAdventureCard({
       href={resolvedHref}
       status={status}
       locked={locked}
+      softLocked={softLocked}
+      featured={featured}
+      startHereLabel={startHereLabel}
       lockedLabel={lockedLabel}
       linkState={linkState}
       external={isExternal}

@@ -160,6 +160,13 @@ export default function KidPlayCharacterCollectionPanel() {
         <div className="kidPlayCharacterCollectionGrid" role="list">
           {characters
             .filter((card) => isKidCharacterId(card.id))
+            .sort((a, b) => {
+              if (!baselineComplete) {
+                if (a.id === 'b4') return -1;
+                if (b.id === 'b4') return 1;
+              }
+              return 0;
+            })
             .map((card) => {
               const characterId = card.id as KidCharacterId;
               const themeId = resolveCharacterThemeId(characterId) as CharacterThemeId | null;
@@ -167,6 +174,7 @@ export default function KidPlayCharacterCollectionPanel() {
               const discoveryCount = snapshot?.discoveryCountByCharacter[characterId] ?? 0;
               const isB4 = characterId === 'b4';
               const locked = !baselineComplete && !isB4;
+              const featured = isB4 && !baselineComplete;
               const isComplete = progress.statusTone === 'complete';
 
               const completionLabel =
@@ -183,6 +191,7 @@ export default function KidPlayCharacterCollectionPanel() {
                     'kidPlayCharacterCollectionCard',
                     themeId ? `kidPlayCharacterCollectionCard--${themeId}` : '',
                     locked ? 'kidPlayCharacterCollectionCard--locked' : '',
+                    featured ? 'kidPlayCharacterCollectionCard--featured' : '',
                     isComplete ? 'kidPlayCharacterCollectionCard--complete' : '',
                   ]
                     .filter(Boolean)
@@ -206,12 +215,15 @@ export default function KidPlayCharacterCollectionPanel() {
                     ) : null}
                     {locked ? (
                       <span className="kidPlayCharacterCollectionLockMark" aria-hidden="true">
-                        🔒
+                        🔒 Locked
                       </span>
                     ) : null}
                   </div>
 
                   <div className="kidPlayCharacterCollectionCopy">
+                    {featured ? (
+                      <span className="kidPlayCharacterCollectionStartHere">Start here</span>
+                    ) : null}
                     {canOpenProfile ? (
                       <button
                         type="button"

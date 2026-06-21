@@ -4,6 +4,7 @@ import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { isValidSupabaseParticipantId, type StudentParticipantRecord } from './pilotTrackingService';
+import { isPlaceholderParentName } from './studentDisplayName';
 
 export type StudentFamilyLink = {
   id: string;
@@ -310,7 +311,9 @@ export async function backfillStudentFamilyLinkParentContact(input: {
     parent_email: parentEmail,
   };
   if (input.parentPhone?.trim()) payload.parent_phone = input.parentPhone.trim();
-  if (input.parentLastName?.trim()) payload.parent_last_name = input.parentLastName.trim();
+  if (input.parentLastName?.trim() && !isPlaceholderParentName(input.parentLastName)) {
+    payload.parent_last_name = input.parentLastName.trim();
+  }
   if (input.parentFirstName?.trim()) payload.parent_first_name = input.parentFirstName.trim();
 
   try {
@@ -456,6 +459,7 @@ export async function markStudentFamilyLinksClaimed(input: {
   familyProgramCode: string;
   parentEmail: string;
   parentPhone?: string;
+  parentFirstName?: string;
   parentLastName?: string;
 }): Promise<{ success: boolean; error?: string }> {
   if (!input.linkIds.length) {
@@ -471,6 +475,7 @@ export async function markStudentFamilyLinksClaimed(input: {
     family_program_code: input.familyProgramCode.trim(),
     parent_email: input.parentEmail.trim(),
     parent_phone: input.parentPhone?.trim() || null,
+    parent_first_name: input.parentFirstName?.trim() || null,
     parent_last_name: input.parentLastName?.trim() || null,
     parent_claimed: true,
     claimed_at: claimedAt,

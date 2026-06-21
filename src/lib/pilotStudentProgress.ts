@@ -3,7 +3,7 @@ import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTr
 import { formatAssessmentScore } from './pilotResultsDisplay';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
-import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
+import { resolveStudentDisplayNameOrFallback, resolveParentGuardianDisplayName } from './studentDisplayName';
 
 export const PILOT_CERTIFICATE_MIN_MODULES = 1;
 export const PILOT_ACTIVE_DAYS = 7;
@@ -209,21 +209,22 @@ export function buildStudentDetailSnapshot(input: {
   const modulesCompleted = participantModules.length;
   const certificateReady =
     Boolean(baseline?.completed_at) && modulesCompleted >= PILOT_CERTIFICATE_MIN_MODULES;
-  const parentFirst = link?.parent_first_name?.trim() ?? '';
-  const parentLast = link?.parent_last_name?.trim() ?? '';
-  const parentName = [parentFirst, parentLast].filter(Boolean).join(' ') || '—';
+  const parentName = resolveParentGuardianDisplayName({
+    parent_first_name: link?.parent_first_name,
+    parent_last_name: link?.parent_last_name,
+    parent_email: link?.parent_email,
+  });
 
   const familyAccessCode = link?.family_program_code?.trim() || '—';
 
   return {
     participantId: participant.id,
-    childName: resolveStudentDisplayNameOrFallback(
-      {
-        nickname: participant.nickname,
-        first_name: participant.first_name,
-      },
-      'Student',
-    ),
+    childName: resolveStudentDisplayNameOrFallback({
+      display_name: participant.display_name,
+      nickname: participant.nickname,
+      first_name: participant.first_name,
+      last_name: participant.last_name,
+    }),
     nickname: participant.nickname?.trim() || '—',
     parentName,
     parentEmail: link?.parent_email?.trim() || '—',

@@ -34,6 +34,7 @@ type PilotStudentDetailDrawerProps = {
   onCopyPin?: () => void;
   onResetPin?: () => void;
   onCopyLoginInstructions?: () => void;
+  onCopyClaimCode?: () => void;
   onCopyClaimLink?: () => void;
   onInviteParent?: () => void;
   pinActionLoading?: boolean;
@@ -68,6 +69,7 @@ export default function PilotStudentDetailDrawer({
   onCopyPin,
   onResetPin,
   onCopyLoginInstructions,
+  onCopyClaimCode,
   onCopyClaimLink,
   onInviteParent,
   pinActionLoading = false,
@@ -87,6 +89,8 @@ export default function PilotStudentDetailDrawer({
   }, [assessmentResults, familyLinks, moduleResults, participantId, participants, programCode]);
 
   if (!snapshot) return null;
+
+  const resolvedClaimCode = familyClaimCode || snapshot.familyAccessCode;
 
   return (
     <PilotDrawer open={open} onClose={onClose} titleId="pilot-student-drawer-title">
@@ -110,34 +114,66 @@ export default function PilotStudentDetailDrawer({
           ) : null}
         </div>
 
-        <section className="pilot-studentAccessPanel" aria-labelledby="pilot-student-access-title">
+        <section className="pilot-studentAccessPanel" aria-labelledby="pilot-student-pin-title">
           <div className="pilot-studentAccessHead">
             <div>
-              <h3 id="pilot-student-access-title" className="pilot-studentAccessTitle">
-                Student Access
+              <h3 id="pilot-student-pin-title" className="pilot-studentAccessTitle">
+                Student PIN
               </h3>
               <p className="pilot-studentAccessCopy">
-                Reveal, copy, or reset the student PIN. Reset only when an adult wants a new PIN.
+                Use this when the child needs to return to the game.
               </p>
             </div>
             <span className="pilot-studentAccessStatus">{hasPin ? 'PIN ready' : 'Missing PIN'}</span>
           </div>
 
-          <dl className="pilot-drawerGrid pilot-studentAccessGrid">
-            <div>
-              <dt>Student PIN</dt>
-              <dd>
-                {oneTimePin ? (
-                  <span className="pilot-studentPinReveal">
-                    PIN for {snapshot.childName}: <strong>{oneTimePin}</strong>
-                  </span>
-                ) : hasPin ? (
-                  <span className="pilot-resultsMono">••••</span>
-                ) : (
-                  'Not generated'
-                )}
-              </dd>
-            </div>
+          <div className="pilot-studentPinBlock">
+            <p className="pilot-studentPinLabel">PIN value</p>
+            <p className="pilot-studentPinValue">
+              {oneTimePin ? (
+                <span className="pilot-studentPinReveal">
+                  PIN for {snapshot.childName}: <strong>{oneTimePin}</strong>
+                </span>
+              ) : hasPin ? (
+                <span className="pilot-resultsMono">••••</span>
+              ) : (
+                'Not generated'
+              )}
+            </p>
+          </div>
+
+          <div className="pilot-studentAccessActions pilot-studentAccessActions--pin">
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onRevealPin}
+              disabled={pinActionLoading || !onRevealPin}
+            >
+              {pinActionLoading ? 'Revealing…' : 'Reveal PIN'}
+            </button>
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onCopyPin}
+              disabled={pinActionLoading || !onCopyPin}
+            >
+              Copy PIN
+            </button>
+            <button
+              type="button"
+              className="pilot-rosterLaunchBtn"
+              onClick={onResetPin}
+              disabled={pinActionLoading}
+              title="Resetting this PIN replaces the child's old login PIN."
+            >
+              {pinActionLoading ? 'Resetting…' : 'Reset PIN'}
+            </button>
+            <button type="button" className="pilot-rosterLaunchBtn" onClick={onCopyLoginInstructions}>
+              Copy Login Instructions
+            </button>
+          </div>
+
+          <dl className="pilot-drawerGrid pilot-studentAccessMeta">
             <div>
               <dt>Last PIN reset</dt>
               <dd>{formatDate(pinLastRotatedAt)}</dd>
@@ -150,10 +186,26 @@ export default function PilotStudentDetailDrawer({
               <dt>Parent connected</dt>
               <dd>{parentConnectionLabel || '—'}</dd>
             </div>
+          </dl>
+        </section>
+
+        <section className="pilot-studentAccessPanel" aria-labelledby="pilot-family-access-title">
+          <div className="pilot-studentAccessHead">
+            <div>
+              <h3 id="pilot-family-access-title" className="pilot-studentAccessTitle">
+                Family Access
+              </h3>
+              <p className="pilot-studentAccessCopy">
+                Send this to a parent/guardian so they can connect to this child&apos;s Family Portal.
+              </p>
+            </div>
+          </div>
+
+          <dl className="pilot-drawerGrid pilot-studentAccessGrid">
             <div>
               <dt>Family Claim Code</dt>
               <dd>
-                <CopyableCompactValue value={familyClaimCode || snapshot.familyAccessCode} type="code" />
+                <CopyableCompactValue value={resolvedClaimCode} type="code" />
               </dd>
             </div>
             <div>
@@ -172,30 +224,10 @@ export default function PilotStudentDetailDrawer({
             <button
               type="button"
               className="pilot-rosterLaunchBtn"
-              onClick={onRevealPin}
-              disabled={!hasPin || pinActionLoading}
+              onClick={onCopyClaimCode}
+              disabled={!onCopyClaimCode || !resolvedClaimCode}
             >
-              {pinActionLoading ? 'Revealing…' : 'Reveal PIN'}
-            </button>
-            <button
-              type="button"
-              className="pilot-rosterLaunchBtn"
-              onClick={onCopyPin}
-              disabled={!hasPin || pinActionLoading}
-            >
-              Copy PIN
-            </button>
-            <button
-              type="button"
-              className="pilot-rosterLaunchBtn"
-              onClick={onResetPin}
-              disabled={pinActionLoading}
-              title="Resetting this PIN replaces the child's old login PIN."
-            >
-              {pinActionLoading ? 'Resetting…' : 'Reset PIN'}
-            </button>
-            <button type="button" className="pilot-rosterLaunchBtn" onClick={onCopyLoginInstructions}>
-              Copy Login Instructions
+              Copy Family Claim Code
             </button>
             <button
               type="button"
@@ -305,6 +337,10 @@ export default function PilotStudentDetailDrawer({
             <div>
               <dt>Participant ID</dt>
               <dd className="pilot-resultsMono">{snapshot.participantId}</dd>
+            </div>
+            <div>
+              <dt>Program Code</dt>
+              <dd className="pilot-resultsMono">{programCode || '—'}</dd>
             </div>
             <div>
               <dt>Family Program</dt>

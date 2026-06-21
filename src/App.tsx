@@ -109,6 +109,7 @@ import {
   PILOT_TERMS_PATH,
   ADMIN_PORTAL_PATH,
   FAMILY_PORTAL_PATH,
+  FAMILY_CLAIM_PATH,
   FAMILY_HUB_PATH,
   FAMILY_HUB_KIDS_BASE,
   FACILITATOR_BASELINE_CHECK_PATH,
@@ -140,6 +141,7 @@ const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout')
 const KidPlaySessionLayout = React.lazy(() => import('./pages/KidPlaySessionLayout'));
 const StudentPinLoginPage = React.lazy(() => import('./pages/StudentPinLoginPage'));
 const FamilyClaimByCodePage = React.lazy(() => import('./pages/FamilyClaimByCodePage'));
+const FamilyClaimRedirect = React.lazy(() => import('./pages/FamilyClaimRedirect'));
 
 const ProgramOverviewTabRoute = React.lazy(() =>
   import('./routes/programDashboardTabRoutes').then((module) => ({
@@ -250,6 +252,7 @@ const RootRoute: React.FC = () => {
 const appRouteChildren = (
   <>
       <Route path="/" element={<RootRoute />} />
+      <Route path={FAMILY_CLAIM_PATH} element={<FamilyClaimByCodePage />} />
       <Route path="/inventory" element={<Navigate to={`${FAMILY_HUB_PATH}/collections`} replace />} />
 
       {/* Story world */}
@@ -364,7 +367,7 @@ const appRouteChildren = (
           <Route path="certificates" element={<FamilyCertificatesPanel />} />
           <Route path="guide" element={<FamilyGuidePanel />} />
           <Route path="settings" element={<FamilyProgramSettingsPanel />} />
-          <Route path="claim" element={<FamilyClaimByCodePage />} />
+          <Route path="claim" element={<FamilyClaimRedirect />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route
@@ -425,7 +428,7 @@ const appRouteChildren = (
           <Route path="guide" element={<FamilyGuidePanel />} />
           <Route path="parent-corner" element={<FamilyGuidePanel />} />
           <Route path="settings" element={<FamilyProgramSettingsPanel />} />
-          <Route path="claim" element={<FamilyClaimByCodePage />} />
+          <Route path="claim" element={<FamilyClaimRedirect />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
         </Route>
         <Route path={`${FAMILY_HUB_PATH}/guide/:guideId`} element={<FamilyAdultGuideHubPage />} />

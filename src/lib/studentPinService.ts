@@ -408,6 +408,18 @@ export async function resetStudentPinViaFunction(input: {
   parentEmail?: string;
   actorRole?: 'facilitator' | 'parent';
 }): Promise<{ pin: string } | { error: string }> {
+  const participantId = input.participantId.trim();
+  const programCode = input.programCode.trim();
+  if (!participantId || !programCode) {
+    console.warn('[RESET_STUDENT_PIN_CLIENT]', {
+      missingParticipantId: !participantId,
+      missingProgramCode: !programCode,
+      participantId: participantId || null,
+      programCode: programCode || null,
+    });
+    return { error: 'Missing participant or program.' };
+  }
+
   try {
     const response = await fetch('/.netlify/functions/reset-student-pin', {
       method: 'POST',

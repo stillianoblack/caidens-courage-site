@@ -1209,19 +1209,57 @@ export type StudentParticipantRecord = {
   program_code: string;
   created_at: string;
   child_age_range?: string | null;
+  display_name?: string | null;
+  last_name?: string | null;
   grade_level?: string | null;
   grade_band?: string | null;
   allow_stretch_level?: boolean | null;
 };
 
-const STUDENT_PARTICIPANT_SELECT_WITH_GRADE =
-  'id, nickname, first_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level';
-
-const STUDENT_PARTICIPANT_SELECT_BASE =
+const STUDENT_PARTICIPANT_SELECT_MINIMAL =
   'id, nickname, first_name, role, program_code, created_at';
 
-function isMissingGradeColumnError(message: string): boolean {
-  return /grade_level|grade_band|allow_stretch_level|column.*does not exist|42703/i.test(message);
+const STUDENT_PARTICIPANT_SELECT_WITH_LAST_NAME =
+  'id, nickname, first_name, last_name, role, program_code, created_at';
+
+const STUDENT_PARTICIPANT_SELECT_WITH_GRADE =
+  'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level';
+
+function isMissingParticipantColumnError(message: string): boolean {
+  return /grade_level|grade_band|allow_stretch_level|last_name|display_name|column.*does not exist|42703/i.test(
+    message,
+  );
+}
+
+async function fetchStudentParticipantsWithSelectFallback(
+  programCode: string,
+): Promise<{ participants: StudentParticipantRecord[]; error?: string }> {
+  const selects = [
+    STUDENT_PARTICIPANT_SELECT_WITH_GRADE,
+    STUDENT_PARTICIPANT_SELECT_WITH_LAST_NAME,
+    STUDENT_PARTICIPANT_SELECT_MINIMAL,
+  ];
+
+  let lastError: string | undefined;
+  for (const select of selects) {
+    const { data, error } = await supabase!
+      .from('participants')
+      .select(select)
+      .eq('program_code', programCode.trim())
+      .eq('role', 'student')
+      .order('created_at', { ascending: true });
+
+    if (!error) {
+      return { participants: (data ?? []) as unknown as StudentParticipantRecord[] };
+    }
+
+    lastError = error.message;
+    if (!isMissingParticipantColumnError(error.message)) {
+      break;
+    }
+  }
+
+  return { participants: [], error: lastError };
 }
 
 export async function fetchStudentParticipantsFromSupabase(programCode: string): Promise<{
@@ -1233,29 +1271,12 @@ export async function fetchStudentParticipantsFromSupabase(programCode: string):
   }
 
   try {
-    const primary = await supabase
-      .from('participants')
-      .select(STUDENT_PARTICIPANT_SELECT_WITH_GRADE)
-      .eq('program_code', programCode.trim())
-      .eq('role', 'student')
-      .order('created_at', { ascending: true });
-
-    let participants: StudentParticipantRecord[] = (primary.data ?? []) as StudentParticipantRecord[];
-    let fetchError = primary.error;
-
-    if (fetchError && isMissingGradeColumnError(fetchError.message)) {
-      const fallback = await supabase
-        .from('participants')
-        .select(STUDENT_PARTICIPANT_SELECT_BASE)
-        .eq('program_code', programCode.trim())
-        .eq('role', 'student')
-        .order('created_at', { ascending: true });
-      participants = (fallback.data ?? []) as StudentParticipantRecord[];
-      fetchError = fallback.error;
-    }
+    const { participants, error: fetchError } = await fetchStudentParticipantsWithSelectFallback(
+      programCode,
+    );
 
     if (fetchError) {
-      return { participants: [], error: fetchError.message };
+      return { participants: [], error: fetchError };
     }
 
     return { participants };

@@ -148,24 +148,38 @@ export default function PortalAccessForm({
       ) : null}
 
       {showManualEntry && onPortalIntentChange ? (
-        <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Portal access type">
-          {PORTAL_LOGIN_INTENTS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={portalIntent === item.id}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                portalIntent === item.id
-                  ? 'bg-golden-500 text-white'
-                  : 'bg-navy-100 text-navy-600 hover:bg-navy-200'
-              }`}
-              onClick={() => onPortalIntentChange(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <fieldset className="cc-portal-roleSelector mt-4 space-y-2 border-0 p-0">
+          <legend className="mb-2 block w-full text-left text-sm font-semibold text-navy-600">
+            Who are you? <span className="font-normal text-red-600">*</span>
+          </legend>
+          <div className="grid gap-2" role="radiogroup" aria-label="Who are you?">
+            {PORTAL_LOGIN_INTENTS.map((item) => {
+              const selected = portalIntent === item.id;
+              return (
+                <label
+                  key={item.id}
+                  className={`cc-portal-roleCard flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                    selected
+                      ? 'border-golden-500 bg-golden-50 ring-2 ring-golden-500/30'
+                      : 'border-navy-200/80 bg-[#FAF9F7] hover:border-navy-300'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`${formId}-portal-role`}
+                    className="mt-1"
+                    checked={selected}
+                    onChange={() => onPortalIntentChange(item.id)}
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-navy-700">{item.label}</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-navy-500">{item.helperText}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
       ) : null}
 
       {showRememberedResume && rememberedSession ? (

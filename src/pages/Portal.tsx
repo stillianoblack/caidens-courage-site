@@ -7,8 +7,10 @@ import ParentClaimViaPinModal from '../components/courage/ParentClaimViaPinModal
 import { parsePortalAudienceParam, type PortalAudienceTab } from '../config/portalAudience';
 import { defaultPortalLoginIntent } from '../config/portalLoginIntent';
 import { usePortalUnlock } from '../hooks/usePortalUnlock';
-import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
+import { resolveFamilyKidDefaultLandingPath, resolveFamilyPortalOverviewPath } from '../lib/familyKidLanding';
+import { readActivePortalRole } from '../config/portalContext';
 import { PORTAL_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { isFamilyClaimCode } from '../lib/familyClaimCode';
 import { logPortalRedirect } from '../lib/portalDebug';
 import {
   hasFacilitatorPortalSession,
@@ -32,7 +34,10 @@ const Portal: React.FC = () => {
   const audience: PortalAudienceTab | null = audienceParam
     ? parsePortalAudienceParam(audienceParam)
     : null;
-  const initialIntent = defaultPortalLoginIntent(audience);
+  const claimCodeFromUrl = searchParams.get('code')?.trim().toUpperCase() || '';
+  const claimMode = searchParams.get('claim') === '1' || isFamilyClaimCode(claimCodeFromUrl);
+  const initialIntent =
+    claimMode || audience === 'parents' ? 'parent' : defaultPortalLoginIntent(audience);
 
   const {
     accessCode,
@@ -62,7 +67,9 @@ const Portal: React.FC = () => {
     onRememberDeviceChange,
     clearAccessCode,
     setError,
-  } = usePortalUnlock('hero', undefined, initialIntent);
+  } = usePortalUnlock('hero', undefined, initialIntent, {
+    initialAccessCode: claimCodeFromUrl || undefined,
+  });
 
   useEffect(() => {
     document.title = "Caiden's Courage Portal";
@@ -76,8 +83,12 @@ const Portal: React.FC = () => {
 
   useEffect(() => {
     if (hasFamilyPortalSession()) {
-      logPortalRedirect(PORTAL_PATH, resolveFamilyKidDefaultLandingPath(), 'resume-family-session');
-      replaceWithPortalRoute(resolveFamilyKidDefaultLandingPath());
+      const resumePath =
+        readActivePortalRole() === 'family'
+          ? resolveFamilyPortalOverviewPath()
+          : resolveFamilyKidDefaultLandingPath();
+      logPortalRedirect(PORTAL_PATH, resumePath, 'resume-family-session');
+      replaceWithPortalRoute(resumePath);
       return;
     }
     if (hasFacilitatorPortalSession()) {

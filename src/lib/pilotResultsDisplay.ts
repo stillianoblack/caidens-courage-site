@@ -2,7 +2,29 @@ import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTr
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 
-export type ParticipantNameLookup = Map<string, Pick<StudentParticipantRecord, 'nickname' | 'first_name'>>;
+export type ParticipantNameLookup = Map<
+  string,
+  Pick<StudentParticipantRecord, 'nickname' | 'first_name' | 'display_name' | 'last_name'>
+>;
+
+function mergeParticipantRecord(
+  existing: StudentParticipantRecord,
+  incoming: StudentParticipantRecord,
+): StudentParticipantRecord {
+  return {
+    ...existing,
+    ...incoming,
+    nickname: incoming.nickname?.trim() || existing.nickname?.trim() || null,
+    first_name: incoming.first_name?.trim() || existing.first_name?.trim() || null,
+    display_name: incoming.display_name?.trim() || existing.display_name?.trim() || null,
+    last_name: incoming.last_name?.trim() || existing.last_name?.trim() || null,
+    grade_level: incoming.grade_level ?? existing.grade_level ?? null,
+    grade_band: incoming.grade_band ?? existing.grade_band ?? null,
+    allow_stretch_level: incoming.allow_stretch_level ?? existing.allow_stretch_level ?? null,
+    program_code: incoming.program_code?.trim() || existing.program_code?.trim() || '',
+    created_at: incoming.created_at || existing.created_at,
+  };
+}
 
 export function mergeParticipantRecords(
   ...groups: StudentParticipantRecord[][]
@@ -12,7 +34,8 @@ export function mergeParticipantRecords(
     for (const participant of group) {
       const id = participant.id?.trim();
       if (!id) continue;
-      byId.set(id, participant);
+      const existing = byId.get(id);
+      byId.set(id, existing ? mergeParticipantRecord(existing, participant) : participant);
     }
   }
   return Array.from(byId.values());
@@ -28,6 +51,8 @@ export function buildParticipantNameLookup(
     lookup.set(id, {
       nickname: participant.nickname,
       first_name: participant.first_name,
+      display_name: participant.display_name,
+      last_name: participant.last_name,
     });
   }
   return lookup;
@@ -42,8 +67,10 @@ export function resolveParticipantDisplayName(
   const participant = lookup.get(id);
   return resolveStudentDisplayNameOrFallback(
     {
+      display_name: participant?.display_name,
       nickname: participant?.nickname,
       first_name: participant?.first_name,
+      last_name: participant?.last_name,
     },
     'Unknown Student',
   );

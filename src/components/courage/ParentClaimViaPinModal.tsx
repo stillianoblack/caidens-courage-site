@@ -2,6 +2,7 @@ import React, { useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import Button from '../ui/Button';
+import '../family-portal/family-student-pin-modal.css';
 
 type ParentClaimViaPinModalProps = {
   open: boolean;
@@ -62,7 +63,7 @@ export default function ParentClaimViaPinModal({
       onClick={submitting ? undefined : onCancel}
     >
       <div
-        className="family-studentPinModal cc-portal-access-card"
+        className="family-studentPinModal cc-portal-access-card family-studentPinModal--scrollable"
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${formId}-title`}

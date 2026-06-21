@@ -3,31 +3,36 @@ export type PortalLoginIntent = 'student' | 'parent' | 'facilitator';
 export const PORTAL_LOGIN_INTENTS: Array<{
   id: PortalLoginIntent;
   label: string;
+  helperText: string;
   credentialLabel: string;
   credentialPlaceholder: string;
   credentialHint: string;
 }> = [
   {
     id: 'student',
-    label: "I'm a Student",
+    label: 'Student',
+    helperText: 'Use your student PIN to continue the adventure.',
     credentialLabel: 'Student PIN',
     credentialPlaceholder: 'Enter student PIN',
-    credentialHint: 'Use your program access code and student PIN to continue your adventure.',
+    credentialHint: 'Enter your program access code and student PIN to open Weekly Adventures.',
   },
   {
     id: 'parent',
-    label: "I'm a Parent / Guardian",
+    label: 'Parent / Guardian',
+    helperText:
+      "Use your email if already connected, or your child's PIN to claim family access.",
     credentialLabel: 'Parent email or student PIN',
     credentialPlaceholder: 'Email or student PIN',
     credentialHint:
-      'Use your parent email after claiming access, or enter a student PIN to connect your family account.',
+      'Connected parents use email. New parents can enter their child’s PIN to claim access.',
   },
   {
     id: 'facilitator',
-    label: "I'm a Facilitator",
+    label: 'Facilitator',
+    helperText: 'Use your facilitator email or access credentials to manage students.',
     credentialLabel: 'Facilitator email',
     credentialPlaceholder: 'Enter facilitator email',
-    credentialHint: 'Use your facilitator access code and email to open the program roster.',
+    credentialHint: 'Enter your facilitator access code and email to open the program roster.',
   },
 ];
 

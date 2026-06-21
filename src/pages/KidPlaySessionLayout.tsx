@@ -32,6 +32,8 @@ import KidPlayShellLoader from '../components/kid-play-shell/KidPlayShellLoader'
 import { IdleSessionGuard } from '../design-system/narration';
 import KidPlayShellNav from '../components/kid-play-shell/KidPlayShellNav';
 import KidPlayShellExitModal from '../components/kid-play-shell/KidPlayShellExitModal';
+import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
+import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import '../design-system/kids-adventure/character-art-image.css';
 import '../components/kid-play-shell/kid-play-shell.css';
 import '../components/kid-play-shell/kid-play-shell-nav.css';
@@ -51,6 +53,7 @@ export default function KidPlaySessionLayout() {
   const [showBootLoader, setShowBootLoader] = useState(true);
   const [bootLoaderExiting, setBootLoaderExiting] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
+  const [returnSessionOpen, setReturnSessionOpen] = useState(() => isKidPlayFamilySoftLocked());
   const resumeHandledRef = useRef(false);
   const initialPathRef = useRef(location.pathname);
 
@@ -168,11 +171,14 @@ export default function KidPlaySessionLayout() {
         reason,
         childDisplayName: displayName,
         childId: session.child_id,
+        stayInShell: true,
         resumePayload: {
           route: location.pathname + location.search,
           module: (resolveKidPlayShellModule(location.pathname) ?? 'weekly-adventures') as KidPlayShellModuleId,
           endedFrom: reason === 'user_exit' ? 'kid_play_shell_exit' : 'kid_play_shell_idle',
         },
+      }).then(() => {
+        setReturnSessionOpen(true);
       });
     },
     [displayName, location.pathname, location.search, navigate, session],
@@ -217,9 +223,15 @@ export default function KidPlaySessionLayout() {
                 onConfirm={handleConfirmExit}
               />
               <IdleSessionGuard
-                enabled
+                enabled={!returnSessionOpen && !isKidPlayFamilySoftLocked()}
                 onEndSession={() => handleEndSession('idle_timeout')}
                 endSessionLabel="End Session"
+              />
+              <KidPlayFamilySoftLockGate
+                open={returnSessionOpen || isKidPlayFamilySoftLocked()}
+                inShellChildId={session.child_id}
+                inShellSessionId={session.id}
+                onUnlocked={() => setReturnSessionOpen(false)}
               />
             </div>
           </KidPlaySessionProvider>

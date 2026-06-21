@@ -4,7 +4,7 @@ import { writeActiveAccessCode } from '../../config/portalContext';
 import { hasFamilyChildGoals, saveFamilyChildGoals } from '../familyChildGoalsService';
 import { trackKitParentSignup } from '../kitIntegration';
 import { submitParentOnboarding } from '../parentOnboardingSubmit';
-import { readParentOnboardingRecord } from '../parentOnboardingState';
+import { readFamilyOnboardingRecord } from '../parentOnboardingState';
 import { saveProgramGoals } from '../programGoalsService';
 import {
   fetchStudentFamilyLinksByCampProgram,
@@ -134,8 +134,12 @@ describe('submitParentOnboarding', () => {
     expect(claim?.confirmed).toBe(true);
     expect(claim?.programCode).toBe('FAMILY-TEST');
 
-    const onboardingRecord = readParentOnboardingRecord('FAMILY-TEST', 'parent@example.com');
-    expect(onboardingRecord?.parentOnboardingComplete).toBe(true);
+    const onboardingRecord = readFamilyOnboardingRecord(
+      'FAMILY-TEST',
+      'child-1',
+      'parent@example.com',
+    );
+    expect(onboardingRecord?.complete).toBe(true);
     expect(onboardingRecord?.familyGoals).toEqual(['Focus', 'Confidence']);
   });
 
@@ -166,7 +170,9 @@ describe('submitParentOnboarding', () => {
     if (!result.success) {
       expect(result.message).toContain('Database unavailable');
     }
-    expect(readParentOnboardingRecord('FAMILY-TEST', 'parent@example.com')).toBeNull();
+    expect(
+      readFamilyOnboardingRecord('FAMILY-TEST', 'child-1', 'parent@example.com'),
+    ).toBeNull();
   });
 
   test('attempts welcome email and Kit Parent tag after successful onboarding', async () => {

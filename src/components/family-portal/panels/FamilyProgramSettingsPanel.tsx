@@ -150,7 +150,7 @@ export default function FamilyProgramSettingsPanel() {
   const parentLink = scopedParentLink;
   const [parentSaveError, setParentSaveError] = useState<string | null>(null);
   const [parentFirstName, setParentFirstName] = useState(
-    parentLink?.parent_first_name?.trim() || '',
+    parentLink?.parent_first_name?.trim() || parentClaim?.firstName?.trim() || '',
   );
   const [parentLastName, setParentLastName] = useState(
     parentClaim?.lastName?.trim() || parentLink?.parent_last_name?.trim() || '',
@@ -172,7 +172,9 @@ export default function FamilyProgramSettingsPanel() {
   }, [tabParam, sectionParam]);
 
   useEffect(() => {
-    setParentFirstName(parentLink?.parent_first_name?.trim() || '');
+    setParentFirstName(
+      parentLink?.parent_first_name?.trim() || parentClaim?.firstName?.trim() || '',
+    );
     setParentLastName(
       parentClaim?.lastName?.trim() || parentLink?.parent_last_name?.trim() || '',
     );

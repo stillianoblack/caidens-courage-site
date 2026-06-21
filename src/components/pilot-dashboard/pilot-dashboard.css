@@ -4040,6 +4040,33 @@ a.pilot-overviewMiniCard:hover {
   font-weight: 700;
 }
 
+.pilot-studentPinBlock {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.pilot-studentPinLabel {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(36, 62, 112, 0.62);
+}
+
+.pilot-studentPinValue {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pilot-studentAccessActions--pin {
+  margin-top: 0.15rem;
+}
+
+.pilot-studentAccessMeta {
+  margin-top: 0.15rem;
+}
+
 @media (max-width: 900px) {
   .pilot-rosterLauncherCard {
     grid-template-columns: 1fr;

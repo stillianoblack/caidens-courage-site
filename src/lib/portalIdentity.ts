@@ -11,6 +11,12 @@ export const PORTAL_ACCESS_NOT_FOUND_MESSAGE =
 
 export const PORTAL_PIN_MISMATCH_MESSAGE = 'Program code or PIN did not match.';
 
+export const PORTAL_CLAIM_PIN_MISMATCH_MESSAGE =
+  'This claim code does not match that student PIN. Check the code from your facilitator or ask for a new link.';
+
+export const PORTAL_EMAIL_NOT_CONNECTED_MESSAGE =
+  'That email is not connected to this program.';
+
 export function normalizePortalEmail(email?: string | null): string {
   return email?.trim().toLowerCase() ?? '';
 }

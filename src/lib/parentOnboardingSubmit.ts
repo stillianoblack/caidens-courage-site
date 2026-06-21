@@ -5,7 +5,7 @@ import { notifyChildProfileUpdated } from '../config/activeChildParticipant';
 import { setActiveChild } from './activeChildContext';
 import { saveFamilyChildGoals } from './familyChildGoalsService';
 import { trackKitParentSignup } from './kitIntegration';
-import { markParentOnboardingComplete } from './parentOnboardingState';
+import { markFamilyOnboardingComplete } from './parentOnboardingState';
 import { saveProgramGoals } from './programGoalsService';
 import { revealStudentPinViaFunction } from './studentPinService';
 import {
@@ -112,6 +112,7 @@ export async function submitParentOnboarding(
     familyProgramCode: programCode,
     parentEmail,
     parentPhone: input.parentPhone?.trim() || undefined,
+    parentFirstName: input.parentFirstName?.trim() || undefined,
     parentLastName: input.parentLastName?.trim() || undefined,
   });
 
@@ -124,6 +125,7 @@ export async function submitParentOnboarding(
 
   writeParentClaimContext({
     email: parentEmail,
+    firstName: input.parentFirstName?.trim() || undefined,
     phone: input.parentPhone?.trim() || undefined,
     lastName: input.parentLastName?.trim() || undefined,
     confirmed: true,
@@ -153,11 +155,11 @@ export async function submitParentOnboarding(
     displayName: childDisplayName,
   });
 
-  markParentOnboardingComplete({
+  markFamilyOnboardingComplete({
     programCode,
+    participantId,
     parentEmail,
     familyGoals: selectedGoals,
-    childParticipantId: participantId,
     childDisplayName,
   });
 

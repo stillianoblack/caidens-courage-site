@@ -15,7 +15,7 @@ import {
   type ParentConnectionStatus,
 } from './studentPinService';
 import { buildFamilyClaimUrl } from './familyClaimCode';
-import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
+import { resolveStudentDisplayNameOrFallback, warnIfStudentMissingDisplayName } from './studentDisplayName';
 import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type CampChildOnboardingInput = {
@@ -242,8 +242,9 @@ export async function createCampChildWithOptionalParent(
       nickname: childNickname,
       first_name: childFirstName,
       last_name: childLastName,
+      display_name: childNickname || childFirstName,
     },
-    'Student',
+    'Unnamed Student',
   );
 
   if (!childFirstName || !campProgramCode) {
@@ -298,6 +299,16 @@ export async function createCampChildWithOptionalParent(
     }
 
     const { participantId } = participantResult;
+
+    warnIfStudentMissingDisplayName(
+      participantId,
+      {
+        nickname: childNickname,
+        first_name: childFirstName,
+        display_name: childNickname || childFirstName,
+      },
+      'createCampChildWithOptionalParent',
+    );
 
     const access = await finalizeCampStudentAccess({
       participantId,

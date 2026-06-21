@@ -25,6 +25,8 @@ export const CAMPS_PATH = '/camps';
 export const SCHOOLS_PATH = '/schools';
 
 export const PORTAL_PATH = '/portal';
+/** Public parent claim deep link — scoped claim code only (?code=CLAIM-…). */
+export const FAMILY_CLAIM_PATH = '/claim';
 export const ADMIN_PORTAL_PATH = '/admin';
 export const DESIGN_SYSTEM_PATH = '/admin/design-system';
 

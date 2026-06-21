@@ -14,7 +14,7 @@ import {
   type StudentFamilyLink,
 } from './studentFamilyLinkService';
 import { revealStudentPinViaFunction } from './studentPinService';
-import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
+import { isPlaceholderParentName, resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 import { trackKitParentSignup } from './kitIntegration';
 import { queueWelcomeEmail } from './welcomeEmailService';
 
@@ -60,7 +60,7 @@ async function resolveCampLink(input: {
     linkId: ensure.link.id,
     parentEmail: input.parentEmail,
     parentFirstName: input.parentFirstName,
-    parentLastName: input.parentLastName || 'Family',
+    parentLastName: input.parentLastName,
     parentPhone: input.parentPhone,
   });
 
@@ -100,7 +100,12 @@ export async function completeParentClaimViaStudentPin(
 
   const familyProgram = await createOrResolveFamilyProgramForParent({
     parentEmail: email,
-    parentLastName: input.parentLastName?.trim() || linkResult.link.parent_last_name || 'Family',
+    parentLastName:
+      input.parentLastName?.trim() ||
+      (linkResult.link.parent_last_name?.trim() &&
+      !isPlaceholderParentName(linkResult.link.parent_last_name)
+        ? linkResult.link.parent_last_name.trim()
+        : 'Family'),
     parentFirstName: input.parentFirstName?.trim() || linkResult.link.parent_first_name || undefined,
     campProgram: input.program,
     existingFamilyProgramCode: linkResult.link.family_program_code,
@@ -115,7 +120,11 @@ export async function completeParentClaimViaStudentPin(
     familyProgramCode: familyProgram.programCode,
     parentEmail: email,
     parentPhone: input.parentPhone,
-    parentLastName: input.parentLastName,
+    parentFirstName: input.parentFirstName?.trim() || linkResult.link.parent_first_name || undefined,
+    parentLastName:
+      input.parentLastName?.trim() ||
+      linkResult.link.parent_last_name?.trim() ||
+      undefined,
   });
 
   if (!claimResult.success) {
@@ -126,8 +135,10 @@ export async function completeParentClaimViaStudentPin(
     familyProgram,
     accessCode: input.accessCode,
     parentEmail: email,
+    parentFirstName: input.parentFirstName?.trim() || linkResult.link.parent_first_name || undefined,
     parentPhone: input.parentPhone,
-    parentLastName: input.parentLastName,
+    parentLastName: input.parentLastName?.trim() || linkResult.link.parent_last_name || undefined,
+    campProgramCode,
   });
 
   writeLastPilotProgram(familyProgram, 'family', email, input.accessCode);

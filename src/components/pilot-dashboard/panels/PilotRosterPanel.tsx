@@ -13,6 +13,12 @@ import {
 import { resolveFacilitatorRosterProgramCode } from '../../../lib/resolveFacilitatorRosterProgramCode';
 import { buildStudentLoginInstructions } from '../../../lib/familyClaimCode';
 import { resetStudentPinViaFunction, revealStudentPinViaFunction, copyStudentPinWithAudit } from '../../../lib/studentPinService';
+import { ensureStudentAccessReady, copyFamilyClaimLinkForStudent } from '../../../lib/ensureStudentAccessReady';
+import {
+  logMissingRosterAccessContext,
+  resolveStudentRosterAccessContext,
+  type StudentRosterAccessContext,
+} from '../../../lib/studentRosterAccessContext';
 import { resolveFacilitatorKidPlayLaunch } from '../../../lib/facilitatorKidPlayLaunch';
 import { isKidPlayRosterLocked, setKidPlayRosterLocked } from '../../../lib/kidPlayRosterLock';
 import { kidShellAwareNavigate } from '../../../lib/kidShellNav';
@@ -41,6 +47,8 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const rawFilter = searchParams.get('filter');
   const rosterFilter = isRosterFilterId(rawFilter) ? rawFilter : null;
   const [drawerParticipantId, setDrawerParticipantId] = useState<string | null>(null);
+  const [drawerAccess, setDrawerAccess] = useState<StudentRosterAccessContext | null>(null);
+  const [drawerAccessLoading, setDrawerAccessLoading] = useState(false);
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [rosterLocked, setRosterLocked] = useState(() => isKidPlayRosterLocked());
   const [launchSessionLoadingId, setLaunchSessionLoadingId] = useState<string | null>(null);
@@ -58,49 +66,186 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
 
+  const resolveAccessContext = useCallback(
+    (participantId: string | null, row?: PilotRosterRow | null): StudentRosterAccessContext | null => {
+      if (!participantId) return null;
+      const rosterRow = row ?? rows.find((item) => item.participantId === participantId) ?? null;
+      return resolveStudentRosterAccessContext({
+        participantId,
+        participants,
+        row: rosterRow,
+        fallbackProgramCode: resolvedProgramCode,
+      });
+    },
+    [participants, resolvedProgramCode, rows],
+  );
+
+  const openStudentDrawer = useCallback(
+    (participantId: string) => {
+      setDrawerParticipantId(participantId);
+      setDrawerAccess(resolveAccessContext(participantId));
+    },
+    [resolveAccessContext],
+  );
+
+  const applyAccessReady = useCallback(
+    (ready: Awaited<ReturnType<typeof ensureStudentAccessReady>>) => {
+      if (!ready.success) return;
+      setDrawerAccess((current) => {
+        if (!current || current.participantId !== ready.access.participantId) return current;
+        return {
+          ...current,
+          programCode: ready.access.programCode,
+          hasPin: ready.access.hasPin,
+          familyClaimCode: ready.access.familyClaimCode,
+          familyClaimUrl: ready.access.familyClaimUrl,
+        };
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!drawerParticipantId) {
+      setDrawerAccess(null);
+      return;
+    }
+
+    const ctx = resolveAccessContext(drawerParticipantId);
+    setDrawerAccess(ctx);
+
+    let cancelled = false;
+    setDrawerAccessLoading(true);
+    void (async () => {
+      const ready = await ensureStudentAccessReady({
+        participantId: drawerParticipantId,
+        programCodeHint: ctx?.programCode,
+        displayNameHint: ctx?.childName,
+      });
+      if (cancelled) return;
+      if (ready.success) {
+        applyAccessReady(ready);
+        if (ready.access.pinAssigned || ready.access.claimCodeAssigned) {
+          void refresh();
+        }
+      }
+      setDrawerAccessLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [applyAccessReady, drawerParticipantId, refresh, resolveAccessContext]);
+
+  const requireDrawerContext = useCallback(
+    (action: string): StudentRosterAccessContext | null => {
+      const ctx =
+        drawerAccess ??
+        (drawerParticipantId ? resolveAccessContext(drawerParticipantId) : null);
+      logMissingRosterAccessContext(action, ctx);
+      if (!ctx?.participantId || !ctx.programCode) {
+        showToast('Missing student access context. Refresh roster and try again.', 'error');
+        return null;
+      }
+      return ctx;
+    },
+    [drawerAccess, drawerParticipantId, resolveAccessContext, showToast],
+  );
+
   const handleCopyLoginInstructions = useCallback(
-    async (row: PilotRosterRow) => {
-      let revealedPin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
+    async (ctx: StudentRosterAccessContext) => {
+      const ready = await ensureStudentAccessReady({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!ready.success) {
+        showToast(ready.error, 'error');
+        return;
+      }
+      applyAccessReady(ready);
+
+      let revealedPin =
+        pinReveal?.participantId === ctx.participantId
+          ? pinReveal.pin
+          : ready.access.generatedPin ?? null;
       if (!revealedPin) {
         const result = await revealStudentPinViaFunction({
-          participantId: row.participantId,
-          programCode: row.campProgramCode,
+          participantId: ctx.participantId,
+          programCode: ready.access.programCode,
         });
         if (!('pin' in result)) {
           showToast(result.error, 'error');
           return;
         }
         revealedPin = result.pin;
-        setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
+        setPinReveal({ participantId: ctx.participantId, childName: ctx.childName, pin: result.pin });
       }
       const instructions = buildStudentLoginInstructions({
-        studentName: row.childName,
-        programName: program?.programName?.trim() || row.campProgramCode,
-        programCode: row.campProgramCode,
+        studentName: ctx.childName,
+        programName: program?.programName?.trim() || ready.access.programCode,
+        programCode: ready.access.programCode,
         pin: revealedPin,
       });
       try {
         await navigator.clipboard.writeText(instructions);
-        showToast(`Login instructions copied for ${row.childName}.`, 'success');
+        showToast(`Login instructions copied for ${ctx.childName}.`, 'success');
       } catch {
         showToast('Copy failed.', 'error');
       }
     },
-    [pinReveal, program?.programName, showToast],
+    [applyAccessReady, pinReveal, program?.programName, showToast],
   );
 
   const handleCopyClaimLink = useCallback(
-    async (row: PilotRosterRow) => {
-      if (!row.familyClaimUrl) {
-        showToast('No family claim link yet.', 'error');
+    async (ctx: StudentRosterAccessContext) => {
+      const copied = await copyFamilyClaimLinkForStudent({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!copied.success) {
+        showToast(copied.error, 'error');
+        return;
+      }
+      setDrawerAccess((current) =>
+        current && current.participantId === ctx.participantId
+          ? { ...current, familyClaimUrl: copied.url }
+          : current,
+      );
+      showToast('Family claim link copied.', 'success');
+      void refresh();
+    },
+    [refresh, showToast],
+  );
+
+  const handleCopyClaimCode = useCallback(
+    async (ctx: StudentRosterAccessContext) => {
+      const ready = await ensureStudentAccessReady({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!ready.success) {
+        showToast(ready.error, 'error');
+        return;
+      }
+      const code = ready.access.familyClaimCode;
+      if (!code) {
+        showToast('No family claim code yet.', 'error');
         return;
       }
       try {
-        await navigator.clipboard.writeText(row.familyClaimUrl);
-        showToast('Family claim link copied.', 'success');
+        await navigator.clipboard.writeText(code);
+        showToast('Family claim code copied.', 'success');
       } catch {
         showToast('Copy failed.', 'error');
       }
+      setDrawerAccess((current) =>
+        current && current.participantId === ctx.participantId
+          ? { ...current, familyClaimCode: code, familyClaimUrl: ready.access.familyClaimUrl }
+          : current,
+      );
     },
     [showToast],
   );
@@ -112,12 +257,36 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       parentLastName?: string;
       sendWelcomeEmail: boolean;
     }) => {
-      if (!inviteParentRow) return;
+      const ctx = inviteParentRow
+        ? resolveStudentRosterAccessContext({
+            participantId: inviteParentRow.participantId,
+            participants,
+            row: inviteParentRow,
+            fallbackProgramCode: resolvedProgramCode,
+          })
+        : null;
+      if (!ctx?.participantId || !ctx.programCode) {
+        setInviteParentError('Missing student access context. Close and reopen the student drawer.');
+        return;
+      }
+
       setInviteParentSubmitting(true);
       setInviteParentError(null);
+
+      const ready = await ensureStudentAccessReady({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!ready.success) {
+        setInviteParentSubmitting(false);
+        setInviteParentError(ready.error);
+        return;
+      }
+
       const result = await inviteParentForStudent({
-        participantId: inviteParentRow.participantId,
-        campProgramCode: inviteParentRow.campProgramCode,
+        participantId: ctx.participantId,
+        campProgramCode: ready.access.programCode,
         parentEmail: input.parentEmail,
         parentFirstName: input.parentFirstName,
         parentLastName: input.parentLastName,
@@ -132,48 +301,82 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       setInviteParentRow(null);
       void refresh();
     },
-    [inviteParentRow, refresh, showToast],
+    [inviteParentRow, participants, refresh, resolvedProgramCode, showToast],
   );
 
   const handleResetPin = useCallback(
-    async (row: PilotRosterRow) => {
+    async (ctx: StudentRosterAccessContext) => {
       const confirmed = window.confirm(
         'Resetting this PIN replaces the child\'s old login PIN. Continue?',
       );
       if (!confirmed) return;
 
-      setPinActionLoadingId(row.participantId);
+      setPinActionLoadingId(ctx.participantId);
+      const ready = await ensureStudentAccessReady({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!ready.success) {
+        setPinActionLoadingId(null);
+        showToast(ready.error, 'error');
+        return;
+      }
+
       const result = await resetStudentPinViaFunction({
-        participantId: row.participantId,
-        programCode: row.campProgramCode,
+        participantId: ctx.participantId,
+        programCode: ready.access.programCode,
       });
       setPinActionLoadingId(null);
       if (!('pin' in result)) {
         showToast(result.error, 'error');
         return;
       }
-      setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
-      setDrawerParticipantId(row.participantId);
-      showToast(`New PIN for ${row.childName}: ${result.pin}`, 'success');
+      setPinReveal({ participantId: ctx.participantId, childName: ctx.childName, pin: result.pin });
+      setDrawerAccess({
+        ...ctx,
+        programCode: ready.access.programCode,
+        hasPin: true,
+        familyClaimCode: ready.access.familyClaimCode,
+        familyClaimUrl: ready.access.familyClaimUrl,
+      });
+      showToast(`PIN generated for ${ctx.childName}.`, 'success');
       void refresh();
     },
     [refresh, showToast],
   );
 
   const handleRevealPin = useCallback(
-    async (row: PilotRosterRow) => {
-      setPinActionLoadingId(row.participantId);
+    async (ctx: StudentRosterAccessContext) => {
+      setPinActionLoadingId(ctx.participantId);
+      const ready = await ensureStudentAccessReady({
+        participantId: ctx.participantId,
+        programCodeHint: ctx.programCode,
+        displayNameHint: ctx.childName,
+      });
+      if (!ready.success) {
+        setPinActionLoadingId(null);
+        showToast(ready.error, 'error');
+        return;
+      }
+
       const result = await revealStudentPinViaFunction({
-        participantId: row.participantId,
-        programCode: row.campProgramCode,
+        participantId: ctx.participantId,
+        programCode: ready.access.programCode,
       });
       setPinActionLoadingId(null);
       if (!('pin' in result)) {
         showToast(result.error, 'error');
         return;
       }
-      setPinReveal({ participantId: row.participantId, childName: row.childName, pin: result.pin });
-      setDrawerParticipantId(row.participantId);
+      setPinReveal({ participantId: ctx.participantId, childName: ctx.childName, pin: result.pin });
+      setDrawerAccess({
+        ...ctx,
+        programCode: ready.access.programCode,
+        hasPin: true,
+        familyClaimCode: ready.access.familyClaimCode,
+        familyClaimUrl: ready.access.familyClaimUrl,
+      });
     },
     [showToast],
   );
@@ -347,8 +550,12 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
             <button
               type="button"
               className="pilot-rosterLaunchBtn"
-              disabled={!launcherRow}
-              onClick={() => launcherRow && void handleCopyLoginInstructions(launcherRow)}
+              disabled={!launcherRow || drawerAccessLoading}
+              onClick={() => {
+                if (!launcherRow) return;
+                const ctx = resolveAccessContext(launcherRow.participantId, launcherRow);
+                if (ctx) void handleCopyLoginInstructions(ctx);
+              }}
             >
               Copy login instructions
             </button>
@@ -366,9 +573,12 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         <PilotAdminStudentTable
           rows={displayRows}
           variant="roster"
-          onStudentClick={setDrawerParticipantId}
+          onStudentClick={openStudentDrawer}
           onGradeSaved={updateParticipantGrade}
-          onInviteParent={setInviteParentRow}
+          onInviteParent={(row) => {
+            openStudentDrawer(row.participantId);
+            setInviteParentRow(row);
+          }}
           showBaselineActions={rosterFilter === 'missing-baseline'}
         />
       )}
@@ -378,71 +588,86 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         participantId={drawerParticipantId}
         onClose={() => {
           setDrawerParticipantId(null);
+          setDrawerAccess(null);
           setPinReveal(null);
         }}
         participants={participants}
         familyLinks={familyLinks}
         assessmentResults={assessmentResults}
         moduleResults={moduleResults}
-        programCode={resolvedProgramCode}
-        hasPin={displayRows.find((row) => row.participantId === drawerParticipantId)?.hasPin}
-        pinLastRotatedAt={
-          displayRows.find((row) => row.participantId === drawerParticipantId)?.pinLastRotatedAt ?? null
-        }
+        programCode={drawerAccess?.programCode ?? resolvedProgramCode}
+        hasPin={drawerAccess?.hasPin}
+        pinLastRotatedAt={drawerAccess?.pinLastRotatedAt ?? null}
         lastStudentLoginAt={
-          displayRows.find((row) => row.participantId === drawerParticipantId)?.lastActivityAt ?? null
+          rows.find((row) => row.participantId === drawerParticipantId)?.lastActivityAt ?? null
         }
-        parentConnectionLabel={
-          displayRows.find((row) => row.participantId === drawerParticipantId)?.parentConnectionLabel
-        }
-        familyClaimCode={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimCode}
-        familyClaimUrl={displayRows.find((row) => row.participantId === drawerParticipantId)?.familyClaimUrl}
+        parentConnectionLabel={drawerAccess?.parentConnectionLabel}
+        familyClaimCode={drawerAccess?.familyClaimCode}
+        familyClaimUrl={drawerAccess?.familyClaimUrl}
         oneTimePin={pinReveal?.participantId === drawerParticipantId ? pinReveal.pin : null}
-        pinActionLoading={pinActionLoadingId === drawerParticipantId}
+        pinActionLoading={pinActionLoadingId === drawerParticipantId || drawerAccessLoading}
         onResetPin={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
-          if (row) void handleResetPin(row);
+          const ctx = requireDrawerContext('reset_pin');
+          if (ctx) void handleResetPin(ctx);
         }}
         onRevealPin={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
-          if (row) void handleRevealPin(row);
+          const ctx = requireDrawerContext('reveal_pin');
+          if (ctx) void handleRevealPin(ctx);
         }}
         onCopyPin={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
-          if (!row) return;
+          const ctx = requireDrawerContext('copy_pin');
+          if (!ctx) return;
           const copy = async () => {
-            let pin = pinReveal?.participantId === row.participantId ? pinReveal.pin : null;
+            const ready = await ensureStudentAccessReady({
+              participantId: ctx.participantId,
+              programCodeHint: ctx.programCode,
+              displayNameHint: ctx.childName,
+            });
+            if (!ready.success) {
+              showToast(ready.error, 'error');
+              return;
+            }
+            let pin =
+              pinReveal?.participantId === ctx.participantId
+                ? pinReveal.pin
+                : ready.access.generatedPin ?? null;
             if (!pin) {
               const result = await revealStudentPinViaFunction({
-                participantId: row.participantId,
-                programCode: row.campProgramCode,
+                participantId: ctx.participantId,
+                programCode: ready.access.programCode,
               });
               if (!('pin' in result)) {
                 showToast(result.error, 'error');
                 return;
               }
               pin = result.pin;
-              setPinReveal({ participantId: row.participantId, childName: row.childName, pin });
+              setPinReveal({ participantId: ctx.participantId, childName: ctx.childName, pin });
             }
             const copied = await copyStudentPinWithAudit({
               pin,
-              participantId: row.participantId,
-              programCode: row.campProgramCode,
+              participantId: ctx.participantId,
+              programCode: ready.access.programCode,
             });
             showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
           };
           void copy();
         }}
         onCopyLoginInstructions={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
-          if (row) void handleCopyLoginInstructions(row);
+          const ctx = requireDrawerContext('copy_login_instructions');
+          if (ctx) void handleCopyLoginInstructions(ctx);
         }}
         onCopyClaimLink={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
-          if (row) void handleCopyClaimLink(row);
+          const ctx = requireDrawerContext('copy_claim_link');
+          if (ctx) void handleCopyClaimLink(ctx);
+        }}
+        onCopyClaimCode={() => {
+          const ctx = requireDrawerContext('copy_claim_code');
+          if (ctx) void handleCopyClaimCode(ctx);
         }}
         onInviteParent={() => {
-          const row = rows.find((item) => item.participantId === drawerParticipantId);
+          const ctx = requireDrawerContext('invite_parent');
+          if (!ctx) return;
+          const row = rows.find((item) => item.participantId === ctx.participantId);
           if (row) setInviteParentRow(row);
         }}
       />

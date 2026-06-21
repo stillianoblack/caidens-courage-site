@@ -54,6 +54,11 @@ export function resolvePortalSubmitAccessCode(input: {
   return (input.enteredAccessCode.trim() || input.rememberedAccessCode.trim()).trim();
 }
 
-export function shouldPersistRememberedProgramAccess(_program: ActivePilotProgram): boolean {
-  return true;
+export function resolveOngoingFamilyAccessCode(
+  program: ActivePilotProgram,
+  submittedCode?: string,
+): string {
+  const familyCode = program.familyAccessCode?.trim();
+  if (familyCode) return familyCode;
+  return submittedCode?.trim() || program.programCode.trim();
 }

@@ -28,8 +28,11 @@ import { verifyFacilitatorProgramEmail } from '../lib/portalFacilitatorAuth';
 import { facilitatorReturnSessionPath } from '../lib/kidPlayReturnSessionRoute';
 import {
   PORTAL_ACCESS_NOT_FOUND_MESSAGE,
+  PORTAL_CLAIM_PIN_MISMATCH_MESSAGE,
+  PORTAL_EMAIL_NOT_CONNECTED_MESSAGE,
   PORTAL_PIN_MISMATCH_MESSAGE,
 } from '../lib/portalIdentity';
+import { isFamilyClaimCode } from '../lib/familyClaimCode';
 import {
   isLegacyDemoAccessCode,
   looksLikeProgramAccessCode,
@@ -40,8 +43,9 @@ import { logPortalRedirect } from '../lib/portalDebug';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
-import { verifyStudentPinLogin } from '../lib/studentPinService';
+import { verifyStudentPinLoginWithProgramFallback } from '../lib/studentPinProgramScope';
 import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
+import { resolveOngoingFamilyAccessCode } from '../lib/portalUnlockRoute';
 import { clearParentClaimContext } from '../config/parentClaimContext';
 import { clearStudentPinSession } from '../lib/studentPinSession';
 import {
@@ -122,12 +126,14 @@ export function usePortalUnlock(
   _variant: PortalUnlockVariant,
   onUnlock?: () => void,
   initialIntent: PortalLoginIntent = 'student',
+  options?: { initialAccessCode?: string },
 ) {
   const remembered = readRememberedDeviceSession();
   const rememberedAccessCode = readRememberedProgramAccessCode() || remembered?.access_code || '';
   const hasRememberedProgram = hasRememberedProgramAccess();
+  const seededAccessCode = options?.initialAccessCode?.trim() || '';
 
-  const [accessCode, setAccessCode] = useState(() => rememberedAccessCode);
+  const [accessCode, setAccessCode] = useState(() => seededAccessCode || rememberedAccessCode);
   const [parentEmail, setParentEmail] = useState('');
   const [parentLastName, setParentLastName] = useState('');
   const [parentFirstName, setParentFirstName] = useState('');
@@ -204,16 +210,35 @@ export function usePortalUnlock(
 
             if (STUDENT_PIN_RE.test(credential)) {
               clearParentClaimContext();
-              const verified = await verifyStudentPinLogin({
-                programCode: program.programCode,
+              const campProgramCodeHint =
+                lookup.claimCodeContext?.campProgramCode?.trim() ||
+                (!isIndependentFamilyProgram(program) ? program.programCode.trim() : undefined);
+              const verified = await verifyStudentPinLoginWithProgramFallback({
                 pin: credential,
+                accessCodeHint: trimmedCode,
+                campProgramCodeHint,
               });
               if (!verified.success) {
+                const claimCodeMismatch =
+                  isFamilyClaimCode(trimmedCode) &&
+                  (verified.error.includes('match') || verified.error.includes('Invalid'));
                 setError(
-                  verified.error.includes('match') || verified.error.includes('Invalid')
-                    ? PORTAL_PIN_MISMATCH_MESSAGE
-                    : verified.error,
+                  claimCodeMismatch
+                    ? PORTAL_CLAIM_PIN_MISMATCH_MESSAGE
+                    : verified.error.includes('match') || verified.error.includes('Invalid')
+                      ? PORTAL_PIN_MISMATCH_MESSAGE
+                      : verified.error,
                 );
+                setSubmitting(false);
+                return;
+              }
+
+              const expectedParticipantId = lookup.claimCodeContext?.participantId?.trim();
+              if (
+                expectedParticipantId &&
+                verified.participantId.trim() !== expectedParticipantId
+              ) {
+                setError(PORTAL_CLAIM_PIN_MISMATCH_MESSAGE);
                 setSubmitting(false);
                 return;
               }
@@ -251,7 +276,9 @@ export function usePortalUnlock(
               persistRememberedDevice({
                 rememberDevice,
                 userType: 'student',
-                accessCode: trimmedCode,
+                accessCode: isFamilyClaimCode(trimmedCode)
+                  ? trimmedCode
+                  : resolveOngoingFamilyAccessCode(program, trimmedCode),
                 program,
                 studentId: verified.participantId,
                 displayName: verified.displayName,
@@ -284,7 +311,11 @@ export function usePortalUnlock(
               });
 
               if (!unlock.success) {
-                setError(unlock.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
+                setError(
+                  hasRememberedProgram && portalIntent === 'parent'
+                    ? PORTAL_EMAIL_NOT_CONNECTED_MESSAGE
+                    : (unlock.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
+                );
                 setSubmitting(false);
                 return;
               }
@@ -292,7 +323,7 @@ export function usePortalUnlock(
               persistRememberedDevice({
                 rememberDevice,
                 userType: 'parent',
-                accessCode: trimmedCode,
+                accessCode: resolveOngoingFamilyAccessCode(program, trimmedCode),
                 program,
                 parentId: credential.trim().toLowerCase(),
               });
@@ -319,20 +350,27 @@ export function usePortalUnlock(
               setError(
                 claim.needsLastNameConfirm
                   ? (claim.message ?? 'Multiple children matched. Enter your last name to continue.')
-                  : (claim.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
+                  : hasRememberedProgram && portalIntent === 'parent'
+                    ? PORTAL_EMAIL_NOT_CONNECTED_MESSAGE
+                    : (claim.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
               );
               setSubmitting(false);
               return;
             }
 
             if (claim.familyProgram) {
-              writeLastPilotProgram(claim.familyProgram, 'family', credential, trimmedCode);
+              writeLastPilotProgram(
+                claim.familyProgram,
+                'family',
+                credential,
+                resolveOngoingFamilyAccessCode(claim.familyProgram, trimmedCode),
+              );
             }
 
             persistRememberedDevice({
               rememberDevice,
               userType: 'parent',
-              accessCode: trimmedCode,
+              accessCode: resolveOngoingFamilyAccessCode(claim.familyProgram ?? program, trimmedCode),
               program: claim.familyProgram ?? program,
               parentId: credential.trim().toLowerCase(),
             });
@@ -378,7 +416,11 @@ export function usePortalUnlock(
 
             const facilitatorVerified = verifyFacilitatorProgramEmail(program, email, trimmedCode);
             if (!facilitatorVerified.success) {
-              setError(facilitatorVerified.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
+              setError(
+                hasRememberedProgram && portalIntent === 'facilitator'
+                  ? PORTAL_EMAIL_NOT_CONNECTED_MESSAGE
+                  : (facilitatorVerified.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
+              );
               setSubmitting(false);
               return;
             }
@@ -468,7 +510,7 @@ export function usePortalUnlock(
       onUnlock?.();
       navigateToPortal(getDashboardPathForTier(tier), `tier-code-${tier.type}`);
     },
-    [accessCode, onUnlock, parentEmail, parentLastName, portalIntent, rememberDevice, rememberedAccessCode],
+    [accessCode, hasRememberedProgram, onUnlock, parentEmail, parentLastName, portalIntent, rememberDevice, rememberedAccessCode],
   );
 
   const cancelPendingParentPinClaim = useCallback(() => {
@@ -509,7 +551,10 @@ export function usePortalUnlock(
       persistRememberedDevice({
         rememberDevice,
         userType: 'parent',
-        accessCode: pendingParentPinClaim.accessCode,
+        accessCode: resolveOngoingFamilyAccessCode(
+          result.familyProgram ?? pendingParentPinClaim.program,
+          pendingParentPinClaim.accessCode,
+        ),
         program: result.familyProgram ?? pendingParentPinClaim.program,
         parentId: parentEmail.trim().toLowerCase(),
       });

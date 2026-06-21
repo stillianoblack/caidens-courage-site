@@ -34,7 +34,45 @@
 }
 
 .kidPlayCharacterCollectionCard--locked {
-  opacity: 0.72;
+  opacity: 0.62;
+  filter: none;
+}
+
+.kidPlayCharacterCollectionCard--featured {
+  opacity: 1;
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.25),
+    0 10px 28px rgba(14, 165, 233, 0.18);
+  animation: kidPlayCharacterFeaturedPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes kidPlayCharacterFeaturedPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.25),
+      0 10px 28px rgba(14, 165, 233, 0.18);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(56, 189, 248, 0.42),
+      0 14px 32px rgba(14, 165, 233, 0.28);
+  }
+}
+
+.kidPlayCharacterCollectionStartHere {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.18);
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .kidPlayCharacterCollectionCard--complete {

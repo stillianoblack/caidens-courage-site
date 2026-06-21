@@ -4,7 +4,7 @@ import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { readActiveAccessCode } from '../../config/portalContext';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
 import {
-  dismissParentOnboardingLater,
+  markFamilyOnboardingSkipped,
   PARENT_ONBOARDING_GOAL_OPTIONS,
 } from '../../lib/parentOnboardingState';
 import { familyPortalPath } from '../../lib/familyPortalPaths';
@@ -13,7 +13,11 @@ import './parent-first-login-wizard.css';
 
 type ParentFirstLoginWizardProps = {
   open: boolean;
+  goalsOnly?: boolean;
   initialEmail?: string;
+  initialFirstName?: string;
+  initialLastName?: string;
+  initialPhone?: string;
   campProgramCode?: string | null;
   onFinished: () => void | Promise<void>;
 };
@@ -22,18 +26,30 @@ type WizardStep = 1 | 2 | 3 | 4 | 5;
 
 export default function ParentFirstLoginWizard({
   open,
+  goalsOnly = false,
   initialEmail = '',
+  initialFirstName = '',
+  initialLastName = '',
+  initialPhone = '',
   campProgramCode = null,
   onFinished,
 }: ParentFirstLoginWizardProps) {
   const navigate = useNavigate();
   const program = readActivePilotProgram();
   const { participant: activeChild } = useActiveParticipant();
-  const [step, setStep] = useState<WizardStep>(1);
+  const [step, setStep] = useState<WizardStep>(() => {
+    if (goalsOnly) return 4;
+    if (!initialEmail.trim()) return 1;
+    const hasContact =
+      Boolean(initialFirstName.trim()) ||
+      Boolean(initialLastName.trim()) ||
+      Boolean(initialPhone.trim());
+    return hasContact ? 4 : 3;
+  });
   const [email, setEmail] = useState(initialEmail);
-  const [parentFirstName, setParentFirstName] = useState('');
-  const [parentLastName, setParentLastName] = useState('');
-  const [parentPhone, setParentPhone] = useState('');
+  const [parentFirstName, setParentFirstName] = useState(initialFirstName);
+  const [parentLastName, setParentLastName] = useState(initialLastName);
+  const [parentPhone, setParentPhone] = useState(initialPhone);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -46,6 +62,24 @@ export default function ParentFirstLoginWizard({
 
   const childDisplayName = activeChild?.displayName?.trim() || 'Your child';
 
+  const needsContactStep = useMemo(
+    () =>
+      !initialFirstName.trim() &&
+      !initialLastName.trim() &&
+      !initialPhone.trim() &&
+      !parentFirstName.trim() &&
+      !parentLastName.trim() &&
+      !parentPhone.trim(),
+    [
+      initialFirstName,
+      initialLastName,
+      initialPhone,
+      parentFirstName,
+      parentLastName,
+      parentPhone,
+    ],
+  );
+
   const toggleGoal = useCallback((goal: string) => {
     setSelectedGoals((current) => {
       if (current.includes(goal)) return current.filter((row) => row !== goal);
@@ -55,14 +89,15 @@ export default function ParentFirstLoginWizard({
   }, []);
 
   const handleFinishLater = useCallback(() => {
-    if (program?.programCode && email.trim()) {
-      dismissParentOnboardingLater({
+    if (program?.programCode && email.trim() && activeChild?.participantId) {
+      markFamilyOnboardingSkipped({
         programCode: program.programCode,
+        participantId: activeChild.participantId,
         parentEmail: email.trim(),
       });
     }
     void onFinished();
-  }, [email, onFinished, program?.programCode]);
+  }, [activeChild?.participantId, email, onFinished, program?.programCode]);
 
   const handleComplete = useCallback(async () => {
     if (!program?.programCode || !activeChild?.participantId) return;
@@ -153,7 +188,7 @@ export default function ParentFirstLoginWizard({
                 type="button"
                 className="parentOnboardingPrimary"
                 disabled={!email.trim()}
-                onClick={() => setStep(3)}
+                onClick={() => (needsContactStep ? setStep(3) : setStep(4))}
               >
                 Continue
               </button>
@@ -161,7 +196,7 @@ export default function ParentFirstLoginWizard({
           </>
         ) : null}
 
-        {step === 3 ? (
+        {step === 3 && needsContactStep ? (
           <>
             <h2 className="parentOnboardingTitle">Parent / Guardian Contact</h2>
             <p className="parentOnboardingBody">
@@ -227,9 +262,15 @@ export default function ParentFirstLoginWizard({
               ))}
             </div>
             <div className="parentOnboardingActions">
-              <button type="button" className="parentOnboardingSecondary" onClick={() => setStep(3)}>
-                Back
-              </button>
+              {!goalsOnly ? (
+                <button
+                  type="button"
+                  className="parentOnboardingSecondary"
+                  onClick={() => setStep(needsContactStep ? 3 : 2)}
+                >
+                  Back
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="parentOnboardingPrimary"

@@ -4,7 +4,11 @@ import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelO
 import { getGradeBand } from '../lib/getGradeBand';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../lib/pilotTrackingLocalStorage';
 import { resolveParticipantDisplayName, buildParticipantNameLookup } from '../lib/pilotResultsDisplay';
-import { resolveStudentDisplayNameOrFallback } from '../lib/studentDisplayName';
+import {
+  resolveStudentDisplayNameOrFallback,
+  resolveParentGuardianDisplayName,
+} from '../lib/studentDisplayName';
+import { resolveRosterParentConnectionStatus } from '../lib/parentGuardianIdentity';
 import {
   formatParentGuardianShort,
   resolveBaselineStatus,
@@ -18,11 +22,9 @@ import {
   fetchStudentFamilyLinksByCampProgram,
   type StudentFamilyLink,
 } from '../lib/studentFamilyLinkService';
-import { isParentConnectedForLink } from '../lib/portalIdentity';
 import { resolveSyncWarningMessage } from '../lib/syncWarningMessages';
 import {
   fetchStudentAccessFieldsByIds,
-  parentConnectionStatusLabel,
   type ParentConnectionStatus,
   type StudentAccessFields,
 } from '../lib/studentPinService';
@@ -40,6 +42,8 @@ export type PilotRosterRow = {
   parentPhone: string;
   emergencyContact: string;
   campProgramCode: string;
+  /** participants.program_code — use for PIN + claim operations */
+  programCode: string;
   familyAccessCode: string;
   familyProgramCode: string;
   baselineStatus: 'Complete' | 'In Progress' | 'Not Started';
@@ -128,25 +132,29 @@ export function usePilotRosterData(
           (row) => row.participant_id === participant.id,
         ).length;
 
+        const parentGuardianName = resolveParentGuardianDisplayName({
+          parent_first_name: link?.parent_first_name,
+          parent_last_name: link?.parent_last_name,
+          parent_email: link?.parent_email,
+        });
         const parentFirst = link?.parent_first_name?.trim() || '';
         const parentLast = link?.parent_last_name?.trim() || '';
-        const parentGuardianName = [parentFirst, parentLast].filter(Boolean).join(' ') || '—';
         const familyAccessCode =
           link?.family_program_code?.trim() || programFamilyAccessCode?.trim() || '—';
         const parentEmail = link?.parent_email?.trim() || '—';
-        const parentConnectionStatus: ParentConnectionStatus = isParentConnectedForLink(link)
-          ? 'connected'
-          : parentEmail !== '—'
-            ? 'invited'
-            : 'unclaimed';
+        const parentConnection = resolveRosterParentConnectionStatus(link);
+        const parentConnectionStatus = parentConnection.status;
         const familyClaimCode = access?.family_claim_code ?? null;
+        const participantProgramCode = participant.program_code?.trim() || code;
 
         return {
           participantId: participant.id,
-          childName: resolveStudentDisplayNameOrFallback(
-            { nickname: participant.nickname, first_name: participant.first_name },
-            'Student',
-          ),
+          childName: resolveStudentDisplayNameOrFallback({
+            display_name: participant.display_name,
+            nickname: participant.nickname,
+            first_name: participant.first_name,
+            last_name: participant.last_name,
+          }),
           nickname: participant.nickname?.trim() || '—',
           parentGuardianName,
           parentGuardianShort: formatParentGuardianShort(parentFirst, parentLast),
@@ -155,7 +163,8 @@ export function usePilotRosterData(
           parentEmail,
           parentPhone: link?.parent_phone?.trim() || '—',
           emergencyContact: '—',
-          campProgramCode: link?.camp_program_code?.trim() || code,
+          campProgramCode: link?.camp_program_code?.trim() || participantProgramCode,
+          programCode: participantProgramCode,
           familyAccessCode,
           familyProgramCode: link?.family_program_code?.trim() || '—',
           baselineStatus: resolveBaselineStatus(participant.id, assessmentResults),
@@ -174,7 +183,7 @@ export function usePilotRosterData(
           gradeLevel: normalizeGradeLevelStorage(participant.grade_level),
           gradeBand: participant.grade_band?.trim() || null,
           parentConnectionStatus,
-          parentConnectionLabel: parentConnectionStatusLabel(parentConnectionStatus),
+          parentConnectionLabel: parentConnection.label,
           hasPin: Boolean(access?.hasPin),
           pinLastRotatedAt: access?.pinLastRotatedAt ?? null,
           familyClaimCode,

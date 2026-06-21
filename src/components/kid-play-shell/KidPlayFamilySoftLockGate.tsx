@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { PORTAL_PATH } from '../../config/courageRoutes';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import {
-  hasRememberedProgramAccess,
   readRememberedProgramAccessCode,
   readRememberedProgramForContext,
   switchRememberedProgram,
 } from '../../lib/rememberedProgramAccess';
+import { readActiveAccessCode } from '../../config/portalContext';
 import { clearChildSessionMemory } from '../../lib/endProtectedChildSession';
 import {
   clearKidPlayFamilySoftLockWithEmail,
@@ -17,9 +17,9 @@ import { clearKidPlayFamilyResumePayload } from '../../lib/kidPlayFamilyResume';
 import { logOverlayActive } from '../../lib/portalClickDebug';
 import { triggerParentPush } from '../../lib/parentPushNotify';
 import { buildSessionEndedPushDedupeKey } from '../../lib/parentPushNotifyDedupe';
-import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
+import { readLocalKidPlaySessionId, writeLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
 import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
-import { verifyStudentPinLogin } from '../../lib/studentPinService';
+import { verifyStudentPinLoginWithProgramFallback } from '../../lib/studentPinProgramScope';
 import { launchStudentPinKidPlay } from '../../lib/studentPinLoginLaunch';
 import { kidShellAwareNavigate } from '../../lib/kidShellNav';
 import { clearKidPlayRosterLockWithEmail } from '../../lib/kidPlayRosterLock';
@@ -37,9 +37,16 @@ import {
 } from '../../lib/kidPlayReturnSessionVerify';
 import {
   KID_PLAY_RETURN_ACCESS_ERROR,
+  KID_PLAY_RETURN_EMAIL_NOT_CONNECTED,
+  KID_PLAY_RETURN_PIN_ERROR,
+  canSkipReturnAccessCode,
+  shouldHideReturnSessionAccessCode,
   verifyKidPlayReturnAccessCode,
 } from '../../lib/kidPlayReturnUnlock';
-import { clearStudentPinSession } from '../../lib/studentPinSession';
+import { clearStudentPinSession, writeStudentPinSession } from '../../lib/studentPinSession';
+import {
+  classifyKidPlayReturnCredential,
+} from '../../lib/kidPlayReturnSessionRoute';
 import '../kid-play-shell/kid-play-roster-lock.css';
 
 import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLogos';
@@ -49,19 +56,26 @@ type KidPlayFamilySoftLockGateProps = {
   onUnlocked: () => void;
   /** Full-screen gate page (PWA / play-pause route) */
   fullscreen?: boolean;
+  /** When set, student PIN unlock resumes this Kid Shell session in place (no redirect). */
+  inShellChildId?: string | null;
+  inShellSessionId?: string | null;
 };
 
 export default function KidPlayFamilySoftLockGate({
   open,
   onUnlocked,
   fullscreen = false,
+  inShellChildId = null,
+  inShellSessionId = null,
 }: KidPlayFamilySoftLockGateProps) {
   const navigate = useNavigate();
   const [accessCode, setAccessCode] = useState('');
   const [emailOrPin, setEmailOrPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [hideAccessCodeField, setHideAccessCodeField] = useState(() => hasRememberedProgramAccess());
+  const [hideAccessCodeField, setHideAccessCodeField] = useState(() =>
+    shouldHideReturnSessionAccessCode({ inShellSessionId }),
+  );
   const [showRolePicker, setShowRolePicker] = useState(false);
   const rememberedAccessCode = readRememberedProgramAccessCode();
 
@@ -105,12 +119,37 @@ export default function KidPlayFamilySoftLockGate({
     [finishUnlock, navigate],
   );
 
+  const resumeInShellSession = useCallback(
+    (verified: { participantId: string; programCode: string; displayName: string }) => {
+      const sessionId = inShellSessionId?.trim();
+      if (!sessionId) return false;
+
+      if (inShellChildId?.trim() && verified.participantId.trim() !== inShellChildId.trim()) {
+        return false;
+      }
+
+      writeStudentPinSession({
+        participantId: verified.participantId,
+        programCode: verified.programCode,
+        displayName: verified.displayName,
+        verifiedAt: new Date().toISOString(),
+      });
+      writeLocalKidPlaySessionId(sessionId);
+      setKidPlayFamilySoftLocked(false);
+      clearKidPlayFamilyResumePayload();
+      finishUnlock();
+      return true;
+    },
+    [finishUnlock, inShellChildId, inShellSessionId],
+  );
+
   const completeReturnSession = useCallback(
     async (input: {
       trimmedSecond: string;
       preferredRole?: KidPlayReturnSessionRole | null;
     }) => {
       const { trimmedSecond, preferredRole } = input;
+      const credentialKind = classifyKidPlayReturnCredential(trimmedSecond);
 
       const destination = resolveKidPlayReturnSessionDestination({
         emailOrPin: trimmedSecond,
@@ -126,21 +165,29 @@ export default function KidPlayFamilySoftLockGate({
         return;
       }
 
+      if (destination === 'invalid') {
+        setSubmitting(false);
+        setError(
+          credentialKind === 'email'
+            ? KID_PLAY_RETURN_EMAIL_NOT_CONNECTED
+            : KID_PLAY_RETURN_ACCESS_ERROR,
+        );
+        return;
+      }
+
       if (destination === 'kid_shell') {
-        const programCode =
-          readActivePilotProgram()?.programCode?.trim() ||
-          readRememberedProgramForContext()?.programCode?.trim() ||
-          '';
-        if (!programCode) {
+        const verified = await verifyStudentPinLoginWithProgramFallback({
+          pin: trimmedSecond,
+          accessCodeHint: rememberedAccessCode || readActiveAccessCode() || undefined,
+        });
+        if (!verified.success) {
           setSubmitting(false);
-          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          setError(KID_PLAY_RETURN_PIN_ERROR);
           return;
         }
 
-        const verified = await verifyStudentPinLogin({ programCode, pin: trimmedSecond });
-        if (!verified.success) {
+        if (resumeInShellSession(verified)) {
           setSubmitting(false);
-          setError(KID_PLAY_RETURN_ACCESS_ERROR);
           return;
         }
 
@@ -153,7 +200,7 @@ export default function KidPlayFamilySoftLockGate({
         });
         setSubmitting(false);
         if (launch.kind === 'error') {
-          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          setError(KID_PLAY_RETURN_PIN_ERROR);
           return;
         }
 
@@ -167,6 +214,9 @@ export default function KidPlayFamilySoftLockGate({
           routeToFacilitatorPortal();
           return;
         }
+        setSubmitting(false);
+        setError(KID_PLAY_RETURN_EMAIL_NOT_CONNECTED);
+        return;
       }
 
       if (destination === 'family_portal') {
@@ -175,12 +225,15 @@ export default function KidPlayFamilySoftLockGate({
           routeToFamilyPortal();
           return;
         }
+        setSubmitting(false);
+        setError(KID_PLAY_RETURN_EMAIL_NOT_CONNECTED);
+        return;
       }
 
       setSubmitting(false);
       setError(KID_PLAY_RETURN_ACCESS_ERROR);
     },
-    [routeToFacilitatorPortal, routeToFamilyPortal, routeToKidShell],
+    [rememberedAccessCode, resumeInShellSession, routeToFacilitatorPortal, routeToFamilyPortal, routeToKidShell],
   );
 
   const handleContinue = useCallback(
@@ -191,23 +244,27 @@ export default function KidPlayFamilySoftLockGate({
 
       const trimmedCode = (accessCode.trim() || rememberedAccessCode).trim();
       const trimmedSecond = emailOrPin.trim();
+      const skipAccessCode = canSkipReturnAccessCode({ inShellSessionId });
 
-      if ((!hideAccessCodeField && !trimmedCode) || !trimmedSecond) {
+      if ((!hideAccessCodeField && !skipAccessCode && !trimmedCode) || !trimmedSecond) {
         setError(KID_PLAY_RETURN_ACCESS_ERROR);
         return;
       }
 
       setSubmitting(true);
-      const codeOk = await verifyKidPlayReturnAccessCode(trimmedCode);
-      if (!codeOk) {
-        setSubmitting(false);
-        setError(KID_PLAY_RETURN_ACCESS_ERROR);
-        return;
+
+      if (!skipAccessCode) {
+        const codeOk = await verifyKidPlayReturnAccessCode(trimmedCode);
+        if (!codeOk) {
+          setSubmitting(false);
+          setError(KID_PLAY_RETURN_ACCESS_ERROR);
+          return;
+        }
       }
 
       await completeReturnSession({ trimmedSecond });
     },
-    [accessCode, completeReturnSession, emailOrPin, hideAccessCodeField, rememberedAccessCode],
+    [accessCode, completeReturnSession, emailOrPin, hideAccessCodeField, inShellSessionId, rememberedAccessCode],
   );
 
   const handleRoleChoice = useCallback(
@@ -242,6 +299,12 @@ export default function KidPlayFamilySoftLockGate({
   }, [onUnlocked]);
 
   useEffect(() => {
+    if (open) {
+      setHideAccessCodeField(shouldHideReturnSessionAccessCode({ inShellSessionId }));
+    }
+  }, [inShellSessionId, open]);
+
+  useEffect(() => {
     logOverlayActive('KidPlayFamilySoftLockGate', open);
   }, [open]);
 
@@ -273,7 +336,7 @@ export default function KidPlayFamilySoftLockGate({
           {showRolePicker
             ? 'This email is linked to more than one role. Choose how you want to continue.'
             : hideAccessCodeField
-              ? 'Enter a parent/guardian email, facilitator email, or student PIN to continue.'
+              ? 'Enter a parent/guardian email or student PIN to continue.'
               : 'Enter your access code and use a parent/guardian email, facilitator email, or student PIN to continue.'}
         </p>
 

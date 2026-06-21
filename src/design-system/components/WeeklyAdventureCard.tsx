@@ -24,6 +24,9 @@ export type WeeklyAdventureCardProps = {
   avatarSrc?: string | null;
   href: string;
   locked?: boolean;
+  softLocked?: boolean;
+  featured?: boolean;
+  startHereLabel?: string;
   lockedLabel?: string;
   kind?: WeeklyAdventureCardKind;
   external?: boolean;
@@ -106,6 +109,9 @@ export default function WeeklyAdventureCard({
   avatarSrc,
   href,
   locked = false,
+  softLocked = false,
+  featured = false,
+  startHereLabel,
   lockedLabel = 'Complete B-4 Check-In to unlock',
   kind = 'game',
   external,
@@ -124,8 +130,9 @@ export default function WeeklyAdventureCard({
       ? { background: getCharacterTheme(themeId).stripGradient }
       : undefined;
   const isExternal = external ?? (href.startsWith('/downloads') || href.startsWith('http'));
-  const displayCta = locked ? lockedLabel : cta;
-  const footerPill = weekLabel ?? (!locked && status ? status : undefined);
+  const isBlocked = locked || softLocked;
+  const displayCta = isBlocked ? lockedLabel : cta;
+  const footerPill = startHereLabel ?? weekLabel ?? (!isBlocked && status ? status : undefined);
   const cardImageSrc =
     avatarSrc !== undefined && avatarSrc !== null
       ? avatarSrc
@@ -152,6 +159,9 @@ export default function WeeklyAdventureCard({
       <div className="weeklyAdventureCardMain">
         <CardAvatar character={character} kind={kind} avatarSrc={avatarSrc} />
         <div className="weeklyAdventureCardText">
+          {startHereLabel ? (
+            <span className="weeklyAdventureCardStartHere">{startHereLabel}</span>
+          ) : null}
           <h3 className="weeklyAdventureCardTitle">{title}</h3>
           <p className="weeklyAdventureCardDesc">{description}</p>
           {skillTags ? <p className="weeklyAdventureCardTags">{skillTags}</p> : null}
@@ -164,23 +174,31 @@ export default function WeeklyAdventureCard({
           )}
           <span className="weeklyAdventureCardCta">
             {displayCta}
-            {!locked ? <span aria-hidden="true">→</span> : null}
+            {!isBlocked ? <span aria-hidden="true">→</span> : null}
           </span>
         </div>
       </div>
+      {softLocked ? (
+        <span className="weeklyAdventureCardSoftLock" aria-hidden="true">
+          🔒 Locked
+        </span>
+      ) : null}
     </>
   );
 
   const cardClass = [
     'weeklyAdventureCard',
     themeClass,
-    locked ? 'weeklyAdventureCard--locked' : 'weeklyAdventureCard--link',
+    locked ? 'weeklyAdventureCard--locked' : '',
+    softLocked ? 'weeklyAdventureCard--softLocked' : '',
+    featured ? 'weeklyAdventureCard--featured' : '',
+    !isBlocked ? 'weeklyAdventureCard--link' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
 
-  if (locked) {
+  if (locked || softLocked) {
     return (
       <div className={cardClass} aria-disabled="true" {...cardSurfaceAttrs}>
         {content}

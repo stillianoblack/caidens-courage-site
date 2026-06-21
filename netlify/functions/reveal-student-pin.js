@@ -25,11 +25,12 @@ exports.handler = async (event) => {
   }
 
   const participantId = String(body.participantId || '').trim();
-  const programCode = String(body.programCode || '').trim();
+  const requestedProgramCode = String(body.programCode || '').trim();
   const parentEmail = String(body.parentEmail || '').trim().toLowerCase();
   const actorRole = String(body.actorRole || 'facilitator').trim();
 
-  if (!UUID_RE.test(participantId) || !programCode) {
+  if (!UUID_RE.test(participantId)) {
+    console.warn('[REVEAL_STUDENT_PIN]', { reason: 'missing_participant_id', participantId });
     return jsonResponse({ error: 'Missing participant or program.' }, 400);
   }
 
@@ -38,24 +39,37 @@ exports.handler = async (event) => {
     return jsonResponse({ error: 'Service unavailable.' }, 503);
   }
 
+  const { data: participantMeta, error: metaError } = await supabase
+    .from('participants')
+    .select('id, program_code, role, guardian_email')
+    .eq('id', participantId)
+    .eq('role', 'student')
+    .maybeSingle();
+
+  if (metaError || !participantMeta) {
+    return jsonResponse({ error: 'Student not found.' }, 404);
+  }
+
+  const programCode = String(participantMeta.program_code || requestedProgramCode || '').trim();
+  if (!programCode) {
+    return jsonResponse({ error: 'Missing participant or program.' }, 400);
+  }
+
+  if (requestedProgramCode && requestedProgramCode !== programCode) {
+    console.info('[REVEAL_STUDENT_PIN]', {
+      reason: 'program_code_resolved_from_participant',
+      participantId,
+      requestedProgramCode,
+      resolvedProgramCode: programCode,
+    });
+  }
+
   if (actorRole === 'parent') {
     if (!parentEmail) {
       return jsonResponse({ error: 'Parent email is required.' }, 403);
     }
 
-    const { data: participantRow } = await supabase
-      .from('participants')
-      .select('id, guardian_email')
-      .eq('id', participantId)
-      .eq('program_code', programCode)
-      .eq('role', 'student')
-      .maybeSingle();
-
-    if (!participantRow) {
-      return jsonResponse({ error: 'Student not found.' }, 404);
-    }
-
-    const guardianEmail = String(participantRow.guardian_email || '').trim().toLowerCase();
+    const guardianEmail = String(participantMeta.guardian_email || '').trim().toLowerCase();
     let authorized = guardianEmail && guardianEmail === parentEmail;
 
     if (!authorized) {

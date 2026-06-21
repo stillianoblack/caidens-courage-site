@@ -13,8 +13,19 @@ export type WelcomeEmailInput = {
   relatedProgramId?: string | null;
 };
 
+export type WelcomeEmailResult = {
+  success: boolean;
+  skipped: boolean;
+  provider: 'Resend' | 'skipped';
+  reason?: string;
+};
+
 export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
   const parentFirstName = input.parentFirstName?.trim() || 'there';
+  const accessLabel = input.familyAccessCode?.trim().startsWith('CLAIM-')
+    ? `Family Claim Code: ${input.familyAccessCode}`
+    : `Family Access Code: ${input.familyAccessCode || 'Provided by your program'}`;
+
   return [
     `Hi ${parentFirstName},`,
     '',
@@ -23,14 +34,14 @@ export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
     'Your family access information is below:',
     '',
     `Family / Program Name: ${input.familyOrProgramName}`,
-    `Family Access Code: ${input.familyAccessCode || 'Provided by your program'}`,
+    accessLabel,
     `Child: ${input.childName}`,
     input.studentPin ? `Student PIN: ${input.studentPin}` : 'Student PIN: Ask your facilitator for a reset if needed.',
-    `Login Link: ${input.loginUrl || buildStudentLoginUrl()}`,
+    `Family Portal Link: ${input.loginUrl || buildStudentLoginUrl()}`,
     '',
     'Your child can use their Student PIN to start their adventure, complete weekly missions, earn badges, and build their Focus Flame skills.',
     '',
-    'You can use your Family Access Code to connect your family portal, view progress, see certificates, and follow along with your child’s growth.',
+    'Use the Family Portal Link above to connect your family portal, view progress, see certificates, and follow along with your child’s growth.',
     '',
     'If you have any questions, just reply to this email and we’ll help you get started.',
     '',
@@ -43,9 +54,11 @@ export function buildWelcomePortalLink(input: WelcomeEmailInput): string {
   return input.loginUrl || `${window.location.origin}/portal`;
 }
 
-export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<void> {
+export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<WelcomeEmailResult> {
   const recipientEmail = input.parentEmail?.trim();
-  if (!recipientEmail) return;
+  if (!recipientEmail) {
+    return { success: false, skipped: true, provider: 'skipped', reason: 'missing_recipient' };
+  }
 
   const payload = {
     recipientEmail,
@@ -69,17 +82,53 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<void>
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      console.info('[WELCOME_EMAIL_FAILED]', {
+      let reason = 'send_function_failed';
+      try {
+        const body = (await response.json()) as { error?: string };
+        if (body.error?.includes('not configured')) {
+          reason = 'RESEND_API_KEY missing';
+        } else if (body.error) {
+          reason = body.error;
+        }
+      } catch {
+        /* ignore parse errors */
+      }
+      console.info('[WELCOME_EMAIL]', {
+        provider: 'Resend',
         recipient_email: recipientEmail,
-        related_student_id: input.relatedStudentId ?? null,
-        reason: 'send_function_failed',
+        success: false,
+        skipped: response.status === 503,
+        reason,
+        status: response.status,
       });
+      return {
+        success: false,
+        skipped: response.status === 503,
+        provider: response.status === 503 ? 'skipped' : 'Resend',
+        reason,
+      };
     }
-  } catch {
-    console.info('[WELCOME_EMAIL_FAILED]', {
+
+    console.info('[WELCOME_EMAIL]', {
+      provider: 'Resend',
       recipient_email: recipientEmail,
-      related_student_id: input.relatedStudentId ?? null,
+      success: true,
+      skipped: false,
+    });
+    return { success: true, skipped: false, provider: 'Resend' };
+  } catch {
+    console.info('[WELCOME_EMAIL]', {
+      provider: 'Resend',
+      recipient_email: recipientEmail,
+      success: false,
+      skipped: true,
       reason: 'send_function_unavailable',
     });
+    return {
+      success: false,
+      skipped: true,
+      provider: 'skipped',
+      reason: 'send_function_unavailable',
+    };
   }
 }

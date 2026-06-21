@@ -65,11 +65,12 @@ exports.handler = async (event) => {
   }
 
   const participantId = String(body.participantId || '').trim();
-  const programCode = String(body.programCode || '').trim();
+  const requestedProgramCode = String(body.programCode || '').trim();
   const parentEmail = String(body.parentEmail || '').trim().toLowerCase();
   const actorRole = String(body.actorRole || 'facilitator').trim();
 
-  if (!UUID_RE.test(participantId) || !programCode) {
+  if (!UUID_RE.test(participantId)) {
+    console.warn('[RESET_STUDENT_PIN]', { reason: 'missing_participant_id', participantId });
     return jsonResponse({ error: 'Missing participant or program.' }, 400);
   }
 
@@ -82,12 +83,35 @@ exports.handler = async (event) => {
     .from('participants')
     .select('id, program_code, role, guardian_email')
     .eq('id', participantId)
-    .eq('program_code', programCode)
     .eq('role', 'student')
     .maybeSingle();
 
   if (lookupError || !participant) {
+    console.warn('[RESET_STUDENT_PIN]', {
+      reason: 'participant_not_found',
+      participantId,
+      requestedProgramCode,
+    });
     return jsonResponse({ error: 'Student not found.' }, 404);
+  }
+
+  const programCode = String(participant.program_code || requestedProgramCode || '').trim();
+  if (!programCode) {
+    console.warn('[RESET_STUDENT_PIN]', {
+      reason: 'missing_program_code',
+      participantId,
+      requestedProgramCode,
+    });
+    return jsonResponse({ error: 'Missing participant or program.' }, 400);
+  }
+
+  if (requestedProgramCode && requestedProgramCode !== programCode) {
+    console.info('[RESET_STUDENT_PIN]', {
+      reason: 'program_code_resolved_from_participant',
+      participantId,
+      requestedProgramCode,
+      resolvedProgramCode: programCode,
+    });
   }
 
   if (actorRole === 'parent') {

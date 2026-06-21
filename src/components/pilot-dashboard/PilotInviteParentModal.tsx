@@ -2,6 +2,8 @@ import React, { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import Button from '../ui/Button';
+import '../family-portal/family-student-pin-modal.css';
+import './pilot-invite-parent-modal.css';
 
 type PilotInviteParentModalProps = {
   open: boolean;
@@ -82,9 +84,13 @@ export default function PilotInviteParentModal({
   const displayError = localError || error;
 
   return createPortal(
-    <div className="family-studentPinModalBackdrop" role="presentation" onClick={submitting ? undefined : onClose}>
+    <div
+      className="family-studentPinModalBackdrop pilot-inviteParentModalBackdrop"
+      role="presentation"
+      onClick={submitting ? undefined : onClose}
+    >
       <div
-        className="family-studentPinModal"
+        className="family-studentPinModal pilot-inviteParentModal"
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${formId}-title`}

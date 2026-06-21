@@ -76,15 +76,49 @@ export async function endKidPlayFacilitatorShellSession(
 }
 
 /**
- * Family/home soft end — preserve portal cookies; parent re-auth or child picker gate.
- * Does NOT force access-code reset.
+ * Family/home soft pause — preserve portal cookies; show Return To Session in place.
+ * Does NOT end the DB session or navigate away from Kid Shell.
  */
-export async function endKidPlayFamilyShellSession(
-  navigate: NavigateFunction,
-  options: EndKidPlayShellSessionOptions,
+export async function pauseKidPlayFamilyShellForReturnModal(
+  options: Omit<EndKidPlayShellSessionOptions, 'sessionId'> & { sessionId: string },
 ): Promise<void> {
   const sessionId = options.sessionId.trim();
   if (!sessionId) return;
+
+  if (options.resumePayload) {
+    await updateKidPlaySessionActivity(sessionId, options.resumePayload);
+  }
+
+  clearChildSessionMemory();
+  setKidPlayFamilySoftLocked(true);
+
+  if (options.resumePayload) {
+    writeKidPlayFamilyResumePayload(options.resumePayload as KidPlayResumePayload);
+  }
+
+  triggerParentPush({
+    trigger: 'child_session_paused',
+    childName: options.childDisplayName,
+    childId: options.childId,
+    dedupeKey: buildSessionPausedPushDedupeKey(sessionId),
+  });
+}
+
+/**
+ * Family/home soft end — preserve portal cookies; parent re-auth or child picker gate.
+ * Navigates to play-pause when not staying in Kid Shell.
+ */
+export async function endKidPlayFamilyShellSession(
+  navigate: NavigateFunction,
+  options: EndKidPlayShellSessionOptions & { stayInShell?: boolean },
+): Promise<void> {
+  const sessionId = options.sessionId.trim();
+  if (!sessionId) return;
+
+  if (options.stayInShell) {
+    await pauseKidPlayFamilyShellForReturnModal(options);
+    return;
+  }
 
   await persistKidPlaySessionEnd(
     sessionId,
@@ -133,7 +167,7 @@ export async function endKidPlayStudentPinShellSession(
 export async function endKidPlayShellSession(
   navigate: NavigateFunction,
   session: Pick<KidPlaySessionRow, 'id' | 'session_source' | 'device_mode'>,
-  options: Omit<EndKidPlayShellSessionOptions, 'sessionId'> = {},
+  options: Omit<EndKidPlayShellSessionOptions, 'sessionId'> & { stayInShell?: boolean } = {},
 ): Promise<void> {
   const behavior = resolveKidPlaySessionBehaviorFromRow(session);
   const payload: EndKidPlayShellSessionOptions = {
@@ -153,7 +187,7 @@ export async function endKidPlayShellSession(
   }
 
   if (behavior.softReturn) {
-    await endKidPlayFamilyShellSession(navigate, payload);
+    await endKidPlayFamilyShellSession(navigate, { ...payload, stayInShell: options.stayInShell });
     return;
   }
 

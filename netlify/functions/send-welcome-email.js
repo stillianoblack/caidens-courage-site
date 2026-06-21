@@ -85,6 +85,13 @@ exports.handler = async (event) => {
 
   const queuedLog = await logEmailAttempt(payload, 'queued');
   if (!process.env.RESEND_API_KEY) {
+    console.info('[SEND_WELCOME_EMAIL]', {
+      provider: 'Resend',
+      recipient_email: payload.recipientEmail,
+      success: false,
+      skipped: true,
+      reason: 'RESEND_API_KEY missing',
+    });
     const log = await updateEmailAttempt(queuedLog.id, 'failed', {
       errorMessage: 'RESEND_API_KEY is not configured.',
     });
@@ -98,6 +105,13 @@ exports.handler = async (event) => {
 
   const result = await sendWelcomeEmail(payload);
   if (!result.success) {
+    console.info('[SEND_WELCOME_EMAIL]', {
+      provider: 'Resend',
+      recipient_email: payload.recipientEmail,
+      success: false,
+      skipped: false,
+      reason: result.error,
+    });
     const log = await updateEmailAttempt(queuedLog.id, 'failed', {
       errorMessage: result.error,
     });
@@ -111,6 +125,13 @@ exports.handler = async (event) => {
 
   const log = await updateEmailAttempt(queuedLog.id, 'sent', {
     providerMessageId: result.providerMessageId,
+  });
+  console.info('[SEND_WELCOME_EMAIL]', {
+    provider: 'Resend',
+    recipient_email: payload.recipientEmail,
+    success: true,
+    skipped: false,
+    provider_message_id: result.providerMessageId ?? null,
   });
   return json(200, {
     success: true,

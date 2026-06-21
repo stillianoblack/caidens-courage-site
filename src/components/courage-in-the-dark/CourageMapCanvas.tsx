@@ -126,7 +126,7 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
         isHub ? 'courageMapCanvas--hub' : '',
         isHub && mapSize === 'split' ? 'courageMapCanvas--hubSplit' : '',
         showImage ? 'courageMapCanvas--hasImage' : '',
-        mapLocked || baselineLocked ? 'courageMapCanvas--locked' : '',
+        mapLocked && !baselineLocked ? 'courageMapCanvas--locked' : '',
         baselineLocked ? 'courageMapCanvas--baselineGate' : '',
       ]
         .filter(Boolean)
@@ -248,6 +248,11 @@ const CourageMapCanvas = forwardRef<HTMLDivElement, CourageMapCanvasProps>(funct
                 </span>
               </span>
               <span className="courageMapHotspotLabel">{hotspot.label}</span>
+              {required ? (
+                <span className="courageMapHotspotStartHere" aria-hidden="true">
+                  Start here
+                </span>
+              ) : null}
             </button>
           );
         })}

@@ -1,4 +1,5 @@
 import { programScopesMatch, resolvePortalProgramScope } from './portalProgramScope';
+import { readParentClaimContext } from '../config/parentClaimContext';
 import { logSessionIsolationWarning } from './sessionIsolationLog';
 
 const STUDENT_PIN_SESSION_KEY = 'cc-student-pin-session';
@@ -10,7 +11,9 @@ export type StudentPinSession = {
   verifiedAt: string;
 };
 
-export function readStudentPinSession(): StudentPinSession | null {
+export function readStudentPinSession(options?: {
+  allowCampUnderFamilyPortal?: boolean;
+}): StudentPinSession | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(STUDENT_PIN_SESSION_KEY);
@@ -23,13 +26,21 @@ export function readStudentPinSession(): StudentPinSession | null {
       expectedProgram &&
       !programScopesMatch(parsed.programCode, expectedProgram)
     ) {
-      logSessionIsolationWarning('student_pin_program_mismatch', {
-        expected_program_code: expectedProgram,
-        stored_program_code: parsed.programCode,
-        participant_id: parsed.participantId,
-      });
-      clearStudentPinSession();
-      return null;
+      const claim = readParentClaimContext({ programCode: expectedProgram });
+      const campMatches =
+        options?.allowCampUnderFamilyPortal &&
+        claim?.campProgramCode?.trim() &&
+        programScopesMatch(parsed.programCode, claim.campProgramCode);
+
+      if (!campMatches) {
+        logSessionIsolationWarning('student_pin_program_mismatch', {
+          expected_program_code: expectedProgram,
+          stored_program_code: parsed.programCode,
+          participant_id: parsed.participantId,
+        });
+        clearStudentPinSession();
+        return null;
+      }
     }
 
     return parsed;

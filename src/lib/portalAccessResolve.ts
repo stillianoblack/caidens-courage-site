@@ -13,6 +13,7 @@ const CLAIM_CODE_RE = /^CLAIM-/i;
 export type PortalClaimCodeContext = {
   participantId: string;
   childDisplayName: string;
+  campProgramCode: string;
 };
 
 export type PortalProgramLookupResponse = PilotProgramLookupResponse & {
@@ -67,6 +68,7 @@ export async function lookupPortalProgramByAccessCodeDetailed(
       claimCodeContext: {
         participantId: claimLookup.student.participantId,
         childDisplayName: claimLookup.student.childDisplayName,
+        campProgramCode: claimLookup.student.programCode,
       },
     };
   } catch {

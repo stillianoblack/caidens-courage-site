@@ -1,8 +1,8 @@
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { PORTAL_PATH } from '../config/courageRoutes';
 
-/** Legacy /claim URLs → portal claim deep link (preserves ?code=). */
-export default function FamilyClaimByCodePage() {
+/** Legacy claim URLs → portal claim deep link (preserves ?code=). */
+export default function FamilyClaimRedirect() {
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code')?.trim();
   const next = code

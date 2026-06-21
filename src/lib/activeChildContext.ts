@@ -1,8 +1,5 @@
-import {
-  ACTIVE_CHILD_PARTICIPANT_ID_KEY,
-  CHILD_PROFILE_UPDATED_EVENT,
-  notifyChildProfileUpdated,
-} from '../config/activeChildParticipant';
+import { ACTIVE_CHILD_PARTICIPANT_ID_KEY } from '../config/activeChildEvents';
+import { notifyChildProfileUpdated } from '../config/activeChildParticipant';
 import { ACTIVE_CHILD_NICKNAME_KEY } from '../config/activeChildNickname';
 import {
   clearScopedActiveChildRecord,
@@ -78,5 +75,3 @@ export function notifyModuleComplete(detail?: Record<string, unknown>): void {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent(MODULE_COMPLETE_EVENT, { detail }));
 }
-
-export { CHILD_PROFILE_UPDATED_EVENT };

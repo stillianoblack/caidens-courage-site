@@ -1,0 +1,116 @@
+.familyClaimPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #070b14;
+}
+
+.familyClaimCard {
+  width: 100%;
+  max-width: 28rem;
+  padding: 1.75rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(7, 11, 20, 0.28);
+}
+
+.familyClaimEyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4a90c4;
+}
+
+.familyClaimTitle {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display, Nunito, sans-serif);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: #1a2f52;
+}
+
+.familyClaimLead {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.82);
+}
+
+.familyClaimForm {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.familyClaimField {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #243e70;
+}
+
+.familyClaimField input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(36, 62, 112, 0.18);
+  border-radius: 0.65rem;
+  font: inherit;
+}
+
+.familyClaimField input[readonly] {
+  background: rgba(36, 62, 112, 0.05);
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.familyClaimSubmit {
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: #243e70;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.familyClaimSubmit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.familyClaimError {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.familyClaimDevNotice {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.familyClaimFooter {
+  margin: 1.25rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(36, 62, 112, 0.72);
+}
+
+.familyClaimFooter a {
+  color: #243e70;
+  font-weight: 700;
+}

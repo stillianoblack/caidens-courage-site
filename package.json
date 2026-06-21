@@ -71,6 +71,7 @@
     "audit:portal-auth": "node scripts/auditPortalAuth.js",
     "audit:portal-identity": "node scripts/auditPortalIdentity.js",
     "audit:family-claim-flow": "node scripts/auditFamilyClaimFlow.js",
+    "test:email-config": "node scripts/testEmailConfig.js",
     "audit:mc-labels": "REACT_APP_SUPABASE_URL= REACT_APP_SUPABASE_ANON_KEY= tsx scripts/audit-mc-choice-labels.ts"
   },
   "browserslist": {
