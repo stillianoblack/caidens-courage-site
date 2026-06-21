@@ -71,6 +71,7 @@ export default function FacilitatorBaselineCheckPage({ variant }: FacilitatorBas
         <div className="pilot-content pilot-content--wide">
           <B4BaselineCheckFlow
             embedded
+            facilitatorMode
             onExit={() => navigate(exitPath)}
           />
         </div>

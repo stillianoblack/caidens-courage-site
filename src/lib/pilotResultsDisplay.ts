@@ -1,5 +1,6 @@
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import type { StudentParticipantRecord } from './pilotTrackingService';
+import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 
 export type ParticipantNameLookup = Map<string, Pick<StudentParticipantRecord, 'nickname' | 'first_name'>>;
 
@@ -39,10 +40,12 @@ export function resolveParticipantDisplayName(
   const id = participantId?.trim();
   if (!id) return 'Unknown Student';
   const participant = lookup.get(id);
-  return (
-    participant?.nickname?.trim() ||
-    participant?.first_name?.trim() ||
-    'Unknown Student'
+  return resolveStudentDisplayNameOrFallback(
+    {
+      nickname: participant?.nickname,
+      first_name: participant?.first_name,
+    },
+    'Unknown Student',
   );
 }
 

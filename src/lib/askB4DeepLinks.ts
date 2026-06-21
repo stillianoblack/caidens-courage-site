@@ -1,4 +1,4 @@
-import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { PROGRAM_DASHBOARD_PATH, PROGRAM_BASELINE_CHECK_PATH } from '../config/courageRoutes';
 import { familyDownloadsTabPath, familyGoalsPath, familyPortalPath } from './familyPortalPaths';
 import type { ActivityCategoryId } from '../data/pilotDashboardContent';
 import { programDashboardTabPath } from './programDashboardNav';
@@ -23,6 +23,17 @@ export function activitiesLibraryTabPath(tab: ActivityCategoryId): string {
 
 export function rosterFilterPath(filter: RosterFilterId): string {
   return `${programDashboardTabPath('roster')}?filter=${encodeURIComponent(filter)}`;
+}
+
+export function certificatesReadyFilterPath(): string {
+  return `${programDashboardTabPath('certificates')}?filter=ready`;
+}
+
+export function facilitatorBaselineCheckPath(studentId?: string): string {
+  const base = PROGRAM_BASELINE_CHECK_PATH;
+  const id = studentId?.trim();
+  if (!id) return base;
+  return `${base}?studentId=${encodeURIComponent(id)}`;
 }
 
 export function resultsNeedsAttentionPath(): string {

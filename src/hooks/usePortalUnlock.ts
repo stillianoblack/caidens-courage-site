@@ -19,6 +19,8 @@ import { claimParentFamilyPortal } from '../lib/parentClaimService';
 import { unlockIndependentFamilyPortal } from '../lib/independentFamilyPortalSignup';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
+import { isLegacyDemoUnlockAllowed } from '../lib/portalAuthConfig';
+import { verifyFacilitatorProgramEmail } from '../lib/portalFacilitatorAuth';
 import {
   isLegacyDemoAccessCode,
   looksLikeProgramAccessCode,
@@ -268,27 +270,55 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
             return;
           }
 
-          applyProgramPortalUnlock(program, role, trimmedCode);
-          writeLastPilotProgram(program, role, program.adminEmail, trimmedCode);
-          if (role === 'facilitator' && program.adminEmail?.trim()) {
+          if (role === 'facilitator') {
+            const email = parentEmail.trim();
+            if (!email) {
+              setError('Enter your facilitator email to continue.');
+              setSubmitting(false);
+              return;
+            }
+
+            if (STUDENT_PIN_RE.test(email)) {
+              setError(
+                'Student PINs use family access codes. Enter your parent/guardian email or use your family access code with a student PIN.',
+              );
+              setSubmitting(false);
+              return;
+            }
+
+            const facilitatorVerified = verifyFacilitatorProgramEmail(program, email, trimmedCode);
+            if (!facilitatorVerified.success) {
+              setError(facilitatorVerified.message);
+              setSubmitting(false);
+              return;
+            }
+
+            applyProgramPortalUnlock(program, role, trimmedCode);
+            writeLastPilotProgram(program, role, email, trimmedCode);
             trackKitFacilitatorSignup({
-              facilitatorEmail: program.adminEmail,
+              facilitatorEmail: email,
               eventName: 'facilitator_unlock',
               metadata: { program_code: program.programCode, source: 'portal_unlock' },
             });
+            persistRememberedDevice({
+              rememberDevice,
+              userType: 'facilitator',
+              accessCode: trimmedCode,
+              program,
+              facilitatorId: email.trim().toLowerCase(),
+            });
+            setAccessCode('');
+            setParentEmail('');
+            setParentLastName('');
+            setNeedsLastNameConfirm(false);
+            navigateToPortal(PROGRAM_DASHBOARD_PATH, 'facilitator-email-verified');
+            setSubmitting(false);
+            onUnlock?.();
+            return;
           }
-          persistRememberedDevice({
-            rememberDevice,
-            userType: 'facilitator',
-            accessCode: trimmedCode,
-            program,
-            facilitatorId: program.adminEmail?.trim().toLowerCase() || undefined,
-          });
-          setAccessCode('');
-          const destination = PROGRAM_DASHBOARD_PATH;
-          navigateToPortal(destination, `program-code-${role}`);
+
+          setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
           setSubmitting(false);
-          onUnlock?.();
           return;
         }
 
@@ -313,7 +343,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
         return;
       }
 
-      if (isLegacyDemoAccessCode(trimmedCode) && isBlueRibbonPilotCode(trimmedCode)) {
+      if (isLegacyDemoUnlockAllowed() && isLegacyDemoAccessCode(trimmedCode) && isBlueRibbonPilotCode(trimmedCode)) {
         writePortalSessionUnlock('pilot');
         writeBlueRibbonUnlock();
         writeActivePortalRole('facilitator');
@@ -324,6 +354,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
       }
 
       if (
+        isLegacyDemoUnlockAllowed() &&
         isLegacyDemoAccessCode(trimmedCode) &&
         (isBlueRibbonFamilyCode(trimmedCode) || isBlueRibbonKidsCode(trimmedCode))
       ) {

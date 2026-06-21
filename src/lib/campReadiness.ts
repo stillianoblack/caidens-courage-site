@@ -11,6 +11,7 @@ import {
   PILOT_INACTIVE_DAYS,
   resolveParticipantLastActivity,
 } from './pilotStudentProgress';
+import { certificatesReadyFilterPath, rosterFilterPath } from './askB4DeepLinks';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 
@@ -115,42 +116,42 @@ export function getCampReadiness(input: {
       label: 'Missing Baseline',
       count: needsAttention.missingBaseline,
       status: needsAttention.missingBaseline > 0 ? 'critical' : 'complete',
-      href: input.resultsPath,
+      href: rosterFilterPath('missing-baseline'),
     },
     {
       id: 'missing-week-1',
       label: 'Missing Week 1',
       count: missingWeek1,
       status: missingWeek1 > 0 ? 'warning' : 'complete',
-      href: input.weeklyModulesPath,
+      href: rosterFilterPath('missing-week-1'),
     },
     {
       id: 'missing-week-2',
       label: 'Missing Week 2',
       count: missingWeek2,
       status: missingWeek2 > 0 ? 'warning' : 'complete',
-      href: input.weeklyModulesPath,
+      href: rosterFilterPath('missing-week-2'),
     },
     {
       id: 'certificates-ready',
       label: 'Certificates Ready',
       count: needsAttention.certificateReady,
       status: needsAttention.certificateReady > 0 ? 'info' : 'complete',
-      href: input.certificatesPath,
+      href: certificatesReadyFilterPath(),
     },
     {
       id: 'inactive-7-plus',
       label: 'Inactive 7+ Days',
       count: needsAttention.inactive7PlusDays,
       status: needsAttention.inactive7PlusDays > 0 ? 'warning' : 'complete',
-      href: input.rosterPath,
+      href: rosterFilterPath('inactive'),
     },
     {
       id: 'requires-follow-up',
       label: 'Requires Follow-up',
       count: followUpIds.size,
       status: followUpIds.size > 0 ? 'critical' : 'complete',
-      href: input.rosterPath,
+      href: rosterFilterPath('requires-follow-up'),
     },
   ];
 

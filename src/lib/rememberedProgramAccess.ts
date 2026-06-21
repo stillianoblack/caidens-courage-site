@@ -1,5 +1,6 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveAccessCode } from '../config/portalContext';
+import { clearAllPortalAuthState } from './portalIdentityReset';
 import { readLastPilotProgram } from '../config/lastPilotProgram';
 import type { ActivePilotProgram } from '../types/pilotProgram';
 import { clearRememberedDeviceSession, readRememberedDeviceSession } from './rememberedDeviceSession';
@@ -97,6 +98,7 @@ export function clearRememberedProgramAccess(): void {
 
 /** Clears remembered program access and optional full device session. */
 export function switchRememberedProgram(clearDeviceSession = true): void {
+  clearAllPortalAuthState('switch_program');
   clearRememberedProgramAccess();
   if (clearDeviceSession) {
     clearRememberedDeviceSession('switch_program');

@@ -78,6 +78,21 @@
   cursor: not-allowed;
 }
 
+.kidPlayRosterLockFacilitatorForm {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kidPlayRosterLockDividerLabel {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(197, 208, 230, 0.75);
+}
+
 .kidPlayRosterLockTitle {
   margin: 0 0 0.5rem;
   font-size: 1.25rem;

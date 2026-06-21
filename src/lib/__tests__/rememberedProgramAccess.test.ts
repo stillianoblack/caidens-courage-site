@@ -62,7 +62,7 @@ describe('rememberedProgramAccess', () => {
     );
   });
 
-  test('switch program clears remembered access code', () => {
+  test('switch program clears remembered access code and identity state', () => {
     writeRememberedProgramAccess('FAMILY-CODE', mockProgram());
     writeRememberedDeviceSession({
       access_code: 'FAMILY-CODE',
@@ -71,11 +71,22 @@ describe('rememberedProgramAccess', () => {
       user_type: 'parent',
       program: mockProgram(),
     });
+    window.localStorage.setItem(
+      'cc-scoped-parent-claim',
+      JSON.stringify({
+        email: 'parent@camp.org',
+        confirmed: true,
+        programCode: 'CAMP-2026',
+      }),
+    );
+    window.localStorage.setItem('lastPilotProgram:facilitator', '{"program_code":"CAMP-2026"}');
 
     switchRememberedProgram(true);
 
     expect(window.localStorage.getItem(REMEMBERED_PROGRAM_ACCESS_KEY)).toBeNull();
     expect(window.localStorage.getItem(REMEMBERED_DEVICE_SESSION_KEY)).toBeNull();
+    expect(window.localStorage.getItem('cc-scoped-parent-claim')).toBeNull();
+    expect(window.localStorage.getItem('lastPilotProgram:facilitator')).toBeNull();
     expect(hasRememberedProgramAccess()).toBe(false);
   });
 

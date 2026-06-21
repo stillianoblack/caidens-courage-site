@@ -1,0 +1,474 @@
+{
+  "generatedAt": "2026-06-21T15:33:13.652Z",
+  "passed": true,
+  "summary": {
+    "sourceFilesScanned": 1273,
+    "storageKeysFound": 316,
+    "scopedKeys": 10,
+    "legacyUnsafeKeys": 6,
+    "identityRelatedKeys": 23,
+    "findings": 35,
+    "highSeverityFindings": 0
+  },
+  "scopedKeys": [
+    {
+      "key": "activeAccessCode",
+      "files": [
+        "src/config/portalContext.ts"
+      ]
+    },
+    {
+      "key": "activeFamilyContext",
+      "files": [
+        "src/config/portalContext.ts"
+      ]
+    },
+    {
+      "key": "activePilotProgram",
+      "files": [
+        "src/config/activePilotProgram.ts"
+      ]
+    },
+    {
+      "key": "activePortalRole",
+      "files": [
+        "src/config/portalContext.ts"
+      ]
+    },
+    {
+      "key": "cc-remembered-device-session",
+      "files": [
+        "src/lib/rememberedDeviceSession.ts"
+      ]
+    },
+    {
+      "key": "cc-remembered-program-access",
+      "files": [
+        "src/lib/rememberedProgramAccess.ts"
+      ]
+    },
+    {
+      "key": "cc-scoped-active-child",
+      "files": [
+        "src/lib/portalSessionIsolation.ts"
+      ]
+    },
+    {
+      "key": "cc-scoped-parent-claim",
+      "files": [
+        "src/config/parentClaimContext.ts"
+      ]
+    },
+    {
+      "key": "lastPilotProgram:facilitator",
+      "files": [
+        "src/config/lastPilotProgram.ts"
+      ]
+    },
+    {
+      "key": "lastPilotProgram:family",
+      "files": [
+        "src/config/lastPilotProgram.ts"
+      ]
+    }
+  ],
+  "legacyUnsafeKeys": [
+    {
+      "key": "activeChildNickname",
+      "files": [
+        "src/config/activeChildNickname.ts",
+        "src/lib/portalSessionIsolation.ts"
+      ]
+    },
+    {
+      "key": "activeChildParticipantId",
+      "files": [
+        "src/config/activeChildParticipant.ts",
+        "src/lib/portalSessionIsolation.ts"
+      ]
+    },
+    {
+      "key": "parentClaimConfirmed",
+      "files": [
+        "src/config/parentClaimContext.ts"
+      ]
+    },
+    {
+      "key": "parentClaimEmail",
+      "files": [
+        "src/config/parentClaimContext.ts"
+      ]
+    },
+    {
+      "key": "parentClaimLastName",
+      "files": [
+        "src/config/parentClaimContext.ts"
+      ]
+    },
+    {
+      "key": "parentClaimPhone",
+      "files": [
+        "src/config/parentClaimContext.ts"
+      ]
+    }
+  ],
+  "identityRelatedKeys": [
+    {
+      "key": "/parents",
+      "files": [
+        "src/config/courageRoutes.ts"
+      ]
+    },
+    {
+      "key": "/play/session",
+      "files": [
+        "src/config/courageRoutes.ts"
+      ]
+    },
+    {
+      "key": "${FAMILY_PARENT_CORNER_PATH}/dr-victoria",
+      "files": [
+        "src/config/courageRoutes.ts"
+      ]
+    },
+    {
+      "key": "${FAMILY_PARENT_CORNER_PATH}/uncle-t",
+      "files": [
+        "src/config/courageRoutes.ts"
+      ]
+    },
+    {
+      "key": "${FAMILY_PORTAL_PATH}/parent-corner",
+      "files": [
+        "src/config/courageRoutes.ts"
+      ]
+    },
+    {
+      "key": "caidens:family-child-goals-saved",
+      "files": [
+        "src/lib/familyChildGoalsService.ts"
+      ]
+    },
+    {
+      "key": "caidens:focus-flame-add-child",
+      "files": [
+        "src/lib/focusFlameJourney.ts"
+      ]
+    },
+    {
+      "key": "caidens:open-facilitator-access-codes",
+      "files": [
+        "src/lib/openFacilitatorAccessCodes.ts"
+      ]
+    },
+    {
+      "key": "cc_toolkit_email",
+      "files": [
+        "src/pages/CourageAcademy.tsx"
+      ]
+    },
+    {
+      "key": "cc_toolkit_role",
+      "files": [
+        "src/pages/CourageAcademy.tsx"
+      ]
+    },
+    {
+      "key": "cc-active-child-changed",
+      "files": [
+        "src/lib/activeChildContext.ts"
+      ]
+    },
+    {
+      "key": "cc-admin-portal-session",
+      "files": [
+        "src/config/adminAccess.ts"
+      ]
+    },
+    {
+      "key": "cc-child-profile-updated",
+      "files": [
+        "src/config/activeChildParticipant.ts"
+      ]
+    },
+    {
+      "key": "Enter the correct access code to open this portal.",
+      "files": [
+        "src/config/portalContext.ts"
+      ]
+    },
+    {
+      "key": "Enter your email to save your certificate, receive new family activities, and access future Focus Flame Academy resources.",
+      "files": [
+        "src/data/adultGrowthCheckContent.ts"
+      ]
+    },
+    {
+      "key": "Family Portal Access",
+      "files": [
+        "src/data/familyPortalContent.ts"
+      ]
+    },
+    {
+      "key": "Focus Skills Snapshot shows your child",
+      "files": [
+        "src/lib/familyGrowthInsights.ts"
+      ]
+    },
+    {
+      "key": "lastPortalReturnRole",
+      "files": [
+        "src/config/lastPilotProgram.ts"
+      ]
+    },
+    {
+      "key": "Occasionally challenge my child with activities 1–2 grade bands higher.",
+      "files": [
+        "src/data/familyGradeBandOptions.ts"
+      ]
+    },
+    {
+      "key": "Parent",
+      "files": [
+        "src/lib/kitTags.ts"
+      ]
+    },
+    {
+      "key": "Parents, Teachers, Counselors, Camp Staff",
+      "files": [
+        "src/data/adult/drVictoriaMissionFramework.ts",
+        "src/data/adult/uncleTMissionFramework.ts"
+      ]
+    },
+    {
+      "key": "This email is not registered for this program.",
+      "files": [
+        "src/lib/portalAuthConfig.ts"
+      ]
+    },
+    {
+      "key": "This saved session belongs to another family or program. Please switch program or enter the correct access code.",
+      "files": [
+        "src/lib/portalProgramScope.ts"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/components/b4/B4BaselineCheckFlow.tsx",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/components/b4/B4MissionFlow.tsx",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/components/family-portal/FamilyPortalDevDiagnosticBanner.tsx",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/components/game-assessment/GameAssessmentFlow.tsx",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/components/kid-play-shell/KidPlayShellNav.tsx",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useAdaptiveMissionGrade.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useAdventureWeekCompletions.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useBaselineGate.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useCharacterModuleProgress.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useCourageInTheDarkProgress.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useFamilyDashboardMetrics.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useFocusCoinWallet.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useFocusFlameJourneyOnboarding.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useInventoryNotificationBadge.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useMirandaGradeBand.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/hooks/useWeeklyAdventureTrail.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/activeProgramContext.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/analytics.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/b4BaselineCheckStorage.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/b4CheckInStatus.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/baselineCompletion.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/familyChildProgressDebug.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "parent_claim_read_without_program_hint",
+      "file": "src/lib/familyNotificationPreferences.ts",
+      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
+    },
+    {
+      "severity": "warning",
+      "kind": "parent_claim_read_without_program_hint",
+      "file": "src/lib/familyParentClaimState.ts",
+      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/familyPortalLinkAudit.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "parent_claim_read_without_program_hint",
+      "file": "src/lib/gameplayPlayerIdentity.ts",
+      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
+    },
+    {
+      "severity": "warning",
+      "kind": "parent_claim_read_without_program_hint",
+      "file": "src/lib/getMobilePortalBranding.ts",
+      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/inventoryNotificationService.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/mirandaGradeBandResolver.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/participantUiState.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/pilotTrackingService.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/portalProgramAssignment.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/pushSubscriptionService.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "unscoped_active_child_read",
+      "file": "src/lib/recordInteractiveCompletion.ts",
+      "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
+    },
+    {
+      "severity": "warning",
+      "kind": "parent_claim_read_without_program_hint",
+      "file": "src/lib/studentFamilyLinkService.ts",
+      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
+    }
+  ],
+  "guardrails": {
+    "programScopedParentClaim": true,
+    "programScopedActiveChild": true,
+    "switchProgramClearsIdentity": false,
+    "signOutClearsIdentity": true
+  }
+}

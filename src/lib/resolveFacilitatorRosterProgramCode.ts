@@ -3,6 +3,7 @@ import { hasBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
 import { BLUE_RIBBON_CAMP_PROGRAM_CODE } from '../config/blueRibbonPilotProgram';
 import { readLastPilotProgramForRole } from '../config/lastPilotProgram';
 import { resolveCanonicalProgramCode } from './portalProgramAssignment';
+import { isLegacyDemoUnlockAllowed } from './portalAuthConfig';
 
 /** Resolve the camp program code for facilitator roster actions (Add Student, roster fetch). */
 export function resolveFacilitatorRosterProgramCode(explicit?: string): string {
@@ -18,7 +19,9 @@ export function resolveFacilitatorRosterProgramCode(explicit?: string): string {
   const lastFacilitator = readLastPilotProgramForRole('facilitator');
   if (lastFacilitator?.program_code?.trim()) return lastFacilitator.program_code.trim();
 
-  if (hasBlueRibbonUnlock()) return BLUE_RIBBON_CAMP_PROGRAM_CODE;
+  if (isLegacyDemoUnlockAllowed() && hasBlueRibbonUnlock()) {
+    return BLUE_RIBBON_CAMP_PROGRAM_CODE;
+  }
 
   return '';
 }

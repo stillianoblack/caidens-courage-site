@@ -1,3 +1,6 @@
+import { programScopesMatch, resolvePortalProgramScope } from './portalProgramScope';
+import { logSessionIsolationWarning } from './sessionIsolationLog';
+
 const STUDENT_PIN_SESSION_KEY = 'cc-student-pin-session';
 
 export type StudentPinSession = {
@@ -14,6 +17,21 @@ export function readStudentPinSession(): StudentPinSession | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StudentPinSession;
     if (!parsed.participantId?.trim() || !parsed.programCode?.trim()) return null;
+
+    const expectedProgram = resolvePortalProgramScope()?.programCode;
+    if (
+      expectedProgram &&
+      !programScopesMatch(parsed.programCode, expectedProgram)
+    ) {
+      logSessionIsolationWarning('student_pin_program_mismatch', {
+        expected_program_code: expectedProgram,
+        stored_program_code: parsed.programCode,
+        participant_id: parsed.participantId,
+      });
+      clearStudentPinSession();
+      return null;
+    }
+
     return parsed;
   } catch {
     return null;

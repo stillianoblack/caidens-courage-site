@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { resolveFamilyBaselineGroupName, resolveFamilyProgramContextForForms } from '../../lib/familyPortalDisplayName';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
@@ -15,7 +15,9 @@ import { useSetMissionGamePhase, type MissionGamePhase } from '../../context/Mis
 import B4BaselineBottomBar from '../b4-baseline-check/B4BaselineBottomBar';
 import B4BaselineHub from '../b4-baseline-check/B4BaselineHub';
 import B4BaselineResults from '../b4-baseline-check/B4BaselineResults';
-import B4BaselineStudentForm from '../b4-baseline-check/B4BaselineStudentForm';
+import B4BaselineStudentForm, {
+  type BaselineStudentOption,
+} from '../b4-baseline-check/B4BaselineStudentForm';
 import B4BaselineGradeGate from '../b4-baseline-check/B4BaselineGradeGate';
 import B4BaselineTopBar, { B4Avatar } from '../b4-baseline-check/B4BaselineTopBar';
 import '../b4-baseline-check/b4-baseline-check.css';
@@ -75,6 +77,8 @@ import { enrichCourageMissionRewardFromCms } from '../../lib/cmsBadgeArtwork';
 import { useFamilyAdventureModules } from '../../hooks/useAdventureModules';
 import { navigateToGameplayReturnTarget } from '../../lib/mobileGameBackNav';
 import { endProtectedChildSession } from '../../lib/endProtectedChildSession';
+import { usePilotRosterData } from '../../hooks/usePilotRosterData';
+import { formatStudentDisplayNameWithGrade } from '../../lib/studentDisplayName';
 import type {
   CompleteMissionResult,
   CourageMissionRewardPayload,
@@ -92,16 +96,51 @@ type View =
 type B4BaselineCheckFlowProps = {
   embedded?: boolean;
   familyPortal?: boolean;
+  facilitatorMode?: boolean;
   onExit?: () => void;
 };
 
 export default function B4BaselineCheckFlow({
   embedded = false,
   familyPortal = false,
+  facilitatorMode = false,
   onExit,
 }: B4BaselineCheckFlowProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const activeProgram = readActivePilotProgram();
+  const facilitatorProgramCode = activeProgram?.programCode?.trim() ?? '';
+  const { rows: facilitatorRosterRows } = usePilotRosterData(
+    facilitatorProgramCode,
+    facilitatorMode && Boolean(facilitatorProgramCode),
+    activeProgram?.familyAccessCode,
+  );
+  const facilitatorStudentOptions = useMemo((): BaselineStudentOption[] => {
+    if (!facilitatorMode) return [];
+    return facilitatorRosterRows
+      .filter((row) => row.baselineStatus !== 'Complete')
+      .map((row) => ({
+        participantId: row.participantId,
+        displayLabel: formatStudentDisplayNameWithGrade({
+          nickname: row.nickname !== '—' ? row.nickname : null,
+          first_name: row.childName,
+          gradeLevel: row.gradeLevel,
+        }),
+      }));
+  }, [facilitatorMode, facilitatorRosterRows]);
+  const deeplinkStudentId = searchParams.get('studentId')?.trim() ?? '';
+  const [facilitatorStudentId, setFacilitatorStudentId] = useState('');
+  useEffect(() => {
+    if (!facilitatorMode || facilitatorStudentOptions.length === 0) return;
+    const preferred =
+      (deeplinkStudentId &&
+        facilitatorStudentOptions.some((row) => row.participantId === deeplinkStudentId) &&
+        deeplinkStudentId) ||
+      facilitatorStudentOptions[0]?.participantId ||
+      '';
+    setFacilitatorStudentId(preferred);
+  }, [deeplinkStudentId, facilitatorMode, facilitatorStudentOptions]);
   const {
     soundEnabled,
     toggleSound,
@@ -455,6 +494,7 @@ export default function B4BaselineCheckFlow({
     nickname: string;
     programCode: string;
     groupName: string;
+    participantId?: string;
   }) => {
     playSelect();
     setProfileError(null);
@@ -467,7 +507,10 @@ export default function B4BaselineCheckFlow({
       const participant = await ensureParticipantForBaseline({
         firstName,
         nickname,
-        participantId: readActiveChildParticipantId() || hubState.profile?.participantId,
+        participantId:
+          values.participantId ||
+          readActiveChildParticipantId() ||
+          hubState.profile?.participantId,
         groupName:
           resolveFamilyBaselineGroupName(readActivePilotProgram(), values.groupName) ||
           values.groupName,
@@ -933,6 +976,11 @@ export default function B4BaselineCheckFlow({
             ) : null}
             <B4BaselineStudentForm
               familyPortal={familyPortal}
+              facilitatorMode={facilitatorMode}
+              studentOptions={facilitatorStudentOptions}
+              selectedStudentId={facilitatorStudentId}
+              onStudentChange={setFacilitatorStudentId}
+              allBaselinesComplete={facilitatorMode && facilitatorStudentOptions.length === 0}
               initialFirstName={hubState.profile?.firstName ?? ''}
               initialNickname={
                 hubState.profile?.nickname ?? readGameplayPlayerDisplayName() ?? ''

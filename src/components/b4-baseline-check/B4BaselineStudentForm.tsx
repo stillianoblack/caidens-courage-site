@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { B4_BASELINE_PRIVACY_NOTE, B4_BASELINE_STUDENT_HINT } from '../../data/b4BaselineCheckContent';
+import { B4_BASELINE_PRIVACY_NOTE } from '../../data/b4BaselineCheckContent';
+
+export type BaselineStudentOption = {
+  participantId: string;
+  displayLabel: string;
+};
 
 type B4BaselineStudentFormProps = {
   initialFirstName?: string;
@@ -7,12 +12,18 @@ type B4BaselineStudentFormProps = {
   initialProgramCode?: string;
   initialGroupName?: string;
   familyPortal?: boolean;
+  facilitatorMode?: boolean;
+  studentOptions?: BaselineStudentOption[];
+  selectedStudentId?: string;
+  onStudentChange?: (participantId: string) => void;
+  allBaselinesComplete?: boolean;
   submitting?: boolean;
   onSubmit: (values: {
     firstName?: string;
     nickname: string;
     programCode: string;
     groupName: string;
+    participantId?: string;
   }) => void;
 };
 
@@ -22,6 +33,11 @@ export default function B4BaselineStudentForm({
   initialProgramCode = '',
   initialGroupName = '',
   familyPortal = false,
+  facilitatorMode = false,
+  studentOptions = [],
+  selectedStudentId = '',
+  onStudentChange,
+  allBaselinesComplete = false,
   submitting = false,
   onSubmit,
 }: B4BaselineStudentFormProps) {
@@ -30,12 +46,14 @@ export default function B4BaselineStudentForm({
   const [programCode, setProgramCode] = useState(initialProgramCode);
   const [groupName, setGroupName] = useState(initialGroupName);
 
-  const displayName = familyPortal
-    ? nickname.trim() || firstName.trim()
-    : nickname.trim();
-  const canStart = displayName.length > 0 && !submitting;
-  const nicknameLabel = familyPortal ? 'Nickname (optional)' : 'Nickname or first name';
-  const groupLabel = familyPortal ? 'Group or classroom (optional)' : 'Group or Classroom Name';
+  const selectedOption = studentOptions.find((row) => row.participantId === selectedStudentId);
+  const displayName = facilitatorMode
+    ? selectedOption?.displayLabel ?? ''
+    : familyPortal
+      ? nickname.trim() || firstName.trim()
+      : nickname.trim();
+  const canStart =
+    displayName.length > 0 && !submitting && !allBaselinesComplete && (!facilitatorMode || Boolean(selectedStudentId));
   const startLabel = familyPortal ? 'Start B-4 Check-In' : 'Start Check';
 
   return (
@@ -44,20 +62,48 @@ export default function B4BaselineStudentForm({
       onSubmit={(e) => {
         e.preventDefault();
         if (!canStart) return;
-        const resolvedNickname = familyPortal
-          ? nickname.trim() || firstName.trim()
-          : nickname.trim();
+        const resolvedNickname = facilitatorMode
+          ? selectedOption?.displayLabel.split(' (')[0]?.trim() || displayName
+          : familyPortal
+            ? nickname.trim() || firstName.trim()
+            : nickname.trim();
         onSubmit({
           firstName: familyPortal ? firstName.trim() || resolvedNickname : undefined,
           nickname: resolvedNickname,
           programCode: programCode.trim(),
           groupName: groupName.trim(),
+          participantId: facilitatorMode ? selectedStudentId : undefined,
         });
       }}
     >
       <p className="bbc-privacyNote" role="note">
         {B4_BASELINE_PRIVACY_NOTE}
       </p>
+
+      {facilitatorMode ? (
+        allBaselinesComplete ? (
+          <p className="bbc-fieldHint" role="status">
+            All students have completed the B-4 Baseline.
+          </p>
+        ) : (
+          <label className="bbc-field">
+            <span className="bbc-fieldLabel">Select student</span>
+            <select
+              className="bbc-fieldInput"
+              value={selectedStudentId}
+              onChange={(event) => onStudentChange?.(event.target.value)}
+              disabled={submitting || studentOptions.length <= 1}
+              required
+            >
+              {studentOptions.map((option) => (
+                <option key={option.participantId} value={option.participantId}>
+                  {option.displayLabel}
+                </option>
+              ))}
+            </select>
+          </label>
+        )
+      ) : null}
 
       {familyPortal ? (
         <label className="bbc-field">
@@ -72,24 +118,26 @@ export default function B4BaselineStudentForm({
             placeholder="Alex"
             required
           />
-          <span className="bbc-fieldHint">{B4_BASELINE_STUDENT_HINT}</span>
         </label>
       ) : null}
 
-      <label className="bbc-field">
-        <span className="bbc-fieldLabel">{familyPortal ? nicknameLabel : 'Nickname or first name'}</span>
-        <input
-          type="text"
-          className="bbc-fieldInput"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          autoComplete="off"
-          maxLength={32}
-          placeholder={familyPortal ? 'Ace' : 'Alex'}
-          required={!familyPortal}
-        />
-        {!familyPortal ? <span className="bbc-fieldHint">{B4_BASELINE_STUDENT_HINT}</span> : null}
-      </label>
+      {!facilitatorMode ? (
+        <label className="bbc-field">
+          <span className="bbc-fieldLabel">
+            {familyPortal ? 'Nickname (optional)' : 'Nickname or first name'}
+          </span>
+          <input
+            type="text"
+            className="bbc-fieldInput"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            autoComplete="off"
+            maxLength={32}
+            placeholder={familyPortal ? 'Ace' : 'Alex'}
+            required={!familyPortal}
+          />
+        </label>
+      ) : null}
 
       {!familyPortal ? (
         <label className="bbc-field">
@@ -109,7 +157,9 @@ export default function B4BaselineStudentForm({
 
       {!familyPortal ? (
         <label className="bbc-field">
-          <span className="bbc-fieldLabel">{groupLabel}</span>
+          <span className="bbc-fieldLabel">
+            {familyPortal ? 'Group or classroom (optional)' : 'Group or Classroom Name'}
+          </span>
           <input
             type="text"
             className="bbc-fieldInput"
@@ -118,6 +168,7 @@ export default function B4BaselineStudentForm({
             autoComplete="off"
             maxLength={48}
             placeholder="Room 12 — Morning"
+            readOnly={facilitatorMode && Boolean(initialGroupName)}
           />
         </label>
       ) : null}

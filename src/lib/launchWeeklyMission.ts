@@ -1,5 +1,6 @@
 import type { NavigateFunction } from 'react-router-dom';
 import type { CourageInTheDarkMission } from '../data/courageInTheDarkMap';
+import { coerceBaselineLockedMission } from './baselineCheckInMission';
 import { isMapMissionComplete } from './courageInTheDarkProgress';
 import { resolveCourageMapTargetHref } from './courageInTheDarkRoutes';
 import { isKidPlayShellPath } from './kidPlayShellRoutes';
@@ -82,7 +83,8 @@ export function resolveLaunchMissionForWeek(
   if (characterMissions.length === 0) return null;
 
   if (options.baselineLocked) {
-    return characterMissions.find((mission) => mission.id === 'b4') ?? null;
+    const b4Mission = characterMissions.find((mission) => mission.id === 'b4');
+    return b4Mission ? coerceBaselineLockedMission(b4Mission) : null;
   }
 
   const nextIncomplete = characterMissions.find(
@@ -136,27 +138,30 @@ export type LaunchWeeklyMissionInput = {
 };
 
 export function launchWeeklyMission(input: LaunchWeeklyMissionInput): boolean {
+  const baselineLocked = Boolean(input.baselineLocked);
+  const mission = baselineLocked ? coerceBaselineLockedMission(input.mission) : input.mission;
+
   const unlockOptions: WeeklyMissionUnlockOptions = {
     week: input.weekId,
-    baselineLocked: Boolean(input.baselineLocked),
+    baselineLocked,
     mapLocked: input.mapLocked,
     completedMissionIds: input.completedMissionIds ?? [],
   };
 
-  if (isWeeklyMissionLocked(input.mission, unlockOptions)) {
+  if (isWeeklyMissionLocked(mission, unlockOptions)) {
     return false;
   }
 
   const route = resolveWeeklyMissionRoute({
-    mission: input.mission,
+    mission,
     weekId: input.weekId,
     weekTitle: input.weekTitle,
     kidsBasePath: input.kidsBasePath,
     pathname: input.pathname,
   });
 
-  const characterId = input.characterId ?? input.mission.id;
-  const missionId = input.missionId ?? input.mission.targetGameSlug;
+  const characterId = input.characterId ?? mission.id;
+  const missionId = baselineLocked ? 'b4-self-check-in' : input.missionId ?? mission.targetGameSlug;
 
   if (!route) {
     if (process.env.NODE_ENV === 'development') {

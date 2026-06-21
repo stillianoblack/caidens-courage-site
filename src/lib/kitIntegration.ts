@@ -6,6 +6,7 @@ import {
   type KitEventName,
 } from './kitTags';
 import { resolveParentEmailsForStudent } from './kitParentEmails';
+import { queueWelcomeEmail, type WelcomeEmailInput } from './welcomeEmailService';
 
 export type TrackKitEventInput = {
   eventName: KitEventName | string;
@@ -58,6 +59,7 @@ export function trackKitParentSignup(input: {
   parentEmail: string;
   eventName?: KitEventName;
   metadata?: TrackKitEventInput['metadata'];
+  welcomeEmail?: WelcomeEmailInput;
 }): void {
   const email = normalizeEmail(input.parentEmail);
   if (!email) return;
@@ -65,8 +67,19 @@ export function trackKitParentSignup(input: {
     eventName: input.eventName ?? 'parent_signup',
     parentEmail: email,
     tags: [KIT_TAG_PARENT],
-    metadata: input.metadata,
+    metadata: {
+      ...input.metadata,
+      welcome_email_requested: Boolean(input.welcomeEmail),
+    },
   });
+  if (input.welcomeEmail) {
+    void queueWelcomeEmail(input.welcomeEmail);
+    trackKitEvent({
+      eventName: 'parent_welcome_email',
+      parentEmail: email,
+      metadata: input.metadata,
+    });
+  }
 }
 
 export function trackKitFacilitatorSignup(input: {

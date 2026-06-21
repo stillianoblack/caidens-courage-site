@@ -13,6 +13,7 @@ import {
   writeLocalKidPlaySessionId,
 } from './kidPlaySessionService';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
+import { persistFacilitatorStudentContinuityFromSessionEnd } from './facilitatorSessionContinuity';
 import { setKidPlayRosterLocked } from './kidPlayRosterLock';
 import { setKidPlayFamilySoftLocked } from './kidPlayFamilySoftLock';
 import {
@@ -65,6 +66,11 @@ export async function endKidPlayFacilitatorShellSession(
   );
 
   clearChildSessionMemory();
+  await persistFacilitatorStudentContinuityFromSessionEnd({
+    childId: options.childId,
+    childDisplayName: options.childDisplayName,
+    resumePayload: options.resumePayload,
+  });
   setKidPlayRosterLocked(true);
   kidShellAwareNavigate(navigate, programDashboardTabPath('roster'), { replace: true });
 }

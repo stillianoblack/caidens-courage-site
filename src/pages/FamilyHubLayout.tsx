@@ -42,7 +42,11 @@ import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
 import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
+import ParentFirstLoginWizard from '../components/family-portal/ParentFirstLoginWizard';
+import { readParentClaimContext } from '../config/parentClaimContext';
+import { shouldShowParentOnboarding } from '../lib/parentOnboardingState';
 import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
+import '../components/family-portal/parent-first-login-wizard.css';
 
 export default function FamilyHubLayout() {
   const navigate = useNavigate();
@@ -56,6 +60,8 @@ export default function FamilyHubLayout() {
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
   const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
+  const parentClaim = readParentClaimContext();
+  const [showParentOnboarding, setShowParentOnboarding] = useState(false);
   useEffect(() => {
     setFamilySoftLocked(isKidPlayFamilySoftLocked());
   }, [location.pathname]);
@@ -64,6 +70,17 @@ export default function FamilyHubLayout() {
   );
   const adminPreviewAccess = isAdminAdventurePreviewActive(location.search);
   const canAccessShell = sessionValid || adminPreviewAccess;
+
+  useEffect(() => {
+    if (!canAccessShell || !programCode) return;
+    setShowParentOnboarding(
+      shouldShowParentOnboarding({
+        programCode,
+        parentEmail: parentClaim?.email,
+        parentConnectionIncomplete: !parentClaim?.email?.trim(),
+      }),
+    );
+  }, [canAccessShell, parentClaim?.email, programCode]);
 
   const { linkedCampLabel, notifications } = useFamilyPortalShell(programCode);
   const { isMobileNav } = useFamilyMobileNav();
@@ -158,6 +175,11 @@ export default function FamilyHubLayout() {
       <KidPlayFamilySoftLockGate
         open={familySoftLocked && !isPlayPauseRoute}
         onUnlocked={() => setFamilySoftLocked(false)}
+      />
+      <ParentFirstLoginWizard
+        open={showParentOnboarding && !kidFacingRoute}
+        initialEmail={parentClaim?.email ?? ''}
+        onFinished={() => setShowParentOnboarding(false)}
       />
       <div
         className={[

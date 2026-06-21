@@ -4,6 +4,7 @@ import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelO
 import { getGradeBand } from '../lib/getGradeBand';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from '../lib/pilotTrackingLocalStorage';
 import { resolveParticipantDisplayName, buildParticipantNameLookup } from '../lib/pilotResultsDisplay';
+import { resolveStudentDisplayNameOrFallback } from '../lib/studentDisplayName';
 import {
   formatParentGuardianShort,
   resolveBaselineStatus,
@@ -142,7 +143,10 @@ export function usePilotRosterData(
 
         return {
           participantId: participant.id,
-          childName: participant.first_name?.trim() || participant.nickname?.trim() || 'Child',
+          childName: resolveStudentDisplayNameOrFallback(
+            { nickname: participant.nickname, first_name: participant.first_name },
+            'Child',
+          ),
           nickname: participant.nickname?.trim() || '—',
           parentGuardianName,
           parentGuardianShort: formatParentGuardianShort(parentFirst, parentLast),

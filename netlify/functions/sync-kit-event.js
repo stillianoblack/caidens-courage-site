@@ -49,6 +49,14 @@ exports.handler = async (event) => {
   const targetEmail = parentEmail || facilitatorEmail;
 
   if (!isKitEnabled()) {
+    await writeIntegrationLog({
+      eventName,
+      email: targetEmail || null,
+      tagName: tags[0] || null,
+      status: 'skipped',
+      errorMessage: 'kit_disabled',
+      metadata,
+    });
     return json(200, {
       success: true,
       status: 'skipped',
@@ -58,6 +66,16 @@ exports.handler = async (event) => {
   }
 
   try {
+    if (targetEmail) {
+      await writeIntegrationLog({
+        eventName,
+        email: targetEmail,
+        tagName: tags[0] || null,
+        status: 'attempted',
+        metadata,
+      });
+    }
+
     if (targetEmail && tags.length) {
       const result = await syncKitSubscriberTags({
         email: targetEmail,

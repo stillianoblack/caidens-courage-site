@@ -562,6 +562,26 @@ export function participantHasPin(row: {
   return Boolean(row.student_pin_hash?.trim() || row.student_pin_fingerprint?.trim());
 }
 
+export async function fetchParticipantPinFingerprint(participantId: string): Promise<string | null> {
+  const id = participantId.trim();
+  if (!id || !isSupabaseConfigured() || !supabase) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('participants')
+      .select('student_pin_fingerprint')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.student_pin_fingerprint?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export function resolveParentConnectionStatus(input: {
   parentConnectionStatus?: string | null;
   linkClaimed?: boolean;

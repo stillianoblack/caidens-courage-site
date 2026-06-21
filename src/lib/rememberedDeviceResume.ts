@@ -40,7 +40,12 @@ function restoreParentSession(session: RememberedDeviceSession, program: ActiveP
   applyProgramPortalUnlock(program, 'family', accessCode);
   writeLastPilotProgram(program, 'family', parentEmail, accessCode);
   if (parentEmail) {
-    writeParentClaimContext({ email: parentEmail, confirmed: true });
+    writeParentClaimContext({
+      email: parentEmail,
+      confirmed: true,
+      programCode: program.programCode,
+      accessCode,
+    });
   }
 }
 

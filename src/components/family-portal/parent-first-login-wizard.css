@@ -1,0 +1,108 @@
+.parentOnboardingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(8, 12, 22, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.parentOnboardingCard {
+  width: min(100%, 28rem);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.parentOnboardingTitle {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #142033;
+}
+
+.parentOnboardingBody {
+  margin: 0 0 1rem;
+  color: #425066;
+  line-height: 1.5;
+}
+
+.parentOnboardingField {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #142033;
+}
+
+.parentOnboardingField input {
+  border: 1px solid #c8d3e6;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 1rem;
+}
+
+.parentOnboardingGoals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.parentOnboardingGoalChip {
+  border: 1px solid #c8d3e6;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  background: #f7f9fc;
+  color: #142033;
+  font-weight: 600;
+}
+
+.parentOnboardingGoalChip--active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.parentOnboardingActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.parentOnboardingPrimary,
+.parentOnboardingSecondary {
+  border-radius: 0.75rem;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+}
+
+.parentOnboardingPrimary {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+}
+
+.parentOnboardingSecondary {
+  border: 1px solid #c8d3e6;
+  background: #fff;
+  color: #142033;
+}
+
+.parentOnboardingLater {
+  margin-top: 1rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  text-decoration: underline;
+}
+
+.parentOnboardingPrimary:disabled,
+.parentOnboardingSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -12,6 +12,8 @@ import { writeFamilyPortalSession } from '../config/familyPortalAccess';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { writeParentClaimContext } from '../config/parentClaimContext';
 import { syncPortalProgramContext } from './activeProgramContext';
+import { clearActiveChild } from './activeChildContext';
+import { clearStalePortalIdentityState } from './portalIdentityReset';
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import {
   INDEPENDENT_FAMILY_DB_TYPE,
@@ -135,6 +137,15 @@ export function activatePrivateFamilyPortalFromClaim(input: {
   parentPhone?: string;
   parentLastName?: string;
 }): void {
+  const existing = readActivePilotProgram();
+  if (
+    existing?.programCode?.trim() &&
+    existing.programCode.trim() !== input.familyProgram.programCode.trim()
+  ) {
+    clearStalePortalIdentityState('family_claim_program_switch');
+  }
+  clearActiveChild();
+
   writeActiveFamilyContext({
     programCode: input.familyProgram.programCode,
     programName: input.familyProgram.programName,
@@ -158,6 +169,8 @@ export function activatePrivateFamilyPortalFromClaim(input: {
     phone: input.parentPhone,
     lastName: input.parentLastName,
     confirmed: true,
+    programCode: input.familyProgram.programCode,
+    accessCode: input.accessCode.trim(),
   });
 }
 

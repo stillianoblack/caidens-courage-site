@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
 import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
@@ -207,6 +208,11 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
         setKidPlayRosterLocked(false);
         setRosterLocked(false);
+        await writeFacilitatorStudentContinuityForLaunch({
+          childId: row.participantId,
+          childDisplayName: row.childName,
+          programCode: program?.programCode ?? undefined,
+        });
         kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id));
       } finally {
         setLaunchSessionLoadingId(null);
@@ -327,6 +333,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           variant="roster"
           onStudentClick={setDrawerParticipantId}
           onGradeSaved={updateParticipantGrade}
+          showBaselineActions={rosterFilter === 'missing-baseline'}
         />
       )}
 

@@ -5,7 +5,9 @@ export type SecurityAuditEvent =
   | 'pin_copied'
   | 'pin_reset'
   | 'remembered_device_created'
-  | 'remembered_device_cleared';
+  | 'remembered_device_cleared'
+  | 'session_identity_cleared'
+  | 'session_isolation_warning';
 
 export function logSecurityAudit(
   event: SecurityAuditEvent,

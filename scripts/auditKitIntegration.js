@@ -18,6 +18,8 @@ function emptyReport(error) {
       success: 0,
       failed: 0,
       skipped: 0,
+      attempted: 0,
+      pending: 0,
     },
     latestEvents: [],
     missingParentEmailEvents: [],
@@ -47,10 +49,25 @@ function writeReports(report) {
     `- Successes: ${summary.success || 0}`,
     `- Failures: ${summary.failed || 0}`,
     `- Skipped: ${summary.skipped || 0}`,
+    `- Attempted (pending sync): ${summary.attempted || 0}`,
+    `- Pending events (attempted + skipped): ${summary.pending || 0}`,
     '',
-    '## Missing parent email (week/certificate events)',
+    '## Recent failures',
     '',
   ].filter(Boolean);
+
+  const failures = report.recentFailures || [];
+  if (!failures.length) {
+    lines.push('- None recorded.');
+  } else {
+    for (const row of failures) {
+      lines.push(
+        `- ${row.created_at} · ${row.event_name} · ${row.email || '—'} · ${row.tag_name || '—'} · ${row.error_message || 'unknown error'}`,
+      );
+    }
+  }
+
+  lines.push('', '## Missing parent email (week/certificate events)', '');
 
   const missing = report.missingParentEmailEvents || [];
   if (!missing.length) {
@@ -118,7 +135,11 @@ async function main() {
       success: rows.filter((row) => row.status === 'success').length,
       failed: rows.filter((row) => row.status === 'failed').length,
       skipped: rows.filter((row) => row.status === 'skipped').length,
+      attempted: rows.filter((row) => row.status === 'attempted').length,
+      pending: rows.filter((row) => row.status === 'attempted' || row.status === 'skipped').length,
     };
+
+    const recentFailures = rows.filter((row) => row.status === 'failed').slice(0, 20);
 
     const missingParentEmailEvents = rows.filter(
       (row) =>
@@ -135,6 +156,7 @@ async function main() {
       kitApiBaseUrl: process.env.KIT_API_BASE_URL || 'https://api.kit.com',
       summary,
       latestEvents: rows.slice(0, 20),
+      recentFailures,
       missingParentEmailEvents: missingParentEmailEvents.slice(0, 50),
     });
 

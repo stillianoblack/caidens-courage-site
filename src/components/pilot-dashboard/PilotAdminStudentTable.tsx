@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import type { PilotRosterRow } from '../../hooks/usePilotRosterData';
 import type { GradeLevel } from '../../data/gradeLevelOptions';
+import { facilitatorBaselineCheckPath } from '../../lib/askB4DeepLinks';
 import { useToast } from '../portal-design-system/ToastProvider';
 import ResponsivePortalTable, {
   type ResponsivePortalTableColumn,
@@ -15,6 +17,7 @@ type PilotAdminStudentTableProps = {
   variant: PilotAdminStudentTableVariant;
   onStudentClick?: (participantId: string) => void;
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void;
+  showBaselineActions?: boolean;
 };
 
 function formatCompactActivityDate(iso: string | null): string {
@@ -101,6 +104,7 @@ function buildRosterColumns(
   isRoster: boolean,
   onStudentClick?: (participantId: string) => void,
   onGradeSaved?: (participantId: string, gradeLevel: GradeLevel) => void,
+  showBaselineActions = false,
 ): ResponsivePortalTableColumn<PilotRosterRow>[] {
   const columns: ResponsivePortalTableColumn<PilotRosterRow>[] = [
     {
@@ -111,6 +115,20 @@ function buildRosterColumns(
       render: (row) => <ChildNameCell row={row} onStudentClick={onStudentClick} />,
     },
   ];
+
+  if (isRoster && showBaselineActions) {
+    columns.push({
+      id: 'baseline-action',
+      header: 'Baseline',
+      mobileRole: 'detail',
+      className: 'pilot-adminCellText',
+      render: (row) => (
+        <Link to={facilitatorBaselineCheckPath(row.participantId)} className="pilot-studentLinkBtn">
+          {row.baselineStatus === 'Complete' ? 'Open Baseline' : 'Start Baseline'}
+        </Link>
+      ),
+    });
+  }
 
   if (isRoster) {
     columns.push({
@@ -221,11 +239,12 @@ export default function PilotAdminStudentTable({
   variant,
   onStudentClick,
   onGradeSaved,
+  showBaselineActions = false,
 }: PilotAdminStudentTableProps) {
   const isRoster = variant === 'roster';
   const columns = useMemo(
-    () => buildRosterColumns(isRoster, onStudentClick, onGradeSaved),
-    [isRoster, onGradeSaved, onStudentClick],
+    () => buildRosterColumns(isRoster, onStudentClick, onGradeSaved, showBaselineActions),
+    [isRoster, onGradeSaved, onStudentClick, showBaselineActions],
   );
 
   const expandedActions = onStudentClick

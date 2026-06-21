@@ -1,4 +1,3 @@
-import { readActiveChildParticipantId } from '../config/activeChildParticipant';
 import { readActiveChildNickname } from '../config/activeChildNickname';
 import { readGameplayPlayerDisplayName } from './gameplayPlayerIdentity';
 import {
@@ -40,9 +39,8 @@ export function isParticipantInRoster(
   return roster.some((row) => row.participantId === id);
 }
 
-/** Never treat nickname alone as an active player — participant id is required. */
 export function readStoredParticipantId(): string {
-  return readActiveChildParticipantId().trim();
+  return readActiveChildState()?.participantId.trim() ?? '';
 }
 
 export function readActiveParticipantDisplayName(): string {

@@ -21,6 +21,8 @@ import { resolveFamilySettingsTab, familyStudentAccessAnchorId } from '../../../
 import { reliablePortalNavigate } from '../../../lib/reliablePortalNavigate';
 import { getPortalRoute } from '../../../lib/portalGamePaths';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
+import { linkMatchesParentScope } from '../../../lib/studentFamilyLinkService';
+import { validateParentClaimWrite } from '../../../lib/portalSessionIsolation';
 import { formatFamilyRelativeActivityDate } from '../../../lib/familyChildSummaryCard';
 import {
   fetchStudentAccessFieldsByIds,
@@ -133,8 +135,18 @@ export default function FamilyProgramSettingsPanel() {
     [studentParticipants],
   );
 
-  const parentClaim = readParentClaimContext();
-  const parentLink = familyLinks[0];
+  const parentClaim = readParentClaimContext({ programCode: programCodeValue });
+  const scopedParentLink = useMemo(() => {
+    if (activeSummary?.participantId) {
+      return resolveChildLink(activeSummary, familyLinks);
+    }
+    if (parentClaim) {
+      return familyLinks.find((link) => linkMatchesParentScope(link, parentClaim)) ?? null;
+    }
+    return null;
+  }, [activeSummary, familyLinks, parentClaim]);
+  const parentLink = scopedParentLink;
+  const [parentSaveError, setParentSaveError] = useState<string | null>(null);
   const [parentFirstName, setParentFirstName] = useState(
     parentLink?.parent_first_name?.trim() || '',
   );
@@ -152,6 +164,15 @@ export default function FamilyProgramSettingsPanel() {
   useEffect(() => {
     setActiveTab(resolveFamilySettingsTab(tabParam, sectionParam));
   }, [tabParam, sectionParam]);
+
+  useEffect(() => {
+    setParentFirstName(parentLink?.parent_first_name?.trim() || '');
+    setParentLastName(
+      parentClaim?.lastName?.trim() || parentLink?.parent_last_name?.trim() || '',
+    );
+    setParentEmail(parentClaim?.email?.trim() || parentLink?.parent_email?.trim() || '');
+    setParentPhone(parentClaim?.phone?.trim() || parentLink?.parent_phone?.trim() || '');
+  }, [parentClaim, parentLink]);
 
   useEffect(() => {
     if (focusParam !== 'student-access') {
@@ -248,11 +269,25 @@ export default function FamilyProgramSettingsPanel() {
   };
 
   const handleSaveParent = () => {
+    const email = parentEmail.trim();
+    const validation = validateParentClaimWrite({
+      programCode: programCodeValue,
+      accessCode: familyCode,
+      email,
+      participantId: activeChild?.participantId,
+    });
+    if (!validation.ok) {
+      setParentSaveError(validation.message);
+      return;
+    }
+    setParentSaveError(null);
     writeParentClaimContext({
-      email: parentEmail.trim(),
+      email,
       phone: parentPhone.trim() || undefined,
       lastName: parentLastName.trim() || undefined,
-      confirmed: Boolean(parentEmail.trim() || parentPhone.trim()),
+      confirmed: Boolean(email || parentPhone.trim()),
+      programCode: programCodeValue,
+      accessCode: familyCode,
     });
     setEditingParent(false);
     void refresh();
@@ -470,6 +505,11 @@ export default function FamilyProgramSettingsPanel() {
             subtitle="Manage parent or guardian contact information connected to this portal."
           >
             <FamilyParentClaimStatus status={claimStatus} showDetail className="family-settingsClaimStatus" />
+            {parentSaveError ? (
+              <p className="family-settingsError" role="alert">
+                {parentSaveError}
+              </p>
+            ) : null}
             {!editingParent ? (
               <dl className="family-settingsGrid">
                 <SettingsRow

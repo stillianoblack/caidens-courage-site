@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-06-21T15:33:13.384Z",
+  "passed": true,
+  "summary": {
+    "sourceFilesScanned": 1273,
+    "findings": 4,
+    "highSeverityFindings": 0
+  },
+  "guardrails": {
+    "facilitatorEmailVerificationModule": true,
+    "devBypassFlagModule": true,
+    "switchProgramClearsAuth": true,
+    "usePortalUnlockVerifiesFacilitatorEmail": true,
+    "legacyDemoGated": true,
+    "blueRibbonCrossGrantGated": true
+  },
+  "findings": [
+    {
+      "severity": "warning",
+      "kind": "facilitator_apply_unlock_without_local_verify",
+      "file": "src/components/admin/AdminPilotProgramCard.tsx",
+      "detail": "applyProgramPortalUnlock(facilitator) — confirm email was verified upstream."
+    },
+    {
+      "severity": "warning",
+      "kind": "facilitator_apply_unlock_without_local_verify",
+      "file": "src/components/admin/AdminPilotProgramRow.tsx",
+      "detail": "applyProgramPortalUnlock(facilitator) — confirm email was verified upstream."
+    },
+    {
+      "severity": "warning",
+      "kind": "facilitator_apply_unlock_without_local_verify",
+      "file": "src/components/courage/PortalCodeRecovery.tsx",
+      "detail": "applyProgramPortalUnlock(facilitator) — confirm email was verified upstream."
+    },
+    {
+      "severity": "warning",
+      "kind": "facilitator_apply_unlock_without_local_verify",
+      "file": "src/pages/PilotProgramSignupPage.tsx",
+      "detail": "applyProgramPortalUnlock(facilitator) — confirm email was verified upstream."
+    }
+  ]
+}

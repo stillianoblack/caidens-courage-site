@@ -11,6 +11,7 @@ import {
   type PortalAccessType,
   writePortalSessionUnlock,
 } from './portalAccess';
+import { isLegacyDemoUnlockAllowed } from '../lib/portalAuthConfig';
 
 export const BLUE_RIBBON_UNLOCK_KEY = 'cc-blueribbon-unlock';
 const FAMILY_PORTAL_SESSION_KEY = 'cc-family-portal-unlock';
@@ -69,6 +70,10 @@ export function ensureFacilitatorPortalAccess(): PortalAccessType | null {
     return sessionType;
   }
 
+  if (!isLegacyDemoUnlockAllowed()) {
+    return null;
+  }
+
   if (hasBlueRibbonUnlock() || readFamilyPortalSessionDirect()) {
     writePortalSessionUnlock('pilot');
     return 'pilot';
@@ -81,6 +86,10 @@ export function ensureFacilitatorPortalAccess(): PortalAccessType | null {
 export function ensureFamilyPortalAccess(): boolean {
   if (readFamilyPortalSessionDirect()) {
     return true;
+  }
+
+  if (!isLegacyDemoUnlockAllowed()) {
+    return false;
   }
 
   if (hasBlueRibbonUnlock() || canAccessPilotDashboard(readPortalSessionUnlock())) {

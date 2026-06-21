@@ -5,6 +5,7 @@ import {
   isInactiveBeyondDays,
   PILOT_CERTIFICATE_MIN_MODULES,
   PILOT_INACTIVE_DAYS,
+  resolveParticipantLastActivity,
 } from './pilotStudentProgress';
 import type { StudentGalleryItem } from './studentGalleryService';
 import type { StudentParticipantRecord } from './pilotTrackingService';
@@ -20,7 +21,8 @@ export type RosterFilterId =
   | 'parent-not-connected'
   | 'missing-pin'
   | 'missing-week-1'
-  | 'missing-week-2';
+  | 'missing-week-2'
+  | 'requires-follow-up';
 
 export const ROSTER_FILTER_IDS: RosterFilterId[] = [
   'missing-baseline',
@@ -31,6 +33,7 @@ export const ROSTER_FILTER_IDS: RosterFilterId[] = [
   'inactive',
   'no-modules',
   'certificate-ready',
+  'requires-follow-up',
 ];
 
 export const ROSTER_FILTER_LABELS: Record<RosterFilterId, string> = {
@@ -42,6 +45,7 @@ export const ROSTER_FILTER_LABELS: Record<RosterFilterId, string> = {
   inactive: 'Inactive 7+ Days',
   'no-modules': 'No Modules Completed',
   'certificate-ready': 'Certificate Ready',
+  'requires-follow-up': 'Requires Follow-up',
 };
 
 export function isRosterFilterId(value: string | null): value is RosterFilterId {
@@ -66,6 +70,38 @@ function hasWeekComplete(
     (row) => row.participant_id === participantId && row.role === 'student',
   );
   return selectCanonicalModuleResultsForWeek(studentModules, weekNumber).length > 0;
+}
+
+export function participantRequiresFollowUp(
+  participantId: string,
+  context: {
+    assessments: LocalAssessmentV2Record[];
+    modules: LocalModuleResultRecord[];
+    lastActivityAt?: string | null;
+    participantCreatedAt?: string | null;
+  },
+): boolean {
+  const baselineComplete = hasBaselineComplete(participantId, context.assessments);
+  const week1Complete = hasWeekComplete(participantId, context.modules, BASELINE_WEEK);
+  const week2Complete = hasWeekComplete(participantId, context.modules, GROWTH_START_WEEK);
+  const lastActivity =
+    context.lastActivityAt ??
+    resolveParticipantLastActivity(participantId, {
+      assessments: context.assessments,
+      modules: context.modules,
+      participantCreatedAt: context.participantCreatedAt,
+    });
+  const inactive = isInactiveBeyondDays(lastActivity, PILOT_INACTIVE_DAYS);
+  const moduleCount = context.modules.filter((row) => row.participant_id === participantId).length;
+  const certificateReady =
+    baselineComplete && moduleCount >= PILOT_CERTIFICATE_MIN_MODULES;
+
+  if (!baselineComplete) return true;
+  if (!week1Complete) return true;
+  if (baselineComplete && !week2Complete) return true;
+  if (inactive) return true;
+  if (!certificateReady && baselineComplete && week1Complete && !week2Complete) return true;
+  return false;
 }
 
 export function filterRosterRows(
@@ -104,6 +140,14 @@ export function filterRosterRows(
       return rows.filter(
         (row) =>
           row.baselineStatus === 'Complete' && row.moduleCompletions >= PILOT_CERTIFICATE_MIN_MODULES,
+      );
+    case 'requires-follow-up':
+      return rows.filter((row) =>
+        participantRequiresFollowUp(row.participantId, {
+          assessments: context?.assessments ?? [],
+          modules: context?.modules ?? [],
+          lastActivityAt: row.lastActivityAt,
+        }),
       );
     default:
       return rows;

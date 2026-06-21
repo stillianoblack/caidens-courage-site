@@ -69,6 +69,7 @@ export const kidPlayShellChildRoutes = (
     <Route path="kids/miranda/:missionId" element={<MirandaPortalMissionPage />} />
     <Route path="kids/b4" element={<B4PortalPage />} />
     <Route path="kids/b4/check-in" element={<B4PortalCheckInPage />} />
+    <Route path="baseline-check" element={<B4PortalCheckInPage />} />
     <Route path="kids/b4/week-1" element={<B4PortalWeek1Page />} />
     <Route path="kids/b4/feeling-finder" element={<B4PortalFeelingFinderPage />} />
     <Route path="kids/b4/:missionId" element={<B4PortalMissionPage />} />

@@ -1,3 +1,4 @@
+import { clearFacilitatorStudentContinuity } from './facilitatorSessionContinuity';
 import { detectReturnSessionFacilitatorEmailMatch } from './kidPlayReturnSessionVerify';
 
 const ROSTER_LOCK_KEY = 'cc-kid-play-roster-locked';
@@ -33,5 +34,6 @@ export function clearKidPlayRosterLockWithEmail(email: string): boolean {
     return false;
   }
   setKidPlayRosterLocked(false);
+  clearFacilitatorStudentContinuity();
   return true;
 }

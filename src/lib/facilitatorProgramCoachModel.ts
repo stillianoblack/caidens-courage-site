@@ -1,5 +1,6 @@
 import { isChildBaselineAssessmentType } from '../config/assessmentTypeConstants';
 import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
+import { certificatesReadyFilterPath, rosterFilterPath } from './askB4DeepLinks';
 import { getCampReadiness, type CampReadinessSummary } from './campReadiness';
 import type { PilotTrackingMetrics } from './pilotTrackingMetrics';
 import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTrackingLocalStorage';
@@ -188,7 +189,7 @@ export function buildFacilitatorProgramCoachModel(input: {
         needsAttention.missingBaseline > 0
           ? `${needsAttention.missingBaseline} students missing baseline`
           : undefined,
-      href: resultsPath,
+      href: rosterFilterPath('missing-baseline'),
     },
     {
       id: 'start-weekly-path',
@@ -217,7 +218,7 @@ export function buildFacilitatorProgramCoachModel(input: {
       title: 'Missing baseline',
       message: `${needsAttention.missingBaseline} students still need the B-4 Baseline Check.`,
       tone: 'warning',
-      href: resultsPath,
+      href: rosterFilterPath('missing-baseline'),
     });
   }
 
@@ -240,7 +241,7 @@ export function buildFacilitatorProgramCoachModel(input: {
       title: 'Missing student PINs',
       message: `${missingPinCount} students still need a login PIN.`,
       tone: 'warning',
-      href: `${rosterPath}?filter=missing-pin`,
+      href: rosterFilterPath('missing-pin'),
     });
   }
 
@@ -250,7 +251,7 @@ export function buildFacilitatorProgramCoachModel(input: {
       title: 'Inactive 7+ days',
       message: `${needsAttention.inactive7PlusDays} students have no activity in 7+ days.`,
       tone: 'warning',
-      href: rosterPath,
+      href: rosterFilterPath('inactive'),
     });
   }
 
@@ -260,7 +261,7 @@ export function buildFacilitatorProgramCoachModel(input: {
       title: 'Certificates ready',
       message: `${needsAttention.certificateReady} certificates are ready to review.`,
       tone: 'info',
-      href: certificatesPath,
+      href: certificatesReadyFilterPath(),
     });
   }
 
@@ -270,10 +271,10 @@ export function buildFacilitatorProgramCoachModel(input: {
     { id: 'roster', label: 'Open Roster', href: rosterPath },
     { id: 'student-login', label: 'Copy Student Login Info', href: rosterPath },
     ...(parentNotConnectedCount > 0
-      ? [{ id: 'family-claim-links', label: 'Copy Family Claim Links', href: `${rosterPath}?filter=parent-not-connected` }]
+      ? [{ id: 'family-claim-links', label: 'Copy Family Claim Links', href: rosterFilterPath('parent-not-connected') }]
       : []),
     ...(missingPinCount > 0
-      ? [{ id: 'reset-missing-pins', label: 'Reset Missing PINs', href: `${rosterPath}?filter=missing-pin` }]
+      ? [{ id: 'reset-missing-pins', label: 'Reset Missing PINs', href: rosterFilterPath('missing-pin') }]
       : []),
     ...(input.activeProgram?.familyAccessCode?.trim() && input.onCopyFamilyCode
       ? [{ id: 'copy-family-code', label: 'Copy Family Code', onClick: input.onCopyFamilyCode }]

@@ -255,7 +255,7 @@ export async function createCampChildWithOptionalParent(
     const participantResult = await insertCampChildParticipant({
       firstName: childFirstName,
       lastName: childLastName,
-      nickname: displayName,
+      nickname: input.childNickname?.trim() || childFirstName,
       campProgramCode,
       gradeLevel: normalizeGradeLevelStorage(input.gradeLevel) ?? undefined,
       pinBootstrap,

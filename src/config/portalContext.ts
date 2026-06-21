@@ -11,6 +11,7 @@ import { writeFamilyPortalSession, clearFamilyPortalSession } from './familyPort
 import { clearLastPilotProgram } from './lastPilotProgram';
 import { clearRememberedProgramAccess, writeRememberedProgramAccess } from '../lib/rememberedProgramAccess';
 import { clearRememberedDeviceSession } from '../lib/rememberedDeviceSession';
+import { clearAllPortalAuthState, clearStalePortalIdentityState } from '../lib/portalIdentityReset';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 
 export type PortalRole = 'facilitator' | 'family';
@@ -129,10 +130,22 @@ export function applyProgramPortalUnlock(
   role: PortalRole,
   accessCode: string,
 ): void {
+  const previousProgram = readActivePilotProgram();
+  const previousAccess = readActiveAccessCode();
+  const nextProgramCode = program.programCode.trim();
   const resolvedRole: PortalRole =
     isIndependentFamilyProgram(program) && role === 'facilitator' ? 'family' : role;
   const resolvedCode =
     resolvedRole === 'family' ? program.familyAccessCode : accessCode.trim() || accessCode;
+
+  const programChanged =
+    Boolean(previousProgram?.programCode?.trim()) &&
+    previousProgram!.programCode.trim() !== nextProgramCode;
+  const accessChanged =
+    Boolean(previousAccess?.trim()) && previousAccess!.trim() !== resolvedCode.trim();
+  if (programChanged || accessChanged) {
+    clearStalePortalIdentityState('program_unlock_switch');
+  }
 
   clearStalePortalRouteState();
   writeActivePilotProgram(program);
@@ -185,7 +198,7 @@ export function clearPortalReturnSession(): void {
 
 /** Sign out — clear portal session; user must re-enter access code at /portal. */
 export function signOutPortal(): void {
-  clearProgramPortalContext();
+  clearAllPortalAuthState('sign_out');
   clearFamilyPortalSession();
   clearPortalSessionUnlock();
   clearStalePortalRouteState();
