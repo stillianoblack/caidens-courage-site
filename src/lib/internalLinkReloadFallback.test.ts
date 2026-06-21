@@ -59,6 +59,38 @@ describe('installInternalLinkReloadFallback', () => {
     ).toBe(true);
   });
 
+  it('force-loads links entering the portal login', () => {
+    window.history.pushState({}, '', '/');
+
+    const link = document.createElement('a');
+    link.href = '/portal';
+    document.body.appendChild(link);
+
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/',
+      ),
+    ).toBe(true);
+  });
+
+  it('force-loads portal dashboard transitions', () => {
+    window.history.pushState({}, '', '/portal');
+
+    const link = document.createElement('a');
+    link.href = '/family-hub';
+    document.body.appendChild(link);
+
+    expect(
+      shouldForceInternalLinkReload(
+        link,
+        new URL(link.href),
+        '/portal',
+      ),
+    ).toBe(true);
+  });
+
   it('does not force-load the current shell route', () => {
     window.history.pushState({}, '', '/play/session/session-123/weekly-adventures');
 

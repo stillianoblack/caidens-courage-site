@@ -14,6 +14,20 @@ function isKidPlayShellPath(pathname: string) {
   return pathname === '/play/session' || pathname.startsWith('/play/session/');
 }
 
+function isPortalShellPath(pathname: string) {
+  return (
+    pathname === '/portal' ||
+    pathname.startsWith('/portal/') ||
+    pathname === '/family-hub' ||
+    pathname.startsWith('/family-hub/') ||
+    pathname === '/program-dashboard' ||
+    pathname.startsWith('/program-dashboard/') ||
+    pathname === '/pilot-dashboard' ||
+    pathname === '/academy-dashboard' ||
+    pathname === '/kids/login'
+  );
+}
+
 export function shouldForceInternalLinkReload(
   anchor: HTMLAnchorElement,
   url: URL,
@@ -23,7 +37,12 @@ export function shouldForceInternalLinkReload(
   if (anchor.hasAttribute('download')) return false;
   if (url.origin !== window.location.origin) return false;
   if (url.pathname === currentPathname && url.search === window.location.search) return false;
-  return isKidPlayShellPath(currentPathname) || isKidPlayShellPath(url.pathname);
+  return (
+    isKidPlayShellPath(currentPathname) ||
+    isKidPlayShellPath(url.pathname) ||
+    isPortalShellPath(currentPathname) ||
+    isPortalShellPath(url.pathname)
+  );
 }
 
 function shouldLetBrowserHandleNormally(anchor: HTMLAnchorElement, url: URL) {
