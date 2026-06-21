@@ -28,10 +28,12 @@ export default function ParentFirstLoginWizard({
 }: ParentFirstLoginWizardProps) {
   const navigate = useNavigate();
   const program = readActivePilotProgram();
-  const { participant: activeChild, roster } = useActiveParticipant();
+  const { participant: activeChild } = useActiveParticipant();
   const [step, setStep] = useState<WizardStep>(1);
   const [email, setEmail] = useState(initialEmail);
-  const [childName, setChildName] = useState(activeChild?.displayName ?? '');
+  const [parentFirstName, setParentFirstName] = useState('');
+  const [parentLastName, setParentLastName] = useState('');
+  const [parentPhone, setParentPhone] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -41,6 +43,8 @@ export default function ParentFirstLoginWizard({
     const parts = [program?.programName, program?.groupName].filter(Boolean);
     return parts.join(' · ') || program?.programCode || 'Your program';
   }, [program]);
+
+  const childDisplayName = activeChild?.displayName?.trim() || 'Your child';
 
   const toggleGoal = useCallback((goal: string) => {
     setSelectedGoals((current) => {
@@ -70,7 +74,10 @@ export default function ParentFirstLoginWizard({
         campProgramCode,
         parentEmail: email.trim() || initialEmail.trim(),
         childParticipantId: activeChild.participantId,
-        childDisplayName: childName.trim() || activeChild.displayName,
+        childDisplayName,
+        parentFirstName: parentFirstName.trim() || undefined,
+        parentLastName: parentLastName.trim() || undefined,
+        parentPhone: parentPhone.trim() || undefined,
         selectedGoals,
         accessCode: readActiveAccessCode(),
       });
@@ -87,14 +94,16 @@ export default function ParentFirstLoginWizard({
       setSubmitting(false);
     }
   }, [
-    activeChild?.displayName,
     activeChild?.participantId,
     campProgramCode,
-    childName,
+    childDisplayName,
     email,
     initialEmail,
     navigate,
     onFinished,
+    parentFirstName,
+    parentLastName,
+    parentPhone,
     program?.programCode,
     selectedGoals,
   ]);
@@ -125,7 +134,8 @@ export default function ParentFirstLoginWizard({
 
         {step === 2 ? (
           <>
-            <h2 className="parentOnboardingTitle">Confirm Parent / Guardian Email</h2>
+            <h2 className="parentOnboardingTitle">Parent / Guardian Email</h2>
+            <p className="parentOnboardingBody">{childProgramLabel}</p>
             <label className="parentOnboardingField">
               <span>Email</span>
               <input
@@ -153,27 +163,42 @@ export default function ParentFirstLoginWizard({
 
         {step === 3 ? (
           <>
-            <h2 className="parentOnboardingTitle">Confirm Child</h2>
-            <p className="parentOnboardingBody">{childProgramLabel}</p>
+            <h2 className="parentOnboardingTitle">Parent / Guardian Contact</h2>
+            <p className="parentOnboardingBody">
+              Optional details for {childDisplayName}&apos;s family profile.
+            </p>
             <label className="parentOnboardingField">
-              <span>Child name</span>
+              <span>First name</span>
               <input
                 type="text"
-                value={childName}
-                onChange={(event) => setChildName(event.target.value)}
-                placeholder={roster[0]?.displayName || 'Your child'}
+                value={parentFirstName}
+                onChange={(event) => setParentFirstName(event.target.value)}
+                autoComplete="given-name"
+              />
+            </label>
+            <label className="parentOnboardingField">
+              <span>Last name</span>
+              <input
+                type="text"
+                value={parentLastName}
+                onChange={(event) => setParentLastName(event.target.value)}
+                autoComplete="family-name"
+              />
+            </label>
+            <label className="parentOnboardingField">
+              <span>Phone (optional)</span>
+              <input
+                type="tel"
+                value={parentPhone}
+                onChange={(event) => setParentPhone(event.target.value)}
+                autoComplete="tel"
               />
             </label>
             <div className="parentOnboardingActions">
               <button type="button" className="parentOnboardingSecondary" onClick={() => setStep(2)}>
                 Back
               </button>
-              <button
-                type="button"
-                className="parentOnboardingPrimary"
-                disabled={!childName.trim()}
-                onClick={() => setStep(4)}
-              >
+              <button type="button" className="parentOnboardingPrimary" onClick={() => setStep(4)}>
                 Continue
               </button>
             </div>
@@ -230,7 +255,8 @@ export default function ParentFirstLoginWizard({
               <>
                 <h2 className="parentOnboardingTitle">Finish your family setup</h2>
                 <p className="parentOnboardingBody">
-                  We&apos;ll save your parent email, family goals, and child connection for this program.
+                  We&apos;ll save your parent email and family goals for {childDisplayName} in{' '}
+                  {childProgramLabel}.
                 </p>
                 {submitError ? (
                   <p className="parentOnboardingError" role="alert">
@@ -246,7 +272,7 @@ export default function ParentFirstLoginWizard({
                 disabled={submitting || saved}
                 onClick={() => void handleComplete()}
               >
-                {saved ? 'Saved' : submitting ? 'Saving…' : 'Save and go to Family Overview'}
+                {saved ? 'Saved' : submitting ? 'Saving…' : 'Go to Family Overview'}
               </button>
             </div>
           </>

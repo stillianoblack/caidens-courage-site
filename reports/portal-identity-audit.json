@@ -1,0 +1,134 @@
+{
+  "generatedAt": "2026-06-21T16:55:09.533Z",
+  "passed": true,
+  "summary": {
+    "sourceFilesScanned": 1275,
+    "findings": 19,
+    "highSeverityFindings": 0
+  },
+  "guardrails": {
+    "parentLoginRoutesToOverview": true,
+    "studentPinClearsParentClaim": true,
+    "facilitatorRoutesToRoster": true,
+    "parentConnectedRequiresEmail": true,
+    "switchProgramClearsIdentity": true,
+    "legacyActiveChildWriteRetired": true,
+    "rememberDeviceGatedProgramAccess": true
+  },
+  "findings": [
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/components/b4/B4MissionGradeBriefing.tsx",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/components/courage/PortalAccessForm.tsx",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/components/kid-play-shell/KidPlayFamilySoftLockGate.tsx",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/config/activeChildNickname.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/config/portalContext.ts",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/hooks/useBaselineGate.ts",
+      "detail": "References legacy identity key \"activeChildParticipantId\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/hooks/usePortalUnlock.ts",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/activeChildContext.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/activeParticipantResolver.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/analytics.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/b4BaselineCheckStorage.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/kidPlayReturnUnlock.ts",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/participantDebug.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/portalProgramScope.ts",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/recordInteractiveCompletion.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/rememberedDeviceResume.ts",
+      "detail": "References legacy identity key \"rememberedProgram\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "remembered_program_always_written",
+      "file": "src/lib/rememberedProgramAccess.ts",
+      "detail": "Remembered program should only persist when remember-device is checked."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/resolvePlayerParticipantId.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    },
+    {
+      "severity": "warning",
+      "kind": "legacy_identity_key_reference",
+      "file": "src/lib/week0AssessmentStorage.ts",
+      "detail": "References legacy identity key \"activeChildNickname\"."
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import {
 } from './studentFamilyLinkService';
 import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { setActiveChild } from './activeChildContext';
+import { PORTAL_ACCESS_NOT_FOUND_MESSAGE } from './portalIdentity';
 import { trackKitParentSignup } from './kitIntegration';
 import { revealStudentPinViaFunction } from './studentPinService';
 
@@ -301,8 +302,7 @@ export async function claimParentFamilyPortal(input: {
 
     return {
       success: false,
-      message:
-        'No children are linked to that email for this program. Ask your camp facilitator to confirm your contact info.',
+      message: PORTAL_ACCESS_NOT_FOUND_MESSAGE,
     };
   }
 

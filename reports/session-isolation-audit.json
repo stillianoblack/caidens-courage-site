@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-21T16:05:20.785Z",
+  "generatedAt": "2026-06-21T16:55:09.897Z",
   "passed": true,
   "summary": {
-    "sourceFilesScanned": 1274,
-    "storageKeysFound": 317,
+    "sourceFilesScanned": 1275,
+    "storageKeysFound": 318,
     "scopedKeys": 10,
     "legacyUnsafeKeys": 6,
-    "identityRelatedKeys": 23,
-    "findings": 35,
+    "identityRelatedKeys": 24,
+    "findings": 34,
     "highSeverityFindings": 0
   },
   "scopedKeys": [
@@ -241,6 +241,12 @@
       ]
     },
     {
+      "key": "Program code or PIN did not match.",
+      "files": [
+        "src/lib/portalIdentity.ts"
+      ]
+    },
+    {
       "key": "This email is not registered for this program.",
       "files": [
         "src/lib/portalAuthConfig.ts"
@@ -394,12 +400,6 @@
     },
     {
       "severity": "warning",
-      "kind": "parent_claim_read_without_program_hint",
-      "file": "src/lib/familyParentClaimState.ts",
-      "detail": "Uses readParentClaimContext — verify program scope is enforced at read time."
-    },
-    {
-      "severity": "warning",
       "kind": "unscoped_active_child_read",
       "file": "src/lib/familyPortalLinkAudit.ts",
       "detail": "Reads activeChildParticipantId directly — prefer readActiveChildState()."
@@ -468,7 +468,7 @@
   "guardrails": {
     "programScopedParentClaim": true,
     "programScopedActiveChild": true,
-    "switchProgramClearsIdentity": false,
+    "switchProgramClearsIdentity": true,
     "signOutClearsIdentity": true
   }
 }

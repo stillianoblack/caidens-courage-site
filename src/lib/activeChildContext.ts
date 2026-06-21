@@ -2,9 +2,8 @@ import {
   ACTIVE_CHILD_PARTICIPANT_ID_KEY,
   CHILD_PROFILE_UPDATED_EVENT,
   notifyChildProfileUpdated,
-  writeActiveChildParticipantId,
 } from '../config/activeChildParticipant';
-import { ACTIVE_CHILD_NICKNAME_KEY, writeActiveChildNickname } from '../config/activeChildNickname';
+import { ACTIVE_CHILD_NICKNAME_KEY } from '../config/activeChildNickname';
 import {
   clearScopedActiveChildRecord,
   readScopedActiveChildRecord,
@@ -50,8 +49,6 @@ export function setActiveChild(child: ActiveChildState): void {
     });
   }
 
-  writeActiveChildParticipantId(child.participantId);
-  writeActiveChildNickname(child.displayName);
   console.info('[ACTIVE_CHILD]', {
     participant_id: child.participantId,
     display_name: child.displayName,
@@ -66,8 +63,6 @@ export function setActiveChild(child: ActiveChildState): void {
 
 export function clearActiveChild(): void {
   clearScopedActiveChildRecord();
-  writeActiveChildParticipantId('');
-  writeActiveChildNickname('');
   if (typeof window !== 'undefined') {
     try {
       window.localStorage.removeItem(ACTIVE_CHILD_PARTICIPANT_ID_KEY);

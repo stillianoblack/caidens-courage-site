@@ -1,27 +1,20 @@
+import { readScopedActiveChildRecord, rejectLegacyActiveChildStorage } from '../lib/portalSessionIsolation';
+
 export const ACTIVE_CHILD_PARTICIPANT_ID_KEY = 'activeChildParticipantId';
 
 export const CHILD_PROFILE_UPDATED_EVENT = 'cc-child-profile-updated';
 
 export function readActiveChildParticipantId(): string {
-  try {
-    const raw = localStorage.getItem(ACTIVE_CHILD_PARTICIPANT_ID_KEY);
-    return raw?.trim() ?? '';
-  } catch {
-    return '';
+  rejectLegacyActiveChildStorage();
+  const scoped = readScopedActiveChildRecord();
+  if (scoped?.participantId?.trim()) {
+    return scoped.participantId.trim();
   }
+  return '';
 }
 
-export function writeActiveChildParticipantId(participantId: string): void {
-  try {
-    const trimmed = participantId.trim();
-    if (trimmed) {
-      localStorage.setItem(ACTIVE_CHILD_PARTICIPANT_ID_KEY, trimmed);
-    } else {
-      localStorage.removeItem(ACTIVE_CHILD_PARTICIPANT_ID_KEY);
-    }
-  } catch {
-    /* localStorage unavailable */
-  }
+export function writeActiveChildParticipantId(_participantId: string): void {
+  /* Legacy unscoped key retired — active child is stored in cc-scoped-active-child only. */
 }
 
 export function notifyChildProfileUpdated(): void {

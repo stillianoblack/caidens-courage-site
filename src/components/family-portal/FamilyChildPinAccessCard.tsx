@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { readParentClaimContext } from '../../config/parentClaimContext';
+import { resolveParentEmailFromSources } from '../../lib/portalIdentity';
 import {
   copyStudentPinWithAudit,
   resetStudentPinViaFunction,
@@ -13,6 +14,8 @@ type FamilyChildPinAccessCardProps = {
   displayName: string;
   programCode: string;
   hasPin?: boolean;
+  parentEmail?: string;
+  parentConnected?: boolean;
   scrollAnchorId?: string;
   scrollAnchorRef?: React.Ref<HTMLElement>;
 };
@@ -22,10 +25,22 @@ export default function FamilyChildPinAccessCard({
   displayName,
   programCode,
   hasPin = true,
+  parentEmail: parentEmailProp,
+  parentConnected: parentConnectedProp,
   scrollAnchorId,
   scrollAnchorRef,
 }: FamilyChildPinAccessCardProps) {
   const { showToast } = useToast();
+  const programCodeValue = programCode.trim();
+  const parentClaim = readParentClaimContext({ programCode: programCodeValue });
+  const parentEmail =
+    parentEmailProp?.trim() ||
+    resolveParentEmailFromSources({
+      programCode: programCodeValue,
+      parentClaim,
+    });
+  const parentConnected = parentConnectedProp ?? Boolean(parentEmail);
+
   const [pinReady, setPinReady] = useState(hasPin);
   const [pinVisible, setPinVisible] = useState(false);
   const [revealedPin, setRevealedPin] = useState<string | null>(null);
@@ -33,7 +48,6 @@ export default function FamilyChildPinAccessCard({
   const [regenerating, setRegenerating] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(false);
-  const parentEmail = readParentClaimContext()?.email?.trim() || '';
 
   useEffect(() => {
     setPinReady(hasPin);
@@ -41,15 +55,15 @@ export default function FamilyChildPinAccessCard({
 
   const resolvePin = useCallback(async (): Promise<string | null> => {
     if (revealedPin) return revealedPin;
-    if (!parentEmail) {
-      showToast('Confirm your parent email in settings first.', 'error');
+    if (!parentConnected || !parentEmail) {
+      showToast('Connect a parent email before viewing the student PIN.', 'error');
       return null;
     }
 
     setLoading(true);
     const result = await revealStudentPinViaFunction({
       participantId,
-      programCode,
+      programCode: programCodeValue,
       parentEmail,
       actorRole: 'parent',
     });
@@ -61,7 +75,7 @@ export default function FamilyChildPinAccessCard({
       }
       showToast(
         result.needsRefresh
-          ? 'PIN needs refresh. Generate a new PIN below.'
+          ? 'PIN needs refresh. Reset the PIN below.'
           : result.error,
         'error',
       );
@@ -70,7 +84,7 @@ export default function FamilyChildPinAccessCard({
 
     setRevealedPin(result.pin);
     return result.pin;
-  }, [parentEmail, participantId, programCode, revealedPin, showToast]);
+  }, [parentConnected, parentEmail, participantId, programCodeValue, revealedPin, showToast]);
 
   const handleTogglePinVisibility = async () => {
     if (pinVisible) {
@@ -87,20 +101,20 @@ export default function FamilyChildPinAccessCard({
   const handleCopyPin = async () => {
     const pin = pinVisible && revealedPin ? revealedPin : await resolvePin();
     if (!pin) return;
-    const copied = await copyStudentPinWithAudit({ pin, participantId, programCode });
+    const copied = await copyStudentPinWithAudit({ pin, participantId, programCode: programCodeValue });
     showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
   };
 
-  const handleGeneratePin = async () => {
-    if (!parentEmail) {
-      showToast('Confirm your parent email in settings first.', 'error');
+  const handleResetPin = async () => {
+    if (!parentConnected || !parentEmail) {
+      showToast('Connect a parent email before resetting the student PIN.', 'error');
       return;
     }
 
     setRegenerating(true);
     const result = await resetStudentPinViaFunction({
       participantId,
-      programCode,
+      programCode: programCodeValue,
       parentEmail,
       actorRole: 'parent',
     });
@@ -116,7 +130,11 @@ export default function FamilyChildPinAccessCard({
     setPinReady(true);
     setRevealedPin(result.pin);
     setPinVisible(true);
-    showToast(`New PIN generated for ${displayName}.`, 'success');
+    showToast(`PIN reset for ${displayName}.`, 'success');
+  };
+
+  const handleGeneratePin = async () => {
+    await handleResetPin();
   };
 
   if (!pinReady) {
@@ -134,10 +152,10 @@ export default function FamilyChildPinAccessCard({
         <button
           type="button"
           className="family-settingsPrimaryBtn"
-          disabled={loading || regenerating}
+          disabled={loading || regenerating || !parentConnected}
           onClick={() => setConfirmOpen(true)}
         >
-          Generate New PIN
+          Generate PIN
         </button>
         <FamilyStudentPinRegenerateModal
           open={confirmOpen}
@@ -159,21 +177,21 @@ export default function FamilyChildPinAccessCard({
       >
         <h4 className="family-settingsStudentAccessTitle">Student Access</h4>
         <p className="family-childPinHelper family-childPinHelper--warn">
-          This PIN needs refresh. Generate a new PIN to restore student login.
+          This PIN needs refresh. Reset the PIN to restore student login.
         </p>
         <button
           type="button"
           className="family-settingsPrimaryBtn"
-          disabled={regenerating}
+          disabled={regenerating || !parentConnected}
           onClick={() => setConfirmOpen(true)}
         >
-          Generate New PIN
+          Reset PIN
         </button>
         <FamilyStudentPinRegenerateModal
           open={confirmOpen}
           submitting={regenerating}
           onCancel={() => setConfirmOpen(false)}
-          onConfirm={() => void handleGeneratePin()}
+          onConfirm={() => void handleResetPin()}
         />
       </section>
     );
@@ -201,15 +219,15 @@ export default function FamilyChildPinAccessCard({
             type="button"
             className="family-settingsGhostBtn"
             onClick={() => void handleTogglePinVisibility()}
-            disabled={loading || regenerating}
+            disabled={loading || regenerating || !parentConnected}
           >
-            {loading ? 'Loading…' : pinVisible ? 'Hide PIN' : 'Show PIN'}
+            {loading ? 'Loading…' : pinVisible ? 'Hide PIN' : 'Reveal PIN'}
           </button>
           <button
             type="button"
             className="family-settingsGhostBtn"
             onClick={() => void handleCopyPin()}
-            disabled={loading || regenerating}
+            disabled={loading || regenerating || !parentConnected}
           >
             Copy PIN
           </button>
@@ -217,9 +235,9 @@ export default function FamilyChildPinAccessCard({
             type="button"
             className="family-settingsGhostBtn"
             onClick={() => setConfirmOpen(true)}
-            disabled={loading || regenerating}
+            disabled={loading || regenerating || !parentConnected}
           >
-            Generate New PIN
+            Reset PIN
           </button>
         </div>
       </div>
@@ -227,7 +245,7 @@ export default function FamilyChildPinAccessCard({
         open={confirmOpen}
         submitting={regenerating}
         onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => void handleGeneratePin()}
+        onConfirm={() => void handleResetPin()}
       />
     </section>
   );

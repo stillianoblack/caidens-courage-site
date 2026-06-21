@@ -20,6 +20,9 @@ export type ParentOnboardingSubmitInput = {
   childParticipantId: string;
   childDisplayName: string;
   selectedGoals: string[];
+  parentFirstName?: string;
+  parentLastName?: string;
+  parentPhone?: string;
   accessCode?: string | null;
   campProgramCode?: string | null;
   skipWelcomeEmail?: boolean;
@@ -108,6 +111,8 @@ export async function submitParentOnboarding(
     linkIds,
     familyProgramCode: programCode,
     parentEmail,
+    parentPhone: input.parentPhone?.trim() || undefined,
+    parentLastName: input.parentLastName?.trim() || undefined,
   });
 
   if (!claimResult.success) {
@@ -119,6 +124,8 @@ export async function submitParentOnboarding(
 
   writeParentClaimContext({
     email: parentEmail,
+    phone: input.parentPhone?.trim() || undefined,
+    lastName: input.parentLastName?.trim() || undefined,
     confirmed: true,
     programCode,
     accessCode: accessCode || undefined,

@@ -212,11 +212,11 @@ function buildReport() {
       programScopedParentClaim: classified.scoped.some((row) => row.key === 'cc-scoped-parent-claim'),
       programScopedActiveChild: classified.scoped.some((row) => row.key === 'cc-scoped-active-child'),
       switchProgramClearsIdentity:
-        fs.readFileSync(path.join(SRC_DIR, 'lib/rememberedProgramAccess.ts'), 'utf8').includes('clearStalePortalIdentityState') &&
-        fs.readFileSync(path.join(SRC_DIR, 'lib/portalIdentityReset.ts'), 'utf8').includes('clearStalePortalIdentityState'),
+        fs.readFileSync(path.join(SRC_DIR, 'lib/rememberedProgramAccess.ts'), 'utf8').includes('clearAllPortalAuthState') &&
+        fs.readFileSync(path.join(SRC_DIR, 'lib/portalIdentityReset.ts'), 'utf8').includes('clearAllPortalAuthState'),
       signOutClearsIdentity:
-        fs.readFileSync(path.join(SRC_DIR, 'config/portalContext.ts'), 'utf8').includes('clearStalePortalIdentityState') &&
-        fs.readFileSync(path.join(SRC_DIR, 'lib/portalIdentityReset.ts'), 'utf8').includes('clearStalePortalIdentityState'),
+        fs.readFileSync(path.join(SRC_DIR, 'config/portalContext.ts'), 'utf8').includes('clearAllPortalAuthState') &&
+        fs.readFileSync(path.join(SRC_DIR, 'lib/portalIdentityReset.ts'), 'utf8').includes('clearAllPortalAuthState'),
     },
   };
 }

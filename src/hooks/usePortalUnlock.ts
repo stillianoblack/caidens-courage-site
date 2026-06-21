@@ -3,9 +3,8 @@ import {
   B4_RESULTS_ADMIN_PATH,
   BLUE_RIBBON_PILOT_PATH,
   FAMILY_PORTAL_PATH,
-  PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
-import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
+import { resolveFamilyKidDefaultLandingPath, resolveFamilyPortalOverviewPath } from '../lib/familyKidLanding';
 import { writeBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
 import { applyProgramPortalUnlock, writeActivePortalRole } from '../config/portalContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
@@ -21,6 +20,11 @@ import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { lookupPilotProgramByAccessCodeDetailed } from '../lib/pilotProgramService';
 import { isLegacyDemoUnlockAllowed } from '../lib/portalAuthConfig';
 import { verifyFacilitatorProgramEmail } from '../lib/portalFacilitatorAuth';
+import { facilitatorReturnSessionPath } from '../lib/kidPlayReturnSessionRoute';
+import {
+  PORTAL_ACCESS_NOT_FOUND_MESSAGE,
+  PORTAL_PIN_MISMATCH_MESSAGE,
+} from '../lib/portalIdentity';
 import {
   isLegacyDemoAccessCode,
   looksLikeProgramAccessCode,
@@ -33,6 +37,8 @@ import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
 import { verifyStudentPinLogin } from '../lib/studentPinService';
 import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
+import { clearParentClaimContext } from '../config/parentClaimContext';
+import { clearStudentPinSession } from '../lib/studentPinSession';
 import {
   defaultRememberDeviceForUserType,
   readRememberedDeviceSession,
@@ -83,19 +89,20 @@ function persistRememberedDevice(input: {
   facilitatorId?: string;
   displayName?: string;
 }): void {
-  writeRememberedProgramAccess(input.accessCode, input.program);
-  if (!input.rememberDevice) return;
-  writeRememberedDeviceSession({
-    access_code: input.accessCode,
-    program_id: input.program.id ?? null,
-    program_code: input.program.programCode,
-    user_type: input.userType,
-    student_id: input.studentId,
-    parent_id: input.parentId,
-    facilitator_id: input.facilitatorId,
-    display_name: input.displayName,
-    program: input.program,
-  });
+  if (input.rememberDevice) {
+    writeRememberedProgramAccess(input.accessCode, input.program);
+    writeRememberedDeviceSession({
+      access_code: input.accessCode,
+      program_id: input.program.id ?? null,
+      program_code: input.program.programCode,
+      user_type: input.userType,
+      student_id: input.studentId,
+      parent_id: input.parentId,
+      facilitator_id: input.facilitatorId,
+      display_name: input.displayName,
+      program: input.program,
+    });
+  }
 }
 
 export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => void) {
@@ -149,24 +156,29 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
           const { program, role } = lookup.result;
 
           if (role === 'family') {
-            const email = parentEmail.trim();
-            if (!email) {
+            const credential = parentEmail.trim();
+            if (!credential) {
               setError(
                 isIndependentFamilyProgram(program)
                   ? 'Enter the parent/guardian email for your family account.'
-                  : 'Enter the parent/guardian email used at camp registration.',
+                  : 'Enter the parent/guardian email or student PIN for this program.',
               );
               setSubmitting(false);
               return;
             }
 
-            if (STUDENT_PIN_RE.test(email)) {
+            if (STUDENT_PIN_RE.test(credential)) {
+              clearParentClaimContext();
               const verified = await verifyStudentPinLogin({
                 programCode: program.programCode,
-                pin: email,
+                pin: credential,
               });
               if (!verified.success) {
-                setError(verified.error);
+                setError(
+                  verified.error.includes('match') || verified.error.includes('Invalid')
+                    ? PORTAL_PIN_MISMATCH_MESSAGE
+                    : verified.error,
+                );
                 setSubmitting(false);
                 return;
               }
@@ -202,16 +214,18 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
               return;
             }
 
+            clearStudentPinSession();
+
             if (isIndependentFamilyProgram(program)) {
               const unlock = await unlockIndependentFamilyPortal({
                 program,
-                parentEmail: email,
+                parentEmail: credential,
                 parentLastName: parentLastName.trim() || undefined,
                 accessCode: trimmedCode,
               });
 
               if (!unlock.success) {
-                setError(unlock.message ?? 'Could not open your family portal.');
+                setError(unlock.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
                 setSubmitting(false);
                 return;
               }
@@ -221,14 +235,14 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
                 userType: 'parent',
                 accessCode: trimmedCode,
                 program,
-                parentId: email.trim().toLowerCase(),
+                parentId: credential.trim().toLowerCase(),
               });
 
               setAccessCode('');
               setParentEmail('');
               setParentLastName('');
               setNeedsLastNameConfirm(false);
-              navigateToPortal(resolveFamilyKidDefaultLandingPath(), 'independent-family-unlock');
+              navigateToPortal(resolveFamilyPortalOverviewPath(), 'independent-family-unlock');
               setSubmitting(false);
               onUnlock?.();
               return;
@@ -236,20 +250,24 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
 
             const claim = await claimParentFamilyPortal({
               program,
-              parentEmail: email,
+              parentEmail: credential,
               parentLastName: parentLastName.trim() || undefined,
               accessCode: trimmedCode,
             });
 
             if (!claim.success) {
               setNeedsLastNameConfirm(Boolean(claim.needsLastNameConfirm));
-              setError(claim.message ?? 'Could not verify parent access.');
+              setError(
+                claim.needsLastNameConfirm
+                  ? (claim.message ?? 'Multiple children matched. Enter your last name to continue.')
+                  : (claim.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
+              );
               setSubmitting(false);
               return;
             }
 
             if (claim.familyProgram) {
-              writeLastPilotProgram(claim.familyProgram, 'family', email, trimmedCode);
+              writeLastPilotProgram(claim.familyProgram, 'family', credential, trimmedCode);
             }
 
             persistRememberedDevice({
@@ -257,14 +275,14 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
               userType: 'parent',
               accessCode: trimmedCode,
               program: claim.familyProgram ?? program,
-              parentId: email.trim().toLowerCase(),
+              parentId: credential.trim().toLowerCase(),
             });
 
             setAccessCode('');
             setParentEmail('');
             setParentLastName('');
             setNeedsLastNameConfirm(false);
-            navigateToPortal(resolveFamilyKidDefaultLandingPath(), 'parent-claim-family');
+            navigateToPortal(resolveFamilyPortalOverviewPath(), 'parent-claim-family');
             setSubmitting(false);
             onUnlock?.();
             return;
@@ -286,9 +304,12 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
               return;
             }
 
+            clearParentClaimContext();
+            clearStudentPinSession();
+
             const facilitatorVerified = verifyFacilitatorProgramEmail(program, email, trimmedCode);
             if (!facilitatorVerified.success) {
-              setError(facilitatorVerified.message);
+              setError(facilitatorVerified.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
               setSubmitting(false);
               return;
             }
@@ -311,7 +332,7 @@ export function usePortalUnlock(_variant: PortalUnlockVariant, onUnlock?: () => 
             setParentEmail('');
             setParentLastName('');
             setNeedsLastNameConfirm(false);
-            navigateToPortal(PROGRAM_DASHBOARD_PATH, 'facilitator-email-verified');
+            navigateToPortal(facilitatorReturnSessionPath(), 'facilitator-email-verified');
             setSubmitting(false);
             onUnlock?.();
             return;

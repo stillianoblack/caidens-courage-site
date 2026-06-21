@@ -1,13 +1,13 @@
 # Session Isolation Audit
 
-Generated: 2026-06-21T16:05:20.785Z
+Generated: 2026-06-21T16:55:09.897Z
 
 **Status:** PASS
 
 ## Summary
 
-- Source files scanned: 1274
-- Storage keys found: 317
+- Source files scanned: 1275
+- Storage keys found: 318
 - Scoped identity keys: 10
 - Legacy unsafe keys still referenced: 6
 - High severity findings: 0
@@ -16,7 +16,7 @@ Generated: 2026-06-21T16:05:20.785Z
 
 - Program-scoped parent claim key: yes
 - Program-scoped active child key: yes
-- switchRememberedProgram clears identity: no
+- switchRememberedProgram clears identity: yes
 - signOutPortal clears identity: yes
 
 ## Scoped keys
@@ -66,7 +66,6 @@ Generated: 2026-06-21T16:05:20.785Z
 - **warning** `unscoped_active_child_read` — src/lib/baselineCompletion.ts: Reads activeChildParticipantId directly — prefer readActiveChildState().
 - **warning** `unscoped_active_child_read` — src/lib/familyChildProgressDebug.ts: Reads activeChildParticipantId directly — prefer readActiveChildState().
 - **warning** `parent_claim_read_without_program_hint` — src/lib/familyNotificationPreferences.ts: Uses readParentClaimContext — verify program scope is enforced at read time.
-- **warning** `parent_claim_read_without_program_hint` — src/lib/familyParentClaimState.ts: Uses readParentClaimContext — verify program scope is enforced at read time.
 - **warning** `unscoped_active_child_read` — src/lib/familyPortalLinkAudit.ts: Reads activeChildParticipantId directly — prefer readActiveChildState().
 - **warning** `parent_claim_read_without_program_hint` — src/lib/gameplayPlayerIdentity.ts: Uses readParentClaimContext — verify program scope is enforced at read time.
 - **warning** `parent_claim_read_without_program_hint` — src/lib/getMobilePortalBranding.ts: Uses readParentClaimContext — verify program scope is enforced at read time.

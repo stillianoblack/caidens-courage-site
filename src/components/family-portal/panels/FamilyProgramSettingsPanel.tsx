@@ -28,6 +28,8 @@ import {
   fetchStudentAccessFieldsByIds,
   type StudentAccessFields,
 } from '../../../lib/studentPinService';
+import { isParentConnectedForLink, resolveParentEmailFromSources } from '../../../lib/portalIdentity';
+import { markStudentFamilyLinksClaimed } from '../../../lib/studentFamilyLinkService';
 import AddChildForm from '../AddChildForm';
 import FamilyChildGradeConfig from '../FamilyChildGradeConfig';
 import FamilyChildPinAccessCard from '../FamilyChildPinAccessCard';
@@ -154,7 +156,11 @@ export default function FamilyProgramSettingsPanel() {
     parentClaim?.lastName?.trim() || parentLink?.parent_last_name?.trim() || '',
   );
   const [parentEmail, setParentEmail] = useState(
-    parentClaim?.email?.trim() || parentLink?.parent_email?.trim() || '',
+    resolveParentEmailFromSources({
+      programCode: programCodeValue,
+      parentClaim,
+      parentLink,
+    }),
   );
   const [parentPhone, setParentPhone] = useState(
     parentClaim?.phone?.trim() || parentLink?.parent_phone?.trim() || '',
@@ -170,9 +176,15 @@ export default function FamilyProgramSettingsPanel() {
     setParentLastName(
       parentClaim?.lastName?.trim() || parentLink?.parent_last_name?.trim() || '',
     );
-    setParentEmail(parentClaim?.email?.trim() || parentLink?.parent_email?.trim() || '');
+    setParentEmail(
+      resolveParentEmailFromSources({
+        programCode: programCodeValue,
+        parentClaim,
+        parentLink,
+      }),
+    );
     setParentPhone(parentClaim?.phone?.trim() || parentLink?.parent_phone?.trim() || '');
-  }, [parentClaim, parentLink]);
+  }, [parentClaim, parentLink, programCodeValue]);
 
   useEffect(() => {
     if (focusParam !== 'student-access') {
@@ -268,7 +280,7 @@ export default function FamilyProgramSettingsPanel() {
     });
   };
 
-  const handleSaveParent = () => {
+  const handleSaveParent = async () => {
     const email = parentEmail.trim();
     const validation = validateParentClaimWrite({
       programCode: programCodeValue,
@@ -280,12 +292,37 @@ export default function FamilyProgramSettingsPanel() {
       setParentSaveError(validation.message);
       return;
     }
+
+    const linkIds = familyLinks
+      .filter((link) =>
+        activeChild?.participantId
+          ? link.student_id === activeChild.participantId
+          : parentClaim
+            ? linkMatchesParentScope(link, parentClaim)
+            : false,
+      )
+      .map((link) => link.id);
+
+    if (linkIds.length) {
+      const claimResult = await markStudentFamilyLinksClaimed({
+        linkIds,
+        familyProgramCode: programCodeValue,
+        parentEmail: email,
+        parentPhone: parentPhone.trim() || undefined,
+        parentLastName: parentLastName.trim() || undefined,
+      });
+      if (!claimResult.success) {
+        setParentSaveError(claimResult.error ?? 'Could not save parent email.');
+        return;
+      }
+    }
+
     setParentSaveError(null);
     writeParentClaimContext({
       email,
       phone: parentPhone.trim() || undefined,
       lastName: parentLastName.trim() || undefined,
-      confirmed: Boolean(email || parentPhone.trim()),
+      confirmed: Boolean(email),
       programCode: programCodeValue,
       accessCode: familyCode,
     });
@@ -422,7 +459,7 @@ export default function FamilyProgramSettingsPanel() {
                           {link ? (
                             <p className="family-settingsChildMeta">
                               Parent/Guardian:{' '}
-                              {link.parent_claimed ? 'Linked' : 'Pending confirmation'}
+                              {isParentConnectedForLink(link) ? 'Linked' : 'Parent not connected'}
                             </p>
                           ) : null}
                           {child.participantId ? (() => {
@@ -437,6 +474,12 @@ export default function FamilyProgramSettingsPanel() {
                                 displayName={child.displayName}
                                 programCode={pinProgramCode}
                                 hasPin={accessByParticipant.get(child.participantId)?.hasPin ?? true}
+                                parentEmail={resolveParentEmailFromSources({
+                                  programCode: programCodeValue,
+                                  parentClaim,
+                                  parentLink: link,
+                                })}
+                                parentConnected={isParentConnectedForLink(link)}
                                 scrollAnchorId={familyStudentAccessAnchorId(child.participantId)}
                                 scrollAnchorRef={
                                   child.participantId === firstPinChildParticipantId
@@ -528,7 +571,7 @@ export default function FamilyProgramSettingsPanel() {
                 className="family-settingsParentForm"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  handleSaveParent();
+                  void handleSaveParent();
                 }}
               >
                 <label className="family-addChildField">

@@ -19,8 +19,9 @@ export function useFamilyPortalShell(programCode?: string) {
         familyLinks: metrics.familyLinks,
         visibleChildrenCount: metrics.visibleChildren.length,
         parentClaim,
+        programCode: resolvedCode,
       }),
-    [metrics.claimRequired, metrics.familyLinks, metrics.visibleChildren.length, parentClaim],
+    [metrics.claimRequired, metrics.familyLinks, metrics.visibleChildren.length, parentClaim, resolvedCode],
   );
 
   const linkedCampLabel = useMemo(() => {
