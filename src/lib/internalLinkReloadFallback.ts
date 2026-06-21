@@ -1,5 +1,3 @@
-import { navigateWithPageTransition } from './pageTransition';
-
 declare global {
   interface Window {
     __ccInternalLinkReloadFallbackInstalled?: boolean;
@@ -8,24 +6,6 @@ declare global {
 
 function isPlainLeftClick(event: MouseEvent) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-}
-
-function isKidPlayShellPath(pathname: string) {
-  return pathname === '/play/session' || pathname.startsWith('/play/session/');
-}
-
-function isPortalShellPath(pathname: string) {
-  return (
-    pathname === '/portal' ||
-    pathname.startsWith('/portal/') ||
-    pathname === '/family-hub' ||
-    pathname.startsWith('/family-hub/') ||
-    pathname === '/program-dashboard' ||
-    pathname.startsWith('/program-dashboard/') ||
-    pathname === '/pilot-dashboard' ||
-    pathname === '/academy-dashboard' ||
-    pathname === '/kids/login'
-  );
 }
 
 export function shouldForceInternalLinkReload(
@@ -37,12 +17,7 @@ export function shouldForceInternalLinkReload(
   if (anchor.hasAttribute('download')) return false;
   if (url.origin !== window.location.origin) return false;
   if (url.pathname === currentPathname && url.search === window.location.search) return false;
-  return (
-    isKidPlayShellPath(currentPathname) ||
-    isKidPlayShellPath(url.pathname) ||
-    isPortalShellPath(currentPathname) ||
-    isPortalShellPath(url.pathname)
-  );
+  return true;
 }
 
 function shouldLetBrowserHandleNormally(anchor: HTMLAnchorElement, url: URL) {
@@ -76,7 +51,7 @@ export function installInternalLinkReloadFallback() {
       if (shouldLetBrowserHandleNormally(anchor, url)) return;
 
       event.preventDefault();
-      navigateWithPageTransition(url.href);
+      window.location.assign(url.href);
     },
     true,
   );

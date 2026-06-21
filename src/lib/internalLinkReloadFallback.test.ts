@@ -27,7 +27,7 @@ describe('installInternalLinkReloadFallback', () => {
     ).toBe(true);
   });
 
-  it('does not force-load normal public navigation links', () => {
+  it('force-loads normal public navigation links', () => {
     window.history.pushState({}, '', '/');
 
     const link = document.createElement('a');
@@ -40,7 +40,7 @@ describe('installInternalLinkReloadFallback', () => {
         new URL(link.href),
         '/',
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('force-loads links entering the kid play shell', () => {
