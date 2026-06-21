@@ -1,7 +1,13 @@
 import { buildFamilyClaimUrl } from '../familyClaimCode';
 import { mergeParticipantRecords } from '../pilotResultsDisplay';
-import { resolveRosterParentConnectionStatus } from '../parentGuardianIdentity';
+import {
+  resolveFamilyPinAccessContext,
+  resolveRosterParentConnectionStatus,
+} from '../parentGuardianIdentity';
 import { PORTAL_CLAIM_PIN_MISMATCH_MESSAGE } from '../portalIdentity';
+import { copyTextToClipboard } from '../studentPinService';
+import { writeLastPilotProgram } from '../../config/lastPilotProgram';
+import type { ActivePilotProgram } from '../../types/pilotProgram';
 import type { StudentFamilyLink } from '../studentFamilyLinkService';
 import type { StudentParticipantRecord } from '../pilotTrackingService';
 import {
@@ -145,5 +151,45 @@ describe('family claim portal deep link', () => {
 
   test('claim pin mismatch message is explicit', () => {
     expect(PORTAL_CLAIM_PIN_MISMATCH_MESSAGE).toMatch(/claim code does not match/i);
+  });
+});
+
+describe('family pin access on mobile settings', () => {
+  const mockProgram = (): ActivePilotProgram =>
+    ({
+      id: 'prog-1',
+      programCode: 'FAMILY-RIVER',
+      programName: 'River Family',
+      familyAccessCode: 'FAMILY-RIVER-2026',
+      facilitatorAccessCode: 'FACIL-RIVER',
+      groupName: 'River Camp',
+      adminEmail: 'facilitator@camp.org',
+    }) as ActivePilotProgram;
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  test('linked invited parent can reveal and copy PIN', () => {
+    writeLastPilotProgram(mockProgram(), 'family', 'v.maddox2015@gmail.com', 'FAMILY-RIVER-2026');
+
+    const access = resolveFamilyPinAccessContext({
+      programCode: 'FAMILY-RIVER',
+      participantId: 'child-caiden',
+      parentLink: baseLink({
+        student_id: 'child-caiden',
+        parent_email: 'v.maddox2015@gmail.com',
+        parent_claimed: false,
+      }),
+    });
+
+    expect(access.parentEmail).toBe('v.maddox2015@gmail.com');
+    expect(access.parentConnected).toBe(true);
+  });
+
+  test('copyTextToClipboard uses execCommand fallback', () => {
+    document.execCommand = jest.fn(() => true);
+    expect(copyTextToClipboard('4319')).toBe(true);
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
   });
 });

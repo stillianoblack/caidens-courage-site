@@ -28,6 +28,7 @@ import {
   fetchStudentAccessFieldsByIds,
   type StudentAccessFields,
 } from '../../../lib/studentPinService';
+import { resolveFamilyPinAccessContext } from '../../../lib/parentGuardianIdentity';
 import { isParentConnectedForLink, resolveParentEmailFromSources } from '../../../lib/portalIdentity';
 import { markStudentFamilyLinksClaimed } from '../../../lib/studentFamilyLinkService';
 import AddChildForm from '../AddChildForm';
@@ -470,18 +471,22 @@ export default function FamilyProgramSettingsPanel() {
                               campProgramCode ||
                               programCodeValue;
                             if (!pinProgramCode) return null;
+                            const pinAccess = resolveFamilyPinAccessContext({
+                              programCode: programCodeValue,
+                              participantId: child.participantId,
+                              parentLink: link,
+                              parentClaim,
+                            });
                             return (
                               <FamilyChildPinAccessCard
                                 participantId={child.participantId}
                                 displayName={child.displayName}
                                 programCode={pinProgramCode}
+                                familyProgramCode={programCodeValue}
                                 hasPin={accessByParticipant.get(child.participantId)?.hasPin ?? true}
-                                parentEmail={resolveParentEmailFromSources({
-                                  programCode: programCodeValue,
-                                  parentClaim,
-                                  parentLink: link,
-                                })}
-                                parentConnected={isParentConnectedForLink(link)}
+                                parentEmail={pinAccess.parentEmail}
+                                parentConnected={pinAccess.parentConnected}
+                                parentLink={link}
                                 scrollAnchorId={familyStudentAccessAnchorId(child.participantId)}
                                 scrollAnchorRef={
                                   child.participantId === firstPinChildParticipantId

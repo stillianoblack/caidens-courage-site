@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { readParentClaimContext } from '../../config/parentClaimContext';
-import { resolveParentEmailFromSources } from '../../lib/portalIdentity';
 import {
   copyStudentPinWithAudit,
   resetStudentPinViaFunction,
   revealStudentPinViaFunction,
 } from '../../lib/studentPinService';
+import { resolveFamilyPinAccessContext } from '../../lib/parentGuardianIdentity';
 import { useToast } from '../portal-design-system/ToastProvider';
 import FamilyStudentPinRegenerateModal from './FamilyStudentPinRegenerateModal';
 
@@ -13,9 +13,11 @@ type FamilyChildPinAccessCardProps = {
   participantId: string;
   displayName: string;
   programCode: string;
+  familyProgramCode?: string;
   hasPin?: boolean;
   parentEmail?: string;
   parentConnected?: boolean;
+  parentLink?: import('../../lib/studentFamilyLinkService').StudentFamilyLink | null;
   scrollAnchorId?: string;
   scrollAnchorRef?: React.Ref<HTMLElement>;
 };
@@ -27,19 +29,24 @@ export default function FamilyChildPinAccessCard({
   hasPin = true,
   parentEmail: parentEmailProp,
   parentConnected: parentConnectedProp,
+  parentLink = null,
+  familyProgramCode,
   scrollAnchorId,
   scrollAnchorRef,
 }: FamilyChildPinAccessCardProps) {
   const { showToast } = useToast();
   const programCodeValue = programCode.trim();
-  const parentClaim = readParentClaimContext({ programCode: programCodeValue });
-  const parentEmail =
-    parentEmailProp?.trim() ||
-    resolveParentEmailFromSources({
-      programCode: programCodeValue,
-      parentClaim,
-    });
-  const parentConnected = parentConnectedProp ?? Boolean(parentEmail);
+  const parentClaim = readParentClaimContext({
+    programCode: familyProgramCode?.trim() || programCodeValue,
+  });
+  const pinAccess = resolveFamilyPinAccessContext({
+    programCode: familyProgramCode?.trim() || programCodeValue,
+    participantId,
+    parentLink,
+    parentClaim,
+  });
+  const parentEmail = parentEmailProp?.trim() || pinAccess.parentEmail;
+  const parentConnected = parentConnectedProp ?? pinAccess.parentConnected;
 
   const [pinReady, setPinReady] = useState(hasPin);
   const [pinVisible, setPinVisible] = useState(false);
@@ -98,11 +105,28 @@ export default function FamilyChildPinAccessCard({
     }
   };
 
-  const handleCopyPin = async () => {
-    const pin = pinVisible && revealedPin ? revealedPin : await resolvePin();
-    if (!pin) return;
-    const copied = await copyStudentPinWithAudit({ pin, participantId, programCode: programCodeValue });
-    showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
+  const handleCopyPin = () => {
+    if (revealedPin) {
+      void copyStudentPinWithAudit({
+        pin: revealedPin,
+        participantId,
+        programCode: programCodeValue,
+      }).then((copied) => {
+        showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
+      });
+      return;
+    }
+
+    void (async () => {
+      const pin = await resolvePin();
+      if (!pin) return;
+      const copied = await copyStudentPinWithAudit({
+        pin,
+        participantId,
+        programCode: programCodeValue,
+      });
+      showToast(copied ? 'PIN copied.' : 'Copy failed.', copied ? 'success' : 'error');
+    })();
   };
 
   const handleResetPin = async () => {

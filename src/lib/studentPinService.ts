@@ -506,13 +506,52 @@ export async function copyStudentPinWithAudit(input: {
   participantId: string;
   programCode: string;
 }): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(input.pin);
+  const pin = input.pin.trim();
+  if (!pin) return false;
+
+  let copied = copyTextToClipboard(pin);
+
+  if (!copied) {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(pin);
+        copied = true;
+      }
+    } catch {
+      copied = false;
+    }
+  }
+
+  if (copied) {
     logSecurityAudit('pin_copied', {
       participant_id: input.participantId.trim(),
       program_code: input.programCode.trim(),
     });
-    return true;
+  }
+  return copied;
+}
+
+/** Works on iOS Safari where async clipboard API loses the user-gesture context. */
+export function copyTextToClipboard(text: string): boolean {
+  const value = text.trim();
+  if (!value) return false;
+
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = value;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, value.length);
+    const copied = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return copied;
   } catch {
     return false;
   }

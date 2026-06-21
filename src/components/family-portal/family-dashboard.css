@@ -423,6 +423,8 @@
   .family-childPinActions .family-settingsGhostBtn {
     width: 100%;
     justify-content: center;
+    min-height: 2.75rem;
+    touch-action: manipulation;
   }
 }
 
