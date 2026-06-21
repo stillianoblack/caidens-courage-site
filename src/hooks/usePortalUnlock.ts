@@ -212,7 +212,7 @@ export function usePortalUnlock(
               clearParentClaimContext();
               const campProgramCodeHint =
                 lookup.claimCodeContext?.campProgramCode?.trim() ||
-                (!isIndependentFamilyProgram(program) ? program.programCode.trim() : undefined);
+                program.programCode.trim();
               const verified = await verifyStudentPinLoginWithProgramFallback({
                 pin: credential,
                 accessCodeHint: trimmedCode,

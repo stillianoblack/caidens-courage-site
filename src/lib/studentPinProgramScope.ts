@@ -1,7 +1,7 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveAccessCode } from '../config/portalContext';
 import { readParentClaimContext } from '../config/parentClaimContext';
-import { isIndependentFamilyProgram } from './independentFamilyProgram';
+import { isIndependentFamilyProgram, inferProgramTypeFromCode, INDEPENDENT_FAMILY_PROGRAM_TYPE } from './independentFamilyProgram';
 import { lookupStudentByFamilyClaimCode } from './familyClaimByCodeService';
 import { isFamilyClaimCode } from './familyClaimCode';
 import { lookupPortalProgramByAccessCodeDetailed } from './portalAccessResolve';
@@ -44,6 +44,9 @@ async function addCampCodesFromAccessCode(accessCode: string, codes: Set<string>
     return;
   }
 
+  // Independent family students are enrolled under the family program_code directly.
+  codes.add(programCode);
+
   const { links } = await fetchStudentFamilyLinksByFamilyProgram(programCode);
   for (const link of links) {
     if (link.camp_program_code?.trim()) {
@@ -82,7 +85,7 @@ export async function resolveStudentPinProgramCodeCandidates(input?: {
   const remembered = readRememberedProgramForContext();
   const portalProgram = active ?? remembered;
 
-  if (portalProgram?.programCode?.trim() && !isIndependentFamilyProgram(portalProgram)) {
+  if (portalProgram?.programCode?.trim()) {
     codes.add(portalProgram.programCode.trim());
   }
 
@@ -92,6 +95,13 @@ export async function resolveStudentPinProgramCodeCandidates(input?: {
     null;
 
   if (familyProgramCode) {
+    if (
+      inferProgramTypeFromCode(familyProgramCode) === INDEPENDENT_FAMILY_PROGRAM_TYPE &&
+      !codes.has(familyProgramCode)
+    ) {
+      codes.add(familyProgramCode);
+    }
+
     const { links } = await fetchStudentFamilyLinksByFamilyProgram(familyProgramCode);
     for (const link of links) {
       if (link.camp_program_code?.trim()) {
