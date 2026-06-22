@@ -200,7 +200,7 @@ describe('portal session flow', () => {
       }),
     ).toBe('invalid');
     expect(PORTAL_EMAIL_NOT_CONNECTED_MESSAGE).toBe(
-      'That email is not connected to this program.',
+      'That email is not connected to this child or program.',
     );
   });
 

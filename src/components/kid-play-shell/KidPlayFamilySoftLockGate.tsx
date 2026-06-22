@@ -32,8 +32,8 @@ import {
 } from '../../lib/kidPlayReturnSessionRoute';
 import {
   detectReturnSessionFacilitatorEmailMatch,
-  detectReturnSessionParentEmailMatch,
   readPreferredReturnSessionRole,
+  verifyReturnSessionParentEmailMatch,
 } from '../../lib/kidPlayReturnSessionVerify';
 import {
   KID_PLAY_RETURN_ACCESS_ERROR,
@@ -43,7 +43,8 @@ import {
   shouldHideReturnSessionAccessCode,
   verifyKidPlayReturnAccessCode,
 } from '../../lib/kidPlayReturnUnlock';
-import { clearStudentPinSession, writeStudentPinSession } from '../../lib/studentPinSession';
+import { clearStudentPinSession, readStudentPinSession, writeStudentPinSession } from '../../lib/studentPinSession';
+import { setActiveChild } from '../../lib/activeChildContext';
 import {
   classifyKidPlayReturnCredential,
 } from '../../lib/kidPlayReturnSessionRoute';
@@ -151,10 +152,22 @@ export default function KidPlayFamilySoftLockGate({
       const { trimmedSecond, preferredRole } = input;
       const credentialKind = classifyKidPlayReturnCredential(trimmedSecond);
 
+      const parentEmailMatches =
+        credentialKind === 'email'
+          ? await verifyReturnSessionParentEmailMatch({
+              email: trimmedSecond,
+              activeStudentId: inShellChildId,
+            })
+          : false;
+      const facilitatorEmailMatches =
+        credentialKind === 'email'
+          ? detectReturnSessionFacilitatorEmailMatch(trimmedSecond)
+          : false;
+
       const destination = resolveKidPlayReturnSessionDestination({
         emailOrPin: trimmedSecond,
-        parentEmailMatches: detectReturnSessionParentEmailMatch(trimmedSecond),
-        facilitatorEmailMatches: detectReturnSessionFacilitatorEmailMatch(trimmedSecond),
+        parentEmailMatches,
+        facilitatorEmailMatches,
         preferredRole: preferredRole ?? readPreferredReturnSessionRole(),
       });
 
@@ -221,6 +234,15 @@ export default function KidPlayFamilySoftLockGate({
 
       if (destination === 'family_portal') {
         if (clearKidPlayFamilySoftLockWithEmail(trimmedSecond)) {
+          const studentId = inShellChildId?.trim() || readStudentPinSession()?.participantId?.trim();
+          if (studentId) {
+            const pinSession = readStudentPinSession();
+            setActiveChild({
+              participantId: studentId,
+              displayName: pinSession?.displayName?.trim() || 'Player',
+              firstName: pinSession?.displayName?.trim() || undefined,
+            });
+          }
           setSubmitting(false);
           routeToFamilyPortal();
           return;
@@ -233,7 +255,7 @@ export default function KidPlayFamilySoftLockGate({
       setSubmitting(false);
       setError(KID_PLAY_RETURN_ACCESS_ERROR);
     },
-    [rememberedAccessCode, resumeInShellSession, routeToFacilitatorPortal, routeToFamilyPortal, routeToKidShell],
+    [inShellChildId, rememberedAccessCode, resumeInShellSession, routeToFacilitatorPortal, routeToFamilyPortal, routeToKidShell],
   );
 
   const handleContinue = useCallback(

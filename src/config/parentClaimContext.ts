@@ -1,8 +1,10 @@
 import {
   programScopesMatch,
   resolvePortalProgramScope,
+  resolvePortalProgramScopeExcludingParentClaim,
 } from '../lib/portalProgramScope';
 import { logSessionIsolationWarning } from '../lib/sessionIsolationLog';
+import { purgeLegacyIdentityStorage } from '../lib/purgeLegacyIdentityStorage';
 
 /** @deprecated Legacy unscoped keys — cleared on read; never restored without program scope. */
 export const PARENT_CLAIM_EMAIL_KEY = 'parentClaimEmail';
@@ -120,8 +122,10 @@ export function clearScopedParentClaimRecord(): void {
 export function readParentClaimContext(options?: {
   programCode?: string;
 }): ParentClaimContext | null {
+  purgeLegacyIdentityStorage('parent_claim_read');
   const expectedProgram =
-    options?.programCode?.trim() || resolvePortalProgramScope()?.programCode;
+    options?.programCode?.trim() ||
+    resolvePortalProgramScopeExcludingParentClaim()?.programCode;
 
   const scoped = readScopedParentClaimRecord();
   if (scoped) {

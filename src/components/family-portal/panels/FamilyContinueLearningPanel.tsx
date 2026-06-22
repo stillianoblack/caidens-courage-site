@@ -70,7 +70,6 @@ import { logFamilyChildProgressDebug } from '../../../lib/familyChildProgressDeb
 import { useActiveChild, type SelectableChild } from '../../../hooks/useActiveChild';
 import '../weekly-adventure-dark-center.css';
 import { useBaselineGate } from '../../../hooks/useBaselineGate';
-import { isB4CheckInCompleteLocal } from '../../../lib/b4CheckInStatus';
 import {
   resolveWeeklyAdventureBaselineLocked,
   resolveWeeklyAdventurePlayerHudGateMessage,
@@ -184,7 +183,9 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     visibilityCtx.previewMode === 'admin' ? 'all' : 'family',
   );
 
-  const { completedByWeek } = useAdventureWeekCompletions(activeChild?.participantId);
+  const { completedByWeek, loading: adventureCompletionsLoading } = useAdventureWeekCompletions(
+    activeChild?.participantId,
+  );
 
   const mapCompletedWeekNumbers = useMemo(
     () =>
@@ -197,16 +198,6 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   );
 
   const requestedWeek = parseWeeklyAdventureWeekParam(searchParams.get(WEEKLY_WEEK_PARAM));
-
-  const b4CheckInCompleteLocal = useMemo(
-    () =>
-      isB4CheckInCompleteLocal({
-        participantId: activeChild?.participantId,
-        programCode,
-        assessments: v2Assessments,
-      }),
-    [activeChild?.participantId, programCode, v2Assessments],
-  );
 
   const adventureProgress = useMemo(
     () =>
@@ -223,18 +214,18 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       resolveWeeklyAdventureBaselineLocked({
         hasActiveChild,
         baselineComplete,
-        b4CheckInComplete: b4CheckInCompleteLocal,
         isAdminPreview: visibilityCtx.previewMode === 'admin',
         completedWeekCount: adventureProgress.completedWeekCount,
         currentWeek: adventureProgress.currentWeek,
         hasAnyMissionCompletion: adventureProgress.hasAnyMissionCompletion,
+        adventureProgressLoading: adventureCompletionsLoading,
       }),
     [
+      adventureCompletionsLoading,
       adventureProgress.completedWeekCount,
       adventureProgress.currentWeek,
       adventureProgress.hasAnyMissionCompletion,
       baselineComplete,
-      b4CheckInCompleteLocal,
       hasActiveChild,
       visibilityCtx.previewMode,
     ],

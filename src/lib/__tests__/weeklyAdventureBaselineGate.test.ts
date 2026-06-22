@@ -106,6 +106,19 @@ describe('weeklyAdventureBaselineGate', () => {
     ).toBe(false);
   });
 
+  test('progress loading keeps returning users unlocked while history hydrates', () => {
+    expect(
+      resolveWeeklyAdventureBaselineLocked({
+        hasActiveChild: true,
+        baselineComplete: false,
+        completedWeekCount: 0,
+        currentWeek: 1,
+        hasAnyMissionCompletion: false,
+        adventureProgressLoading: true,
+      }),
+    ).toBe(false);
+  });
+
   test('player hud copy distinguishes returning and new users', () => {
     expect(
       resolveWeeklyAdventurePlayerHudWeekLabel({ weekNumber: 4, baselineLocked: false }),

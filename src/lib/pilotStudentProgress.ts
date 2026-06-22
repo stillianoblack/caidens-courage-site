@@ -3,7 +3,7 @@ import type { LocalAssessmentV2Record, LocalModuleResultRecord } from './pilotTr
 import { formatAssessmentScore } from './pilotResultsDisplay';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
-import { resolveStudentDisplayNameOrFallback, resolveParentGuardianDisplayName } from './studentDisplayName';
+import { resolveStudentDisplayNameOrFallback, resolveParentGuardianDisplayName, isPlaceholderParentName } from './studentDisplayName';
 
 export const PILOT_CERTIFICATE_MIN_MODULES = 1;
 export const PILOT_ACTIVE_DAYS = 7;
@@ -51,8 +51,8 @@ export type PilotNeedsAttentionCounts = {
 };
 
 export function formatParentGuardianShort(firstName: string, lastName: string): string {
-  const first = firstName.trim();
-  const last = lastName.trim();
+  const first = isPlaceholderParentName(firstName) ? '' : firstName.trim();
+  const last = isPlaceholderParentName(lastName) ? '' : lastName.trim();
   if (!first && !last) return '—';
   if (!last) return first;
   return `${first} ${last.charAt(0).toUpperCase()}.`;

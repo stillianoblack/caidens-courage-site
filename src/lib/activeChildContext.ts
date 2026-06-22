@@ -8,6 +8,25 @@ import {
   resolvePortalProgramScope,
   writeScopedActiveChildRecord,
 } from './portalSessionIsolation';
+import { readStudentPinSession, type StudentPinSession } from './studentPinSession';
+
+function hydrateScopedActiveChildFromPinSession(): StudentPinSession | null {
+  const pinSession = readStudentPinSession({ allowCampUnderFamilyPortal: true });
+  if (!pinSession?.participantId?.trim()) return null;
+  if (readScopedActiveChildRecord()) return pinSession;
+
+  const programCode = resolvePortalProgramScope()?.programCode || pinSession.programCode?.trim();
+  if (!programCode) return pinSession;
+
+  writeScopedActiveChildRecord({
+    participantId: pinSession.participantId.trim(),
+    displayName: pinSession.displayName?.trim() || 'Player',
+    firstName: pinSession.displayName?.trim() || undefined,
+    programCode,
+    createdAt: new Date().toISOString(),
+  });
+  return pinSession;
+}
 
 export const ACTIVE_CHILD_EVENT = 'cc-active-child-changed';
 export const MODULE_COMPLETE_EVENT = 'cc-module-complete';
@@ -20,6 +39,8 @@ export type ActiveChildState = {
 
 export function readActiveChildState(): ActiveChildState | null {
   rejectLegacyActiveChildStorage();
+
+  hydrateScopedActiveChildFromPinSession();
 
   const scoped = readScopedActiveChildRecord();
   if (scoped) {
@@ -35,13 +56,15 @@ export function readActiveChildState(): ActiveChildState | null {
 
 export function setActiveChild(child: ActiveChildState): void {
   const scope = resolvePortalProgramScope();
-  if (scope?.programCode) {
+  const pinSession = readStudentPinSession();
+  const programCode = scope?.programCode?.trim() || pinSession?.programCode?.trim();
+  if (programCode) {
     writeScopedActiveChildRecord({
       participantId: child.participantId.trim(),
       displayName: child.displayName.trim() || 'Player',
       firstName: child.firstName?.trim() || undefined,
-      programCode: scope.programCode,
-      accessCode: scope.accessCode,
+      programCode,
+      accessCode: scope?.accessCode,
       createdAt: new Date().toISOString(),
     });
   }
@@ -50,7 +73,7 @@ export function setActiveChild(child: ActiveChildState): void {
     participant_id: child.participantId,
     display_name: child.displayName,
     first_name: child.firstName ?? null,
-    program_code: scope?.programCode ?? null,
+    program_code: programCode ?? null,
   });
   notifyChildProfileUpdated();
   if (typeof window !== 'undefined') {

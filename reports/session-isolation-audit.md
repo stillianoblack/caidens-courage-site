@@ -1,13 +1,13 @@
 # Session Isolation Audit
 
-Generated: 2026-06-21T16:55:09.897Z
+Generated: 2026-06-22T18:21:05.493Z
 
 **Status:** PASS
 
 ## Summary
 
-- Source files scanned: 1275
-- Storage keys found: 318
+- Source files scanned: 1290
+- Storage keys found: 323
 - Scoped identity keys: 10
 - Legacy unsafe keys still referenced: 6
 - High severity findings: 0
@@ -35,7 +35,7 @@ Generated: 2026-06-21T16:55:09.897Z
 ## Legacy unsafe keys (must not restore without program scope)
 
 - `activeChildNickname` — src/config/activeChildNickname.ts, src/lib/portalSessionIsolation.ts
-- `activeChildParticipantId` — src/config/activeChildParticipant.ts, src/lib/portalSessionIsolation.ts
+- `activeChildParticipantId` — src/config/activeChildEvents.ts, src/lib/portalSessionIsolation.ts
 - `parentClaimConfirmed` — src/config/parentClaimContext.ts
 - `parentClaimEmail` — src/config/parentClaimContext.ts
 - `parentClaimLastName` — src/config/parentClaimContext.ts

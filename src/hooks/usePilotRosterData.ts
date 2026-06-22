@@ -7,6 +7,7 @@ import { resolveParticipantDisplayName, buildParticipantNameLookup } from '../li
 import {
   resolveStudentDisplayNameOrFallback,
   resolveParentGuardianDisplayName,
+  isPlaceholderParentName,
 } from '../lib/studentDisplayName';
 import { resolveRosterParentConnectionStatus } from '../lib/parentGuardianIdentity';
 import {
@@ -137,8 +138,12 @@ export function usePilotRosterData(
           parent_last_name: link?.parent_last_name,
           parent_email: link?.parent_email,
         });
-        const parentFirst = link?.parent_first_name?.trim() || '';
-        const parentLast = link?.parent_last_name?.trim() || '';
+        const parentFirst = isPlaceholderParentName(link?.parent_first_name)
+          ? ''
+          : link?.parent_first_name?.trim() || '';
+        const parentLast = isPlaceholderParentName(link?.parent_last_name)
+          ? ''
+          : link?.parent_last_name?.trim() || '';
         const familyAccessCode =
           link?.family_program_code?.trim() || programFamilyAccessCode?.trim() || '—';
         const parentEmail = link?.parent_email?.trim() || '—';

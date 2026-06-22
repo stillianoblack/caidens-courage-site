@@ -52,9 +52,11 @@ export function resolveWeeklyAdventureBaselineLocked(input: {
   completedWeekCount: number;
   currentWeek: number;
   hasAnyMissionCompletion: boolean;
+  adventureProgressLoading?: boolean;
 }): boolean {
   if (!input.hasActiveChild) return true;
   if (input.isAdminPreview) return false;
+  if (input.adventureProgressLoading) return false;
   if (input.baselineComplete || input.b4CheckInComplete) return false;
   if (input.completedWeekCount >= 1) return false;
   if (input.currentWeek > 1) return false;

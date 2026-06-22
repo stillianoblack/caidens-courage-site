@@ -43,20 +43,21 @@ export async function checkBaselineCompletion(
     participantId: resolvedParticipantId,
     assessments,
   });
-  const complete =
-    localComplete ||
-    (await isBaselineCompleteRemote({
-      programCode,
-      participantId: resolvedParticipantId,
-      assessments,
-    }));
+
+  const remoteComplete = await isBaselineCompleteRemote({
+    programCode,
+    participantId: resolvedParticipantId,
+    assessments,
+  });
+
+  const complete = remoteComplete || localComplete;
 
   if (process.env.NODE_ENV === 'development') {
     if (complete) {
       console.info('[BASELINE_GATE_UNLOCKED]', {
         program_code: programCode ?? null,
         participant_id: resolvedParticipantId,
-        source: localComplete ? 'local' : 'remote',
+        source: remoteComplete ? 'remote' : localComplete ? 'local' : 'none',
       });
     } else {
       console.info('[BASELINE_GATE_LOCKED]', {

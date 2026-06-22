@@ -18,7 +18,8 @@ const RESULTS_ARCHIVE_KEY = 'caidens-courage-b4-baseline-results-archive';
 
 function resolveBaselineStorageKey(participantId?: string): string {
   const id = participantId?.trim();
-  return id ? `${STORAGE_KEY_PREFIX}:${id}` : STORAGE_KEY_PREFIX;
+  if (!id) return '';
+  return `${STORAGE_KEY_PREFIX}:${id}`;
 }
 
 export function resolveBaselineParticipantId(explicitId?: string): string {
@@ -141,8 +142,13 @@ function normalizeRecord(raw: unknown, profile: B4BaselineStudentProfile | null)
 
 export function loadB4BaselineState(participantId?: string): B4BaselinePersistedState {
   if (typeof window === 'undefined') return { ...EMPTY };
+  const key = resolveBaselineStorageKey(participantId);
+  if (!key) return { ...EMPTY };
   try {
-    const raw = window.localStorage.getItem(resolveBaselineStorageKey(participantId));
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY_PREFIX);
+    }
+    const raw = window.localStorage.getItem(key);
     if (!raw) return { ...EMPTY };
     const parsed = JSON.parse(raw) as Record<string, unknown>;
 
@@ -179,8 +185,10 @@ export function saveB4BaselineState(
     state.profile?.participantId?.trim() ||
     state.record?.participantId?.trim() ||
     '';
+  if (!keyParticipant) return;
+  window.localStorage.removeItem(STORAGE_KEY_PREFIX);
   window.localStorage.setItem(
-    resolveBaselineStorageKey(keyParticipant || undefined),
+    resolveBaselineStorageKey(keyParticipant),
     JSON.stringify(state),
   );
 }

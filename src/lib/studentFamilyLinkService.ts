@@ -198,7 +198,7 @@ export async function createCampStudentFamilyLink(input: {
   studentId: string;
   campProgramCode: string;
   parentFirstName?: string;
-  parentLastName: string;
+  parentLastName?: string;
   parentEmail?: string;
   parentPhone?: string;
   relationship?: string;
@@ -234,7 +234,7 @@ export async function createCampStudentFamilyLink(input: {
     family_program_code: null,
     parent_first_name: input.parentFirstName?.trim() || null,
     parent_email: parentEmail,
-    parent_last_name: input.parentLastName.trim(),
+    parent_last_name: input.parentLastName?.trim() || null,
     parent_phone: input.parentPhone?.trim() || null,
     relationship: input.relationship?.trim() || 'parent',
     parent_claimed: false,
@@ -286,7 +286,6 @@ export async function ensureCampStudentFamilyLink(input: {
   return createCampStudentFamilyLink({
     studentId,
     campProgramCode,
-    parentLastName: 'Pending',
   });
 }
 

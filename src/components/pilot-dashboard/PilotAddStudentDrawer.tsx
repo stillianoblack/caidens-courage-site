@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   createCampChildWithOptionalParent,
   type CampChildOnboardingResult,
@@ -51,6 +51,7 @@ export default function PilotAddStudentDrawer({
   const [successResult, setSuccessResult] = useState<CampChildOnboardingResult | null>(null);
 
   const trimmedProgramCode = programCode.trim();
+  const wasOpenRef = useRef(false);
 
   const resetForm = () => {
     setChildFirstName('');
@@ -64,6 +65,13 @@ export default function PilotAddStudentDrawer({
     setError(null);
     setSuccessResult(null);
   };
+
+  useEffect(() => {
+    if (open && !wasOpenRef.current) {
+      resetForm();
+    }
+    wasOpenRef.current = open;
+  }, [open]);
 
   const handleClose = () => {
     resetForm();
@@ -123,10 +131,10 @@ export default function PilotAddStudentDrawer({
       childLastName: childLastName.trim() || undefined,
       childNickname: childNickname.trim() || undefined,
       connectParentLater: !trimmedParentEmail,
-      parentFirstName: parentFirstName.trim() || undefined,
-      parentLastName: parentLastName.trim() || undefined,
+      parentFirstName: trimmedParentEmail ? parentFirstName.trim() || undefined : undefined,
+      parentLastName: trimmedParentEmail ? parentLastName.trim() || undefined : undefined,
       parentEmail: trimmedParentEmail || undefined,
-      parentPhone: parentPhone.trim() || undefined,
+      parentPhone: trimmedParentEmail ? parentPhone.trim() || undefined : undefined,
       gradeLevel,
       campProgramCode: trimmedProgramCode,
     });
@@ -290,7 +298,7 @@ export default function PilotAddStudentDrawer({
                 type="text"
                 value={parentFirstName}
                 onChange={(event) => setParentFirstName(event.target.value)}
-                autoComplete="given-name"
+                autoComplete="off"
               />
             </label>
             <label className="pilot-drawerField">
@@ -299,7 +307,7 @@ export default function PilotAddStudentDrawer({
                 type="text"
                 value={parentLastName}
                 onChange={(event) => setParentLastName(event.target.value)}
-                autoComplete="family-name"
+                autoComplete="off"
               />
             </label>
             <label className="pilot-drawerField">
@@ -308,7 +316,7 @@ export default function PilotAddStudentDrawer({
                 type="email"
                 value={parentEmail}
                 onChange={(event) => setParentEmail(event.target.value)}
-                autoComplete="email"
+                autoComplete="off"
               />
             </label>
             <label className="pilot-drawerField">
@@ -317,7 +325,7 @@ export default function PilotAddStudentDrawer({
                 type="tel"
                 value={parentPhone}
                 onChange={(event) => setParentPhone(event.target.value)}
-                autoComplete="tel"
+                autoComplete="off"
               />
             </label>
             <label className="pilot-drawerField">

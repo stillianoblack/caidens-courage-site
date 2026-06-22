@@ -8,6 +8,9 @@ import {
 } from './portalProgramScope';
 import { logSessionIsolationWarning } from './sessionIsolationLog';
 import { readRememberedDeviceSession, type RememberedDeviceSession } from './rememberedDeviceSession';
+import { readStudentPinSession } from './studentPinSession';
+import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -23,6 +26,52 @@ function lastPilotProgramMatchesActiveProgram(programCode?: string | null): bool
   const expected = resolvePortalProgramScope();
   if (!expected?.programCode || !programCode?.trim()) return false;
   return programScopesMatch(programCode, expected.programCode);
+}
+
+async function isParentEmailLinkedToActiveStudent(input: {
+  email: string;
+  studentId: string;
+}): Promise<boolean> {
+  const email = normalizeEmail(input.email);
+  const studentId = input.studentId.trim();
+  if (!email || !studentId || !isSupabaseConfigured() || !supabase) {
+    return false;
+  }
+
+  const { data: links, error } = await withTimeout(
+    supabase
+      .from('student_family_links')
+      .select('id, student_id, parent_email, camp_program_code, family_program_code')
+      .eq('student_id', studentId),
+    DASHBOARD_FETCH_TIMEOUT_MS,
+    'return_session_parent_link_lookup',
+  );
+
+  if (error) {
+    console.warn('[RETURN_SESSION_PARENT_VERIFY]', { reason: 'link_lookup_failed', message: error.message });
+    return false;
+  }
+
+  if ((links || []).some((link) => normalizeEmail(String(link.parent_email || '')) === email)) {
+    return true;
+  }
+
+  const { data: participant, error: participantError } = await withTimeout(
+    supabase
+      .from('participants')
+      .select('id, guardian_email')
+      .eq('id', studentId)
+      .eq('role', 'student')
+      .maybeSingle(),
+    DASHBOARD_FETCH_TIMEOUT_MS,
+    'return_session_guardian_lookup',
+  );
+
+  if (participantError || !participant) {
+    return false;
+  }
+
+  return normalizeEmail(String(participant.guardian_email || '')) === email;
 }
 
 export function detectReturnSessionParentEmailMatch(email: string): boolean {
@@ -87,6 +136,36 @@ export function detectReturnSessionParentEmailMatch(email: string): boolean {
   }
 
   return false;
+}
+
+/** Verify parent email against the active student's linked family record (DB-first). */
+export async function verifyReturnSessionParentEmailMatch(input: {
+  email: string;
+  activeStudentId?: string | null;
+}): Promise<boolean> {
+  const entered = normalizeEmail(input.email);
+  if (!entered) return false;
+
+  const studentId =
+    input.activeStudentId?.trim() ||
+    readStudentPinSession()?.participantId?.trim() ||
+    '';
+
+  if (studentId) {
+    const linked = await isParentEmailLinkedToActiveStudent({
+      email: entered,
+      studentId,
+    });
+    if (linked) return true;
+
+    logSessionIsolationWarning('return_session_email_child_mismatch', {
+      email: entered,
+      student_id: studentId,
+    });
+    return false;
+  }
+
+  return detectReturnSessionParentEmailMatch(entered);
 }
 
 export function detectReturnSessionFacilitatorEmailMatch(email: string): boolean {

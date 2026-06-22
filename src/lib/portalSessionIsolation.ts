@@ -1,10 +1,7 @@
 import { readScopedParentClaimRecord } from '../config/parentClaimContext';
-import {
-  resolvePortalProgramScope,
-  programScopesMatch,
-  SESSION_MISMATCH_MESSAGE,
-} from './portalProgramScope';
+import { resolvePortalProgramScope, programScopesMatch, SESSION_MISMATCH_MESSAGE, readPinSessionProgramCodeRaw } from './portalProgramScope';
 import { logSessionIsolationWarning } from './sessionIsolationLog';
+import { purgeLegacyIdentityStorage } from './purgeLegacyIdentityStorage';
 
 export { SESSION_MISMATCH_MESSAGE } from './portalProgramScope';
 export type { PortalProgramScope } from './portalProgramScope';
@@ -44,7 +41,9 @@ export function readScopedActiveChildRecord(
       createdAt: parsed.createdAt?.trim() || new Date(0).toISOString(),
     };
     const expected =
-      expectedProgramCode?.trim() || resolvePortalProgramScope()?.programCode;
+      expectedProgramCode?.trim() ||
+      resolvePortalProgramScope()?.programCode ||
+      readPinSessionProgramCodeRaw();
     if (expected && !programScopesMatch(record.programCode, expected)) {
       logSessionIsolationWarning('active_child_program_mismatch', {
         expected_program_code: expected,
@@ -78,6 +77,7 @@ export function clearScopedActiveChildRecord(): void {
 }
 
 export function rejectLegacyActiveChildStorage(): void {
+  purgeLegacyIdentityStorage('active_child_read');
   if (typeof window === 'undefined') return;
   try {
     const legacyId = window.localStorage.getItem('activeChildParticipantId')?.trim();

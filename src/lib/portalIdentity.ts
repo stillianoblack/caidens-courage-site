@@ -15,7 +15,7 @@ export const PORTAL_CLAIM_PIN_MISMATCH_MESSAGE =
   'This claim code does not match that student PIN. Check the code from your facilitator or ask for a new link.';
 
 export const PORTAL_EMAIL_NOT_CONNECTED_MESSAGE =
-  'That email is not connected to this program.';
+  'That email is not connected to this child or program.';
 
 export function normalizePortalEmail(email?: string | null): string {
   return email?.trim().toLowerCase() ?? '';

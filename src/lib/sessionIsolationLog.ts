@@ -10,6 +10,8 @@ export type SessionIsolationEvent =
   | 'student_pin_program_mismatch'
   | 'facilitator_continuity_program_mismatch'
   | 'return_session_email_program_mismatch'
+  | 'return_session_email_child_mismatch'
+  | 'legacy_identity_key_purged'
   | 'family_settings_parent_attach_blocked'
   | 'facilitator_email_not_registered';
 

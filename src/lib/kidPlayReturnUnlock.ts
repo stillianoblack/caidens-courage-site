@@ -22,7 +22,7 @@ export const KID_PLAY_RETURN_PIN_ERROR =
   'That student PIN did not match. Check the PIN from your facilitator or parent settings.';
 
 export const KID_PLAY_RETURN_EMAIL_NOT_CONNECTED =
-  'That email is not connected to this program.';
+  'That email is not connected to this child or program.';
 
 /** True when play-pause / Return To Session can run without sending users to /portal. */
 export function hasKidPlayReturnSessionContext(): boolean {
