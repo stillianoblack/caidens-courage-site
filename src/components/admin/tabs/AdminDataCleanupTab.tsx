@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { isAdminPermanentDeleteEnabled } from '../../../config/adminProtectedPrograms';
+import { isAdminPermanentDeleteEnabled } from '../../../config/adminAccess';
 import {
   archivePilotProgram,
   deletePilotProgramPermanently,
   previewPilotCleanup,
   type PilotCleanupPreview,
 } from '../../../lib/adminPilotCleanupService';
+import { PROTECTION_ACTION_BLOCKED_MESSAGE } from '../../../lib/pilotProgramProtection';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
 
 type AdminDataCleanupTabProps = {
@@ -87,8 +88,13 @@ export default function AdminDataCleanupTab({ onChanged }: AdminDataCleanupTabPr
       {preview ? (
         <div className="adminPortal-cleanupPreview">
           <p>
-            <strong>{preview.programName || preview.programCode}</strong> · {preview.pilotStatus}
+            <strong>{preview.programName || preview.programCode}</strong> · {preview.pilotStatus} · {preview.protectionLevel}
           </p>
+          {!preview.canArchive || !preview.canDelete ? (
+            <p className="adminPortal-protectedNote" role="status">
+              {PROTECTION_ACTION_BLOCKED_MESSAGE}
+            </p>
+          ) : null}
           {!preview.archiveColumnsAvailable ? (
             <p className="adminPortal-error" role="alert">
               Archive columns are missing. Run <code>supabase/pilot_programs_archive.sql</code> in
@@ -124,7 +130,8 @@ export default function AdminDataCleanupTab({ onChanged }: AdminDataCleanupTabPr
         <button
           type="button"
           className="adminPortal-btn adminPortal-btn--gold"
-          disabled={!preview || preview.protected || preview.pilotStatus === 'archived'}
+          disabled={!preview || !preview.canArchive || preview.pilotStatus === 'archived'}
+          title={preview && !preview.canArchive ? PROTECTION_ACTION_BLOCKED_MESSAGE : undefined}
           onClick={() => void handleArchive()}
         >
           Archive Pilot
@@ -144,7 +151,8 @@ export default function AdminDataCleanupTab({ onChanged }: AdminDataCleanupTabPr
           <button
             type="button"
             className="adminPortal-btn adminPortal-btn--danger"
-            disabled={!preview || preview.protected || !confirmDelete}
+            disabled={!preview || !preview.canDelete || !confirmDelete}
+            title={preview && !preview.canDelete ? PROTECTION_ACTION_BLOCKED_MESSAGE : undefined}
             onClick={() => void handleDelete()}
           >
             Delete Permanently

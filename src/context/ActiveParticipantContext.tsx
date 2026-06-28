@@ -16,6 +16,7 @@ import {
 } from '../lib/activeParticipantResolver';
 import { loadFamilyChildrenRoster } from '../lib/familyChildrenRosterService';
 import { setGameplayPlayerIdentity } from '../lib/gameplayPlayerIdentity';
+import { portalDebug } from '../lib/portalDebug';
 import type {
   ActiveParticipantRosterEntry,
   ActiveParticipantState,
@@ -33,6 +34,7 @@ export type ActiveParticipantContextValue = {
   needsSelection: boolean;
   claimRequired: boolean;
   loading: boolean;
+  error: string | null;
   selectParticipant: (entry: ActiveParticipantRosterEntry) => void;
   refreshRoster: () => Promise<void>;
   refreshParticipant: () => void;
@@ -51,6 +53,7 @@ export function ActiveParticipantProvider({
   const [participant, setParticipant] = useState<ActiveParticipantState | null>(null);
   const [claimRequired, setClaimRequired] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const syncGameplayIdentity = useCallback(
     (resolved: ActiveParticipantState | null, rosterEntries: ActiveParticipantRosterEntry[]) => {
@@ -91,16 +94,37 @@ export function ActiveParticipantProvider({
     }
 
     setLoading(true);
+    setError(null);
     try {
+      portalDebug('portal load step', { step: 'participant_hydration_start', program_code: programCode });
       const payload = await loadFamilyChildrenRoster(programCode);
+      portalDebug('portal load step', {
+        step: 'participant_hydration_complete',
+        program_code: programCode,
+        roster_count: payload.roster.length,
+        claim_required: payload.claimRequired,
+        errors: payload.errors,
+      });
       setRoster(payload.roster);
       setClaimRequired(payload.claimRequired);
+      setError(payload.errors[0] ?? null);
 
       let resolved = validateStoredParticipantAgainstRoster(payload.roster);
       if (!resolved) {
         resolved = autoSelectSingleChildRoster(payload.roster);
       }
       syncGameplayIdentity(resolved, payload.roster);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Could not load family roster.';
+      portalDebug('portal load step', {
+        step: 'participant_hydration_failed',
+        program_code: programCode,
+        error: message,
+      });
+      setRoster([]);
+      setGameplayPlayerIdentity(null);
+      setParticipant(null);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -171,6 +195,7 @@ export function ActiveParticipantProvider({
       needsSelection: roster.length > 1 && !participant?.participantId,
       claimRequired,
       loading,
+      error,
       selectParticipant,
       refreshRoster,
       refreshParticipant,
@@ -181,6 +206,7 @@ export function ActiveParticipantProvider({
       playerLabel,
       claimRequired,
       loading,
+      error,
       selectParticipant,
       refreshRoster,
       refreshParticipant,
@@ -260,6 +286,7 @@ export function KidPlaySessionParticipantProvider({
       needsSelection: false,
       claimRequired: false,
       loading: false,
+      error: null,
       selectParticipant: () => undefined,
       refreshRoster: async () => undefined,
       refreshParticipant: () => undefined,

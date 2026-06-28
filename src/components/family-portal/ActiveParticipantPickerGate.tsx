@@ -17,7 +17,8 @@ function isGameplayPickerRoute(pathname: string): boolean {
 
 export default function ActiveParticipantPickerGate() {
   const location = useLocation();
-  const { roster, needsSelection, loading, selectParticipant } = useActiveParticipant();
+  const { roster, needsSelection, loading, error, selectParticipant, refreshRoster } =
+    useActiveParticipant();
 
   const shouldPrompt =
     !loading &&
@@ -26,10 +27,20 @@ export default function ActiveParticipantPickerGate() {
     isGameplayPickerRoute(location.pathname);
 
   return (
-    <ActiveParticipantPickerModal
-      open={shouldPrompt}
-      roster={roster}
-      onSelect={selectParticipant}
-    />
+    <>
+      {!loading && error ? (
+        <div className="activeParticipantRecovery" role="alert">
+          <p>We&apos;re having trouble loading this portal. Try refreshing or switch program.</p>
+          <button type="button" onClick={() => void refreshRoster()}>
+            Try Again
+          </button>
+        </div>
+      ) : null}
+      <ActiveParticipantPickerModal
+        open={shouldPrompt}
+        roster={roster}
+        onSelect={selectParticipant}
+      />
+    </>
   );
 }

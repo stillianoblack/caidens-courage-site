@@ -77,10 +77,10 @@ export default function AdminPilotProgramCard({ program, onCopied }: AdminPilotP
       </div>
 
       <div className="adminPortal-detailGrid">
-        <AdminCopyField label="Program Code" value={program.program_code} onCopied={onCopied} />
+        <AdminCopyField label="Internal Program Code" value={program.program_code} onCopied={onCopied} />
         {isIndependentFamily || !program.facilitator_access_code ? null : (
           <AdminCopyField
-            label="Facilitator Access Code"
+            label="Facilitator Code"
             value={program.facilitator_access_code}
             onCopied={onCopied}
           />

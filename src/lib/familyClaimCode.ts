@@ -1,19 +1,15 @@
 import { PORTAL_PATH } from '../config/courageRoutes';
+import { generateClaimAccessCode } from './portalCodeIdentity';
 
-const CLAIM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const CLAIM_CODE_PATTERN = /^CLAIM-[A-Z0-9]{5}-[A-Z0-9]{5}$/;
+const CLAIM_CODE_PATTERN = /^CLAIM-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 export function isFamilyClaimCode(value: string): boolean {
   return CLAIM_CODE_PATTERN.test(value.trim().toUpperCase());
 }
 
 export function generateFamilyClaimCode(prefix = 'CLAIM'): string {
-  let token = '';
-  const bytes = crypto.getRandomValues(new Uint8Array(10));
-  for (let i = 0; i < bytes.length; i += 1) {
-    token += CLAIM_ALPHABET[bytes[i] % CLAIM_ALPHABET.length];
-  }
-  return `${prefix}-${token.slice(0, 5)}-${token.slice(5)}`;
+  const code = generateClaimAccessCode();
+  return prefix === 'CLAIM' ? code : code.replace(/^CLAIM/, prefix);
 }
 
 export function buildFamilyClaimUrl(claimCode: string, origin?: string): string {

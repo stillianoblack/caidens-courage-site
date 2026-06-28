@@ -9,7 +9,6 @@ import {
   fetchStudentFamilyLinksByCampProgram,
   fetchStudentFamilyLinksByFamilyProgram,
   markStudentFamilyLinksClaimed,
-  repairCampParentLinksForClaim,
   type StudentFamilyLink,
 } from './studentFamilyLinkService';
 import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
@@ -248,41 +247,6 @@ export async function claimParentFamilyPortal(input: {
     parentPhone: input.parentPhone,
     parentLastName: input.parentLastName,
   });
-
-  if (!lookup.matches.length && campProgramCode) {
-    const repair = await repairCampParentLinksForClaim({
-      campProgramCode,
-      parentEmail: email,
-      parentPhone: input.parentPhone,
-      parentLastName: input.parentLastName,
-    });
-
-    if (repair.repaired) {
-      console.info('[PARENT_CLAIM_REPAIR]', {
-        access_code: input.accessCode.trim(),
-        parent_email: email,
-        camp_program_code: campProgramCode,
-        reason: repair.reason,
-        link_ids: repair.linkIds ?? [],
-        student_ids: repair.studentIds ?? [],
-      });
-      lookup = await lookupParentChildLinks({
-        campProgramCode,
-        parentEmail: email,
-        parentPhone: input.parentPhone,
-        parentLastName: input.parentLastName,
-      });
-    } else if (repair.reason && repair.reason !== 'no_repair_candidate') {
-      console.info('[PARENT_CLAIM_REPAIR_SKIPPED]', {
-        access_code: input.accessCode.trim(),
-        parent_email: email,
-        camp_program_code: campProgramCode,
-        reason: repair.reason,
-        link_ids: repair.linkIds ?? [],
-        student_ids: repair.studentIds ?? [],
-      });
-    }
-  }
 
   if (lookup.needsLastNameConfirm) {
     return {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { recordToActivePilotProgram } from '../../config/activePilotProgram';
-import { isProtectedPilotProgramCode } from '../../config/adminProtectedPrograms';
+import { isSuperAdminSession } from '../../config/adminAccess';
 import { writeLastPilotProgram } from '../../config/lastPilotProgram';
 import { applyProgramPortalUnlock } from '../../config/portalContext';
 import { FAMILY_HUB_PATH, PROGRAM_DASHBOARD_PATH } from '../../config/courageRoutes';
@@ -9,6 +9,7 @@ import {
   archivePilotProgram,
   fetchPilotProgramAdminStats,
   restorePilotProgram,
+  updatePilotProgramProtectionLevel,
   type PilotCleanupTableCount,
 } from '../../lib/adminPilotCleanupService';
 import {
@@ -21,6 +22,13 @@ import AdminPilotEstimatedRangeModal from './AdminPilotEstimatedRangeModal';
 import AdminPilotProgramScaleSummary from './AdminPilotProgramScaleSummary';
 import AdminPilotRenameModal from './AdminPilotRenameModal';
 import { normalizePilotFeatureFlags, PILOT_PROGRAM_FEATURE_FLAG_KEYS } from '../../lib/pilotProgramFeatureFlags';
+import {
+  getPilotProgramProtectionDecision,
+  PILOT_PROGRAM_PROTECTION_LEVELS,
+  PROTECTION_ACTION_BLOCKED_MESSAGE,
+  resolvePilotProgramProtectionLevel,
+} from '../../lib/pilotProgramProtection';
+import type { PilotProgramProtectionLevel } from '../../types/pilotProgram';
 
 type AdminPilotProgramRowProps = {
   program: PilotProgramRecord;
@@ -68,8 +76,13 @@ export default function AdminPilotProgramRow({
   const activeProgram = recordToActivePilotProgram(program);
   const isIndependentFamily = isIndependentFamilyType(program.program_type);
   const programMetaLabel = resolveAdminPilotProgramMeta(program);
-  const protectedProgram = isProtectedPilotProgramCode(program.program_code);
   const isArchived = program.pilot_status === 'archived';
+  const protectionLevel = resolvePilotProgramProtectionLevel(program);
+  const editLabelsDecision = getPilotProgramProtectionDecision(program, 'edit_labels');
+  const archiveDecision = getPilotProgramProtectionDecision(program, 'archive');
+  const deleteDecision = getPilotProgramProtectionDecision(program, 'delete');
+  const regenerateDecision = getPilotProgramProtectionDecision(program, 'regenerate_codes');
+  const canEditProtectionLevel = isSuperAdminSession();
   const featureFlags = normalizePilotFeatureFlags(program.feature_flags ?? undefined);
 
   useEffect(() => {
@@ -96,6 +109,16 @@ export default function AdminPilotProgramRow({
   };
 
   const handleArchive = async () => {
+    if (!archiveDecision.allowed) {
+      setActionError(archiveDecision.message ?? PROTECTION_ACTION_BLOCKED_MESSAGE);
+      return;
+    }
+    if (
+      archiveDecision.requiresConfirmation &&
+      !window.confirm('Archive this pilot? Student data will remain recoverable.')
+    ) {
+      return;
+    }
     setActionError(null);
     setActionMessage(null);
     const result = await archivePilotProgram(program.program_code);
@@ -111,6 +134,32 @@ export default function AdminPilotProgramRow({
     setActionError(null);
     setActionMessage(null);
     const result = await restorePilotProgram(program.program_code);
+    if (result.success) {
+      setActionMessage(result.message);
+      onChanged();
+    } else {
+      setActionError(result.message);
+    }
+  };
+
+  const handleProtectionChange = async (nextLevel: PilotProgramProtectionLevel) => {
+    if (nextLevel === protectionLevel) return;
+    if (
+      nextLevel === 'production' &&
+      !window.confirm('Production protection prevents deletion, archiving, code regeneration, and portal-type changes.')
+    ) {
+      return;
+    }
+    if (
+      protectionLevel === 'production' &&
+      !window.confirm('Lower Production protection for this program? Destructive actions may become available.')
+    ) {
+      return;
+    }
+
+    setActionError(null);
+    setActionMessage(null);
+    const result = await updatePilotProgramProtectionLevel(program.program_code, nextLevel);
     if (result.success) {
       setActionMessage(result.message);
       onChanged();
@@ -146,8 +195,11 @@ export default function AdminPilotProgramRow({
         </div>
 
         <div className="adminPortal-detailGrid">
-          <AdminCopyField label="Program Code (internal)" value={program.program_code} onCopied={onCopied} />
+          <AdminCopyField label="Internal Program Code" value={program.program_code} onCopied={onCopied} />
           <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
+          {!isIndependentFamily && program.facilitator_access_code ? (
+            <AdminCopyField label="Facilitator Code" value={program.facilitator_access_code} onCopied={onCopied} />
+          ) : null}
           <div className="adminPortal-detailItem">
             <span className="adminPortal-detailLabel">Display Name</span>
             <span className="adminPortal-detailValue">{program.program_name}</span>
@@ -172,6 +224,29 @@ export default function AdminPilotProgramRow({
               {program.age_grade_band || program.age_range || '—'}
               {program.age_grade_notes ? ` (${program.age_grade_notes})` : ''}
             </span>
+          </div>
+          <div className="adminPortal-detailItem adminPortal-detailItem--wide">
+            <label className="adminPortal-detailLabel" htmlFor={`protection-${program.id ?? program.program_code}`}>
+              Program Protection
+            </label>
+            <select
+              id={`protection-${program.id ?? program.program_code}`}
+              className="adminPortal-select"
+              value={protectionLevel}
+              disabled={!canEditProtectionLevel}
+              title={!canEditProtectionLevel ? 'Only Super Admin can edit protection level.' : undefined}
+              onChange={(event) => void handleProtectionChange(event.target.value as PilotProgramProtectionLevel)}
+            >
+              {PILOT_PROGRAM_PROTECTION_LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </option>
+              ))}
+            </select>
+            <p className="adminPortal-fieldHint">
+              Protection controls whether this program can be archived, deleted, or have access codes regenerated. Display names can still be edited unless archived.
+              {!canEditProtectionLevel ? ' Only Super Admin can change this value.' : ''}
+            </p>
           </div>
           {expanded && !statsLoading ? (
             <>
@@ -202,9 +277,9 @@ export default function AdminPilotProgramRow({
           ) : null}
         </div>
 
-        {protectedProgram ? (
+        {!archiveDecision.allowed || !deleteDecision.allowed || !regenerateDecision.allowed ? (
           <p className="adminPortal-protectedNote" role="status">
-            Protected pilot — archive and delete are disabled in code.
+            {PROTECTION_ACTION_BLOCKED_MESSAGE}
           </p>
         ) : null}
 
@@ -219,6 +294,8 @@ export default function AdminPilotProgramRow({
             type="button"
             className="adminPortal-btn adminPortal-btn--ghost"
             onClick={() => setRenameOpen(true)}
+            disabled={!editLabelsDecision.allowed}
+            title={!editLabelsDecision.allowed ? editLabelsDecision.message : undefined}
           >
             ✏️ Edit Name
           </button>
@@ -230,13 +307,28 @@ export default function AdminPilotProgramRow({
           <button type="button" className="adminPortal-btn adminPortal-btn--gold" onClick={openFamilyPortal}>
             Open Family Portal
           </button>
-          {showArchiveActions && !protectedProgram ? (
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--ghost"
+            disabled={!regenerateDecision.allowed}
+            title={!regenerateDecision.allowed ? regenerateDecision.message : undefined}
+            onClick={() => setActionError('Access-code regeneration is gated but not implemented in this admin view yet.')}
+          >
+            Regenerate Codes
+          </button>
+          {showArchiveActions ? (
             isArchived ? (
               <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void handleRestore()}>
                 Restore Pilot
               </button>
             ) : (
-              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void handleArchive()}>
+              <button
+                type="button"
+                className="adminPortal-btn adminPortal-btn--ghost"
+                disabled={!archiveDecision.allowed}
+                title={!archiveDecision.allowed ? archiveDecision.message : undefined}
+                onClick={() => void handleArchive()}
+              >
                 Archive Pilot
               </button>
             )

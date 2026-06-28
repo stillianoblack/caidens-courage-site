@@ -39,10 +39,11 @@ import {
   PORTAL_CODE_NOT_FOUND_MESSAGE,
   PORTAL_CONNECTION_ERROR_MESSAGE,
 } from '../lib/portalAccessCodes';
-import { logPortalRedirect } from '../lib/portalDebug';
+import { logPortalRedirect, portalDebug } from '../lib/portalDebug';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import { resetPortalScroll } from '../lib/portalScroll';
 import { isSupabaseConfigReady } from '../lib/supabaseClient';
+import { FetchTimeoutError, withTimeout } from '../lib/fetchWithTimeout';
 import { verifyStudentPinLoginWithProgramFallback } from '../lib/studentPinProgramScope';
 import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
 import { resolveOngoingFamilyAccessCode } from '../lib/portalUnlockRoute';
@@ -66,6 +67,9 @@ export type PortalUnlockVariant = 'nav' | 'hero';
 
 const BASELINE_RESULTS_CODES = new Set(['results', 'result']);
 const STUDENT_PIN_RE = /^\d{4,8}$/;
+const PORTAL_LOGIN_TIMEOUT_MS = 8000;
+const PORTAL_SLOW_LOAD_MESSAGE =
+  "We're having trouble loading this portal. Try refreshing or switch program.";
 
 export type PendingParentPinClaim = {
   program: ActivePilotProgram;
@@ -152,10 +156,16 @@ export function usePortalUnlock(
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    portalDebug('portal load step', {
+      step: 'session_restoration',
+      has_remembered_access_code: Boolean(rememberedAccessCode),
+      has_remembered_program: hasRememberedProgram,
+      user_type: remembered?.user_type ?? null,
+    });
     if (rememberedAccessCode && !accessCode.trim()) {
       setAccessCode(rememberedAccessCode);
     }
-  }, [accessCode, rememberedAccessCode]);
+  }, [accessCode, hasRememberedProgram, remembered?.user_type, rememberedAccessCode]);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -181,7 +191,36 @@ export function usePortalUnlock(
 
       if (isSupabaseConfigReady()) {
         setSubmitting(true);
-        const lookup = await lookupPortalProgramByAccessCodeDetailed(trimmedCode);
+        portalDebug('portal load step', {
+          step: 'program_lookup_start',
+          code_shape: isProgramShaped ? 'program' : 'legacy_or_short',
+          intent: portalIntent,
+        });
+        let lookup: Awaited<ReturnType<typeof lookupPortalProgramByAccessCodeDetailed>>;
+        try {
+          lookup = await withTimeout(
+            lookupPortalProgramByAccessCodeDetailed(trimmedCode),
+            PORTAL_LOGIN_TIMEOUT_MS,
+            'portal_program_lookup',
+          );
+        } catch (err) {
+          portalDebug('portal load step', {
+            step: 'program_lookup_failed',
+            reason: err instanceof FetchTimeoutError ? 'timeout' : 'error',
+          });
+          setSubmitting(false);
+          setError(
+            err instanceof FetchTimeoutError ? PORTAL_SLOW_LOAD_MESSAGE : PORTAL_CONNECTION_ERROR_MESSAGE,
+          );
+          return;
+        }
+        portalDebug('portal load step', {
+          step: 'program_lookup_complete',
+          status: lookup.status,
+          role: lookup.result?.role ?? null,
+          program_code: lookup.result?.program.programCode ?? null,
+          has_claim_context: Boolean(lookup.claimCodeContext),
+        });
 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
@@ -213,11 +252,26 @@ export function usePortalUnlock(
               const campProgramCodeHint =
                 lookup.claimCodeContext?.campProgramCode?.trim() ||
                 program.programCode.trim();
-              const verified = await verifyStudentPinLoginWithProgramFallback({
-                pin: credential,
-                accessCodeHint: trimmedCode,
-                campProgramCodeHint,
-              });
+              let verified: Awaited<ReturnType<typeof verifyStudentPinLoginWithProgramFallback>>;
+              try {
+                verified = await withTimeout(
+                  verifyStudentPinLoginWithProgramFallback({
+                    pin: credential,
+                    accessCodeHint: trimmedCode,
+                    campProgramCodeHint,
+                  }),
+                  PORTAL_LOGIN_TIMEOUT_MS,
+                  'portal_student_pin_hydration',
+                );
+              } catch (err) {
+                portalDebug('portal load step', {
+                  step: 'participant_hydration_failed',
+                  reason: err instanceof FetchTimeoutError ? 'timeout' : 'error',
+                });
+                setError(PORTAL_SLOW_LOAD_MESSAGE);
+                setSubmitting(false);
+                return;
+              }
               if (!verified.success) {
                 const claimCodeMismatch =
                   isFamilyClaimCode(trimmedCode) &&
@@ -303,12 +357,27 @@ export function usePortalUnlock(
             clearStudentPinSession();
 
             if (isIndependentFamilyProgram(program)) {
-              const unlock = await unlockIndependentFamilyPortal({
-                program,
-                parentEmail: credential,
-                parentLastName: parentLastName.trim() || undefined,
-                accessCode: trimmedCode,
-              });
+              let unlock: Awaited<ReturnType<typeof unlockIndependentFamilyPortal>>;
+              try {
+                unlock = await withTimeout(
+                  unlockIndependentFamilyPortal({
+                    program,
+                    parentEmail: credential,
+                    parentLastName: parentLastName.trim() || undefined,
+                    accessCode: trimmedCode,
+                  }),
+                  PORTAL_LOGIN_TIMEOUT_MS,
+                  'portal_family_link_lookup',
+                );
+              } catch (err) {
+                portalDebug('portal load step', {
+                  step: 'family_link_lookup_failed',
+                  reason: err instanceof FetchTimeoutError ? 'timeout' : 'error',
+                });
+                setError(PORTAL_SLOW_LOAD_MESSAGE);
+                setSubmitting(false);
+                return;
+              }
 
               if (!unlock.success) {
                 setError(
@@ -338,11 +407,32 @@ export function usePortalUnlock(
               return;
             }
 
-            const claim = await claimParentFamilyPortal({
-              program,
-              parentEmail: credential,
-              parentLastName: parentLastName.trim() || undefined,
-              accessCode: trimmedCode,
+            let claim: Awaited<ReturnType<typeof claimParentFamilyPortal>>;
+            try {
+              claim = await withTimeout(
+                claimParentFamilyPortal({
+                  program,
+                  parentEmail: credential,
+                  parentLastName: parentLastName.trim() || undefined,
+                  accessCode: trimmedCode,
+                }),
+                PORTAL_LOGIN_TIMEOUT_MS,
+                'portal_family_claim_lookup',
+              );
+            } catch (err) {
+              portalDebug('portal load step', {
+                step: 'family_claim_lookup_failed',
+                reason: err instanceof FetchTimeoutError ? 'timeout' : 'error',
+              });
+              setError(PORTAL_SLOW_LOAD_MESSAGE);
+              setSubmitting(false);
+              return;
+            }
+            portalDebug('portal load step', {
+              step: 'family_claim_lookup',
+              success: claim.success,
+              program_code: program.programCode,
+              matched_student_count: claim.matchedStudentIds?.length ?? 0,
             });
 
             if (!claim.success) {
@@ -380,6 +470,11 @@ export function usePortalUnlock(
             setParentLastName('');
             setNeedsLastNameConfirm(false);
             navigateToPortal(resolveFamilyPortalOverviewPath(), 'parent-claim-family');
+            portalDebug('portal load step', {
+              step: 'route_decision',
+              destination: resolveFamilyPortalOverviewPath(),
+              reason: 'parent-claim-family',
+            });
             setSubmitting(false);
             onUnlock?.();
             return;
@@ -444,6 +539,11 @@ export function usePortalUnlock(
             setParentLastName('');
             setNeedsLastNameConfirm(false);
             navigateToPortal(facilitatorReturnSessionPath(), 'facilitator-email-verified');
+            portalDebug('portal load step', {
+              step: 'route_decision',
+              destination: facilitatorReturnSessionPath(),
+              reason: 'facilitator-email-verified',
+            });
             setSubmitting(false);
             onUnlock?.();
             return;
@@ -541,7 +641,22 @@ export function usePortalUnlock(
         parentPhone: parentPhone.trim() || undefined,
       };
 
-      const result = await completeParentClaimViaStudentPin(payload);
+      let result: Awaited<ReturnType<typeof completeParentClaimViaStudentPin>>;
+      try {
+        result = await withTimeout(
+          completeParentClaimViaStudentPin(payload),
+          PORTAL_LOGIN_TIMEOUT_MS,
+          'portal_parent_claim_via_pin',
+        );
+      } catch (err) {
+        portalDebug('portal load step', {
+          step: 'parent_claim_via_pin_failed',
+          reason: err instanceof FetchTimeoutError ? 'timeout' : 'error',
+        });
+        setClaimError(PORTAL_SLOW_LOAD_MESSAGE);
+        setClaimSubmitting(false);
+        return;
+      }
       if (!result.success) {
         setClaimError(result.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE);
         setClaimSubmitting(false);

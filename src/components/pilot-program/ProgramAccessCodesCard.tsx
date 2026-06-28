@@ -71,7 +71,7 @@ export default function ProgramAccessCodesCard({
   const codesBody = (
     <div className="pilotAccessCodesGrid">
       <div className="pilotAccessCodesRow">
-        <span className="pilotAccessCodesLabel">Program Code</span>
+        <span className="pilotAccessCodesLabel">Internal Program Code</span>
         <span className="pilotAccessCodesValue">{program.programCode}</span>
         <button
           type="button"

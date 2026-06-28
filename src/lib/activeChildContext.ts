@@ -37,6 +37,8 @@ export type ActiveChildState = {
   firstName?: string;
 };
 
+let lastActiveChildSignature = '';
+
 export function readActiveChildState(): ActiveChildState | null {
   rejectLegacyActiveChildStorage();
 
@@ -58,23 +60,39 @@ export function setActiveChild(child: ActiveChildState): void {
   const scope = resolvePortalProgramScope();
   const pinSession = readStudentPinSession();
   const programCode = scope?.programCode?.trim() || pinSession?.programCode?.trim();
+  const previous = readScopedActiveChildRecord();
+  const nextParticipantId = child.participantId.trim();
+  const nextDisplayName = child.displayName.trim() || 'Player';
+  const nextFirstName = child.firstName?.trim() || undefined;
+  const unchanged =
+    (previous?.participantId === nextParticipantId &&
+      previous?.displayName === nextDisplayName &&
+      previous?.firstName === nextFirstName &&
+      (!programCode || previous?.programCode === programCode)) ||
+    lastActiveChildSignature ===
+      `${programCode ?? ''}|${nextParticipantId}|${nextDisplayName}|${nextFirstName ?? ''}`;
+
   if (programCode) {
     writeScopedActiveChildRecord({
-      participantId: child.participantId.trim(),
-      displayName: child.displayName.trim() || 'Player',
-      firstName: child.firstName?.trim() || undefined,
+      participantId: nextParticipantId,
+      displayName: nextDisplayName,
+      firstName: nextFirstName,
       programCode,
       accessCode: scope?.accessCode,
       createdAt: new Date().toISOString(),
     });
   }
 
-  console.info('[ACTIVE_CHILD]', {
-    participant_id: child.participantId,
-    display_name: child.displayName,
-    first_name: child.firstName ?? null,
-    program_code: programCode ?? null,
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[PORTAL_DEBUG]', 'active child', {
+      participant_id: child.participantId,
+      display_name: child.displayName,
+      first_name: child.firstName ?? null,
+      program_code: programCode ?? null,
+    });
+  }
+  lastActiveChildSignature = `${programCode ?? ''}|${nextParticipantId}|${nextDisplayName}|${nextFirstName ?? ''}`;
+  if (unchanged) return;
   notifyChildProfileUpdated();
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(ACTIVE_CHILD_EVENT, { detail: child }));

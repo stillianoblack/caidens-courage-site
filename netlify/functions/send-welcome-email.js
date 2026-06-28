@@ -83,6 +83,13 @@ exports.handler = async (event) => {
     return json(400, { success: false, error: 'Missing email payload.' });
   }
 
+  console.info('[PARENT_EMAIL_ATTEMPTED]', {
+    recipient_email: payload.recipientEmail,
+    email_type: payload.emailType || 'welcome',
+    related_student_id: payload.relatedStudentId || null,
+    related_program_id: payload.relatedProgramId || null,
+  });
+
   const queuedLog = await logEmailAttempt(payload, 'queued');
   if (!process.env.RESEND_API_KEY) {
     console.info('[SEND_WELCOME_EMAIL]', {

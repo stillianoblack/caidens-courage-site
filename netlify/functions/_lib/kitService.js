@@ -21,6 +21,19 @@ function isKitEnabled() {
   return process.env.KIT_ENABLED === 'true' || Boolean(apiKey);
 }
 
+function sanitizeKitErrorBody(body) {
+  if (!body || typeof body !== 'object') return body || null;
+  const blocked = new Set(['api_key', 'apiKey', 'token', 'access_token', 'authorization']);
+  return Object.fromEntries(
+    Object.entries(body)
+      .filter(([key]) => !blocked.has(key))
+      .map(([key, value]) => [
+        key,
+        typeof value === 'string' && value.length > 500 ? `${value.slice(0, 500)}...` : value,
+      ]),
+  );
+}
+
 function getSupabase() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -109,6 +122,11 @@ async function kitRequest(path, options = {}) {
     const error = new Error(message);
     error.status = response.status;
     error.body = body;
+    console.warn('[KIT_API_ERROR]', {
+      path,
+      status: response.status,
+      body: sanitizeKitErrorBody(body),
+    });
     throw error;
   }
 
@@ -149,6 +167,12 @@ async function upsertKitSubscriber({ email, firstName, lastName, metadata = {} }
   }
 
   if (!isKitEnabled()) {
+    console.info('[KIT_SYNC]', {
+      step: 'kit_api_disabled',
+      email: normalizedEmail,
+      kit_enabled: false,
+      reason: 'KIT_ENABLED false or KIT_API_KEY missing',
+    });
     await writeIntegrationLog({
       eventName: 'kit_subscriber_upsert',
       email: normalizedEmail,
@@ -160,6 +184,11 @@ async function upsertKitSubscriber({ email, firstName, lastName, metadata = {} }
   }
 
   try {
+    console.info('[KIT_SYNC]', {
+      step: 'subscriber_upsert_attempted',
+      email: normalizedEmail,
+      kit_enabled: true,
+    });
     const payload = {
       email_address: normalizedEmail,
       first_name: firstName?.trim() || null,
@@ -172,6 +201,12 @@ async function upsertKitSubscriber({ email, firstName, lastName, metadata = {} }
     const result = await kitRequest('/v4/subscribers', {
       method: 'POST',
       body: JSON.stringify(payload),
+    });
+
+    console.info('[KIT_SYNC]', {
+      step: 'subscriber_created_or_found',
+      email: normalizedEmail,
+      subscriber_id: result?.subscriber?.id ?? null,
     });
 
     return {
@@ -187,7 +222,13 @@ async function upsertKitSubscriber({ email, firstName, lastName, metadata = {} }
       errorMessage: error.message,
       metadata,
     });
-    return { ok: false, skipped: false, error: error.message };
+    return {
+      ok: false,
+      skipped: false,
+      error: error.message,
+      status: error.status ?? null,
+      body: sanitizeKitErrorBody(error.body),
+    };
   }
 }
 
@@ -196,6 +237,12 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
   const normalizedTag = String(tagName || '').trim();
 
   if (!normalizedEmail) {
+    console.info('[KIT_SYNC]', {
+      step: 'parent_email_attempted',
+      email: null,
+      skipped: true,
+      reason: 'no_parent_email',
+    });
     await writeIntegrationLog({
       eventName: eventName || 'kit_tag_apply',
       email: null,
@@ -212,6 +259,13 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
   }
 
   if (!isKitEnabled()) {
+    console.info('[KIT_SYNC]', {
+      step: 'kit_api_disabled',
+      email: normalizedEmail,
+      tag: normalizedTag,
+      kit_enabled: false,
+      reason: 'KIT_ENABLED false or KIT_API_KEY missing',
+    });
     await writeIntegrationLog({
       eventName: eventName || 'kit_tag_apply',
       email: normalizedEmail,
@@ -225,6 +279,12 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
 
   const participantId = metadata?.participant_id || metadata?.participantId || null;
   if (await hasSuccessfulTagLog(normalizedEmail, normalizedTag, participantId)) {
+    console.info('[KIT_SYNC]', {
+      step: 'tag_apply_skipped',
+      email: normalizedEmail,
+      tag: normalizedTag,
+      reason: 'duplicate_tag_event',
+    });
     await writeIntegrationLog({
       eventName: eventName || 'kit_tag_apply',
       email: normalizedEmail,
@@ -246,6 +306,11 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
 
     const tagId = await resolveTagId(normalizedTag);
     if (!tagId) {
+      console.warn('[KIT_SYNC]', {
+        step: 'tag_lookup_failed',
+        email: normalizedEmail,
+        tag: normalizedTag,
+      });
       await writeIntegrationLog({
         eventName: eventName || 'kit_tag_apply',
         email: normalizedEmail,
@@ -270,6 +335,13 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
       metadata,
     });
 
+    console.info('[KIT_SYNC]', {
+      step: 'tag_applied',
+      email: normalizedEmail,
+      tag: normalizedTag,
+      tag_id: tagId,
+    });
+
     return { ok: true, skipped: false, tagName: normalizedTag };
   } catch (error) {
     await writeIntegrationLog({
@@ -280,13 +352,36 @@ async function applyKitTag({ email, tagName, eventName, metadata = {} }) {
       errorMessage: error.message,
       metadata,
     });
-    return { ok: false, skipped: false, error: error.message };
+    console.warn('[KIT_SYNC]', {
+      step: 'tag_apply_failed',
+      email: normalizedEmail,
+      tag: normalizedTag,
+      error: error.message,
+      status: error.status ?? null,
+      body: sanitizeKitErrorBody(error.body),
+    });
+    return {
+      ok: false,
+      skipped: false,
+      error: error.message,
+      status: error.status ?? null,
+      body: sanitizeKitErrorBody(error.body),
+    };
   }
 }
 
 async function syncKitSubscriberTags({ email, tags, metadata = {}, eventName = 'kit_sync_tags' }) {
   const normalizedEmail = normalizeEmail(email);
   const tagList = Array.isArray(tags) ? tags.filter(Boolean) : [];
+
+  console.info('[KIT_SYNC]', {
+    step: 'parent_email_attempted',
+    email: normalizedEmail || null,
+    event_name: eventName,
+    tags: tagList,
+    kit_enabled: isKitEnabled(),
+    welcome_sequence_configured: false,
+  });
 
   if (!normalizedEmail) {
     await writeIntegrationLog({

@@ -22,6 +22,20 @@ function trimDisplayName(value: string): string {
   return value.trim();
 }
 
+export function buildProgramDisplayNameUpdatePayload(input: {
+  displayName: string;
+  groupName?: string;
+}): { program_name: string; group_name?: string } {
+  const programName = trimDisplayName(input.displayName);
+  const payload: { program_name: string; group_name?: string } = {
+    program_name: programName,
+  };
+  if (input.groupName !== undefined) {
+    payload.group_name = trimDisplayName(input.groupName);
+  }
+  return payload;
+}
+
 /** Sync display-only fields in local session after a rename — identifiers unchanged. */
 export function syncLocalProgramDisplayName(
   programCode: string,
@@ -38,7 +52,7 @@ export function syncLocalProgramDisplayName(
     writeActivePilotProgram({
       ...active,
       programName,
-      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName || programName } : {}),
+      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName ?? '' } : {}),
     });
   }
 
@@ -47,7 +61,7 @@ export function syncLocalProgramDisplayName(
     writeActiveFamilyContext({
       ...familyContext,
       programName,
-      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName || programName } : {}),
+      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName ?? '' } : {}),
     });
   }
 
@@ -58,7 +72,7 @@ export function syncLocalProgramDisplayName(
     const updatedProgram: ActivePilotProgram = {
       ...last.program,
       programName,
-      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName || programName } : {}),
+      ...(shouldUpdateGroupName ? { groupName: resolvedGroupName ?? '' } : {}),
     };
     writeLastPilotProgram(
       updatedProgram,
@@ -98,7 +112,7 @@ export async function updateProgramDisplayNameByCode(
       const updated: ActivePilotProgram = {
         ...active,
         programName,
-        groupName: shouldUpdateGroupName ? groupName ?? programName : active.groupName,
+        groupName: shouldUpdateGroupName ? groupName ?? '' : active.groupName,
       };
       syncLocalProgramDisplayName(code, programName, shouldUpdateGroupName ? groupName : undefined);
       return { success: true, program: updated };
@@ -106,12 +120,10 @@ export async function updateProgramDisplayNameByCode(
     return { success: false, message: 'Supabase is not configured.' };
   }
 
-  const updatePayload: { program_name: string; group_name?: string } = {
-    program_name: programName,
-  };
-  if (shouldUpdateGroupName) {
-    updatePayload.group_name = groupName || programName;
-  }
+  const updatePayload = buildProgramDisplayNameUpdatePayload({
+    displayName: programName,
+    ...(shouldUpdateGroupName ? { groupName: groupName ?? '' } : {}),
+  });
 
   const { data, error } = await supabase
     .from('pilot_programs')

@@ -269,8 +269,18 @@ async function loadFamilyDashboardDataImpl(
 
   const errors: string[] = [];
   warnSupabaseEnvInDevelopment();
-  const linkAudit = await auditFamilyPortalLinking(programCode);
-  const hydration = await hydrateExistingFamilyChildren(programCode);
+  console.info('[PORTAL_LOAD_STEP]', { step: 'family_link_lookup_start', program_code: programCode });
+  const [linkAudit, hydration] = await Promise.all([
+    auditFamilyPortalLinking(programCode),
+    hydrateExistingFamilyChildren(programCode),
+  ]);
+  console.info('[PORTAL_LOAD_STEP]', {
+    step: 'family_link_lookup_complete',
+    program_code: programCode,
+    linked_child_count: hydration.linkedChildCount,
+    visible_child_count: hydration.visibleChildren.length,
+    claim_required: hydration.claimRequired,
+  });
   errors.push(...hydration.errors);
 
   if (linkAudit.findings.length) {

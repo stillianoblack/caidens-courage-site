@@ -385,6 +385,23 @@
   cursor: not-allowed;
 }
 
+.adminPortal-select {
+  width: min(100%, 260px);
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  color: #172033;
+  background: #fff;
+}
+
+.adminPortal-fieldHint {
+  margin: 0.4rem 0 0;
+  color: #667085;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
 .adminPortal-btn--primary {
   background: #243e70;
   color: #fff;

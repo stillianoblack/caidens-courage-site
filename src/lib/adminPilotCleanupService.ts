@@ -1,7 +1,12 @@
 import { getConfiguredAdminEmail } from '../config/adminAccess';
-import { isProtectedPilotProgramCode } from '../config/adminProtectedPrograms';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import { updateProgramDisplayNameByCode } from './familyProgramDisplayNameService';
+import {
+  getPilotProgramProtectionDecision,
+  normalizePilotProgramProtectionLevel,
+  PROTECTION_ACTION_BLOCKED_MESSAGE,
+  resolvePilotProgramProtectionLevel,
+} from './pilotProgramProtection';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type PilotCleanupTableCount = {
@@ -14,7 +19,11 @@ export type PilotCleanupPreview = {
   programCode: string;
   programName: string;
   pilotStatus: string;
-  protected: boolean;
+  canArchive: boolean;
+  canDelete: boolean;
+  canRegenerateCodes: boolean;
+  canChangePortalType: boolean;
+  protectionLevel: string;
   archiveColumnsAvailable: boolean;
   tables: PilotCleanupTableCount[];
   error?: string;
@@ -117,8 +126,12 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
     return {
       programCode: '',
       programName: '',
-      pilotStatus: '',
-      protected: false,
+        pilotStatus: '',
+        canArchive: false,
+        canDelete: false,
+        canRegenerateCodes: false,
+        canChangePortalType: false,
+        protectionLevel: 'testing',
       archiveColumnsAvailable: false,
       tables: [],
       error: 'Program code is required.',
@@ -130,7 +143,11 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
       programCode: code,
       programName: '',
       pilotStatus: '',
-      protected: isProtectedPilotProgramCode(code),
+      canArchive: false,
+      canDelete: false,
+      canRegenerateCodes: false,
+      canChangePortalType: false,
+      protectionLevel: 'testing',
       archiveColumnsAvailable: false,
       tables: [],
       error: 'Supabase is not configured.',
@@ -141,7 +158,7 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
 
   const { data: programRow, error: programError } = await supabase
     .from('pilot_programs')
-    .select('program_name, pilot_status')
+    .select('program_name, pilot_status, protection_level')
     .eq('program_code', code)
     .maybeSingle();
 
@@ -150,7 +167,11 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
       programCode: code,
       programName: '',
       pilotStatus: '',
-      protected: isProtectedPilotProgramCode(code),
+      canArchive: false,
+      canDelete: false,
+      canRegenerateCodes: false,
+      canChangePortalType: false,
+      protectionLevel: 'testing',
       archiveColumnsAvailable,
       tables: [],
       error: programError.message,
@@ -162,7 +183,11 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
       programCode: code,
       programName: '',
       pilotStatus: '',
-      protected: isProtectedPilotProgramCode(code),
+      canArchive: false,
+      canDelete: false,
+      canRegenerateCodes: false,
+      canChangePortalType: false,
+      protectionLevel: 'testing',
       archiveColumnsAvailable,
       tables: [],
       error: 'Pilot program not found.',
@@ -183,11 +208,21 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
     }
   }
 
+  const protectionProgram = programRow as Pick<PilotProgramRecord, 'protection_level' | 'pilot_status'>;
+  const archiveDecision = getPilotProgramProtectionDecision(protectionProgram, 'archive');
+  const deleteDecision = getPilotProgramProtectionDecision(protectionProgram, 'delete');
+  const regenerateDecision = getPilotProgramProtectionDecision(protectionProgram, 'regenerate_codes');
+  const portalTypeDecision = getPilotProgramProtectionDecision(protectionProgram, 'change_portal_type');
+
   return {
     programCode: code,
     programName: programRow.program_name ?? '',
     pilotStatus: programRow.pilot_status ?? '',
-    protected: isProtectedPilotProgramCode(code),
+    canArchive: archiveDecision.allowed,
+    canDelete: deleteDecision.allowed,
+    canRegenerateCodes: regenerateDecision.allowed,
+    canChangePortalType: portalTypeDecision.allowed,
+    protectionLevel: resolvePilotProgramProtectionLevel(protectionProgram),
     archiveColumnsAvailable,
     tables,
   };
@@ -195,12 +230,24 @@ export async function previewPilotCleanup(programCode: string): Promise<PilotCle
 
 export async function archivePilotProgram(programCode: string): Promise<PilotArchiveResult> {
   const code = programCode.trim().toUpperCase();
-  if (isProtectedPilotProgramCode(code)) {
-    return { success: false, message: 'This pilot program is protected and cannot be archived.' };
-  }
 
   if (!isSupabaseConfigured() || !supabase) {
     return { success: false, message: 'Supabase is not configured.' };
+  }
+
+  const { data: programRow, error: programError } = await supabase
+    .from('pilot_programs')
+    .select('pilot_status, protection_level')
+    .eq('program_code', code)
+    .maybeSingle();
+  if (programError) return { success: false, message: programError.message };
+  if (!programRow) return { success: false, message: 'Pilot program not found.' };
+  const archiveDecision = getPilotProgramProtectionDecision(
+    programRow as Pick<PilotProgramRecord, 'protection_level' | 'pilot_status'>,
+    'archive',
+  );
+  if (!archiveDecision.allowed) {
+    return { success: false, message: archiveDecision.message ?? PROTECTION_ACTION_BLOCKED_MESSAGE };
   }
 
   const archiveColumnsAvailable = await detectArchiveColumns();
@@ -255,12 +302,24 @@ export async function restorePilotProgram(programCode: string): Promise<PilotArc
 
 export async function deletePilotProgramPermanently(programCode: string): Promise<PilotArchiveResult> {
   const code = programCode.trim().toUpperCase();
-  if (isProtectedPilotProgramCode(code)) {
-    return { success: false, message: 'This pilot program is protected and cannot be deleted.' };
-  }
 
   if (!isSupabaseConfigured() || !supabase) {
     return { success: false, message: 'Supabase is not configured.' };
+  }
+
+  const { data: programRow, error: programError } = await supabase
+    .from('pilot_programs')
+    .select('pilot_status, protection_level')
+    .eq('program_code', code)
+    .maybeSingle();
+  if (programError) return { success: false, message: programError.message };
+  if (!programRow) return { success: false, message: 'Pilot program not found.' };
+  const deleteDecision = getPilotProgramProtectionDecision(
+    programRow as Pick<PilotProgramRecord, 'protection_level' | 'pilot_status'>,
+    'delete',
+  );
+  if (!deleteDecision.allowed) {
+    return { success: false, message: deleteDecision.message ?? PROTECTION_ACTION_BLOCKED_MESSAGE };
   }
 
   const { error } = await supabase.from('pilot_programs').delete().eq('program_code', code);
@@ -314,6 +373,26 @@ export async function updatePilotProgramEstimatedRange(
   }
 
   return { success: true, message: 'Estimated student range updated.' };
+}
+
+export async function updatePilotProgramProtectionLevel(
+  programCode: string,
+  protectionLevel: string,
+): Promise<PilotArchiveResult> {
+  const code = programCode.trim().toUpperCase();
+  const level = normalizePilotProgramProtectionLevel(protectionLevel);
+  if (!code) return { success: false, message: 'Program code is required.' };
+  if (!isSupabaseConfigured() || !supabase) {
+    return { success: false, message: 'Supabase is not configured.' };
+  }
+
+  const { error } = await supabase
+    .from('pilot_programs')
+    .update({ protection_level: level })
+    .eq('program_code', code);
+
+  if (error) return { success: false, message: error.message };
+  return { success: true, message: `Protection level updated to ${level}.` };
 }
 
 export function filterProgramsForSearch(

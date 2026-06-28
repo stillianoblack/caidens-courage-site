@@ -20,6 +20,10 @@ import { resolveDefaultPilotFeatureFlags } from './pilotProgramFeatureFlags';
 import { deriveEstimatedStudentsFromRange } from './pilotProgramStudentRange';
 import { resolvePilotPortalPrep } from './pilotProgramPortalPrep';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
+import {
+  generateStablePilotCodeToken,
+  normalizeAccessCodeForIdentity,
+} from './portalCodeIdentity';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
@@ -60,6 +64,36 @@ export type PilotProgramLookupResponse = {
   result: PilotProgramLookupResult | null;
 };
 
+type ProgramCodeAliasLookup = {
+  programCode: string;
+  role: 'facilitator' | 'family';
+};
+
+function resolveRoleFromAliasType(aliasType?: string | null): 'facilitator' | 'family' {
+  const normalized = aliasType?.trim().toLowerCase() ?? '';
+  if (normalized.includes('family')) return 'family';
+  return 'facilitator';
+}
+
+async function lookupCanonicalProgramCodeByAlias(normalizedAlias: string): Promise<ProgramCodeAliasLookup | null> {
+  if (!supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('program_code_aliases')
+      .select('program_code, alias_type')
+      .eq('alias_code', normalizedAlias)
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as { program_code?: string; alias_type?: string | null };
+    const programCode = String(row.program_code || '').trim();
+    if (!programCode) return null;
+    return { programCode, role: resolveRoleFromAliasType(row.alias_type) };
+  } catch {
+    return null;
+  }
+}
+
 export async function lookupPilotProgramByAccessCode(
   rawCode: string,
 ): Promise<PilotProgramLookupResult | null> {
@@ -97,6 +131,25 @@ export async function lookupPilotProgramByAccessCodeDetailed(
     }
 
     if (!data?.length) {
+      const aliasLookup = await lookupCanonicalProgramCodeByAlias(normalized);
+      if (aliasLookup && aliasLookup.programCode !== normalized) {
+        const { data: aliasData, error: aliasError } = await supabase
+          .from('pilot_programs')
+          .select('*')
+          .eq('program_code', aliasLookup.programCode)
+          .eq('pilot_status', 'active')
+          .limit(1);
+        const aliasRow = (aliasData ?? [])[0] as PilotProgramRecord | undefined;
+        if (!aliasError && aliasRow) {
+          const response = {
+            status: 'found' as const,
+            result: { role: aliasLookup.role, program: recordToActivePilotProgram(aliasRow) },
+          };
+          logProgramCodeLookup(rawCode, response);
+          return response;
+        }
+      }
+
       const response = { status: 'not_found' as const, result: null };
       logProgramCodeLookup(rawCode, response);
       return response;
@@ -188,16 +241,6 @@ export type PilotProgramSignupResult =
 
 const PILOT_SIGNUP_TIMEOUT_MS = 15000;
 
-const PROGRAM_TYPE_PREFIX: Record<PilotProgramType, string> = {
-  'Camp / Youth Program': 'CAMP',
-  'Teacher / Classroom': 'TEACHER',
-  'After-School Program': 'AFTERSCHOOL',
-  School: 'SCHOOL',
-  District: 'DISTRICT',
-  'Homeschool Group': 'HOMESCHOOL',
-  'Independent Family': 'FAMILY',
-};
-
 function resolvePricingTier(programType: PilotProgramType): PilotPricingTier {
   switch (programType) {
     case 'Camp / Youth Program':
@@ -218,55 +261,89 @@ function resolvePricingTier(programType: PilotProgramType): PilotPricingTier {
   }
 }
 
-function slugifyProgramName(name: string, programType: PilotProgramType): string {
-  let base = name.trim();
-  if (programType === 'Camp / Youth Program' || programType === 'After-School Program') {
-    base = base.replace(/\bcamp\b/gi, '').replace(/\bprogram\b/gi, '').trim();
+async function accessCodeExists(code: string): Promise<boolean> {
+  const normalized = normalizeAccessCodeForIdentity(code);
+  if (!normalized || !isSupabaseConfigured() || !supabase) return false;
+
+  const quoted = quotePostgrestValue(normalized);
+  const [programLookup, aliasLookup] = await Promise.all([
+    supabase
+      .from('pilot_programs')
+      .select('id')
+      .or(
+        `program_code.eq.${quoted},family_access_code.eq.${quoted},facilitator_access_code.eq.${quoted}`,
+      )
+      .limit(1),
+    supabase
+      .from('program_code_aliases')
+      .select('id')
+      .eq('alias_code', normalized)
+      .limit(1),
+  ]);
+
+  if (programLookup.error) {
+    console.warn('[pilot_programs] uniqueness check failed:', programLookup.error.message);
+    return true;
   }
-  if (programType === 'Independent Family') {
-    base = base.replace(/\bfamily\b/gi, '').trim();
+
+  if (aliasLookup.error && !/relation|does not exist/i.test(aliasLookup.error.message)) {
+    console.warn('[pilot_programs] alias uniqueness check failed:', aliasLookup.error.message);
+    return true;
   }
-  const slug = base.toUpperCase().replace(/[^A-Z0-9]+/g, '');
-  if (programType === 'Independent Family') {
-    return slug || 'HOME';
-  }
-  return slug || 'PROGRAM';
+
+  return Boolean(programLookup.data?.length || aliasLookup.data?.length);
 }
 
-export function generateProgramCodes(
+async function generateUniquePilotProgramCodes(
   programType: PilotProgramType,
   programName: string,
   year = new Date().getFullYear(),
+): Promise<{
+  program_code: string;
+  family_access_code: string;
+  facilitator_access_code: string | null;
+}> {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const codes = generateProgramCodes(programType, programName, year);
+    const candidates = [
+      codes.program_code,
+      codes.family_access_code,
+      codes.facilitator_access_code,
+    ].filter((value): value is string => Boolean(value?.trim()));
+    const collisionChecks = await Promise.all(candidates.map(accessCodeExists));
+    if (!collisionChecks.some(Boolean)) {
+      return codes;
+    }
+  }
+  throw new Error('access_code_collision');
+}
+
+export function generateProgramCodes(
+  _programType: PilotProgramType,
+  _programName: string,
+  _year = new Date().getFullYear(),
 ): {
   program_code: string;
   family_access_code: string;
   facilitator_access_code: string | null;
 } {
-  const prefix = PROGRAM_TYPE_PREFIX[programType];
-  const slug = slugifyProgramName(programName, programType);
-  const program_code = `${prefix}-${slug}-${year}`;
-
-  if (programType === INDEPENDENT_FAMILY_PROGRAM_TYPE) {
-    return {
-      program_code,
-      family_access_code: `${program_code}-FAMILY`,
-      facilitator_access_code: null,
-    };
-  }
+  const token = generateStablePilotCodeToken();
 
   return {
-    program_code,
-    family_access_code: `${program_code}-FAMILY`,
-    facilitator_access_code: `${program_code}-FACILITATOR`,
+    program_code: `CMP-${token}`,
+    family_access_code: `FAM-${token}`,
+    facilitator_access_code: `FAC-${token}`,
   };
 }
 
-function buildProgramRecord(input: PilotProgramSignupInput): PilotProgramRecord {
+function buildProgramRecord(
+  input: PilotProgramSignupInput,
+  codes: ReturnType<typeof generateProgramCodes>,
+): PilotProgramRecord {
   const isIndependentFamily = input.programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
   const resolvedProgramName = isIndependentFamily
     ? resolveIndependentFamilyProgramName(input.programName, input.adminFirstName)
     : input.programName.trim();
-  const codes = generateProgramCodes(input.programType, resolvedProgramName);
   const agreedAt = new Date().toISOString();
   const studentCountRange = isIndependentFamily
     ? input.estimatedStudentCountRange ?? '1 child'
@@ -363,7 +440,15 @@ export async function submitPilotProgramSignup(
     return { success: false, message: 'Please agree to the Pilot License Terms to continue.' };
   }
 
-  const record = buildProgramRecord(input);
+  const isIndependentFamily = input.programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
+  const resolvedProgramName = isIndependentFamily
+    ? resolveIndependentFamilyProgramName(input.programName, input.adminFirstName)
+    : input.programName.trim();
+  const codes =
+    isSupabaseConfigured() && supabase
+      ? await generateUniquePilotProgramCodes(input.programType, resolvedProgramName)
+      : generateProgramCodes(input.programType, resolvedProgramName);
+  const record = buildProgramRecord(input, codes);
 
   if (!isSupabaseConfigured() || !supabase) {
     const program = recordToActivePilotProgram(record);

@@ -48,6 +48,7 @@ export type PilotPricingTier =
 export type PilotPaymentStatus = 'pending' | 'paid' | 'waived';
 
 export type PilotStatus = 'active' | 'paused' | 'completed' | 'archived' | 'testing';
+export type PilotProgramProtectionLevel = 'testing' | 'internal' | 'pilot' | 'production';
 
 export type EstimatedStudentCountRange =
   | '1 child'
@@ -107,6 +108,7 @@ export type PilotProgramRecord = {
   pricing_tier: PilotPricingTier;
   payment_status: PilotPaymentStatus;
   pilot_status: PilotStatus;
+  protection_level?: PilotProgramProtectionLevel | null;
   archived_at?: string | null;
   archived_by?: string | null;
   agreed_to_terms: boolean;

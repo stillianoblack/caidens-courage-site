@@ -18,6 +18,7 @@ export function useActiveParticipant() {
       needsSelection: false,
       claimRequired: false,
       loading: false,
+      error: null,
       selectParticipant: () => undefined,
       refreshRoster: async () => undefined,
       refreshParticipant: () => undefined,

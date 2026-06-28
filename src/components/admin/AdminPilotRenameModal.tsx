@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalScrollLock } from '../../hooks/useModalScrollLock';
 import { updatePilotProgramDisplayName } from '../../lib/adminPilotCleanupService';
-import { isIndependentFamilyType } from '../../lib/independentFamilyProgram';
 import type { PilotProgramRecord } from '../../types/pilotProgram';
 
 const MAX_PROGRAM_NAME_LENGTH = 80;
@@ -23,6 +22,7 @@ export default function AdminPilotRenameModal({
   onToast,
 }: AdminPilotRenameModalProps) {
   const [nameDraft, setNameDraft] = useState('');
+  const [groupDraft, setGroupDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -31,6 +31,7 @@ export default function AdminPilotRenameModal({
   useEffect(() => {
     if (!open || !program) return;
     setNameDraft(program.program_name);
+    setGroupDraft(program.group_name ?? '');
     setError(null);
     setSaving(false);
   }, [open, program]);
@@ -52,10 +53,13 @@ export default function AdminPilotRenameModal({
   if (!open || !program) return null;
 
   const trimmedName = nameDraft.trim();
+  const trimmedGroup = groupDraft.trim();
+  const displayNameChanged = trimmedName !== program.program_name.trim();
+  const groupNameChanged = trimmedGroup !== (program.group_name ?? '').trim();
   const canSave =
     trimmedName.length > 0 &&
     trimmedName.length <= MAX_PROGRAM_NAME_LENGTH &&
-    trimmedName !== program.program_name.trim() &&
+    (displayNameChanged || groupNameChanged) &&
     !saving;
 
   const handleSave = async () => {
@@ -71,10 +75,9 @@ export default function AdminPilotRenameModal({
     setSaving(true);
     setError(null);
 
-    const isIndependent = isIndependentFamilyType(program.program_type);
     const result = await updatePilotProgramDisplayName(program.program_code, {
       programName: trimmedName,
-      ...(isIndependent ? { groupName: trimmedName } : {}),
+      groupName: trimmedGroup,
     });
 
     setSaving(false);
@@ -84,7 +87,7 @@ export default function AdminPilotRenameModal({
       return;
     }
 
-    onToast('Program name updated successfully.');
+    onToast('Program labels updated successfully.');
     onSaved();
     onClose();
   };
@@ -111,8 +114,7 @@ export default function AdminPilotRenameModal({
           Rename Program
         </h2>
         <p className="adminPortal-modalDescription">
-          Update the display name shown throughout the facilitator and family portals. Program codes
-          and access codes stay the same.
+          Update the display name and group label shown throughout the portals. Changing the display name will not change access codes.
         </p>
 
         <form
@@ -124,7 +126,7 @@ export default function AdminPilotRenameModal({
           }}
         >
           <label className="adminPortal-modalField">
-            <span className="adminPortal-modalLabel">Program Name</span>
+            <span className="adminPortal-modalLabel">Display Name</span>
             <input
               type="text"
               className="adminPortal-modalInput"
@@ -133,6 +135,17 @@ export default function AdminPilotRenameModal({
               maxLength={MAX_PROGRAM_NAME_LENGTH}
               autoFocus
               required
+            />
+          </label>
+
+          <label className="adminPortal-modalField">
+            <span className="adminPortal-modalLabel">Group Name</span>
+            <input
+              type="text"
+              className="adminPortal-modalInput"
+              value={groupDraft}
+              onChange={(event) => setGroupDraft(event.target.value)}
+              maxLength={MAX_PROGRAM_NAME_LENGTH}
             />
           </label>
 

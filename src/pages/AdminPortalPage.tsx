@@ -105,7 +105,7 @@ export default function AdminPortalPage() {
       return;
     }
 
-    writeAdminSession();
+    writeAdminSession(email);
     setUnlocked(true);
     setPasscode('');
   };

@@ -30,6 +30,7 @@ import {
   type StudentAccessFields,
 } from '../lib/studentPinService';
 import { buildFamilyClaimUrl } from '../lib/familyClaimCode';
+import { buildPortalProgramDiagnostic } from '../lib/portalDiagnostics';
 
 export type PilotRosterRow = {
   participantId: string;
@@ -109,10 +110,19 @@ export function usePilotRosterData(
           directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || undefined,
         ) ?? undefined,
       );
+      void buildPortalProgramDiagnostic({
+        programCode: code,
+        programName: code,
+        familyAccessCode: programFamilyAccessCode ?? '',
+      }).then((diagnostic) => {
+        if (diagnostic) {
+          console.info('[PORTAL_PROGRAM_DIAGNOSTIC]', diagnostic);
+        }
+      });
     } finally {
       setLoading(false);
     }
-  }, [programCode]);
+  }, [programCode, programFamilyAccessCode]);
 
   useEffect(() => {
     if (!enabled) return;

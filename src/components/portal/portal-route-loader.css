@@ -72,3 +72,46 @@
   margin: 0;
   color: #4e6a86;
 }
+
+.portal-routeLoaderRecovery {
+  margin-top: 1rem;
+  max-width: 28rem;
+  border: 1px solid #f0cf8f;
+  border-radius: 0.75rem;
+  background: #fff8ea;
+  padding: 0.875rem 1rem;
+  color: #6d4d1f;
+}
+
+.portal-routeLoaderRecovery p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.portal-routeLoaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+
+.portal-routeLoaderActions button,
+.portal-routeLoaderActions a {
+  border: 1px solid #d49a34;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6d4d1f;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.55rem 0.8rem;
+  text-decoration: none;
+}
+
+.portal-routeLoaderActions button:hover,
+.portal-routeLoaderActions a:hover {
+  background: #fff1d4;
+}

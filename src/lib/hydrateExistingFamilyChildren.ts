@@ -15,6 +15,8 @@ import {
   fetchStudentParticipantsFromSupabase,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import { programCodesEquivalent } from './portalCodeIdentity';
+import { portalDebug } from './portalDebug';
 
 export type HydratedFamilyChild = {
   participantId: string;
@@ -69,6 +71,21 @@ function childDedupeKey(input: {
   if (id) return `id:${id}`;
   const name = (input.nickname?.trim() || input.firstName?.trim() || '').toLowerCase();
   return `name:${normalizeCode(input.programCode)}:${name}`;
+}
+
+function normalizeChildName(value?: string | null): string {
+  return value
+    ?.trim()
+    .toLowerCase()
+    .replace(/\b(player|grade|grader|student|child)\b/g, '')
+    .replace(/\b(pre[-\s]?k|kindergarten|k|[1-8](st|nd|rd|th)?)\b/g, '')
+    .replace(/[^a-z0-9]+/g, '') ?? '';
+}
+
+function childNameProgramKey(child: HydratedFamilyChild): string {
+  const name = normalizeChildName(child.nickname || child.firstName || child.displayName);
+  if (!name) return '';
+  return `name:${normalizeCode(child.programCode)}:${name}`;
 }
 
 function participantToHydratedChild(
@@ -142,7 +159,12 @@ export async function hydrateExistingFamilyChildren(
 
   const claimRequired = !isIndependentFamily && !hasConfirmedParentClaim(claimContext);
 
-  const linksPayload = await fetchStudentFamilyLinksByFamilyProgram(code);
+  const [linksPayloadRaw, familyParticipantsPayloadRaw] = await Promise.all([
+    fetchStudentFamilyLinksByFamilyProgram(code),
+    fetchStudentParticipantsFromSupabase(code),
+  ]);
+
+  const linksPayload = linksPayloadRaw ?? { links: [], error: 'fetch_failed' };
   if (linksPayload.error) errors.push(linksPayload.error);
 
   const allLinks = linksPayload.links;
@@ -150,15 +172,18 @@ export async function hydrateExistingFamilyChildren(
     ? allLinks
     : allLinks.filter((link) => linkMatchesParentScope(link, scope));
 
-  const familyParticipantsPayload = await fetchStudentParticipantsFromSupabase(code);
+  const familyParticipantsPayload = familyParticipantsPayloadRaw ?? {
+    participants: [],
+    error: 'participants_fetch_failed',
+  };
   if (familyParticipantsPayload.error) errors.push(familyParticipantsPayload.error);
 
   const familyParticipants = familyParticipantsPayload.participants;
-  const allLinkedIds = Array.from(
-    new Set(allLinks.map((link) => link.student_id?.trim()).filter((id): id is string => Boolean(id))),
+  const scopedLinkedIds = Array.from(
+    new Set(scopedLinks.map((link) => link.student_id?.trim()).filter((id): id is string => Boolean(id))),
   );
 
-  const participantIdsToFetch = new Set<string>(allLinkedIds);
+  const participantIdsToFetch = new Set<string>(scopedLinkedIds);
   for (const participant of familyParticipants) {
     participantIdsToFetch.add(participant.id);
   }
@@ -177,18 +202,38 @@ export async function hydrateExistingFamilyChildren(
     participantById.set(participant.id, participant);
   }
 
-  const linkedChildCount = allLinkedIds.filter((id) => participantById.has(id)).length;
+  const linkedChildCount = scopedLinkedIds.filter((id) => participantById.has(id)).length;
   const fallbackChildCount = familyParticipants.filter(
-    (participant) => !allLinkedIds.includes(participant.id),
+    (participant) => !scopedLinkedIds.includes(participant.id),
   ).length;
 
   const children: HydratedFamilyChild[] = [];
   const seen = new Set<string>();
+  const seenNameProgram = new Map<string, HydratedFamilyChild>();
 
   const pushChild = (child: HydratedFamilyChild) => {
     const key = childDedupeKey(child);
     if (seen.has(key)) return;
+    const normalizedNameKey = childNameProgramKey(child);
+    const nameMatch = normalizedNameKey ? seenNameProgram.get(normalizedNameKey) : null;
+    if (nameMatch) {
+      if (
+        nameMatch.participantId !== child.participantId &&
+        programCodesEquivalent(nameMatch.programCode, child.programCode)
+      ) {
+        portalDebug('family child dedupe', {
+          reason: 'normalized_name_program',
+          kept_participant_id: nameMatch.participantId,
+          skipped_participant_id: child.participantId,
+          normalized_name_key: normalizedNameKey,
+        });
+        return;
+      }
+    }
     seen.add(key);
+    if (normalizedNameKey) {
+      seenNameProgram.set(normalizedNameKey, child);
+    }
     children.push(child);
   };
 

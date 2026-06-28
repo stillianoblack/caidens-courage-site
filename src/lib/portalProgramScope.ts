@@ -1,6 +1,7 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readScopedParentClaimRecord } from '../config/parentClaimContext';
 import { readActiveAccessCode, readActiveFamilyContext } from '../config/portalContext';
+import { programCodesEquivalent } from './portalCodeIdentity';
 import { readRememberedProgramAccessRecord } from './rememberedProgramAccess';
 
 const STUDENT_PIN_SESSION_KEY = 'cc-student-pin-session';
@@ -85,8 +86,5 @@ export function programScopesMatch(
   left?: string | null,
   right?: string | null,
 ): boolean {
-  const a = left?.trim();
-  const b = right?.trim();
-  if (!a || !b) return false;
-  return a === b;
+  return programCodesEquivalent(left, right);
 }
