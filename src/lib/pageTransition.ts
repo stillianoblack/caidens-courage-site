@@ -3,6 +3,7 @@ import { FOCUS_FLAME_ICON_SRC } from '../design-system/brand/brandLogos';
 
 const TRANSITION_ID = 'cc-page-transition';
 const TRANSITION_DELAY_MS = 170;
+const TRANSITION_RECOVERY_MS = 6500;
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
@@ -22,12 +23,32 @@ export function showPageTransition(): number {
     overlay.setAttribute('aria-label', 'Opening next adventure');
     overlay.innerHTML = `
       <img class="focusFlameMark focusFlameMark--animate" src="${FOCUS_FLAME_ICON_SRC}" alt="" decoding="async" />
+      <div class="cc-pageTransitionRecovery" role="alert">
+        <p>We&apos;re having trouble loading this page.</p>
+        <div class="cc-pageTransitionActions">
+          <button type="button" data-page-transition-refresh>Refresh</button>
+          <a href="/portal">Open Portal</a>
+        </div>
+      </div>
     `;
+    overlay
+      .querySelector('[data-page-transition-refresh]')
+      ?.addEventListener('click', () => window.location.reload());
     document.body.appendChild(overlay);
   }
 
+  if (!overlay) return 0;
+
+  const overlayElement = overlay;
+
+  overlayElement.removeAttribute('data-recovering');
+  window.setTimeout(() => {
+    if (!document.body.contains(overlayElement)) return;
+    overlayElement.setAttribute('data-recovering', 'true');
+  }, TRANSITION_RECOVERY_MS);
+
   window.requestAnimationFrame(() => {
-    overlay?.setAttribute('data-active', 'true');
+    overlayElement.setAttribute('data-active', 'true');
   });
 
   return TRANSITION_DELAY_MS;

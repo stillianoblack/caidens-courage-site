@@ -1,6 +1,9 @@
 import { FAMILY_HUB_PATH, FAMILY_PORTAL_PATH, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 
 export function resolvePortalRouteLoaderMessage(pathname: string): string {
+  if (pathname === '/portal' || pathname.startsWith('/portal/')) {
+    return 'Loading Portal...';
+  }
   if (pathname.startsWith(FAMILY_HUB_PATH) || pathname.startsWith(FAMILY_PORTAL_PATH)) {
     return 'Loading Family Portal...';
   }

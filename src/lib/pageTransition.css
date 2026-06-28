@@ -5,8 +5,11 @@
   position: fixed;
   inset: 0;
   z-index: 2147483000;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
@@ -16,6 +19,59 @@
 
 .cc-pageTransition[data-active='true'] {
   opacity: 1;
+}
+
+.cc-pageTransitionRecovery {
+  display: none;
+  max-width: min(26rem, calc(100vw - 2rem));
+  border: 1px solid rgba(240, 207, 143, 0.55);
+  border-radius: 0.875rem;
+  background: rgba(255, 248, 234, 0.96);
+  color: #533712;
+  padding: 0.875rem 1rem;
+  text-align: center;
+}
+
+.cc-pageTransitionRecovery p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.cc-pageTransitionActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+
+.cc-pageTransitionActions button,
+.cc-pageTransitionActions a {
+  border: 1px solid #d49a34;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #533712;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+}
+
+.cc-pageTransitionActions button:hover,
+.cc-pageTransitionActions a:hover {
+  background: #fff1d4;
+}
+
+.cc-pageTransition[data-recovering='true'] {
+  pointer-events: auto;
+}
+
+.cc-pageTransition[data-recovering='true'] .cc-pageTransitionRecovery {
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {

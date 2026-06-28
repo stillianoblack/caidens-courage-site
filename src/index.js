@@ -12,6 +12,17 @@ import reportWebVitals from './reportWebVitals';
 const SW_RELOAD_FLAG = 'cc-sw-reload-pending';
 const CHUNK_RELOAD_FLAG = 'cc-chunk-reload-pending';
 
+function isRecoverableChunkLoadError(reason) {
+  const message = typeof reason?.message === 'string' ? reason.message : String(reason ?? '');
+  return (
+    reason?.name === 'ChunkLoadError' ||
+    /Loading chunk [\d]+ failed/i.test(message) ||
+    /Failed to fetch dynamically imported module/i.test(message) ||
+    /Importing a module script failed/i.test(message) ||
+    /error loading dynamically imported module/i.test(message)
+  );
+}
+
 function initAnalyticsAfterFirstPaint() {
   const run = () => initAnalytics();
 
@@ -45,11 +56,7 @@ function installChunkLoadRecovery() {
 
   window.addEventListener('unhandledrejection', (event) => {
     const reason = event.reason;
-    const message = typeof reason?.message === 'string' ? reason.message : String(reason ?? '');
-    const isChunkError =
-      reason?.name === 'ChunkLoadError' || /Loading chunk [\d]+ failed/i.test(message);
-
-    if (!isChunkError) return;
+    if (!isRecoverableChunkLoadError(reason)) return;
 
     try {
       if (sessionStorage.getItem(CHUNK_RELOAD_FLAG) === '1') return;

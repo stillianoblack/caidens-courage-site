@@ -18,9 +18,13 @@ export class ChunkErrorBoundary extends React.Component<Props, State> {
   componentDidCatch(error: unknown) {
     // Only handle webpack ChunkLoadError-style failures.
     const err = error as { name?: string; message?: string };
+    const message = typeof err?.message === 'string' ? err.message : '';
     const isChunkError =
       err?.name === 'ChunkLoadError' ||
-      (typeof err?.message === 'string' && err.message.includes('Loading chunk'));
+      /Loading chunk [\d]+ failed/i.test(message) ||
+      /Failed to fetch dynamically imported module/i.test(message) ||
+      /Importing a module script failed/i.test(message) ||
+      /error loading dynamically imported module/i.test(message);
 
     if (isChunkError) {
       // Avoid infinite reload loops by only retrying once per session.
@@ -53,4 +57,3 @@ export class ChunkErrorBoundary extends React.Component<Props, State> {
     return this.props.children;
   }
 }
-

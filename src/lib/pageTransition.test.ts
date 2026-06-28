@@ -2,6 +2,7 @@ import { showPageTransition } from './pageTransition';
 
 describe('showPageTransition', () => {
   beforeEach(() => {
+    jest.useRealTimers();
     document.body.innerHTML = '';
     window.matchMedia = jest.fn().mockReturnValue({ matches: false });
     window.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
@@ -18,6 +19,20 @@ describe('showPageTransition', () => {
     expect(overlay?.getAttribute('data-active')).toBe('true');
     expect(overlay?.querySelector('img')?.getAttribute('src')).toContain('focus-flame-mark.svg');
     expect(overlay?.querySelector('img')?.classList.contains('focusFlameMark')).toBe(true);
+  });
+
+  it('reveals recovery actions when hard navigation stalls', () => {
+    jest.useFakeTimers();
+
+    showPageTransition();
+    const overlay = document.getElementById('cc-page-transition');
+    expect(overlay?.getAttribute('data-recovering')).toBeNull();
+
+    jest.advanceTimersByTime(6500);
+
+    expect(overlay?.getAttribute('data-recovering')).toBe('true');
+    expect(overlay?.querySelector('[data-page-transition-refresh]')).not.toBeNull();
+    jest.useRealTimers();
   });
 
   it('does not animate for reduced motion users', () => {
