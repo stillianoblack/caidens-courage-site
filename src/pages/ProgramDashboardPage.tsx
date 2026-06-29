@@ -15,7 +15,6 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import {
-  PILOT_PROGRAM_SIGNUP_PATH,
   PORTAL_PATH,
   PROGRAM_DASHBOARD_PATH,
 } from '../config/courageRoutes';
@@ -40,6 +39,7 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
+import { clearPageTransitionOverlay } from '../lib/pageTransition';
 import { FacilitatorOverviewCoachProvider } from '../components/pilot-dashboard/coach/FacilitatorOverviewCoachProvider';
 import FacilitatorPortalMobileChrome, {
   facilitatorMobileNavShellClass,
@@ -56,6 +56,16 @@ const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
 
 const VALID_NAV_IDS = new Set(PROGRAM_SIDEBAR_NAV.map((item) => item.id));
 
+function logProgramDashboardHydration(
+  step: string,
+  detail: Record<string, unknown>,
+): void {
+  console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
+    step,
+    ...detail,
+  });
+}
+
 export default function ProgramDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +77,7 @@ export default function ProgramDashboardPage() {
   const activeNav = resolveProgramDashboardTab(location.pathname);
   const showOverviewCoach = !isKidsRoute && activeNav === 'overview';
   const programCode = activeProgram?.programCode;
+  const hasActiveProgram = Boolean(activeProgram);
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
   const isIndependentFamily = isIndependentFamilyProgram(activeProgram);
@@ -81,6 +92,31 @@ export default function ProgramDashboardPage() {
   const { isMobileNav, moreOpen, openMore, closeMore } = useFacilitatorMobileNav();
   const showMobileNav = sessionValid && !isKidsRoute;
   const mobileNavShellClass = facilitatorMobileNavShellClass(showMobileNav, isMobileNav);
+
+  useEffect(() => {
+    clearPageTransitionOverlay();
+  }, []);
+
+  useEffect(() => {
+    logProgramDashboardHydration('session_restore', {
+      path: location.pathname,
+      has_active_program: hasActiveProgram,
+      program_code: programCode ?? null,
+      role,
+      has_unlock: Boolean(hasUnlock),
+      is_independent_family: isIndependentFamily,
+      route_allowed: isPortalRoleAllowed(location.pathname),
+      session_valid: sessionValid,
+    });
+  }, [
+    hasActiveProgram,
+    hasUnlock,
+    isIndependentFamily,
+    location.pathname,
+    programCode,
+    role,
+    sessionValid,
+  ]);
 
   const {
     open: goalsOpen,
@@ -136,19 +172,49 @@ export default function ProgramDashboardPage() {
   }, [location.hash, navigate]);
 
   useEffect(() => {
-    if (!activeProgram) {
-      navigate(PILOT_PROGRAM_SIGNUP_PATH, { replace: true });
+    if (!hasActiveProgram) {
+      logProgramDashboardHydration('redirect_to_portal', {
+        reason: 'missing_active_program',
+        path: location.pathname,
+      });
+      navigate(PORTAL_PATH, {
+        replace: true,
+        state: {
+          redirect: location.pathname,
+          message: 'Open your facilitator portal again to restore this dashboard.',
+          reason: 'missing_active_program',
+        },
+      });
       return;
     }
     if (isIndependentFamily) {
+      logProgramDashboardHydration('redirect_to_family', {
+        reason: 'independent_family_program',
+        program_code: programCode ?? null,
+      });
       navigate(resolveFamilyKidDefaultLandingPath(), { replace: true });
       return;
     }
     if (!sessionValid) {
+      logProgramDashboardHydration('redirect_to_portal', {
+        reason: 'invalid_facilitator_session',
+        path: location.pathname,
+        program_code: programCode ?? null,
+        role,
+        has_unlock: Boolean(hasUnlock),
+        route_allowed: isPortalRoleAllowed(location.pathname),
+      });
       clearProgramPortalContext();
-      navigate(PORTAL_PATH, { replace: true, state: { redirect: PROGRAM_DASHBOARD_PATH } });
+      navigate(PORTAL_PATH, {
+        replace: true,
+        state: {
+          redirect: location.pathname,
+          message: 'Your facilitator session needs to be reopened.',
+          reason: 'invalid_facilitator_session',
+        },
+      });
     }
-  }, [activeProgram, isIndependentFamily, navigate, sessionValid]);
+  }, [hasActiveProgram, hasUnlock, isIndependentFamily, location.pathname, navigate, programCode, role, sessionValid]);
 
   const dismissWelcome = useCallback(() => {
     searchParams.delete('welcome');

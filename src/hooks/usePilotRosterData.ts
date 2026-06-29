@@ -90,15 +90,28 @@ export function usePilotRosterData(
 
     setLoading(true);
     try {
-      const [linksPayload, trackingPayload] = await Promise.all([
+      console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
+        step: 'roster_lookup_start',
+        program_code: code,
+      });
+      const [linksPayload, trackingPayload, directoryPayload] = await Promise.all([
         fetchStudentFamilyLinksByCampProgram(code),
         loadPilotTrackingData(code),
+        loadProgramParticipantDirectory(code),
       ]);
 
-      const directoryPayload = await loadProgramParticipantDirectory(code);
       const accessMap = await fetchStudentAccessFieldsByIds(
         directoryPayload.participants.map((row) => row.id),
       );
+      console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
+        step: 'roster_lookup_complete',
+        program_code: code,
+        participants: directoryPayload.participants.length,
+        family_links: linksPayload.links.length,
+        module_results: trackingPayload.moduleResults.length,
+        assessment_results: trackingPayload.assessmentResults.length,
+        warning: directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || null,
+      });
 
       setParticipants(directoryPayload.participants);
       setLinks(linksPayload.links);
@@ -119,6 +132,18 @@ export function usePilotRosterData(
           console.info('[PORTAL_PROGRAM_DIAGNOSTIC]', diagnostic);
         }
       });
+    } catch (err) {
+      console.warn('[PROGRAM_DASHBOARD_HYDRATION]', {
+        step: 'roster_lookup_failed',
+        program_code: code,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      setParticipants([]);
+      setLinks([]);
+      setAssessmentResults([]);
+      setModuleResults([]);
+      setAccessByParticipant(new Map());
+      setWarning('Could not load synced roster data. Try refreshing or reopen this program from the portal.');
     } finally {
       setLoading(false);
     }

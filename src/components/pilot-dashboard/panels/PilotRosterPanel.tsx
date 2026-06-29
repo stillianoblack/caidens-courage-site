@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
 import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
+import { readActiveAccessCode } from '../../../config/portalContext';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import {
   filterRosterRows,
@@ -449,14 +450,17 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         await writeFacilitatorStudentContinuityForLaunch({
           childId: row.participantId,
           childDisplayName: row.childName,
-          programCode: program?.programCode ?? undefined,
+          programCode: row.programCode || program?.programCode || resolvedProgramCode,
+          campProgramCode: row.campProgramCode || row.programCode || resolvedProgramCode,
+          familyProgramCode: row.familyProgramCode || undefined,
+          activeAccessCode: readActiveAccessCode(),
         });
         kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id));
       } finally {
         setLaunchSessionLoadingId(null);
       }
     },
-    [navigate, showToast],
+    [navigate, resolvedProgramCode, showToast],
   );
 
   const handleLaunchStudentSession = useCallback(

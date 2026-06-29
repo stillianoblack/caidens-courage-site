@@ -5,11 +5,14 @@ import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLog
 import {
   continuityDecisionMessage,
   evaluateFacilitatorStudentContinuity,
+  readFacilitatorStudentContinuity,
+  resolveFacilitatorReturnPinProgramCode,
   restoreFacilitatorStudentViaPin,
 } from '../../lib/facilitatorSessionContinuity';
 import { setKidPlayRosterLocked, clearKidPlayRosterLockWithEmail } from '../../lib/kidPlayRosterLock';
 import { buildPinFingerprint } from '../../lib/studentPinCrypto';
 import { verifyStudentPinLogin } from '../../lib/studentPinService';
+import { verifyStudentPinLoginWithProgramFallback } from '../../lib/studentPinProgramScope';
 import './kid-play-roster-lock.css';
 
 type KidPlayRosterLockGateProps = {
@@ -37,21 +40,48 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
         return;
       }
 
-      const programCode = readActivePilotProgram()?.programCode?.trim() ?? '';
-      if (!programCode) {
-        setError(INVALID_PIN_MESSAGE);
-        return;
-      }
+      const continuity = readFacilitatorStudentContinuity();
+      const programCode = resolveFacilitatorReturnPinProgramCode({
+        record: continuity,
+        activeProgramCode: readActivePilotProgram()?.programCode,
+      });
 
       setSubmitting(true);
       try {
-        const verified = await verifyStudentPinLogin({ programCode, pin: trimmedPin });
+        console.info('[FACILITATOR_RETURN_PIN]', {
+          step: 'verify_start',
+          has_continuity: Boolean(continuity),
+          continuity_program_code: continuity?.programCode ?? null,
+          continuity_camp_program_code: continuity?.campProgramCode ?? null,
+          active_program_code: readActivePilotProgram()?.programCode ?? null,
+          participant_id: continuity?.lastStudentId ?? null,
+        });
+
+        let verified = programCode
+          ? await verifyStudentPinLogin({ programCode, pin: trimmedPin })
+          : await verifyStudentPinLoginWithProgramFallback({
+              pin: trimmedPin,
+              campProgramCodeHint: continuity?.campProgramCode || continuity?.programCode,
+              accessCodeHint: continuity?.activeAccessCode,
+            });
+        if (!verified.success && programCode) {
+          verified = await verifyStudentPinLoginWithProgramFallback({
+            pin: trimmedPin,
+            campProgramCodeHint: continuity?.campProgramCode || continuity?.programCode || programCode,
+            accessCodeHint: continuity?.activeAccessCode,
+          });
+        }
         if (!verified.success) {
+          console.warn('[FACILITATOR_RETURN_PIN]', {
+            step: 'verify_failed',
+            program_code: programCode || null,
+            error: verified.error,
+          });
           setError(INVALID_PIN_MESSAGE);
           return;
         }
 
-        const pinFingerprint = await buildPinFingerprint(programCode, trimmedPin);
+        const pinFingerprint = await buildPinFingerprint(verified.programCode, trimmedPin);
         const decision = evaluateFacilitatorStudentContinuity({
           participantId: verified.participantId,
           pinFingerprint,

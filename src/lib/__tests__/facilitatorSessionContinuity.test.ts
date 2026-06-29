@@ -3,6 +3,7 @@ import {
   evaluateFacilitatorStudentContinuity,
   facilitatorContinuityWindowMs,
   readFacilitatorStudentContinuity,
+  resolveFacilitatorReturnPinProgramCode,
   writeFacilitatorStudentContinuity,
   continuityDecisionMessage,
   clearFacilitatorStudentContinuity,
@@ -98,13 +99,39 @@ describe('facilitatorSessionContinuity', () => {
   });
 
   test('persists and reads continuity record from session storage', () => {
-    writeFacilitatorStudentContinuity(baseRecord({ resumePayload: { module: 'weekly-adventures', week: 2 } }));
+    writeFacilitatorStudentContinuity(
+      baseRecord({
+        campProgramCode: 'CAMP-GDI-2026',
+        familyProgramCode: 'FAMILY-STILLS-2026',
+        activeAccessCode: 'FAC-GDI-2026',
+        resumePayload: { module: 'weekly-adventures', week: 2 },
+      }),
+    );
     expect(readFacilitatorStudentContinuity()).toMatchObject({
       lastStudentId: 'student-a',
       lastStudentPinHash: 'fp-a',
       programCode: 'CAMP-2026',
+      campProgramCode: 'CAMP-GDI-2026',
+      familyProgramCode: 'FAMILY-STILLS-2026',
+      activeAccessCode: 'FAC-GDI-2026',
       resumePayload: { module: 'weekly-adventures', week: 2 },
     });
+  });
+
+  test('facilitator-launched return PIN uses stored camp program before stale active context', () => {
+    const record = baseRecord({
+      programCode: 'CAMP-GDI-2026',
+      campProgramCode: 'CAMP-GDI-2026',
+      familyProgramCode: 'FAMILY-STILLS-2026',
+      activeAccessCode: 'FAC-GDI-2026',
+    });
+
+    expect(
+      resolveFacilitatorReturnPinProgramCode({
+        record,
+        activeProgramCode: 'FAMILY-STILLS-2026',
+      }),
+    ).toBe('CAMP-GDI-2026');
   });
 
   test('clearFacilitatorStudentContinuity removes stored record', () => {
