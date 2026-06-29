@@ -1,6 +1,7 @@
 import { getConfiguredAdminEmail } from '../config/adminAccess';
 import type { PilotProgramRecord } from '../types/pilotProgram';
 import { updateProgramDisplayNameByCode } from './familyProgramDisplayNameService';
+import { renamePilotProgramTransaction } from './renamePilotProgramTransaction';
 import {
   getPilotProgramProtectionDecision,
   normalizePilotProgramProtectionLevel,
@@ -346,6 +347,32 @@ export async function updatePilotProgramDisplayName(
     return { success: false, message: result.message };
   }
   return { success: true, message: 'Program name updated successfully.' };
+}
+
+export async function updatePilotProgramIdentityTransaction(
+  oldProgramCode: string,
+  input: {
+    newProgramCode: string;
+    programName?: string;
+    groupName?: string;
+    familyAccessCode?: string;
+    facilitatorAccessCode?: string | null;
+  },
+): Promise<PilotArchiveResult> {
+  const result = await renamePilotProgramTransaction({
+    oldProgramCode,
+    newProgramCode: input.newProgramCode,
+    programName: input.programName,
+    groupName: input.groupName,
+    familyAccessCode: input.familyAccessCode,
+    facilitatorAccessCode: input.facilitatorAccessCode,
+  });
+
+  if (!result.success) {
+    return { success: false, message: result.message };
+  }
+
+  return { success: true, message: 'Program identity updated successfully.' };
 }
 
 export async function updatePilotProgramEstimatedRange(
