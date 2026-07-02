@@ -21,6 +21,7 @@ import {
   loadFamilyDashboardData,
   type FamilyDashboardData,
 } from '../lib/familyDashboardDataService';
+import { dedupeFamilyPortalDisplayChildren } from '../lib/familyPortalDisplayDedupe';
 import type { StudentParticipantRecord } from '../lib/pilotTrackingService';
 import {
   logFamilyProgressMetrics,
@@ -171,7 +172,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       data.adultLegacyAssessments,
     );
 
-    const children = computeFamilyChildrenSummaries({
+    const rawChildren = computeFamilyChildrenSummaries({
       programCode: data.programCode,
       participants: data.studentParticipants,
       allowedStudentIds: data.allowedStudentIds,
@@ -179,6 +180,17 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       assessmentResults: data.v2Assessments,
       legacyBaselines: data.studentLegacyBaselines,
     });
+    const display = dedupeFamilyPortalDisplayChildren({
+      children: rawChildren,
+      visibleChildren: data.visibleChildren,
+      moduleResults: data.moduleResults,
+      activeParticipantId: readActiveChildParticipantId(),
+    });
+    const children = display.children;
+    const visibleChildren = display.visibleChildren;
+    const allowedStudentIds = visibleChildren.length
+      ? visibleChildren.map((child) => child.studentId).filter(Boolean)
+      : data.allowedStudentIds.filter((id) => !display.hiddenParticipantIds.includes(id));
 
     const metrics = data.programCode
       ? computeFamilyProgressSnapshot({
@@ -189,7 +201,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
           adultBaselineComplete,
           adultGrowthComplete,
           children,
-          allowedStudentIds: data.allowedStudentIds,
+          allowedStudentIds,
         })
       : EMPTY_SNAPSHOT;
 
@@ -216,12 +228,12 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     const baselineAveragePct = computeFamilyBaselineAverage({
       v2Assessments: data.v2Assessments,
       legacyBaselines: data.studentLegacyBaselines,
-      allowedStudentIds: data.allowedStudentIds,
+      allowedStudentIds,
     });
 
     const certificatesEarned = countFamilyCertificatesEarned({
       moduleResults: data.moduleResults,
-      allowedStudentIds: data.allowedStudentIds,
+      allowedStudentIds,
     });
 
     const parentLink = data.familyLinks[0];
@@ -233,7 +245,7 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
     return {
       programCode: data.programCode,
       children,
-      visibleChildren: data.visibleChildren,
+      visibleChildren,
       familyLinks: data.familyLinks,
       campProgramCode,
       campProgramName,
@@ -253,7 +265,9 @@ export function useFamilyDashboardMetrics(programCode?: string): FamilyDashboard
       loading,
       errors: data.errors,
       refresh,
-      studentParticipants: data.studentParticipants,
+      studentParticipants: data.studentParticipants.filter(
+        (row) => !display.hiddenParticipantIds.includes(row.id),
+      ),
     };
   }, [campProgramCode, campProgramName, data, loading, refresh]);
 }
