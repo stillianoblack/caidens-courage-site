@@ -1,5 +1,6 @@
 import type { ActivePilotProgram, PilotProgramRecord } from '../types/pilotProgram';
 import { fromDbProgramType } from '../lib/independentFamilyProgram';
+import { notifyPortalSessionChanged } from '../lib/portalSessionEvents';
 
 export const ACTIVE_PILOT_PROGRAM_KEY = 'activePilotProgram';
 
@@ -39,6 +40,7 @@ export function readActivePilotProgram(): ActivePilotProgram | null {
 export function writeActivePilotProgram(program: ActivePilotProgram): void {
   try {
     localStorage.setItem(ACTIVE_PILOT_PROGRAM_KEY, JSON.stringify(program));
+    notifyPortalSessionChanged('active_program_write');
   } catch {
     /* localStorage unavailable */
   }
@@ -47,6 +49,7 @@ export function writeActivePilotProgram(program: ActivePilotProgram): void {
 export function clearActivePilotProgram(): void {
   try {
     localStorage.removeItem(ACTIVE_PILOT_PROGRAM_KEY);
+    notifyPortalSessionChanged('active_program_clear');
   } catch {
     /* localStorage unavailable */
   }

@@ -9,6 +9,7 @@ import type {
   EndKidPlaySessionInput,
   KidPlaySessionRow,
 } from './kidPlaySessionTypes';
+import { notifyPortalSessionChanged } from './portalSessionEvents';
 
 const KID_PLAY_SESSIONS_TABLE = 'kid_play_sessions';
 const LOCAL_SESSION_ID_KEY = 'cc-kid-play-session-id';
@@ -59,6 +60,7 @@ export function writeLocalKidPlaySessionId(sessionId: string | null): void {
     } else {
       window.localStorage.removeItem(LOCAL_SESSION_ID_KEY);
     }
+    notifyPortalSessionChanged('kid_play_session_id_write');
   } catch {
     /* localStorage unavailable */
   }

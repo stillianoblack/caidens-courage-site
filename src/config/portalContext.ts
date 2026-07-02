@@ -13,6 +13,7 @@ import { clearRememberedProgramAccess, writeRememberedProgramAccess } from '../l
 import { clearRememberedDeviceSession } from '../lib/rememberedDeviceSession';
 import { clearAllPortalAuthState, clearStalePortalIdentityState } from '../lib/portalIdentityReset';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
+import { notifyPortalSessionChanged } from '../lib/portalSessionEvents';
 
 export type PortalRole = 'facilitator' | 'family';
 
@@ -171,6 +172,7 @@ export function applyProgramPortalUnlock(
   }
 
   logActivePortalDev();
+  notifyPortalSessionChanged('program_portal_unlock');
 }
 
 export function clearProgramPortalContext(): void {
@@ -183,6 +185,7 @@ export function clearProgramPortalContext(): void {
     /* localStorage unavailable */
   }
   clearActiveFamilyContext();
+  notifyPortalSessionChanged('program_portal_context_clear');
 }
 
 /** Clear cached return session on portal login without signing out of an active dashboard. */
@@ -194,6 +197,7 @@ export function clearPortalReturnSession(): void {
   } catch {
     /* localStorage unavailable */
   }
+  notifyPortalSessionChanged('portal_return_session_clear');
 }
 
 /** Sign out — clear portal session; user must re-enter access code at /portal. */
@@ -204,4 +208,5 @@ export function signOutPortal(): void {
   clearStalePortalRouteState();
   clearRememberedProgramAccess();
   clearRememberedDeviceSession('sign_out');
+  notifyPortalSessionChanged('portal_sign_out');
 }

@@ -9,6 +9,7 @@ import {
   writeScopedActiveChildRecord,
 } from './portalSessionIsolation';
 import { readStudentPinSession, type StudentPinSession } from './studentPinSession';
+import { notifyPortalSessionChanged } from './portalSessionEvents';
 
 function hydrateScopedActiveChildFromPinSession(): StudentPinSession | null {
   const pinSession = readStudentPinSession({ allowCampUnderFamilyPortal: true });
@@ -83,17 +84,10 @@ export function setActiveChild(child: ActiveChildState): void {
     });
   }
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('[PORTAL_DEBUG]', 'active child', {
-      participant_id: child.participantId,
-      display_name: child.displayName,
-      first_name: child.firstName ?? null,
-      program_code: programCode ?? null,
-    });
-  }
   lastActiveChildSignature = `${programCode ?? ''}|${nextParticipantId}|${nextDisplayName}|${nextFirstName ?? ''}`;
   if (unchanged) return;
   notifyChildProfileUpdated();
+  notifyPortalSessionChanged('active_child_set');
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(ACTIVE_CHILD_EVENT, { detail: child }));
   }
@@ -108,6 +102,7 @@ export function clearActiveChild(): void {
     } catch {
       /* localStorage unavailable */
     }
+    notifyPortalSessionChanged('active_child_clear');
     window.dispatchEvent(new CustomEvent(ACTIVE_CHILD_EVENT, { detail: null }));
   }
 }

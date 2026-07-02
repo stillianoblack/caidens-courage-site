@@ -5,6 +5,7 @@
  */
 
 import { ensureFamilyPortalAccess } from './blueRibbonPortalAccess';
+import { notifyPortalSessionChanged } from '../lib/portalSessionEvents';
 
 export const FAMILY_PORTAL_SESSION_KEY = 'cc-family-portal-unlock';
 
@@ -25,6 +26,7 @@ export function readLegacyFamilyPortalSession(): boolean {
 export function writeFamilyPortalSession(): void {
   try {
     sessionStorage.setItem(FAMILY_PORTAL_SESSION_KEY, '1');
+    notifyPortalSessionChanged('family_portal_session_write');
   } catch {
     /* sessionStorage unavailable */
   }
@@ -33,6 +35,7 @@ export function writeFamilyPortalSession(): void {
 export function clearFamilyPortalSession(): void {
   try {
     sessionStorage.removeItem(FAMILY_PORTAL_SESSION_KEY);
+    notifyPortalSessionChanged('family_portal_session_clear');
   } catch {
     /* ignore */
   }

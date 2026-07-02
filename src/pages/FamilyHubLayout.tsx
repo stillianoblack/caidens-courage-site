@@ -12,12 +12,11 @@ import '../components/family-portal/family-mobile-bottom-nav.css';
 import '../design-system/kids-adventure/kids-adventure-visual-system.css';
 import '../design-system/kids-adventure/kids-adventure-visual-system-desktop.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram } from '../config/activePilotProgram';
 import { resolveTrackingProgramCode } from '../lib/activeProgramContext';
 import FamilyPortalDevDiagnosticBanner from '../components/family-portal/FamilyPortalDevDiagnosticBanner';
-import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
+import { clearProgramPortalContext } from '../config/portalContext';
 import { FAMILY_HUB_PATH, PORTAL_PATH } from '../config/courageRoutes';
-import { clearFamilyPortalSession, readFamilyPortalSession } from '../config/familyPortalAccess';
+import { clearFamilyPortalSession } from '../config/familyPortalAccess';
 import { FAMILY_PORTAL_TITLE, PROGRAM_FAMILY_SIDEBAR_NAV } from '../data/familyPortalContent';
 import { afterIdle } from '../lib/defer';
 import { requestGalleryCountsRefresh } from '../lib/galleryNavCounts';
@@ -39,6 +38,7 @@ import { familyGoalsPath, familySettingsTabPath } from '../lib/familyPortalPaths
 import { isAdminAdventurePreviewActive } from '../lib/adventureVisibility';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
 import { ActiveParticipantProvider } from '../context/ActiveParticipantContext';
+import { PortalSessionProvider, usePortalSession } from '../context/PortalSessionContext';
 import ActiveParticipantPickerGate from '../components/family-portal/ActiveParticipantPickerGate';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
@@ -47,15 +47,27 @@ import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
 import '../components/family-portal/parent-first-login-wizard.css';
 
 export default function FamilyHubLayout() {
+  return (
+    <PortalSessionProvider>
+      <FamilyHubLayoutContent />
+    </PortalSessionProvider>
+  );
+}
+
+function FamilyHubLayoutContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const activeProgram = readActivePilotProgram();
-  const hasSession = readFamilyPortalSession();
-  const role = readActivePortalRole();
+  const {
+    activeProgram,
+    familySessionActive: hasSession,
+    activeRole: role,
+    programCode: sessionProgramCode,
+    refreshSession,
+  } = usePortalSession();
   const pageTitle = resolvePortalPageTitle(location.pathname, FAMILY_HUB_PATH);
   const [programCode, setProgramCode] = useState(
-    () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
+    () => resolveTrackingProgramCode() ?? sessionProgramCode ?? '',
   );
   const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
   useEffect(() => {
@@ -119,10 +131,11 @@ export default function FamilyHubLayout() {
   useEffect(() => {
     if (sessionValid) {
       const resolved = ensureFamilyPortalProgramSync();
-      setProgramCode(resolved.code ?? resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '');
+      setProgramCode(resolved.code ?? resolveTrackingProgramCode() ?? sessionProgramCode ?? '');
+      refreshSession();
       prefetchFamilyPortalRoutes();
     }
-  }, [activeProgram?.programCode, sessionValid]);
+  }, [refreshSession, sessionProgramCode, sessionValid]);
 
   useEffect(() => {
     if (sessionValid) {

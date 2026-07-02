@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { KidPlaySessionParticipantProvider } from '../context/ActiveParticipantContext';
 import { KidPlaySessionProvider } from '../context/KidPlaySessionContext';
+import { PortalSessionProvider } from '../context/PortalSessionContext';
 import {
   getKidPlaySessionById,
   resolveKidPlaySessionBehaviorFromRow,
@@ -43,6 +44,14 @@ import '../components/kid-play-shell/kid-play-character-missions.css';
 import '../components/kid-play-shell/kid-play-character-collection.css';
 
 export default function KidPlaySessionLayout() {
+  return (
+    <PortalSessionProvider>
+      <KidPlaySessionLayoutContent />
+    </PortalSessionProvider>
+  );
+}
+
+function KidPlaySessionLayoutContent() {
   const { kidPlaySessionId = '' } = useParams<{ kidPlaySessionId: string }>();
   const navigate = useNavigate();
   const location = useLocation();

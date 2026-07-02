@@ -1,6 +1,7 @@
 import { programScopesMatch, resolvePortalProgramScope } from './portalProgramScope';
 import { readParentClaimContext } from '../config/parentClaimContext';
 import { logSessionIsolationWarning } from './sessionIsolationLog';
+import { notifyPortalSessionChanged } from './portalSessionEvents';
 
 const STUDENT_PIN_SESSION_KEY = 'cc-student-pin-session';
 
@@ -53,6 +54,7 @@ export function writeStudentPinSession(session: StudentPinSession): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STUDENT_PIN_SESSION_KEY, JSON.stringify(session));
+    notifyPortalSessionChanged('student_pin_session_write');
   } catch {
     /* ignore */
   }
@@ -62,6 +64,7 @@ export function clearStudentPinSession(): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.removeItem(STUDENT_PIN_SESSION_KEY);
+    notifyPortalSessionChanged('student_pin_session_clear');
   } catch {
     /* ignore */
   }
