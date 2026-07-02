@@ -1,5 +1,6 @@
 import type { CharlieAdaptiveMissionFile } from '../../types/charlieAdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
+import { registerCharlieAdaptiveMission } from './charlieAdaptiveBuilder';
 import { CHARLIE_MISSION_1_FILE } from './missions/mission1MysteryFootprints';
 import { CHARLIE_MISSION_2_FILE } from './missions/mission2FloatingOrange';
 import { CHARLIE_MISSION_3_FILE } from './missions/mission3MysterySound';
@@ -8,15 +9,6 @@ import { CHARLIE_MISSION_5_FILE } from './missions/mission5MissingPlant';
 import { CHARLIE_MISSION_6_FILE } from './missions/mission6RobotRescue';
 import { CHARLIE_MISSION_7_FILE } from './missions/mission7MarshmallowTower';
 import { CHARLIE_MISSION_8_FILE } from './missions/mission8ScienceFairMystery';
-
-import './missions/mission1MysteryFootprints';
-import './missions/mission2FloatingOrange';
-import './missions/mission3MysterySound';
-import './missions/mission4VolcanoTrouble';
-import './missions/mission5MissingPlant';
-import './missions/mission6RobotRescue';
-import './missions/mission7MarshmallowTower';
-import './missions/mission8ScienceFairMystery';
 
 export {
   CHARLIE_MISSION_1_ID,
@@ -72,6 +64,7 @@ function charlieSkillAreaSlug(skillArea: string): string {
 }
 
 for (const mission of CHARLIE_ADAPTIVE_MISSION_FILES) {
+  registerCharlieAdaptiveMission(mission);
   registerModuleTracking({
     moduleId: mission.id,
     moduleTitle: mission.subtitle,

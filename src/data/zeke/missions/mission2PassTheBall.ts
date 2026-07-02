@@ -1,5 +1,4 @@
 import type { ZekeAdaptiveMissionFile } from '../../../types/zekeAdaptiveQuest';
-import { registerZekeAdaptiveMission } from '../zekeAdaptiveBuilder';
 import { makeZekeQuestion, bandContent } from '../zekeQuestionHelpers';
 
 export const ZEKE_MISSION_2_ID = 'zeke-pass-the-ball';
@@ -286,5 +285,3 @@ export const ZEKE_MISSION_2_FILE: ZekeAdaptiveMissionFile = {
     ),
   },
 };
-
-registerZekeAdaptiveMission(ZEKE_MISSION_2_FILE);

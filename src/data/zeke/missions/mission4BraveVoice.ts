@@ -1,5 +1,4 @@
 import type { ZekeAdaptiveMissionFile } from '../../../types/zekeAdaptiveQuest';
-import { registerZekeAdaptiveMission } from '../zekeAdaptiveBuilder';
 import { makeZekeQuestion, bandContent } from '../zekeQuestionHelpers';
 
 export const ZEKE_MISSION_4_ID = 'zeke-brave-voice';
@@ -286,5 +285,3 @@ export const ZEKE_MISSION_4_FILE: ZekeAdaptiveMissionFile = {
     ),
   },
 };
-
-registerZekeAdaptiveMission(ZEKE_MISSION_4_FILE);

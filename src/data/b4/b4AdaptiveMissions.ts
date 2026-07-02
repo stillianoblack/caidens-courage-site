@@ -1,5 +1,6 @@
 import type { B4AdaptiveMissionFile } from '../../types/b4AdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
+import { registerB4AdaptiveMission } from './b4AdaptiveBuilder';
 import { B4_MISSION_1_FILE } from './missions/mission1MoodScanner';
 import { B4_MISSION_2_FILE } from './missions/mission2BodySignalDetective';
 import { B4_MISSION_3_FILE } from './missions/mission3BraveChoiceButton';
@@ -8,15 +9,6 @@ import { B4_MISSION_5_FILE } from './missions/mission5CalmDownCountdown';
 import { B4_MISSION_6_FILE } from './missions/mission6OopsRepairLab';
 import { B4_MISSION_7_FILE } from './missions/mission7ConfidenceCharger';
 import { B4_MISSION_8_FILE } from './missions/mission8FocusFlameFinale';
-
-import './missions/mission1MoodScanner';
-import './missions/mission2BodySignalDetective';
-import './missions/mission3BraveChoiceButton';
-import './missions/mission4FocusResetStation';
-import './missions/mission5CalmDownCountdown';
-import './missions/mission6OopsRepairLab';
-import './missions/mission7ConfidenceCharger';
-import './missions/mission8FocusFlameFinale';
 
 export {
   B4_MISSION_1_ID,
@@ -75,6 +67,7 @@ function b4SkillAreaSlug(skillArea: string): string {
 }
 
 for (const mission of B4_ADAPTIVE_MISSION_FILES) {
+  registerB4AdaptiveMission(mission);
   registerModuleTracking({
     moduleId: mission.id,
     moduleTitle: mission.subtitle,

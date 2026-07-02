@@ -1,5 +1,4 @@
 import type { CharlieAdaptiveMissionFile } from '../../../types/charlieAdaptiveQuest';
-import { registerCharlieAdaptiveMission } from '../charlieAdaptiveBuilder';
 import { makeCharlieQuestion, bandContent } from '../charlieQuestionHelpers';
 
 export const CHARLIE_MISSION_3_ID = 'charlie-mystery-sound';
@@ -300,5 +299,3 @@ export const CHARLIE_MISSION_3_FILE: CharlieAdaptiveMissionFile = {
     ),
   },
 };
-
-registerCharlieAdaptiveMission(CHARLIE_MISSION_3_FILE);

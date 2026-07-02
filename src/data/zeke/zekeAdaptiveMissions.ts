@@ -1,5 +1,6 @@
 import type { ZekeAdaptiveMissionFile } from '../../types/zekeAdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
+import { registerZekeAdaptiveMission } from './zekeAdaptiveBuilder';
 import { ZEKE_MISSION_1_FILE } from './missions/mission1NewTable';
 import { ZEKE_MISSION_2_FILE } from './missions/mission2PassTheBall';
 import { ZEKE_MISSION_3_FILE } from './missions/mission3GroupProjectGlitch';
@@ -8,15 +9,6 @@ import { ZEKE_MISSION_5_FILE } from './missions/mission5FriendshipRepair';
 import { ZEKE_MISSION_6_FILE } from './missions/mission6CourageChallenge';
 import { ZEKE_MISSION_7_FILE } from './missions/mission7TeamCaptainTest';
 import { ZEKE_MISSION_8_FILE } from './missions/mission8FinalHuddle';
-
-import './missions/mission1NewTable';
-import './missions/mission2PassTheBall';
-import './missions/mission3GroupProjectGlitch';
-import './missions/mission4BraveVoice';
-import './missions/mission5FriendshipRepair';
-import './missions/mission6CourageChallenge';
-import './missions/mission7TeamCaptainTest';
-import './missions/mission8FinalHuddle';
 
 export {
   ZEKE_MISSION_1_ID,
@@ -72,6 +64,7 @@ function zekeSkillAreaSlug(skillArea: string): string {
 }
 
 for (const mission of ZEKE_ADAPTIVE_MISSION_FILES) {
+  registerZekeAdaptiveMission(mission);
   registerModuleTracking({
     moduleId: mission.id,
     moduleTitle: mission.subtitle,

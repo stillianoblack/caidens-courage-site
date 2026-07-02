@@ -74,7 +74,7 @@ export function isZekeAdaptiveMission(missionId: string): boolean {
 }
 
 export function countAvailableZekeMissions(): number {
-  return ZEKE_MISSIONS.length;
+  return 8;
 }
 
 export {

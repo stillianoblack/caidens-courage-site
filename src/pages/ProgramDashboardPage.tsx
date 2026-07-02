@@ -56,16 +56,6 @@ const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
 
 const VALID_NAV_IDS = new Set(PROGRAM_SIDEBAR_NAV.map((item) => item.id));
 
-function logProgramDashboardHydration(
-  step: string,
-  detail: Record<string, unknown>,
-): void {
-  console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
-    step,
-    ...detail,
-  });
-}
-
 export default function ProgramDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -96,27 +86,6 @@ export default function ProgramDashboardPage() {
   useEffect(() => {
     clearPageTransitionOverlay();
   }, []);
-
-  useEffect(() => {
-    logProgramDashboardHydration('session_restore', {
-      path: location.pathname,
-      has_active_program: hasActiveProgram,
-      program_code: programCode ?? null,
-      role,
-      has_unlock: Boolean(hasUnlock),
-      is_independent_family: isIndependentFamily,
-      route_allowed: isPortalRoleAllowed(location.pathname),
-      session_valid: sessionValid,
-    });
-  }, [
-    hasActiveProgram,
-    hasUnlock,
-    isIndependentFamily,
-    location.pathname,
-    programCode,
-    role,
-    sessionValid,
-  ]);
 
   const {
     open: goalsOpen,
@@ -173,10 +142,6 @@ export default function ProgramDashboardPage() {
 
   useEffect(() => {
     if (!hasActiveProgram) {
-      logProgramDashboardHydration('redirect_to_portal', {
-        reason: 'missing_active_program',
-        path: location.pathname,
-      });
       navigate(PORTAL_PATH, {
         replace: true,
         state: {
@@ -188,22 +153,10 @@ export default function ProgramDashboardPage() {
       return;
     }
     if (isIndependentFamily) {
-      logProgramDashboardHydration('redirect_to_family', {
-        reason: 'independent_family_program',
-        program_code: programCode ?? null,
-      });
       navigate(resolveFamilyKidDefaultLandingPath(), { replace: true });
       return;
     }
     if (!sessionValid) {
-      logProgramDashboardHydration('redirect_to_portal', {
-        reason: 'invalid_facilitator_session',
-        path: location.pathname,
-        program_code: programCode ?? null,
-        role,
-        has_unlock: Boolean(hasUnlock),
-        route_allowed: isPortalRoleAllowed(location.pathname),
-      });
       clearProgramPortalContext();
       navigate(PORTAL_PATH, {
         replace: true,

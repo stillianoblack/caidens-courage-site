@@ -28,7 +28,6 @@ import {
   type LocalModuleResultRecord,
   type LocalParticipantRecord,
 } from './pilotTrackingLocalStorage';
-import { readParentClaimContext } from '../config/parentClaimContext';
 import {
   logTrackingSave,
   logTrackingSaveError,
@@ -63,13 +62,6 @@ export type FindOrCreateParticipantOptions = {
   diagnosticTag?: string;
 };
 
-type SupabaseErrorFields = {
-  code: string | null;
-  message: string | null;
-  details: string | null;
-  hint: string | null;
-};
-
 export type EnsureStudentParticipantInput = {
   participantId?: string;
   firstName?: string;
@@ -83,6 +75,24 @@ export type EnsureStudentParticipantResult = {
   nickname: string;
   programCode: string;
   source: 'supabase' | 'local';
+};
+
+export type ExistingStudentParticipantResolutionInput = {
+  participantId?: string | null;
+  programCode: string;
+  nickname?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  groupName?: string | null;
+  parentEmail?: string | null;
+  familyProgramCode?: string | null;
+  diagnosticTag?: string;
+};
+
+export type ExistingStudentParticipantResolution = {
+  participantId: string;
+  reason: 'participant_id' | 'family_link' | 'student_identity';
+  duplicateCandidateIds: string[];
 };
 
 export type ModuleResultPayload = {
@@ -130,6 +140,66 @@ function isStudentRole(role: string): boolean {
   return role === 'student';
 }
 
+function normalizeIdentityToken(value?: string | null): string {
+  return value?.trim().toLowerCase().replace(/\s+/g, ' ') ?? '';
+}
+
+function normalizedIdentitySet(input: {
+  nickname?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+}): Set<string> {
+  return new Set(
+    [input.nickname, input.firstName, input.lastName]
+      .map(normalizeIdentityToken)
+      .filter(Boolean),
+  );
+}
+
+function studentIdentityMatches(
+  candidate: {
+    nickname?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+  },
+  identity: Set<string>,
+): boolean {
+  if (!identity.size) return false;
+  return [candidate.nickname, candidate.first_name, candidate.last_name]
+    .map(normalizeIdentityToken)
+    .some((token) => token && identity.has(token));
+}
+
+function logDuplicateStudentParticipant(input: {
+  reason: string;
+  programCode: string;
+  participantIds: string[];
+  nickname?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  parentEmail?: string | null;
+  diagnosticTag?: string;
+}): void {
+  console.error('[DUPLICATE_STUDENT_PARTICIPANT_DETECTED]', {
+    reason: input.reason,
+    program_code: input.programCode,
+    participant_ids: input.participantIds,
+    nickname: input.nickname ?? null,
+    first_name: input.firstName ?? null,
+    last_name: input.lastName ?? null,
+    parent_email: input.parentEmail ?? null,
+    diagnostic_tag: input.diagnosticTag ?? null,
+  });
+  logTrackingSaveError({
+    table: 'participants',
+    operation: 'select',
+    participantName: input.nickname || input.firstName || input.lastName || undefined,
+    role: 'student',
+    programCode: input.programCode,
+    error: `duplicate student participants detected: ${input.participantIds.join(', ')}`,
+  });
+}
+
 function computePercent(score: number, maxScore: number): number {
   if (maxScore <= 0) return 0;
   return Math.round((score / maxScore) * 10000) / 100;
@@ -155,14 +225,7 @@ function logResultSaveDebug(input: {
   moduleId?: string | null;
   assessmentType?: string | null;
 }): void {
-  console.info('[RESULT_SAVE_DEBUG]', {
-    table: input.table,
-    active_participant_id: input.activeParticipantId ?? readActiveChildParticipantId() ?? null,
-    participant_id: input.participantId ?? null,
-    program_code: input.programCode ?? null,
-    module_id: input.moduleId ?? null,
-    assessment_type: input.assessmentType ?? null,
-  });
+  void input;
 }
 
 function blockOrphanedParticipantSave(input: {
@@ -223,6 +286,155 @@ function buildStudentParticipantOrFilter(nickname?: string, firstName?: string):
     .join(',');
 }
 
+export async function resolveExistingStudentParticipant(
+  input: ExistingStudentParticipantResolutionInput,
+): Promise<ExistingStudentParticipantResolution | null> {
+  const programCode = input.programCode.trim();
+  if (!programCode || !isSupabaseConfigured() || !supabase) return null;
+
+  const identity = normalizedIdentitySet({
+    nickname: input.nickname,
+    firstName: input.firstName,
+    lastName: input.lastName,
+  });
+  const parentEmail = normalizeIdentityToken(input.parentEmail);
+  const familyProgramCode = input.familyProgramCode?.trim() || null;
+
+  try {
+    if (isValidSupabaseParticipantId(input.participantId)) {
+      const { data, error } = await withTimeout(
+        supabase
+          .from('participants')
+          .select('id')
+          .eq('id', input.participantId!.trim())
+          .eq('program_code', programCode)
+          .eq('role', 'student')
+          .limit(1),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'student_participant_resolve_by_id',
+      );
+
+      if (!error && data?.length) {
+        return { participantId: data[0].id as string, reason: 'participant_id', duplicateCandidateIds: [] };
+      }
+    }
+
+    if (parentEmail || familyProgramCode) {
+      let linkQuery = supabase
+        .from('student_family_links')
+        .select('student_id, parent_email, family_program_code')
+        .eq('camp_program_code', programCode);
+      if (parentEmail) linkQuery = linkQuery.ilike('parent_email', parentEmail);
+      if (familyProgramCode) linkQuery = linkQuery.eq('family_program_code', familyProgramCode);
+
+      const { data: links, error: linkError } = await withTimeout(
+        linkQuery.limit(10),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'student_participant_resolve_by_family_link',
+      );
+
+      const linkedIds = Array.from(
+        new Set(
+          ((linkError ? [] : links) ?? [])
+            .map((row) => (row.student_id as string | null)?.trim())
+            .filter((id): id is string => isValidSupabaseParticipantId(id)),
+        ),
+      );
+
+      if (linkedIds.length > 0) {
+        const { data: linkedParticipants, error: participantsError } = await withTimeout(
+          supabase
+            .from('participants')
+            .select('id, nickname, first_name, last_name, created_at')
+            .in('id', linkedIds)
+            .eq('program_code', programCode)
+            .eq('role', 'student')
+            .order('created_at', { ascending: true }),
+          DASHBOARD_FETCH_TIMEOUT_MS,
+          'student_participant_resolve_by_linked_ids',
+        );
+
+        if (!participantsError && linkedParticipants?.length) {
+          const matches = identity.size
+            ? linkedParticipants.filter((row) => studentIdentityMatches(row, identity))
+            : linkedParticipants;
+          const candidates = matches.length ? matches : linkedParticipants;
+          const candidateIds = candidates.map((row) => row.id as string);
+          if (candidateIds.length > 1) {
+            logDuplicateStudentParticipant({
+              reason: 'family_link',
+              programCode,
+              participantIds: candidateIds,
+              nickname: input.nickname,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              parentEmail: input.parentEmail,
+              diagnosticTag: input.diagnosticTag,
+            });
+          }
+          return {
+            participantId: candidateIds[0],
+            reason: 'family_link',
+            duplicateCandidateIds: candidateIds.slice(1),
+          };
+        }
+      }
+    }
+
+    if (identity.size) {
+      let query = supabase
+        .from('participants')
+        .select('id, nickname, first_name, last_name, created_at')
+        .eq('program_code', programCode)
+        .eq('role', 'student');
+      const orFilter = buildStudentParticipantOrFilter(input.nickname?.trim(), input.firstName?.trim());
+      if (orFilter) query = query.or(orFilter);
+      query = applyStudentGroupFilter(query, input.groupName ?? undefined);
+
+      const { data: rows, error } = await withTimeout(
+        query.order('created_at', { ascending: true }).limit(10),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'student_participant_resolve_by_identity',
+      );
+
+      if (!error && rows?.length) {
+        const matches = rows.filter((row) => studentIdentityMatches(row, identity));
+        if (matches.length) {
+          const candidateIds = matches.map((row) => row.id as string);
+          if (candidateIds.length > 1) {
+            logDuplicateStudentParticipant({
+              reason: 'student_identity',
+              programCode,
+              participantIds: candidateIds,
+              nickname: input.nickname,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              parentEmail: input.parentEmail,
+              diagnosticTag: input.diagnosticTag,
+            });
+          }
+          return {
+            participantId: candidateIds[0],
+            reason: 'student_identity',
+            duplicateCandidateIds: candidateIds.slice(1),
+          };
+        }
+      }
+    }
+  } catch (err) {
+    logTrackingSaveError({
+      table: 'participants',
+      operation: 'select',
+      participantName: input.nickname || input.firstName || input.lastName || undefined,
+      role: 'student',
+      programCode,
+      error: err,
+    });
+  }
+
+  return null;
+}
+
 /** Resolve a Supabase student participant before module/assessment saves. */
 export async function ensureStudentParticipantForSave(
   input: EnsureStudentParticipantInput = {},
@@ -270,16 +482,6 @@ export async function ensureStudentParticipantForSave(
     group_name: groupName,
   });
 
-  console.info('[CHILD_PROFILE]', {
-    action: 'ensure_for_save',
-    participant_id: ensuredId,
-    first_name: resolvedFirstName,
-    nickname: resolvedNickname,
-    program_code: programCode,
-    source,
-    had_known_id: isValidSupabaseParticipantId(resolvedParticipantId),
-  });
-
   return {
     participantId: ensuredId,
     firstName: resolvedFirstName,
@@ -315,12 +517,6 @@ function resolveResultProgramCode(
         : resolvedProgramCode.toUpperCase().startsWith('FAMILY-')
           ? resolvedProgramCode
           : null;
-    console.warn('[PROGRAM_ASSIGNMENT_MISMATCH]', {
-      save_context: saveContext,
-      resolved_program_code: resolvedProgramCode,
-      payload_program_code: payloadCode,
-      saved_program_code: familyCode ?? resolvedProgramCode,
-    });
     const finalProgramCode = familyCode ?? resolvedProgramCode;
     logProgramAssignmentSave({ table, saveContext, finalProgramCode });
     return finalProgramCode;
@@ -348,24 +544,6 @@ function parseMissingSupabaseColumn(error: unknown): string | null {
   return null;
 }
 
-function formatSupabaseErrorFields(error: unknown): SupabaseErrorFields {
-  if (!error || typeof error !== 'object') {
-    return {
-      code: null,
-      message: error instanceof Error ? error.message : String(error ?? ''),
-      details: null,
-      hint: null,
-    };
-  }
-  const record = error as { code?: string; message?: string; details?: string; hint?: string };
-  return {
-    code: record.code ?? null,
-    message: record.message ?? null,
-    details: record.details ?? null,
-    hint: record.hint ?? null,
-  };
-}
-
 function logParticipantUpsertDiagnostic(input: {
   diagnosticTag?: string;
   operation: 'insert' | 'update' | 'select';
@@ -375,18 +553,7 @@ function logParticipantUpsertDiagnostic(input: {
   participantId?: string;
   error?: unknown;
 }): void {
-  if (!input.diagnosticTag) return;
-  const parentEmail = readParentClaimContext()?.email?.trim() || null;
-  console.info('[PARTICIPANT_UPSERT_DIAGNOSTIC]', {
-    tag: input.diagnosticTag,
-    parent_email: parentEmail,
-    program_code: input.programCode,
-    operation: input.operation,
-    payload_keys: input.payloadKeys,
-    source: input.source ?? null,
-    participant_id: input.participantId ?? null,
-    supabase_error: input.error ? formatSupabaseErrorFields(input.error) : null,
-  });
+  void input;
 }
 
 async function mutateParticipantRowWithSchemaFallback<T extends Record<string, unknown>>(input: {
@@ -537,32 +704,27 @@ export async function findOrCreateParticipant(
 
   if (isSupabaseConfigured() && supabase) {
     try {
-      if (isStudentRole(payload.role) && isValidSupabaseParticipantId(payload.participant_id)) {
-        const { data: byIdRows, error: byIdError } = await withTimeout(
-          supabase
-            .from('participants')
-            .select('id')
-            .eq('id', payload.participant_id!.trim())
-            .eq('program_code', programCode)
-            .eq('role', 'student')
-            .limit(1),
-          DASHBOARD_FETCH_TIMEOUT_MS,
-          'participant_lookup_by_id',
-        );
+      if (isStudentRole(payload.role)) {
+        const resolvedExisting = await resolveExistingStudentParticipant({
+          participantId: payload.participant_id,
+          programCode,
+          nickname: payload.nickname,
+          firstName: payload.first_name,
+          groupName: payload.group_name,
+          diagnosticTag,
+        });
 
-        if (byIdError) {
-          logTrackingSaveError({
-            table: 'participants',
-            operation: 'select',
-            participantId: payload.participant_id,
-            participantName: payload.nickname || payload.first_name,
-            role: payload.role,
-            programCode,
-            error: byIdError,
-          });
-        } else if (byIdRows && byIdRows.length > 0) {
-          const participantId = byIdRows[0].id as string;
+        if (resolvedExisting) {
+          const participantId = resolvedExisting.participantId;
           saveLocalParticipant(participantToLocalRow(normalizedPayload, participantId, programCode));
+          logParticipantUpsertDiagnostic({
+            diagnosticTag,
+            operation: 'select',
+            programCode,
+            payloadKeys: Object.keys(payload),
+            source: 'supabase',
+            participantId,
+          });
           return { participantId, source: 'supabase' };
         }
       }
@@ -921,11 +1083,6 @@ export async function saveModuleResult(payload: ModuleResultPayload): Promise<Tr
             assessmentType: resolvedPayload.module_id,
             response: data,
           });
-          console.info('[CHILD_MODULE_SAVE]', {
-            participant_id: resolvedPayload.participant_id,
-            program_code: programCode,
-            module_id: resolvedPayload.module_id,
-          });
           return {
             success: true,
             source: 'supabase',
@@ -1115,11 +1272,6 @@ export async function saveAssessmentResult(
             programCode,
             assessmentType: resolvedPayload.assessment_type,
             response: data,
-          });
-          console.info('[CHILD_ASSESSMENT_SAVE]', {
-            participant_id: resolvedPayload.participant_id,
-            program_code: programCode,
-            assessment_type: resolvedPayload.assessment_type,
           });
           return {
             success: true,

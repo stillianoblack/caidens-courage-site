@@ -1,5 +1,4 @@
 import type { B4AdaptiveMissionFile } from '../../../types/b4AdaptiveQuest';
-import { registerB4AdaptiveMission } from '../b4AdaptiveBuilder';
 import { makeB4Question, bandContent } from '../b4QuestionHelpers';
 
 export const B4_MISSION_2_ID = 'b4-body-signal-detective';
@@ -399,5 +398,3 @@ export const B4_MISSION_2_FILE: B4AdaptiveMissionFile = {
     ),
   },
 };
-
-registerB4AdaptiveMission(B4_MISSION_2_FILE);

@@ -1,5 +1,4 @@
 import type { ZekeAdaptiveMissionFile } from '../../../types/zekeAdaptiveQuest';
-import { registerZekeAdaptiveMission } from '../zekeAdaptiveBuilder';
 import { makeZekeQuestion, bandContent } from '../zekeQuestionHelpers';
 
 export const ZEKE_MISSION_5_ID = 'zeke-friendship-repair';
@@ -286,5 +285,3 @@ export const ZEKE_MISSION_5_FILE: ZekeAdaptiveMissionFile = {
     ),
   },
 };
-
-registerZekeAdaptiveMission(ZEKE_MISSION_5_FILE);

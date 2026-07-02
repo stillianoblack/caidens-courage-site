@@ -1,9 +1,16 @@
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
 import { getGradeBand } from './getGradeBand';
-import { isValidSupabaseParticipantId } from './pilotTrackingService';
+import {
+  isValidSupabaseParticipantId,
+  resolveExistingStudentParticipant,
+} from './pilotTrackingService';
 import { saveParticipantGradeLevel } from './participantGradeService';
-import { createCampStudentFamilyLink } from './studentFamilyLinkService';
+import {
+  backfillStudentFamilyLinkParentContact,
+  createCampStudentFamilyLink,
+  ensureCampStudentFamilyLink,
+} from './studentFamilyLinkService';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 export type AdminEmergencyAddStudentInput = {
@@ -87,6 +94,55 @@ export async function createAdminEmergencyStudent(
   const gradeBand = getGradeBand(gradeLevel);
 
   try {
+    const existing = await resolveExistingStudentParticipant({
+      programCode: campProgramCode,
+      nickname: displayName,
+      firstName: childFirstName,
+      groupName,
+      parentEmail,
+      diagnosticTag: 'admin_emergency_add_student',
+    });
+
+    if (existing) {
+      await saveParticipantGradeLevel(existing.participantId, gradeLevel);
+
+      if (parentEmail) {
+        const linkResult = await ensureCampStudentFamilyLink({
+          studentId: existing.participantId,
+          campProgramCode,
+        });
+
+        if (!linkResult.success) {
+          return {
+            success: true,
+            participantId: existing.participantId,
+            displayName,
+            familyAccessCode: programAccess.familyAccessCode,
+            facilitatorAccessCode: programAccess.facilitatorAccessCode,
+            message: `${displayName} already existed in ${programAccess.programName ?? campProgramCode}, but the parent link failed: ${linkResult.error ?? 'unknown error'}.`,
+          };
+        }
+
+        if (linkResult.link?.id) {
+          await backfillStudentFamilyLinkParentContact({
+            linkId: linkResult.link.id,
+            parentEmail,
+            parentFirstName: 'Parent',
+            parentLastName: 'Pending',
+          });
+        }
+      }
+
+      return {
+        success: true,
+        participantId: existing.participantId,
+        displayName,
+        familyAccessCode: programAccess.familyAccessCode,
+        facilitatorAccessCode: programAccess.facilitatorAccessCode,
+        message: `${displayName} already exists in ${programAccess.programName ?? campProgramCode}; reused the existing student instead of creating a duplicate.`,
+      };
+    }
+
     const insertPayload: Record<string, string | null> = {
       role: 'student',
       nickname: displayName,
@@ -136,14 +192,6 @@ export async function createAdminEmergencyStudent(
         };
       }
     }
-
-    console.info('[ADMIN_EMERGENCY_STUDENT_ADDED]', {
-      participant_id: savedParticipantId,
-      camp_program_code: campProgramCode,
-      group_name: groupName,
-      parent_email: parentEmail || null,
-      notes,
-    });
 
     const accessHint = programAccess.familyAccessCode
       ? ` Family access code: ${programAccess.familyAccessCode}.`

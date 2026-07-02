@@ -8,7 +8,7 @@ export function isStandaloneDisplayMode(): boolean {
 
   const standaloneMq =
     typeof window.matchMedia === 'function' &&
-    window.matchMedia('(display-mode: standalone)').matches;
+    Boolean(window.matchMedia('(display-mode: standalone)')?.matches);
 
   const iosStandalone =
     'standalone' in window.navigator &&

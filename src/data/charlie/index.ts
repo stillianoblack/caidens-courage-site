@@ -77,7 +77,7 @@ export function isCharlieAdaptiveMission(missionId: string): boolean {
 }
 
 export function countAvailableCharlieMissions(): number {
-  return CHARLIE_MISSIONS.length;
+  return 8;
 }
 
 export {

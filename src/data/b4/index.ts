@@ -74,7 +74,7 @@ export function isB4AdaptiveMission(missionId: string): boolean {
 }
 
 export function countAvailableB4Missions(): number {
-  return B4_MISSIONS.length;
+  return 8;
 }
 
 export {

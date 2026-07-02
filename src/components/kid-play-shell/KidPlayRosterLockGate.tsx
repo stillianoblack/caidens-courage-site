@@ -48,15 +48,6 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
 
       setSubmitting(true);
       try {
-        console.info('[FACILITATOR_RETURN_PIN]', {
-          step: 'verify_start',
-          has_continuity: Boolean(continuity),
-          continuity_program_code: continuity?.programCode ?? null,
-          continuity_camp_program_code: continuity?.campProgramCode ?? null,
-          active_program_code: readActivePilotProgram()?.programCode ?? null,
-          participant_id: continuity?.lastStudentId ?? null,
-        });
-
         let verified = programCode
           ? await verifyStudentPinLogin({ programCode, pin: trimmedPin })
           : await verifyStudentPinLoginWithProgramFallback({
@@ -72,11 +63,6 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
           });
         }
         if (!verified.success) {
-          console.warn('[FACILITATOR_RETURN_PIN]', {
-            step: 'verify_failed',
-            program_code: programCode || null,
-            error: verified.error,
-          });
           setError(INVALID_PIN_MESSAGE);
           return;
         }

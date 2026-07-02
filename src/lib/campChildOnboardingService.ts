@@ -1,7 +1,10 @@
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
 import { getGradeBand } from './getGradeBand';
-import { isValidSupabaseParticipantId } from './pilotTrackingService';
+import {
+  isValidSupabaseParticipantId,
+  resolveExistingStudentParticipant,
+} from './pilotTrackingService';
 import { saveParticipantGradeLevel } from './participantGradeService';
 import {
   backfillStudentFamilyLinkParentContact,
@@ -60,6 +63,7 @@ async function insertCampChildParticipant(input: {
   nickname: string;
   campProgramCode: string;
   gradeLevel?: GradeLevel;
+  parentEmail?: string;
 }): Promise<{ participantId: string } | { error: string }> {
   const firstName = input.firstName.trim();
   const lastName = input.lastName?.trim() || null;
@@ -68,18 +72,44 @@ async function insertCampChildParticipant(input: {
   const gradeLevel = normalizeGradeLevelStorage(input.gradeLevel) ?? undefined;
   const gradeBand = gradeLevel ? getGradeBand(gradeLevel) : undefined;
 
-  console.info('[CAMP_CHILD_INSERT_START]', {
-    first_name: firstName,
-    last_name: lastName,
-    nickname,
-    camp_program_code: campProgramCode,
-  });
-
   if (!isSupabaseConfigured() || !supabase) {
     return { error: 'Supabase is not configured. Cannot add camp child.' };
   }
 
   try {
+    const existing = await resolveExistingStudentParticipant({
+      programCode: campProgramCode,
+      nickname,
+      firstName,
+      lastName,
+      parentEmail: input.parentEmail,
+      diagnosticTag: 'camp_child_onboarding',
+    });
+
+    if (existing) {
+      const updatePayload: Record<string, unknown> = {
+        nickname,
+        first_name: firstName,
+        ...(lastName ? { last_name: lastName } : {}),
+      };
+      if (gradeLevel) {
+        updatePayload.grade_level = gradeLevel;
+        updatePayload.grade_band = gradeBand!;
+      }
+
+      const { error: updateError } = await withTimeout(
+        supabase.from('participants').update(updatePayload).eq('id', existing.participantId),
+        DASHBOARD_FETCH_TIMEOUT_MS,
+        'camp_child_participant_existing_update',
+      );
+
+      if (updateError) {
+        return { error: updateError.message };
+      }
+
+      return { participantId: existing.participantId };
+    }
+
     let query = supabase
       .from('participants')
       .select('id')
@@ -128,11 +158,6 @@ async function insertCampChildParticipant(input: {
         return { error: updateError.message };
       }
 
-      console.info('[CAMP_CHILD_INSERT_SUCCESS]', {
-        participant_id: participantId,
-        camp_program_code: campProgramCode,
-        action: 'existing',
-      });
       return { participantId };
     }
 
@@ -165,11 +190,6 @@ async function insertCampChildParticipant(input: {
     }
     const participantId = insertedId as string;
 
-    console.info('[CAMP_CHILD_INSERT_SUCCESS]', {
-      participant_id: participantId,
-      camp_program_code: campProgramCode,
-      action: 'inserted',
-    });
     return { participantId };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not save camp child participant.';
@@ -288,6 +308,7 @@ export async function createCampChildWithOptionalParent(
       nickname: childNickname,
       campProgramCode,
       gradeLevel: normalizeGradeLevelStorage(input.gradeLevel) ?? undefined,
+      parentEmail,
     });
 
     if ('error' in participantResult) {
@@ -367,15 +388,6 @@ export async function createCampChildWithOptionalParent(
         linkId = linkResult.link?.id;
       }
 
-      console.info('[CAMP_CHILD_ONBOARDED]', {
-        participant_id: participantId,
-        camp_program_code: campProgramCode,
-        parent_email: parentEmail,
-        parent_last_name: parentLastName,
-        link_id: linkId ?? null,
-        grade_level: input.gradeLevel ?? null,
-      });
-
       if (input.gradeLevel && normalizeGradeLevelStorage(input.gradeLevel)) {
         await saveParticipantGradeLevel(participantId, normalizeGradeLevelStorage(input.gradeLevel)!);
       }
@@ -413,14 +425,6 @@ export async function createCampChildWithOptionalParent(
     }
 
     const familyClaimUrl = access.familyClaimCode ? buildFamilyClaimUrl(access.familyClaimCode) : undefined;
-
-    console.info('[CAMP_CHILD_ONBOARDED_STUDENT_ONLY]', {
-      participant_id: participantId,
-      camp_program_code: campProgramCode,
-      parent_connection_status: parentConnectionStatus,
-      has_pin: Boolean(access.studentPin),
-      has_claim_code: Boolean(access.familyClaimCode),
-    });
 
     return {
       success: true,

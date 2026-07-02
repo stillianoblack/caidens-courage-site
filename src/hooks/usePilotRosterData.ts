@@ -30,7 +30,6 @@ import {
   type StudentAccessFields,
 } from '../lib/studentPinService';
 import { buildFamilyClaimUrl } from '../lib/familyClaimCode';
-import { buildPortalProgramDiagnostic } from '../lib/portalDiagnostics';
 
 export type PilotRosterRow = {
   participantId: string;
@@ -90,10 +89,6 @@ export function usePilotRosterData(
 
     setLoading(true);
     try {
-      console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
-        step: 'roster_lookup_start',
-        program_code: code,
-      });
       const [linksPayload, trackingPayload, directoryPayload] = await Promise.all([
         fetchStudentFamilyLinksByCampProgram(code),
         loadPilotTrackingData(code),
@@ -103,15 +98,6 @@ export function usePilotRosterData(
       const accessMap = await fetchStudentAccessFieldsByIds(
         directoryPayload.participants.map((row) => row.id),
       );
-      console.info('[PROGRAM_DASHBOARD_HYDRATION]', {
-        step: 'roster_lookup_complete',
-        program_code: code,
-        participants: directoryPayload.participants.length,
-        family_links: linksPayload.links.length,
-        module_results: trackingPayload.moduleResults.length,
-        assessment_results: trackingPayload.assessmentResults.length,
-        warning: directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || null,
-      });
 
       setParticipants(directoryPayload.participants);
       setLinks(linksPayload.links);
@@ -123,21 +109,7 @@ export function usePilotRosterData(
           directoryPayload.errors[0] || linksPayload.error || trackingPayload.warning || undefined,
         ) ?? undefined,
       );
-      void buildPortalProgramDiagnostic({
-        programCode: code,
-        programName: code,
-        familyAccessCode: programFamilyAccessCode ?? '',
-      }).then((diagnostic) => {
-        if (diagnostic) {
-          console.info('[PORTAL_PROGRAM_DIAGNOSTIC]', diagnostic);
-        }
-      });
-    } catch (err) {
-      console.warn('[PROGRAM_DASHBOARD_HYDRATION]', {
-        step: 'roster_lookup_failed',
-        program_code: code,
-        error: err instanceof Error ? err.message : String(err),
-      });
+    } catch {
       setParticipants([]);
       setLinks([]);
       setAssessmentResults([]);
@@ -147,7 +119,7 @@ export function usePilotRosterData(
     } finally {
       setLoading(false);
     }
-  }, [programCode, programFamilyAccessCode]);
+  }, [programCode]);
 
   useEffect(() => {
     if (!enabled) return;
