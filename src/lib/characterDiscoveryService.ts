@@ -40,6 +40,44 @@ async function fetchDiscoveryClaimRows(
     .filter((row) => row.reward_key.startsWith('discovery:'));
 }
 
+async function fetchDiscoveryProgressRows(
+  participantId: string,
+): Promise<Array<{ mission_id: string; completed_at: string | null }>> {
+  if (!isSupabaseConfigured() || !supabase) return [];
+
+  const { data, error } = await supabase
+    .from('player_progress')
+    .select('mission_id, completed_at')
+    .eq('participant_id', participantId);
+
+  if (error) throw error;
+
+  return (data ?? [])
+    .map((row) => ({
+      mission_id: (row as { mission_id?: string | null }).mission_id?.trim() ?? '',
+      completed_at: (row as { completed_at?: string | null }).completed_at ?? null,
+    }))
+    .filter((row) => row.mission_id);
+}
+
+export function earnedDiscoveriesFromProgressRows(
+  rows: Array<{ mission_id: string; completed_at: string | null }>,
+  seen: Set<string> = new Set(),
+): EarnedCharacterDiscovery[] {
+  const earned: EarnedCharacterDiscovery[] = [];
+  for (const row of rows) {
+    const definition = resolveCharacterDiscoveryForMission(row.mission_id);
+    if (!definition || seen.has(definition.id)) continue;
+    seen.add(definition.id);
+    earned.push({
+      id: definition.id,
+      definition,
+      earnedAt: row.completed_at,
+    });
+  }
+  return earned;
+}
+
 export async function getEarnedCharacterDiscoveries(
   childId: string,
 ): Promise<EarnedCharacterDiscovery[]> {
@@ -47,7 +85,10 @@ export async function getEarnedCharacterDiscoveries(
   if (!participantId) return [];
 
   try {
-    const rows = await fetchDiscoveryClaimRows(participantId);
+    const [rows, progressRows] = await Promise.all([
+      fetchDiscoveryClaimRows(participantId),
+      fetchDiscoveryProgressRows(participantId),
+    ]);
     const earned: EarnedCharacterDiscovery[] = [];
     const seen = new Set<string>();
 
@@ -64,6 +105,8 @@ export async function getEarnedCharacterDiscoveries(
         earnedAt: row.claimed_at,
       });
     }
+
+    earned.push(...earnedDiscoveriesFromProgressRows(progressRows, seen));
 
     return earned.sort((left, right) => left.definition.name.localeCompare(right.definition.name));
   } catch (err) {

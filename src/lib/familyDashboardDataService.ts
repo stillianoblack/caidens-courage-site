@@ -20,6 +20,7 @@ import {
   fetchModuleResultsFromSupabase,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import { fetchPlayerProgressDisplayModuleResults } from './familyPlayerProgressDisplay';
 import { auditFamilyPortalLinking } from './familyPortalLinkAudit';
 import { hydrateExistingFamilyChildren } from './hydrateExistingFamilyChildren';
 import { hasCanonicalGradeLevel } from './participantGradeDisplay';
@@ -367,13 +368,28 @@ async function loadFamilyDashboardDataImpl(
     allowedStudentIds,
   );
 
-  const moduleResults = filterStudentRowsByAllowedIds(
+  const baseModuleResults = filterStudentRowsByAllowedIds(
     mergeUniqueById(
       moduleByProgramPayload.results,
       moduleByStudentsPayload.results,
       (row) => `${row.participant_id}-${row.module_id}-${row.completed_at}`,
     ),
     allowedStudentIds,
+  );
+  const playerProgressModulePayload = await fetchPlayerProgressDisplayModuleResults({
+    participantIds: useParticipantScope ? scopedParticipantIds : allowedStudentIds,
+    programCode,
+    existingModuleResults: baseModuleResults,
+  });
+  if (playerProgressModulePayload.error) errors.push(playerProgressModulePayload.error);
+  const moduleResults = mergeUniqueById(
+    baseModuleResults,
+    playerProgressModulePayload.results,
+    (row) => {
+      const missionId =
+        typeof row.answers_json?.mission_id === 'string' ? row.answers_json.mission_id : row.module_id;
+      return `${row.participant_id}-${missionId}`;
+    },
   );
 
   const data: FamilyDashboardData = {
