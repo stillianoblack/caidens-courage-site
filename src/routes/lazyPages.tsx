@@ -62,6 +62,9 @@ export const MirandaMysteryFilesHubPage = lazy(() => import('../pages/MirandaMys
 export const MirandaMissionPage = lazy(() => import('../pages/MirandaMissionPage'));
 export const KidsPortalPage = lazy(() => import('../pages/KidsPortalPage'));
 export const KidsCharacterPage = lazy(() => import('../pages/KidsCharacterPage'));
+export const B4FocusFlightPage = lazy(
+  () => import('../games/b4-focus-flight/B4FocusFlightPage'),
+);
 
 export const FacilitatorAdultGuideHubPage = lazy(
   () => import('../pages/FacilitatorAdultGuideHubPage'),

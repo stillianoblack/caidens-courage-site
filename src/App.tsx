@@ -23,6 +23,7 @@ import { PilotAccessProvider } from './components/courage/PilotAccessProvider';
 import {
   AboutPage,
   B4ClickerPage,
+  B4FocusFlightPage,
   B4BaselineCheckPage,
   B4GuidePage,
   B4ToolsLibraryPage,
@@ -453,6 +454,7 @@ const appRouteChildren = (
 
       {/* Legacy kids hub (non-portal shell) */}
       <Route path={KIDS_PORTAL_PATH} element={<KidsPortalPage />} />
+      <Route path={`${KIDS_PORTAL_PATH}/games/b4-focus-flight`} element={<B4FocusFlightPage />} />
       <Route path={`${KIDS_PORTAL_PATH}/zeke`} element={<ZekePortalHubPage />} />
       <Route path={`${KIDS_PORTAL_PATH}/zeke/:missionId`} element={<ZekePortalMissionPage />} />
 
@@ -464,6 +466,7 @@ const appRouteChildren = (
       />
       <Route path={STUDENT_GALLERY_SUBMIT_PATH} element={<StudentGallerySubmitPage />} />
       <Route path={STUDENT_GALLERY_PUBLIC_PATH} element={<StudentGalleryPublicPage />} />
+      <Route path="/kids/games/b4-focus-flight" element={<B4FocusFlightPage />} />
       <Route path="/kids" element={<KidsHubPage />} />
       <Route path="/parents" element={<ParentsPage />} />
       <Route path="/teachers" element={<TeachersPage />} />

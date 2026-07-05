@@ -4,6 +4,7 @@ import FamilyContinueLearningPanel from '../components/family-portal/panels/Fami
 import FamilyInventoryPanel from '../components/family-portal/panels/FamilyInventoryPanel';
 import FamilyCharacterProfilePage from '../components/family-portal/panels/FamilyCharacterProfilePage';
 import {
+  B4FocusFlightPage,
   B4PortalCheckInPage,
   B4PortalFeelingFinderPage,
   B4PortalMissionPage,
@@ -20,6 +21,7 @@ import {
 } from '../routes/lazyPages';
 import KidPlayShellComingSoonPanel from '../components/kid-play-shell/KidPlayShellComingSoonPanel';
 import KidPlayCharacterCollectionPanel from '../components/kid-play-shell/KidPlayCharacterCollectionPanel';
+import KidArcadePanel from '../components/kid-play-shell/KidArcadePanel';
 import KidPlayShellPage from '../components/kid-play-shell/KidPlayShellPage';
 
 /** Nested kid play shell routes — missions stay under /play/session/:id/kids/... */
@@ -47,14 +49,17 @@ export const kidPlayShellChildRoutes = (
       />
       <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
     </Route>
-    <Route
-      path="arcade"
-      element={
-        <KidPlayShellPage>
-          <KidPlayShellComingSoonPanel moduleLabel="Arcade" />
-        </KidPlayShellPage>
-      }
-    />
+    <Route path="arcade">
+      <Route
+        index
+        element={
+          <KidPlayShellPage>
+            <KidArcadePanel />
+          </KidPlayShellPage>
+        }
+      />
+      <Route path="b4-focus-flight" element={<B4FocusFlightPage />} />
+    </Route>
     <Route
       path="rewards"
       element={

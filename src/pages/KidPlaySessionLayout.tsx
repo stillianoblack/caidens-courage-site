@@ -33,8 +33,15 @@ import KidPlayShellLoader from '../components/kid-play-shell/KidPlayShellLoader'
 import { IdleSessionGuard } from '../design-system/narration';
 import KidPlayShellNav from '../components/kid-play-shell/KidPlayShellNav';
 import KidPlayShellExitModal from '../components/kid-play-shell/KidPlayShellExitModal';
+import B4FocusFlightUnlockModal from '../components/kid-play-shell/B4FocusFlightUnlockModal';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
+import {
+  B4_FOCUS_FLIGHT_UNLOCK_EVENT,
+  getB4FocusFlightUnlockState,
+  markB4FocusFlightUnlockSeen,
+  requestB4FocusFlightHighlight,
+} from '../lib/b4FocusFlightUnlock';
 import '../design-system/kids-adventure/character-art-image.css';
 import '../components/kid-play-shell/kid-play-shell.css';
 import '../components/kid-play-shell/kid-play-shell-nav.css';
@@ -62,6 +69,8 @@ function KidPlaySessionLayoutContent() {
   const [showBootLoader, setShowBootLoader] = useState(true);
   const [bootLoaderExiting, setBootLoaderExiting] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
+  const [showB4UnlockModal, setShowB4UnlockModal] = useState(false);
+  const [showArcadeNewBadge, setShowArcadeNewBadge] = useState(false);
   const [returnSessionOpen, setReturnSessionOpen] = useState(() => isKidPlayFamilySoftLocked());
   const resumeHandledRef = useRef(false);
   const initialPathRef = useRef(location.pathname);
@@ -166,6 +175,24 @@ function KidPlaySessionLayoutContent() {
     });
   }, [location.pathname, location.search, session]);
 
+  useEffect(() => {
+    if (showLoaderOverlay || !session) return undefined;
+
+    const refreshUnlockState = () => {
+      const unlockState = getB4FocusFlightUnlockState();
+      setShowArcadeNewBadge(unlockState.shouldShowArcadeBadge);
+      setShowB4UnlockModal(unlockState.shouldShowModal);
+    };
+
+    refreshUnlockState();
+    window.addEventListener(B4_FOCUS_FLIGHT_UNLOCK_EVENT, refreshUnlockState);
+    window.addEventListener('storage', refreshUnlockState);
+    return () => {
+      window.removeEventListener(B4_FOCUS_FLIGHT_UNLOCK_EVENT, refreshUnlockState);
+      window.removeEventListener('storage', refreshUnlockState);
+    };
+  }, [session, showLoaderOverlay]);
+
   const handleEndSession = useCallback(
     (reason: 'idle_timeout' | 'user_exit' = 'idle_timeout') => {
       if (!session) return;
@@ -198,6 +225,21 @@ function KidPlaySessionLayoutContent() {
     handleEndSession('user_exit');
   }, [handleEndSession]);
 
+  const handleB4UnlockDismiss = useCallback(() => {
+    markB4FocusFlightUnlockSeen();
+    setShowB4UnlockModal(false);
+    setShowArcadeNewBadge(getB4FocusFlightUnlockState().shouldShowArcadeBadge);
+  }, []);
+
+  const handleB4UnlockPlayNow = useCallback(() => {
+    if (!session) return;
+    markB4FocusFlightUnlockSeen();
+    requestB4FocusFlightHighlight();
+    setShowB4UnlockModal(false);
+    setShowArcadeNewBadge(false);
+    kidPlayShellNavigate(navigate, `${getKidPlayShellRoute(session.id, 'arcade')}?launch=b4-focus-flight`);
+  }, [navigate, session]);
+
   if (bootError) {
     return (
       <div className="kid-play-shellLoader kid-play-shellLoader--error" role="alert">
@@ -221,6 +263,7 @@ function KidPlaySessionLayoutContent() {
               <KidPlayShellNav
                 sessionId={session.id}
                 activeModule={activeModule}
+                showArcadeNewBadge={showArcadeNewBadge}
                 onExitClick={() => setExitOpen(true)}
               />
               <Suspense fallback={null}>
@@ -241,6 +284,11 @@ function KidPlaySessionLayoutContent() {
                 inShellChildId={session.child_id}
                 inShellSessionId={session.id}
                 onUnlocked={() => setReturnSessionOpen(false)}
+              />
+              <B4FocusFlightUnlockModal
+                open={showB4UnlockModal}
+                onPlayNow={handleB4UnlockPlayNow}
+                onDismiss={handleB4UnlockDismiss}
               />
             </div>
           </KidPlaySessionProvider>

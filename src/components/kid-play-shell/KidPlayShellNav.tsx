@@ -21,19 +21,21 @@ const NAV_ITEMS: KidPlayShellNavItem[] = [
   { id: 'weekly-adventures', label: 'Weekly Adventures', available: true },
   { id: 'collections', label: 'Collections', available: true },
   { id: 'character-hub', label: 'Characters', available: true },
-  { id: 'arcade', label: 'Arcade', available: false },
+  { id: 'arcade', label: 'Arcade', available: true },
   { id: 'rewards', label: 'Rewards', available: false },
 ];
 
 type KidPlayShellNavProps = {
   sessionId: string;
   activeModule: KidPlayShellModuleId;
+  showArcadeNewBadge?: boolean;
   onExitClick: () => void;
 };
 
 export default function KidPlayShellNav({
   sessionId,
   activeModule,
+  showArcadeNewBadge = false,
   onExitClick,
 }: KidPlayShellNavProps) {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ export default function KidPlayShellNav({
           {NAV_ITEMS.map((item) => {
             const isActive = item.id === resolvedActiveModule;
             const showBadge = item.id === 'collections' && collectionsBadgeCount > 0;
+            const showNewBadge = item.id === 'arcade' && showArcadeNewBadge;
             return (
               <li key={item.id}>
                 <button
@@ -71,6 +74,11 @@ export default function KidPlayShellNav({
                   {showBadge ? (
                     <span className="kidPlayShellNavBadge" aria-label="New collection items">
                       {collectionsBadgeCount > 9 ? '9+' : collectionsBadgeCount}
+                    </span>
+                  ) : null}
+                  {showNewBadge ? (
+                    <span className="kidPlayShellNavNewBadge" aria-label="New Arcade game">
+                      NEW
                     </span>
                   ) : null}
                   {!item.available ? <span className="kidPlayShellNavSoon">Soon</span> : null}

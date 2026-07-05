@@ -135,7 +135,7 @@ export function resolveKidPlayShellModule(pathname: string): KidPlayShellModuleI
   if (!remainder || remainder === 'weekly-adventures') return 'weekly-adventures';
   if (remainder === 'inventory' || remainder === 'collections') return 'collections';
   if (remainder === 'characters' || remainder.startsWith('characters/')) return 'character-hub';
-  if (remainder === 'arcade') return 'arcade';
+  if (remainder === 'arcade' || remainder.startsWith('arcade/')) return 'arcade';
   if (remainder === 'rewards') return 'rewards';
   if (remainder.startsWith('kids/')) return 'kids';
   return null;

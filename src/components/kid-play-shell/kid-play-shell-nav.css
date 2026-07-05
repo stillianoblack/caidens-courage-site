@@ -79,6 +79,23 @@
   line-height: 1;
 }
 
+.kidPlayShellNavNewBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 1.1rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe777, #ffb84f);
+  color: #1a1200;
+  font-size: 0.6rem;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  box-shadow: 0 0 14px rgba(255, 216, 95, 0.45);
+}
+
 .kidPlayShellComingSoon {
   min-height: 50vh;
   display: grid;

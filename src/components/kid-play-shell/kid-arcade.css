@@ -1,0 +1,245 @@
+.kidArcadePanel {
+  min-width: 0;
+}
+
+.kidArcadeHeader {
+  margin-bottom: 1.25rem;
+}
+
+.kidArcadeSubtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #9eb0d8;
+  line-height: 1.45;
+}
+
+.kidArcadeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kidArcadeGameCard {
+  --arcade-card-bg-a: #2e9cff;
+  --arcade-card-bg-b: #1661d8;
+  --arcade-card-ink: #ffffff;
+  --arcade-card-soft: rgba(255, 255, 255, 0.84);
+  --arcade-card-pill: rgba(255, 255, 255, 0.22);
+  --arcade-card-button: #ffffff;
+  --arcade-card-button-ink: #123b7a;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 360px;
+  padding: 1rem;
+  border: 0;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 76% 8%, rgba(255, 255, 255, 0.34), transparent 6rem),
+    linear-gradient(160deg, var(--arcade-card-bg-a) 0%, var(--arcade-card-bg-b) 100%);
+  color: var(--arcade-card-ink);
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, 0.14),
+    0 10px 24px rgba(2, 6, 23, 0.32);
+}
+
+.kidArcadeGameCard--dragon {
+  --arcade-card-bg-a: #ff8a52;
+  --arcade-card-bg-b: #dc3b36;
+  --arcade-card-button-ink: #7a1b16;
+}
+
+.kidArcadeGameCard--memory {
+  --arcade-card-bg-a: #a78bfa;
+  --arcade-card-bg-b: #6d28d9;
+  --arcade-card-button-ink: #3b176f;
+}
+
+.kidArcadeGameCard--focus {
+  --arcade-card-bg-a: #45d483;
+  --arcade-card-bg-b: #15803d;
+  --arcade-card-button-ink: #06451f;
+}
+
+.kidArcadeGameCard--empty {
+  --arcade-card-bg-a: #7dd3fc;
+  --arcade-card-bg-b: #475569;
+  --arcade-card-button-ink: #243044;
+}
+
+.kidArcadeGameCard--locked {
+  filter: saturate(0.94);
+}
+
+.kidArcadeGameCard--highlight {
+  animation: kidArcadeB4Highlight 1.05s ease-in-out infinite;
+}
+
+@keyframes kidArcadeB4Highlight {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 -6px 0 rgba(0, 0, 0, 0.14),
+      0 10px 24px rgba(2, 6, 23, 0.32),
+      0 0 0 0 rgba(255, 231, 119, 0);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 -6px 0 rgba(0, 0, 0, 0.14),
+      0 14px 32px rgba(45, 156, 255, 0.42),
+      0 0 0 5px rgba(255, 231, 119, 0.48);
+  }
+}
+
+.kidArcadeGameCardArt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.4), transparent 5.5rem),
+    rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.kidArcadeGameCardArt::before {
+  content: "";
+  position: absolute;
+  inset: 16% 18% 20%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  filter: blur(12px);
+}
+
+.kidArcadeGameCardArt img {
+  position: relative;
+  z-index: 1;
+  width: min(82%, 210px);
+  height: auto;
+  image-rendering: auto;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+}
+
+.kidArcadeGameCardGlyph {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.26);
+  color: #ffffff;
+  font-size: 1.65rem;
+  font-weight: 1000;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.kidArcadeGameCardLock {
+  position: absolute;
+  z-index: 2;
+  right: 0.7rem;
+  top: 0.7rem;
+  padding: 0.3rem 0.58rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kidArcadeGameCardCopy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.kidArcadeGameCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+}
+
+.kidArcadeGameCardMeta span {
+  border-radius: 999px;
+  background: var(--arcade-card-pill);
+  color: #ffffff;
+  padding: 0.28rem 0.58rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.kidArcadeGameCardMeta .kidArcadeGameCardNewPill {
+  background: #fff2a6;
+  color: #17408f;
+  box-shadow: 0 0 16px rgba(255, 242, 166, 0.48);
+}
+
+.kidArcadeGameCard h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.08;
+}
+
+.kidArcadeGameCard p {
+  margin: 0.45rem 0 0;
+  color: var(--arcade-card-soft);
+  font-size: 0.88rem;
+  line-height: 1.38;
+}
+
+.kidArcadeGameCardUnlock {
+  color: #fff7d1 !important;
+  font-weight: 900;
+}
+
+.kidArcadeGameCardCta {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--arcade-card-button);
+  color: var(--arcade-card-button-ink);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 1000;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.12),
+    0 8px 16px rgba(2, 6, 23, 0.18);
+}
+
+.kidArcadeGameCardCta:disabled {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(15, 23, 42, 0.72);
+}
+
+@media (max-width: 980px) {
+  .kidArcadeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kidArcadeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .kidArcadeGameCard {
+    min-height: 0;
+  }
+}

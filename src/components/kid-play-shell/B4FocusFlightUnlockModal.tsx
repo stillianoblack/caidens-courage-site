@@ -1,0 +1,77 @@
+import React, { useEffect } from 'react';
+import './b4-focus-flight-unlock-modal.css';
+
+type B4FocusFlightUnlockModalProps = {
+  open: boolean;
+  onPlayNow: () => void;
+  onDismiss: () => void;
+};
+
+export default function B4FocusFlightUnlockModal({
+  open,
+  onPlayNow,
+  onDismiss,
+}: B4FocusFlightUnlockModalProps) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onDismiss, open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="b4UnlockModalBackdrop" role="presentation" onClick={onDismiss}>
+      <section
+        className="b4UnlockModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="b4-unlock-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="b4UnlockModalClose"
+          onClick={onDismiss}
+          aria-label="Close B-4 Focus Flight announcement"
+        >
+          x
+        </button>
+        <div className="b4UnlockSparkles" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="b4UnlockRobot" aria-hidden="true">
+          <img src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png" alt="" />
+        </div>
+        <p className="b4UnlockKicker">New training simulator</p>
+        <h2 id="b4-unlock-title">Focus Flight Simulator Online!</h2>
+        <p className="b4UnlockMessage">
+          Psst... I've been building something while you were away. Want to help me collect
+          Focus Flames?
+        </p>
+        <div className="b4UnlockGameCard">
+          <div className="b4UnlockFlame" aria-hidden="true" />
+          <div>
+            <strong>B-4 Focus Flight</strong>
+            <span>Level 1: Spark Run</span>
+          </div>
+        </div>
+        <div className="b4UnlockActions">
+          <button type="button" className="b4UnlockPrimary" onClick={onPlayNow}>
+            Play Now
+          </button>
+          <button type="button" className="b4UnlockSecondary" onClick={onDismiss}>
+            Maybe Later
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
