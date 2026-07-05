@@ -3,6 +3,7 @@
 export const STORY_PATH = '/story';
 export const STORY_BOOKS_PATH = '/story/books';
 export const STORY_CHARACTERS_PATH = '/story/characters';
+export const STORY_MODE_PATH = '/story-mode';
 
 export const BRAVE_MIND_CLUB_PATH = '/brave-mind-club';
 export const BMC_COLORING_PATH = '/brave-mind-club/coloring-pages';

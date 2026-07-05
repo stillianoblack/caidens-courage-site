@@ -70,6 +70,7 @@ import {
   ResourcesPage,
   SchoolsPage,
   StoryHubPage,
+  StoryModePage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
   SuccessPage,
@@ -88,6 +89,7 @@ import {
   BRAVE_MIND_CLUB_PATH,
   STORY_BOOKS_PATH,
   STORY_CHARACTERS_PATH,
+  STORY_MODE_PATH,
   STORY_PATH,
   B4_GUIDE_PATH,
   B4_BASELINE_CHECK_PATH,
@@ -260,6 +262,8 @@ const appRouteChildren = (
       <Route path={STORY_PATH} element={<StoryHubPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
+      <Route path={STORY_MODE_PATH} element={<StoryModePage />} />
+      <Route path={`${STORY_MODE_PATH}/:chapterId`} element={<StoryModePage />} />
 
       {/* Brave Mind Club */}
       <Route path={BRAVE_MIND_CLUB_PATH} element={<ResourcesPage />} />
@@ -549,6 +553,8 @@ const AppLayout: React.FC = () => {
     location.pathname === PILOT_PROGRAM_SIGNUP_PATH ||
     location.pathname === FAMILY_PORTAL_PATH ||
     location.pathname.startsWith(`${FAMILY_PORTAL_PATH}/`) ||
+    location.pathname === STORY_MODE_PATH ||
+    location.pathname.startsWith(`${STORY_MODE_PATH}/`) ||
     location.pathname.startsWith(`${CAIDEN_QUEST_HUB_PATH}`) ||
     location.pathname === KIDS_PORTAL_PATH ||
     location.pathname.startsWith(`${KIDS_PORTAL_PATH}/`);

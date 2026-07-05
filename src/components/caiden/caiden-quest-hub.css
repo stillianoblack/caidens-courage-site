@@ -134,3 +134,29 @@
   line-height: 1.25;
   color: #243e70;
 }
+
+.storyModeLaunchCard {
+  margin-bottom: 1.125rem;
+  padding: 1.125rem;
+  border: 1px solid rgba(36, 62, 112, 0.12);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+  box-shadow: 0 12px 28px -20px rgba(26, 47, 82, 0.24);
+}
+
+.storyModeLaunchCard h2 {
+  margin: 0 0 0.5rem;
+  color: #1a2f52;
+  font-size: 1.125rem;
+}
+
+.storyModeLaunchCard p {
+  margin: 0 0 0.875rem;
+  color: #4f6074;
+  line-height: 1.45;
+}
+
+.storyModeLaunchCard a {
+  color: #1f5f8b;
+  font-weight: 800;
+}

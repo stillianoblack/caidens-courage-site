@@ -1,0 +1,389 @@
+.storyModePage {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 184, 77, 0.16), transparent 34rem),
+    linear-gradient(150deg, #06111d 0%, #0b1d2b 42%, #10171f 100%);
+  color: #f7fbff;
+  padding: 18px clamp(14px, 4vw, 48px) 42px;
+}
+
+.storyModeShell {
+  width: min(1160px, 100%);
+  margin: 0 auto;
+}
+
+.storyModeHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 22px;
+}
+
+.storyModeHero h1,
+.storyCompleteScreen h1 {
+  margin: 8px 0 12px;
+  color: #fff7dd;
+  font-size: 2.45rem;
+  line-height: 0.98;
+  text-shadow: 0 0 24px rgba(255, 196, 87, 0.2);
+}
+
+.storyModeHero p,
+.storyChapterDetail p,
+.storyCompleteScreen p,
+.storyMissionGate p {
+  max-width: 720px;
+  color: #c9d7e4;
+  line-height: 1.6;
+}
+
+.storyModeHero span,
+.storyChapterCard__eyebrow,
+.storyReader__copy span,
+.storyDialogueCard span,
+.storyChoiceCard span,
+.storyCompleteScreen span,
+.storyMissionGate span,
+.storyNarratorCard span {
+  color: #ffd27a;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.storyModeHero a,
+.storyModeHero button,
+.storyChapterCard a,
+.storyReader button,
+.storyDialogueCard button,
+.storyChoiceCard > button,
+.storyMissionGate a,
+.storyMissionGate button,
+.storyCompleteScreen a,
+.storyChapterDetail__actions a {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 215, 135, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffb24a, #f36b32);
+  box-shadow: 0 0 24px rgba(255, 152, 67, 0.28);
+  color: #1b1309;
+  font-weight: 900;
+  padding: 0 20px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.storyModeHero > a {
+  width: 100%;
+}
+
+.storyMissionGate button,
+.storyCompleteScreen a:last-child,
+.storyChapterDetail__actions a:last-child {
+  background: rgba(228, 241, 255, 0.12);
+  box-shadow: none;
+  color: #e7f1ff;
+}
+
+.storyModeStage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.storyNarratorCard,
+.storyChapterCard,
+.storyReader,
+.storyDialogueCard,
+.storyChoiceCard,
+.storyMissionGate,
+.storyChapterDetail,
+.storyCompleteScreen,
+.storyModeLaunchCard {
+  border: 1px solid rgba(173, 219, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(8, 24, 38, 0.72);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.storyNarratorCard {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+}
+
+.storyModeHero .storyNarratorCard {
+  align-self: start;
+}
+
+.storyNarratorCard img {
+  width: 62px;
+  height: 62px;
+  border: 2px solid rgba(255, 210, 122, 0.58);
+  border-radius: 16px;
+  background: #10283a;
+  object-fit: cover;
+  box-shadow: 0 0 20px rgba(255, 199, 94, 0.18);
+}
+
+.storyNarratorCard p {
+  margin: 5px 0 0;
+  color: #e5f0fb;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.storyTimeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.storyChapterCard {
+  overflow: hidden;
+  position: relative;
+}
+
+.storyChapterCard--locked {
+  opacity: 0.55;
+}
+
+.storyChapterCard__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.storyChapterCard__body,
+.storyCompleteScreen,
+.storyMissionGate {
+  padding: 22px;
+}
+
+.storyChapterDetail {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.storyChapterDetail > img {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+}
+
+.storyChapterDetail > div {
+  padding: 22px;
+}
+
+.storyChapterCard h3,
+.storyChoiceCard h2,
+.storyMissionGate h2,
+.storyChapterDetail h1 {
+  margin: 8px 0 10px;
+  color: #fff7dd;
+  line-height: 1.1;
+}
+
+.storyChapterCard p {
+  min-height: 76px;
+  color: #c9d7e4;
+  line-height: 1.45;
+}
+
+.storyChapterCard__footer,
+.storyCompleteScreen__actions,
+.storyMissionGate__actions,
+.storyChapterDetail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.storyChapterCard__footer span {
+  color: #9fb5c9;
+  font-weight: 900;
+}
+
+.storyChapterCard button:disabled,
+.storyChoiceCard > button:disabled {
+  border-color: rgba(177, 193, 207, 0.18);
+  background: rgba(177, 193, 207, 0.16);
+  box-shadow: none;
+  color: #8999a7;
+  cursor: not-allowed;
+}
+
+.storyReader {
+  overflow: hidden;
+}
+
+.storyReader__media {
+  background: #020810;
+}
+
+.storyReader__media img {
+  display: block;
+  width: 100%;
+  max-height: 540px;
+  object-fit: cover;
+}
+
+.storyReader__copy,
+.storyDialogueCard,
+.storyChoiceCard {
+  padding: 24px;
+}
+
+.storyReader__copy p,
+.storyDialogueCard p {
+  color: #f2f7ff;
+  font-size: 1.16rem;
+  line-height: 1.58;
+}
+
+.storyDialogueCard {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.storyDialogueCard img {
+  width: 88px;
+  height: 88px;
+  border: 2px solid rgba(255, 210, 122, 0.5);
+  border-radius: 18px;
+  background: #10283a;
+  object-fit: cover;
+}
+
+.storyChoiceCard__options {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.storyChoiceCard__options button {
+  min-height: 52px;
+  border: 1px solid rgba(173, 219, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(231, 244, 255, 0.09);
+  color: #f3f8ff;
+  font-weight: 850;
+  text-align: left;
+  padding: 13px 15px;
+  cursor: pointer;
+}
+
+.storyChoiceCard__options .storyChoiceCard__option--selected {
+  border-color: rgba(255, 210, 122, 0.74);
+  background: rgba(255, 178, 74, 0.2);
+  box-shadow: 0 0 22px rgba(255, 178, 74, 0.14);
+}
+
+.storyMissionGate__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.storyMissionGate__meta div {
+  border: 1px solid rgba(173, 219, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(231, 244, 255, 0.08);
+  color: #d8e8f7;
+  padding: 12px;
+}
+
+.storyMissionGate__meta strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #fff7dd;
+}
+
+.storyModeLaunchCard {
+  margin-bottom: 18px;
+  padding: 18px;
+}
+
+.storyModeLaunchCard h2 {
+  margin: 0 0 8px;
+  color: #fff7dd;
+}
+
+.storyModeLaunchCard p {
+  margin: 0 0 14px;
+  color: #c9d7e4;
+}
+
+.storyModeLaunchCard a {
+  color: #ffd27a;
+  font-weight: 900;
+}
+
+@media (min-width: 860px) {
+  .storyModeHero {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    align-items: end;
+  }
+
+  .storyModeHero h1,
+  .storyCompleteScreen h1 {
+    font-size: 4rem;
+  }
+
+  .storyModeHero .storyNarratorCard {
+    margin-top: 3.2rem;
+  }
+
+  .storyModeHero > a {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .storyModeStage {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .storyNarratorCard {
+    position: sticky;
+    top: 20px;
+  }
+}
+
+@media (max-width: 720px) {
+  .storyModePage {
+    padding-top: 14px;
+  }
+
+  .storyDialogueCard,
+  .storyMissionGate__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .storyChapterCard__footer,
+  .storyCompleteScreen__actions,
+  .storyMissionGate__actions,
+  .storyChapterDetail__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

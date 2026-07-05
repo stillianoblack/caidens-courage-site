@@ -9,6 +9,7 @@ const smokeRoutes = [
   '/family-hub/results',
   '/program-dashboard',
   '/braveminds',
+  '/story-mode',
 ];
 
 test.each(smokeRoutes)('renders route without crashing: %s', async (path) => {

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import CharacterAdventureCard from '../family-portal/CharacterAdventureCard';
 import { CharacterDashboardLayout, QuestGrid } from '../../design-system/character-dashboard';
 import { buildPortalReturnState, formatBackLabel } from '../../lib/portalBreadcrumbNav';
@@ -7,7 +7,7 @@ import { buildCharacterDashboardCoach } from '../../lib/characterDashboardCoach'
 import { useCharacterModuleProgress } from '../../hooks/useCharacterModuleProgress';
 import { applyMissionBoardProgress } from '../../lib/characterProgressService';
 import { remapPortalKidsRoute } from '../../lib/portalGamePaths';
-import { CAIDEN_QUEST_HUB_PATH } from '../../config/courageRoutes';
+import { CAIDEN_QUEST_HUB_PATH, STORY_MODE_PATH } from '../../config/courageRoutes';
 import { CAIDEN_HUB, CAIDEN_AVATAR_SRC } from '../../data/caiden/sharedAssets';
 import { buildCaidenQuestBoardItems } from '../../data/caiden/missionBoardData';
 import { useCaidenGradeBand } from '../../hooks/useCaidenGradeBand';
@@ -66,6 +66,14 @@ export default function CaidenFocusQuestHub() {
       coach={coach}
       quests={
         <>
+          <section className="storyModeLaunchCard" aria-labelledby="story-mode-launch-title">
+            <h2 id="story-mode-launch-title">Story Mode</h2>
+            <p>
+              Follow Caiden through a chapter campaign that opens each Focus Quest as part of
+              the story.
+            </p>
+            <Link to={STORY_MODE_PATH}>Continue Journey</Link>
+          </section>
           <QuestGrid aria-label="Focus quests">
             {quests.map((quest) => (
               <CharacterAdventureCard
