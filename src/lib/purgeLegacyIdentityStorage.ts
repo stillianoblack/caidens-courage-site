@@ -1,20 +1,12 @@
-import {
-  PARENT_CLAIM_CONFIRMED_KEY,
-  PARENT_CLAIM_EMAIL_KEY,
-  PARENT_CLAIM_LAST_NAME_KEY,
-  PARENT_CLAIM_PHONE_KEY,
-} from '../config/parentClaimContext';
-import { ACTIVE_CHILD_NICKNAME_KEY } from '../config/activeChildNickname';
-import { ACTIVE_CHILD_PARTICIPANT_ID_KEY } from '../config/activeChildEvents';
 import { logSessionIsolationWarning } from './sessionIsolationLog';
 
 const LEGACY_GLOBAL_KEYS = [
-  PARENT_CLAIM_EMAIL_KEY,
-  PARENT_CLAIM_PHONE_KEY,
-  PARENT_CLAIM_LAST_NAME_KEY,
-  PARENT_CLAIM_CONFIRMED_KEY,
-  ACTIVE_CHILD_PARTICIPANT_ID_KEY,
-  ACTIVE_CHILD_NICKNAME_KEY,
+  'parentClaimEmail',
+  'parentClaimPhone',
+  'parentClaimLastName',
+  'parentClaimConfirmed',
+  'activeChildParticipantId',
+  'activeChildNickname',
   'lastPilotProgram',
   'program_code',
   'program_name',
