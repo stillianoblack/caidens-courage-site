@@ -35,12 +35,16 @@ const PLAYER_TRAIL_SOCKET = {
   y: 4,
 };
 
-const SOUND_MUTED_STORAGE_KEY = 'b4-focus-flight:muted';
+const SOUND_MUTED_STORAGE_KEY = 'b4FocusFlightMuted';
+const LEGACY_SOUND_MUTED_STORAGE_KEY = 'b4-focus-flight:muted';
 
 const readMutedPreference = (): boolean => {
   if (typeof window === 'undefined') return false;
   try {
-    return window.localStorage.getItem(SOUND_MUTED_STORAGE_KEY) === 'true';
+    return (
+      window.localStorage.getItem(SOUND_MUTED_STORAGE_KEY) === 'true' ||
+      window.localStorage.getItem(LEGACY_SOUND_MUTED_STORAGE_KEY) === 'true'
+    );
   } catch {
     return false;
   }
@@ -50,6 +54,7 @@ const writeMutedPreference = (muted: boolean): void => {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(SOUND_MUTED_STORAGE_KEY, muted ? 'true' : 'false');
+    window.localStorage.removeItem(LEGACY_SOUND_MUTED_STORAGE_KEY);
   } catch {
     /* localStorage unavailable */
   }
@@ -111,6 +116,7 @@ export default class GameScene extends Phaser.Scene {
   private b4Expression: B4Expression = 'idle';
   private blinkTimer?: Phaser.Time.TimerEvent;
   private lightningTimer?: Phaser.Time.TimerEvent;
+  private mobileGraphics = false;
 
   constructor() {
     super('GameScene');
@@ -162,6 +168,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private resetState(): void {
+    this.mobileGraphics = Boolean(this.registry.get('b4MobileGraphics'));
     this.score = 0;
     this.hearts = STARTING_HEARTS;
     this.combo = 0;
@@ -222,7 +229,7 @@ export default class GameScene extends Phaser.Scene {
 
   private createBackground(): void {
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x081329).setOrigin(0);
-    const hasLayeredBackground = B4_BACKGROUND_LAYER_SOURCES.some((layer) => this.textures.exists(layer.key));
+    const hasLayeredBackground = !this.mobileGraphics && B4_BACKGROUND_LAYER_SOURCES.some((layer) => this.textures.exists(layer.key));
 
     if (!hasLayeredBackground && this.textures.exists(B4_ASSET_KEYS.gameplayBackground)) {
       this.addCoverImage(0, 0, GAME_WIDTH, GAME_HEIGHT, B4_ASSET_KEYS.gameplayBackground);
@@ -231,13 +238,17 @@ export default class GameScene extends Phaser.Scene {
       this.createGeneratedForestFallback();
     }
 
-    this.createOptionalBackgroundLayers();
+    if (!this.mobileGraphics) {
+      this.createOptionalBackgroundLayers();
+    }
     this.createAtmosphereLayers();
     this.createCinematicRain();
     this.createWindEffects();
     this.createReadabilityOverlay();
-    this.scheduleLightningFlash(Phaser.Math.Between(2200, 3600));
-    this.scheduleWindGust();
+    this.scheduleLightningFlash(this.mobileGraphics ? Phaser.Math.Between(8000, 13000) : Phaser.Math.Between(2200, 3600));
+    if (!this.mobileGraphics) {
+      this.scheduleWindGust();
+    }
   }
 
   private createGeneratedForestFallback(): void {
@@ -261,30 +272,34 @@ export default class GameScene extends Phaser.Scene {
     if (!this.textures.exists('b4-bg-layer-fog')) {
       this.addParallaxLayer(this.createLayerTexture('b4ff-fog-layer', 4), 0, 0.75, 0, 0.28);
     }
-    this.addParallaxLayer(this.createLayerTexture('b4ff-firefly-layer', 5), 0, 0.08, 0, 0.72);
+    if (!this.mobileGraphics) {
+      this.addParallaxLayer(this.createLayerTexture('b4ff-firefly-layer', 5), 0, 0.08, 0, 0.72);
+    }
   }
 
   private createCinematicRain(): void {
-    const rainBack = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-back', 128, 1.4, 0.24));
+    const rainBack = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-back', this.mobileGraphics ? 190 : 128, 1.4, 0.24));
     rainBack.setOrigin(0);
-    rainBack.setAlpha(0.42);
+    rainBack.setAlpha(this.mobileGraphics ? 0.28 : 0.42);
     rainBack.setBlendMode(Phaser.BlendModes.ADD);
 
-    const rainMid = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-mid', 92, 1.7, 0.32));
+    const rainMid = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-mid', this.mobileGraphics ? 150 : 92, 1.7, 0.32));
     rainMid.setOrigin(0);
-    rainMid.setAlpha(0.34);
+    rainMid.setAlpha(this.mobileGraphics ? 0.22 : 0.34);
     rainMid.setBlendMode(Phaser.BlendModes.ADD);
-
-    const rainFront = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-front', 66, 2.1, 0.42));
-    rainFront.setOrigin(0);
-    rainFront.setAlpha(0.36);
-    rainFront.setBlendMode(Phaser.BlendModes.ADD);
 
     this.stormRainLayers.push(
       { sprite: rainBack, speedX: -0.08, speedY: 0.38 },
       { sprite: rainMid, speedX: -0.13, speedY: 0.56 },
-      { sprite: rainFront, speedX: -0.22, speedY: 0.86 },
     );
+
+    if (!this.mobileGraphics) {
+      const rainFront = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.createRainTexture('b4ff-rain-front', 66, 2.1, 0.42));
+      rainFront.setOrigin(0);
+      rainFront.setAlpha(0.36);
+      rainFront.setBlendMode(Phaser.BlendModes.ADD);
+      this.stormRainLayers.push({ sprite: rainFront, speedX: -0.22, speedY: 0.86 });
+    }
 
     this.foregroundRain = this.add.particles(GAME_WIDTH / 2, -40, 'rain-drop', {
       x: { min: -120, max: GAME_WIDTH + 120 },
@@ -292,9 +307,9 @@ export default class GameScene extends Phaser.Scene {
       speedX: { min: -220, max: -90 },
       speedY: { min: 720, max: 980 },
       lifespan: { min: 760, max: 1040 },
-      quantity: 3,
-      frequency: 30,
-      alpha: { start: 0.58, end: 0 },
+      quantity: this.mobileGraphics ? 1 : 3,
+      frequency: this.mobileGraphics ? 95 : 30,
+      alpha: { start: this.mobileGraphics ? 0.36 : 0.58, end: 0 },
       scaleX: { start: 0.86, end: 0.58 },
       scaleY: { start: 1.36, end: 0.82 },
       tint: [0x9fefff, 0xc7f7ff, 0x7fc9ff],
@@ -303,6 +318,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private createWindEffects(): void {
+    if (this.mobileGraphics) return;
     this.windWisps = this.add.particles(-80, GAME_HEIGHT * 0.48, 'rain-drop', {
       x: -80,
       y: { min: 120, max: GAME_HEIGHT - 90 },
@@ -435,6 +451,9 @@ export default class GameScene extends Phaser.Scene {
     vignette.fillRect(0, 0, GAME_WIDTH, 118);
 
     const glow = this.add.ellipse(GAME_WIDTH * 0.7, GAME_HEIGHT * 0.52, 460, 280, 0x50f4ff, 0.06);
+    if (this.mobileGraphics) {
+      glow.setAlpha(0.035);
+    }
     glow.setBlendMode(Phaser.BlendModes.ADD);
   }
 
@@ -447,7 +466,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private playLightningFlash(): void {
-    const flash = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.66, 0xd5edff, 0.34).setOrigin(0);
+    const flash = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.66, 0xd5edff, this.mobileGraphics ? 0.22 : 0.34).setOrigin(0);
     flash.setBlendMode(Phaser.BlendModes.ADD);
 
     const mood = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x20456f, 0.16).setOrigin(0);
@@ -630,13 +649,13 @@ export default class GameScene extends Phaser.Scene {
   private createParticles(): void {
     const socket = this.getPlayerTrailSocketWorldPosition();
     this.trail = this.add.particles(socket.x, socket.y, 'trail-dot', {
-      speedX: { min: -128, max: -42 },
-      speedY: { min: -16, max: 16 },
-      lifespan: { min: 460, max: 610 },
+      speedX: { min: this.mobileGraphics ? -108 : -128, max: -42 },
+      speedY: { min: this.mobileGraphics ? -12 : -16, max: this.mobileGraphics ? 12 : 16 },
+      lifespan: { min: this.mobileGraphics ? 390 : 460, max: this.mobileGraphics ? 520 : 610 },
       alpha: { start: 1, end: 0 },
-      scale: { start: 0.86, end: 0 },
+      scale: { start: this.mobileGraphics ? 0.68 : 0.86, end: 0 },
       tint: [0x9dffff, 0x5ce8ff, 0x4b83ff],
-      frequency: 12,
+      frequency: this.mobileGraphics ? 20 : 12,
       blendMode: Phaser.BlendModes.ADD,
     });
   }
@@ -762,7 +781,7 @@ export default class GameScene extends Phaser.Scene {
     const definition = this.pickFlame();
     const x = GAME_WIDTH + 80;
     const y = Phaser.Math.Between(90, GAME_HEIGHT - 90);
-    const container = this.flameManager.create(definition, x, y);
+    const container = this.flameManager.create(definition, x, y, { mobileGraphics: this.mobileGraphics });
     this.flames.add(container);
     this.activeFlames.push(container);
   }
@@ -914,15 +933,15 @@ export default class GameScene extends Phaser.Scene {
 
   private sparkle(x: number, y: number): void {
     const particles = this.add.particles(x, y, 'sparkle-dot', {
-      speed: { min: 60, max: 220 },
+      speed: { min: 60, max: this.mobileGraphics ? 150 : 220 },
       angle: { min: 0, max: 360 },
-      lifespan: 520,
-      quantity: 18,
-      scale: { start: 1.1, end: 0 },
+      lifespan: this.mobileGraphics ? 390 : 520,
+      quantity: this.mobileGraphics ? 7 : 18,
+      scale: { start: this.mobileGraphics ? 0.78 : 1.1, end: 0 },
       blendMode: Phaser.BlendModes.ADD,
     });
-    this.time.delayedCall(120, () => particles.stop());
-    this.time.delayedCall(760, () => particles.destroy());
+    this.time.delayedCall(this.mobileGraphics ? 80 : 120, () => particles.stop());
+    this.time.delayedCall(this.mobileGraphics ? 520 : 760, () => particles.destroy());
   }
 
   private updateWorldObjects(delta: number): void {

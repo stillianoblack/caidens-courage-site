@@ -1,4 +1,5 @@
 export const B4_ASSET_BASE_PATH = '/images/B-4FlightGame';
+export const B4_ICON_BASE_PATH = '/images/icons';
 
 export const B4_ASSET_KEYS = {
   idle: 'b4-asset-idle',
@@ -35,7 +36,7 @@ export const B4_ASSET_SOURCES = [
   {
     key: B4_ASSET_KEYS.idle,
     folder: 'Idle',
-    file: 'Idle@2x.png',
+    file: 'Idle@2x-transparent.png',
     label: 'B-4 idle',
   },
   {
@@ -58,8 +59,9 @@ export const B4_ASSET_SOURCES = [
   },
   {
     key: B4_ASSET_KEYS.sparkFlame,
-    folder: 'Sparkle Flame',
-    file: 'Asset 11@2x.png',
+    folder: 'FocusFlameIcon',
+    file: 'focus-flame-transparent.png',
+    url: `${B4_ICON_BASE_PATH}/FocusFlameIcon/focus-flame-transparent.png`,
     label: 'Sparkle Flame',
   },
   {

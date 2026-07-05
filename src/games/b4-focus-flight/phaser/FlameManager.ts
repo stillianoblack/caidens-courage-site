@@ -6,15 +6,19 @@ export interface ManagedFlame extends Phaser.GameObjects.Container {
   points: number;
 }
 
+interface FlameCreateOptions {
+  mobileGraphics?: boolean;
+}
+
 export default class FlameManager {
   constructor(private readonly scene: Phaser.Scene) {}
 
-  create(definition: FlameDefinition, x: number, y: number): ManagedFlame {
+  create(definition: FlameDefinition, x: number, y: number, options: FlameCreateOptions = {}): ManagedFlame {
     const container = this.scene.add.container(x, y) as ManagedFlame;
     container.flameType = definition.id;
     container.points = definition.score;
 
-    const bloom = this.createBloom(definition);
+    const bloom = this.createBloom(definition, options.mobileGraphics);
     const sprite = this.createSprite(definition);
     container.add([...bloom, sprite ?? this.createFallbackFlame(definition)]);
 
@@ -22,9 +26,9 @@ export default class FlameManager {
     container.setData('pickupRadius', pickupRadius);
     container.setData('speed', 265);
 
-    const emitter = this.createSparkEmitter(container, definition);
-    container.setData('sparkEmitter', emitter);
-    this.addAmbientSparkles(container, definition);
+    const emitter = this.createSparkEmitter(container, definition, options.mobileGraphics);
+    if (emitter) container.setData('sparkEmitter', emitter);
+    this.addAmbientSparkles(container, definition, options.mobileGraphics);
     this.addMotion(container, definition);
 
     return container;
@@ -56,46 +60,50 @@ export default class FlameManager {
     return fallback;
   }
 
-  private createBloom(definition: FlameDefinition): Phaser.GameObjects.GameObject[] {
+  private createBloom(definition: FlameDefinition, mobileGraphics = false): Phaser.GameObjects.GameObject[] {
     const bloomScale = definition.rarity === 'rare' ? 1.18 : definition.rarity === 'medium' ? 1.08 : 1;
     const outer = this.scene.add.image(0, 5, 'b4-glow-dot').setTint(definition.glowColor);
     outer.setDisplaySize(66 * bloomScale, 106 * bloomScale);
-    outer.setAlpha(definition.rarity === 'rare' ? 0.38 : 0.3);
+    outer.setAlpha(mobileGraphics ? 0.18 : definition.rarity === 'rare' ? 0.38 : 0.3);
     const mid = this.scene.add.image(0, 3, 'b4-glow-dot').setTint(definition.glowColor);
     mid.setDisplaySize(42 * bloomScale, 76 * bloomScale);
-    mid.setAlpha(definition.rarity === 'medium' ? 0.46 : 0.38);
+    mid.setAlpha(mobileGraphics ? 0.26 : definition.rarity === 'medium' ? 0.46 : 0.38);
     const halo = this.scene.add.image(0, 2, 'sparkle-dot').setTint(definition.particleColor);
     halo.setDisplaySize(44 * bloomScale, 56 * bloomScale);
-    halo.setAlpha(0.16);
+    halo.setAlpha(mobileGraphics ? 0.08 : 0.16);
     const core = this.scene.add.image(0, 0, 'sparkle-dot').setTint(0xffffff);
     core.setDisplaySize(20, 46);
     core.setAlpha(0.22);
     [outer, mid, halo, core].forEach((glow) => glow.setBlendMode(Phaser.BlendModes.ADD));
-    this.scene.tweens.add({
-      targets: [outer, mid, halo],
-      alpha: '+=0.12',
-      scaleX: 1.08,
-      scaleY: 1.08,
-      duration: definition.rarity === 'rare' ? 620 : 820,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.InOut',
-    });
+    if (!mobileGraphics) {
+      this.scene.tweens.add({
+        targets: [outer, mid, halo],
+        alpha: '+=0.12',
+        scaleX: 1.08,
+        scaleY: 1.08,
+        duration: definition.rarity === 'rare' ? 620 : 820,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.InOut',
+      });
+    }
     return [outer, mid, halo, core];
   }
 
   private createSparkEmitter(
     flame: ManagedFlame,
     definition: FlameDefinition,
-  ): Phaser.GameObjects.Particles.ParticleEmitter {
+    mobileGraphics = false,
+  ): Phaser.GameObjects.Particles.ParticleEmitter | undefined {
+    if (mobileGraphics && definition.rarity === 'common') return undefined;
     const emitter = this.scene.add.particles(flame.x, flame.y, 'sparkle-dot', {
       speed: { min: 6, max: 24 },
       angle: { min: 245, max: 295 },
       lifespan: { min: 420, max: 760 },
       quantity: 1,
-      frequency: definition.rarity === 'rare' ? 120 : definition.rarity === 'medium' ? 150 : 185,
+      frequency: mobileGraphics ? 280 : definition.rarity === 'rare' ? 120 : definition.rarity === 'medium' ? 150 : 185,
       alpha: { start: 0.95, end: 0 },
-      scale: { start: definition.rarity === 'rare' ? 0.46 : 0.38, end: 0 },
+      scale: { start: mobileGraphics ? 0.26 : definition.rarity === 'rare' ? 0.46 : 0.38, end: 0 },
       tint: [definition.particleColor, definition.glowColor, 0xffffff],
       blendMode: Phaser.BlendModes.ADD,
     });
@@ -103,8 +111,8 @@ export default class FlameManager {
     return emitter;
   }
 
-  private addAmbientSparkles(container: Phaser.GameObjects.Container, definition: FlameDefinition): void {
-    const sparkleCount = definition.rarity === 'rare' ? 5 : definition.rarity === 'medium' ? 4 : 3;
+  private addAmbientSparkles(container: Phaser.GameObjects.Container, definition: FlameDefinition, mobileGraphics = false): void {
+    const sparkleCount = mobileGraphics ? (definition.rarity === 'rare' ? 2 : 1) : definition.rarity === 'rare' ? 5 : definition.rarity === 'medium' ? 4 : 3;
     for (let i = 0; i < sparkleCount; i += 1) {
       const sparkle = this.scene.add.star(
         Phaser.Math.Between(-30, 30),

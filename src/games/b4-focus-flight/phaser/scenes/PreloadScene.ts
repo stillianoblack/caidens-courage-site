@@ -79,7 +79,7 @@ export default class PreloadScene extends Phaser.Scene {
       // runtime assets for predictable loading and performance.
       // TODO(sprite-sheets): Swap these high-resolution first-frame PNG references for
       // B-4 sprite sheets once final production animation exports are ready.
-      this.load.image(asset.key, resolveB4AssetUrl(asset.folder, asset.file));
+      this.load.image(asset.key, 'url' in asset ? asset.url : resolveB4AssetUrl(asset.folder, asset.file));
     });
 
     B4_AUDIO_SOURCES.forEach((asset) => {
@@ -97,20 +97,29 @@ export default class PreloadScene extends Phaser.Scene {
     createSoftDotTexture(this, 'sparkle-dot', 9, 0xfff2a6, 0.9);
     createSoftDotTexture(this, 'trail-dot', 13, 0x5ce8ff, 0.9);
     createRainDropTexture(this);
+    if (this.registry.get('b4MobileGraphics') && this.textures.exists(B4_BACKGROUND_SOURCE.key)) {
+      this.scene.start('StartScene');
+      return;
+    }
     this.loadOptionalBackgroundLayers();
   }
 
   private async loadOptionalBackgroundLayers(): Promise<void> {
     const loadableLayers = (
       await Promise.all(
-        B4_BACKGROUND_LAYER_SOURCES.map(async (layer) => {
-          const url = await this.resolveOptionalLayerUrl(layer.files);
-          if (!url) {
-            console.warn(`[B-4 Focus Flight] Missing optional background layer: ${layer.label}`);
-            return null;
-          }
-          return { ...layer, url };
-        }),
+        B4_BACKGROUND_LAYER_SOURCES
+          .filter((layer) => (
+            !this.registry.get('b4MobileGraphics') ||
+            ['Sky', 'Mountains_Mid', 'Trees_Mid', 'Foreground_Leaves'].includes(layer.label)
+          ))
+          .map(async (layer) => {
+            const url = await this.resolveOptionalLayerUrl(layer.files);
+            if (!url) {
+              console.warn(`[B-4 Focus Flight] Missing optional background layer: ${layer.label}`);
+              return null;
+            }
+            return { ...layer, url };
+          }),
       )
     ).filter((layer): layer is NonNullable<typeof layer> => Boolean(layer));
 

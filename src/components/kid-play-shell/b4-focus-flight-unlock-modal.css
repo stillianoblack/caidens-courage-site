@@ -133,12 +133,10 @@
 }
 
 .b4UnlockFlame {
-  width: 42px;
-  height: 42px;
-  border-radius: 50% 50% 50% 8px;
-  background: linear-gradient(145deg, #fff7a8, #ffd34f 52%, #ff9d3f);
-  transform: rotate(-28deg);
-  box-shadow: 0 0 22px rgba(255, 221, 92, 0.72);
+  width: 48px;
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(255, 221, 92, 0.82));
 }
 
 .b4UnlockGameCard strong,

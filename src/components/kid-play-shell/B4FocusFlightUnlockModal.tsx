@@ -50,17 +50,23 @@ export default function B4FocusFlightUnlockModal({
         <div className="b4UnlockRobot" aria-hidden="true">
           <img src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png" alt="" />
         </div>
-        <p className="b4UnlockKicker">New training simulator</p>
-        <h2 id="b4-unlock-title">Focus Flight Simulator Online!</h2>
+        <p className="b4UnlockKicker" aria-label="New game">
+          <span aria-hidden="true">✨</span> NEW GAME <span aria-hidden="true">✨</span>
+        </p>
+        <h2 id="b4-unlock-title">Focus Flight</h2>
         <p className="b4UnlockMessage">
-          Psst... I've been building something while you were away. Want to help me collect
-          Focus Flames?
+          Help B-4 collect every Focus Flame!
         </p>
         <div className="b4UnlockGameCard">
-          <div className="b4UnlockFlame" aria-hidden="true" />
+          <img
+            className="b4UnlockFlame"
+            src="/images/icons/FocusFlameIcon/focus-flame-transparent.png"
+            alt=""
+            aria-hidden="true"
+          />
           <div>
-            <strong>B-4 Focus Flight</strong>
-            <span>Level 1: Spark Run</span>
+            <strong>Focus Flight</strong>
+            <span>Level 1 • Spark Run</span>
           </div>
         </div>
         <div className="b4UnlockActions">

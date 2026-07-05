@@ -21,10 +21,11 @@ export interface B4FocusFlightGameHandle {
 interface B4FocusFlightGameProps {
   onHud: (hud: B4FocusFlightHudState) => void;
   onResult: (result: B4FocusFlightResult) => void;
+  mobileGraphics?: boolean;
 }
 
 const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameProps>(
-  ({ onHud, onResult }, ref) => {
+  ({ onHud, onResult, mobileGraphics = false }, ref) => {
     const hostRef = useRef<HTMLDivElement | null>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -39,7 +40,7 @@ const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameP
 
       let disposed = false;
       const host = hostRef.current;
-      const game = createB4FocusFlightGame(host);
+      const game = createB4FocusFlightGame(host, { mobileGraphics });
       gameRef.current = game;
 
       const handleHud = (hud: B4FocusFlightHudState) => {
@@ -60,7 +61,7 @@ const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameP
         if (host) host.innerHTML = '';
         if (gameRef.current === game) gameRef.current = null;
       };
-    }, [onHud, onResult]);
+    }, [mobileGraphics, onHud, onResult]);
 
     return <div ref={hostRef} className="b4ff-phaserHost" aria-label="B-4 Focus Flight game canvas" />;
   },
