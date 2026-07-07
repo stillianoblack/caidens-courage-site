@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GameCard from './GameCard';
+import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { getKidPlayShellRoute, parseKidPlayShellPath } from '../../lib/kidPlayShellRoutes';
 import {
   clearB4FocusFlightHighlight,
@@ -47,7 +48,10 @@ export default function KidArcadePanel() {
     markB4FocusFlightArcadeVisited();
 
     if (launchB4FromUnlock) {
-      const launchTimer = window.setTimeout(() => navigate(b4GamePath, { replace: true }), 1250);
+      const launchTimer = window.setTimeout(
+        () => kidPlayShellNavigate(navigate, b4GamePath, { replace: true }),
+        1250,
+      );
       return () => window.clearTimeout(launchTimer);
     }
 
@@ -82,7 +86,7 @@ export default function KidArcadePanel() {
           thumbnailSrc="/images/B-4FlightGame/Idle/Idle@2x-transparent.png"
           newTraining={showB4NewPill}
           highlight={highlightB4Card}
-          onPlay={() => navigate(b4GamePath)}
+          onPlay={() => kidPlayShellNavigate(navigate, b4GamePath)}
         />
         <GameCard
           title="Dragon Flight"
