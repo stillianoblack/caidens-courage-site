@@ -1,8 +1,13 @@
-# Caiden Vale: root only → classic-home (not a blanket host /* redirect)
-https://caidenvale.com/           /classic-home    302!
-https://www.caidenvale.com/       /classic-home    302!
-http://caidenvale.com/            /classic-home    302!
-http://www.caidenvale.com/        /classic-home    302!
+# Brand domains
+# Caiden's Courage is the app/product/portal marketing home.
+https://www.caidenscourage.com/*  https://caidenscourage.com/:splat  301!
+http://www.caidenscourage.com/*   https://caidenscourage.com/:splat  301!
+
+# Caiden Vale is the story/graphic-novel marketing home.
+https://www.caidenvale.com/*      https://caidenvale.com/:splat      301!
+http://www.caidenvale.com/*       https://caidenvale.com/:splat      301!
+https://caidenvale.com/           /classic-home                      302!
+http://caidenvale.com/            https://caidenvale.com/classic-home 302!
 
 # Static success pages
 /camp-courage/success    /camp-courage-success.html    200
