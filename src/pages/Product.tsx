@@ -140,28 +140,28 @@ const Product: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
 
-  // Gallery images: responsive comic cover (900/1600w); thumb = small for strip.
+  // Gallery images: keep the existing gallery structure; swap source files only.
   const galleryImages: { src: string; thumb?: string; alt: string; heroSrcSet?: string; heroSizes?: string }[] = [
     {
-      src: "/images/comic-book/Comic5_Coverpage_header_2.jpg",
-      thumb: "/images/comic-book/Comic5_Coverpage_header_2.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: The Graphic Novel Cover",
+      src: "/images/Caiden-vale-book/Caiden-vale-book.webp",
+      thumb: "/images/Caiden-vale-book/Caiden-vale-book.webp",
+      alt: "Caiden Vale and the Focus Flame: hardcover graphic novel cover",
     },
     {
-      src: "/images/comic-book/Comic5_Coverpage_header_Shop_2.jpg",
-      thumb: "/images/comic-book/Comic5_Coverpage_header_Shop_2.jpg",
-      alt: "Caiden's Courage and the Dragon's Nest: Interior spread",
+      src: "/images/Caiden-vale-book/Caiden-vale-pages.webp",
+      thumb: "/images/Caiden-vale-book/Caiden-vale-pages.webp",
+      alt: "Caiden Vale and the Focus Flame: interior spread",
     },
     {
-      src: "/images/comic-book/zThirdpage_Comic5_Coverpage_header_Shop.jpg",
-      thumb: "/images/comic-book/zThirdpage_Comic5_Coverpage_header_Shop.jpg",
-      alt: "Caiden's Courage: Third page",
+      src: "/images/Caiden-vale-book/Caiden-vale-pages_1.webp",
+      thumb: "/images/Caiden-vale-book/Caiden-vale-pages_1.webp",
+      alt: "Caiden Vale and the Focus Flame: sample page",
     },
   ];
 
   // Set page title
   useEffect(() => {
-    document.title = "Caiden's Courage and the Dragon's Nest: The Graphic Novel | Caiden's Courage";
+    document.title = "Caiden Vale and the Focus Flame | Caiden Vale";
   }, []);
 
   // Page-local scroll reset: only when there's no hash (preserve anchor navigation). Use router location, not window.location.
@@ -356,35 +356,41 @@ const Product: React.FC = () => {
               {/* Eyebrow */}
               <div className="mb-3 text-left">
                 <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
-                  THE GRAPHIC NOVEL — FIRST EDITION
+                  A MIDDLE-GRADE FANTASY ADVENTURE
                 </p>
               </div>
               
               {/* Title */}
               <h1 className="font-display text-4xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-4 text-left">
-                Caiden's Courage and the Dragon's Nest
+                Caiden Vale and the Focus Flame
               </h1>
               
               {/* Tagline - Secondary */}
               <div className="mb-4 text-left">
                 <p className="text-base text-navy-500 font-normal leading-relaxed">
-                  When the world feels loud, Caiden learns how to lock in. Pulled into a hidden realm of ancient guardians and powerful forces, he must face the noise in his mind and discover what makes him different is also what makes him brave. Originally created as a 54-page story, now expanded into a 120-page hardcover graphic novel.
+                  Caiden never expected to discover a hidden world filled with dragons, ancient guardians, and the mysterious Focus Flame.
+                  <br />
+                  <br />
+                  When darkness threatens both worlds, he must learn to trust himself, protect those he loves, and discover that the qualities that make him different may also become his greatest strength.
+                  <br />
+                  <br />
+                  A cinematic full-color fantasy adventure about courage, friendship, and discovering the hero within.
                 </p>
               </div>
 
               {/* Metadata Pills - Smaller, Softer */}
               <div className="flex flex-wrap gap-2 mb-8 justify-start">
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  Ages 7–12
+                  Ages 8–12
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
                   Full-Color Graphic Novel
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  120 Pages
+                  132 Pages
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  Print & Digital Friendly
+                  Digital Access to the Focus Flame Academy
                 </span>
               </div>
 
@@ -400,31 +406,41 @@ const Product: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-sm text-navy-600 leading-relaxed">
-                    Early supporters locked in the first print of Caiden's Courage. All Founder copies will receive the upgraded hardcover edition.
+                    Thank you to everyone who believed in Caiden from the very beginning.
+                    <br />
+                    <br />
+                    Every Founder’s Edition preorder has been upgraded to the new hardcover edition as a thank-you for helping bring this world to life.
+                    <br />
+                    <br />
+                    You'll always be the first Guardians of the Focus Flame.
                   </p>
                 </div>
 
-                {/* Block 2: Hardcover + Companion Workbook - Primary */}
+                {/* Block 2: Pre-Order Bundle - Primary */}
                 <div className="rounded-2xl border-2 border-navy-200 bg-white p-4 sm:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                   <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-                    <h3 className="font-display font-bold text-navy-500 text-lg">Hardcover + Companion Workbook</h3>
-                    <span className="font-bold text-navy-600 text-xl">$50</span>
+                    <h3 className="font-display font-bold text-navy-500 text-lg">Pre-Order Bundle</h3>
+                    <span className="font-bold text-navy-600 text-xl">$59.99</span>
                   </div>
                   <ul className="space-y-1.5 mb-3 text-sm text-navy-600">
                     <li className="flex items-start">
                       <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      120-page hardcover graphic novel
+                      132-page Hardcover Graphic Novel
                     </li>
                     <li className="flex items-start">
                       <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      Courage Companion activity workbook
+                      Courage Companion Activity Workbook
                     </li>
                     <li className="flex items-start">
                       <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      <span className="font-semibold">Signed first edition copy (limited)</span>
+                      <span className="font-semibold">Signed First Edition Copy</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
+                      Digital Access to the Focus Flame Academy
                     </li>
                   </ul>
-                  <p className="text-xs text-navy-400 mb-4">Limited first print run</p>
+                  <p className="text-xs text-navy-400 mb-4">Limited First Edition Release</p>
                   <button
                     type="button"
                     onClick={() => productLinks.hardcoverBundle && openExternalUrl(productLinks.hardcoverBundle)}
@@ -444,7 +460,7 @@ const Product: React.FC = () => {
                   <ul className="space-y-1.5 mb-4 text-sm text-navy-600">
                     <li className="flex items-start">
                       <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      120-page full-color paperback
+                      132-page full-color paperback
                     </li>
                     <li className="flex items-start">
                       <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
@@ -542,13 +558,13 @@ const Product: React.FC = () => {
           {/* Eyebrow - Small, uppercase, letter-spaced, muted color */}
           <div className="text-center mb-3">
             <p className="text-xs sm:text-sm font-semibold text-navy-400 uppercase tracking-[0.2em]">
-              A STORY FOR KIDS WHO THINK DIFFERENTLY
+              A FANTASY ADVENTURE WITH HEART
             </p>
           </div>
 
           {/* Main Headline */}
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy-500 mb-8 text-center">
-            This Story Helps With…
+            Inside the Adventure…
           </h2>
 
           {/* Toggle */}
@@ -605,22 +621,22 @@ const Product: React.FC = () => {
               {helpView === 'kids' && (
                 <div className="space-y-4 text-left">
                   <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
-                    What Kids Learn From This Story
+                    What Kids Discover in This Story
                   </h3>
                   <ul className="list-none space-y-3">
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
-                        Understanding big feelings
+                        Courage in unexpected places
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
-                        How my brain works
+                        Dragons, guardians, and hidden worlds
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full text-base font-medium border border-white/10 bg-[#243A5E]/90 text-white/90">
-                        Finding focus my way
+                        Trusting your imagination
                       </span>
                     </li>
                     <li>
@@ -641,27 +657,27 @@ const Product: React.FC = () => {
               {helpView === 'parents' && (
                 <div className="space-y-4 text-left">
                   <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
-                    What Kids Learn From This Story
+                    Why Families Love This Story
                   </h3>
                   <ul className="list-none space-y-3">
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
-                        Emotional awareness and self-regulation
+                        A premium fantasy adventure for young readers
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
-                        Confidence for children with ADHD
+                        A hero kids can cheer for and grow with
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
-                        Positive representation of neurodiversity
+                        Friendship, courage, and inner strength
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-base font-medium border border-purple-200">
-                        Language to talk about focus and overwhelm
+                        Emotional depth woven into the adventure
                       </span>
                     </li>
                     <li>
@@ -677,22 +693,22 @@ const Product: React.FC = () => {
               {helpView === 'teachers' && (
                 <div className="space-y-4 text-left">
                   <h3 className="font-display text-2xl sm:text-3xl font-bold text-navy-500 mb-4 text-left">
-                    How This Book Supports Learning
+                    How This Book Supports Readers
                   </h3>
                   <ul className="list-none space-y-3">
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
-                        Social-emotional learning (SEL) support
+                        Visual storytelling that keeps readers engaged
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
-                        Classroom discussion starter
+                        Rich character moments for discussion
                       </span>
                     </li>
                     <li>
                       <span className="inline-block px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-base font-medium border border-orange-200">
-                        Neurodiversity-affirming content
+                        Themes of courage, friendship, and identity
                       </span>
                     </li>
                     <li>
@@ -1205,4 +1221,3 @@ const Product: React.FC = () => {
 };
 
 export default Product;
-

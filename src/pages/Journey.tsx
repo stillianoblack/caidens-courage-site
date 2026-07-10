@@ -83,7 +83,7 @@ const JOURNEY_ENTRIES: JourneyEntry[] = [
     date: 'MARCH 2026',
     status: 'CREATIVE UPDATE',
     title: 'The Story Expanded',
-    body: 'What began as a 54-page story grew into a full world-building milestone — a 120-page hardcover graphic novel that set the foundation for camps, companions, and adventures still unfolding.',
+    body: 'Caiden’s world expanded into a 132-page hardcover graphic novel — a larger fantasy adventure filled with hidden realms, ancient guardians, and adventures still unfolding.',
     thumbnail: '/images/Comic5_Coverpage_header_2_smaller.webp',
     thumbnailAlt: 'Expanded graphic novel preview',
   },

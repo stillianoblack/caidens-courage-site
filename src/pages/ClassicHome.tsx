@@ -68,8 +68,8 @@ const StarIcon = ({ className }: { className?: string }) => (
 const features = [
   {
     icon: SparkleIcon,
-    title: 'Different Minds Hold Hidden Power',
-    description: "Caiden's story shows kids that ADHD isn't a flaw — it can be a source of creativity, energy, and unique strength.",
+    title: 'Ordinary Kids Can Find Hidden Power',
+    description: "Caiden's story invites readers into a world of dragons, ancient secrets, and the courage waiting inside them.",
   },
   {
     icon: PaletteIcon,
@@ -93,7 +93,7 @@ const characters = [
   {
     name: 'Caiden',
     microLabel: 'The Dreamer',
-    description: "The brave, imaginative 11-year-old at the center of our story — learning how his ADHD is actually his greatest strength.",
+    description: "The brave, imaginative 11-year-old at the center of our story — learning that courage can begin in the most unexpected places.",
     image: '/images/characters/Caiden_img_profile.webp',
   },
   {
@@ -105,7 +105,7 @@ const characters = [
   {
     name: 'B-4',
     microLabel: 'The Mind in Motion',
-    description: "A floating robotic companion who represents what's happening inside Caiden's mind. B-4 helps him understand his ADHD.",
+    description: "A floating robotic companion who helps Caiden slow down, look closer, and choose the next brave step.",
     image: '/images/characters/b4_img_profile_192w.webp',
   },
   {
@@ -120,7 +120,7 @@ const characters = [
 const products = [
   {
     title: "Caiden's Courage — Limited Edition",
-    description: "Caiden discovers that the thing he struggles with most — his ADHD — is actually his superpower. Pre-order the exclusive limited edition now!",
+    description: "Caiden discovers a hidden world, an ancient flame, and a courage he never knew he had. Pre-order the exclusive limited edition now!",
     badge: "Limited Edition",
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.limitedEdition,
@@ -129,7 +129,7 @@ const products = [
   },
   {
     title: "Caiden's Courage T-Shirt",
-    description: "Wear your courage! Show the world you support neurodiversity with our official Caiden's Courage t-shirt.",
+    description: "Wear your courage! Carry the spirit of Caiden's world wherever the next adventure takes you.",
     badge: "New",
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.tShirt,
@@ -139,7 +139,7 @@ const products = [
   },
   {
     title: "B-4 Plush Companions",
-    description: "Floating robotic friends that represent different neurodivergent strengths — ADHD, Autism, Anxiety, Big Feelers, & more.",
+    description: "Floating robotic friends inspired by the companions, courage, and imagination of Caiden's world.",
     badge: "New",
     badgeColor: "bg-golden-500",
     purchaseUrl: productLinks.b4Plush,
@@ -403,7 +403,7 @@ const Home = () => {
                   color: 'rgba(36, 62, 112, 0.8)'
                 }}
               >
-                MEET CAIDEN
+                EVERY HERO STARTS SOMEWHERE
               </div>
 
               {/* Headline */}
@@ -414,7 +414,8 @@ const Home = () => {
               {/* Body Paragraphs */}
               <div className="space-y-4 mb-8">
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
-                  Caiden is a fast-thinking, deeply creative boy with ADHD—and the very thing that makes him different… may be his greatest strength.
+                  Caiden never expected to become a hero.
+                  But when an ancient force awakens, he must enter a hidden world, face impossible challenges, and discover the power that has been inside him all along.
                 </p>
                 <p className="text-lg sm:text-xl text-navy-600 leading-relaxed">
                   Through imagination, friendship, and everyday bravery, Caiden learns to understand himself — and show up with courage in a world that doesn’t always see him clearly.

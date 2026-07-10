@@ -496,7 +496,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   boxShadow: '0 0 14px rgba(229, 192, 106, 0.35)',
                 }}
               />
-              <span>Where different minds discover their power</span>
+              <span>Where ordinary kids discover extraordinary courage</span>
             </div>
           </div>
         </div>
@@ -636,7 +636,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                   className="text-xs font-semibold uppercase tracking-[0.22em]"
                   style={{ color: 'rgba(255, 255, 255, 0.88)' }}
                 >
-                  WHERE DIFFERENT MINDS DISCOVER THEIR POWER
+                  WHERE ORDINARY KIDS DISCOVER EXTRAORDINARY COURAGE
                 </span>
               </div>
             </div>

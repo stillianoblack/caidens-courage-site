@@ -52,24 +52,6 @@ export default function CourageInTheDarkMap({
   mapLocked = false,
 }: CourageInTheDarkMapProps) {
   const isHero = variant === 'hero';
-
-  if (isHero) {
-    return (
-      <CourageInTheDarkAdventureHub
-        weekNodes={weekNodes}
-        supplementaryNodes={supplementaryNodes}
-        weekTitle={weekTitle}
-        week={week}
-        weekUnlockStatus={weekUnlockStatus}
-        selFocus={selFocus}
-        kidsBasePath={kidsBasePath}
-        baselineLocked={baselineLocked}
-        baselineLockedLabel={baselineLockedLabel}
-        mapLocked={mapLocked}
-      />
-    );
-  }
-
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const previewCloseTimerRef = useRef<number | null>(null);
   const previewPinnedRef = useRef(false);
@@ -182,6 +164,23 @@ export default function CourageInTheDarkMap({
   }, [closePreview]);
 
   const comingSoon = Boolean(selectedHotspot && !targetHref);
+
+  if (isHero) {
+    return (
+      <CourageInTheDarkAdventureHub
+        weekNodes={weekNodes}
+        supplementaryNodes={supplementaryNodes}
+        weekTitle={weekTitle}
+        week={week}
+        weekUnlockStatus={weekUnlockStatus}
+        selFocus={selFocus}
+        kidsBasePath={kidsBasePath}
+        baselineLocked={baselineLocked}
+        baselineLockedLabel={baselineLockedLabel}
+        mapLocked={mapLocked}
+      />
+    );
+  }
 
   return (
     <div

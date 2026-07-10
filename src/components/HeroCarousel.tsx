@@ -29,13 +29,13 @@ type HeroCarouselProps = {
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
     eyebrow: "A CAIDEN’S COURAGE UNIVERSE",
-    headline: 'Where focus becomes power.',
-    mobileHeadline: 'Where focus becomes power.',
+    headline: 'Where ordinary kids discover extraordinary courage.',
+    mobileHeadline: 'Where ordinary kids discover extraordinary courage.',
     desktopPosition: 'center top',
     mobilePosition: 'center 65%',
-    highlight: 'power',
+    highlight: 'courage',
     description:
-      "A story that helps kids with ADHD turn creativity into focus—without feeling like something is wrong with them.",
+      'An adventure of dragons, hidden worlds, courage, imagination, friendship, and the strength waiting inside every hero.',
     primaryCta: { label: 'Pre-Order Volume 1', to: STORY_BOOKS_PATH },
     secondaryCta: { label: 'Explore the World', to: '/world' },
     desktopImage: '/images/heros/hero-desktop_slide_1.webp',
@@ -43,14 +43,14 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     tabLabel: 'The Focus Flame',
   },
   {
-    eyebrow: 'MEET CAIDEN VALE',
+    eyebrow: 'EVERY HERO STARTS SOMEWHERE',
     headline: 'Not every hero looks fearless.',
     mobileHeadline: 'Not every hero looks fearless.',
     mobilePosition: 'center 70%',
     description:
-      'Caiden is a fast-thinking, deeply creative kid learning that what makes him different may be his greatest strength.',
-    primaryCta: { label: 'Meet Caiden', to: '/mission' },
-    secondaryCta: { label: 'Read His Story', to: '/mission' },
+      'Caiden never expected to become a hero. But when an ancient force awakens, he must enter a hidden world, face impossible challenges, and discover the power that has been inside him all along.',
+    primaryCta: { label: 'Meet the Hero', to: '/mission' },
+    secondaryCta: { label: 'Enter the Story', to: '/mission' },
     desktopImage: '/images/heros/hero-desktop_slide_2.webp',
     mobileImage: '/images/heros/hero-mobile_slide_2.webp',
     tabLabel: 'Caiden Vale',

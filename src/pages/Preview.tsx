@@ -422,7 +422,7 @@ const Preview = () => {
 
           {/* Title - Left aligned */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-navy-500 mb-6 leading-tight text-left">
-            Preview: Caiden's Courage and the Dragon's Nest
+            Preview: Caiden Vale and the Focus Flame
           </h1>
           
           {/* Subtitle - Left aligned */}

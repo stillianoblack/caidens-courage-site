@@ -45,7 +45,7 @@ export default function StoryHub() {
       <SectionHero
         eyebrow="Caiden Vale"
         title="Story World"
-        description="Enter the world where the Focus Flame begins — a graphic novel adventure about focus, courage, and different minds."
+        description="Enter the world where the Focus Flame begins — a graphic novel adventure about courage, friendship, hidden worlds, and discovering inner strength."
         supportingText="Caiden Vale is the story world behind Caiden's Courage™, Brave Mind Club, Focus Flame Lab, and Focus Flame Academy."
       >
         <Button variant="primary" size="lg" as={Link} to={STORY_BOOKS_PATH} leftIconSrc={null} className="w-full sm:w-auto">

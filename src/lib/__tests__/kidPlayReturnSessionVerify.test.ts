@@ -1,3 +1,10 @@
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import {
+  detectReturnSessionParentEmailMatch,
+  verifyReturnSessionParentEmailMatch,
+} from '../kidPlayReturnSessionVerify';
+import { writeStudentPinSession } from '../studentPinSession';
+
 jest.mock('../fetchWithTimeout', () => ({
   withTimeout: <T,>(promise: PromiseLike<T>) => Promise.resolve(promise),
   DASHBOARD_FETCH_TIMEOUT_MS: 5000,
@@ -9,13 +16,6 @@ jest.mock('../supabaseClient', () => ({
     from: jest.fn(),
   },
 }));
-
-import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import {
-  detectReturnSessionParentEmailMatch,
-  verifyReturnSessionParentEmailMatch,
-} from '../kidPlayReturnSessionVerify';
-import { writeStudentPinSession } from '../studentPinSession';
 
 const mockedFrom = supabase!.from as jest.Mock;
 
