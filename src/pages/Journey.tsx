@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BluePageHeader from '../components/sections/BluePageHeader';
@@ -205,7 +206,7 @@ const Journey: React.FC = () => {
           <p className="mb-6 text-lg text-navy-600 sm:text-xl">
             Pre-orders for the first print are still open — and the world keeps growing.
           </p>
-          <Link to="/comicbook">
+          <Link to={STORY_BOOKS_PATH}>
             <Button variant="primary" size="lg" className="w-full sm:w-auto">
               Pre-order Now
             </Button>

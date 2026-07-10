@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
@@ -160,7 +161,7 @@ const Mission: React.FC = () => {
                 variant="primary"
                 size="md"
                 as={Link}
-                to="/comicbook"
+                to={STORY_BOOKS_PATH}
                 className="w-full sm:w-auto"
               >
                 Pre-Order Volume 1
@@ -523,7 +524,7 @@ const Mission: React.FC = () => {
                 
                 {/* CTA Text Link */}
                 <Link
-                  to="/comicbook"
+                  to={STORY_BOOKS_PATH}
                   className="inline-flex items-center text-base sm:text-lg font-semibold text-navy-500 hover:text-navy-600 transition-colors group w-fit"
                 >
                   <span className="group-hover:underline">View Comic Book</span>
@@ -624,4 +625,3 @@ const Mission: React.FC = () => {
 };
 
 export default Mission;
-

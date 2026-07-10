@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
@@ -346,7 +347,7 @@ const Home = () => {
               {/* Comic Book Callout */}
               <div className="w-full">
                 <Link
-                  to="/comicbook"
+                  to={STORY_BOOKS_PATH}
                   className="block bg-transparent rounded-2xl p-4 sm:p-5 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   <div className="flex items-start gap-4">
@@ -1020,7 +1021,7 @@ const Home = () => {
                   {product.available && product.purchaseUrl ? (
                     <button
                       onClick={() => {
-                        navigate('/comicbook');
+                        navigate(STORY_BOOKS_PATH);
                         window.scrollTo(0, 0);
                       }}
                       className="mt-5 w-full py-3 px-6 bg-golden-500 text-navy-500 font-bold rounded-full shadow-golden hover:bg-golden-600 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"

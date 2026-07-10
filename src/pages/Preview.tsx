@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -413,7 +414,7 @@ const Preview = () => {
 
           {/* Breadcrumb */}
           <Link 
-            to="/comicbook"
+            to={STORY_BOOKS_PATH}
             className="inline-block text-sm text-navy-400 hover:text-navy-600 transition-colors mb-4 group"
           >
             <span className="group-hover:underline">← Back to Comic Book</span>
@@ -774,4 +775,3 @@ const Preview = () => {
 };
 
 export default Preview;
-

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -186,7 +187,7 @@ const PrivacyPolicy: React.FC = () => {
           </div>
           <div className="mt-8 pt-8 border-t border-white/10">
             <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-              <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
+              <Link to={STORY_BOOKS_PATH} className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
               <Link to="/braveminds" className="text-white/70 hover:text-white transition-colors">Resources</Link>
               <Link 
                 to="/#about" 

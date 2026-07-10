@@ -2,6 +2,8 @@
 // All internal links use React Router <Link> / <NavLink> / useNavigate() only.
 // No window.history.pushState, replaceState, or <a href="/path"> for in-app routes.
 
+import { STORY_BOOKS_PATH } from './courageRoutes';
+
 export interface NavItem {
   label: string;
   href: string;
@@ -91,7 +93,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'Pre-Order Volume 1',
-        href: '/comicbook',
+        href: STORY_BOOKS_PATH,
         description: 'The graphic novel and official shop.'
       },
       {
@@ -123,12 +125,12 @@ export const NAV_ITEMS: NavItem[] = [
     dropdownItems: [
       {
         label: 'Pre-Order Volume 1',
-        href: '/comicbook',
+        href: STORY_BOOKS_PATH,
         subtitle: 'The Graphic Novel'
       },
       {
         label: 'Comic Book',
-        href: '/comicbook',
+        href: STORY_BOOKS_PATH,
         subtitle: 'Volume 1: The Graphic Novel'
       },
       {

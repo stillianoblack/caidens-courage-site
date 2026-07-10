@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import Button from './ui/Button';
 
 export type HeroSlide = {
@@ -35,7 +36,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     highlight: 'power',
     description:
       "A story that helps kids with ADHD turn creativity into focus—without feeling like something is wrong with them.",
-    primaryCta: { label: 'Pre-Order Volume 1', to: '/comicbook' },
+    primaryCta: { label: 'Pre-Order Volume 1', to: STORY_BOOKS_PATH },
     secondaryCta: { label: 'Explore the World', to: '/world' },
     desktopImage: '/images/heros/hero-desktop_slide_1.webp',
     mobileImage: '/images/heros/hero-mobile_slide_1.webp',

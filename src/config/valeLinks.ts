@@ -7,7 +7,7 @@ export function valeSiteUrl(path: string): string {
 }
 
 export const VALE_CLASSIC_HOME_URL = valeSiteUrl('/classic-home');
-export const VALE_COMICBOOK_URL = valeSiteUrl('/comicbook');
+export const VALE_COMICBOOK_URL = valeSiteUrl('/story/books');
 export const VALE_MISSION_URL = valeSiteUrl('/mission');
 export const VALE_WORLD_URL = valeSiteUrl('/world');
 export const VALE_CHARACTERS_URL = valeSiteUrl('/characters');

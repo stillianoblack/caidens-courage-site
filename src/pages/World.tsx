@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
@@ -29,7 +30,7 @@ const World: React.FC = () => {
     if (waitlistUrl) {
       openExternalUrl(waitlistUrl);
     } else {
-      navigate('/comicbook');
+      navigate(STORY_BOOKS_PATH);
     }
   };
 

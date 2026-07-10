@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { CAIDEN_VALE_HOME_PATH } from '../config/nav';
 import ValeLogo from './marketing/ValeLogo';
 
@@ -25,7 +26,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="mt-8 pt-8 border-t border-white/10">
           <div className="flex flex-wrap justify-center gap-4 text-sm mb-4">
-            <Link to="/comicbook" className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
+            <Link to={STORY_BOOKS_PATH} className="text-white/70 hover:text-white transition-colors">Comic Book</Link>
             <Link to="/braveminds" className="text-white/70 hover:text-white transition-colors">Resources</Link>
             <Link to="/classic-home#about" className="text-white/70 hover:text-white transition-colors">About</Link>
             <Link to="/classic-home#characters" className="text-white/70 hover:text-white transition-colors">Characters</Link>

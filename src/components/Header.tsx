@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { NAV_ITEMS, RIGHT_NAV_ITEMS, CAIDEN_VALE_HOME_PATH, handleAnchorClick, NavItem } from '../config/nav';
 import ValeLogo from './marketing/ValeLogo';
 import { SAFE_MODE } from '../lib/safeMode';
@@ -451,7 +452,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* Right: Pre-Order (mobile) */}
               <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 flex-shrink-0">
                 <Link
-                  to="/comicbook"
+                  to={STORY_BOOKS_PATH}
                   className="whitespace-nowrap flex-shrink-0 text-sm sm:text-base px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 h-11 sm:h-12 inline-flex items-center justify-center font-bold rounded-full bg-golden-500 hover:bg-golden-400 text-navy-700 transition-colors shadow-[0_10px_26px_-14px_rgba(240,206,110,0.55)] hover:shadow-[0_14px_34px_-16px_rgba(240,206,110,0.7)]"
                 >
                   Pre-Order Volume 1
@@ -549,7 +550,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
                     }}
                   >
                     <Link
-                      to="/comicbook"
+                      to={STORY_BOOKS_PATH}
                       className="group inline-flex items-center whitespace-nowrap text-sm font-semibold tracking-wide leading-none transition-colors duration-200 ease hover:text-[#E5C06A]"
                       style={{ color: 'rgba(255,255,255,0.92)' }}
                     >
@@ -811,7 +812,7 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
               {/* CTA in Mobile Menu - router-native Link */}
               <div className="px-6 py-6 mt-4">
                 <Link
-                  to="/comicbook"
+                  to={STORY_BOOKS_PATH}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full text-center font-bold rounded-lg bg-golden-500 hover:bg-golden-400 text-navy-500 py-4 px-6 transition-colors"
                 >
@@ -852,4 +853,3 @@ const HeaderInner: React.FC<HeaderProps> = ({ onComingSoonClick }) => {
 
 const Header = React.memo(HeaderInner);
 export default Header;
-
