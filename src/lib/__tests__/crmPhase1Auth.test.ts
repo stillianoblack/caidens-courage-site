@@ -14,9 +14,10 @@ describe('CRM Phase 1 authorization primitives', () => {
     expect(assignmentAllows(assignment, 'organizations:read', 'org-b')).toBe(false);
   });
 
-  test('allows approved read roles but never invents write permission', () => {
+  test('keeps read-only admins read-only while Phase 2 audience admins gain approved writes', () => {
     expect(assignmentAllows({ role: 'read_only_admin', organizationId: null }, 'crm:read', null)).toBe(true);
-    expect(assignmentAllows({ role: 'audience_admin', organizationId: null }, 'crm:write', null)).toBe(false);
+    expect(assignmentAllows({ role: 'read_only_admin', organizationId: null }, 'crm:write', null)).toBe(false);
+    expect(assignmentAllows({ role: 'audience_admin', organizationId: null }, 'crm:write', null)).toBe(true);
   });
 
   test('masks adult email values', () => {

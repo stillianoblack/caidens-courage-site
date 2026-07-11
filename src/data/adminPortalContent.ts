@@ -9,7 +9,11 @@ export type AdminPortalTabId =
   | 'crm-overview'
   | 'crm-contacts'
   | 'crm-organizations'
-  | 'crm-classification';
+  | 'crm-classification'
+  | 'crm-add-contact'
+  | 'crm-segments'
+  | 'crm-tasks'
+  | 'crm-activity';
 
 export const ADMIN_PORTAL_PAGE = {
   title: 'Admin Portal',
@@ -30,6 +34,14 @@ export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> =
         { id: 'crm-contacts' as const, label: 'CRM Contacts' },
         { id: 'crm-organizations' as const, label: 'CRM Organizations' },
         { id: 'crm-classification' as const, label: 'Classification Preview' },
+      ]
+    : []),
+  ...(process.env.REACT_APP_AUDIENCE_CRM_WORKFLOWS_DISPLAY_ENABLED === 'true'
+    ? [
+        { id: 'crm-add-contact' as const, label: 'Add Contact' },
+        { id: 'crm-segments' as const, label: 'CRM Segments' },
+        { id: 'crm-tasks' as const, label: 'CRM Tasks' },
+        { id: 'crm-activity' as const, label: 'CRM Activity' },
       ]
     : []),
 ];

@@ -2,9 +2,9 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const ROLE_PERMISSIONS = {
-  internal_admin: new Set(['crm:read', 'organizations:read', 'classification:read', 'bootstrap:read']),
-  audience_admin: new Set(['crm:read', 'organizations:read', 'classification:read']),
-  organization_admin: new Set(['crm:read', 'organizations:read']),
+  internal_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'bootstrap:read']),
+  audience_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate']),
+  organization_admin: new Set(['crm:read', 'organizations:read', 'activities:read', 'activities:write']),
   read_only_admin: new Set(['crm:read', 'organizations:read', 'classification:read']),
 };
 

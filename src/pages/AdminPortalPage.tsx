@@ -18,6 +18,7 @@ import AdminCommerceTab, {
   type AdminCommerceSubtab,
 } from '../components/admin/tabs/AdminCommerceTab';
 import AdminCrmTab from '../components/admin/tabs/AdminCrmTab';
+import AdminCrmWorkflowTab from '../components/admin/tabs/AdminCrmWorkflowTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -195,6 +196,14 @@ export default function AdminPortalPage() {
         return <AdminCrmTab view="organizations" />;
       case 'crm-classification':
         return <AdminCrmTab view="classification" />;
+      case 'crm-add-contact':
+        return <AdminCrmWorkflowTab view="add-contact" />;
+      case 'crm-segments':
+        return <AdminCrmWorkflowTab view="segments" />;
+      case 'crm-tasks':
+        return <AdminCrmWorkflowTab view="tasks" />;
+      case 'crm-activity':
+        return <AdminCrmWorkflowTab view="activity" />;
       default:
         return null;
     }
