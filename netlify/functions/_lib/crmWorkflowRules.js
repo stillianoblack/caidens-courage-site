@@ -2,7 +2,8 @@ const COMMUNICATION_RANK = { confirmed: 0, unknown: 1, unclear: 1, unsubscribed:
 const PROMOTIONAL_SEGMENTS = new Set(['general_prospect','camp_lead','school_lead','family_prospect','book_customer','active_family_member','active_camp_partner','active_school_partner','newsletter_eligible','product_updates_eligible']);
 
 function mostRestrictiveStatus(statuses) {
-  return (statuses || []).reduce((winner, status) =>
+  if (!statuses?.length) return 'unknown';
+  return statuses.reduce((winner, status) =>
     (COMMUNICATION_RANK[status] ?? 1) > (COMMUNICATION_RANK[winner] ?? 1) ? status : winner, 'confirmed');
 }
 

@@ -4,6 +4,7 @@ export {};
 
 describe('CRM Phase 2 consent safety', () => {
   test('suppressed and unsubscribed states cannot be weakened', () => {
+    expect(mostRestrictiveStatus([])).toBe('unknown');
     expect(mostRestrictiveStatus(['confirmed','unsubscribed'])).toBe('unsubscribed');
     expect(mostRestrictiveStatus(['suppressed','confirmed'])).toBe('suppressed');
     expect(applyConsentEvent({ status: 'unsubscribed', version: 2 }, { status_after: 'confirmed', occurred_at: '2026-01-01', source: 'signup' })).toMatchObject({ status: 'unsubscribed', version: 3 });

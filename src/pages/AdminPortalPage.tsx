@@ -19,6 +19,7 @@ import AdminCommerceTab, {
 } from '../components/admin/tabs/AdminCommerceTab';
 import AdminCrmTab from '../components/admin/tabs/AdminCrmTab';
 import AdminCrmWorkflowTab from '../components/admin/tabs/AdminCrmWorkflowTab';
+import AdminCrmProviderTab from '../components/admin/tabs/AdminCrmProviderTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -204,6 +205,18 @@ export default function AdminPortalPage() {
         return <AdminCrmWorkflowTab view="tasks" />;
       case 'crm-activity':
         return <AdminCrmWorkflowTab view="activity" />;
+      case 'crm-email-journeys':
+        return <AdminCrmProviderTab view="journeys" />;
+      case 'crm-kit-subscribers':
+        return <AdminCrmProviderTab view="subscribers" />;
+      case 'crm-email-performance':
+        return <AdminCrmProviderTab view="performance" />;
+      case 'crm-subscriber-reconciliation':
+        return <AdminCrmProviderTab view="reconciliation" />;
+      case 'crm-sync-activity':
+        return <AdminCrmProviderTab view="sync" />;
+      case 'crm-provider-settings':
+        return <AdminCrmProviderTab view="settings" />;
       default:
         return null;
     }
