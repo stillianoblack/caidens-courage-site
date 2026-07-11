@@ -385,6 +385,47 @@
   padding-top: 0.25rem;
 }
 
+.adminPortal-tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.adminPortal-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.adminPortal-table th,
+.adminPortal-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  text-align: left;
+  vertical-align: top;
+}
+
+.adminPortal-table th {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  color: var(--portal-text-muted, #64748b);
+}
+
+.adminPortal-codeBlock {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.06);
+  white-space: pre-wrap;
+}
+
+.adminPortal-formRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
 .adminPortal-btn {
   display: inline-flex;
   align-items: center;

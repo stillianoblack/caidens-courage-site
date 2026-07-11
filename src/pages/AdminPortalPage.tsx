@@ -17,6 +17,7 @@ import AdminCommerceTab, {
   resolveAdminCommerceSubtab,
   type AdminCommerceSubtab,
 } from '../components/admin/tabs/AdminCommerceTab';
+import AdminCrmTab from '../components/admin/tabs/AdminCrmTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -186,6 +187,14 @@ export default function AdminPortalPage() {
             onCopied={handleCopied}
           />
         );
+      case 'crm-overview':
+        return <AdminCrmTab view="overview" />;
+      case 'crm-contacts':
+        return <AdminCrmTab view="contacts" />;
+      case 'crm-organizations':
+        return <AdminCrmTab view="organizations" />;
+      case 'crm-classification':
+        return <AdminCrmTab view="classification" />;
       default:
         return null;
     }

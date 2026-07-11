@@ -5,7 +5,11 @@ export type AdminPortalTabId =
   | 'pilot-programs'
   | 'adventures'
   | 'data-cleanup'
-  | 'commerce';
+  | 'commerce'
+  | 'crm-overview'
+  | 'crm-contacts'
+  | 'crm-organizations'
+  | 'crm-classification';
 
 export const ADMIN_PORTAL_PAGE = {
   title: 'Admin Portal',
@@ -20,6 +24,14 @@ export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> =
   { id: 'adventures', label: 'Adventures' },
   { id: 'data-cleanup', label: 'Data Cleanup' },
   { id: 'commerce', label: 'Commerce' },
+  ...(process.env.REACT_APP_AUDIENCE_CRM_DISPLAY_ENABLED === 'true'
+    ? [
+        { id: 'crm-overview' as const, label: 'CRM Overview' },
+        { id: 'crm-contacts' as const, label: 'CRM Contacts' },
+        { id: 'crm-organizations' as const, label: 'CRM Organizations' },
+        { id: 'crm-classification' as const, label: 'Classification Preview' },
+      ]
+    : []),
 ];
 
 export const DEFAULT_ADMIN_PORTAL_TAB: AdminPortalTabId = 'manage-accounts';
