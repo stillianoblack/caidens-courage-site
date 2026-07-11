@@ -6,6 +6,11 @@ import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import GlobalNotification from '../components/GlobalNotification';
+import { useCommerceProduct } from '../hooks/useCommerceProduct';
+import {
+  formatCommercePrice,
+  HARDCOVER_BUNDLE_KEY,
+} from '../lib/commerceProductsService';
 
 // Reusable InsideCard Component for "What's Inside" section
 interface InsideCardProps {
@@ -132,6 +137,11 @@ const Product: React.FC = () => {
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [showDigitalNotice, setShowDigitalNotice] = useState(false);
+  const {
+    product: hardcoverBundleProduct,
+    loading: hardcoverBundleLoading,
+    error: hardcoverBundleError,
+  } = useCommerceProduct(HARDCOVER_BUNDLE_KEY);
 
   const handleDigitalClick = () => {
     setShowDigitalNotice(true);
@@ -181,6 +191,21 @@ const Product: React.FC = () => {
   const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
   }, []);
+
+  const hardcoverBundleCheckoutUrl = hardcoverBundleProduct?.paymentLinkUrl?.trim() || '';
+  const isHardcoverBundleCheckoutUnavailable =
+    hardcoverBundleLoading || Boolean(hardcoverBundleError) || !hardcoverBundleCheckoutUrl;
+  const hardcoverBundlePrice = hardcoverBundleProduct
+    ? formatCommercePrice(hardcoverBundleProduct.displayPriceCents, hardcoverBundleProduct.currency)
+    : '—';
+
+  const handleHardcoverBundleCheckout = () => {
+    if (!hardcoverBundleCheckoutUrl) {
+      console.error('[commerce] Missing active Hardcover Bundle checkout configuration.');
+      return;
+    }
+    openExternalUrl(hardcoverBundleCheckoutUrl);
+  };
 
   return (
     <div className="min-h-screen bg-cream font-body">
@@ -420,7 +445,7 @@ const Product: React.FC = () => {
                 <div className="rounded-2xl border-2 border-navy-200 bg-white p-4 sm:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
                   <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
                     <h3 className="font-display font-bold text-navy-500 text-lg">Pre-Order Bundle</h3>
-                    <span className="font-bold text-navy-600 text-xl">$59.99</span>
+                    <span className="font-bold text-navy-600 text-xl">{hardcoverBundlePrice}</span>
                   </div>
                   <ul className="space-y-1.5 mb-3 text-sm text-navy-600">
                     <li className="flex items-start">
@@ -441,13 +466,19 @@ const Product: React.FC = () => {
                     </li>
                   </ul>
                   <p className="text-xs text-navy-400 mb-4">Limited First Edition Release</p>
+                  {isHardcoverBundleCheckoutUnavailable && !hardcoverBundleLoading ? (
+                    <p className="text-sm font-semibold text-red-700 mb-3">
+                      Checkout is temporarily unavailable. Please try again shortly.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
-                    onClick={() => productLinks.hardcoverBundle && openExternalUrl(productLinks.hardcoverBundle)}
-                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 shadow-[0_10px_24px_rgba(245,210,107,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)] active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2"
+                    onClick={handleHardcoverBundleCheckout}
+                    disabled={isHardcoverBundleCheckoutUnavailable}
+                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 shadow-[0_10px_24px_rgba(245,210,107,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)] active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     style={{ backgroundColor: '#F2D06B' }}
                   >
-                    Pre-order Hardcover Bundle
+                    {hardcoverBundleLoading ? 'Loading checkout...' : 'Pre-order Hardcover Bundle'}
                   </button>
                 </div>
 

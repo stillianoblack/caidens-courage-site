@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   clearAdminSession,
   isAdminAccessConfigured,
@@ -13,7 +13,10 @@ import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab'
 import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
 import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
 import AdminAdventuresTab from '../components/admin/tabs/AdminAdventuresTab';
-import AdminPricingPlansTab from '../components/admin/tabs/AdminPricingPlansTab';
+import AdminCommerceTab, {
+  resolveAdminCommerceSubtab,
+  type AdminCommerceSubtab,
+} from '../components/admin/tabs/AdminCommerceTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -29,8 +32,16 @@ import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<AdminPortalTabId>(resolveAdminPortalTab(tabParam));
+  const isCommerceRoute = location.pathname.endsWith('/commerce');
+  const [activeTab, setActiveTab] = useState<AdminPortalTabId>(
+    isCommerceRoute ? 'commerce' : resolveAdminPortalTab(tabParam),
+  );
+  const [activeCommerceSubtab, setActiveCommerceSubtab] = useState<AdminCommerceSubtab>(
+    resolveAdminCommerceSubtab(isCommerceRoute ? tabParam : searchParams.get('commerceTab')),
+  );
   const [unlocked, setUnlocked] = useState(() => readAdminSession());
   const [email, setEmail] = useState('');
   const [passcode, setPasscode] = useState('');
@@ -47,10 +58,24 @@ export default function AdminPortalPage() {
   }, []);
 
   useEffect(() => {
-    if (tabParam) {
-      setActiveTab(resolveAdminPortalTab(tabParam));
+    if (!isCommerceRoute && tabParam === 'pricing-plans') {
+      navigate('/admin/commerce?tab=memberships', { replace: true });
+      return;
     }
-  }, [tabParam]);
+    if (!isCommerceRoute && tabParam === 'commerce-products') {
+      navigate('/admin/commerce?tab=products', { replace: true });
+      return;
+    }
+    if (isCommerceRoute) {
+      setActiveTab('commerce');
+      setActiveCommerceSubtab(resolveAdminCommerceSubtab(tabParam));
+    } else if (tabParam) {
+      setActiveTab(resolveAdminPortalTab(tabParam));
+      setActiveCommerceSubtab(resolveAdminCommerceSubtab(searchParams.get('commerceTab')));
+    } else {
+      setActiveTab(resolveAdminPortalTab(null));
+    }
+  }, [isCommerceRoute, navigate, searchParams, tabParam]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -80,6 +105,10 @@ export default function AdminPortalPage() {
   const selectTab = useCallback(
     (next: AdminPortalTabId) => {
       setActiveTab(next);
+      if (next === 'commerce') {
+        navigate('/admin/commerce?tab=products');
+        return;
+      }
       const nextParams = new URLSearchParams(searchParams);
       if (next === 'manage-accounts') {
         nextParams.delete('tab');
@@ -88,7 +117,15 @@ export default function AdminPortalPage() {
       }
       setSearchParams(nextParams, { replace: true });
     },
-    [searchParams, setSearchParams],
+    [navigate, searchParams, setSearchParams],
+  );
+
+  const selectCommerceSubtab = useCallback(
+    (next: AdminCommerceSubtab) => {
+      setActiveCommerceSubtab(next);
+      navigate(`/admin/commerce?tab=${next}`);
+    },
+    [navigate],
   );
 
   const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
@@ -141,8 +178,14 @@ export default function AdminPortalPage() {
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
         return <AdminDataCleanupTab onChanged={() => void loadPrograms()} />;
-      case 'pricing-plans':
-        return <AdminPricingPlansTab onCopied={handleCopied} />;
+      case 'commerce':
+        return (
+          <AdminCommerceTab
+            activeSubtab={activeCommerceSubtab}
+            onSelectSubtab={selectCommerceSubtab}
+            onCopied={handleCopied}
+          />
+        );
       default:
         return null;
     }

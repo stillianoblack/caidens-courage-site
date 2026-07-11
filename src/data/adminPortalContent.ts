@@ -5,11 +5,11 @@ export type AdminPortalTabId =
   | 'pilot-programs'
   | 'adventures'
   | 'data-cleanup'
-  | 'pricing-plans';
+  | 'commerce';
 
 export const ADMIN_PORTAL_PAGE = {
   title: 'Admin Portal',
-  subtitle: 'Manage programs, accounts, design system tools, and pilot cleanup.',
+  subtitle: 'Manage programs, accounts, commerce, design system tools, and pilot cleanup.',
 } as const;
 
 export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> = [
@@ -19,7 +19,7 @@ export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> =
   { id: 'pilot-programs', label: 'Pilot Programs' },
   { id: 'adventures', label: 'Adventures' },
   { id: 'data-cleanup', label: 'Data Cleanup' },
-  { id: 'pricing-plans', label: 'Payment Links' },
+  { id: 'commerce', label: 'Commerce' },
 ];
 
 export const DEFAULT_ADMIN_PORTAL_TAB: AdminPortalTabId = 'manage-accounts';

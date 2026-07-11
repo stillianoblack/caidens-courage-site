@@ -139,6 +139,25 @@
   font-weight: 600;
 }
 
+.adminPortal-success,
+.adminPortal-warning {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.adminPortal-success {
+  background: rgba(46, 125, 82, 0.1);
+  color: #1f6b43;
+}
+
+.adminPortal-warning {
+  background: rgba(212, 168, 75, 0.16);
+  color: #7a5a12;
+}
+
 .adminPortal-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1006,6 +1025,33 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 0.5rem;
+}
+
+.adminPortal-segmentedTabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(36, 62, 112, 0.06);
+  border: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.adminPortal-segmentedTab {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  color: rgba(36, 62, 112, 0.74);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.adminPortal-segmentedTab--active {
+  background: #243e70;
+  color: #fff;
+  box-shadow: 0 8px 18px -12px rgba(36, 62, 112, 0.55);
 }
 
 .adminPortal-form--grid {

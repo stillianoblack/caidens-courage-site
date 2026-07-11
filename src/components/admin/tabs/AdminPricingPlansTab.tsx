@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PRICING_PLAN_GROUP_LABELS } from '../../../data/pricingPlansDefaults';
 import { notifyPricingPlansUpdated } from '../../../hooks/usePricingPlansConfig';
 import {
+  getMembershipPlans,
   isStripeLinkConfigured,
-  readPricingPlansConfig,
-  resetPricingPlansConfig,
-  savePricingPlansConfig,
+  resetMembershipPlansToDefaults,
+  updateMembershipPlans,
 } from '../../../lib/pricingPlansService';
 import type { PricingPlanGroup, PricingPlanRecord } from '../../../types/pricingPlans';
 
@@ -25,8 +25,13 @@ function textToFeatures(value: string): string[] {
 }
 
 export default function AdminPricingPlansTab({ onCopied }: AdminPricingPlansTabProps) {
-  const [plans, setPlans] = useState<PricingPlanRecord[]>(() => readPricingPlansConfig().plans);
-  const [savedAt, setSavedAt] = useState<string | null>(readPricingPlansConfig().updatedAt);
+  const initialConfig = getMembershipPlans();
+  const [plans, setPlans] = useState<PricingPlanRecord[]>(() => initialConfig.plans);
+  const [savedAt, setSavedAt] = useState<string | null>(initialConfig.updatedAt || null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const savedSnapshotRef = useRef(JSON.stringify(initialConfig.plans));
 
   const grouped = useMemo(() => {
     const groups: PricingPlanGroup[] = ['family', 'small_group', 'large_organization'];
@@ -38,39 +43,92 @@ export default function AdminPricingPlansTab({ onCopied }: AdminPricingPlansTabP
   }, [plans]);
 
   const updatePlan = (id: string, patch: Partial<PricingPlanRecord>) => {
+    setError(null);
+    setDirty(true);
     setPlans((current) => current.map((plan) => (plan.id === id ? { ...plan, ...patch } : plan)));
   };
 
   const handleSave = () => {
-    const next = savePricingPlansConfig(plans);
+    const validationErrors = plans.flatMap((plan) => {
+      const errors: string[] = [];
+      if (!plan.audienceLabel.trim()) errors.push(`${plan.planName}: audience / account type is required.`);
+      if (!plan.priceLabel.trim()) errors.push(`${plan.planName}: display price label is required.`);
+      if (plan.active && !plan.ctaLabel.trim()) errors.push(`${plan.planName}: CTA label is required for active plans.`);
+      return errors;
+    });
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(' '));
+      return;
+    }
+
+    const previousPlans = JSON.parse(savedSnapshotRef.current) as PricingPlanRecord[];
+    const changedPriceSameLink = plans.some((plan) => {
+      const previous = previousPlans.find((item) => item.id === plan.id);
+      return previous && previous.priceLabel !== plan.priceLabel && previous.stripeUrl === plan.stripeUrl;
+    });
+    if (
+      changedPriceSameLink &&
+      !window.confirm(
+        'You changed the displayed price. Confirm that the Stripe Payment Link charges the same amount before publishing.',
+      )
+    ) {
+      return;
+    }
+
+    setSaving(true);
+    const next = updateMembershipPlans(plans);
     setPlans(next.plans);
     setSavedAt(next.updatedAt);
+    savedSnapshotRef.current = JSON.stringify(next.plans);
+    setDirty(false);
+    setSaving(false);
     notifyPricingPlansUpdated();
-    onCopied?.('Pricing plans saved.');
+    onCopied?.('Membership plans saved.');
   };
 
   const handleReset = () => {
-    const next = resetPricingPlansConfig();
+    const next = resetMembershipPlansToDefaults();
     setPlans(next.plans);
-    setSavedAt(next.updatedAt);
+    setSavedAt(next.updatedAt || null);
+    savedSnapshotRef.current = JSON.stringify(next.plans);
+    setDirty(false);
     notifyPricingPlansUpdated();
-    onCopied?.('Pricing plans reset to defaults.');
+    onCopied?.('Membership plans reset to defaults.');
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [dirty]);
 
   return (
     <div className="adminPortal-stack">
       <section className="adminPortal-card">
-        <h2 className="adminPortal-cardTitle">Payment Links / Pricing Plans</h2>
+        <h2 className="adminPortal-cardTitle">Membership Plans</h2>
         <p className="adminPortal-cardSub">
-          Edit Stripe payment links and plan copy used by Family and Facilitator upgrade modals. Changes
-          save to this browser and apply immediately in the portal.
+          Recurring or access-based plans for families, educators, camps, schools, and districts.
+          These settings power Family, Educator, Camp, School, and related upgrade experiences.
         </p>
         {savedAt ? (
           <p className="adminPortal-cardSub">Last saved: {new Date(savedAt).toLocaleString()}</p>
-        ) : null}
+        ) : (
+          <p className="adminPortal-cardSub">Last saved: Not saved yet</p>
+        )}
+        {error ? <p className="adminPortal-error">{error}</p> : null}
+        {dirty ? <p className="adminPortal-warning">You have unsaved membership plan changes.</p> : null}
         <div className="adminPortal-actionsRow">
-          <button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={handleSave}>
-            Save pricing plans
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--primary"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save membership plans'}
           </button>
           <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleReset}>
             Reset to defaults

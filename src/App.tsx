@@ -481,6 +481,7 @@ const appRouteChildren = (
       <Route path={ADMIN_PORTAL_PATH} element={<AdminRouteLayout />}>
         <Route path="design-system" element={<DesignSystemPage />} />
         <Route path="adventures/:id/preview" element={<AdminAdventurePreviewPage />} />
+        <Route path="commerce" element={<AdminPortalPage />} />
         <Route index element={<AdminPortalPage />} />
       </Route>
 

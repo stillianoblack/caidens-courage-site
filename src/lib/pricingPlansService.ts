@@ -13,22 +13,26 @@ function mergeWithDefaults(overrides: PricingPlanRecord[]): PricingPlanRecord[] 
 
 export function readPricingPlansConfig(): PricingPlansConfig {
   if (typeof window === 'undefined') {
-    return { updatedAt: new Date(0).toISOString(), plans: mergeWithDefaults([]) };
+    return { updatedAt: '', plans: mergeWithDefaults([]) };
   }
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      return { updatedAt: new Date(0).toISOString(), plans: mergeWithDefaults([]) };
+      return { updatedAt: '', plans: mergeWithDefaults([]) };
     }
     const parsed = JSON.parse(raw) as PricingPlansConfig;
     return {
-      updatedAt: parsed.updatedAt ?? new Date(0).toISOString(),
+      updatedAt: parsed.updatedAt ?? '',
       plans: mergeWithDefaults(Array.isArray(parsed.plans) ? parsed.plans : []),
     };
   } catch {
-    return { updatedAt: new Date(0).toISOString(), plans: mergeWithDefaults([]) };
+    return { updatedAt: '', plans: mergeWithDefaults([]) };
   }
+}
+
+export function getMembershipPlans(): PricingPlansConfig {
+  return readPricingPlansConfig();
 }
 
 export function savePricingPlansConfig(plans: PricingPlanRecord[]): PricingPlansConfig {
@@ -44,11 +48,19 @@ export function savePricingPlansConfig(plans: PricingPlanRecord[]): PricingPlans
   return next;
 }
 
+export function updateMembershipPlans(plans: PricingPlanRecord[]): PricingPlansConfig {
+  return savePricingPlansConfig(plans);
+}
+
 export function resetPricingPlansConfig(): PricingPlansConfig {
   if (typeof window !== 'undefined') {
     window.localStorage.removeItem(STORAGE_KEY);
   }
   return readPricingPlansConfig();
+}
+
+export function resetMembershipPlansToDefaults(): PricingPlansConfig {
+  return resetPricingPlansConfig();
 }
 
 export function getActivePricingPlans(group?: PricingPlanGroup): PricingPlanRecord[] {

@@ -95,14 +95,13 @@ function buildEntries(): PricingEntry[] {
       stripeUrl: plan.stripeUrl || null,
       recommendedGroup: plan.group,
       status: plan.stripeUrl ? 'dynamic' : 'missing_stripe',
-      notes: 'Default plan seed — admin overrides via Payment Links tab (localStorage).',
+      notes: 'Default plan seed — admin overrides via Commerce > Membership Plans (localStorage).',
     });
   }
 
   const externalLinks = readSource('src/config/externalLinks.ts');
   const productLinks = [
     { key: 'limitedEdition', label: 'Limited Edition Pre-order' },
-    { key: 'hardcoverBundle', label: 'Hardcover Bundle' },
     { key: 'paperback', label: 'Paperback' },
     { key: 'b4Plush', label: 'B-4 Plush' },
     { key: 'tShirt', label: 'T-Shirt' },
@@ -116,9 +115,19 @@ function buildEntries(): PricingEntry[] {
       stripeUrl: match?.[1] ?? null,
       recommendedGroup: 'product_shop',
       status: 'hardcoded',
-      notes: 'Shop / product preorder links — not part of portal upgrade pricing config.',
+      notes: 'Shop / product preorder links — not part of the Hardcover Bundle commerce_products setting.',
     });
   }
+
+  entries.push({
+    location: 'public.commerce_products',
+    label: 'Hardcover Bundle',
+    price: 'commerce_products.display_price_cents',
+    stripeUrl: null,
+    recommendedGroup: 'product_shop',
+    status: 'dynamic',
+    notes: 'Admin-managed via Commerce > Products; runtime does not use productLinks.hardcoverBundle.',
+  });
 
   const personaSource = readSource('src/config/personaPages.ts');
   const personaStripeHits = [...personaSource.matchAll(/title:\s*'([^']+)'[\s\S]*?href:\s*'(https:\/\/buy\.stripe\.com\/[^']+)'/g)];
@@ -188,9 +197,9 @@ function buildQaChecklist(): AuditReport['qaChecklist'] {
 
   return [
     {
-      item: 'Admin Payment Links tab',
-      pass: ADMIN_PORTAL_TABS.some((tab) => tab.id === 'pricing-plans'),
-      detail: 'Admin portal exposes pricing-plans tab',
+      item: 'Admin Commerce tab',
+      pass: ADMIN_PORTAL_TABS.some((tab) => tab.id === 'commerce'),
+      detail: 'Admin portal exposes unified Commerce tab',
     },
     {
       item: 'Family Portal upgrade modal uses config',
@@ -253,7 +262,7 @@ function runAudit(): AuditReport {
       dynamic: entries.filter((e) => e.status === 'dynamic').length,
       hardcoded: entries.filter((e) => e.status === 'hardcoded').length,
       missingStripe: entries.filter((e) => e.status === 'missing_stripe').length,
-      adminTabConfigured: qaChecklist.find((c) => c.item === 'Admin Payment Links tab')?.pass ?? false,
+      adminTabConfigured: qaChecklist.find((c) => c.item === 'Admin Commerce tab')?.pass ?? false,
       familyModalDynamic: qaChecklist.find((c) => c.item === 'Family Portal upgrade modal uses config')?.pass ?? false,
       facilitatorModalDynamic:
         qaChecklist.find((c) => c.item === 'Facilitator upgrade modal uses config')?.pass ?? false,
@@ -298,7 +307,7 @@ function renderMarkdown(report: AuditReport): string {
     `- Dynamic (portal config): **${report.summary.dynamic}**`,
     `- Hardcoded Stripe links: **${report.summary.hardcoded}**`,
     `- Missing Stripe links in defaults: **${report.summary.missingStripe}**`,
-    `- Admin Payment Links tab: **${report.summary.adminTabConfigured ? 'yes' : 'no'}**`,
+    `- Admin Commerce tab: **${report.summary.adminTabConfigured ? 'yes' : 'no'}**`,
     `- Family modal dynamic: **${report.summary.familyModalDynamic ? 'yes' : 'no'}**`,
     `- Facilitator modal dynamic: **${report.summary.facilitatorModalDynamic ? 'yes' : 'no'}**`,
     '',
@@ -337,14 +346,14 @@ function renderMarkdown(report: AuditReport): string {
     '## Still hardcoded (recommended follow-up)',
     '',
     '- `src/config/personaPages.ts` — Camp Pilot / Camp Plus marketing CTAs use Stripe URLs directly.',
-    '- `src/config/externalLinks.ts` — product shop preorder links (limited edition, bundles, merch).',
+    '- `src/config/externalLinks.ts` — product shop preorder links (limited edition, paperback, merch).',
     '- Marketing persona pages for Families, Teachers, and Schools use contact CTAs or inline prices not yet wired to admin config.',
     '',
     '## Missing Stripe links (defaults)',
     '',
     ...report.defaultPlans
       .filter((plan) => !plan.stripeConfigured)
-      .map((plan) => `- **${plan.planName}** (${plan.group}) — configure in Admin → Payment Links`),
+      .map((plan) => `- **${plan.planName}** (${plan.group}) — configure in Admin → Commerce → Membership Plans`),
     '',
     '## QA checklist',
     '',
@@ -354,7 +363,7 @@ function renderMarkdown(report: AuditReport): string {
     '',
     '## Admin configuration',
     '',
-    'Edit plans at **Admin Portal → Payment Links** (`?tab=pricing-plans`).',
+    'Edit plans at **Admin Portal → Commerce → Membership Plans** (`/admin/commerce?tab=memberships`).',
     'Changes persist in browser localStorage (`cc-pricing-plans-config`) and broadcast via `cc-pricing-plans-updated`.',
     '',
   ];
