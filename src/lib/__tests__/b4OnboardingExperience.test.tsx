@@ -5,15 +5,17 @@ import B4UnitOnboardingModal from '../../components/b4/B4UnitOnboardingModal';
 const mockSave = jest.fn().mockResolvedValue('fusion');
 let mockSelectionRequired = true;
 let mockLoading = false;
+let mockError: string | null = null;
+const mockRefresh = jest.fn();
 
 jest.mock('../../hooks/useB4Variant', () => ({
   useB4Variant: () => ({
     variant: 'courage',
     selectionRequired: mockSelectionRequired,
     loading: mockLoading,
-    error: null,
+    error: mockError,
     save: mockSave,
-    refresh: jest.fn(),
+    refresh: mockRefresh,
   }),
 }));
 
@@ -21,7 +23,9 @@ describe('first-time B-4 onboarding', () => {
   beforeEach(() => {
     mockSelectionRequired = true;
     mockLoading = false;
+    mockError = null;
     mockSave.mockClear();
+    mockRefresh.mockClear();
   });
 
   test('shows only for an unconfirmed preference and saves the chosen canonical variant', async () => {
@@ -54,5 +58,12 @@ describe('first-time B-4 onboarding', () => {
     render(<B4UnitOnboardingModal participantId="child-1" enforce />);
     expect(screen.getByRole('status')).toHaveTextContent('Loading your B-4 companion');
     expect(screen.queryByRole('dialog', { name: 'Select Your B-4 Unit' })).not.toBeInTheDocument();
+  });
+
+  test('Try Again reruns the failed preference request', () => {
+    mockError = 'temporary failure';
+    render(<B4UnitOnboardingModal participantId="child-1" enforce />);
+    fireEvent.click(screen.getByRole('button', { name: 'Try Again' }));
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
   });
 });

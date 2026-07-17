@@ -5,6 +5,9 @@ import {
   familyCompatibilityHeaders,
   hasFamilyCompatibilitySession,
 } from './familyPortalChildrenApi';
+import { readActivePilotProgram } from '../config/activePilotProgram';
+import { readActiveAccessCode, readActivePortalRole } from '../config/portalContext';
+import { readLocalKidPlaySessionId } from './kidPlaySessionService';
 
 export const B4_VARIANT_UPDATED_EVENT = 'b4:variant-updated';
 
@@ -13,32 +16,71 @@ export type B4Preference = {
   selectionRequired: boolean;
 };
 
+const inFlightLoads = new Map<string, Promise<B4Preference>>();
+
+function campKidCompatibilityHeaders(): Record<string, string> {
+  const program = readActivePilotProgram();
+  const accessCode = readActiveAccessCode();
+  const sessionId = readLocalKidPlaySessionId();
+  if (
+    readActivePortalRole() !== 'facilitator' ||
+    !program?.programCode?.trim() ||
+    !accessCode?.trim() ||
+    !sessionId?.trim()
+  ) {
+    return {};
+  }
+  return {
+    'X-Camp-Program-Code': program.programCode.trim(),
+    'X-Camp-Access-Code': accessCode.trim(),
+    'X-Kid-Session-Id': sessionId.trim(),
+  };
+}
+
 async function request(participantId: string, init?: RequestInit): Promise<B4Preference> {
   const token = supabase ? (await supabase.auth.getSession()).data.session?.access_token : null;
-  const compatibilityHeaders = !token && hasFamilyCompatibilitySession()
+  const familyHeaders = hasFamilyCompatibilitySession()
     ? familyCompatibilityHeaders()
     : {};
-  if (!token && !Object.keys(compatibilityHeaders).length) {
+  const campHeaders = campKidCompatibilityHeaders();
+  if (!token && !Object.keys(familyHeaders).length && !Object.keys(campHeaders).length) {
     throw new Error('Sign in or reopen your family session to manage this B-4 choice.');
   }
   const response = await fetch(`/.netlify/functions/portal-b4-variant?participantId=${encodeURIComponent(participantId)}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : compatibilityHeaders),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...familyHeaders,
+      ...campHeaders,
       ...init?.headers,
     },
   });
-  if (!response.ok) throw new Error(response.status === 403 ? 'This participant is not available to this account.' : 'B-4 preference could not be loaded.');
-  const body = await response.json();
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(response.status === 403 ? 'This participant is not available to this account.' : 'B-4 preference could not be loaded.') as Error & { status?: number; correlationId?: string | null };
+    error.status = response.status;
+    error.correlationId = response.headers.get('X-Correlation-Id') || body?.correlationId || null;
+    throw error;
+  }
+  if (!body || !['saved', 'onboarding_required'].includes(body.state)) {
+    throw new Error('B-4 preference response was invalid.');
+  }
   return {
     variant: normalizeB4Variant(body.variant),
-    selectionRequired: Boolean(body.selectionRequired),
+    selectionRequired: body.state === 'onboarding_required',
   };
 }
 
 export function loadB4Variant(participantId: string): Promise<B4Preference> {
-  return request(participantId);
+  const id = participantId.trim();
+  const existing = inFlightLoads.get(id);
+  if (existing) return existing;
+  const pending = request(id).finally(() => {
+    if (inFlightLoads.get(id) === pending) inFlightLoads.delete(id);
+  });
+  inFlightLoads.set(id, pending);
+  return pending;
 }
 
 export async function saveB4Variant(participantId: string, variant: B4VariantKey): Promise<B4VariantKey> {
@@ -47,3 +89,5 @@ export async function saveB4Variant(participantId: string, variant: B4VariantKey
   notifyChildProfileUpdated();
   return saved.variant;
 }
+
+export const _test = { campKidCompatibilityHeaders, inFlightLoads };

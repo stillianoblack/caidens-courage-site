@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizeB4Variant, type B4VariantKey } from '../data/b4/variantManifest';
 import { B4_VARIANT_UPDATED_EVENT, loadB4Variant, saveB4Variant } from '../lib/b4VariantService';
 
@@ -8,22 +8,38 @@ export function useB4Variant(participantId?: string | null) {
   const [loading, setLoading] = useState(Boolean(participantId));
   const [loadedParticipantId, setLoadedParticipantId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const requestSequenceRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestSequence = ++requestSequenceRef.current;
     const id = participantId?.trim();
     if (!id) { setVariant('courage'); setSelectionRequired(false); setLoading(false); setLoadedParticipantId(null); return; }
+    setError(null);
     setLoading(true);
     try {
       const preference = await loadB4Variant(id);
+      if (requestSequence !== requestSequenceRef.current) return;
       setVariant(preference.variant);
       setSelectionRequired(preference.selectionRequired);
       setError(null);
     }
-    catch (caught) { setError(caught instanceof Error ? caught.message : 'B-4 preference could not be loaded.'); }
-    finally { setLoadedParticipantId(id); setLoading(false); }
+    catch (caught) {
+      if (requestSequence === requestSequenceRef.current) {
+        setError(caught instanceof Error ? caught.message : 'B-4 preference could not be loaded.');
+      }
+    }
+    finally {
+      if (requestSequence === requestSequenceRef.current) {
+        setLoadedParticipantId(id);
+        setLoading(false);
+      }
+    }
   }, [participantId]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+    return () => { requestSequenceRef.current += 1; };
+  }, [refresh]);
   useEffect(() => {
     const onUpdated = (event: Event) => {
       const detail = (event as CustomEvent<{ participantId: string; variant: string; selectionRequired?: boolean }>).detail;

@@ -33,7 +33,7 @@ export default function B4UnitOnboardingModal({
       <div className="b4OnboardingBackdrop" role="presentation">
         <div className="b4OnboardingLoading" role="alert">
           <p>We couldn’t load your B-4 choice yet.</p>
-          <button type="button" onClick={() => void refresh()}>
+          <button type="button" disabled={loading} onClick={() => void refresh()}>
             Try Again
           </button>
         </div>
