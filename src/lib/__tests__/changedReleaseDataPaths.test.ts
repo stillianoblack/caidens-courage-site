@@ -40,6 +40,7 @@ describe('changed narrow-release data-path safety', () => {
     const flight = read('src/games/b4-focus-flight/B4FocusFlightPage.tsx');
     expect(flight).toContain('getParticipantB4FlightStorageKey');
     expect(flight).toContain('participantId');
+    expect(flight).toContain('kidPlayShellNavigate(navigate, exitPath)');
     expect(flight).not.toContain('.from(');
   });
 });

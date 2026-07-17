@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { B4_AVATAR_SRC } from '../../data/b4/avatar';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 import type { FocusFlameJourneyStep } from '../../hooks/useFocusFlameJourneyOnboarding';
 import FamilyChildGoalsChecklist from './FamilyChildGoalsChecklist';
 import FocusFlameProfileReadyCard from './FocusFlameProfileReadyCard';
@@ -189,7 +189,11 @@ export default function FocusFlameJourneyOnboarding({
   return (
     <section className={moduleClass} aria-labelledby="ffj-module-title">
       <div className="ffj-moduleHeader">
-        <img className="ffj-b4Avatar" src={B4_AVATAR_SRC} alt="" decoding="async" />
+        <B4CircleAvatar
+          className="ffj-b4Avatar"
+          variant={activeParticipantRecord?.b4_variant_key ?? 'courage'}
+          size="medium"
+        />
         <div className="ffj-moduleHeaderText">
           <p className="ffj-eyebrow">Parent/Guardian Onboarding</p>
           <h2 id="ffj-module-title" className="ffj-title">

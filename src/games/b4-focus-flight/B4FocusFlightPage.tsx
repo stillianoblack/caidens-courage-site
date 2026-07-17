@@ -10,6 +10,7 @@ import './b4-focus-flight.css';
 import { useActiveParticipant } from '../../hooks/useActiveParticipant';
 import { useB4Variant } from '../../hooks/useB4Variant';
 import { getB4Asset } from '../../data/b4/variantManifest';
+import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 
 const BEST_SCORE_KEY = 'b4-focus-flight:best-score';
 const LEVEL_1_COMPLETE_KEY = 'b4-focus-flight:level-1-complete';
@@ -53,7 +54,7 @@ const B4FocusFlightPage: React.FC = () => {
 
   const returnToPortal = useCallback(() => {
     playB4ButtonSound();
-    navigate(exitPath);
+    kidPlayShellNavigate(navigate, exitPath);
   }, [exitPath, navigate]);
 
   const handleResult = useCallback((result: B4FocusFlightResult) => {

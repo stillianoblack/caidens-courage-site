@@ -60,6 +60,29 @@ describe('B-4 variant manifest', () => {
       expect(source).toMatch(/getB4Asset|B4VariantSelector|getB4TextureKey/);
     }
   });
+
+  it('uses the shared centered B-4 avatar for family journey onboarding', () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/family-portal/FocusFlameJourneyOnboarding.tsx'),
+      'utf8',
+    );
+    const css = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/family-portal/family-dashboard.css'),
+      'utf8',
+    );
+
+    expect(source).toContain("import B4CircleAvatar from '../b4/B4CircleAvatar'");
+    expect(source).toMatch(
+      /<B4CircleAvatar[\s\S]*variant=\{activeParticipantRecord\?\.b4_variant_key \?\? 'courage'\}/,
+    );
+    expect(source).not.toContain('B4_AVATAR_SRC');
+    expect(css).toMatch(
+      /\.ffj-b4Avatar \.b4CircleAvatar__image[\s\S]*object-fit:\s*contain/,
+    );
+    expect(css).toMatch(
+      /\.ffj-b4Avatar \.b4CircleAvatar__image[\s\S]*object-position:\s*center/,
+    );
+  });
 });
 
 describe('B-4 onboarding migration safety', () => {
