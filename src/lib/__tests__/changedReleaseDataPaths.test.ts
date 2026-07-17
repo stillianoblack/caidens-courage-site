@@ -6,10 +6,24 @@ const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), '
 describe('changed narrow-release data-path safety', () => {
   test('independent family browser clients use validated Netlify functions', () => {
     expect(read('src/lib/pilotProgramService.ts')).toContain("fetch('/.netlify/functions/pilot-family-signup'");
+    expect(read('src/lib/portalProgramAccessApi.ts')).toContain('/.netlify/functions/portal-program-access');
     expect(read('src/lib/familyPortalChildrenApi.ts')).toContain("fetch('/.netlify/functions/family-portal-children'");
     expect(read('src/lib/familyChildSessionApi.ts')).toContain('/.netlify/functions/family-child-session');
     expect(read('src/lib/familyChildProgressApi.ts')).toContain('/.netlify/functions/family-child-progress');
     expect(read('src/lib/b4VariantService.ts')).toContain('/.netlify/functions/portal-b4-variant');
+  });
+
+  test('initial portal program resolution has no protected browser-table fallback', () => {
+    const programService = read('src/lib/pilotProgramService.ts');
+    const lookupStart = programService.indexOf('export async function lookupPilotProgramByAccessCodeDetailed');
+    const lookupEnd = programService.indexOf('export type PilotProgramRecoveryResult');
+    expect(programService.slice(lookupStart, lookupEnd)).toContain('fetchPortalProgramAccess');
+    expect(programService.slice(lookupStart, lookupEnd)).not.toContain(".from('pilot_programs')");
+
+    const portalResolve = read('src/lib/portalAccessResolve.ts');
+    expect(portalResolve).not.toContain('supabaseClient');
+    expect(portalResolve).not.toContain(".from('pilot_programs')");
+    expect(portalResolve).not.toContain('lookupStudentByFamilyClaimCode');
   });
 
   test('family B-4 status and progress failures do not fall through to protected browser reads', () => {

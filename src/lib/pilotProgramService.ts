@@ -26,6 +26,11 @@ import {
 } from './portalCodeIdentity';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import {
+  fetchPortalProgramAccess,
+  type PortalProgramAccessClaimContext,
+  type PortalProgramAccessIntent,
+} from './portalProgramAccessApi';
 
 export type PilotProgramLookupResult = {
   role: 'facilitator' | 'family';
@@ -40,59 +45,18 @@ function quotePostgrestValue(value: string): string {
   return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
-function resolveRoleFromCode(record: PilotProgramRecord, normalized: string): 'facilitator' | 'family' | null {
-  const family = normalizePilotAccessCode(record.family_access_code);
-  const program = normalizePilotAccessCode(record.program_code);
-
-  if (isIndependentFamilyType(record.program_type)) {
-    if (normalized === family || normalized === program) return 'family';
-    return null;
-  }
-
-  const facilitator = hasFacilitatorAccessCode(record.facilitator_access_code)
-    ? normalizePilotAccessCode(record.facilitator_access_code!)
-    : '';
-  if (normalized === family) return 'family';
-  if ((facilitator && normalized === facilitator) || normalized === program) return 'facilitator';
-  return null;
-}
-
-export type PilotProgramLookupStatus = 'found' | 'not_found' | 'unavailable' | 'error';
+export type PilotProgramLookupStatus =
+  | 'found'
+  | 'not_found'
+  | 'invalid_credential'
+  | 'unavailable'
+  | 'error';
 
 export type PilotProgramLookupResponse = {
   status: PilotProgramLookupStatus;
   result: PilotProgramLookupResult | null;
+  claimCodeContext?: PortalProgramAccessClaimContext;
 };
-
-type ProgramCodeAliasLookup = {
-  programCode: string;
-  role: 'facilitator' | 'family';
-};
-
-function resolveRoleFromAliasType(aliasType?: string | null): 'facilitator' | 'family' {
-  const normalized = aliasType?.trim().toLowerCase() ?? '';
-  if (normalized.includes('family')) return 'family';
-  return 'facilitator';
-}
-
-async function lookupCanonicalProgramCodeByAlias(normalizedAlias: string): Promise<ProgramCodeAliasLookup | null> {
-  if (!supabase) return null;
-
-  try {
-    const { data, error } = await supabase
-      .from('program_code_aliases')
-      .select('program_code, alias_type')
-      .eq('alias_code', normalizedAlias)
-      .maybeSingle();
-    if (error || !data) return null;
-    const row = data as { program_code?: string; alias_type?: string | null };
-    const programCode = String(row.program_code || '').trim();
-    if (!programCode) return null;
-    return { programCode, role: resolveRoleFromAliasType(row.alias_type) };
-  } catch {
-    return null;
-  }
-}
 
 export async function lookupPilotProgramByAccessCode(
   rawCode: string,
@@ -104,76 +68,23 @@ export async function lookupPilotProgramByAccessCode(
 /** Supabase-only lookup — never falls back to browser-stored programs. */
 export async function lookupPilotProgramByAccessCodeDetailed(
   rawCode: string,
+  options: { intent?: PortalProgramAccessIntent; credential?: string } = {},
 ): Promise<PilotProgramLookupResponse> {
   const normalized = normalizePilotAccessCode(rawCode);
   if (!normalized) return { status: 'not_found', result: null };
-
-  if (!isSupabaseConfigured() || !supabase) {
-    return { status: 'unavailable', result: null };
-  }
-
-  const quoted = quotePostgrestValue(normalized);
-
-  try {
-    const { data, error } = await supabase
-      .from('pilot_programs')
-      .select('*')
-      .or(
-        `family_access_code.eq.${quoted},facilitator_access_code.eq.${quoted},program_code.eq.${quoted}`,
-      )
-      .eq('pilot_status', 'active')
-      .limit(5);
-
-    if (error) {
-      const response = { status: 'error' as const, result: null };
-      logProgramCodeLookup(rawCode, response);
-      return response;
-    }
-
-    if (!data?.length) {
-      const aliasLookup = await lookupCanonicalProgramCodeByAlias(normalized);
-      if (aliasLookup && aliasLookup.programCode !== normalized) {
-        const { data: aliasData, error: aliasError } = await supabase
-          .from('pilot_programs')
-          .select('*')
-          .eq('program_code', aliasLookup.programCode)
-          .eq('pilot_status', 'active')
-          .limit(1);
-        const aliasRow = (aliasData ?? [])[0] as PilotProgramRecord | undefined;
-        if (!aliasError && aliasRow) {
-          const response = {
-            status: 'found' as const,
-            result: { role: aliasLookup.role, program: recordToActivePilotProgram(aliasRow) },
-          };
-          logProgramCodeLookup(rawCode, response);
-          return response;
+  const lookup = await fetchPortalProgramAccess({
+    accessCode: normalized,
+    intent: options.intent,
+    credential: options.credential,
+  });
+  const response: PilotProgramLookupResponse =
+    lookup.status === 'found'
+      ? {
+          status: 'found',
+          result: { role: lookup.role, program: lookup.program },
+          ...(lookup.claimCodeContext ? { claimCodeContext: lookup.claimCodeContext } : {}),
         }
-      }
-
-      const response = { status: 'not_found' as const, result: null };
-      logProgramCodeLookup(rawCode, response);
-      return response;
-    }
-
-    for (const row of data as PilotProgramRecord[]) {
-      const role = resolveRoleFromCode(row, normalized);
-      if (role) {
-        const response = {
-          status: 'found' as const,
-          result: { role, program: recordToActivePilotProgram(row) },
-        };
-        logProgramCodeLookup(rawCode, response);
-        return response;
-      }
-    }
-  } catch (err) {
-    console.warn('[pilot_programs] lookup error:', err);
-    const response = { status: 'error' as const, result: null };
-    logProgramCodeLookup(rawCode, response);
-    return response;
-  }
-
-  const response = { status: 'not_found' as const, result: null };
+      : { status: lookup.status, result: null };
   logProgramCodeLookup(rawCode, response);
   return response;
 }

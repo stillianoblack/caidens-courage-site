@@ -42,7 +42,6 @@ import {
 import { logPortalRedirect, portalDebug } from '../lib/portalDebug';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import { resetPortalScroll } from '../lib/portalScroll';
-import { isSupabaseConfigReady } from '../lib/supabaseClient';
 import { FetchTimeoutError, withTimeout } from '../lib/fetchWithTimeout';
 import { verifyStudentPinLoginWithProgramFallback } from '../lib/studentPinProgramScope';
 import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
@@ -189,7 +188,7 @@ export function usePortalUnlock(
 
       const isProgramShaped = looksLikeProgramAccessCode(trimmedCode);
 
-      if (isSupabaseConfigReady()) {
+      {
         setSubmitting(true);
         portalDebug('portal load step', {
           step: 'program_lookup_start',
@@ -199,7 +198,10 @@ export function usePortalUnlock(
         let lookup: Awaited<ReturnType<typeof lookupPortalProgramByAccessCodeDetailed>>;
         try {
           lookup = await withTimeout(
-            lookupPortalProgramByAccessCodeDetailed(trimmedCode),
+            lookupPortalProgramByAccessCodeDetailed(trimmedCode, {
+              intent: portalIntent,
+              credential: parentEmail.trim(),
+            }),
             PORTAL_LOGIN_TIMEOUT_MS,
             'portal_program_lookup',
           );
@@ -221,6 +223,12 @@ export function usePortalUnlock(
           program_code: lookup.result?.program.programCode ?? null,
           has_claim_context: Boolean(lookup.claimCodeContext),
         });
+
+        if (lookup.status === 'invalid_credential') {
+          setError(PORTAL_EMAIL_NOT_CONNECTED_MESSAGE);
+          setSubmitting(false);
+          return;
+        }
 
         if (lookup.status === 'found' && lookup.result) {
           const { program, role } = lookup.result;
@@ -565,9 +573,6 @@ export function usePortalUnlock(
           setError(PORTAL_CODE_NOT_FOUND_MESSAGE);
           return;
         }
-      } else if (isProgramShaped) {
-        setError(PORTAL_CONNECTION_ERROR_MESSAGE);
-        return;
       }
 
       if (isProgramShaped) {
