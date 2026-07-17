@@ -72,7 +72,6 @@ import '../weekly-adventure-dark-center.css';
 import { useBaselineGate } from '../../../hooks/useBaselineGate';
 import {
   resolveWeeklyAdventureBaselineLocked,
-  resolveWeeklyAdventurePlayerHudGateMessage,
   resolveWeeklyAdventurePlayerHudWeekLabel,
   resolveWeeklyAdventureProgressSignal,
 } from '../../../lib/weeklyAdventureBaselineGate';
@@ -828,9 +827,6 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       focusCoinsLoading: kidPlayShell ? false : focusCoinsLoading,
       weekLabel: resolveWeeklyAdventurePlayerHudWeekLabel({
         weekNumber: heroWeekNumber,
-        baselineLocked: adventuresLocked,
-      }),
-      baselineGateMessage: resolveWeeklyAdventurePlayerHudGateMessage({
         baselineLocked: adventuresLocked,
       }),
       children: kidPlayShell ? [] : selectableChildren,

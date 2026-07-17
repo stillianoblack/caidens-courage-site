@@ -17,7 +17,7 @@ import {
 } from './week1MissionUnlock';
 
 export const BASELINE_GATE_MESSAGE =
-  'Complete your B-4 Check-In first to unlock the rest of the adventure.';
+  'Complete your B-4 Check-In to unlock your Focus Flame Journey.';
 
 export type WeeklyMissionLaunchSource =
   | 'hero-map'
