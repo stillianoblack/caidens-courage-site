@@ -5,6 +5,7 @@ export type AppVersionInfo = {
   buildTime: string;
   commit: string;
   nodeEnv: string;
+  signupContract: 'family-function-v2';
 };
 
 export const APP_VERSION: AppVersionInfo = {
@@ -16,8 +17,9 @@ export const APP_VERSION: AppVersionInfo = {
     process.env.REACT_APP_GIT_COMMIT ??
     'local',
   nodeEnv: process.env.NODE_ENV ?? 'development',
+  signupContract: 'family-function-v2',
 };
 
 export function logAppVersion(): void {
-  console.info('[APP_VERSION]', APP_VERSION);
+  console.info('[APP_VERSION]', JSON.stringify(APP_VERSION));
 }
