@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react';
 import './b4-focus-flight-unlock-modal.css';
+import { useActiveParticipant } from '../../hooks/useActiveParticipant';
+import { useB4Variant } from '../../hooks/useB4Variant';
+import { getB4Asset } from '../../data/b4/variantManifest';
 
 type B4FocusFlightUnlockModalProps = {
   open: boolean;
@@ -12,6 +15,8 @@ export default function B4FocusFlightUnlockModal({
   onPlayNow,
   onDismiss,
 }: B4FocusFlightUnlockModalProps) {
+  const { participantId } = useActiveParticipant();
+  const { variant } = useB4Variant(participantId);
   useEffect(() => {
     if (!open) return undefined;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -48,7 +53,7 @@ export default function B4FocusFlightUnlockModal({
           <span />
         </div>
         <div className="b4UnlockRobot" aria-hidden="true">
-          <img src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png" alt="" />
+          <img src={getB4Asset(variant, 'happy')} alt="" />
         </div>
         <p className="b4UnlockKicker" aria-label="New game">
           <span aria-hidden="true">✨</span> NEW GAME <span aria-hidden="true">✨</span>

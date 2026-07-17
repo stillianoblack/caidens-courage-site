@@ -150,3 +150,4 @@
     min-height: 38px;
   }
 }
+.milestoneCelebration{position:fixed;right:1rem;bottom:calc(5rem + env(safe-area-inset-bottom));z-index:80;display:grid;grid-template-columns:1fr auto;gap:.15rem .75rem;max-width:320px;padding:1rem 1.1rem;border:1px solid rgba(226,177,60,.45);border-radius:16px;background:#fff8df;color:#18335f;box-shadow:0 14px 35px rgba(20,43,78,.18);animation:milestone-in .25s ease-out}.milestoneCelebration span{grid-column:1}.milestoneCelebration button{grid-column:2;grid-row:1/3;border:0;background:transparent;font-size:1.35rem;color:inherit}@keyframes milestone-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.milestoneCelebration{animation:none}}

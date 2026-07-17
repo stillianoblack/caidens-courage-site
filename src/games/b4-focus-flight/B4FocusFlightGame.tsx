@@ -11,6 +11,7 @@ import {
   type B4FocusFlightHudState,
   type B4FocusFlightResult,
 } from './phaser/types';
+import type { B4VariantKey } from '../../data/b4/variantManifest';
 
 export interface B4FocusFlightGameHandle {
   restart: () => void;
@@ -22,10 +23,11 @@ interface B4FocusFlightGameProps {
   onHud: (hud: B4FocusFlightHudState) => void;
   onResult: (result: B4FocusFlightResult) => void;
   mobileGraphics?: boolean;
+  variant: B4VariantKey;
 }
 
 const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameProps>(
-  ({ onHud, onResult, mobileGraphics = false }, ref) => {
+  ({ onHud, onResult, mobileGraphics = false, variant }, ref) => {
     const hostRef = useRef<HTMLDivElement | null>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -40,7 +42,7 @@ const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameP
 
       let disposed = false;
       const host = hostRef.current;
-      const game = createB4FocusFlightGame(host, { mobileGraphics });
+      const game = createB4FocusFlightGame(host, { mobileGraphics, variant });
       gameRef.current = game;
 
       const handleHud = (hud: B4FocusFlightHudState) => {
@@ -61,7 +63,7 @@ const B4FocusFlightGame = forwardRef<B4FocusFlightGameHandle, B4FocusFlightGameP
         if (host) host.innerHTML = '';
         if (gameRef.current === game) gameRef.current = null;
       };
-    }, [mobileGraphics, onHud, onResult]);
+    }, [mobileGraphics, onHud, onResult, variant]);
 
     return <div ref={hostRef} className="b4ff-phaserHost" aria-label="B-4 Focus Flight game canvas" />;
   },

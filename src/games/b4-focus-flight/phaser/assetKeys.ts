@@ -2,10 +2,6 @@ export const B4_ASSET_BASE_PATH = '/images/B-4FlightGame';
 export const B4_ICON_BASE_PATH = '/images/icons';
 
 export const B4_ASSET_KEYS = {
-  idle: 'b4-asset-idle',
-  blinking: 'b4-asset-blinking',
-  happy: 'b4-asset-happy',
-  hurt: 'b4-asset-hurt',
   sparkFlame: 'b4-asset-sparkle-flame',
   anchorFlame: 'b4-asset-anchor-flame',
   emberFlame: 'b4-asset-ember-flame',
@@ -21,10 +17,6 @@ export const B4_AUDIO_KEYS = {
 } as const;
 
 export const B4_PROCESSED_ASSET_KEYS = {
-  idle: 'b4-asset-idle-clean',
-  blinking: 'b4-asset-blinking-clean',
-  happy: 'b4-asset-happy-clean',
-  hurt: 'b4-asset-hurt-clean',
   sparkFlame: 'b4-asset-sparkle-flame-clean',
   anchorFlame: 'b4-asset-anchor-flame-clean',
   emberFlame: 'b4-asset-ember-flame-clean',
@@ -33,30 +25,6 @@ export const B4_PROCESSED_ASSET_KEYS = {
 } as const;
 
 export const B4_ASSET_SOURCES = [
-  {
-    key: B4_ASSET_KEYS.idle,
-    folder: 'Idle',
-    file: 'Idle@2x-transparent.png',
-    label: 'B-4 idle',
-  },
-  {
-    key: B4_ASSET_KEYS.blinking,
-    folder: 'Blinking',
-    file: 'Blinking@2x.png',
-    label: 'B-4 blinking',
-  },
-  {
-    key: B4_ASSET_KEYS.happy,
-    folder: 'Happy',
-    file: 'Happy@2x.png',
-    label: 'B-4 happy',
-  },
-  {
-    key: B4_ASSET_KEYS.hurt,
-    folder: 'Hurt',
-    file: 'Hurt@2x.png',
-    label: 'B-4 hurt',
-  },
   {
     key: B4_ASSET_KEYS.sparkFlame,
     folder: 'FocusFlameIcon',

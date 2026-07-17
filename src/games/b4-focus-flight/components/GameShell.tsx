@@ -7,6 +7,7 @@ import {
 import { playB4ButtonSound } from '../uiAudio';
 import GameHud from './GameHud';
 import GameResults from './GameResults';
+import { getB4Asset, type B4VariantKey } from '../../../data/b4/variantManifest';
 
 const initialHud: B4FocusFlightHudState = {
   score: 0,
@@ -54,6 +55,7 @@ interface GameShellProps {
   onRestart: () => void;
   onExit: () => void;
   exitLabel?: string;
+  variant: B4VariantKey;
 }
 
 const GameShell: React.FC<GameShellProps> = ({
@@ -63,6 +65,7 @@ const GameShell: React.FC<GameShellProps> = ({
   onRestart,
   onExit,
   exitLabel = 'Portal',
+  variant,
 }) => {
   const gameRef = useRef<B4FocusFlightGameHandle>(null);
   const [hud, setHud] = useState(initialHud);
@@ -135,6 +138,7 @@ const GameShell: React.FC<GameShellProps> = ({
           key={missionKey}
           ref={gameRef}
           mobileGraphics={mobileGraphics}
+          variant={variant}
           onHud={setHud}
           onResult={handleResult}
         />
@@ -144,7 +148,7 @@ const GameShell: React.FC<GameShellProps> = ({
         <div className="b4ff-rotatePrompt" role="status" aria-live="polite">
           <img
             className="b4ff-rotateB4"
-            src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png"
+            src={getB4Asset(variant, 'idle')}
             alt=""
             aria-hidden="true"
           />
@@ -172,6 +176,7 @@ const GameShell: React.FC<GameShellProps> = ({
             onPlayAgain={handleRestart}
             onExit={handleExit}
             exitLabel={exitLabel === 'Portal' ? 'Return to Kid Portal' : exitLabel}
+            variant={variant}
           />
         </div>
       )}

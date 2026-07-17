@@ -6,6 +6,9 @@ import {
   type GradeLevel,
 } from '../../data/gradeLevelOptions';
 import { saveParticipantGradeLevel } from '../../lib/participantGradeService';
+import { hasFamilyCompatibilitySession } from '../../lib/familyPortalChildrenApi';
+import { saveFamilyCompatibilityChildGrade } from '../../lib/familyChildSessionApi';
+import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
 
 type B4BaselineGradeGateProps = {
   participantId: string;
@@ -31,7 +34,15 @@ export default function B4BaselineGradeGate({
     setSaving(true);
     setError(null);
 
-    const result = await saveParticipantGradeLevel(participantId, gradeLevel);
+    const sessionId = readLocalKidPlaySessionId();
+    const result = sessionId && hasFamilyCompatibilitySession()
+      ? await saveFamilyCompatibilityChildGrade(sessionId, gradeLevel)
+          .then(() => ({ success: true as const }))
+          .catch((caught) => ({
+            success: false as const,
+            error: caught instanceof Error ? caught.message : 'Could not save grade level.',
+          }))
+      : await saveParticipantGradeLevel(participantId, gradeLevel);
     setSaving(false);
 
     if (!result.success) {

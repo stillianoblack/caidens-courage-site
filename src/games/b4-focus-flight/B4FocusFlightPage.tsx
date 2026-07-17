@@ -5,19 +5,24 @@ import type { B4FocusFlightResult } from './phaser/types';
 import { playB4ButtonSound } from './uiAudio';
 import { getKidPlayShellRoute, parseKidPlayShellPath } from '../../lib/kidPlayShellRoutes';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
-import { markB4FocusFlightPlayed } from '../../lib/b4FocusFlightUnlock';
+import { getParticipantB4FlightStorageKey, markB4FocusFlightPlayed } from '../../lib/b4FocusFlightUnlock';
 import './b4-focus-flight.css';
+import { useActiveParticipant } from '../../hooks/useActiveParticipant';
+import { useB4Variant } from '../../hooks/useB4Variant';
+import { getB4Asset } from '../../data/b4/variantManifest';
 
 const BEST_SCORE_KEY = 'b4-focus-flight:best-score';
 const LEVEL_1_COMPLETE_KEY = 'b4-focus-flight:level-1-complete';
 
-const readBestScore = (): number => {
+const readBestScore = (participantId?: string | null): number => {
   if (typeof window === 'undefined') return 0;
-  const stored = window.localStorage.getItem(BEST_SCORE_KEY);
+  const stored = window.localStorage.getItem(getParticipantB4FlightStorageKey(BEST_SCORE_KEY, participantId));
   return stored ? Number.parseInt(stored, 10) || 0 : 0;
 };
 
 const B4FocusFlightPage: React.FC = () => {
+  const { participantId } = useActiveParticipant();
+  const { variant } = useB4Variant(participantId);
   const navigate = useNavigate();
   const location = useLocation();
   const [started, setStarted] = useState(false);
@@ -26,8 +31,9 @@ const B4FocusFlightPage: React.FC = () => {
   const [bestScore, setBestScore] = useState(0);
 
   useEffect(() => {
-    setBestScore(readBestScore());
-  }, []);
+    setBestScore(readBestScore(participantId));
+    setStarted(false);
+  }, [participantId]);
 
   const arcadeContext = parseKidPlayShellPath(location.pathname);
   const isArcadeLaunch = Boolean(arcadeContext && location.pathname.includes('/arcade/'));
@@ -54,24 +60,24 @@ const B4FocusFlightPage: React.FC = () => {
     setBestScore((previousBest) => {
       const nextBest = Math.max(previousBest, result.score);
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(BEST_SCORE_KEY, String(nextBest));
+        window.localStorage.setItem(getParticipantB4FlightStorageKey(BEST_SCORE_KEY, participantId), String(nextBest));
         if (result.objectiveComplete) {
-          window.localStorage.setItem(LEVEL_1_COMPLETE_KEY, 'true');
+          window.localStorage.setItem(getParticipantB4FlightStorageKey(LEVEL_1_COMPLETE_KEY, participantId), 'true');
         }
       }
-      markB4FocusFlightPlayed();
+      markB4FocusFlightPlayed(participantId);
 
       // TODO(progress): Replace localStorage with kid progress when Week 1 completion,
       // Level 2 unlocks, and Dragon Flight after Week 3 are backed by the real profile store.
       return nextBest;
     });
-  }, []);
+  }, [participantId]);
 
   const restartMission = useCallback(() => {
-    markB4FocusFlightPlayed();
+    markB4FocusFlightPlayed(participantId);
     setMissionKey((key) => key + 1);
     setStarted(true);
-  }, []);
+  }, [participantId]);
 
   const pageClassName = [
     'b4ff-page',
@@ -86,7 +92,7 @@ const B4FocusFlightPage: React.FC = () => {
         {!started ? (
           <div className="b4ff-landing">
             <div className="b4ff-robotBadge" aria-hidden="true">
-              <img src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png" alt="" />
+              <img src={getB4Asset(variant, 'idle')} alt="" />
             </div>
             <p className="b4ff-kicker">Courage in the Dark Arcade</p>
             <h1>B-4 Focus Flight</h1>
@@ -102,7 +108,7 @@ const B4FocusFlightPage: React.FC = () => {
                 className="b4ff-primaryButton"
                 onClick={() => {
                   playB4ButtonSound();
-                  markB4FocusFlightPlayed();
+                  markB4FocusFlightPlayed(participantId);
                   setStarted(true);
                 }}
               >
@@ -131,6 +137,7 @@ const B4FocusFlightPage: React.FC = () => {
             onRestart={restartMission}
             onExit={returnToPortal}
             exitLabel={exitLabel}
+            variant={variant}
           />
         )}
       </section>
