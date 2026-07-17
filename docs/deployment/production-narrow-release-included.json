@@ -44,6 +44,10 @@
       "path": "netlify/functions/portal-b4-variant.js"
     },
     {
+      "status": "A",
+      "path": "netlify/functions/portal-program-access.js"
+    },
+    {
       "status": "??",
       "path": "public/assets/b4/anchor/blinking/b4-anchor-blinking.png"
     },
@@ -160,6 +164,14 @@
       "path": "src/components/caiden/CaidenQuestFlow.tsx"
     },
     {
+      "status": "A",
+      "path": "src/components/courage-in-the-dark/courage-adventure-hub.css"
+    },
+    {
+      "status": "A",
+      "path": "src/components/courage-in-the-dark/CourageInTheDarkAdventureHub.tsx"
+    },
+    {
       "status": "M",
       "path": "src/components/family-portal/family-dashboard.css"
     },
@@ -182,6 +194,10 @@
     {
       "status": "M",
       "path": "src/components/family-portal/FamilyMissionCoachPanel.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/components/family-portal/FocusFlameJourneyOnboarding.tsx"
     },
     {
       "status": "M",
@@ -360,6 +376,10 @@
       "path": "src/hooks/useB4Variant.ts"
     },
     {
+      "status": "A",
+      "path": "src/hooks/usePortalUnlock.ts"
+    },
+    {
       "status": "M",
       "path": "src/hooks/useQuestionInteraction.ts"
     },
@@ -432,8 +452,24 @@
       "path": "src/lib/__tests__/pilotFamilySignupEndpoint.test.ts"
     },
     {
+      "status": "A",
+      "path": "src/lib/__tests__/portalAcceptancePolish.test.ts"
+    },
+    {
       "status": "??",
       "path": "src/lib/__tests__/portalB4VariantEndpoint.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/portalProgramAccessApi.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/portalProgramAccessEndpoint.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/weeklyAdventureLockGuidanceLayout.test.ts"
     },
     {
       "status": "M",
@@ -512,6 +548,10 @@
       "path": "src/lib/launchFamilyKidPlay.ts"
     },
     {
+      "status": "A",
+      "path": "src/lib/launchWeeklyMission.ts"
+    },
+    {
       "status": "M",
       "path": "src/lib/participantGradeService.ts"
     },
@@ -522,6 +562,14 @@
     {
       "status": "M",
       "path": "src/lib/pilotTrackingService.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/portalAccessResolve.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/portalProgramAccessApi.ts"
     },
     {
       "status": "M",
