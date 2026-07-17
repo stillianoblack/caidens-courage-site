@@ -13,22 +13,15 @@ import { countAvailableB4Missions } from './b4';
 import { countAvailableZekeMissions } from './zeke';
 import { CAIDEN_QUEST_RANK } from './caiden/missionBoardData';
 import type { CharacterProfileId } from './characterProfiles';
+import type { FamilySidebarNavId } from './familyPortalNavMetadata';
+
+export { FAMILY_NAV_TITLE } from './familyPortalNavMetadata';
+export type { FamilySidebarNavId } from './familyPortalNavMetadata';
 
 export const FAMILY_PORTAL_BRAND = 'Family Portal';
 export const FAMILY_PORTAL_SUBBRAND = 'FOCUS FLAME ACADEMY';
 export const FAMILY_PORTAL_TAG = 'Family Portal Access';
 export const FAMILY_PORTAL_TITLE = 'Family Portal';
-
-export type FamilySidebarNavId =
-  | 'overview'
-  | 'results'
-  | 'continue-learning'
-  | 'character-hub'
-  | 'inventory'
-  | 'downloads'
-  | 'gallery'
-  | 'certificates'
-  | 'guide';
 
 export type FamilySidebarNavItem = {
   id: FamilySidebarNavId;
@@ -110,18 +103,6 @@ export const FAMILY_PARENT_RESOURCE_CATEGORIES: Array<{
   { id: 'reflection-journals', label: 'Reflection Prompts', activityCategory: 'reflection-journals' },
   { id: 'b4-reset-tools', label: 'Calm-Down Tools', activityCategory: 'b4-reset-tools' },
 ];
-
-export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
-  overview: 'Home',
-  results: 'Results',
-  'continue-learning': 'Weekly Adventures',
-  'character-hub': 'Character Hub',
-  inventory: 'Collections',
-  downloads: 'Parent Resources',
-  gallery: 'Gallery',
-  certificates: 'Certificates',
-  guide: 'Parent Corner',
-};
 
 export const FAMILY_OVERVIEW_KPIS = [
   { label: 'Current Week', value: 'Week 1' },

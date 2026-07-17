@@ -1366,6 +1366,8 @@ export type StudentParticipantRecord = {
   grade_level?: string | null;
   grade_band?: string | null;
   allow_stretch_level?: boolean | null;
+  b4_variant_key?: string | null;
+  b4_variant_selected_at?: string | null;
 };
 
 const STUDENT_PARTICIPANT_SELECT_MINIMAL =
@@ -1377,6 +1379,9 @@ const STUDENT_PARTICIPANT_SELECT_WITH_LAST_NAME =
 const STUDENT_PARTICIPANT_SELECT_WITH_GRADE =
   'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level';
 
+const STUDENT_PARTICIPANT_SELECT_WITH_B4_VARIANT =
+  `${STUDENT_PARTICIPANT_SELECT_WITH_GRADE}, b4_variant_key, b4_variant_selected_at`;
+
 function isMissingParticipantColumnError(message: string): boolean {
   return /grade_level|grade_band|allow_stretch_level|last_name|display_name|column.*does not exist|42703/i.test(
     message,
@@ -1387,6 +1392,7 @@ async function fetchStudentParticipantsWithSelectFallback(
   programCode: string,
 ): Promise<{ participants: StudentParticipantRecord[]; error?: string }> {
   const selects = [
+    STUDENT_PARTICIPANT_SELECT_WITH_B4_VARIANT,
     STUDENT_PARTICIPANT_SELECT_WITH_GRADE,
     STUDENT_PARTICIPANT_SELECT_WITH_LAST_NAME,
     STUDENT_PARTICIPANT_SELECT_MINIMAL,

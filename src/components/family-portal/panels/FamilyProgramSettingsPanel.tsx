@@ -34,8 +34,6 @@ import { markStudentFamilyLinksClaimed } from '../../../lib/studentFamilyLinkSer
 import AddChildForm from '../AddChildForm';
 import FamilyChildGradeConfig from '../FamilyChildGradeConfig';
 import FamilyChildPinAccessCard from '../FamilyChildPinAccessCard';
-import ParticipantGradeMeta from '../../shared/ParticipantGradeMeta';
-import '../../shared/participant-grade-meta.css';
 import { hasCanonicalGradeLevel } from '../../../lib/participantGradeDisplay';
 import FamilyChildGoalsChecklist from '../FamilyChildGoalsChecklist';
 import FamilyParentClaimStatus from '../FamilyParentClaimStatus';
@@ -46,6 +44,7 @@ import FamilySettingsOverviewTab from '../settings/FamilySettingsOverviewTab';
 import FamilyPushNotificationsCard from '../settings/FamilyPushNotificationsCard';
 import FamilyDisplayNameEditor from '../FamilyDisplayNameEditor';
 import { CopyableCompactValue, StatusChip } from '../../portal-design-system';
+import FamilyChildB4Control from '../FamilyChildB4Control';
 
 function SettingsRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -115,7 +114,7 @@ export default function FamilyProgramSettingsPanel() {
   const [pricingOpen, setPricingOpen] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const addChildRef = useRef<HTMLDivElement | null>(null);
-  const gradeFocusRef = useRef<HTMLDivElement | null>(null);
+  const gradeFocusRef = useRef<HTMLUListElement | null>(null);
   const gradeFocusScrolledRef = useRef(false);
   const studentAccessFocusRef = useRef<HTMLElement | null>(null);
   const studentAccessFocusScrolledRef = useRef(false);
@@ -396,39 +395,11 @@ export default function FamilyProgramSettingsPanel() {
               </p>
             ) : null}
             {children.length > 0 ? (
-              <>
-                <div
+                <ul
                   ref={gradeFocusRef}
                   id="family-child-grade-focus"
-                  className="family-settingsGradeSection"
+                  className="family-settingsChildList"
                 >
-                  <h3 className="family-settingsSubheading">Grade Level</h3>
-                  <p className="family-panelHelper">
-                    Select a grade for each child. B-4 uses this to recommend the right activities.
-                  </p>
-                  <div className="family-settingsGradeList">
-                    {children.map((child) => {
-                      if (!child.participantId) return null;
-                      const participant = participantById.get(child.participantId);
-                      return (
-                        <FamilyChildGradeConfig
-                          key={`grade-${child.key}`}
-                          participantId={child.participantId}
-                          displayName={child.displayName}
-                          gradeLevel={participant?.grade_level}
-                          allowStretchLevel={participant?.allow_stretch_level}
-                          highlighted={
-                            focusParam === 'grade' &&
-                            !hasCanonicalGradeLevel(participant?.grade_level)
-                          }
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <h3 className="family-settingsSubheading">Child Profiles</h3>
-                <ul className="family-settingsChildList">
                   {children.map((child) => {
                     const link = resolveChildLink(child, familyLinks);
                     const lastActivity = formatFamilyRelativeActivityDate(child.lastActivityAt);
@@ -436,35 +407,74 @@ export default function FamilyProgramSettingsPanel() {
                       ? participantById.get(child.participantId)
                       : undefined;
                     return (
-                      <li key={child.key} className="family-settingsChildItem">
+                      <li
+                        key={child.key}
+                        className={`family-settingsChildItem${
+                          activeChild?.participantId === child.participantId
+                            ? ' family-settingsChildItem--selected'
+                            : ''
+                        }`}
+                      >
                         <div className="family-settingsChildMain">
-                          <p className="family-settingsChildName">{child.displayName}</p>
-                          {child.nickname && child.nickname !== child.displayName ? (
-                            <p className="family-settingsChildMeta">Nickname: {child.nickname}</p>
+                          <div className="family-settingsChildHeader">
+                            <div>
+                              <p className="family-settingsChildName">{child.displayName}</p>
+                              {child.nickname && child.nickname !== child.displayName ? (
+                                <p className="family-settingsChildMeta">Nickname: {child.nickname}</p>
+                              ) : null}
+                            </div>
+                            {child.participantId ? (
+                              <button
+                                type="button"
+                                className="family-settingsGhostBtn"
+                                aria-pressed={activeChild?.participantId === child.participantId}
+                                onClick={() =>
+                                  selectChild({
+                                    participantId: child.participantId!,
+                                    displayName: child.displayName,
+                                  })
+                                }
+                              >
+                                {activeChild?.participantId === child.participantId
+                                  ? 'Selected Child'
+                                  : 'Select Child'}
+                              </button>
+                            ) : null}
+                          </div>
+                          {child.participantId ? (
+                            <div className="family-settingsChildGrade">
+                              <FamilyChildGradeConfig
+                                participantId={child.participantId}
+                                displayName={child.displayName}
+                                gradeLevel={participant?.grade_level}
+                                allowStretchLevel={participant?.allow_stretch_level}
+                                highlighted={
+                                  focusParam === 'grade' &&
+                                  !hasCanonicalGradeLevel(participant?.grade_level)
+                                }
+                                showDisplayName={false}
+                                onSaved={() => void refresh()}
+                              />
+                            </div>
                           ) : null}
-                          <ParticipantGradeMeta
-                            gradeLevel={participant?.grade_level}
-                            gradeBand={participant?.grade_band}
-                            allowStretch={Boolean(participant?.allow_stretch_level)}
-                            variant="family"
-                          />
-                          <p className="family-settingsChildMeta">
-                            {formatB4CheckInStatusLabel(child.b4CheckInStatus)}
-                          </p>
-                          {child.latestActivity ? (
-                            <p className="family-settingsChildMeta">Latest: {child.latestActivity}</p>
-                          ) : lastActivity ? (
-                            <p className="family-settingsChildMeta">Last activity: {lastActivity}</p>
-                          ) : null}
-                          {child.progressLabel ? (
-                            <p className="family-settingsChildMeta">Progress: {child.progressLabel}</p>
-                          ) : null}
-                          {link ? (
-                            <p className="family-settingsChildMeta">
-                              Parent/Guardian:{' '}
-                              {isParentConnectedForLink(link) ? 'Linked' : 'Parent not connected'}
-                            </p>
-                          ) : null}
+                          <dl className="family-settingsChildStatusGrid">
+                            <div>
+                              <dt>B-4 Check-In</dt>
+                              <dd>{formatB4CheckInStatusLabel(child.b4CheckInStatus)}</dd>
+                            </div>
+                            <div>
+                              <dt>Last activity</dt>
+                              <dd>{child.latestActivity || lastActivity || 'No activity yet'}</dd>
+                            </div>
+                            <div>
+                              <dt>Mission progress</dt>
+                              <dd>{child.progressLabel || 'No missions completed yet'}</dd>
+                            </div>
+                            <div>
+                              <dt>Parent/Guardian</dt>
+                              <dd>{link && isParentConnectedForLink(link) ? 'Linked' : 'Not linked'}</dd>
+                            </div>
+                          </dl>
                           {child.participantId ? (() => {
                             const pinProgramCode =
                               participant?.program_code?.trim() ||
@@ -496,26 +506,17 @@ export default function FamilyProgramSettingsPanel() {
                               />
                             );
                           })() : null}
+                          {child.participantId ? (
+                            <FamilyChildB4Control
+                              participantId={child.participantId}
+                              displayName={child.displayName}
+                            />
+                          ) : null}
                         </div>
-                        {child.participantId ? (
-                          <button
-                            type="button"
-                            className="family-settingsGhostBtn"
-                            onClick={() =>
-                              selectChild({
-                                participantId: child.participantId!,
-                                displayName: child.displayName,
-                              })
-                            }
-                          >
-                            {activeChild?.participantId === child.participantId ? 'Selected' : 'Select'}
-                          </button>
-                        ) : null}
                       </li>
                     );
                   })}
                 </ul>
-              </>
             ) : null}
             {canShowAddChild ? (
               <div className="family-settingsActions">

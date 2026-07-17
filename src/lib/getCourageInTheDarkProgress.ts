@@ -6,6 +6,10 @@ import {
   isWeekBadgeEarnedFromState,
   loadWeeklyBadgeEarnedState,
 } from './weeklyBadgeUnlock';
+import { checkBaselineCompletion } from './baselineCompletion';
+import { resolveTrackingProgramCode } from './activeProgramContext';
+import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
+import { fetchFamilyCompatibilityChildProgressSnapshot } from './familyChildProgressApi';
 
 const EMPTY_PROGRESS: CourageInTheDarkProgressSnapshot = {
   completedMissionIds: [],
@@ -20,6 +24,17 @@ function weekNumberFromId(weekId: string): number {
   if (!match) return 1;
   const week = Number.parseInt(match[1], 10);
   return Number.isFinite(week) && week > 0 ? week : 1;
+}
+
+export function mergeB4CheckInCompletion(
+  completedMissionIds: string[],
+  weekNumber: number,
+  complete: boolean,
+): string[] {
+  if (weekNumber !== 1 || !complete || completedMissionIds.includes('b4-self-check-in')) {
+    return completedMissionIds;
+  }
+  return [...completedMissionIds, 'b4-self-check-in'];
 }
 
 export async function getCourageInTheDarkProgress(
@@ -42,7 +57,33 @@ export async function getCourageInTheDarkProgress(
   const weekNumber = weekNumberFromId(weekId);
 
   try {
-    const [progressResult, walletResult, weeklyBadgeState] = await Promise.all([
+    if (hasFamilyCompatibilitySession()) {
+      const [snapshot, b4CheckInComplete] = await Promise.all([
+        fetchFamilyCompatibilityChildProgressSnapshot(participantId, weekId),
+        weekNumber === 1
+          ? checkBaselineCompletion(resolveTrackingProgramCode() ?? undefined, participantId)
+          : Promise.resolve(false),
+      ]);
+      const completedMissionIds = mergeB4CheckInCompletion(
+        snapshot.rows
+          .map((row) => row.mission_id)
+          .filter((missionId): missionId is string => typeof missionId === 'string'),
+        weekNumber,
+        b4CheckInComplete,
+      );
+      const unlockedBadges = snapshot.badges.length > 0
+        ? snapshot.badges
+        : [];
+      return {
+        completedMissionIds,
+        completedCount: completedMissionIds.length,
+        totalMissions,
+        totalCoins: snapshot.totalCoins,
+        unlockedBadges,
+      };
+    }
+
+    const [progressResult, walletResult, weeklyBadgeState, b4CheckInComplete] = await Promise.all([
       supabase
         .from('player_progress')
         .select('mission_id')
@@ -54,6 +95,9 @@ export async function getCourageInTheDarkProgress(
         .eq('participant_id', participantId)
         .maybeSingle(),
       loadWeeklyBadgeEarnedState(participantId),
+      weekNumber === 1
+        ? checkBaselineCompletion(resolveTrackingProgramCode() ?? undefined, participantId)
+        : Promise.resolve(false),
     ]);
 
     if (progressResult.error) {
@@ -63,9 +107,14 @@ export async function getCourageInTheDarkProgress(
       throw walletResult.error;
     }
 
-    const completedMissionIds = (progressResult.data ?? [])
+    let completedMissionIds = (progressResult.data ?? [])
       .map((row) => row.mission_id)
       .filter((missionId): missionId is string => typeof missionId === 'string');
+    completedMissionIds = mergeB4CheckInCompletion(
+      completedMissionIds,
+      weekNumber,
+      b4CheckInComplete,
+    );
 
     const unlockedBadges: string[] = [];
     if (isWeekBadgeEarnedFromState(weeklyBadgeState, weekNumber)) {

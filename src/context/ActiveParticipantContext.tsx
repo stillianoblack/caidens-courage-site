@@ -23,6 +23,10 @@ import type {
 } from '../types/activeParticipant';
 import { CHILD_PROFILE_UPDATED_EVENT } from '../config/activeChildParticipant';
 import { MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
+import {
+  formatGradeLevelDisplay,
+  normalizeGradeLevelStorage,
+} from '../data/gradeLevelOptions';
 
 export type ActiveParticipantContextValue = {
   roster: ActiveParticipantRosterEntry[];
@@ -235,14 +239,17 @@ export function KidPlaySessionParticipantProvider({
   participantId,
   displayName,
   firstName,
+  gradeLevel,
   children,
 }: {
   participantId: string;
   displayName: string;
   firstName?: string;
+  gradeLevel?: string | null;
   children: ReactNode;
 }) {
   const resolvedFirstName = firstName?.trim() || displayName.split(/\s+/)[0] || displayName;
+  const resolvedGradeLevel = normalizeGradeLevelStorage(gradeLevel);
 
   const roster = useMemo<ActiveParticipantRosterEntry[]>(
     () => [
@@ -250,11 +257,11 @@ export function KidPlaySessionParticipantProvider({
         participantId,
         displayName,
         firstName: resolvedFirstName,
-        gradeLevel: null,
-        gradeLabel: null,
+        gradeLevel: resolvedGradeLevel,
+        gradeLabel: resolvedGradeLevel ? formatGradeLevelDisplay(resolvedGradeLevel) : null,
       },
     ],
-    [displayName, participantId, resolvedFirstName],
+    [displayName, participantId, resolvedFirstName, resolvedGradeLevel],
   );
 
   const participant = useMemo<ActiveParticipantState>(
@@ -262,8 +269,9 @@ export function KidPlaySessionParticipantProvider({
       participantId,
       displayName,
       firstName: resolvedFirstName,
+      gradeLevel: resolvedGradeLevel,
     }),
-    [displayName, participantId, resolvedFirstName],
+    [displayName, participantId, resolvedFirstName, resolvedGradeLevel],
   );
 
   useEffect(() => {
@@ -271,9 +279,11 @@ export function KidPlaySessionParticipantProvider({
     setGameplayPlayerIdentity({
       participantId,
       displayName,
-      playerLabel: displayName,
+      playerLabel: resolvedGradeLevel
+        ? `${displayName} · ${formatGradeLevelDisplay(resolvedGradeLevel)}`
+        : displayName,
     });
-  }, [displayName, participant, participantId]);
+  }, [displayName, participant, participantId, resolvedGradeLevel]);
 
   const value = useMemo<ActiveParticipantContextValue>(
     () => ({
@@ -281,7 +291,9 @@ export function KidPlaySessionParticipantProvider({
       participant,
       participantId,
       displayName,
-      playerLabel: displayName,
+      playerLabel: resolvedGradeLevel
+        ? `${displayName} · ${formatGradeLevelDisplay(resolvedGradeLevel)}`
+        : displayName,
       hasActiveParticipant: true,
       needsSelection: false,
       claimRequired: false,
@@ -291,7 +303,7 @@ export function KidPlaySessionParticipantProvider({
       refreshRoster: async () => undefined,
       refreshParticipant: () => undefined,
     }),
-    [displayName, participant, participantId, roster],
+    [displayName, participant, participantId, resolvedGradeLevel, roster],
   );
 
   return (

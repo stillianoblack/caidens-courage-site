@@ -27,6 +27,7 @@ export type MissionCoachCardProps = {
   variant?: MissionCoachVariant;
   className?: string;
   compact?: boolean;
+  avatarContent?: React.ReactNode;
 };
 
 function StepIndicator({
@@ -128,6 +129,7 @@ export default function MissionCoachCard({
   variant = 'default',
   className = '',
   compact = false,
+  avatarContent,
 }: MissionCoachCardProps) {
   const clampedProgress = Math.max(0, Math.min(100, progressPercent));
 
@@ -144,12 +146,14 @@ export default function MissionCoachCard({
       aria-labelledby="mission-coach-title"
     >
       <div className="ds-missionCoach-header">
-        <img
-          className="ds-missionCoach-avatar"
-          src={avatarImage}
-          alt={avatarAlt}
-          decoding="async"
-        />
+        {avatarContent ?? (
+          <img
+            className="ds-missionCoach-avatar"
+            src={avatarImage}
+            alt={avatarAlt}
+            decoding="async"
+          />
+        )}
         <div className="ds-missionCoach-intro">
           <h2 id="mission-coach-title" className="ds-missionCoach-title">
             {title}

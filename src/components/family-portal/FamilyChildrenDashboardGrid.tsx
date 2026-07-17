@@ -12,6 +12,7 @@ import {
 } from '../../lib/familyChildSummaryCard';
 import FamilyChildSummaryCard from './FamilyChildSummaryCard';
 import './family-children-dashboard-grid.css';
+import { getB4Asset } from '../../data/b4/variantManifest';
 
 type FamilyChildrenDashboardGridProps = {
   programName: string;
@@ -56,7 +57,10 @@ export default function FamilyChildrenDashboardGrid({
             lastActivityLabel: formatFamilyRelativeActivityDate(child.lastActivityAt),
             gradeLevel: participant?.grade_level ?? null,
             gradeBand: participant?.grade_band ?? null,
-            avatarSrc: resolveFamilyChildAvatarSrc({ participantId, moduleResults }),
+            avatarSrc: participant?.b4_variant_key
+              ? getB4Asset(participant.b4_variant_key, 'idle')
+              : resolveFamilyChildAvatarSrc({ participantId, moduleResults }),
+            b4Variant: participant?.b4_variant_key ?? null,
             avatarInitials: resolveChildDisplayInitials(child.displayName),
           };
         }),
@@ -91,6 +95,7 @@ export default function FamilyChildrenDashboardGrid({
             gradeLevel={card.gradeLevel}
             gradeBand={card.gradeBand}
             avatarSrc={card.avatarSrc}
+            b4Variant={card.b4Variant}
             avatarInitials={card.avatarInitials}
             activeParticipantId={activeChild?.participantId}
             isActivePlayer={isActive}

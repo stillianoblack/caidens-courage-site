@@ -469,7 +469,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
 
   const showCourageHero = Boolean(
     heroWeek &&
-      (heroWeek.weekStatus !== 'locked' || visibilityCtx.previewMode === 'admin'),
+      (kidPlayShell || heroWeek.weekStatus !== 'locked' || visibilityCtx.previewMode === 'admin'),
   );
 
   const heroMapNodes = useMemo(() => {

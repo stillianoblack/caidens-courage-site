@@ -74,6 +74,8 @@ export type PilotProgramSignupInput = {
   programName: string;
   adminFirstName: string;
   adminEmail: string;
+  /** Required when programType is Independent Family. */
+  childFirstName?: string;
   /** @deprecated Legacy numeric estimate — derived from range when provided. */
   estimatedStudents: number | null;
   estimatedStudentCountRange: EstimatedStudentCountRange | null;

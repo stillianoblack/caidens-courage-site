@@ -2,6 +2,7 @@ import React from 'react';
 import MissionCoachCard from '../../design-system/components/MissionCoachCard';
 import { useFamilyOnboardingStatus } from '../../hooks/useFamilyOnboardingStatus';
 import FocusFlameProfileReadyCard from './FocusFlameProfileReadyCard';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 
 type FamilyMissionCoachPanelProps = {
   compact?: boolean;
@@ -57,6 +58,14 @@ export default function FamilyMissionCoachPanel({
       {...missionCoachProps}
       compact={compact}
       className={className}
+      avatarContent={
+        <B4CircleAvatar
+          variant={activeParticipantRecord?.b4_variant_key}
+          size="medium"
+          alt=""
+          className="ds-missionCoach-b4Avatar"
+        />
+      }
     />
   );
 }

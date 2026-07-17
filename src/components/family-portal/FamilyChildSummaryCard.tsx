@@ -1,6 +1,7 @@
 import React, { useId } from 'react';
 import type { FamilyChildBaselineStatus } from '../../lib/familyChildrenMetrics';
 import { resolveParticipantGradeDisplay } from '../../lib/participantGradeDisplay';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 
 export type FamilyChildSummaryCardOption = {
   participantId: string;
@@ -18,6 +19,7 @@ export type FamilyChildSummaryCardProps = {
   gradeLevel?: string | null;
   gradeBand?: string | null;
   avatarSrc?: string | null;
+  b4Variant?: string | null;
   avatarInitials: string;
   childOptions?: FamilyChildSummaryCardOption[];
   activeParticipantId?: string | null;
@@ -51,6 +53,7 @@ export default function FamilyChildSummaryCard({
   gradeLevel = null,
   gradeBand = null,
   avatarSrc = null,
+  b4Variant = null,
   avatarInitials,
   childOptions = [],
   activeParticipantId = null,
@@ -129,11 +132,17 @@ export default function FamilyChildSummaryCard({
     >
       <div className="family-childSummaryGlow" aria-hidden="true" />
       <div className="family-childSummaryTop">
-        <div className="family-childSummaryAvatarWrap" aria-hidden="true">
-          {avatarSrc ? (
+        <div className={`family-childSummaryAvatarWrap${b4Variant ? ' family-childSummaryAvatarWrap--b4' : ''}`}>
+          {b4Variant ? (
+            <B4CircleAvatar
+              variant={b4Variant}
+              size="medium"
+              alt={`${childName}'s selected B-4`}
+            />
+          ) : avatarSrc ? (
             <img
               src={avatarSrc}
-              alt=""
+              alt={`${childName}'s profile`}
               className="family-childSummaryAvatarImg"
               decoding="async"
               loading="lazy"

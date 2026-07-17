@@ -29,6 +29,10 @@ function resolveIndependentFamilyPlaceholder(firstName: string): string {
   return 'My Family';
 }
 
+export function isValidPilotSignupEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export default function PilotProgramSignupForm({
   onSubmit,
   submitting,
@@ -38,6 +42,7 @@ export default function PilotProgramSignupForm({
   const [programName, setProgramName] = useState('');
   const [adminFirstName, setAdminFirstName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
+  const [childFirstName, setChildFirstName] = useState('');
   const [estimatedStudentCountRange, setEstimatedStudentCountRange] = useState<
     EstimatedStudentCountRange | ''
   >('');
@@ -45,6 +50,7 @@ export default function PilotProgramSignupForm({
   const [ageGradeNotes, setAgeGradeNotes] = useState('');
   const [groupName, setGroupName] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const isIndependentFamily = programType === INDEPENDENT_FAMILY_PROGRAM_TYPE;
 
@@ -85,11 +91,20 @@ export default function PilotProgramSignupForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (submitting) return;
+
+    if (!isValidPilotSignupEmail(adminEmail)) {
+      setValidationError('Enter a valid parent or guardian email.');
+      return;
+    }
+    setValidationError(null);
 
     if (!isIndependentFamily) {
       if (!programName.trim() || !groupName.trim()) {
         return;
       }
+    } else if (!childFirstName.trim()) {
+      return;
     }
 
     const studentCountRange = isIndependentFamily
@@ -104,6 +119,7 @@ export default function PilotProgramSignupForm({
       programName,
       adminFirstName,
       adminEmail,
+      childFirstName: isIndependentFamily ? childFirstName : undefined,
       estimatedStudents: students,
       estimatedStudentCountRange: studentCountRange,
       ageGradeBand,
@@ -131,6 +147,23 @@ export default function PilotProgramSignupForm({
           ))}
         </select>
       </div>
+
+      {isIndependentFamily ? (
+        <div className="pilotSignup-field">
+          <label htmlFor="pilot-child-first-name">Child First Name</label>
+          <input
+            id="pilot-child-first-name"
+            type="text"
+            value={childFirstName}
+            onChange={(event) => setChildFirstName(event.target.value)}
+            autoComplete="off"
+            required
+          />
+          <p className="pilotSignup-fieldHint">
+            We use this name to create the one student profile connected to this family.
+          </p>
+        </div>
+      ) : null}
 
       {isIndependentFamily ? (
         <>
@@ -196,9 +229,19 @@ export default function PilotProgramSignupForm({
           id="pilot-admin-email"
           type="email"
           value={adminEmail}
-          onChange={(event) => setAdminEmail(event.target.value)}
+          onChange={(event) => {
+            setAdminEmail(event.target.value);
+            if (validationError) setValidationError(null);
+          }}
+          aria-invalid={Boolean(validationError)}
+          aria-describedby={validationError ? 'pilot-admin-email-error' : undefined}
           required
         />
+        {validationError ? (
+          <p id="pilot-admin-email-error" className="pilotSignup-fieldHint" role="alert">
+            {validationError}
+          </p>
+        ) : null}
       </div>
 
       {isIndependentFamily ? null : (
@@ -284,7 +327,7 @@ export default function PilotProgramSignupForm({
         </label>
       </div>
 
-      {error ? (
+      {error && !validationError ? (
         <p className="pilotSignup-error" role="alert">
           {error}
         </p>

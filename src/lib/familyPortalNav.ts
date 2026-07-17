@@ -9,7 +9,7 @@ import {
 } from '../config/courageRoutes';
 import { isKidPlayShellPath, parseKidPlayShellPath } from './kidPlayShellRoutes';
 import { resolveCharacterProfileTitle } from '../data/characterProfiles';
-import { FAMILY_NAV_TITLE, type FamilySidebarNavId } from '../data/familyPortalContent';
+import { FAMILY_NAV_TITLE, type FamilySidebarNavId } from '../data/familyPortalNavMetadata';
 import { isWeeklyAdventureSource } from './weeklyAdventureRouteContext';
 
 export function resolveFamilyBasePath(pathname: string): string {

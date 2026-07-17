@@ -3,9 +3,12 @@ import {
   createKidPlaySession,
   findActiveKidPlaySessionForChild,
   readLocalKidPlaySessionId,
+  writeLocalKidPlaySessionId,
 } from './kidPlaySessionService';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
 import { resolveLaunchedByUserId } from './resolveLaunchedByUserId';
+import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
+import { launchFamilyCompatibilityChildSession } from './familyChildSessionApi';
 
 export type FamilyKidPlayLaunchInput = {
   childId: string;
@@ -15,7 +18,7 @@ export type FamilyKidPlayLaunchInput = {
 export type FamilyKidPlayLaunchResult =
   | { kind: 'session'; session: KidPlaySessionRow }
   | { kind: 'resume'; session: KidPlaySessionRow }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string; supportCode?: string | null };
 
 export async function resolveFamilyKidPlayLaunch(
   input: FamilyKidPlayLaunchInput,
@@ -23,6 +26,21 @@ export async function resolveFamilyKidPlayLaunch(
   const childId = input.childId.trim();
   if (!childId) {
     return { kind: 'error', message: 'Choose a player before starting the child game.' };
+  }
+
+  if (hasFamilyCompatibilitySession()) {
+    try {
+      const result = await launchFamilyCompatibilityChildSession(childId);
+      writeLocalKidPlaySessionId(result.session.id);
+      return { kind: result.reused ? 'resume' : 'session', session: result.session };
+    } catch (caught) {
+      const error = caught as Error & { correlationId?: string | null };
+      return {
+        kind: 'error',
+        message: 'Could not start child game. Try again.',
+        supportCode: error.correlationId || null,
+      };
+    }
   }
 
   const existing = await findActiveKidPlaySessionForChild(childId);

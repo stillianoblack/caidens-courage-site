@@ -17,6 +17,7 @@ type FamilyChildGradeConfigProps = {
   allowStretchLevel?: boolean | null;
   highlighted?: boolean;
   onSaved?: () => void;
+  showDisplayName?: boolean;
 };
 
 export default function FamilyChildGradeConfig({
@@ -26,6 +27,7 @@ export default function FamilyChildGradeConfig({
   allowStretchLevel = false,
   highlighted = false,
   onSaved,
+  showDisplayName = true,
 }: FamilyChildGradeConfigProps) {
   const selectId = useId();
   const stretchId = useId();
@@ -92,7 +94,7 @@ export default function FamilyChildGradeConfig({
         .join(' ')}
       data-grade-focus={highlighted ? 'true' : undefined}
     >
-      <p className="family-childGradeConfigName">{displayName}</p>
+      {showDisplayName ? <p className="family-childGradeConfigName">{displayName}</p> : null}
       <label className="family-childGradeConfigField" htmlFor={selectId}>
         <span className="family-childGradeConfigLabel">{GRADE_LEVEL_LABEL}</span>
         <select

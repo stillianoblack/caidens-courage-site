@@ -239,6 +239,17 @@
   gap: 1.5rem;
 }
 
+.family-settingsContent {
+  display: grid;
+  gap: 1.75rem;
+}
+
+@media (max-width: 720px) {
+  .family-settingsContent {
+    gap: 1.25rem;
+  }
+}
+
 .family-settingsCard {
   padding: 1.1rem 1.2rem;
   border-radius: 0.875rem;
@@ -333,15 +344,24 @@
 }
 
 .family-settingsChildItem {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
+  display: block;
+  padding: 1rem;
   border-radius: 0.875rem;
   border: 1px solid var(--family-border);
   background: #fff;
+}
+
+.family-settingsChildItem--selected {
+  border-color: rgba(59, 130, 246, 0.38);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.family-settingsChildHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.875rem;
 }
 
 .family-settingsChildMain {
@@ -361,6 +381,65 @@
   margin: 0.2rem 0 0;
   font-size: 0.8125rem;
   color: rgba(36, 62, 112, 0.72);
+}
+
+.family-childB4 {
+  display: grid;
+  gap: 0.875rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--family-border);
+  text-align: left;
+}
+
+.family-childB4Summary {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.family-childB4Copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  color: var(--family-navy-deep);
+}
+
+.family-childB4Copy > span:last-child {
+  color: rgba(36, 62, 112, 0.72);
+  font-size: 0.8125rem;
+}
+
+.family-childB4Label {
+  color: rgba(36, 62, 112, 0.62);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.family-childB4Actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.family-childB4Actions > button {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.family-childB4PlayBtn {
+  margin: 0;
+}
+
+.family-childB4Picker {
+  margin-top: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--family-border);
 }
 
 .family-settingsChildPinBlock {
@@ -490,6 +569,11 @@
     flex: 1 1 100%;
     width: 100%;
   }
+
+  .family-childB4Actions > button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
 }
 
 .family-settingsAddChild {
@@ -500,6 +584,44 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+}
+
+.family-settingsChildGrade {
+  margin-bottom: 0.875rem;
+}
+
+.family-settingsChildGrade .family-childGradeConfig {
+  padding: 0.875rem;
+}
+
+.family-settingsChildStatusGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin: 0;
+}
+
+.family-settingsChildStatusGrid > div {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.family-settingsChildStatusGrid dt {
+  margin-bottom: 0.2rem;
+  color: rgba(36, 62, 112, 0.58);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.family-settingsChildStatusGrid dd {
+  margin: 0;
+  color: var(--family-navy-deep);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .family-settingsGradeList {
@@ -1897,6 +2019,15 @@ a.family-dash-card:hover {
 }
 
 @media (max-width: 767px) {
+  .family-settingsChildHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .family-settingsChildStatusGrid {
+    grid-template-columns: 1fr;
+  }
+
   .family-shell {
     flex-direction: column;
     height: auto;
@@ -3154,6 +3285,12 @@ a.family-dash-card:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.family-childSummaryAvatarWrap--b4 {
+  border: 0 !important;
+  background: transparent;
+  overflow: visible;
 }
 
 .family-childSummaryAvatarInitials {
