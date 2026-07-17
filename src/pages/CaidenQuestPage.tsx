@@ -1,14 +1,14 @@
 import React from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import CaidenQuestFlow from '../components/caiden/CaidenQuestFlow';
-import { getCaidenQuestById } from '../data/caiden';
+import { getCaidenPlayableMissionById } from '../data/caiden';
 import { resolveCaidenHubPath, resolvePortalFamilyShellPath } from '../lib/portalGamePaths';
 
 export default function CaidenQuestPage() {
   const { questId } = useParams<{ questId: string }>();
   const location = useLocation();
   const hubPath = resolveCaidenHubPath(location.pathname);
-  const quest = getCaidenQuestById(questId);
+  const quest = getCaidenPlayableMissionById(questId);
 
   if (!quest) {
     return <Navigate to={`${hubPath}${location.search}`} replace />;

@@ -399,9 +399,9 @@ export default function GameAssessmentFlow({
       displayQuestion ? isGameAnswerCorrect(displayQuestion, value) : false,
     getCorrectFeedback: () =>
       currentQuestion ? getCorrectFeedbackMessage(currentQuestion) : '',
-    getIncorrectFeedback: () =>
+    getIncorrectFeedback: (selectedAnswer) =>
       currentQuestion
-        ? getIncorrectFeedbackMessage(currentQuestion)
+        ? getIncorrectFeedbackMessage(currentQuestion, selectedAnswer)
         : 'Not quite. Try again or use a hint.',
   });
 
