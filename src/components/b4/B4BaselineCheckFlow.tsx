@@ -84,9 +84,11 @@ import type {
   CompleteMissionResult,
   CourageMissionRewardPayload,
 } from '../../types/courageMissionProgress';
-import { hasFamilyCompatibilitySession } from '../../lib/familyPortalChildrenApi';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
-import { saveFamilyCompatibilityChildBaseline } from '../../lib/familyChildSessionApi';
+import {
+  hasServerMediatedChildSession,
+  saveFamilyCompatibilityChildBaseline,
+} from '../../lib/familyChildSessionApi';
 
 type View =
   | 'landing'
@@ -287,7 +289,7 @@ export default function B4BaselineCheckFlow({
       !record ||
       !record.completedAt ||
       !isBaselineFullyComplete(hubState, participantId) ||
-      !hasFamilyCompatibilitySession()
+      !hasServerMediatedChildSession()
     ) {
       return;
     }

@@ -16,6 +16,12 @@ import {
   getFamilyCompatibilityChildSession,
   updateFamilyCompatibilityChildSession,
 } from './familyChildSessionApi';
+import {
+  endCampCompatibilityChildSession,
+  getCampCompatibilityChildSession,
+  hasCampCompatibilitySession,
+  updateCampCompatibilityChildSession,
+} from './campChildSessionApi';
 
 const KID_PLAY_SESSIONS_TABLE = 'kid_play_sessions';
 const LOCAL_SESSION_ID_KEY = 'cc-kid-play-session-id';
@@ -105,6 +111,13 @@ async function fetchSessionById(sessionId: string): Promise<KidPlaySessionRow | 
   if (hasFamilyCompatibilitySession()) {
     try {
       return await getFamilyCompatibilityChildSession(sessionId);
+    } catch {
+      return null;
+    }
+  }
+  if (hasCampCompatibilitySession()) {
+    try {
+      return await getCampCompatibilityChildSession(sessionId);
     } catch {
       return null;
     }
@@ -213,7 +226,7 @@ export async function getActiveKidPlaySession(
   explicitSessionId?: string | null,
 ): Promise<KidPlaySessionRow | null> {
   const sessionId = explicitSessionId?.trim() || readLocalKidPlaySessionId();
-  if (!sessionId || !isSupabaseConfigured()) {
+  if (!sessionId) {
     return null;
   }
 
@@ -234,7 +247,7 @@ export async function updateKidPlaySessionActivity(
   resumePayload?: Record<string, unknown> | null,
 ): Promise<KidPlaySessionRow | null> {
   const sessionId = sessionIdInput?.trim() || readLocalKidPlaySessionId();
-  if (!sessionId || !isSupabaseConfigured() || !supabase) {
+  if (!sessionId) {
     return null;
   }
 
@@ -245,6 +258,14 @@ export async function updateKidPlaySessionActivity(
       return null;
     }
   }
+  if (hasCampCompatibilitySession()) {
+    try {
+      return await updateCampCompatibilityChildSession(sessionId, resumePayload);
+    } catch {
+      return null;
+    }
+  }
+  if (!isSupabaseConfigured() || !supabase) return null;
 
   const timestamp = nowIso();
   const patch: Record<string, unknown> = {
@@ -286,7 +307,7 @@ export async function endKidPlaySession(
   input: EndKidPlaySessionInput,
 ): Promise<KidPlaySessionRow | null> {
   const sessionId = input.sessionId.trim();
-  if (!sessionId || !isSupabaseConfigured() || !supabase) {
+  if (!sessionId) {
     return null;
   }
 
@@ -299,6 +320,16 @@ export async function endKidPlaySession(
       return null;
     }
   }
+  if (hasCampCompatibilitySession()) {
+    try {
+      const session = await endCampCompatibilityChildSession(sessionId, input.reason);
+      if (readLocalKidPlaySessionId() === sessionId) writeLocalKidPlaySessionId(null);
+      return session;
+    } catch {
+      return null;
+    }
+  }
+  if (!isSupabaseConfigured() || !supabase) return null;
 
   const timestamp = nowIso();
   const status = input.status ?? 'ended';

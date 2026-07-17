@@ -49,6 +49,24 @@ function event(body: Record<string, unknown>, headers = true) {
 describe('family child session endpoint', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  test('returns only allowlisted child-session resume metadata', () => {
+    expect(endpoint._test.sanitizeResumePayload({
+      route: '/play/session/example/weekly-adventures',
+      module: 'week-1',
+      week: 1,
+      participant_baseline_complete: false,
+      access_code: 'must-not-leak',
+      student_pin: 'must-not-leak',
+      email: 'must-not-leak@example.com',
+      rawParticipant: { id: participantId },
+    })).toEqual({
+      route: '/play/session/example/weekly-adventures',
+      module: 'week-1',
+      week: 1,
+      participant_baseline_complete: false,
+    });
+  });
+
   test('rejects anonymous launch before participant access is evaluated', async () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === 'pilot_programs') return query({ data: null, error: null });
@@ -71,6 +89,119 @@ describe('family child session endpoint', () => {
     );
     expect(available).toBe(true);
     expect(insert).toHaveBeenCalledTimes(1);
+  });
+
+  test('creates a facilitator camp session through the server and reconciles duplicate launches', async () => {
+    const campProgram = {
+      id: program.id,
+      program_code: 'CAMP-TEST',
+      program_type: 'camp',
+    };
+    const participant = {
+      id: participantId,
+      role: 'student',
+      program_code: campProgram.program_code,
+      first_name: 'Trace',
+      nickname: 'Ace',
+      grade_level: '3',
+    };
+    const created = {
+      id: sessionId,
+      child_id: participantId,
+      participant_id: participantId,
+      organization_id: campProgram.id,
+      launched_by_user_id: null,
+      session_source: 'facilitator_roster_launch',
+      device_mode: 'shared_camp_device',
+      status: 'active',
+      started_at: '2026-07-17T00:00:00.000Z',
+      last_activity_at: '2026-07-17T00:00:00.000Z',
+      ended_at: null,
+      ended_reason: null,
+      device_label: null,
+      resume_payload: { participant_display_name: 'Ace' },
+      created_at: '2026-07-17T00:00:00.000Z',
+      updated_at: '2026-07-17T00:00:00.000Z',
+    };
+    let kidSessionRead = 0;
+    const insert = jest.fn(() => query({ data: created, error: null }));
+    const supabase = {
+      from: (table: string) => {
+        if (table === 'participants') return query({ data: participant, error: null });
+        if (table === 'kid_play_sessions') {
+          const result = kidSessionRead++ === 0
+            ? { data: [], error: null }
+            : { data: [created], error: null };
+          const q = query(result);
+          q.insert = insert;
+          q.update = jest.fn(() => query({ data: null, error: null }));
+          return q;
+        }
+        if (table === 'admin_audit_events') {
+          const q = query({ data: null, error: null });
+          q.insert = jest.fn(() => query({ data: null, error: null }));
+          return q;
+        }
+        throw new Error(`Unexpected table ${table}`);
+      },
+    };
+
+    const result = await endpoint._test.launchCampSession(
+      supabase,
+      campProgram,
+      participantId,
+      {},
+      'camp-launch-correlation',
+    );
+    expect(result.session.id).toBe(sessionId);
+    expect(result.reused).toBe(false);
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({
+      child_id: participantId,
+      participant_id: participantId,
+      organization_id: campProgram.id,
+      session_source: 'facilitator_roster_launch',
+      device_mode: 'shared_camp_device',
+    }));
+  });
+
+  test('returns an active-elsewhere conflict instead of creating a second camp session', async () => {
+    const existing = {
+      id: sessionId,
+      child_id: participantId,
+      participant_id: participantId,
+      organization_id: program.id,
+      session_source: 'facilitator_roster_launch',
+      device_mode: 'shared_camp_device',
+      status: 'active',
+      resume_payload: null,
+    };
+    const insert = jest.fn();
+    const supabase = {
+      from: (table: string) => {
+        if (table === 'participants') return query({
+          data: { id: participantId, role: 'student', program_code: 'CAMP-TEST' },
+          error: null,
+        });
+        if (table === 'kid_play_sessions') {
+          const q = query({ data: [existing], error: null });
+          q.insert = insert;
+          return q;
+        }
+        throw new Error(`Unexpected table ${table}`);
+      },
+    };
+
+    const result = await endpoint._test.launchCampSession(
+      supabase,
+      { id: program.id, program_code: 'CAMP-TEST' },
+      participantId,
+      {},
+      'camp-conflict-correlation',
+    );
+    expect(result.status).toBe(409);
+    expect(result.code).toBe('camp_session_active_elsewhere');
+    expect(result.conflict.id).toBe(sessionId);
+    expect(insert).not.toHaveBeenCalled();
   });
 
   test('rejects a participant from another family', async () => {

@@ -23,9 +23,11 @@ import {
   logTrackingSaveError,
   TRACKING_SAVE_WARNING,
 } from './trackingSaveLog';
-import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
 import { readLocalKidPlaySessionId } from './kidPlaySessionService';
-import { saveFamilyCompatibilityChildBaseline } from './familyChildSessionApi';
+import {
+  hasServerMediatedChildSession,
+  saveFamilyCompatibilityChildBaseline,
+} from './familyChildSessionApi';
 
 export type AssessmentResultRow = {
   id?: string;
@@ -472,7 +474,7 @@ export async function saveStudentBaselineToSupabase(
   record: B4BaselineCheckRecord,
 ): Promise<BaselineSubmitResult> {
   const familySessionId = readLocalKidPlaySessionId();
-  if (familySessionId && hasFamilyCompatibilitySession()) {
+  if (familySessionId && hasServerMediatedChildSession()) {
     try {
       await saveFamilyCompatibilityChildBaseline(familySessionId, record);
       return {

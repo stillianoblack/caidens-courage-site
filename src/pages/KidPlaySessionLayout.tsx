@@ -109,7 +109,11 @@ function KidPlaySessionLayoutContent() {
       }
 
       writeLocalKidPlaySessionId(row.id);
-      const { participants } = await fetchParticipantsByIds([row.child_id]);
+      const serverHydratedSession =
+        row.session_source === 'facilitator_roster_launch' || row.session_source === 'family_home';
+      const { participants } = serverHydratedSession
+        ? { participants: [] }
+        : await fetchParticipantsByIds([row.child_id]);
       const participant = participants[0];
       const sessionDisplayName = String(row.resume_payload?.participant_display_name || '').trim();
       const sessionFirstName = String(row.resume_payload?.participant_first_name || '').trim();

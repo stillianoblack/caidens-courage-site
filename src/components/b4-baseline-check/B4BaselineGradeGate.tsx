@@ -6,8 +6,10 @@ import {
   type GradeLevel,
 } from '../../data/gradeLevelOptions';
 import { saveParticipantGradeLevel } from '../../lib/participantGradeService';
-import { hasFamilyCompatibilitySession } from '../../lib/familyPortalChildrenApi';
-import { saveFamilyCompatibilityChildGrade } from '../../lib/familyChildSessionApi';
+import {
+  hasServerMediatedChildSession,
+  saveFamilyCompatibilityChildGrade,
+} from '../../lib/familyChildSessionApi';
 import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
 
 type B4BaselineGradeGateProps = {
@@ -35,7 +37,7 @@ export default function B4BaselineGradeGate({
     setError(null);
 
     const sessionId = readLocalKidPlaySessionId();
-    const result = sessionId && hasFamilyCompatibilitySession()
+    const result = sessionId && hasServerMediatedChildSession()
       ? await saveFamilyCompatibilityChildGrade(sessionId, gradeLevel)
           .then(() => ({ success: true as const }))
           .catch((caught) => ({

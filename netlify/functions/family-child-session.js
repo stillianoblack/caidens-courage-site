@@ -4,6 +4,11 @@ const {
   participantBelongsToFamily,
   safeText,
 } = require('./_lib/familyCompatibilityAuth');
+const {
+  authorizeCampProgram,
+  participantForCamp,
+  sessionForCamp,
+} = require('./_lib/campCompatibilityAuth');
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED_END_REASONS = new Set(['idle_timeout', 'user_exit', 'signed_out']);
@@ -13,6 +18,28 @@ const REQUIRED_BASELINE_MODULES = new Set(['feelings', 'reading', 'focus-moves']
 function suffix(value) {
   const normalized = safeText(value, 80);
   return normalized ? `…${normalized.slice(-6)}` : null;
+}
+
+function sanitizeResumePayload(value) {
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const sanitized = {};
+  const copyText = (key, maxLength) => {
+    const text = safeText(input[key], maxLength);
+    if (text) sanitized[key] = text;
+  };
+  copyText('route', 400);
+  copyText('module', 80);
+  copyText('endedFrom', 80);
+  copyText('characterId', 80);
+  copyText('missionId', 120);
+  copyText('participant_baseline_completed_at', 60);
+  if (Number.isInteger(input.week) && input.week >= 1 && input.week <= 52) {
+    sanitized.week = input.week;
+  }
+  if (typeof input.participant_baseline_complete === 'boolean') {
+    sanitized.participant_baseline_complete = input.participant_baseline_complete;
+  }
+  return sanitized;
 }
 
 function publicSession(row, participant) {
@@ -35,7 +62,7 @@ function publicSession(row, participant) {
     ended_reason: row.ended_reason,
     device_label: row.device_label,
     resume_payload: {
-      ...(row.resume_payload || {}),
+      ...sanitizeResumePayload(row.resume_payload),
       participant_display_name: displayName,
       participant_first_name: safeText(participant?.first_name, 80) || displayName,
       ...(participant?.grade_level
@@ -87,7 +114,10 @@ async function recordLaunchAudit(supabase, id, participantId, reused) {
     organization_id: null,
     request_correlation_id: id,
     reason: null,
-    metadata: { session_type: 'legacy_access_code', reused: Boolean(reused) },
+    metadata: {
+      session_type: 'legacy_access_code',
+      reused: Boolean(reused),
+    },
   });
   if (!error) return true;
   const missingAuditTable =
@@ -167,7 +197,7 @@ async function launchSession(supabase, program, participantId, id) {
       .update({
         last_activity_at: timestamp,
         updated_at: timestamp,
-        resume_payload: { ...(session.resume_payload || {}), ...sessionIdentity },
+        resume_payload: { ...sanitizeResumePayload(session.resume_payload), ...sessionIdentity },
       })
       .eq('id', session.id)
       .eq('status', 'active')
@@ -215,6 +245,139 @@ async function launchSession(supabase, program, participantId, id) {
   };
 }
 
+async function launchCampSession(supabase, program, participantId, input, id) {
+  const participantResult = await participantForCamp(
+    supabase,
+    participantId,
+    program.program_code,
+  );
+  if (!participantResult.participant) {
+    return { status: participantResult.status, code: participantResult.code };
+  }
+
+  const localSessionId = safeText(input.localSessionId, 80);
+  const moveFromSessionId = safeText(input.moveFromExistingSessionId, 80);
+  const { data: activeRows, error: activeError } = await supabase
+    .from('kid_play_sessions')
+    .select('*')
+    .eq('organization_id', program.id)
+    .eq('child_id', participantId)
+    .eq('session_source', 'facilitator_roster_launch')
+    .eq('status', 'active')
+    .order('started_at', { ascending: true });
+  if (activeError) return { status: 503, code: 'camp_session_lookup_failed' };
+
+  const active = activeRows || [];
+  const timestamp = new Date().toISOString();
+  const displayName = safeText(
+    participantResult.participant.nickname || participantResult.participant.first_name,
+    80,
+  ) || 'Player';
+  const sessionIdentity = {
+    participant_display_name: displayName,
+    participant_first_name: safeText(participantResult.participant.first_name, 80) || displayName,
+    ...(participantResult.participant.grade_level
+      ? { participant_grade_level: participantResult.participant.grade_level }
+      : {}),
+  };
+
+  if (moveFromSessionId) {
+    const moved = active.find((row) => row.id === moveFromSessionId);
+    if (!moved) return { status: 409, code: 'camp_session_move_conflict' };
+    const { error } = await supabase
+      .from('kid_play_sessions')
+      .update({
+        status: 'moved',
+        ended_at: timestamp,
+        ended_reason: 'moved_to_this_device',
+        updated_at: timestamp,
+      })
+      .eq('id', moved.id)
+      .eq('status', 'active');
+    if (error) return { status: 503, code: 'camp_session_move_failed' };
+  } else if (active.length) {
+    const reusable = active.find((row) => row.id === localSessionId);
+    if (!reusable) {
+      return {
+        status: 409,
+        code: 'camp_session_active_elsewhere',
+        conflict: active[0],
+        participant: participantResult.participant,
+      };
+    }
+    const { data, error } = await supabase
+      .from('kid_play_sessions')
+      .update({
+        last_activity_at: timestamp,
+        updated_at: timestamp,
+        resume_payload: { ...sanitizeResumePayload(reusable.resume_payload), ...sessionIdentity },
+      })
+      .eq('id', reusable.id)
+      .eq('status', 'active')
+      .select('*')
+      .maybeSingle();
+    if (error || !data) return { status: 503, code: 'camp_session_resume_failed' };
+    return {
+      session: data,
+      participant: participantResult.participant,
+      reused: true,
+    };
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('kid_play_sessions')
+    .insert({
+      child_id: participantId,
+      participant_id: participantId,
+      organization_id: program.id,
+      launched_by_user_id: null,
+      session_source: 'facilitator_roster_launch',
+      device_mode: 'shared_camp_device',
+      status: 'active',
+      started_at: timestamp,
+      last_activity_at: timestamp,
+      resume_payload: sessionIdentity,
+      updated_at: timestamp,
+    })
+    .select('*')
+    .single();
+  if (insertError || !inserted) return { status: 503, code: 'camp_session_create_failed' };
+
+  // Reconcile concurrent launch requests deterministically. The oldest active row wins;
+  // later duplicates are ended without changing participant data or progress.
+  const { data: concurrentRows, error: reconcileError } = await supabase
+    .from('kid_play_sessions')
+    .select('*')
+    .eq('organization_id', program.id)
+    .eq('child_id', participantId)
+    .eq('session_source', 'facilitator_roster_launch')
+    .eq('status', 'active')
+    .order('started_at', { ascending: true })
+    .order('id', { ascending: true });
+  if (reconcileError) return { status: 503, code: 'camp_session_reconcile_failed' };
+  const canonical = concurrentRows?.[0] || inserted;
+  const duplicateIds = (concurrentRows || []).slice(1).map((row) => row.id);
+  if (duplicateIds.length) {
+    const { error } = await supabase
+      .from('kid_play_sessions')
+      .update({
+        status: 'ended',
+        ended_at: timestamp,
+        ended_reason: 'duplicate_facilitator_launch',
+        updated_at: timestamp,
+      })
+      .in('id', duplicateIds)
+      .eq('status', 'active');
+    if (error) return { status: 503, code: 'camp_session_reconcile_failed' };
+  }
+
+  return {
+    session: canonical,
+    participant: participantResult.participant,
+    reused: canonical.id !== inserted.id,
+  };
+}
+
 exports.handler = async (event) => {
   const id = correlationId(event);
   if (!['GET', 'POST', 'PATCH'].includes(event.httpMethod)) {
@@ -223,27 +386,49 @@ exports.handler = async (event) => {
   const supabase = getServerSupabase();
   if (!supabase) return json(503, { success: false, code: 'configuration_error' }, id);
 
-  const auth = await authorizeFamilyCompatibilitySession(event, supabase);
-  if (!auth.program) {
-    return json(auth.status, { success: false, code: auth.code }, id);
-  }
-  const program = auth.program;
-
-  if (event.httpMethod === 'POST') {
-    let body;
+  let body = null;
+  if (event.httpMethod !== 'GET') {
     try { body = JSON.parse(event.body || '{}'); } catch {
       return json(400, { success: false, code: 'invalid_json' }, id);
     }
+  }
+
+  const params = new URLSearchParams(event.rawQuery || '');
+  const sessionId = safeText(params.get('sessionId'), 80);
+  const familyAuth = await authorizeFamilyCompatibilitySession(event, supabase);
+  const campRequested = Boolean(event.headers?.['x-camp-program-id']);
+  const campAuth = familyAuth.program
+    ? null
+    : await authorizeCampProgram(event, supabase);
+  const mode = familyAuth.program ? 'family' : campAuth?.program ? 'camp' : null;
+  const program = familyAuth.program || campAuth?.program;
+  if (!program || !mode) {
+    const failed = campRequested ? campAuth : familyAuth;
+    return json(failed?.status || 401, { success: false, code: failed?.code || 'missing_session' }, id);
+  }
+
+  if (event.httpMethod === 'POST') {
     const participantId = safeText(body.participantId, 80);
     if (!UUID.test(participantId)) {
       return json(400, { success: false, code: 'validation_error' }, id);
     }
-    const result = await launchSession(supabase, program, participantId, id);
-    if (!result.session) return json(result.status, { success: false, code: result.code }, id);
+    const result = mode === 'family'
+      ? await launchSession(supabase, program, participantId, id)
+      : await launchCampSession(supabase, program, participantId, body, id);
+    if (!result.session) {
+      return json(result.status, {
+        success: false,
+        code: result.code,
+        ...(result.conflict
+          ? { conflictSession: publicSession(result.conflict, result.participant) }
+          : {}),
+      }, id);
+    }
     console.info('[FAMILY_CHILD_SESSION]', {
       correlationId: id,
       action: 'launch',
       result: 'success',
+      authorizationMode: mode === 'family' ? 'family_compatibility' : 'camp_facilitator_session',
       programId: suffix(program.id),
       participantId: suffix(participantId),
       sessionId: suffix(result.session.id),
@@ -252,19 +437,21 @@ exports.handler = async (event) => {
     });
     return json(200, {
       success: true,
-      sessionType: 'legacy_access_code',
+      sessionType: mode === 'family' ? 'legacy_access_code' : 'facilitator_program_session',
       ownershipMode: 'server_validated_compatibility',
       reused: result.reused,
       session: publicSession(result.session, result.participant),
     }, id);
   }
 
-  const params = new URLSearchParams(event.rawQuery || '');
-  const sessionId = safeText(params.get('sessionId'), 80);
   if (!UUID.test(sessionId)) return json(400, { success: false, code: 'validation_error' }, id);
-  const lookup = await sessionForFamily(supabase, sessionId, program);
-  if (lookup.error) return json(503, { success: false, code: lookup.error }, id);
-  if (!lookup.session) return json(403, { success: false, code: 'session_access_denied' }, id);
+  const lookup = mode === 'family'
+    ? await sessionForFamily(supabase, sessionId, program)
+    : await sessionForCamp(supabase, sessionId, program);
+  if (lookup.error || (!lookup.session && lookup.status === 503)) {
+    return json(503, { success: false, code: lookup.error || lookup.code }, id);
+  }
+  if (!lookup.session) return json(lookup.status || 403, { success: false, code: lookup.code || 'session_access_denied' }, id);
 
   if (event.httpMethod === 'GET') {
     return json(200, {
@@ -273,10 +460,6 @@ exports.handler = async (event) => {
     }, id);
   }
 
-  let body;
-  try { body = JSON.parse(event.body || '{}'); } catch {
-    return json(400, { success: false, code: 'invalid_json' }, id);
-  }
   if (body.action === 'grade') {
     const gradeLevel = safeText(body.gradeLevel, 20).toLowerCase();
     if (!ALLOWED_GRADE_LEVELS.has(gradeLevel)) {
@@ -373,7 +556,7 @@ exports.handler = async (event) => {
       .from('kid_play_sessions')
       .update({
         resume_payload: {
-          ...(lookup.session.resume_payload || {}),
+          ...sanitizeResumePayload(lookup.session.resume_payload),
           participant_baseline_complete: true,
           participant_baseline_completed_at: new Date(completedDate).toISOString(),
         },
@@ -400,7 +583,17 @@ exports.handler = async (event) => {
   const timestamp = new Date().toISOString();
   const patch = { last_activity_at: timestamp, updated_at: timestamp };
   if (body.resumePayload && typeof body.resumePayload === 'object' && !Array.isArray(body.resumePayload)) {
-    patch.resume_payload = body.resumePayload;
+    patch.resume_payload = {
+      ...sanitizeResumePayload(body.resumePayload),
+      participant_display_name: safeText(
+        lookup.participant.nickname || lookup.participant.first_name,
+        80,
+      ) || 'Player',
+      participant_first_name: safeText(lookup.participant.first_name, 80) || 'Player',
+      ...(lookup.participant.grade_level
+        ? { participant_grade_level: lookup.participant.grade_level }
+        : {}),
+    };
   }
   if (action === 'end') {
     patch.status = 'ended';
@@ -426,6 +619,8 @@ exports._test = {
   UUID,
   ALLOWED_GRADE_LEVELS,
   REQUIRED_BASELINE_MODULES,
+  sanitizeResumePayload,
+  launchCampSession,
   launchSession,
   participantForFamily,
   publicSession,

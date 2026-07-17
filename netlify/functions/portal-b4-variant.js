@@ -3,9 +3,13 @@ const {
   authorizeFamilyCompatibilitySession,
   participantBelongsToFamily,
 } = require('./_lib/familyCompatibilityAuth');
+const {
+  authorizeCampProgram,
+  participantForCamp,
+  sessionForCamp,
+} = require('./_lib/campCompatibilityAuth');
 
 const ALLOWED_VARIANTS = new Set(['courage', 'pattern', 'shield', 'anchor', 'fusion']);
-const CAMP_KID_SESSION_SOURCES = new Set(['facilitator_roster_launch']);
 
 function normalizeVariant(value) {
   if (value === 'spark') return 'courage';
@@ -18,52 +22,22 @@ function maskId(value) {
 }
 
 async function authorizeCampKidSession(event, supabase, participantId) {
-  const programCode = String(event.headers?.['x-camp-program-code'] || '').trim();
-  const accessCode = String(event.headers?.['x-camp-access-code'] || '').trim();
   const sessionId = String(event.headers?.['x-kid-session-id'] || '').trim();
-  if (!programCode || !accessCode || !sessionId) return { authorized: false, code: 'missing_camp_session' };
-
-  const { data: program, error: programError } = await supabase
-    .from('pilot_programs')
-    .select('id, program_code, program_type')
-    .eq('program_code', programCode)
-    .eq('facilitator_access_code', accessCode)
-    .neq('pilot_status', 'archived')
-    .maybeSingle();
-  if (programError) return { authorized: false, code: 'camp_program_lookup_failed' };
-  if (!program || program.program_type === 'independent_family') {
-    return { authorized: false, code: 'invalid_camp_session' };
-  }
-
-  const { data: participant, error: participantError } = await supabase
-    .from('participants')
-    .select('id, role, program_code')
-    .eq('id', participantId)
-    .maybeSingle();
+  if (!sessionId) return { authorized: false, code: 'missing_camp_session' };
+  const programResult = await authorizeCampProgram(event, supabase);
+  if (!programResult.program) return { authorized: false, code: programResult.code };
+  const participantResult = await participantForCamp(
+    supabase,
+    participantId,
+    programResult.program.program_code,
+  );
+  if (!participantResult.participant) return { authorized: false, code: participantResult.code };
+  const sessionResult = await sessionForCamp(supabase, sessionId, programResult.program);
   if (
-    participantError ||
-    participant?.role !== 'student' ||
-    participant?.program_code !== program.program_code
-  ) {
-    return { authorized: false, code: 'camp_participant_mismatch' };
-  }
-
-  const { data: session, error: sessionError } = await supabase
-    .from('kid_play_sessions')
-    .select('id, child_id, participant_id, session_source, status')
-    .eq('id', sessionId)
-    .eq('child_id', participantId)
-    .eq('status', 'active')
-    .maybeSingle();
-  if (
-    sessionError ||
-    !session ||
-    (session.participant_id && session.participant_id !== participantId) ||
-    !CAMP_KID_SESSION_SOURCES.has(session.session_source)
-  ) {
-    return { authorized: false, code: 'camp_kid_session_mismatch' };
-  }
-
+    !sessionResult.session ||
+    sessionResult.session.status !== 'active' ||
+    (sessionResult.session.participant_id || sessionResult.session.child_id) !== participantId
+  ) return { authorized: false, code: sessionResult.code || 'camp_kid_session_mismatch' };
   return { authorized: true, code: 'camp_facilitator_session' };
 }
 
@@ -167,7 +141,6 @@ exports.handler = async (event) => {
 
 exports._test = {
   ALLOWED_VARIANTS,
-  CAMP_KID_SESSION_SOURCES,
   authorizeCampKidSession,
   normalizeVariant,
 };

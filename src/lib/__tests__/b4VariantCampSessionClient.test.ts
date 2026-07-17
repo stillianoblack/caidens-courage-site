@@ -8,11 +8,17 @@ describe('B-4 camp-session client transport', () => {
   );
 
   test('sends only the server-validation metadata needed for facilitator-launched kid sessions', () => {
-    expect(source).toContain("'X-Camp-Program-Code'");
-    expect(source).toContain("'X-Camp-Access-Code'");
-    expect(source).toContain("'X-Kid-Session-Id'");
-    expect(source).not.toContain('student_pin');
-    expect(source).not.toContain('admin_email');
+    expect(source).toContain('campCompatibilityHeaders(sessionId)');
+    const transport = fs.readFileSync(
+      path.join(process.cwd(), 'src/lib/campChildSessionApi.ts'),
+      'utf8',
+    );
+    expect(transport).toContain("'X-Camp-Program-Id'");
+    expect(transport).toContain("'X-Camp-Program-Code'");
+    expect(transport).toContain("'X-Camp-Access-Code'");
+    expect(transport).toContain("'X-Kid-Session-Id'");
+    expect(transport).not.toContain('student_pin');
+    expect(transport).not.toContain('admin_email');
   });
 
   test('deduplicates simultaneous preference loads and accepts explicit endpoint states', () => {

@@ -20,9 +20,14 @@ describe('portal B-4 variant endpoint', () => {
     expect(source).toContain('authorizeFamilyCompatibilitySession');
     expect(source).toContain('participantBelongsToFamily');
     expect(source).toContain('authorizeCampKidSession');
-    expect(source).toContain(".eq('facilitator_access_code', accessCode)");
-    expect(source).toContain(".from('kid_play_sessions')");
-    expect(source).toContain(".eq('child_id', participantId)");
+    expect(source).toContain("require('./_lib/campCompatibilityAuth')");
+    const helper = fs.readFileSync(
+      path.join(process.cwd(), 'netlify/functions/_lib/campCompatibilityAuth.js'),
+      'utf8',
+    );
+    expect(helper).toContain(".eq('facilitator_access_code', accessCode)");
+    expect(helper).toContain(".from('kid_play_sessions')");
+    expect(helper).toContain(".eq('organization_id', program.id)");
     expect(source).not.toContain('portalOwnershipAuth');
     expect(source).not.toContain('getCrmRoles');
   });
@@ -57,6 +62,7 @@ describe('portal B-4 variant endpoint', () => {
     };
     const result = await endpoint._test.authorizeCampKidSession({
       headers: {
+        'x-camp-program-id': 'program-1',
         'x-camp-program-code': 'CAMP-TEST',
         'x-camp-access-code': 'FAC-TEST',
         'x-kid-session-id': 'session-1',

@@ -1,11 +1,12 @@
-import { readActivePilotProgram } from '../config/activePilotProgram';
 import {
-  createKidPlaySession,
-  endKidPlaySession,
-  findActiveKidPlaySessionForChild,
   readLocalKidPlaySessionId,
+  writeLocalKidPlaySessionId,
 } from './kidPlaySessionService';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
+import {
+  launchCampCompatibilityChildSession,
+  type CampChildSessionError,
+} from './campChildSessionApi';
 
 export type FacilitatorKidPlayLaunchInput = {
   childId: string;
@@ -25,7 +26,7 @@ export type FacilitatorKidPlayLaunchResult =
   | { kind: 'session'; session: KidPlaySessionRow }
   | { kind: 'resume'; session: KidPlaySessionRow }
   | { kind: 'conflict'; conflict: FacilitatorKidPlayLaunchConflict }
-  | { kind: 'error'; message: string };
+  | { kind: 'error'; message: string; supportCode?: string | null };
 
 export async function resolveFacilitatorKidPlayLaunch(
   input: FacilitatorKidPlayLaunchInput,
@@ -36,39 +37,31 @@ export async function resolveFacilitatorKidPlayLaunch(
   }
 
   const childName = input.childName?.trim() || 'This student';
-  const existing = await findActiveKidPlaySessionForChild(childId);
   const localSessionId = readLocalKidPlaySessionId();
-
-  if (existing && !input.moveFromExistingSessionId) {
-    if (localSessionId && existing.id === localSessionId) {
-      return { kind: 'resume', session: existing };
+  try {
+    const result = await launchCampCompatibilityChildSession({
+      participantId: childId,
+      localSessionId,
+      moveFromExistingSessionId: input.moveFromExistingSessionId,
+    });
+    writeLocalKidPlaySessionId(result.session.id);
+    return { kind: result.reused ? 'resume' : 'session', session: result.session };
+  } catch (caught) {
+    const error = caught as CampChildSessionError;
+    if (error.status === 409 && error.conflictSession) {
+      return {
+        kind: 'conflict',
+        conflict: {
+          kind: 'active_elsewhere',
+          existingSession: error.conflictSession,
+          childName,
+        },
+      };
     }
     return {
-      kind: 'conflict',
-      conflict: { kind: 'active_elsewhere', existingSession: existing, childName },
+      kind: 'error',
+      message: 'Could not start student session. Try again.',
+      supportCode: error.correlationId || null,
     };
   }
-
-  if (input.moveFromExistingSessionId) {
-    await endKidPlaySession({
-      sessionId: input.moveFromExistingSessionId,
-      reason: 'moved',
-      status: 'moved',
-    });
-  }
-
-  const program = readActivePilotProgram();
-  const session = await createKidPlaySession({
-    childId,
-    participantId: childId,
-    organizationId: input.organizationId?.trim() || program?.id || null,
-    sessionSource: 'facilitator_roster_launch',
-    deviceMode: 'shared_camp_device',
-  });
-
-  if (!session) {
-    return { kind: 'error', message: 'Could not start student session. Try again.' };
-  }
-
-  return { kind: 'session', session };
 }

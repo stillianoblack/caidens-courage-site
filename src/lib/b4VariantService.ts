@@ -5,9 +5,8 @@ import {
   familyCompatibilityHeaders,
   hasFamilyCompatibilitySession,
 } from './familyPortalChildrenApi';
-import { readActivePilotProgram } from '../config/activePilotProgram';
-import { readActiveAccessCode, readActivePortalRole } from '../config/portalContext';
 import { readLocalKidPlaySessionId } from './kidPlaySessionService';
+import { campCompatibilityHeaders, hasCampCompatibilitySession } from './campChildSessionApi';
 
 export const B4_VARIANT_UPDATED_EVENT = 'b4:variant-updated';
 
@@ -19,22 +18,9 @@ export type B4Preference = {
 const inFlightLoads = new Map<string, Promise<B4Preference>>();
 
 function campKidCompatibilityHeaders(): Record<string, string> {
-  const program = readActivePilotProgram();
-  const accessCode = readActiveAccessCode();
   const sessionId = readLocalKidPlaySessionId();
-  if (
-    readActivePortalRole() !== 'facilitator' ||
-    !program?.programCode?.trim() ||
-    !accessCode?.trim() ||
-    !sessionId?.trim()
-  ) {
-    return {};
-  }
-  return {
-    'X-Camp-Program-Code': program.programCode.trim(),
-    'X-Camp-Access-Code': accessCode.trim(),
-    'X-Kid-Session-Id': sessionId.trim(),
-  };
+  if (!sessionId?.trim() || !hasCampCompatibilitySession()) return {};
+  return campCompatibilityHeaders(sessionId);
 }
 
 async function request(participantId: string, init?: RequestInit): Promise<B4Preference> {

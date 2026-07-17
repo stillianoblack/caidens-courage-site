@@ -1,5 +1,7 @@
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
 import { familyCompatibilityHeaders } from './familyPortalChildrenApi';
+import { campCompatibilityHeaders, hasCampCompatibilitySession } from './campChildSessionApi';
+import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
 import type { GradeLevel } from '../data/gradeLevelOptions';
 import type { B4BaselineCheckRecord } from './b4BaselineCheckStorage';
 
@@ -9,6 +11,15 @@ export type FamilyChildSessionResult = {
   correlationId: string | null;
 };
 
+function childSessionHeaders(sessionId?: string): Record<string, string> {
+  if (hasFamilyCompatibilitySession()) return familyCompatibilityHeaders();
+  return campCompatibilityHeaders(sessionId);
+}
+
+export function hasServerMediatedChildSession(): boolean {
+  return hasFamilyCompatibilitySession() || hasCampCompatibilitySession();
+}
+
 async function request(
   method: 'GET' | 'POST' | 'PATCH',
   input: { participantId?: string; sessionId?: string; action?: 'activity' | 'end'; reason?: string; resumePayload?: Record<string, unknown> | null },
@@ -16,7 +27,7 @@ async function request(
   const query = input.sessionId ? `?sessionId=${encodeURIComponent(input.sessionId)}` : '';
   const response = await fetch(`/.netlify/functions/family-child-session${query}`, {
     method,
-    headers: familyCompatibilityHeaders(),
+    headers: childSessionHeaders(input.sessionId),
     body: method === 'GET' ? undefined : JSON.stringify(input),
   });
   const body = await response.json().catch(() => null);
@@ -66,7 +77,7 @@ export async function saveFamilyCompatibilityChildGrade(
     `/.netlify/functions/family-child-session?sessionId=${encodeURIComponent(sessionId)}`,
     {
       method: 'PATCH',
-      headers: familyCompatibilityHeaders(),
+      headers: childSessionHeaders(sessionId),
       body: JSON.stringify({ action: 'grade', gradeLevel }),
     },
   );
@@ -90,7 +101,7 @@ export async function saveFamilyCompatibilityChildBaseline(
     `/.netlify/functions/family-child-session?sessionId=${encodeURIComponent(sessionId)}`,
     {
       method: 'PATCH',
-      headers: familyCompatibilityHeaders(),
+      headers: childSessionHeaders(sessionId),
       body: JSON.stringify({
         action: 'baseline',
         record: {
