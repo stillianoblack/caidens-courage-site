@@ -88,6 +88,17 @@ describe('server-mediated portal program access', () => {
     expect(body).not.toHaveProperty('program');
   });
 
+  test('does not exchange a public program code for the private family access code', async () => {
+    const response = await handler({
+      httpMethod: 'POST',
+      headers: {},
+      body: JSON.stringify({ accessCode: program.program_code, intent: 'parent' }),
+    });
+    const body = JSON.parse(response.body);
+    expect(response.statusCode).toBe(200);
+    expect(body.program.familyAccessCode).toBe('');
+  });
+
   test('rejects malformed access codes before querying Supabase', async () => {
     const response = await handler({
       httpMethod: 'POST',

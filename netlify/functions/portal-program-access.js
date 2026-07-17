@@ -112,10 +112,17 @@ function credentialMatches(program, role, intent, credential) {
   };
 }
 
-function sessionProgram(program, role, credential, credentialVerified) {
-  const familyAccessCode = role === 'family' ? normalizeAccessCode(program.family_access_code) : '';
+function sessionProgram(program, role, accessCode, credential, credentialVerified) {
+  const canonicalFamilyCode = normalizeAccessCode(program.family_access_code);
+  const canonicalFacilitatorCode = normalizeAccessCode(program.facilitator_access_code);
+  const familyAccessCode =
+    role === 'family' && (accessCode === canonicalFamilyCode || credentialVerified)
+      ? canonicalFamilyCode
+      : '';
   const facilitatorAccessCode =
-    role === 'facilitator' ? normalizeAccessCode(program.facilitator_access_code) : null;
+    role === 'facilitator' && (accessCode === canonicalFacilitatorCode || credentialVerified)
+      ? canonicalFacilitatorCode
+      : null;
   return {
     id: String(program.id || ''),
     programName: safeText(program.program_name, 180),
@@ -190,6 +197,7 @@ exports.handler = async (event) => {
     program: sessionProgram(
       result.program,
       result.role,
+      accessCode,
       credential,
       credentialCheck.verified,
     ),
