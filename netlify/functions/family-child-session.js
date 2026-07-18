@@ -6,6 +6,7 @@ const {
 } = require('./_lib/familyCompatibilityAuth');
 const {
   authorizeCampProgram,
+  participantDirectoryForCamp,
   participantForCamp,
   sessionForCamp,
 } = require('./_lib/campCompatibilityAuth');
@@ -408,6 +409,16 @@ exports.handler = async (event) => {
   }
 
   if (event.httpMethod === 'POST') {
+    if (mode === 'camp' && body.action === 'roster') {
+      const directory = await participantDirectoryForCamp(supabase, program.program_code);
+      if (!directory.participants) {
+        return json(directory.status || 503, { success: false, code: directory.code }, id);
+      }
+      return json(200, {
+        success: true,
+        participants: directory.participants,
+      }, id);
+    }
     const participantId = safeText(body.participantId, 80);
     if (!UUID.test(participantId)) {
       return json(400, { success: false, code: 'validation_error' }, id);
@@ -622,6 +633,7 @@ exports._test = {
   sanitizeResumePayload,
   launchCampSession,
   launchSession,
+  participantDirectoryForCamp,
   participantForFamily,
   publicSession,
   recordLaunchAudit,

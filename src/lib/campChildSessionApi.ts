@@ -14,6 +14,18 @@ export type CampChildSessionError = Error & {
   conflictSession?: KidPlaySessionRow | null;
 };
 
+export type CampParticipantDirectoryRow = {
+  id: string;
+  nickname: string | null;
+  first_name: string | null;
+  role: 'student';
+  program_code: string;
+  created_at: string;
+  grade_level: string | null;
+  b4_variant_key: string | null;
+  b4_variant_selected_at: string | null;
+};
+
 export function campCompatibilityHeaders(sessionId?: string | null): Record<string, string> {
   const program = readActivePilotProgram();
   const accessCode = readActiveAccessCode();
@@ -74,6 +86,22 @@ async function request(
 }
 
 const launchRequests = new Map<string, Promise<CampChildSessionResult>>();
+
+export async function getCampCompatibilityParticipantDirectory(): Promise<CampParticipantDirectoryRow[]> {
+  const response = await fetch('/.netlify/functions/family-child-session', {
+    method: 'POST',
+    headers: campCompatibilityHeaders(),
+    body: JSON.stringify({ action: 'roster' }),
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok || !body?.success || !Array.isArray(body.participants)) {
+    const error = new Error(body?.code || 'camp_participant_directory_failed') as CampChildSessionError;
+    error.status = response.status;
+    error.correlationId = response.headers.get('X-Correlation-Id') || body?.correlationId || null;
+    throw error;
+  }
+  return body.participants as CampParticipantDirectoryRow[];
+}
 
 export function launchCampCompatibilityChildSession(input: {
   participantId: string;

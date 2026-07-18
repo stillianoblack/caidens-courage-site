@@ -40,6 +40,29 @@ async function participantForCamp(supabase, participantId, programCode) {
   return { participant: data };
 }
 
+async function participantDirectoryForCamp(supabase, programCode) {
+  const { data, error } = await supabase
+    .from('participants')
+    .select('id, nickname, first_name, role, program_code, created_at, grade_level, b4_variant_key, b4_variant_selected_at')
+    .eq('program_code', programCode)
+    .eq('role', 'student')
+    .order('created_at', { ascending: true });
+  if (error) return { status: 503, code: 'camp_participant_directory_failed' };
+  return {
+    participants: (data || []).map((row) => ({
+      id: row.id,
+      nickname: safeText(row.nickname, 80) || null,
+      first_name: safeText(row.first_name, 80) || null,
+      role: 'student',
+      program_code: row.program_code,
+      created_at: row.created_at,
+      grade_level: safeText(row.grade_level, 20) || null,
+      b4_variant_key: safeText(row.b4_variant_key, 20) || null,
+      b4_variant_selected_at: row.b4_variant_selected_at || null,
+    })),
+  };
+}
+
 async function sessionForCamp(supabase, sessionId, program) {
   const { data, error } = await supabase
     .from('kid_play_sessions')
@@ -63,6 +86,7 @@ async function sessionForCamp(supabase, sessionId, program) {
 module.exports = {
   CAMP_SESSION_SOURCES,
   authorizeCampProgram,
+  participantDirectoryForCamp,
   participantForCamp,
   safeText,
   sessionForCamp,

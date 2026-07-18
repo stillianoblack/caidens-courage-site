@@ -1,5 +1,6 @@
 import {
   campCompatibilityHeaders,
+  getCampCompatibilityParticipantDirectory,
   launchCampCompatibilityChildSession,
 } from '../campChildSessionApi';
 
@@ -66,5 +67,28 @@ describe('camp child session transport', () => {
     expect(request[1]).toEqual(expect.objectContaining({ method: 'POST' }));
     expect(String(request[1]?.body)).not.toContain('PIN');
     expect(String(request[1]?.body)).not.toContain('FAC-TEST');
+  });
+
+  test('loads a sanitized facilitator participant directory through the same endpoint', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(response({
+      success: true,
+      participants: [{
+        id: participantId,
+        nickname: 'Ace',
+        first_name: 'Trace',
+        role: 'student',
+        program_code: 'CAMP-TEST',
+        created_at: '2026-07-17T00:00:00.000Z',
+        grade_level: '3',
+        b4_variant_key: 'courage',
+        b4_variant_selected_at: null,
+      }],
+    }));
+    const rows = await getCampCompatibilityParticipantDirectory();
+    expect(rows).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/family-child-session',
+      expect.objectContaining({ method: 'POST', body: JSON.stringify({ action: 'roster' }) }),
+    );
   });
 });

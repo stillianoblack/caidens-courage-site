@@ -67,6 +67,40 @@ describe('family child session endpoint', () => {
     });
   });
 
+  test('returns only sanitized participant directory fields for a camp program', async () => {
+    const participantQuery = query({
+      data: [{
+        id: participantId,
+        nickname: 'Ace',
+        first_name: 'Trace',
+        role: 'student',
+        program_code: 'CAMP-TEST',
+        created_at: '2026-07-17T00:00:00.000Z',
+        grade_level: '3',
+        b4_variant_key: 'courage',
+        b4_variant_selected_at: null,
+        email: 'must-not-leak@example.com',
+        student_pin: 'must-not-leak',
+      }],
+      error: null,
+    });
+    const result = await endpoint._test.participantDirectoryForCamp(
+      { from: () => participantQuery },
+      'CAMP-TEST',
+    );
+    expect(result.participants).toEqual([{
+      id: participantId,
+      nickname: 'Ace',
+      first_name: 'Trace',
+      role: 'student',
+      program_code: 'CAMP-TEST',
+      created_at: '2026-07-17T00:00:00.000Z',
+      grade_level: '3',
+      b4_variant_key: 'courage',
+      b4_variant_selected_at: null,
+    }]);
+  });
+
   test('rejects anonymous launch before participant access is evaluated', async () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === 'pilot_programs') return query({ data: null, error: null });

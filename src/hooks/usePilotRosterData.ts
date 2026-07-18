@@ -30,6 +30,7 @@ import {
   type StudentAccessFields,
 } from '../lib/studentPinService';
 import { buildFamilyClaimUrl } from '../lib/familyClaimCode';
+import { hasCampCompatibilitySession } from '../lib/campChildSessionApi';
 
 export type PilotRosterRow = {
   participantId: string;
@@ -95,9 +96,11 @@ export function usePilotRosterData(
         loadProgramParticipantDirectory(code),
       ]);
 
-      const accessMap = await fetchStudentAccessFieldsByIds(
-        directoryPayload.participants.map((row) => row.id),
-      );
+      const accessMap = hasCampCompatibilitySession()
+        ? new Map<string, StudentAccessFields>()
+        : await fetchStudentAccessFieldsByIds(
+            directoryPayload.participants.map((row) => row.id),
+          );
 
       setParticipants(directoryPayload.participants);
       setLinks(linksPayload.links);

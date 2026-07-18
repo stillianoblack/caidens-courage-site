@@ -24,6 +24,14 @@ describe('camp child protected data paths', () => {
     expect(layout).toContain('serverHydratedSession');
   });
 
+  test('facilitator participant directory is server-mediated before session launch', () => {
+    const directory = source('src/lib/pilotParticipantDirectory.ts');
+    expect(directory).toContain('getCampCompatibilityParticipantDirectory');
+    expect(directory).toContain('hasCampCompatibilitySession');
+    const roster = source('src/hooks/usePilotRosterData.ts');
+    expect(roster).toContain('hasCampCompatibilitySession()');
+  });
+
   test('server validates program, facilitator proof, participant membership, and session scope', () => {
     const helper = source('netlify/functions/_lib/campCompatibilityAuth.js');
     expect(helper).toContain(".eq('id', programId)");
