@@ -16,6 +16,10 @@
       "path": "netlify.toml"
     },
     {
+      "status": "A",
+      "path": "netlify/functions/_lib/campCompatibilityAuth.js"
+    },
+    {
       "status": "??",
       "path": "netlify/functions/_lib/crmAuth.js"
     },
@@ -377,6 +381,14 @@
     },
     {
       "status": "A",
+      "path": "src/hooks/useDocumentModalScrollLock.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/hooks/usePilotRosterData.ts"
+    },
+    {
+      "status": "A",
       "path": "src/hooks/usePortalUnlock.ts"
     },
     {
@@ -400,8 +412,20 @@
       "path": "src/lib/__tests__/b4OnboardingExperience.test.tsx"
     },
     {
+      "status": "A",
+      "path": "src/lib/__tests__/b4VariantCampSessionClient.test.ts"
+    },
+    {
       "status": "??",
       "path": "src/lib/__tests__/b4VariantSystem.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/campChildSessionApi.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/campChildSessionProtectedPaths.test.ts"
     },
     {
       "status": "??",
@@ -500,8 +524,16 @@
       "path": "src/lib/b4VariantService.ts"
     },
     {
+      "status": "A",
+      "path": "src/lib/campChildSessionApi.ts"
+    },
+    {
       "status": "M",
       "path": "src/lib/childProfileService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/facilitatorKidPlayLaunch.ts"
     },
     {
       "status": "??",
@@ -554,6 +586,10 @@
     {
       "status": "M",
       "path": "src/lib/participantGradeService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/pilotParticipantDirectory.ts"
     },
     {
       "status": "M",
