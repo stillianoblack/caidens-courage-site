@@ -137,6 +137,7 @@ const B4FocusFlightPage: React.FC = () => {
             onResult={handleResult}
             onRestart={restartMission}
             onExit={returnToPortal}
+            exitHref={exitPath}
             exitLabel={exitLabel}
             variant={variant}
           />

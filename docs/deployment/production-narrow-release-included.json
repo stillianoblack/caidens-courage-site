@@ -256,6 +256,10 @@
       "path": "src/components/kid-play-shell/KidPlayShellNav.tsx"
     },
     {
+      "status": "M",
+      "path": "src/components/pilot-dashboard/CharacterLearningTrackCard.tsx"
+    },
+    {
       "status": "??",
       "path": "src/components/pilot-program/PilotProgramSignupForm.test.tsx"
     },
