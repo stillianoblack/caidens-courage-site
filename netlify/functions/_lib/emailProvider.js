@@ -55,18 +55,23 @@ async function sendResendEmail(payload) {
     "Caiden's Courage <hello@caidenscourage.com>";
 
   try {
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+    if (payload.idempotencyKey) {
+      headers['Idempotency-Key'] = String(payload.idempotencyKey).slice(0, 256);
+    }
     const response = await fetch(RESEND_ENDPOINT, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         from,
         to: payload.to,
         subject: payload.subject,
         html: payload.html,
         text: payload.text,
+        ...(payload.replyTo ? { reply_to: payload.replyTo } : {}),
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -85,6 +90,8 @@ function sendWelcomeEmail(payload) {
     subject: payload.subject || "Welcome to Caiden's Courage",
     html: payload.html || welcomeEmailHtml(payload),
     text: payload.body || payload.text,
+    replyTo: payload.replyTo || process.env.RESEND_REPLY_TO_EMAIL,
+    idempotencyKey: payload.idempotencyKey,
   });
 }
 

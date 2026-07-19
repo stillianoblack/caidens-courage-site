@@ -1,11 +1,63 @@
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 const { sendWelcomeEmail } = require('./_lib/emailProvider');
 
-function json(statusCode, body) {
+function correlationId(event = {}) {
+  const supplied = event.headers?.['x-correlation-id'] || event.headers?.['X-Correlation-Id'];
+  return /^[a-zA-Z0-9._-]{8,120}$/.test(String(supplied || ''))
+    ? String(supplied)
+    : crypto.randomUUID();
+}
+
+function json(statusCode, body, id) {
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Correlation-Id': id,
+    },
+    body: JSON.stringify({ ...body, correlationId: id }),
+  };
+}
+
+function maskEmail(value) {
+  const [local = '', domain = ''] = String(value || '').trim().toLowerCase().split('@');
+  if (!local || !domain) return 'masked';
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
+function validEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+
+function previewBaseUrl() {
+  const value = process.env.DEPLOY_PRIME_URL || process.env.URL || '';
+  try {
+    return new URL(value).origin;
+  } catch {
+    return 'http://localhost:8888';
+  }
+}
+
+function canaryPayload(recipientEmail) {
+  const day = new Date().toISOString().slice(0, 10);
+  const recipientHash = crypto.createHash('sha256').update(recipientEmail).digest('hex').slice(0, 16);
+  return {
+    recipientEmail,
+    emailType: 'welcome_canary',
+    subject: "Caiden's Courage transactional email test",
+    body: [
+      "Welcome to Caiden's Courage.",
+      '',
+      'This is a controlled staging test of transactional email delivery.',
+      'No child information, access code, PIN, or marketing enrollment is included.',
+    ].join('\n'),
+    childName: 'Staging Test Member',
+    programName: "Caiden's Courage Staging",
+    portalLink: `${previewBaseUrl()}/portal`,
+    idempotencyKey: `welcome-canary/${day}/${recipientHash}`,
   };
 }
 
@@ -15,6 +67,7 @@ function getSupabase() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { transport: WebSocket },
   });
 }
 
@@ -68,33 +121,49 @@ async function updateEmailAttempt(logId, status, detail = {}) {
 }
 
 exports.handler = async (event) => {
+  const id = correlationId(event);
   if (event.httpMethod !== 'POST') {
-    return json(405, { success: false, error: 'Method not allowed.' });
+    return json(405, { success: false, error: 'Method not allowed.' }, id);
   }
 
-  let payload;
+  // This legacy browser endpoint is closed in production. The only supported use is a
+  // preview-only, server-configured adult canary. Real transactional sends must originate
+  // from an authorized server workflow that resolves its own recipient and template.
+  if (process.env.CONTEXT === 'production') {
+    return json(404, { success: false, error: 'Not found.' }, id);
+  }
+  if (process.env.TRANSACTIONAL_EMAIL_CANARY_ENABLED !== 'true') {
+    return json(404, { success: false, error: 'Email canary is disabled.' }, id);
+  }
+
+  let request;
   try {
-    payload = JSON.parse(event.body || '{}');
+    request = JSON.parse(event.body || '{}');
   } catch {
-    return json(400, { success: false, error: 'Invalid JSON.' });
+    return json(400, { success: false, error: 'Invalid JSON.' }, id);
+  }
+  if (request.action !== 'send_welcome_canary') {
+    return json(400, { success: false, error: 'Invalid canary request.' }, id);
   }
 
-  if (!payload.recipientEmail || !payload.subject || !payload.body) {
-    return json(400, { success: false, error: 'Missing email payload.' });
+  const recipientEmail = String(process.env.CRM_ADULT_TEST_EMAIL || '').trim().toLowerCase();
+  if (!validEmail(recipientEmail)) {
+    return json(503, { success: false, error: 'Canary recipient is not configured.' }, id);
   }
+  const payload = canaryPayload(recipientEmail);
 
   console.info('[PARENT_EMAIL_ATTEMPTED]', {
-    recipient_email: payload.recipientEmail,
-    email_type: payload.emailType || 'welcome',
-    related_student_id: payload.relatedStudentId || null,
-    related_program_id: payload.relatedProgramId || null,
+    correlationId: id,
+    recipient_email: maskEmail(payload.recipientEmail),
+    email_type: payload.emailType,
   });
 
   const queuedLog = await logEmailAttempt(payload, 'queued');
   if (!process.env.RESEND_API_KEY) {
     console.info('[SEND_WELCOME_EMAIL]', {
+      correlationId: id,
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_email: maskEmail(payload.recipientEmail),
       success: false,
       skipped: true,
       reason: 'RESEND_API_KEY missing',
@@ -107,17 +176,18 @@ exports.handler = async (event) => {
       status: 'failed',
       log,
       error: 'Email delivery is not configured.',
-    });
+    }, id);
   }
 
   const result = await sendWelcomeEmail(payload);
   if (!result.success) {
     console.info('[SEND_WELCOME_EMAIL]', {
+      correlationId: id,
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_email: maskEmail(payload.recipientEmail),
       success: false,
       skipped: false,
-      reason: result.error,
+      reason: 'provider_rejected',
     });
     const log = await updateEmailAttempt(queuedLog.id, 'failed', {
       errorMessage: result.error,
@@ -126,16 +196,17 @@ exports.handler = async (event) => {
       success: false,
       status: 'failed',
       log,
-      error: result.error,
-    });
+      error: 'Email provider rejected the canary.',
+    }, id);
   }
 
   const log = await updateEmailAttempt(queuedLog.id, 'sent', {
     providerMessageId: result.providerMessageId,
   });
   console.info('[SEND_WELCOME_EMAIL]', {
+    correlationId: id,
     provider: 'Resend',
-    recipient_email: payload.recipientEmail,
+    recipient_email: maskEmail(payload.recipientEmail),
     success: true,
     skipped: false,
     provider_message_id: result.providerMessageId ?? null,
@@ -143,7 +214,6 @@ exports.handler = async (event) => {
   return json(200, {
     success: true,
     status: 'sent',
-    providerMessageId: result.providerMessageId,
     log,
-  });
+  }, id);
 };
