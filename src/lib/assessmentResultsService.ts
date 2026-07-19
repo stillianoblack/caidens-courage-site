@@ -23,6 +23,11 @@ import {
   logTrackingSaveError,
   TRACKING_SAVE_WARNING,
 } from './trackingSaveLog';
+import { readLocalKidPlaySessionId } from './kidPlaySessionService';
+import {
+  hasServerMediatedChildSession,
+  saveFamilyCompatibilityChildBaseline,
+} from './familyChildSessionApi';
 
 export type AssessmentResultRow = {
   id?: string;
@@ -468,6 +473,19 @@ export async function insertAdultAssessmentResult(
 export async function saveStudentBaselineToSupabase(
   record: B4BaselineCheckRecord,
 ): Promise<BaselineSubmitResult> {
+  const familySessionId = readLocalKidPlaySessionId();
+  if (familySessionId && hasServerMediatedChildSession()) {
+    try {
+      await saveFamilyCompatibilityChildBaseline(familySessionId, record);
+      return {
+        success: true,
+        message: 'B-4 Check-In saved. Your Weekly Adventures are ready.',
+      };
+    } catch {
+      return { success: false, message: TRACKING_SAVE_WARNING };
+    }
+  }
+
   const programCode = resolveTrackingProgramCode();
   if (!programCode) {
     return { success: false, message: TRACKING_SAVE_WARNING };

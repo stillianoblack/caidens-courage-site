@@ -16,16 +16,13 @@ import type {
 } from '../../types/charlieAdaptiveQuest';
 import { CHARLIE_ADAPTIVE_COACH } from './charlieCoachCopy';
 import { CHARLIE_AVATAR_SRC } from './sharedAssets';
+import { CHARLIE_ADAPTIVE_MISSION_REGISTRY } from './charlieAdaptiveRegistry';
 
-export const CHARLIE_ADAPTIVE_MISSION_REGISTRY: Record<string, CharlieAdaptiveMissionFile> = {};
-
-export function registerCharlieAdaptiveMission(mission: CharlieAdaptiveMissionFile): void {
-  CHARLIE_ADAPTIVE_MISSION_REGISTRY[mission.id] = mission;
-}
-
-export function isCharlieAdaptiveMissionId(missionId: string): boolean {
-  return missionId in CHARLIE_ADAPTIVE_MISSION_REGISTRY;
-}
+export {
+  CHARLIE_ADAPTIVE_MISSION_REGISTRY,
+  isCharlieAdaptiveMissionId,
+  registerCharlieAdaptiveMission,
+} from './charlieAdaptiveRegistry';
 
 const LEGACY_DEFAULT_BAND: CharlieGradeBand = '2-3';
 

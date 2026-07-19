@@ -1,6 +1,6 @@
 import type { ZekeAdaptiveMissionFile } from '../../types/zekeAdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
-import { registerZekeAdaptiveMission } from './zekeAdaptiveBuilder';
+import { registerZekeAdaptiveMission } from './zekeAdaptiveRegistry';
 import { ZEKE_MISSION_1_FILE } from './missions/mission1NewTable';
 import { ZEKE_MISSION_2_FILE } from './missions/mission2PassTheBall';
 import { ZEKE_MISSION_3_FILE } from './missions/mission3GroupProjectGlitch';

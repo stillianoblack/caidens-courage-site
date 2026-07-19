@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import { initAnalytics } from './lib/analytics';
-import { logAppVersion } from './lib/appVersion';
+import { APP_VERSION, logAppVersion } from './lib/appVersion';
 import { installInternalLinkReloadFallback } from './lib/internalLinkReloadFallback';
 import { installPortalClickDebug } from './lib/portalClickDebug';
 import App from './App';
@@ -38,6 +38,46 @@ installInternalLinkReloadFallback();
 installPortalClickDebug();
 initAnalyticsAfterFirstPaint();
 logAppVersion();
+
+async function clearLocalDevelopmentApplicationCache() {
+  if (process.env.NODE_ENV !== 'development') return;
+  if (!['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) return;
+
+  const registrations = 'serviceWorker' in navigator
+    ? await navigator.serviceWorker.getRegistrations().catch(() => [])
+    : [];
+  const registrationResults = await Promise.all(
+    registrations.map((registration) => registration.unregister().catch(() => false)),
+  );
+  const cacheNames = 'caches' in window ? await window.caches.keys().catch(() => []) : [];
+  const cacheResults = await Promise.all(
+    cacheNames.map((cacheName) => window.caches.delete(cacheName).catch(() => false)),
+  );
+
+  console.info('[LOCAL_DEV_CACHE_RESET]', JSON.stringify({
+    serviceWorkersUnregistered: registrationResults.filter(Boolean).length,
+    applicationCachesDeleted: cacheResults.filter(Boolean).length,
+  }));
+}
+
+void clearLocalDevelopmentApplicationCache();
+
+function installLocalDevelopmentChunkCacheBuster() {
+  if (process.env.NODE_ENV !== 'development') return;
+  if (!['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) return;
+
+  const originalAppendChild = document.head.appendChild.bind(document.head);
+  document.head.appendChild = (node) => {
+    if (node instanceof HTMLScriptElement && node.src.includes('.chunk.js')) {
+      const chunkUrl = new URL(node.src, window.location.href);
+      chunkUrl.searchParams.set('local-contract', APP_VERSION.signupContract);
+      node.src = chunkUrl.toString();
+    }
+    return originalAppendChild(node);
+  };
+}
+
+installLocalDevelopmentChunkCacheBuster();
 
 function installKidShellBackForwardRecovery() {
   if (typeof window === 'undefined') return;
@@ -89,8 +129,9 @@ function installServiceWorkerUpdateReload() {
   });
 
   window.addEventListener('load', () => {
+    const workerVersion = encodeURIComponent(`${APP_VERSION.buildTime}:${APP_VERSION.commit}`);
     navigator.serviceWorker
-      .register('/sw.js')
+      .register(`/sw.js?v=${workerVersion}`, { updateViaCache: 'none' })
       .then((registration) => {
         registration.addEventListener('updatefound', () => {
           const worker = registration.installing;

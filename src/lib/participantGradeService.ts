@@ -9,6 +9,10 @@ import { resolveTrackingProgramCode } from './activeProgramContext';
 import { getGradeBand } from './getGradeBand';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { loadLocalParticipants, saveLocalParticipant } from './pilotTrackingLocalStorage';
+import {
+  hasFamilyCompatibilitySession,
+  updateFamilyCompatibilityParticipantGrade,
+} from './familyPortalChildrenApi';
 
 export type ParticipantGradeSettings = {
   grade_level?: GradeLevel | null;
@@ -112,14 +116,24 @@ export async function saveParticipantGradeSettings(
     return { success: false, error: 'Invalid grade band.' };
   }
 
-  updateLocalParticipantGrade(id, settings);
-
   if (!isSupabaseConfigured() || !supabase) {
+    updateLocalParticipantGrade(id, settings);
     notifyGradeSaved(id);
     return { success: true, warning: 'Saved locally. Grade will sync when Supabase is available.' };
   }
 
   try {
+    if (hasFamilyCompatibilitySession() && settings.grade_level) {
+      await updateFamilyCompatibilityParticipantGrade({
+        participantId: id,
+        gradeLevel: settings.grade_level,
+        allowStretchLevel: settings.allow_stretch_level,
+      });
+      updateLocalParticipantGrade(id, settings);
+      notifyGradeSaved(id);
+      return { success: true };
+    }
+
     const payload: Record<string, unknown> = {
       grade_band: settings.grade_band,
       allow_stretch_level: settings.allow_stretch_level,
@@ -132,6 +146,7 @@ export async function saveParticipantGradeSettings(
 
     if (error) {
       if (isMissingGradeColumnError(error.message)) {
+        updateLocalParticipantGrade(id, settings);
         notifyGradeSaved(id);
         return {
           success: true,
@@ -142,11 +157,21 @@ export async function saveParticipantGradeSettings(
       return { success: false, error: error.message };
     }
 
+    updateLocalParticipantGrade(id, settings);
     notifyGradeSaved(id);
     return { success: true };
-  } catch {
-    notifyGradeSaved(id);
-    return { success: true, warning: 'Grade saved locally.' };
+  } catch (caught) {
+    if (process.env.NODE_ENV === 'development') {
+      const error = caught as Error & { status?: number; correlationId?: string | null };
+      console.warn('[PARTICIPANT_GRADE_SAVE]', {
+        route: hasFamilyCompatibilitySession() ? 'family_compatibility_endpoint' : 'direct_client',
+        status: error?.status ?? null,
+        code: error?.message || 'unknown_error',
+        correlationId: error?.correlationId ?? null,
+        participantIdSuffix: id.slice(-6),
+      });
+    }
+    return { success: false, error: 'Could not save grade level.' };
   }
 }
 

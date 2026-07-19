@@ -26,10 +26,10 @@ import {
   type B4FocusFlightResult,
   type FlameDefinition,
 } from '../types';
+import { getB4TextureKey, normalizeB4Variant, type B4StateKey, type B4VariantKey } from '../../../../data/b4/variantManifest';
+import { B4FlightStateMachine } from '../B4FlightStateMachine';
 
 type ObstacleKind = 'cloud' | 'branch' | 'rock' | 'wind';
-type B4Expression = 'idle' | 'blinking' | 'happy' | 'hurt';
-
 const PLAYER_TRAIL_SOCKET = {
   x: -56,
   y: 4,
@@ -113,7 +113,8 @@ export default class GameScene extends Phaser.Scene {
   private ambientSound?: Phaser.Sound.BaseSound;
   private buttonSound?: Phaser.Sound.BaseSound;
   private successSound?: Phaser.Sound.BaseSound;
-  private b4Expression: B4Expression = 'idle';
+  private b4Variant: B4VariantKey = 'courage';
+  private b4StateMachine?: B4FlightStateMachine;
   private blinkTimer?: Phaser.Time.TimerEvent;
   private lightningTimer?: Phaser.Time.TimerEvent;
   private mobileGraphics = false;
@@ -193,7 +194,9 @@ export default class GameScene extends Phaser.Scene {
     this.activeFlames = [];
     this.activeObstacles = [];
     this.playerSprite = undefined;
-    this.b4Expression = 'idle';
+    this.b4Variant = normalizeB4Variant(this.registry.get('b4Variant'));
+    this.b4StateMachine?.dispose();
+    this.b4StateMachine = undefined;
     this.blinkTimer?.remove(false);
     this.blinkTimer = undefined;
     this.lightningTimer?.remove(false);
@@ -586,12 +589,17 @@ export default class GameScene extends Phaser.Scene {
     exhaustSocket.setAlpha(0.7);
     exhaustSocket.setBlendMode(Phaser.BlendModes.ADD);
 
-    if (this.hasUsableTexture(B4_PROCESSED_ASSET_KEYS.idle)) {
-      this.playerSprite = this.add.image(0, 0, B4_PROCESSED_ASSET_KEYS.idle);
+    const idleTexture = getB4TextureKey(this.b4Variant, 'idle');
+    if (this.hasUsableTexture(idleTexture)) {
+      this.playerSprite = this.add.image(0, 0, idleTexture);
       this.playerSprite.setDisplaySize(108, 61);
       this.playerSprite.setOrigin(0.5);
-      this.playerSprite.setTexture(B4_PROCESSED_ASSET_KEYS.idle);
       this.player.add([trailGlow, rimGlow, exhaustSocket, this.playerSprite]);
+      this.b4StateMachine = new B4FlightStateMachine(
+        (state) => this.applyB4StateTexture(state),
+        (delay, callback) => this.time.delayedCall(delay, callback),
+        (timer) => (timer as Phaser.Time.TimerEvent).remove(false),
+      );
       this.scheduleNextBlink();
     } else {
       this.player.add([trailGlow, rimGlow, exhaustSocket, ...this.createPlaceholderB4()]);
@@ -691,6 +699,10 @@ export default class GameScene extends Phaser.Scene {
       this.game.events.off(B4_FOCUS_FLIGHT_EVENTS.pauseToggle, this.togglePause, this);
       this.game.events.off(B4_FOCUS_FLIGHT_EVENTS.muteToggle, this.toggleMute, this);
       this.game.events.off(B4_FOCUS_FLIGHT_EVENTS.restart, this.restartMission, this);
+      this.b4StateMachine?.dispose();
+      this.b4StateMachine = undefined;
+      this.blinkTimer?.remove(false);
+      this.blinkTimer = undefined;
       this.stopAmbientAudio();
     });
   }
@@ -885,7 +897,7 @@ export default class GameScene extends Phaser.Scene {
     this.hearts -= 1;
     this.combo = 0;
     this.invincible = true;
-    this.showB4Expression('hurt', 500);
+    this.showB4Expression('hurt', 1100);
     this.playAudioHook('hit obstacle');
     this.cameras.main.shake(180, 0.008);
     this.cameras.main.flash(150, 146, 238, 255, true);
@@ -898,9 +910,7 @@ export default class GameScene extends Phaser.Scene {
       onComplete: () => {
         this.player.setAlpha(1);
         this.invincible = false;
-        if (this.b4Expression === 'hurt') {
-          this.showB4Expression('idle');
-        }
+        this.showB4Expression('idle');
       },
     });
     this.emitHud();
@@ -1111,10 +1121,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private prepareProductionTextures(): void {
-    this.createTransparentBorderTexture(B4_ASSET_KEYS.idle, B4_PROCESSED_ASSET_KEYS.idle, 'B-4 idle');
-    this.createTransparentBorderTexture(B4_ASSET_KEYS.blinking, B4_PROCESSED_ASSET_KEYS.blinking, 'B-4 blinking');
-    this.createTransparentBorderTexture(B4_ASSET_KEYS.happy, B4_PROCESSED_ASSET_KEYS.happy, 'B-4 happy');
-    this.createTransparentBorderTexture(B4_ASSET_KEYS.hurt, B4_PROCESSED_ASSET_KEYS.hurt, 'B-4 hurt');
     this.createTransparentBorderTexture(B4_ASSET_KEYS.sparkFlame, B4_PROCESSED_ASSET_KEYS.sparkFlame, 'Sparkle Flame');
     this.createTransparentBorderTexture(B4_ASSET_KEYS.anchorFlame, B4_PROCESSED_ASSET_KEYS.anchorFlame, 'Anchor Flame');
     this.createTransparentBorderTexture(B4_ASSET_KEYS.emberFlame, B4_PROCESSED_ASSET_KEYS.emberFlame, 'Ember Flame');
@@ -1303,48 +1309,26 @@ export default class GameScene extends Phaser.Scene {
     if (!this.playerSprite || this.gameOver) return;
     this.blinkTimer?.remove(false);
     this.blinkTimer = this.time.delayedCall(Phaser.Math.Between(1800, 3200), () => {
-      if (this.playerSprite && !this.invincible && this.b4Expression === 'idle') {
-        this.playBlinkSequence(Phaser.Math.Between(0, 100) < 22);
+      if (this.playerSprite && !this.invincible && this.b4StateMachine?.state === 'idle') {
+        this.playBlinkSequence();
       }
       this.scheduleNextBlink();
     });
   }
 
-  private playBlinkSequence(doubleBlink: boolean): void {
-    this.showB4Expression('blinking');
-    this.time.delayedCall(Phaser.Math.Between(105, 155), () => {
-      if (this.b4Expression !== 'blinking') return;
-      this.showB4Expression('idle');
-      if (!doubleBlink || this.invincible) return;
-      this.time.delayedCall(Phaser.Math.Between(95, 135), () => {
-        if (this.b4Expression !== 'idle' || this.invincible) return;
-        this.showB4Expression('blinking');
-        this.time.delayedCall(Phaser.Math.Between(90, 130), () => {
-          if (this.b4Expression === 'blinking') {
-            this.showB4Expression('idle');
-          }
-        });
-      });
-    });
+  private playBlinkSequence(): void {
+    this.showB4Expression('blinking', Phaser.Math.Between(105, 155));
   }
 
-  private showB4Expression(expression: B4Expression, durationMs?: number): void {
-    if (!this.playerSprite) return;
+  private showB4Expression(expression: B4StateKey, durationMs?: number): void {
+    if (!this.playerSprite || !this.b4StateMachine) return;
     if (expression === 'blinking' && this.invincible) return;
     if (expression === 'happy' && this.invincible) return;
+    this.b4StateMachine.request(expression, durationMs);
+  }
 
-    const textureKey = B4_PROCESSED_ASSET_KEYS[expression];
-    if (!this.hasUsableTexture(textureKey)) return;
-
-    this.b4Expression = expression;
-    this.playerSprite.setTexture(textureKey);
-
-    if (durationMs) {
-      this.time.delayedCall(durationMs, () => {
-        if (this.b4Expression !== expression) return;
-        if (expression === 'hurt' && this.invincible) return;
-        this.showB4Expression('idle');
-      });
-    }
+  private applyB4StateTexture(state: B4StateKey): void {
+    const textureKey = getB4TextureKey(this.b4Variant, state);
+    if (this.playerSprite && this.hasUsableTexture(textureKey)) this.playerSprite.setTexture(textureKey);
   }
 }

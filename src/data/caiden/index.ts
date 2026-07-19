@@ -52,6 +52,10 @@ import './questAdaptiveCampSupplyMission';
 import './questAdaptiveHomeworkRescuePlan';
 import './questAdaptiveCampLeaderChallenge';
 import { applyCaidenLegacyK1Bands } from './caidenApplyLegacyK1Bands';
+import {
+  getFocusFlameChallengeConfig,
+  getFocusFlameChallengeMission,
+} from './focusFlameChallenges';
 
 applyCaidenLegacyK1Bands();
 
@@ -96,6 +100,10 @@ export function getCaidenQuestById(id: string | undefined): CaidenQuestMeta | un
   return CAIDEN_QUESTS.find((quest) => quest.id === id);
 }
 
+export function getCaidenPlayableMissionById(id: string | undefined) {
+  return getCaidenQuestById(id) ?? getFocusFlameChallengeMission(id);
+}
+
 export function getCaidenAdaptiveQuest(questId: string) {
   return CAIDEN_ADAPTIVE_QUEST_REGISTRY[questId];
 }
@@ -116,6 +124,9 @@ export function resolveCaidenQuestConfig(
   gradeBand: CaidenGradeBand,
   selectionContext?: Omit<AdaptiveQuestionSelectionContext, 'missionId' | 'gradeBand'>,
 ): GameAssessmentConfig | undefined {
+  const challengeConfig = getFocusFlameChallengeConfig(questId);
+  if (challengeConfig) return challengeConfig;
+
   const quest = getCaidenQuestById(questId);
   if (!quest) return undefined;
 
@@ -149,3 +160,10 @@ export {
   buildCaidenAdaptiveConfig,
   getCaidenDashboardDescription,
 };
+export {
+  FOCUS_FLAME_CHALLENGE_CONFIGS,
+  FOCUS_FLAME_CHALLENGE_MISSIONS,
+  buildFocusFlameChallengeConfig,
+  getFocusFlameChallengeConfig,
+  getFocusFlameChallengeMission,
+} from './focusFlameChallenges';

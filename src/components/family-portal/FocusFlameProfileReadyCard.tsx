@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { resolveParticipantGradeDisplay } from '../../lib/participantGradeDisplay';
 import type { StudentParticipantRecord } from '../../lib/pilotTrackingService';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 
 type FocusFlameProfileReadyCardProps = {
   childName: string;
@@ -45,14 +46,15 @@ export default function FocusFlameProfileReadyCard({
         <span className="ffj-profileReadyCelebration" aria-hidden="true">
           🎉
         </span>
-        {avatarSrc ? (
-          <img
-            className="ffj-profileReadyAvatar"
-            src={avatarSrc}
+        {participant?.b4_variant_key ? (
+          <B4CircleAvatar
+            variant={participant.b4_variant_key}
+            size="medium"
             alt=""
-            decoding="async"
-            loading="lazy"
+            className="ffj-profileReadyAvatar ffj-profileReadyB4Avatar"
           />
+        ) : avatarSrc ? (
+          <img className="ffj-profileReadyAvatar" src={avatarSrc} alt="" decoding="async" loading="lazy" />
         ) : (
           <span className="ffj-profileReadyAvatar ffj-profileReadyAvatar--placeholder" aria-hidden="true">
             ✨

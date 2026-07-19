@@ -46,7 +46,14 @@ export function getCorrectFeedbackMessage(question: GameQuestion): string {
   return question.correctFeedback ?? question.feedbackCorrect;
 }
 
-export function getIncorrectFeedbackMessage(question: GameQuestion): string {
+export function getIncorrectFeedbackMessage(
+  question: GameQuestion,
+  answer?: GameAnswerValue,
+): string {
+  if (isChoiceQuestion(question) && typeof answer === 'string') {
+    const selected = question.options.find((option) => option.id === answer);
+    if (selected?.incorrectFeedback) return selected.incorrectFeedback;
+  }
   return question.incorrectFeedback ?? question.feedbackIncorrect;
 }
 
@@ -57,6 +64,8 @@ export function getGameQuestionFeedback(
   const correct = isGameAnswerCorrect(question, answer);
   return {
     correct,
-    message: correct ? getCorrectFeedbackMessage(question) : getIncorrectFeedbackMessage(question),
+    message: correct
+      ? getCorrectFeedbackMessage(question)
+      : getIncorrectFeedbackMessage(question, answer),
   };
 }

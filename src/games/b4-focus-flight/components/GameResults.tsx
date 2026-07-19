@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { B4FocusFlightResult } from '../phaser/types';
+import { getB4Asset, type B4VariantKey } from '../../../data/b4/variantManifest';
 
 interface GameResultsProps {
   result: B4FocusFlightResult;
@@ -7,6 +8,7 @@ interface GameResultsProps {
   onPlayAgain: () => void;
   onExit: () => void;
   exitLabel?: string;
+  variant: B4VariantKey;
 }
 
 const flameLabels = {
@@ -22,6 +24,7 @@ const GameResults: React.FC<GameResultsProps> = ({
   onPlayAgain,
   onExit,
   exitLabel = 'Return to Kid Portal',
+  variant,
 }) => {
   const [step, setStep] = useState<'celebration' | 'stats'>('celebration');
   const completed = result.objectiveComplete;
@@ -31,7 +34,7 @@ const GameResults: React.FC<GameResultsProps> = ({
       <section className="b4ff-resultsPanel b4ff-resultsPanel--celebration" aria-live="polite">
         <img
           className="b4ff-resultsB4"
-          src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png"
+          src={getB4Asset(variant, completed ? 'happy' : 'idle')}
           alt=""
           aria-hidden="true"
         />

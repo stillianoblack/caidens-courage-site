@@ -10,6 +10,7 @@ import {
 } from './independentFamilyProgram';
 import { invalidatePortalFetch } from './portalFetchDedupe';
 import { saveParticipantGradeLevel } from './participantGradeService';
+import { createFamilyCompatibilityChild } from './familyPortalChildrenApi';
 import {
   ensureStudentParticipantForSave,
   findOrCreateParticipant,
@@ -35,6 +36,7 @@ export type CreateFamilyChildResult = {
 };
 
 const CHILD_SAVE_ERROR_MESSAGE = "Couldn't save child yet. Please try again.";
+const pendingFamilyChildRequestIds = new Map<string, string>();
 
 function resolveChildDisplayName(firstName: string, nickname?: string): string {
   return nickname?.trim() || firstName.trim();
@@ -146,6 +148,31 @@ export async function createFamilyChildParticipant(
   const parsedAgeGrade = parseOptionalAgeGradeInput(input.ageGrade);
 
   try {
+    if (isIndependentFamily) {
+      const requestIdentity = [programCode, firstName, nickname, input.ageGrade?.trim() || '']
+        .join('|')
+        .toLowerCase();
+      const requestId = pendingFamilyChildRequestIds.get(requestIdentity) ?? crypto.randomUUID();
+      pendingFamilyChildRequestIds.set(requestIdentity, requestId);
+      const created = await createFamilyCompatibilityChild({
+        firstName,
+        nickname: nickname || undefined,
+        ageGrade: input.ageGrade?.trim() || undefined,
+        requestId,
+      });
+      pendingFamilyChildRequestIds.delete(requestIdentity);
+      setActiveChild({ participantId: created.participant.id, displayName, firstName });
+      invalidateFamilyPortalChildCaches(programCode);
+      return {
+        success: true,
+        participantId: created.participant.id,
+        displayName,
+        message: created.reused
+          ? `${displayName} is already connected to your family.`
+          : `${displayName} was added to your family.`,
+      };
+    }
+
     const { participantId, source } = await findOrCreateParticipant(
       {
         role: 'student',
@@ -186,19 +213,17 @@ export async function createFamilyChildParticipant(
       firstName,
     });
 
-    if (!isIndependentFamily) {
-      const linkResult = await ensureFamilyChildLink({
-        studentId: participantId,
-        familyProgramCode: programCode,
+    const linkResult = await ensureFamilyChildLink({
+      studentId: participantId,
+      familyProgramCode: programCode,
+    });
+    if (!linkResult.linked) {
+      console.warn('[CHILD_PROFILE]', {
+        action: 'camp_link_optional_failed',
+        participant_id: participantId,
+        program_code: programCode,
+        error: linkResult.error,
       });
-      if (!linkResult.linked) {
-        console.warn('[CHILD_PROFILE]', {
-          action: 'camp_link_optional_failed',
-          participant_id: participantId,
-          program_code: programCode,
-          error: linkResult.error,
-        });
-      }
     }
 
     invalidateFamilyPortalChildCaches(programCode);

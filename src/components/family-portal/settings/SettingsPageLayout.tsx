@@ -20,6 +20,7 @@ type SettingsPageLayoutProps<T extends string> = {
   tabAriaLabel?: string;
   /** Show in-page title when no portal top bar is present (e.g. Admin Portal). */
   showPageTitle?: boolean;
+  navigation?: React.ReactNode;
 };
 
 export default function SettingsPageLayout<T extends string>({
@@ -33,6 +34,7 @@ export default function SettingsPageLayout<T extends string>({
   panelClassName = 'family-panel family-panel--settings',
   tabAriaLabel,
   showPageTitle = false,
+  navigation,
 }: SettingsPageLayoutProps<T>) {
   return (
     <div className={panelClassName}>
@@ -54,12 +56,12 @@ export default function SettingsPageLayout<T extends string>({
       </header>
 
       <div className="family-settingsLayout family-resourceLayout">
-        <SettingsTabRail
+        {navigation || <SettingsTabRail
           tabs={tabs}
           activeTab={activeTab}
           onSelectTab={onSelectTab}
           ariaLabel={tabAriaLabel}
-        />
+        />}
         <SettingsContentPanel>{children}</SettingsContentPanel>
       </div>
     </div>

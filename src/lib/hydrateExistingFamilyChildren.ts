@@ -17,6 +17,10 @@ import {
 } from './pilotTrackingService';
 import { programCodesEquivalent } from './portalCodeIdentity';
 import { portalDebug } from './portalDebug';
+import {
+  fetchFamilyCompatibilityChildren,
+  hasFamilyCompatibilitySession,
+} from './familyPortalChildrenApi';
 
 export type HydratedFamilyChild = {
   participantId: string;
@@ -159,10 +163,19 @@ export async function hydrateExistingFamilyChildren(
 
   const claimRequired = !isIndependentFamily && !hasConfirmedParentClaim(claimContext);
 
-  const [linksPayloadRaw, familyParticipantsPayloadRaw] = await Promise.all([
-    fetchStudentFamilyLinksByFamilyProgram(code),
-    fetchStudentParticipantsFromSupabase(code),
-  ]);
+  const compatibilityPayload =
+    isIndependentFamily && hasFamilyCompatibilitySession()
+      ? await fetchFamilyCompatibilityChildren().catch(() => null)
+      : null;
+  const [linksPayloadRaw, familyParticipantsPayloadRaw] = compatibilityPayload
+    ? [
+        { links: compatibilityPayload.links },
+        { participants: compatibilityPayload.participants },
+      ]
+    : await Promise.all([
+        fetchStudentFamilyLinksByFamilyProgram(code),
+        fetchStudentParticipantsFromSupabase(code),
+      ]);
 
   const linksPayload = linksPayloadRaw ?? { links: [], error: 'fetch_failed' };
   if (linksPayload.error) errors.push(linksPayload.error);
@@ -245,18 +258,7 @@ export async function hydrateExistingFamilyChildren(
       pushChild(participantToHydratedChild(participant, 'camp_link', code));
       continue;
     }
-    pushChild({
-      participantId: studentId,
-      displayName: 'Linked Child',
-      firstName: null,
-      nickname: null,
-      programCode: link.camp_program_code?.trim() || code,
-      childAgeRange: null,
-      gradeLevel: null,
-      gradeBand: null,
-      allowStretchLevel: false,
-      source: 'camp_link',
-    });
+    errors.push(`orphaned_student_family_link:${link.id}`);
   }
 
   for (const participant of familyParticipants) {

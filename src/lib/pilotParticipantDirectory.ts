@@ -5,6 +5,10 @@ import {
   fetchStudentParticipantsFromSupabase,
   type StudentParticipantRecord,
 } from './pilotTrackingService';
+import {
+  getCampCompatibilityParticipantDirectory,
+  hasCampCompatibilitySession,
+} from './campChildSessionApi';
 
 function localParticipantsForProgram(programCode: string): StudentParticipantRecord[] {
   const code = programCode.trim().toUpperCase();
@@ -29,6 +33,25 @@ export async function loadProgramParticipantDirectory(
   resultParticipantIds: string[] = [],
 ): Promise<{ participants: StudentParticipantRecord[]; errors: string[] }> {
   const errors: string[] = [];
+  if (hasCampCompatibilitySession()) {
+    try {
+      const participants = await getCampCompatibilityParticipantDirectory();
+      return {
+        participants: mergeParticipantRecords(
+          participants as StudentParticipantRecord[],
+          [],
+          localParticipantsForProgram(programCode),
+        ),
+        errors,
+      };
+    } catch {
+      errors.push('camp_participant_directory_failed');
+      return {
+        participants: localParticipantsForProgram(programCode),
+        errors,
+      };
+    }
+  }
   const [programPayload, byIdPayload] = await Promise.all([
     fetchStudentParticipantsFromSupabase(programCode),
     resultParticipantIds.length

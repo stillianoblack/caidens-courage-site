@@ -1,0 +1,659 @@
+{
+  "schemaVersion": 1,
+  "release": "production-narrow-release-2026-07-17",
+  "baseCommit": "3d4e65a4cae1d3d93fa7b1873214279ccf677a82",
+  "files": [
+    {
+      "status": "A",
+      "path": "docs/deployment/production-narrow-release-excluded.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/deployment/production-narrow-release-included.json"
+    },
+    {
+      "status": "M",
+      "path": "netlify.toml"
+    },
+    {
+      "status": "A",
+      "path": "netlify/functions/_lib/campCompatibilityAuth.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/_lib/crmAuth.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/_lib/familyCompatibilityAuth.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/family-child-progress.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/family-child-session.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/family-portal-children.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/pilot-family-signup.js"
+    },
+    {
+      "status": "??",
+      "path": "netlify/functions/portal-b4-variant.js"
+    },
+    {
+      "status": "A",
+      "path": "netlify/functions/portal-program-access.js"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/anchor/blinking/b4-anchor-blinking.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/anchor/happy/b4-anchor-happy.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/anchor/hurt/b4-anchor-hurt.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/anchor/idle/b4-anchor-idle.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/courage/blinking/b4-courage-blinking.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/courage/happy/b4-courage-happy.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/courage/hurt/b4-courage-hurt.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/courage/idle/b4-courage-idle.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/fusion/blinking/b4-fusion-blinking.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/fusion/happy/b4-fusion-happy.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/fusion/hurt/b4-fusion-hurt.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/fusion/idle/b4-fusion-idle.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/pattern/blinking/b4-pattern-blinking.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/pattern/happy/b4-pattern-happy.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/pattern/hurt/b4-pattern-hurt.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/pattern/idle/b4-pattern-idle.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/shield/blinking/b4-shield-blinking.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/shield/happy/b4-shield-happy.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/shield/hurt/b4-shield-hurt.png"
+    },
+    {
+      "status": "??",
+      "path": "public/assets/b4/shield/idle/b4-shield-idle.png"
+    },
+    {
+      "status": "M",
+      "path": "src/components/b4-baseline-check/B4BaselineGradeGate.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/b4/b4-circle-avatar.css"
+    },
+    {
+      "status": "??",
+      "path": "src/components/b4/b4-variant-selector.css"
+    },
+    {
+      "status": "M",
+      "path": "src/components/b4/B4BaselineCheckFlow.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/b4/B4CircleAvatar.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/b4/B4UnitOnboardingModal.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/b4/B4VariantSelector.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/caiden/CaidenFocusQuestHub.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/caiden/CaidenQuestFlow.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/components/courage-in-the-dark/courage-adventure-hub.css"
+    },
+    {
+      "status": "A",
+      "path": "src/components/courage-in-the-dark/CourageInTheDarkAdventureHub.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/family-dashboard.css"
+    },
+    {
+      "status": "??",
+      "path": "src/components/family-portal/FamilyChildB4Control.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/FamilyChildGradeConfig.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/FamilyChildrenDashboardGrid.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/FamilyChildSummaryCard.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/FamilyMissionCoachPanel.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/components/family-portal/FocusFlameJourneyOnboarding.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/FocusFlameProfileReadyCard.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/panels/FamilyContinueLearningPanel.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/panels/FamilyProgramSettingsPanel.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/panels/FamilyWeeklyAdventuresLauncher.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/settings/SettingsPageLayout.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/family-portal/StartChildGameButton.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/game-assessment/GameAssessmentFlow.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/kid-play-shell/B4FocusFlightUnlockModal.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/kid-play-shell/kid-play-shell-nav.css"
+    },
+    {
+      "status": "M",
+      "path": "src/components/kid-play-shell/kid-play-shell.css"
+    },
+    {
+      "status": "M",
+      "path": "src/components/kid-play-shell/KidArcadePanel.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/kid-play-shell/KidPlayB4ProfileControl.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/kid-play-shell/KidPlayShellNav.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/pilot-program/PilotProgramSignupForm.test.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/pilot-program/PilotProgramSignupForm.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/context/ActiveParticipantContext.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/data/b4/avatar.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/b4/b4AdaptiveBuilder.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/b4/b4AdaptiveMissions.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/b4/b4AdaptiveRegistry.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/b4/variantManifest.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/caiden/focusFlameChallenges.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/caiden/index.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/caiden/questAdaptiveCampLeaderChallenge.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/charlie/charlieAdaptiveBuilder.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/charlie/charlieAdaptiveMissions.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/charlie/charlieAdaptiveRegistry.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/familyPortalContent.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/familyPortalNavMetadata.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/zeke/zekeAdaptiveBuilder.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/data/zeke/zekeAdaptiveMissions.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/data/zeke/zekeAdaptiveRegistry.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/design-system/components/mission-coach-card.css"
+    },
+    {
+      "status": "M",
+      "path": "src/design-system/components/MissionCoachCard.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/B4FocusFlightGame.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/B4FocusFlightPage.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/components/GameResults.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/components/GameShell.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/phaser/assetKeys.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/games/b4-focus-flight/phaser/B4FlightStateMachine.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/phaser/createGame.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/phaser/scenes/GameScene.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/games/b4-focus-flight/phaser/scenes/PreloadScene.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/hooks/useB4Variant.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/hooks/useDocumentModalScrollLock.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/hooks/usePilotRosterData.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/hooks/usePortalUnlock.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/hooks/useQuestionInteraction.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/index.js"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/b4CheckInParticipantScope.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/b4CircleAvatar.test.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/b4OnboardingExperience.test.tsx"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/b4VariantCampSessionClient.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/b4VariantSystem.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/campChildSessionApi.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/campChildSessionProtectedPaths.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/changedReleaseDataPaths.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familyChildB4Cards.test.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familyChildProgressEndpoint.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familyChildSessionEndpoint.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familyPortalChildLinkageRegression.test.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familyPortalChildrenEndpoint.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familySignupProgressRegression.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/familySignupReleaseGuards.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/focusFlameChallenges.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/kidPlayB4ProfileControl.test.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/pilotFamilySignupClient.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/pilotFamilySignupEndpoint.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/portalAcceptancePolish.test.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/__tests__/portalB4VariantEndpoint.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/portalProgramAccessApi.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/portalProgramAccessEndpoint.test.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/__tests__/weeklyAdventureLockGuidanceLayout.test.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/adventureWeekProgress.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/appVersion.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/assessmentResultsService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/b4BaselineCheckStorage.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/b4CheckInStatus.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/b4FocusFlightUnlock.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/b4VariantService.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/campChildSessionApi.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/childProfileService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/facilitatorKidPlayLaunch.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/familyChildProgressApi.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/familyChildSessionApi.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/familyKidPlayLaunch.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/lib/familyPortalChildrenApi.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/familyPortalNav.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/gameAssessmentValidation.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/getCourageInTheDarkProgress.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/hydrateExistingFamilyChildren.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/independentFamilyPortalSignup.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/kidPlaySessionService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/launchFamilyKidPlay.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/launchWeeklyMission.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/participantGradeService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/pilotParticipantDirectory.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/pilotProgramService.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/pilotTrackingService.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/portalAccessResolve.ts"
+    },
+    {
+      "status": "A",
+      "path": "src/lib/portalProgramAccessApi.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/recordInteractiveCompletion.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/week0AssessmentStorage.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/pages/CaidenQuestPage.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/pages/KidPlaySessionLayout.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/pages/PilotProgramSignupPage.test.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/pages/PilotProgramSignupPage.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/types/gameAssessment.ts"
+    },
+    {
+      "status": "M",
+      "path": "src/types/pilotProgram.ts"
+    },
+    {
+      "status": "??",
+      "path": "supabase/migrations/20260713000200_family_signup_identity_integrity.sql"
+    },
+    {
+      "status": "??",
+      "path": "supabase/migrations/20260715000100_b4_variant_preference.sql"
+    },
+    {
+      "status": "??",
+      "path": "supabase/migrations/20260715000250_independent_family_child_creation_production_safe.sql"
+    },
+    {
+      "status": "??",
+      "path": "supabase/migrations/20260715000400_b4_selection_onboarding.sql"
+    }
+  ]
+}

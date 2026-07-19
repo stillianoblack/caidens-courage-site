@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  getCaidenQuestById,
+  getCaidenPlayableMissionById,
   isCaidenAdaptiveQuest,
   resolveCaidenQuestConfig,
 } from '../../data/caiden';
@@ -31,7 +31,7 @@ export default function CaidenQuestFlow({
     <AdaptiveMissionGameFlow
       characterId="caiden"
       missionId={questId}
-      missionExists={Boolean(getCaidenQuestById(questId))}
+      missionExists={Boolean(getCaidenPlayableMissionById(questId))}
       resolveConfig={resolveCaidenQuestConfig}
       isAdaptiveMission={isCaidenAdaptiveQuest}
       contentVersionId={caidenContentVersionId}

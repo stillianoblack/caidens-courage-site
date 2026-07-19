@@ -1,6 +1,6 @@
 import type { B4AdaptiveMissionFile } from '../../types/b4AdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
-import { registerB4AdaptiveMission } from './b4AdaptiveBuilder';
+import { registerB4AdaptiveMission } from './b4AdaptiveRegistry';
 import { B4_MISSION_1_FILE } from './missions/mission1MoodScanner';
 import { B4_MISSION_2_FILE } from './missions/mission2BodySignalDetective';
 import { B4_MISSION_3_FILE } from './missions/mission3BraveChoiceButton';

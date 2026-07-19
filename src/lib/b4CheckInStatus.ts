@@ -12,6 +12,9 @@ import {
 } from './b4BaselineCheckStorage';
 import type { LocalAssessmentV2Record } from './pilotTrackingLocalStorage';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
+import { getFamilyCompatibilityChildSession } from './familyChildSessionApi';
+import { readLocalKidPlaySessionId } from './kidPlaySessionService';
 
 export type B4CheckInStatus = 'not_started' | 'in_progress' | 'complete';
 export type B4CheckInDisplayStatus = 'Not Started' | 'In Progress' | 'Complete';
@@ -105,10 +108,11 @@ export function isBaselineAssessmentCompleteLocal(input: B4CheckInStatusInput = 
 
   const session = loadB4BaselineState(participantId);
   if (isBaselineFullyComplete(session, participantId) && sessionMatchesParticipant(participantId)) {
-    const sessionCode = session.profile?.programCode ?? session.record?.programCode ?? '';
-    if (!code || normalizeCode(sessionCode) === normalizeCode(code)) {
-      return true;
-    }
+    // A participant UUID is the authoritative identity for child progress. Family-linked
+    // children can move between the family program context and their camp/school program
+    // context without changing participants, so a program-code mismatch must not relock a
+    // completed check-in stored under that exact participant ID.
+    return true;
   }
 
   const archive = loadAllBaselineResults();
@@ -230,6 +234,21 @@ export async function isBaselineAssessmentCompleteRemote(
 ): Promise<boolean> {
   const code = input.programCode?.trim();
   const participantId = resolveParticipantId(input.participantId);
+
+  if (participantId && hasFamilyCompatibilitySession()) {
+    const familySessionId = readLocalKidPlaySessionId();
+    if (!familySessionId) return false;
+    try {
+      const session = await getFamilyCompatibilityChildSession(familySessionId);
+      const sessionParticipantId = session.participant_id || session.child_id;
+      return Boolean(
+        sessionParticipantId === participantId &&
+        session.resume_payload?.participant_baseline_complete === true
+      );
+    } catch {
+      return false;
+    }
+  }
 
   if (!isSupabaseConfigured() || !supabase || !code || !participantId) {
     return false;

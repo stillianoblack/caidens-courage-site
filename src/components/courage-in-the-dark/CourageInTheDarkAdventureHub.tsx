@@ -670,7 +670,7 @@ export default function CourageInTheDarkAdventureHub({
   );
 
   const baselineHelper = baselineLocked ? (
-    <p className="family-panelHelper" role="status">
+    <p className="courageAdventureHubBaselineGuide" role="status">
       {baselineLockedLabel}
     </p>
   ) : null;
@@ -733,6 +733,7 @@ export default function CourageInTheDarkAdventureHub({
       >
         <div className="courageAdventureHubMapCol">
           {weekMetaRow}
+          {baselineHelper}
 
           {isMobileLayout ? (
             <div className="courageAdventureHubMobileStack">
@@ -809,8 +810,6 @@ export default function CourageInTheDarkAdventureHub({
                   {useHudPills ? bottomHudTrayContent : questListPanel}
                 </div>
               ) : null}
-
-              {baselineHelper}
             </div>
           ) : (
             <div
@@ -835,8 +834,6 @@ export default function CourageInTheDarkAdventureHub({
               {desktopSidePanel}
             </div>
           )}
-
-          {!isMobileLayout ? baselineHelper : null}
         </div>
       </div>
     </CourageHubAudioProvider>

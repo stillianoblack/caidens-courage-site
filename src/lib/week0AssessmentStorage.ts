@@ -76,7 +76,13 @@ export function markWeek0ModuleComplete(
 export async function persistWeek0ResultToDatabase(
   result: Week0AssessmentResult,
 ): Promise<BaselineSubmitResult> {
-  const nickname = result.studentName?.trim() || readActiveChildNickname()?.trim() || 'Student';
+  const nickname = result.studentName?.trim() || readActiveChildNickname()?.trim() || '';
+  if (!nickname) {
+    return {
+      success: false,
+      message: 'Select or add a named student before saving this assessment.',
+    };
+  }
   const assessmentType = result.phase === 'growth' ? 'final' : 'baseline';
 
   const programCode = resolveTrackingProgramCode();

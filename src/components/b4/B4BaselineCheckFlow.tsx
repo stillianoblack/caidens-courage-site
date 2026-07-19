@@ -56,6 +56,7 @@ import {
   isBaselineFullyComplete,
   loadB4BaselineState,
   markBaselineModuleComplete,
+  recoverCompletedBaselineStateForParticipant,
   resetB4BaselineSession,
   saveB4BaselineStudentProfile,
   submitBaselineResults,
@@ -83,6 +84,11 @@ import type {
   CompleteMissionResult,
   CourageMissionRewardPayload,
 } from '../../types/courageMissionProgress';
+import { readLocalKidPlaySessionId } from '../../lib/kidPlaySessionService';
+import {
+  hasServerMediatedChildSession,
+  saveFamilyCompatibilityChildBaseline,
+} from '../../lib/familyChildSessionApi';
 
 type View =
   | 'landing'
@@ -170,12 +176,13 @@ export default function B4BaselineCheckFlow({
   } = useActiveParticipant();
   const { modules: adventureModules } = useFamilyAdventureModules();
   const [familyCheckInStatus, setFamilyCheckInStatus] = useState<B4CheckInDisplayStatus>('Not Started');
-  const [hubState, setHubState] = useState(() => loadB4BaselineState(activeParticipantId));
+  const initialParticipantId = contextParticipantId || activeParticipantId;
+  const [hubState, setHubState] = useState(() => loadB4BaselineState(initialParticipantId));
   const [view, setView] = useState<View>('landing');
   const [playerName, setPlayerName] = useState(
     () =>
       readGameplayPlayerDisplayName() ||
-      loadB4BaselineState(activeParticipantId).profile?.nickname ||
+      loadB4BaselineState(initialParticipantId).profile?.nickname ||
       '',
   );
   const [courageMissionPayload, setCourageMissionPayload] =
@@ -206,6 +213,8 @@ export default function B4BaselineCheckFlow({
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [mcAttemptsRecord, setMcAttemptsRecord] = useState<QuestionAttemptsMap>({});
   const mcFirstAnswerRef = useRef<Record<string, string>>({});
+  const compatibilityBaselineSyncRef = useRef('');
+
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
@@ -237,6 +246,22 @@ export default function B4BaselineCheckFlow({
   const familyNeedsChildSelection = familyPortal && roster.length > 1 && (needsSelection || !hasActiveParticipant);
   const familyNoChildren = familyPortal && !participantLoading && roster.length === 0;
 
+  useEffect(() => {
+    const participantId = resolvedParticipantId.trim();
+    if (!participantId) return;
+    const displayName = contextDisplayName?.trim() || resolvedChildName;
+    const scoped =
+      recoverCompletedBaselineStateForParticipant({ participantId, displayName }) ||
+      loadB4BaselineState(participantId);
+    setHubState(scoped);
+    setPlayerName(
+      displayName ||
+      readGameplayPlayerDisplayName() ||
+      scoped.profile?.nickname ||
+      '',
+    );
+  }, [contextDisplayName, resolvedChildName, resolvedParticipantId]);
+
   const refreshHub = useCallback(() => {
     const participantId = readActiveChildParticipantId();
     setHubState(loadB4BaselineState(participantId));
@@ -253,6 +278,30 @@ export default function B4BaselineCheckFlow({
     window.addEventListener(ACTIVE_CHILD_EVENT, onActiveChild);
     return () => window.removeEventListener(ACTIVE_CHILD_EVENT, onActiveChild);
   }, [refreshHub]);
+
+  useEffect(() => {
+    const participantId = resolvedParticipantId.trim();
+    const sessionId = readLocalKidPlaySessionId();
+    const record = hubState.record;
+    if (
+      !participantId ||
+      !sessionId ||
+      !record ||
+      !record.completedAt ||
+      !isBaselineFullyComplete(hubState, participantId) ||
+      !hasServerMediatedChildSession()
+    ) {
+      return;
+    }
+    const syncKey = `${sessionId}:${participantId}:${record.completedAt}`;
+    if (compatibilityBaselineSyncRef.current === syncKey) return;
+    compatibilityBaselineSyncRef.current = syncKey;
+    void saveFamilyCompatibilityChildBaseline(sessionId, record).then(() => {
+      window.dispatchEvent(new CustomEvent('cc-baseline-complete'));
+    }).catch(() => {
+      compatibilityBaselineSyncRef.current = '';
+    });
+  }, [hubState, resolvedParticipantId]);
 
   useEffect(() => {
     if (!familyPortal) return;
@@ -292,7 +341,8 @@ export default function B4BaselineCheckFlow({
       }
 
       const gradeSettings = await readParticipantGradeSettingsAsync(participantId);
-      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+      const resolvedGradeLevel = rosterMatch?.gradeLevel ?? gradeSettings.gradeLevel;
+      if (!hasCanonicalGradeLevel(resolvedGradeLevel)) {
         setView('landing');
         return;
       }
@@ -455,7 +505,8 @@ export default function B4BaselineCheckFlow({
       }
 
       const gradeSettings = await readParticipantGradeSettingsAsync(participantId);
-      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+      const resolvedGradeLevel = rosterMatch?.gradeLevel ?? gradeSettings.gradeLevel;
+      if (!hasCanonicalGradeLevel(resolvedGradeLevel)) {
         setPendingBaselineStart({
           participant: { participantId, firstName: displayName, nickname: displayName },
           values: {
@@ -519,7 +570,10 @@ export default function B4BaselineCheckFlow({
       });
 
       const gradeSettings = await readParticipantGradeSettingsAsync(participant.participantId);
-      if (!hasCanonicalGradeLevel(gradeSettings.gradeLevel)) {
+      const rosterGradeLevel = roster.find(
+        (entry) => entry.participantId === participant.participantId,
+      )?.gradeLevel;
+      if (!hasCanonicalGradeLevel(rosterGradeLevel ?? gradeSettings.gradeLevel)) {
         setPendingBaselineStart({ participant, values });
         setGradeGateParticipantId(participant.participantId);
         setView('grade_gate');

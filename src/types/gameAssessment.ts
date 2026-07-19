@@ -15,7 +15,19 @@ export type GameQuestionType =
 export type GameChoiceOption = {
   id: string;
   label: string;
+  /** Optional answer-specific coaching used when this incorrect option is selected. */
+  incorrectFeedback?: string;
 };
+
+export type ExecutiveFunctionInteractionType =
+  | 'best_response'
+  | 'sequencing'
+  | 'prioritization'
+  | 'checklist_building'
+  | 'identify_distraction'
+  | 'time_estimation'
+  | 'plan_revision'
+  | 'reflection';
 
 export type MirandaClueAccent =
   | 'note'
@@ -234,6 +246,16 @@ export type GameQuestionBase = {
   };
   /** Optional reflection prompt for hard/challenge questions */
   whyPrompt?: string;
+  /** Supplemental Focus Flame Challenge metadata; ignored by legacy story missions. */
+  challengeMeta?: {
+    week: number;
+    missionName: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    interactionType: ExecutiveFunctionInteractionType;
+    illustrationKey: string;
+    badgeProgressionValue: number;
+    status: 'draft' | 'published';
+  };
 };
 
 export type GameChoiceQuestion = GameQuestionBase & {

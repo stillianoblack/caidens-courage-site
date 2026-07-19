@@ -10,6 +10,10 @@ import { remapPortalKidsRoute } from '../../lib/portalGamePaths';
 import { CAIDEN_QUEST_HUB_PATH, STORY_MODE_PATH } from '../../config/courageRoutes';
 import { CAIDEN_HUB, CAIDEN_AVATAR_SRC } from '../../data/caiden/sharedAssets';
 import { buildCaidenQuestBoardItems } from '../../data/caiden/missionBoardData';
+import {
+  FOCUS_FLAME_CHALLENGE_MISSIONS,
+  resolveFocusFlameChallengeAvailability,
+} from '../../data/caiden/focusFlameChallenges';
 import { useCaidenGradeBand } from '../../hooks/useCaidenGradeBand';
 import CaidenSkillTracker from './CaidenSkillTracker';
 import '../../design-system/character-dashboard/character-dashboard.css';
@@ -35,6 +39,25 @@ export default function CaidenFocusQuestHub() {
   const questReturnState = buildPortalReturnState(
     location.pathname,
     formatBackLabel('Focus Flame Journey'),
+  );
+
+  const focusFlameChallenges = useMemo(
+    () =>
+      FOCUS_FLAME_CHALLENGE_MISSIONS.map((mission) => {
+        const prerequisite = quests.find((quest) => quest.id === mission.prerequisiteQuestId);
+        const availability = resolveFocusFlameChallengeAvailability({
+          prerequisiteStatus: prerequisite?.status,
+          completed: progress.completedModuleIds.has(mission.id),
+        });
+        const completed = availability === 'completed';
+        const locked = availability === 'locked';
+        const route = remapPortalKidsRoute(
+          `${CAIDEN_QUEST_HUB_PATH}/${mission.id}`,
+          location.pathname,
+        );
+        return { ...mission, completed, locked, route };
+      }),
+    [location.pathname, progress.completedModuleIds, quests],
   );
 
   const firstQuestHref = quests[0]?.route ?? `${CAIDEN_QUEST_HUB_PATH}/quest-1`;
@@ -89,6 +112,29 @@ export default function CaidenFocusQuestHub() {
                 locked={quest.status === 'locked'}
                 lockedLabel={quest.status === 'locked' ? 'Coming Next' : undefined}
                 skillTags={quest.skills?.slice(0, 3).join(' · ')}
+                layout="horizontal"
+              />
+            ))}
+          </QuestGrid>
+          <section className="storyModeLaunchCard" aria-labelledby="focus-flame-challenges-title">
+            <h2 id="focus-flame-challenges-title">Focus Flame Challenges</h2>
+            <p>Practice one real-life executive-function mission alongside each Week 3–9 adventure.</p>
+          </section>
+          <QuestGrid aria-label="Focus Flame challenges">
+            {focusFlameChallenges.map((mission) => (
+              <CharacterAdventureCard
+                key={mission.id}
+                characterId="caiden"
+                title={`Week ${mission.week}: ${mission.name}`}
+                description={`${mission.difficulty[0].toUpperCase()}${mission.difficulty.slice(1)} · ${mission.skills.slice(0, 3).join(' · ')}`}
+                cta={mission.locked ? 'Coming Next' : mission.completed ? 'Play Again' : 'Start Challenge'}
+                href={mission.locked ? '#' : mission.route}
+                useCharacterHubLaunch={!mission.locked}
+                linkState={mission.locked ? undefined : questReturnState}
+                status={mission.locked ? 'Locked' : mission.completed ? 'Complete' : 'Available'}
+                locked={mission.locked}
+                lockedLabel={mission.locked ? 'Complete the matching Focus Quest first' : undefined}
+                skillTags={mission.badge}
                 layout="horizontal"
               />
             ))}

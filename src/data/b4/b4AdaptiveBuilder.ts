@@ -15,16 +15,13 @@ import type {
 } from '../../types/b4AdaptiveQuest';
 import { B4_ADAPTIVE_COACH } from './b4CoachCopy';
 import { B4_GAME_AVATAR_SRC } from './sharedAssets';
+import { B4_ADAPTIVE_MISSION_REGISTRY } from './b4AdaptiveRegistry';
 
-export const B4_ADAPTIVE_MISSION_REGISTRY: Record<string, B4AdaptiveMissionFile> = {};
-
-export function registerB4AdaptiveMission(mission: B4AdaptiveMissionFile): void {
-  B4_ADAPTIVE_MISSION_REGISTRY[mission.id] = mission;
-}
-
-export function isB4AdaptiveMissionId(missionId: string): boolean {
-  return missionId in B4_ADAPTIVE_MISSION_REGISTRY;
-}
+export {
+  B4_ADAPTIVE_MISSION_REGISTRY,
+  isB4AdaptiveMissionId,
+  registerB4AdaptiveMission,
+} from './b4AdaptiveRegistry';
 
 const LEGACY_DEFAULT_BAND: B4GradeBand = '2-3';
 

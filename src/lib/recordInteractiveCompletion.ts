@@ -20,7 +20,10 @@ import {
 import { resolveAttemptScope } from './canonicalAttemptRules';
 import { resolveMissionAttemptType } from './missionAttemptType';
 import { saveQuestionAttempts } from './questionAttemptService';
+import { buildQuestionAttemptRows } from './questionAttemptService';
 import type { MissionAttemptType } from './questionAttemptService';
+import { hasFamilyCompatibilitySession } from './familyPortalChildrenApi';
+import { saveFamilyCompatibilityModuleCompletion } from './familyChildProgressApi';
 
 export type RecordInteractiveCompletionInput = {
   config: GameAssessmentConfig;
@@ -199,6 +202,98 @@ export async function recordInteractiveModuleCompletion(
   }
 
   try {
+    if (tracking.role === 'student' && hasFamilyCompatibilitySession()) {
+      const participant = resolveStudentParticipant();
+      const participantId = participant.participant_id?.trim();
+      if (!participantId) {
+        return { warning: 'Add or select your child profile before saving progress.' };
+      }
+      const resolvedAttemptType =
+        input.attemptType ??
+        resolveMissionAttemptType({
+          participantId,
+          moduleId: tracking.moduleId,
+          weekNumber: input.weekNumber ?? null,
+        });
+      const resolvedAttemptScope = resolveAttemptScope(
+        resolvedAttemptType === 'initial' ? 'weekly' : resolvedAttemptType,
+      );
+      const completedAt = new Date().toISOString();
+      const attempts = extractQuestionAttempts(input.answers);
+      const attemptRows = attempts
+        ? buildQuestionAttemptRows({
+            config: input.config,
+            attempts,
+            context: {
+              participant_id: participantId,
+              program_code: participant.program_code,
+              week_number: input.weekNumber ?? null,
+              mission_id: input.missionId ?? tracking.moduleId,
+              character: tracking.character,
+              grade_level: input.gradeLevelUsed ?? null,
+              grade_band: input.gradeBandUsed ?? null,
+              content_version: input.contentVersionId ?? null,
+              module_id: tracking.moduleId,
+              attempt_type: resolvedAttemptType,
+              attempt_scope: resolvedAttemptScope,
+            },
+          })
+        : [];
+
+      await saveFamilyCompatibilityModuleCompletion({
+        participantId,
+        module: {
+          moduleId: tracking.moduleId,
+          moduleTitle: tracking.moduleTitle,
+          character: tracking.character,
+          skillArea: tracking.skillArea,
+          score: input.score,
+          maxScore: input.maxScore,
+          timeSpentSeconds: input.timeSpentSeconds,
+          answersJson: answersToJson(input.answers, {
+            gradeBandUsed: input.gradeBandUsed,
+            gradeLevelUsed: input.gradeLevelUsed,
+            contentVersionId: input.contentVersionId,
+            fileId: input.fileId,
+            missionId: input.missionId,
+            moduleId: tracking.moduleId,
+            attemptType: resolvedAttemptType,
+            attemptScope: resolvedAttemptScope,
+          }),
+          completedAt,
+        },
+        attempts: attemptRows.map((row) => ({
+          weekNumber: row.week_number,
+          missionId: row.mission_id,
+          character: row.character,
+          questionId: row.question_id,
+          gradeLevel: row.grade_level,
+          gradeBand: row.grade_band,
+          contentVersion: row.content_version,
+          selectedAnswer: row.selected_answer,
+          correctAnswer: row.correct_answer,
+          firstSelectedAnswer: row.first_selected_answer,
+          isCorrectFirstTry: row.is_correct_first_try,
+          isCorrectFinal: row.is_correct_final,
+          attemptCount: row.attempt_count,
+          usedHint: row.used_hint,
+          attemptType: row.attempt_type,
+          attemptScope: row.attempt_scope,
+          isReplay: row.is_replay,
+          completedAt: row.completed_at,
+          moduleId: row.module_id,
+        })),
+      });
+
+      notifyModuleComplete({
+        participant_id: participantId,
+        module_id: tracking.moduleId,
+        character: tracking.character,
+        program_code: participant.program_code,
+      });
+      return {};
+    }
+
     const { participantId } = await resolveParticipantForTracking(tracking);
     const participant =
       tracking.role === 'student' ? resolveStudentParticipant() : resolveAdultParticipant();

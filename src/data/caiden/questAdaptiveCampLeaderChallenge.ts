@@ -118,6 +118,36 @@ const K1: RawCaidenQuestion[] = [
     explanation: 'Giving others a turn is fair leadership.',
     hint: 'Fair turns build trust.',
   }),
+  q('k1', 9, {
+    scenarioText: 'The team cannot hear the next camp direction because everyone is talking.',
+    question: 'What can Caiden do as leader?',
+    scenarioTag: 'LISTEN TOGETHER',
+    scenarioAccent: 'priority',
+    choices: [
+      'Talk louder than everyone else',
+      'Ask the team to pause and listen',
+      'Leave before the direction is finished',
+      'Choose a different activity without asking',
+    ],
+    correctIndex: 1,
+    explanation: 'A calm pause helps the whole team hear the direction and stay together.',
+    hint: 'What helps everyone hear the camp direction?',
+  }),
+  q('k1', 10, {
+    scenarioText: 'Caiden forgets to bring the team marker to the challenge station.',
+    question: 'What is the responsible choice?',
+    scenarioTag: 'OWN THE MISTAKE',
+    scenarioAccent: 'reflection',
+    choices: [
+      'Say another teammate lost it',
+      'Hide the empty marker bag',
+      'Tell the counselor and help fix the mistake',
+      'Pretend the team does not need it',
+    ],
+    correctIndex: 2,
+    explanation: 'Responsible leaders tell the truth about mistakes and help make things right.',
+    hint: 'Leaders can be honest and help repair a mistake.',
+  }),
 ];
 
 const BAND_23: RawCaidenQuestion[] = [
@@ -211,6 +241,36 @@ const BAND_23: RawCaidenQuestion[] = [
     explanation: 'Listening, helping, and calm are core leader traits.',
     hint: 'Volume is not the same as leadership.',
   }),
+  q('23', 9, {
+    scenarioText: 'The timer is running, but two teammates are unsure which job comes next.',
+    question: 'What should Caiden do first?',
+    scenarioTag: 'CLEAR NEXT STEP',
+    scenarioAccent: 'weekly-plan',
+    choices: [
+      'Give both teammates every remaining job',
+      'Check the plan and name one clear next job for each person',
+      'Wait for someone else to notice',
+      'Start cheering without explaining the jobs',
+    ],
+    correctIndex: 1,
+    explanation: 'Clear next jobs help teammates act without adding confusion or blame.',
+    hint: 'Use the team plan to make the next step clear.',
+  }),
+  q('23', 10, {
+    scenarioText: 'Mia notices the supply count is wrong after Caiden checked it.',
+    question: 'How can Caiden respond like a responsible co-leader?',
+    scenarioTag: 'CHECK AGAIN',
+    scenarioAccent: 'reflection',
+    choices: [
+      'Thank Mia and count the supplies together',
+      'Tell Mia not to question the leader',
+      'Erase the supply list',
+      'Keep the wrong count so the team can leave sooner',
+    ],
+    correctIndex: 0,
+    explanation: 'Checking together uses Mia’s observation and protects the team’s plan.',
+    hint: 'Shared leadership makes room for a teammate to catch an error.',
+  }),
 ];
 
 const BAND_45: RawCaidenQuestion[] = [
@@ -298,6 +358,36 @@ const BAND_45: RawCaidenQuestion[] = [
     correctIndex: 0,
     explanation: 'Listen, blend, test — a solid conflict pattern.',
     hint: 'Name the steps you actually used.',
+  }),
+  q('45', 9, {
+    scenarioText: 'The raft test fails because a rope knot slips, and the team starts blaming the builder.',
+    question: 'Which response best keeps the team learning?',
+    scenarioTag: 'TEST AND REPAIR',
+    scenarioAccent: 'small-step',
+    choices: [
+      'Replace the builder without discussing the test',
+      'Ignore the slipped knot and repeat the same design',
+      'Review where the knot slipped, adjust it, and test again',
+      'End the challenge before anyone can make another mistake',
+    ],
+    correctIndex: 2,
+    explanation: 'Reviewing evidence and testing a repair turns the mistake into useful team learning.',
+    hint: 'A failed test can show the team exactly what to improve.',
+  }),
+  q('45', 10, {
+    scenarioText: 'The timekeeper says the team needs five more minutes, but the navigator says the route is unsafe.',
+    question: 'What should Caiden prioritize?',
+    scenarioTag: 'SAFETY FIRST',
+    scenarioAccent: 'priority',
+    choices: [
+      'Choose the faster route without checking it',
+      'Pause for the safety concern, then revise the plan',
+      'Let the two teammates argue until time expires',
+      'Remove both teammates from their roles',
+    ],
+    correctIndex: 1,
+    explanation: 'A leader protects safety first, then helps the team adjust time and route decisions.',
+    hint: 'Which concern could cause harm if the team ignores it?',
   }),
 ];
 
@@ -391,6 +481,36 @@ const BAND_68: RawCaidenQuestion[] = [
     correctIndex: 1,
     explanation: 'Listen, clarify goals, test — durable disagreement protocol.',
     hint: 'Great choice. Leaders pause before making decisions.',
+  }),
+  q('68', 9, {
+    scenarioText: 'A checkpoint delay means the team cannot finish every planned task before camp closes.',
+    question: 'What is the strongest leadership response?',
+    scenarioTag: 'REPLAN',
+    scenarioAccent: 'weekly-plan',
+    choices: [
+      'Hide the delay and keep every deadline unchanged',
+      'Ask the fastest teammate to complete everything alone',
+      'Clarify the essential goal, revise roles, and communicate the new plan',
+      'Cancel the remaining work without telling staff',
+    ],
+    correctIndex: 2,
+    explanation: 'Re-centering the goal and communicating a realistic plan helps the team adapt responsibly.',
+    hint: 'Good coordination changes the plan without losing the mission goal.',
+  }),
+  q('68', 10, {
+    scenarioText: 'During the debrief, a quiet teammate says the group dismissed their safety idea earlier.',
+    question: 'How should Caiden respond?',
+    scenarioTag: 'ACCOUNTABLE DEBRIEF',
+    scenarioAccent: 'reflection',
+    choices: [
+      'Explain that leaders cannot hear every idea',
+      'Acknowledge the missed input, ask for the idea, and change the next discussion process',
+      'End the debrief before the team becomes uncomfortable',
+      'Ask the teammate to speak only with staff next time',
+    ],
+    correctIndex: 1,
+    explanation: 'Accountability includes hearing the missed idea and improving how the team includes quieter voices.',
+    hint: 'A useful apology includes a concrete change for next time.',
   }),
 ];
 

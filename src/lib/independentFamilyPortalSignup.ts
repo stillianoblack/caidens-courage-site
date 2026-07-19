@@ -63,8 +63,8 @@ export function activateIndependentFamilyPortalSession(input: {
 
   console.info('[INDEPENDENT_FAMILY_PORTAL_UNLOCK]', {
     program_code: input.program.programCode,
-    parent_email: normalizeEmail(input.parentEmail),
-    access_code: accessCode,
+    parent_email_present: Boolean(normalizeEmail(input.parentEmail)),
+    access_code_present: Boolean(accessCode),
   });
 }
 

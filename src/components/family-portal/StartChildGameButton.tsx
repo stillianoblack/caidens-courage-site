@@ -3,17 +3,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { launchFamilyKidPlay } from '../../lib/launchFamilyKidPlay';
 import { useToast } from '../portal-design-system/ToastProvider';
 import './start-child-game-button.css';
+import { setActiveChild } from '../../lib/activeChildContext';
 
 type StartChildGameButtonProps = {
   participantId: string;
   displayName?: string;
   className?: string;
+  label?: string;
 };
 
 export default function StartChildGameButton({
   participantId,
   displayName,
   className,
+  label,
 }: StartChildGameButtonProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,18 +29,26 @@ export default function StartChildGameButton({
 
     setLoading(true);
     try {
+      setActiveChild({
+        participantId: childId,
+        displayName: displayName?.trim() || 'Player',
+        firstName: displayName?.trim() || 'Player',
+      });
       const result = await launchFamilyKidPlay({
         childId,
         returnPath: location.pathname,
         navigate,
       });
       if (!result.ok) {
-        showToast(result.message, 'error');
+        showToast(
+          result.supportCode ? `${result.message} Support code: ${result.supportCode}` : result.message,
+          'error',
+        );
       }
     } finally {
       setLoading(false);
     }
-  }, [loading, location.pathname, navigate, participantId, showToast]);
+  }, [displayName, loading, location.pathname, navigate, participantId, showToast]);
 
   return (
     <button
@@ -51,7 +62,7 @@ export default function StartChildGameButton({
           : 'Start child game for active player'
       }
     >
-      {loading ? 'Starting…' : 'Start Child Game'}
+      {loading ? 'Starting…' : label || 'Start Child Game'}
     </button>
   );
 }
