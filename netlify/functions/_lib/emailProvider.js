@@ -76,11 +76,26 @@ async function sendResendEmail(payload) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return { success: false, error: data.message || `Resend failed with ${response.status}.` };
+      return {
+        success: false,
+        error: data.message || `Resend failed with ${response.status}.`,
+        providerStatus: response.status,
+        providerErrorCode:
+          typeof data.name === 'string'
+            ? data.name
+            : typeof data.code === 'string'
+              ? data.code
+              : null,
+      };
     }
     return { success: true, providerMessageId: data.id || null };
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Resend delivery failed.' };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Resend delivery failed.',
+      providerStatus: null,
+      providerErrorCode: 'network_error',
+    };
   }
 }
 

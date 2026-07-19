@@ -96,13 +96,20 @@ describe('transactional email canary endpoint', () => {
   });
 
   test('returns a sanitized provider failure with a support identifier', async () => {
-    mockSendWelcomeEmail.mockResolvedValue({ success: false, error: 'sensitive provider detail' });
+    mockSendWelcomeEmail.mockResolvedValue({
+      success: false,
+      error: 'The sender domain is not verified: sensitive provider detail',
+      providerStatus: 403,
+      providerErrorCode: 'validation_error',
+    });
 
     const response = await handler(request());
     const payload = JSON.parse(response.body);
 
     expect(response.statusCode).toBe(502);
     expect(payload.error).toBe('Email provider rejected the canary.');
+    expect(payload.providerStatus).toBe(403);
+    expect(payload.providerErrorCategory).toBe('sender_domain_not_verified');
     expect(payload.correlationId).toBe('email-canary-test-001');
     expect(JSON.stringify(payload)).not.toContain('sensitive provider detail');
   });

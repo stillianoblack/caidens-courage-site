@@ -32,6 +32,18 @@ function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
 }
 
+function providerErrorCategory(result = {}) {
+  const message = String(result.error || '').toLowerCase();
+  if (message.includes('domain') && message.includes('verif')) return 'sender_domain_not_verified';
+  if (message.includes('api key') || message.includes('unauthorized')) return 'api_key_authorization';
+  if (message.includes('reply')) return 'reply_to_invalid';
+  if (message.includes('sender') || message.includes('from')) return 'sender_invalid';
+  if (message.includes('recipient')) return 'recipient_invalid';
+  if (result.providerErrorCode === 'network_error') return 'provider_network_error';
+  if (result.providerErrorCode === 'validation_error') return 'request_validation';
+  return 'provider_rejection_other';
+}
+
 function previewBaseUrl() {
   const value = process.env.DEPLOY_PRIME_URL || process.env.URL || '';
   try {
@@ -181,6 +193,7 @@ exports.handler = async (event) => {
 
   const result = await sendWelcomeEmail(payload);
   if (!result.success) {
+    const errorCategory = providerErrorCategory(result);
     console.info('[SEND_WELCOME_EMAIL]', {
       correlationId: id,
       provider: 'Resend',
@@ -188,6 +201,9 @@ exports.handler = async (event) => {
       success: false,
       skipped: false,
       reason: 'provider_rejected',
+      provider_status: result.providerStatus || null,
+      provider_error_code: result.providerErrorCode || null,
+      provider_error_category: errorCategory,
     });
     const log = await updateEmailAttempt(queuedLog.id, 'failed', {
       errorMessage: result.error,
@@ -197,6 +213,8 @@ exports.handler = async (event) => {
       status: 'failed',
       log,
       error: 'Email provider rejected the canary.',
+      providerStatus: result.providerStatus || null,
+      providerErrorCategory: errorCategory,
     }, id);
   }
 
