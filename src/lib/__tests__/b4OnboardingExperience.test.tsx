@@ -32,6 +32,8 @@ describe('first-time B-4 onboarding', () => {
     render(<B4UnitOnboardingModal participantId="child-1" />);
     const dialog = screen.getByRole('dialog', { name: 'Select Your B-4 Unit' });
     expect(dialog).toBeInTheDocument();
+    expect(dialog.parentElement).toBe(document.body.querySelector('.b4OnboardingBackdrop'));
+    expect(document.body).toHaveStyle({ position: 'fixed', overflow: 'hidden' });
     expect(dialog.querySelector('.b4VariantSelector--game')).toBeInTheDocument();
     expect(dialog).toHaveClass('b4OnboardingModal');
     expect(screen.getByRole('button', { name: 'Choose This B-4' })).toBeDisabled();

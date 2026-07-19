@@ -2,6 +2,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { B4_VARIANTS } from '../../data/b4/variantManifest';
 import { useB4Variant } from '../../hooks/useB4Variant';
+import { useDocumentModalScrollLock } from '../../hooks/useDocumentModalScrollLock';
 import B4CircleAvatar from '../b4/B4CircleAvatar';
 import B4VariantSelector from '../b4/B4VariantSelector';
 
@@ -31,6 +32,8 @@ export default function KidPlayB4ProfileControl({
       : selectionRequired
         ? `Choose a B-4 for ${displayName}`
         : `Open ${displayName}'s ${definition.name} profile`;
+
+  useDocumentModalScrollLock(pickerOpen);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -145,7 +148,7 @@ export default function KidPlayB4ProfileControl({
         >
           <div
             ref={pickerRef}
-            className="kidPlayB4PickerModal"
+            className="kidPlayB4PickerFrame"
             role="dialog"
             aria-modal="true"
             aria-label={`Change B-4 for ${displayName}`}
@@ -158,14 +161,16 @@ export default function KidPlayB4ProfileControl({
             >
               ×
             </button>
-            <B4VariantSelector
-              participantId={participantId}
-              theme="game"
-              onSaved={() => {
-                setPickerOpen(false);
-                setMenuOpen(false);
-              }}
-            />
+            <div className="kidPlayB4PickerModal">
+              <B4VariantSelector
+                participantId={participantId}
+                theme="game"
+                onSaved={() => {
+                  setPickerOpen(false);
+                  setMenuOpen(false);
+                }}
+              />
+            </div>
           </div>
         </div>,
         document.body,

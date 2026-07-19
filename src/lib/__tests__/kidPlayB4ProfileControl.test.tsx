@@ -40,10 +40,13 @@ describe('child B-4 profile control', () => {
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole('button', { name: 'Change B-4' }));
     const picker = screen.getByRole('dialog', { name: 'Change B-4 for Nova' });
+    expect(picker.parentElement).toBe(document.body.querySelector('.kidPlayB4PickerBackdrop'));
+    expect(document.body).toHaveStyle({ position: 'fixed', overflow: 'hidden' });
     expect(picker.querySelector('.b4VariantSelector--game')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: 'B-4 Pattern — Pattern Power' }));
     fireEvent.click(screen.getByRole('button', { name: 'Close B-4 picker' }));
     expect(screen.queryByRole('dialog', { name: 'Change B-4 for Nova' })).not.toBeInTheDocument();
+    expect(document.body).not.toHaveStyle({ position: 'fixed', overflow: 'hidden' });
     expect(trigger).toHaveAccessibleName("Open Nova's B-4 Fusion profile");
 
     fireEvent.click(trigger);
