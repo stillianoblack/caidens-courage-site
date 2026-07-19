@@ -7,6 +7,7 @@ interface GameResultsProps {
   bestScore: number;
   onPlayAgain: () => void;
   onExit: () => void;
+  exitHref?: string;
   exitLabel?: string;
   variant: B4VariantKey;
 }
@@ -23,6 +24,7 @@ const GameResults: React.FC<GameResultsProps> = ({
   bestScore,
   onPlayAgain,
   onExit,
+  exitHref,
   exitLabel = 'Return to Kid Portal',
   variant,
 }) => {
@@ -96,9 +98,15 @@ const GameResults: React.FC<GameResultsProps> = ({
         <button type="button" className="b4ff-primaryButton" onClick={onPlayAgain}>
           Play Again
         </button>
-        <button type="button" className="b4ff-secondaryButton" onClick={onExit}>
-          {exitLabel}
-        </button>
+        {exitHref ? (
+          <a className="b4ff-secondaryButton" href={exitHref}>
+            {exitLabel}
+          </a>
+        ) : (
+          <button type="button" className="b4ff-secondaryButton" onClick={onExit}>
+            {exitLabel}
+          </button>
+        )}
       </div>
     </section>
   );

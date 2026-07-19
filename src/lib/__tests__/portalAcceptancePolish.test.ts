@@ -27,11 +27,33 @@ describe('portal acceptance polish', () => {
     expect(overview).not.toMatch(/Review progress and rewards/i);
   });
 
-  it('routes Flight results through the canonical kid-shell navigation helper', () => {
+  it('gives Flight results a native return link to the canonical Arcade route', () => {
     const flight = read('src/games/b4-focus-flight/B4FocusFlightPage.tsx');
+    const shell = read('src/games/b4-focus-flight/components/GameShell.tsx');
+    const results = read('src/games/b4-focus-flight/components/GameResults.tsx');
 
     expect(flight).toContain("import { kidPlayShellNavigate } from '../../lib/kidShellNav'");
     expect(flight).toContain('kidPlayShellNavigate(navigate, exitPath)');
+    expect(flight).toContain('exitHref={exitPath}');
+    expect(shell).toContain('exitHref={exitHref}');
+    expect(results).toContain('href={exitHref}');
     expect(flight).not.toContain('window.location.reload');
+  });
+
+  it('hard-loads facilitator learning previews so URL and visible route cannot diverge', () => {
+    const trackCard = read('src/components/pilot-dashboard/CharacterLearningTrackCard.tsx');
+
+    expect(trackCard).toContain('window.location.assign(previewHref)');
+    expect(trackCard).not.toContain('navigate(previewHref)');
+  });
+
+  it('centers the mobile B-4 profile layer inside the dynamic safe-area viewport', () => {
+    const css = read('src/components/kid-play-shell/kid-play-shell-nav.css');
+
+    expect(css).toContain('.kidPlayB4ProfileMenuLayer');
+    expect(css).toContain('place-items: center');
+    expect(css).toContain('env(safe-area-inset-top)');
+    expect(css).toContain('env(safe-area-inset-bottom)');
+    expect(css).toContain('100dvh');
   });
 });

@@ -54,6 +54,7 @@ interface GameShellProps {
   onResult: (result: B4FocusFlightResult) => void;
   onRestart: () => void;
   onExit: () => void;
+  exitHref?: string;
   exitLabel?: string;
   variant: B4VariantKey;
 }
@@ -64,6 +65,7 @@ const GameShell: React.FC<GameShellProps> = ({
   onResult,
   onRestart,
   onExit,
+  exitHref,
   exitLabel = 'Portal',
   variant,
 }) => {
@@ -175,6 +177,7 @@ const GameShell: React.FC<GameShellProps> = ({
             bestScore={bestScore}
             onPlayAgain={handleRestart}
             onExit={handleExit}
+            exitHref={exitHref}
             exitLabel={exitLabel === 'Portal' ? 'Return to Kid Portal' : exitLabel}
             variant={variant}
           />

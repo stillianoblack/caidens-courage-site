@@ -20,9 +20,11 @@ export default function KidPlayB4ProfileControl({
   const [pickerOpen, setPickerOpen] = useState(false);
   const menuId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const changeButtonRef = useRef<HTMLButtonElement | null>(null);
   const pickerRef = useRef<HTMLDivElement | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 12 });
   const definition = B4_VARIANTS[variant];
   const unavailable = Boolean(error) || selectionRequired;
   const triggerLabel = loading
@@ -76,11 +78,36 @@ export default function KidPlayB4ProfileControl({
   useEffect(() => {
     if (!menuOpen || pickerOpen) return undefined;
     const handleOutsideClick = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) setMenuOpen(false);
+      const target = event.target as Node;
+      if (
+        !containerRef.current?.contains(target) &&
+        !menuRef.current?.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
     };
     document.addEventListener('click', handleOutsideClick);
     return () => document.removeEventListener('click', handleOutsideClick);
   }, [menuOpen, pickerOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const positionMenu = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuPosition({
+        top: rect.bottom + 8,
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    };
+    positionMenu();
+    window.addEventListener('resize', positionMenu);
+    window.addEventListener('orientationchange', positionMenu);
+    return () => {
+      window.removeEventListener('resize', positionMenu);
+      window.removeEventListener('orientationchange', positionMenu);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -112,8 +139,19 @@ export default function KidPlayB4ProfileControl({
         />
       </button>
 
-      {menuOpen ? (
-        <div id={menuId} className="kidPlayB4ProfileMenu" role="dialog" aria-label={`${displayName}'s B-4 profile`}>
+      {menuOpen ? createPortal(
+        <div className="kidPlayB4ProfileMenuLayer" role="presentation">
+        <div
+          ref={menuRef}
+          id={menuId}
+          className="kidPlayB4ProfileMenu"
+          role="dialog"
+          aria-label={`${displayName}'s B-4 profile`}
+          style={{
+            '--b4-profile-menu-top': `${menuPosition.top}px`,
+            '--b4-profile-menu-right': `${menuPosition.right}px`,
+          } as React.CSSProperties}
+        >
           <div className="kidPlayB4ProfileMenuHead">
             <B4CircleAvatar
               variant={variant}
@@ -136,6 +174,8 @@ export default function KidPlayB4ProfileControl({
             Change B-4
           </button>
         </div>
+        </div>,
+        document.body,
       ) : null}
 
       {pickerOpen ? createPortal(

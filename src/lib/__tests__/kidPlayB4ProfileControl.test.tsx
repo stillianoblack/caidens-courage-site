@@ -26,6 +26,7 @@ describe('child B-4 profile control', () => {
     const popover = screen.getByRole('dialog', { name: "Nova's B-4 profile" });
     expect(popover).toHaveTextContent('Balanced Focus');
     expect(popover).toHaveClass('kidPlayB4ProfileMenu');
+    expect(popover.parentElement).toBe(document.body.querySelector('.kidPlayB4ProfileMenuLayer'));
     expect(screen.getByRole('button', { name: 'Change B-4' })).toBeEnabled();
   });
 

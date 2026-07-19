@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import type {
   PilotCharacterTrackMetric,
   PilotCharacterTrackId,
@@ -36,10 +35,11 @@ export default function CharacterLearningTrackCard({
   metrics,
   baselineChecksCompleted = 0,
 }: CharacterLearningTrackCardProps) {
-  const navigate = useNavigate();
-
   const openPreview = () => {
-    navigate(previewHref);
+    // These previews cross from the facilitator dashboard shell into a nested
+    // learning route. A document navigation prevents the dashboard outlet from
+    // remaining visually stale after the URL changes.
+    window.location.assign(previewHref);
   };
 
   return (
