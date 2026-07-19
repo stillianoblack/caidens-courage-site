@@ -48,4 +48,21 @@ describe('portal program access client', () => {
       credential: 'wrong@example.com',
     })).resolves.toEqual({ status: 'invalid_credential' });
   });
+
+  test('maps an unknown code to not found when the optional alias layer is unavailable', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({
+        code: 'program_not_found',
+        lookupStatus: 'alias_object_unavailable',
+        correlationId: 'portal-program-test',
+      }),
+    });
+
+    await expect(fetchPortalProgramAccess({
+      accessCode: 'UNKNOWN-CODE',
+      intent: 'parent',
+    })).resolves.toEqual({ status: 'not_found' });
+  });
 });

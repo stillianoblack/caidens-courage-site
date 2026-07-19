@@ -3,6 +3,8 @@ const { safeText } = require('./_lib/familyCompatibilityAuth');
 
 const ACCESS_CODE_RE = /^[A-Z0-9-]{3,120}$/;
 const CLAIM_CODE_RE = /^CLAIM-/;
+const OPTIONAL_ALIAS_OBJECT_CODES = new Set(['PGRST205', '42P01']);
+const ALIAS_PERMISSION_CODES = new Set(['42501']);
 
 function normalizeAccessCode(value) {
   return safeText(value, 120).toUpperCase().replace(/\s+/g, '');
@@ -21,6 +23,13 @@ function resolveRoleFromProgram(program, accessCode) {
   if (normalizeAccessCode(program.facilitator_access_code) === accessCode) return 'facilitator';
   if (normalizeAccessCode(program.program_code) !== accessCode) return null;
   return program.program_type === 'independent_family' ? 'family' : 'facilitator';
+}
+
+function classifyAliasLookupError(error) {
+  const code = safeText(error?.code, 40).toUpperCase();
+  if (OPTIONAL_ALIAS_OBJECT_CODES.has(code)) return 'alias_object_unavailable';
+  if (ALIAS_PERMISSION_CODES.has(code)) return 'alias_permission_denied';
+  return 'alias_database_unavailable';
 }
 
 async function findProgramByCode(supabase, accessCode) {
@@ -63,8 +72,20 @@ async function findProgramByCode(supabase, accessCode) {
     .select('program_code, alias_type')
     .eq('alias_code', accessCode)
     .maybeSingle();
-  if (aliasError) return { error: 'alias_lookup_failed' };
-  if (!alias?.program_code) return { program: null };
+  if (aliasError) {
+    const aliasLookupStatus = classifyAliasLookupError(aliasError);
+    // Aliases are an optional compatibility layer. A missing table or a denied
+    // optional lookup must not convert an otherwise unknown code into a 503.
+    if (aliasLookupStatus !== 'alias_database_unavailable') {
+      return { program: null, aliasLookupStatus };
+    }
+    return {
+      error: 'alias_lookup_unavailable',
+      errorStage: 'alias_lookup',
+      errorCategory: aliasLookupStatus,
+    };
+  }
+  if (!alias?.program_code) return { program: null, aliasLookupStatus: 'alias_not_found' };
 
   const { data: aliasProgram, error: aliasProgramError } = await supabase
     .from('pilot_programs')
@@ -72,9 +93,19 @@ async function findProgramByCode(supabase, accessCode) {
     .eq('program_code', safeText(alias.program_code, 120))
     .eq('pilot_status', 'active')
     .maybeSingle();
-  if (aliasProgramError) return { error: 'program_lookup_failed' };
-  if (!aliasProgram) return { program: null };
-  return { program: aliasProgram, role: resolveRoleFromAliasType(alias.alias_type) };
+  if (aliasProgramError) {
+    return {
+      error: 'program_lookup_failed',
+      errorStage: 'alias_program_lookup',
+      errorCategory: 'database_unavailable',
+    };
+  }
+  if (!aliasProgram) return { program: null, aliasLookupStatus: 'alias_target_not_found' };
+  return {
+    program: aliasProgram,
+    role: resolveRoleFromAliasType(alias.alias_type),
+    aliasLookupStatus: 'alias_resolved',
+  };
 }
 
 async function findProgramByClaimCode(supabase, claimCode) {
@@ -176,9 +207,25 @@ exports.handler = async (event) => {
   const result = CLAIM_CODE_RE.test(accessCode)
     ? await findProgramByClaimCode(supabase, accessCode)
     : await findProgramByCode(supabase, accessCode);
-  if (result.error) return json(503, { success: false, code: result.error }, id);
+  if (result.error) {
+    console.error('[PORTAL_PROGRAM_ACCESS]', {
+      correlationId: id,
+      outcome: 'lookup_unavailable',
+      stage: result.errorStage || 'program_lookup',
+      category: result.errorCategory || 'database_unavailable',
+    });
+    return json(503, { success: false, code: result.error }, id);
+  }
   if (!result.program || !result.role) {
-    return json(404, { success: false, code: 'program_not_found' }, id);
+    const lookupStatus = result.aliasLookupStatus || 'not_found';
+    if (lookupStatus !== 'alias_not_found' && lookupStatus !== 'not_found') {
+      console.warn('[PORTAL_PROGRAM_ACCESS]', {
+        correlationId: id,
+        outcome: 'program_not_found',
+        lookupStatus,
+      });
+    }
+    return json(404, { success: false, code: 'program_not_found', lookupStatus }, id);
   }
 
   const credentialCheck = credentialMatches(
