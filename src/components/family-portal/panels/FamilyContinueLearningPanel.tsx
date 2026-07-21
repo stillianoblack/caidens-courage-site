@@ -6,6 +6,7 @@ import '../start-child-game-button.css';
 import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
+import WeeklyAdventureMonthHero from '../../../design-system/components/WeeklyAdventureMonthHero';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { kidPlayShellNavigate } from '../../../lib/kidShellNav';
@@ -917,6 +918,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
           className="courageMapHubSection"
           aria-label={`Week ${heroWeekNumber} adventure hub`}
         >
+          {kidPlayShell && heroMonth ? <WeeklyAdventureMonthHero month={heroMonth} /> : null}
           <CourageInTheDarkAdventureHub
             weekNodes={heroMapNodes}
             weekTitle={heroWeek.title}
