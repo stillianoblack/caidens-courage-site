@@ -6,16 +6,10 @@ const read = (relativePath: string): string =>
 
 describe('Kid Play navigation performance contracts', () => {
   test('remounts routed content by pathname without remounting for tab query changes', () => {
-    const app = read('src/App.tsx');
     const layout = read('src/pages/KidPlaySessionLayout.tsx');
     const navigation = read('src/lib/kidShellNav.ts');
 
-    expect(app).toMatch(/KID_PLAY_SESSION_PATH}\/:kidPlaySessionId\/\*`/);
-    expect(app).not.toContain('{kidPlayShellChildRoutes}');
-    expect(layout).toContain(
-      '<KidPlayShellRouteContent key={location.pathname} />',
-    );
-    expect(layout).not.toContain('<Outlet');
+    expect(layout).toContain('<Outlet key={location.pathname} />');
     expect(layout).not.toContain('location.pathname}${location.search');
     expect(layout).toContain('const navigateRef = useRef(navigate);');
     expect(layout).toContain('}, [kidPlaySessionId]);');

@@ -16,10 +16,6 @@
     },
     {
       "status": "M",
-      "path": "src/App.tsx"
-    },
-    {
-      "status": "M",
       "path": "src/components/courage-in-the-dark/CourageInTheDarkAdventureHub.tsx"
     },
     {
@@ -112,10 +108,6 @@
     },
     {
       "status": "A",
-      "path": "src/lib/__tests__/kidPlayShellRouteTransitions.test.tsx"
-    },
-    {
-      "status": "A",
       "path": "src/lib/__tests__/kidShellSoftNavigation.test.ts"
     },
     {
@@ -153,10 +145,6 @@
     {
       "status": "M",
       "path": "src/pages/KidPlaySessionLayout.tsx"
-    },
-    {
-      "status": "M",
-      "path": "src/routes/kidPlayShellChildRoutes.tsx"
     }
   ]
 }

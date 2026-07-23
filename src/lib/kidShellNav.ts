@@ -51,11 +51,16 @@ export function shouldUseImmediateShellAssign(from: string, to: string): boolean
   return Boolean(fromCtx && toCtx && fromCtx.sessionId === toCtx.sessionId);
 }
 
+function pathWithoutSearch(path: string): string {
+  return path.split(/[?#]/, 1)[0] ?? path;
+}
+
 /**
- * Navigation within the same play session keeps the mounted shell and shared
- * providers. KidPlaySessionLayout keys only the routed child by pathname, so
- * module changes cannot leave stale content mounted while query-only Weekly
- * Adventures tab changes preserve the hero and cached page state.
+ * Query-only changes within the same play-session route keep the mounted shell.
+ *
+ * Distinct module routes still load their final URL directly. Those lazy route
+ * boundaries can otherwise update the address bar while leaving stale module
+ * content mounted until refresh.
  */
 export function shouldUseSoftShellNavigation(from: string, to: string): boolean {
   const fromCtx = parseKidPlayShellPath(from);
@@ -63,7 +68,8 @@ export function shouldUseSoftShellNavigation(from: string, to: string): boolean 
   return Boolean(
     fromCtx &&
       toCtx &&
-      fromCtx.sessionId === toCtx.sessionId,
+      fromCtx.sessionId === toCtx.sessionId &&
+      pathWithoutSearch(from) === pathWithoutSearch(to),
   );
 }
 
@@ -95,8 +101,9 @@ function assignPath(
 
 /**
  * Reliable navigation for kid play shell actions.
- * Routes within one authenticated play session stay inside the mounted shell
- * so shared session data and cached module data are preserved.
+ * Query-only changes within a module stay inside the mounted shell so tab and
+ * month state update instantly. Cross-module navigation uses the established
+ * direct-load recovery path to guarantee that visible content follows the URL.
  */
 export function kidPlayShellNavigate(
   navigate: NavigateFunction,

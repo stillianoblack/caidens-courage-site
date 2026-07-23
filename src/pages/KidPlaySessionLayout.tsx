@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { KidPlaySessionParticipantProvider } from '../context/ActiveParticipantContext';
 import { KidPlaySessionProvider } from '../context/KidPlaySessionContext';
 import { MyAdventuresProvider } from '../context/MyAdventuresContext';
@@ -22,7 +22,6 @@ import {
   parseKidPlayResumePayload,
 } from '../lib/kidPlaySessionResume';
 import { kidPlayShellNavigate } from '../lib/kidShellNav';
-import { KidPlayShellRouteContent } from '../routes/kidPlayShellChildRoutes';
 import { clearPageTransitionOverlay } from '../lib/pageTransition';
 import {
   getKidPlayShellRoute,
@@ -308,7 +307,7 @@ function KidPlaySessionLayoutContent() {
                 onExitClick={() => setExitOpen(true)}
               />
               <Suspense fallback={null}>
-                <KidPlayShellRouteContent key={location.pathname} />
+                <Outlet key={location.pathname} />
               </Suspense>
               <KidPlayShellExitModal
                 open={exitOpen}
