@@ -130,4 +130,13 @@ describe('My Adventures drawer', () => {
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
     expect(css).toContain('.kidPlayShellNavBtn--discovery { animation: none; }');
   });
+
+  test('keeps the B-4 avatar circular instead of stretching it as flex content', () => {
+    const css = require('fs').readFileSync(
+      require('path').join(process.cwd(), 'src/components/kid-play-shell/my-adventures-drawer.css'),
+      'utf8',
+    );
+    expect(css).toContain('.myAdventuresPlayer__b4Name {');
+    expect(css).not.toContain('.myAdventuresPlayer__b4 > span {');
+  });
 });

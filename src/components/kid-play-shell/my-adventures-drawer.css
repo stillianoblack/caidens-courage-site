@@ -133,7 +133,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.myAdventuresPlayer__b4 > span {
+.myAdventuresPlayer__b4Name {
   flex: 1;
   font-size: 0.8rem;
   font-weight: 800;

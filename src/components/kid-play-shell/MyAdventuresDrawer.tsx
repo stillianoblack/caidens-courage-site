@@ -141,7 +141,9 @@ export default function MyAdventuresDrawer({
             </div>
             <div className="myAdventuresPlayer__b4">
               <B4CircleAvatar variant={variant} loading={b4Loading} size="small" alt="" />
-              <span>{selectionRequired ? 'Choose your B-4' : b4Definition.name}</span>
+              <span className="myAdventuresPlayer__b4Name">
+                {selectionRequired ? 'Choose your B-4' : b4Definition.name}
+              </span>
               <button
                 type="button"
                 onClick={() => {
