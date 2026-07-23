@@ -7,7 +7,10 @@ import { useFocusCoinWallet } from '../../hooks/useFocusCoinWallet';
 import { useWeeklyAdventureTrail } from '../../hooks/useWeeklyAdventureTrail';
 import { resolveFullyCompletedWeekNumbers } from '../../lib/adventureWeekCompletion';
 import { resolveDefaultMonthNumber } from '../../lib/adventureMonthService';
-import { buildAdventureJourneyMonthViews } from '../../lib/weeklyAdventureJourneyMonths';
+import {
+  buildAdventureJourneyMonthViews,
+  isAdventureJourneyMonthLocked,
+} from '../../lib/weeklyAdventureJourneyMonths';
 import { getKidPlayShellKidsBase, getKidPlayShellRoute } from '../../lib/kidPlayShellRoutes';
 import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import {
@@ -103,10 +106,7 @@ export default function KidPlayMyAdventures({
     () =>
       journeyMonths.map((month) => ({
         month,
-        locked: month.weekNumbers.every((weekNumber) => {
-          const week = weeks.find((item) => item.week === weekNumber);
-          return !week || week.weekStatus === 'locked';
-        }),
+        locked: isAdventureJourneyMonthLocked(month, weeks),
       })),
     [journeyMonths, weeks],
   );

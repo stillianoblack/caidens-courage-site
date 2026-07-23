@@ -6,6 +6,7 @@ import KidPlayShellNav from '../../components/kid-play-shell/KidPlayShellNav';
 import { MyAdventuresProvider, useMyAdventures } from '../../context/MyAdventuresContext';
 import { KID_PLAY_B4_PICKER_REQUEST_EVENT } from '../kidPlayB4PickerEvents';
 import type { AdventureJourneyMonthView } from '../weeklyAdventureJourneyMonths';
+import { isAdventureJourneyMonthLocked } from '../weeklyAdventureJourneyMonths';
 
 type MockB4VariantState = {
   variant: 'courage' | 'pattern' | 'shield' | 'anchor' | 'fusion';
@@ -187,6 +188,22 @@ describe('My Adventures drawer', () => {
     );
     expect(css).toContain('.myAdventuresPlayer__b4Name {');
     expect(css).not.toContain('.myAdventuresPlayer__b4 > span {');
+  });
+
+  test('never labels a fully completed month as locked', () => {
+    const completedMonth = month(1, 4);
+    const lockedWeeks = completedMonth.weekNumbers.map((week) => ({
+      week,
+      title: `Week ${week}`,
+      selFocus: 'Focus',
+      weekStatus: 'locked' as const,
+      unlockStatus: 'Coming soon',
+      previewActivities: [],
+      thumbnailUrl: null,
+      nodes: [],
+    }));
+
+    expect(isAdventureJourneyMonthLocked(completedMonth, lockedWeeks)).toBe(false);
   });
 
   test('shows only the B-4 action card when onboarding is required and opens the picker', async () => {

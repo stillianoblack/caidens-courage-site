@@ -131,6 +131,24 @@ export type AdventureJourneyMonthView = AdventureJourneyMonthDefinition & {
   completedWeekNumbers: number[];
 };
 
+export function isAdventureJourneyMonthLocked(
+  month: AdventureJourneyMonthView,
+  trailWeeks: AdventureTrailWeekView[],
+): boolean {
+  if (
+    month.progress.certificateEarned ||
+    (month.progress.weeksTotal > 0 &&
+      month.progress.weeksCompleted >= month.progress.weeksTotal)
+  ) {
+    return false;
+  }
+
+  return month.weekNumbers.every((weekNumber) => {
+    const week = trailWeeks.find((item) => item.week === weekNumber);
+    return !week || week.weekStatus === 'locked';
+  });
+}
+
 function flattenCompletedMissionIds(completedByWeek: Record<number, string[]>): string[] {
   return Object.values(completedByWeek).flat();
 }
