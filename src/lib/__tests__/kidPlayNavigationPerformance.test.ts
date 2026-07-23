@@ -5,18 +5,17 @@ const read = (relativePath: string): string =>
   fs.readFileSync(path.join(process.cwd(), relativePath), 'utf8');
 
 describe('Kid Play navigation performance contracts', () => {
-  test('remounts routed content by pathname without remounting for tab query changes', () => {
+  test('direct-loads shell changes and retains the selected Weekly Adventures query', () => {
     const layout = read('src/pages/KidPlaySessionLayout.tsx');
     const navigation = read('src/lib/kidShellNav.ts');
 
     expect(layout).toContain('<Outlet key={location.pathname} />');
-    expect(layout).not.toContain('location.pathname}${location.search');
     expect(layout).toContain('const navigateRef = useRef(navigate);');
     expect(layout).toContain('}, [kidPlaySessionId]);');
-    expect(layout).toContain('route: location.pathname,');
-    expect(layout).toContain('}, [location.pathname, session]);');
+    expect(layout).toContain('route: location.pathname + location.search,');
+    expect(layout).toContain('}, [location.pathname, location.search, session]);');
     expect(navigation).toContain('shouldUseSoftShellNavigation');
-    expect(navigation).toContain('fromCtx.sessionId === toCtx.sessionId');
+    expect(navigation).toContain('window.location.assign(href)');
   });
 
   test('retains successful module, month, and completion data for the session', () => {

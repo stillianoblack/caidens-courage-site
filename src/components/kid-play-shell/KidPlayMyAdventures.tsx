@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdventureModules } from '../../hooks/useAdventureModules';
 import { useAdventureMonths } from '../../hooks/useAdventureMonths';
 import { useAdventureWeekCompletions } from '../../hooks/useAdventureWeekCompletions';
@@ -15,6 +15,7 @@ import {
   WEEKLY_VIEW_EXPLORE_VALUE,
   WEEKLY_VIEW_PARAM,
   WEEKLY_WEEK_PARAM,
+  parseWeeklyAdventureMonthParam,
 } from '../../lib/weeklyAdventureRouteContext';
 import MyAdventuresDrawer, { type MyAdventuresMonthItem } from './MyAdventuresDrawer';
 
@@ -34,6 +35,7 @@ export default function KidPlayMyAdventures({
   sessionId,
 }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { modules } = useAdventureModules('family');
   const { months: cmsMonths } = useAdventureMonths('family');
   const { completedByWeek } = useAdventureWeekCompletions(participantId);
@@ -86,11 +88,16 @@ export default function KidPlayMyAdventures({
     return firstIncompleteUnlocked?.week ?? Math.max(1, ...completedWeekNumbers);
   }, [completedWeekNumbers, weeks]);
   const currentMonthNumber = resolveDefaultMonthNumber(currentWeek);
-  const [selectedMonthNumber, setSelectedMonthNumber] = useState(currentMonthNumber);
+  const requestedMonthNumber = parseWeeklyAdventureMonthParam(
+    new URLSearchParams(location.search).get(WEEKLY_MONTH_PARAM),
+  );
+  const [selectedMonthNumber, setSelectedMonthNumber] = useState(
+    requestedMonthNumber ?? currentMonthNumber,
+  );
 
   useEffect(() => {
-    setSelectedMonthNumber(currentMonthNumber);
-  }, [currentMonthNumber, participantId]);
+    setSelectedMonthNumber(requestedMonthNumber ?? currentMonthNumber);
+  }, [currentMonthNumber, participantId, requestedMonthNumber]);
 
   const monthItems = useMemo<MyAdventuresMonthItem[]>(
     () =>

@@ -76,6 +76,29 @@ export const WEEKLY_VIEW_MAP_VALUE = 'map';
 /** @deprecated Use WEEKLY_VIEW_MISSIONS_VALUE */
 export const WEEKLY_VIEW_LIST_VALUE = 'list';
 
+const WEEKLY_SELECTION_PARAMS = [
+  WEEKLY_VIEW_PARAM,
+  WEEKLY_MONTH_PARAM,
+  WEEKLY_WEEK_PARAM,
+] as const;
+
+/**
+ * Keep the selected Weekly Adventures month while moving through Kid Play
+ * modules. Other module-specific query parameters are intentionally excluded.
+ */
+export function preserveWeeklyAdventureSelectionSearch(search: string): string {
+  const current = new URLSearchParams(search);
+  const preserved = new URLSearchParams();
+
+  WEEKLY_SELECTION_PARAMS.forEach((key) => {
+    const value = current.get(key)?.trim();
+    if (value) preserved.set(key, value);
+  });
+
+  const serialized = preserved.toString();
+  return serialized ? `?${serialized}` : '';
+}
+
 export function resolveWeeklyAdventuresPanelPath(pathname?: string): string {
   const basePath = resolveFamilyBasePath(pathname ?? '');
   return `${basePath}/weekly-adventures`;

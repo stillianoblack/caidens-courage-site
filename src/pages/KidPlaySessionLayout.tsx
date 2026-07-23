@@ -195,11 +195,11 @@ function KidPlaySessionLayoutContent() {
     const module = resolveKidPlayShellModule(location.pathname) ?? 'weekly-adventures';
     void updateKidPlaySessionActivity(session.id, {
       ...(session.resume_payload ?? {}),
-      route: location.pathname,
+      route: location.pathname + location.search,
       module,
       sessionId: session.id,
     });
-  }, [location.pathname, session]);
+  }, [location.pathname, location.search, session]);
 
   useEffect(() => {
     if (showLoaderOverlay || !session) return undefined;

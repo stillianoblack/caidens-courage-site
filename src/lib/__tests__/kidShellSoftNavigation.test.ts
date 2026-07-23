@@ -2,14 +2,21 @@ import {
   shouldUseImmediateShellAssign,
   shouldUseSoftShellNavigation,
 } from '../kidShellNav';
+import { preserveWeeklyAdventureSelectionSearch } from '../weeklyAdventureRouteContext';
 
 describe('Kid Play shell soft navigation', () => {
   const weekly =
     '/play/session/session-1/weekly-adventures?view=explore&week=1';
 
-  test('uses router navigation for tab query changes inside the same module', () => {
+  test('hard-loads query changes so visible content follows the URL', () => {
     expect(
       shouldUseSoftShellNavigation(
+        weekly,
+        '/play/session/session-1/weekly-adventures?view=missions&week=1',
+      ),
+    ).toBe(false);
+    expect(
+      shouldUseImmediateShellAssign(
         weekly,
         '/play/session/session-1/weekly-adventures?view=missions&week=1',
       ),
@@ -53,5 +60,17 @@ describe('Kid Play shell soft navigation', () => {
         '/play/session/session-2/weekly-adventures?view=missions',
       ),
     ).toBe(false);
+  });
+
+  test('preserves only the Weekly Adventures selection across shell tabs', () => {
+    expect(
+      preserveWeeklyAdventureSelectionSearch(
+        '?view=explore&month=2&week=5&character=miranda&debug=true',
+      ),
+    ).toBe('?view=explore&month=2&week=5');
+  });
+
+  test('returns no search string when there is no Weekly Adventures selection', () => {
+    expect(preserveWeeklyAdventureSelectionSearch('?character=miranda')).toBe('');
   });
 });

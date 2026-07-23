@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
 import {
@@ -9,6 +9,7 @@ import {
 import './kid-play-shell-nav.css';
 import KidPlayB4ProfileControl from './KidPlayB4ProfileControl';
 import { useMyAdventures } from '../../context/MyAdventuresContext';
+import { preserveWeeklyAdventureSelectionSearch } from '../../lib/weeklyAdventureRouteContext';
 
 export type { KidPlayShellModuleId };
 
@@ -44,6 +45,7 @@ export default function KidPlayShellNav({
   onExitClick,
 }: KidPlayShellNavProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const collectionsBadgeCount = useInventoryNotificationBadge(participantId);
   const { acknowledged, openDrawer, triggerRef } = useMyAdventures();
   const resolvedActiveModule = activeModule === 'inventory' ? 'collections' : activeModule;
@@ -69,7 +71,11 @@ export default function KidPlayShellNav({
                     .join(' ')}
                   onClick={() => {
                     if (!item.available) return;
-                    kidPlayShellNavigate(navigate, getKidPlayShellRoute(sessionId, item.id));
+                    const weeklySelection = preserveWeeklyAdventureSelectionSearch(location.search);
+                    kidPlayShellNavigate(
+                      navigate,
+                      `${getKidPlayShellRoute(sessionId, item.id)}${weeklySelection}`,
+                    );
                   }}
                   disabled={!item.available}
                   aria-current={isActive ? 'page' : undefined}
