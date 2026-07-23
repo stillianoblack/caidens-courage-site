@@ -91,28 +91,26 @@ export default function KidPlayShellNav({
               </li>
             );
           })}
-          {resolvedActiveModule === 'weekly-adventures' ? (
-            <li>
-              <button
-                ref={triggerRef}
-                type="button"
-                className={[
-                  'kidPlayShellNavBtn',
-                  'kidPlayShellNavBtn--myAdventures',
-                  !acknowledged ? 'kidPlayShellNavBtn--discovery' : '',
-                ].filter(Boolean).join(' ')}
-                onClick={openDrawer}
-                aria-haspopup="dialog"
-              >
-                My Adventures
-                {!acknowledged ? (
-                  <span className="kidPlayShellNavNewBadge" aria-label="New">
-                    NEW
-                  </span>
-                ) : null}
-              </button>
-            </li>
-          ) : null}
+          <li>
+            <button
+              ref={triggerRef}
+              type="button"
+              className={[
+                'kidPlayShellNavBtn',
+                'kidPlayShellNavBtn--myAdventures',
+                !acknowledged ? 'kidPlayShellNavBtn--discovery' : '',
+              ].filter(Boolean).join(' ')}
+              onClick={openDrawer}
+              aria-haspopup="dialog"
+            >
+              My Adventures
+              {!acknowledged ? (
+                <span className="kidPlayShellNavNewBadge" aria-label="New">
+                  NEW
+                </span>
+              ) : null}
+            </button>
+          </li>
         </ul>
       </nav>
       <div className="kidPlayShellNavActions">

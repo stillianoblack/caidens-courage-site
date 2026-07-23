@@ -618,7 +618,10 @@ export default function CourageInTheDarkAdventureHub({
       />
     ) : null;
 
-  const hideWeekMetaHeader = showCinematicSelector || (cinematicAdventureMode && showPlayerHud);
+  // The cinematic world is the canonical header in the kid shell. Keeping the
+  // legacy thumbnail/title row for Missions or Quests duplicates week context
+  // and inserts empty vertical space above the world when tabs change.
+  const hideWeekMetaHeader = cinematicAdventureMode || showCinematicSelector;
 
   const mapWrap = (
     <div

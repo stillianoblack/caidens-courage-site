@@ -29,8 +29,53 @@ export type B4Preference = {
 
 const inFlightLoads = new Map<string, Promise<B4Preference>>();
 const inFlightSessionRecovery = new Map<string, Promise<void>>();
+const preferenceCache = new Map<string, B4Preference>();
+const B4_CACHE_PREFIX = 'kid-play:b4-preference:';
+const B4_REQUEST_TIMEOUT_MS = 12_000;
 
 type B4RequestError = Error & { status?: number; correlationId?: string | null };
+
+function cacheKey(participantId: string): string {
+  return `${B4_CACHE_PREFIX}${participantId}`;
+}
+
+function writeCachedB4Preference(participantId: string, preference: B4Preference): void {
+  const id = participantId.trim();
+  if (!id) return;
+  preferenceCache.set(id, preference);
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(cacheKey(id), JSON.stringify(preference));
+  } catch {
+    // The in-memory cache still protects route changes when storage is unavailable.
+  }
+}
+
+export function readCachedB4Preference(participantId?: string | null): B4Preference | null {
+  const id = participantId?.trim();
+  if (!id) return null;
+  const memory = preferenceCache.get(id);
+  if (memory) return memory;
+  if (typeof window === 'undefined') return null;
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(cacheKey(id)) || 'null');
+    if (
+      parsed &&
+      typeof parsed.variant === 'string' &&
+      typeof parsed.selectionRequired === 'boolean'
+    ) {
+      const preference = {
+        variant: normalizeB4Variant(parsed.variant),
+        selectionRequired: parsed.selectionRequired,
+      };
+      preferenceCache.set(id, preference);
+      return preference;
+    }
+  } catch {
+    // Ignore malformed or unavailable session storage and perform a foreground load.
+  }
+  return null;
+}
 
 function sessionMatchesParticipant(
   session: { participant_id?: string | null; child_id?: string | null; status?: string | null },
@@ -118,16 +163,30 @@ async function requestOnce(participantId: string, init?: RequestInit): Promise<B
   if (!token && !Object.keys(familyHeaders).length && !Object.keys(campHeaders).length) {
     throw new Error('Sign in or reopen your family session to manage this B-4 choice.');
   }
-  const response = await fetch(`/.netlify/functions/portal-b4-variant?participantId=${encodeURIComponent(participantId)}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...familyHeaders,
-      ...campHeaders,
-      ...init?.headers,
-    },
-  });
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort();
+  init?.signal?.addEventListener('abort', abortFromCaller, { once: true });
+  const timeout = window.setTimeout(() => controller.abort(), B4_REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(
+      `/.netlify/functions/portal-b4-variant?participantId=${encodeURIComponent(participantId)}`,
+      {
+        ...init,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...familyHeaders,
+          ...campHeaders,
+          ...init?.headers,
+        },
+      },
+    );
+  } finally {
+    window.clearTimeout(timeout);
+    init?.signal?.removeEventListener('abort', abortFromCaller);
+  }
   const body = await response.json().catch(() => null);
   if (!response.ok) {
     const error = new Error(response.status === 403 ? 'This participant is not available to this account.' : 'B-4 preference could not be loaded.') as B4RequestError;
@@ -164,15 +223,24 @@ export function loadB4Variant(participantId: string): Promise<B4Preference> {
   const id = participantId.trim();
   const existing = inFlightLoads.get(id);
   if (existing) return existing;
-  const pending = request(id).finally(() => {
-    if (inFlightLoads.get(id) === pending) inFlightLoads.delete(id);
-  });
+  const pending = request(id)
+    .then((preference) => {
+      writeCachedB4Preference(id, preference);
+      return preference;
+    })
+    .finally(() => {
+      if (inFlightLoads.get(id) === pending) inFlightLoads.delete(id);
+    });
   inFlightLoads.set(id, pending);
   return pending;
 }
 
 export async function saveB4Variant(participantId: string, variant: B4VariantKey): Promise<B4VariantKey> {
   const saved = await request(participantId, { method: 'PUT', body: JSON.stringify({ variant }) });
+  writeCachedB4Preference(participantId, {
+    variant: saved.variant,
+    selectionRequired: false,
+  });
   window.dispatchEvent(new CustomEvent(B4_VARIANT_UPDATED_EVENT, { detail: { participantId, variant: saved.variant, selectionRequired: false } }));
   notifyChildProfileUpdated();
   return saved.variant;
@@ -183,6 +251,9 @@ export const _test = {
   ensureCompatibilitySession,
   inFlightLoads,
   inFlightSessionRecovery,
+  preferenceCache,
+  readCachedB4Preference,
+  B4_REQUEST_TIMEOUT_MS,
   refreshExpiredSupabaseSession,
   sessionMatchesParticipant,
   shouldRetryAfterSessionRecovery,

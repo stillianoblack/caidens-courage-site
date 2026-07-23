@@ -7,7 +7,6 @@ import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
 import WeeklyAdventureMonthSelector from '../../../design-system/components/WeeklyAdventureMonthSelector';
-import MyAdventuresDrawer from '../../kid-play-shell/MyAdventuresDrawer';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { kidPlayShellNavigate } from '../../../lib/kidShellNav';
@@ -1000,20 +999,6 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
               months={monthSelectorItems}
               selectedMonthNumber={selectedMonthNumber}
               currentMonthNumber={currentMonthNumber}
-              onSelectMonth={handleSelectMonth}
-            />
-          ) : null}
-          {kidPlayShell && activeChild ? (
-            <MyAdventuresDrawer
-              participantId={activeChild.participantId}
-              displayName={activeChild.displayName}
-              currentWeek={heroWeekNumber}
-              focusCoins={focusCoins}
-              focusCoinsLoading={focusCoinsLoading}
-              months={monthSelectorItems}
-              selectedMonthNumber={selectedMonthNumber}
-              currentMonthNumber={currentMonthNumber}
-              selectedMonthRecord={heroMonth}
               onSelectMonth={handleSelectMonth}
             />
           ) : null}

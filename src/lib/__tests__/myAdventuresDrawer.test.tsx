@@ -97,6 +97,30 @@ describe('My Adventures drawer', () => {
     expect(window.localStorage.getItem('kid-play:my-adventures-seen:child-1')).toBe('true');
   });
 
+  test.each([
+    'weekly-adventures',
+    'collections',
+    'character-hub',
+    'arcade',
+    'rewards',
+  ] as const)('renders exactly one shared trigger on the %s route', (activeModule) => {
+    render(
+      <MemoryRouter>
+        <MyAdventuresProvider participantId="child-1">
+          <KidPlayShellNav
+            sessionId="session-1"
+            activeModule={activeModule}
+            participantId="child-1"
+            displayName="Nova"
+            onExitClick={jest.fn()}
+          />
+        </MyAdventuresProvider>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByRole('button', { name: /My Adventures/ })).toHaveLength(1);
+  });
+
   test('opens accessibly, traps focus, restores focus, and keeps locked months disabled', async () => {
     const onSelectMonth = jest.fn();
     render(

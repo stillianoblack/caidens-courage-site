@@ -36,6 +36,7 @@ import KidPlayShellNav from '../components/kid-play-shell/KidPlayShellNav';
 import KidPlayShellExitModal from '../components/kid-play-shell/KidPlayShellExitModal';
 import B4FocusFlightUnlockModal from '../components/kid-play-shell/B4FocusFlightUnlockModal';
 import B4UnitOnboardingModal from '../components/b4/B4UnitOnboardingModal';
+import KidPlayMyAdventures from '../components/kid-play-shell/KidPlayMyAdventures';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import {
@@ -271,15 +272,18 @@ function KidPlaySessionLayoutContent() {
           firstName={firstName}
           gradeLevel={gradeLevel}
         >
-      <KidPlaySessionProvider session={session}>
-        <MyAdventuresProvider participantId={session.child_id}>
-        {activeModule === 'weekly-adventures' ? (
-          <B4UnitOnboardingModal
-            key={session.child_id}
-            participantId={session.child_id}
-            enforce
-          />
-        ) : null}
+          <KidPlaySessionProvider session={session}>
+            <MyAdventuresProvider participantId={session.child_id}>
+            <B4UnitOnboardingModal
+              key={session.child_id}
+              participantId={session.child_id}
+              enforce
+            />
+            <KidPlayMyAdventures
+              participantId={session.child_id}
+              displayName={displayName}
+              sessionId={session.id}
+            />
             <div className="kid-play-shell">
               <KidPlayShellNav
                 sessionId={session.id}
@@ -313,8 +317,8 @@ function KidPlaySessionLayoutContent() {
                 onPlayNow={handleB4UnlockPlayNow}
                 onDismiss={handleB4UnlockDismiss}
               />
-            </div>
-        </MyAdventuresProvider>
+              </div>
+            </MyAdventuresProvider>
           </KidPlaySessionProvider>
         </KidPlaySessionParticipantProvider>
       ) : null}
