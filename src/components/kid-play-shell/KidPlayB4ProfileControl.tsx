@@ -5,6 +5,7 @@ import { useB4Variant } from '../../hooks/useB4Variant';
 import { useDocumentModalScrollLock } from '../../hooks/useDocumentModalScrollLock';
 import B4CircleAvatar from '../b4/B4CircleAvatar';
 import B4VariantSelector from '../b4/B4VariantSelector';
+import { KID_PLAY_B4_PICKER_REQUEST_EVENT } from '../../lib/kidPlayB4PickerEvents';
 
 type KidPlayB4ProfileControlProps = {
   participantId: string;
@@ -41,6 +42,15 @@ export default function KidPlayB4ProfileControl({
     setMenuOpen(false);
     setPickerOpen(false);
   }, [participantId]);
+
+  useEffect(() => {
+    const openPicker = () => {
+      setMenuOpen(false);
+      setPickerOpen(true);
+    };
+    window.addEventListener(KID_PLAY_B4_PICKER_REQUEST_EVENT, openPicker);
+    return () => window.removeEventListener(KID_PLAY_B4_PICKER_REQUEST_EVENT, openPicker);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen && !pickerOpen) return undefined;
@@ -117,7 +127,7 @@ export default function KidPlayB4ProfileControl({
 
   const closePicker = () => {
     setPickerOpen(false);
-    window.setTimeout(() => changeButtonRef.current?.focus(), 0);
+    window.setTimeout(() => (changeButtonRef.current ?? triggerRef.current)?.focus(), 0);
   };
 
   return (

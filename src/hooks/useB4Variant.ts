@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizeB4Variant, type B4VariantKey } from '../data/b4/variantManifest';
 import { B4_VARIANT_UPDATED_EVENT, loadB4Variant, saveB4Variant } from '../lib/b4VariantService';
+import { PORTAL_SESSION_CHANGED_EVENT } from '../lib/portalSessionEvents';
 
 export function useB4Variant(participantId?: string | null) {
   const [variant, setVariant] = useState<B4VariantKey>('courage');
@@ -51,6 +52,13 @@ export function useB4Variant(participantId?: string | null) {
     window.addEventListener(B4_VARIANT_UPDATED_EVENT, onUpdated);
     return () => window.removeEventListener(B4_VARIANT_UPDATED_EVENT, onUpdated);
   }, [participantId]);
+  useEffect(() => {
+    const onSessionChanged = () => {
+      void refresh();
+    };
+    window.addEventListener(PORTAL_SESSION_CHANGED_EVENT, onSessionChanged);
+    return () => window.removeEventListener(PORTAL_SESSION_CHANGED_EVENT, onSessionChanged);
+  }, [refresh]);
 
   const save = useCallback(async (next: B4VariantKey) => {
     const id = participantId?.trim();

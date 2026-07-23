@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { KidPlaySessionParticipantProvider } from '../context/ActiveParticipantContext';
 import { KidPlaySessionProvider } from '../context/KidPlaySessionContext';
+import { MyAdventuresProvider } from '../context/MyAdventuresContext';
 import { PortalSessionProvider } from '../context/PortalSessionContext';
 import {
   getKidPlaySessionById,
@@ -271,6 +272,7 @@ function KidPlaySessionLayoutContent() {
           gradeLevel={gradeLevel}
         >
       <KidPlaySessionProvider session={session}>
+        <MyAdventuresProvider participantId={session.child_id}>
         {activeModule === 'weekly-adventures' ? (
           <B4UnitOnboardingModal
             key={session.child_id}
@@ -312,6 +314,7 @@ function KidPlaySessionLayoutContent() {
                 onDismiss={handleB4UnlockDismiss}
               />
             </div>
+        </MyAdventuresProvider>
           </KidPlaySessionProvider>
         </KidPlaySessionParticipantProvider>
       ) : null}

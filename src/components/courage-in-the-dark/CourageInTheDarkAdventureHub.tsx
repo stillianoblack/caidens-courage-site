@@ -92,6 +92,8 @@ type CourageInTheDarkAdventureHubProps = {
   cinematicAdventureMode?: boolean;
   bottomHudTrayEnabled?: boolean;
   playerHud?: HeroCinematicPlayerHudProps | null;
+  playerHudPlacement?: 'world' | 'outside';
+  monthHeroOverlay?: React.ReactNode;
   weekSelectorCards?: WeeklyAdventureJourneyCardItem[];
   onWeekSelectorSelectWeek?: (weekNumber: number) => void;
   onWeekPillSelectWeek?: (weekNumber: number) => void;
@@ -100,6 +102,7 @@ type CourageInTheDarkAdventureHubProps = {
     weekNumber: number,
     source: 'week-card' | 'week-card-cta',
   ) => boolean;
+  onViewModeChange?: (mode: CourageHubViewMode) => void;
   /** @deprecated Legacy large Explore overlay — use cinematicWeekSelectorEnabled */
   heroExploreOverlayEnabled?: boolean;
   exploreOverlayWeekCards?: WeeklyAdventureJourneyCardItem[];
@@ -130,11 +133,14 @@ export default function CourageInTheDarkAdventureHub({
   cinematicAdventureMode = false,
   bottomHudTrayEnabled = ENABLE_BOTTOM_HUD_TRAY,
   playerHud = null,
+  playerHudPlacement = 'world',
+  monthHeroOverlay = null,
   weekSelectorCards,
   onWeekSelectorSelectWeek,
   onWeekPillSelectWeek,
   onWeekSelectorReviewWeek,
   onWeekSelectorLaunchWeek,
+  onViewModeChange,
   heroExploreOverlayEnabled = false,
   exploreOverlayWeekCards,
   onExploreSelectWeek,
@@ -205,7 +211,8 @@ export default function CourageInTheDarkAdventureHub({
 
   const handleViewModeChange = useCallback((mode: CourageHubViewMode) => {
     setViewMode(mode);
-  }, []);
+    onViewModeChange?.(mode);
+  }, [onViewModeChange]);
 
   const showPlayerHud = Boolean(cinematicAdventureMode && playerHud);
 
@@ -626,12 +633,17 @@ export default function CourageInTheDarkAdventureHub({
         .join(' ')}
     >
       {sharedMapCanvas}
+      {monthHeroOverlay && viewMode === 'explore' ? (
+        <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--monthMeta">
+          {monthHeroOverlay}
+        </div>
+      ) : null}
       {!isMobileLayout ? (
         <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--pillsOnly">
           {desktopMapPills}
         </div>
       ) : null}
-      {showPlayerHud && playerHud ? (
+      {showPlayerHud && playerHud && playerHudPlacement === 'world' ? (
         <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--playerHud">
           <HeroCinematicPlayerHud {...playerHud} />
         </div>
@@ -732,6 +744,11 @@ export default function CourageInTheDarkAdventureHub({
         aria-label="Courage in the Dark adventure hub"
       >
         <div className="courageAdventureHubMapCol">
+          {showPlayerHud && playerHud && playerHudPlacement === 'outside' ? (
+            <div className="courageAdventureHubPlayerBar">
+              <HeroCinematicPlayerHud {...playerHud} />
+            </div>
+          ) : null}
           {weekMetaRow}
           {baselineHelper}
 

@@ -6,7 +6,8 @@ import '../start-child-game-button.css';
 import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
-import WeeklyAdventureMonthHero from '../../../design-system/components/WeeklyAdventureMonthHero';
+import WeeklyAdventureMonthSelector from '../../../design-system/components/WeeklyAdventureMonthSelector';
+import MyAdventuresDrawer from '../../kid-play-shell/MyAdventuresDrawer';
 import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { kidPlayShellNavigate } from '../../../lib/kidShellNav';
@@ -23,6 +24,8 @@ import {
   WEEKLY_VIEW_MAP_VALUE,
   WEEKLY_VIEW_LIST_VALUE,
   WEEKLY_VIEW_PARAM,
+  WEEKLY_MONTH_PARAM,
+  parseWeeklyAdventureMonthParam,
   WEEKLY_WEEK_PARAM,
   parseWeeklyAdventureWeekParam,
   weeklyAdventureHeroAnchor,
@@ -48,7 +51,10 @@ import {
 import { logFeaturedAdventureDiagnostics } from '../../../lib/getFeaturedAdventure';
 import { resolveAdventureMapMissions } from '../../../lib/adventureMapMissions';
 import { resolveAdventureMonthHeroSrc } from '../../../lib/adventureMonthHero';
-import { resolveMonthForWeek } from '../../../lib/adventureMonthService';
+import {
+  resolveDefaultMonthNumber,
+  resolveMonthForWeek,
+} from '../../../lib/adventureMonthService';
 import {
   countCompletedMapMissions,
   resolveFullyCompletedWeekNumbers,
@@ -198,6 +204,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   );
 
   const requestedWeek = parseWeeklyAdventureWeekParam(searchParams.get(WEEKLY_WEEK_PARAM));
+  const requestedMonth = parseWeeklyAdventureMonthParam(searchParams.get(WEEKLY_MONTH_PARAM));
 
   const adventureProgress = useMemo(
     () =>
@@ -333,6 +340,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       const params = new URLSearchParams(searchParams);
       params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
       params.set(WEEKLY_WEEK_PARAM, String(selectable));
+      params.set(WEEKLY_MONTH_PARAM, String(resolveDefaultMonthNumber(selectable)));
       const heroHash = weeklyAdventureHeroAnchor(selectable);
       const nextLocation = {
         pathname: location.pathname,
@@ -682,6 +690,79 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     return section?.cards ?? [];
   }, [heroMonth, journeyMonthSections]);
 
+  const currentMonthNumber = resolveDefaultMonthNumber(playableWeekNumber);
+  const selectedMonthNumber = heroMonth?.month_number ?? currentMonthNumber;
+  const monthSelectorItems = useMemo(
+    () =>
+      journeyMonthSections.map((section) => ({
+        month: section.month,
+        cards: section.cards,
+        locked:
+          visibilityCtx.previewMode !== 'admin' &&
+          section.cards.every((card) => card.disabled || card.variant === 'locked'),
+      })),
+    [journeyMonthSections, visibilityCtx.previewMode],
+  );
+
+  const handleSelectMonth = useCallback(
+    (monthNumber: number) => {
+      const item = monthSelectorItems.find((row) => row.month.monthNumber === monthNumber);
+      if (!item || item.locked) return;
+
+      const selectedWeekStillInMonth = item.month.weekNumbers.includes(heroWeekNumber)
+        ? item.cards.find((card) => card.weekNumber === heroWeekNumber && !card.disabled)
+        : null;
+      const targetCard =
+        selectedWeekStillInMonth ??
+        item.cards.find((card) => !card.disabled && card.variant !== 'locked');
+      if (!targetCard) return;
+
+      setSelectedWeekNumber(targetCard.weekNumber);
+      const params = new URLSearchParams(searchParams);
+      params.set(WEEKLY_MONTH_PARAM, String(monthNumber));
+      params.set(WEEKLY_WEEK_PARAM, String(targetCard.weekNumber));
+      const nextLocation = {
+        pathname: location.pathname,
+        search: `?${params.toString()}`,
+        hash: weeklyAdventureHeroAnchor(targetCard.weekNumber),
+      };
+
+      if (kidPlayShell) {
+        kidPlayShellNavigate(navigate, nextLocation);
+      } else {
+        navigate(nextLocation, { replace: false });
+      }
+    },
+    [heroWeekNumber, kidPlayShell, location.pathname, monthSelectorItems, navigate, searchParams],
+  );
+
+  const handleHubViewModeChange = useCallback(
+    (mode: CourageHubViewMode) => {
+      const params = new URLSearchParams(searchParams);
+      params.set(WEEKLY_VIEW_PARAM, mode);
+      const nextLocation = {
+        pathname: location.pathname,
+        search: `?${params.toString()}`,
+        hash: location.hash,
+      };
+      if (kidPlayShell) {
+        kidPlayShellNavigate(navigate, nextLocation, { replace: true });
+      } else {
+        navigate(nextLocation, { replace: true });
+      }
+    },
+    [kidPlayShell, location.hash, location.pathname, navigate, searchParams],
+  );
+
+  useEffect(() => {
+    if (!requestedMonth || requestedWeek) return;
+    if (requestedMonth === selectedMonthNumber) return;
+    const item = monthSelectorItems.find((row) => row.month.monthNumber === requestedMonth);
+    if (!item || item.locked) return;
+    const targetCard = item.cards.find((card) => !card.disabled && card.variant !== 'locked');
+    if (targetCard) setSelectedWeekNumber(targetCard.weekNumber);
+  }, [monthSelectorItems, requestedMonth, requestedWeek, selectedMonthNumber]);
+
   const hideLegacyWeekGrid =
     ENABLE_CINEMATIC_WEEK_SELECTOR && !ENABLE_LEGACY_WEEK_GRID && !ENABLE_DARK_ADVENTURE_CENTER;
   const showDarkBottomWeekCards =
@@ -913,12 +994,34 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
       ) : null}
 
       {showCourageHero && heroWeek ? (
-        <section
-          id={weeklyAdventureHeroAnchor(heroWeekNumber)}
-          className="courageMapHubSection"
-          aria-label={`Week ${heroWeekNumber} adventure hub`}
-        >
-          {kidPlayShell && heroMonth ? <WeeklyAdventureMonthHero month={heroMonth} /> : null}
+        <>
+          {!kidPlayShell ? (
+            <WeeklyAdventureMonthSelector
+              months={monthSelectorItems}
+              selectedMonthNumber={selectedMonthNumber}
+              currentMonthNumber={currentMonthNumber}
+              onSelectMonth={handleSelectMonth}
+            />
+          ) : null}
+          {kidPlayShell && activeChild ? (
+            <MyAdventuresDrawer
+              participantId={activeChild.participantId}
+              displayName={activeChild.displayName}
+              currentWeek={heroWeekNumber}
+              focusCoins={focusCoins}
+              focusCoinsLoading={focusCoinsLoading}
+              months={monthSelectorItems}
+              selectedMonthNumber={selectedMonthNumber}
+              currentMonthNumber={currentMonthNumber}
+              selectedMonthRecord={heroMonth}
+              onSelectMonth={handleSelectMonth}
+            />
+          ) : null}
+          <section
+            id={weeklyAdventureHeroAnchor(heroWeekNumber)}
+            className="courageMapHubSection"
+            aria-label={`Week ${heroWeekNumber} adventure hub`}
+          >
           <CourageInTheDarkAdventureHub
             weekNodes={heroMapNodes}
             weekTitle={heroWeek.title}
@@ -951,18 +1054,22 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
               )
             }
             cinematicAdventureMode={kidPlayShell || ENABLE_CINEMATIC_ADVENTURE_MODE}
-            playerHud={heroPlayerHud}
+            playerHud={kidPlayShell ? null : heroPlayerHud}
+            playerHudPlacement="outside"
+            monthHeroOverlay={null}
             cinematicWeekSelectorEnabled={ENABLE_CINEMATIC_WEEK_SELECTOR}
             weekSelectorCards={heroMonthExploreCards}
             onWeekSelectorSelectWeek={handleSelectWeek}
             onWeekPillSelectWeek={handleHighlightWeek}
             onWeekSelectorReviewWeek={handleReviewWeek}
             onWeekSelectorLaunchWeek={handleLaunchWeek}
+            onViewModeChange={handleHubViewModeChange}
           />
-        </section>
+          </section>
+        </>
       ) : null}
 
-      {!kidPlayShell ? (
+      {!kidPlayShell && !ENABLE_CINEMATIC_WEEK_SELECTOR ? (
         <div
           className={[
             'weeklyJourneySections',

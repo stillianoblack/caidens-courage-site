@@ -26,4 +26,15 @@ describe('B-4 camp-session client transport', () => {
     expect(source).toContain("['saved', 'onboarding_required'].includes(body.state)");
     expect(source).toContain("selectionRequired: body.state === 'onboarding_required'");
   });
+
+  test('validates or re-establishes an expired compatibility session before one retry', () => {
+    expect(source).toContain('refreshExpiredSupabaseSession');
+    expect(source).toContain('ensureCompatibilitySession(participantId)');
+    expect(source).toContain('ensureCompatibilitySession(participantId, true)');
+    expect(source).toContain('getCampCompatibilityChildSession(localSessionId)');
+    expect(source).toContain('launchCampCompatibilityChildSession');
+    expect(source).toContain('getFamilyCompatibilityChildSession(localSessionId)');
+    expect(source).toContain('launchFamilyCompatibilityChildSession(participantId)');
+    expect(source.match(/return requestOnce\(participantId, init\)/g)).toHaveLength(1);
+  });
 });

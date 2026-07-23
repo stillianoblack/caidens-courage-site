@@ -8,6 +8,7 @@ import {
 } from '../../lib/kidPlayShellRoutes';
 import './kid-play-shell-nav.css';
 import KidPlayB4ProfileControl from './KidPlayB4ProfileControl';
+import { useMyAdventures } from '../../context/MyAdventuresContext';
 
 export type { KidPlayShellModuleId };
 
@@ -44,6 +45,7 @@ export default function KidPlayShellNav({
 }: KidPlayShellNavProps) {
   const navigate = useNavigate();
   const collectionsBadgeCount = useInventoryNotificationBadge(participantId);
+  const { acknowledged, openDrawer, triggerRef } = useMyAdventures();
   const resolvedActiveModule = activeModule === 'inventory' ? 'collections' : activeModule;
 
   return (
@@ -89,6 +91,28 @@ export default function KidPlayShellNav({
               </li>
             );
           })}
+          {resolvedActiveModule === 'weekly-adventures' ? (
+            <li>
+              <button
+                ref={triggerRef}
+                type="button"
+                className={[
+                  'kidPlayShellNavBtn',
+                  'kidPlayShellNavBtn--myAdventures',
+                  !acknowledged ? 'kidPlayShellNavBtn--discovery' : '',
+                ].filter(Boolean).join(' ')}
+                onClick={openDrawer}
+                aria-haspopup="dialog"
+              >
+                My Adventures
+                {!acknowledged ? (
+                  <span className="kidPlayShellNavNewBadge" aria-label="New">
+                    NEW
+                  </span>
+                ) : null}
+              </button>
+            </li>
+          ) : null}
         </ul>
       </nav>
       <div className="kidPlayShellNavActions">

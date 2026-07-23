@@ -166,6 +166,40 @@
   pointer-events: auto;
 }
 
+.courageAdventureHubPlayerBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.7rem clamp(0.75rem, 2vw, 1.25rem);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background: #070c18;
+}
+
+.courageAdventureHubPlayerBar .heroCinematicPlayerHud {
+  width: min(100%, 19rem);
+  max-width: 19rem;
+  background: rgba(15, 28, 52, 0.88);
+}
+
+.courageMapCanvasHeroOverlay--monthMeta {
+  inset: 1rem auto auto 1rem;
+  width: min(27rem, calc(100% - 2rem));
+  z-index: 4;
+  display: block;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .courageAdventureHubPlayerBar {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .courageMapCanvasHeroOverlay--monthMeta {
+    inset: 0.75rem auto auto 0.75rem;
+    width: calc(100% - 1.5rem);
+  }
+}
+
 .courageMapCanvas--hub {
   width: 100%;
   min-height: var(--courage-hub-map-height);

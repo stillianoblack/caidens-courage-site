@@ -6,6 +6,7 @@ export const WEEKLY_SOURCE_PARAM = 'source';
 export const WEEKLY_SOURCE_VALUE = 'weekly';
 export const WEEKLY_CHARACTER_SOURCE_VALUE = 'character';
 export const WEEKLY_WEEK_PARAM = 'week';
+export const WEEKLY_MONTH_PARAM = 'month';
 export const WEEKLY_WEEK_TITLE_PARAM = 'weekTitle';
 
 export type WeeklyAdventureRouteContext = {
@@ -57,6 +58,12 @@ export function parseWeeklyAdventureWeekParam(value: string | null | undefined):
   if (!value?.trim()) return null;
   const week = Number.parseInt(value, 10);
   return Number.isFinite(week) && week > 0 ? week : null;
+}
+
+export function parseWeeklyAdventureMonthParam(value: string | null | undefined): number | null {
+  if (!value?.trim()) return null;
+  const month = Number.parseInt(value, 10);
+  return Number.isFinite(month) && month > 0 ? month : null;
 }
 
 export const WEEKLY_VIEW_PARAM = 'view';
