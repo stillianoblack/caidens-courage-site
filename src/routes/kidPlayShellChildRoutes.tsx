@@ -1,5 +1,10 @@
 import React from 'react';
-import { Navigate, Route } from 'react-router-dom';
+import {
+  createRoutesFromElements,
+  Navigate,
+  Route,
+  useRoutes,
+} from 'react-router-dom';
 import FamilyContinueLearningPanel from '../components/family-portal/panels/FamilyContinueLearningPanel';
 import FamilyInventoryPanel from '../components/family-portal/panels/FamilyInventoryPanel';
 import FamilyCharacterProfilePage from '../components/family-portal/panels/FamilyCharacterProfilePage';
@@ -84,3 +89,17 @@ export const kidPlayShellChildRoutes = (
     <Route path="kids/zeke/:missionId" element={<ZekePortalMissionPage />} />
   </>
 );
+
+const kidPlayShellRouteObjects = createRoutesFromElements(kidPlayShellChildRoutes);
+
+/**
+ * Resolve the active child route inside the mounted Kid Play session shell.
+ *
+ * Keeping this route switch local prevents the app-level outlet from retaining
+ * a stale child match when the URL changes between top-level Kid Portal
+ * modules. The session providers and shell stay mounted while only the routed
+ * content changes.
+ */
+export function KidPlayShellRouteContent() {
+  return useRoutes(kidPlayShellRouteObjects);
+}

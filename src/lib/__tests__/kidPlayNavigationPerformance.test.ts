@@ -9,7 +9,8 @@ describe('Kid Play navigation performance contracts', () => {
     const layout = read('src/pages/KidPlaySessionLayout.tsx');
     const navigation = read('src/lib/kidShellNav.ts');
 
-    expect(layout).toContain('<Outlet key={location.pathname} />');
+    expect(layout).toContain('<KidPlayShellRouteContent />');
+    expect(layout).not.toContain('<Outlet');
     expect(layout).not.toContain('location.pathname}${location.search');
     expect(layout).toContain('const navigateRef = useRef(navigate);');
     expect(layout).toContain('}, [kidPlaySessionId]);');

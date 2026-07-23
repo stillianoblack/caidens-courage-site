@@ -108,6 +108,10 @@
     },
     {
       "status": "A",
+      "path": "src/lib/__tests__/kidPlayShellRouteTransitions.test.tsx"
+    },
+    {
+      "status": "A",
       "path": "src/lib/__tests__/kidShellSoftNavigation.test.ts"
     },
     {
@@ -145,6 +149,10 @@
     {
       "status": "M",
       "path": "src/pages/KidPlaySessionLayout.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/routes/kidPlayShellChildRoutes.tsx"
     }
   ]
 }
