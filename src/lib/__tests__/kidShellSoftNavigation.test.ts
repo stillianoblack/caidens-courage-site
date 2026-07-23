@@ -16,13 +16,13 @@ describe('Kid Play shell soft navigation', () => {
     ).toBe(true);
   });
 
-  test('hard-loads changes between Kid Play modules to avoid stale content', () => {
+  test('uses router navigation between Kid Play modules in the same session', () => {
     expect(
       shouldUseSoftShellNavigation(
         weekly,
         '/play/session/session-1/collections',
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       shouldUseImmediateShellAssign(
         weekly,
@@ -31,19 +31,19 @@ describe('Kid Play shell soft navigation', () => {
     ).toBe(true);
   });
 
-  test('hard-loads nested Arcade and character route changes', () => {
+  test('uses router navigation for nested Arcade and character route changes', () => {
     expect(
       shouldUseSoftShellNavigation(
         '/play/session/session-1/arcade',
         '/play/session/session-1/arcade/b4-focus-flight',
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       shouldUseSoftShellNavigation(
         '/play/session/session-1/characters',
         '/play/session/session-1/characters/caiden',
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test('does not soften navigation across sessions', () => {

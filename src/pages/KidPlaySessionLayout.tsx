@@ -307,7 +307,7 @@ function KidPlaySessionLayoutContent() {
                 onExitClick={() => setExitOpen(true)}
               />
               <Suspense fallback={null}>
-                <Outlet />
+                <Outlet key={location.pathname} />
               </Suspense>
               <KidPlayShellExitModal
                 open={exitOpen}
