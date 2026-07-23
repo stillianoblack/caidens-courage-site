@@ -133,6 +133,56 @@
   border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
+.myAdventuresB4Action {
+  margin-top: 0.9rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(244, 201, 93, 0.58);
+  border-radius: 0.85rem;
+  background: linear-gradient(145deg, rgba(69, 52, 24, 0.82), rgba(29, 36, 62, 0.92));
+}
+
+.myAdventuresB4Action__badge {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  padding: 0.2rem 0.48rem;
+  border-radius: 999px;
+  background: #f4c95d;
+  color: #172441;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.myAdventuresB4Action h3,
+.myAdventuresB4Action p {
+  margin: 0;
+}
+
+.myAdventuresB4Action h3 {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.myAdventuresB4Action p {
+  margin-top: 0.35rem;
+  color: #d8e2f4;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.myAdventuresB4Action button {
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.75rem;
+  border: 1px solid #f4c95d;
+  border-radius: 999px;
+  background: #f4c95d;
+  color: #172441;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .myAdventuresPlayer__b4Name {
   flex: 1;
   font-size: 0.8rem;

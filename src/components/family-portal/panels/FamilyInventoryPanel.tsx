@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ActiveChildSelector from '../ActiveChildSelector';
 import InventoryBadgeDetailSheet, {
@@ -77,6 +77,13 @@ const EMPTY_INVENTORY: PlayerInventorySnapshot = {
   purchasedShopItemIds: new Set(),
   rewardSnapshot: null,
 };
+
+type InventorySessionSnapshot = {
+  inventory: PlayerInventorySnapshot;
+  earned: ChildBadgeEarnedInput;
+};
+
+const inventorySessionCache = new Map<string, InventorySessionSnapshot>();
 
 function InventorySection({
   title,
@@ -233,9 +240,18 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
     }),
     [adventureModules, progressPaths],
   );
-  const [inventory, setInventory] = useState<PlayerInventorySnapshot>(EMPTY_INVENTORY);
-  const [earned, setEarned] = useState<ChildBadgeEarnedInput>(EMPTY_EARNED);
-  const [loading, setLoading] = useState(true);
+  const initialParticipantId = resolvedParticipantId?.trim() ?? '';
+  const initialCachedInventory = initialParticipantId
+    ? inventorySessionCache.get(initialParticipantId)
+    : undefined;
+  const [inventory, setInventory] = useState<PlayerInventorySnapshot>(
+    initialCachedInventory?.inventory ?? EMPTY_INVENTORY,
+  );
+  const [earned, setEarned] = useState<ChildBadgeEarnedInput>(
+    initialCachedInventory?.earned ?? EMPTY_EARNED,
+  );
+  const [loading, setLoading] = useState(!initialCachedInventory);
+  const refreshRequestRef = useRef(0);
   const [badgeDetail, setBadgeDetail] = useState<InventoryBadgeDetail | null>(null);
   const [helpSheetOpen, setHelpSheetOpen] = useState(false);
   const [shopUnlockTarget, setShopUnlockTarget] = useState<{
@@ -247,6 +263,7 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
 
   const refreshInventory = useCallback(async () => {
     const participantId = resolvedParticipantId?.trim();
+    const requestId = ++refreshRequestRef.current;
     if (!participantId) {
       setInventory(EMPTY_INVENTORY);
       setEarned(EMPTY_EARNED);
@@ -254,11 +271,21 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
       return;
     }
 
-    setLoading(true);
+    const cached = inventorySessionCache.get(participantId);
+    if (cached) {
+      setInventory(cached.inventory);
+      setEarned(cached.earned);
+    }
+    setLoading(!cached);
     const [snapshot, earnedState] = await Promise.all([
       getPlayerInventory(participantId, adventureModules, progressPaths),
       loadChildBadgeEarnedState(participantId, activeWeekNumbers, progressOptions),
     ]);
+    if (requestId !== refreshRequestRef.current) return;
+    inventorySessionCache.set(participantId, {
+      inventory: snapshot,
+      earned: earnedState,
+    });
     setInventory(snapshot);
     setEarned(earnedState);
     setLoading(false);
@@ -277,6 +304,13 @@ export default function FamilyInventoryPanel({ kidPlayShell = false }: { kidPlay
       window.removeEventListener('cc-reward-claimed', handleRefresh);
     };
   }, [resolvedParticipantId, refreshInventory]);
+
+  useEffect(
+    () => () => {
+      refreshRequestRef.current += 1;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!showHelpSheet) {

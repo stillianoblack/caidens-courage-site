@@ -64,6 +64,7 @@ export default function KidPlaySessionLayout() {
 function KidPlaySessionLayoutContent() {
   const { kidPlaySessionId = '' } = useParams<{ kidPlaySessionId: string }>();
   const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
   const location = useLocation();
   const [session, setSession] = useState<KidPlaySessionRow | null>(null);
   const [displayName, setDisplayName] = useState('');
@@ -78,6 +79,10 @@ function KidPlaySessionLayoutContent() {
   const [returnSessionOpen, setReturnSessionOpen] = useState(() => isKidPlayFamilySoftLocked());
   const resumeHandledRef = useRef(false);
   const initialPathRef = useRef(location.pathname);
+
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
 
   useEffect(() => {
     clearPageTransitionOverlay();
@@ -103,9 +108,13 @@ function KidPlaySessionLayoutContent() {
       const row = await getKidPlaySessionById(sessionId);
       if (!row || row.status !== 'active') {
         if (!cancelled) {
-          kidPlayShellNavigate(navigate, resolveKidPlaySessionExitPath(row?.session_source), {
-            replace: true,
-          });
+          kidPlayShellNavigate(
+            navigateRef.current,
+            resolveKidPlaySessionExitPath(row?.session_source),
+            {
+              replace: true,
+            },
+          );
         }
         return;
       }
@@ -151,11 +160,15 @@ function KidPlaySessionLayoutContent() {
       if (atShellRoot && !resumeHandledRef.current) {
         resumeHandledRef.current = true;
         const resume = parseKidPlayResumePayload(row.resume_payload);
-        const restored = applyKidPlaySessionResume(navigate, row, resume);
+        const restored = applyKidPlaySessionResume(navigateRef.current, row, resume);
         if (!restored) {
-          kidPlayShellNavigate(navigate, getKidPlayShellRoute(sessionId, 'weekly-adventures'), {
-            replace: true,
-          });
+          kidPlayShellNavigate(
+            navigateRef.current,
+            getKidPlayShellRoute(sessionId, 'weekly-adventures'),
+            {
+              replace: true,
+            },
+          );
         }
       }
     }
@@ -165,7 +178,7 @@ function KidPlaySessionLayoutContent() {
     return () => {
       cancelled = true;
     };
-  }, [kidPlaySessionId, navigate]);
+  }, [kidPlaySessionId]);
 
   const isBooting = !session || !displayName;
   const showLoaderOverlay = isBooting || showBootLoader;
@@ -182,11 +195,11 @@ function KidPlaySessionLayoutContent() {
     const module = resolveKidPlayShellModule(location.pathname) ?? 'weekly-adventures';
     void updateKidPlaySessionActivity(session.id, {
       ...(session.resume_payload ?? {}),
-      route: location.pathname + location.search,
+      route: location.pathname,
       module,
       sessionId: session.id,
     });
-  }, [location.pathname, location.search, session]);
+  }, [location.pathname, session]);
 
   useEffect(() => {
     if (showLoaderOverlay || !session) return undefined;
@@ -294,7 +307,7 @@ function KidPlaySessionLayoutContent() {
                 onExitClick={() => setExitOpen(true)}
               />
               <Suspense fallback={null}>
-                <Outlet key={`${location.pathname}${location.search}`} />
+                <Outlet />
               </Suspense>
               <KidPlayShellExitModal
                 open={exitOpen}

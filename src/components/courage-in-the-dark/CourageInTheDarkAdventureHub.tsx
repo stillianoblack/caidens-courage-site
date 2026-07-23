@@ -76,6 +76,7 @@ type CourageInTheDarkAdventureHubProps = {
   kidsBasePath?: string;
   baselineLocked?: boolean;
   baselineLockedLabel?: string;
+  hideBaselineGuide?: boolean;
   mapLocked?: boolean;
   mapBackgroundSrc?: string;
   adminPreview?: boolean;
@@ -120,6 +121,7 @@ export default function CourageInTheDarkAdventureHub({
   kidsBasePath,
   baselineLocked = false,
   baselineLockedLabel = BASELINE_GATE_MESSAGE,
+  hideBaselineGuide = false,
   mapLocked = false,
   mapBackgroundSrc,
   adminPreview = false,
@@ -684,7 +686,7 @@ export default function CourageInTheDarkAdventureHub({
     </div>
   );
 
-  const baselineHelper = baselineLocked ? (
+  const baselineHelper = baselineLocked && !hideBaselineGuide ? (
     <p className="courageAdventureHubBaselineGuide" role="status">
       {baselineLockedLabel}
     </p>

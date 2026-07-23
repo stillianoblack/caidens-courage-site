@@ -44,8 +44,15 @@ export function resolveKidShellNavigationMethod(from: string, to: string): 'rout
   return isKidPlayShellPath(from) || isKidPlayShellPath(to) ? 'assign' : 'router';
 }
 
-/** Same play session tab/module changes must hard-load immediately — no transition delay. */
+/** Same play session module changes may hard-load as an explicit recovery fallback. */
 export function shouldUseImmediateShellAssign(from: string, to: string): boolean {
+  const fromCtx = parseKidPlayShellPath(from);
+  const toCtx = parseKidPlayShellPath(to);
+  return Boolean(fromCtx && toCtx && fromCtx.sessionId === toCtx.sessionId);
+}
+
+/** Navigation within the same play session keeps the mounted shell and data providers. */
+export function shouldUseSoftShellNavigation(from: string, to: string): boolean {
   const fromCtx = parseKidPlayShellPath(from);
   const toCtx = parseKidPlayShellPath(to);
   return Boolean(fromCtx && toCtx && fromCtx.sessionId === toCtx.sessionId);
@@ -79,9 +86,8 @@ function assignPath(
 
 /**
  * Reliable navigation for kid play shell actions.
- * The kid shell crosses several lazy portal/game panels. In production, soft
- * router transitions can leave the visible shell on stale content until a
- * manual refresh. Shell actions therefore load the final URL directly.
+ * Routes within one authenticated play session stay inside the mounted shell
+ * so shared session data and cached module data are preserved.
  */
 export function kidPlayShellNavigate(
   navigate: NavigateFunction,
@@ -95,6 +101,13 @@ export function kidPlayShellNavigate(
   const targetInShell = isKidPlayShellPath(targetNorm);
   const method = resolveKidShellNavigationMethod(from, targetNorm);
   const assignMode = options.replace ? 'replace' : 'assign';
+
+  if (!options.forceAssign && shouldUseSoftShellNavigation(from, targetNorm)) {
+    logKidShellNav(from, targetNorm, 'router');
+    logNavTest(from, targetNorm, { method: 'router', scope: 'kid-shell' });
+    navigate(to, { replace: options.replace, state: options.state });
+    return;
+  }
 
   if ((inShell || targetInShell) && method === 'router') {
     logKidShellNav(from, targetNorm, method);

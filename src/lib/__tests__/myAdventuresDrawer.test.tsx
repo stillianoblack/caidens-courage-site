@@ -4,21 +4,33 @@ import { MemoryRouter } from 'react-router-dom';
 import MyAdventuresDrawer from '../../components/kid-play-shell/MyAdventuresDrawer';
 import KidPlayShellNav from '../../components/kid-play-shell/KidPlayShellNav';
 import { MyAdventuresProvider, useMyAdventures } from '../../context/MyAdventuresContext';
+import { KID_PLAY_B4_PICKER_REQUEST_EVENT } from '../kidPlayB4PickerEvents';
 import type { AdventureJourneyMonthView } from '../weeklyAdventureJourneyMonths';
+
+type MockB4VariantState = {
+  variant: 'courage' | 'pattern' | 'shield' | 'anchor' | 'fusion';
+  selectionRequired: boolean;
+  loading: boolean;
+  error: null;
+  save: jest.Mock;
+  refresh: jest.Mock;
+};
+
+const mockUseB4Variant = jest.fn((): MockB4VariantState => ({
+  variant: 'pattern',
+  selectionRequired: false,
+  loading: false,
+  error: null,
+  save: jest.fn(),
+  refresh: jest.fn(),
+}));
 
 jest.mock('../../hooks/useInventoryNotificationBadge', () => ({
   useInventoryNotificationBadge: () => 0,
 }));
 
 jest.mock('../../hooks/useB4Variant', () => ({
-  useB4Variant: () => ({
-    variant: 'pattern',
-    selectionRequired: false,
-    loading: false,
-    error: null,
-    save: jest.fn(),
-    refresh: jest.fn(),
-  }),
+  useB4Variant: () => mockUseB4Variant(),
 }));
 
 function month(monthNumber: number, completed: number): AdventureJourneyMonthView {
@@ -73,7 +85,17 @@ function DrawerHarness({ onSelectMonth }: { onSelectMonth: jest.Mock }) {
 }
 
 describe('My Adventures drawer', () => {
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => {
+    window.localStorage.clear();
+    mockUseB4Variant.mockReturnValue({
+      variant: 'pattern',
+      selectionRequired: false,
+      loading: false,
+      error: null,
+      save: jest.fn(),
+      refresh: jest.fn(),
+    });
+  });
 
   test('shows NEW before first open and removes it after acknowledgment', () => {
     render(
@@ -162,5 +184,46 @@ describe('My Adventures drawer', () => {
     );
     expect(css).toContain('.myAdventuresPlayer__b4Name {');
     expect(css).not.toContain('.myAdventuresPlayer__b4 > span {');
+  });
+
+  test('shows only the B-4 action card when onboarding is required and opens the picker', async () => {
+    mockUseB4Variant.mockReturnValue({
+      variant: 'courage',
+      selectionRequired: true,
+      loading: false,
+      error: null,
+      save: jest.fn(),
+      refresh: jest.fn(),
+    });
+    const onSelectMonth = jest.fn();
+    const requested = jest.fn();
+    window.addEventListener(KID_PLAY_B4_PICKER_REQUEST_EVENT, requested);
+
+    render(
+      <MyAdventuresProvider participantId="child-1">
+        <DrawerHarness onSelectMonth={onSelectMonth} />
+      </MyAdventuresProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open adventures' }));
+    expect(screen.getByRole('status', { name: /Action needed/ })).toBeInTheDocument();
+    expect(screen.getByText('Complete Your B-4 Check-In')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Change B-4' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Start Check-In' }));
+    await waitFor(() => expect(requested).toHaveBeenCalledTimes(1));
+    window.removeEventListener(KID_PLAY_B4_PICKER_REQUEST_EVENT, requested);
+  });
+
+  test('shows the saved B-4 summary without the onboarding action', () => {
+    render(
+      <MyAdventuresProvider participantId="child-1">
+        <DrawerHarness onSelectMonth={jest.fn()} />
+      </MyAdventuresProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open adventures' }));
+    expect(screen.getByText('B-4 Pattern')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Change B-4' })).toBeInTheDocument();
+    expect(screen.queryByText('Complete Your B-4 Check-In')).not.toBeInTheDocument();
   });
 });

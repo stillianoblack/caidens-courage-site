@@ -42,7 +42,9 @@ import { resolveAdventureComicThumbnailUrl } from '../../../lib/adventureThumbna
 import { resolveHeroWeekNumber } from '../../../lib/resolveHeroWeekNumber';
 import type { CourageHubViewMode } from '../../courage-in-the-dark/CourageHubViewToggle';
 import {
+  ADMIN_PREVIEW_PARAM,
   PREVIEW_ADVENTURE_PARAM,
+  PREVIEW_MODE_LIVE,
   readAdventureVisibilityContext,
   resolveCurrentFeaturedAdventure,
   resolveHeroDisplayWeekNumber,
@@ -179,9 +181,19 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   );
 
   const previewAdventureId = searchParams.get(PREVIEW_ADVENTURE_PARAM);
+  const adminPreview = searchParams.get(ADMIN_PREVIEW_PARAM);
+  const livePreview = searchParams.get(PREVIEW_MODE_LIVE);
+  const adventurePreviewSearch = useMemo(() => {
+    const params = new URLSearchParams();
+    if (previewAdventureId) params.set(PREVIEW_ADVENTURE_PARAM, previewAdventureId);
+    if (adminPreview) params.set(ADMIN_PREVIEW_PARAM, adminPreview);
+    if (livePreview) params.set(PREVIEW_MODE_LIVE, livePreview);
+    const serialized = params.toString();
+    return serialized ? `?${serialized}` : '';
+  }, [adminPreview, livePreview, previewAdventureId]);
   const visibilityCtx = useMemo(
-    () => readAdventureVisibilityContext(previewAdventureId, location.search),
-    [location.search, previewAdventureId],
+    () => readAdventureVisibilityContext(previewAdventureId, adventurePreviewSearch),
+    [adventurePreviewSearch, previewAdventureId],
   );
 
   const { modules: adventureModules } = useAdventureModules(
@@ -1017,6 +1029,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
             baselineLockedLabel={
               !hasActiveChild ? 'Select your child to begin' : BASELINE_LOCKED_LABEL
             }
+            hideBaselineGuide={kidPlayShell}
             embeddedInFamilyPortal
             hideActivitiesTab={kidPlayShell}
             kidPlayShell={kidPlayShell}

@@ -139,21 +139,42 @@ export default function MyAdventuresDrawer({
                 <p>Week {currentWeek} · {focusCoinsLoading ? 'Loading coins…' : `${focusCoins} Focus Coins`}</p>
               </div>
             </div>
-            <div className="myAdventuresPlayer__b4">
-              <B4CircleAvatar variant={variant} loading={b4Loading} size="small" alt="" />
-              <span className="myAdventuresPlayer__b4Name">
-                {selectionRequired ? 'Choose your B-4' : b4Definition.name}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  closeDrawer();
-                  window.setTimeout(requestKidPlayB4Picker, 0);
-                }}
+            {!b4Loading && selectionRequired ? (
+              <div
+                className="myAdventuresB4Action"
+                role="status"
+                aria-label="Action needed: complete your B-4 Check-In"
               >
-                Change B-4
-              </button>
-            </div>
+                <span className="myAdventuresB4Action__badge">Action needed</span>
+                <h3>Complete Your B-4 Check-In</h3>
+                <p>Choose your B-4 companion to unlock your Focus Flame Journey.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDrawer();
+                    window.setTimeout(requestKidPlayB4Picker, 0);
+                  }}
+                >
+                  Start Check-In
+                </button>
+              </div>
+            ) : null}
+            {b4Loading || !selectionRequired ? (
+              <div className="myAdventuresPlayer__b4">
+                <B4CircleAvatar variant={variant} loading={b4Loading} size="small" alt="" />
+                <span className="myAdventuresPlayer__b4Name">{b4Definition.name}</span>
+                <button
+                  type="button"
+                  disabled={b4Loading}
+                  onClick={() => {
+                    closeDrawer();
+                    window.setTimeout(requestKidPlayB4Picker, 0);
+                  }}
+                >
+                  Change B-4
+                </button>
+              </div>
+            ) : null}
           </section>
 
           <section aria-labelledby="my-adventures-months">
