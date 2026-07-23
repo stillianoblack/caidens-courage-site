@@ -16,6 +16,10 @@
     },
     {
       "status": "M",
+      "path": "src/App.tsx"
+    },
+    {
+      "status": "M",
       "path": "src/components/courage-in-the-dark/CourageInTheDarkAdventureHub.tsx"
     },
     {

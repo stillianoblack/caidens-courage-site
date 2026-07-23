@@ -127,7 +127,6 @@ import {
   KID_PLAY_SESSION_PATH,
   STUDENT_PIN_LOGIN_PATH,
 } from './config/courageRoutes';
-import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
 
 const Portal = React.lazy(() => import('./pages/Portal'));
 const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
@@ -280,9 +279,10 @@ const appRouteChildren = (
 
       {/* Facilitator / family kid play shell (no portal chrome) */}
       <Route path={STUDENT_PIN_LOGIN_PATH} element={<StudentPinLoginPage />} />
-      <Route path={`${KID_PLAY_SESSION_PATH}/:kidPlaySessionId`} element={<KidPlaySessionLayout />}>
-        {kidPlayShellChildRoutes}
-      </Route>
+      <Route
+        path={`${KID_PLAY_SESSION_PATH}/:kidPlaySessionId/*`}
+        element={<KidPlaySessionLayout />}
+      />
 
       {/* Focus Flame Academy */}
       <Route
