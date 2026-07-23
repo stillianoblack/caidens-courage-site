@@ -198,7 +198,10 @@ export default function MyAdventuresDrawer({
                     ].filter(Boolean).join(' ')}
                     disabled={locked}
                     aria-current={selected ? 'page' : undefined}
-                    onClick={() => onSelectMonth(month.monthNumber)}
+                    onClick={() => {
+                      onSelectMonth(month.monthNumber);
+                      closeDrawer();
+                    }}
                   >
                     <span className="myAdventuresMonth__number">Month {month.monthNumber}</span>
                     <strong>{month.cmsMonth?.month_title || month.title.replace(/^Month \d+:?\s*/i, '')}</strong>

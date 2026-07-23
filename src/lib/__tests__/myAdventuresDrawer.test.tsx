@@ -161,7 +161,10 @@ describe('My Adventures drawer', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Month 1/ }));
     expect(onSelectMonth).toHaveBeenCalledWith(1);
+    expect(screen.queryByRole('dialog', { name: 'My Adventures' })).not.toBeInTheDocument();
+    await waitFor(() => expect(trigger).toHaveFocus());
 
+    fireEvent.click(trigger);
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: 'My Adventures' })).not.toBeInTheDocument();
     expect(document.body).not.toHaveStyle({ position: 'fixed', overflow: 'hidden' });
