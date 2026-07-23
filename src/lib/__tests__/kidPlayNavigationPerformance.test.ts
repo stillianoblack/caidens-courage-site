@@ -12,7 +12,9 @@ describe('Kid Play navigation performance contracts', () => {
 
     expect(app).toMatch(/KID_PLAY_SESSION_PATH}\/:kidPlaySessionId\/\*`/);
     expect(app).not.toContain('{kidPlayShellChildRoutes}');
-    expect(layout).toContain('<KidPlayShellRouteContent />');
+    expect(layout).toContain(
+      '<KidPlayShellRouteContent key={location.pathname} />',
+    );
     expect(layout).not.toContain('<Outlet');
     expect(layout).not.toContain('location.pathname}${location.search');
     expect(layout).toContain('const navigateRef = useRef(navigate);');
