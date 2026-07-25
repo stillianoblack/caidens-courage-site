@@ -25,6 +25,7 @@ function brandedShell(title, body) {
 function welcomeEmailHtml(payload) {
   const studentName = escapeHtml(payload.studentName || payload.childName || 'your student');
   const programName = escapeHtml(payload.programName || payload.familyOrProgramName || "Caiden's Courage");
+  const programCode = escapeHtml(payload.programCode || '');
   const code = escapeHtml(payload.familyAccessCode || 'Provided by your program');
   const portalLink = escapeHtml(payload.portalLink || payload.loginUrl || 'https://caidenscourage.com/portal');
   return brandedShell(
@@ -34,11 +35,13 @@ function welcomeEmailHtml(payload) {
       <div style="margin:20px 0;padding:18px;border-radius:14px;background:rgba(229,192,106,.12);border:1px solid rgba(229,192,106,.26);">
         <p style="margin:0 0 8px;"><strong>Student:</strong> ${studentName}</p>
         <p style="margin:0 0 8px;"><strong>Program:</strong> ${programName}</p>
+        ${programCode ? `<p style="margin:0 0 8px;"><strong>Program code:</strong> ${programCode}</p>` : ''}
         <p style="margin:0;"><strong>Family access code:</strong> ${code}</p>
       </div>
       <p style="margin:0 0 18px;">Open your family portal, enter your family access code, and follow the prompts to connect to your child.</p>
       <p style="margin:0 0 20px;"><a href="${portalLink}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#4f7df3;color:#fff;text-decoration:none;font-weight:700;">Open Family Portal</a></p>
-      <p style="margin:0;color:#a7b4cc;">Parents can view progress, certificates, and activity updates from the portal.</p>
+      <p style="margin:0 0 18px;color:#a7b4cc;"><strong>Next steps:</strong> sign in, connect to your child, and begin the first adventure. Parents can view progress, certificates, and activity updates from the portal.</p>
+      <p style="margin:0;color:#a7b4cc;">Need help? Contact <a href="mailto:hello@caidenscourage.com" style="color:#e5c06a;">hello@caidenscourage.com</a>.</p>
     `,
   );
 }
