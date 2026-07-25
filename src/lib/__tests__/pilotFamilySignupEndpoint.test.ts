@@ -1,12 +1,18 @@
 const mockRpc = jest.fn();
+const mockSendWelcomeEmail = jest.fn();
 
 jest.mock('../../../netlify/functions/_lib/crmAuth', () => ({
   correlationId: () => 'test-correlation',
   getServerSupabase: () => ({ rpc: mockRpc }),
-  json: (statusCode: number, body: Record<string, unknown>) => ({
+  json: (statusCode: number, body: Record<string, unknown>, id: string) => ({
     statusCode,
-    body: JSON.stringify(body),
+    headers: { 'X-Correlation-Id': id },
+    body: JSON.stringify({ ...body, correlationId: id }),
   }),
+}));
+
+jest.mock('../../../netlify/functions/_lib/emailProvider', () => ({
+  sendWelcomeEmail: (...args: unknown[]) => mockSendWelcomeEmail(...args),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,7 +39,11 @@ const validRecord = {
 };
 
 describe('pilot family signup endpoint', () => {
-  beforeEach(() => mockRpc.mockReset());
+  beforeEach(() => {
+    mockRpc.mockReset();
+    mockSendWelcomeEmail.mockReset();
+    mockSendWelcomeEmail.mockResolvedValue({ success: true, providerMessageId: 'email-1' });
+  });
 
   test('rejects a missing child before any database write', async () => {
     const response = await handler({
@@ -117,6 +127,7 @@ describe('pilot family signup endpoint', () => {
     expect(response.statusCode).toBe(200);
     expect(body.success).toBe(true);
     expect(body.participantId).toBe('student-1');
+    expect(body.welcomeEmailStatus).toBe('sent');
     expect(mockRpc).toHaveBeenCalledTimes(1);
     const [, rpcInput] = mockRpc.mock.calls[0];
     expect(rpcInput).toMatchObject({
@@ -131,9 +142,28 @@ describe('pilot family signup endpoint', () => {
     });
     expect(rpcInput.signup_record.program_code).not.toBe(validRecord.program_code);
     expect(rpcInput.signup_record.family_access_code).not.toBe(validRecord.family_access_code);
+    expect(mockSendWelcomeEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientEmail: validRecord.admin_email,
+        childName: 'London',
+        programCode: validRecord.program_code,
+        familyAccessCode: validRecord.family_access_code,
+        relatedStudentId: 'student-1',
+        relatedProgramId: 'program-1',
+      }),
+    );
+    expect(mockSendWelcomeEmail).toHaveBeenCalledTimes(1);
+    const emailPayload = mockSendWelcomeEmail.mock.calls[0][0];
+    expect(emailPayload.body).toContain("Welcome to Caiden's Courage");
+    expect(emailPayload.body).toContain(validRecord.family_access_code);
+    expect(emailPayload.body).toContain('/portal');
+    expect(emailPayload.body).toContain('Next steps');
+    expect(emailPayload.body).toContain('hello@caidenscourage.com');
+    expect(response.headers).toEqual({ 'X-Correlation-Id': 'test-correlation' });
+    expect(body.correlationId).toBe('test-correlation');
   });
 
-  test('repeated idempotent response reuses the same participant', async () => {
+  test('repeated idempotent response reuses the same participant without resending email', async () => {
     mockRpc.mockResolvedValue({
       data: {
         program: { ...validRecord, id: 'program-1' },
@@ -149,7 +179,80 @@ describe('pilot family signup endpoint', () => {
       body: JSON.stringify({ record: validRecord, childFirstName: 'London' }),
     });
 
-    expect(JSON.parse(response.body).reused).toBe(true);
+    expect(JSON.parse(response.body)).toMatchObject({
+      reused: true,
+      welcomeEmailStatus: 'not_resent',
+    });
+    expect(mockSendWelcomeEmail).not.toHaveBeenCalled();
+  });
+
+  test('sends exactly one welcome email across an original request and a repeated retry', async () => {
+    mockRpc
+      .mockResolvedValueOnce({
+        data: {
+          program: { ...validRecord, id: 'program-1' },
+          participant_id: 'student-1',
+          reused: false,
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: {
+          program: { ...validRecord, id: 'program-1' },
+          participant_id: 'student-1',
+          reused: true,
+        },
+        error: null,
+      });
+
+    const event = {
+      httpMethod: 'POST',
+      headers: { 'x-idempotency-key': 'request-1234' },
+      body: JSON.stringify({ record: validRecord, childFirstName: 'London' }),
+    };
+    await handler(event);
+    await handler(event);
+
+    expect(mockSendWelcomeEmail).toHaveBeenCalledTimes(1);
+  });
+
+  test('keeps a successful signup when welcome email delivery fails', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mockRpc.mockResolvedValue({
+      data: {
+        program: { ...validRecord, id: 'program-1' },
+        participant_id: 'student-1',
+        reused: false,
+      },
+      error: null,
+    });
+    mockSendWelcomeEmail.mockResolvedValue({
+      success: false,
+      error: 'Email provider unavailable.',
+    });
+
+    const response = await handler({
+      httpMethod: 'POST',
+      headers: { 'x-idempotency-key': 'request-1234' },
+      body: JSON.stringify({ record: validRecord, childFirstName: 'London' }),
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toMatchObject({
+      success: true,
+      welcomeEmailStatus: 'failed',
+      correlationId: 'test-correlation',
+    });
+    expect(response.headers).toEqual({ 'X-Correlation-Id': 'test-correlation' });
+    expect(warning).toHaveBeenCalledWith(
+      '[PILOT_SIGNUP_WELCOME_EMAIL]',
+      expect.objectContaining({
+        correlationId: 'test-correlation',
+        status: 'failed',
+        error: 'Email provider unavailable.',
+      }),
+    );
+    warning.mockRestore();
   });
 });
 
