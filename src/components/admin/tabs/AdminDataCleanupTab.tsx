@@ -8,12 +8,14 @@ import {
 } from '../../../lib/adminPilotCleanupService';
 import { PROTECTION_ACTION_BLOCKED_MESSAGE } from '../../../lib/pilotProgramProtection';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
+import type { AdminProgramDirectoryRecord } from '../../../types/adminProgramDirectory';
 
 type AdminDataCleanupTabProps = {
   onChanged: () => void;
+  programs: AdminProgramDirectoryRecord[];
 };
 
-export default function AdminDataCleanupTab({ onChanged }: AdminDataCleanupTabProps) {
+export default function AdminDataCleanupTab({ onChanged, programs }: AdminDataCleanupTabProps) {
   const [programCode, setProgramCode] = useState('');
   const [preview, setPreview] = useState<PilotCleanupPreview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,6 +67,18 @@ export default function AdminDataCleanupTab({ onChanged }: AdminDataCleanupTabPr
       title="Data Cleanup"
       subtitle="Archive-first workflow for old test pilots. Preview affected records before taking action."
     >
+      <label className="adminPortal-field">
+        <span>Program directory</span>
+        <select defaultValue="">
+          <option value="">Choose a program to review…</option>
+          {programs.map((program) => (
+            <option key={program.id} value={program.id}>
+              {program.displayName} ({program.status})
+            </option>
+          ))}
+        </select>
+        <small>The protected directory intentionally does not expose access codes.</small>
+      </label>
       <label className="adminPortal-field">
         <span>Pilot program code</span>
         <input
