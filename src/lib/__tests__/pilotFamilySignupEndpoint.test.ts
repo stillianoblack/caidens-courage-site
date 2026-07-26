@@ -145,20 +145,20 @@ describe('pilot family signup endpoint', () => {
     expect(mockSendWelcomeEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         recipientEmail: validRecord.admin_email,
-        childName: 'London',
-        programCode: validRecord.program_code,
+        learnerName: 'London',
         familyAccessCode: validRecord.family_access_code,
+        programType: 'independent_family',
+        templateType: 'family',
+        recipientRole: 'parent_guardian',
         relatedStudentId: 'student-1',
         relatedProgramId: 'program-1',
       }),
     );
     expect(mockSendWelcomeEmail).toHaveBeenCalledTimes(1);
     const emailPayload = mockSendWelcomeEmail.mock.calls[0][0];
-    expect(emailPayload.body).toContain("Welcome to Caiden's Courage");
-    expect(emailPayload.body).toContain(validRecord.family_access_code);
-    expect(emailPayload.body).toContain('/portal');
-    expect(emailPayload.body).toContain('Next steps');
-    expect(emailPayload.body).toContain('hello@caidenscourage.com');
+    expect(emailPayload).not.toHaveProperty('programCode');
+    expect(emailPayload.portalLink).toContain('/portal');
+    expect(emailPayload.deliveryEventKey).toBe('pilot-program:program-1:parent-welcome');
     expect(response.headers).toEqual({ 'X-Correlation-Id': 'test-correlation' });
     expect(body.correlationId).toBe('test-correlation');
   });
@@ -249,7 +249,7 @@ describe('pilot family signup endpoint', () => {
       expect.objectContaining({
         correlationId: 'test-correlation',
         status: 'failed',
-        error: 'Email provider unavailable.',
+        error_category: 'welcome_email_delivery_failed',
       }),
     );
     warning.mockRestore();

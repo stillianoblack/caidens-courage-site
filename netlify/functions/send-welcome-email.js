@@ -1,5 +1,13 @@
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const { sendWelcomeEmail } = require('./_lib/emailProvider');
+const {
+  createDeliveryAttempt,
+  findDeliveryByEventKey,
+  recipientIdentifier,
+  updateDeliveryAttempt,
+} = require('./_lib/emailDeliveryLog');
+const { buildWelcomeEmail } = require('./_lib/welcomeEmailBuilder');
 
 function json(statusCode, body) {
   return {
@@ -18,53 +26,11 @@ function getSupabase() {
   });
 }
 
-async function logEmailAttempt(payload, status, detail = {}) {
-  const supabase = getSupabase();
-  if (!supabase) {
-    return { logged: false, reason: 'supabase_env_missing' };
-  }
-
-  const record = {
-    recipient_email: payload.recipientEmail,
-    email_type: payload.emailType || 'welcome',
-    related_student_id: payload.relatedStudentId || null,
-    related_family_id: payload.relatedFamilyId || null,
-    related_program_id: payload.relatedProgramId || null,
-    status,
-    provider_message_id: detail.providerMessageId || null,
-    error_message: detail.errorMessage || null,
-    sent_at: status === 'sent' ? new Date().toISOString() : null,
-    delivered_at: status === 'delivered' ? new Date().toISOString() : null,
-  };
-
-  const { data, error } = await supabase
-    .from('email_delivery_logs')
-    .insert(record)
-    .select('id')
-    .maybeSingle();
-
-  if (error) return { logged: false, reason: error.message };
-  return { logged: true, id: data?.id || null };
-}
-
-async function updateEmailAttempt(logId, status, detail = {}) {
-  const supabase = getSupabase();
-  if (!supabase || !logId) {
-    return { logged: false, reason: supabase ? 'missing_log_id' : 'supabase_env_missing' };
-  }
-
-  const now = new Date().toISOString();
-  const patch = {
-    status,
-    provider_message_id: detail.providerMessageId || null,
-    error_message: detail.errorMessage || null,
-    sent_at: status === 'sent' ? now : null,
-    delivered_at: status === 'delivered' ? now : null,
-  };
-
-  const { error } = await supabase.from('email_delivery_logs').update(patch).eq('id', logId);
-  if (error) return { logged: false, reason: error.message };
-  return { logged: true, id: logId };
+function resolveCorrelationId(event) {
+  const supplied = event.headers?.['x-correlation-id'] || event.headers?.['X-Correlation-Id'];
+  return /^[a-zA-Z0-9._:-]{8,160}$/.test(String(supplied || ''))
+    ? String(supplied)
+    : crypto.randomUUID();
 }
 
 exports.handler = async (event) => {
@@ -79,63 +45,143 @@ exports.handler = async (event) => {
     return json(400, { success: false, error: 'Invalid JSON.' });
   }
 
-  if (!payload.recipientEmail || !payload.subject || !payload.body) {
+  const correlationId = resolveCorrelationId(event);
+  if (!payload.recipientEmail) {
     return json(400, { success: false, error: 'Missing email payload.' });
   }
+  const transactionalWelcome = !payload.emailType || payload.emailType === 'welcome';
+  const built = transactionalWelcome
+    ? buildWelcomeEmail(payload)
+    : payload.subject && payload.body && payload.html
+      ? {
+          success: true,
+          subject: payload.subject,
+          text: payload.body,
+          html: payload.html,
+          programType: payload.programType || 'compatibility',
+          recipientRole: payload.recipientRole || 'admin',
+          templateType: payload.templateType || payload.emailType,
+        }
+      : { success: false, error: 'missing_email_content' };
+  if (!built.success) {
+    return json(400, {
+      success: false,
+      error: built.error,
+      correlationId,
+    });
+  }
+  const deliveryPayload = {
+    ...payload,
+    programType: built.programType,
+    recipientRole: built.recipientRole,
+    templateType: built.templateType,
+    correlationId,
+    emailProvider: 'resend',
+  };
+  const recipientHash = recipientIdentifier(payload.recipientEmail);
+  const supabase = getSupabase();
 
-  console.info('[PARENT_EMAIL_ATTEMPTED]', {
-    recipient_email: payload.recipientEmail,
-    email_type: payload.emailType || 'welcome',
+  console.info('[WELCOME_EMAIL_ATTEMPTED]', {
+    recipient_identifier: recipientHash,
+    program_type: built.programType,
+    recipient_role: built.recipientRole,
+    template_type: built.templateType,
+    correlation_id: correlationId,
     related_student_id: payload.relatedStudentId || null,
     related_program_id: payload.relatedProgramId || null,
   });
 
-  const queuedLog = await logEmailAttempt(payload, 'queued');
+  const existing = await findDeliveryByEventKey(supabase, payload.deliveryEventKey);
+  const retryApproved = payload.allowRetry === true && existing?.status === 'failed' && existing?.retry_eligible;
+  if (existing && !retryApproved) {
+    console.info('[WELCOME_EMAIL_DUPLICATE_SUPPRESSED]', {
+      recipient_identifier: recipientHash,
+      correlation_id: correlationId,
+      delivery_event_key_present: Boolean(payload.deliveryEventKey),
+      existing_status: existing.status,
+    });
+    return json(200, {
+      success: true,
+      status: 'duplicate_suppressed',
+      providerMessageId: existing.provider_message_id || null,
+      correlationId,
+    });
+  }
+
+  const queuedLog = retryApproved
+    ? {
+        ...(await updateDeliveryAttempt(supabase, existing.id, 'queued', { correlationId })),
+        id: existing.id,
+      }
+    : await createDeliveryAttempt(supabase, deliveryPayload);
+  if (queuedLog.duplicate) {
+    return json(200, {
+      success: true,
+      status: 'duplicate_suppressed',
+      providerMessageId: queuedLog.existing?.provider_message_id || null,
+      correlationId,
+    });
+  }
+
   if (!process.env.RESEND_API_KEY) {
     console.info('[SEND_WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_identifier: recipientHash,
+      correlation_id: correlationId,
       success: false,
       skipped: true,
       reason: 'RESEND_API_KEY missing',
     });
-    const log = await updateEmailAttempt(queuedLog.id, 'failed', {
+    const log = await updateDeliveryAttempt(supabase, queuedLog.id, 'failed', {
       errorMessage: 'RESEND_API_KEY is not configured.',
+      correlationId,
     });
     return json(503, {
       success: false,
       status: 'failed',
       log,
       error: 'Email delivery is not configured.',
+      correlationId,
     });
   }
 
-  const result = await sendWelcomeEmail(payload);
+  const result = await sendWelcomeEmail({
+    ...deliveryPayload,
+    subject: built.subject,
+    html: built.html,
+    text: built.text,
+  });
   if (!result.success) {
     console.info('[SEND_WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_identifier: recipientHash,
+      correlation_id: correlationId,
       success: false,
       skipped: false,
       reason: result.error,
     });
-    const log = await updateEmailAttempt(queuedLog.id, 'failed', {
+    const log = await updateDeliveryAttempt(supabase, queuedLog.id, 'failed', {
       errorMessage: result.error,
+      correlationId,
     });
     return json(502, {
       success: false,
       status: 'failed',
       log,
       error: result.error,
+      correlationId,
     });
   }
 
-  const log = await updateEmailAttempt(queuedLog.id, 'sent', {
+  const log = await updateDeliveryAttempt(supabase, queuedLog.id, 'sent', {
     providerMessageId: result.providerMessageId,
+    correlationId,
+    retryEligible: false,
   });
   console.info('[SEND_WELCOME_EMAIL]', {
     provider: 'Resend',
-    recipient_email: payload.recipientEmail,
+    recipient_identifier: recipientHash,
+    correlation_id: correlationId,
     success: true,
     skipped: false,
     provider_message_id: result.providerMessageId ?? null,
@@ -145,5 +191,6 @@ exports.handler = async (event) => {
     status: 'sent',
     providerMessageId: result.providerMessageId,
     log,
+    correlationId,
   });
 };
