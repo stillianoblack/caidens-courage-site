@@ -19,8 +19,9 @@ import { trackContactFormStarted } from '../../lib/analytics';
 
 type PilotProgramSignupFormProps = {
   onSubmit: (input: PilotProgramSignupInput) => Promise<void>;
+  onRetry?: () => Promise<void>;
   submitting: boolean;
-  error: string | null;
+  error: { title: string; body: string } | null;
 };
 
 function resolveIndependentFamilyPlaceholder(firstName: string): string {
@@ -35,6 +36,7 @@ export function isValidPilotSignupEmail(value: string): boolean {
 
 export default function PilotProgramSignupForm({
   onSubmit,
+  onRetry,
   submitting,
   error,
 }: PilotProgramSignupFormProps) {
@@ -328,9 +330,15 @@ export default function PilotProgramSignupForm({
       </div>
 
       {error && !validationError ? (
-        <p className="pilotSignup-error" role="alert">
-          {error}
-        </p>
+        <div className="pilotSignup-error" role="alert">
+          <strong>{error.title}</strong>
+          <p>{error.body}</p>
+          {onRetry ? (
+            <button type="button" onClick={() => void onRetry()} disabled={submitting}>
+              Try Again
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <button type="submit" className="pilotSignup-submit" disabled={submitting || !agreedToTerms}>

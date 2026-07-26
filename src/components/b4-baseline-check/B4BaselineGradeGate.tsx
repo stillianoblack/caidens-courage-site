@@ -40,15 +40,23 @@ export default function B4BaselineGradeGate({
     const result = sessionId && hasServerMediatedChildSession()
       ? await saveFamilyCompatibilityChildGrade(sessionId, gradeLevel)
           .then(() => ({ success: true as const }))
-          .catch((caught) => ({
-            success: false as const,
-            error: caught instanceof Error ? caught.message : 'Could not save grade level.',
-          }))
+          .catch((caught) => {
+            console.warn('[B4_GRADE_SAVE_FAILED]', {
+              error: caught instanceof Error ? caught.message : 'unknown_error',
+            });
+            return {
+              success: false as const,
+              error: "We couldn't save the grade level. Please try again.",
+            };
+          })
       : await saveParticipantGradeLevel(participantId, gradeLevel);
     setSaving(false);
 
     if (!result.success) {
-      setError(result.error ?? 'Could not save grade. Please try again.');
+      if (result.error) {
+        console.warn('[B4_GRADE_SAVE_FAILED]', { error: result.error });
+      }
+      setError("We couldn't save the grade level. Please try again.");
       return;
     }
 

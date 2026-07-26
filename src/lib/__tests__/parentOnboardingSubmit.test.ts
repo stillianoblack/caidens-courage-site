@@ -167,7 +167,8 @@ describe('submitParentOnboarding', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.message).toContain('Database unavailable');
+      expect(result.message).toBe("We couldn't save your family information. Please try again.");
+      expect(result.message).not.toContain('Database unavailable');
     }
     expect(
       readFamilyOnboardingRecord('FAMILY-TEST', 'child-1', 'parent@example.com'),

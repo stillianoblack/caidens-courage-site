@@ -72,7 +72,10 @@ export async function submitParentOnboarding(
   const selectedGoals = input.selectedGoals.map((goal) => goal.trim()).filter(Boolean);
 
   if (!programCode) {
-    return { success: false, message: 'Missing program information. Refresh and try again.' };
+    return {
+      success: false,
+      message: "We couldn't find your program information. Return to the portal and try again.",
+    };
   }
   if (!parentEmail) {
     return { success: false, message: 'Enter a parent or guardian email to continue.' };
@@ -118,9 +121,13 @@ export async function submitParentOnboarding(
   });
 
   if (!claimResult.success) {
+    console.warn('[PARENT_ONBOARDING_FAILED]', {
+      stage: 'family_claim',
+      error: claimResult.error ?? 'unknown_error',
+    });
     return {
       success: false,
-      message: claimResult.error ?? 'Could not save parent email. Try again in a moment.',
+      message: "We couldn't save your family information. Please try again.",
     };
   }
 
