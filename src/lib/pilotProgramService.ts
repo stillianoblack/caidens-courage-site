@@ -165,6 +165,7 @@ export type PilotProgramSignupResult =
         | 'server_error';
       message: string;
       supportCode?: string;
+      correlationId?: string;
     };
 
 const PILOT_SIGNUP_TIMEOUT_MS = 15000;
@@ -441,6 +442,10 @@ export async function submitPilotProgramSignup(
               ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
               : payload?.message || 'Could not save your family signup right now. Please try again.',
           supportCode: payload?.supportCode,
+          correlationId:
+            payload?.correlationId ||
+            response.headers?.get?.('X-Correlation-Id') ||
+            undefined,
         };
       }
       return {
@@ -482,11 +487,15 @@ export async function submitPilotProgramSignup(
       'Pilot signup preflight timed out.',
     );
     uniqueRecord = buildProgramRecord(input, uniqueCodes);
-  } catch {
+  } catch (error) {
+    console.warn('[PILOT_SIGNUP_FAILED]', {
+      stage: 'code_generation',
+      error: error instanceof Error ? error.message : 'unknown_error',
+    });
     return {
       success: false,
       code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
+      message: "We couldn't create your program. Please try again.",
     };
   }
 
@@ -550,11 +559,14 @@ export async function submitPilotProgramSignup(
       redirectDestination: '/program-dashboard?welcome=1',
     };
   } catch (err) {
-    console.warn('[pilot_programs] insert error:', err);
+    console.warn('[PILOT_SIGNUP_FAILED]', {
+      stage: 'program_insert',
+      error: err instanceof Error ? err.message : 'unknown_error',
+    });
     return {
       success: false,
       code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
+      message: "We couldn't create your program. Please try again.",
     };
   }
 }

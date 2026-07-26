@@ -50,7 +50,7 @@ export default function FamilyDisplayNameEditor({
       return;
     }
     if (!resolvedCode) {
-      showToast('Could not resolve your family program. Please refresh and try again.', 'error');
+      showToast("We couldn't find your family program. Return to the portal and try again.", 'error');
       return;
     }
 
@@ -62,7 +62,8 @@ export default function FamilyDisplayNameEditor({
     setSaving(false);
 
     if (!result.success) {
-      showToast(result.message, 'error');
+      console.warn('[FAMILY_DISPLAY_NAME_SAVE_FAILED]', { error: result.message });
+      showToast("We couldn't save the family display name. Please try again.", 'error');
       return;
     }
 
