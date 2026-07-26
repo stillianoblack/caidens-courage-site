@@ -3,11 +3,25 @@ import { buildStudentLoginUrl } from './familyClaimCode';
 export type WelcomeEmailInput = {
   parentEmail?: string | null;
   parentFirstName?: string | null;
-  familyOrProgramName: string;
+  familyOrProgramName?: string;
   familyAccessCode?: string | null;
-  childName: string;
+  facilitatorAccessCode?: string | null;
+  programCode?: string | null;
+  childName?: string;
   studentPin?: string | null;
   loginUrl?: string;
+  templateType?: 'family' | 'camp_parent' | 'staff';
+  programType?:
+    | 'independent_family'
+    | 'Independent Family'
+    | 'Camp / Youth Program'
+    | 'Teacher / Classroom'
+    | 'After-School Program'
+    | 'School'
+    | 'District'
+    | 'Homeschool Group';
+  recipientRole?: 'parent_guardian' | 'facilitator' | 'educator';
+  deliveryEventKey?: string | null;
   relatedStudentId?: string | null;
   relatedFamilyId?: string | null;
   relatedProgramId?: string | null;
@@ -29,14 +43,16 @@ export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
   return [
     `Hi ${parentFirstName},`,
     '',
-    "Welcome to Caiden's Courage! We’re excited to have your family join the Focus Flame journey.",
+    'Welcome to Focus Flame Academy',
+    'A Caiden’s Courage Learning Adventure',
+    '',
+    'Your family is ready to begin its Focus Flame adventure.',
     '',
     'Your family access information is below:',
     '',
-    `Family / Program Name: ${input.familyOrProgramName}`,
+    input.familyOrProgramName ? `Family / Program Name: ${input.familyOrProgramName}` : null,
     accessLabel,
-    `Child: ${input.childName}`,
-    input.studentPin ? `Student PIN: ${input.studentPin}` : 'Student PIN: Ask your facilitator for a reset if needed.',
+    input.childName ? `Learner: ${input.childName}` : null,
     `Family Portal Link: ${input.loginUrl || buildStudentLoginUrl()}`,
     '',
     'Your child can use their Student PIN to start their adventure, complete weekly missions, earn badges, and build their Focus Flame skills.',
@@ -47,7 +63,7 @@ export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
     '',
     'Welcome aboard,',
     'The Caiden’s Courage Team',
-  ].join('\n');
+  ].filter((line): line is string => line !== null).join('\n');
 }
 
 export function buildWelcomePortalLink(input: WelcomeEmailInput): string {
@@ -63,13 +79,19 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
   const payload = {
     recipientEmail,
     emailType: 'welcome',
-    subject: "Welcome to Caiden's Courage",
+    subject: 'Welcome to Focus Flame Academy — Your Adventure Starts Here',
     body: buildWelcomeEmailBody(input),
-    childName: input.childName,
-    studentName: input.childName,
+    templateType: input.templateType ?? 'family',
+    programType: input.programType ?? 'independent_family',
+    recipientRole: input.recipientRole ?? 'parent_guardian',
+    recipientName: input.parentFirstName,
+    learnerName: input.childName,
     programName: input.familyOrProgramName,
     familyAccessCode: input.familyAccessCode ?? null,
+    facilitatorAccessCode: input.facilitatorAccessCode ?? null,
+    programCode: input.programCode ?? null,
     portalLink: buildWelcomePortalLink(input),
+    deliveryEventKey: input.deliveryEventKey ?? null,
     relatedStudentId: input.relatedStudentId ?? null,
     relatedFamilyId: input.relatedFamilyId ?? null,
     relatedProgramId: input.relatedProgramId ?? null,
@@ -95,7 +117,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
       }
       console.info('[WELCOME_EMAIL]', {
         provider: 'Resend',
-        recipient_email: recipientEmail,
+        recipient_present: true,
         success: false,
         skipped: response.status === 503,
         reason,
@@ -111,7 +133,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
 
     console.info('[WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: recipientEmail,
+      recipient_present: true,
       success: true,
       skipped: false,
     });
@@ -119,7 +141,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
   } catch {
     console.info('[WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: recipientEmail,
+      recipient_present: true,
       success: false,
       skipped: true,
       reason: 'send_function_unavailable',

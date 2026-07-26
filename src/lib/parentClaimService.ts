@@ -15,7 +15,7 @@ import { fetchStudentParticipantsFromSupabase } from './pilotTrackingService';
 import { setActiveChild } from './activeChildContext';
 import { PORTAL_ACCESS_NOT_FOUND_MESSAGE } from './portalIdentity';
 import { trackKitParentSignup } from './kitIntegration';
-import { revealStudentPinViaFunction } from './studentPinService';
+import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type ParentLookupInput = {
   campProgramCode?: string;
@@ -323,8 +323,7 @@ export async function claimParentFamilyPortal(input: {
   }
 
   console.info('[PARENT_CLAIMED]', {
-    parent_email: email,
-    family_program_code: familyProgram.programCode,
+    parent_email_present: true,
     matched_student_ids: matchedStudentIds,
     link_count: linkIds.length,
   });
@@ -335,23 +334,6 @@ export async function claimParentFamilyPortal(input: {
     firstParticipant?.first_name?.trim() ||
     'Your child';
 
-  let studentPin: string | undefined;
-  if (matchedStudentIds[0]) {
-    try {
-      const pinResult = await revealStudentPinViaFunction({
-        participantId: matchedStudentIds[0],
-        programCode: familyProgram.programCode,
-        parentEmail: email,
-        actorRole: 'parent',
-      });
-      if ('pin' in pinResult) {
-        studentPin = pinResult.pin;
-      }
-    } catch {
-      /* PIN optional in welcome email */
-    }
-  }
-
   trackKitParentSignup({
     parentEmail: email,
     eventName: 'parent_claim',
@@ -359,14 +341,17 @@ export async function claimParentFamilyPortal(input: {
       family_program_code: familyProgram.programCode,
       matched_student_count: matchedStudentIds.length,
     },
-    welcomeEmail: {
-      parentEmail: email,
-      familyOrProgramName: familyProgram.programName ?? familyProgram.programCode,
-      familyAccessCode: input.accessCode,
-      childName,
-      studentPin,
-      relatedStudentId: matchedStudentIds[0] ?? null,
-    },
+  });
+  void queueWelcomeEmail({
+    parentEmail: email,
+    familyOrProgramName: familyProgram.programName ?? familyProgram.programCode,
+    familyAccessCode: input.accessCode,
+    childName,
+    templateType: 'camp_parent',
+    programType: 'Camp / Youth Program',
+    recipientRole: 'parent_guardian',
+    deliveryEventKey: matchedStudentIds[0] ? `participant:${matchedStudentIds[0]}:parent-welcome` : null,
+    relatedStudentId: matchedStudentIds[0] ?? null,
   });
 
   return {

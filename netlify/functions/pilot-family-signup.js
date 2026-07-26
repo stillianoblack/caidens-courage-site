@@ -1,6 +1,11 @@
 const crypto = require('crypto');
 const { correlationId, getServerSupabase, json } = require('./_lib/crmAuth');
 const { sendWelcomeEmail } = require('./_lib/emailProvider');
+const {
+  createDeliveryAttempt,
+  recipientIdentifier,
+  updateDeliveryAttempt,
+} = require('./_lib/emailDeliveryLog');
 
 const REQUEST_TIMEOUT_MS = 12000;
 const EMAIL_TIMEOUT_MS = 8000;
@@ -36,29 +41,6 @@ function withTimeout(promise, timeoutMs, timeoutCode = 'signup_timeout') {
       timer.unref?.();
     }),
   ]);
-}
-
-function signupWelcomeBody({ parentFirstName, childFirstName, programName, programCode, familyAccessCode, portalLink }) {
-  return [
-    `Hi ${parentFirstName || 'there'},`,
-    '',
-    "Welcome to Caiden's Courage! Your family account is ready.",
-    '',
-    `Family / Program Name: ${programName}`,
-    `Program Code: ${programCode}`,
-    `Family Access Code: ${familyAccessCode}`,
-    `Child: ${childFirstName}`,
-    `Family Portal: ${portalLink}`,
-    '',
-    'Next steps: sign in, connect to your child, and begin the first adventure.',
-    '',
-    'Keep this email somewhere safe. You can use these access details to return to your family portal.',
-    '',
-    'Need help? Reply to this email or contact hello@caidenscourage.com.',
-    '',
-    'Welcome aboard,',
-    "The Caiden's Courage Team",
-  ].join('\n');
 }
 
 exports.handler = async (event) => {
@@ -187,43 +169,66 @@ exports.handler = async (event) => {
       const siteUrl = String(process.env.URL || process.env.DEPLOY_PRIME_URL || 'https://caidenscourage.com')
         .replace(/\/+$/, '');
       const portalLink = `${siteUrl}/portal`;
-      const emailResult = await withTimeout(
-        sendWelcomeEmail({
-          recipientEmail: record.admin_email,
-          subject: "Welcome to Caiden's Courage — your family access codes",
-          body: signupWelcomeBody({
-            parentFirstName: record.admin_first_name,
-            childFirstName,
-            programName: result.program.program_name || record.program_name,
-            programCode: result.program.program_code,
-            familyAccessCode: result.program.family_access_code,
-            portalLink,
-          }),
-          parentFirstName: record.admin_first_name,
-          childName: childFirstName,
-          studentName: childFirstName,
-          programName: result.program.program_name || record.program_name,
-          programCode: result.program.program_code,
-          familyAccessCode: result.program.family_access_code,
-          portalLink,
-          relatedStudentId: result.participant_id,
-          relatedProgramId: result.program.id,
-        }),
-        EMAIL_TIMEOUT_MS,
-        'email_timeout',
-      ).catch((error) => ({
-        success: false,
-        error: error instanceof Error ? error.message : 'Welcome email delivery failed.',
+      const emailPayload = {
+        recipientEmail: record.admin_email,
+        emailType: 'welcome',
+        templateType: 'family',
+        programType: 'independent_family',
+        recipientRole: 'parent_guardian',
+        recipientName: record.admin_first_name,
+        learnerName: childFirstName,
+        programName: result.program.program_name || record.program_name,
+        familyAccessCode: result.program.family_access_code,
+        portalLink,
+        relatedStudentId: result.participant_id,
+        relatedProgramId: result.program.id,
+        correlationId: correlation,
+        deliveryEventKey: `pilot-program:${result.program.id}:parent-welcome`,
+        emailProvider: 'resend',
+      };
+      const queuedLog = await createDeliveryAttempt(supabase, emailPayload).catch(() => ({
+        logged: false,
+        reason: 'delivery_log_unavailable',
       }));
+      const emailResult = queuedLog.duplicate
+        ? {
+            success: true,
+            duplicateSuppressed: true,
+            providerMessageId: queuedLog.existing?.provider_message_id || null,
+          }
+        : await withTimeout(
+            sendWelcomeEmail(emailPayload),
+            EMAIL_TIMEOUT_MS,
+            'email_timeout',
+          ).catch((error) => ({
+            success: false,
+            error: error instanceof Error ? error.message : 'Welcome email delivery failed.',
+          }));
       welcomeEmailStatus = emailResult.success ? 'sent' : 'failed';
+      if (!queuedLog.duplicate) {
+        await updateDeliveryAttempt(
+          supabase,
+          queuedLog.id,
+          emailResult.success ? 'sent' : 'failed',
+          {
+            providerMessageId: emailResult.providerMessageId || null,
+            errorMessage: emailResult.success ? null : emailResult.error,
+            retryEligible: !emailResult.success,
+            correlationId: correlation,
+          },
+        ).catch(() => ({ logged: false, reason: 'delivery_log_unavailable' }));
+      }
       const logEmailResult = emailResult.success ? console.info : console.warn;
       logEmailResult('[PILOT_SIGNUP_WELCOME_EMAIL]', {
         correlationId: correlation,
         program_id: result.program.id,
         participant_id: result.participant_id,
+        recipient_identifier: recipientIdentifier(record.admin_email),
+        template_type: 'family',
         status: welcomeEmailStatus,
+        duplicate_suppressed: Boolean(emailResult.duplicateSuppressed),
         provider_message_id: emailResult.providerMessageId || null,
-        error: emailResult.success ? null : emailResult.error,
+        error_category: emailResult.success ? null : 'welcome_email_delivery_failed',
       });
     }
 
