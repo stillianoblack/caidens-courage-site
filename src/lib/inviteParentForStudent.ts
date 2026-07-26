@@ -5,7 +5,7 @@ import {
   fetchParticipantsByIds,
 } from './studentFamilyLinkService';
 import { trackKitParentSignup } from './kitIntegration';
-import { revealStudentPinViaFunction, type ParentConnectionStatus } from './studentPinService';
+import type { ParentConnectionStatus } from './studentPinService';
 import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { queueWelcomeEmail } from './welcomeEmailService';
@@ -94,22 +94,8 @@ export async function inviteParentForStudent(
       )
     : 'Student';
 
-  let studentPin: string | undefined;
   let welcomeEmailSkipped = false;
   if (input.sendWelcomeEmail !== false) {
-    try {
-      const pinResult = await revealStudentPinViaFunction({
-        participantId,
-        programCode,
-        actorRole: 'facilitator',
-      });
-      if ('pin' in pinResult) {
-        studentPin = pinResult.pin;
-      }
-    } catch {
-      /* optional */
-    }
-
     trackKitParentSignup({
       parentEmail,
       eventName: 'parent_signup',
@@ -126,8 +112,11 @@ export async function inviteParentForStudent(
       familyOrProgramName: programCode,
       familyAccessCode: familyClaimCode,
       childName,
-      studentPin,
       loginUrl: familyClaimUrl,
+      templateType: 'camp_parent',
+      programType: 'Camp / Youth Program',
+      recipientRole: 'parent_guardian',
+      deliveryEventKey: `participant:${participantId}:parent-welcome`,
       relatedStudentId: participantId,
       relatedProgramId: programCode,
     });

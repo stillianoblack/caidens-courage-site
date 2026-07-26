@@ -11,7 +11,7 @@ import {
   fetchStudentFamilyLinksByFamilyProgram,
   markStudentFamilyLinksClaimed,
 } from '../studentFamilyLinkService';
-import { revealStudentPinViaFunction } from '../studentPinService';
+import { queueWelcomeEmail } from '../welcomeEmailService';
 
 jest.mock('../studentFamilyLinkService', () => ({
   fetchStudentFamilyLinksByFamilyProgram: jest.fn(),
@@ -31,12 +31,12 @@ jest.mock('../programGoalsService', () => ({
   saveProgramGoals: jest.fn(),
 }));
 
-jest.mock('../studentPinService', () => ({
-  revealStudentPinViaFunction: jest.fn(),
-}));
-
 jest.mock('../kitIntegration', () => ({
   trackKitParentSignup: jest.fn(),
+}));
+
+jest.mock('../welcomeEmailService', () => ({
+  queueWelcomeEmail: jest.fn(),
 }));
 
 const mockedFetchFamilyLinks = fetchStudentFamilyLinksByFamilyProgram as jest.MockedFunction<
@@ -50,10 +50,8 @@ const mockedMarkClaimed = markStudentFamilyLinksClaimed as jest.MockedFunction<
 >;
 const mockedSaveGoals = saveFamilyChildGoals as jest.MockedFunction<typeof saveFamilyChildGoals>;
 const mockedSaveProgramGoals = saveProgramGoals as jest.MockedFunction<typeof saveProgramGoals>;
-const mockedRevealPin = revealStudentPinViaFunction as jest.MockedFunction<
-  typeof revealStudentPinViaFunction
->;
 const mockedTrackKit = trackKitParentSignup as jest.MockedFunction<typeof trackKitParentSignup>;
+const mockedQueueWelcome = queueWelcomeEmail as jest.MockedFunction<typeof queueWelcomeEmail>;
 
 describe('submitParentOnboarding', () => {
   beforeEach(() => {
@@ -62,6 +60,7 @@ describe('submitParentOnboarding', () => {
       id: 'family-1',
       programCode: 'FAMILY-TEST',
       programName: 'Test Family Program',
+      programType: 'Independent Family',
       familyAccessCode: 'ACCESS-123',
       groupName: 'Test Group',
     } as never);
@@ -99,7 +98,7 @@ describe('submitParentOnboarding', () => {
       portal_type: 'family',
       selected_goals: ['Focus'],
     });
-    mockedRevealPin.mockResolvedValue({ pin: '4321' });
+    mockedQueueWelcome.mockResolvedValue({ success: true, skipped: false, provider: 'Resend' });
     mockedTrackKit.mockImplementation(() => undefined);
   });
 
@@ -188,14 +187,17 @@ describe('submitParentOnboarding', () => {
       expect.objectContaining({
         parentEmail: 'parent@example.com',
         eventName: 'parent_onboarding_complete',
-        welcomeEmail: expect.objectContaining({
-          parentEmail: 'parent@example.com',
-          familyAccessCode: 'ACCESS-123',
-          childName: 'Alex',
-          studentPin: '4321',
-        }),
       }),
     );
+    expect(mockedTrackKit.mock.calls[0][0]).not.toHaveProperty('welcomeEmail');
+    expect(mockedQueueWelcome).toHaveBeenCalledWith(expect.objectContaining({
+      parentEmail: 'parent@example.com',
+      familyAccessCode: 'ACCESS-123',
+      childName: 'Alex',
+      templateType: 'family',
+      programType: 'independent_family',
+      deliveryEventKey: 'participant:child-1:parent-welcome',
+    }));
   });
 
   test('persists scoped parent claim for program-scoped parent email login', async () => {
