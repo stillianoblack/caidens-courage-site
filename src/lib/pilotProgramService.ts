@@ -31,6 +31,7 @@ import {
   type PortalProgramAccessClaimContext,
   type PortalProgramAccessIntent,
 } from './portalProgramAccessApi';
+import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type PilotProgramLookupResult = {
   role: 'facilitator' | 'family';
@@ -517,10 +518,35 @@ export async function submitPilotProgramSignup(
     }
 
     const saved = data as PilotProgramRecord;
-    // TODO: Email facilitator_access_code and family_access_code after signup via Supabase Edge Function or external email service.
+    const savedRecord = { ...uniqueRecord, id: saved.id };
+    const educatorRecipient =
+      input.programType === 'Teacher / Classroom' ||
+      input.programType === 'School' ||
+      input.programType === 'District';
+    const welcomeEmail = await queueWelcomeEmail({
+      parentEmail: input.adminEmail,
+      parentFirstName: input.adminFirstName,
+      familyOrProgramName: savedRecord.program_name,
+      facilitatorAccessCode: savedRecord.facilitator_access_code,
+      programCode: savedRecord.program_code,
+      templateType: 'staff',
+      programType: input.programType,
+      recipientRole: educatorRecipient ? 'educator' : 'facilitator',
+      loginUrl: `${window.location.origin}/portal`,
+      deliveryEventKey: saved.id ? `pilot-program:${saved.id}:admin-welcome` : null,
+      relatedProgramId: saved.id ?? null,
+    });
+    if (!welcomeEmail.success) {
+      console.warn('[PILOT_PROGRAM_WELCOME_EMAIL]', {
+        program_type: input.programType,
+        recipient_role: educatorRecipient ? 'educator' : 'facilitator',
+        success: false,
+        reason: welcomeEmail.reason || 'delivery_failed',
+      });
+    }
     return {
       success: true,
-      program: recordToActivePilotProgram({ ...uniqueRecord, id: saved.id }),
+      program: recordToActivePilotProgram(savedRecord),
       redirectDestination: '/program-dashboard?welcome=1',
     };
   } catch (err) {

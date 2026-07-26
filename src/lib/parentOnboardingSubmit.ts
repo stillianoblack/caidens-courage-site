@@ -4,10 +4,11 @@ import { writeParentClaimContext } from '../config/parentClaimContext';
 import { notifyChildProfileUpdated } from '../config/activeChildParticipant';
 import { setActiveChild } from './activeChildContext';
 import { saveFamilyChildGoals } from './familyChildGoalsService';
+import { isIndependentFamilyProgram } from './independentFamilyProgram';
 import { trackKitParentSignup } from './kitIntegration';
 import { markFamilyOnboardingComplete } from './parentOnboardingState';
 import { saveProgramGoals } from './programGoalsService';
-import { revealStudentPinViaFunction } from './studentPinService';
+import { queueWelcomeEmail } from './welcomeEmailService';
 import {
   fetchStudentFamilyLinksByCampProgram,
   fetchStudentFamilyLinksByFamilyProgram,
@@ -166,21 +167,6 @@ export async function submitParentOnboarding(
   notifyChildProfileUpdated();
 
   if (!input.skipWelcomeEmail) {
-    let studentPin: string | undefined;
-    try {
-      const pinResult = await revealStudentPinViaFunction({
-        participantId,
-        programCode,
-        parentEmail,
-        actorRole: 'parent',
-      });
-      if ('pin' in pinResult) {
-        studentPin = pinResult.pin;
-      }
-    } catch {
-      /* PIN optional in welcome email */
-    }
-
     trackKitParentSignup({
       parentEmail,
       eventName: 'parent_onboarding_complete',
@@ -188,20 +174,25 @@ export async function submitParentOnboarding(
         family_program_code: programCode,
         participant_id: participantId,
       },
-      welcomeEmail: {
-        parentEmail,
-        familyOrProgramName: activeProgram?.programName ?? programCode,
-        familyAccessCode: accessCode || null,
-        childName: childDisplayName,
-        studentPin,
-        relatedStudentId: participantId,
-      },
+    });
+    const independentFamily = isIndependentFamilyProgram(activeProgram);
+    void queueWelcomeEmail({
+      parentEmail,
+      parentFirstName: input.parentFirstName,
+      familyOrProgramName: activeProgram?.programName ?? programCode,
+      familyAccessCode: accessCode || null,
+      childName: childDisplayName,
+      templateType: independentFamily ? 'family' : 'camp_parent',
+      programType: independentFamily ? 'independent_family' : 'Camp / Youth Program',
+      recipientRole: 'parent_guardian',
+      deliveryEventKey: `participant:${participantId}:parent-welcome`,
+      relatedStudentId: participantId,
+      relatedProgramId: activeProgram?.id ?? null,
     });
   }
 
   console.info('[PARENT_ONBOARDING_SAVED]', {
-    parent_email: parentEmail,
-    program_code: programCode,
+    parent_email_present: true,
     participant_id: participantId,
     family_goals: selectedGoals,
     parent_claim_confirmed: true,
