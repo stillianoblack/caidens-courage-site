@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Program Health – Local Acceptance Fixture</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f6f8fc;color:#17345f;font:16px/1.45 Arial,sans-serif}
+    header{background:#0c2b55;color:#fff;padding:22px 5vw}.wrap{max-width:1280px;margin:auto;padding:28px 5vw}
+    h1,h2,h3,p{margin-top:0}.eyebrow{color:#53709a;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    .panel{background:#fff;border:1px solid #dce5f1;border-radius:18px;padding:24px;margin-bottom:28px;box-shadow:0 8px 25px #15335d12}
+    .program-card{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:18px;align-items:center}
+    .meta{color:#536985;font-size:14px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    button{border:1px solid #214778;border-radius:9px;padding:10px 14px;background:white;color:#17345f;font-weight:700}.primary{background:#214778;color:white}
+    .health{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .health-card{padding:18px;border-radius:14px;background:#f3f7fc;border:1px solid #dce5f1;min-width:0}
+    .health-card strong{display:block;font-size:28px;color:#112f58}.health-card span{color:#5d718d}
+    .timeline{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:20px}
+    .step{text-align:center;padding:10px 6px;border-radius:10px;background:#eef3f9;font-size:13px}
+    .step b{display:block;font-size:20px}.done{color:#14735b;background:#e8f7f1}.active{color:#8b5c00;background:#fff4d8}
+    .snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .impact{border:1px solid #dce5f1;border-radius:16px;padding:18px;text-align:center;min-width:0}
+    .circle{width:150px;height:150px;border-radius:50%;border:12px solid #adc2dc;margin:8px auto 14px;display:grid;place-items:center;background:#f8fbff}
+    .circle strong{font-size:22px;line-height:1.1}.impact .status{font-weight:700;color:#8b5c00}.detail{color:#5d718d;font-size:14px}
+    .participation .circle{border-color:#4b9b7d}.participation .status{color:#14735b}
+    .notice{background:#fff7df;border-radius:10px;padding:12px;margin-top:12px;color:#6f5100}
+    @media(max-width:760px){
+      .wrap{padding:18px 14px}.panel{padding:18px}.program-card,.health,.snapshot{grid-template-columns:1fr}
+      .timeline{grid-template-columns:1fr 1fr}.circle{width:132px;height:132px}.actions button{flex:1 1 45%}
+    }
+  </style>
+</head>
+<body>
+<header><strong>Focus Flame Academy</strong><div>Pilot Outcomes · Local acceptance fixture</div></header>
+<main class="wrap">
+  <section id="programs" class="panel">
+    <div class="eyebrow">Pilot Programs</div>
+    <div class="program-card">
+      <div><h2>Blue Ribbon Results Academy</h2><div class="meta">School · Active pilot</div><div class="actions"><button class="primary">View Details</button><button>Copy Program Code</button><button>Copy Facilitator Code</button><button>Reset Facilitator Access</button><button>Email Facilitator</button><button>Archive</button></div></div>
+      <div><strong>Facilitator</strong><div class="meta">Program facilitator<br>Contact protected</div></div>
+      <div><strong>Students</strong><div class="meta">17 enrolled</div></div>
+      <div><strong>Activity</strong><div class="meta">Active this week<br>Created Apr 2026</div></div>
+    </div>
+  </section>
+  <section id="health" class="panel">
+    <div class="eyebrow">Blue Ribbon Results Academy</div><h2>Program Health</h2>
+    <p>Live operational progress during the active pilot.</p>
+    <div class="health">
+      <div class="health-card"><strong>17</strong><span>Students enrolled</span></div>
+      <div class="health-card"><strong>13</strong><span>Baseline completed</span></div>
+      <div class="health-card"><strong>12</strong><span>At least one adventure</span></div>
+      <div class="health-card"><strong>13</strong><span>At least one assessment</span></div>
+      <div class="health-card"><strong>33.3%</strong><span>Weekly completion</span></div>
+      <div class="health-card"><strong>76.5%</strong><span>Participation</span></div>
+      <div class="health-card"><strong>4</strong><span>Certificates earned</span></div>
+      <div class="health-card"><strong>1,240</strong><span>Coins earned</span></div>
+      <div class="health-card"><strong>9</strong><span>Active students this week</span></div>
+    </div>
+    <div class="timeline">
+      <div class="step done"><b>✓</b>Program Created</div><div class="step done"><b>✓</b>Students Added</div>
+      <div class="step active"><b>◐</b>Baseline Complete</div><div class="step done"><b>✓</b>Adventures Active</div>
+      <div class="step done"><b>✓</b>Weekly Activities</div><div class="step"><b>○</b>Post Assessment</div>
+      <div class="step"><b>○</b>Final Growth Report</div>
+    </div>
+  </section>
+  <section id="impact" class="panel">
+    <div class="eyebrow">Measured outcomes</div><h2>Pilot Impact Snapshot</h2>
+    <p>Growth calculations still require matched baseline and post assessments.</p>
+    <div class="snapshot">
+      <article class="impact"><h3>Reading comprehension</h3><div class="circle"><strong>Growth<br>pending</strong></div><div class="status">Awaiting post assessments</div><p class="detail">13 baseline assessments recorded. Growth will unlock after matched post assessments.</p></article>
+      <article class="impact"><h3>SEL growth</h3><div class="circle"><strong>Growth<br>pending</strong></div><div class="status">Awaiting post assessments</div><p class="detail">Baseline assessments are recorded. Waiting for final assessments.</p></article>
+      <article class="impact"><h3>Focus / executive function</h3><div class="circle"><strong>Growth<br>pending</strong></div><div class="status">Awaiting post assessments</div><p class="detail">Baseline complete. Waiting for final assessment.</p></article>
+      <article class="impact"><h3>Weekly completion</h3><div class="circle"><strong>33.3%</strong></div><div class="status">Directional result</div><p class="detail">Live activity measure; not a growth calculation.</p></article>
+      <article class="impact participation"><h3>Participation</h3><div class="circle"><strong>76.5%</strong></div><div class="status">On track</div><p class="detail">13 of 17 students have completed at least one assessment.</p></article>
+      <article class="impact"><h3>Overall matched growth</h3><div class="circle"><strong>Growth<br>pending</strong></div><div class="status">Final report pending</div><p class="detail">Final growth report becomes available after matched post assessments.</p></article>
+    </div>
+    <div class="notice"><strong>Current status:</strong> 17 students · 13 baseline assessments · 0 post assessments · Growth pending.</div>
+  </section>
+</main>
+</body>
+</html>

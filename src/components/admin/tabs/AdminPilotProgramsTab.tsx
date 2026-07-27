@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
 import AdminPilotProgramRow from '../AdminPilotProgramRow';
 import type { PilotProgramRecord } from '../../../types/pilotProgram';
+import '../admin-program-health-visual.css';
 
 type AdminPilotProgramsTabProps = {
   programs: PilotProgramRecord[];
@@ -36,15 +37,16 @@ export default function AdminPilotProgramsTab({
       {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
 
       {!loading && !loadError ? (
-        <>
+        <div className="phVisual">
           <section className="adminPortal-programSection" aria-labelledby="admin-active-pilots">
+            <p className="phVisual-eyebrow">Pilot Programs</p>
             <h3 id="admin-active-pilots" className="adminPortal-sectionTitle">
               Active Pilots ({activePrograms.length})
             </h3>
             {activePrograms.length === 0 ? (
               <p className="adminPortal-empty">No active pilot programs.</p>
             ) : (
-              <div className="adminPortal-programList">
+              <div className="phVisual-programList">
                 {activePrograms.map((program) => (
                   <AdminPilotProgramRow
                     key={program.id ?? program.program_code}
@@ -67,7 +69,7 @@ export default function AdminPilotProgramsTab({
             {archivedPrograms.length === 0 ? (
               <p className="adminPortal-empty">No archived pilots.</p>
             ) : (
-              <div className="adminPortal-programList">
+              <div className="phVisual-programList">
                 {archivedPrograms.map((program) => (
                   <AdminPilotProgramRow
                     key={program.id ?? program.program_code}
@@ -79,7 +81,7 @@ export default function AdminPilotProgramsTab({
               </div>
             )}
           </section>
-        </>
+        </div>
       ) : null}
     </SettingsCard>
   );

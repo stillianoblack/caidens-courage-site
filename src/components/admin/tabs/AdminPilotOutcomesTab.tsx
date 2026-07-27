@@ -11,18 +11,16 @@ import {
   formatPercentage,
   formatPercentageWords,
   formatPoints,
-  growthPendingCenterLabel,
-  growthPendingStatusLabel,
   missingImpactStatus,
 } from '../../../lib/pilotOutcomesPresentation';
 import AdminProgramHealthPanel from '../AdminProgramHealthPanel';
 import { isGrowthPending } from '../../../lib/buildProgramHealthModel';
 import type {
-  PilotImpactDomain,
   PilotOutcomeProgram,
   PilotOutcomeSummary,
 } from '../../../types/pilotOutcomes';
 import './admin-pilot-outcomes.css';
+import '../admin-program-health-visual.css';
 
 const EMPTY_SUMMARY: PilotOutcomeSummary = {
   totalActivePilots: 0,
@@ -99,106 +97,38 @@ function direction(value: number | null) {
   return 'No change';
 }
 
-function ImpactCircle({
-  label,
+function FixtureImpactCard({
+  title,
   center,
-  ringPercentage,
-  state,
   status,
-  summary,
-  details,
+  detail,
+  participation = false,
 }: {
-  label: string;
-  center: string;
-  ringPercentage: number | null;
-  state: 'positive' | 'negative' | 'unchanged' | 'completion' | 'missing';
+  title: string;
+  center: React.ReactNode;
   status: string;
-  summary: string;
-  details: React.ReactNode;
+  detail: string;
+  participation?: boolean;
 }) {
-  const ringValue = ringPercentage == null ? 0 : Math.max(0, Math.min(100, ringPercentage));
   return (
-    <article className="pilotImpact-card" data-state={state}>
-      <div
-        className={`pilotImpact-circle ${ringPercentage == null ? 'pilotImpact-circle--missing' : ''}`}
-        style={{
-          background:
-            ringPercentage == null
-              ? undefined
-              : `conic-gradient(var(--pilot-impact-ring) ${ringValue}%, #dfe7ef ${ringValue}% 100%)`,
-        }}
-        role="img"
-        aria-label={`${label}. ${center}. ${summary}`}
-      >
-        <div className="pilotImpact-circleCenter">
-          <strong>{center}</strong>
-        </div>
+    <article className={`phVisual-impact${participation ? ' phVisual-impact--participation' : ''}`}>
+      <h3>{title}</h3>
+      <div className="phVisual-impactCircle" role="img" aria-label={`${title}. ${status}. ${detail}`}>
+        <strong>{center}</strong>
       </div>
-      <h4>{label}</h4>
-      <p className="pilotImpact-status">{status}</p>
-      <p>{summary}</p>
-      <details>
-        <summary>View calculation details</summary>
-        {details}
-      </details>
+      <p className="phVisual-impactStatus">{status}</p>
+      <p className="phVisual-impactDetail">{detail}</p>
     </article>
   );
 }
 
-function DomainImpactCircle({
-  domain,
-  growthPending,
-}: {
-  domain: PilotImpactDomain;
-  growthPending: boolean;
-}) {
-  const delta = domain.deltaPercentagePoints;
-  const available = delta != null;
-  const state = !available
-    ? 'missing'
-    : delta > 0
-      ? 'positive'
-      : delta < 0
-        ? 'negative'
-        : 'unchanged';
-  const pendingCenter = growthPending && !available;
-  const summary = available
-    ? `${direction(delta)} of ${signedPoints(delta)}. Baseline ${formatPercentageWords(domain.baselinePercentage)} to post ${formatPercentageWords(domain.postPercentage)}. ${domain.matchedStudentCount} matched students.`
-    : pendingCenter
-      ? `Baseline is recorded for ${domain.baselineNumerator} students. Post-assessment scores are not complete yet, so matched growth is pending.`
-      : `${domain.matchedStudentCount} matched students are available; ${domain.requiredMatchedCount} required. ${domain.missingReason}`;
+function growthPendingCenter() {
   return (
-    <ImpactCircle
-      label={domain.label}
-      center={
-        available
-          ? signedPoints(domain.deltaPercentagePoints)
-          : pendingCenter
-            ? growthPendingCenterLabel()
-            : 'Not enough data'
-      }
-      ringPercentage={available ? domain.postPercentage : domain.baselinePercentage}
-      state={state}
-      status={
-        available
-          ? domain.displayStatus
-          : pendingCenter
-            ? growthPendingStatusLabel()
-            : missingImpactStatus('domain')
-      }
-      summary={summary}
-      details={(
-        <dl>
-          <div><dt>Baseline</dt><dd>{formatPercentage(domain.baselinePercentage, 'Awaiting data')} ({domain.baselineNumerator}/{domain.baselineDenominator})</dd></div>
-          <div><dt>Post</dt><dd>{formatPercentage(domain.postPercentage, 'Awaiting data')} ({domain.postNumerator}/{domain.postDenominator})</dd></div>
-          <div><dt>Percentage-point delta</dt><dd>{formatPoints(domain.deltaPercentagePoints, 'Awaiting data')}</dd></div>
-          <div><dt>Matched sample</dt><dd>{domain.matchedStudentCount}; minimum {domain.requiredMatchedCount}</dd></div>
-          <div><dt>Excluded records</dt><dd>{domain.excludedRecordCount}</dd></div>
-          <div><dt>Data quality</dt><dd>{available ? domain.dataQualityStatus : missingImpactStatus('domain')}</dd></div>
-          <div><dt>Authoritative source</dt><dd>{domain.source}</dd></div>
-        </dl>
-      )}
-    />
+    <>
+      Growth
+      <br />
+      pending
+    </>
   );
 }
 
@@ -207,80 +137,96 @@ export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram 
   const weekly = program.impactSnapshot.weeklyCompletion;
   const participation = program.impactSnapshot.participation;
   const overall = program.impactSnapshot.overallMatchedGrowth;
-  const overallState = overall.deltaPercentagePoints == null
-    ? 'missing'
-    : overall.deltaPercentagePoints > 0
-      ? 'positive'
-      : overall.deltaPercentagePoints < 0
-        ? 'negative'
-        : 'unchanged';
   const overallPending = growthPending && overall.deltaPercentagePoints == null;
+  const growthStatusLabel = growthPending ? 'Growth pending' : 'Not enough data';
+
   return (
-    <section className="pilotOutcomes-panel pilotImpact" aria-labelledby="pilot-impact-title">
-      <div className="pilotImpact-heading">
-        <div>
-          <p className="pilotOutcomes-eyebrow">Matched outcomes</p>
-          <h3 id="pilot-impact-title">Pilot Impact</h3>
-        </div>
-        <p>Rings show post scores or completion rates. Center values show percentage-point change.</p>
-      </div>
-      <div className="pilotImpact-grid">
-        {program.impactSnapshot.domains.map((domain) => (
-          <DomainImpactCircle key={domain.key} domain={domain} growthPending={growthPending} />
-        ))}
-        <ImpactCircle
-          label="Weekly completion"
+    <section className="phVisual-panel pilotImpact" aria-labelledby="pilot-impact-title">
+      <p className="phVisual-eyebrow">Measured outcomes</p>
+      <h2 id="pilot-impact-title">Pilot Impact Snapshot</h2>
+      <p className="phVisual-meta">Growth calculations still require matched baseline and post assessments.</p>
+      <div className="phVisual-snapshot">
+        {program.impactSnapshot.domains.map((domain) => {
+          const pending = growthPending && domain.deltaPercentagePoints == null;
+          return (
+            <FixtureImpactCard
+              key={domain.key}
+              title={domain.label}
+              center={
+                domain.deltaPercentagePoints != null
+                  ? signedPoints(domain.deltaPercentagePoints)
+                  : pending
+                    ? growthPendingCenter()
+                    : 'Not enough data'
+              }
+              status={
+                domain.deltaPercentagePoints != null
+                  ? domain.displayStatus
+                  : pending
+                    ? 'Awaiting post assessments'
+                    : missingImpactStatus('domain')
+              }
+              detail={
+                pending
+                  ? `${domain.baselineNumerator} baseline assessments recorded. Growth will unlock after matched post assessments.`
+                  : domain.deltaPercentagePoints != null
+                    ? `${direction(domain.deltaPercentagePoints)} of ${signedPoints(domain.deltaPercentagePoints)} from baseline to post.`
+                    : domain.missingReason || 'Awaiting matched assessment data.'
+              }
+            />
+          );
+        })}
+        <FixtureImpactCard
+          title="Weekly completion"
           center={metric(weekly.percentage, '%')}
-          ringPercentage={weekly.percentage}
-          state={weekly.percentage == null ? 'missing' : 'completion'}
           status={weekly.percentage == null ? missingImpactStatus('weekly') : weekly.displayStatus}
-          summary={weekly.percentage == null
-            ? weekly.missingReason || 'Weekly progress has not been recorded yet.'
-            : `Weekly completion is ${formatPercentageWords(weekly.percentage)}, ${weekly.numerator} of ${weekly.denominator} student-weeks.`}
-          details={<dl><div><dt>Completed</dt><dd>{weekly.numerator}</dd></div><div><dt>Possible</dt><dd>{weekly.denominator}</dd></div><div><dt>Data quality</dt><dd>{weekly.dataQualityStatus}</dd></div></dl>}
+          detail={
+            weekly.percentage == null
+              ? 'Weekly progress has not been recorded yet.'
+              : 'Live activity measure; not a growth calculation.'
+          }
         />
-        <ImpactCircle
-          label="Participation"
+        <FixtureImpactCard
+          title="Participation"
           center={metric(participation.percentage, '%')}
-          ringPercentage={participation.percentage}
-          state={participation.percentage == null ? 'missing' : 'completion'}
           status={participation.percentage == null ? missingImpactStatus('participation') : participation.displayStatus}
-          summary={participation.percentage == null
-            ? participation.missingReason || 'Assessment participation has not been recorded yet.'
-            : `Assessment participation is ${formatPercentageWords(participation.percentage)}, ${participation.numerator} of ${participation.denominator} students with at least one assessment.`}
-          details={<dl><div><dt>Participating students</dt><dd>{participation.numerator}</dd></div><div><dt>Enrolled students</dt><dd>{participation.denominator}</dd></div><div><dt>Baseline complete</dt><dd>{participation.baselineCompleted}</dd></div><div><dt>Post complete</dt><dd>{participation.postCompleted}</dd></div></dl>}
+          detail={
+            participation.percentage == null
+              ? 'Assessment participation has not been recorded yet.'
+              : `${participation.numerator} of ${participation.denominator} students have completed at least one assessment.`
+          }
+          participation
         />
-        <ImpactCircle
-          label="Overall matched-student growth"
+        <FixtureImpactCard
+          title="Overall matched growth"
           center={
-            overall.deltaPercentagePoints == null
-              ? overallPending
-                ? growthPendingCenterLabel()
+            overall.deltaPercentagePoints != null
+              ? signedPoints(overall.deltaPercentagePoints)
+              : overallPending
+                ? growthPendingCenter()
                 : signedPoints(overall.deltaPercentagePoints)
-              : signedPoints(overall.deltaPercentagePoints)
           }
-          ringPercentage={null}
-          state={overallState}
           status={
-            overall.deltaPercentagePoints == null
-              ? overallPending
-                ? growthPendingStatusLabel()
+            overall.deltaPercentagePoints != null
+              ? overall.displayStatus
+              : overallPending
+                ? 'Final report pending'
                 : missingImpactStatus('overall')
-              : overall.displayStatus
           }
-          summary={
-            overall.deltaPercentagePoints == null
-              ? overallPending
-                ? `${overall.matchedStudentCount} matched students are available; post assessments are not complete. Growth is pending until matched post scores are recorded.`
-                : `${overall.matchedStudentCount} matched students are available; ${overall.requiredMatchedCount} required. ${overall.missingReason}`
-              : `${direction(overall.deltaPercentagePoints)} of ${signedPoints(overall.deltaPercentagePoints)}, calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`
+          detail={
+            overallPending
+              ? 'Final growth report becomes available after matched post assessments.'
+              : overall.deltaPercentagePoints != null
+                ? `Calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`
+                : overall.missingReason || 'Awaiting matched post data.'
           }
-          details={<dl><div><dt>Included domains</dt><dd>{overall.includedDomainCount} of {overall.totalDomainCount}</dd></div><div><dt>Matched sample</dt><dd>{overall.matchedStudentCount}</dd></div><div><dt>Weighting</dt><dd>{overall.weighting}</dd></div><div><dt>Data quality</dt><dd>{overall.dataQualityStatus}</dd></div></dl>}
         />
       </div>
-      <p className="pilotImpact-method">
-        Growth values are percentage-point differences, not percent growth. Overall growth excludes completion and engagement and uses an unweighted average because no approved domain weighting is configured.
-      </p>
+      <div className="phVisual-notice" role="status">
+        <strong>Current status:</strong>{' '}
+        {program.activeStudentCount} students · {program.baseline.count} baseline assessments ·{' '}
+        {program.post.count} post assessments · {growthPending ? growthStatusLabel : overall.displayStatus}.
+      </div>
     </section>
   );
 }
@@ -425,16 +371,10 @@ function ProgramDetail({
   };
 
   return (
-    <div className="pilotOutcomes-detail">
+    <div className="phVisual pilotOutcomes-detail">
       <div className="pilotOutcomes-detailHeader">
-        <div><p className="pilotOutcomes-eyebrow">Program detail</p><h2>{program.programName}</h2><p>{program.programType} · {program.facilitator}</p></div>
+        <div><p className="phVisual-eyebrow">Program detail</p><h2>{program.programName}</h2><p className="phVisual-meta">{program.programType} · {program.facilitator}</p></div>
         <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={onClose}>Back to portfolio</button>
-      </div>
-      <div className="pilotOutcomes-summaryGrid">
-        <article className="pilotOutcomes-metric"><span>Students</span><strong>{program.activeStudentCount}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Baseline</span><strong>{program.baseline.count}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Post</span><strong>{program.post.count}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Participation</span><strong>{metric(program.impactSnapshot.participation.percentage, '%')}</strong></article>
       </div>
       <AdminProgramHealthPanel program={program} />
       <PilotImpactSnapshot program={program} />

@@ -105,7 +105,7 @@ describe('buildProgramHealthModel', () => {
       'Active students this week',
     ]);
     expect(model.metrics[0].value).toBe('17');
-    expect(model.metrics[1].value).toBe('13 of 17');
+    expect(model.metrics[1].value).toBe('13');
     expect(model.metrics[5].value).toBe('76.5%');
     expect(model.timeline.map((step) => step.label)).toEqual([
       'Program Created',

@@ -1,41 +1,33 @@
 import React from 'react';
 import { buildProgramHealthModel } from '../../lib/buildProgramHealthModel';
 import type { PilotOutcomeProgram } from '../../types/pilotOutcomes';
+import './admin-program-health-visual.css';
 
 type AdminProgramHealthPanelProps = {
   program: PilotOutcomeProgram;
 };
 
 export default function AdminProgramHealthPanel({ program }: AdminProgramHealthPanelProps) {
-  const { metrics, timeline, statusBanner } = buildProgramHealthModel(program);
+  const { metrics, timeline } = buildProgramHealthModel(program);
 
   return (
-    <section className="pilotOutcomes-panel programHealth" aria-labelledby="program-health-title">
-      <div className="programHealth-heading">
-        <div>
-          <p className="pilotOutcomes-eyebrow">Engagement snapshot</p>
-          <h3 id="program-health-title">Program Health</h3>
-        </div>
-        <p className="programHealth-banner" role="status">
-          {statusBanner}
-        </p>
-      </div>
-      <div className="pilotOutcomes-summaryGrid programHealth-metrics">
+    <section className="phVisual-panel programHealth" aria-labelledby="program-health-title">
+      <p className="phVisual-eyebrow">{program.programName}</p>
+      <h2 id="program-health-title">Program Health</h2>
+      <p className="phVisual-meta">Live operational progress during the active pilot.</p>
+      <div className="phVisual-health">
         {metrics.map((metric) => (
-          <article className="pilotOutcomes-metric" key={metric.label}>
-            <span>{metric.label}</span>
+          <article className="phVisual-healthCard" key={metric.label}>
             <strong>{metric.value}</strong>
+            <span>{metric.label}</span>
           </article>
         ))}
       </div>
-      <ol className="programHealth-timeline" aria-label="Program milestone timeline">
+      <ol className="phVisual-timeline" aria-label="Program milestone timeline">
         {timeline.map((step) => (
-          <li key={step.key} className="programHealth-timelineStep" data-state={step.state}>
-            <span className="programHealth-timelineMarker" aria-hidden="true" />
-            <div className="programHealth-timelineBody">
-              <strong>{step.label}</strong>
-              <span>{step.detail}</span>
-            </div>
+          <li key={step.key} className="phVisual-timelineStep" data-state={step.state}>
+            <b aria-hidden="true">{step.marker}</b>
+            {step.label}
           </li>
         ))}
       </ol>

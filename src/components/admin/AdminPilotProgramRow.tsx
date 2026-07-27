@@ -31,6 +31,7 @@ import {
   resolvePilotProgramProtectionLevel,
 } from '../../lib/pilotProgramProtection';
 import type { PilotProgramProtectionLevel } from '../../types/pilotProgram';
+import './admin-program-health-visual.css';
 
 type AdminPilotProgramRowProps = {
   program: PilotProgramRecord;
@@ -39,34 +40,18 @@ type AdminPilotProgramRowProps = {
   showArchiveActions?: boolean;
 };
 
-function formatCreatedAt(value?: string): string {
+function formatCreatedMonth(value?: string): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
 }
 
-function formatLastActivity(value?: string | null): string {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
-function statusClass(status: string): string {
-  const normalized = status.trim().toLowerCase();
-  if (normalized === 'active') return 'adminPortal-status adminPortal-status--active';
-  if (normalized === 'archived') return 'adminPortal-status adminPortal-status--paused';
-  if (normalized === 'testing') return 'adminPortal-status adminPortal-status--completed';
-  if (normalized === 'paused') return 'adminPortal-status adminPortal-status--paused';
-  if (normalized === 'completed') return 'adminPortal-status adminPortal-status--completed';
-  return 'adminPortal-status';
+function isActiveThisWeek(value?: string | null): boolean {
+  if (!value) return false;
+  const ts = Date.parse(value);
+  if (!Number.isFinite(ts)) return false;
+  return Date.now() - ts <= 7 * 24 * 60 * 60 * 1000;
 }
 
 function readCount(tables: PilotCleanupTableCount[], table: string): number {
@@ -214,46 +199,110 @@ export default function AdminPilotProgramRow({
     window.location.href = `mailto:${program.admin_email}?subject=${subject}`;
   };
 
+  const pilotStatusLabel = program.pilot_status === 'active' ? 'Active pilot' : program.pilot_status;
+
   return (
     <>
-      <article className="adminPortal-programCard">
-        <div className="adminPortal-programHeader">
+      <article className="phVisual-panel">
+        <div className="phVisual-programCard">
           <div>
-            <h2 className="adminPortal-programName">{program.program_name}</h2>
-            <p className="adminPortal-programMeta">
-              <span className="adminPortal-programCategory">{programMetaLabel}</span>
-              <span className="adminPortal-programMetaDivider"> · </span>
-              <span className="adminPortal-programSummaryLabel">Status:</span> {program.pilot_status}
-            </p>
+            <h2>{program.program_name}</h2>
+            <div className="phVisual-meta">
+              {programMetaLabel} · {pilotStatusLabel}
+            </div>
+            <div className="phVisual-actions">
+              <button
+                type="button"
+                className="phVisual-btn phVisual-btn--primary"
+                onClick={() => setExpanded((v) => !v)}
+              >
+                {expanded ? 'Hide Details' : 'View Details'}
+              </button>
+              <button
+                type="button"
+                className="phVisual-btn"
+                onClick={() => void copyCode(program.program_code, 'Program code')}
+              >
+                Copy Program Code
+              </button>
+              {!isIndependentFamily && program.facilitator_access_code ? (
+                <button
+                  type="button"
+                  className="phVisual-btn"
+                  onClick={() => void copyCode(program.facilitator_access_code!, 'Facilitator code')}
+                >
+                  Copy Facilitator Code
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="phVisual-btn"
+                disabled={!regenerateDecision.allowed}
+                title={!regenerateDecision.allowed ? regenerateDecision.message : undefined}
+                onClick={() => setActionError('Reset Facilitator Access is gated but not implemented in this admin view yet.')}
+              >
+                Reset Facilitator Access
+              </button>
+              <button
+                type="button"
+                className="phVisual-btn"
+                onClick={emailFacilitator}
+                disabled={!program.admin_email?.trim()}
+              >
+                Email Facilitator
+              </button>
+              {showArchiveActions ? (
+                isArchived ? (
+                  <button type="button" className="phVisual-btn" onClick={() => void handleRestore()}>
+                    Restore Pilot
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="phVisual-btn"
+                    disabled={!archiveDecision.allowed}
+                    title={!archiveDecision.allowed ? archiveDecision.message : undefined}
+                    onClick={() => void handleArchive()}
+                  >
+                    Archive
+                  </button>
+                )
+              ) : null}
+            </div>
           </div>
-          <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
+          <div>
+            <strong>Facilitator</strong>
+            <div className="phVisual-meta">
+              {facilitatorName}
+              <br />
+              Contact protected
+            </div>
+          </div>
+          <div>
+            <strong>Students</strong>
+            <div className="phVisual-meta">{studentCount == null ? '…' : studentCount} enrolled</div>
+          </div>
+          <div>
+            <strong>Activity</strong>
+            <div className="phVisual-meta">
+              {isActiveThisWeek(lastActivity) ? 'Active this week' : 'No recent activity'}
+              <br />
+              Created {formatCreatedMonth(program.created_at)}
+            </div>
+          </div>
         </div>
 
-        <div className="adminPortal-programDirectoryMeta">
-          <p>
-            <strong>Facilitator name</strong>
-            {facilitatorName}
+        {!archiveDecision.allowed || !deleteDecision.allowed || !regenerateDecision.allowed ? (
+          <p className="adminPortal-protectedNote" role="status">
+            {PROTECTION_ACTION_BLOCKED_MESSAGE}
           </p>
-          <p>
-            <strong>Facilitator email</strong>
-            {facilitatorEmail}
-          </p>
-          <p>
-            <strong>Student count</strong>
-            {studentCount == null ? '…' : studentCount}
-          </p>
-          <p>
-            <strong>Last activity</strong>
-            {formatLastActivity(lastActivity)}
-          </p>
-          <p>
-            <strong>Created date</strong>
-            {formatCreatedAt(program.created_at)}
-          </p>
-        </div>
+        ) : null}
+
+        {actionMessage ? <p className="adminPortal-actionSuccess" role="status">{actionMessage}</p> : null}
+        {actionError ? <p className="adminPortal-error">{actionError}</p> : null}
 
         {expanded ? (
-          <div className="adminPortal-detailGrid">
+          <div className="phVisual-expanded adminPortal-detailGrid">
             <AdminCopyField label="Internal Program Code" value={program.program_code} onCopied={onCopied} />
             <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
             {!isIndependentFamily && program.facilitator_access_code ? (
@@ -330,90 +379,25 @@ export default function AdminPilotProgramRow({
                 </div>
               </>
             ) : null}
+            <div className="adminPortal-detailItem">
+              <span className="adminPortal-detailLabel">Facilitator email</span>
+              <span className="adminPortal-detailValue">{facilitatorEmail}</span>
+            </div>
+            <div className="adminPortal-detailItem adminPortal-detailItem--wide phVisual-actions">
+              <button type="button" className="phVisual-btn" onClick={() => setRenameOpen(true)} disabled={!editLabelsDecision.allowed}>
+                Edit Name
+              </button>
+              {!isIndependentFamily && program.facilitator_access_code ? (
+                <button type="button" className="phVisual-btn phVisual-btn--primary" onClick={openFacilitatorDashboard}>
+                  Open Facilitator Dashboard
+                </button>
+              ) : null}
+              <button type="button" className="phVisual-btn" onClick={openFamilyPortal}>
+                Open Family Portal
+              </button>
+            </div>
           </div>
         ) : null}
-
-        {!archiveDecision.allowed || !deleteDecision.allowed || !regenerateDecision.allowed ? (
-          <p className="adminPortal-protectedNote" role="status">
-            {PROTECTION_ACTION_BLOCKED_MESSAGE}
-          </p>
-        ) : null}
-
-        {actionMessage ? <p className="adminPortal-actionSuccess" role="status">{actionMessage}</p> : null}
-        {actionError ? <p className="adminPortal-error">{actionError}</p> : null}
-
-        <div className="adminPortal-actions">
-          <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => setExpanded((v) => !v)}>
-            {expanded ? 'Hide Details' : 'View Details'}
-          </button>
-          <button
-            type="button"
-            className="adminPortal-btn adminPortal-btn--ghost"
-            onClick={() => void copyCode(program.program_code, 'Program code')}
-          >
-            Copy Program Code
-          </button>
-          {!isIndependentFamily && program.facilitator_access_code ? (
-            <button
-              type="button"
-              className="adminPortal-btn adminPortal-btn--ghost"
-              onClick={() => void copyCode(program.facilitator_access_code!, 'Facilitator code')}
-            >
-              Copy Facilitator Code
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className="adminPortal-btn adminPortal-btn--ghost"
-            disabled={!regenerateDecision.allowed}
-            title={!regenerateDecision.allowed ? regenerateDecision.message : undefined}
-            onClick={() => setActionError('Reset Facilitator Access is gated but not implemented in this admin view yet.')}
-          >
-            Reset Facilitator Access
-          </button>
-          <button
-            type="button"
-            className="adminPortal-btn adminPortal-btn--ghost"
-            onClick={emailFacilitator}
-            disabled={!program.admin_email?.trim()}
-          >
-            Email Facilitator
-          </button>
-          <button
-            type="button"
-            className="adminPortal-btn adminPortal-btn--ghost"
-            onClick={() => setRenameOpen(true)}
-            disabled={!editLabelsDecision.allowed}
-            title={!editLabelsDecision.allowed ? editLabelsDecision.message : undefined}
-          >
-            Edit Name
-          </button>
-          {!isIndependentFamily && program.facilitator_access_code ? (
-            <button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={openFacilitatorDashboard}>
-              Open Facilitator Dashboard
-            </button>
-          ) : null}
-          <button type="button" className="adminPortal-btn adminPortal-btn--gold" onClick={openFamilyPortal}>
-            Open Family Portal
-          </button>
-          {showArchiveActions ? (
-            isArchived ? (
-              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void handleRestore()}>
-                Restore Pilot
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="adminPortal-btn adminPortal-btn--ghost"
-                disabled={!archiveDecision.allowed}
-                title={!archiveDecision.allowed ? archiveDecision.message : undefined}
-                onClick={() => void handleArchive()}
-              >
-                Archive
-              </button>
-            )
-          ) : null}
-        </div>
       </article>
 
       <AdminPilotRenameModal

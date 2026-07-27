@@ -14,6 +14,7 @@ export type ProgramHealthTimelineStep = {
   label: string;
   state: 'complete' | 'current' | 'upcoming';
   detail: string;
+  marker: string;
 };
 
 export type ProgramHealthModel = {
@@ -24,8 +25,22 @@ export type ProgramHealthModel = {
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-function yesNo(value: boolean): string {
-  return value ? 'Yes' : 'No';
+function studentsWithAdventure(program: PilotOutcomeProgram): number {
+  return (program.students ?? []).filter((row) => row.weeklyAdventuresCompleted > 0).length;
+}
+
+function studentsWithAssessment(program: PilotOutcomeProgram): number {
+  const students = program.students ?? [];
+  if (students.length) {
+    return students.filter(
+      (row) => row.assessmentsCompleted > 0 || row.baselineScore != null || row.postScore != null,
+    ).length;
+  }
+  return program.baseline.count;
+}
+
+function formatCoins(value: number): string {
+  return value.toLocaleString('en-US');
 }
 
 function countPair(count: number, total: number): string {
@@ -76,9 +91,9 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
 
   const metrics = [
     { label: 'Students enrolled', value: String(program.activeStudentCount) },
-    { label: 'Baseline completed', value: countPair(program.baseline.count, program.baseline.total) },
-    { label: 'At least one adventure', value: yesNo(atLeastOneAdventure) },
-    { label: 'At least one assessment', value: yesNo(atLeastOneAssessment) },
+    { label: 'Baseline completed', value: String(program.baseline.count) },
+    { label: 'At least one adventure', value: String(studentsWithAdventure(program)) },
+    { label: 'At least one assessment', value: String(studentsWithAssessment(program)) },
     {
       label: 'Weekly completion',
       value: weeklyImpact.percentage == null ? 'Not enough data' : `${weeklyImpact.percentage}%`,
@@ -89,11 +104,11 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
         participation.percentage == null ? 'Not enough data' : `${participation.percentage}%`,
     },
     { label: 'Certificates earned', value: String(program.certificateCount) },
-    { label: 'Coins earned', value: String(program.focusCoins) },
+    { label: 'Coins earned', value: formatCoins(program.focusCoins) },
     { label: 'Active students this week', value: String(activeStudentsThisWeek(program)) },
   ];
 
-  const stepDefs: Array<Omit<ProgramHealthTimelineStep, 'state'>> = [
+  const stepDefs: Array<{ key: ProgramHealthTimelineStepKey; label: string; detail: string }> = [
     {
       key: 'programCreated',
       label: 'Program Created',
@@ -150,9 +165,11 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
 
   const firstIncomplete = completionFlags.findIndex((done) => !done);
   const timeline: ProgramHealthTimelineStep[] = stepDefs.map((step, index) => {
-    if (completionFlags[index]) return { ...step, state: 'complete' };
-    if (firstIncomplete === index) return { ...step, state: 'current' };
-    return { ...step, state: 'upcoming' };
+    let state: ProgramHealthTimelineStep['state'] = 'upcoming';
+    if (completionFlags[index]) state = 'complete';
+    else if (firstIncomplete === index) state = 'current';
+    const marker = state === 'complete' ? '✓' : state === 'current' ? '◐' : '○';
+    return { ...step, state, marker };
   });
 
   let statusBanner: string;

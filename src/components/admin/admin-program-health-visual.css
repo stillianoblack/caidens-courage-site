@@ -1,0 +1,271 @@
+.phVisual {
+  color: #17345f;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.phVisual .phVisual-eyebrow {
+  margin: 0 0 8px;
+  color: #53709a;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.phVisual .phVisual-panel {
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid #dce5f1;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 25px #15335d12;
+  box-sizing: border-box;
+}
+
+.phVisual .phVisual-panel > * {
+  min-width: 0;
+}
+
+.phVisual .phVisual-panel h2,
+.phVisual .phVisual-panel h3 {
+  margin-top: 0;
+  color: #112f58;
+  overflow-wrap: anywhere;
+}
+
+.phVisual .phVisual-meta {
+  color: #536985;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.phVisual-programCard {
+  display: grid;
+  grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: center;
+  min-width: 0;
+}
+
+.phVisual-programCard h2 {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+}
+
+.phVisual-programCard > div {
+  min-width: 0;
+}
+
+.phVisual-programCard strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #112f58;
+}
+
+.phVisual-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  max-width: 100%;
+}
+
+.phVisual-btn {
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #214778;
+  border-radius: 9px;
+  background: #fff;
+  color: #17345f;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: normal;
+}
+
+.phVisual-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.phVisual-btn--primary {
+  border-color: #214778;
+  background: #214778;
+  color: #fff;
+}
+
+.phVisual-health {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+
+.phVisual-healthCard {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #dce5f1;
+  border-radius: 14px;
+  background: #f3f7fc;
+  overflow-wrap: anywhere;
+}
+
+.phVisual-healthCard strong {
+  display: block;
+  font-size: 28px;
+  color: #112f58;
+  line-height: 1.1;
+}
+
+.phVisual-healthCard span {
+  color: #5d718d;
+  font-size: 14px;
+}
+
+.phVisual-timeline {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phVisual-timelineStep {
+  min-width: 0;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: #eef3f9;
+  color: #536985;
+  font-size: 13px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.phVisual-timelineStep b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.phVisual-timelineStep[data-state='complete'] {
+  color: #14735b;
+  background: #e8f7f1;
+}
+
+.phVisual-timelineStep[data-state='current'] {
+  color: #8b5c00;
+  background: #fff4d8;
+}
+
+.phVisual-snapshot {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  min-width: 0;
+}
+
+.phVisual-impact {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #dce5f1;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.phVisual-impact h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.phVisual-impactCircle {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  max-width: 100%;
+  height: 150px;
+  margin: 8px auto 14px;
+  border: 12px solid #adc2dc;
+  border-radius: 50%;
+  background: #f8fbff;
+  box-sizing: border-box;
+}
+
+.phVisual-impactCircle strong {
+  font-size: 22px;
+  line-height: 1.1;
+  color: #112f58;
+  overflow-wrap: anywhere;
+  padding: 4px;
+}
+
+.phVisual-impactStatus {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: #8b5c00;
+}
+
+.phVisual-impactDetail {
+  margin: 0;
+  color: #5d718d;
+  font-size: 14px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.phVisual-impact--participation .phVisual-impactCircle {
+  border-color: #4b9b7d;
+}
+
+.phVisual-impact--participation .phVisual-impactStatus {
+  color: #14735b;
+}
+
+.phVisual-notice {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fff7df;
+  color: #6f5100;
+  overflow-wrap: anywhere;
+}
+
+.phVisual-programList {
+  display: grid;
+  gap: 28px;
+}
+
+.phVisual-expanded {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #dce5f1;
+}
+
+@media (max-width: 760px) {
+  .phVisual .phVisual-panel {
+    padding: 18px;
+  }
+
+  .phVisual-programCard,
+  .phVisual-health,
+  .phVisual-snapshot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .phVisual-timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .phVisual-impactCircle {
+    width: 132px;
+    height: 132px;
+  }
+
+  .phVisual-actions .phVisual-btn {
+    flex: 1 1 45%;
+  }
+}
