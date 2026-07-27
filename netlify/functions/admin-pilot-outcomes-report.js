@@ -1,6 +1,12 @@
 const PDFDocument = require('pdfkit');
 const { requireAdmin, json } = require('./_lib/adminAuth');
 const { buildPilotOutcomes } = require('./_lib/pilotOutcomes');
+const {
+  formatDecimal,
+  formatPercentage,
+  formatPoints,
+  missingImpactStatus,
+} = require('../../src/lib/pilotOutcomesPresentation');
 
 function text(value, max = 3000) {
   return String(value || '').replace(/[<>]/g, '').trim().slice(0, max);
@@ -11,7 +17,8 @@ function safeFilePart(value) {
 }
 
 function metric(value, suffix = '') {
-  return value == null ? 'Not enough data' : `${value}${suffix}`;
+  if (suffix === '%') return formatPercentage(value);
+  return value == null ? 'Not enough data' : formatDecimal(value) || 'Not enough data';
 }
 
 async function load(supabase, table) {
@@ -85,8 +92,7 @@ function line(doc, label, value) {
 }
 
 function signedPoints(value) {
-  if (value == null) return 'Not enough data';
-  return `${value > 0 ? '+' : ''}${value} pts`;
+  return formatPoints(value);
 }
 
 function circleState(value) {
@@ -151,7 +157,7 @@ function impactItems(program) {
     center: signedPoints(domain.deltaPercentagePoints),
     delta: domain.deltaPercentagePoints,
     ring: domain.postPercentage,
-    status: domain.displayStatus,
+    status: domain.deltaPercentagePoints == null ? missingImpactStatus('domain') : domain.displayStatus,
     caption:
       domain.deltaPercentagePoints == null
         ? `${domain.matchedStudentCount} matched; ${domain.requiredMatchedCount} required`
@@ -165,19 +171,19 @@ function impactItems(program) {
     {
       label: 'Weekly completion',
       kind: 'completion',
-      center: weekly.percentage == null ? 'Not enough data' : `${weekly.percentage}%`,
+      center: formatPercentage(weekly.percentage),
       delta: weekly.percentage == null ? null : 0,
       ring: weekly.percentage,
-      status: weekly.displayStatus,
+      status: weekly.percentage == null ? missingImpactStatus('weekly') : weekly.displayStatus,
       caption: `${weekly.numerator} of ${weekly.denominator || 'unavailable'} student-weeks`,
     },
     {
       label: 'Participation',
       kind: 'completion',
-      center: participation.percentage == null ? 'Not enough data' : `${participation.percentage}%`,
+      center: formatPercentage(participation.percentage),
       delta: participation.percentage == null ? null : 0,
       ring: participation.percentage,
-      status: participation.displayStatus,
+      status: participation.percentage == null ? missingImpactStatus('participation') : participation.displayStatus,
       caption: `${participation.numerator} of ${participation.denominator} students`,
     },
     {
@@ -185,7 +191,7 @@ function impactItems(program) {
       center: signedPoints(overall.deltaPercentagePoints),
       delta: overall.deltaPercentagePoints,
       ring: null,
-      status: overall.displayStatus,
+      status: overall.deltaPercentagePoints == null ? missingImpactStatus('overall') : overall.displayStatus,
       caption: `${overall.includedDomainCount} of ${overall.totalDomainCount} domains; unweighted`,
     },
   ];
@@ -283,7 +289,7 @@ function buildPdf(program, options) {
     line(doc, 'Average post', metric(program.postAverage));
     line(doc, 'Absolute delta', metric(program.absoluteDelta));
     line(doc, 'Percentage delta', program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable');
-    line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Not enough data' : `${program.weeklyCompletion.rate}% (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
+    line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Not enough data' : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
     if (options.includeCharts !== false) drawImpactSnapshot(doc, program);
     addContentPage(doc);
     heading(doc, 'Program snapshot');

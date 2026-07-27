@@ -86,7 +86,7 @@ const sample = {
       },
     ],
     weeklyCompletion: { numerator: 4, denominator: 8, percentage: 50, dataQualityStatus: 'Available', displayStatus: 'Needs attention', missingReason: null },
-    participation: { numerator: 1, denominator: 2, percentage: 50, dataQualityStatus: 'Available', displayStatus: 'Needs attention', missingReason: null, baselineCompleted: 1, postCompleted: 1 },
+    participation: { numerator: 1, denominator: 3, percentage: 33.333333333, dataQualityStatus: 'Available', displayStatus: 'Needs attention', missingReason: null, baselineCompleted: 1, postCompleted: 1 },
     overallMatchedGrowth: { deltaPercentagePoints: 30, includedDomainCount: 2, totalDomainCount: 3, matchedStudentCount: 1, requiredMatchedCount: 1, weighting: 'Unweighted average of domains with valid matched pre/post data', dataQualityStatus: 'Directional - small sample', displayStatus: 'Directional result', missingReason: null },
   },
   assessmentCount: 2,
@@ -135,6 +135,9 @@ describe('pilot outcomes report', () => {
     );
     expect(items.find((item: { label: string }) => item.label === 'Overall matched growth')).toEqual(
       expect.objectContaining({ center: '+30 pts', ring: null }),
+    );
+    expect(items.find((item: { label: string }) => item.label === 'Participation')).toEqual(
+      expect.objectContaining({ center: '33.3%', ring: 33.333333333 }),
     );
   });
 

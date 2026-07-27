@@ -59,6 +59,20 @@ describe('Pilot Impact Snapshot', () => {
     };
     render(<PilotImpactSnapshot program={missing} />);
     expect(screen.getByRole('img', { name: /Reading comprehension.*Not enough data.*mapped post domain score is missing/i })).toBeInTheDocument();
+    const readingCard = screen.getByRole('heading', { name: 'Reading comprehension' }).closest('article');
+    expect(readingCard).toHaveTextContent('Awaiting matched assessments.');
+    expect(readingCard?.textContent?.match(/Not enough data/g)).toHaveLength(1);
+    expect(readingCard).toHaveTextContent('Awaiting data');
+  });
+
+  it('formats percentage presentation without changing the underlying values', () => {
+    const repeating = program();
+    repeating.impactSnapshot.participation.percentage = 33.333333333;
+    render(<PilotImpactSnapshot program={repeating} />);
+    const participationCard = screen.getByRole('heading', { name: 'Participation' }).closest('article');
+    expect(participationCard).toHaveTextContent('33.3%');
+    expect(participationCard).toHaveTextContent('33.3 percent');
+    expect(participationCard).not.toHaveTextContent('33.333333333');
   });
 
   it('includes responsive one-, two-, and three-column layouts without fixed card widths', () => {
