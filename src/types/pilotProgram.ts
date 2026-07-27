@@ -116,6 +116,10 @@ export type PilotProgramRecord = {
   agreed_to_terms: boolean;
   agreed_at: string;
   created_at?: string;
+  /** Populated by admin-pilot-programs for directory display. */
+  admin_student_count?: number;
+  /** Populated by admin-pilot-programs for directory display. */
+  admin_last_activity_at?: string | null;
 };
 
 export type ActivePilotProgram = {

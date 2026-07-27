@@ -26,10 +26,20 @@ function missingImpactStatus(kind) {
   return 'Awaiting matched assessments.';
 }
 
+function growthPendingCenterLabel() {
+  return 'Growth pending';
+}
+
+function growthPendingStatusLabel() {
+  return 'Growth pending';
+}
+
 module.exports = {
   formatDecimal,
   formatPercentage,
   formatPercentageWords,
   formatPoints,
   missingImpactStatus,
+  growthPendingCenterLabel,
+  growthPendingStatusLabel,
 };

@@ -11,8 +11,12 @@ import {
   formatPercentage,
   formatPercentageWords,
   formatPoints,
+  growthPendingCenterLabel,
+  growthPendingStatusLabel,
   missingImpactStatus,
 } from '../../../lib/pilotOutcomesPresentation';
+import AdminProgramHealthPanel from '../AdminProgramHealthPanel';
+import { isGrowthPending } from '../../../lib/buildProgramHealthModel';
 import type {
   PilotImpactDomain,
   PilotOutcomeProgram,
@@ -141,7 +145,13 @@ function ImpactCircle({
   );
 }
 
-function DomainImpactCircle({ domain }: { domain: PilotImpactDomain }) {
+function DomainImpactCircle({
+  domain,
+  growthPending,
+}: {
+  domain: PilotImpactDomain;
+  growthPending: boolean;
+}) {
   const delta = domain.deltaPercentagePoints;
   const available = delta != null;
   const state = !available
@@ -151,16 +161,31 @@ function DomainImpactCircle({ domain }: { domain: PilotImpactDomain }) {
       : delta < 0
         ? 'negative'
         : 'unchanged';
+  const pendingCenter = growthPending && !available;
   const summary = available
     ? `${direction(delta)} of ${signedPoints(delta)}. Baseline ${formatPercentageWords(domain.baselinePercentage)} to post ${formatPercentageWords(domain.postPercentage)}. ${domain.matchedStudentCount} matched students.`
-    : `${domain.matchedStudentCount} matched students are available; ${domain.requiredMatchedCount} required. ${domain.missingReason}`;
+    : pendingCenter
+      ? `Baseline is recorded for ${domain.baselineNumerator} students. Post-assessment scores are not complete yet, so matched growth is pending.`
+      : `${domain.matchedStudentCount} matched students are available; ${domain.requiredMatchedCount} required. ${domain.missingReason}`;
   return (
     <ImpactCircle
       label={domain.label}
-      center={available ? signedPoints(domain.deltaPercentagePoints) : 'Not enough data'}
-      ringPercentage={available ? domain.postPercentage : null}
+      center={
+        available
+          ? signedPoints(domain.deltaPercentagePoints)
+          : pendingCenter
+            ? growthPendingCenterLabel()
+            : 'Not enough data'
+      }
+      ringPercentage={available ? domain.postPercentage : domain.baselinePercentage}
       state={state}
-      status={available ? domain.displayStatus : missingImpactStatus('domain')}
+      status={
+        available
+          ? domain.displayStatus
+          : pendingCenter
+            ? growthPendingStatusLabel()
+            : missingImpactStatus('domain')
+      }
       summary={summary}
       details={(
         <dl>
@@ -178,6 +203,7 @@ function DomainImpactCircle({ domain }: { domain: PilotImpactDomain }) {
 }
 
 export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram }) {
+  const growthPending = isGrowthPending(program);
   const weekly = program.impactSnapshot.weeklyCompletion;
   const participation = program.impactSnapshot.participation;
   const overall = program.impactSnapshot.overallMatchedGrowth;
@@ -188,17 +214,20 @@ export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram 
       : overall.deltaPercentagePoints < 0
         ? 'negative'
         : 'unchanged';
+  const overallPending = growthPending && overall.deltaPercentagePoints == null;
   return (
     <section className="pilotOutcomes-panel pilotImpact" aria-labelledby="pilot-impact-title">
       <div className="pilotImpact-heading">
         <div>
           <p className="pilotOutcomes-eyebrow">Matched outcomes</p>
-          <h3 id="pilot-impact-title">Pilot Impact Snapshot</h3>
+          <h3 id="pilot-impact-title">Pilot Impact</h3>
         </div>
         <p>Rings show post scores or completion rates. Center values show percentage-point change.</p>
       </div>
       <div className="pilotImpact-grid">
-        {program.impactSnapshot.domains.map((domain) => <DomainImpactCircle key={domain.key} domain={domain} />)}
+        {program.impactSnapshot.domains.map((domain) => (
+          <DomainImpactCircle key={domain.key} domain={domain} growthPending={growthPending} />
+        ))}
         <ImpactCircle
           label="Weekly completion"
           center={metric(weekly.percentage, '%')}
@@ -223,13 +252,29 @@ export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram 
         />
         <ImpactCircle
           label="Overall matched-student growth"
-          center={signedPoints(overall.deltaPercentagePoints)}
+          center={
+            overall.deltaPercentagePoints == null
+              ? overallPending
+                ? growthPendingCenterLabel()
+                : signedPoints(overall.deltaPercentagePoints)
+              : signedPoints(overall.deltaPercentagePoints)
+          }
           ringPercentage={null}
           state={overallState}
-          status={overall.deltaPercentagePoints == null ? missingImpactStatus('overall') : overall.displayStatus}
-          summary={overall.deltaPercentagePoints == null
-            ? `${overall.matchedStudentCount} matched students are available; ${overall.requiredMatchedCount} required. ${overall.missingReason}`
-            : `${direction(overall.deltaPercentagePoints)} of ${signedPoints(overall.deltaPercentagePoints)}, calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`}
+          status={
+            overall.deltaPercentagePoints == null
+              ? overallPending
+                ? growthPendingStatusLabel()
+                : missingImpactStatus('overall')
+              : overall.displayStatus
+          }
+          summary={
+            overall.deltaPercentagePoints == null
+              ? overallPending
+                ? `${overall.matchedStudentCount} matched students are available; post assessments are not complete. Growth is pending until matched post scores are recorded.`
+                : `${overall.matchedStudentCount} matched students are available; ${overall.requiredMatchedCount} required. ${overall.missingReason}`
+              : `${direction(overall.deltaPercentagePoints)} of ${signedPoints(overall.deltaPercentagePoints)}, calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`
+          }
           details={<dl><div><dt>Included domains</dt><dd>{overall.includedDomainCount} of {overall.totalDomainCount}</dd></div><div><dt>Matched sample</dt><dd>{overall.matchedStudentCount}</dd></div><div><dt>Weighting</dt><dd>{overall.weighting}</dd></div><div><dt>Data quality</dt><dd>{overall.dataQualityStatus}</dd></div></dl>}
         />
       </div>
@@ -387,10 +432,11 @@ function ProgramDetail({
       </div>
       <div className="pilotOutcomes-summaryGrid">
         <article className="pilotOutcomes-metric"><span>Students</span><strong>{program.activeStudentCount}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Matched</span><strong>{program.matchedCount}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Absolute delta</span><strong>{metric(program.absoluteDelta)}</strong></article>
-        <article className="pilotOutcomes-metric"><span>Weekly completion</span><strong>{metric(program.weeklyCompletion.rate, '%')}</strong></article>
+        <article className="pilotOutcomes-metric"><span>Baseline</span><strong>{program.baseline.count}</strong></article>
+        <article className="pilotOutcomes-metric"><span>Post</span><strong>{program.post.count}</strong></article>
+        <article className="pilotOutcomes-metric"><span>Participation</span><strong>{metric(program.impactSnapshot.participation.percentage, '%')}</strong></article>
       </div>
+      <AdminProgramHealthPanel program={program} />
       <PilotImpactSnapshot program={program} />
       <OutcomeCharts program={program} />
       <DataQuality program={program} />

@@ -3,3 +3,5 @@ export function formatPercentage(value: number | null | undefined, missingLabel?
 export function formatPercentageWords(value: number | null | undefined, missingLabel?: string): string;
 export function formatPoints(value: number | null | undefined, missingLabel?: string): string;
 export function missingImpactStatus(kind: 'domain' | 'overall' | 'weekly' | 'participation'): string;
+export function growthPendingCenterLabel(): string;
+export function growthPendingStatusLabel(): string;

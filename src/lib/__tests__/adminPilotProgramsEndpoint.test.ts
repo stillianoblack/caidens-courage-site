@@ -45,8 +45,13 @@ describe('admin-pilot-programs endpoint', () => {
       }],
       error: null,
     });
-    const select = jest.fn(() => ({ order }));
-    const from = jest.fn(() => ({ select }));
+    const selectPrograms = jest.fn(() => ({ order }));
+    const inParticipants = jest.fn().mockResolvedValue({ data: [], error: null });
+    const selectParticipants = jest.fn(() => ({ in: inParticipants }));
+    const from = jest.fn((table: string) => {
+      if (table === 'participants') return { select: selectParticipants };
+      return { select: selectPrograms };
+    });
     adminAuth.requireAdmin.mockResolvedValue({
       context: {
         correlationId: 'correlation-123',
@@ -58,7 +63,7 @@ describe('admin-pilot-programs endpoint', () => {
     const payload = JSON.parse(response.body);
 
     expect(response.statusCode).toBe(200);
-    expect(select).toHaveBeenCalledWith('*');
+    expect(selectPrograms).toHaveBeenCalledWith('*');
     expect(payload.programs).toEqual([{
       id: 'program-id',
       program_name: 'Pilot One',
@@ -68,6 +73,8 @@ describe('admin-pilot-programs endpoint', () => {
       program_code: 'PILOT-ONE',
       admin_email: 'admin@example.com',
       facilitator_access_code: 'FAC-123',
+      admin_student_count: 0,
+      admin_last_activity_at: null,
     }]);
   });
 });

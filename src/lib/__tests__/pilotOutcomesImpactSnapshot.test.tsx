@@ -30,7 +30,7 @@ function program(): PilotOutcomeProgram {
 describe('Pilot Impact Snapshot', () => {
   it('provides semantic labels and keyboard-accessible calculation details', () => {
     render(<PilotImpactSnapshot program={program()} />);
-    expect(screen.getByRole('heading', { name: 'Pilot Impact Snapshot' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pilot Impact' })).toBeInTheDocument();
     expect(screen.getAllByRole('img')).toHaveLength(6);
     expect(screen.getByRole('img', { name: /Reading comprehension.*Baseline 40 percent to post 80 percent.*1 matched students/i })).toBeInTheDocument();
     expect(screen.getByText(/percentage-point differences, not percent growth/i)).toBeInTheDocument();

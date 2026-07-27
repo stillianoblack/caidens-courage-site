@@ -12,6 +12,8 @@ import {
   updatePilotProgramProtectionLevel,
   type PilotCleanupTableCount,
 } from '../../lib/adminPilotCleanupService';
+import { copyToClipboard } from '../../lib/copyToClipboard';
+import { fetchPilotProgramStudentCount } from '../../lib/pilotProgramAdminScale';
 import {
   isIndependentFamilyType,
   resolveAdminPilotProgramMeta,
@@ -44,6 +46,19 @@ function formatCreatedAt(value?: string): string {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatLastActivity(value?: string | null): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 function statusClass(status: string): string {
   const normalized = status.trim().toLowerCase();
   if (normalized === 'active') return 'adminPortal-status adminPortal-status--active';
@@ -70,6 +85,9 @@ export default function AdminPilotProgramRow({
   const [estimateOpen, setEstimateOpen] = useState(false);
   const [stats, setStats] = useState<PilotCleanupTableCount[]>([]);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [studentCount, setStudentCount] = useState<number | null>(
+    typeof program.admin_student_count === 'number' ? program.admin_student_count : null,
+  );
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -84,6 +102,20 @@ export default function AdminPilotProgramRow({
   const regenerateDecision = getPilotProgramProtectionDecision(program, 'regenerate_codes');
   const canEditProtectionLevel = isSuperAdminSession();
   const featureFlags = normalizePilotFeatureFlags(program.feature_flags ?? undefined);
+
+  useEffect(() => {
+    if (typeof program.admin_student_count === 'number') {
+      setStudentCount(program.admin_student_count);
+      return;
+    }
+    let cancelled = false;
+    void fetchPilotProgramStudentCount(program.program_code).then((count) => {
+      if (!cancelled) setStudentCount(count);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [program.admin_student_count, program.program_code]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -168,6 +200,20 @@ export default function AdminPilotProgramRow({
     }
   };
 
+  const facilitatorName = program.admin_first_name?.trim() || '—';
+  const facilitatorEmail = program.admin_email?.trim() || '—';
+  const lastActivity = program.admin_last_activity_at ?? null;
+
+  const copyCode = async (value: string, label: string) => {
+    await copyToClipboard(value, `${label} copied`, onCopied);
+  };
+
+  const emailFacilitator = () => {
+    if (!program.admin_email?.trim()) return;
+    const subject = encodeURIComponent(`${program.program_name} — Caiden's Courage pilot`);
+    window.location.href = `mailto:${program.admin_email}?subject=${subject}`;
+  };
+
   return (
     <>
       <article className="adminPortal-programCard">
@@ -176,106 +222,116 @@ export default function AdminPilotProgramRow({
             <h2 className="adminPortal-programName">{program.program_name}</h2>
             <p className="adminPortal-programMeta">
               <span className="adminPortal-programCategory">{programMetaLabel}</span>
-            </p>
-            <p className="adminPortal-programSummary">
-              <span className="adminPortal-programSummaryLabel">Code:</span>{' '}
-              <code>{program.program_code}</code>
               <span className="adminPortal-programMetaDivider"> · </span>
-              <span className="adminPortal-programSummaryLabel">Created:</span>{' '}
-              {formatCreatedAt(program.created_at)}
-              <span className="adminPortal-programMetaDivider"> · </span>
-              <span className="adminPortal-programSummaryLabel">Admin:</span> {program.admin_email}
+              <span className="adminPortal-programSummaryLabel">Status:</span> {program.pilot_status}
             </p>
-            <AdminPilotProgramScaleSummary
-              program={program}
-              onEditEstimate={() => setEstimateOpen(true)}
-            />
           </div>
           <span className={statusClass(program.pilot_status)}>{program.pilot_status}</span>
         </div>
 
-        <div className="adminPortal-detailGrid">
-          <AdminCopyField label="Internal Program Code" value={program.program_code} onCopied={onCopied} />
-          <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
-          {!isIndependentFamily && program.facilitator_access_code ? (
-            <AdminCopyField label="Facilitator Code" value={program.facilitator_access_code} onCopied={onCopied} />
-          ) : null}
-          <div className="adminPortal-detailItem">
-            <span className="adminPortal-detailLabel">Display Name</span>
-            <span className="adminPortal-detailValue">{program.program_name}</span>
-          </div>
-          {!isIndependentFamily && program.group_name && program.group_name !== program.program_name ? (
-            <div className="adminPortal-detailItem">
-              <span className="adminPortal-detailLabel">Group Name</span>
-              <span className="adminPortal-detailValue">{program.group_name}</span>
-            </div>
-          ) : null}
-          <div className="adminPortal-detailItem">
-            <span className="adminPortal-detailLabel">Created</span>
-            <span className="adminPortal-detailValue">{formatCreatedAt(program.created_at)}</span>
-          </div>
-          <div className="adminPortal-detailItem">
-            <span className="adminPortal-detailLabel">Admin Email</span>
-            <span className="adminPortal-detailValue">{program.admin_email}</span>
-          </div>
-          <div className="adminPortal-detailItem">
-            <span className="adminPortal-detailLabel">Age / Grade Band</span>
-            <span className="adminPortal-detailValue">
-              {program.age_grade_band || program.age_range || '—'}
-              {program.age_grade_notes ? ` (${program.age_grade_notes})` : ''}
-            </span>
-          </div>
-          <div className="adminPortal-detailItem adminPortal-detailItem--wide">
-            <label className="adminPortal-detailLabel" htmlFor={`protection-${program.id ?? program.program_code}`}>
-              Program Protection
-            </label>
-            <select
-              id={`protection-${program.id ?? program.program_code}`}
-              className="adminPortal-select"
-              value={protectionLevel}
-              disabled={!canEditProtectionLevel}
-              title={!canEditProtectionLevel ? 'Only Super Admin can edit protection level.' : undefined}
-              onChange={(event) => void handleProtectionChange(event.target.value as PilotProgramProtectionLevel)}
-            >
-              {PILOT_PROGRAM_PROTECTION_LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {level.charAt(0).toUpperCase() + level.slice(1)}
-                </option>
-              ))}
-            </select>
-            <p className="adminPortal-fieldHint">
-              Protection controls whether this program can be archived, deleted, or have access codes regenerated. Display names can still be edited unless archived.
-              {!canEditProtectionLevel ? ' Only Super Admin can change this value.' : ''}
-            </p>
-          </div>
-          {expanded && !statsLoading ? (
-            <>
-              <div className="adminPortal-detailItem">
-                <span className="adminPortal-detailLabel">Participants</span>
-                <span className="adminPortal-detailValue">{readCount(stats, 'participants')}</span>
-              </div>
-              <div className="adminPortal-detailItem">
-                <span className="adminPortal-detailLabel">Assessments (v2)</span>
-                <span className="adminPortal-detailValue">{readCount(stats, 'assessment_results_v2')}</span>
-              </div>
-              <div className="adminPortal-detailItem">
-                <span className="adminPortal-detailLabel">Module Results</span>
-                <span className="adminPortal-detailValue">{readCount(stats, 'module_results')}</span>
-              </div>
-              <div className="adminPortal-detailItem adminPortal-detailItem--wide">
-                <span className="adminPortal-detailLabel">Feature flags (prep)</span>
-                <span className="adminPortal-detailValue adminPortal-featureFlags">
-                  {PILOT_PROGRAM_FEATURE_FLAG_KEYS.map((key) => (
-                    <span key={key} className="adminPortal-featureFlag">
-                      {key.replace(/^can_/, '').replace(/_/g, ' ')}:{' '}
-                      {featureFlags[key] ? 'on' : 'off'}
-                    </span>
-                  ))}
-                </span>
-              </div>
-            </>
-          ) : null}
+        <div className="adminPortal-programDirectoryMeta">
+          <p>
+            <strong>Facilitator name</strong>
+            {facilitatorName}
+          </p>
+          <p>
+            <strong>Facilitator email</strong>
+            {facilitatorEmail}
+          </p>
+          <p>
+            <strong>Student count</strong>
+            {studentCount == null ? '…' : studentCount}
+          </p>
+          <p>
+            <strong>Last activity</strong>
+            {formatLastActivity(lastActivity)}
+          </p>
+          <p>
+            <strong>Created date</strong>
+            {formatCreatedAt(program.created_at)}
+          </p>
         </div>
+
+        {expanded ? (
+          <div className="adminPortal-detailGrid">
+            <AdminCopyField label="Internal Program Code" value={program.program_code} onCopied={onCopied} />
+            <AdminCopyField label="Family Access Code" value={program.family_access_code} onCopied={onCopied} />
+            {!isIndependentFamily && program.facilitator_access_code ? (
+              <AdminCopyField label="Facilitator Code" value={program.facilitator_access_code} onCopied={onCopied} />
+            ) : null}
+            <div className="adminPortal-detailItem">
+              <span className="adminPortal-detailLabel">Display Name</span>
+              <span className="adminPortal-detailValue">{program.program_name}</span>
+            </div>
+            {!isIndependentFamily && program.group_name && program.group_name !== program.program_name ? (
+              <div className="adminPortal-detailItem">
+                <span className="adminPortal-detailLabel">Group Name</span>
+                <span className="adminPortal-detailValue">{program.group_name}</span>
+              </div>
+            ) : null}
+            <div className="adminPortal-detailItem">
+              <span className="adminPortal-detailLabel">Age / Grade Band</span>
+              <span className="adminPortal-detailValue">
+                {program.age_grade_band || program.age_range || '—'}
+                {program.age_grade_notes ? ` (${program.age_grade_notes})` : ''}
+              </span>
+            </div>
+            <AdminPilotProgramScaleSummary
+              program={program}
+              onEditEstimate={() => setEstimateOpen(true)}
+            />
+            <div className="adminPortal-detailItem adminPortal-detailItem--wide">
+              <label className="adminPortal-detailLabel" htmlFor={`protection-${program.id ?? program.program_code}`}>
+                Program Protection
+              </label>
+              <select
+                id={`protection-${program.id ?? program.program_code}`}
+                className="adminPortal-select"
+                value={protectionLevel}
+                disabled={!canEditProtectionLevel}
+                title={!canEditProtectionLevel ? 'Only Super Admin can edit protection level.' : undefined}
+                onChange={(event) => void handleProtectionChange(event.target.value as PilotProgramProtectionLevel)}
+              >
+                {PILOT_PROGRAM_PROTECTION_LEVELS.map((level) => (
+                  <option key={level} value={level}>
+                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                  </option>
+                ))}
+              </select>
+              <p className="adminPortal-fieldHint">
+                Protection controls whether this program can be archived, deleted, or have access codes regenerated.
+                {!canEditProtectionLevel ? ' Only Super Admin can change this value.' : ''}
+              </p>
+            </div>
+            {expanded && !statsLoading ? (
+              <>
+                <div className="adminPortal-detailItem">
+                  <span className="adminPortal-detailLabel">Participants</span>
+                  <span className="adminPortal-detailValue">{readCount(stats, 'participants')}</span>
+                </div>
+                <div className="adminPortal-detailItem">
+                  <span className="adminPortal-detailLabel">Assessments (v2)</span>
+                  <span className="adminPortal-detailValue">{readCount(stats, 'assessment_results_v2')}</span>
+                </div>
+                <div className="adminPortal-detailItem">
+                  <span className="adminPortal-detailLabel">Module Results</span>
+                  <span className="adminPortal-detailValue">{readCount(stats, 'module_results')}</span>
+                </div>
+                <div className="adminPortal-detailItem adminPortal-detailItem--wide">
+                  <span className="adminPortal-detailLabel">Feature flags (prep)</span>
+                  <span className="adminPortal-detailValue adminPortal-featureFlags">
+                    {PILOT_PROGRAM_FEATURE_FLAG_KEYS.map((key) => (
+                      <span key={key} className="adminPortal-featureFlag">
+                        {key.replace(/^can_/, '').replace(/_/g, ' ')}:{' '}
+                        {featureFlags[key] ? 'on' : 'off'}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
 
         {!archiveDecision.allowed || !deleteDecision.allowed || !regenerateDecision.allowed ? (
           <p className="adminPortal-protectedNote" role="status">
@@ -293,11 +349,44 @@ export default function AdminPilotProgramRow({
           <button
             type="button"
             className="adminPortal-btn adminPortal-btn--ghost"
+            onClick={() => void copyCode(program.program_code, 'Program code')}
+          >
+            Copy Program Code
+          </button>
+          {!isIndependentFamily && program.facilitator_access_code ? (
+            <button
+              type="button"
+              className="adminPortal-btn adminPortal-btn--ghost"
+              onClick={() => void copyCode(program.facilitator_access_code!, 'Facilitator code')}
+            >
+              Copy Facilitator Code
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--ghost"
+            disabled={!regenerateDecision.allowed}
+            title={!regenerateDecision.allowed ? regenerateDecision.message : undefined}
+            onClick={() => setActionError('Reset Facilitator Access is gated but not implemented in this admin view yet.')}
+          >
+            Reset Facilitator Access
+          </button>
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--ghost"
+            onClick={emailFacilitator}
+            disabled={!program.admin_email?.trim()}
+          >
+            Email Facilitator
+          </button>
+          <button
+            type="button"
+            className="adminPortal-btn adminPortal-btn--ghost"
             onClick={() => setRenameOpen(true)}
             disabled={!editLabelsDecision.allowed}
             title={!editLabelsDecision.allowed ? editLabelsDecision.message : undefined}
           >
-            ✏️ Edit Name
+            Edit Name
           </button>
           {!isIndependentFamily && program.facilitator_access_code ? (
             <button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={openFacilitatorDashboard}>
@@ -306,15 +395,6 @@ export default function AdminPilotProgramRow({
           ) : null}
           <button type="button" className="adminPortal-btn adminPortal-btn--gold" onClick={openFamilyPortal}>
             Open Family Portal
-          </button>
-          <button
-            type="button"
-            className="adminPortal-btn adminPortal-btn--ghost"
-            disabled={!regenerateDecision.allowed}
-            title={!regenerateDecision.allowed ? regenerateDecision.message : undefined}
-            onClick={() => setActionError('Access-code regeneration is gated but not implemented in this admin view yet.')}
-          >
-            Regenerate Codes
           </button>
           {showArchiveActions ? (
             isArchived ? (
@@ -329,7 +409,7 @@ export default function AdminPilotProgramRow({
                 title={!archiveDecision.allowed ? archiveDecision.message : undefined}
                 onClick={() => void handleArchive()}
               >
-                Archive Pilot
+                Archive
               </button>
             )
           ) : null}
