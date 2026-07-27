@@ -333,12 +333,12 @@ function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: str
 
 /** Admin-only sanitized directory. Authorization is enforced by the Netlify Function. */
 export async function fetchAllPilotProgramsForAdmin(
-  accessToken: string,
+  _accessToken: string,
 ): Promise<AdminProgramDirectoryLoad> {
   try {
     const response = await fetch('/.netlify/functions/admin-pilot-programs', {
       method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      credentials: 'same-origin',
     });
     if (response.status === 401) return { programs: [], error: 'unauthenticated' };
     if (response.status === 403) return { programs: [], error: 'forbidden' };

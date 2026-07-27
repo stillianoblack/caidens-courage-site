@@ -27,7 +27,7 @@ describe('minimal admin session endpoint', () => {
     expect(response.body).not.toContain('server-only-passcode');
   });
 
-  it('returns a signed session for correct credentials', async () => {
+  it('returns a secure HttpOnly session cookie for correct credentials', async () => {
     const response = await handler({
       httpMethod: 'POST',
       body: JSON.stringify({ email: 'admin@example.com', passcode: 'server-only-passcode' }),
@@ -35,7 +35,17 @@ describe('minimal admin session endpoint', () => {
     const payload = JSON.parse(response.body);
     expect(response.statusCode).toBe(200);
     expect(payload.authenticated).toBe(true);
-    expect(typeof payload.token).toBe('string');
+    expect(payload.token).toBeUndefined();
+    expect(response.headers['Set-Cookie']).toContain('HttpOnly');
+    expect(response.headers['Set-Cookie']).toContain('Secure');
+    expect(response.headers['Set-Cookie']).toContain('SameSite=Strict');
+    expect(response.headers['Set-Cookie']).not.toContain('admin@example.com');
     expect(response.body).not.toContain('server-only-passcode');
+  });
+
+  it('clears the server session cookie on sign-out', async () => {
+    const response = await handler({ httpMethod: 'DELETE', headers: {} });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['Set-Cookie']).toContain('Max-Age=0');
   });
 });

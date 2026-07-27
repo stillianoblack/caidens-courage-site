@@ -1,9 +1,11 @@
 const {
   authenticateCredentials,
+  clearSessionCookie,
   correlationId,
   issueAdminToken,
   json,
   requireAdmin,
+  sessionCookie,
 } = require('./_lib/adminAuth');
 
 exports.handler = async (event) => {
@@ -21,16 +23,21 @@ exports.handler = async (event) => {
       return json(503, { error: 'Admin sign-in is unavailable.' }, id);
     }
     if (!auth.valid) return json(403, { error: 'Admin access denied.' }, id);
-    return json(200, {
-      authenticated: true,
-      token: issueAdminToken(auth.credentials.email, auth.credentials.passcode),
-    }, id);
+    const response = json(200, { authenticated: true }, id);
+    response.headers['Set-Cookie'] = sessionCookie(issueAdminToken(auth.credentials.passcode));
+    return response;
   }
 
   if (event.httpMethod === 'GET') {
     const auth = await requireAdmin(event);
     if (auth.response) return auth.response;
     return json(200, { authenticated: true }, auth.context.correlationId);
+  }
+
+  if (event.httpMethod === 'DELETE') {
+    const response = json(200, { authenticated: false }, id);
+    response.headers['Set-Cookie'] = clearSessionCookie();
+    return response;
   }
 
   return json(405, { error: 'Method not allowed.' }, id);

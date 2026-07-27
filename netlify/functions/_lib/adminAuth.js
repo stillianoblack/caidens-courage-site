@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const ADMIN_SESSION_COOKIE = 'cc_admin_session';
 
 function correlationId(event = {}) {
   const incoming = event.headers?.['x-correlation-id'] || event.headers?.['X-Correlation-Id'];
@@ -47,31 +48,46 @@ function signature(payload, secret) {
   return crypto.createHmac('sha256', secret).update(payload).digest('base64url');
 }
 
-function issueAdminToken(email, secret, now = Date.now()) {
-  const payload = Buffer.from(JSON.stringify({ email, exp: now + SESSION_TTL_MS })).toString('base64url');
+function issueAdminToken(secret, now = Date.now()) {
+  const payload = Buffer.from(JSON.stringify({ exp: now + SESSION_TTL_MS })).toString('base64url');
   return `${payload}.${signature(payload, secret)}`;
 }
 
-function verifyAdminToken(token, credentials, now = Date.now()) {
-  if (!token || !credentials) return false;
+function verifyAdminToken(token, secret, now = Date.now()) {
+  if (!token || !secret) return false;
   const [payload, suppliedSignature, extra] = String(token).split('.');
   if (!payload || !suppliedSignature || extra) return false;
-  if (!safeEqual(suppliedSignature, signature(payload, credentials.passcode))) return false;
+  if (!safeEqual(suppliedSignature, signature(payload, secret))) return false;
   try {
     const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    return (
-      typeof parsed.exp === 'number' &&
-      parsed.exp > now &&
-      safeEqual(String(parsed.email || '').toLowerCase(), credentials.email)
-    );
+    return typeof parsed.exp === 'number' && parsed.exp > now;
   } catch {
     return false;
   }
 }
 
-function bearerToken(event = {}) {
-  const value = event.headers?.authorization || event.headers?.Authorization || '';
-  return String(value).match(/^Bearer\s+(.+)$/i)?.[1]?.trim() || null;
+function cookieToken(event = {}) {
+  const value = event.headers?.cookie || event.headers?.Cookie || '';
+  for (const part of String(value).split(';')) {
+    const [name, ...rest] = part.trim().split('=');
+    if (name === ADMIN_SESSION_COOKIE) return decodeURIComponent(rest.join('='));
+  }
+  return null;
+}
+
+function sessionCookie(token) {
+  return [
+    `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(token)}`,
+    'Path=/',
+    `Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}`,
+    'HttpOnly',
+    'Secure',
+    'SameSite=Strict',
+  ].join('; ');
+}
+
+function clearSessionCookie() {
+  return `${ADMIN_SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
 }
 
 function authenticateCredentials(email, passcode) {
@@ -92,7 +108,7 @@ async function requireAdmin(event, suppliedClient) {
     console.error('[ADMIN_AUTH_CONFIG_MISSING]', { correlationId: id });
     return { response: json(503, { error: 'Admin service is unavailable.' }, id) };
   }
-  if (!verifyAdminToken(bearerToken(event), credentials)) {
+  if (!verifyAdminToken(cookieToken(event), credentials.passcode)) {
     return { response: json(401, { error: 'Authentication required.' }, id) };
   }
   const supabase = suppliedClient || getServerSupabase();
@@ -104,13 +120,16 @@ async function requireAdmin(event, suppliedClient) {
 }
 
 module.exports = {
+  ADMIN_SESSION_COOKIE,
   authenticateCredentials,
-  bearerToken,
+  clearSessionCookie,
   configuredCredentials,
+  cookieToken,
   correlationId,
   getServerSupabase,
   issueAdminToken,
   json,
   requireAdmin,
+  sessionCookie,
   verifyAdminToken,
 };

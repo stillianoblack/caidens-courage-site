@@ -1,7 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-const ADMIN_TOKEN_KEY = 'cc-admin-server-session';
-
 type AdminAuthValue = {
   token: string | null;
   loading: boolean;
@@ -13,28 +11,9 @@ type AdminAuthValue = {
 
 const AdminAuthContext = createContext<AdminAuthValue | null>(null);
 
-function readToken(): string | null {
+async function validateSession(): Promise<boolean> {
   try {
-    return window.sessionStorage.getItem(ADMIN_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function storeToken(token: string | null) {
-  try {
-    if (token) window.sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
-    else window.sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-  } catch {
-    /* session storage unavailable */
-  }
-}
-
-async function validateToken(token: string): Promise<boolean> {
-  try {
-    const response = await fetch('/.netlify/functions/admin-session', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await fetch('/.netlify/functions/admin-session', { credentials: 'same-origin' });
     return response.ok;
   } catch {
     return false;
@@ -47,14 +26,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const existing = readToken();
-    if (!existing) {
-      setLoading(false);
-      return;
-    }
-    void validateToken(existing).then((valid) => {
-      if (valid) setToken(existing);
-      else storeToken(null);
+    void validateSession().then((valid) => {
+      if (valid) setToken('http-only-session');
       setLoading(false);
     });
   }, []);
@@ -65,19 +38,19 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch('/.netlify/functions/admin-session', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), passcode }),
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || typeof payload.token !== 'string') {
+      if (!response.ok || payload.authenticated !== true) {
         setError(response.status === 403
           ? 'The email or passcode was not recognized.'
           : 'Admin sign-in is temporarily unavailable.');
         setLoading(false);
         return false;
       }
-      storeToken(payload.token);
-      setToken(payload.token);
+      setToken('http-only-session');
       setLoading(false);
       return true;
     } catch {
@@ -88,7 +61,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    storeToken(null);
+    await fetch('/.netlify/functions/admin-session', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    }).catch(() => undefined);
     setToken(null);
     setError(null);
   }, []);

@@ -23,8 +23,9 @@ describe('pilot outcomes security architecture', () => {
     );
     expect(client).not.toContain(".from('");
     expect(component).not.toContain(".from('");
-    expect(client).toContain('Authorization:');
-    expect(client).toContain('Bearer');
+    expect(client).toContain("credentials: 'same-origin'");
+    expect(client).not.toContain('Authorization:');
+    expect(client).not.toContain('Bearer');
   });
 
   it('does not expose access codes, pins, raw emails, or correlation identifiers in the UI', () => {

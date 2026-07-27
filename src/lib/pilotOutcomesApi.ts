@@ -1,11 +1,11 @@
 import type { PilotOutcomeProgram, PilotOutcomeSummary } from '../types/pilotOutcomes';
 
-async function authorizedJson<T>(url: string, token: string, init?: RequestInit): Promise<T> {
+async function authorizedJson<T>(url: string, _token: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
+    credentials: 'same-origin',
     headers: {
       ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
   });
@@ -53,12 +53,13 @@ export function savePilotRollout(
 }
 
 export async function downloadPilotOutcomesReport(
-  token: string,
+  _token: string,
   payload: Record<string, unknown>,
 ) {
   const response = await fetch('/.netlify/functions/admin-pilot-outcomes-report', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!response.ok) {

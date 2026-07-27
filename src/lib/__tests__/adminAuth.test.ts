@@ -26,12 +26,12 @@ describe('minimal server admin authorization', () => {
     expect(authenticateCredentials('admin@example.com', 'wrong').valid).toBe(false);
   });
 
-  it('issues an expiring signed token and rejects tampering', () => {
-    const token = issueAdminToken('admin@example.com', 'server-only-passcode', 1000);
-    const credentials = { email: 'admin@example.com', passcode: 'server-only-passcode' };
-    expect(verifyAdminToken(token, credentials, 2000)).toBe(true);
-    expect(verifyAdminToken(`${token}x`, credentials, 2000)).toBe(false);
-    expect(verifyAdminToken(token, credentials, 1000 + 9 * 60 * 60 * 1000)).toBe(false);
+  it('issues an expiring signed token without embedding the admin identity', () => {
+    const token = issueAdminToken('server-only-passcode', 1000);
+    expect(token).not.toContain('admin@example.com');
+    expect(verifyAdminToken(token, 'server-only-passcode', 2000)).toBe(true);
+    expect(verifyAdminToken(`${token}x`, 'server-only-passcode', 2000)).toBe(false);
+    expect(verifyAdminToken(token, 'server-only-passcode', 1000 + 9 * 60 * 60 * 1000)).toBe(false);
   });
 
   it('rejects an anonymous request with 401', async () => {
@@ -40,10 +40,10 @@ describe('minimal server admin authorization', () => {
   });
 
   it('accepts a valid session and supplies the server-only database client', async () => {
-    const token = issueAdminToken('admin@example.com', 'server-only-passcode');
+    const token = issueAdminToken('server-only-passcode');
     const client = {};
     const result = await requireAdmin(
-      { headers: { authorization: `Bearer ${token}` } },
+      { headers: { cookie: `cc_admin_session=${encodeURIComponent(token)}` } },
       client,
     );
     expect(result.response).toBeUndefined();
