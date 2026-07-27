@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const ADMIN_SESSION_COOKIE = 'cc_admin_session';
@@ -29,6 +30,7 @@ function getServerSupabase() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { transport: WebSocket },
   });
 }
 
