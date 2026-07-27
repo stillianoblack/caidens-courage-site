@@ -28,6 +28,7 @@ import { INDEPENDENT_FAMILY_STUDENT_COUNT_RANGE } from '../types/pilotProgram';
 import { mapAgeGradeBandToLegacyAgeRange } from './pilotProgramAgeGrade';
 import { resolveDefaultPilotFeatureFlags } from './pilotProgramFeatureFlags';
 import { resolvePilotPortalPrep } from './pilotProgramPortalPrep';
+import { createCampParentProgram } from './pilotSignupApi';
 
 async function fetchPilotProgramByCode(programCode: string): Promise<ActivePilotProgram | null> {
   if (!isSupabaseConfigured() || !supabase) return null;
@@ -116,13 +117,17 @@ export async function createOrResolveFamilyProgramForParent(input: {
   };
 
   try {
-    const { data, error } = await withTimeout(
-      supabase.from('pilot_programs').insert(payload).select('*').single(),
+    const result = await withTimeout(
+      createCampParentProgram({
+        record: payload,
+        requestedProgramCode: familyProgramCode,
+        requestId: `camp-parent-program:${familyProgramCode}`,
+      }),
       DASHBOARD_FETCH_TIMEOUT_MS,
       'family_program_parent_claim',
     );
-    if (!error && data) {
-      return recordToActivePilotProgram(data as PilotProgramRecord);
+    if (result.success && result.program) {
+      return recordToActivePilotProgram(result.program);
     }
     return (await fetchPilotProgramByCode(familyProgramCode)) ?? null;
   } catch {
