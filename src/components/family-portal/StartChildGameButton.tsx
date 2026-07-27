@@ -40,10 +40,7 @@ export default function StartChildGameButton({
         navigate,
       });
       if (!result.ok) {
-        showToast(
-          result.supportCode ? `${result.message} Support code: ${result.supportCode}` : result.message,
-          'error',
-        );
+        showToast(result.message, 'error');
       }
     } finally {
       setLoading(false);

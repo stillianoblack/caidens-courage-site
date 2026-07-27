@@ -401,8 +401,11 @@ export async function createCampChildWithOptionalParent(
         familyOrProgramName: campProgramCode,
         familyAccessCode: access.familyClaimCode,
         childName: displayName,
-        studentPin: access.studentPin,
-        loginUrl: undefined,
+        loginUrl: familyClaimUrl,
+        templateType: 'camp_parent',
+        programType: 'Camp / Youth Program',
+        recipientRole: 'parent_guardian',
+        deliveryEventKey: `participant:${participantId}:parent-welcome`,
         relatedStudentId: participantId,
         relatedProgramId: campProgramCode,
       });

@@ -5,6 +5,10 @@ import type {
   PilotProgramSignupInput,
   PilotProgramType,
 } from '../types/pilotProgram';
+import type {
+  AdminProgramDirectoryLoad,
+  AdminProgramDirectoryRecord,
+} from '../types/adminProgramDirectory';
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
 import {
@@ -20,10 +24,7 @@ import { resolveDefaultPilotFeatureFlags } from './pilotProgramFeatureFlags';
 import { deriveEstimatedStudentsFromRange } from './pilotProgramStudentRange';
 import { resolvePilotPortalPrep } from './pilotProgramPortalPrep';
 import { normalizeAccessCodeInput } from './portalAccessCodes';
-import {
-  generateStablePilotCodeToken,
-  normalizeAccessCodeForIdentity,
-} from './portalCodeIdentity';
+import { generateStablePilotCodeToken } from './portalCodeIdentity';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import {
@@ -39,10 +40,6 @@ export type PilotProgramLookupResult = {
 
 export function normalizePilotAccessCode(raw: string): string {
   return normalizeAccessCodeInput(raw);
-}
-
-function quotePostgrestValue(value: string): string {
-  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 }
 
 export type PilotProgramLookupStatus =
@@ -164,6 +161,7 @@ export type PilotProgramSignupResult =
         | 'server_error';
       message: string;
       supportCode?: string;
+      correlationId?: string;
     };
 
 const PILOT_SIGNUP_TIMEOUT_MS = 15000;
@@ -188,63 +186,6 @@ function resolvePricingTier(programType: PilotProgramType): PilotPricingTier {
     default:
       return 'camp_pilot';
   }
-}
-
-async function accessCodeExists(code: string): Promise<boolean> {
-  const normalized = normalizeAccessCodeForIdentity(code);
-  if (!normalized || !isSupabaseConfigured() || !supabase) return false;
-
-  const quoted = quotePostgrestValue(normalized);
-  const [programLookup, aliasLookup] = await Promise.all([
-    supabase
-      .from('pilot_programs')
-      .select('id')
-      .or(
-        `program_code.eq.${quoted},family_access_code.eq.${quoted},facilitator_access_code.eq.${quoted}`,
-      )
-      .limit(1),
-    supabase
-      .from('program_code_aliases')
-      .select('id')
-      .eq('alias_code', normalized)
-      .limit(1),
-  ]);
-
-  if (programLookup.error) {
-    console.warn('[pilot_programs] uniqueness check failed:', programLookup.error.message);
-    return true;
-  }
-
-  if (aliasLookup.error && !/relation|does not exist/i.test(aliasLookup.error.message)) {
-    console.warn('[pilot_programs] alias uniqueness check failed:', aliasLookup.error.message);
-    return true;
-  }
-
-  return Boolean(programLookup.data?.length || aliasLookup.data?.length);
-}
-
-async function generateUniquePilotProgramCodes(
-  programType: PilotProgramType,
-  programName: string,
-  year = new Date().getFullYear(),
-): Promise<{
-  program_code: string;
-  family_access_code: string;
-  facilitator_access_code: string | null;
-}> {
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const codes = generateProgramCodes(programType, programName, year);
-    const candidates = [
-      codes.program_code,
-      codes.family_access_code,
-      codes.facilitator_access_code,
-    ].filter((value): value is string => Boolean(value?.trim()));
-    const collisionChecks = await Promise.all(candidates.map(accessCodeExists));
-    if (!collisionChecks.some(Boolean)) {
-      return codes;
-    }
-  }
-  throw new Error('access_code_collision');
 }
 
 export function generateProgramCodes(
@@ -317,48 +258,26 @@ function buildProgramRecord(
   };
 }
 
-function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timeout = globalThis.setTimeout(() => reject(new Error(message)), timeoutMs);
-    Promise.resolve(promise)
-      .then(resolve)
-      .catch(reject)
-      .finally(() => globalThis.clearTimeout(timeout));
-  });
-}
-
-export type AdminPilotProgramsLoad = {
-  programs: PilotProgramRecord[];
-  error?: string;
-};
-
-/** Admin-only listing — Supabase only, no local/demo fallback. */
-export async function fetchAllPilotProgramsForAdmin(): Promise<AdminPilotProgramsLoad> {
-  if (!isSupabaseConfigured() || !supabase) {
-    return { programs: [], error: 'Supabase is not configured. Admin pilot data is unavailable.' };
-  }
-
+/** Admin-only sanitized directory. Authorization is enforced by the Netlify Function. */
+export async function fetchAllPilotProgramsForAdmin(
+  accessToken: string,
+): Promise<AdminProgramDirectoryLoad> {
   try {
-    const { data, error } = await supabase
-      .from('pilot_programs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.warn('[pilot_programs] admin list failed:', error.message);
-      return {
-        programs: [],
-        error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
-      };
-    }
-
-    return { programs: (data ?? []) as PilotProgramRecord[] };
-  } catch (err) {
-    console.warn('[pilot_programs] admin list error:', err);
+    const response = await fetch('/.netlify/functions/admin-pilot-programs', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.status === 401) return { programs: [], error: 'unauthenticated' };
+    if (response.status === 403) return { programs: [], error: 'forbidden' };
+    if (!response.ok) return { programs: [], error: 'unavailable' };
+    const payload = await response.json();
     return {
-      programs: [],
-      error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
+      programs: Array.isArray(payload.programs)
+        ? (payload.programs as AdminProgramDirectoryRecord[])
+        : [],
     };
+  } catch {
+    return { programs: [], error: 'unavailable' };
   }
 }
 
@@ -388,147 +307,70 @@ export async function submitPilotProgramSignup(
   const codes = generateProgramCodes(input.programType, resolvedProgramName);
   const record = buildProgramRecord(input, codes);
 
-  if (isIndependentFamily) {
-    const controller = new AbortController();
-    const timeout = globalThis.setTimeout(() => controller.abort(), PILOT_SIGNUP_TIMEOUT_MS);
-    const approvedRecord: Partial<PilotProgramRecord> = { ...record };
-    delete approvedRecord.program_code;
-    delete approvedRecord.family_access_code;
-    delete approvedRecord.facilitator_access_code;
-    try {
-      const requestStartedAt = Date.now();
-      const response = await fetch('/.netlify/functions/pilot-family-signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Idempotency-Key': options.requestId?.trim() || generateStablePilotCodeToken(),
-        },
-        body: JSON.stringify({ record: approvedRecord, childFirstName: input.childFirstName?.trim() }),
-        signal: controller.signal,
-      });
-      const payload = (await response.json().catch(() => null)) as
-        | {
-            success?: boolean;
-            code?: PilotProgramSignupResult extends { success: false; code: infer C } ? C : never;
-            message?: string;
-            program?: PilotProgramRecord;
-            participantId?: string;
-            redirectDestination?: string;
-            reused?: boolean;
-            correlationId?: string;
-            supportCode?: string;
-          }
-        | null;
-      if (process.env.NODE_ENV === 'development') {
-        console.info('[PILOT_SIGNUP_HTTP]', JSON.stringify({
-          requestUrl: '/.netlify/functions/pilot-family-signup',
-          method: 'POST',
-          status: response.status,
-          durationMs: Date.now() - requestStartedAt,
-          success: Boolean(payload?.success),
-          code: payload?.code || null,
-          correlationId: payload?.correlationId || null,
-          supportCode: payload?.supportCode || null,
-        }));
-      }
-      if (!response.ok || !payload?.success || !payload.program) {
-        return {
-          success: false,
-          code: payload?.code || (response.status === 409 ? 'duplicate' : 'server_error'),
-          message:
-            response.status === 504 || payload?.code === 'timeout'
-              ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
-              : payload?.message || 'Could not save your family signup right now. Please try again.',
-          supportCode: payload?.supportCode,
-        };
-      }
-      return {
-        success: true,
-        program: recordToActivePilotProgram(payload.program),
-        participantId: payload.participantId,
-        redirectDestination: payload.redirectDestination || '/family-hub',
-        reused: Boolean(payload.reused),
-      };
-    } catch (err) {
-      const uncertain = err instanceof DOMException && err.name === 'AbortError';
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), PILOT_SIGNUP_TIMEOUT_MS);
+  const approvedRecord: Partial<PilotProgramRecord> = { ...record };
+  delete approvedRecord.program_code;
+  delete approvedRecord.family_access_code;
+  delete approvedRecord.facilitator_access_code;
+  try {
+    const response = await fetch('/.netlify/functions/pilot-family-signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Idempotency-Key': options.requestId?.trim() || generateStablePilotCodeToken(),
+      },
+      body: JSON.stringify({
+        record: approvedRecord,
+        childFirstName: input.childFirstName?.trim(),
+      }),
+      signal: controller.signal,
+    });
+    const payload = (await response.json().catch(() => null)) as
+      | {
+          success?: boolean;
+          code?: PilotProgramSignupResult extends { success: false; code: infer C } ? C : never;
+          message?: string;
+          program?: PilotProgramRecord;
+          participantId?: string;
+          redirectDestination?: string;
+          reused?: boolean;
+          correlationId?: string;
+        }
+      | null;
+    if (!response.ok || !payload?.success || !payload.program) {
       return {
         success: false,
-        code: uncertain ? 'timeout' : 'server_error',
-        message: uncertain
-          ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
-          : 'Could not create family access right now. Please try again.',
-      };
-    } finally {
-      globalThis.clearTimeout(timeout);
-    }
-  }
-
-  if (!isSupabaseConfigured() || !supabase) {
-    const program = recordToActivePilotProgram(record);
-    // TODO: Email facilitator_access_code and family_access_code after signup when email service is connected.
-    return {
-      success: true,
-      program,
-      redirectDestination: isIndependentFamily ? '/family-hub' : '/program-dashboard?welcome=1',
-    };
-  }
-
-  let uniqueRecord = record;
-  try {
-    const uniqueCodes = await withTimeout(
-      generateUniquePilotProgramCodes(input.programType, resolvedProgramName),
-      PILOT_SIGNUP_TIMEOUT_MS,
-      'Pilot signup preflight timed out.',
-    );
-    uniqueRecord = buildProgramRecord(input, uniqueCodes);
-  } catch {
-    return {
-      success: false,
-      code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
-    };
-  }
-
-  try {
-    const { data, error } = await withTimeout<{
-      data: PilotProgramRecord | null;
-      error: { code?: string; message: string } | null;
-    }>(
-      supabase.from('pilot_programs').insert(uniqueRecord).select('*').single(),
-      PILOT_SIGNUP_TIMEOUT_MS,
-      'Pilot signup request timed out.',
-    );
-
-    if (error) {
-      console.warn('[pilot_programs] insert failed:', error.message);
-      if (error.code === '23505') {
-        return {
-          success: false,
-          code: 'duplicate',
-          message:
-            'A program with this internal code already exists. Try again or contact support.',
-        };
-      }
-      return {
-        success: false,
-        code: 'server_error',
-        message: 'Could not save your pilot signup right now. Please try again in a moment.',
+        code: payload?.code || (response.status === 409 ? 'duplicate' : 'server_error'),
+        message:
+          response.status === 504 || payload?.code === 'timeout'
+            ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
+            : payload?.message || "We couldn't create your program. Please try again.",
+        correlationId:
+          payload?.correlationId ||
+          response.headers?.get?.('X-Correlation-Id') ||
+          undefined,
       };
     }
-
-    const saved = data as PilotProgramRecord;
-    // TODO: Email facilitator_access_code and family_access_code after signup via Supabase Edge Function or external email service.
     return {
       success: true,
-      program: recordToActivePilotProgram({ ...uniqueRecord, id: saved.id }),
-      redirectDestination: '/program-dashboard?welcome=1',
+      program: recordToActivePilotProgram(payload.program),
+      participantId: payload.participantId,
+      redirectDestination:
+        payload.redirectDestination ||
+        (isIndependentFamily ? '/family-hub' : '/program-dashboard?welcome=1'),
+      reused: Boolean(payload.reused),
     };
   } catch (err) {
-    console.warn('[pilot_programs] insert error:', err);
+    const uncertain = err instanceof DOMException && err.name === 'AbortError';
     return {
       success: false,
-      code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
+      code: uncertain ? 'timeout' : 'server_error',
+      message: uncertain
+        ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
+        : "We couldn't create your program. Please try again.",
     };
+  } finally {
+    globalThis.clearTimeout(timeout);
   }
 }
