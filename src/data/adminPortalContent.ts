@@ -3,6 +3,7 @@ export type AdminPortalTabId =
   | 'add-student'
   | 'design-system'
   | 'pilot-programs'
+  | 'pilot-outcomes'
   | 'adventures'
   | 'data-cleanup'
   | 'commerce';
@@ -17,6 +18,7 @@ export const ADMIN_PORTAL_TABS: Array<{ id: AdminPortalTabId; label: string }> =
   { id: 'add-student', label: 'Add Student' },
   { id: 'design-system', label: 'Design System' },
   { id: 'pilot-programs', label: 'Pilot Programs' },
+  { id: 'pilot-outcomes', label: 'Pilot Outcomes' },
   { id: 'adventures', label: 'Adventures' },
   { id: 'data-cleanup', label: 'Data Cleanup' },
   { id: 'commerce', label: 'Commerce' },

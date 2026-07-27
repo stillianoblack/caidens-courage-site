@@ -5,6 +5,10 @@ import type {
   PilotProgramSignupInput,
   PilotProgramType,
 } from '../types/pilotProgram';
+import type {
+  AdminProgramDirectoryLoad,
+  AdminProgramDirectoryRecord,
+} from '../types/adminProgramDirectory';
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
 import {
@@ -327,38 +331,26 @@ function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: str
   });
 }
 
-export type AdminPilotProgramsLoad = {
-  programs: PilotProgramRecord[];
-  error?: string;
-};
-
-/** Admin-only listing — Supabase only, no local/demo fallback. */
-export async function fetchAllPilotProgramsForAdmin(): Promise<AdminPilotProgramsLoad> {
-  if (!isSupabaseConfigured() || !supabase) {
-    return { programs: [], error: 'Supabase is not configured. Admin pilot data is unavailable.' };
-  }
-
+/** Admin-only sanitized directory. Authorization is enforced by the Netlify Function. */
+export async function fetchAllPilotProgramsForAdmin(
+  accessToken: string,
+): Promise<AdminProgramDirectoryLoad> {
   try {
-    const { data, error } = await supabase
-      .from('pilot_programs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.warn('[pilot_programs] admin list failed:', error.message);
-      return {
-        programs: [],
-        error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
-      };
-    }
-
-    return { programs: (data ?? []) as PilotProgramRecord[] };
-  } catch (err) {
-    console.warn('[pilot_programs] admin list error:', err);
+    const response = await fetch('/.netlify/functions/admin-pilot-programs', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.status === 401) return { programs: [], error: 'unauthenticated' };
+    if (response.status === 403) return { programs: [], error: 'forbidden' };
+    if (!response.ok) return { programs: [], error: 'unavailable' };
+    const payload = await response.json();
     return {
-      programs: [],
-      error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
+      programs: Array.isArray(payload.programs)
+        ? (payload.programs as AdminProgramDirectoryRecord[])
+        : [],
     };
+  } catch {
+    return { programs: [], error: 'unavailable' };
   }
 }
 

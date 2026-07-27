@@ -2,36 +2,29 @@ export const ADMIN_PORTAL_PATH = '/admin';
 export const ADMIN_SESSION_KEY = 'cc-admin-portal-session';
 const ADMIN_SESSION_EMAIL_KEY = 'cc-admin-portal-session-email';
 
+/** @deprecated Admin authorization is now server-verified through AdminAuthContext. */
 export function isAdminAccessConfigured(): boolean {
-  const email = process.env.REACT_APP_ADMIN_EMAIL?.trim();
-  const passcode = process.env.REACT_APP_ADMIN_PASSCODE?.trim();
-  return Boolean(email && passcode);
+  return false;
 }
 
 export function isAdminPermanentDeleteEnabled(): boolean {
   return process.env.REACT_APP_ADMIN_ALLOW_DELETE === 'true';
 }
 
+/** @deprecated Client bundles must never contain administrator identities. */
 export function getConfiguredAdminEmail(): string | null {
-  const email = process.env.REACT_APP_ADMIN_EMAIL?.trim();
-  return email || null;
+  return null;
 }
 
 export function getConfiguredSuperAdminEmail(): string | null {
-  return process.env.REACT_APP_SUPER_ADMIN_EMAIL?.trim() || getConfiguredAdminEmail();
+  return null;
 }
 
+/** @deprecated Client-side credentials are not an authorization mechanism. */
 export function verifyAdminCredentials(email: string, passcode: string): boolean {
-  const configuredEmail = getConfiguredAdminEmail();
-  const configuredPasscode = process.env.REACT_APP_ADMIN_PASSCODE?.trim();
-  if (!configuredEmail || !configuredPasscode) {
-    return false;
-  }
-
-  return (
-    email.trim().toLowerCase() === configuredEmail.toLowerCase() &&
-    passcode.trim() === configuredPasscode
-  );
+  void email;
+  void passcode;
+  return false;
 }
 
 export function readAdminSession(): boolean {

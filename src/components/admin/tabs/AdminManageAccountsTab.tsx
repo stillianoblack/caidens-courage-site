@@ -1,21 +1,24 @@
 import React, { useMemo, useState } from 'react';
 import AdminParticipantReassignment from '../AdminParticipantReassignment';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
-import { filterProgramsForSearch } from '../../../lib/adminPilotCleanupService';
-import type { PilotProgramRecord } from '../../../types/pilotProgram';
+import type { AdminProgramDirectoryRecord } from '../../../types/adminProgramDirectory';
 
 type AdminManageAccountsTabProps = {
-  programs: PilotProgramRecord[];
+  programs: AdminProgramDirectoryRecord[];
   onCopied: (message: string) => void;
 };
 
 export default function AdminManageAccountsTab({ programs, onCopied }: AdminManageAccountsTabProps) {
   const [query, setQuery] = useState('');
 
-  const filtered = useMemo(() => filterProgramsForSearch(programs, query), [programs, query]);
-
-  const facilitators = filtered.filter((program) => Boolean(program.facilitator_access_code));
-  const families = filtered.filter((program) => Boolean(program.family_access_code));
+  const filtered = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return programs;
+    return programs.filter((program) =>
+      [program.displayName, program.programType, program.status]
+        .some((value) => value.toLowerCase().includes(normalized)),
+    );
+  }, [programs, query]);
 
   return (
     <>
@@ -29,7 +32,7 @@ export default function AdminManageAccountsTab({ programs, onCopied }: AdminMana
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Program code, email, family name, organization…"
+            placeholder="Program name, type, or status…"
           />
         </label>
 
@@ -39,32 +42,25 @@ export default function AdminManageAccountsTab({ programs, onCopied }: AdminMana
             <span>Programs</span>
           </div>
           <div className="adminPortal-accountStat">
-            <strong>{facilitators.length}</strong>
-            <span>Facilitators</span>
+            <strong>{filtered.filter((program) => program.status === 'active').length}</strong>
+            <span>Active</span>
           </div>
           <div className="adminPortal-accountStat">
-            <strong>{families.length}</strong>
-            <span>Families</span>
+            <strong>{filtered.filter((program) => program.status === 'archived').length}</strong>
+            <span>Archived</span>
           </div>
         </div>
 
         {filtered.length > 0 ? (
           <ul className="adminPortal-accountList">
             {filtered.slice(0, 12).map((program) => (
-              <li key={program.id ?? program.program_code} className="adminPortal-accountListItem">
+              <li key={program.id} className="adminPortal-accountListItem">
                 <div>
-                  <strong>{program.program_name}</strong>
-                  <p>{program.program_code}</p>
-                  <p className="adminPortal-accountMeta">
-                    {program.admin_email}
-                    {program.group_name ? ` · ${program.group_name}` : ''}
-                  </p>
+                  <strong>{program.displayName}</strong>
+                  <p className="adminPortal-accountMeta">{program.programType}</p>
                 </div>
                 <div className="adminPortal-accountTags">
-                  <span className="adminPortal-tag">Family</span>
-                  {program.facilitator_access_code ? (
-                    <span className="adminPortal-tag">Facilitator</span>
-                  ) : null}
+                  <span className="adminPortal-tag">{program.status}</span>
                 </div>
               </li>
             ))}
