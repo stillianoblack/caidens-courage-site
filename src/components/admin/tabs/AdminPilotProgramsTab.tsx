@@ -1,43 +1,30 @@
 import React, { useMemo } from 'react';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
-import type { AdminProgramDirectoryRecord } from '../../../types/adminProgramDirectory';
+import AdminPilotProgramRow from '../AdminPilotProgramRow';
+import type { PilotProgramRecord } from '../../../types/pilotProgram';
 
 type AdminPilotProgramsTabProps = {
-  programs: AdminProgramDirectoryRecord[];
+  programs: PilotProgramRecord[];
   loading: boolean;
-  loadError: boolean;
-  onRetry: () => void;
+  loadError: string | null;
+  onCopied: (message: string) => void;
+  onChanged: () => void;
 };
 
 export default function AdminPilotProgramsTab({
   programs,
   loading,
   loadError,
-  onRetry,
+  onCopied,
+  onChanged,
 }: AdminPilotProgramsTabProps) {
   const activePrograms = useMemo(
-    () => programs.filter((program) => program.status !== 'archived'),
+    () => programs.filter((program) => program.pilot_status !== 'archived'),
     [programs],
   );
   const archivedPrograms = useMemo(
-    () => programs.filter((program) => program.status === 'archived'),
+    () => programs.filter((program) => program.pilot_status === 'archived'),
     [programs],
-  );
-
-  const renderProgram = (program: AdminProgramDirectoryRecord) => (
-    <article key={program.id} className="adminPortal-programCard">
-      <div className="adminPortal-programHeader">
-        <div>
-          <h2 className="adminPortal-programName">{program.displayName}</h2>
-          <p className="adminPortal-programMeta">{program.programType}</p>
-          <p className="adminPortal-programSummary">
-            Created:{' '}
-            {program.createdAt ? new Date(program.createdAt).toLocaleDateString() : '—'}
-          </p>
-        </div>
-        <span className="adminPortal-status">{program.status}</span>
-      </div>
-    </article>
   );
 
   return (
@@ -46,15 +33,7 @@ export default function AdminPilotProgramsTab({
       subtitle="Camp, school, family, and testing pilots. Archive hides programs from active portal unlock while keeping all student data recoverable."
     >
       {loading ? <p className="adminPortal-empty">Loading pilot programs…</p> : null}
-      {loadError ? (
-        <div className="adminPortal-error" role="alert">
-          <h3>We couldn’t load your programs.</h3>
-          <p>Please try again in a moment.</p>
-          <button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={onRetry}>
-            Try Again
-          </button>
-        </div>
-      ) : null}
+      {loadError ? <p className="adminPortal-error">{loadError}</p> : null}
 
       {!loading && !loadError ? (
         <>
@@ -66,7 +45,14 @@ export default function AdminPilotProgramsTab({
               <p className="adminPortal-empty">No active pilot programs.</p>
             ) : (
               <div className="adminPortal-programList">
-                {activePrograms.map(renderProgram)}
+                {activePrograms.map((program) => (
+                  <AdminPilotProgramRow
+                    key={program.id ?? program.program_code}
+                    program={program}
+                    onCopied={onCopied}
+                    onChanged={onChanged}
+                  />
+                ))}
               </div>
             )}
           </section>
@@ -82,7 +68,14 @@ export default function AdminPilotProgramsTab({
               <p className="adminPortal-empty">No archived pilots.</p>
             ) : (
               <div className="adminPortal-programList">
-                {archivedPrograms.map(renderProgram)}
+                {archivedPrograms.map((program) => (
+                  <AdminPilotProgramRow
+                    key={program.id ?? program.program_code}
+                    program={program}
+                    onCopied={onCopied}
+                    onChanged={onChanged}
+                  />
+                ))}
               </div>
             )}
           </section>

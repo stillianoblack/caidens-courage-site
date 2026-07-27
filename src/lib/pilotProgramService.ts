@@ -5,10 +5,7 @@ import type {
   PilotProgramSignupInput,
   PilotProgramType,
 } from '../types/pilotProgram';
-import type {
-  AdminProgramDirectoryLoad,
-  AdminProgramDirectoryRecord,
-} from '../types/adminProgramDirectory';
+import type { AdminProgramDirectoryRecord } from '../types/adminProgramDirectory';
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
 import {
@@ -331,10 +328,15 @@ function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: str
   });
 }
 
-/** Admin-only sanitized directory. Authorization is enforced by the Netlify Function. */
+export type AdminPilotProgramsLoad = {
+  programs: PilotProgramRecord[];
+  error?: 'unauthenticated' | 'forbidden' | 'unavailable' | string;
+};
+
+/** Admin-only program roster. Authorization is enforced by the Netlify Function. */
 export async function fetchAllPilotProgramsForAdmin(
   _accessToken: string,
-): Promise<AdminProgramDirectoryLoad> {
+): Promise<AdminPilotProgramsLoad> {
   try {
     const response = await fetch('/.netlify/functions/admin-pilot-programs', {
       method: 'GET',
@@ -342,16 +344,30 @@ export async function fetchAllPilotProgramsForAdmin(
     });
     if (response.status === 401) return { programs: [], error: 'unauthenticated' };
     if (response.status === 403) return { programs: [], error: 'forbidden' };
-    if (!response.ok) return { programs: [], error: 'unavailable' };
+    if (!response.ok) {
+      return { programs: [], error: 'We couldn’t load your programs. Please try again in a moment.' };
+    }
     const payload = await response.json();
     return {
       programs: Array.isArray(payload.programs)
-        ? (payload.programs as AdminProgramDirectoryRecord[])
+        ? (payload.programs as PilotProgramRecord[])
         : [],
     };
   } catch {
-    return { programs: [], error: 'unavailable' };
+    return { programs: [], error: 'We couldn’t load your programs. Please try again in a moment.' };
   }
+}
+
+export function toAdminProgramDirectoryRecord(
+  program: PilotProgramRecord,
+): AdminProgramDirectoryRecord {
+  return {
+    id: program.id ?? program.program_code,
+    displayName: program.program_name,
+    programType: program.program_type,
+    status: program.pilot_status,
+    createdAt: program.created_at ?? null,
+  };
 }
 
 export async function submitPilotProgramSignup(

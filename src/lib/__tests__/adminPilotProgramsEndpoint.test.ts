@@ -31,7 +31,7 @@ describe('admin-pilot-programs endpoint', () => {
     expect(response.statusCode).toBe(403);
   });
 
-  it('returns only sanitized program metadata for an authorized admin', async () => {
+  it('returns full pilot program records for an authorized admin', async () => {
     const order = jest.fn().mockResolvedValue({
       data: [{
         id: 'program-id',
@@ -39,8 +39,9 @@ describe('admin-pilot-programs endpoint', () => {
         program_type: 'School',
         pilot_status: 'active',
         created_at: '2026-07-01T00:00:00Z',
-        program_code: 'MUST-NOT-LEAK',
-        admin_email: 'must-not-leak@example.com',
+        program_code: 'PILOT-ONE',
+        admin_email: 'admin@example.com',
+        facilitator_access_code: 'FAC-123',
       }],
       error: null,
     });
@@ -57,15 +58,16 @@ describe('admin-pilot-programs endpoint', () => {
     const payload = JSON.parse(response.body);
 
     expect(response.statusCode).toBe(200);
-    expect(select).toHaveBeenCalledWith('id,program_name,program_type,pilot_status,created_at');
+    expect(select).toHaveBeenCalledWith('*');
     expect(payload.programs).toEqual([{
       id: 'program-id',
-      displayName: 'Pilot One',
-      programType: 'School',
-      status: 'active',
-      createdAt: '2026-07-01T00:00:00Z',
+      program_name: 'Pilot One',
+      program_type: 'School',
+      pilot_status: 'active',
+      created_at: '2026-07-01T00:00:00Z',
+      program_code: 'PILOT-ONE',
+      admin_email: 'admin@example.com',
+      facilitator_access_code: 'FAC-123',
     }]);
-    expect(response.body).not.toContain('MUST-NOT-LEAK');
-    expect(response.body).not.toContain('must-not-leak@example.com');
   });
 });

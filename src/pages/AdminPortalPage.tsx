@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import AdminAddStudentTab from '../components/admin/tabs/AdminAddStudentTab';
 import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
@@ -17,10 +17,10 @@ import {
   ADMIN_PORTAL_TABS,
   type AdminPortalTabId,
 } from '../data/adminPortalContent';
-import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
+import { fetchAllPilotProgramsForAdmin, toAdminProgramDirectoryRecord } from '../lib/pilotProgramService';
 import { resolveAdminPortalTab } from '../lib/adminPortalPaths';
-import type { AdminProgramDirectoryRecord } from '../types/adminProgramDirectory';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import type { PilotProgramRecord } from '../types/pilotProgram';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/admin/admin-portal.css';
@@ -44,8 +44,8 @@ export default function AdminPortalPage() {
   const [email, setEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [programs, setPrograms] = useState<AdminProgramDirectoryRecord[]>([]);
-  const [loadError, setLoadError] = useState(false);
+  const [programs, setPrograms] = useState<PilotProgramRecord[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -83,10 +83,15 @@ export default function AdminPortalPage() {
     setToast(message);
   }, []);
 
+  const directoryPrograms = useMemo(
+    () => programs.map(toAdminProgramDirectoryRecord),
+    [programs],
+  );
+
   const loadPrograms = useCallback(async () => {
     if (!adminAccessToken) return;
     setLoading(true);
-    setLoadError(false);
+    setLoadError(null);
     const result = await fetchAllPilotProgramsForAdmin(adminAccessToken);
     if (result.error === 'unauthenticated') {
       await adminSignOut();
@@ -95,7 +100,11 @@ export default function AdminPortalPage() {
       return;
     }
     setPrograms(result.programs);
-    setLoadError(Boolean(result.error));
+    if (result.error && result.error !== 'forbidden') {
+      setLoadError(typeof result.error === 'string' ? result.error : 'We couldn’t load your programs.');
+    } else if (result.error === 'forbidden') {
+      setLoadError('You do not have permission to view pilot programs.');
+    }
     setLoading(false);
   }, [adminAccessToken, adminSignOut]);
 
@@ -142,7 +151,7 @@ export default function AdminPortalPage() {
   const handleSignOut = async () => {
     await adminAuth.signOut();
     setPrograms([]);
-    setLoadError(false);
+    setLoadError(null);
     setEmail('');
     setPasscode('');
   };
@@ -150,9 +159,9 @@ export default function AdminPortalPage() {
   const renderTab = () => {
     switch (activeTab) {
       case 'manage-accounts':
-        return <AdminManageAccountsTab programs={programs} onCopied={handleCopied} />;
+        return <AdminManageAccountsTab programs={directoryPrograms} onCopied={handleCopied} />;
       case 'add-student':
-        return <AdminAddStudentTab programs={programs} onCopied={handleCopied} />;
+        return <AdminAddStudentTab programs={directoryPrograms} onCopied={handleCopied} />;
       case 'design-system':
         return <AdminDesignSystemTab />;
       case 'pilot-programs':
@@ -161,7 +170,8 @@ export default function AdminPortalPage() {
             programs={programs}
             loading={loading}
             loadError={loadError}
-            onRetry={() => void loadPrograms()}
+            onCopied={handleCopied}
+            onChanged={() => void loadPrograms()}
           />
         );
       case 'pilot-outcomes':
@@ -169,7 +179,7 @@ export default function AdminPortalPage() {
       case 'adventures':
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
-        return <AdminDataCleanupTab programs={programs} onChanged={() => void loadPrograms()} />;
+        return <AdminDataCleanupTab programs={directoryPrograms} onChanged={() => void loadPrograms()} />;
       case 'commerce':
         return (
           <AdminCommerceTab
