@@ -48,7 +48,7 @@ export class ChunkErrorBoundary extends React.Component<Props, State> {
         <div style={{ padding: 24, textAlign: 'center', color: '#fff', background: '#1f2933' }}>
           <p>Something went wrong loading this page.</p>
           <p style={{ marginTop: 8, fontSize: 12, opacity: 0.8 }}>
-            Please refresh the page. If the problem persists, a new deploy may be in progress.
+            Return to the portal and try opening this page again.
           </p>
         </div>
       );

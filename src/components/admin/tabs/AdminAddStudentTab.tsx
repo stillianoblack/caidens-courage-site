@@ -6,17 +6,17 @@ import {
   type GradeLevel,
 } from '../../../data/gradeLevelOptions';
 import { createAdminEmergencyStudent } from '../../../lib/adminEmergencyAddStudentService';
-import type { PilotProgramRecord } from '../../../types/pilotProgram';
+import type { AdminProgramDirectoryRecord } from '../../../types/adminProgramDirectory';
 import SettingsCard from '../../family-portal/settings/SettingsCard';
 
 type AdminAddStudentTabProps = {
-  programs: PilotProgramRecord[];
+  programs: AdminProgramDirectoryRecord[];
   onCopied: (message: string) => void;
 };
 
 export default function AdminAddStudentTab({ programs, onCopied }: AdminAddStudentTabProps) {
   const activePrograms = useMemo(
-    () => programs.filter((program) => program.pilot_status !== 'archived'),
+    () => programs.filter((program) => program.status !== 'archived'),
     [programs],
   );
 
@@ -24,6 +24,7 @@ export default function AdminAddStudentTab({ programs, onCopied }: AdminAddStude
   const [childNickname, setChildNickname] = useState('');
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | ''>('');
   const [parentEmail, setParentEmail] = useState('');
+  const [selectedProgramId, setSelectedProgramId] = useState('');
   const [campProgramCode, setCampProgramCode] = useState('');
   const [groupName, setGroupName] = useState('');
   const [notes, setNotes] = useState('');
@@ -135,19 +136,29 @@ export default function AdminAddStudentTab({ programs, onCopied }: AdminAddStude
         </label>
 
         <label className="adminPortal-field">
-          <span>Program / camp</span>
+          <span>Program directory</span>
           <select
-            value={campProgramCode}
-            onChange={(event) => setCampProgramCode(event.target.value)}
-            required
+            value={selectedProgramId}
+            onChange={(event) => setSelectedProgramId(event.target.value)}
           >
-            <option value="">Select program…</option>
+            <option value="">Choose a program to review…</option>
             {activePrograms.map((program) => (
-              <option key={program.program_code} value={program.program_code}>
-                {program.program_name} ({program.program_code})
+              <option key={program.id} value={program.id}>
+                {program.displayName} ({program.programType})
               </option>
             ))}
           </select>
+          <small>The protected directory intentionally does not expose access codes.</small>
+        </label>
+
+        <label className="adminPortal-field">
+          <span>Program code for student creation</span>
+          <input
+            value={campProgramCode}
+            onChange={(event) => setCampProgramCode(event.target.value.toUpperCase())}
+            placeholder="Enter the authorized program code"
+            required
+          />
         </label>
 
         <label className="adminPortal-field">

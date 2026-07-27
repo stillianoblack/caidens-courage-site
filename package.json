@@ -29,6 +29,7 @@
   },
   "scripts": {
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "prebuild": "node scripts/validateSupabaseBuildContext.js",
     "build": "GENERATE_SOURCEMAP=false REACT_APP_BUILD_TIME=$(node -p \"new Date().toISOString()\") react-scripts build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",

@@ -41,10 +41,7 @@ export default function FamilyWeeklyAdventuresLauncher() {
         navigate,
       });
       if (!result.ok) {
-        showToast(
-          result.supportCode ? `${result.message} Support code: ${result.supportCode}` : result.message,
-          'error',
-        );
+        showToast(result.message, 'error');
         returnHome();
       }
     },

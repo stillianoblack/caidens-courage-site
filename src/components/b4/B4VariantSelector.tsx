@@ -74,8 +74,11 @@ export default function B4VariantSelector({
       timersRef.current.push(window.setTimeout(() => setPreviewState('idle'), 1050));
       timersRef.current.push(window.setTimeout(() => onSaved?.(saved), mode === 'onboarding' ? 1200 : 0));
     } catch (caught) {
+      console.warn('[B4_VARIANT_SAVE_FAILED]', {
+        error: caught instanceof Error ? caught.message : 'unknown_error',
+      });
       setPreviewState('idle');
-      setStatus(caught instanceof Error ? caught.message : 'B-4 could not be saved.');
+      setStatus("We couldn't save this B-4 choice. Please try again.");
     } finally {
       setSaving(false);
     }

@@ -5,6 +5,10 @@ import type {
   PilotProgramSignupInput,
   PilotProgramType,
 } from '../types/pilotProgram';
+import type {
+  AdminProgramDirectoryLoad,
+  AdminProgramDirectoryRecord,
+} from '../types/adminProgramDirectory';
 import { recordToActivePilotProgram } from '../config/activePilotProgram';
 import { maskAccessCode } from '../config/lastPilotProgram';
 import {
@@ -31,6 +35,7 @@ import {
   type PortalProgramAccessClaimContext,
   type PortalProgramAccessIntent,
 } from './portalProgramAccessApi';
+import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type PilotProgramLookupResult = {
   role: 'facilitator' | 'family';
@@ -164,6 +169,7 @@ export type PilotProgramSignupResult =
         | 'server_error';
       message: string;
       supportCode?: string;
+      correlationId?: string;
     };
 
 const PILOT_SIGNUP_TIMEOUT_MS = 15000;
@@ -327,38 +333,26 @@ function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: str
   });
 }
 
-export type AdminPilotProgramsLoad = {
-  programs: PilotProgramRecord[];
-  error?: string;
-};
-
-/** Admin-only listing — Supabase only, no local/demo fallback. */
-export async function fetchAllPilotProgramsForAdmin(): Promise<AdminPilotProgramsLoad> {
-  if (!isSupabaseConfigured() || !supabase) {
-    return { programs: [], error: 'Supabase is not configured. Admin pilot data is unavailable.' };
-  }
-
+/** Admin-only sanitized directory. Authorization is enforced by the Netlify Function. */
+export async function fetchAllPilotProgramsForAdmin(
+  accessToken: string,
+): Promise<AdminProgramDirectoryLoad> {
   try {
-    const { data, error } = await supabase
-      .from('pilot_programs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.warn('[pilot_programs] admin list failed:', error.message);
-      return {
-        programs: [],
-        error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
-      };
-    }
-
-    return { programs: (data ?? []) as PilotProgramRecord[] };
-  } catch (err) {
-    console.warn('[pilot_programs] admin list error:', err);
+    const response = await fetch('/.netlify/functions/admin-pilot-programs', {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.status === 401) return { programs: [], error: 'unauthenticated' };
+    if (response.status === 403) return { programs: [], error: 'forbidden' };
+    if (!response.ok) return { programs: [], error: 'unavailable' };
+    const payload = await response.json();
     return {
-      programs: [],
-      error: 'Could not load pilot programs from Supabase. Check connection and RLS policies.',
+      programs: Array.isArray(payload.programs)
+        ? (payload.programs as AdminProgramDirectoryRecord[])
+        : [],
     };
+  } catch {
+    return { programs: [], error: 'unavailable' };
   }
 }
 
@@ -440,6 +434,10 @@ export async function submitPilotProgramSignup(
               ? UNCERTAIN_FAMILY_SIGNUP_MESSAGE
               : payload?.message || 'Could not save your family signup right now. Please try again.',
           supportCode: payload?.supportCode,
+          correlationId:
+            payload?.correlationId ||
+            response.headers?.get?.('X-Correlation-Id') ||
+            undefined,
         };
       }
       return {
@@ -481,11 +479,15 @@ export async function submitPilotProgramSignup(
       'Pilot signup preflight timed out.',
     );
     uniqueRecord = buildProgramRecord(input, uniqueCodes);
-  } catch {
+  } catch (error) {
+    console.warn('[PILOT_SIGNUP_FAILED]', {
+      stage: 'code_generation',
+      error: error instanceof Error ? error.message : 'unknown_error',
+    });
     return {
       success: false,
       code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
+      message: "We couldn't create your program. Please try again.",
     };
   }
 
@@ -517,18 +519,46 @@ export async function submitPilotProgramSignup(
     }
 
     const saved = data as PilotProgramRecord;
-    // TODO: Email facilitator_access_code and family_access_code after signup via Supabase Edge Function or external email service.
+    const savedRecord = { ...uniqueRecord, id: saved.id };
+    const educatorRecipient =
+      input.programType === 'Teacher / Classroom' ||
+      input.programType === 'School' ||
+      input.programType === 'District';
+    const welcomeEmail = await queueWelcomeEmail({
+      parentEmail: input.adminEmail,
+      parentFirstName: input.adminFirstName,
+      familyOrProgramName: savedRecord.program_name,
+      facilitatorAccessCode: savedRecord.facilitator_access_code,
+      programCode: savedRecord.program_code,
+      templateType: 'staff',
+      programType: input.programType,
+      recipientRole: educatorRecipient ? 'educator' : 'facilitator',
+      loginUrl: `${window.location.origin}/portal`,
+      deliveryEventKey: saved.id ? `pilot-program:${saved.id}:admin-welcome` : null,
+      relatedProgramId: saved.id ?? null,
+    });
+    if (!welcomeEmail.success) {
+      console.warn('[PILOT_PROGRAM_WELCOME_EMAIL]', {
+        program_type: input.programType,
+        recipient_role: educatorRecipient ? 'educator' : 'facilitator',
+        success: false,
+        reason: welcomeEmail.reason || 'delivery_failed',
+      });
+    }
     return {
       success: true,
-      program: recordToActivePilotProgram({ ...uniqueRecord, id: saved.id }),
+      program: recordToActivePilotProgram(savedRecord),
       redirectDestination: '/program-dashboard?welcome=1',
     };
   } catch (err) {
-    console.warn('[pilot_programs] insert error:', err);
+    console.warn('[PILOT_SIGNUP_FAILED]', {
+      stage: 'program_insert',
+      error: err instanceof Error ? err.message : 'unknown_error',
+    });
     return {
       success: false,
       code: 'timeout',
-      message: 'Creating your program is taking too long. Please refresh and try again.',
+      message: "We couldn't create your program. Please try again.",
     };
   }
 }
