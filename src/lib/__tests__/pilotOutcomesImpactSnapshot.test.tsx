@@ -85,5 +85,20 @@ describe('Pilot Impact Snapshot', () => {
     expect(css).toContain('@media(max-width:600px)');
     expect(css).toContain('@media(max-width:360px)');
     expect(css).toContain('min-width:0');
+    expect(css).toMatch(
+      /@media\(max-width:600px\)[\s\S]*?\.pilotImpact-grid\s*\{\s*grid-template-columns:minmax\(0,1fr\)/,
+    );
+    expect(css).toMatch(
+      /@media\(max-width:760px\)[\s\S]*?\.pilotOutcomes-chartGrid\s*\{\s*grid-template-columns:minmax\(0,1fr\)/,
+    );
+    expect(css).toMatch(
+      /@media\(max-width:430px\)[\s\S]*?\.pilotOutcomes-qualityGrid\s*\{\s*grid-template-columns:minmax\(0,1fr\)/,
+    );
+    expect(css).toMatch(
+      /@media\(max-width:600px\)[\s\S]*?\.pilotImpact-card dl div\s*\{\s*grid-template-columns:minmax\(0,1fr\)/,
+    );
+    expect(css).toMatch(
+      /@media\(max-width:430px\)[\s\S]*?\.pilotOutcomes-barLabel\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/,
+    );
   });
 });
