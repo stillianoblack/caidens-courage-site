@@ -21,6 +21,9 @@ function fail(message) {
 
 const legacyAdminKeys = ['EMAIL', 'PASSCODE'].map((suffix) =>
   ['REACT', 'APP', 'ADMIN', suffix].join('_'));
+const serverAdminKeys = ['EMAIL', 'PASSCODE'].map((suffix) =>
+  ['ADMIN', suffix].join('_'));
+const forbiddenClientAdminKeys = [...legacyAdminKeys, ...serverAdminKeys];
 
 if (legacyAdminKeys.some((key) => process.env[key])) {
   fail('Legacy client-side admin credentials must be removed before building.');
@@ -36,7 +39,7 @@ function findClientCredentialReference(directory) {
     }
     if (!/\.(?:js|jsx|ts|tsx)$/.test(entry.name)) continue;
     const source = fs.readFileSync(absolutePath, 'utf8');
-    if (legacyAdminKeys.some((key) => source.includes(key))) return absolutePath;
+    if (forbiddenClientAdminKeys.some((key) => source.includes(key))) return absolutePath;
   }
   return null;
 }

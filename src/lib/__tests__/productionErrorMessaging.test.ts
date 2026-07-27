@@ -31,4 +31,20 @@ describe('production error messaging', () => {
     expect(signupSources).not.toMatch(/refresh (the browser|and try|the page)/i);
     expect(signupSources).not.toMatch(/postgres|netlify function|stack trace|HTTP [45]\d\d/i);
   });
+
+  test('application UI does not render stack traces or raw error messages', () => {
+    const uiRoots = [
+      path.resolve(__dirname, '../../components'),
+      path.resolve(__dirname, '../../pages'),
+    ];
+    const offenders = uiRoots
+      .flatMap(sourceFiles)
+      .filter((file) =>
+        /(?:error\.stack|this\.state\.error\.(?:message|stack))/.test(
+          fs.readFileSync(file, 'utf8'),
+        ),
+      );
+
+    expect(offenders).toEqual([]);
+  });
 });

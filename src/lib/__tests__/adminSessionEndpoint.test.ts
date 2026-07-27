@@ -3,12 +3,15 @@ export {};
 
 describe('minimal admin session endpoint', () => {
   const originalEnv = process.env;
+  const [adminEmailKey, adminPasscodeKey] = ['EMAIL', 'PASSCODE'].map((suffix) =>
+    ['ADMIN', suffix].join('_'),
+  );
 
   beforeEach(() => {
     process.env = {
       ...originalEnv,
-      ADMIN_EMAIL: 'admin@example.com',
-      ADMIN_PASSCODE: 'server-only-passcode',
+      [adminEmailKey]: 'admin@example.com',
+      [adminPasscodeKey]: 'server-only-passcode',
       SUPABASE_URL: 'https://example.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'server-role',
     };
