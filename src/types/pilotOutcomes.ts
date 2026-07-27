@@ -1,4 +1,32 @@
 export type OutcomeState = 'Not enough data' | 'Baseline only' | 'Post only' | 'Matched';
+export type ImpactDataQuality = 'Available' | 'Directional - small sample' | 'Not enough data';
+export type ImpactDisplayStatus =
+  | 'Strong growth'
+  | 'Positive growth'
+  | 'No measurable change'
+  | 'Needs attention'
+  | 'On track'
+  | 'Directional result'
+  | 'Not enough data';
+
+export type PilotImpactDomain = {
+  key: 'reading' | 'sel' | 'focus';
+  label: string;
+  source: string;
+  baselineNumerator: number;
+  baselineDenominator: number;
+  postNumerator: number;
+  postDenominator: number;
+  baselinePercentage: number | null;
+  postPercentage: number | null;
+  deltaPercentagePoints: number | null;
+  matchedStudentCount: number;
+  requiredMatchedCount: number;
+  excludedRecordCount: number;
+  dataQualityStatus: ImpactDataQuality;
+  displayStatus: ImpactDisplayStatus;
+  missingReason: string | null;
+};
 
 export type PilotOutcomeProgram = {
   id: string;
@@ -17,6 +45,38 @@ export type PilotOutcomeProgram = {
   percentageDelta: number | null;
   percentageDeltaAvailable: boolean;
   weeklyCompletion: { count: number; total: number; rate: number | null };
+  impactSnapshot: {
+    domains: PilotImpactDomain[];
+    weeklyCompletion: {
+      numerator: number;
+      denominator: number;
+      percentage: number | null;
+      dataQualityStatus: ImpactDataQuality;
+      displayStatus: ImpactDisplayStatus;
+      missingReason: string | null;
+    };
+    participation: {
+      numerator: number;
+      denominator: number;
+      percentage: number | null;
+      dataQualityStatus: ImpactDataQuality;
+      displayStatus: ImpactDisplayStatus;
+      missingReason: string | null;
+      baselineCompleted: number;
+      postCompleted: number;
+    };
+    overallMatchedGrowth: {
+      deltaPercentagePoints: number | null;
+      includedDomainCount: number;
+      totalDomainCount: number;
+      matchedStudentCount: number;
+      requiredMatchedCount: number;
+      weighting: string;
+      dataQualityStatus: ImpactDataQuality;
+      displayStatus: ImpactDisplayStatus;
+      missingReason: string | null;
+    };
+  };
   certificateCount: number;
   focusCoins: number;
   assessmentCount: number;

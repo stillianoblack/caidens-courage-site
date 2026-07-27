@@ -1,5 +1,30 @@
 const BASELINE_TYPES = new Set(['baseline', 'child_baseline', 'adult_pre']);
 const POST_TYPES = new Set(['final', 'post', 'post_assessment', 'adult_post']);
+const MIN_MATCHED_DOMAIN_STUDENTS = 1;
+const SMALL_SAMPLE_THRESHOLD = 5;
+const IMPACT_DOMAINS = [
+  {
+    key: 'reading',
+    label: 'Reading comprehension',
+    field: 'reading_score',
+    rawMaximum: 5,
+    source: 'Canonical B-4 reading score',
+  },
+  {
+    key: 'sel',
+    label: 'SEL growth',
+    field: 'confidence_score',
+    rawMaximum: 50,
+    source: 'Canonical B-4 feelings/SEL score',
+  },
+  {
+    key: 'focus',
+    label: 'Focus / executive-function growth',
+    field: 'focus_score',
+    rawMaximum: 5,
+    source: 'Canonical B-4 focus-moves score',
+  },
+];
 const CATEGORY_FIELDS = [
   ['emotional_awareness_score', 'Emotional awareness'],
   ['decision_making_score', 'Decision making'],
@@ -84,6 +109,163 @@ function categoryScores(row) {
     byLabel.set(label, list);
   }
   return Object.fromEntries([...byLabel].map(([label, values]) => [label, average(values)]));
+}
+
+function domainObservation(row, definition) {
+  const value = numberOrNull(row?.[definition.field]);
+  if (value === null || value < 0) return null;
+  if (value <= definition.rawMaximum) {
+    return { numerator: value, denominator: definition.rawMaximum };
+  }
+  if (value <= 100) {
+    return { numerator: value, denominator: 100 };
+  }
+  return null;
+}
+
+function buildDomainOutcome(definition, studentRows) {
+  const pairs = studentRows
+    .map((row) => ({
+      baseline: domainObservation(row.baseline, definition),
+      post: domainObservation(row.post, definition),
+    }))
+    .filter((row) => row.baseline && row.post);
+  const baselineNumerator = pairs.reduce((sum, row) => sum + row.baseline.numerator, 0);
+  const baselineDenominator = pairs.reduce((sum, row) => sum + row.baseline.denominator, 0);
+  const postNumerator = pairs.reduce((sum, row) => sum + row.post.numerator, 0);
+  const postDenominator = pairs.reduce((sum, row) => sum + row.post.denominator, 0);
+  const baselinePercentage = baselineDenominator
+    ? round((baselineNumerator / baselineDenominator) * 100)
+    : null;
+  const postPercentage = postDenominator ? round((postNumerator / postDenominator) * 100) : null;
+  const deltaPercentagePoints =
+    baselinePercentage !== null && postPercentage !== null
+      ? round(postPercentage - baselinePercentage)
+      : null;
+  const missingBaseline = studentRows.filter(
+    (row) => !domainObservation(row.baseline, definition),
+  ).length;
+  const missingPost = studentRows.filter((row) => !domainObservation(row.post, definition)).length;
+  const matchedStudentCount = pairs.length;
+  let missingReason = null;
+  if (!studentRows.length) missingReason = 'No participants are available.';
+  else if (!matchedStudentCount && missingBaseline && missingPost) {
+    missingReason = 'Baseline and post domain scores are missing or not mapped.';
+  } else if (!matchedStudentCount && missingBaseline) {
+    missingReason = 'A mapped baseline domain score is missing.';
+  } else if (!matchedStudentCount && missingPost) {
+    missingReason = 'A mapped post domain score is missing.';
+  } else if (matchedStudentCount < MIN_MATCHED_DOMAIN_STUDENTS) {
+    missingReason = 'Participant matching is incomplete.';
+  }
+  const available = matchedStudentCount >= MIN_MATCHED_DOMAIN_STUDENTS;
+  const displayStatus = !available
+    ? 'Not enough data'
+    : matchedStudentCount < SMALL_SAMPLE_THRESHOLD
+      ? 'Directional result'
+      : deltaPercentagePoints >= 10
+        ? 'Strong growth'
+        : deltaPercentagePoints > 0
+          ? 'Positive growth'
+          : deltaPercentagePoints === 0
+            ? 'No measurable change'
+            : 'Needs attention';
+  return {
+    key: definition.key,
+    label: definition.label,
+    source: definition.source,
+    baselineNumerator: round(baselineNumerator, 2),
+    baselineDenominator: round(baselineDenominator, 2),
+    postNumerator: round(postNumerator, 2),
+    postDenominator: round(postDenominator, 2),
+    baselinePercentage: available ? baselinePercentage : null,
+    postPercentage: available ? postPercentage : null,
+    deltaPercentagePoints: available ? deltaPercentagePoints : null,
+    matchedStudentCount,
+    requiredMatchedCount: MIN_MATCHED_DOMAIN_STUDENTS,
+    excludedRecordCount: studentRows.length - matchedStudentCount,
+    dataQualityStatus: available
+      ? matchedStudentCount < SMALL_SAMPLE_THRESHOLD
+        ? 'Directional - small sample'
+        : 'Available'
+      : 'Not enough data',
+    displayStatus,
+    missingReason,
+  };
+}
+
+function buildImpactSnapshot(studentRows, weeklyCompletion, baseline, post) {
+  const domains = IMPACT_DOMAINS.map((definition) => buildDomainOutcome(definition, studentRows));
+  const validDomains = domains.filter((domain) => domain.deltaPercentagePoints !== null);
+  const overallDelta = average(validDomains.map((domain) => domain.deltaPercentagePoints));
+  const participationCount = studentRows.filter(
+    (row) => row.baselineScore !== null || row.postScore !== null,
+  ).length;
+  const participationTotal = studentRows.length;
+  return {
+    domains,
+    weeklyCompletion: {
+      numerator: weeklyCompletion.count,
+      denominator: weeklyCompletion.total,
+      percentage: weeklyCompletion.rate,
+      dataQualityStatus: weeklyCompletion.rate === null ? 'Not enough data' : 'Available',
+      displayStatus:
+        weeklyCompletion.rate === null
+          ? 'Not enough data'
+          : weeklyCompletion.rate >= 75
+            ? 'On track'
+            : 'Needs attention',
+      missingReason:
+        weeklyCompletion.rate === null
+          ? 'Published-week denominator or weekly progress data is missing.'
+          : null,
+    },
+    participation: {
+      numerator: participationCount,
+      denominator: participationTotal,
+      percentage: participationTotal ? round((participationCount / participationTotal) * 100) : null,
+      dataQualityStatus: participationTotal ? 'Available' : 'Not enough data',
+      displayStatus:
+        !participationTotal
+          ? 'Not enough data'
+          : (participationCount / participationTotal) * 100 >= 75
+            ? 'On track'
+            : 'Needs attention',
+      missingReason: participationTotal ? null : 'No participants are available.',
+      baselineCompleted: baseline.count,
+      postCompleted: post.count,
+    },
+    overallMatchedGrowth: {
+      deltaPercentagePoints: round(overallDelta),
+      includedDomainCount: validDomains.length,
+      totalDomainCount: domains.length,
+      matchedStudentCount: validDomains.length
+        ? Math.min(...validDomains.map((domain) => domain.matchedStudentCount))
+        : 0,
+      requiredMatchedCount: MIN_MATCHED_DOMAIN_STUDENTS,
+      weighting: 'Unweighted average of domains with valid matched pre/post data',
+      dataQualityStatus:
+        validDomains.length === 0
+          ? 'Not enough data'
+          : validDomains.some((domain) => domain.matchedStudentCount < SMALL_SAMPLE_THRESHOLD)
+            ? 'Directional - small sample'
+            : 'Available',
+      displayStatus:
+        validDomains.length === 0
+          ? 'Not enough data'
+          : validDomains.some((domain) => domain.matchedStudentCount < SMALL_SAMPLE_THRESHOLD)
+            ? 'Directional result'
+            : overallDelta >= 10
+              ? 'Strong growth'
+              : overallDelta > 0
+                ? 'Positive growth'
+                : overallDelta === 0
+                  ? 'No measurable change'
+                  : 'Needs attention',
+      missingReason:
+        validDomains.length === 0 ? 'No domain has valid matched baseline and post data.' : null,
+    },
+  };
 }
 
 function sanitizeGrade(participant) {
@@ -231,27 +413,42 @@ function buildProgramOutcome(program, data, options = {}) {
   if (!matched.length) reportBlockers.push('No matched baseline and post-assessment records');
   if (quality.invalidScoreRanges) reportBlockers.push('Invalid assessment score ranges');
   if (!program.start_date && !program.pilot_start_date) reportBlockers.push('Program start date is missing');
+  const baselineCompletion = {
+    count: studentRows.filter((row) => row.baselineScore !== null).length,
+    total: participants.length,
+  };
+  const postCompletion = {
+    count: studentRows.filter((row) => row.postScore !== null).length,
+    total: participants.length,
+  };
+  const weeklyCompletion = {
+    count: completedStudentWeeks,
+    total: possibleStudentWeeks,
+    rate: possibleStudentWeeks ? round((completedStudentWeeks / possibleStudentWeeks) * 100) : null,
+  };
   return {
     id: program.id,
     programName: program.program_name,
     programType: program.program_type,
     facilitator: program.admin_first_name || 'Not provided',
     status: program.pilot_status,
-    startDate: program.start_date || program.pilot_start_date || program.created_at || null,
+    startDate: program.start_date || program.pilot_start_date || null,
     activeStudentCount: participants.length,
-    baseline: { count: studentRows.filter((row) => row.baselineScore !== null).length, total: participants.length },
-    post: { count: studentRows.filter((row) => row.postScore !== null).length, total: participants.length },
+    baseline: baselineCompletion,
+    post: postCompletion,
     matchedCount: matched.length,
     baselineAverage: round(baselineAverage),
     postAverage: round(postAverage),
     absoluteDelta: round(absoluteDelta),
     percentageDelta: round(percentageDelta),
     percentageDeltaAvailable: percentageDelta !== null,
-    weeklyCompletion: {
-      count: completedStudentWeeks,
-      total: possibleStudentWeeks,
-      rate: possibleStudentWeeks ? round((completedStudentWeeks / possibleStudentWeeks) * 100) : null,
-    },
+    weeklyCompletion,
+    impactSnapshot: buildImpactSnapshot(
+      studentRows,
+      weeklyCompletion,
+      baselineCompletion,
+      postCompletion,
+    ),
     certificateCount: studentRows.reduce((sum, row) => sum + row.certificates, 0),
     focusCoins: studentRows.reduce((sum, row) => sum + row.focusCoins, 0),
     assessmentCount: studentRows.reduce((sum, row) => sum + row.assessmentsCompleted, 0),
@@ -309,4 +506,7 @@ module.exports = {
   buildProgramOutcome,
   portfolioSummary,
   scorePercent,
+  buildDomainOutcome,
+  buildImpactSnapshot,
+  IMPACT_DOMAINS,
 };

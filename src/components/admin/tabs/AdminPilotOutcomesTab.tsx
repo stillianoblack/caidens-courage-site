@@ -6,7 +6,11 @@ import {
   fetchPilotRollout,
   savePilotRollout,
 } from '../../../lib/pilotOutcomesApi';
-import type { PilotOutcomeProgram, PilotOutcomeSummary } from '../../../types/pilotOutcomes';
+import type {
+  PilotImpactDomain,
+  PilotOutcomeProgram,
+  PilotOutcomeSummary,
+} from '../../../types/pilotOutcomes';
 import './admin-pilot-outcomes.css';
 
 const EMPTY_SUMMARY: PilotOutcomeSummary = {
@@ -39,10 +43,6 @@ const CHECKLIST = [
   'Follow-up meeting scheduled',
 ];
 
-function percent(count: number, total: number) {
-  return total ? `${Math.round((count / total) * 100)}% (${count}/${total})` : `0% (${count}/${total})`;
-}
-
 function metric(value: number | null, suffix = '') {
   return value == null ? 'Not enough data' : `${value}${suffix}`;
 }
@@ -71,6 +71,163 @@ function AccessibleBar({
       </div>
       <span className="sr-only">{description}</span>
     </div>
+  );
+}
+
+function signedPoints(value: number | null) {
+  if (value == null) return 'Not enough data';
+  return `${value > 0 ? '+' : ''}${value} pts`;
+}
+
+function direction(value: number | null) {
+  if (value == null) return 'Unavailable';
+  if (value > 0) return 'Increase';
+  if (value < 0) return 'Decrease';
+  return 'No change';
+}
+
+function ImpactCircle({
+  label,
+  center,
+  ringPercentage,
+  state,
+  status,
+  summary,
+  details,
+}: {
+  label: string;
+  center: string;
+  ringPercentage: number | null;
+  state: 'positive' | 'negative' | 'unchanged' | 'completion' | 'missing';
+  status: string;
+  summary: string;
+  details: React.ReactNode;
+}) {
+  const ringValue = ringPercentage == null ? 0 : Math.max(0, Math.min(100, ringPercentage));
+  return (
+    <article className="pilotImpact-card" data-state={state}>
+      <div
+        className={`pilotImpact-circle ${ringPercentage == null ? 'pilotImpact-circle--missing' : ''}`}
+        style={{
+          background:
+            ringPercentage == null
+              ? undefined
+              : `conic-gradient(var(--pilot-impact-ring) ${ringValue}%, #dfe7ef ${ringValue}% 100%)`,
+        }}
+        role="img"
+        aria-label={`${label}. ${summary}`}
+      >
+        <div className="pilotImpact-circleCenter">
+          <strong>{center}</strong>
+        </div>
+      </div>
+      <h4>{label}</h4>
+      <p className="pilotImpact-status">{status}</p>
+      <p>{summary}</p>
+      <details>
+        <summary>View calculation details</summary>
+        {details}
+      </details>
+    </article>
+  );
+}
+
+function DomainImpactCircle({ domain }: { domain: PilotImpactDomain }) {
+  const delta = domain.deltaPercentagePoints;
+  const available = delta != null;
+  const state = !available
+    ? 'missing'
+    : delta > 0
+      ? 'positive'
+      : delta < 0
+        ? 'negative'
+        : 'unchanged';
+  const summary = available
+    ? `${direction(delta)} of ${signedPoints(delta)}. Baseline ${domain.baselinePercentage} percent to post ${domain.postPercentage} percent. ${domain.matchedStudentCount} matched students.`
+    : `Not enough data. ${domain.matchedStudentCount} matched students are available; ${domain.requiredMatchedCount} required. ${domain.missingReason}`;
+  return (
+    <ImpactCircle
+      label={domain.label}
+      center={available ? signedPoints(domain.deltaPercentagePoints) : 'Not enough data'}
+      ringPercentage={available ? domain.postPercentage : null}
+      state={state}
+      status={domain.displayStatus}
+      summary={summary}
+      details={(
+        <dl>
+          <div><dt>Baseline</dt><dd>{metric(domain.baselinePercentage, '%')} ({domain.baselineNumerator}/{domain.baselineDenominator})</dd></div>
+          <div><dt>Post</dt><dd>{metric(domain.postPercentage, '%')} ({domain.postNumerator}/{domain.postDenominator})</dd></div>
+          <div><dt>Percentage-point delta</dt><dd>{signedPoints(domain.deltaPercentagePoints)}</dd></div>
+          <div><dt>Matched sample</dt><dd>{domain.matchedStudentCount}; minimum {domain.requiredMatchedCount}</dd></div>
+          <div><dt>Excluded records</dt><dd>{domain.excludedRecordCount}</dd></div>
+          <div><dt>Data quality</dt><dd>{domain.dataQualityStatus}</dd></div>
+          <div><dt>Authoritative source</dt><dd>{domain.source}</dd></div>
+        </dl>
+      )}
+    />
+  );
+}
+
+export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram }) {
+  const weekly = program.impactSnapshot.weeklyCompletion;
+  const participation = program.impactSnapshot.participation;
+  const overall = program.impactSnapshot.overallMatchedGrowth;
+  const overallState = overall.deltaPercentagePoints == null
+    ? 'missing'
+    : overall.deltaPercentagePoints > 0
+      ? 'positive'
+      : overall.deltaPercentagePoints < 0
+        ? 'negative'
+        : 'unchanged';
+  return (
+    <section className="pilotOutcomes-panel pilotImpact" aria-labelledby="pilot-impact-title">
+      <div className="pilotImpact-heading">
+        <div>
+          <p className="pilotOutcomes-eyebrow">Matched outcomes</p>
+          <h3 id="pilot-impact-title">Pilot Impact Snapshot</h3>
+        </div>
+        <p>Rings show post scores or completion rates. Center values show percentage-point change.</p>
+      </div>
+      <div className="pilotImpact-grid">
+        {program.impactSnapshot.domains.map((domain) => <DomainImpactCircle key={domain.key} domain={domain} />)}
+        <ImpactCircle
+          label="Weekly completion"
+          center={metric(weekly.percentage, '%')}
+          ringPercentage={weekly.percentage}
+          state={weekly.percentage == null ? 'missing' : 'completion'}
+          status={weekly.displayStatus}
+          summary={weekly.percentage == null
+            ? `Not enough data. ${weekly.missingReason}`
+            : `Weekly completion is ${weekly.percentage} percent, ${weekly.numerator} of ${weekly.denominator} student-weeks.`}
+          details={<dl><div><dt>Completed</dt><dd>{weekly.numerator}</dd></div><div><dt>Possible</dt><dd>{weekly.denominator}</dd></div><div><dt>Data quality</dt><dd>{weekly.dataQualityStatus}</dd></div></dl>}
+        />
+        <ImpactCircle
+          label="Participation"
+          center={metric(participation.percentage, '%')}
+          ringPercentage={participation.percentage}
+          state={participation.percentage == null ? 'missing' : 'completion'}
+          status={participation.displayStatus}
+          summary={participation.percentage == null
+            ? `Not enough data. ${participation.missingReason}`
+            : `Assessment participation is ${participation.percentage} percent, ${participation.numerator} of ${participation.denominator} students with at least one assessment.`}
+          details={<dl><div><dt>Participating students</dt><dd>{participation.numerator}</dd></div><div><dt>Enrolled students</dt><dd>{participation.denominator}</dd></div><div><dt>Baseline complete</dt><dd>{participation.baselineCompleted}</dd></div><div><dt>Post complete</dt><dd>{participation.postCompleted}</dd></div></dl>}
+        />
+        <ImpactCircle
+          label="Overall matched-student growth"
+          center={signedPoints(overall.deltaPercentagePoints)}
+          ringPercentage={null}
+          state={overallState}
+          status={overall.displayStatus}
+          summary={overall.deltaPercentagePoints == null
+            ? `Not enough data. ${overall.matchedStudentCount} matched students are available; ${overall.requiredMatchedCount} required. ${overall.missingReason}`
+            : `${direction(overall.deltaPercentagePoints)} of ${signedPoints(overall.deltaPercentagePoints)}, calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`}
+          details={<dl><div><dt>Included domains</dt><dd>{overall.includedDomainCount} of {overall.totalDomainCount}</dd></div><div><dt>Matched sample</dt><dd>{overall.matchedStudentCount}</dd></div><div><dt>Weighting</dt><dd>{overall.weighting}</dd></div><div><dt>Data quality</dt><dd>{overall.dataQualityStatus}</dd></div></dl>}
+        />
+      </div>
+      <p className="pilotImpact-method">
+        Growth values are percentage-point differences, not percent growth. Overall growth excludes completion and engagement and uses an unweighted average because no approved domain weighting is configured.
+      </p>
+    </section>
   );
 }
 
@@ -225,6 +382,7 @@ function ProgramDetail({
         <article className="pilotOutcomes-metric"><span>Absolute delta</span><strong>{metric(program.absoluteDelta)}</strong></article>
         <article className="pilotOutcomes-metric"><span>Weekly completion</span><strong>{metric(program.weeklyCompletion.rate, '%')}</strong></article>
       </div>
+      <PilotImpactSnapshot program={program} />
       <OutcomeCharts program={program} />
       <DataQuality program={program} />
       <section className="pilotOutcomes-panel">
@@ -260,8 +418,8 @@ function ProgramDetail({
         </div>
         <label className="pilotOutcomes-notes">Educator observations<textarea value={educatorNotes} onChange={(event) => setEducatorNotes(event.target.value)} placeholder="What worked, student response, challenges, and approved next steps" /></label>
         <div className="pilotOutcomes-actions">
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Preview report</button>
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download PDF</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Generate PDF</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download Report</button>
           <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('html', 'inline')}>HTML print view</button>
         </div>
         {reportError ? <p className="adminPortal-error">{reportError}</p> : null}
@@ -441,8 +599,11 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
       <section className="pilotOutcomes-panel" aria-labelledby="program-table-title">
         <h3 id="program-table-title">Programs</h3>
         <div className="pilotOutcomes-tableWrap">
-          <table><thead><tr><th>Program</th><th>Type</th><th>Facilitator</th><th>Start</th><th>Students</th><th>Baseline</th><th>Post</th><th>Matched</th><th>Baseline avg.</th><th>Post avg.</th><th>Delta</th><th>Weekly</th><th>Certificates</th><th>Last activity</th><th>Report</th><th>Actions</th></tr></thead>
-          <tbody>{filtered.map((program) => <tr key={program.id}><td>{program.programName}</td><td>{program.programType}</td><td>{program.facilitator}</td><td>{date(program.startDate)}</td><td>{program.activeStudentCount}</td><td>{percent(program.baseline.count, program.baseline.total)}</td><td>{percent(program.post.count, program.post.total)}</td><td>{program.matchedCount}</td><td>{metric(program.baselineAverage)}</td><td>{metric(program.postAverage)}</td><td>{metric(program.absoluteDelta)} / {program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable'}</td><td>{metric(program.weeklyCompletion.rate, '%')}</td><td>{program.certificateCount}</td><td>{date(program.lastActivity)}</td><td>{program.reportStatus}</td><td><button type="button" onClick={() => void openProgram(program.id)}>View details</button> <button type="button" onClick={() => void openProgram(program.id)}>Generate report</button></td></tr>)}</tbody></table>
+          <table className="pilotOutcomes-programTable"><thead><tr><th>Program</th><th>Overall matched growth</th><th>Matched students</th><th>Weekly completion</th><th>Data quality</th><th>Action</th></tr></thead>
+          <tbody>{filtered.map((program) => {
+            const overall = program.impactSnapshot.overallMatchedGrowth;
+            return <tr key={program.id}><td data-label="Program"><strong>{program.programName}</strong><br /><span>{program.programType}</span></td><td data-label="Overall matched growth">{signedPoints(overall.deltaPercentagePoints)}<br /><span>{overall.displayStatus}</span></td><td data-label="Matched students">{program.matchedCount}</td><td data-label="Weekly completion">{metric(program.weeklyCompletion.rate, '%')}</td><td data-label="Data quality">{overall.dataQualityStatus}</td><td data-label="Action"><button type="button" onClick={() => void openProgram(program.id)}>View Details</button></td></tr>;
+          })}</tbody></table>
         </div>
         {!filtered.length && !loading ? <p className="pilotOutcomes-empty">No programs match these filters.</p> : null}
       </section>

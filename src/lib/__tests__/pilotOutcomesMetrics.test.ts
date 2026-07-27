@@ -77,4 +77,85 @@ describe('pilot outcomes formulas', () => {
     expect(outcome.categories).toEqual([]);
     expect(outcome.reportStatus).toBe('Blocked');
   });
+
+  it.each([
+    ['positive', 2, 4, 40],
+    ['negative', 4, 2, -40],
+    ['unchanged', 3, 3, 0],
+  ])('reports a %s reading percentage-point delta', (_label, baseline, post, expected) => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants: [participants[0]],
+      assessments: [
+        { participant_id: 'p1', assessment_type: 'baseline', percent_score: 50, reading_score: baseline },
+        { participant_id: 'p1', assessment_type: 'post', percent_score: 50, reading_score: post },
+      ],
+    }).programs[0];
+    const reading = outcome.impactSnapshot.domains.find((domain: { key: string }) => domain.key === 'reading');
+    expect(reading.deltaPercentagePoints).toBe(expected);
+    expect(reading.matchedStudentCount).toBe(1);
+    expect(reading.dataQualityStatus).toBe('Directional - small sample');
+  });
+
+  it('does not divide by zero for a zero domain baseline', () => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants: [participants[0]],
+      assessments: [
+        { participant_id: 'p1', assessment_type: 'baseline', percent_score: 0, focus_score: 0 },
+        { participant_id: 'p1', assessment_type: 'post', percent_score: 20, focus_score: 1 },
+      ],
+    }).programs[0];
+    const focus = outcome.impactSnapshot.domains.find((domain: { key: string }) => domain.key === 'focus');
+    expect(focus.baselinePercentage).toBe(0);
+    expect(focus.postPercentage).toBe(20);
+    expect(focus.deltaPercentagePoints).toBe(20);
+  });
+
+  it('excludes partial, missing, and unmatched domain records', () => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants,
+      assessments: [
+        { participant_id: 'p1', assessment_type: 'baseline', percent_score: 50, confidence_score: 25 },
+        { participant_id: 'p1', assessment_type: 'post', percent_score: 70 },
+        { participant_id: 'p2', assessment_type: 'baseline', percent_score: 50, confidence_score: 20 },
+        { participant_id: 'p3', assessment_type: 'post', percent_score: 70, confidence_score: 35 },
+      ],
+    }).programs[0];
+    const sel = outcome.impactSnapshot.domains.find((domain: { key: string }) => domain.key === 'sel');
+    expect(sel.matchedStudentCount).toBe(0);
+    expect(sel.excludedRecordCount).toBe(3);
+    expect(sel.deltaPercentagePoints).toBeNull();
+    expect(sel.dataQualityStatus).toBe('Not enough data');
+    expect(sel.missingReason).toMatch(/baseline|post/i);
+  });
+
+  it('does not infer a domain mapping from unrelated score fields', () => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants: [participants[0]],
+      assessments: [
+        { participant_id: 'p1', assessment_type: 'baseline', percent_score: 50, understanding_score: 4 },
+        { participant_id: 'p1', assessment_type: 'post', percent_score: 70, understanding_score: 5 },
+      ],
+    }).programs[0];
+    expect(outcome.impactSnapshot.domains.every((domain: { deltaPercentagePoints: number | null }) => domain.deltaPercentagePoints === null)).toBe(true);
+    expect(outcome.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints).toBeNull();
+  });
+
+  it('uses an unweighted average of valid domains without engagement', () => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants: [participants[0]],
+      assessments: [
+        { participant_id: 'p1', assessment_type: 'baseline', percent_score: 50, reading_score: 2, focus_score: 1 },
+        { participant_id: 'p1', assessment_type: 'post', percent_score: 70, reading_score: 3, focus_score: 3 },
+      ],
+      weeks: [{ participant_id: 'p1', week_number: 1 }],
+    }, { publishedWeeks: 1 }).programs[0];
+    expect(outcome.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints).toBe(30);
+    expect(outcome.impactSnapshot.overallMatchedGrowth.includedDomainCount).toBe(2);
+    expect(outcome.impactSnapshot.overallMatchedGrowth.weighting).toMatch(/Unweighted/);
+  });
 });

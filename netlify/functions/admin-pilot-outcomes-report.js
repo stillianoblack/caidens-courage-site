@@ -63,16 +63,197 @@ function addHeader(doc) {
   doc.moveDown(0.5).strokeColor('#d8a847').moveTo(54, doc.y).lineTo(558, doc.y).stroke().moveDown();
 }
 
+function addContentPage(doc) {
+  doc.addPage();
+  addHeader(doc);
+}
+
+function ensureSpace(doc, height = 24) {
+  if (doc.y + height > 690) addContentPage(doc);
+}
+
 function heading(doc, value) {
-  if (doc.y > 700) doc.addPage();
+  ensureSpace(doc, 34);
   doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(15).text(value, { keepTogether: true });
   doc.moveDown(0.35);
 }
 
 function line(doc, label, value) {
-  if (doc.y > 725) doc.addPage();
+  ensureSpace(doc, 16);
   doc.fillColor('#213047').font('Helvetica-Bold').fontSize(9).text(`${label}: `, { continued: true });
   doc.font('Helvetica').text(String(value));
+}
+
+function signedPoints(value) {
+  if (value == null) return 'Not enough data';
+  return `${value > 0 ? '+' : ''}${value} pts`;
+}
+
+function circleState(value) {
+  if (value == null) return { color: '#687789' };
+  if (value > 0) return { color: '#19734b' };
+  if (value < 0) return { color: '#a53b32' };
+  return { color: '#6b5f24' };
+}
+
+function drawImpactCircle(doc, item, x, y) {
+  const radius = 41;
+  const centerX = x + radius;
+  const centerY = y + radius;
+  const state = item.kind === 'completion'
+    ? { color: '#2469ad' }
+    : circleState(item.delta);
+  doc.lineWidth(8).strokeColor('#dfe7ef').circle(centerX, centerY, radius).stroke();
+  if (item.ring != null) {
+    const bounded = Math.max(0, Math.min(100, item.ring));
+    if (bounded === 100) {
+      doc.lineWidth(8).strokeColor(state.color).circle(centerX, centerY, radius).stroke();
+    } else if (bounded > 0) {
+      doc
+        .lineWidth(8)
+        .strokeColor(state.color)
+        .path(`M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 ${bounded > 50 ? 1 : 0} 1 ${centerX + radius * Math.sin((bounded / 100) * Math.PI * 2)} ${centerY - radius * Math.cos((bounded / 100) * Math.PI * 2)}`)
+        .stroke();
+    }
+  } else {
+    doc.lineWidth(2).dash(4, { space: 3 }).strokeColor(state.color).circle(centerX, centerY, radius - 5).stroke().undash();
+  }
+  doc
+    .fillColor('#14345f')
+    .font('Helvetica-Bold')
+    .fontSize(item.center.length > 12 ? 8 : 11)
+    .text(item.center, centerX - 32, centerY - 7, { width: 64, align: 'center' });
+  doc
+    .fillColor('#14345f')
+    .font('Helvetica-Bold')
+    .fontSize(8)
+    .text(item.label, x - 10, y + 91, { width: 102, align: 'center', height: 25 });
+  doc
+    .fillColor(state.color)
+    .font('Helvetica-Bold')
+    .fontSize(7.5)
+    .text(item.status, x - 12, y + 116, { width: 106, align: 'center', height: 13 });
+  doc
+    .fillColor('#52657f')
+    .font('Helvetica')
+    .fontSize(7)
+    .text(item.caption, x - 12, y + 131, { width: 106, align: 'center', height: 28 });
+}
+
+function reportImpactPayload(program) {
+  return program.impactSnapshot;
+}
+
+function impactItems(program) {
+  const snapshot = reportImpactPayload(program);
+  const domainItems = snapshot.domains.map((domain) => ({
+    label: domain.label,
+    center: signedPoints(domain.deltaPercentagePoints),
+    delta: domain.deltaPercentagePoints,
+    ring: domain.postPercentage,
+    status: domain.displayStatus,
+    caption:
+      domain.deltaPercentagePoints == null
+        ? `${domain.matchedStudentCount} matched; ${domain.requiredMatchedCount} required`
+        : `${domain.baselinePercentage}% to ${domain.postPercentage}%; n=${domain.matchedStudentCount}`,
+  }));
+  const weekly = snapshot.weeklyCompletion;
+  const participation = snapshot.participation;
+  const overall = snapshot.overallMatchedGrowth;
+  return [
+    ...domainItems,
+    {
+      label: 'Weekly completion',
+      kind: 'completion',
+      center: weekly.percentage == null ? 'Not enough data' : `${weekly.percentage}%`,
+      delta: weekly.percentage == null ? null : 0,
+      ring: weekly.percentage,
+      status: weekly.displayStatus,
+      caption: `${weekly.numerator} of ${weekly.denominator || 'unavailable'} student-weeks`,
+    },
+    {
+      label: 'Participation',
+      kind: 'completion',
+      center: participation.percentage == null ? 'Not enough data' : `${participation.percentage}%`,
+      delta: participation.percentage == null ? null : 0,
+      ring: participation.percentage,
+      status: participation.displayStatus,
+      caption: `${participation.numerator} of ${participation.denominator} students`,
+    },
+    {
+      label: 'Overall matched growth',
+      center: signedPoints(overall.deltaPercentagePoints),
+      delta: overall.deltaPercentagePoints,
+      ring: null,
+      status: overall.displayStatus,
+      caption: `${overall.includedDomainCount} of ${overall.totalDomainCount} domains; unweighted`,
+    },
+  ];
+}
+
+function drawImpactSnapshot(doc, program) {
+  const snapshot = reportImpactPayload(program);
+  addContentPage(doc);
+  heading(doc, 'Pilot Impact Snapshot');
+  doc
+    .font('Helvetica')
+    .fontSize(8)
+    .fillColor('#52657f')
+    .text('Rings show post scores or completion rates. Center growth values are percentage-point changes, not percent growth.');
+  const items = impactItems(program);
+  const startY = doc.y + 12;
+  const columns = [78, 250, 422];
+  items.forEach((item, index) => {
+    drawImpactCircle(doc, item, columns[index % 3], startY + Math.floor(index / 3) * 155);
+  });
+  doc.y = startY + 310;
+  doc
+    .fillColor('#213047')
+    .font('Helvetica')
+    .fontSize(8)
+    .text(
+      `Methodology: ${snapshot.overallMatchedGrowth.weighting}. Completion and engagement are excluded from academic/SEL growth. Findings with fewer than 5 matched students are directional.`,
+      54,
+      startY + 310,
+      { width: 504 },
+    );
+  addContentPage(doc);
+  heading(doc, 'Detailed outcomes');
+  const headers = ['Measure', 'Baseline', 'Post', 'Delta', 'Matched', 'Excluded', 'Status'];
+  const widths = [118, 61, 61, 58, 46, 47, 82];
+  const rows = snapshot.domains.map((domain) => [
+    domain.label,
+    metric(domain.baselinePercentage, '%'),
+    metric(domain.postPercentage, '%'),
+    signedPoints(domain.deltaPercentagePoints),
+    String(domain.matchedStudentCount),
+    String(domain.excludedRecordCount),
+    domain.dataQualityStatus,
+  ]);
+  let tableY = doc.y;
+  let x = 54;
+  headers.forEach((header, index) => {
+    doc.rect(x, tableY, widths[index], 20).fillAndStroke('#edf3fa', '#b8c7d8');
+    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(7).text(header, x + 3, tableY + 6, { width: widths[index] - 6 });
+    x += widths[index];
+  });
+  tableY += 20;
+  rows.forEach((row) => {
+    x = 54;
+    row.forEach((value, index) => {
+      doc.rect(x, tableY, widths[index], 27).strokeColor('#cbd5e1').stroke();
+      doc.fillColor('#213047').font('Helvetica').fontSize(6.8).text(value, x + 3, tableY + 5, { width: widths[index] - 6, height: 19 });
+      x += widths[index];
+    });
+    tableY += 27;
+  });
+  doc.y = tableY + 8;
+  doc.fillColor('#52657f').font('Helvetica').fontSize(8).text(
+    'Baseline and post percentages use only students with both mapped domain scores. Excluded records are not imputed.',
+    54,
+    tableY + 8,
+    { width: 504 },
+  );
 }
 
 function buildPdf(program, options) {
@@ -84,7 +265,7 @@ function buildPdf(program, options) {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     addHeader(doc);
     doc.moveDown(1.5);
-    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(28).text('Pilot Outcomes Report');
+    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(26).text('Focus Flame Academy Pilot Outcomes Report');
     doc.moveDown();
     doc.fillColor('#213047').fontSize(18).text(program.programName);
     doc.font('Helvetica').fontSize(11).text(program.programType);
@@ -92,8 +273,7 @@ function buildPdf(program, options) {
     line(doc, 'Reporting period', `${options.reportingStart || 'Program start'} – ${options.reportingEnd || 'Prepared date'}`);
     line(doc, 'Prepared', new Date().toISOString().slice(0, 10));
     line(doc, 'Confidentiality', 'Administrative pilot review — privacy-safe cohort summary');
-    doc.addPage();
-    addHeader(doc);
+    addContentPage(doc);
     heading(doc, 'Executive summary');
     doc.fillColor('#213047').font('Helvetica').fontSize(10).text(narrative(program));
     doc.moveDown();
@@ -104,6 +284,8 @@ function buildPdf(program, options) {
     line(doc, 'Absolute delta', metric(program.absoluteDelta));
     line(doc, 'Percentage delta', program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable');
     line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Not enough data' : `${program.weeklyCompletion.rate}% (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
+    if (options.includeCharts !== false) drawImpactSnapshot(doc, program);
+    addContentPage(doc);
     heading(doc, 'Program snapshot');
     line(doc, 'Facilitator', program.facilitator);
     line(doc, 'Start date', program.startDate || 'Not provided');
@@ -118,13 +300,23 @@ function buildPdf(program, options) {
     line(doc, 'Unchanged', program.students.filter((row) => row.delta === 0).length);
     line(doc, 'Declined', program.students.filter((row) => row.delta < 0).length);
     line(doc, 'Incomplete', program.students.filter((row) => row.delta == null).length);
-    if (options.includeCharts !== false) {
-      doc.moveDown().font('Helvetica-Bold').text('Category-level gains');
-      for (const category of program.categories) {
-        doc.font('Helvetica').text(`${category.category}: ${metric(category.delta)} (n=${category.n})`);
-      }
-      if (!program.categories.length) doc.font('Helvetica').text('Not enough data');
-    }
+    heading(doc, 'Key strengths');
+    doc.font('Helvetica').fontSize(9).text(
+      program.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints != null
+        ? `Matched domain results show ${signedPoints(program.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints)} across ${program.impactSnapshot.overallMatchedGrowth.includedDomainCount} mapped domains.`
+        : 'Not enough matched domain data is available to identify measured strengths.',
+    );
+    heading(doc, 'Areas needing additional data');
+    program.reportBlockers.forEach((blocker) => {
+      ensureSpace(doc, 15);
+      doc.font('Helvetica').fontSize(9).text(`- ${blocker}`);
+    });
+    program.impactSnapshot.domains
+      .filter((domain) => domain.deltaPercentagePoints == null)
+      .forEach((domain) => {
+        ensureSpace(doc, 15);
+        doc.font('Helvetica').fontSize(9).text(`- ${domain.label}: ${domain.missingReason}`);
+      });
     heading(doc, 'Engagement');
     line(doc, 'Weekly adventures completed', `${program.weeklyCompletion.count}/${program.weeklyCompletion.total || 'unavailable'}`);
     line(doc, 'Last activity', program.lastActivity || 'Not enough data');
@@ -143,15 +335,17 @@ function buildPdf(program, options) {
       'Pre/post change uses only students with both a valid baseline and post score. Incomplete records remain visible in participation and data-quality totals. Results describe this pilot cohort and do not establish clinical, diagnostic, causal, or statistically significant effects.',
     );
     heading(doc, 'Next-step recommendations');
-    recommendations(program).forEach((item) => doc.font('Helvetica').fontSize(10).text(`• ${item}`));
+    recommendations(program).forEach((item) => {
+      ensureSpace(doc, 18);
+      doc.font('Helvetica').fontSize(10).text(`- ${item}`);
+    });
     if (options.includeStudentAppendix) {
       doc.addPage();
       addHeader(doc);
       heading(doc, 'Privacy-safe student appendix');
       for (const student of program.students) {
         if (doc.y > 720) {
-          doc.addPage();
-          addHeader(doc);
+          addContentPage(doc);
           heading(doc, 'Privacy-safe student appendix — continued');
         }
         doc.font('Helvetica-Bold').fontSize(9).text(student.studentLabel, { continued: true });
@@ -173,7 +367,8 @@ function buildPdf(program, options) {
 }
 
 function buildHtml(program) {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><table><tbody><tr><th>Students enrolled</th><td>${program.activeStudentCount}</td></tr><tr><th>Matched students</th><td>${program.matchedCount}</td></tr><tr><th>Baseline average</th><td>${metric(program.baselineAverage)}</td></tr><tr><th>Post average</th><td>${metric(program.postAverage)}</td></tr><tr><th>Absolute delta</th><td>${metric(program.absoluteDelta)}</td></tr></tbody></table><h2>Data notes</h2><p>Results use matched students and describe this pilot cohort. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
+  const domainRows = program.impactSnapshot.domains.map((domain) => `<tr><th>${text(domain.label)}</th><td>${metric(domain.baselinePercentage, '%')}</td><td>${metric(domain.postPercentage, '%')}</td><td>${signedPoints(domain.deltaPercentagePoints)}</td><td>${domain.matchedStudentCount}</td><td>${domain.excludedRecordCount}</td><td>${text(domain.dataQualityStatus)}</td></tr>`).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Pilot Impact Snapshot</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data notes</h2><p>Results use matched students and describe this pilot cohort. Missing records are not inferred. Findings with fewer than 5 matched students are directional.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
 }
 
 exports.handler = async (event) => {
@@ -233,3 +428,5 @@ exports.handler = async (event) => {
 
 module.exports.buildPdf = buildPdf;
 module.exports.buildHtml = buildHtml;
+module.exports.impactItems = impactItems;
+module.exports.reportImpactPayload = reportImpactPayload;
