@@ -21,14 +21,17 @@ const WEEK1_STATIC = '/images/caidenscourage/Game-Hub/courage-in-the-dark.webp';
 
 function firstMissionImageUrl(module: AdventureModuleRecord | null | undefined): string | null {
   if (!module?.hotspots?.length) return null;
-  for (const spot of module.hotspots) {
-    const image =
-      spot.character_image_url?.trim() ||
-      spot.reward_image_url?.trim() ||
-      null;
-    if (image) return image;
-  }
-  return null;
+  const hotspots = module.hotspots;
+  const configuredCharacters = new Set(
+    hotspots.map((spot) => spot.character_key).filter(Boolean),
+  );
+  // A hotspot list is a set of activities, not a lead-character assignment.
+  // Only use character art when the week has one unambiguous configured character.
+  if (configuredCharacters.size !== 1) return null;
+  const spot = hotspots.find(
+    (candidate) => candidate.character_key === hotspots[0]?.character_key,
+  );
+  return spot?.character_image_url?.trim() || spot?.reward_image_url?.trim() || null;
 }
 
 /** Thumbnail priority: CMS comic → mission image → map background → week-1 static → placeholder. */

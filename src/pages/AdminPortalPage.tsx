@@ -4,6 +4,7 @@ import AdminAddStudentTab from '../components/admin/tabs/AdminAddStudentTab';
 import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
 import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
 import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
+import AdminPilotOutcomesTab from '../components/admin/tabs/AdminPilotOutcomesTab';
 import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
 import AdminAdventuresTab from '../components/admin/tabs/AdminAdventuresTab';
 import AdminCommerceTab, {
@@ -163,6 +164,8 @@ export default function AdminPortalPage() {
             onRetry={() => void loadPrograms()}
           />
         );
+      case 'pilot-outcomes':
+        return adminAccessToken ? <AdminPilotOutcomesTab token={adminAccessToken} /> : null;
       case 'adventures':
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':

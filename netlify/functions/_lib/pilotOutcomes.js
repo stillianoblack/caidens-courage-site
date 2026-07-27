@@ -1,0 +1,312 @@
+const BASELINE_TYPES = new Set(['baseline', 'child_baseline', 'adult_pre']);
+const POST_TYPES = new Set(['final', 'post', 'post_assessment', 'adult_post']);
+const CATEGORY_FIELDS = [
+  ['emotional_awareness_score', 'Emotional awareness'],
+  ['decision_making_score', 'Decision making'],
+  ['communication_score', 'Communication'],
+  ['teamwork_score', 'Teamwork'],
+  ['problem_solving_score', 'Problem solving'],
+  ['focus_score', 'Focus/self-regulation'],
+  ['perseverance_score', 'Perseverance/resilience'],
+  ['confidence_score', 'Courage/confidence'],
+  ['reading_score', 'Reading comprehension'],
+  ['understanding_score', 'Reading comprehension'],
+];
+
+function numberOrNull(value) {
+  const number = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function timestamp(value) {
+  const time = Date.parse(String(value || ''));
+  return Number.isFinite(time) ? time : 0;
+}
+
+function latestIso(values) {
+  const latest = values.map(timestamp).filter(Boolean).sort((a, b) => b - a)[0];
+  return latest ? new Date(latest).toISOString() : null;
+}
+
+function round(value, places = 1) {
+  if (!Number.isFinite(value)) return null;
+  const factor = 10 ** places;
+  return Math.round(value * factor) / factor;
+}
+
+function average(values) {
+  const valid = values.filter((value) => Number.isFinite(value));
+  return valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : null;
+}
+
+function scorePercent(row) {
+  const explicit = numberOrNull(row?.percent_score);
+  if (explicit !== null) return explicit >= 0 && explicit <= 100 ? explicit : null;
+  const total = numberOrNull(row?.total_score ?? row?.score);
+  const max = numberOrNull(row?.max_score);
+  if (total === null || max === null || max <= 0) return null;
+  const percent = (total / max) * 100;
+  return percent >= 0 && percent <= 100 ? percent : null;
+}
+
+function assessmentKind(row) {
+  const type = String(row?.assessment_type || '').trim().toLowerCase();
+  if (BASELINE_TYPES.has(type)) return 'baseline';
+  if (POST_TYPES.has(type)) return 'post';
+  return null;
+}
+
+function groupBy(rows, keyFn) {
+  const grouped = new Map();
+  for (const row of rows || []) {
+    const key = keyFn(row);
+    if (!key) continue;
+    const list = grouped.get(key) || [];
+    list.push(row);
+    grouped.set(key, list);
+  }
+  return grouped;
+}
+
+function latestAssessment(rows, kind) {
+  return rows
+    .filter((row) => assessmentKind(row) === kind)
+    .sort((a, b) => timestamp(b.completed_at ?? b.created_at) - timestamp(a.completed_at ?? a.created_at))[0] || null;
+}
+
+function categoryScores(row) {
+  const byLabel = new Map();
+  for (const [field, label] of CATEGORY_FIELDS) {
+    const value = numberOrNull(row?.[field]);
+    if (value === null) continue;
+    const list = byLabel.get(label) || [];
+    list.push(value);
+    byLabel.set(label, list);
+  }
+  return Object.fromEntries([...byLabel].map(([label, values]) => [label, average(values)]));
+}
+
+function sanitizeGrade(participant) {
+  return String(participant.grade_level || participant.grade_band || 'Not provided').trim() || 'Not provided';
+}
+
+function participantOutcome(participant, assessments, engagement) {
+  const baselineRows = assessments.filter((row) => assessmentKind(row) === 'baseline');
+  const postRows = assessments.filter((row) => assessmentKind(row) === 'post');
+  const baseline = latestAssessment(assessments, 'baseline');
+  const post = latestAssessment(assessments, 'post');
+  const baselineScore = scorePercent(baseline);
+  const postScore = scorePercent(post);
+  const matched = baselineScore !== null && postScore !== null;
+  const status = matched
+    ? 'Matched'
+    : baselineScore !== null
+      ? 'Baseline only'
+      : postScore !== null
+        ? 'Post only'
+        : 'Not enough data';
+  const completionTimes = [
+    ...assessments.map((row) => row.completed_at || row.created_at),
+    ...engagement.modules.map((row) => row.completed_at || row.created_at),
+    ...engagement.weeks.map((row) => row.completed_at || row.updated_at || row.created_at),
+  ];
+  return {
+    participantId: participant.id,
+    grade: sanitizeGrade(participant),
+    baseline,
+    post,
+    baselineScore,
+    postScore,
+    delta: matched ? round(postScore - baselineScore) : null,
+    status,
+    duplicateBaseline: baselineRows.length > 1,
+    duplicatePost: postRows.length > 1,
+    invalidScoreCount: assessments.filter((row) => {
+      const hasScore = row.percent_score != null || row.total_score != null || row.score != null;
+      return hasScore && scorePercent(row) === null;
+    }).length,
+    weeklyAdventuresCompleted: new Set(engagement.weeks.map((row) => row.week_number ?? row.week_id).filter(Boolean)).size,
+    assessmentsCompleted: assessments.filter((row) => assessmentKind(row)).length,
+    missionsCompleted: new Set(engagement.modules.map((row) => row.mission_id || row.module_id || row.id).filter(Boolean)).size,
+    focusCoins: engagement.wallets.reduce((sum, row) => sum + (numberOrNull(row.total_coins ?? row.balance ?? row.coins ?? row.amount) || 0), 0),
+    certificates: engagement.rewards.filter((row) => /certificate/i.test(String(row.reward_type || row.reward_key || row.reward_name || ''))).length,
+    lastActivity: latestIso(completionTimes),
+    categoryBaseline: baseline ? categoryScores(baseline) : {},
+    categoryPost: post ? categoryScores(post) : {},
+  };
+}
+
+function buildProgramOutcome(program, data, options = {}) {
+  const participants = (data.participants || []).filter(
+    (row) => row.program_code === program.program_code && (!row.role || row.role === 'student'),
+  );
+  const participantIds = new Set(participants.map((row) => row.id));
+  const assessmentsByParticipant = groupBy(
+    (data.assessments || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
+  const modulesByParticipant = groupBy(
+    (data.modules || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
+  const weeksByParticipant = groupBy(
+    (data.weeks || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
+  const walletsByParticipant = groupBy(
+    (data.wallets || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
+  const rewardsByParticipant = groupBy(
+    (data.rewards || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
+  const studentRows = participants.map((participant) =>
+    participantOutcome(
+      participant,
+      assessmentsByParticipant.get(participant.id) || [],
+      {
+        modules: modulesByParticipant.get(participant.id) || [],
+        weeks: weeksByParticipant.get(participant.id) || [],
+        wallets: walletsByParticipant.get(participant.id) || [],
+        rewards: rewardsByParticipant.get(participant.id) || [],
+      },
+    ),
+  );
+  const matched = studentRows.filter((row) => row.status === 'Matched');
+  const baselineAverage = average(matched.map((row) => row.baselineScore));
+  const postAverage = average(matched.map((row) => row.postScore));
+  const absoluteDelta =
+    baselineAverage !== null && postAverage !== null ? postAverage - baselineAverage : null;
+  const percentageDelta =
+    baselineAverage !== null && baselineAverage !== 0 && absoluteDelta !== null
+      ? (absoluteDelta / baselineAverage) * 100
+      : null;
+  const publishedWeeks = Math.max(0, Number(options.publishedWeeks || 0));
+  const completedStudentWeeks = studentRows.reduce((sum, row) => sum + row.weeklyAdventuresCompleted, 0);
+  const possibleStudentWeeks = participants.length * publishedWeeks;
+  const gradeDistribution = Object.entries(
+    studentRows.reduce((result, row) => {
+      result[row.grade] = (result[row.grade] || 0) + 1;
+      return result;
+    }, {}),
+  ).map(([grade, count]) => ({ grade, count }));
+  const categoryLabels = [...new Set(matched.flatMap((row) => Object.keys(row.categoryBaseline)))];
+  const categories = categoryLabels.map((label) => {
+    const pairs = matched
+      .map((row) => [row.categoryBaseline[label], row.categoryPost[label]])
+      .filter(([baselineValue, postValue]) => Number.isFinite(baselineValue) && Number.isFinite(postValue));
+    const baselineCategoryAverage = average(pairs.map(([value]) => value));
+    const postCategoryAverage = average(pairs.map(([, value]) => value));
+    return {
+      category: label,
+      baselineAverage: round(baselineCategoryAverage),
+      postAverage: round(postCategoryAverage),
+      delta:
+        baselineCategoryAverage !== null && postCategoryAverage !== null
+          ? round(postCategoryAverage - baselineCategoryAverage)
+          : null,
+      n: pairs.length,
+      state: pairs.length ? 'Matched' : 'Not enough data',
+    };
+  });
+  const lastActivity = latestIso([
+    program.created_at,
+    ...studentRows.map((row) => row.lastActivity),
+  ]);
+  const quality = {
+    missingBaseline: studentRows.filter((row) => row.baselineScore === null).length,
+    missingPost: studentRows.filter((row) => row.postScore === null).length,
+    unmatchedRecords: studentRows.filter((row) => row.status !== 'Matched').length,
+    duplicateAssessmentWarnings: studentRows.filter((row) => row.duplicateBaseline || row.duplicatePost).length,
+    invalidScoreRanges: studentRows.reduce((sum, row) => sum + row.invalidScoreCount, 0),
+    studentsWithoutGrade: studentRows.filter((row) => row.grade === 'Not provided').length,
+    programWithoutStartDate: !program.start_date && !program.pilot_start_date,
+    staleProgram:
+      String(program.pilot_status || '') === 'active' &&
+      timestamp(lastActivity) > 0 &&
+      Date.now() - timestamp(lastActivity) > 30 * 24 * 60 * 60 * 1000,
+  };
+  const reportBlockers = [];
+  if (!matched.length) reportBlockers.push('No matched baseline and post-assessment records');
+  if (quality.invalidScoreRanges) reportBlockers.push('Invalid assessment score ranges');
+  if (!program.start_date && !program.pilot_start_date) reportBlockers.push('Program start date is missing');
+  return {
+    id: program.id,
+    programName: program.program_name,
+    programType: program.program_type,
+    facilitator: program.admin_first_name || 'Not provided',
+    status: program.pilot_status,
+    startDate: program.start_date || program.pilot_start_date || program.created_at || null,
+    activeStudentCount: participants.length,
+    baseline: { count: studentRows.filter((row) => row.baselineScore !== null).length, total: participants.length },
+    post: { count: studentRows.filter((row) => row.postScore !== null).length, total: participants.length },
+    matchedCount: matched.length,
+    baselineAverage: round(baselineAverage),
+    postAverage: round(postAverage),
+    absoluteDelta: round(absoluteDelta),
+    percentageDelta: round(percentageDelta),
+    percentageDeltaAvailable: percentageDelta !== null,
+    weeklyCompletion: {
+      count: completedStudentWeeks,
+      total: possibleStudentWeeks,
+      rate: possibleStudentWeeks ? round((completedStudentWeeks / possibleStudentWeeks) * 100) : null,
+    },
+    certificateCount: studentRows.reduce((sum, row) => sum + row.certificates, 0),
+    focusCoins: studentRows.reduce((sum, row) => sum + row.focusCoins, 0),
+    assessmentCount: studentRows.reduce((sum, row) => sum + row.assessmentsCompleted, 0),
+    missionCount: studentRows.reduce((sum, row) => sum + row.missionsCompleted, 0),
+    lastActivity,
+    reportStatus: reportBlockers.length ? 'Blocked' : 'Ready',
+    reportBlockers,
+    categories,
+    gradeDistribution,
+    quality,
+    students: studentRows.map((row, index) => ({
+      studentLabel: `Student ${String(index + 1).padStart(3, '0')}`,
+      grade: row.grade,
+      baselineScore: row.baselineScore,
+      postScore: row.postScore,
+      delta: row.delta,
+      weeklyAdventuresCompleted: row.weeklyAdventuresCompleted,
+      assessmentsCompleted: row.assessmentsCompleted,
+      missionsCompleted: row.missionsCompleted,
+      focusCoins: row.focusCoins,
+      certificates: row.certificates,
+      lastActivity: row.lastActivity,
+      dataCompleteness: row.status,
+    })),
+  };
+}
+
+function portfolioSummary(programs) {
+  const active = programs.filter((program) => program.status === 'active');
+  const studentTotal = programs.reduce((sum, program) => sum + program.activeStudentCount, 0);
+  const completionRates = programs.map((program) => program.weeklyCompletion.rate).filter(Number.isFinite);
+  return {
+    totalActivePilots: active.length,
+    totalEnrolledStudents: studentTotal,
+    completedBaseline: programs.reduce((sum, program) => sum + program.baseline.count, 0),
+    completedPost: programs.reduce((sum, program) => sum + program.post.count, 0),
+    matchedStudents: programs.reduce((sum, program) => sum + program.matchedCount, 0),
+    averageProgramCompletionRate: round(average(completionRates)),
+    averageWeeklyAdventureCompletion: round(average(completionRates)),
+    totalCompletedAssessments: programs.reduce((sum, program) => sum + program.assessmentCount, 0),
+    totalCertificatesEarned: programs.reduce((sum, program) => sum + program.certificateCount, 0),
+    totalFocusCoinsEarned: programs.reduce((sum, program) => sum + program.focusCoins, 0),
+    mostRecentActivity: latestIso(programs.map((program) => program.lastActivity)),
+  };
+}
+
+function buildPilotOutcomes(data, options = {}) {
+  const programs = (data.programs || []).map((program) => buildProgramOutcome(program, data, options));
+  return { summary: portfolioSummary(programs), programs };
+}
+
+module.exports = {
+  assessmentKind,
+  buildPilotOutcomes,
+  buildProgramOutcome,
+  portfolioSummary,
+  scorePercent,
+};
