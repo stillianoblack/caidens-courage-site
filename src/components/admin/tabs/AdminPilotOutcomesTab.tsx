@@ -369,8 +369,13 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [programType, setProgramType] = useState('all');
+  const [programId, setProgramId] = useState('all');
+  const [grade, setGrade] = useState('all');
+  const [dateStart, setDateStart] = useState('');
+  const [dateEnd, setDateEnd] = useState('');
   const [status, setStatus] = useState('all');
   const [assessmentStatus, setAssessmentStatus] = useState('all');
+  const [completionStatus, setCompletionStatus] = useState('all');
   const [minimumMatched, setMinimumMatched] = useState(0);
 
   const load = useCallback(async () => {
@@ -385,15 +390,22 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
   useEffect(() => { void load(); }, [load]);
 
   const filtered = useMemo(() => programs.filter((program) => {
+    if (programId !== 'all' && program.id !== programId) return false;
     if (programType !== 'all' && program.programType !== programType) return false;
+    if (grade !== 'all' && !program.gradeDistribution.some((item) => item.grade === grade)) return false;
     if (status !== 'all' && program.status !== status) return false;
+    if (dateStart && (!program.lastActivity || new Date(program.lastActivity) < new Date(dateStart))) return false;
+    if (dateEnd && (!program.lastActivity || new Date(program.lastActivity) > new Date(`${dateEnd}T23:59:59`))) return false;
     if (program.matchedCount < minimumMatched) return false;
     if (assessmentStatus === 'matched' && !program.matchedCount) return false;
     if (assessmentStatus === 'baseline-only' && !(program.baseline.count && !program.post.count)) return false;
     if (assessmentStatus === 'post-only' && !(program.post.count && !program.baseline.count)) return false;
     if (assessmentStatus === 'incomplete' && program.baseline.count === program.baseline.total && program.post.count === program.post.total) return false;
+    if (completionStatus === 'complete' && program.weeklyCompletion.rate !== 100) return false;
+    if (completionStatus === 'in-progress' && !(program.weeklyCompletion.rate != null && program.weeklyCompletion.rate > 0 && program.weeklyCompletion.rate < 100)) return false;
+    if (completionStatus === 'not-started' && program.weeklyCompletion.count !== 0) return false;
     return true;
-  }), [assessmentStatus, minimumMatched, programType, programs, status]);
+  }), [assessmentStatus, completionStatus, dateEnd, dateStart, grade, minimumMatched, programId, programType, programs, status]);
 
   const openProgram = async (programId: string) => {
     setError('');
@@ -415,9 +427,14 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
       <section className="pilotOutcomes-panel" aria-labelledby="filters-title">
         <h3 id="filters-title">Filters</h3>
         <div className="pilotOutcomes-controls">
+          <label>Program<select value={programId} onChange={(event) => setProgramId(event.target.value)}><option value="all">All programs</option>{programs.map((program) => <option key={program.id} value={program.id}>{program.programName}</option>)}</select></label>
           <label>Program type<select value={programType} onChange={(event) => setProgramType(event.target.value)}><option value="all">All types</option>{Array.from(new Set(programs.map((program) => program.programType))).map((type) => <option key={type}>{type}</option>)}</select></label>
+          <label>Grade<select value={grade} onChange={(event) => setGrade(event.target.value)}><option value="all">All grades</option>{Array.from(new Set(programs.flatMap((program) => program.gradeDistribution.map((item) => item.grade)))).sort().map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label>Activity from<input type="date" value={dateStart} onChange={(event) => setDateStart(event.target.value)} /></label>
+          <label>Activity through<input type="date" value={dateEnd} onChange={(event) => setDateEnd(event.target.value)} /></label>
           <label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">Active and archived</option>{Array.from(new Set(programs.map((program) => program.status))).map((item) => <option key={item}>{item}</option>)}</select></label>
           <label>Assessment status<select value={assessmentStatus} onChange={(event) => setAssessmentStatus(event.target.value)}><option value="all">All states</option><option value="matched">Matched</option><option value="baseline-only">Baseline only</option><option value="post-only">Post only</option><option value="incomplete">Incomplete</option></select></label>
+          <label>Completion status<select value={completionStatus} onChange={(event) => setCompletionStatus(event.target.value)}><option value="all">All completion states</option><option value="complete">Complete</option><option value="in-progress">In progress</option><option value="not-started">Not started</option></select></label>
           <label>Minimum matched students<input type="number" min="0" value={minimumMatched} onChange={(event) => setMinimumMatched(Number(event.target.value))} /></label>
         </div>
       </section>
@@ -425,7 +442,7 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
         <h3 id="program-table-title">Programs</h3>
         <div className="pilotOutcomes-tableWrap">
           <table><thead><tr><th>Program</th><th>Type</th><th>Facilitator</th><th>Start</th><th>Students</th><th>Baseline</th><th>Post</th><th>Matched</th><th>Baseline avg.</th><th>Post avg.</th><th>Delta</th><th>Weekly</th><th>Certificates</th><th>Last activity</th><th>Report</th><th>Actions</th></tr></thead>
-          <tbody>{filtered.map((program) => <tr key={program.id}><td>{program.programName}</td><td>{program.programType}</td><td>{program.facilitator}</td><td>{date(program.startDate)}</td><td>{program.activeStudentCount}</td><td>{percent(program.baseline.count, program.baseline.total)}</td><td>{percent(program.post.count, program.post.total)}</td><td>{program.matchedCount}</td><td>{metric(program.baselineAverage)}</td><td>{metric(program.postAverage)}</td><td>{metric(program.absoluteDelta)} / {program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable'}</td><td>{metric(program.weeklyCompletion.rate, '%')}</td><td>{program.certificateCount}</td><td>{date(program.lastActivity)}</td><td>{program.reportStatus}</td><td><button type="button" onClick={() => void openProgram(program.id)}>View details</button></td></tr>)}</tbody></table>
+          <tbody>{filtered.map((program) => <tr key={program.id}><td>{program.programName}</td><td>{program.programType}</td><td>{program.facilitator}</td><td>{date(program.startDate)}</td><td>{program.activeStudentCount}</td><td>{percent(program.baseline.count, program.baseline.total)}</td><td>{percent(program.post.count, program.post.total)}</td><td>{program.matchedCount}</td><td>{metric(program.baselineAverage)}</td><td>{metric(program.postAverage)}</td><td>{metric(program.absoluteDelta)} / {program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable'}</td><td>{metric(program.weeklyCompletion.rate, '%')}</td><td>{program.certificateCount}</td><td>{date(program.lastActivity)}</td><td>{program.reportStatus}</td><td><button type="button" onClick={() => void openProgram(program.id)}>View details</button> <button type="button" onClick={() => void openProgram(program.id)}>Generate report</button></td></tr>)}</tbody></table>
         </div>
         {!filtered.length && !loading ? <p className="pilotOutcomes-empty">No programs match these filters.</p> : null}
       </section>
