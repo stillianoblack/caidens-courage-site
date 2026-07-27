@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  clearAdminSession,
-  isAdminAccessConfigured,
-  readAdminSession,
-  verifyAdminCredentials,
-  writeAdminSession,
-} from '../config/adminAccess';
 import AdminAddStudentTab from '../components/admin/tabs/AdminAddStudentTab';
 import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
 import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
@@ -25,12 +18,17 @@ import {
 } from '../data/adminPortalContent';
 import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
 import { resolveAdminPortalTab } from '../lib/adminPortalPaths';
-import type { PilotProgramRecord } from '../types/pilotProgram';
+import type { AdminProgramDirectoryRecord } from '../types/adminProgramDirectory';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
+  const adminAuth = useAdminAuth();
+  const adminAccessToken = adminAuth.token;
+  const adminAuthorized = adminAuth.authorized;
+  const adminSignOut = adminAuth.signOut;
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,16 +40,13 @@ export default function AdminPortalPage() {
   const [activeCommerceSubtab, setActiveCommerceSubtab] = useState<AdminCommerceSubtab>(
     resolveAdminCommerceSubtab(isCommerceRoute ? tabParam : searchParams.get('commerceTab')),
   );
-  const [unlocked, setUnlocked] = useState(() => readAdminSession());
   const [email, setEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [programs, setPrograms] = useState<PilotProgramRecord[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [programs, setPrograms] = useState<AdminProgramDirectoryRecord[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-
-  const configured = isAdminAccessConfigured();
 
   useEffect(() => {
     document.title = "Admin Portal | Caiden's Courage";
@@ -88,19 +83,26 @@ export default function AdminPortalPage() {
   }, []);
 
   const loadPrograms = useCallback(async () => {
+    if (!adminAccessToken) return;
     setLoading(true);
-    setLoadError(null);
-    const result = await fetchAllPilotProgramsForAdmin();
+    setLoadError(false);
+    const result = await fetchAllPilotProgramsForAdmin(adminAccessToken);
+    if (result.error === 'unauthenticated') {
+      await adminSignOut();
+      setPrograms([]);
+      setLoading(false);
+      return;
+    }
     setPrograms(result.programs);
-    setLoadError(result.error ?? null);
+    setLoadError(Boolean(result.error));
     setLoading(false);
-  }, []);
+  }, [adminAccessToken, adminSignOut]);
 
   useEffect(() => {
-    if (unlocked && configured) {
+    if (adminAuthorized) {
       void loadPrograms();
     }
-  }, [configured, loadPrograms, unlocked]);
+  }, [adminAuthorized, loadPrograms]);
 
   const selectTab = useCallback(
     (next: AdminPortalTabId) => {
@@ -128,30 +130,18 @@ export default function AdminPortalPage() {
     [navigate],
   );
 
-  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleUnlock = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError(null);
-
-    if (!configured) {
-      setAuthError('Admin access is not configured.');
-      return;
-    }
-
-    if (!verifyAdminCredentials(email, passcode)) {
-      setAuthError('Invalid admin email or passcode.');
-      return;
-    }
-
-    writeAdminSession(email);
-    setUnlocked(true);
+    const authorized = await adminAuth.signIn(email, passcode);
+    if (!authorized) setAuthError(adminAuth.error || 'Admin access could not be verified.');
     setPasscode('');
   };
 
-  const handleSignOut = () => {
-    clearAdminSession();
-    setUnlocked(false);
+  const handleSignOut = async () => {
+    await adminAuth.signOut();
     setPrograms([]);
-    setLoadError(null);
+    setLoadError(false);
     setEmail('');
     setPasscode('');
   };
@@ -170,14 +160,13 @@ export default function AdminPortalPage() {
             programs={programs}
             loading={loading}
             loadError={loadError}
-            onCopied={handleCopied}
-            onChanged={() => void loadPrograms()}
+            onRetry={() => void loadPrograms()}
           />
         );
       case 'adventures':
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
-        return <AdminDataCleanupTab onChanged={() => void loadPrograms()} />;
+        return <AdminDataCleanupTab programs={programs} onChanged={() => void loadPrograms()} />;
       case 'commerce':
         return (
           <AdminCommerceTab
@@ -194,19 +183,15 @@ export default function AdminPortalPage() {
   return (
     <div className="adminPortal-page font-body">
       <main className="adminPortal-main adminPortal-main--settings">
-        {!configured ? (
+        {adminAuth.loading ? (
           <section className="adminPortal-card">
-            <h2 className="adminPortal-cardTitle">Admin access is not configured.</h2>
-            <p className="adminPortal-cardSub">
-              Set <code>REACT_APP_ADMIN_EMAIL</code> and <code>REACT_APP_ADMIN_PASSCODE</code> in your
-              environment, then restart the app.
-            </p>
+            <h2 className="adminPortal-cardTitle">Checking admin access…</h2>
           </section>
-        ) : !unlocked ? (
+        ) : !adminAuth.authorized ? (
           <section className="adminPortal-card">
             <h2 className="adminPortal-cardTitle">Admin Portal</h2>
-            <p className="adminPortal-cardSub">Enter your admin email and passcode to continue.</p>
-            <form className="adminPortal-form" onSubmit={handleUnlock}>
+            <p className="adminPortal-cardSub">Sign in with your authorized admin account.</p>
+            <form className="adminPortal-form" onSubmit={(event) => void handleUnlock(event)}>
               <div className="adminPortal-field">
                 <label htmlFor="admin-email">Admin Email</label>
                 <input
@@ -229,9 +214,11 @@ export default function AdminPortalPage() {
                   required
                 />
               </div>
-              {authError ? <p className="adminPortal-error">{authError}</p> : null}
+              {authError || adminAuth.error ? (
+                <p className="adminPortal-error">{authError || adminAuth.error}</p>
+              ) : null}
               <button type="submit" className="adminPortal-btn adminPortal-btn--primary">
-                Unlock Admin Portal
+                Sign in
               </button>
             </form>
           </section>
@@ -246,7 +233,7 @@ export default function AdminPortalPage() {
             panelClassName="family-panel family-panel--settings adminPortal-settingsPanel"
             tabAriaLabel="Admin portal sections"
             toolbar={
-              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
+              <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void handleSignOut()}>
                 Sign out
               </button>
             }

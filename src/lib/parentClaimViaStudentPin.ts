@@ -13,7 +13,6 @@ import {
   markStudentFamilyLinksClaimed,
   type StudentFamilyLink,
 } from './studentFamilyLinkService';
-import { revealStudentPinViaFunction } from './studentPinService';
 import { isPlaceholderParentName, resolveStudentDisplayNameOrFallback } from './studentDisplayName';
 import { trackKitParentSignup } from './kitIntegration';
 import { queueWelcomeEmail } from './welcomeEmailService';
@@ -162,38 +161,12 @@ export async function completeParentClaimViaStudentPin(
     });
   }
 
-  let studentPin: string | undefined;
-  try {
-    const pinResult = await revealStudentPinViaFunction({
-      participantId,
-      programCode: campProgramCode,
-      parentEmail: email,
-      actorRole: 'parent',
-    });
-    if ('pin' in pinResult) {
-      studentPin = pinResult.pin;
-    }
-  } catch {
-    /* optional in welcome email */
-  }
-
   trackKitParentSignup({
     parentEmail: email,
     eventName: 'parent_claim',
     metadata: {
       family_program_code: familyProgram.programCode,
       participant_id: participantId,
-    },
-    welcomeEmail: {
-      parentEmail: email,
-      parentFirstName: input.parentFirstName,
-      familyOrProgramName: familyProgram.programName || campProgramCode,
-      familyAccessCode: familyProgram.familyAccessCode ?? undefined,
-      childName,
-      studentPin,
-      loginUrl: undefined,
-      relatedStudentId: participantId,
-      relatedProgramId: familyProgram.programCode,
     },
   });
 
@@ -203,16 +176,18 @@ export async function completeParentClaimViaStudentPin(
     familyOrProgramName: familyProgram.programName || campProgramCode,
     familyAccessCode: familyProgram.familyAccessCode ?? undefined,
     childName,
-    studentPin,
     loginUrl: undefined,
+    templateType: 'camp_parent',
+    programType: 'Camp / Youth Program',
+    recipientRole: 'parent_guardian',
+    deliveryEventKey: `participant:${participantId}:parent-welcome`,
     relatedStudentId: participantId,
     relatedProgramId: familyProgram.programCode,
   });
 
   console.info('[PARENT_CLAIM_VIA_PIN]', {
-    parent_email: email,
+    parent_email_present: true,
     participant_id: participantId,
-    family_program_code: familyProgram.programCode,
   });
 
   return {

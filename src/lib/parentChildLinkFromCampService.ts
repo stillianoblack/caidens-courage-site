@@ -37,6 +37,7 @@ import {
 import { isSupabaseConfigured, supabase } from './supabaseClient';
 import type { ActivePilotProgram, PilotProgramRecord } from '../types/pilotProgram';
 import { INDEPENDENT_FAMILY_STUDENT_COUNT_RANGE } from '../types/pilotProgram';
+import { createCampParentProgram } from './pilotSignupApi';
 
 export type ParentChildLinkFromCampInput = {
   parentFirstName: string;
@@ -185,13 +186,17 @@ async function createOrResolveFamilyPilotProgram(input: {
   };
 
   try {
-    const { data, error } = await withTimeout(
-      supabase.from('pilot_programs').insert(payload).select('*').single(),
+    const result = await withTimeout(
+      createCampParentProgram({
+        record: payload,
+        requestedProgramCode: input.familyProgramCode.trim(),
+        requestId: `camp-parent-program:${input.familyProgramCode.trim()}`,
+      }),
       DASHBOARD_FETCH_TIMEOUT_MS,
       'family_pilot_program_insert',
     );
 
-    if (error || !data) {
+    if (!result.success || !result.program) {
       const fallback = await fetchPilotProgramByCode(input.familyProgramCode);
       if (fallback) {
         return { program: fallback, created: false };
@@ -199,18 +204,18 @@ async function createOrResolveFamilyPilotProgram(input: {
       return {
         program: buildLocalFamilyProgram(input),
         created: false,
-        error: error?.message ?? 'Could not create family program.',
+        error: result.message ?? 'Could not create family program.',
       };
     }
 
-    const program = recordToActivePilotProgram(data as PilotProgramRecord);
+    const program = recordToActivePilotProgram(result.program);
     console.info('[FAMILY_PORTAL_CREATED]', {
       family_program_code: program.programCode,
       family_access_code: program.familyAccessCode,
       program_name: program.programName,
       created: true,
     });
-    return { program, created: true };
+    return { program, created: !result.reused };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not create family program.';
     return { program: buildLocalFamilyProgram(input), created: false, error: message };

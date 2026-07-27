@@ -16,18 +16,17 @@ import { submitPilotProgramSignup } from '../lib/pilotProgramService';
 import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
 
-function supportCodeFromRequestId(value: string): string {
-  return value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase() || 'SIGNUP';
-}
-
-function appendSupportCode(message: string, supportCode?: string): string {
-  return supportCode ? `${message} Support code: ${supportCode}.` : message;
-}
+const SIGNUP_ERROR = {
+  title: "We couldn't create your program.",
+  body:
+    "Your information hasn't been lost. Please try again. If the problem continues, contact hello@caidenscourage.com.",
+};
 
 export default function PilotProgramSignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
-  const [error, setError] = useState<string | null>(null);
+  const lastSubmissionRef = useRef<PilotProgramSignupInput | null>(null);
+  const [error, setError] = useState<{ title: string; body: string } | null>(null);
   const [signupRequestId] = useState(() =>
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
@@ -40,6 +39,7 @@ export default function PilotProgramSignupPage() {
 
   const handleSubmit = async (input: PilotProgramSignupInput) => {
     if (submittingRef.current) return;
+    lastSubmissionRef.current = input;
     submittingRef.current = true;
     setSubmitting(true);
     setError(null);
@@ -55,10 +55,15 @@ export default function PilotProgramSignupPage() {
 
       if (!result.success) {
         step(`request_failed:${result.code}`);
+        console.warn('[PILOT_SIGNUP_FAILED]', {
+          request_id: signupRequestId,
+          correlation_id: result.correlationId || null,
+          code: result.code,
+        });
         setError(
           result.code === 'validation_error'
-            ? result.message
-            : appendSupportCode(result.message, result.supportCode || supportCodeFromRequestId(signupRequestId)),
+            ? { title: 'Check your information.', body: result.message }
+            : SIGNUP_ERROR,
         );
         return;
       }
@@ -82,7 +87,11 @@ export default function PilotProgramSignupPage() {
 
       const facilitatorCode = result.program.facilitatorAccessCode;
       if (!facilitatorCode) {
-        setError('Facilitator access code is missing for this program. Please contact support.');
+        console.warn('[PILOT_SIGNUP_FAILED]', {
+          request_id: signupRequestId,
+          code: 'missing_facilitator_access',
+        });
+        setError(SIGNUP_ERROR);
         return;
       }
       applyProgramPortalUnlock(result.program, 'facilitator', facilitatorCode);
@@ -102,13 +111,16 @@ export default function PilotProgramSignupPage() {
         request_id: signupRequestId,
         error: caught instanceof Error ? caught.message : 'unknown_error',
       });
-      setError(
-        `We could not create family access right now. Your information is still here. Please try again. Support code: ${supportCodeFromRequestId(signupRequestId)}.`,
-      );
+      setError(SIGNUP_ERROR);
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
     }
+  };
+
+  const handleRetry = async () => {
+    if (!lastSubmissionRef.current || submittingRef.current) return;
+    await handleSubmit(lastSubmissionRef.current);
   };
 
   return (
@@ -131,7 +143,12 @@ export default function PilotProgramSignupPage() {
             codes and open your portal right away.
           </p>
 
-          <PilotProgramSignupForm onSubmit={handleSubmit} submitting={submitting} error={error} />
+          <PilotProgramSignupForm
+            onSubmit={handleSubmit}
+            onRetry={handleRetry}
+            submitting={submitting}
+            error={error}
+          />
 
           <p className="pilotSignup-cardSub" style={{ marginTop: '1.25rem', marginBottom: 0 }}>
             Already have a Blue Ribbon pilot?{' '}

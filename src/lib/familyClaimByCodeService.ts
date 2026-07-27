@@ -359,6 +359,10 @@ async function trackKitParentSignupWithEmail(input: {
     familyAccessCode: input.claimCode,
     childName: input.childName,
     loginUrl: input.familyClaimUrl,
+    templateType: 'camp_parent',
+    programType: 'Camp / Youth Program',
+    recipientRole: 'parent_guardian',
+    deliveryEventKey: `participant:${input.participantId}:parent-welcome`,
     relatedStudentId: input.participantId,
     relatedProgramId: input.familyProgram.programCode,
   });
