@@ -1,3 +1,4 @@
+const { buildLiveLearningSnapshot } = require('./pilotLiveLearningSignals');
 const BASELINE_TYPES = new Set(['baseline', 'child_baseline', 'adult_pre']);
 const POST_TYPES = new Set(['final', 'post', 'post_assessment', 'adult_post']);
 const MIN_MATCHED_DOMAIN_STUDENTS = 1;
@@ -365,8 +366,13 @@ function buildProgramOutcome(program, data, options = {}) {
       ? (absoluteDelta / baselineAverage) * 100
       : null;
   const publishedWeeks = Math.max(0, Number(options.publishedWeeks || 0));
+  const programWeekRows = (data.weeks || []).filter((row) => participantIds.has(row.participant_id));
+  const observedWeekCount = new Set(
+    programWeekRows.map((row) => String(row.week_id || row.week_number || '').trim()).filter(Boolean),
+  ).size;
+  const effectivePublishedWeeks = Math.max(publishedWeeks, observedWeekCount);
   const completedStudentWeeks = studentRows.reduce((sum, row) => sum + row.weeklyAdventuresCompleted, 0);
-  const possibleStudentWeeks = participants.length * publishedWeeks;
+  const possibleStudentWeeks = participants.length * effectivePublishedWeeks;
   const gradeDistribution = Object.entries(
     studentRows.reduce((result, row) => {
       result[row.grade] = (result[row.grade] || 0) + 1;
@@ -426,6 +432,21 @@ function buildProgramOutcome(program, data, options = {}) {
     total: possibleStudentWeeks,
     rate: possibleStudentWeeks ? round((completedStudentWeeks / possibleStudentWeeks) * 100) : null,
   };
+  const impactSnapshot = buildImpactSnapshot(
+    studentRows,
+    weeklyCompletion,
+    baselineCompletion,
+    postCompletion,
+  );
+  const programModules = (data.modules || []).filter((row) => row.program_code === program.program_code);
+  const liveLearningSnapshot = buildLiveLearningSnapshot({
+    modules: programModules,
+    participantIds,
+    weeklyCompletion,
+    weekRows: programWeekRows,
+    participation: impactSnapshot.participation,
+    participantCount: participants.length,
+  });
   return {
     id: program.id,
     programName: program.program_name,
@@ -443,12 +464,9 @@ function buildProgramOutcome(program, data, options = {}) {
     percentageDelta: round(percentageDelta),
     percentageDeltaAvailable: percentageDelta !== null,
     weeklyCompletion,
-    impactSnapshot: buildImpactSnapshot(
-      studentRows,
-      weeklyCompletion,
-      baselineCompletion,
-      postCompletion,
-    ),
+    impactSnapshot,
+    verifiedGrowthSnapshot: impactSnapshot,
+    liveLearningSnapshot,
     certificateCount: studentRows.reduce((sum, row) => sum + row.certificates, 0),
     focusCoins: studentRows.reduce((sum, row) => sum + row.focusCoins, 0),
     assessmentCount: studentRows.reduce((sum, row) => sum + row.assessmentsCompleted, 0),
@@ -508,5 +526,6 @@ module.exports = {
   scorePercent,
   buildDomainOutcome,
   buildImpactSnapshot,
+  buildLiveLearningSnapshot,
   IMPACT_DOMAINS,
 };

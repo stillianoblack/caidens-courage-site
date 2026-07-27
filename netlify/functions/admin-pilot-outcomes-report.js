@@ -48,11 +48,58 @@ async function getProgramOutcome(supabase, programId) {
 }
 
 function narrative(program) {
+  const live = program.liveLearningSnapshot;
+  const overallLive = live?.cards?.find((card) => card.key === 'overall');
+  const domainLive = (live?.cards || []).filter(
+    (card) => card.available && ['reading', 'sel', 'focus'].includes(card.key),
+  );
+  const positiveStatuses = new Set(['Strong signal', 'Positive signal', 'Developing signal']);
+  if (
+    !program.matchedCount &&
+    overallLive?.available &&
+    positiveStatuses.has(overallLive.statusLabel)
+  ) {
+    const domainPhrase =
+      domainLive.length >= 3
+        ? 'reading, SEL, and focus activities'
+        : `${domainLive.length} learning domain(s) with recorded activity`;
+    return `Students are actively participating and demonstrating ${overallLive.statusLabel.toLowerCase()} live learning signals across ${domainPhrase}. Verified pre/post growth remains pending.`;
+  }
   if (!program.matchedCount) {
+    if (domainLive.length) {
+      return 'Students are building live learning signal data from mission activity. Verified pre/post growth remains pending until matched post-assessments are recorded.';
+    }
     return 'This pilot does not yet have enough matched baseline and post-assessment data to describe outcome change.';
   }
   const direction = program.absoluteDelta > 0 ? 'increased' : program.absoluteDelta < 0 ? 'decreased' : 'was unchanged';
   return `Among ${program.matchedCount} students with matched records, the average score ${direction} from ${metric(program.baselineAverage)} to ${metric(program.postAverage)}. These results describe this pilot cohort and do not establish causation.`;
+}
+
+function reportLiveLearningPayload(program) {
+  return program.liveLearningSnapshot || null;
+}
+
+function reportVerifiedGrowthPayload(program) {
+  return program.verifiedGrowthSnapshot || program.impactSnapshot;
+}
+
+function liveChartItems(program) {
+  const snapshot = reportLiveLearningPayload(program);
+  if (!snapshot) return [];
+  return snapshot.cards.map((card) => {
+    const numeric = typeof card.centerValue === 'string' && card.centerValue.endsWith('%')
+      ? Number(card.centerValue.replace('%', ''))
+      : null;
+    return {
+      label: card.label,
+      kind: card.evidenceType === 'operational' ? 'completion' : 'live',
+      center: card.centerValue,
+      delta: null,
+      ring: Number.isFinite(numeric) ? numeric : null,
+      status: card.statusLabel,
+      caption: card.summary,
+    };
+  });
 }
 
 function recommendations(program) {
@@ -106,7 +153,7 @@ function drawImpactCircle(doc, item, x, y) {
   const radius = 41;
   const centerX = x + radius;
   const centerY = y + radius;
-  const state = item.kind === 'completion'
+  const state = item.kind === 'completion' || item.kind === 'live'
     ? { color: '#2469ad' }
     : circleState(item.delta);
   doc.lineWidth(8).strokeColor('#dfe7ef').circle(centerX, centerY, radius).stroke();
@@ -147,7 +194,7 @@ function drawImpactCircle(doc, item, x, y) {
 }
 
 function reportImpactPayload(program) {
-  return program.impactSnapshot;
+  return reportVerifiedGrowthPayload(program);
 }
 
 function impactItems(program) {
@@ -197,15 +244,60 @@ function impactItems(program) {
   ];
 }
 
-function drawImpactSnapshot(doc, program) {
-  const snapshot = reportImpactPayload(program);
+function drawLiveLearningSnapshot(doc, program) {
+  const items = liveChartItems(program);
+  if (!items.length) return;
   addContentPage(doc);
-  heading(doc, 'Pilot Impact Snapshot');
+  heading(doc, 'Live Learning Signals');
   doc
     .font('Helvetica')
     .fontSize(8)
     .fillColor('#52657f')
-    .text('Rings show post scores or completion rates. Center growth values are percentage-point changes, not percent growth.');
+    .text('Directional signals from tagged mission activity and accuracy. These are not verified baseline/post growth.');
+  const startY = doc.y + 12;
+  const columns = [78, 250, 422];
+  items.forEach((item, index) => {
+    drawImpactCircle(doc, item, columns[index % 3], startY + Math.floor(index / 3) * 155);
+  });
+  doc.y = startY + Math.ceil(items.length / 3) * 155 + 8;
+  const guide = program.liveLearningSnapshot?.evidenceGuide;
+  if (guide) {
+    doc
+      .fillColor('#213047')
+      .font('Helvetica')
+      .fontSize(8)
+      .text(
+        `Evidence labels — Operational: ${guide.operational} Directional: ${guide.directional} Verified: ${guide.verified}`,
+        54,
+        doc.y,
+        { width: 504 },
+      );
+  }
+}
+
+function drawProgramHealthSummary(doc, program) {
+  addContentPage(doc);
+  heading(doc, 'Program Health');
+  line(doc, 'Students enrolled', program.activeStudentCount);
+  line(doc, 'Baseline completed', `${program.baseline.count}/${program.baseline.total}`);
+  line(doc, 'Post completed', `${program.post.count}/${program.post.total}`);
+  line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Awaiting activity' : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
+  line(doc, 'Assessments completed', program.assessmentCount);
+  line(doc, 'Missions completed', program.missionCount);
+  line(doc, 'Focus Coins earned', program.focusCoins);
+  line(doc, 'Certificates earned', program.certificateCount);
+  line(doc, 'Last activity', program.lastActivity || 'Not recorded');
+}
+
+function drawImpactSnapshot(doc, program) {
+  const snapshot = reportImpactPayload(program);
+  addContentPage(doc);
+  heading(doc, 'Verified Growth');
+  doc
+    .font('Helvetica')
+    .fontSize(8)
+    .fillColor('#52657f')
+    .text('Confirmed change based on matched baseline and post-assessments. Center values are percentage-point changes.');
   const items = impactItems(program);
   const startY = doc.y + 12;
   const columns = [78, 250, 422];
@@ -290,7 +382,11 @@ function buildPdf(program, options) {
     line(doc, 'Absolute delta', metric(program.absoluteDelta));
     line(doc, 'Percentage delta', program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable');
     line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Not enough data' : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
-    if (options.includeCharts !== false) drawImpactSnapshot(doc, program);
+    drawProgramHealthSummary(doc, program);
+    if (options.includeCharts !== false) {
+      drawLiveLearningSnapshot(doc, program);
+      drawImpactSnapshot(doc, program);
+    }
     addContentPage(doc);
     heading(doc, 'Program snapshot');
     line(doc, 'Facilitator', program.facilitator);
@@ -374,7 +470,8 @@ function buildPdf(program, options) {
 
 function buildHtml(program) {
   const domainRows = program.impactSnapshot.domains.map((domain) => `<tr><th>${text(domain.label)}</th><td>${metric(domain.baselinePercentage, '%')}</td><td>${metric(domain.postPercentage, '%')}</td><td>${signedPoints(domain.deltaPercentagePoints)}</td><td>${domain.matchedStudentCount}</td><td>${domain.excludedRecordCount}</td><td>${text(domain.dataQualityStatus)}</td></tr>`).join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Pilot Impact Snapshot</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data notes</h2><p>Results use matched students and describe this pilot cohort. Missing records are not inferred. Findings with fewer than 5 matched students are directional.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
+  const liveRows = (program.liveLearningSnapshot?.cards || []).map((card) => `<tr><th>${text(card.label)}</th><td>${text(card.centerValue)}</td><td>${text(card.statusLabel)}</td><td>${text(card.summary)}</td></tr>`).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Live Learning Signals</h2><table><thead><tr><th>Measure</th><th>Value</th><th>Status</th><th>Summary</th></tr></thead><tbody>${liveRows || '<tr><td colspan="4">No live signal payload</td></tr>'}</tbody></table><h2>Verified Growth</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data notes</h2><p>Operational metrics describe enrollment and activity. Directional live signals describe mission activity. Verified growth requires matched baseline and post assessments. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
 }
 
 exports.handler = async (event) => {
@@ -436,3 +533,7 @@ module.exports.buildPdf = buildPdf;
 module.exports.buildHtml = buildHtml;
 module.exports.impactItems = impactItems;
 module.exports.reportImpactPayload = reportImpactPayload;
+module.exports.reportLiveLearningPayload = reportLiveLearningPayload;
+module.exports.reportVerifiedGrowthPayload = reportVerifiedGrowthPayload;
+module.exports.liveChartItems = liveChartItems;
+module.exports.narrative = narrative;

@@ -9,6 +9,52 @@ export type ImpactDisplayStatus =
   | 'Directional result'
   | 'Not enough data';
 
+export type PilotLiveLearningCardDetails = {
+  source: string;
+  numerator: number | null;
+  denominator: number | null;
+  includedStudents: number | null;
+  excludedStudents: number | null;
+  dataSufficiencyRule: string;
+  lastCalculatedAt: string;
+  studentsWithActivity?: number;
+  missionsCompleted?: number;
+  questionsAnswered?: number;
+  correctAnswers?: number;
+  averageAttempts?: number | null;
+  skillAreasObserved?: string[];
+  trendNote?: string;
+  baselineCompleted?: number;
+  postCompleted?: number;
+  currentWeekStatus?: string;
+  includedDomainCount?: number;
+  totalDomainCount?: number;
+  weighting?: string;
+};
+
+export type PilotLiveLearningCard = {
+  key: string;
+  label: string;
+  evidenceType: 'operational' | 'directional' | 'verified';
+  centerValue: string;
+  statusLabel: string;
+  summary: string;
+  details: PilotLiveLearningCardDetails;
+  available: boolean;
+  percentage?: number | null;
+};
+
+export type PilotLiveLearningSnapshot = {
+  calculatedAt: string;
+  subtitle: string;
+  cards: PilotLiveLearningCard[];
+  evidenceGuide: {
+    operational: string;
+    directional: string;
+    verified: string;
+  };
+};
+
 export type PilotImpactDomain = {
   key: 'reading' | 'sel' | 'focus';
   label: string;
@@ -28,6 +74,39 @@ export type PilotImpactDomain = {
   missingReason: string | null;
 };
 
+export type PilotImpactSnapshotPayload = {
+  domains: PilotImpactDomain[];
+  weeklyCompletion: {
+    numerator: number;
+    denominator: number;
+    percentage: number | null;
+    dataQualityStatus: ImpactDataQuality;
+    displayStatus: ImpactDisplayStatus;
+    missingReason: string | null;
+  };
+  participation: {
+    numerator: number;
+    denominator: number;
+    percentage: number | null;
+    dataQualityStatus: ImpactDataQuality;
+    displayStatus: ImpactDisplayStatus;
+    missingReason: string | null;
+    baselineCompleted: number;
+    postCompleted: number;
+  };
+  overallMatchedGrowth: {
+    deltaPercentagePoints: number | null;
+    includedDomainCount: number;
+    totalDomainCount: number;
+    matchedStudentCount: number;
+    requiredMatchedCount: number;
+    weighting: string;
+    dataQualityStatus: ImpactDataQuality;
+    displayStatus: ImpactDisplayStatus;
+    missingReason: string | null;
+  };
+};
+
 export type PilotOutcomeProgram = {
   id: string;
   programName: string;
@@ -45,38 +124,9 @@ export type PilotOutcomeProgram = {
   percentageDelta: number | null;
   percentageDeltaAvailable: boolean;
   weeklyCompletion: { count: number; total: number; rate: number | null };
-  impactSnapshot: {
-    domains: PilotImpactDomain[];
-    weeklyCompletion: {
-      numerator: number;
-      denominator: number;
-      percentage: number | null;
-      dataQualityStatus: ImpactDataQuality;
-      displayStatus: ImpactDisplayStatus;
-      missingReason: string | null;
-    };
-    participation: {
-      numerator: number;
-      denominator: number;
-      percentage: number | null;
-      dataQualityStatus: ImpactDataQuality;
-      displayStatus: ImpactDisplayStatus;
-      missingReason: string | null;
-      baselineCompleted: number;
-      postCompleted: number;
-    };
-    overallMatchedGrowth: {
-      deltaPercentagePoints: number | null;
-      includedDomainCount: number;
-      totalDomainCount: number;
-      matchedStudentCount: number;
-      requiredMatchedCount: number;
-      weighting: string;
-      dataQualityStatus: ImpactDataQuality;
-      displayStatus: ImpactDisplayStatus;
-      missingReason: string | null;
-    };
-  };
+  impactSnapshot: PilotImpactSnapshotPayload;
+  verifiedGrowthSnapshot?: PilotImpactSnapshotPayload;
+  liveLearningSnapshot?: PilotLiveLearningSnapshot;
   certificateCount: number;
   focusCoins: number;
   assessmentCount: number;

@@ -11,6 +11,9 @@ const {
   buildHtml,
   impactItems,
   reportImpactPayload,
+  reportVerifiedGrowthPayload,
+  liveChartItems,
+  narrative,
 } = require('../../../netlify/functions/admin-pilot-outcomes-report');
 
 const sample = {
@@ -124,7 +127,7 @@ describe('pilot outcomes report', () => {
     expect(html).toContain('Focus Flame Academy Pilot Outcomes Report');
     expect(html).toContain('Reading comprehension');
     expect(html).toContain('+40 pts');
-    expect(html).toContain('matched students');
+    expect(html).toContain('Verified Growth');
     expect(html).not.toContain('statistically significant');
   });
 
@@ -143,6 +146,43 @@ describe('pilot outcomes report', () => {
 
   it('passes the exact canonical dashboard payload to the PDF renderer', () => {
     expect(reportImpactPayload(sample)).toBe(sample.impactSnapshot);
-    expect(reportImpactPayload(sample)).toEqual(sample.impactSnapshot);
+    expect(reportVerifiedGrowthPayload(sample)).toEqual(sample.impactSnapshot);
+  });
+
+  it('uses live learning payload parity for PDF chart data', () => {
+    const withLive = {
+      ...sample,
+      matchedCount: 0,
+      liveLearningSnapshot: {
+        cards: [
+          {
+            key: 'reading',
+            label: 'Reading comprehension signal',
+            centerValue: '72%',
+            statusLabel: 'Positive signal',
+            summary: 'Reading activity recorded.',
+            evidenceType: 'directional',
+          },
+          {
+            key: 'overall',
+            label: 'Overall live learning signal',
+            centerValue: '72%',
+            statusLabel: 'Positive signal',
+            summary: 'Composite live signal.',
+            evidenceType: 'directional',
+            available: true,
+          },
+        ],
+        evidenceGuide: {
+          operational: 'Operational metrics.',
+          directional: 'Directional metrics.',
+          verified: 'Verified metrics.',
+        },
+      },
+    };
+    const items = liveChartItems(withLive);
+    expect(items[0]).toEqual(expect.objectContaining({ center: '72%', ring: 72 }));
+    expect(narrative(withLive)).toMatch(/Verified pre\/post growth remains pending/i);
+    expect(narrative(withLive)).not.toMatch(/statistically significant/i);
   });
 });

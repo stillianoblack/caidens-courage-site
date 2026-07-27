@@ -44,4 +44,14 @@ describe('pilot outcomes security architecture', () => {
     expect(component).toContain('sr-only');
     expect(component).toContain('description=');
   });
+
+  it('does not compute live or verified metrics in React evidence panels', () => {
+    const panels = fs.readFileSync(
+      path.join(root, 'src/components/admin/AdminPilotEvidencePanels.tsx'),
+      'utf8',
+    );
+    expect(panels).toContain('program.liveLearningSnapshot');
+    expect(panels).not.toMatch(/buildLiveLearningSnapshot|buildImpactSnapshot|buildDomainOutcome/);
+    expect(panels).not.toContain(".from('");
+  });
 });

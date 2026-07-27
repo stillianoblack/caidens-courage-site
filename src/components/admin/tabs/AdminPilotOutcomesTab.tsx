@@ -14,7 +14,11 @@ import {
   missingImpactStatus,
 } from '../../../lib/pilotOutcomesPresentation';
 import AdminProgramHealthPanel from '../AdminProgramHealthPanel';
-import { isGrowthPending } from '../../../lib/buildProgramHealthModel';
+import {
+  LiveLearningSignalsPanel,
+  ProgramDetailSummary,
+  VerifiedGrowthPanel,
+} from '../AdminPilotEvidencePanels';
 import type {
   PilotOutcomeProgram,
   PilotOutcomeSummary,
@@ -90,146 +94,7 @@ function signedPoints(value: number | null) {
   return formatPoints(value);
 }
 
-function direction(value: number | null) {
-  if (value == null) return 'Unavailable';
-  if (value > 0) return 'Increase';
-  if (value < 0) return 'Decrease';
-  return 'No change';
-}
-
-function FixtureImpactCard({
-  title,
-  center,
-  status,
-  detail,
-  participation = false,
-}: {
-  title: string;
-  center: React.ReactNode;
-  status: string;
-  detail: string;
-  participation?: boolean;
-}) {
-  return (
-    <article className={`phVisual-impact${participation ? ' phVisual-impact--participation' : ''}`}>
-      <h3>{title}</h3>
-      <div className="phVisual-impactCircle" role="img" aria-label={`${title}. ${status}. ${detail}`}>
-        <strong>{center}</strong>
-      </div>
-      <p className="phVisual-impactStatus">{status}</p>
-      <p className="phVisual-impactDetail">{detail}</p>
-    </article>
-  );
-}
-
-function growthPendingCenter() {
-  return (
-    <>
-      Growth
-      <br />
-      pending
-    </>
-  );
-}
-
-export function PilotImpactSnapshot({ program }: { program: PilotOutcomeProgram }) {
-  const growthPending = isGrowthPending(program);
-  const weekly = program.impactSnapshot.weeklyCompletion;
-  const participation = program.impactSnapshot.participation;
-  const overall = program.impactSnapshot.overallMatchedGrowth;
-  const overallPending = growthPending && overall.deltaPercentagePoints == null;
-  const growthStatusLabel = growthPending ? 'Growth pending' : 'Not enough data';
-
-  return (
-    <section className="phVisual-panel pilotImpact" aria-labelledby="pilot-impact-title">
-      <p className="phVisual-eyebrow">Measured outcomes</p>
-      <h2 id="pilot-impact-title">Pilot Impact Snapshot</h2>
-      <p className="phVisual-meta">Growth calculations still require matched baseline and post assessments.</p>
-      <div className="phVisual-snapshot">
-        {program.impactSnapshot.domains.map((domain) => {
-          const pending = growthPending && domain.deltaPercentagePoints == null;
-          return (
-            <FixtureImpactCard
-              key={domain.key}
-              title={domain.label}
-              center={
-                domain.deltaPercentagePoints != null
-                  ? signedPoints(domain.deltaPercentagePoints)
-                  : pending
-                    ? growthPendingCenter()
-                    : 'Not enough data'
-              }
-              status={
-                domain.deltaPercentagePoints != null
-                  ? domain.displayStatus
-                  : pending
-                    ? 'Awaiting post assessments'
-                    : missingImpactStatus('domain')
-              }
-              detail={
-                pending
-                  ? `${domain.baselineNumerator} baseline assessments recorded. Growth will unlock after matched post assessments.`
-                  : domain.deltaPercentagePoints != null
-                    ? `${direction(domain.deltaPercentagePoints)} of ${signedPoints(domain.deltaPercentagePoints)} from baseline to post.`
-                    : domain.missingReason || 'Awaiting matched assessment data.'
-              }
-            />
-          );
-        })}
-        <FixtureImpactCard
-          title="Weekly completion"
-          center={metric(weekly.percentage, '%')}
-          status={weekly.percentage == null ? missingImpactStatus('weekly') : weekly.displayStatus}
-          detail={
-            weekly.percentage == null
-              ? 'Weekly progress has not been recorded yet.'
-              : 'Live activity measure; not a growth calculation.'
-          }
-        />
-        <FixtureImpactCard
-          title="Participation"
-          center={metric(participation.percentage, '%')}
-          status={participation.percentage == null ? missingImpactStatus('participation') : participation.displayStatus}
-          detail={
-            participation.percentage == null
-              ? 'Assessment participation has not been recorded yet.'
-              : `${participation.numerator} of ${participation.denominator} students have completed at least one assessment.`
-          }
-          participation
-        />
-        <FixtureImpactCard
-          title="Overall matched growth"
-          center={
-            overall.deltaPercentagePoints != null
-              ? signedPoints(overall.deltaPercentagePoints)
-              : overallPending
-                ? growthPendingCenter()
-                : signedPoints(overall.deltaPercentagePoints)
-          }
-          status={
-            overall.deltaPercentagePoints != null
-              ? overall.displayStatus
-              : overallPending
-                ? 'Final report pending'
-                : missingImpactStatus('overall')
-          }
-          detail={
-            overallPending
-              ? 'Final growth report becomes available after matched post assessments.'
-              : overall.deltaPercentagePoints != null
-                ? `Calculated from ${overall.includedDomainCount} of ${overall.totalDomainCount} domains. ${overall.weighting}.`
-                : overall.missingReason || 'Awaiting matched post data.'
-          }
-        />
-      </div>
-      <div className="phVisual-notice" role="status">
-        <strong>Current status:</strong>{' '}
-        {program.activeStudentCount} students · {program.baseline.count} baseline assessments ·{' '}
-        {program.post.count} post assessments · {growthPending ? growthStatusLabel : overall.displayStatus}.
-      </div>
-    </section>
-  );
-}
+export { LiveLearningSignalsPanel, VerifiedGrowthPanel };
 
 function SummaryCards({ summary }: { summary: PilotOutcomeSummary }) {
   const metrics = [
@@ -376,8 +241,10 @@ function ProgramDetail({
         <div><p className="phVisual-eyebrow">Program detail</p><h2>{program.programName}</h2><p className="phVisual-meta">{program.programType} · {program.facilitator}</p></div>
         <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={onClose}>Back to portfolio</button>
       </div>
+      <ProgramDetailSummary program={program} />
       <AdminProgramHealthPanel program={program} />
-      <PilotImpactSnapshot program={program} />
+      <LiveLearningSignalsPanel program={program} />
+      <VerifiedGrowthPanel program={program} />
       <OutcomeCharts program={program} />
       <DataQuality program={program} />
       <section className="pilotOutcomes-panel">
