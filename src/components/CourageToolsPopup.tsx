@@ -1,26 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import CourageToolsPopupModal from './CourageToolsPopupModal';
 import { useCourageToolsPopupTrigger } from '../hooks/useCourageToolsPopupTrigger';
-
-const EXCLUDED_PATHS = new Set(['/focus-flame-lab']);
-const KID_SAFE_PREFIXES = [
-  '/kids',
-  '/portal',
-  '/play',
-  '/game',
-  '/games',
-  '/access-code',
-  '/play/session',
-];
-
-const shouldSuppressPopup = (pathname: string): boolean =>
-  EXCLUDED_PATHS.has(pathname) ||
-  KID_SAFE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+import { supabase } from '../lib/supabaseClient';
+import {
+  browserApplicationSessionExists,
+  isCourageToolsPopupEligible,
+} from '../lib/courageToolsPopupEligibility';
 
 export default function CourageToolsPopup() {
   const { pathname } = useLocation();
-  const enabled = !shouldSuppressPopup(pathname);
+  const [authenticationLoading, setAuthenticationLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const applicationSessionExists = browserApplicationSessionExists();
+  useEffect(() => {
+    let active = true;
+    if (!supabase) {
+      setAuthenticated(false);
+      setAuthenticationLoading(false);
+      return undefined;
+    }
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!active) return;
+      setAuthenticated(Boolean(data.session));
+      setAuthenticationLoading(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setAuthenticated(Boolean(session));
+      setAuthenticationLoading(false);
+    });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+  const enabled = isCourageToolsPopupEligible({
+    pathname,
+    authenticationLoading,
+    authenticated,
+    applicationSessionExists,
+  });
   const { armed, isOpen, closePopup, dismiss, markSubmitted } = useCourageToolsPopupTrigger(enabled);
 
   if (!armed && !isOpen) return null;

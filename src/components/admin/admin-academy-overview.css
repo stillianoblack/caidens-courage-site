@@ -1,0 +1,43 @@
+.academyOverview { display: grid; gap: 1rem; margin-bottom: 1.5rem; color: #213047; }
+.academyOverview-hero, .academyOverview-panel { border: 1px solid #d8e2ef; border-radius: 18px; background: #fff; padding: 1.2rem; box-shadow: 0 8px 24px rgba(20,52,95,.06); }
+.academyOverview-hero { display: flex; justify-content: space-between; gap: 1rem; background: linear-gradient(135deg,#f8fbff,#fffaf0); }
+.academyOverview-hero h2 { margin: .15rem 0 .45rem; color: #14345f; }
+.academyOverview-range { font-weight: 700; }
+.academyOverview-actions { display: flex; flex-wrap: wrap; gap: .55rem; align-content: flex-start; }
+.academyOverview-actions button { border: 0; border-radius: 999px; background: #14345f; color: #fff; padding: .72rem 1rem; font-weight: 800; }
+.academyOverview-kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .75rem; }
+.academyOverview-kpis article, .academyOverview-signalGrid article { display: grid; gap: .25rem; border: 1px solid #d8e2ef; border-radius: 14px; background: #fff; padding: 1rem; }
+.academyOverview-kpis strong, .academyOverview-signalGrid strong { color: #14345f; font-size: 1.5rem; }
+.academyOverview-kpis span, .academyOverview-signalGrid span { font-size: .78rem; font-weight: 750; }
+.academyOverview-kpis--compact { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.academyOverview-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 1rem; }
+.academyOverview-signalGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .65rem; }
+.academyOverview-signalGrid em { font-size: .75rem; font-style: normal; }
+.academyOverview-domainList, .academyOverview-quality { display: grid; gap: .55rem; }
+.academyOverview-domainList > div, .academyOverview-quality > div { display: grid; grid-template-columns: 1fr auto; gap: .25rem 1rem; border-bottom: 1px solid #e6edf5; padding: .5rem 0; }
+.academyOverview-domainList dd:last-child { grid-column: 1/-1; color: #59687c; }
+.academyOverview-quality { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.academyOverview-quality > div { grid-template-columns: 1fr; border: 1px solid #e1e8f0; border-radius: 12px; padding: .7rem; }
+.academyOverview-quality dt { text-transform: capitalize; }
+.academyOverview-quality dd { margin: 0; font-weight: 800; color: #14345f; }
+.academyOverview-filters { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .7rem; margin-bottom: 1rem; }
+.academyOverview-filters label, .academyOverview-override label { display: grid; gap: .3rem; font-size: .76rem; font-weight: 750; }
+.academyOverview-filters input, .academyOverview-filters select, .academyOverview-override input, .academyOverview-override select { min-width: 0; border: 1px solid #b8c7d9; border-radius: 8px; background: #fff; padding: .55rem; }
+.academyOverview-cohort { display: grid; gap: .65rem; }
+.academyOverview-cohortRow { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem; border: 1px solid #d8e2ef; border-radius: 14px; padding: .9rem; }
+.academyOverview-cohortRow > div:first-child { display: grid; gap: .2rem; align-content: start; }
+.academyOverview-cohortRow > div:first-child span { color: #59687c; font-size: .76rem; }
+.academyOverview-cohortRow dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .45rem; margin: 0; }
+.academyOverview-cohortRow dl div { min-width: 0; }
+.academyOverview-cohortRow dt { color: #59687c; font-size: .7rem; }
+.academyOverview-cohortRow dd { margin: 0; font-size: .8rem; font-weight: 700; overflow-wrap: anywhere; }
+.academyOverview-override { display: grid; gap: .55rem; align-content: start; }
+@media (max-width: 760px) {
+  .academyOverview-hero, .academyOverview-grid { display: grid; grid-template-columns: 1fr; }
+  .academyOverview-kpis, .academyOverview-kpis--compact, .academyOverview-signalGrid, .academyOverview-quality, .academyOverview-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .academyOverview-cohortRow { grid-template-columns: 1fr; }
+  .academyOverview-cohortRow dl { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 430px) {
+  .academyOverview-kpis, .academyOverview-kpis--compact, .academyOverview-signalGrid, .academyOverview-quality, .academyOverview-filters { grid-template-columns: 1fr; }
+}

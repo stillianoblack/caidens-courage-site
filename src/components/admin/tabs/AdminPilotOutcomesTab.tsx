@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   downloadPilotOutcomesReport,
+  fetchAcademyOutcomes,
   fetchPilotOutcomeProgram,
   fetchPilotOutcomes,
   fetchPilotRollout,
@@ -13,12 +14,14 @@ import {
   missingImpactStatus,
 } from '../../../lib/pilotOutcomesPresentation';
 import AdminProgramHealthPanel from '../AdminProgramHealthPanel';
+import AdminAcademyOverview from '../AdminAcademyOverview';
 import {
   LiveLearningSignalsPanel,
   ProgramDetailSummary,
   VerifiedGrowthPanel,
 } from '../AdminPilotEvidencePanels';
 import type {
+  AcademyOutcomePayload,
   PilotOutcomeProgram,
   PilotOutcomeSummary,
 } from '../../../types/pilotOutcomes';
@@ -383,6 +386,7 @@ function Rollout({
 
 export default function AdminPilotOutcomesTab({ token }: { token: string }) {
   const [summary, setSummary] = useState(EMPTY_SUMMARY);
+  const [academy, setAcademy] = useState<AcademyOutcomePayload | null>(null);
   const [programs, setPrograms] = useState<PilotOutcomeProgram[]>([]);
   const [selected, setSelected] = useState<PilotOutcomeProgram | null>(null);
   const [loading, setLoading] = useState(true);
@@ -400,8 +404,11 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
   const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const result = await fetchPilotOutcomes(token);
-      setSummary(result.summary); setPrograms(result.programs);
+      const [result, academyResult] = await Promise.all([
+        fetchPilotOutcomes(token),
+        fetchAcademyOutcomes(token),
+      ]);
+      setSummary(result.summary); setPrograms(result.programs); setAcademy(academyResult.academy);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Pilot outcomes could not be loaded.');
     } finally { setLoading(false); }
@@ -442,6 +449,7 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
       <header className="pilotOutcomes-header"><div><p className="pilotOutcomes-eyebrow">Pilot analytics</p><h2>Pilot Outcomes</h2><p>Participation, matched growth, engagement, readiness, and reporting across every pilot.</p></div><button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void load()}>Refresh</button></header>
       {loading ? <p role="status">Loading pilot outcomes…</p> : null}
       {error ? <div className="pilotOutcomes-warning"><p>{error}</p><button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void load()}>Try Again</button></div> : null}
+      {academy ? <AdminAcademyOverview academy={academy} token={token} onReload={load} /> : null}
       <SummaryCards summary={summary} />
       <section className="pilotOutcomes-panel" aria-labelledby="filters-title">
         <h3 id="filters-title">Filters</h3>

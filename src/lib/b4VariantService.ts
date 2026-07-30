@@ -32,6 +32,7 @@ const inFlightSessionRecovery = new Map<string, Promise<void>>();
 const preferenceCache = new Map<string, B4Preference>();
 const B4_CACHE_PREFIX = 'kid-play:b4-preference:';
 const B4_REQUEST_TIMEOUT_MS = 12_000;
+const B4_RETRY_BACKOFF_MS = 250;
 
 type B4RequestError = Error & { status?: number; correlationId?: string | null };
 
@@ -214,6 +215,7 @@ async function request(participantId: string, init?: RequestInit): Promise<B4Pre
     return await requestOnce(participantId, init);
   } catch (error) {
     if (!shouldRetryAfterSessionRecovery(error)) throw error;
+    await new Promise((resolve) => window.setTimeout(resolve, B4_RETRY_BACKOFF_MS));
     await ensureCompatibilitySession(participantId, true);
     return requestOnce(participantId, init);
   }

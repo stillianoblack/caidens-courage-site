@@ -164,6 +164,29 @@
   position: relative;
 }
 
+.kidPlayB4ProfileNotice {
+  position: absolute;
+  right: 0;
+  top: calc(100% + .45rem);
+  z-index: 12;
+  width: max-content;
+  max-width: 15rem;
+  border: 1px solid rgba(20, 52, 95, .16);
+  border-radius: .75rem;
+  background: #fff;
+  padding: .45rem .6rem;
+  color: #14345f;
+  font-size: .72rem;
+  box-shadow: 0 .45rem 1.2rem rgba(20, 52, 95, .12);
+}
+
+.kidPlayB4ProfileNotice button {
+  margin-left: .35rem;
+  color: #14345f;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
 .kidPlayB4ProfileBtn {
   display: inline-flex;
   width: 2.65rem;

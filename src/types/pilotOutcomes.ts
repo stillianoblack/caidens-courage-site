@@ -186,3 +186,58 @@ export type PilotOutcomeSummary = {
   totalFocusCoinsEarned: number;
   mostRecentActivity: string | null;
 };
+
+export type AcademyCohortRow = {
+  participantId: string;
+  studentIdentifier: string;
+  programId: string | null;
+  programCode: string | null;
+  programName: string;
+  programType: string;
+  organization: string;
+  distinctActiveDays: number;
+  completedRecognizedActivities: number;
+  firstActivity: string | null;
+  latestActivity: string | null;
+  automaticEligible: boolean;
+  reportingOverride: 'automatic' | 'include' | 'exclude';
+  reportingOverrideReason: string | null;
+  included: boolean;
+  exclusionReason: string | null;
+  testSynthetic: boolean;
+  missingProgramLink: boolean;
+  missingGradeLevel: boolean;
+};
+
+export type AcademyOutcomePayload = {
+  calculatedAt: string;
+  eligibilityRule: {
+    distinctActiveDays: number;
+    completedRecognizedActivities: number;
+    statement: string;
+  };
+  cohortSummary: {
+    totalParticipantAccounts: number;
+    automaticallyEligibleStudents: number;
+    manuallyIncludedStudents: number;
+    manuallyExcludedStudents: number;
+    lowEngagementExclusions: number;
+    testSyntheticExcluded: number;
+    programsRepresented: number;
+    activeOrganizations: number;
+    earliestActivity: string | null;
+    latestActivity: string | null;
+  };
+  dataQuality: {
+    unmatchedParticipantRecords: number;
+    missingProgramLinks: number;
+    missingGradeLevels: number;
+    duplicateIdentities: number;
+    excludedTestSyntheticRecords: number;
+    studentsBelowEligibilityThreshold: number;
+    stalePrograms: number;
+    missingWeeklyProgressSource: boolean;
+  };
+  aggregate: PilotOutcomeProgram;
+  cohort: AcademyCohortRow[];
+};

@@ -1,4 +1,8 @@
-import type { PilotOutcomeProgram, PilotOutcomeSummary } from '../types/pilotOutcomes';
+import type {
+  AcademyOutcomePayload,
+  PilotOutcomeProgram,
+  PilotOutcomeSummary,
+} from '../types/pilotOutcomes';
 
 async function authorizedJson<T>(url: string, _token: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -70,4 +74,42 @@ export async function downloadPilotOutcomesReport(
   const disposition = response.headers.get('Content-Disposition') || '';
   const encodedName = disposition.match(/filename\\*=UTF-8''([^;]+)/)?.[1];
   return { blob, filename: encodedName ? decodeURIComponent(encodedName) : 'pilot-outcomes-report.pdf' };
+}
+
+export function fetchAcademyOutcomes(token: string) {
+  return authorizedJson<{ academy: AcademyOutcomePayload; unavailableSources: string[] }>(
+    '/.netlify/functions/admin-academy-outcomes',
+    token,
+  );
+}
+
+export function saveAcademyReportingOverride(
+  token: string,
+  payload: {
+    participantId: string;
+    reportingOverride: 'automatic' | 'include' | 'exclude';
+    reason?: string;
+  },
+) {
+  return authorizedJson<{ override: Record<string, unknown> }>(
+    '/.netlify/functions/admin-academy-outcomes',
+    token,
+    { method: 'PATCH', body: JSON.stringify(payload) },
+  );
+}
+
+export async function downloadAcademyReport(format: 'pdf' | 'html' = 'pdf') {
+  const response = await fetch(`/.netlify/functions/admin-academy-report?format=${format}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error || 'The Academy report could not be generated.');
+  }
+  if (format === 'html') return { html: await response.text() };
+  return {
+    blob: await response.blob(),
+    filename: `focus-flame-academy-overview-${new Date().toISOString().slice(0, 10)}.pdf`,
+  };
 }

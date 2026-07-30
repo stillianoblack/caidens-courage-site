@@ -16,7 +16,7 @@ export default function KidPlayB4ProfileControl({
   participantId,
   displayName,
 }: KidPlayB4ProfileControlProps) {
-  const { variant, selectionRequired, loading, error } = useB4Variant(participantId);
+  const { variant, selectionRequired, loading, error, refresh } = useB4Variant(participantId);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const menuId = useId();
@@ -148,6 +148,12 @@ export default function KidPlayB4ProfileControl({
           alt=""
         />
       </button>
+      {error ? (
+        <span className="kidPlayB4ProfileNotice" role="status">
+          B-4 is temporarily unavailable.
+          <button type="button" onClick={() => void refresh()}>Retry</button>
+        </span>
+      ) : null}
 
       {menuOpen ? createPortal(
         <div className="kidPlayB4ProfileMenuLayer" role="presentation">

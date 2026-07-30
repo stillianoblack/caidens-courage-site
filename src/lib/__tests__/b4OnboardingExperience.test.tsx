@@ -55,17 +55,18 @@ describe('first-time B-4 onboarding', () => {
     expect(screen.queryByRole('dialog', { name: 'Select Your B-4 Unit' })).not.toBeInTheDocument();
   });
 
-  test('uses a neutral blocking state while Weekly Adventures resolves the participant choice', () => {
+  test('does not block Weekly Adventures while the participant choice resolves', () => {
     mockLoading = true;
     render(<B4UnitOnboardingModal participantId="child-1" enforce />);
-    expect(screen.getByRole('status')).toHaveTextContent('Loading your B-4 companion');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Select Your B-4 Unit' })).not.toBeInTheDocument();
+    expect(document.body.querySelector('.b4OnboardingBackdrop')).not.toBeInTheDocument();
   });
 
-  test('Try Again reruns the failed preference request', () => {
+  test('does not show a full-screen failure when background resolution fails', () => {
     mockError = 'temporary failure';
     render(<B4UnitOnboardingModal participantId="child-1" enforce />);
-    fireEvent.click(screen.getByRole('button', { name: 'Try Again' }));
-    expect(mockRefresh).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(document.body.querySelector('.b4OnboardingBackdrop')).not.toBeInTheDocument();
   });
 });

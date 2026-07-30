@@ -12,45 +12,17 @@ export default function B4UnitOnboardingModal({
   participantId?: string | null;
   enforce?: boolean;
 }) {
-  const { selectionRequired, loading, error, refresh } = useB4Variant(participantId);
+  const { selectionRequired, loading, error } = useB4Variant(participantId);
   const [confirmedVariant, setConfirmedVariant] = useState<B4VariantKey | null>(null);
-  const showLoading = Boolean(participantId && !confirmedVariant && enforce && loading);
-  const showError = Boolean(participantId && !confirmedVariant && enforce && error);
   const showSelector = Boolean(
     participantId && !confirmedVariant && !loading && !error && selectionRequired,
   );
 
-  useDocumentModalScrollLock(showLoading || showError || showSelector);
+  useDocumentModalScrollLock(showSelector);
 
   useEffect(() => setConfirmedVariant(null), [participantId]);
 
   if (!participantId || confirmedVariant) return null;
-
-  if (enforce && loading) {
-    return createPortal(
-      <div className="b4OnboardingBackdrop" role="presentation">
-        <div className="b4OnboardingLoading" role="status" aria-live="polite">
-          <span className="b4OnboardingLoading__avatar" aria-hidden="true" />
-          <p>Loading your B-4 companion…</p>
-        </div>
-      </div>,
-      document.body,
-    );
-  }
-
-  if (enforce && error) {
-    return createPortal(
-      <div className="b4OnboardingBackdrop" role="presentation">
-        <div className="b4OnboardingLoading" role="alert">
-          <p>We couldn’t load your B-4 choice yet.</p>
-          <button type="button" disabled={loading} onClick={() => void refresh()}>
-            Try Again
-          </button>
-        </div>
-      </div>,
-      document.body,
-    );
-  }
 
   if (loading || error || !selectionRequired) return null;
 
