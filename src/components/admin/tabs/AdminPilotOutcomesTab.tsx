@@ -9,7 +9,6 @@ import {
 import {
   formatDecimal,
   formatPercentage,
-  formatPercentageWords,
   formatPoints,
   missingImpactStatus,
 } from '../../../lib/pilotOutcomesPresentation';

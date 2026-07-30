@@ -84,10 +84,6 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
   const weeklyImpact = program.impactSnapshot.weeklyCompletion;
   const weeklyProgress = program.weeklyCompletion;
   const atLeastOneAdventure = adventuresActive(program);
-  const atLeastOneAssessment =
-    program.assessmentCount > 0 ||
-    program.baseline.count > 0 ||
-    program.post.count > 0;
 
   const metrics = [
     { label: 'Students enrolled', value: String(program.activeStudentCount) },
