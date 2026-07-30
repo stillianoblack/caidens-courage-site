@@ -44,8 +44,12 @@ export async function loadProgramParticipantDirectory(
         ),
         errors,
       };
-    } catch {
-      errors.push('camp_participant_directory_failed');
+    } catch (error) {
+      errors.push(
+        error instanceof Error && error.message
+          ? error.message
+          : 'camp_participant_directory_failed',
+      );
       return {
         participants: localParticipantsForProgram(programCode),
         errors,

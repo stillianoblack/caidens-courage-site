@@ -73,10 +73,13 @@ describe('family child session endpoint', () => {
         id: participantId,
         nickname: 'Ace',
         first_name: 'Trace',
+        last_name: 'Tester',
         role: 'student',
         program_code: 'CAMP-TEST',
         created_at: '2026-07-17T00:00:00.000Z',
         grade_level: '3',
+        grade_band: '2-3',
+        allow_stretch_level: true,
         b4_variant_key: 'courage',
         b4_variant_selected_at: null,
         email: 'must-not-leak@example.com',
@@ -92,13 +95,50 @@ describe('family child session endpoint', () => {
       id: participantId,
       nickname: 'Ace',
       first_name: 'Trace',
+      last_name: 'Tester',
       role: 'student',
       program_code: 'CAMP-TEST',
       created_at: '2026-07-17T00:00:00.000Z',
       grade_level: '3',
+      grade_band: '2-3',
+      allow_stretch_level: true,
       b4_variant_key: 'courage',
       b4_variant_selected_at: null,
     }]);
+  });
+
+  test('falls back to the known-good minimal roster projection when optional columns are unavailable', async () => {
+    const missingOptionalColumn = query({
+      data: null,
+      error: { code: '42703', message: 'column participants.grade_band does not exist' },
+    });
+    const minimalQuery = query({
+      data: [{
+        id: participantId,
+        nickname: 'Ace',
+        first_name: 'Trace',
+        role: 'student',
+        program_code: 'CAMP-TEST',
+        created_at: '2026-07-17T00:00:00.000Z',
+      }],
+      error: null,
+    });
+    const from = jest.fn()
+      .mockReturnValueOnce(missingOptionalColumn)
+      .mockReturnValueOnce(missingOptionalColumn)
+      .mockReturnValueOnce(missingOptionalColumn)
+      .mockReturnValueOnce(minimalQuery);
+
+    const result = await endpoint._test.participantDirectoryForCamp({ from }, 'CAMP-TEST');
+
+    expect(from).toHaveBeenCalledTimes(4);
+    expect(result.participants).toEqual([
+      expect.objectContaining({
+        id: participantId,
+        nickname: 'Ace',
+        first_name: 'Trace',
+      }),
+    ]);
   });
 
   test('rejects anonymous launch before participant access is evaluated', async () => {

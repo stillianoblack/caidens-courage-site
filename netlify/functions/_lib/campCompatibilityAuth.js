@@ -41,22 +41,53 @@ async function participantForCamp(supabase, participantId, programCode) {
 }
 
 async function participantDirectoryForCamp(supabase, programCode) {
-  const { data, error } = await supabase
-    .from('participants')
-    .select('id, nickname, first_name, role, program_code, created_at, grade_level, b4_variant_key, b4_variant_selected_at')
-    .eq('program_code', programCode)
-    .eq('role', 'student')
-    .order('created_at', { ascending: true });
-  if (error) return { status: 503, code: 'camp_participant_directory_failed' };
+  const selects = [
+    'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level, b4_variant_key, b4_variant_selected_at',
+    'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level',
+    'id, nickname, first_name, last_name, role, program_code, created_at',
+    'id, nickname, first_name, role, program_code, created_at',
+  ];
+  let data = null;
+  let lastError = null;
+  for (const select of selects) {
+    const result = await supabase
+      .from('participants')
+      .select(select)
+      .eq('program_code', programCode)
+      .eq('role', 'student')
+      .order('created_at', { ascending: true });
+    if (!result.error) {
+      data = result.data;
+      lastError = null;
+      break;
+    }
+    lastError = result.error;
+    if (!/column|schema cache|42703/i.test(`${result.error.code || ''} ${result.error.message || ''}`)) {
+      break;
+    }
+  }
+  if (lastError) {
+    console.error('[CAMP_PARTICIPANT_DIRECTORY]', {
+      result: 'failed',
+      code: lastError.code || null,
+      message: safeText(lastError.message, 240) || 'unknown_query_error',
+    });
+    return { status: 503, code: 'camp_participant_directory_failed' };
+  }
   return {
     participants: (data || []).map((row) => ({
       id: row.id,
       nickname: safeText(row.nickname, 80) || null,
       first_name: safeText(row.first_name, 80) || null,
+      last_name: safeText(row.last_name, 80) || null,
       role: 'student',
       program_code: row.program_code,
       created_at: row.created_at,
       grade_level: safeText(row.grade_level, 20) || null,
+      grade_band: safeText(row.grade_band, 20) || null,
+      allow_stretch_level: typeof row.allow_stretch_level === 'boolean'
+        ? row.allow_stretch_level
+        : null,
       b4_variant_key: safeText(row.b4_variant_key, 20) || null,
       b4_variant_selected_at: row.b4_variant_selected_at || null,
     })),

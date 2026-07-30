@@ -18,10 +18,13 @@ export type CampParticipantDirectoryRow = {
   id: string;
   nickname: string | null;
   first_name: string | null;
+  last_name: string | null;
   role: 'student';
   program_code: string;
   created_at: string;
   grade_level: string | null;
+  grade_band: string | null;
+  allow_stretch_level: boolean | null;
   b4_variant_key: string | null;
   b4_variant_selected_at: string | null;
 };
