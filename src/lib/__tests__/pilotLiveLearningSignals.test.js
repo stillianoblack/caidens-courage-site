@@ -58,6 +58,26 @@ describe('pilot live learning signals', () => {
     expect(signal.statusLabel).not.toMatch(/growth/i);
   });
 
+  it('reads the production question-attempt correctness field', () => {
+    const modules = [
+      {
+        participant_id: 's1',
+        character: 'zeke',
+        percent_score: 80,
+        module_id: 'm1',
+        answers_json: {
+          _attempts: {
+            q1: { is_correct_final: true, attempts_count: 2 },
+            q2: { is_correct_final: false, attempts_count: 1 },
+          },
+        },
+      },
+    ];
+    const signal = buildDomainLiveSignal('reading', modules, participantSet(['s1']));
+    expect(signal.details.questionsAnswered).toBe(2);
+    expect(signal.details.correctAnswers).toBe(1);
+  });
+
   it('computes SEL signal from miranda / SEL skill tags', () => {
     const modules = [
       { participant_id: 's1', character: 'miranda', skill_area: 'SEL', percent_score: 90, module_id: 'sel1' },
@@ -131,6 +151,34 @@ describe('pilot live learning signals', () => {
     expect(outcome.liveLearningSnapshot.cards[0].available).toBe(true);
     expect(outcome.verifiedGrowthSnapshot.domains[0].deltaPercentagePoints).toBeNull();
     expect(outcome.impactSnapshot.domains[0].deltaPercentagePoints).toBeNull();
+  });
+
+  it('joins module activity by participant when legacy rows have no program_code', () => {
+    const outcome = buildPilotOutcomes({
+      programs: [program],
+      participants: [participants[0]],
+      assessments: [],
+      modules: [
+        {
+          participant_id: 's1',
+          character: 'zeke',
+          percent_score: 70,
+          module_id: 'r1',
+        },
+      ],
+      sessions: [
+        {
+          participant_id: 's1',
+          last_activity_at: new Date().toISOString(),
+        },
+      ],
+    }, { weeklyProgressSourceAvailable: false }).programs[0];
+    expect(outcome.liveLearningSnapshot.cards[0].available).toBe(true);
+    expect(outcome.studentsWithAdventureCount).toBe(1);
+    expect(outcome.activeStudentCountThisWeek).toBe(1);
+    const weekly = outcome.liveLearningSnapshot.cards.find((card) => card.key === 'weekly');
+    expect(weekly.centerValue).toBe('Unavailable');
+    expect(weekly.summary).toMatch(/source is not deployed/i);
   });
 
   it('uses directional status labels from transparent thresholds', () => {

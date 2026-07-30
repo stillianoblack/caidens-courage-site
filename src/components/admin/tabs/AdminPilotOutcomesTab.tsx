@@ -279,8 +279,8 @@ function ProgramDetail({
         </div>
         <label className="pilotOutcomes-notes">Educator observations<textarea value={educatorNotes} onChange={(event) => setEducatorNotes(event.target.value)} placeholder="What worked, student response, challenges, and approved next steps" /></label>
         <div className="pilotOutcomes-actions">
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Generate PDF</button>
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download Report</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Generate Report</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download PDF</button>
           <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('html', 'inline')}>HTML print view</button>
         </div>
         {reportError ? <p className="adminPortal-error">{reportError}</p> : null}

@@ -97,8 +97,20 @@ const sample = {
   focusCoins: 100,
   certificateCount: 1,
   lastActivity: '2026-02-01',
+  activeStudentCountThisWeek: 1,
+  studentsWithAdventureCount: 2,
+  weeklyProgressSourceAvailable: true,
   reportBlockers: [],
   categories: [{ category: 'Focus/self-regulation', delta: 10, n: 1 }],
+  gradeDistribution: [{ grade: '4', count: 2 }],
+  quality: {
+    missingBaseline: 1,
+    missingPost: 1,
+    unmatchedRecords: 1,
+    duplicateAssessmentWarnings: 0,
+    invalidScoreRanges: 0,
+    studentsWithoutGrade: 0,
+  },
   students: Array.from({ length: 80 }, (_, index) => ({
     studentLabel: `Student ${String(index + 1).padStart(3, '0')}`,
     grade: '4',
@@ -127,7 +139,10 @@ describe('pilot outcomes report', () => {
     expect(html).toContain('Focus Flame Academy Pilot Outcomes Report');
     expect(html).toContain('Reading comprehension');
     expect(html).toContain('+40 pts');
-    expect(html).toContain('Verified Growth');
+    expect(html).toContain('Verified Outcomes');
+    expect(html).toContain('Live Student Progress');
+    expect(html).toContain('Data Quality');
+    expect(html).toContain('Grade Distribution');
     expect(html).not.toContain('statistically significant');
   });
 
@@ -139,9 +154,7 @@ describe('pilot outcomes report', () => {
     expect(items.find((item: { label: string }) => item.label === 'Overall matched growth')).toEqual(
       expect.objectContaining({ center: '+30 pts', ring: null }),
     );
-    expect(items.find((item: { label: string }) => item.label === 'Participation')).toEqual(
-      expect.objectContaining({ center: '33.3%', ring: 33.333333333 }),
-    );
+    expect(items.find((item: { label: string }) => item.label === 'Participation')).toBeUndefined();
   });
 
   it('passes the exact canonical dashboard payload to the PDF renderer', () => {

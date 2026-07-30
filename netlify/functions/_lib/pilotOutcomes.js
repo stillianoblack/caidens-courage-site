@@ -125,16 +125,22 @@ function domainObservation(row, definition) {
 }
 
 function buildDomainOutcome(definition, studentRows) {
+  const baselineObservations = studentRows
+    .map((row) => domainObservation(row.baseline, definition))
+    .filter(Boolean);
+  const postObservations = studentRows
+    .map((row) => domainObservation(row.post, definition))
+    .filter(Boolean);
   const pairs = studentRows
     .map((row) => ({
       baseline: domainObservation(row.baseline, definition),
       post: domainObservation(row.post, definition),
     }))
     .filter((row) => row.baseline && row.post);
-  const baselineNumerator = pairs.reduce((sum, row) => sum + row.baseline.numerator, 0);
-  const baselineDenominator = pairs.reduce((sum, row) => sum + row.baseline.denominator, 0);
-  const postNumerator = pairs.reduce((sum, row) => sum + row.post.numerator, 0);
-  const postDenominator = pairs.reduce((sum, row) => sum + row.post.denominator, 0);
+  const baselineNumerator = baselineObservations.reduce((sum, row) => sum + row.numerator, 0);
+  const baselineDenominator = baselineObservations.reduce((sum, row) => sum + row.denominator, 0);
+  const postNumerator = postObservations.reduce((sum, row) => sum + row.numerator, 0);
+  const postDenominator = postObservations.reduce((sum, row) => sum + row.denominator, 0);
   const baselinePercentage = baselineDenominator
     ? round((baselineNumerator / baselineDenominator) * 100)
     : null;
@@ -150,12 +156,12 @@ function buildDomainOutcome(definition, studentRows) {
   const matchedStudentCount = pairs.length;
   let missingReason = null;
   if (!studentRows.length) missingReason = 'No participants are available.';
-  else if (!matchedStudentCount && missingBaseline && missingPost) {
-    missingReason = 'Baseline and post domain scores are missing or not mapped.';
-  } else if (!matchedStudentCount && missingBaseline) {
-    missingReason = 'A mapped baseline domain score is missing.';
-  } else if (!matchedStudentCount && missingPost) {
+  else if (!matchedStudentCount && baselineObservations.length && !postObservations.length) {
     missingReason = 'A mapped post domain score is missing.';
+  } else if (!matchedStudentCount && postObservations.length && !baselineObservations.length) {
+    missingReason = 'A mapped baseline domain score is missing.';
+  } else if (!matchedStudentCount && missingBaseline && missingPost) {
+    missingReason = 'Baseline and post domain scores are missing or not mapped.';
   } else if (matchedStudentCount < MIN_MATCHED_DOMAIN_STUDENTS) {
     missingReason = 'Participant matching is incomplete.';
   }
@@ -179,8 +185,8 @@ function buildDomainOutcome(definition, studentRows) {
     baselineDenominator: round(baselineDenominator, 2),
     postNumerator: round(postNumerator, 2),
     postDenominator: round(postDenominator, 2),
-    baselinePercentage: available ? baselinePercentage : null,
-    postPercentage: available ? postPercentage : null,
+    baselinePercentage,
+    postPercentage,
     deltaPercentagePoints: available ? deltaPercentagePoints : null,
     matchedStudentCount,
     requiredMatchedCount: MIN_MATCHED_DOMAIN_STUDENTS,
@@ -292,6 +298,9 @@ function participantOutcome(participant, assessments, engagement) {
     ...assessments.map((row) => row.completed_at || row.created_at),
     ...engagement.modules.map((row) => row.completed_at || row.created_at),
     ...engagement.weeks.map((row) => row.completed_at || row.updated_at || row.created_at),
+    ...engagement.sessions.map(
+      (row) => row.last_activity_at || row.ended_at || row.updated_at || row.started_at || row.created_at,
+    ),
   ];
   return {
     participantId: participant.id,
@@ -311,6 +320,7 @@ function participantOutcome(participant, assessments, engagement) {
     weeklyAdventuresCompleted: new Set(engagement.weeks.map((row) => row.week_number ?? row.week_id).filter(Boolean)).size,
     assessmentsCompleted: assessments.filter((row) => assessmentKind(row)).length,
     missionsCompleted: new Set(engagement.modules.map((row) => row.mission_id || row.module_id || row.id).filter(Boolean)).size,
+    kidPlaySessions: engagement.sessions.length,
     focusCoins: engagement.wallets.reduce((sum, row) => sum + (numberOrNull(row.total_coins ?? row.balance ?? row.coins ?? row.amount) || 0), 0),
     certificates: engagement.rewards.filter((row) => /certificate/i.test(String(row.reward_type || row.reward_key || row.reward_name || ''))).length,
     lastActivity: latestIso(completionTimes),
@@ -344,6 +354,10 @@ function buildProgramOutcome(program, data, options = {}) {
     (data.rewards || []).filter((row) => participantIds.has(row.participant_id)),
     (row) => row.participant_id,
   );
+  const sessionsByParticipant = groupBy(
+    (data.sessions || []).filter((row) => participantIds.has(row.participant_id)),
+    (row) => row.participant_id,
+  );
   const studentRows = participants.map((participant) =>
     participantOutcome(
       participant,
@@ -353,6 +367,7 @@ function buildProgramOutcome(program, data, options = {}) {
         weeks: weeksByParticipant.get(participant.id) || [],
         wallets: walletsByParticipant.get(participant.id) || [],
         rewards: rewardsByParticipant.get(participant.id) || [],
+        sessions: sessionsByParticipant.get(participant.id) || [],
       },
     ),
   );
@@ -432,13 +447,18 @@ function buildProgramOutcome(program, data, options = {}) {
     total: possibleStudentWeeks,
     rate: possibleStudentWeeks ? round((completedStudentWeeks / possibleStudentWeeks) * 100) : null,
   };
+  const weeklyProgressSourceAvailable = options.weeklyProgressSourceAvailable !== false;
+  const activeCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const activeStudentCountThisWeek = studentRows.filter(
+    (row) => row.lastActivity && timestamp(row.lastActivity) >= activeCutoff,
+  ).length;
   const impactSnapshot = buildImpactSnapshot(
     studentRows,
     weeklyCompletion,
     baselineCompletion,
     postCompletion,
   );
-  const programModules = (data.modules || []).filter((row) => row.program_code === program.program_code);
+  const programModules = (data.modules || []).filter((row) => participantIds.has(row.participant_id));
   const liveLearningSnapshot = buildLiveLearningSnapshot({
     modules: programModules,
     participantIds,
@@ -446,6 +466,7 @@ function buildProgramOutcome(program, data, options = {}) {
     weekRows: programWeekRows,
     participation: impactSnapshot.participation,
     participantCount: participants.length,
+    weeklyProgressSourceAvailable,
   });
   return {
     id: program.id,
@@ -464,6 +485,7 @@ function buildProgramOutcome(program, data, options = {}) {
     percentageDelta: round(percentageDelta),
     percentageDeltaAvailable: percentageDelta !== null,
     weeklyCompletion,
+    weeklyProgressSourceAvailable,
     impactSnapshot,
     verifiedGrowthSnapshot: impactSnapshot,
     liveLearningSnapshot,
@@ -471,6 +493,8 @@ function buildProgramOutcome(program, data, options = {}) {
     focusCoins: studentRows.reduce((sum, row) => sum + row.focusCoins, 0),
     assessmentCount: studentRows.reduce((sum, row) => sum + row.assessmentsCompleted, 0),
     missionCount: studentRows.reduce((sum, row) => sum + row.missionsCompleted, 0),
+    studentsWithAdventureCount: studentRows.filter((row) => row.missionsCompleted > 0).length,
+    activeStudentCountThisWeek,
     lastActivity,
     reportStatus: reportBlockers.length ? 'Blocked' : 'Ready',
     reportBlockers,
@@ -486,6 +510,7 @@ function buildProgramOutcome(program, data, options = {}) {
       weeklyAdventuresCompleted: row.weeklyAdventuresCompleted,
       assessmentsCompleted: row.assessmentsCompleted,
       missionsCompleted: row.missionsCompleted,
+      kidPlaySessions: row.kidPlaySessions,
       focusCoins: row.focusCoins,
       certificates: row.certificates,
       lastActivity: row.lastActivity,

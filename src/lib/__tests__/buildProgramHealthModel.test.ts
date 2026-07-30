@@ -123,4 +123,16 @@ describe('buildProgramHealthModel', () => {
     expect(isGrowthPending(baseProgram())).toBe(true);
     expect(isGrowthPending(baseProgram({ post: { count: 2, total: 17 } }))).toBe(false);
   });
+
+  it('uses server-calculated activity and mission evidence when weekly progress is unavailable', () => {
+    const model = buildProgramHealthModel(baseProgram({
+      weeklyCompletion: { count: 0, total: 0, rate: null },
+      weeklyProgressSourceAvailable: false,
+      studentsWithAdventureCount: 10,
+      activeStudentCountThisWeek: 1,
+    }));
+    expect(model.metrics.find((row) => row.label === 'At least one adventure')?.value).toBe('10');
+    expect(model.metrics.find((row) => row.label === 'Active students this week')?.value).toBe('1');
+    expect(model.metrics.find((row) => row.label === 'Weekly completion')?.value).toBe('Unavailable');
+  });
 });

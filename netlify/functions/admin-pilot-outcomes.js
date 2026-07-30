@@ -42,6 +42,7 @@ exports.handler = async (event) => {
   }
   const outcomes = buildPilotOutcomes(data, {
     publishedWeeks: Number(event.queryStringParameters?.publishedWeeks || 0),
+    weeklyProgressSourceAvailable: !unavailableSources.includes('participant_week_progress'),
   });
   const programId = String(event.queryStringParameters?.programId || '').trim();
   if (programId) {

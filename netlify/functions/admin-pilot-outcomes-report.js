@@ -27,15 +27,17 @@ async function load(supabase, table) {
 }
 
 async function getProgramOutcome(supabase, programId) {
-  const [programs, participants, assessments, modules, weeks, wallets, rewards] = await Promise.all([
+  const [programs, participants, assessments, modules, weekSource, wallets, rewards, sessions] = await Promise.all([
     load(supabase, 'pilot_programs'),
     load(supabase, 'participants'),
     load(supabase, 'assessment_results_v2'),
     load(supabase, 'module_results'),
-    load(supabase, 'participant_week_progress'),
+    supabase.from('participant_week_progress').select('*').limit(10000),
     load(supabase, 'player_wallets'),
     load(supabase, 'player_reward_claims'),
+    load(supabase, 'kid_play_sessions'),
   ]);
+  const weeks = weekSource.error ? [] : weekSource.data || [];
   return buildPilotOutcomes({
     programs: programs.filter((program) => program.id === programId),
     participants,
@@ -44,6 +46,9 @@ async function getProgramOutcome(supabase, programId) {
     weeks,
     wallets,
     rewards,
+    sessions,
+  }, {
+    weeklyProgressSourceAvailable: !weekSource.error,
   }).programs[0] || null;
 }
 
@@ -199,46 +204,45 @@ function reportImpactPayload(program) {
 
 function impactItems(program) {
   const snapshot = reportImpactPayload(program);
+  const growthPending = program.baseline.count > 0 && program.post.count === 0;
   const domainItems = snapshot.domains.map((domain) => ({
     label: domain.label,
-    center: signedPoints(domain.deltaPercentagePoints),
+    center:
+      domain.deltaPercentagePoints == null && growthPending && domain.baselineNumerator > 0
+        ? 'Verified outcomes pending'
+        : signedPoints(domain.deltaPercentagePoints),
     delta: domain.deltaPercentagePoints,
     ring: domain.postPercentage,
-    status: domain.deltaPercentagePoints == null ? missingImpactStatus('domain') : domain.displayStatus,
+    status:
+      domain.deltaPercentagePoints == null && growthPending && domain.baselineNumerator > 0
+        ? 'Verified outcomes pending'
+        : domain.deltaPercentagePoints == null
+          ? missingImpactStatus('domain')
+          : domain.displayStatus,
     caption:
       domain.deltaPercentagePoints == null
-        ? `${domain.matchedStudentCount} matched; ${domain.requiredMatchedCount} required`
+        ? growthPending && domain.baselineNumerator > 0
+          ? `${domain.baselinePercentage}% baseline recorded; matched post pending`
+          : `${domain.matchedStudentCount} matched; ${domain.requiredMatchedCount} required`
         : `${domain.baselinePercentage}% to ${domain.postPercentage}%; n=${domain.matchedStudentCount}`,
   }));
-  const weekly = snapshot.weeklyCompletion;
-  const participation = snapshot.participation;
   const overall = snapshot.overallMatchedGrowth;
   return [
     ...domainItems,
     {
-      label: 'Weekly completion',
-      kind: 'completion',
-      center: formatPercentage(weekly.percentage),
-      delta: weekly.percentage == null ? null : 0,
-      ring: weekly.percentage,
-      status: weekly.percentage == null ? missingImpactStatus('weekly') : weekly.displayStatus,
-      caption: `${weekly.numerator} of ${weekly.denominator || 'unavailable'} student-weeks`,
-    },
-    {
-      label: 'Participation',
-      kind: 'completion',
-      center: formatPercentage(participation.percentage),
-      delta: participation.percentage == null ? null : 0,
-      ring: participation.percentage,
-      status: participation.percentage == null ? missingImpactStatus('participation') : participation.displayStatus,
-      caption: `${participation.numerator} of ${participation.denominator} students`,
-    },
-    {
       label: 'Overall matched growth',
-      center: signedPoints(overall.deltaPercentagePoints),
+      center:
+        overall.deltaPercentagePoints == null && growthPending
+          ? 'Verified outcomes pending'
+          : signedPoints(overall.deltaPercentagePoints),
       delta: overall.deltaPercentagePoints,
       ring: null,
-      status: overall.deltaPercentagePoints == null ? missingImpactStatus('overall') : overall.displayStatus,
+      status:
+        overall.deltaPercentagePoints == null && growthPending
+          ? 'Verified outcomes pending'
+          : overall.deltaPercentagePoints == null
+            ? missingImpactStatus('overall')
+            : overall.displayStatus,
       caption: `${overall.includedDomainCount} of ${overall.totalDomainCount} domains; unweighted`,
     },
   ];
@@ -248,7 +252,7 @@ function drawLiveLearningSnapshot(doc, program) {
   const items = liveChartItems(program);
   if (!items.length) return;
   addContentPage(doc);
-  heading(doc, 'Live Learning Signals');
+  heading(doc, 'Live Student Progress');
   doc
     .font('Helvetica')
     .fontSize(8)
@@ -281,9 +285,19 @@ function drawProgramHealthSummary(doc, program) {
   line(doc, 'Students enrolled', program.activeStudentCount);
   line(doc, 'Baseline completed', `${program.baseline.count}/${program.baseline.total}`);
   line(doc, 'Post completed', `${program.post.count}/${program.post.total}`);
-  line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Awaiting activity' : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
+  line(
+    doc,
+    'Weekly completion',
+    program.weeklyProgressSourceAvailable === false
+      ? 'Unavailable - canonical weekly-progress source is not deployed'
+      : program.weeklyCompletion.rate == null
+        ? 'Awaiting activity'
+        : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`,
+  );
   line(doc, 'Assessments completed', program.assessmentCount);
   line(doc, 'Missions completed', program.missionCount);
+  line(doc, 'Students with at least one adventure', program.studentsWithAdventureCount || 0);
+  line(doc, 'Active students this week', program.activeStudentCountThisWeek || 0);
   line(doc, 'Focus Coins earned', program.focusCoins);
   line(doc, 'Certificates earned', program.certificateCount);
   line(doc, 'Last activity', program.lastActivity || 'Not recorded');
@@ -292,7 +306,7 @@ function drawProgramHealthSummary(doc, program) {
 function drawImpactSnapshot(doc, program) {
   const snapshot = reportImpactPayload(program);
   addContentPage(doc);
-  heading(doc, 'Verified Growth');
+  heading(doc, 'Verified Outcomes');
   doc
     .font('Helvetica')
     .fontSize(8)
@@ -347,7 +361,7 @@ function drawImpactSnapshot(doc, program) {
   });
   doc.y = tableY + 8;
   doc.fillColor('#52657f').font('Helvetica').fontSize(8).text(
-    'Baseline and post percentages use only students with both mapped domain scores. Excluded records are not imputed.',
+    'Baseline and post columns summarize available mapped scores. Delta uses only students with both scores. Excluded records are not imputed.',
     54,
     tableY + 8,
     { width: 504 },
@@ -420,8 +434,30 @@ function buildPdf(program, options) {
         doc.font('Helvetica').fontSize(9).text(`- ${domain.label}: ${domain.missingReason}`);
       });
     heading(doc, 'Engagement');
-    line(doc, 'Weekly adventures completed', `${program.weeklyCompletion.count}/${program.weeklyCompletion.total || 'unavailable'}`);
+    line(doc, 'Students with at least one adventure', program.studentsWithAdventureCount || 0);
+    line(doc, 'Mission completions', program.missionCount);
+    line(doc, 'Active students this week', program.activeStudentCountThisWeek || 0);
+    line(
+      doc,
+      'Weekly completion',
+      program.weeklyProgressSourceAvailable === false
+        ? 'Unavailable — canonical weekly-progress source is not deployed'
+        : `${program.weeklyCompletion.count}/${program.weeklyCompletion.total || 'unavailable'}`,
+    );
     line(doc, 'Last activity', program.lastActivity || 'Not enough data');
+    heading(doc, 'Data Quality');
+    line(doc, 'Missing baseline', program.quality.missingBaseline);
+    line(doc, 'Missing post', program.quality.missingPost);
+    line(doc, 'Unmatched records', program.quality.unmatchedRecords);
+    line(doc, 'Duplicate assessments', program.quality.duplicateAssessmentWarnings);
+    line(doc, 'Invalid score ranges', program.quality.invalidScoreRanges);
+    line(doc, 'Students without grade', program.quality.studentsWithoutGrade);
+    heading(doc, 'Grade Distribution');
+    if (program.gradeDistribution.length) {
+      program.gradeDistribution.forEach((item) => line(doc, item.grade, item.count));
+    } else {
+      line(doc, 'Grades', 'Not enough data');
+    }
     if (options.includeNotes !== false) {
       heading(doc, 'Educator observations');
       for (const [label, value] of [
@@ -436,7 +472,9 @@ function buildPdf(program, options) {
     doc.font('Helvetica').fontSize(9).fillColor('#213047').text(
       'Pre/post change uses only students with both a valid baseline and post score. Incomplete records remain visible in participation and data-quality totals. Results describe this pilot cohort and do not establish clinical, diagnostic, causal, or statistically significant effects.',
     );
+    ensureSpace(doc, 80);
     heading(doc, 'Next-step recommendations');
+    doc.y += 10;
     recommendations(program).forEach((item) => {
       ensureSpace(doc, 18);
       doc.font('Helvetica').fontSize(10).text(`- ${item}`);
@@ -471,7 +509,8 @@ function buildPdf(program, options) {
 function buildHtml(program) {
   const domainRows = program.impactSnapshot.domains.map((domain) => `<tr><th>${text(domain.label)}</th><td>${metric(domain.baselinePercentage, '%')}</td><td>${metric(domain.postPercentage, '%')}</td><td>${signedPoints(domain.deltaPercentagePoints)}</td><td>${domain.matchedStudentCount}</td><td>${domain.excludedRecordCount}</td><td>${text(domain.dataQualityStatus)}</td></tr>`).join('');
   const liveRows = (program.liveLearningSnapshot?.cards || []).map((card) => `<tr><th>${text(card.label)}</th><td>${text(card.centerValue)}</td><td>${text(card.statusLabel)}</td><td>${text(card.summary)}</td></tr>`).join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Live Learning Signals</h2><table><thead><tr><th>Measure</th><th>Value</th><th>Status</th><th>Summary</th></tr></thead><tbody>${liveRows || '<tr><td colspan="4">No live signal payload</td></tr>'}</tbody></table><h2>Verified Growth</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data notes</h2><p>Operational metrics describe enrollment and activity. Directional live signals describe mission activity. Verified growth requires matched baseline and post assessments. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
+  const gradeRows = program.gradeDistribution.map((item) => `<li>${text(item.grade)}: ${item.count}</li>`).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Program Health</h2><p>${program.activeStudentCount} students; ${program.baseline.count} baseline; ${program.post.count} post; ${program.missionCount} mission completions; ${program.activeStudentCountThisWeek || 0} active this week.</p><h2>Live Student Progress</h2><table><thead><tr><th>Measure</th><th>Value</th><th>Status</th><th>Summary</th></tr></thead><tbody>${liveRows || '<tr><td colspan="4">No live signal payload</td></tr>'}</tbody></table><h2>Verified Outcomes</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data Quality</h2><p>Missing baseline: ${program.quality.missingBaseline}. Missing post: ${program.quality.missingPost}. Unmatched records: ${program.quality.unmatchedRecords}. Invalid score ranges: ${program.quality.invalidScoreRanges}.</p><h2>Grade Distribution</h2><ul>${gradeRows || '<li>Not enough data</li>'}</ul><h2>Data notes</h2><p>Operational metrics describe enrollment and activity. Directional live signals describe mission activity. Verified outcomes require matched baseline and post assessments. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
 }
 
 exports.handler = async (event) => {
@@ -499,16 +538,6 @@ exports.handler = async (event) => {
   };
   try {
     const content = format === 'html' ? Buffer.from(buildHtml(program)) : await buildPdf(program, options);
-    await auth.context.supabase.from('pilot_outcome_reports').insert({
-      program_id: programId,
-      status: body.status === 'final' ? 'final' : 'draft',
-      reporting_start: options.reportingStart || null,
-      reporting_end: options.reportingEnd || null,
-      include_student_appendix: options.includeStudentAppendix,
-      include_notes: options.includeNotes,
-      include_charts: options.includeCharts,
-      generated_at: new Date().toISOString(),
-    }).then(() => undefined, () => undefined);
     return {
       statusCode: 200,
       isBase64Encoded: true,

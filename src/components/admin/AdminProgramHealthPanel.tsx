@@ -8,7 +8,7 @@ type AdminProgramHealthPanelProps = {
 };
 
 export default function AdminProgramHealthPanel({ program }: AdminProgramHealthPanelProps) {
-  const { metrics, timeline } = buildProgramHealthModel(program);
+  const { metrics, timeline, statusBanner } = buildProgramHealthModel(program);
 
   return (
     <section className="phVisual-panel programHealth" aria-labelledby="program-health-title">
@@ -31,6 +31,9 @@ export default function AdminProgramHealthPanel({ program }: AdminProgramHealthP
           </li>
         ))}
       </ol>
+      <p className="phVisual-notice phVisual-currentStatus" role="status">
+        <strong>Current status:</strong> {statusBanner}
+      </p>
     </section>
   );
 }

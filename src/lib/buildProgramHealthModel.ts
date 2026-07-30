@@ -26,7 +26,10 @@ export type ProgramHealthModel = {
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function studentsWithAdventure(program: PilotOutcomeProgram): number {
-  return (program.students ?? []).filter((row) => row.weeklyAdventuresCompleted > 0).length;
+  if (program.studentsWithAdventureCount != null) return program.studentsWithAdventureCount;
+  return (program.students ?? []).filter(
+    (row) => row.weeklyAdventuresCompleted > 0 || row.missionsCompleted > 0,
+  ).length;
 }
 
 function studentsWithAssessment(program: PilotOutcomeProgram): number {
@@ -49,6 +52,7 @@ function countPair(count: number, total: number): string {
 }
 
 function activeStudentsThisWeek(program: PilotOutcomeProgram): number {
+  if (program.activeStudentCountThisWeek != null) return program.activeStudentCountThisWeek;
   const students = program.students ?? [];
   if (!students.length) return 0;
   const cutoff = Date.now() - 7 * MS_PER_DAY;
@@ -92,7 +96,12 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
     { label: 'At least one assessment', value: String(studentsWithAssessment(program)) },
     {
       label: 'Weekly completion',
-      value: weeklyImpact.percentage == null ? 'Not enough data' : `${weeklyImpact.percentage}%`,
+      value:
+        program.weeklyProgressSourceAvailable === false
+          ? 'Unavailable'
+          : weeklyImpact.percentage == null
+            ? 'Not enough data'
+            : `${weeklyImpact.percentage}%`,
     },
     {
       label: 'Participation',
@@ -130,7 +139,9 @@ export function buildProgramHealthModel(program: PilotOutcomeProgram): ProgramHe
       label: 'Weekly Activities',
       detail:
         weeklyProgress.rate == null
-          ? 'Weekly progress not recorded yet'
+          ? program.weeklyProgressSourceAvailable === false
+            ? 'Weekly progress source unavailable'
+            : 'Weekly progress not recorded yet'
           : `${weeklyProgress.count} of ${weeklyProgress.total} student-weeks`,
     },
     {

@@ -66,14 +66,20 @@ function parseQuestionStats(answersJson) {
     for (const attempt of entries) {
       if (!attempt || typeof attempt !== 'object') continue;
       questionsAnswered += 1;
-      if (attempt.correct === true || attempt.isCorrect === true || attempt.result === 'correct') {
+      if (
+        attempt.correct === true ||
+        attempt.isCorrect === true ||
+        attempt.is_correct_final === true ||
+        attempt.result === 'correct'
+      ) {
         correctAnswers += 1;
       }
     }
     if (questionsAnswered) return { questionsAnswered, correctAnswers };
   }
-  const keys = Object.keys(answersJson).filter((key) => !key.startsWith('_') && key !== 'mission_id');
-  return { questionsAnswered: keys.length, correctAnswers: 0 };
+  // Legacy answer maps do not carry a reliable correctness contract. Do not mix
+  // their key counts with canonical `_attempts` correctness totals.
+  return { questionsAnswered: 0, correctAnswers: 0 };
 }
 
 function liveStatusLabel(avgPercent, studentsWithActivity) {
@@ -156,7 +162,12 @@ function buildDomainLiveSignal(domainKey, modules, participantIds) {
   };
 }
 
-function buildWeeklyLiveSignal(weeklyCompletion, weekRows, participantCount) {
+function buildWeeklyLiveSignal(
+  weeklyCompletion,
+  weekRows,
+  participantCount,
+  sourceAvailable = true,
+) {
   const distinctWeeks = new Set(
     (weekRows || []).map((row) => String(row.week_id || row.week_number || '').trim()).filter(Boolean),
   );
@@ -164,25 +175,43 @@ function buildWeeklyLiveSignal(weeklyCompletion, weekRows, participantCount) {
   const numerator = weeklyCompletion.count;
   const percentage =
     denominator > 0 ? round((numerator / denominator) * 100) : weeklyCompletion.rate;
-  const available = denominator > 0 && numerator > 0;
+  const available = sourceAvailable && denominator > 0;
+  const unavailableSummary =
+    'Weekly completion is unavailable because the canonical weekly-progress source is not deployed. Mission activity is reported separately and is not converted into a weekly rate.';
   return {
     key: 'weekly',
     label: 'Weekly completion',
     evidenceType: 'operational',
-    centerValue: percentage == null ? 'Awaiting activity' : `${percentage}%`,
-    statusLabel: available ? (percentage >= 75 ? 'Strong signal' : percentage >= 50 ? 'Positive signal' : 'Developing signal') : 'Awaiting activity',
+    centerValue: !sourceAvailable
+      ? 'Unavailable'
+      : percentage == null
+        ? 'Awaiting activity'
+        : `${percentage}%`,
+    statusLabel: !sourceAvailable
+      ? 'Source unavailable'
+      : available
+        ? (percentage >= 75 ? 'Strong signal' : percentage >= 50 ? 'Positive signal' : 'Developing signal')
+        : 'Awaiting activity',
     summary: available
       ? `${numerator} of ${denominator} student-weeks completed across published weekly adventures.`
-      : 'Weekly progress has not been recorded yet.',
+      : sourceAvailable
+        ? 'Weekly progress has not been recorded yet.'
+        : unavailableSummary,
     details: {
       source: 'participant_week_progress',
       numerator,
       denominator,
       includedStudents: participantCount,
       excludedStudents: 0,
-      dataSufficiencyRule: 'Counts distinct participant-week progress rows against published or observed weeks.',
+      dataSufficiencyRule: sourceAvailable
+        ? 'Counts distinct participant-week progress rows against published or observed weeks.'
+        : 'No rate is calculated without the canonical participant-week denominator.',
       lastCalculatedAt: new Date().toISOString(),
-      currentWeekStatus: distinctWeeks.size ? `${distinctWeeks.size} week(s) observed in progress records` : 'No week progress rows yet',
+      currentWeekStatus: !sourceAvailable
+        ? 'Canonical weekly-progress source unavailable'
+        : distinctWeeks.size
+          ? `${distinctWeeks.size} week(s) observed in progress records`
+          : 'No week progress rows yet',
     },
     available,
     percentage,
@@ -262,11 +291,17 @@ function buildLiveLearningSnapshot(input) {
     weekRows = [],
     participation,
     participantCount,
+    weeklyProgressSourceAvailable = true,
   } = input;
   const reading = buildDomainLiveSignal('reading', modules, participantIds);
   const sel = buildDomainLiveSignal('sel', modules, participantIds);
   const focus = buildDomainLiveSignal('focus', modules, participantIds);
-  const weekly = buildWeeklyLiveSignal(weeklyCompletion, weekRows, participantCount);
+  const weekly = buildWeeklyLiveSignal(
+    weeklyCompletion,
+    weekRows,
+    participantCount,
+    weeklyProgressSourceAvailable,
+  );
   const participationSignal = buildParticipationLiveSignal(participation);
   const overall = buildOverallLiveSignal([reading, sel, focus]);
   return {

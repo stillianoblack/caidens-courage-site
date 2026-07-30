@@ -43,7 +43,7 @@ describe('Pilot outcomes evidence panels', () => {
     const program = baselineOnlyProgram();
     expect(program.post.count).toBe(0);
     render(<LiveLearningSignalsPanel program={program} />);
-    expect(screen.getByRole('heading', { name: 'Live Learning Signals' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Live Student Progress' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Reading comprehension signal/i })).toBeInTheDocument();
     expect(screen.getAllByText('Directional').length).toBeGreaterThan(0);
     expect(screen.getByRole('heading', { name: /Overall live learning signal/i })).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('Pilot outcomes evidence panels', () => {
 
   it('shows verified growth pending instead of live growth labels', () => {
     render(<VerifiedGrowthPanel program={baselineOnlyProgram()} />);
-    expect(screen.getByRole('heading', { name: 'Verified Growth' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Verified Outcomes' })).toBeInTheDocument();
     expect(screen.getByText(/Verified growth will appear after matched post-assessments/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Verified growth pending/i).length).toBeGreaterThan(0);
   });

@@ -54,4 +54,14 @@ describe('pilot outcomes security architecture', () => {
     expect(panels).not.toMatch(/buildLiveLearningSnapshot|buildImpactSnapshot|buildDomainOutcome/);
     expect(panels).not.toContain(".from('");
   });
+
+  it('generates reports without mutating production reporting tables', () => {
+    const report = fs.readFileSync(
+      path.join(root, 'netlify/functions/admin-pilot-outcomes-report.js'),
+      'utf8',
+    );
+    expect(report).not.toMatch(/\.insert\s*\(/);
+    expect(report).not.toMatch(/\.update\s*\(/);
+    expect(report).not.toMatch(/\.delete\s*\(/);
+  });
 });

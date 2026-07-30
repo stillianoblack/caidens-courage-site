@@ -124,6 +124,7 @@ export type PilotOutcomeProgram = {
   percentageDelta: number | null;
   percentageDeltaAvailable: boolean;
   weeklyCompletion: { count: number; total: number; rate: number | null };
+  weeklyProgressSourceAvailable?: boolean;
   impactSnapshot: PilotImpactSnapshotPayload;
   verifiedGrowthSnapshot?: PilotImpactSnapshotPayload;
   liveLearningSnapshot?: PilotLiveLearningSnapshot;
@@ -131,6 +132,8 @@ export type PilotOutcomeProgram = {
   focusCoins: number;
   assessmentCount: number;
   missionCount: number;
+  studentsWithAdventureCount?: number;
+  activeStudentCountThisWeek?: number;
   lastActivity: string | null;
   reportStatus: string;
   reportBlockers: string[];
@@ -162,6 +165,7 @@ export type PilotOutcomeProgram = {
     weeklyAdventuresCompleted: number;
     assessmentsCompleted: number;
     missionsCompleted: number;
+    kidPlaySessions?: number;
     focusCoins: number;
     certificates: number;
     lastActivity: string | null;

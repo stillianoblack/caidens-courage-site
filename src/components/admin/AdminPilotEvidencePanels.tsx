@@ -94,8 +94,8 @@ export function LiveLearningSignalsPanel({ program }: { program: PilotOutcomePro
 
   return (
     <section className="phVisual-panel" aria-labelledby="live-learning-title">
-      <p className="phVisual-eyebrow">Continuous pilot activity</p>
-      <h2 id="live-learning-title">Live Learning Signals</h2>
+      <p className="phVisual-eyebrow">Live Learning Signals</p>
+      <h2 id="live-learning-title">Live Student Progress</h2>
       <p className="phVisual-meta">{snapshot.subtitle}</p>
       <p className="phVisual-evidenceGuide">
         <strong>Operational</strong> — {snapshot.evidenceGuide.operational}{' '}
@@ -153,8 +153,8 @@ export function VerifiedGrowthPanel({ program }: { program: PilotOutcomeProgram 
 
   return (
     <section className="phVisual-panel" aria-labelledby="verified-growth-title">
-      <p className="phVisual-eyebrow">Matched assessments</p>
-      <h2 id="verified-growth-title">Verified Growth</h2>
+      <p className="phVisual-eyebrow">Pilot Impact · matched assessments</p>
+      <h2 id="verified-growth-title">Verified Outcomes</h2>
       <p className="phVisual-meta">Confirmed change based on matched baseline and post-assessments.</p>
       {growthPending ? (
         <p className="phVisual-notice" role="status">
