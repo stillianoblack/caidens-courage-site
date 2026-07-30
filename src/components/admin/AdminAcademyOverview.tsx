@@ -14,6 +14,28 @@ function value(value: number | null | undefined, suffix = '') {
   return value == null ? 'Unavailable' : `${value}${suffix}`;
 }
 
+const classificationCopy: Record<AcademyCohortRow['cohortClassification'], {
+  label: string;
+  reason: string;
+}> = {
+  established: {
+    label: 'Established',
+    reason: 'At least 3 active days and at least 2 recognized completed activities.',
+  },
+  emerging: {
+    label: 'Emerging',
+    reason: 'At least 2 active days or 1 recognized completion, but below the established threshold.',
+  },
+  minimal: {
+    label: 'Minimal/no engagement',
+    reason: 'One-off, login-only, no recognized completion, or fewer than 2 active days.',
+  },
+  test_internal: {
+    label: 'Test/internal',
+    reason: 'Test or internal account; excluded regardless of activity.',
+  },
+};
+
 export default function AdminAcademyOverview({
   academy,
   token,
@@ -23,7 +45,7 @@ export default function AdminAcademyOverview({
   token: string;
   onReload: () => Promise<void>;
 }) {
-  const [eligibility, setEligibility] = useState('all');
+  const [cohortFilter, setCohortFilter] = useState('non-test');
   const [program, setProgram] = useState('all');
   const [organization, setOrganization] = useState('all');
   const [search, setSearch] = useState('');
@@ -32,13 +54,16 @@ export default function AdminAcademyOverview({
   const [message, setMessage] = useState('');
   const [reporting, setReporting] = useState(false);
   const rows = useMemo(() => academy.cohort.filter((row) => {
-    if (eligibility === 'eligible' && !row.included) return false;
-    if (eligibility === 'ineligible' && row.included) return false;
+    if (cohortFilter === 'non-test' && row.testSynthetic) return false;
+    if (['established', 'emerging', 'minimal', 'test_internal'].includes(cohortFilter)
+      && row.cohortClassification !== cohortFilter) return false;
+    if (cohortFilter === 'included' && !row.included) return false;
+    if (cohortFilter === 'excluded' && row.included) return false;
     if (program !== 'all' && row.programCode !== program) return false;
     if (organization !== 'all' && row.organization !== organization) return false;
     if (search && !row.studentIdentifier.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
-  }), [academy.cohort, eligibility, organization, program, search]);
+  }), [academy.cohort, cohortFilter, organization, program, search]);
 
   const saveOverride = async (
     row: AcademyCohortRow,
@@ -107,6 +132,7 @@ export default function AdminAcademyOverview({
           <p className="academyOverview-range">
             Reporting period: {formatDate(academy.cohortSummary.earliestActivity)}–{formatDate(academy.cohortSummary.latestActivity)}
           </p>
+          <p className="academyOverview-calculated">Calculated at {new Date(academy.calculatedAt).toLocaleString()}</p>
         </div>
         <div className="academyOverview-actions">
           <button type="button" disabled={reporting} onClick={() => void generateReport()}>Generate Academy Report</button>
@@ -114,17 +140,48 @@ export default function AdminAcademyOverview({
         </div>
       </header>
 
-      <div className="academyOverview-kpis" aria-label="Academy cohort summary">
+      <section className="academyOverview-summary" aria-labelledby="academy-cohort-summary">
+        <div>
+          <p className="pilotOutcomes-eyebrow">Formal cohort definition</p>
+          <h3 id="academy-cohort-summary">Academy cohort summary</h3>
+          <p>Cohort denominator: {academy.cohortSummary.canonicalStudentAccounts} canonical student accounts. Categories are mutually exclusive and total {academy.cohortSummary.canonicalStudentAccounts}.</p>
+        </div>
+        <div className="academyOverview-kpis">
         {[
-          ['Participant accounts', academy.cohortSummary.totalParticipantAccounts],
-          ['Automatically eligible', academy.cohortSummary.automaticallyEligibleStudents],
-          ['Manually included', academy.cohortSummary.manuallyIncludedStudents],
-          ['Manually excluded', academy.cohortSummary.manuallyExcludedStudents],
-          ['Low-engagement exclusions', academy.cohortSummary.lowEngagementExclusions],
-          ['Programs represented', academy.cohortSummary.programsRepresented],
-          ['Active organizations', academy.cohortSummary.activeOrganizations],
-          ['Included students', a.activeStudentCount],
+          ['Canonical student accounts', academy.cohortSummary.canonicalStudentAccounts],
+          ['Established reporting cohort', academy.cohortSummary.establishedParticipants],
+          ['Emerging participants', academy.cohortSummary.emergingParticipants],
+          ['Minimal/no engagement', academy.cohortSummary.minimalParticipants],
+          ['Test/internal excluded', academy.cohortSummary.testInternalParticipants],
+          ['Manual inclusions', academy.cohortSummary.manuallyIncludedStudents],
+          ['Manual exclusions', academy.cohortSummary.manuallyExcludedStudents],
         ].map(([label, metric]) => <article key={label}><strong>{metric}</strong><span>{label}</span></article>)}
+        </div>
+      </section>
+
+      <div className="academyOverview-populations">
+        <section className="academyOverview-panel">
+          <p className="pilotOutcomes-eyebrow">Academy operations</p>
+          <h3>Operational participation</h3>
+          <p>Describes the full Academy population and participation activity. These measures are not verified growth.</p>
+          <dl>
+            <div><dt>Canonical accounts</dt><dd>{academy.cohortSummary.canonicalStudentAccounts}</dd></div>
+            <div><dt>Non-test learners</dt><dd>{academy.cohortSummary.nonTestLearners}</dd></div>
+            <div><dt>Active learners</dt><dd>{academy.cohortSummary.activeLearners}</dd></div>
+            <div><dt>Operational programs</dt><dd>{academy.cohortSummary.operationalPrograms}</dd></div>
+          </dl>
+        </section>
+        <section className="academyOverview-panel academyOverview-panel--formal">
+          <p className="pilotOutcomes-eyebrow">Formal reporting cohort</p>
+          <h3>Established learners in this report</h3>
+          <p>The live learning analysis below uses the {a.activeStudentCount}-student formal cohort unless otherwise labeled.</p>
+          <dl>
+            <div><dt>Included students</dt><dd>{a.activeStudentCount}</dd></div>
+            <div><dt>Included programs</dt><dd>{academy.cohortSummary.programsRepresented}</dd></div>
+            <div><dt>Included organizations</dt><dd>{academy.cohortSummary.activeOrganizations}</dd></div>
+            <div><dt>Reporting period</dt><dd>{formatDate(academy.cohortSummary.earliestActivity)}–{formatDate(academy.cohortSummary.latestActivity)}</dd></div>
+          </dl>
+        </section>
       </div>
 
       <div className="academyOverview-grid">
@@ -181,9 +238,11 @@ export default function AdminAcademyOverview({
       </section>
 
       <section className="academyOverview-panel">
-        <h3>Cohort management</h3>
+        <p className="pilotOutcomes-eyebrow">Academy reporting cohort</p>
+        <h3>Cohort explorer</h3>
+        <p>Explore operational participation and the formal reporting cohort without exposing private student names.</p>
         <div className="academyOverview-filters">
-          <label>Inclusion status<select value={eligibility} onChange={(event) => setEligibility(event.target.value)}><option value="all">All students</option><option value="eligible">Included</option><option value="ineligible">Excluded</option></select></label>
+          <label>Cohort status<select value={cohortFilter} onChange={(event) => setCohortFilter(event.target.value)}><option value="non-test">All non-test learners</option><option value="established">Established</option><option value="emerging">Emerging</option><option value="minimal">Minimal/no engagement</option><option value="test_internal">Test/internal</option><option value="included">Included in formal report</option><option value="excluded">Excluded from formal report</option></select></label>
           <label>Program<select value={program} onChange={(event) => setProgram(event.target.value)}><option value="all">All programs</option>{Array.from(new Map(academy.cohort.map((row) => [row.programCode, row.programName])).entries()).filter(([code]) => code).map(([code, name]) => <option key={code || ''} value={code || ''}>{name}</option>)}</select></label>
           <label>Organization<select value={organization} onChange={(event) => setOrganization(event.target.value)}><option value="all">All organizations</option>{Array.from(new Set(academy.cohort.map((row) => row.organization))).sort().map((item) => <option key={item}>{item}</option>)}</select></label>
           <label>Privacy-safe identifier<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="FFA-…" /></label>
@@ -191,16 +250,23 @@ export default function AdminAcademyOverview({
         <div className="academyOverview-cohort" role="list" aria-label="Academy reporting cohort">
           {rows.map((row) => (
             <article key={row.participantId} role="listitem" className="academyOverview-cohortRow">
-              <div><strong>{row.studentIdentifier}</strong><span>{row.programName} · {row.programType}</span><span>{row.organization}</span></div>
-              <dl>
+              <div className="academyOverview-programCell">
+                <strong>{row.programName}</strong>
+                <span>{row.programType}</span>
+                {row.programCode ? <small>{row.programCode}</small> : null}
+                <b>Student {row.studentIdentifier}</b>
+                <span>{row.organization}</span>
+              </div>
+              <dl className="academyOverview-rowMetrics">
+                <div><dt>Cohort status</dt><dd>{classificationCopy[row.cohortClassification].label}</dd></div>
                 <div><dt>Active days</dt><dd>{row.distinctActiveDays}</dd></div>
                 <div><dt>Activities</dt><dd>{row.completedRecognizedActivities}</dd></div>
-                <div><dt>First activity</dt><dd>{formatDate(row.firstActivity)}</dd></div>
+                <div><dt>Assessments</dt><dd>{row.assessmentCount}</dd></div>
                 <div><dt>Latest activity</dt><dd>{formatDate(row.latestActivity)}</dd></div>
-                <div><dt>Automatic result</dt><dd>{row.automaticEligible ? 'Eligible' : 'Below threshold'}</dd></div>
-                <div><dt>Final status</dt><dd>{row.included ? 'Included' : `Excluded — ${row.exclusionReason || 'No reason recorded'}`}</dd></div>
+                <div><dt>Reporting status</dt><dd>{row.included ? 'Included' : 'Excluded'}</dd></div>
+                <div className="academyOverview-rowReason"><dt>Reason</dt><dd>{row.included ? classificationCopy[row.cohortClassification].reason : row.exclusionReason || classificationCopy[row.cohortClassification].reason}</dd></div>
               </dl>
-              <div className="academyOverview-override">
+              <div className="academyOverview-override" aria-label={`Actions for ${row.studentIdentifier}`}>
                 <label>Reporting override<select value={row.reportingOverride} disabled={savingId === row.participantId} onChange={(event) => void saveOverride(row, event.target.value as AcademyCohortRow['reportingOverride'])}><option value="automatic">Automatic</option><option value="include">Force include</option><option value="exclude">Force exclude</option></select></label>
                 <label>Internal reason<input value={reasonById[row.participantId] ?? row.reportingOverrideReason ?? ''} onChange={(event) => setReasonById((current) => ({ ...current, [row.participantId]: event.target.value }))} /></label>
               </div>

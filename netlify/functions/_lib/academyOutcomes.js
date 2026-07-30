@@ -99,6 +99,13 @@ function overrideFor(overrides, participantId) {
   };
 }
 
+function cohortClassification({ testSynthetic, automaticEligible, distinctActiveDays, completedRecognizedActivities }) {
+  if (testSynthetic) return 'test_internal';
+  if (automaticEligible) return 'established';
+  if (distinctActiveDays >= 2 || completedRecognizedActivities >= 1) return 'emerging';
+  return 'minimal';
+}
+
 function participantCohortRow(participant, program, grouped, overrides) {
   const sessions = grouped.sessions.get(participant.id) || [];
   const modules = grouped.modules.get(participant.id) || [];
@@ -137,7 +144,7 @@ function participantCohortRow(participant, program, grouped, overrides) {
     included = false;
     exclusionReason = override.reason || 'Manually excluded';
   }
-  return {
+  const row = {
     participantId: participant.id,
     studentIdentifier: privacySafeId(participant.id),
     programId: program?.id || null,
@@ -147,6 +154,7 @@ function participantCohortRow(participant, program, grouped, overrides) {
     organization: program?.organization || program?.group_name || 'Unspecified',
     distinctActiveDays: activeDays.size,
     completedRecognizedActivities: recognizedActivities.size,
+    assessmentCount: assessments.length,
     firstActivity: earliestIso(activityTimes),
     latestActivity: latestIso(activityTimes),
     automaticEligible,
@@ -157,6 +165,10 @@ function participantCohortRow(participant, program, grouped, overrides) {
     testSynthetic,
     missingProgramLink: !program,
     missingGradeLevel: !String(participant.grade_level || participant.grade_band || '').trim(),
+  };
+  return {
+    ...row,
+    cohortClassification: cohortClassification(row),
   };
 }
 
@@ -214,6 +226,11 @@ function buildAcademyOutcomes(data, options = {}) {
     options,
   );
   const represented = cohort.filter((row) => row.included);
+  const established = cohort.filter((row) => row.cohortClassification === 'established').length;
+  const emerging = cohort.filter((row) => row.cohortClassification === 'emerging').length;
+  const minimal = cohort.filter((row) => row.cohortClassification === 'minimal').length;
+  const testInternal = cohort.filter((row) => row.cohortClassification === 'test_internal').length;
+  const nonTestLearners = cohort.length - testInternal;
   return {
     calculatedAt: new Date().toISOString(),
     eligibilityRule: {
@@ -224,6 +241,16 @@ function buildAcademyOutcomes(data, options = {}) {
     },
     cohortSummary: {
       totalParticipantAccounts: cohort.length,
+      canonicalStudentAccounts: cohort.length,
+      establishedParticipants: established,
+      emergingParticipants: emerging,
+      minimalParticipants: minimal,
+      testInternalParticipants: testInternal,
+      nonTestLearners,
+      activeLearners: cohort.filter((row) => !row.testSynthetic && row.distinctActiveDays > 0).length,
+      operationalPrograms: new Set(
+        cohort.filter((row) => !row.testSynthetic).map((row) => row.programCode).filter(Boolean),
+      ).size,
       automaticallyEligibleStudents: cohort.filter(
         (row) => row.automaticEligible && row.reportingOverride === 'automatic' && !row.testSynthetic,
       ).length,
@@ -267,6 +294,7 @@ module.exports = {
   ACTIVE_DAY_THRESHOLD,
   ACTIVITY_THRESHOLD,
   buildAcademyOutcomes,
+  cohortClassification,
   isTestOrSynthetic,
   privacySafeId,
 };

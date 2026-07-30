@@ -36,6 +36,28 @@ function data(): any {
 }
 
 describe('Academy reporting eligibility', () => {
+  test('assigns every canonical account to one mutually exclusive presentation cohort', () => {
+    const input = data();
+    input.participants.push({ id: 'emerging-1', program_code: 'CAMP-1', role: 'student' });
+    input.sessions.push(
+      { id: 'e1', participant_id: 'emerging-1', started_at: '2026-07-01T12:00:00Z' },
+      { id: 'e2', participant_id: 'emerging-1', started_at: '2026-07-02T12:00:00Z' },
+    );
+    const result = buildAcademyOutcomes(input);
+    const summary = result.cohortSummary;
+    const mutuallyExclusiveTotal =
+      summary.establishedParticipants +
+      summary.emergingParticipants +
+      summary.minimalParticipants +
+      summary.testInternalParticipants;
+
+    expect(summary.canonicalStudentAccounts).toBe(4);
+    expect(mutuallyExclusiveTotal).toBe(summary.canonicalStudentAccounts);
+    expect(result.cohort.map((row: { cohortClassification: string }) => row.cohortClassification).sort())
+      .toEqual(['emerging', 'established', 'minimal', 'test_internal']);
+    expect(summary.nonTestLearners).toBe(3);
+  });
+
   test('uses normalized distinct dates and canonical completed activities', () => {
     const result = buildAcademyOutcomes(data());
     const eligible = result.cohort.find((row: { participantId: string }) => row.participantId === 's1');
@@ -85,5 +107,48 @@ describe('Academy reporting eligibility', () => {
     expect(result.aggregate.missionCount).toBe(2);
     expect(result.aggregate.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints).toBeNull();
     expect(result.aggregate.impactSnapshot.overallMatchedGrowth.displayStatus).toBe('Not enough data');
+  });
+
+  test('reconciles the Blue Ribbon 17-student presentation without changing eligibility', () => {
+    const input = data();
+    input.programs = [{
+      id: 'blue-ribbon',
+      program_code: 'CAMP-BLUERIBBONRESULTSACADEMY-2026',
+      program_name: 'Blue Ribbon Results Academy',
+      program_type: 'camp',
+      organization: 'Summer program',
+    }];
+    input.participants = Array.from({ length: 17 }, (_, index) => ({
+      id: `br-${index + 1}`,
+      program_code: 'CAMP-BLUERIBBONRESULTSACADEMY-2026',
+      role: 'student',
+    }));
+    input.sessions = [];
+    input.modules = [];
+    for (let index = 0; index < 6; index += 1) {
+      input.sessions.push(
+        { id: `s-${index}-1`, participant_id: `br-${index + 1}`, started_at: '2026-07-01T12:00:00Z' },
+        { id: `s-${index}-2`, participant_id: `br-${index + 1}`, started_at: '2026-07-02T12:00:00Z' },
+        { id: `s-${index}-3`, participant_id: `br-${index + 1}`, started_at: '2026-07-03T12:00:00Z' },
+      );
+      input.modules.push(
+        { id: `m-${index}-1`, participant_id: `br-${index + 1}`, module_id: 'one', completed_at: '2026-07-02T13:00:00Z' },
+        { id: `m-${index}-2`, participant_id: `br-${index + 1}`, module_id: 'two', completed_at: '2026-07-03T13:00:00Z' },
+      );
+    }
+    for (let index = 6; index < 14; index += 1) {
+      input.sessions.push(
+        { id: `s-${index}-1`, participant_id: `br-${index + 1}`, started_at: '2026-07-01T12:00:00Z' },
+        { id: `s-${index}-2`, participant_id: `br-${index + 1}`, started_at: '2026-07-02T12:00:00Z' },
+      );
+    }
+    const result = buildAcademyOutcomes(input);
+    expect(result.cohortSummary).toEqual(expect.objectContaining({
+      canonicalStudentAccounts: 17,
+      establishedParticipants: 6,
+      emergingParticipants: 8,
+      minimalParticipants: 3,
+      testInternalParticipants: 0,
+    }));
   });
 });

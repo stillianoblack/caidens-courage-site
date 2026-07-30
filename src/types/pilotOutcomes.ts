@@ -197,6 +197,7 @@ export type AcademyCohortRow = {
   organization: string;
   distinctActiveDays: number;
   completedRecognizedActivities: number;
+  assessmentCount: number;
   firstActivity: string | null;
   latestActivity: string | null;
   automaticEligible: boolean;
@@ -207,6 +208,7 @@ export type AcademyCohortRow = {
   testSynthetic: boolean;
   missingProgramLink: boolean;
   missingGradeLevel: boolean;
+  cohortClassification: 'established' | 'emerging' | 'minimal' | 'test_internal';
 };
 
 export type AcademyOutcomePayload = {
@@ -218,6 +220,14 @@ export type AcademyOutcomePayload = {
   };
   cohortSummary: {
     totalParticipantAccounts: number;
+    canonicalStudentAccounts: number;
+    establishedParticipants: number;
+    emergingParticipants: number;
+    minimalParticipants: number;
+    testInternalParticipants: number;
+    nonTestLearners: number;
+    activeLearners: number;
+    operationalPrograms: number;
     automaticallyEligibleStudents: number;
     manuallyIncludedStudents: number;
     manuallyExcludedStudents: number;

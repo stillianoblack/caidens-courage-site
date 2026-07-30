@@ -78,8 +78,9 @@ export async function downloadPilotOutcomesReport(
 
 export function fetchAcademyOutcomes(token: string) {
   return authorizedJson<{ academy: AcademyOutcomePayload; unavailableSources: string[] }>(
-    '/.netlify/functions/admin-academy-outcomes',
+    `/.netlify/functions/admin-academy-outcomes?refresh=${Date.now()}`,
     token,
+    { cache: 'no-store' },
   );
 }
 
