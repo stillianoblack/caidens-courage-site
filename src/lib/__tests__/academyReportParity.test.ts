@@ -64,6 +64,9 @@ describe('Academy dashboard and export parity', () => {
     expect(disclosure.operational).toContain('31 canonical student accounts');
     expect(disclosure.operational).toContain('Seven students met'.replace('Seven', '7'));
     expect(html).toContain(disclosure.operational);
+    expect(html).toContain('This is an Academy-wide report.');
+    expect(html).toContain('Program Composition');
+    expect(html).toContain('Readable Learning Program');
     expect(html).not.toContain('33 canonical');
   });
 });

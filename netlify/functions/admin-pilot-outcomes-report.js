@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const { requireAdmin, json } = require('./_lib/adminAuth');
 const { buildPilotOutcomes } = require('./_lib/pilotOutcomes');
+const { buildAcademyOutcomes } = require('./_lib/academyOutcomes');
 const {
   formatDecimal,
   formatPercentage,
@@ -27,7 +28,7 @@ async function load(supabase, table) {
 }
 
 async function getProgramOutcome(supabase, programId) {
-  const [programs, participants, assessments, modules, weekSource, wallets, rewards, sessions] = await Promise.all([
+  const [programs, participants, assessments, modules, weekSource, wallets, rewards, sessions, missions, questions, overrides] = await Promise.all([
     load(supabase, 'pilot_programs'),
     load(supabase, 'participants'),
     load(supabase, 'assessment_results_v2'),
@@ -36,20 +37,44 @@ async function getProgramOutcome(supabase, programId) {
     load(supabase, 'player_wallets'),
     load(supabase, 'player_reward_claims'),
     load(supabase, 'kid_play_sessions'),
+    load(supabase, 'participant_mission_progress'),
+    load(supabase, 'question_attempts'),
+    load(supabase, 'academy_reporting_overrides'),
   ]);
   const weeks = weekSource.error ? [] : weekSource.data || [];
-  return buildPilotOutcomes({
-    programs: programs.filter((program) => program.id === programId),
+  const selectedPrograms = programs.filter((program) => program.id === programId);
+  const source = {
+    programs: selectedPrograms,
     participants,
     assessments,
     modules,
+    missions,
+    questions,
+    overrides,
     weeks,
     wallets,
     rewards,
     sessions,
-  }, {
+  };
+  const program = buildPilotOutcomes(source, {
     weeklyProgressSourceAvailable: !weekSource.error,
   }).programs[0] || null;
+  if (!program) return null;
+  const academy = buildAcademyOutcomes(source, {
+    weeklyProgressSourceAvailable: !weekSource.error,
+  });
+  const summary = academy.programSummaries.find((row) => row.programId === program.id);
+  return {
+    ...program,
+    reportingCohort: summary ? {
+      enrolledStudents: summary.enrolledStudents,
+      establishedStudents: summary.establishedStudents,
+      emergingStudents: summary.emergingStudents,
+      minimalStudents: summary.minimalStudents,
+      testInternalStudents: summary.testInternalStudents,
+      includedStudents: summary.includedStudents,
+    } : null,
+  };
 }
 
 function narrative(program) {
@@ -370,14 +395,14 @@ function drawImpactSnapshot(doc, program) {
 
 function buildPdf(program, options) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'LETTER', margin: 54, bufferPages: true, info: { Title: `Pilot Outcomes Report — ${program.programName}` } });
+    const doc = new PDFDocument({ size: 'LETTER', margin: 54, bufferPages: true, info: { Title: `${program.programName} Report` } });
     const chunks = [];
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('error', reject);
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     addHeader(doc);
     doc.moveDown(1.5);
-    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(26).text('Focus Flame Academy Pilot Outcomes Report');
+    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(26).text(`${program.programName} Report`);
     doc.moveDown();
     doc.fillColor('#213047').fontSize(18).text(program.programName);
     doc.font('Helvetica').fontSize(11).text(program.programType);
@@ -387,8 +412,20 @@ function buildPdf(program, options) {
     line(doc, 'Confidentiality', 'Administrative pilot review — privacy-safe cohort summary');
     addContentPage(doc);
     heading(doc, 'Executive summary');
+    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(11).text(`This report covers ${program.programName} only.`);
+    doc.moveDown(.45);
     doc.fillColor('#213047').font('Helvetica').fontSize(10).text(narrative(program));
     doc.moveDown();
+    if (program.reportingCohort) {
+      doc.text(
+        `${program.programName} includes ${program.reportingCohort.enrolledStudents} enrolled students: ` +
+        `${program.reportingCohort.establishedStudents} established, ` +
+        `${program.reportingCohort.emergingStudents} emerging, and ` +
+        `${program.reportingCohort.minimalStudents} with minimal or no recorded engagement.`,
+      );
+      doc.moveDown();
+      line(doc, 'Included in formal report', program.reportingCohort.includedStudents);
+    }
     line(doc, 'Students enrolled', program.activeStudentCount);
     line(doc, 'Matched pre/post students', `${program.matchedCount} of ${program.activeStudentCount}`);
     line(doc, 'Average baseline', metric(program.baselineAverage));
@@ -408,6 +445,7 @@ function buildPdf(program, options) {
     line(doc, 'Baseline participation', `${program.baseline.count}/${program.baseline.total}`);
     line(doc, 'Post participation', `${program.post.count}/${program.post.total}`);
     line(doc, 'Assessments completed', program.assessmentCount);
+    line(doc, 'Kid Shell sessions', program.students.reduce((sum, row) => sum + (row.kidPlaySessions || 0), 0));
     line(doc, 'Missions completed', program.missionCount);
     line(doc, 'Focus Coins', program.focusCoins);
     line(doc, 'Certificates', program.certificateCount);
@@ -510,7 +548,11 @@ function buildHtml(program) {
   const domainRows = program.impactSnapshot.domains.map((domain) => `<tr><th>${text(domain.label)}</th><td>${metric(domain.baselinePercentage, '%')}</td><td>${metric(domain.postPercentage, '%')}</td><td>${signedPoints(domain.deltaPercentagePoints)}</td><td>${domain.matchedStudentCount}</td><td>${domain.excludedRecordCount}</td><td>${text(domain.dataQualityStatus)}</td></tr>`).join('');
   const liveRows = (program.liveLearningSnapshot?.cards || []).map((card) => `<tr><th>${text(card.label)}</th><td>${text(card.centerValue)}</td><td>${text(card.statusLabel)}</td><td>${text(card.summary)}</td></tr>`).join('');
   const gradeRows = program.gradeDistribution.map((item) => `<li>${text(item.grade)}: ${item.count}</li>`).join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Focus Flame Academy Pilot Outcomes Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>Focus Flame Academy Pilot Outcomes Report</h1><h2>${text(program.programName)}</h2><p>${text(narrative(program))}</p><h2>Program Health</h2><p>${program.activeStudentCount} students; ${program.baseline.count} baseline; ${program.post.count} post; ${program.missionCount} mission completions; ${program.activeStudentCountThisWeek || 0} active this week.</p><h2>Live Student Progress</h2><table><thead><tr><th>Measure</th><th>Value</th><th>Status</th><th>Summary</th></tr></thead><tbody>${liveRows || '<tr><td colspan="4">No live signal payload</td></tr>'}</tbody></table><h2>Verified Outcomes</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data Quality</h2><p>Missing baseline: ${program.quality.missingBaseline}. Missing post: ${program.quality.missingPost}. Unmatched records: ${program.quality.unmatchedRecords}. Invalid score ranges: ${program.quality.invalidScoreRanges}.</p><h2>Grade Distribution</h2><ul>${gradeRows || '<li>Not enough data</li>'}</ul><h2>Data notes</h2><p>Operational metrics describe enrollment and activity. Directional live signals describe mission activity. Verified outcomes require matched baseline and post assessments. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print report</button></body></html>`;
+  const cohort = program.reportingCohort;
+  const cohortText = cohort
+    ? `<p>${text(program.programName)} includes ${cohort.enrolledStudents} enrolled students: ${cohort.establishedStudents} established, ${cohort.emergingStudents} emerging, and ${cohort.minimalStudents} with minimal or no recorded engagement. ${cohort.includedStudents} are included in the formal report.</p>`
+    : '';
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${text(program.programName)} Report</title><style>body{font:16px/1.5 system-ui;color:#213047;max-width:850px;margin:40px auto;padding:24px}h1,h2{color:#14345f}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}@media print{body{margin:0}.no-print{display:none}}</style></head><body><p><strong>FOCUS FLAME ACADEMY</strong><br>A Caiden's Courage Learning Adventure</p><h1>${text(program.programName)} Report</h1><p><strong>This report covers ${text(program.programName)} only.</strong></p>${cohortText}<p>${text(narrative(program))}</p><h2>Program Health</h2><p>${program.activeStudentCount} enrolled students; ${program.baseline.count} baseline; ${program.post.count} post; ${program.missionCount} mission completions; ${program.studentsWithAdventureCount || 0} with adventures; ${program.activeStudentCountThisWeek || 0} active this week.</p><h2>Live Student Progress</h2><table><thead><tr><th>Measure</th><th>Value</th><th>Status</th><th>Summary</th></tr></thead><tbody>${liveRows || '<tr><td colspan="4">No live signal payload</td></tr>'}</tbody></table><h2>Verified Outcomes</h2><table><thead><tr><th>Measure</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Matched</th><th>Excluded</th><th>Status</th></tr></thead><tbody>${domainRows}</tbody></table><p>${text(program.impactSnapshot.overallMatchedGrowth.weighting)}. Completion and engagement are excluded from academic/SEL growth.</p><h2>Data Quality</h2><p>Missing baseline: ${program.quality.missingBaseline}. Missing post: ${program.quality.missingPost}. Unmatched records: ${program.quality.unmatchedRecords}. Invalid score ranges: ${program.quality.invalidScoreRanges}.</p><h2>Grade Distribution</h2><ul>${gradeRows || '<li>Not enough data</li>'}</ul><h2>Reporting methodology</h2><p>Operational metrics describe enrollment and activity. Directional live signals describe mission activity. Verified outcomes require matched baseline and post assessments. Missing records are not inferred.</p><button class="no-print" onclick="print()">Print program report</button></body></html>`;
 }
 
 exports.handler = async (event) => {
@@ -527,7 +569,7 @@ exports.handler = async (event) => {
   const program = await getProgramOutcome(auth.context.supabase, programId);
   if (!program) return json(404, { error: 'Program outcomes were not found.' }, auth.context.correlationId);
   const format = body.format === 'html' ? 'html' : 'pdf';
-  const filename = `Caiden's Courage Pilot Outcomes — ${safeFilePart(program.programName)} — ${new Date().toISOString().slice(0, 10)}.${format}`;
+  const filename = `${safeFilePart(program.programName)} Report — ${new Date().toISOString().slice(0, 10)}.${format}`;
   const options = {
     reportingStart: text(body.reportingStart, 20),
     reportingEnd: text(body.reportingEnd, 20),

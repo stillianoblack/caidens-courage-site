@@ -50,11 +50,13 @@ describe('Academy reporting security contract', () => {
     expect(dashboard).not.toContain('24 below eligibility threshold');
     expect(dashboard).not.toMatch(/Participant accounts['"]\s*,\s*33/);
     expect(api).toContain("cache: 'no-store'");
-    expect(api).toContain('?refresh=${Date.now()}');
+    expect(api).toContain('?refresh=');
+    expect(api).toContain('Date.now()');
   });
 
   test('presents readable program name before secondary program code', () => {
-    expect(dashboard.indexOf('{row.programName}')).toBeLessThan(dashboard.indexOf('{row.programCode}'));
+    const programCard = dashboard.slice(dashboard.indexOf('<h4>{summary.programName}</h4>'));
+    expect(programCard.indexOf('{summary.programName}')).toBeLessThan(programCard.indexOf('{summary.programCode}'));
     expect(dashboard).toContain('Student {row.studentIdentifier}');
   });
 

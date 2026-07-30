@@ -20,6 +20,18 @@
 .academyOverview-populations dt { color: #66758a; font-size: .72rem; }
 .academyOverview-populations dd { margin: .15rem 0 0; color: #14345f; font-weight: 850; }
 .academyOverview-panel--formal { border-color: #d5c27b; background: #fffdf5; }
+.academyOverview-sectionHeading { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.academyOverview-sectionHeading h3 { margin: .1rem 0 .35rem; }
+.academyOverview-scopeBadge { display: inline-flex; width: max-content; border-radius: 999px; background: #e7f0fb; color: #174f88; padding: .28rem .55rem; font-size: .65rem; font-weight: 850; }
+.academyOverview-programTableWrap { overflow-x: auto; margin-top: 1rem; }
+.academyOverview-programTable { width: 100%; min-width: 1080px; border-collapse: collapse; }
+.academyOverview-programTable th, .academyOverview-programTable td { border-bottom: 1px solid #e1e8f0; padding: .65rem .55rem; text-align: left; vertical-align: top; font-size: .75rem; }
+.academyOverview-programTable th { color: #52657f; font-size: .65rem; text-transform: uppercase; letter-spacing: .035em; }
+.academyOverview-programTable td:first-child strong, .academyOverview-programTable td:first-child small { display: block; }
+.academyOverview-programTable td:first-child strong { color: #14345f; font-size: .82rem; }
+.academyOverview-programTable td:first-child small { margin-top: .2rem; color: #728096; overflow-wrap: anywhere; }
+.academyOverview-tableActions { display: grid; gap: .3rem; min-width: 130px; }
+.academyOverview-tableActions button, .academyOverview-programHeader > button { border: 1px solid #9fb2c9; border-radius: 999px; background: #fff; color: #14345f; padding: .4rem .65rem; font-size: .68rem; font-weight: 800; }
 .academyOverview-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 1rem; }
 .academyOverview-signalGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .65rem; }
 .academyOverview-signalGrid em { font-size: .75rem; font-style: normal; }
@@ -34,11 +46,27 @@
 .academyOverview-filters label, .academyOverview-override label { display: grid; gap: .3rem; font-size: .76rem; font-weight: 750; }
 .academyOverview-filters input, .academyOverview-filters select, .academyOverview-override input, .academyOverview-override select { min-width: 0; border: 1px solid #b8c7d9; border-radius: 8px; background: #fff; padding: .55rem; }
 .academyOverview-cohort { display: grid; gap: .65rem; }
+.academyOverview-programGroups { display: grid; gap: .8rem; }
+.academyOverview-programGroup { border: 1px solid #d8e2ef; border-radius: 16px; background: #fbfdff; overflow: hidden; }
+.academyOverview-programHeader { display: grid; grid-template-columns: minmax(220px,1.2fr) minmax(430px,2fr) auto; gap: 1rem; align-items: center; padding: 1rem; }
+.academyOverview-programHeader h4 { margin: 0; color: #14345f; font-size: 1.05rem; }
+.academyOverview-programHeader p { margin: .15rem 0; color: #52657f; font-size: .76rem; }
+.academyOverview-programHeader small { display: block; color: #728096; font-size: .66rem; overflow-wrap: anywhere; }
+.academyOverview-programHeader > div:first-child > strong { display: block; margin-top: .45rem; }
+.academyOverview-programCounts { display: grid; grid-template-columns: repeat(5,minmax(78px,1fr)); gap: .45rem; }
+.academyOverview-programCounts span { border: 1px solid #e1e8f0; border-radius: 10px; background: #fff; padding: .5rem; color: #52657f; font-size: .64rem; }
+.academyOverview-programCounts b { display: block; color: #14345f; font-size: 1rem; }
+.academyOverview-studentGroups { display: grid; gap: 1rem; border-top: 1px solid #d8e2ef; background: #fff; padding: 1rem; }
+.academyOverview-studentGroups h5 { margin: 0 0 .5rem; color: #14345f; font-size: .85rem; }
+.academyOverview-studentGroups h5 span { border-radius: 999px; background: #edf3f9; padding: .15rem .45rem; }
 .academyOverview-cohortRow { display: grid; grid-template-columns: minmax(190px,1fr) minmax(430px,2.3fr) minmax(170px,.85fr); gap: 1rem; border: 1px solid #d8e2ef; border-radius: 14px; padding: .9rem; }
 .academyOverview-programCell { display: grid; gap: .16rem; align-content: start; }
 .academyOverview-programCell strong { color: #14345f; font-size: .96rem; }
 .academyOverview-programCell b { margin-top: .45rem; font-size: .78rem; }
 .academyOverview-programCell span, .academyOverview-programCell small { color: #59687c; font-size: .7rem; overflow-wrap: anywhere; }
+.academyOverview-studentCell { display: grid; gap: .25rem; align-content: start; }
+.academyOverview-studentCell strong { color: #14345f; font-size: .85rem; }
+.academyOverview-studentCell small { color: #728096; font-size: .65rem; overflow-wrap: anywhere; }
 .academyOverview-cohortRow dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .45rem; margin: 0; }
 .academyOverview-cohortRow dl div { min-width: 0; }
 .academyOverview-cohortRow dt { color: #59687c; font-size: .7rem; }
@@ -49,6 +77,8 @@
   .academyOverview-kpis { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .academyOverview-cohortRow { grid-template-columns: minmax(180px,1fr) minmax(340px,2fr); }
   .academyOverview-override { grid-column: 1/-1; grid-template-columns: 1fr 1fr; }
+  .academyOverview-programHeader { grid-template-columns: 1fr auto; }
+  .academyOverview-programCounts { grid-column: 1/-1; grid-row: 2; }
 }
 @media (max-width: 760px) {
   .academyOverview-hero, .academyOverview-grid, .academyOverview-populations { display: grid; grid-template-columns: 1fr; }
@@ -58,6 +88,24 @@
   .academyOverview-cohortRow dl { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .academyOverview-rowReason { grid-column: span 2; }
   .academyOverview-override { grid-column: auto; grid-template-columns: 1fr; }
+  .academyOverview-sectionHeading, .academyOverview-programHeader { display: grid; grid-template-columns: 1fr; }
+  .academyOverview-programCounts { grid-column: auto; grid-row: auto; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .academyOverview-programTableWrap { overflow: visible; }
+  .academyOverview-programTable, .academyOverview-programTable tbody, .academyOverview-programTable tr, .academyOverview-programTable td { display: block; min-width: 0; }
+  .academyOverview-programTable thead { display: none; }
+  .academyOverview-programTable tr { border: 1px solid #d8e2ef; border-radius: 14px; padding: .8rem; margin-top: .7rem; }
+  .academyOverview-programTable td { display: grid; grid-template-columns: 42% 1fr; border: 0; padding: .3rem 0; }
+  .academyOverview-programTable td::before { color: #66758a; font-size: .68rem; font-weight: 750; }
+  .academyOverview-programTable td:nth-child(1)::before { content: "Program"; }
+  .academyOverview-programTable td:nth-child(2)::before { content: "Program type"; }
+  .academyOverview-programTable td:nth-child(3)::before { content: "Organization"; }
+  .academyOverview-programTable td:nth-child(4)::before { content: "Enrolled"; }
+  .academyOverview-programTable td:nth-child(5)::before { content: "Established"; }
+  .academyOverview-programTable td:nth-child(6)::before { content: "Emerging"; }
+  .academyOverview-programTable td:nth-child(7)::before { content: "Minimal"; }
+  .academyOverview-programTable td:nth-child(8)::before { content: "Formal report"; }
+  .academyOverview-programTable td:nth-child(9)::before { content: "Latest activity"; }
+  .academyOverview-programTable td:nth-child(10) { display: block; }
 }
 @media (max-width: 430px) {
   .academyOverview-kpis, .academyOverview-kpis--compact, .academyOverview-signalGrid, .academyOverview-quality, .academyOverview-filters { grid-template-columns: 1fr; }

@@ -106,6 +106,38 @@ function cohortClassification({ testSynthetic, automaticEligible, distinctActive
   return 'minimal';
 }
 
+function buildProgramSummaries(cohort, programs = []) {
+  const programsByCode = new Map(
+    (programs || []).map((program) => [program.program_code, program]),
+  );
+  const grouped = new Map();
+  for (const row of cohort || []) {
+    const key = row.programCode || `unlinked:${row.programId || 'unknown'}`;
+    grouped.set(key, [...(grouped.get(key) || []), row]);
+  }
+  return [...grouped.entries()].map(([programCode, rows]) => {
+    const program = programsByCode.get(programCode);
+    const latest = latestIso(rows.map((row) => row.latestActivity));
+    return {
+      programId: program?.id || rows[0]?.programId || null,
+      programCode: rows[0]?.programCode || null,
+      programName: program?.program_name || rows[0]?.programName || 'Unlinked program',
+      programType: program?.program_type || rows[0]?.programType || 'Unknown',
+      organization:
+        program?.organization || program?.group_name || rows[0]?.organization || 'Unspecified',
+      facilitator: program?.admin_first_name || null,
+      enrolledStudents: rows.length,
+      establishedStudents: rows.filter((row) => row.cohortClassification === 'established').length,
+      emergingStudents: rows.filter((row) => row.cohortClassification === 'emerging').length,
+      minimalStudents: rows.filter((row) => row.cohortClassification === 'minimal').length,
+      testInternalStudents: rows.filter((row) => row.cohortClassification === 'test_internal').length,
+      includedStudents: rows.filter((row) => row.included).length,
+      latestActivity: latest,
+      students: rows,
+    };
+  }).sort((a, b) => a.programName.localeCompare(b.programName));
+}
+
 function participantCohortRow(participant, program, grouped, overrides) {
   const sessions = grouped.sessions.get(participant.id) || [];
   const modules = grouped.modules.get(participant.id) || [];
@@ -226,6 +258,7 @@ function buildAcademyOutcomes(data, options = {}) {
     options,
   );
   const represented = cohort.filter((row) => row.included);
+  const programSummaries = buildProgramSummaries(cohort, data.programs);
   const established = cohort.filter((row) => row.cohortClassification === 'established').length;
   const emerging = cohort.filter((row) => row.cohortClassification === 'emerging').length;
   const minimal = cohort.filter((row) => row.cohortClassification === 'minimal').length;
@@ -287,6 +320,7 @@ function buildAcademyOutcomes(data, options = {}) {
     },
     aggregate,
     cohort,
+    programSummaries,
   };
 }
 
@@ -294,6 +328,7 @@ module.exports = {
   ACTIVE_DAY_THRESHOLD,
   ACTIVITY_THRESHOLD,
   buildAcademyOutcomes,
+  buildProgramSummaries,
   cohortClassification,
   isTestOrSynthetic,
   privacySafeId,

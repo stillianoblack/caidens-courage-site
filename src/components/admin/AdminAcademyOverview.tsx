@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import type { AcademyCohortRow, AcademyOutcomePayload } from '../../types/pilotOutcomes';
 import {
   downloadAcademyReport,
+  downloadPilotOutcomesReport,
   saveAcademyReportingOverride,
 } from '../../lib/pilotOutcomesApi';
 import './admin-academy-overview.css';
@@ -40,10 +41,12 @@ export default function AdminAcademyOverview({
   academy,
   token,
   onReload,
+  onViewProgram,
 }: {
   academy: AcademyOutcomePayload;
   token: string;
   onReload: () => Promise<void>;
+  onViewProgram: (programId: string) => Promise<void>;
 }) {
   const [cohortFilter, setCohortFilter] = useState('non-test');
   const [program, setProgram] = useState('all');
@@ -53,6 +56,7 @@ export default function AdminAcademyOverview({
   const [savingId, setSavingId] = useState('');
   const [message, setMessage] = useState('');
   const [reporting, setReporting] = useState(false);
+  const [expandedPrograms, setExpandedPrograms] = useState<Record<string, boolean>>({});
   const rows = useMemo(() => academy.cohort.filter((row) => {
     if (cohortFilter === 'non-test' && row.testSynthetic) return false;
     if (['established', 'emerging', 'minimal', 'test_internal'].includes(cohortFilter)
@@ -64,6 +68,12 @@ export default function AdminAcademyOverview({
     if (search && !row.studentIdentifier.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }), [academy.cohort, cohortFilter, organization, program, search]);
+  const programRows = useMemo(() => academy.programSummaries
+    .map((summary) => ({
+      ...summary,
+      students: rows.filter((row) => row.programId === summary.programId),
+    }))
+    .filter((summary) => summary.students.length > 0), [academy.programSummaries, rows]);
 
   const saveOverride = async (
     row: AcademyCohortRow,
@@ -121,6 +131,41 @@ export default function AdminAcademyOverview({
     }
   };
 
+  const programReport = async (
+    programId: string | null,
+    disposition: 'inline' | 'attachment',
+  ) => {
+    if (!programId) {
+      setMessage('This program does not have a reportable program record.');
+      return;
+    }
+    setReporting(true);
+    setMessage('');
+    try {
+      const result = await downloadPilotOutcomesReport(token, {
+        programId,
+        format: 'pdf',
+        disposition,
+        includeStudentAppendix: false,
+        includeNotes: true,
+        includeCharts: true,
+      });
+      const url = URL.createObjectURL(result.blob);
+      if (disposition === 'inline') window.open(url, '_blank', 'noopener,noreferrer');
+      else {
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = result.filename;
+        anchor.click();
+      }
+      window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'The program report could not be generated.');
+    } finally {
+      setReporting(false);
+    }
+  };
+
   const a = academy.aggregate;
   return (
     <section className="academyOverview" aria-labelledby="academy-overview-title">
@@ -156,6 +201,36 @@ export default function AdminAcademyOverview({
           ['Manual inclusions', academy.cohortSummary.manuallyIncludedStudents],
           ['Manual exclusions', academy.cohortSummary.manuallyExcludedStudents],
         ].map(([label, metric]) => <article key={label}><strong>{metric}</strong><span>{label}</span></article>)}
+        </div>
+      </section>
+
+      <section className="academyOverview-panel" aria-labelledby="program-reporting-summary">
+        <div className="academyOverview-sectionHeading">
+          <div>
+            <p className="pilotOutcomes-eyebrow">Program level</p>
+            <h3 id="program-reporting-summary">Program Reporting Summary</h3>
+            <p>Program-scoped enrollment and reporting composition. Select a program to view its own denominator, signals, and report.</p>
+          </div>
+          <span className="academyOverview-scopeBadge">Program-scoped</span>
+        </div>
+        <div className="academyOverview-programTableWrap">
+          <table className="academyOverview-programTable">
+            <thead><tr><th>Program</th><th>Program type</th><th>Organization</th><th>Enrolled</th><th>Established</th><th>Emerging</th><th>Minimal</th><th>Included in formal report</th><th>Latest activity</th><th>Actions</th></tr></thead>
+            <tbody>{academy.programSummaries.map((summary) => (
+              <tr key={summary.programCode || summary.programName}>
+                <td><strong>{summary.programName}</strong>{summary.programCode ? <small>{summary.programCode}</small> : null}</td>
+                <td>{summary.programType}</td><td>{summary.organization}</td><td>{summary.enrolledStudents}</td>
+                <td>{summary.establishedStudents}</td><td>{summary.emergingStudents}</td><td>{summary.minimalStudents}</td>
+                <td>{summary.includedStudents}</td><td>{formatDate(summary.latestActivity)}</td>
+                <td><div className="academyOverview-tableActions">
+                  <button type="button" disabled={!summary.programId} onClick={() => summary.programId && void onViewProgram(summary.programId)}>View Program Report</button>
+                  <button type="button" onClick={() => setExpandedPrograms((current) => ({ ...current, [summary.programCode || summary.programName]: true }))}>View Students</button>
+                  <button type="button" disabled={reporting || !summary.programId} onClick={() => void programReport(summary.programId, 'inline')}>Generate Program Report</button>
+                  <button type="button" disabled={reporting || !summary.programId} onClick={() => void programReport(summary.programId, 'attachment')}>Download Program PDF</button>
+                </div></td>
+              </tr>
+            ))}</tbody>
+          </table>
         </div>
       </section>
 
@@ -238,42 +313,75 @@ export default function AdminAcademyOverview({
       </section>
 
       <section className="academyOverview-panel">
-        <p className="pilotOutcomes-eyebrow">Academy reporting cohort</p>
+        <p className="pilotOutcomes-eyebrow">Academy level</p>
         <h3>Cohort explorer</h3>
-        <p>Explore operational participation and the formal reporting cohort without exposing private student names.</p>
+        <p>Programs are collapsed by default. Expand a program to inspect privacy-safe student classifications and reporting controls.</p>
         <div className="academyOverview-filters">
           <label>Cohort status<select value={cohortFilter} onChange={(event) => setCohortFilter(event.target.value)}><option value="non-test">All non-test learners</option><option value="established">Established</option><option value="emerging">Emerging</option><option value="minimal">Minimal/no engagement</option><option value="test_internal">Test/internal</option><option value="included">Included in formal report</option><option value="excluded">Excluded from formal report</option></select></label>
           <label>Program<select value={program} onChange={(event) => setProgram(event.target.value)}><option value="all">All programs</option>{Array.from(new Map(academy.cohort.map((row) => [row.programCode, row.programName])).entries()).filter(([code]) => code).map(([code, name]) => <option key={code || ''} value={code || ''}>{name}</option>)}</select></label>
           <label>Organization<select value={organization} onChange={(event) => setOrganization(event.target.value)}><option value="all">All organizations</option>{Array.from(new Set(academy.cohort.map((row) => row.organization))).sort().map((item) => <option key={item}>{item}</option>)}</select></label>
           <label>Privacy-safe identifier<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="FFA-…" /></label>
         </div>
-        <div className="academyOverview-cohort" role="list" aria-label="Academy reporting cohort">
-          {rows.map((row) => (
-            <article key={row.participantId} role="listitem" className="academyOverview-cohortRow">
-              <div className="academyOverview-programCell">
-                <strong>{row.programName}</strong>
-                <span>{row.programType}</span>
-                {row.programCode ? <small>{row.programCode}</small> : null}
-                <b>Student {row.studentIdentifier}</b>
-                <span>{row.organization}</span>
-              </div>
-              <dl className="academyOverview-rowMetrics">
-                <div><dt>Cohort status</dt><dd>{classificationCopy[row.cohortClassification].label}</dd></div>
-                <div><dt>Active days</dt><dd>{row.distinctActiveDays}</dd></div>
-                <div><dt>Activities</dt><dd>{row.completedRecognizedActivities}</dd></div>
-                <div><dt>Assessments</dt><dd>{row.assessmentCount}</dd></div>
-                <div><dt>Latest activity</dt><dd>{formatDate(row.latestActivity)}</dd></div>
-                <div><dt>Reporting status</dt><dd>{row.included ? 'Included' : 'Excluded'}</dd></div>
-                <div className="academyOverview-rowReason"><dt>Reason</dt><dd>{row.included ? classificationCopy[row.cohortClassification].reason : row.exclusionReason || classificationCopy[row.cohortClassification].reason}</dd></div>
-              </dl>
-              <div className="academyOverview-override" aria-label={`Actions for ${row.studentIdentifier}`}>
-                <label>Reporting override<select value={row.reportingOverride} disabled={savingId === row.participantId} onChange={(event) => void saveOverride(row, event.target.value as AcademyCohortRow['reportingOverride'])}><option value="automatic">Automatic</option><option value="include">Force include</option><option value="exclude">Force exclude</option></select></label>
-                <label>Internal reason<input value={reasonById[row.participantId] ?? row.reportingOverrideReason ?? ''} onChange={(event) => setReasonById((current) => ({ ...current, [row.participantId]: event.target.value }))} /></label>
-              </div>
-            </article>
-          ))}
+        <div className="academyOverview-programGroups" role="list" aria-label="Academy reporting programs">
+          {programRows.map((summary) => {
+            const programKey = summary.programCode || summary.programName;
+            const expanded = Boolean(expandedPrograms[programKey]);
+            return (
+              <article key={programKey} role="listitem" className="academyOverview-programGroup">
+                <div className="academyOverview-programHeader">
+                  <div>
+                    <h4>{summary.programName}</h4>
+                    <p>{summary.programType} · {summary.organization}</p>
+                    {summary.programCode ? <small>{summary.programCode}</small> : null}
+                    <strong>{summary.enrolledStudents} enrolled</strong>
+                  </div>
+                  <div className="academyOverview-programCounts">
+                    <span><b>{summary.establishedStudents}</b>Established</span>
+                    <span><b>{summary.emergingStudents}</b>Emerging</span>
+                    <span><b>{summary.minimalStudents}</b>Minimal/no engagement</span>
+                    {summary.testInternalStudents ? <span><b>{summary.testInternalStudents}</b>Test/internal</span> : null}
+                    <span><b>{summary.includedStudents}</b>Included in formal report</span>
+                  </div>
+                  <button type="button" aria-expanded={expanded} onClick={() => setExpandedPrograms((current) => ({ ...current, [programKey]: !expanded }))}>{expanded ? 'Hide students' : 'View students'}</button>
+                </div>
+                {expanded ? (
+                  <div className="academyOverview-studentGroups">
+                    {(['established', 'emerging', 'minimal', 'test_internal'] as const).map((classification) => {
+                      const students = summary.students.filter((row) => row.cohortClassification === classification);
+                      if (!students.length) return null;
+                      return <section key={classification} aria-labelledby={`${programKey}-${classification}`}>
+                        <h5 id={`${programKey}-${classification}`}>{classificationCopy[classification].label} <span>{students.length}</span></h5>
+                        <div className="academyOverview-cohort">{students.map((row) => (
+                          <article key={row.participantId} className="academyOverview-cohortRow">
+                            <div className="academyOverview-studentCell">
+                              <span className="academyOverview-scopeBadge">Student-level</span>
+                              <strong>Student {row.studentIdentifier}</strong>
+                              <small>Focus Flame Academy / {summary.programName} / Student {row.studentIdentifier}</small>
+                            </div>
+                            <dl className="academyOverview-rowMetrics">
+                              <div><dt>Cohort status</dt><dd>{classificationCopy[row.cohortClassification].label}</dd></div>
+                              <div><dt>Active days</dt><dd>{row.distinctActiveDays}</dd></div>
+                              <div><dt>Activities</dt><dd>{row.completedRecognizedActivities}</dd></div>
+                              <div><dt>Assessments</dt><dd>{row.assessmentCount}</dd></div>
+                              <div><dt>Latest activity</dt><dd>{formatDate(row.latestActivity)}</dd></div>
+                              <div><dt>Formal reporting</dt><dd>{row.included ? 'Included' : 'Excluded'}</dd></div>
+                              {!row.included ? <div className="academyOverview-rowReason"><dt>Exclusion reason</dt><dd>{row.exclusionReason || classificationCopy[row.cohortClassification].reason}</dd></div> : null}
+                            </dl>
+                            <div className="academyOverview-override" aria-label={`Reporting controls for ${row.studentIdentifier}`}>
+                              <label>Reporting override<select value={row.reportingOverride} disabled={savingId === row.participantId} onChange={(event) => void saveOverride(row, event.target.value as AcademyCohortRow['reportingOverride'])}><option value="automatic">Automatic</option><option value="include">Force include</option><option value="exclude">Force exclude</option></select></label>
+                              <label>Internal reason<input value={reasonById[row.participantId] ?? row.reportingOverrideReason ?? ''} onChange={(event) => setReasonById((current) => ({ ...current, [row.participantId]: event.target.value }))} /></label>
+                            </div>
+                          </article>
+                        ))}</div>
+                      </section>;
+                    })}
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
         </div>
-        {!rows.length ? <p>No cohort records match these filters.</p> : null}
+        {!programRows.length ? <p>No cohort records match these filters.</p> : null}
         {message ? <p role="status">{message}</p> : null}
       </section>
     </section>

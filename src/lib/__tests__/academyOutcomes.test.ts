@@ -150,5 +150,15 @@ describe('Academy reporting eligibility', () => {
       minimalParticipants: 3,
       testInternalParticipants: 0,
     }));
+    expect(result.programSummaries).toEqual([
+      expect.objectContaining({
+        programName: 'Blue Ribbon Results Academy',
+        enrolledStudents: 17,
+        establishedStudents: 6,
+        emergingStudents: 8,
+        minimalStudents: 3,
+        includedStudents: 6,
+      }),
+    ]);
   });
 });

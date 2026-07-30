@@ -100,6 +100,14 @@ const sample = {
   activeStudentCountThisWeek: 1,
   studentsWithAdventureCount: 2,
   weeklyProgressSourceAvailable: true,
+  reportingCohort: {
+    enrolledStudents: 17,
+    establishedStudents: 6,
+    emergingStudents: 8,
+    minimalStudents: 3,
+    testInternalStudents: 0,
+    includedStudents: 6,
+  },
   reportBlockers: [],
   categories: [{ category: 'Focus/self-regulation', delta: 10, n: 1 }],
   gradeDistribution: [{ grade: '4', count: 2 }],
@@ -136,7 +144,10 @@ describe('pilot outcomes report', () => {
 
   it('provides a print fallback with honest data notes', () => {
     const html = buildHtml(sample);
-    expect(html).toContain('Focus Flame Academy Pilot Outcomes Report');
+    expect(html).toContain('Synthetic School Pilot Report');
+    expect(html).toContain('This report covers Synthetic School Pilot only.');
+    expect(html).toContain('17 enrolled students: 6 established, 8 emerging, and 3 with minimal or no recorded engagement');
+    expect(html).not.toContain('7-student established reporting cohort');
     expect(html).toContain('Reading comprehension');
     expect(html).toContain('+40 pts');
     expect(html).toContain('Verified Outcomes');

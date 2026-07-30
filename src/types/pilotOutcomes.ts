@@ -171,6 +171,14 @@ export type PilotOutcomeProgram = {
     lastActivity: string | null;
     dataCompleteness: OutcomeState;
   }>;
+  reportingCohort?: {
+    enrolledStudents: number;
+    establishedStudents: number;
+    emergingStudents: number;
+    minimalStudents: number;
+    testInternalStudents: number;
+    includedStudents: number;
+  };
 };
 
 export type PilotOutcomeSummary = {
@@ -250,4 +258,22 @@ export type AcademyOutcomePayload = {
   };
   aggregate: PilotOutcomeProgram;
   cohort: AcademyCohortRow[];
+  programSummaries: AcademyProgramSummary[];
+};
+
+export type AcademyProgramSummary = {
+  programId: string | null;
+  programCode: string | null;
+  programName: string;
+  programType: string;
+  organization: string;
+  facilitator: string | null;
+  enrolledStudents: number;
+  establishedStudents: number;
+  emergingStudents: number;
+  minimalStudents: number;
+  testInternalStudents: number;
+  includedStudents: number;
+  latestActivity: string | null;
+  students: AcademyCohortRow[];
 };

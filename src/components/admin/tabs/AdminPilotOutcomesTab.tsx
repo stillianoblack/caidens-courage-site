@@ -239,11 +239,31 @@ function ProgramDetail({
 
   return (
     <div className="phVisual pilotOutcomes-detail">
+      <nav aria-label="Reporting breadcrumb" className="pilotOutcomes-breadcrumb">
+        <span>Focus Flame Academy</span><span>/</span><strong>{program.programName}</strong>
+      </nav>
       <div className="pilotOutcomes-detailHeader">
-        <div><p className="phVisual-eyebrow">Program detail</p><h2>{program.programName}</h2><p className="phVisual-meta">{program.programType} · {program.facilitator}</p></div>
-        <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={onClose}>Back to portfolio</button>
+        <div><p className="phVisual-eyebrow">Program-scoped</p><h2>{program.programName} Report</h2><p>Program-scoped enrollment, engagement, live learning signals, cohort status, and verified outcomes.</p><p className="phVisual-meta">{program.programType} · {program.facilitator}</p></div>
+        <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={onClose}>Back to Academy Overview</button>
       </div>
       <ProgramDetailSummary program={program} />
+      {program.reportingCohort ? (
+        <section className="pilotOutcomes-panel" aria-labelledby="program-cohort-title">
+          <p className="phVisual-eyebrow">Program-scoped denominator</p>
+          <h3 id="program-cohort-title">{program.programName} cohort</h3>
+          <p>This program contains {program.reportingCohort.enrolledStudents} enrolled students. These counts do not use the Academy-wide formal-report denominator.</p>
+          <div className="pilotOutcomes-summaryGrid">
+            {[
+              ['Enrolled', program.reportingCohort.enrolledStudents],
+              ['Established', program.reportingCohort.establishedStudents],
+              ['Emerging', program.reportingCohort.emergingStudents],
+              ['Minimal/no engagement', program.reportingCohort.minimalStudents],
+              ['Test/internal', program.reportingCohort.testInternalStudents],
+              ['Included in formal report', program.reportingCohort.includedStudents],
+            ].map(([label, count]) => <article className="pilotOutcomes-metric" key={label}><span>{label}</span><strong>{count}</strong></article>)}
+          </div>
+        </section>
+      ) : null}
       <AdminProgramHealthPanel program={program} />
       <LiveLearningSignalsPanel program={program} />
       <VerifiedGrowthPanel program={program} />
@@ -256,7 +276,9 @@ function ProgramDetail({
           : <p>Not enough data.</p>}
       </section>
       <section className="pilotOutcomes-panel">
-        <h3>Privacy-safe student roster</h3>
+        <p className="phVisual-eyebrow">Student-level</p>
+        <h3>Student Reporting Detail</h3>
+        <p>Privacy-safe student activity, classification, and reporting status.</p>
         <div className="pilotOutcomes-tableWrap">
           <table>
             <thead><tr><th>Student</th><th>Grade</th><th>Baseline</th><th>Post</th><th>Delta</th><th>Weeks</th><th>Missions</th><th>Coins</th><th>Certificates</th><th>State</th></tr></thead>
@@ -282,9 +304,9 @@ function ProgramDetail({
         </div>
         <label className="pilotOutcomes-notes">Educator observations<textarea value={educatorNotes} onChange={(event) => setEducatorNotes(event.target.value)} placeholder="What worked, student response, challenges, and approved next steps" /></label>
         <div className="pilotOutcomes-actions">
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Generate Report</button>
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download PDF</button>
-          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('html', 'inline')}>HTML print view</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('pdf', 'inline')}>Generate Program Report</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void generate('pdf', 'attachment')}>Download Program PDF</button>
+          <button disabled={generating} type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void generate('html', 'inline')}>Program HTML print view</button>
         </div>
         {reportError ? <p className="adminPortal-error">{reportError}</p> : null}
       </section>
@@ -446,10 +468,10 @@ export default function AdminPilotOutcomesTab({ token }: { token: string }) {
   if (selected) return <ProgramDetail program={selected} token={token} onClose={() => setSelected(null)} />;
   return (
     <div className="pilotOutcomes">
-      <header className="pilotOutcomes-header"><div><p className="pilotOutcomes-eyebrow">Pilot analytics</p><h2>Pilot Outcomes</h2><p>Participation, matched growth, engagement, readiness, and reporting across every pilot.</p></div><button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void load()}>Refresh</button></header>
+      <header className="pilotOutcomes-header"><div><p className="pilotOutcomes-eyebrow">Academy-wide</p><h2>Academy and Program Reporting</h2><p>Academy-wide operational participation and formal reporting across all qualifying programs.</p></div><button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={() => void load()}>Refresh reporting</button></header>
       {loading ? <p role="status">Loading pilot outcomes…</p> : null}
       {error ? <div className="pilotOutcomes-warning"><p>{error}</p><button type="button" className="adminPortal-btn adminPortal-btn--primary" onClick={() => void load()}>Try Again</button></div> : null}
-      {academy ? <AdminAcademyOverview academy={academy} token={token} onReload={load} /> : null}
+      {academy ? <AdminAcademyOverview academy={academy} token={token} onReload={load} onViewProgram={openProgram} /> : null}
       <SummaryCards summary={summary} />
       <section className="pilotOutcomes-panel" aria-labelledby="filters-title">
         <h3 id="filters-title">Filters</h3>

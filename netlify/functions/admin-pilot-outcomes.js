@@ -1,5 +1,6 @@
 const { requireAdmin, json } = require('./_lib/adminAuth');
 const { buildPilotOutcomes } = require('./_lib/pilotOutcomes');
+const { buildAcademyOutcomes } = require('./_lib/academyOutcomes');
 
 async function safeLoad(supabase, table, correlationId) {
   const { data, error } = await supabase.from(table).select('*').limit(10000);
@@ -30,6 +31,9 @@ exports.handler = async (event) => {
     ['wallets', 'player_wallets'],
     ['rewards', 'player_reward_claims'],
     ['sessions', 'kid_play_sessions'],
+    ['missions', 'participant_mission_progress'],
+    ['questions', 'question_attempts'],
+    ['overrides', 'academy_reporting_overrides'],
   ];
   const loaded = await Promise.all(
     sources.map(async ([key, table]) => [key, await safeLoad(supabase, table, correlationId)]),
@@ -44,6 +48,23 @@ exports.handler = async (event) => {
     publishedWeeks: Number(event.queryStringParameters?.publishedWeeks || 0),
     weeklyProgressSourceAvailable: !unavailableSources.includes('participant_week_progress'),
   });
+  const academy = buildAcademyOutcomes(data, {
+    weeklyProgressSourceAvailable: !unavailableSources.includes('participant_week_progress'),
+  });
+  const cohortByProgramId = new Map(
+    academy.programSummaries.map((summary) => [summary.programId, {
+      enrolledStudents: summary.enrolledStudents,
+      establishedStudents: summary.establishedStudents,
+      emergingStudents: summary.emergingStudents,
+      minimalStudents: summary.minimalStudents,
+      testInternalStudents: summary.testInternalStudents,
+      includedStudents: summary.includedStudents,
+    }]),
+  );
+  outcomes.programs = outcomes.programs.map((program) => ({
+    ...program,
+    reportingCohort: cohortByProgramId.get(program.id) || null,
+  }));
   const programId = String(event.queryStringParameters?.programId || '').trim();
   if (programId) {
     const program = outcomes.programs.find((row) => row.id === programId);
