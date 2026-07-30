@@ -14,6 +14,11 @@ function run(env: Record<string, string>) {
   });
 }
 
+function publicJwt(ref: string, role = 'anon') {
+  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
+  return `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ ref, role })}.test-signature`;
+}
+
 describe('Supabase build context guard', () => {
   it('rejects legacy client-side admin credentials', () => {
     const passcodeKey = ['REACT', 'APP', 'ADMIN', 'PASSCODE'].join('_');
@@ -45,6 +50,7 @@ describe('Supabase build context guard', () => {
       PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
       REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: productionRef,
       REACT_APP_SUPABASE_URL: `https://${productionRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(productionRef),
     });
     expect(result.status).toBe(0);
   });
@@ -55,8 +61,32 @@ describe('Supabase build context guard', () => {
       PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
       REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: stagingRef,
       REACT_APP_SUPABASE_URL: `https://${stagingRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(stagingRef),
     });
     expect(result.status).toBe(1);
+  });
+
+  it('rejects a production URL paired with a staging browser credential', () => {
+    const result = run({
+      CONTEXT: 'production',
+      PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_URL: `https://${productionRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(stagingRef),
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('browser credential');
+  });
+
+  it('accepts a browser-safe publishable key in production', () => {
+    const result = run({
+      CONTEXT: 'production',
+      PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_URL: `https://${productionRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: 'sb_publishable_public-test-value',
+    });
+    expect(result.status).toBe(0);
   });
 
   it('rejects production configuration in previews by default', () => {
@@ -65,6 +95,18 @@ describe('Supabase build context guard', () => {
       PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
       REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: productionRef,
       REACT_APP_SUPABASE_URL: `https://${productionRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(productionRef),
+    });
+    expect(result.status).toBe(1);
+  });
+
+  it('rejects mismatched preview URL and browser credential projects', () => {
+    const result = run({
+      CONTEXT: 'deploy-preview',
+      PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: stagingRef,
+      REACT_APP_SUPABASE_URL: `https://${stagingRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt('another-staging-project'),
     });
     expect(result.status).toBe(1);
   });

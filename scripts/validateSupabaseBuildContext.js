@@ -4,6 +4,7 @@ const path = require('path');
 const productionContext = process.env.CONTEXT === 'production';
 const previewContext = ['deploy-preview', 'branch-deploy', 'dev'].includes(process.env.CONTEXT || '');
 const clientUrl = process.env.REACT_APP_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const clientPublicKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 const productionRef = process.env.PRODUCTION_SUPABASE_PROJECT_REF || '';
 const expectedRef = process.env.REACT_APP_SUPABASE_EXPECTED_PROJECT_REF || '';
 const projectRef = (() => {
@@ -13,6 +14,18 @@ const projectRef = (() => {
     return '';
   }
 })();
+
+function decodeLegacyJwtClaims(value) {
+  const segments = value.split('.');
+  if (segments.length !== 3) return null;
+  try {
+    return JSON.parse(Buffer.from(segments[1], 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+const clientKeyClaims = decodeLegacyJwtClaims(clientPublicKey);
 
 function fail(message) {
   console.error(`[supabase-build-context] ${message}`);
@@ -48,11 +61,22 @@ if (clientCredentialReference) {
 }
 
 if (productionContext) {
-  if (!clientUrl || !productionRef) {
-    fail('Production builds require a Supabase URL and PRODUCTION_SUPABASE_PROJECT_REF.');
+  if (!clientUrl || !clientPublicKey || !productionRef) {
+    fail(
+      'Production builds require a Supabase URL, browser public key, and PRODUCTION_SUPABASE_PROJECT_REF.',
+    );
   }
   if (projectRef !== productionRef || (expectedRef && expectedRef !== productionRef)) {
     fail('Production Supabase configuration does not match the approved production project.');
+  }
+  if (
+    clientKeyClaims &&
+    (clientKeyClaims.ref !== productionRef || clientKeyClaims.role !== 'anon')
+  ) {
+    fail('Production browser credential does not match the approved production project.');
+  }
+  if (!clientKeyClaims && !clientPublicKey.startsWith('sb_publishable_')) {
+    fail('Production browser credential is not a recognized public Supabase credential.');
   }
 }
 
@@ -63,6 +87,15 @@ if (
   process.env.ALLOW_PREVIEW_PRODUCTION_SUPABASE !== 'true'
 ) {
   fail('Preview and branch builds may not target production without explicit approval.');
+}
+
+if (
+  previewContext &&
+  clientKeyClaims &&
+  projectRef &&
+  clientKeyClaims.ref !== projectRef
+) {
+  fail('Browser Supabase URL and credential belong to different projects.');
 }
 
 console.info('[supabase-build-context] deploy context validated');

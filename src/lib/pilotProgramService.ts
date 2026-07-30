@@ -255,16 +255,6 @@ function buildProgramRecord(
   };
 }
 
-function withTimeout<T>(promise: PromiseLike<T>, timeoutMs: number, message: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timeout = globalThis.setTimeout(() => reject(new Error(message)), timeoutMs);
-    Promise.resolve(promise)
-      .then(resolve)
-      .catch(reject)
-      .finally(() => globalThis.clearTimeout(timeout));
-  });
-}
-
 export type AdminPilotProgramsLoad = {
   programs: PilotProgramRecord[];
   error?: 'unauthenticated' | 'forbidden' | 'unavailable' | string;
