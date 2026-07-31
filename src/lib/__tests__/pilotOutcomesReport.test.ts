@@ -15,6 +15,8 @@ const {
   liveChartItems,
   narrative,
 } = require('../../../netlify/functions/admin-pilot-outcomes-report');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { formatReportDate, formatReportingPeriod } = require('../../../netlify/functions/_lib/reportPdfFormatting');
 
 const sample = {
   programName: 'Synthetic School Pilot',
@@ -130,6 +132,24 @@ const sample = {
 };
 
 describe('pilot outcomes report', () => {
+  it('locks the program scope and approved Blue Ribbon cohort denominator', () => {
+    expect(sample.activeStudentCount).toBe(2);
+    expect(sample.reportingCohort).toEqual(expect.objectContaining({
+      enrolledStudents: 17,
+      includedStudents: 6,
+      establishedStudents: 6,
+      emergingStudents: 8,
+      minimalStudents: 3,
+    }));
+    expect(buildHtml(sample)).toContain('This report covers Synthetic School Pilot only.');
+  });
+
+  it('formats shareable report dates without ISO timestamps or placeholders', () => {
+    expect(formatReportDate('2026-07-30T21:30:27.983Z')).toBe('July 30, 2026');
+    expect(formatReportingPeriod(null, '2026-07-30T21:30:27.983Z'))
+      .toBe('Start date not provided - July 30, 2026');
+  });
+
   it('generates a multi-page branded PDF without student PII', async () => {
     const pdf = await buildPdf(sample, {
       includeStudentAppendix: true,

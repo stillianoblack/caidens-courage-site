@@ -2,6 +2,14 @@ const PDFDocument = require('pdfkit');
 const { requireAdmin, json } = require('./_lib/adminAuth');
 const { loadAcademyData } = require('./_lib/academyData');
 const { buildAcademyOutcomes } = require('./_lib/academyOutcomes');
+const {
+  BRAND,
+  addReportFooters,
+  drawMetricCard,
+  drawSectionTitle,
+  formatReportDate,
+  formatReportingPeriod,
+} = require('./_lib/reportPdfFormatting');
 
 function text(value) {
   return String(value ?? '').replace(/[<>]/g, '');
@@ -44,53 +52,127 @@ function academyPdf(academy) {
   const doc = new PDFDocument({ size: 'LETTER', margin: 54, bufferPages: true });
   const chunks = [];
   doc.on('data', (chunk) => chunks.push(chunk));
-  const heading = (value) => {
-    if (doc.y > 680) doc.addPage();
-    doc.moveDown(.65).fillColor('#14345f').font('Helvetica-Bold').fontSize(15).text(value);
-    doc.moveDown(.25).fillColor('#213047').font('Helvetica').fontSize(10);
-  };
   const disclosure = academyPopulationDisclosure(academy);
-  doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(11).text('FOCUS FLAME ACADEMY');
-  doc.fontSize(24).text('Focus Flame Academy Overview');
-  doc.moveDown(.3).fillColor('#59687c').font('Helvetica').fontSize(10)
-    .text(`Reporting period: ${academy.cohortSummary.earliestActivity || 'Unavailable'} through ${academy.cohortSummary.latestActivity || 'Unavailable'}`);
-  heading('Executive summary');
-  doc.text(disclosure.operational);
-  doc.moveDown(.3).font('Helvetica-Bold').text(disclosure.formal);
-  doc.moveDown(.3).font('Helvetica').text(`Cohort denominator: ${academy.cohortSummary.canonicalStudentAccounts} canonical student accounts. Categories are mutually exclusive and total ${academy.cohortSummary.canonicalStudentAccounts}.`);
-  heading('Cohort definition');
-  doc.text(`Established: ${academy.cohortSummary.establishedParticipants}. Emerging: ${academy.cohortSummary.emergingParticipants}. Minimal/no engagement: ${academy.cohortSummary.minimalParticipants}. Test/internal: ${academy.cohortSummary.testInternalParticipants}. Manually included: ${academy.cohortSummary.manuallyIncludedStudents}. Manually excluded: ${academy.cohortSummary.manuallyExcludedStudents}.`);
-  doc.moveDown(.3).text(academy.eligibilityRule.statement);
-  heading('Program Composition');
-  for (const program of academy.programSummaries) {
-    doc.font('Helvetica-Bold').text(program.programName);
-    doc.font('Helvetica').text(
-      `${program.enrolledStudents} enrolled; ${program.establishedStudents} established; ` +
-      `${program.emergingStudents} emerging; ${program.minimalStudents} minimal/no engagement; ` +
-      `${program.includedStudents} included in the formal report.`,
-    );
-    doc.moveDown(.25);
-  }
-  heading('Program Health');
   const a = academy.aggregate;
-  doc.text(`${a.baseline.count} baseline; ${a.post.count} post; ${a.missionCount} completed missions; ${a.focusCoins} coins; ${a.certificateCount} certificates.`);
-  heading('Academy-wide Live Student Progress');
-  for (const card of a.liveLearningSnapshot.cards) {
-    doc.font('Helvetica-Bold').text(`${card.label}: ${card.centerValue}`, { continued: true });
-    doc.font('Helvetica').text(` — ${card.statusLabel}. ${card.summary}`);
-  }
-  heading('Verified Outcomes');
+  const preparedAt = academy.calculatedAt || new Date();
+  const period = formatReportingPeriod(academy.cohortSummary.earliestActivity, academy.cohortSummary.latestActivity || preparedAt);
+
+  doc.fillColor(BRAND.gold).font('Helvetica-Bold').fontSize(9).text('FOCUS FLAME ACADEMY', { characterSpacing: 1.3 });
+  doc.moveDown(.7).fillColor(BRAND.navy).fontSize(28).text('Focus Flame Academy Overview');
+  doc.moveDown(.45).fillColor(BRAND.ink).font('Helvetica').fontSize(12)
+    .text('Academy-wide participation, engagement, and formal reporting across qualifying programs.', { width: 470 });
+  doc.moveDown(1).fillColor(BRAND.muted).fontSize(9).text(`Reporting period: ${period}`);
+  doc.text('Confidential administrative report');
+  doc.moveDown(1.5);
+  drawSectionTitle(doc, 'Executive overview', 'Academy-wide');
+  const cards = [
+    [academy.cohortSummary.canonicalStudentAccounts, 'Canonical accounts'],
+    [academy.cohortSummary.nonTestLearners, 'Non-test learners'],
+    [academy.cohortSummary.establishedParticipants, 'Established cohort'],
+    [academy.cohortSummary.emergingParticipants, 'Emerging'],
+    [academy.cohortSummary.minimalParticipants, 'Minimal / no engagement'],
+    [academy.cohortSummary.testInternalParticipants, 'Test / internal excluded'],
+  ];
+  cards.forEach(([value, label], index) => drawMetricCard(doc, {
+    x: 54 + (index % 3) * 172,
+    y: 252 + Math.floor(index / 3) * 84,
+    width: 160,
+    label,
+    value,
+  }));
+  doc.x = 54;
+  doc.y = 430;
+  doc.fillColor(BRAND.ink).font('Helvetica').fontSize(10).text(disclosure.operational, { width: 504, lineGap: 2 });
+  doc.moveDown(.65).font('Helvetica-Bold').text(disclosure.formal, { width: 504, lineGap: 2 });
+  doc.moveDown(.65).font('Helvetica').text(
+    `Categories are mutually exclusive and total ${academy.cohortSummary.canonicalStudentAccounts} canonical student accounts.`,
+  );
+  doc.moveDown(.45).fillColor(BRAND.muted).fontSize(8.5).text(
+    `Manual inclusions: ${academy.cohortSummary.manuallyIncludedStudents}. Manual exclusions: ${academy.cohortSummary.manuallyExcludedStudents}.`,
+  );
+
+  doc.addPage();
+  drawSectionTitle(doc, 'Program composition', 'Participation');
+  const externalPrograms = academy.programSummaries.filter((program) => !/test|internal|demo|sandbox/i.test(`${program.programName} ${program.programCode || ''}`));
+  const headers = ['Program', 'Enrolled', 'Established', 'Emerging', 'Minimal', 'Included'];
+  const widths = [218, 57, 62, 56, 54, 57];
+  let tableY = doc.y;
+  let tableX = 54;
+  headers.forEach((header, index) => {
+    doc.rect(tableX, tableY, widths[index], 24).fillAndStroke(BRAND.navy, BRAND.navy);
+    doc.fillColor(BRAND.white).font('Helvetica-Bold').fontSize(7.2).text(header, tableX + 4, tableY + 8, { width: widths[index] - 8 });
+    tableX += widths[index];
+  });
+  tableY += 24;
+  externalPrograms.forEach((program, rowIndex) => {
+    const row = [program.programName, program.enrolledStudents, program.establishedStudents, program.emergingStudents, program.minimalStudents, program.includedStudents];
+    tableX = 54;
+    row.forEach((value, index) => {
+      doc.rect(tableX, tableY, widths[index], 30).fillAndStroke(rowIndex % 2 ? BRAND.white : BRAND.pale, BRAND.border);
+      doc.fillColor(BRAND.ink).font(index === 0 ? 'Helvetica-Bold' : 'Helvetica').fontSize(7.5).text(String(value), tableX + 4, tableY + 8, {
+        width: widths[index] - 8,
+        height: 18,
+      });
+      tableX += widths[index];
+    });
+    tableY += 30;
+  });
+  doc.x = 54;
+  doc.y = tableY + 10;
+  doc.fillColor(BRAND.muted).font('Helvetica').fontSize(8.5)
+    .text(`${academy.cohortSummary.testInternalParticipants} test/internal accounts are excluded from formal reporting.`, 54, doc.y, { width: 504 });
+  doc.moveDown(1.2);
+  drawSectionTitle(doc, 'Academy-wide live student progress', 'Directional and operational');
+  const liveCards = (a.liveLearningSnapshot?.cards || []).slice(0, 6);
+  const liveStartY = doc.y;
+  liveCards.forEach((card, index) => drawMetricCard(doc, {
+    x: 54 + (index % 3) * 172,
+    y: liveStartY + Math.floor(index / 3) * 84,
+    width: 160,
+    label: card.label,
+    value: card.centerValue,
+    note: card.evidenceType === 'operational' ? 'Operational' : 'Directional',
+  }));
+  doc.x = 54;
+  doc.y = liveStartY + Math.ceil(liveCards.length / 3) * 84 + 10;
+  doc.fillColor(BRAND.muted).font('Helvetica').fontSize(8.5)
+    .text('Weekly completion is not available because the weekly progress source has not yet been connected.');
+
+  doc.addPage();
+  drawSectionTitle(doc, 'Verified outcomes', 'Matched assessments');
+  doc.fillColor(BRAND.ink).font('Helvetica').fontSize(10)
+    .text('Verified growth remains pending until matched post-assessments are recorded.');
+  doc.moveDown(.8);
   for (const domain of a.impactSnapshot.domains) {
-    doc.font('Helvetica-Bold').text(domain.label, { continued: true });
-    doc.font('Helvetica').text(` — baseline ${metric(domain.baselinePercentage, '%')}; post ${metric(domain.postPercentage, '%')}; delta ${metric(domain.deltaPercentagePoints, ' pts')}; matched ${domain.matchedStudentCount}; ${domain.displayStatus}.`);
+    const y = doc.y;
+    doc.roundedRect(54, y, 504, 74, 9).fillAndStroke(BRAND.pale, BRAND.border);
+    doc.fillColor(BRAND.navy).font('Helvetica-Bold').fontSize(11).text(domain.label, 68, y + 12, { width: 190 });
+    doc.fillColor(BRAND.ink).font('Helvetica').fontSize(9)
+      .text(`Baseline: ${metric(domain.baselinePercentage, '%')}`, 270, y + 12, { width: 120 })
+      .text(`Post: ${domain.postPercentage == null ? 'Awaiting post-assessments' : metric(domain.postPercentage, '%')}`, 270, y + 29, { width: 220 })
+      .text(`Matched: ${domain.matchedStudentCount}`, 68, y + 40, { width: 130 });
+    doc.fillColor(BRAND.gold).font('Helvetica-Bold').fontSize(8.5)
+      .text('VERIFIED OUTCOMES PENDING', 68, y + 56, { width: 190 });
+    doc.y = y + 86;
   }
-  doc.moveDown(.3).font('Helvetica-Oblique').text('Activity and engagement are never converted into verified growth.');
-  heading('Engagement and completion');
-  doc.text(`Sessions: ${a.students.reduce((sum, row) => sum + (row.kidPlaySessions || 0), 0)}. Completed missions: ${a.missionCount}. Assessments: ${a.assessmentCount}. Coins: ${a.focusCoins}. Certificates: ${a.certificateCount}.`);
-  heading('Methodology');
-  doc.text('Operational metrics describe participation and activity. Live signals are directional evidence from completed learning records. Verified outcomes require matched baseline and post assessments.');
-  heading('Data quality disclosure');
-  doc.text(`Missing program links: ${academy.dataQuality.missingProgramLinks}. Missing grades: ${academy.dataQuality.missingGradeLevels}. Duplicate identities: ${academy.dataQuality.duplicateIdentities}. Excluded test/synthetic records: ${academy.dataQuality.excludedTestSyntheticRecords}. Below threshold: ${academy.dataQuality.studentsBelowEligibilityThreshold}. Missing weekly-progress source: ${academy.dataQuality.missingWeeklyProgressSource ? 'Yes' : 'No'}.`);
+  doc.fillColor(BRAND.navy).font('Helvetica-Bold').fontSize(10)
+    .text('Activity and engagement are never converted into verified growth.');
+  doc.moveDown(1);
+  drawSectionTitle(doc, 'Methodology and data quality', 'Disclosure');
+  doc.fillColor(BRAND.ink).font('Helvetica').fontSize(9).text(
+    'Operational metrics describe participation and activity. Live signals are directional evidence from completed learning records. Verified outcomes require matched baseline and post assessments.',
+    { lineGap: 2 },
+  );
+  doc.moveDown(.6).text(
+    `Missing program links: ${academy.dataQuality.missingProgramLinks}. Missing grades: ${academy.dataQuality.missingGradeLevels}. ` +
+    `Duplicate identities: ${academy.dataQuality.duplicateIdentities}. Excluded test/synthetic records: ${academy.dataQuality.excludedTestSyntheticRecords}.`,
+  );
+  doc.moveDown(.6).font('Helvetica-Bold').text(`Not automatically eligible: ${academy.dataQuality.studentsBelowEligibilityThreshold}`);
+  doc.font('Helvetica').text(
+    `Includes ${academy.cohortSummary.lowEngagementExclusions} non-test learners below the engagement threshold and ` +
+    `${academy.cohortSummary.testInternalParticipants} test/internal accounts.`,
+  );
+  addReportFooters(doc, { scope: 'Academy Overview', preparedAt });
   doc.end();
   return new Promise((resolve) => doc.on('end', () => resolve(Buffer.concat(chunks))));
 }
@@ -127,4 +209,4 @@ exports.handler = async (event) => {
   };
 };
 
-exports._test = { academyHtml, academyPdf, academyPopulationDisclosure };
+exports._test = { academyHtml, academyPdf, academyPopulationDisclosure, formatReportDate, formatReportingPeriod };

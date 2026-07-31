@@ -3,6 +3,14 @@ const { requireAdmin, json } = require('./_lib/adminAuth');
 const { buildPilotOutcomes } = require('./_lib/pilotOutcomes');
 const { buildAcademyOutcomes } = require('./_lib/academyOutcomes');
 const {
+  BRAND,
+  addReportFooters,
+  drawMetricCard,
+  drawSectionTitle,
+  formatReportDate,
+  formatReportingPeriod,
+} = require('./_lib/reportPdfFormatting');
+const {
   formatDecimal,
   formatPercentage,
   formatPoints,
@@ -400,22 +408,27 @@ function buildPdf(program, options) {
     doc.on('data', (chunk) => chunks.push(chunk));
     doc.on('error', reject);
     doc.on('end', () => resolve(Buffer.concat(chunks)));
+    const preparedAt = options.preparedAt || new Date();
+    const reportingStart = options.reportingStart || program.startDate;
+    const reportingPeriod = formatReportingPeriod(reportingStart, options.reportingEnd || preparedAt);
     addHeader(doc);
     doc.moveDown(1.5);
-    doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(26).text(`${program.programName} Report`);
-    doc.moveDown();
-    doc.fillColor('#213047').fontSize(18).text(program.programName);
-    doc.font('Helvetica').fontSize(11).text(program.programType);
-    doc.moveDown();
-    line(doc, 'Reporting period', `${options.reportingStart || 'Program start'} – ${options.reportingEnd || 'Prepared date'}`);
-    line(doc, 'Prepared', new Date().toISOString().slice(0, 10));
+    doc.fillColor(BRAND.gold).font('Helvetica-Bold').fontSize(9).text('PROGRAM REPORT', { characterSpacing: 1.3 });
+    doc.moveDown(.7).fillColor(BRAND.navy).font('Helvetica-Bold').fontSize(28).text(program.programName);
+    doc.moveDown(.4).fillColor(BRAND.ink).font('Helvetica').fontSize(12).text('Focus Flame Academy program outcomes report');
+    doc.moveDown(1.5);
+    line(doc, 'Reporting period', reportingPeriod);
+    line(doc, 'Prepared', formatReportDate(preparedAt));
     line(doc, 'Confidentiality', 'Administrative pilot review — privacy-safe cohort summary');
     addContentPage(doc);
-    heading(doc, 'Executive summary');
+    drawSectionTitle(doc, 'Executive summary', program.programName);
     doc.fillColor('#14345f').font('Helvetica-Bold').fontSize(11).text(`This report covers ${program.programName} only.`);
     doc.moveDown(.45);
-    doc.fillColor('#213047').font('Helvetica').fontSize(10).text(narrative(program));
-    doc.moveDown();
+    doc.fillColor('#213047').font('Helvetica').fontSize(10).text(
+      'Live learning signals are available from activity and mission accuracy. Verified growth remains pending until matched post-assessments are recorded.',
+      { lineGap: 2 },
+    );
+    doc.moveDown(1);
     if (program.reportingCohort) {
       doc.text(
         `${program.programName} includes ${program.reportingCohort.enrolledStudents} enrolled students: ` +
@@ -423,66 +436,65 @@ function buildPdf(program, options) {
         `${program.reportingCohort.emergingStudents} emerging, and ` +
         `${program.reportingCohort.minimalStudents} with minimal or no recorded engagement.`,
       );
-      doc.moveDown();
-      line(doc, 'Included in formal report', program.reportingCohort.includedStudents);
+      doc.moveDown(.6);
+      doc.font('Helvetica-Bold').text(`${program.reportingCohort.includedStudents} students are included in the formal report.`);
     }
-    line(doc, 'Students enrolled', program.activeStudentCount);
-    line(doc, 'Matched pre/post students', `${program.matchedCount} of ${program.activeStudentCount}`);
-    line(doc, 'Average baseline', metric(program.baselineAverage));
-    line(doc, 'Average post', metric(program.postAverage));
-    line(doc, 'Absolute delta', metric(program.absoluteDelta));
-    line(doc, 'Percentage delta', program.percentageDeltaAvailable ? metric(program.percentageDelta, '%') : 'Unavailable');
-    line(doc, 'Weekly completion', program.weeklyCompletion.rate == null ? 'Not enough data' : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`);
+    const executiveMetrics = [
+      [program.activeStudentCount, 'Students enrolled'],
+      [program.baseline.count, 'Baseline complete'],
+      [program.post.count, 'Post complete'],
+      [formatPercentage(program.impactSnapshot.participation.percentage), 'Participation'],
+      [program.missionCount, 'Missions completed'],
+      [program.studentsWithAdventureCount || 0, 'Students with an adventure'],
+    ];
+    executiveMetrics.forEach(([value, label], index) => drawMetricCard(doc, {
+      x: 54 + (index % 3) * 172,
+      y: 330 + Math.floor(index / 3) * 84,
+      width: 160,
+      label,
+      value,
+    }));
+    doc.x = 54;
+    doc.y = 512;
+    doc.fillColor(BRAND.muted).font('Helvetica').fontSize(8.5)
+      .text('Evidence labels: activity and participation are operational; live learning signals are directional; growth requires matched assessments.');
     drawProgramHealthSummary(doc, program);
     if (options.includeCharts !== false) {
       drawLiveLearningSnapshot(doc, program);
       drawImpactSnapshot(doc, program);
     }
     addContentPage(doc);
-    heading(doc, 'Program snapshot');
+    drawSectionTitle(doc, 'Engagement and data quality', 'Program snapshot');
     line(doc, 'Facilitator', program.facilitator);
-    line(doc, 'Start date', program.startDate || 'Not provided');
+    line(doc, 'Reporting period', reportingPeriod);
+    line(doc, 'Students enrolled', program.activeStudentCount);
     line(doc, 'Baseline participation', `${program.baseline.count}/${program.baseline.total}`);
     line(doc, 'Post participation', `${program.post.count}/${program.post.total}`);
     line(doc, 'Assessments completed', program.assessmentCount);
-    line(doc, 'Kid Shell sessions', program.students.reduce((sum, row) => sum + (row.kidPlaySessions || 0), 0));
     line(doc, 'Missions completed', program.missionCount);
     line(doc, 'Focus Coins', program.focusCoins);
     line(doc, 'Certificates', program.certificateCount);
-    heading(doc, 'Outcomes');
-    line(doc, 'Improved', program.students.filter((row) => row.delta > 0).length);
-    line(doc, 'Unchanged', program.students.filter((row) => row.delta === 0).length);
-    line(doc, 'Declined', program.students.filter((row) => row.delta < 0).length);
-    line(doc, 'Incomplete', program.students.filter((row) => row.delta == null).length);
-    heading(doc, 'Key strengths');
-    doc.font('Helvetica').fontSize(9).text(
-      program.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints != null
-        ? `Matched domain results show ${signedPoints(program.impactSnapshot.overallMatchedGrowth.deltaPercentagePoints)} across ${program.impactSnapshot.overallMatchedGrowth.includedDomainCount} mapped domains.`
-        : 'Not enough matched domain data is available to identify measured strengths.',
-    );
-    heading(doc, 'Areas needing additional data');
-    program.reportBlockers.forEach((blocker) => {
-      ensureSpace(doc, 15);
-      doc.font('Helvetica').fontSize(9).text(`- ${blocker}`);
-    });
-    program.impactSnapshot.domains
-      .filter((domain) => domain.deltaPercentagePoints == null)
-      .forEach((domain) => {
-        ensureSpace(doc, 15);
-        doc.font('Helvetica').fontSize(9).text(`- ${domain.label}: ${domain.missingReason}`);
-      });
+    line(doc, 'Last activity', formatReportDate(program.lastActivity) || 'No activity date recorded');
+    heading(doc, 'Cohort composition');
+    line(doc, 'Established', program.reportingCohort?.establishedStudents ?? 0);
+    line(doc, 'Emerging', program.reportingCohort?.emergingStudents ?? 0);
+    line(doc, 'Minimal / no engagement', program.reportingCohort?.minimalStudents ?? 0);
     heading(doc, 'Engagement');
     line(doc, 'Students with at least one adventure', program.studentsWithAdventureCount || 0);
-    line(doc, 'Mission completions', program.missionCount);
     line(doc, 'Active students this week', program.activeStudentCountThisWeek || 0);
     line(
       doc,
       'Weekly completion',
       program.weeklyProgressSourceAvailable === false
-        ? 'Unavailable — canonical weekly-progress source is not deployed'
-        : `${program.weeklyCompletion.count}/${program.weeklyCompletion.total || 'unavailable'}`,
+        ? 'Source unavailable'
+        : program.weeklyCompletion.rate == null
+          ? 'Awaiting activity'
+          : `${formatPercentage(program.weeklyCompletion.rate)} (${program.weeklyCompletion.count}/${program.weeklyCompletion.total})`,
     );
-    line(doc, 'Last activity', program.lastActivity || 'Not enough data');
+    if (program.weeklyProgressSourceAvailable === false) {
+      doc.fillColor(BRAND.muted).font('Helvetica').fontSize(8)
+        .text('Weekly completion is not available because the weekly progress source has not yet been connected.');
+    }
     heading(doc, 'Data Quality');
     line(doc, 'Missing baseline', program.quality.missingBaseline);
     line(doc, 'Missing post', program.quality.missingPost);
@@ -498,13 +510,19 @@ function buildPdf(program, options) {
     }
     if (options.includeNotes !== false) {
       heading(doc, 'Educator observations');
-      for (const [label, value] of [
+      const observations = [
         ['What worked', options.notes?.whatWorked],
         ['Student response', options.notes?.studentResponse],
         ['Challenges', options.notes?.challenges],
         ['Recommended next steps', options.notes?.recommendedNextSteps],
         ['Approved quote/testimonial', options.notes?.approvedQuote],
-      ]) line(doc, label, text(value) || 'Not provided');
+      ].filter(([, value]) => text(value));
+      if (!observations.length) {
+        doc.fillColor(BRAND.muted).font('Helvetica-Oblique').fontSize(9)
+          .text('Educator observations have not yet been submitted.');
+      } else {
+        observations.forEach(([label, value]) => line(doc, label, text(value)));
+      }
     }
     heading(doc, 'Data notes');
     doc.font('Helvetica').fontSize(9).fillColor('#213047').text(
@@ -530,16 +548,7 @@ function buildPdf(program, options) {
         doc.font('Helvetica').text(`  Grade: ${student.grade}  Baseline: ${metric(student.baselineScore)}  Post: ${metric(student.postScore)}  Delta: ${metric(student.delta)}  State: ${student.dataCompleteness}`);
       }
     }
-    const range = doc.bufferedPageRange();
-    for (let page = range.start; page < range.start + range.count; page += 1) {
-      doc.switchToPage(page);
-      doc.font('Helvetica').fontSize(8).fillColor('#52657f').text(
-        `caidenscourage.com  •  Focus Flame Academy  •  A Caiden's Courage Learning Adventure  •  Page ${page + 1} of ${range.count}  •  ${new Date().toISOString().slice(0, 10)}`,
-        54,
-        724,
-        { width: 504, align: 'center', lineBreak: false },
-      );
-    }
+    addReportFooters(doc, { scope: program.programName, preparedAt });
     doc.end();
   });
 }

@@ -68,5 +68,10 @@ describe('Academy dashboard and export parity', () => {
     expect(html).toContain('Program Composition');
     expect(html).toContain('Readable Learning Program');
     expect(html).not.toContain('33 canonical');
+    expect(academy.aggregate.activeStudentCount).toBe(7);
+    expect(academy.cohortSummary.nonTestLearners).toBe(22);
+    expect(academy.cohortSummary.manuallyIncludedStudents).toBe(0);
+    expect(academy.cohortSummary.manuallyExcludedStudents).toBe(0);
+    expect(_test.formatReportDate('2026-07-30T21:30:27.983Z')).toBe('July 30, 2026');
   });
 });
