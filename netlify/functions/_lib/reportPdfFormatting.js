@@ -32,7 +32,7 @@ function formatReportingPeriod(start, end) {
   return `${startLabel} - ${endLabel}`;
 }
 
-function addReportFooters(doc, { scope, preparedAt }) {
+function addReportFooters(doc, { scope, preparedAt, coverColor }) {
   const range = doc.bufferedPageRange();
   const prepared = formatReportDate(preparedAt) || formatReportDate(new Date());
   for (let page = range.start; page < range.start + range.count; page += 1) {
@@ -40,7 +40,7 @@ function addReportFooters(doc, { scope, preparedAt }) {
     doc
       .font('Helvetica')
       .fontSize(7.4)
-      .fillColor(BRAND.muted)
+      .fillColor(page === range.start && coverColor ? coverColor : BRAND.muted)
       .text(
         `caidenscourage.com  |  Focus Flame Academy  |  ${scope}  |  Page ${page + 1} of ${range.count}  |  Prepared ${prepared}`,
         54,

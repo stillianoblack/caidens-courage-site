@@ -99,7 +99,7 @@ export function saveAcademyReportingOverride(
   );
 }
 
-export async function downloadAcademyReport(format: 'pdf' | 'html' = 'pdf') {
+export async function downloadAcademyReport(format: 'pdf' | 'html' | 'executive' = 'pdf') {
   const response = await fetch(`/.netlify/functions/admin-academy-report?format=${format}`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -111,6 +111,6 @@ export async function downloadAcademyReport(format: 'pdf' | 'html' = 'pdf') {
   if (format === 'html') return { html: await response.text() };
   return {
     blob: await response.blob(),
-    filename: `focus-flame-academy-overview-${new Date().toISOString().slice(0, 10)}.pdf`,
+    filename: `${format === 'executive' ? 'focus-flame-academy-executive-shareout' : 'focus-flame-academy-overview'}-${new Date().toISOString().slice(0, 10)}.pdf`,
   };
 }

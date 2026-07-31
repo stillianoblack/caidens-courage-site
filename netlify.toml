@@ -4,6 +4,12 @@
   command = "yarn build"
   functions = "netlify/functions"
 
+[functions."admin-academy-report"]
+  included_files = [
+    "public/logo.png",
+    "public/images/CaidensCourage_SocialImage.png"
+  ]
+
 # CRA already emits optimized hashed assets. Avoid Netlify post-processing so
 # dynamic import chunks deploy exactly as the build generated them.
 [build.processing]

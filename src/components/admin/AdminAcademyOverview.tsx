@@ -131,6 +131,25 @@ export default function AdminAcademyOverview({
     }
   };
 
+  const downloadExecutiveShareout = async () => {
+    setReporting(true);
+    setMessage('');
+    try {
+      const result = await downloadAcademyReport('executive');
+      if (!('blob' in result) || !result.blob) throw new Error('The Executive Share-Out could not be generated.');
+      const url = URL.createObjectURL(result.blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = result.filename || 'focus-flame-academy-executive-shareout.pdf';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'The Executive Share-Out could not be downloaded.');
+    } finally {
+      setReporting(false);
+    }
+  };
+
   const programReport = async (
     programId: string | null,
     disposition: 'inline' | 'attachment',
@@ -182,6 +201,7 @@ export default function AdminAcademyOverview({
         <div className="academyOverview-actions">
           <button type="button" disabled={reporting} onClick={() => void generateReport()}>Generate Academy Report</button>
           <button type="button" disabled={reporting} onClick={() => void downloadPdf()}>Download Academy PDF</button>
+          <button type="button" disabled={reporting} onClick={() => void downloadExecutiveShareout()}>Download Executive Share-Out</button>
         </div>
       </header>
 
