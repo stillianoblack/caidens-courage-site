@@ -1,5 +1,4 @@
 import React, { useId, useRef, useState } from 'react';
-import BrandLogo from '../../design-system/components/BrandLogo';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
 import type { PortalLoginIntent } from '../../config/portalLoginIntent';
@@ -72,6 +71,7 @@ export default function PortalAccessForm({
   const [hideWelcomeBack, setHideWelcomeBack] = useState(false);
   const [hideRememberedResume, setHideRememberedResume] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
+  const [selectedIntent, setSelectedIntent] = useState<PortalLoginIntent | null>(null);
   const accessCodeInputRef = useRef<HTMLInputElement>(null);
   const showRememberedResume =
     isHero &&
@@ -94,6 +94,26 @@ export default function PortalAccessForm({
     PORTAL_LOGIN_INTENTS.find((item) => item.id === portalIntent) ?? PORTAL_LOGIN_INTENTS[0];
   const credentialAutoComplete =
     portalIntent === 'student' ? 'off' : portalIntent === 'facilitator' ? 'email' : 'email';
+  const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string }> = {
+    student: {
+      title: 'Student Access',
+      description: 'Enter your program code and student PIN to continue your adventure.',
+      optionDescription: 'Continue your quests, games, and Weekly Adventures.',
+      cta: 'Enter the World',
+    },
+    parent: {
+      title: 'Parent / Guardian Access',
+      description: 'Sign in to family tools and your child’s connected experience.',
+      optionDescription: 'Access family tools and view your child’s experience.',
+      cta: 'Continue to Family Portal',
+    },
+    facilitator: {
+      title: 'Facilitator Access',
+      description: 'Manage students, activities, and program progress.',
+      optionDescription: 'Manage students, activities, and program progress.',
+      cta: 'Open Facilitator Portal',
+    },
+  };
 
   const cardClass = isHero
     ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
@@ -124,62 +144,65 @@ export default function PortalAccessForm({
 
   return (
     <div id={id} className={cardClass}>
-      {isHero && showManualEntry ? (
-        <div className="flex flex-col items-center text-center">
-          <BrandLogo variant="facilitator" size="accessCode" decorative />
-          {cardAudienceLabel ? (
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-navy-500/70">
-              {cardAudienceLabel}
-            </p>
-          ) : null}
-          <h2
-            className={`font-display text-lg font-extrabold text-navy-500 sm:text-xl ${cardAudienceLabel ? 'mt-2' : 'mt-4'}`}
-          >
-            {hasRememberedProgram ? 'Welcome back' : 'Have a Courage Access Code?'}
-          </h2>
-          <p className="mt-1.5 text-sm text-navy-600">
-            {hasRememberedProgram
-              ? portalIntent === 'student'
-                ? 'Enter your student PIN to continue.'
-                : 'Enter your email to continue.'
-              : 'Enter your code to unlock your resources.'}
-          </p>
+      {isHero && showManualEntry && !selectedIntent && onPortalIntentChange ? (
+        <div className="cc-portal-gateway" data-testid="portal-role-gateway">
+          {cardAudienceLabel ? <p className="cc-portal-gatewayEyebrow">{cardAudienceLabel}</p> : null}
+          <h2 className="cc-portal-gatewayTitle">How are you entering the world?</h2>
+          <p className="cc-portal-gatewayCopy">Choose the experience that belongs to you.</p>
+          <div className="cc-portal-roleOptions" aria-label="Choose how you are entering the world">
+            {PORTAL_LOGIN_INTENTS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="cc-portal-roleOption"
+                onClick={() => {
+                  onPortalIntentChange(item.id);
+                  setSelectedIntent(item.id);
+                  setShowRecovery(false);
+                }}
+              >
+                <span className={`cc-portal-roleIcon cc-portal-roleIcon--${item.id}`} aria-hidden="true">
+                  {item.id === 'student' ? (
+                    <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H12v16h5.5a2.5 2.5 0 0 1 2.5 2.5v-16Z" /></svg>
+                  ) : item.id === 'parent' ? (
+                    <svg viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8.5 2a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM1.5 21a6.5 6.5 0 0 1 13 0h-13Zm12.5 0a7.9 7.9 0 0 0-1.6-4.8A5.5 5.5 0 0 1 22 20v1h-8Z" /></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5.3 3.8 9.7 9 10 5.2-.3 9-4.7 9-10V6l-9-4Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 11.5a7 7 0 0 1-4.7-1.8A5 5 0 0 1 12 14a5 5 0 0 1 4.7 2.7 7 7 0 0 1-4.7 1.8Z" /></svg>
+                  )}
+                </span>
+                <span className="cc-portal-roleText">
+                  <strong>{item.label}</strong>
+                  <small>{roleCopy[item.id].optionDescription}</small>
+                </span>
+                <span className="cc-portal-roleArrow" aria-hidden="true">→</span>
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 
-      {showManualEntry && onPortalIntentChange ? (
-        <fieldset className="cc-portal-roleSelector mt-4 space-y-2 border-0 p-0">
-          <legend className="mb-2 block w-full text-left text-sm font-semibold text-navy-600">
-            Who are you? <span className="font-normal text-red-600">*</span>
-          </legend>
-          <div className="grid gap-2" role="radiogroup" aria-label="Who are you?">
-            {PORTAL_LOGIN_INTENTS.map((item) => {
-              const selected = portalIntent === item.id;
-              return (
-                <label
-                  key={item.id}
-                  className={`cc-portal-roleCard flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
-                    selected
-                      ? 'border-golden-500 bg-golden-50 ring-2 ring-golden-500/30'
-                      : 'border-navy-200/80 bg-[#FAF9F7] hover:border-navy-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`${formId}-portal-role`}
-                    className="mt-1"
-                    checked={selected}
-                    onChange={() => onPortalIntentChange(item.id)}
-                  />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-navy-700">{item.label}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-navy-500">{item.helperText}</span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
+      {isHero && showManualEntry && selectedIntent ? (
+        <div className="cc-portal-selectedIntro" aria-live="polite">
+          <button
+            type="button"
+            className="cc-portal-back"
+            onClick={() => {
+              onPortalIntentChange?.(selectedIntent);
+              setSelectedIntent(null);
+              setShowRecovery(false);
+            }}
+          >
+            <span aria-hidden="true">←</span> Choose another path
+          </button>
+          <h2>{hasRememberedProgram ? 'Welcome back' : roleCopy[selectedIntent].title}</h2>
+          <p>
+            {hasRememberedProgram
+              ? selectedIntent === 'student'
+                ? 'Enter your student PIN to continue.'
+                : 'Enter your email to continue.'
+              : roleCopy[selectedIntent].description}
+          </p>
+        </div>
       ) : null}
 
       {showRememberedResume && rememberedSession ? (
@@ -200,7 +223,7 @@ export default function PortalAccessForm({
         />
       ) : null}
 
-      {showManualEntry ? (
+      {showManualEntry && (!isHero || selectedIntent) ? (
         <form
           className={isHero ? 'mt-5 space-y-3.5' : 'space-y-3'}
           onSubmit={onSubmit}
@@ -310,7 +333,7 @@ export default function PortalAccessForm({
             className="!w-full"
             disabled={submitting}
           >
-            {submitting ? 'Unlocking…' : isHero ? 'Unlock Portal' : 'Unlock'}
+            {submitting ? 'Unlocking…' : isHero && selectedIntent ? roleCopy[selectedIntent].cta : 'Unlock'}
           </Button>
 
           {hasRememberedProgram ? (
@@ -321,7 +344,7 @@ export default function PortalAccessForm({
         </form>
       ) : null}
 
-      {isHero && showManualEntry && !hasRememberedProgram ? (
+      {isHero && showManualEntry && selectedIntent && !hasRememberedProgram ? (
         <button
           type="button"
           className="portal-forgotCodeLink"
@@ -342,7 +365,7 @@ export default function PortalAccessForm({
 
       {isHero && showRecovery ? <PortalCodeRecovery onClose={() => setShowRecovery(false)} /> : null}
 
-      {isHero && showManualEntry ? (
+      {isHero && showManualEntry && selectedIntent ? (
         <p className="mt-4 text-xs leading-relaxed text-navy-500/80">
           Current access codes are used for pilot testing. Checkout and secure accounts are coming soon.
         </p>
