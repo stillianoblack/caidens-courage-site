@@ -102,6 +102,7 @@ export default function PortalAccessForm({
     audience: string;
     description: string;
     imageSrc: string;
+    hoverImageSrc: string;
     imageAlt: string;
     selectedImageSrc?: string;
   };
@@ -116,8 +117,9 @@ export default function PortalAccessForm({
         label: 'Continue the Adventure',
         audience: 'Student',
         description: 'Continue your quests, games, and weekly adventures.',
-        imageSrc: '/images/characters/HappyCaiden_1@caiden.webp',
-        imageAlt: 'Caiden',
+        imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover.webp',
+        imageAlt: 'Student B-4 guide',
       },
     },
     parent: {
@@ -130,8 +132,9 @@ export default function PortalAccessForm({
         label: 'Support the Journey',
         audience: 'Parent / Guardian',
         description: 'Access family tools and view your child’s experience.',
-        imageSrc: '/images/caidenscourage/Character Hub/Gameplay Cards/dr-victoria-guide.webp',
-        imageAlt: 'Dr. Victoria',
+        imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover.webp',
+        imageAlt: 'Parent and guardian B-4 guide',
       },
     },
     facilitator: {
@@ -144,8 +147,9 @@ export default function PortalAccessForm({
         label: 'Guide the Program',
         audience: 'Facilitator',
         description: 'Manage students, activities, and program progress.',
-        imageSrc: '/images/characters/uncle-t-guide.webp',
-        imageAlt: 'Uncle T',
+        imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover.webp',
+        imageAlt: 'Facilitator B-4 guide',
       },
     },
   };
@@ -210,11 +214,21 @@ export default function PortalAccessForm({
               >
                 <span className="cc-portal-characterPortrait">
                   <img
+                    className="cc-portal-characterImage cc-portal-characterImage--default"
                     src={roleCopy[item.id].guide.imageSrc}
                     alt={roleCopy[item.id].guide.imageAlt}
                     width="320"
                     height="360"
                     loading={item.id === 'student' ? 'eager' : 'lazy'}
+                  />
+                  <img
+                    className="cc-portal-characterImage cc-portal-characterImage--hover"
+                    src={roleCopy[item.id].guide.hoverImageSrc}
+                    alt=""
+                    width="320"
+                    height="360"
+                    loading="lazy"
+                    aria-hidden="true"
                   />
                 </span>
                 <span className="cc-portal-characterText">

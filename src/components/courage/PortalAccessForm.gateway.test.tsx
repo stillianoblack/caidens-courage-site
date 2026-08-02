@@ -55,11 +55,16 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByText('Student')).toBeInTheDocument();
     expect(screen.getByText('Parent / Guardian')).toBeInTheDocument();
     expect(screen.getByText('Facilitator')).toBeInTheDocument();
-    expect(screen.getByAltText('Caiden')).toHaveAttribute('src', '/images/characters/HappyCaiden_1@caiden.webp');
-    expect(screen.getByAltText('Dr. Victoria')).toHaveAttribute(
+    expect(screen.getByAltText('Student B-4 guide')).toHaveAttribute(
       'src',
-      '/images/caidenscourage/Character Hub/Gameplay Cards/dr-victoria-guide.webp',
+      '/images/Choose-Your-Guide/B-4student.webp',
     );
+    expect(screen.getByAltText('Parent and guardian B-4 guide')).toHaveAttribute(
+      'src',
+      '/images/Choose-Your-Guide/B-4orange.webp',
+    );
+    expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/b-4facilitator.webp');
+    expect(document.querySelectorAll('.cc-portal-characterImage--hover')).toHaveLength(3);
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Student PIN')).not.toBeInTheDocument();
   });

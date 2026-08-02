@@ -8463,13 +8463,31 @@ a.ffl-ctaSecondary {
 }
 
 .cc-portal-characterPortrait img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
   filter: saturate(0.98) brightness(1.04);
   transform: scale(0.98);
-  transition: filter 180ms ease, transform 180ms ease;
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
+}
+
+.cc-portal-characterImage--hover {
+  opacity: 0;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterImage--default,
+.cc-portal-characterOption:focus-visible .cc-portal-characterImage--default,
+.cc-portal-characterOption.is-selected .cc-portal-characterImage--default {
+  opacity: 0;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterImage--hover,
+.cc-portal-characterOption:focus-visible .cc-portal-characterImage--hover,
+.cc-portal-characterOption.is-selected .cc-portal-characterImage--hover {
+  opacity: 1;
 }
 
 .cc-portal-characterOption:hover .cc-portal-characterPortrait img,
