@@ -99,6 +99,8 @@ export default function PortalAccessForm({
   type CharacterGuide = {
     name: string;
     label: string;
+    audience: string;
+    description: string;
     imageSrc: string;
     imageAlt: string;
     selectedImageSrc?: string;
@@ -112,6 +114,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Caiden',
         label: 'Continue the Adventure',
+        audience: 'Student',
+        description: 'Continue your quests, games, and weekly adventures.',
         imageSrc: '/images/characters/HappyCaiden_1@caiden.webp',
         imageAlt: 'Caiden',
       },
@@ -124,7 +128,9 @@ export default function PortalAccessForm({
       guide: {
         name: 'Dr. Victoria',
         label: 'Support the Journey',
-        imageSrc: '/images/characters/dr-victoria-guide.webp',
+        audience: 'Parent / Guardian',
+        description: 'Access family tools and view your child’s experience.',
+        imageSrc: '/images/caidenscourage/Character Hub/Gameplay Cards/dr-victoria-guide.webp',
         imageAlt: 'Dr. Victoria',
       },
     },
@@ -136,6 +142,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Uncle T',
         label: 'Guide the Program',
+        audience: 'Facilitator',
+        description: 'Manage students, activities, and program progress.',
         imageSrc: '/images/characters/uncle-t-guide.webp',
         imageAlt: 'Uncle T',
       },
@@ -210,8 +218,9 @@ export default function PortalAccessForm({
                   />
                 </span>
                 <span className="cc-portal-characterText">
-                  <strong>{roleCopy[item.id].guide.name}</strong>
-                  <small>{roleCopy[item.id].guide.label}</small>
+                  <strong>{roleCopy[item.id].guide.audience}</strong>
+                  <small>{roleCopy[item.id].guide.description}</small>
+                  <span>{roleCopy[item.id].guide.name}</span>
                 </span>
                 <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>

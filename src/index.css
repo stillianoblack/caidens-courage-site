@@ -8344,10 +8344,10 @@ a.ffl-ctaSecondary {
 }
 
 .cc-portal-hero--gateway .cc-portal-access-card--selector {
-  border-color: rgb(174 195 225 / 0.22);
-  background: rgb(7 20 41 / 0.58);
-  box-shadow: 0 34px 86px -38px rgb(0 0 0 / 0.92);
-  backdrop-filter: blur(14px);
+  border-color: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / 0.98);
+  box-shadow: 0 34px 86px -38px rgb(0 0 0 / 0.82);
+  backdrop-filter: blur(12px);
 }
 
 .cc-portal-guide-stage {
@@ -8400,26 +8400,24 @@ a.ffl-ctaSecondary {
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 23rem;
-  overflow: hidden;
+  min-height: 18rem;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: 100%;
   padding: 0;
-  border: 1px solid rgb(157 182 217 / 0.24);
-  border-radius: 1.15rem;
-  background: linear-gradient(160deg, #1b2c48, #0c192d 72%);
-  color: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #111827;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 18px 38px -28px rgb(0 0 0 / 0.9);
+  box-shadow: none;
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .cc-portal-characterOption:hover {
   transform: translateY(-2px);
-  border-color: rgb(244 212 119 / 0.62);
-  box-shadow: 0 24px 48px -26px rgb(0 0 0 / 0.95);
+  box-shadow: none;
 }
 
 .cc-portal-characterOption:focus-visible,
@@ -8432,30 +8430,35 @@ a.ffl-ctaSecondary {
 .cc-portal-characterOption[aria-pressed='true'],
 .cc-portal-characterOption:focus-visible {
   transform: translateY(-4px);
-  border-color: #f4d477;
-  background: linear-gradient(155deg, #f5d983, #dcae3f 76%);
+  background: transparent;
   color: #10284d;
-  box-shadow: 0 26px 54px -22px rgb(218 174 67 / 0.7);
+  box-shadow: none;
 }
 
 .cc-portal-characterPortrait {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: flex;
+  width: 100%;
+  aspect-ratio: 1.08 / 1;
   align-items: flex-end;
   justify-content: center;
   overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  background: #3d424d;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
 .cc-portal-characterPortrait::after {
-  content: '';
-  position: absolute;
-  inset: 38% 0 0;
-  background: linear-gradient(180deg, transparent, rgb(4 13 28 / 0.94));
+  content: none;
 }
 
-.cc-portal-characterOption.is-selected .cc-portal-characterPortrait::after {
-  background: linear-gradient(180deg, transparent, rgb(211 160 45 / 0.9));
+.cc-portal-characterOption.is-selected .cc-portal-characterPortrait,
+.cc-portal-characterOption[aria-pressed='true'] .cc-portal-characterPortrait,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPortrait {
+  border-color: #245da8;
+  background: #ffe17d;
+  box-shadow: 0 14px 28px -18px rgb(25 76 145 / 0.72);
 }
 
 .cc-portal-characterPortrait img {
@@ -8463,8 +8466,8 @@ a.ffl-ctaSecondary {
   height: 100%;
   object-fit: contain;
   object-position: center bottom;
-  filter: saturate(0.96) brightness(1.08);
-  transform: scale(1.01);
+  filter: saturate(0.98) brightness(1.04);
+  transform: scale(0.98);
   transition: filter 180ms ease, transform 180ms ease;
 }
 
@@ -8472,14 +8475,14 @@ a.ffl-ctaSecondary {
 .cc-portal-characterOption.is-selected .cc-portal-characterPortrait img,
 .cc-portal-characterOption:focus-visible .cc-portal-characterPortrait img {
   filter: saturate(1.05) brightness(1.18);
-  transform: scale(1.035);
+  transform: scale(1.015);
 }
 
 .cc-portal-characterText {
   position: relative;
   z-index: 1;
-  min-height: 5.6rem;
-  padding: 1rem 2.8rem 1rem 1.1rem;
+  min-height: 7rem;
+  padding: 1rem 0.1rem 0;
 }
 
 .cc-portal-characterText strong,
@@ -8488,31 +8491,30 @@ a.ffl-ctaSecondary {
 }
 
 .cc-portal-characterText strong {
-  font-family: var(--font-display, inherit);
-  font-size: 1.2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: 800;
 }
 
 .cc-portal-characterText small {
-  margin-top: 0.28rem;
-  color: rgb(236 242 252 / 0.76);
-  font-size: 0.78rem;
-  line-height: 1.4;
+  margin-top: 0.5rem;
+  color: #252b35;
+  font-size: 0.84rem;
+  line-height: 1.22;
 }
 
-.cc-portal-characterOption.is-selected .cc-portal-characterText small,
-.cc-portal-characterOption:focus-visible .cc-portal-characterText small {
-  color: rgb(16 40 77 / 0.76);
+.cc-portal-characterText span {
+  display: block;
+  margin-top: 0.5rem;
+  color: #31598d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .cc-portal-characterArrow {
-  position: absolute;
-  right: 1.1rem;
-  bottom: 1.45rem;
-  z-index: 2;
-  color: #f4d477;
-  font-size: 1.25rem;
-  transition: transform 160ms ease;
+  display: none;
 }
 
 .cc-portal-characterOption.is-selected .cc-portal-characterArrow,
@@ -8608,7 +8610,7 @@ a.ffl-ctaSecondary {
   }
 
   .cc-portal-characterOption {
-    min-height: 19rem;
+    min-height: 16rem;
   }
 }
 
@@ -8643,11 +8645,11 @@ a.ffl-ctaSecondary {
   }
 
   .cc-portal-characterOption {
-    min-height: 18.5rem;
+    min-height: auto;
   }
 
   .cc-portal-access-card--selector {
-    background: rgb(7 20 41 / 0.42) !important;
+    background: rgb(255 255 255 / 0.98) !important;
   }
 
   .cc-portal-b4Pass {

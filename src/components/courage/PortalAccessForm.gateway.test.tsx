@@ -52,8 +52,14 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Dr. Victoria: Support the Journey' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Uncle T: Guide the Program' })).toBeInTheDocument();
-    expect(screen.queryByText('Student')).not.toBeInTheDocument();
+    expect(screen.getByText('Student')).toBeInTheDocument();
+    expect(screen.getByText('Parent / Guardian')).toBeInTheDocument();
+    expect(screen.getByText('Facilitator')).toBeInTheDocument();
     expect(screen.getByAltText('Caiden')).toHaveAttribute('src', '/images/characters/HappyCaiden_1@caiden.webp');
+    expect(screen.getByAltText('Dr. Victoria')).toHaveAttribute(
+      'src',
+      '/images/caidenscourage/Character Hub/Gameplay Cards/dr-victoria-guide.webp',
+    );
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Student PIN')).not.toBeInTheDocument();
   });
