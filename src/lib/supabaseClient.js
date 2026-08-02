@@ -2,12 +2,23 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const PRODUCTION_PROJECT_REF = 'bnopaocdqkknjzmmkaen';
+
+function projectRefFromUrl(value) {
+  try {
+    const hostname = new URL(String(value || '')).hostname;
+    return hostname.endsWith('.supabase.co') ? hostname.split('.')[0] : null;
+  } catch {
+    return null;
+  }
+}
 
 const hasSupabaseEnv = Boolean(
   supabaseUrl &&
     supabaseAnonKey &&
     supabaseUrl.startsWith('https://') &&
-    supabaseUrl.includes('.supabase.co'),
+    supabaseUrl.includes('.supabase.co') &&
+    projectRefFromUrl(supabaseUrl) === PRODUCTION_PROJECT_REF,
 );
 
 if (process.env.NODE_ENV === 'development') {

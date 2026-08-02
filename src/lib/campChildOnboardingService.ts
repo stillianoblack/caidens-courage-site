@@ -20,6 +20,10 @@ import {
 import { buildFamilyClaimUrl } from './familyClaimCode';
 import { resolveStudentDisplayNameOrFallback, warnIfStudentMissingDisplayName } from './studentDisplayName';
 import { queueWelcomeEmail } from './welcomeEmailService';
+import {
+  createCampCompatibilityParticipant,
+  hasCampCompatibilitySession,
+} from './campChildSessionApi';
 
 export type CampChildOnboardingInput = {
   childFirstName: string;
@@ -302,6 +306,48 @@ export async function createCampChildWithOptionalParent(
   const parentConnectionStatus: ParentConnectionStatus = hasParentEmail ? 'invited' : 'unclaimed';
 
   try {
+    if (hasCampCompatibilitySession()) {
+      const created = await createCampCompatibilityParticipant({
+        childFirstName,
+        childLastName,
+        childNickname,
+        parentFirstName,
+        parentLastName,
+        parentEmail,
+        parentPhone: input.parentPhone?.trim(),
+        gradeLevel: normalizeGradeLevelStorage(input.gradeLevel)!,
+      });
+      const familyClaimUrl = buildFamilyClaimUrl(created.familyClaimCode);
+      if (hasParentEmail) {
+        void queueWelcomeEmail({
+          parentEmail,
+          parentFirstName,
+          familyOrProgramName: campProgramCode,
+          familyAccessCode: created.familyClaimCode,
+          childName: displayName,
+          loginUrl: familyClaimUrl,
+          templateType: 'camp_parent',
+          programType: 'Camp / Youth Program',
+          recipientRole: 'parent_guardian',
+          deliveryEventKey: `participant:${created.participantId}:parent-welcome`,
+          relatedStudentId: created.participantId,
+          relatedProgramId: campProgramCode,
+        });
+      }
+      return {
+        success: true,
+        participantId: created.participantId,
+        linkId: created.linkId,
+        displayName: created.displayName,
+        studentPin: created.studentPin,
+        familyClaimCode: created.familyClaimCode,
+        familyClaimUrl,
+        parentConnectionStatus: created.parentConnectionStatus,
+        message: hasParentEmail
+          ? `${created.displayName} was added to camp. Parent can claim access later with the family code and ${parentEmail}.`
+          : `${created.displayName} was added. Share the student PIN for game login. Parent can connect later with the family claim link.`,
+      };
+    }
     const participantResult = await insertCampChildParticipant({
       firstName: childFirstName,
       lastName: childLastName,

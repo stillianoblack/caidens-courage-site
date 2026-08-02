@@ -217,7 +217,7 @@ exports.handler = async (event) => {
   const supabase = getServerSupabase();
   console.info('[PILOT_SIGNUP_RUNTIME]', {
     correlationId: correlation,
-    supabaseUrlPresent: Boolean(process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL),
+    supabaseUrlPresent: Boolean(process.env.SUPABASE_URL),
     serviceRolePresent: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
   });
   if (!supabase) {

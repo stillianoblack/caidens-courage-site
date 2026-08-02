@@ -66,7 +66,7 @@ describe('send-welcome-email endpoint', () => {
     jest.clearAllMocks();
     process.env = {
       ...originalEnv,
-      SUPABASE_URL: 'https://example.supabase.co',
+      SUPABASE_URL: 'https://bnopaocdqkknjzmmkaen.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
       RESEND_API_KEY: 'test-resend-key',
     };

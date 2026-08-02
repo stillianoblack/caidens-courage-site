@@ -4,6 +4,7 @@
  */
 
 const webpush = require('web-push');
+const { getProductionSupabase } = require('./supabaseRuntime');
 
 function configureWebPush() {
   const publicKey = process.env.WEB_PUSH_PUBLIC_KEY?.trim();
@@ -18,38 +19,15 @@ function configureWebPush() {
   return { ok: true };
 }
 
-function resolveSupabaseUrl() {
-  return (
-    process.env.SUPABASE_URL ||
-    process.env.REACT_APP_SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    ''
-  ).trim();
-}
-
-function resolveSupabaseServiceKey() {
-  return (
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SERVICE_KEY ||
-    ''
-  ).trim();
-}
-
 function getServiceSupabase() {
-  const url = resolveSupabaseUrl();
-  const serviceKey = resolveSupabaseServiceKey();
-  if (!url || !serviceKey) {
+  const supabase = getProductionSupabase();
+  if (!supabase) {
     console.info('[PUSH_SAVE_ERROR]', {
-      reason: 'supabase_env_missing',
-      hasUrl: Boolean(url),
-      hasServiceKey: Boolean(serviceKey),
+      reason: 'production_supabase_unavailable',
     });
     return null;
   }
-  const { createClient } = require('@supabase/supabase-js');
-  return createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  return supabase;
 }
 
 /**

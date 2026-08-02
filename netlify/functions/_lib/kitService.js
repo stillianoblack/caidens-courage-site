@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const { getProductionSupabase } = require('./supabaseRuntime');
 
 const DEFAULT_KIT_BASE_URL = 'https://api.kit.com';
 const PROVIDER = 'kit';
@@ -35,13 +35,7 @@ function sanitizeKitErrorBody(body) {
 }
 
 function getSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    realtime: { enabled: false },
-  });
+  return getProductionSupabase();
 }
 
 async function writeIntegrationLog(entry) {

@@ -6,6 +6,7 @@ const {
 } = require('./_lib/familyCompatibilityAuth');
 const {
   authorizeCampProgram,
+  createParticipantForCamp,
   participantDirectoryForCamp,
   participantForCamp,
   sessionForCamp,
@@ -418,6 +419,20 @@ exports.handler = async (event) => {
         success: true,
         participants: directory.participants,
       }, id);
+    }
+    if (mode === 'camp' && body.action === 'create-participant') {
+      const created = await createParticipantForCamp(supabase, program.program_code, body);
+      if (!created.participantId) {
+        return json(created.status || 503, { success: false, code: created.code }, id);
+      }
+      console.info('[FAMILY_CHILD_SESSION]', {
+        correlationId: id,
+        action: 'create_participant',
+        result: 'success',
+        programId: suffix(program.id),
+        participantId: suffix(created.participantId),
+      });
+      return json(201, { success: true, participant: created }, id);
     }
     const participantId = safeText(body.participantId, 80);
     if (!UUID.test(participantId)) {

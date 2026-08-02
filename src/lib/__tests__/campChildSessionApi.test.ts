@@ -1,5 +1,6 @@
 import {
   campCompatibilityHeaders,
+  createCampCompatibilityParticipant,
   getCampCompatibilityParticipantDirectory,
   launchCampCompatibilityChildSession,
 } from '../campChildSessionApi';
@@ -93,5 +94,33 @@ describe('camp child session transport', () => {
       '/.netlify/functions/family-child-session',
       expect.objectContaining({ method: 'POST', body: JSON.stringify({ action: 'roster' }) }),
     );
+  });
+
+  test('creates a participant through the authenticated server endpoint', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(response({
+      success: true,
+      participant: {
+        participantId,
+        linkId: '44444444-4444-4444-8444-444444444444',
+        displayName: 'Runtime Test',
+        studentPin: '2468',
+        familyClaimCode: 'CLAIM-ABCDE-FGHJK',
+        parentConnectionStatus: 'unclaimed',
+      },
+    }, 201));
+    const result = await createCampCompatibilityParticipant({
+      childFirstName: 'Runtime',
+      childNickname: 'Runtime Test',
+      gradeLevel: '3',
+    });
+    expect(result.participantId).toBe(participantId);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/family-child-session',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ 'X-Camp-Access-Code': 'FAC-TEST' }),
+      }),
+    );
+    expect(String(fetchMock.mock.calls[0][1]?.body)).toContain('create-participant');
   });
 });

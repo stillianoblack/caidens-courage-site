@@ -1,6 +1,5 @@
 const crypto = require('crypto');
-const WebSocket = require('ws');
-const { createClient } = require('@supabase/supabase-js');
+const { getProductionSupabase } = require('./supabaseRuntime');
 
 const ROLE_PERMISSIONS = {
   internal_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'provider:read', 'provider:write', 'content:read', 'content:write', 'bootstrap:read']),
@@ -33,13 +32,7 @@ function serverFlagEnabled(name) {
 }
 
 function getServerSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    realtime: { transport: WebSocket },
-  });
+  return getProductionSupabase();
 }
 
 function bearerToken(event = {}) {

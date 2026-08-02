@@ -2,6 +2,111 @@ function safeText(value, max = 160) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
+const { generateFamilyClaimCode, generateStudentPin, hashStudentPin } = require('./studentPinCrypto');
+
+const GRADE_BANDS = {
+  kindergarten: 'k-2', '1': 'k-2', '2': 'k-2',
+  '3': '3-5', '4': '3-5', '5': '3-5',
+  '6': '6-8', '7': '6-8', '8': '6-8',
+};
+
+async function createParticipantForCamp(supabase, programCode, input) {
+  const firstName = safeText(input.childFirstName, 80);
+  const lastName = safeText(input.childLastName, 80) || null;
+  const nickname = safeText(input.childNickname, 80) || firstName;
+  const gradeLevel = safeText(input.gradeLevel, 20).toLowerCase();
+  const parentEmail = safeText(input.parentEmail, 200).toLowerCase() || null;
+  const parentFirstName = safeText(input.parentFirstName, 80) || null;
+  const parentLastName = safeText(input.parentLastName, 80) || null;
+  const parentPhone = safeText(input.parentPhone, 40) || null;
+  if (!firstName || (!lastName && !safeText(input.childNickname, 80)) || !GRADE_BANDS[gradeLevel]) {
+    return { status: 400, code: 'validation_error' };
+  }
+  if (parentEmail && (!parentFirstName || !parentLastName)) {
+    return { status: 400, code: 'parent_validation_error' };
+  }
+
+  let duplicateQuery = supabase
+    .from('participants')
+    .select('id')
+    .eq('program_code', programCode)
+    .eq('role', 'student')
+    .ilike('nickname', nickname);
+  if (lastName) duplicateQuery = duplicateQuery.ilike('last_name', lastName);
+  const { data: duplicates, error: duplicateError } = await duplicateQuery.limit(1);
+  if (duplicateError) return { status: 503, code: 'participant_duplicate_check_failed' };
+  if (duplicates?.length) return { status: 409, code: 'participant_already_exists' };
+
+  const pin = generateStudentPin();
+  const { hash, fingerprint } = hashStudentPin(programCode, pin);
+  const claimCode = generateFamilyClaimCode();
+  const now = new Date().toISOString();
+  const participantPayload = {
+    role: 'student',
+    nickname,
+    first_name: firstName,
+    last_name: lastName,
+    program_code: programCode,
+    group_name: null,
+    grade_level: gradeLevel,
+    grade_band: GRADE_BANDS[gradeLevel],
+    student_pin_hash: hash,
+    student_pin_fingerprint: fingerprint,
+    student_pin_reveal_value: pin,
+    student_pin_enabled: true,
+    student_pin_last_rotated_at: now,
+    family_claim_code: claimCode,
+    family_claim_code_created_at: now,
+    parent_connection_status: parentEmail ? 'invited' : 'unclaimed',
+    guardian_email: parentEmail,
+    guardian_phone: parentPhone,
+  };
+  const { data: participant, error: participantError } = await supabase
+    .from('participants')
+    .insert(participantPayload)
+    .select('id')
+    .single();
+  if (participantError || !participant?.id) {
+    return { status: 503, code: 'participant_create_failed' };
+  }
+
+  const { data: link, error: linkError } = await supabase
+    .from('student_family_links')
+    .insert({
+      student_id: participant.id,
+      camp_program_code: programCode,
+      family_program_code: null,
+      parent_first_name: parentFirstName,
+      parent_last_name: parentLastName,
+      parent_email: parentEmail,
+      parent_phone: parentPhone,
+      relationship: 'parent',
+      parent_claimed: false,
+    })
+    .select('id')
+    .single();
+  if (linkError || !link?.id) {
+    const { error: rollbackError } = await supabase
+      .from('participants')
+      .delete()
+      .eq('id', participant.id)
+      .eq('program_code', programCode);
+    return {
+      status: 503,
+      code: rollbackError ? 'participant_create_rollback_failed' : 'family_link_create_failed',
+    };
+  }
+
+  return {
+    participantId: participant.id,
+    linkId: link.id,
+    displayName: nickname,
+    studentPin: pin,
+    familyClaimCode: claimCode,
+    parentConnectionStatus: parentEmail ? 'invited' : 'unclaimed',
+  };
+}
+
 const CAMP_SESSION_SOURCES = new Set(['facilitator_roster_launch']);
 
 async function authorizeCampProgram(event, supabase) {
@@ -117,6 +222,7 @@ async function sessionForCamp(supabase, sessionId, program) {
 module.exports = {
   CAMP_SESSION_SOURCES,
   authorizeCampProgram,
+  createParticipantForCamp,
   participantDirectoryForCamp,
   participantForCamp,
   safeText,
