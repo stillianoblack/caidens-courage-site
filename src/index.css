@@ -8632,6 +8632,11 @@ a.ffl-ctaSecondary {
   margin-top: 0;
 }
 
+.cc-portal-access-card--form .cc-portal-selectedIntro,
+.cc-portal-access-card--form form {
+  animation: none;
+}
+
 .cc-portal-formIntro {
   margin-bottom: 1rem;
   text-align: center;
