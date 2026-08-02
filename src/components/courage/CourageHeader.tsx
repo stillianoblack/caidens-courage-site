@@ -17,7 +17,7 @@ import PilotAccessNavLink from './PilotAccessNavLink';
 
 function navPillClass(isActive: boolean, mobile = false) {
   return [
-    mobile ? 'block w-full rounded-xl px-4 py-3 text-base text-left' : 'rounded-full px-3 py-1.5 text-sm',
+    mobile ? 'block min-h-11 w-full rounded-xl px-4 py-3 text-base text-left' : 'inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm',
     'font-semibold transition-colors',
     isActive ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50',
   ].join(' ');
@@ -127,12 +127,11 @@ type DropdownProps = {
   items: CourageNavLink[];
   isOpen: boolean;
   onToggle: () => void;
-  onOpen?: () => void;
   onClose: () => void;
   active: boolean;
 };
 
-function DesktopDropdown({ label, items, isOpen, onToggle, onOpen, onClose, active }: DropdownProps) {
+function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: DropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -161,7 +160,7 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onOpen, onClose, acti
   const menuId = `courage-${label.toLowerCase().replace(/\s+/g, '-')}-menu`;
 
   return (
-    <div ref={ref} className="relative" onMouseEnter={onOpen} onMouseLeave={onClose}>
+    <div ref={ref} className="relative">
       <button
         ref={triggerRef}
         type="button"
@@ -175,7 +174,7 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onOpen, onClose, acti
         aria-expanded={isOpen}
         aria-controls={menuId}
         aria-haspopup="menu"
-        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+        className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/70 ${
           active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
         }`}
       >
@@ -223,6 +222,7 @@ type KidsMegaDropdownProps = {
 
 function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: KidsMegaDropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const panelStyle = useViewportCenteredPanel(isOpen, ref, panelRef);
@@ -236,13 +236,35 @@ function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: Ki
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={onToggle}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onToggle();
+          }
+        }}
+        aria-haspopup="menu"
         aria-expanded={isOpen}
-        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+        aria-controls="courage-kids-menu"
+        className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/70 ${
           active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
         }`}
       >
@@ -254,6 +276,9 @@ function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: Ki
       {isOpen ? (
         <div
           ref={panelRef}
+          id="courage-kids-menu"
+          role="menu"
+          aria-label="Kids"
           style={panelStyle}
           className="absolute top-full z-50 mt-2 w-[min(880px,calc(100vw-3rem))] max-w-[min(900px,calc(100vw-3rem))] rounded-2xl border border-navy-100 bg-white p-5 shadow-xl"
         >
@@ -306,6 +331,8 @@ function MobileDropdownGroup({
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-controls={`courage-mobile-${label.toLowerCase().replace(/\s+/g, '-')}-menu`}
         className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-semibold text-navy-500 hover:bg-navy-50"
       >
         {label}
@@ -314,7 +341,7 @@ function MobileDropdownGroup({
         </svg>
       </button>
       {isOpen ? (
-        <ul className="mt-1 space-y-1 pl-2">
+        <ul id={`courage-mobile-${label.toLowerCase().replace(/\s+/g, '-')}-menu`} className="mt-1 space-y-1 pl-2" aria-label={label}>
           {items.map((item) => (
             <li key={`${item.href}-${item.label}`}>
               {item.href.startsWith('http') ? (
@@ -337,6 +364,8 @@ function MobileKidsMegaGroup({ mega, isOpen, onToggle, onClose }: Omit<KidsMegaD
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-controls="courage-mobile-kids-menu"
         className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-semibold text-navy-500 hover:bg-navy-50"
       >
         Kids
@@ -345,7 +374,7 @@ function MobileKidsMegaGroup({ mega, isOpen, onToggle, onClose }: Omit<KidsMegaD
         </svg>
       </button>
       {isOpen ? (
-        <div className="mt-1 pl-2">
+        <div id="courage-mobile-kids-menu" className="mt-1 pl-2" aria-label="Kids">
           {mega.intro ? (
             <div className="mb-4 px-4 pb-3">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">{mega.intro.label}</p>
@@ -474,7 +503,6 @@ export default function CourageHeader() {
               items={STORY_DROPDOWN}
               isOpen={storyOpen}
               onToggle={() => { setStoryOpen((open) => !open); setKidsOpen(false); setForOpen(false); }}
-              onOpen={() => { setStoryOpen(true); setKidsOpen(false); setForOpen(false); }}
               onClose={() => setStoryOpen(false)}
               active={storyActive}
             />
@@ -498,7 +526,6 @@ export default function CourageHeader() {
                 setStoryOpen(false);
                 setKidsOpen(false);
               }}
-              onOpen={() => { setForOpen(true); setStoryOpen(false); setKidsOpen(false); }}
               onClose={() => setForOpen(false)}
               active={forActive}
             />
@@ -508,7 +535,7 @@ export default function CourageHeader() {
               interestType="focus_flame_lab"
               clickSource="header_games"
             />
-            <NavLink to={PORTAL_PATH} className="ml-2 inline-flex min-h-11 items-center rounded-full bg-golden-500 px-5 text-sm font-bold text-navy-800 shadow-sm transition hover:bg-golden-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/60">
+            <NavLink to={PORTAL_PATH} className="ml-2 inline-flex min-h-[50px] items-center rounded-full bg-golden-500 px-8 text-base font-bold text-navy-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-golden-400 active:translate-y-0 active:bg-golden-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/70 focus-visible:ring-offset-2">
               Enter the World <span className="ml-2" aria-hidden>→</span>
             </NavLink>
           </nav>
