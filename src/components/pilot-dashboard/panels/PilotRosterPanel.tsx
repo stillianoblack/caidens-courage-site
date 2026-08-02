@@ -440,14 +440,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     return () => setRosterSnapshot(null);
   }, [adventureSnapshot, setRosterSnapshot]);
 
-  const launcherGuideMessage = launcherRow
-    ? launcherRow.moduleCompletions > 0
-      ? `${launcherRow.childName} has completed ${launcherRow.moduleCompletions} ${
-          launcherRow.moduleCompletions === 1 ? 'adventure' : 'adventures'
-        }.`
-      : `${launcherRow.childName} is ready to continue their adventure.`
-    : "Select a student and I’ll help you open their next adventure.";
-
   useEffect(() => {
     if (searchParams.get('addStudent') !== '1') return;
     setAddStudentOpen(true);
@@ -566,11 +558,10 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           <div className="pilot-rosterLauncherGuide">
             <div className="pilot-rosterLauncherPortrait">
               <img
-                src="/images/Choose-Your-Guide/B-4orange.webp"
+                src="/images/Choose-Your-Guide/B-4orange-hover.webp"
                 alt="Facilitator B-4 guide"
               />
             </div>
-            <p className="pilot-rosterGuideMessage" aria-live="polite">{launcherGuideMessage}</p>
           </div>
           <div className="pilot-rosterLauncherCopy">
             <span className="pilot-rosterLauncherEyebrow">STUDENT SESSION LAUNCHER</span>

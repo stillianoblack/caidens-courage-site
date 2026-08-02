@@ -3502,9 +3502,15 @@ a.pilot-overviewMiniCard:hover {
   display: grid; place-items: center; width: 6.5rem; height: 6.5rem; padding: .55rem;
   border: 3px solid rgba(255,255,255,.82); border-radius: 50%; background: rgba(255,255,255,.14);
   box-shadow: 0 0 0 7px rgba(246,196,83,.15), 0 12px 24px rgba(13,23,50,.28);
+  overflow: hidden;
 }
-.pilot-rosterLauncherPortrait img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
-.pilot-rosterGuideMessage { max-width: 13rem; text-align: center; font-weight: 700; }
+.pilot-rosterLauncherPortrait img {
+  width: 118%;
+  height: 118%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center;
+}
 .pilot-rosterLauncherEyebrow { font-size: .67rem; font-weight: 900; letter-spacing: .15em; color: #ffe199; }
 .pilot-rosterLauncherControls { display: grid; gap: .65rem; }
 
