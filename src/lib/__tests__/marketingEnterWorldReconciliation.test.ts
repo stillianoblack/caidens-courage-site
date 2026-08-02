@@ -54,9 +54,9 @@ describe('marketing and Enter the World reconciliation', () => {
     expect(portalForm).toContain("name: 'Caiden'");
     expect(portalForm).toContain("name: 'Dr. Victoria'");
     expect(portalForm).toContain("name: 'Uncle T'");
-    expect(portalForm).toContain("title: 'Continue with Caiden'");
-    expect(portalForm).toContain("title: 'Continue with Dr. Victoria'");
-    expect(portalForm).toContain("title: 'Continue with Uncle T'");
+    expect(portalForm).toContain("title: 'Continue Students'");
+    expect(portalForm).toContain("title: 'Continue as Parent / Guardian'");
+    expect(portalForm).toContain("title: 'Continue as Facilitator'");
     expect(portalForm).toContain('onSubmit={onSubmit}');
     expect(portalForm).toContain('aria-pressed={pendingIntent === item.id}');
     expect(styles).toContain(".cc-portal-characterOption[aria-pressed='true']");

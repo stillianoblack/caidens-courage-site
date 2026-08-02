@@ -65,6 +65,7 @@ export default function PortalHero({
             <h1 className="cc-section-hero-title font-display font-extrabold leading-[1.06] text-white">
               Choose your guide.
             </h1>
+            <p className="cc-portal-hero-atmosphere">Your adventure begins here.</p>
           </div>
 
           <div className="cc-portal-hero-access mx-auto mt-7 w-full min-w-0 max-w-[61rem]">
