@@ -8482,7 +8482,7 @@ a.ffl-ctaSecondary {
   transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
 }
 
-.cc-portal-characterImage--hover {
+.cc-portal-characterPortrait .cc-portal-characterImage--hover {
   inset: 0;
   width: 100%;
   height: 100%;
