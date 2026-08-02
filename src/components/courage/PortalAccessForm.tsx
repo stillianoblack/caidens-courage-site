@@ -106,6 +106,7 @@ export default function PortalAccessForm({
     imageAlt: string;
     selectedImageSrc?: string;
   };
+  const guideDisplayOrder: PortalLoginIntent[] = ['student', 'facilitator', 'parent'];
   const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string; guide: CharacterGuide }> = {
     student: {
       title: 'Continue with Caiden',
@@ -115,8 +116,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Caiden',
         label: 'Continue the Adventure',
-        pillLabel: 'Continue Your Adventure',
-        description: 'Continue your quests, games, and weekly adventures.',
+        pillLabel: 'Students',
+        description: 'Continue Your Quests, Games, And Weekly Adventures.',
         imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
         imageAlt: 'Student B-4 guide',
@@ -130,10 +131,10 @@ export default function PortalAccessForm({
       guide: {
         name: 'Dr. Victoria',
         label: 'Support the Journey',
-        pillLabel: 'Help Young Heroes',
-        description: 'Access family tools and view your child’s experience.',
-        imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
-        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp',
+        pillLabel: 'Parents / Guardians',
+        description: 'Access Family Tools And View Your Child’s Experience.',
+        imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp',
         imageAlt: 'Parent and guardian B-4 guide',
       },
     },
@@ -145,10 +146,10 @@ export default function PortalAccessForm({
       guide: {
         name: 'Uncle T',
         label: 'Guide the Program',
-        pillLabel: 'Teach the Academy',
-        description: 'Manage students, activities, and program progress.',
-        imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
-        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp',
+        pillLabel: 'Facilitator',
+        description: 'Students, Activities, And Program Progress.',
+        imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp',
         imageAlt: 'Facilitator B-4 guide',
       },
     },
@@ -203,7 +204,14 @@ export default function PortalAccessForm({
         <div className="cc-portal-gateway" data-testid="portal-character-gateway">
           {cardAudienceLabel ? <p className="cc-portal-gatewayEyebrow">{cardAudienceLabel}</p> : null}
           <div className="cc-portal-characterOptions" role="group" aria-label="Choose your guide">
-            {PORTAL_LOGIN_INTENTS.map((item) => (
+            {guideDisplayOrder.map((intentId) => {
+              const item = PORTAL_LOGIN_INTENTS.find((candidate) => candidate.id === intentId)!;
+              const hoverLabel = intentId === 'student'
+                ? 'Continue Your Adventure'
+                : intentId === 'facilitator'
+                  ? 'Teach the Academy'
+                  : 'Help Young Heroes';
+              return (
               <button
                 key={item.id}
                 type="button"
@@ -231,7 +239,8 @@ export default function PortalAccessForm({
                     aria-hidden="true"
                   />
                   <span className={`cc-portal-characterPill cc-portal-characterPill--${item.id}`}>
-                    {roleCopy[item.id].guide.pillLabel}
+                    <span className="cc-portal-characterPillDefault">{roleCopy[item.id].guide.pillLabel}</span>
+                    <span className="cc-portal-characterPillHover">{hoverLabel}</span>
                   </span>
                 </span>
                 <span className="cc-portal-characterText">
@@ -239,7 +248,8 @@ export default function PortalAccessForm({
                 </span>
                 <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : null}

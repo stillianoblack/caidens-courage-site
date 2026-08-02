@@ -8450,11 +8450,11 @@ a.ffl-ctaSecondary {
   transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
-.cc-portal-characterPortrait--parent {
+.cc-portal-characterPortrait--facilitator {
   background: #ffe27a;
 }
 
-.cc-portal-characterPortrait--facilitator {
+.cc-portal-characterPortrait--parent {
   background: #c8eadb;
 }
 
@@ -8510,12 +8510,28 @@ a.ffl-ctaSecondary {
   box-shadow: 0 5px 14px -8px rgb(0 0 0 / 0.55);
 }
 
-.cc-portal-characterPill--parent {
+.cc-portal-characterPill--facilitator {
   background: #ee8c2d;
 }
 
-.cc-portal-characterPill--facilitator {
+.cc-portal-characterPill--parent {
   background: #38b97d;
+}
+
+.cc-portal-characterPillHover {
+  display: none;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterPillDefault,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPillDefault,
+.cc-portal-characterOption.is-selected .cc-portal-characterPillDefault {
+  display: none;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterPillHover,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPillHover,
+.cc-portal-characterOption.is-selected .cc-portal-characterPillHover {
+  display: inline;
 }
 
 .cc-portal-characterOption:hover .cc-portal-characterImage--default,
@@ -8581,7 +8597,23 @@ a.ffl-ctaSecondary {
 }
 
 .cc-portal-characterArrow {
-  display: none;
+  position: absolute;
+  right: 0.85rem;
+  bottom: 5.25rem;
+  z-index: 4;
+  display: block;
+  color: #ffd34d;
+  font-size: 1.15rem;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterArrow,
+.cc-portal-characterOption:focus-visible .cc-portal-characterArrow,
+.cc-portal-characterOption.is-selected .cc-portal-characterArrow {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .cc-portal-characterOption.is-selected .cc-portal-characterArrow,

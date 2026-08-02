@@ -52,9 +52,20 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Dr. Victoria: Support the Journey' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Uncle T: Guide the Program' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button').slice(0, 3).map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Caiden: Continue the Adventure',
+      'Uncle T: Guide the Program',
+      'Dr. Victoria: Support the Journey',
+    ]);
+    expect(screen.getByText('Students')).toBeInTheDocument();
+    expect(screen.getByText('Facilitator')).toBeInTheDocument();
+    expect(screen.getByText('Parents / Guardians')).toBeInTheDocument();
     expect(screen.getByText('Continue Your Adventure')).toBeInTheDocument();
     expect(screen.getByText('Help Young Heroes')).toBeInTheDocument();
     expect(screen.getByText('Teach the Academy')).toBeInTheDocument();
+    expect(screen.getByText('Continue Your Quests, Games, And Weekly Adventures.')).toBeInTheDocument();
+    expect(screen.getByText('Students, Activities, And Program Progress.')).toBeInTheDocument();
+    expect(screen.getByText('Access Family Tools And View Your Child’s Experience.')).toBeInTheDocument();
     expect(screen.queryByText('For Students')).not.toBeInTheDocument();
     expect(screen.queryByText('For Parents / Guardians')).not.toBeInTheDocument();
     expect(screen.queryByText('For Facilitator / Teachers')).not.toBeInTheDocument();
@@ -64,14 +75,15 @@ describe('Enter the World character gateway', () => {
     );
     expect(screen.getByAltText('Parent and guardian B-4 guide')).toHaveAttribute(
       'src',
-      '/images/Choose-Your-Guide/B-4orange.webp',
+      '/images/Choose-Your-Guide/b-4facilitator.webp',
     );
-    expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/b-4facilitator.webp');
+    expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/B-4orange.webp');
     expect(document.querySelectorAll('.cc-portal-characterImage--hover')).toHaveLength(3);
-    expect(document.querySelector('.cc-portal-characterImage--hover')).toHaveAttribute(
-      'src',
-      '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
-    );
+    expect(Array.from(document.querySelectorAll<HTMLImageElement>('.cc-portal-characterImage--hover')).map((image) => image.src)).toEqual([
+      expect.stringContaining('/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp'),
+      expect.stringContaining('/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp'),
+      expect.stringContaining('/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp'),
+    ]);
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Student PIN')).not.toBeInTheDocument();
   });
