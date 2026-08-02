@@ -100,6 +100,7 @@ export default function PortalAccessForm({
     name: string;
     label: string;
     audience: string;
+    pillLabel: string;
     footerLabel: string;
     description: string;
     imageSrc: string;
@@ -117,10 +118,11 @@ export default function PortalAccessForm({
         name: 'Caiden',
         label: 'Continue the Adventure',
         audience: 'Continue Your Adventure',
+        pillLabel: 'Students',
         footerLabel: 'For Students',
         description: 'Continue your quests, games, and weekly adventures.',
         imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
-        hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
         imageAlt: 'Student B-4 guide',
       },
     },
@@ -133,10 +135,11 @@ export default function PortalAccessForm({
         name: 'Dr. Victoria',
         label: 'Support the Journey',
         audience: 'Help Young Heroes',
+        pillLabel: 'Parents / Guardians',
         footerLabel: 'For Parents / Guardians',
         description: 'Access family tools and view your child’s experience.',
         imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
-        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp',
         imageAlt: 'Parent and guardian B-4 guide',
       },
     },
@@ -149,10 +152,11 @@ export default function PortalAccessForm({
         name: 'Uncle T',
         label: 'Guide the Program',
         audience: 'Teach the Academy',
+        pillLabel: 'Facilitators / Teachers',
         footerLabel: 'For Facilitator / Teachers',
         description: 'Manage students, activities, and program progress.',
         imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
-        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp',
         imageAlt: 'Facilitator B-4 guide',
       },
     },
@@ -234,6 +238,9 @@ export default function PortalAccessForm({
                     loading="lazy"
                     aria-hidden="true"
                   />
+                  <span className={`cc-portal-characterPill cc-portal-characterPill--${item.id}`}>
+                    {roleCopy[item.id].guide.pillLabel}
+                  </span>
                 </span>
                 <span className="cc-portal-characterText">
                   <strong>{roleCopy[item.id].guide.audience}</strong>

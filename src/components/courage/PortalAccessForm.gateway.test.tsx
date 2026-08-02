@@ -58,6 +58,9 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByText('For Students')).toBeInTheDocument();
     expect(screen.getByText('For Parents / Guardians')).toBeInTheDocument();
     expect(screen.getByText('For Facilitator / Teachers')).toBeInTheDocument();
+    expect(screen.getByText('Students')).toBeInTheDocument();
+    expect(screen.getByText('Parents / Guardians')).toBeInTheDocument();
+    expect(screen.getByText('Facilitators / Teachers')).toBeInTheDocument();
     expect(screen.getByAltText('Student B-4 guide')).toHaveAttribute(
       'src',
       '/images/Choose-Your-Guide/B-4student.webp',
@@ -68,6 +71,10 @@ describe('Enter the World character gateway', () => {
     );
     expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/b-4facilitator.webp');
     expect(document.querySelectorAll('.cc-portal-characterImage--hover')).toHaveLength(3);
+    expect(document.querySelector('.cc-portal-characterImage--hover')).toHaveAttribute(
+      'src',
+      '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
+    );
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Student PIN')).not.toBeInTheDocument();
   });
