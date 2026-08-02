@@ -8,10 +8,11 @@ import {
   KIDS_MEGA_DROPDOWN,
   KIDS_NAV_PATHS,
   PORTAL_PATH,
+  STORY_DROPDOWN,
+  STORY_NAV_PATHS,
   type CourageKidsMegaNav,
   type CourageNavLink,
 } from '../../config/courageNav';
-import { PORTAL_DASHBOARD_PATH } from '../../config/portalAccess';
 import PilotAccessNavLink from './PilotAccessNavLink';
 
 function navPillClass(isActive: boolean, mobile = false) {
@@ -126,12 +127,14 @@ type DropdownProps = {
   items: CourageNavLink[];
   isOpen: boolean;
   onToggle: () => void;
+  onOpen?: () => void;
   onClose: () => void;
   active: boolean;
 };
 
-function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: DropdownProps) {
+function DesktopDropdown({ label, items, isOpen, onToggle, onOpen, onClose, active }: DropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -142,12 +145,36 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: Dr
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
+  const menuId = `courage-${label.toLowerCase().replace(/\s+/g, '-')}-menu`;
+
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" onMouseEnter={onOpen} onMouseLeave={onClose}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={onToggle}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onToggle();
+          }
+        }}
         aria-expanded={isOpen}
+        aria-controls={menuId}
+        aria-haspopup="menu"
         className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
           active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
         }`}
@@ -158,21 +185,32 @@ function DesktopDropdown({ label, items, isOpen, onToggle, onClose, active }: Dr
         </svg>
       </button>
       {isOpen ? (
-        <div className="absolute left-0 top-full z-50 mt-2 min-w-[220px] max-w-[min(100vw-2rem,280px)] rounded-2xl border border-navy-100 bg-white py-2 shadow-xl">
+        <div id={menuId} role="menu" className="absolute left-0 top-full z-50 mt-2 min-w-[290px] max-w-[min(100vw-2rem,340px)] rounded-2xl border border-navy-100 bg-white py-2 shadow-xl">
           {items.map((item) => (
-            <Link
-              key={`${item.href}-${item.label}`}
-              to={item.href}
-              onClick={onClose}
-              className="block px-4 py-2.5 text-sm font-semibold text-navy-600 transition-colors hover:bg-navy-50 hover:text-navy-800"
-            >
-              {item.label}
-            </Link>
+            <DropdownMenuItem key={`${item.href}-${item.label}`} item={item} onClose={onClose} />
           ))}
         </div>
       ) : null}
     </div>
   );
+}
+
+function DropdownMenuItem({ item, onClose }: { item: CourageNavLink; onClose: () => void }) {
+  const content = <>{item.icon ? <NavItemIcon name={item.icon} /> : null}<span><span className="block text-sm font-semibold">{item.label}</span>{item.description ? <span className="mt-0.5 block text-xs font-normal leading-snug text-navy-400">{item.description}</span> : null}</span></>;
+  const className = 'group flex min-h-12 items-start gap-3 px-4 py-3 text-navy-600 transition-colors hover:bg-navy-50 hover:text-navy-800 focus:bg-navy-50 focus:outline-none';
+  return item.href.startsWith('http')
+    ? <a href={item.href} onClick={onClose} role="menuitem" className={className}>{content}</a>
+    : <Link to={item.href} onClick={onClose} role="menuitem" className={className}>{content}</Link>;
+}
+
+function NavItemIcon({ name }: { name: NonNullable<CourageNavLink['icon']> }) {
+  const paths = {
+    story: <path d="M5 4.5h5.2c1 0 1.8.8 1.8 1.8V20c0-1.1-.9-2-2-2H5V4.5Zm14 0h-5.2c-1 0-1.8.8-1.8 1.8V20c0-1.1.9-2 2-2h5V4.5Z" />,
+    characters: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.5-4 2.8-6 7-6s6.5 2 7 6" /></>,
+    world: <><circle cx="12" cy="12" r="8" /><path d="M4 12h16M12 4c2.7 2.5 4 5.2 4 8s-1.3 5.5-4 8c-2.7-2.5-4-5.2-4-8s1.3-5.5 4-8Z" /></>,
+    vale: <><path d="M12 3v18M5 9l7-6 7 6M7 21v-8h10v8" /><path d="M3 21h18" /></>,
+  };
+  return <svg className="mt-0.5 h-5 w-5 shrink-0 text-golden-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{paths[name]}</svg>;
 }
 
 type KidsMegaDropdownProps = {
@@ -279,13 +317,11 @@ function MobileDropdownGroup({
         <ul className="mt-1 space-y-1 pl-2">
           {items.map((item) => (
             <li key={`${item.href}-${item.label}`}>
-              <Link
-                to={item.href}
-                onClick={onClose}
-                className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50"
-              >
-                {item.label}
-              </Link>
+              {item.href.startsWith('http') ? (
+                <a href={item.href} onClick={onClose} className="block min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50">{item.label}</a>
+              ) : (
+                <Link to={item.href} onClick={onClose} className="block min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold text-navy-600 hover:bg-navy-50">{item.label}</Link>
+              )}
             </li>
           ))}
         </ul>
@@ -349,17 +385,21 @@ export default function CourageHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [kidsOpen, setKidsOpen] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
   const [forOpen, setForOpen] = useState(false);
   const [mobileKidsOpen, setMobileKidsOpen] = useState(false);
+  const [mobileStoryOpen, setMobileStoryOpen] = useState(false);
   const [mobileForOpen, setMobileForOpen] = useState(false);
 
   const closeAllDropdowns = () => {
     setKidsOpen(false);
+    setStoryOpen(false);
     setForOpen(false);
   };
 
   const closeAllMobileDropdowns = () => {
     setMobileKidsOpen(false);
+    setMobileStoryOpen(false);
     setMobileForOpen(false);
   };
 
@@ -386,6 +426,7 @@ export default function CourageHeader() {
 
   const closeMenu = () => setMenuOpen(false);
   const kidsFlatLinks = flattenKidsMegaNav(KIDS_MEGA_DROPDOWN);
+  const storyActive = isNavPathActive(STORY_NAV_PATHS, location.pathname);
   const kidsActive =
     isNavPathActive(KIDS_NAV_PATHS, location.pathname) ||
     isDropdownActive(kidsFlatLinks, location.pathname, location.hash, location.search);
@@ -399,9 +440,6 @@ export default function CourageHeader() {
       ),
     ),
   );
-  const portalActive =
-    location.pathname === PORTAL_PATH || location.pathname.startsWith(PORTAL_DASHBOARD_PATH);
-
   return (
     <header
       className={[
@@ -431,11 +469,21 @@ export default function CourageHeader() {
             <NavLink to="/" end className={({ isActive }) => navPillClass(isActive)}>
               Home
             </NavLink>
+            <DesktopDropdown
+              label="The Story"
+              items={STORY_DROPDOWN}
+              isOpen={storyOpen}
+              onToggle={() => { setStoryOpen((open) => !open); setKidsOpen(false); setForOpen(false); }}
+              onOpen={() => { setStoryOpen(true); setKidsOpen(false); setForOpen(false); }}
+              onClose={() => setStoryOpen(false)}
+              active={storyActive}
+            />
             <DesktopKidsMegaDropdown
               mega={KIDS_MEGA_DROPDOWN}
               isOpen={kidsOpen}
               onToggle={() => {
                 setKidsOpen((o) => !o);
+                setStoryOpen(false);
                 setForOpen(false);
               }}
               onClose={() => setKidsOpen(false)}
@@ -447,8 +495,10 @@ export default function CourageHeader() {
               isOpen={forOpen}
               onToggle={() => {
                 setForOpen((o) => !o);
+                setStoryOpen(false);
                 setKidsOpen(false);
               }}
+              onOpen={() => { setForOpen(true); setStoryOpen(false); setKidsOpen(false); }}
               onClose={() => setForOpen(false)}
               active={forActive}
             />
@@ -458,8 +508,8 @@ export default function CourageHeader() {
               interestType="focus_flame_lab"
               clickSource="header_games"
             />
-            <NavLink to={PORTAL_PATH} className={({ isActive }) => navPillClass(isActive || portalActive)}>
-              Portal
+            <NavLink to={PORTAL_PATH} className="ml-2 inline-flex min-h-11 items-center rounded-full bg-golden-500 px-5 text-sm font-bold text-navy-800 shadow-sm transition hover:bg-golden-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/60">
+              Enter the World <span className="ml-2" aria-hidden>→</span>
             </NavLink>
           </nav>
 
@@ -503,11 +553,19 @@ export default function CourageHeader() {
                   Home
                 </NavLink>
               </li>
+              <MobileDropdownGroup
+                label="The Story"
+                items={STORY_DROPDOWN}
+                isOpen={mobileStoryOpen}
+                onToggle={() => { setMobileStoryOpen((open) => !open); setMobileKidsOpen(false); setMobileForOpen(false); }}
+                onClose={closeMenu}
+              />
               <MobileKidsMegaGroup
                 mega={KIDS_MEGA_DROPDOWN}
                 isOpen={mobileKidsOpen}
                 onToggle={() => {
                   setMobileKidsOpen((o) => !o);
+                  setMobileStoryOpen(false);
                   setMobileForOpen(false);
                 }}
                 onClose={closeMenu}
@@ -518,6 +576,7 @@ export default function CourageHeader() {
                 isOpen={mobileForOpen}
                 onToggle={() => {
                   setMobileForOpen((o) => !o);
+                  setMobileStoryOpen(false);
                   setMobileKidsOpen(false);
                 }}
                 onClose={closeMenu}
@@ -534,10 +593,10 @@ export default function CourageHeader() {
               <li>
                 <NavLink
                   to={PORTAL_PATH}
-                  className={({ isActive }) => navPillClass(isActive || portalActive, true)}
+                  className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-golden-500 px-4 py-3 text-base font-bold text-navy-800"
                   onClick={closeMenu}
                 >
-                  Portal
+                  Enter the World <span className="ml-2" aria-hidden>→</span>
                 </NavLink>
               </li>
             </ul>

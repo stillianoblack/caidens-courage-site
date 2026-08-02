@@ -70,6 +70,7 @@ import {
   ResourcesPage,
   SchoolsPage,
   StoryHubPage,
+  TheStoryPage,
   StoryModePage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
@@ -91,6 +92,7 @@ import {
   STORY_CHARACTERS_PATH,
   STORY_MODE_PATH,
   STORY_PATH,
+  THE_STORY_PATH,
   B4_GUIDE_PATH,
   B4_BASELINE_CHECK_PATH,
   B4_RESULTS_ADMIN_PATH,
@@ -260,6 +262,7 @@ const appRouteChildren = (
 
       {/* Story world */}
       <Route path={STORY_PATH} element={<StoryHubPage />} />
+      <Route path={THE_STORY_PATH} element={<TheStoryPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
       <Route path={STORY_MODE_PATH} element={<StoryModePage />} />
