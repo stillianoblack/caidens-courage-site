@@ -52,9 +52,12 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' })).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Dr. Victoria: Support the Journey' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Uncle T: Guide the Program' })).toBeInTheDocument();
-    expect(screen.getByText('Student')).toBeInTheDocument();
-    expect(screen.getByText('Parent / Guardian')).toBeInTheDocument();
-    expect(screen.getByText('Facilitator')).toBeInTheDocument();
+    expect(screen.getByText('Continue Your Adventure')).toBeInTheDocument();
+    expect(screen.getByText('Help Young Heroes')).toBeInTheDocument();
+    expect(screen.getByText('Teach the Academy')).toBeInTheDocument();
+    expect(screen.getByText('For Students')).toBeInTheDocument();
+    expect(screen.getByText('For Parents / Guardians')).toBeInTheDocument();
+    expect(screen.getByText('For Facilitator / Teachers')).toBeInTheDocument();
     expect(screen.getByAltText('Student B-4 guide')).toHaveAttribute(
       'src',
       '/images/Choose-Your-Guide/B-4student.webp',

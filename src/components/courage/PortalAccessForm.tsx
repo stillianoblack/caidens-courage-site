@@ -100,6 +100,7 @@ export default function PortalAccessForm({
     name: string;
     label: string;
     audience: string;
+    footerLabel: string;
     description: string;
     imageSrc: string;
     hoverImageSrc: string;
@@ -115,7 +116,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Caiden',
         label: 'Continue the Adventure',
-        audience: 'Student',
+        audience: 'Continue Your Adventure',
+        footerLabel: 'For Students',
         description: 'Continue your quests, games, and weekly adventures.',
         imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover.webp',
@@ -130,7 +132,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Dr. Victoria',
         label: 'Support the Journey',
-        audience: 'Parent / Guardian',
+        audience: 'Help Young Heroes',
+        footerLabel: 'For Parents / Guardians',
         description: 'Access family tools and view your child’s experience.',
         imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover.webp',
@@ -145,7 +148,8 @@ export default function PortalAccessForm({
       guide: {
         name: 'Uncle T',
         label: 'Guide the Program',
-        audience: 'Facilitator',
+        audience: 'Teach the Academy',
+        footerLabel: 'For Facilitator / Teachers',
         description: 'Manage students, activities, and program progress.',
         imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover.webp',
@@ -234,7 +238,7 @@ export default function PortalAccessForm({
                 <span className="cc-portal-characterText">
                   <strong>{roleCopy[item.id].guide.audience}</strong>
                   <small>{roleCopy[item.id].guide.description}</small>
-                  <span>{roleCopy[item.id].guide.name}</span>
+                  <span>{roleCopy[item.id].guide.footerLabel}</span>
                 </span>
                 <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>

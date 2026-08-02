@@ -8464,13 +8464,13 @@ a.ffl-ctaSecondary {
 
 .cc-portal-characterPortrait img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center;
   filter: saturate(0.98) brightness(1.04);
-  transform: scale(0.98);
+  transform: scale(0.9);
   transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
 }
 
@@ -8494,7 +8494,7 @@ a.ffl-ctaSecondary {
 .cc-portal-characterOption.is-selected .cc-portal-characterPortrait img,
 .cc-portal-characterOption:focus-visible .cc-portal-characterPortrait img {
   filter: saturate(1.05) brightness(1.18);
-  transform: scale(1.015);
+  transform: scale(0.94);
 }
 
 .cc-portal-characterText {
