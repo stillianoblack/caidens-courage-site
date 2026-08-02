@@ -109,7 +109,7 @@ export default function PortalAccessForm({
   const guideDisplayOrder: PortalLoginIntent[] = ['student', 'facilitator', 'parent'];
   const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string; guide: CharacterGuide }> = {
     student: {
-      title: 'Continue with Caiden',
+      title: 'Continue Students',
       description: 'Enter your access information to continue your quests and adventures.',
       optionDescription: 'Continue the Adventure',
       cta: 'Enter the World',
@@ -124,7 +124,7 @@ export default function PortalAccessForm({
       },
     },
     parent: {
-      title: 'Continue with Dr. Victoria',
+      title: 'Continue as Parent / Guardian',
       description: 'Access the connected family experience and support your child’s journey.',
       optionDescription: 'Support the Journey',
       cta: 'Continue to Family Portal',
@@ -139,7 +139,7 @@ export default function PortalAccessForm({
       },
     },
     facilitator: {
-      title: 'Continue with Uncle T',
+      title: 'Continue as Facilitator',
       description: 'Access your program tools, students, and learning resources.',
       optionDescription: 'Guide the Program',
       cta: 'Open Facilitator Portal',
@@ -246,7 +246,6 @@ export default function PortalAccessForm({
                 <span className="cc-portal-characterText">
                   <small>{roleCopy[item.id].guide.description}</small>
                 </span>
-                <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>
               );
             })}
@@ -271,19 +270,12 @@ export default function PortalAccessForm({
           </button>
           <img
             className="cc-portal-guideIntroImage"
-            src={roleCopy[selectedIntent].guide.selectedImageSrc ?? roleCopy[selectedIntent].guide.imageSrc}
+            src={roleCopy[selectedIntent].guide.selectedImageSrc ?? roleCopy[selectedIntent].guide.hoverImageSrc}
             alt=""
-            width="72"
-            height="72"
+            width="320"
+            height="360"
           />
-          <h2>{hasRememberedProgram ? 'Welcome back' : roleCopy[selectedIntent].title}</h2>
-          <p>
-            {hasRememberedProgram
-              ? selectedIntent === 'student'
-                ? 'Enter your student PIN to continue.'
-                : 'Enter your email to continue.'
-              : roleCopy[selectedIntent].description}
-          </p>
+          <p className="cc-portal-guideIntroCaption">{roleCopy[selectedIntent].guide.description}</p>
         </div>
       ) : null}
 
@@ -312,6 +304,18 @@ export default function PortalAccessForm({
           noValidate
           aria-describedby={error ? errorId : undefined}
         >
+          {isHero && selectedIntent ? (
+            <div className="cc-portal-formIntro">
+              <h2>{hasRememberedProgram ? 'Welcome back' : roleCopy[selectedIntent].title}</h2>
+              <p>
+                {hasRememberedProgram
+                  ? selectedIntent === 'student'
+                    ? 'Enter your student PIN to continue.'
+                    : 'Enter your email to continue.'
+                  : roleCopy[selectedIntent].description}
+              </p>
+            </div>
+          ) : null}
           {!hideAccessCodeField ? (
             <div>
               <label

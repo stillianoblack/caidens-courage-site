@@ -89,9 +89,9 @@ describe('Enter the World character gateway', () => {
   });
 
   it.each([
-    ['Caiden: Continue the Adventure', 'Continue with Caiden', 'Student PIN', 'Enter the World', 'student'],
-    ['Dr. Victoria: Support the Journey', 'Continue with Dr. Victoria', 'Parent email or student PIN', 'Continue to Family Portal', 'parent'],
-    ['Uncle T: Guide the Program', 'Continue with Uncle T', 'Facilitator email', 'Open Facilitator Portal', 'facilitator'],
+    ['Caiden: Continue the Adventure', 'Continue Students', 'Student PIN', 'Enter the World', 'student'],
+    ['Dr. Victoria: Support the Journey', 'Continue as Parent / Guardian', 'Parent email or student PIN', 'Continue to Family Portal', 'parent'],
+    ['Uncle T: Guide the Program', 'Continue as Facilitator', 'Facilitator email', 'Open Facilitator Portal', 'facilitator'],
   ])('maps %s to the existing form in the same card', async (guide, heading, credential, cta, intent) => {
     const props = renderGateway();
 
