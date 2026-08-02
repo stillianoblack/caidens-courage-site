@@ -8401,7 +8401,7 @@ a.ffl-ctaSecondary {
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 18rem;
+  min-height: 24rem;
   flex-direction: column;
   justify-content: flex-start;
   width: 100%;
@@ -8440,14 +8440,22 @@ a.ffl-ctaSecondary {
   position: relative;
   display: flex;
   width: 100%;
-  aspect-ratio: 1.08 / 1;
+  aspect-ratio: 0.86 / 1;
   align-items: flex-end;
   justify-content: center;
   overflow: hidden;
   border: 2px solid transparent;
   border-radius: 1rem;
-  background: #3d424d;
+  background: #bdcce7;
   transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.cc-portal-characterPortrait--parent {
+  background: #ffe27a;
+}
+
+.cc-portal-characterPortrait--facilitator {
+  background: #c8eadb;
 }
 
 .cc-portal-characterPortrait::after {
@@ -8495,7 +8503,7 @@ a.ffl-ctaSecondary {
   border-radius: 999px;
   background: #36588d;
   color: #fff;
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1;
@@ -8540,7 +8548,7 @@ a.ffl-ctaSecondary {
 .cc-portal-characterText {
   position: relative;
   z-index: 1;
-  min-height: 7rem;
+  min-height: 4.5rem;
   padding: 1rem 0.1rem 0;
 }
 
@@ -8556,7 +8564,7 @@ a.ffl-ctaSecondary {
 }
 
 .cc-portal-characterText small {
-  margin-top: 0.5rem;
+  margin-top: 0;
   color: #252b35;
   font-size: 0.84rem;
   line-height: 1.22;
@@ -8669,7 +8677,7 @@ a.ffl-ctaSecondary {
   }
 
   .cc-portal-characterOption {
-    min-height: 16rem;
+    min-height: 19rem;
   }
 }
 

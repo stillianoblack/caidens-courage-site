@@ -99,9 +99,7 @@ export default function PortalAccessForm({
   type CharacterGuide = {
     name: string;
     label: string;
-    audience: string;
     pillLabel: string;
-    footerLabel: string;
     description: string;
     imageSrc: string;
     hoverImageSrc: string;
@@ -117,9 +115,7 @@ export default function PortalAccessForm({
       guide: {
         name: 'Caiden',
         label: 'Continue the Adventure',
-        audience: 'Continue Your Adventure',
-        pillLabel: 'Students',
-        footerLabel: 'For Students',
+        pillLabel: 'Continue Your Adventure',
         description: 'Continue your quests, games, and weekly adventures.',
         imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
@@ -134,9 +130,7 @@ export default function PortalAccessForm({
       guide: {
         name: 'Dr. Victoria',
         label: 'Support the Journey',
-        audience: 'Help Young Heroes',
-        pillLabel: 'Parents / Guardians',
-        footerLabel: 'For Parents / Guardians',
+        pillLabel: 'Help Young Heroes',
         description: 'Access family tools and view your child’s experience.',
         imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp',
@@ -151,9 +145,7 @@ export default function PortalAccessForm({
       guide: {
         name: 'Uncle T',
         label: 'Guide the Program',
-        audience: 'Teach the Academy',
-        pillLabel: 'Facilitators / Teachers',
-        footerLabel: 'For Facilitator / Teachers',
+        pillLabel: 'Teach the Academy',
         description: 'Manage students, activities, and program progress.',
         imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
         hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp',
@@ -220,7 +212,7 @@ export default function PortalAccessForm({
                 aria-label={`${roleCopy[item.id].guide.name}: ${roleCopy[item.id].guide.label}`}
                 onClick={() => chooseGuide(item.id)}
               >
-                <span className="cc-portal-characterPortrait">
+                <span className={`cc-portal-characterPortrait cc-portal-characterPortrait--${item.id}`}>
                   <img
                     className="cc-portal-characterImage cc-portal-characterImage--default"
                     src={roleCopy[item.id].guide.imageSrc}
@@ -243,9 +235,7 @@ export default function PortalAccessForm({
                   </span>
                 </span>
                 <span className="cc-portal-characterText">
-                  <strong>{roleCopy[item.id].guide.audience}</strong>
                   <small>{roleCopy[item.id].guide.description}</small>
-                  <span>{roleCopy[item.id].guide.footerLabel}</span>
                 </span>
                 <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>

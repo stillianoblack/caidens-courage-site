@@ -55,12 +55,9 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByText('Continue Your Adventure')).toBeInTheDocument();
     expect(screen.getByText('Help Young Heroes')).toBeInTheDocument();
     expect(screen.getByText('Teach the Academy')).toBeInTheDocument();
-    expect(screen.getByText('For Students')).toBeInTheDocument();
-    expect(screen.getByText('For Parents / Guardians')).toBeInTheDocument();
-    expect(screen.getByText('For Facilitator / Teachers')).toBeInTheDocument();
-    expect(screen.getByText('Students')).toBeInTheDocument();
-    expect(screen.getByText('Parents / Guardians')).toBeInTheDocument();
-    expect(screen.getByText('Facilitators / Teachers')).toBeInTheDocument();
+    expect(screen.queryByText('For Students')).not.toBeInTheDocument();
+    expect(screen.queryByText('For Parents / Guardians')).not.toBeInTheDocument();
+    expect(screen.queryByText('For Facilitator / Teachers')).not.toBeInTheDocument();
     expect(screen.getByAltText('Student B-4 guide')).toHaveAttribute(
       'src',
       '/images/Choose-Your-Guide/B-4student.webp',
