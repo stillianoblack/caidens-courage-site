@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
 import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
@@ -33,7 +33,13 @@ import PilotAdminStudentTable from '../PilotAdminStudentTable';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
 import PilotInviteParentModal from '../PilotInviteParentModal';
 import { inviteParentForStudent } from '../../../lib/inviteParentForStudent';
-import { openProgramGoals } from '../../../lib/openProgramGoals';
+import FacilitatorAdventureSnapshot, {
+  type FacilitatorAdventureSnapshotData,
+} from '../FacilitatorAdventureSnapshot';
+
+type FacilitatorRosterOutletContext = {
+  setRosterSnapshot: React.Dispatch<React.SetStateAction<FacilitatorAdventureSnapshotData | null>>;
+};
 
 type PilotRosterPanelProps = {
   programCode?: string;
@@ -67,6 +73,8 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const program = readActivePilotProgram();
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
+  const outletContext = useOutletContext<FacilitatorRosterOutletContext | undefined>();
+  const setRosterSnapshot = outletContext?.setRosterSnapshot;
 
   const resolveAccessContext = useCallback(
     (participantId: string | null, row?: PilotRosterRow | null): StudentRosterAccessContext | null => {
@@ -409,15 +417,28 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     [displayRows, launcherParticipantId],
   );
 
-  const adventureSnapshot = useMemo(() => {
+  const adventureSnapshot = useMemo<FacilitatorAdventureSnapshotData>(() => {
     const completedAdventures = rows.reduce((total, row) => total + row.moduleCompletions, 0);
     const learnersWithCompletedAdventure = rows.filter((row) => row.moduleCompletions > 0).length;
     const readyToPlay = rows.filter((row) => row.hasPin).length;
     const parentConnected = rows.filter(
       (row) => row.parentConnectionStatus === 'connected',
     ).length;
-    return { completedAdventures, learnersWithCompletedAdventure, readyToPlay, parentConnected };
-  }, [rows]);
+    return {
+      studentsEnrolled: rows.length,
+      completedAdventures,
+      learnersWithCompletedAdventure,
+      readyToPlay,
+      parentConnected,
+      warning: Boolean(warning),
+    };
+  }, [rows, warning]);
+
+  useEffect(() => {
+    if (!setRosterSnapshot) return;
+    setRosterSnapshot(adventureSnapshot);
+    return () => setRosterSnapshot(null);
+  }, [adventureSnapshot, setRosterSnapshot]);
 
   const launcherGuideMessage = launcherRow
     ? launcherRow.moduleCompletions > 0
@@ -545,7 +566,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           <div className="pilot-rosterLauncherGuide">
             <div className="pilot-rosterLauncherPortrait">
               <img
-                src="/images/Choose-Your-Guide/B-4orange-hover.webp"
+                src="/images/Choose-Your-Guide/B-4orange.webp"
                 alt="Facilitator B-4 guide"
               />
             </div>
@@ -598,6 +619,10 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         </section>
       ) : null}
 
+      {displayRows.length > 0 ? (
+        <FacilitatorAdventureSnapshot data={adventureSnapshot} placement="inline" />
+      ) : null}
+
       {displayRows.length === 0 ? (
         <p className="pilot-emptyNote">
           {rosterFilter
@@ -605,53 +630,17 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
             : 'No students yet. Add your first student.'}
         </p>
       ) : (
-        <div className="pilot-rosterWorkspace">
-          <div className="pilot-rosterWorkspaceMain">
-            <PilotAdminStudentTable
-              rows={displayRows}
-              variant="roster"
-              onStudentClick={openStudentDrawer}
-              onGradeSaved={updateParticipantGrade}
-              onInviteParent={(row) => {
-                openStudentDrawer(row.participantId);
-                setInviteParentRow(row);
-              }}
-              showBaselineActions={rosterFilter === 'missing-baseline'}
-            />
-          </div>
-          <aside className="pilot-adventureSnapshot" aria-labelledby="academy-adventure-title">
-            <img
-              className="pilot-adventureSnapshotB4"
-              src="/images/Choose-Your-Guide/B-4orange.webp"
-              alt=""
-            />
-            <span className="pilot-adventureSnapshotEyebrow">LIVE PROGRAM SNAPSHOT</span>
-            <h3 id="academy-adventure-title">Your Academy Adventure</h3>
-            <p>A live snapshot of how your learners are moving through the Focus Flame journey.</p>
-            {warning ? (
-              <div className="pilot-adventureSnapshotUnavailable">
-                We couldn’t load the latest snapshot. Your roster is still available.
-              </div>
-            ) : (
-              <dl className="pilot-adventureSnapshotMetrics">
-                <div><dt>Students enrolled</dt><dd>{rows.length}</dd></div>
-                <div><dt>Completed an adventure</dt><dd>{adventureSnapshot.learnersWithCompletedAdventure}</dd></div>
-                <div><dt>Completed adventures</dt><dd>{adventureSnapshot.completedAdventures}</dd></div>
-                <div><dt>Ready to play</dt><dd>{adventureSnapshot.readyToPlay}</dd></div>
-                <div><dt>Parent connected</dt><dd>{adventureSnapshot.parentConnected}</dd></div>
-              </dl>
-            )}
-            <p className="pilot-adventureSnapshotNarrative">
-              {adventureSnapshot.completedAdventures > 0
-                ? 'Momentum is building.'
-                : 'No adventures have been recorded yet.'}
-            </p>
-            <button type="button" className="pilot-adventureGoalsBtn" onClick={openProgramGoals}>
-              <span aria-hidden="true">✦</span> What would you like to improve?
-            </button>
-            <small>Choose the focus areas you want Caiden’s Courage to support.</small>
-          </aside>
-        </div>
+        <PilotAdminStudentTable
+          rows={displayRows}
+          variant="roster"
+          onStudentClick={openStudentDrawer}
+          onGradeSaved={updateParticipantGrade}
+          onInviteParent={(row) => {
+            openStudentDrawer(row.participantId);
+            setInviteParentRow(row);
+          }}
+          showBaselineActions={rosterFilter === 'missing-baseline'}
+        />
       )}
 
       <PilotStudentDetailDrawer

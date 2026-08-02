@@ -3475,10 +3475,9 @@ a.pilot-overviewMiniCard:hover {
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 1.15rem;
   background:
-    radial-gradient(circle at 8% 18%, rgba(255,255,255,.22) 0 2px, transparent 3px),
-    radial-gradient(circle at 80% 22%, rgba(246,196,83,.25), transparent 28%),
+    radial-gradient(ellipse at 10% 5%, rgba(255,255,255,.2), transparent 35%),
+    radial-gradient(ellipse at 82% 20%, rgba(246,196,83,.22), transparent 32%),
     linear-gradient(120deg, #e26f2d 0%, #7b3f79 48%, #182f5b 100%);
-  background-size: 34px 34px, auto, auto;
   box-shadow: 0 18px 45px -24px rgba(28, 33, 73, 0.75);
   color: #fff;
 }
@@ -3500,11 +3499,11 @@ a.pilot-overviewMiniCard:hover {
 
 .pilot-rosterLauncherGuide { display: grid; justify-items: center; gap: .55rem; }
 .pilot-rosterLauncherPortrait {
-  display: grid; place-items: center; width: 6.5rem; height: 6.5rem; padding: .4rem;
+  display: grid; place-items: center; width: 6.5rem; height: 6.5rem; padding: .55rem;
   border: 3px solid rgba(255,255,255,.82); border-radius: 50%; background: rgba(255,255,255,.14);
   box-shadow: 0 0 0 7px rgba(246,196,83,.15), 0 12px 24px rgba(13,23,50,.28);
 }
-.pilot-rosterLauncherPortrait img { width: 100%; height: 100%; object-fit: contain; }
+.pilot-rosterLauncherPortrait img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .pilot-rosterGuideMessage { max-width: 13rem; text-align: center; font-weight: 700; }
 .pilot-rosterLauncherEyebrow { font-size: .67rem; font-weight: 900; letter-spacing: .15em; color: #ffe199; }
 .pilot-rosterLauncherControls { display: grid; gap: .65rem; }
@@ -3534,15 +3533,15 @@ a.pilot-overviewMiniCard:hover {
   gap: 0.5rem;
 }
 
-.pilot-rosterWorkspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 24%); gap: 1rem; align-items: start; }
-.pilot-rosterWorkspaceMain { min-width: 0; }
 .pilot-adventureSnapshot {
-  position: sticky; top: 1rem; overflow: hidden; padding: 1.2rem; border-radius: 1rem;
+  overflow: hidden; padding: 1.1rem; border-radius: 1rem;
   border: 1px solid rgba(88,67,142,.18);
   background: radial-gradient(circle at 95% 0, rgba(246,196,83,.3), transparent 30%), linear-gradient(155deg,#fff8e8,#f2efff 58%,#eaf4ff);
   box-shadow: 0 18px 38px -28px rgba(35,42,95,.7); color: var(--pilot-navy-deep);
 }
-.pilot-adventureSnapshotB4 { float: right; width: 4.25rem; height: 3.35rem; object-fit: contain; margin: -.15rem -.2rem .3rem .5rem; }
+.pilot-adventureSnapshot--inline { display: none; }
+.pilot-adventureSnapshot--rail { max-height: calc(100dvh - 7.5rem); overflow-y: auto; }
+.pilot-adventureSnapshotB4 { float: right; width: 4.5rem; height: 3.25rem; object-fit: contain; object-position: center; margin: -.1rem -.15rem .25rem .5rem; }
 .pilot-adventureSnapshotEyebrow { display: block; margin-bottom: .25rem; color: #a54f28; font-size: .63rem; font-weight: 900; letter-spacing: .12em; }
 .pilot-adventureSnapshot h3 { margin: 0; font-size: 1.15rem; }
 .pilot-adventureSnapshot > p { margin: .45rem 0 0; font-size: .76rem; line-height: 1.45; color: rgba(36,62,112,.72); }
@@ -3927,8 +3926,6 @@ a.pilot-overviewMiniCard:hover {
 @media (max-width: 1100px) {
   .pilot-rosterLauncherCard { grid-template-columns: 8rem minmax(0,1fr); }
   .pilot-rosterLauncherControls { grid-column: 1 / -1; grid-template-columns: minmax(14rem,1fr) auto; align-items: end; }
-  .pilot-rosterWorkspace { grid-template-columns: minmax(0,1fr); }
-  .pilot-adventureSnapshot { position: static; }
 }
 
 @media (max-width: 700px) {
@@ -3944,6 +3941,28 @@ a.pilot-overviewMiniCard:hover {
   .pilot-adventureGoalsBtn, .pilot-rosterStatusPill { transition: border-color .18s ease, background-color .18s ease, transform .18s ease; }
 }
 @keyframes pilot-rosterGuideIn { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+
+@media (min-width: 1400px) {
+  .pilot-shell--rosterRail .portal-layout--withRail { gap: 1.25rem; padding-right: 1.25rem; }
+  .pilot-shell--rosterRail .portal-rightRail { flex-basis: 19rem; width: 19rem; max-width: 19rem; top: 1.25rem; }
+}
+
+@media (max-width: 1399px) {
+  .pilot-shell--rosterRail .portal-layout--withRail {
+    flex-direction: column;
+    gap: 0;
+    overflow: visible;
+    padding: 2rem 1.5rem 3rem;
+  }
+  .pilot-shell--rosterRail .portal-layoutMain { max-width: 70rem; width: 100%; }
+  .pilot-shell--rosterRail .portal-rightRail { display: none; }
+  .pilot-adventureSnapshot--inline { display: block; position: static; margin: 0 0 1.25rem; }
+}
+
+@media (max-width: 767px) {
+  .pilot-shell--rosterRail .portal-layout--withRail { padding: 1.25rem; }
+  .portal-shell--facilitatorMobileNav.pilot-shell--rosterRail .portal-layout--withRail { padding: 0; }
+}
 
 .pilot-studentLinkBtn {
   display: inline-block;

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useCallback, useEffect } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardSidebar';
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
@@ -45,6 +45,9 @@ import FacilitatorPortalMobileChrome, {
   facilitatorMobileNavShellClass,
 } from '../components/pilot-dashboard/FacilitatorPortalMobileChrome';
 import { useFacilitatorMobileNav } from '../hooks/useFacilitatorMobileNav';
+import FacilitatorAdventureSnapshot, {
+  type FacilitatorAdventureSnapshotData,
+} from '../components/pilot-dashboard/FacilitatorAdventureSnapshot';
 
 const FacilitatorOverviewCoachRail = lazy(
   () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
@@ -62,6 +65,7 @@ export default function ProgramDashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeProgram = readActivePilotProgram();
   const showWelcome = searchParams.get('welcome') === '1';
+  const [rosterSnapshot, setRosterSnapshot] = useState<FacilitatorAdventureSnapshotData | null>(null);
 
   const isKidsRoute = isProgramDashboardKidsPath(location.pathname);
   const activeNav = resolveProgramDashboardTab(location.pathname);
@@ -82,6 +86,10 @@ export default function ProgramDashboardPage() {
   const { isMobileNav, moreOpen, openMore, closeMore } = useFacilitatorMobileNav();
   const showMobileNav = sessionValid && !isKidsRoute;
   const mobileNavShellClass = facilitatorMobileNavShellClass(showMobileNav, isMobileNav);
+  const dashboardShellClass = [
+    mobileNavShellClass,
+    activeNav === 'roster' && rosterSnapshot ? 'pilot-shell--rosterRail' : '',
+  ].filter(Boolean).join(' ');
 
   useEffect(() => {
     clearPageTransitionOverlay();
@@ -187,9 +195,11 @@ export default function ProgramDashboardPage() {
     >
     <AppShell
       variant="facilitator"
-      shellClassName={mobileNavShellClass}
+      shellClassName={dashboardShellClass}
       rightRail={
-        showOverviewCoach ? (
+        activeNav === 'roster' && rosterSnapshot ? (
+          <FacilitatorAdventureSnapshot data={rosterSnapshot} placement="rail" />
+        ) : showOverviewCoach ? (
           <Suspense fallback={null}>
             <FacilitatorOverviewCoachRail />
           </Suspense>
@@ -227,7 +237,10 @@ export default function ProgramDashboardPage() {
           />
         }
       >
-        <Outlet key={resolvePortalOutletKey(location.pathname, location.search)} />
+        <Outlet
+          key={resolvePortalOutletKey(location.pathname, location.search)}
+          context={{ setRosterSnapshot }}
+        />
       </Suspense>
 
       <GoalsOnboardingDrawer
