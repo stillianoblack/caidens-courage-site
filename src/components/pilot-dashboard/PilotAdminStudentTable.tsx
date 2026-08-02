@@ -119,6 +119,7 @@ function buildRosterColumns(
       mobileRole: 'primary',
       className: 'pilot-adminCellChild',
       render: (row) => <ChildNameCell row={row} onStudentClick={onStudentClick} />,
+      renderMobileSummary: (row) => <span title={row.childName}>{row.childName}</span>,
     },
   ];
 
@@ -153,6 +154,7 @@ function buildRosterColumns(
       mobileRole: 'secondary',
       className: 'pilot-adminCellParent',
       render: (row) => <ParentGuardianCell row={row} />,
+      renderMobileSummary: (row) => <span title={row.parentGuardianName}>{row.parentGuardianShort}</span>,
     },
     ...(isRoster
       ? [
@@ -199,7 +201,11 @@ function buildRosterColumns(
                     <button
                       type="button"
                       className="pilot-studentLinkBtn"
-                      onClick={() => onInviteParent(row)}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onInviteParent(row);
+                      }}
                     >
                       Invite Parent
                     </button>

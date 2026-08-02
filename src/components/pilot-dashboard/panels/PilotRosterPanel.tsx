@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
 import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
@@ -89,6 +89,10 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     },
     [participants, resolvedProgramCode, rows],
   );
+  const resolveAccessContextRef = useRef(resolveAccessContext);
+  const refreshRef = useRef(refresh);
+  resolveAccessContextRef.current = resolveAccessContext;
+  refreshRef.current = refresh;
 
   const openStudentDrawer = useCallback(
     (participantId: string) => {
@@ -121,7 +125,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       return;
     }
 
-    const ctx = resolveAccessContext(drawerParticipantId);
+    const ctx = resolveAccessContextRef.current(drawerParticipantId);
     setDrawerAccess(ctx);
 
     let cancelled = false;
@@ -136,7 +140,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       if (ready.success) {
         applyAccessReady(ready);
         if (ready.access.pinAssigned || ready.access.claimCodeAssigned) {
-          void refresh();
+          void refreshRef.current();
         }
       }
       setDrawerAccessLoading(false);
@@ -145,7 +149,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     return () => {
       cancelled = true;
     };
-  }, [applyAccessReady, drawerParticipantId, refresh, resolveAccessContext]);
+  }, [applyAccessReady, drawerParticipantId]);
 
   const requireDrawerContext = useCallback(
     (action: string): StudentRosterAccessContext | null => {
@@ -627,7 +631,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           onStudentClick={openStudentDrawer}
           onGradeSaved={updateParticipantGrade}
           onInviteParent={(row) => {
-            openStudentDrawer(row.participantId);
             setInviteParentRow(row);
           }}
           showBaselineActions={rosterFilter === 'missing-baseline'}

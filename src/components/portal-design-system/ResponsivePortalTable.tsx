@@ -13,6 +13,8 @@ export type ResponsivePortalTableColumn<T> = {
   id: string;
   header: string;
   render: (row: T) => React.ReactNode;
+  /** Non-interactive rendering for content placed inside the mobile accordion trigger. */
+  renderMobileSummary?: (row: T) => React.ReactNode;
   mobileRole?: ResponsivePortalTableMobileRole;
   /** Expanded-field label; defaults to header */
   mobileLabel?: string;
@@ -130,9 +132,9 @@ export default function ResponsivePortalTable<T>({
               <MobileDataAccordionItem
                 key={key}
                 id={key}
-                primary={primaryColumn ? primaryColumn.render(row) : '—'}
-                secondary={secondaryColumn ? secondaryColumn.render(row) : undefined}
-                metric={metricColumn ? metricColumn.render(row) : undefined}
+                primary={primaryColumn ? (primaryColumn.renderMobileSummary ?? primaryColumn.render)(row) : '—'}
+                secondary={secondaryColumn ? (secondaryColumn.renderMobileSummary ?? secondaryColumn.render)(row) : undefined}
+                metric={metricColumn ? (metricColumn.renderMobileSummary ?? metricColumn.render)(row) : undefined}
                 details={detailColumns.map((column) => ({
                   id: column.id,
                   label: column.mobileLabel ?? column.header,

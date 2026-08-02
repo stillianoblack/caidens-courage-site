@@ -52,6 +52,12 @@ export default function PilotAddStudentDrawer({
 
   const trimmedProgramCode = programCode.trim();
   const wasOpenRef = useRef(false);
+  const childFirstNameRef = useRef<HTMLInputElement>(null);
+  const childLastNameRef = useRef<HTMLInputElement>(null);
+  const parentFirstNameRef = useRef<HTMLInputElement>(null);
+  const parentLastNameRef = useRef<HTMLInputElement>(null);
+  const parentEmailRef = useRef<HTMLInputElement>(null);
+  const gradeLevelRef = useRef<HTMLSelectElement>(null);
 
   const resetForm = () => {
     setChildFirstName('');
@@ -96,27 +102,33 @@ export default function PilotAddStudentDrawer({
 
     if (!childFirstName.trim()) {
       setError('Child first name is required.');
+      childFirstNameRef.current?.focus();
       return;
     }
     if (!childLastName.trim() && !childNickname.trim()) {
       setError('Add a last name or nickname for the student.');
+      childLastNameRef.current?.focus();
       return;
     }
     if (trimmedParentEmail) {
       if (!parentFirstName.trim() || !parentLastName.trim()) {
         setError('Parent/guardian first and last name are required when adding a parent email.');
+        (!parentFirstName.trim() ? parentFirstNameRef.current : parentLastNameRef.current)?.focus();
         return;
       }
       if (!isValidEmail(trimmedParentEmail)) {
         setError('Enter a valid parent/guardian email or leave it blank.');
+        parentEmailRef.current?.focus();
         return;
       }
     } else if (parentEmail.trim() && !isValidEmail(trimmedParentEmail)) {
       setError('Enter a valid parent email or leave it blank.');
+      parentEmailRef.current?.focus();
       return;
     }
     if (!isGradeLevel(gradeLevel)) {
       setError('Grade level is required so missions match the student profile.');
+      gradeLevelRef.current?.focus();
       return;
     }
     if (!trimmedProgramCode) {
@@ -237,6 +249,7 @@ export default function PilotAddStudentDrawer({
       characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
       size="wide"
       titleId="pilot-add-student-title"
+      initialFocusRef={childFirstNameRef}
     >
       <form className="pilot-drawerFormShell" onSubmit={(event) => void handleSubmit(event)}>
         <div className="pilot-drawerBody pilot-drawerBody--form">
@@ -244,6 +257,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Child first name</span>
               <input
+                ref={childFirstNameRef}
                 type="text"
                 value={childFirstName}
                 onChange={(event) => setChildFirstName(event.target.value)}
@@ -254,6 +268,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Child last name</span>
               <input
+                ref={childLastNameRef}
                 type="text"
                 value={childLastName}
                 onChange={(event) => setChildLastName(event.target.value)}
@@ -263,6 +278,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Child nickname (optional if last name provided)</span>
               <input
+                ref={parentFirstNameRef}
                 type="text"
                 value={childNickname}
                 onChange={(event) => setChildNickname(event.target.value)}
@@ -276,6 +292,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Parent/Guardian first name (optional)</span>
               <input
+                ref={parentLastNameRef}
                 type="text"
                 value={parentFirstName}
                 onChange={(event) => setParentFirstName(event.target.value)}
@@ -294,6 +311,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Parent/Guardian email (optional)</span>
               <input
+                ref={parentEmailRef}
                 type="email"
                 value={parentEmail}
                 onChange={(event) => setParentEmail(event.target.value)}
@@ -312,6 +330,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>{GRADE_LEVEL_LABEL}</span>
               <select
+                ref={gradeLevelRef}
                 value={gradeLevel}
                 onChange={(event) => {
                   const next = event.target.value;

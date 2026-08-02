@@ -60,7 +60,10 @@ export default function FacilitatorDrawer({
   const panelRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
   const [mounted, setMounted] = useState(open);
+
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (open) setMounted(true);
@@ -69,11 +72,11 @@ export default function FacilitatorDrawer({
   useEffect(() => {
     const handleAnotherDrawer = (event: Event) => {
       const activeId = (event as CustomEvent<string>).detail;
-      if (open && activeId !== drawerIdRef.current) onClose();
+      if (open && activeId !== drawerIdRef.current) onCloseRef.current();
     };
     window.addEventListener(ACTIVE_DRAWER_EVENT, handleAnotherDrawer);
     return () => window.removeEventListener(ACTIVE_DRAWER_EVENT, handleAnotherDrawer);
-  }, [onClose, open]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -93,7 +96,7 @@ export default function FacilitatorDrawer({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab' || !panelRef.current) return;
@@ -117,7 +120,7 @@ export default function FacilitatorDrawer({
       document.body.style.paddingRight = previousPaddingRight;
       window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
     };
-  }, [initialFocusRef, onClose, open]);
+  }, [initialFocusRef, open]);
 
   if (!mounted) return null;
 
