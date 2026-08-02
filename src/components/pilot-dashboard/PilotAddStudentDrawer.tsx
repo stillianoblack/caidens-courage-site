@@ -16,7 +16,7 @@ import {
   type GradeLevel,
 } from '../../data/gradeLevelOptions';
 import { useToast } from '../portal-design-system/ToastProvider';
-import PilotDrawer from './PilotDrawer';
+import FacilitatorDrawer from './FacilitatorDrawer';
 
 type PilotAddStudentDrawerProps = {
   open: boolean;
@@ -170,25 +170,16 @@ export default function PilotAddStudentDrawer({
     });
 
     return (
-      <PilotDrawer
+      <FacilitatorDrawer
         open={open}
         onClose={handleClose}
-        className="pilot-drawer pilot-drawer--form"
+        eyebrow="NEW LEARNER"
+        title="Student ready"
+        description={`${successResult.displayName} can log in now. Copy the PIN and claim link before closing.`}
+        characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
+        size="wide"
         titleId="pilot-add-student-success-title"
       >
-        <div className="pilot-drawerHead">
-          <div>
-            <h2 id="pilot-add-student-success-title" className="pilot-drawerTitle">
-              Student ready
-            </h2>
-            <p className="pilot-drawerSubtitle">
-              {successResult.displayName} can log in now. Copy the PIN and claim link before closing.
-            </p>
-          </div>
-          <button type="button" className="pilot-drawerClose" onClick={handleClose} aria-label="Close">
-            ×
-          </button>
-        </div>
         <div className="pilot-drawerBody pilot-drawerBody--form">
           <div className="pilot-drawerForm">
             <p>
@@ -232,31 +223,21 @@ export default function PilotAddStudentDrawer({
             Done
           </button>
         </div>
-      </PilotDrawer>
+      </FacilitatorDrawer>
     );
   }
 
   return (
-    <PilotDrawer
+    <FacilitatorDrawer
       open={open}
       onClose={handleClose}
-      className="pilot-drawer pilot-drawer--form"
+      eyebrow="NEW LEARNER"
+      title="Add a Student"
+      description="Create a student profile and prepare their path into the Focus Flame experience."
+      characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
+      size="wide"
       titleId="pilot-add-student-title"
     >
-      <div className="pilot-drawerHead">
-        <div>
-          <h2 id="pilot-add-student-title" className="pilot-drawerTitle">
-            Add Student
-          </h2>
-          <p className="pilot-drawerSubtitle">
-            Creates a student profile for this program. Parent contact is optional.
-          </p>
-        </div>
-        <button type="button" className="pilot-drawerClose" onClick={handleClose} aria-label="Close">
-          ×
-        </button>
-      </div>
-
       <form className="pilot-drawerFormShell" onSubmit={(event) => void handleSubmit(event)}>
         <div className="pilot-drawerBody pilot-drawerBody--form">
           <div className="pilot-drawerForm">
@@ -367,6 +348,6 @@ export default function PilotAddStudentDrawer({
           </div>
         </div>
       </form>
-    </PilotDrawer>
+    </FacilitatorDrawer>
   );
 }

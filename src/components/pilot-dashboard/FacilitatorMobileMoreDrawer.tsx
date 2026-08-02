@@ -9,7 +9,7 @@ import {
 import { openProgramGoals } from '../../lib/openProgramGoals';
 import type { PilotPricingTier } from '../../types/pilotProgram';
 import PilotNavIcon from './PilotNavIcon';
-import PilotDrawer from './PilotDrawer';
+import FacilitatorDrawer from './FacilitatorDrawer';
 import PilotProgramSettingsDrawer, {
   type ProgramSettingsTabId,
 } from './PilotProgramSettingsDrawer';
@@ -79,24 +79,18 @@ export default function FacilitatorMobileMoreDrawer({
 
   return (
     <>
-      <PilotDrawer
+      <FacilitatorDrawer
         open={open}
         onClose={onClose}
-        className="pilot-drawer facilitator-mobileMoreDrawer"
+        className="facilitator-mobileMoreDrawer"
+        eyebrow="FACILITATOR TOOLS"
+        title="More"
+        description="Weekly tools, gallery, training, and program settings."
+        characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
+        accent="navy"
+        size="standard"
         titleId="facilitator-mobile-more-title"
       >
-        <div className="pilot-drawerHead facilitator-mobileMoreHead">
-          <div>
-            <h2 id="facilitator-mobile-more-title" className="pilot-drawerTitle">
-              More
-            </h2>
-            <p className="pilot-drawerSubtitle">Weekly tools, gallery, training, and program settings.</p>
-          </div>
-          <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-
         <div className="pilot-drawerBody facilitator-mobileMoreBody">
           <div className="facilitator-mobileMoreCard">
             <ul className="facilitator-mobileMoreList">
@@ -166,7 +160,7 @@ export default function FacilitatorMobileMoreDrawer({
             </ul>
           </div>
         </div>
-      </PilotDrawer>
+      </FacilitatorDrawer>
 
       <PilotProgramSettingsDrawer
         open={drawerOpen}

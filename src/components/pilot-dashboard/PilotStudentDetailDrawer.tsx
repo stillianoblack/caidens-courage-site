@@ -11,7 +11,7 @@ import type { StudentFamilyLink } from '../../lib/studentFamilyLinkService';
 import CopyableCompactValue from './CopyableCompactValue';
 import ParticipantGradeMeta from '../shared/ParticipantGradeMeta';
 import '../shared/participant-grade-meta.css';
-import PilotDrawer from './PilotDrawer';
+import FacilitatorDrawer from './FacilitatorDrawer';
 import PilotStatusChip from './PilotStatusChip';
 
 type PilotStudentDetailDrawerProps = {
@@ -88,24 +88,22 @@ export default function PilotStudentDetailDrawer({
     });
   }, [assessmentResults, familyLinks, moduleResults, participantId, participants, programCode]);
 
-  if (!snapshot) return null;
-
-  const resolvedClaimCode = familyClaimCode || snapshot.familyAccessCode;
+  const resolvedClaimCode = familyClaimCode || snapshot?.familyAccessCode;
 
   return (
-    <PilotDrawer open={open} onClose={onClose} titleId="pilot-student-drawer-title">
-      <div className="pilot-drawerHead">
-        <div>
-          <h2 id="pilot-student-drawer-title" className="pilot-drawerTitle">
-            {snapshot.childName}
-          </h2>
-          <p className="pilot-drawerSubtitle">Student access and progress summary</p>
-        </div>
-        <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
-          ×
-        </button>
-      </div>
-
+    <FacilitatorDrawer
+      open={open}
+      onClose={onClose}
+      eyebrow="STUDENT ADVENTURE PROFILE"
+      title={snapshot?.childName ?? 'Student Details'}
+      description="Access, readiness, and family connection details for this learner."
+      accent="blue"
+      size="standard"
+      loading={open && !snapshot}
+      titleId="pilot-student-drawer-title"
+      characterSrc="/images/Choose-Your-Guide/B-4student.webp"
+    >
+      {snapshot ? (
       <div className="pilot-drawerBody pilot-drawerBody--detail">
         <div className="pilot-drawerStatusRow">
           <PilotStatusChip status={snapshot.status} />
@@ -205,7 +203,7 @@ export default function PilotStudentDetailDrawer({
             <div>
               <dt>Family Claim Code</dt>
               <dd>
-                <CopyableCompactValue value={resolvedClaimCode} type="code" />
+                <CopyableCompactValue value={resolvedClaimCode ?? '—'} type="code" />
               </dd>
             </div>
             <div>
@@ -349,6 +347,7 @@ export default function PilotStudentDetailDrawer({
           </dl>
         </details>
       </div>
-    </PilotDrawer>
+      ) : <></>}
+    </FacilitatorDrawer>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import FacilitatorDrawer from '../pilot-dashboard/FacilitatorDrawer';
 import SlideOutDrawer from '../portal-design-system/SlideOutDrawer';
 import {
   PORTAL_UPDATE_SECTION_LABELS,
@@ -77,53 +78,32 @@ export function PortalUpdatesPanel({
     }
   }, [open, onOpen]);
 
-  return (
-    <SlideOutDrawer
+  const content = (
+    <div className="portalUpdatesDrawerBody">
+      {sections.length === 0 ? <p className="portalUpdatesEmpty">You&apos;re all caught up — no updates right now.</p> : sections.map(({ section, items }) => (
+        <section key={section} className="portalUpdatesSection" aria-label={PORTAL_UPDATE_SECTION_LABELS[section]}>
+          <h3 className="portalUpdatesSectionTitle">{PORTAL_UPDATE_SECTION_LABELS[section]}</h3>
+          <ul className="portalUpdatesList">{items.map((update) => <li key={update.id}><PortalUpdateItem update={update} portal={portal} unread={isUnread(update)} onNavigate={() => onNavigate(update)} /></li>)}</ul>
+        </section>
+      ))}
+    </div>
+  );
+  return portal === 'facilitator' ? (
+    <FacilitatorDrawer
       open={open}
       onClose={onClose}
-      className="pilot-drawer portalUpdatesDrawer"
+      eyebrow="WHAT’S NEW"
+      title="Updates"
+      description="Recent Focus Flame features, program announcements, and tools available to your team."
+      accent="blue"
+      size="compact"
+      characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
       titleId="portal-updates-drawer-title"
-      header={
-        <div className="portalUpdatesDrawerHead">
-          <div className="portalUpdatesDrawerHeadText">
-            <h2 id="portal-updates-drawer-title" className="portalUpdatesDrawerTitle">
-              Updates
-            </h2>
-            <p className="portalUpdatesDrawerSubtext">
-              Recent product and program announcements for your portal.
-            </p>
-          </div>
-          <button type="button" className="portalUpdatesDrawerClose" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-      }
-      body={
-        <div className="portalUpdatesDrawerBody">
-          {sections.length === 0 ? (
-            <p className="portalUpdatesEmpty">You&apos;re all caught up — no updates right now.</p>
-          ) : (
-            sections.map(({ section, items }) => (
-              <section key={section} className="portalUpdatesSection" aria-label={PORTAL_UPDATE_SECTION_LABELS[section]}>
-                <h3 className="portalUpdatesSectionTitle">{PORTAL_UPDATE_SECTION_LABELS[section]}</h3>
-                <ul className="portalUpdatesList">
-                  {items.map((update) => (
-                    <li key={update.id}>
-                      <PortalUpdateItem
-                        update={update}
-                        portal={portal}
-                        unread={isUnread(update)}
-                        onNavigate={() => onNavigate(update)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))
-          )}
-        </div>
-      }
-    />
+    >
+      {content}
+    </FacilitatorDrawer>
+  ) : (
+    <SlideOutDrawer open={open} onClose={onClose} className="pilot-drawer portalUpdatesDrawer" titleId="portal-updates-drawer-title" header={<div className="portalUpdatesDrawerHead"><div className="portalUpdatesDrawerHeadText"><h2 id="portal-updates-drawer-title" className="portalUpdatesDrawerTitle">Updates</h2><p className="portalUpdatesDrawerSubtext">Recent product and program announcements for your portal.</p></div><button type="button" className="portalUpdatesDrawerClose" onClick={onClose} aria-label="Close">×</button></div>} body={content} />
   );
 }
 

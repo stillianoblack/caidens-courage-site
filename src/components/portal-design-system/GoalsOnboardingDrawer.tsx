@@ -5,6 +5,7 @@ import {
   type ProgramGoalsPortalType,
 } from '../../data/programGoalsOptions';
 import type { ProgramGoalsRecord } from '../../lib/programGoalsService';
+import FacilitatorDrawer from '../pilot-dashboard/FacilitatorDrawer';
 import SlideOutDrawer from './SlideOutDrawer';
 import { useToast } from './ToastProvider';
 import './portal-design-system.css';
@@ -73,12 +74,7 @@ export default function GoalsOnboardingDrawer({
 
   const handleRemindLater = async () => {
     await onRemindLater();
-    showToast(
-      isFacilitator
-        ? 'Closed for now. Your existing selections are unchanged.'
-        : "Okay — I'll remind you tomorrow.",
-      'info',
-    );
+    if (!isFacilitator) showToast("Okay — I'll remind you tomorrow.", 'info');
   };
 
   const handleSkip = async () => {
@@ -92,44 +88,53 @@ export default function GoalsOnboardingDrawer({
 
   const handleDismiss = () => {
     onClose();
-    const dismissMessage =
-      portalType === 'family'
-        ? 'Okay — you can set goals anytime from Family Goals.'
-        : 'Okay — you can set goals anytime from Program Goals.';
-    showToast(dismissMessage, 'info');
+    if (portalType === 'family') showToast('Okay — you can set goals anytime from Family Goals.', 'info');
   };
 
+  if (!isFacilitator) {
+    return (
+      <SlideOutDrawer open={open} onClose={handleDismiss} className="pilot-drawer pilot-drawer--settings ds-goalsDrawer" titleId="program-goals-drawer-title">
+        <div className="ds-goalsDrawerHead">
+          <div className="ds-goalsDrawerHeadText"><h2 id="program-goals-drawer-title" className="ds-goalsDrawerTitle">{copy.title}</h2><p className="ds-goalsDrawerSubtext">{copy.subtext}</p></div>
+          <button type="button" className="ds-goalsDrawerClose" onClick={handleDismiss} aria-label="Close">×</button>
+        </div>
+        <div className="ds-goalsDrawerBody">
+          <p className="ds-goalsLimitNote">{selected.length} of {copy.maxGoals} selected</p>
+          {limitHint ? <p className="ds-goalsLimitHint" role="alert">Choose up to {copy.maxGoals} goals.</p> : null}
+          <div className="ds-goalsGrid" role="group" aria-label="Family goals">{options.map((goal) => <label key={goal} className={`ds-goalsOption${selected.includes(goal) ? ' ds-goalsOption--selected' : ''}`}><input type="checkbox" checked={selected.includes(goal)} onChange={() => toggleGoal(goal)} /><span>{goal}</span></label>)}</div>
+          {programCode ? <p className="ds-goalsProgramNote">Saved for program: {programCode}</p> : null}
+        </div>
+        <footer className="ds-goalsFooter"><button type="button" className="ds-goalsBtnPrimary" disabled={!selected.length || saving} onClick={() => void handleSave()}>{saving ? 'Saving…' : 'Save Goals'}</button><button type="button" className="ds-goalsBtnSecondary" onClick={() => void handleRemindLater()}>Remind Me Later</button><button type="button" className="ds-goalsBtnGhost" onClick={() => void handleSkip()}>Skip for Now</button></footer>
+      </SlideOutDrawer>
+    );
+  }
+
   return (
-    <SlideOutDrawer
+    <FacilitatorDrawer
       open={open}
       onClose={handleDismiss}
-      className="pilot-drawer pilot-drawer--settings ds-goalsDrawer"
+      eyebrow="PROGRAM GOALS"
+      title="What would you like to improve?"
+      description="Choose up to five goals so Caiden’s Courage can better support your students, families, and facilitators."
+      characterSrc="/images/Choose-Your-Guide/B-4orange.webp"
+      size="wide"
       titleId="program-goals-drawer-title"
+      footer={
+        <>
+          <button
+            type="button"
+            className="ds-goalsBtnPrimary"
+            disabled={selected.length === 0 || saving}
+            onClick={() => void handleSave()}
+          >
+            {saving ? 'Saving…' : 'Save Goals'}
+          </button>
+          <button type="button" className="ds-goalsBtnSecondary" onClick={() => void handleRemindLater()}>
+            Close for Now
+          </button>
+        </>
+      }
     >
-      <div className="ds-goalsDrawerHead">
-        {isFacilitator ? (
-          <img
-            className="ds-goalsDrawerGuide"
-            src="/images/Choose-Your-Guide/B-4orange.webp"
-            alt=""
-          />
-        ) : null}
-        <div className="ds-goalsDrawerHeadText">
-          {isFacilitator ? <span className="ds-goalsDrawerEyebrow">PROGRAM GOALS</span> : null}
-          <h2 id="program-goals-drawer-title" className="ds-goalsDrawerTitle">
-            {isFacilitator ? 'What would you like to improve?' : copy.title}
-          </h2>
-          <p className="ds-goalsDrawerSubtext">
-            {isFacilitator
-              ? 'Choose up to five goals so Caiden’s Courage can better support your students, families, and facilitators.'
-              : copy.subtext}
-          </p>
-        </div>
-        <button type="button" className="ds-goalsDrawerClose" onClick={handleDismiss} aria-label="Close">
-          ×
-        </button>
-      </div>
-
       <div className="ds-goalsDrawerBody">
         <p className="ds-goalsLimitNote">{selected.length} of {copy.maxGoals} selected</p>
         {limitHint ? (
@@ -160,28 +165,6 @@ export default function GoalsOnboardingDrawer({
         ) : null}
       </div>
 
-      <footer className="ds-goalsFooter">
-        <button
-          type="button"
-          className="ds-goalsBtnPrimary"
-          disabled={selected.length === 0 || saving}
-          onClick={() => void handleSave()}
-        >
-          {saving ? 'Saving…' : 'Save Goals'}
-        </button>
-        <button
-          type="button"
-          className="ds-goalsBtnSecondary"
-          onClick={() => void handleRemindLater()}
-        >
-          {isFacilitator ? 'Close for Now' : 'Remind Me Later'}
-        </button>
-        {!isFacilitator ? (
-          <button type="button" className="ds-goalsBtnGhost" onClick={() => void handleSkip()}>
-            Skip for Now
-          </button>
-        ) : null}
-      </footer>
-    </SlideOutDrawer>
+    </FacilitatorDrawer>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import SlideOutDrawer from '../../components/portal-design-system/SlideOutDrawer';
+import FacilitatorDrawer from '../../components/pilot-dashboard/FacilitatorDrawer';
 import type { B4InsightsDrawerProps } from '../../types/b4Insights';
 import './b4-insights-drawer.css';
 
@@ -31,6 +32,20 @@ export default function B4InsightsDrawer({
 }: B4InsightsDrawerProps) {
   const primaryAction = nextActions.find((action) => action.variant === 'primary') ?? nextActions[0];
   const secondaryActions = nextActions.filter((action) => action !== primaryAction);
+
+  if (portalType === 'facilitator') {
+    return (
+      <FacilitatorDrawer open={isOpen} onClose={onClose} eyebrow={eyebrow.toUpperCase()} title={title} description={summary} characterSrc={avatarImage} accent="blue" size="wide" titleId="b4-insights-title">
+        <div className="ds-b4Insights-body">
+          {insights.length > 0 ? <section className="ds-b4Insights-section"><h3 className="ds-b4Insights-sectionTitle">What B-4 Notices</h3><ul className="ds-b4Insights-insightList">{insights.map((item) => <li key={item.id} className={`ds-b4Insights-insight ${InsightToneClass(item.tone)}`.trim()}><strong>{item.label}</strong>{item.detail ? <span>{item.detail}</span> : null}</li>)}</ul></section> : null}
+          {recommendations.length > 0 ? <section className="ds-b4Insights-section"><h3 className="ds-b4Insights-sectionTitle">Recommendations</h3><ul className="ds-b4Insights-recommendationList">{recommendations.map((item) => <li key={item}>{item}</li>)}</ul></section> : null}
+          {primaryAction ? <section className="ds-b4Insights-section ds-b4Insights-section--cta"><h3 className="ds-b4Insights-sectionTitle">Recommended Next Action</h3><div className="ds-b4Insights-actions">{primaryAction.href ? <Link to={primaryAction.href} className="ds-b4Insights-action ds-b4Insights-action--primary" onClick={() => { primaryAction.onClick?.(); onClose(); }}>{primaryAction.label}</Link> : <button type="button" className="ds-b4Insights-action ds-b4Insights-action--primary" onClick={() => { primaryAction.onClick?.(); onClose(); }}>{primaryAction.label}</button>}{secondaryActions.map((action) => action.href ? <Link key={action.id} to={action.href} className="ds-b4Insights-action ds-b4Insights-action--secondary" onClick={() => { action.onClick?.(); onClose(); }}>{action.label}</Link> : <button key={action.id} type="button" className="ds-b4Insights-action ds-b4Insights-action--secondary" onClick={() => { action.onClick?.(); onClose(); }}>{action.label}</button>)}</div></section> : null}
+          {metrics.length > 0 ? <section className="ds-b4Insights-section"><h3 className="ds-b4Insights-sectionTitle">Supporting Metrics</h3><div className="ds-b4Insights-metrics">{metrics.map((metric) => <article key={metric.label} className="ds-b4Insights-metric"><p className="ds-b4Insights-metricLabel">{metric.label}</p><p className="ds-b4Insights-metricValue">{metric.value}</p>{metric.hint ? <p className="ds-b4Insights-metricHint">{metric.hint}</p> : null}</article>)}</div></section> : null}
+          {footerNote ? <p className="ds-b4Insights-footer">{footerNote}</p> : null}
+        </div>
+      </FacilitatorDrawer>
+    );
+  }
 
   return (
     <SlideOutDrawer

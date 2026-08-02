@@ -12,7 +12,7 @@ import {
 import { useToast } from '../portal-design-system/ToastProvider';
 import CopyableCompactValue from './CopyableCompactValue';
 import PilotAdminStudentTable from './PilotAdminStudentTable';
-import PilotDrawer from './PilotDrawer';
+import FacilitatorDrawer from './FacilitatorDrawer';
 import {
   fetchGalleryProgramSettings,
   saveGalleryProgramSettings,
@@ -101,8 +101,6 @@ export default function PilotProgramSettingsDrawer({
     if (!open || !code) return;
     void fetchGalleryProgramSettings(code).then(setGallerySettings);
   }, [open, code]);
-
-  if (!open) return null;
 
   const handleGalleryToggle = async (
     key: keyof GalleryProgramSettings,
@@ -315,35 +313,21 @@ export default function PilotProgramSettingsDrawer({
   };
 
   const isMobileLayout = layout === 'mobile';
+  const isCodes = activeTab === 'access-codes';
 
   return (
-    <PilotDrawer
+    <FacilitatorDrawer
       open={open}
       onClose={onClose}
-      className={[
-        'pilot-drawer',
-        'pilot-drawer--settings',
-        isMobileLayout ? 'pilot-drawer--settingsMobile' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      eyebrow={isCodes ? 'PROGRAM ACCESS' : 'PROGRAM SETTINGS'}
+      title={isCodes ? 'Program Codes' : 'Program Settings'}
+      description={isCodes ? 'Copy and share the access information your learners, families, and facilitators need.' : 'Manage access, students, gallery, exports, and support.'}
+      characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
+      accent="navy"
+      size="wide"
+      className={isMobileLayout ? 'pilot-drawer--settingsMobile' : ''}
       titleId="pilot-settings-drawer-title"
     >
-      <div className="pilot-drawerHead pilot-settingsMobileHead">
-        <div>
-          <h2 id="pilot-settings-drawer-title" className="pilot-drawerTitle">
-            Program Settings
-          </h2>
-          {isMobileLayout ? (
-            <p className="pilot-drawerSubtitle">
-              Manage access, students, gallery, exports, and support.
-            </p>
-          ) : null}
-        </div>
-        <button type="button" className="pilot-drawerClose" onClick={onClose} aria-label="Close">
-          ×
-        </button>
-      </div>
       <div className="pilot-drawerBody pilot-drawerBody--settings">
         {isMobileLayout ? (
           <div className="pilot-settingsMobile">
@@ -402,6 +386,6 @@ export default function PilotProgramSettingsDrawer({
           </div>
         )}
       </div>
-    </PilotDrawer>
+    </FacilitatorDrawer>
   );
 }
