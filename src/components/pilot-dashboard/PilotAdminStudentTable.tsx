@@ -101,6 +101,10 @@ function ContactCell({ row }: { row: PilotRosterRow }) {
   );
 }
 
+function RosterStatusPill({ tone, children }: { tone: 'ready' | 'pending' | 'info' | 'neutral'; children: React.ReactNode }) {
+  return <span className={`pilot-rosterStatusPill pilot-rosterStatusPill--${tone}`}>{children}</span>;
+}
+
 function buildRosterColumns(
   isRoster: boolean,
   onStudentClick?: (participantId: string) => void,
@@ -157,14 +161,32 @@ function buildRosterColumns(
             header: 'Parent Status',
             mobileRole: 'detail' as const,
             className: 'pilot-adminCellText',
-            render: (row: PilotRosterRow) => row.parentConnectionLabel,
+            render: (row: PilotRosterRow) => (
+              <RosterStatusPill
+                tone={row.parentConnectionStatus === 'connected'
+                  ? 'ready'
+                  : row.parentConnectionStatus === 'invited'
+                    ? 'pending'
+                    : 'neutral'}
+              >
+                {row.parentConnectionStatus === 'connected'
+                  ? 'Parent Connected'
+                  : row.parentConnectionStatus === 'invited'
+                    ? 'Invitation Pending'
+                    : 'Parent Not Connected'}
+              </RosterStatusPill>
+            ),
           },
           {
             id: 'student-access',
             header: 'Student Access',
             mobileRole: 'detail' as const,
             className: 'pilot-adminCellText',
-            render: (row: PilotRosterRow) => (row.hasPin ? 'PIN ready' : 'Missing PIN'),
+            render: (row: PilotRosterRow) => (
+              <RosterStatusPill tone={row.hasPin ? 'ready' : 'pending'}>
+                {row.hasPin ? 'Ready to Play' : 'Missing PIN'}
+              </RosterStatusPill>
+            ),
           },
           ...(onInviteParent
             ? [

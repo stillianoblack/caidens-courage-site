@@ -118,10 +118,17 @@
   gap: 0.75rem;
   flex-shrink: 0;
   padding: 1.5rem 1.75rem 1.25rem;
-  border-bottom: 1px solid rgba(36, 62, 112, 0.1);
+  border-bottom: 1px solid rgba(255,255,255,.18);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.22) 0 2px, transparent 3px) 0 0 / 30px 30px,
+    radial-gradient(circle at 78% 12%, rgba(246,196,83,.28), transparent 30%),
+    linear-gradient(125deg, #df702f 0%, #774079 48%, #1c3767 100%);
   box-sizing: border-box;
   min-width: 0;
 }
+
+.ds-goalsDrawerGuide { width: 4.75rem; height: 4.25rem; flex: 0 0 auto; object-fit: contain; align-self: center; filter: drop-shadow(0 8px 12px rgba(12,22,48,.28)); }
+.ds-goalsDrawerEyebrow { display: block; margin-bottom: .25rem; font-size: .65rem; font-weight: 900; letter-spacing: .15em; color: #ffe19a; }
 
 .ds-goalsDrawerHeadText {
   min-width: 0;
@@ -132,7 +139,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--pilot-navy-deep, #1a2f52);
+  color: #fff;
 }
 
 .ds-goalsProgramNote {
@@ -147,16 +154,16 @@
   margin: 0.35rem 0 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: rgba(36, 62, 112, 0.72);
+  color: rgba(255,255,255,.86);
 }
 
 .ds-goalsDrawerClose {
   width: 2rem;
   height: 2rem;
-  border: 1px solid rgba(36, 62, 112, 0.15);
+  border: 1px solid rgba(255,255,255,.45);
   border-radius: 999px;
-  background: #fff;
-  color: var(--pilot-navy, #243e70);
+  background: rgba(255,255,255,.12);
+  color: #fff;
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
@@ -235,9 +242,12 @@
 }
 
 .ds-goalsOption--selected {
-  border-color: rgba(229, 192, 106, 0.65);
-  background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+  border-color: #d08e2f;
+  box-shadow: inset 0 0 0 1px rgba(208,142,47,.2);
+  background: linear-gradient(135deg, #fff4d7 0%, #f5efff 100%);
 }
+
+.ds-goalsOption--selected::after { content: '✓'; display: grid; place-items: center; width: 1.35rem; height: 1.35rem; flex: 0 0 auto; border-radius: 50%; background: #6d479a; color: #fff; font-size: .72rem; font-weight: 900; }
 
 .ds-goalsOption input {
   flex-shrink: 0;
@@ -295,6 +305,13 @@
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .ds-goalsDrawerHead { padding: 1.1rem; }
+  .ds-goalsDrawerGuide { width: 3.7rem; height: 3.3rem; }
+  .ds-goalsDrawerBody { padding: 1.15rem; }
+  .ds-goalsFooter { padding: 1rem 1.15rem 1.25rem; }
 }
 
 .portal-headerGoalsBtn {

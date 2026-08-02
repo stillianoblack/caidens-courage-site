@@ -33,6 +33,7 @@ import PilotAdminStudentTable from '../PilotAdminStudentTable';
 import PilotStudentDetailDrawer from '../PilotStudentDetailDrawer';
 import PilotInviteParentModal from '../PilotInviteParentModal';
 import { inviteParentForStudent } from '../../../lib/inviteParentForStudent';
+import { openProgramGoals } from '../../../lib/openProgramGoals';
 
 type PilotRosterPanelProps = {
   programCode?: string;
@@ -408,6 +409,24 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     [displayRows, launcherParticipantId],
   );
 
+  const adventureSnapshot = useMemo(() => {
+    const completedAdventures = rows.reduce((total, row) => total + row.moduleCompletions, 0);
+    const learnersWithCompletedAdventure = rows.filter((row) => row.moduleCompletions > 0).length;
+    const readyToPlay = rows.filter((row) => row.hasPin).length;
+    const parentConnected = rows.filter(
+      (row) => row.parentConnectionStatus === 'connected',
+    ).length;
+    return { completedAdventures, learnersWithCompletedAdventure, readyToPlay, parentConnected };
+  }, [rows]);
+
+  const launcherGuideMessage = launcherRow
+    ? launcherRow.moduleCompletions > 0
+      ? `${launcherRow.childName} has completed ${launcherRow.moduleCompletions} ${
+          launcherRow.moduleCompletions === 1 ? 'adventure' : 'adventures'
+        }.`
+      : `${launcherRow.childName} is ready to continue their adventure.`
+    : "Select a student and I’ll help you open their next adventure.";
+
   useEffect(() => {
     if (searchParams.get('addStudent') !== '1') return;
     setAddStudentOpen(true);
@@ -523,46 +542,58 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
 
       {displayRows.length > 0 ? (
         <section className="pilot-rosterLauncherCard" aria-labelledby="student-session-launcher-title">
-          <div>
-            <h3 id="student-session-launcher-title">Student Session Launcher</h3>
-            <p>Select a student, launch Kid Shell, or copy login instructions.</p>
+          <div className="pilot-rosterLauncherGuide">
+            <div className="pilot-rosterLauncherPortrait">
+              <img
+                src="/images/Choose-Your-Guide/B-4orange-hover.webp"
+                alt="Facilitator B-4 guide"
+              />
+            </div>
+            <p className="pilot-rosterGuideMessage" aria-live="polite">{launcherGuideMessage}</p>
           </div>
-          <label className="pilot-rosterLauncherField">
-            <span>Select student</span>
-            <select
-              value={launcherRow?.participantId ?? ''}
-              onChange={(event) => setLauncherParticipantId(event.target.value)}
-            >
-              {displayRows.map((row) => (
-                <option key={row.participantId} value={row.participantId}>
-                  {row.childName}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="pilot-rosterLauncherActions">
-            <button
-              type="button"
-              className="pilot-rosterLaunchBtn"
-              disabled={!launcherRow || launchSessionLoadingId === launcherRow.participantId}
-              onClick={() => launcherRow && handleLaunchStudentSession(launcherRow)}
-            >
-              {launcherRow && launchSessionLoadingId === launcherRow.participantId
-                ? 'Launching…'
-                : 'Launch Student Session'}
-            </button>
-            <button
-              type="button"
-              className="pilot-rosterLaunchBtn"
-              disabled={!launcherRow || drawerAccessLoading}
-              onClick={() => {
-                if (!launcherRow) return;
-                const ctx = resolveAccessContext(launcherRow.participantId, launcherRow);
-                if (ctx) void handleCopyLoginInstructions(ctx);
-              }}
-            >
-              Copy login instructions
-            </button>
+          <div className="pilot-rosterLauncherCopy">
+            <span className="pilot-rosterLauncherEyebrow">STUDENT SESSION LAUNCHER</span>
+            <h3 id="student-session-launcher-title">Who’s ready for their next adventure?</h3>
+            <p>Select a student to launch their personalized Focus Flame experience.</p>
+          </div>
+          <div className="pilot-rosterLauncherControls">
+            <label className="pilot-rosterLauncherField">
+              <span>Select student</span>
+              <select
+                value={launcherRow?.participantId ?? ''}
+                onChange={(event) => setLauncherParticipantId(event.target.value)}
+              >
+                {displayRows.map((row) => (
+                  <option key={row.participantId} value={row.participantId}>
+                    {row.childName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="pilot-rosterLauncherActions">
+              <button
+                type="button"
+                className="pilot-rosterLaunchBtn pilot-rosterLaunchBtn--primary"
+                disabled={!launcherRow || launchSessionLoadingId === launcherRow.participantId}
+                onClick={() => launcherRow && handleLaunchStudentSession(launcherRow)}
+              >
+                {launcherRow && launchSessionLoadingId === launcherRow.participantId
+                  ? 'Launching…'
+                  : 'Launch Student Session'}
+              </button>
+              <button
+                type="button"
+                className="pilot-rosterLaunchBtn pilot-rosterLaunchBtn--secondary"
+                disabled={!launcherRow || drawerAccessLoading}
+                onClick={() => {
+                  if (!launcherRow) return;
+                  const ctx = resolveAccessContext(launcherRow.participantId, launcherRow);
+                  if (ctx) void handleCopyLoginInstructions(ctx);
+                }}
+              >
+                Copy Login Instructions
+              </button>
+            </div>
           </div>
         </section>
       ) : null}
@@ -574,17 +605,53 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
             : 'No students yet. Add your first student.'}
         </p>
       ) : (
-        <PilotAdminStudentTable
-          rows={displayRows}
-          variant="roster"
-          onStudentClick={openStudentDrawer}
-          onGradeSaved={updateParticipantGrade}
-          onInviteParent={(row) => {
-            openStudentDrawer(row.participantId);
-            setInviteParentRow(row);
-          }}
-          showBaselineActions={rosterFilter === 'missing-baseline'}
-        />
+        <div className="pilot-rosterWorkspace">
+          <div className="pilot-rosterWorkspaceMain">
+            <PilotAdminStudentTable
+              rows={displayRows}
+              variant="roster"
+              onStudentClick={openStudentDrawer}
+              onGradeSaved={updateParticipantGrade}
+              onInviteParent={(row) => {
+                openStudentDrawer(row.participantId);
+                setInviteParentRow(row);
+              }}
+              showBaselineActions={rosterFilter === 'missing-baseline'}
+            />
+          </div>
+          <aside className="pilot-adventureSnapshot" aria-labelledby="academy-adventure-title">
+            <img
+              className="pilot-adventureSnapshotB4"
+              src="/images/Choose-Your-Guide/B-4orange.webp"
+              alt=""
+            />
+            <span className="pilot-adventureSnapshotEyebrow">LIVE PROGRAM SNAPSHOT</span>
+            <h3 id="academy-adventure-title">Your Academy Adventure</h3>
+            <p>A live snapshot of how your learners are moving through the Focus Flame journey.</p>
+            {warning ? (
+              <div className="pilot-adventureSnapshotUnavailable">
+                We couldn’t load the latest snapshot. Your roster is still available.
+              </div>
+            ) : (
+              <dl className="pilot-adventureSnapshotMetrics">
+                <div><dt>Students enrolled</dt><dd>{rows.length}</dd></div>
+                <div><dt>Completed an adventure</dt><dd>{adventureSnapshot.learnersWithCompletedAdventure}</dd></div>
+                <div><dt>Completed adventures</dt><dd>{adventureSnapshot.completedAdventures}</dd></div>
+                <div><dt>Ready to play</dt><dd>{adventureSnapshot.readyToPlay}</dd></div>
+                <div><dt>Parent connected</dt><dd>{adventureSnapshot.parentConnected}</dd></div>
+              </dl>
+            )}
+            <p className="pilot-adventureSnapshotNarrative">
+              {adventureSnapshot.completedAdventures > 0
+                ? 'Momentum is building.'
+                : 'No adventures have been recorded yet.'}
+            </p>
+            <button type="button" className="pilot-adventureGoalsBtn" onClick={openProgramGoals}>
+              <span aria-hidden="true">✦</span> What would you like to improve?
+            </button>
+            <small>Choose the focus areas you want Caiden’s Courage to support.</small>
+          </aside>
+        </div>
       )}
 
       <PilotStudentDetailDrawer

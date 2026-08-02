@@ -32,6 +32,7 @@ export default function GoalsOnboardingDrawer({
 }: GoalsOnboardingDrawerProps) {
   const { showToast } = useToast();
   const copy = getProgramGoalsCopy(portalType);
+  const isFacilitator = portalType === 'facilitator';
   const options = getProgramGoalOptions(portalType);
   const [selected, setSelected] = useState<string[]>(initialRecord?.selected_goals ?? []);
   const [saving, setSaving] = useState(false);
@@ -72,7 +73,12 @@ export default function GoalsOnboardingDrawer({
 
   const handleRemindLater = async () => {
     await onRemindLater();
-    showToast("Okay — I'll remind you tomorrow.", 'info');
+    showToast(
+      isFacilitator
+        ? 'Closed for now. Your existing selections are unchanged.'
+        : "Okay — I'll remind you tomorrow.",
+      'info',
+    );
   };
 
   const handleSkip = async () => {
@@ -101,11 +107,23 @@ export default function GoalsOnboardingDrawer({
       titleId="program-goals-drawer-title"
     >
       <div className="ds-goalsDrawerHead">
+        {isFacilitator ? (
+          <img
+            className="ds-goalsDrawerGuide"
+            src="/images/Choose-Your-Guide/B-4orange.webp"
+            alt=""
+          />
+        ) : null}
         <div className="ds-goalsDrawerHeadText">
+          {isFacilitator ? <span className="ds-goalsDrawerEyebrow">PROGRAM GOALS</span> : null}
           <h2 id="program-goals-drawer-title" className="ds-goalsDrawerTitle">
-            {copy.title}
+            {isFacilitator ? 'What would you like to improve?' : copy.title}
           </h2>
-          <p className="ds-goalsDrawerSubtext">{copy.subtext}</p>
+          <p className="ds-goalsDrawerSubtext">
+            {isFacilitator
+              ? 'Choose up to five goals so Caiden’s Courage can better support your students, families, and facilitators.'
+              : copy.subtext}
+          </p>
         </div>
         <button type="button" className="ds-goalsDrawerClose" onClick={handleDismiss} aria-label="Close">
           ×
@@ -113,9 +131,7 @@ export default function GoalsOnboardingDrawer({
       </div>
 
       <div className="ds-goalsDrawerBody">
-        <p className="ds-goalsLimitNote">
-          Choose up to {copy.maxGoals} ({selected.length}/{copy.maxGoals} selected)
-        </p>
+        <p className="ds-goalsLimitNote">{selected.length} of {copy.maxGoals} selected</p>
         {limitHint ? (
           <p className="ds-goalsLimitHint" role="alert">
             Choose up to {copy.maxGoals} goals.
@@ -158,11 +174,13 @@ export default function GoalsOnboardingDrawer({
           className="ds-goalsBtnSecondary"
           onClick={() => void handleRemindLater()}
         >
-          Remind Me Later
+          {isFacilitator ? 'Close for Now' : 'Remind Me Later'}
         </button>
-        <button type="button" className="ds-goalsBtnGhost" onClick={() => void handleSkip()}>
-          Skip for Now
-        </button>
+        {!isFacilitator ? (
+          <button type="button" className="ds-goalsBtnGhost" onClick={() => void handleSkip()}>
+            Skip for Now
+          </button>
+        ) : null}
       </footer>
     </SlideOutDrawer>
   );
