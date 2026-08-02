@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
 import type { PortalLoginIntent } from '../../config/portalLoginIntent';
@@ -72,7 +72,9 @@ export default function PortalAccessForm({
   const [hideRememberedResume, setHideRememberedResume] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<PortalLoginIntent | null>(null);
+  const [pendingIntent, setPendingIntent] = useState<PortalLoginIntent | null>(null);
   const accessCodeInputRef = useRef<HTMLInputElement>(null);
+  const selectionTimerRef = useRef<number | null>(null);
   const showRememberedResume =
     isHero &&
     Boolean(rememberedSession?.program) &&
@@ -94,29 +96,70 @@ export default function PortalAccessForm({
     PORTAL_LOGIN_INTENTS.find((item) => item.id === portalIntent) ?? PORTAL_LOGIN_INTENTS[0];
   const credentialAutoComplete =
     portalIntent === 'student' ? 'off' : portalIntent === 'facilitator' ? 'email' : 'email';
-  const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string }> = {
+  type CharacterGuide = {
+    name: string;
+    label: string;
+    imageSrc: string;
+    imageAlt: string;
+    selectedImageSrc?: string;
+  };
+  const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string; guide: CharacterGuide }> = {
     student: {
-      title: 'Student Access',
-      description: 'Enter your program code and student PIN to continue your adventure.',
-      optionDescription: 'Continue your quests, games, and Weekly Adventures.',
+      title: 'Continue with Caiden',
+      description: 'Enter your access information to continue your quests and adventures.',
+      optionDescription: 'Continue the Adventure',
       cta: 'Enter the World',
+      guide: {
+        name: 'Caiden',
+        label: 'Continue the Adventure',
+        imageSrc: '/images/characters/HappyCaiden_1@caiden.webp',
+        imageAlt: 'Caiden',
+      },
     },
     parent: {
-      title: 'Parent / Guardian Access',
-      description: 'Sign in to family tools and your child’s connected experience.',
-      optionDescription: 'Access family tools and view your child’s experience.',
+      title: 'Continue with Dr. Victoria',
+      description: 'Access the connected family experience and support your child’s journey.',
+      optionDescription: 'Support the Journey',
       cta: 'Continue to Family Portal',
+      guide: {
+        name: 'Dr. Victoria',
+        label: 'Support the Journey',
+        imageSrc: '/images/characters/dr-victoria-guide.webp',
+        imageAlt: 'Dr. Victoria',
+      },
     },
     facilitator: {
-      title: 'Facilitator Access',
-      description: 'Manage students, activities, and program progress.',
-      optionDescription: 'Manage students, activities, and program progress.',
+      title: 'Continue with Uncle T',
+      description: 'Access your program tools, students, and learning resources.',
+      optionDescription: 'Guide the Program',
       cta: 'Open Facilitator Portal',
+      guide: {
+        name: 'Uncle T',
+        label: 'Guide the Program',
+        imageSrc: '/images/characters/uncle-t-guide.webp',
+        imageAlt: 'Uncle T',
+      },
     },
   };
 
+  useEffect(() => () => {
+    if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+  }, []);
+
+  const chooseGuide = (intent: PortalLoginIntent) => {
+    if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+    setPendingIntent(intent);
+    setShowRecovery(false);
+    onPortalIntentChange?.(intent);
+    selectionTimerRef.current = window.setTimeout(() => {
+      setSelectedIntent(intent);
+      setPendingIntent(null);
+      selectionTimerRef.current = null;
+    }, 260);
+  };
+
   const cardClass = isHero
-    ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
+    ? `cc-portal-access-card ${!selectedIntent ? 'cc-portal-access-card--selector' : 'cc-portal-access-card--form'} rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7`
     : 'cc-portal-access-form--nav';
 
   const handleUseDifferentCode = () => {
@@ -145,36 +188,32 @@ export default function PortalAccessForm({
   return (
     <div id={id} className={cardClass}>
       {isHero && showManualEntry && !selectedIntent && onPortalIntentChange ? (
-        <div className="cc-portal-gateway" data-testid="portal-role-gateway">
+        <div className="cc-portal-gateway" data-testid="portal-character-gateway">
           {cardAudienceLabel ? <p className="cc-portal-gatewayEyebrow">{cardAudienceLabel}</p> : null}
-          <h2 className="cc-portal-gatewayTitle">How are you entering the world?</h2>
-          <p className="cc-portal-gatewayCopy">Choose the experience that belongs to you.</p>
-          <div className="cc-portal-roleOptions" aria-label="Choose how you are entering the world">
+          <div className="cc-portal-characterOptions" role="group" aria-label="Choose your guide">
             {PORTAL_LOGIN_INTENTS.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className="cc-portal-roleOption"
-                onClick={() => {
-                  onPortalIntentChange(item.id);
-                  setSelectedIntent(item.id);
-                  setShowRecovery(false);
-                }}
+                className={`cc-portal-characterOption ${pendingIntent === item.id ? 'is-selected' : ''}`}
+                aria-pressed={pendingIntent === item.id}
+                aria-label={`${roleCopy[item.id].guide.name}: ${roleCopy[item.id].guide.label}`}
+                onClick={() => chooseGuide(item.id)}
               >
-                <span className={`cc-portal-roleIcon cc-portal-roleIcon--${item.id}`} aria-hidden="true">
-                  {item.id === 'student' ? (
-                    <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm16 0A2.5 2.5 0 0 0 17.5 3H12v16h5.5a2.5 2.5 0 0 1 2.5 2.5v-16Z" /></svg>
-                  ) : item.id === 'parent' ? (
-                    <svg viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8.5 2a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM1.5 21a6.5 6.5 0 0 1 13 0h-13Zm12.5 0a7.9 7.9 0 0 0-1.6-4.8A5.5 5.5 0 0 1 22 20v1h-8Z" /></svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24"><path d="M12 2 3 6v6c0 5.3 3.8 9.7 9 10 5.2-.3 9-4.7 9-10V6l-9-4Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 11.5a7 7 0 0 1-4.7-1.8A5 5 0 0 1 12 14a5 5 0 0 1 4.7 2.7 7 7 0 0 1-4.7 1.8Z" /></svg>
-                  )}
+                <span className="cc-portal-characterPortrait">
+                  <img
+                    src={roleCopy[item.id].guide.imageSrc}
+                    alt={roleCopy[item.id].guide.imageAlt}
+                    width="320"
+                    height="360"
+                    loading={item.id === 'student' ? 'eager' : 'lazy'}
+                  />
                 </span>
-                <span className="cc-portal-roleText">
-                  <strong>{item.label}</strong>
-                  <small>{roleCopy[item.id].optionDescription}</small>
+                <span className="cc-portal-characterText">
+                  <strong>{roleCopy[item.id].guide.name}</strong>
+                  <small>{roleCopy[item.id].guide.label}</small>
                 </span>
-                <span className="cc-portal-roleArrow" aria-hidden="true">→</span>
+                <span className="cc-portal-characterArrow" aria-hidden="true">→</span>
               </button>
             ))}
           </div>
@@ -182,18 +221,27 @@ export default function PortalAccessForm({
       ) : null}
 
       {isHero && showManualEntry && selectedIntent ? (
-        <div className="cc-portal-selectedIntro" aria-live="polite">
+        <div className="cc-portal-selectedIntro cc-portal-guideIntro" aria-live="polite">
           <button
             type="button"
             className="cc-portal-back"
             onClick={() => {
+              if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
               onPortalIntentChange?.(selectedIntent);
               setSelectedIntent(null);
+              setPendingIntent(null);
               setShowRecovery(false);
             }}
           >
-            <span aria-hidden="true">←</span> Choose another path
+            <span aria-hidden="true">←</span> Choose another guide
           </button>
+          <img
+            className="cc-portal-guideIntroImage"
+            src={roleCopy[selectedIntent].guide.selectedImageSrc ?? roleCopy[selectedIntent].guide.imageSrc}
+            alt=""
+            width="72"
+            height="72"
+          />
           <h2>{hasRememberedProgram ? 'Welcome back' : roleCopy[selectedIntent].title}</h2>
           <p>
             {hasRememberedProgram

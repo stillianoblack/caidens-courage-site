@@ -54,24 +54,24 @@ export default function PortalHero({
     >
       <div className="cc-section-hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="cc-section-hero-noise pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="cc-portal-ambientMist pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="cc-portal-b4Pass pointer-events-none absolute" aria-hidden="true">
+        <img src="/images/B-4FlightGame/Idle/Idle@2x-transparent.png" alt="" width="108" height="61" />
+      </div>
 
       <div className="cc-portal-hero-inner relative z-10 mx-auto flex w-full max-w-[75rem] flex-1 flex-col justify-center px-4 sm:px-6 lg:px-8">
-        <div className="cc-portal-hero-grid grid w-full gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(26rem,30rem)] lg:items-center lg:gap-12 xl:gap-20">
-          <div className="cc-portal-hero-copy min-w-0 text-center lg:text-left">
+        <div className="cc-portal-guide-stage w-full">
+          <div className="cc-portal-hero-copy min-w-0 text-center">
             <p className="cc-section-hero-eyebrow text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-400 sm:text-[11px]">
               ENTER THE WORLD
             </p>
             <h1 className="cc-section-hero-title mt-4 font-display font-extrabold leading-[1.06] text-white sm:mt-5">
-              Choose your path.
+              Choose your guide.
             </h1>
-            <p className="cc-section-hero-description mx-auto mt-5 max-w-[42rem] text-base leading-relaxed text-white/[0.85] sm:mt-6 sm:text-lg sm:leading-relaxed lg:mx-0 lg:text-xl">
-              Every adventure begins differently. Continue your quests, support a child, or guide a program through
-              the Focus Flame Academy.
-            </p>
-            <p className="cc-portal-hero-atmosphere">Your journey continues here.</p>
+            <p className="cc-portal-hero-atmosphere">Your adventure begins here.</p>
           </div>
 
-          <div className="cc-portal-hero-access mx-auto w-full min-w-0 max-w-md lg:mx-0 lg:max-w-md lg:justify-self-end">
+          <div className="cc-portal-hero-access mx-auto mt-7 w-full min-w-0 max-w-[61rem]">
             <PortalAccessForm
               id="portal-access-code"
               variant="hero"

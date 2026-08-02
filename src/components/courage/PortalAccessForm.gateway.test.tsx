@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PortalAccessForm from './PortalAccessForm';
 
@@ -45,44 +45,47 @@ const renderGateway = (overrides: Partial<React.ComponentProps<typeof PortalAcce
   return props;
 };
 
-describe('Enter the World role gateway', () => {
-  it('renders role selection first without exposing authentication fields', () => {
+describe('Enter the World character gateway', () => {
+  it('renders the three supplied character guides first without administrative role cards', () => {
     renderGateway();
 
-    expect(screen.getByRole('heading', { name: 'How are you entering the world?' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Student Continue your quests/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Parent \/ Guardian Access family tools/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Facilitator Manage students/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Dr. Victoria: Support the Journey' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Uncle T: Guide the Program' })).toBeInTheDocument();
+    expect(screen.queryByText('Student')).not.toBeInTheDocument();
+    expect(screen.getByAltText('Caiden')).toHaveAttribute('src', '/images/characters/HappyCaiden_1@caiden.webp');
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Student PIN')).not.toBeInTheDocument();
   });
 
   it.each([
-    ['Student', 'Student Access', 'Student PIN', 'Enter the World'],
-    ['Parent / Guardian', 'Parent / Guardian Access', 'Parent email or student PIN', 'Continue to Family Portal'],
-    ['Facilitator', 'Facilitator Access', 'Facilitator email', 'Open Facilitator Portal'],
-  ])('opens the %s form in the same card', (role, heading, credential, cta) => {
+    ['Caiden: Continue the Adventure', 'Continue with Caiden', 'Student PIN', 'Enter the World', 'student'],
+    ['Dr. Victoria: Support the Journey', 'Continue with Dr. Victoria', 'Parent email or student PIN', 'Continue to Family Portal', 'parent'],
+    ['Uncle T: Guide the Program', 'Continue with Uncle T', 'Facilitator email', 'Open Facilitator Portal', 'facilitator'],
+  ])('maps %s to the existing form in the same card', async (guide, heading, credential, cta, intent) => {
     const props = renderGateway();
 
-    fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${role}`) }));
+    fireEvent.click(screen.getByRole('button', { name: guide }));
 
-    expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: guide })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getAllByRole('button', { pressed: true })).toHaveLength(1);
+    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
     expect(screen.getByLabelText('Access Code')).toBeInTheDocument();
     expect(screen.getByLabelText(credential)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: cta })).toBeInTheDocument();
-    expect(props.onPortalIntentChange).toHaveBeenCalledTimes(1);
+    expect(props.onPortalIntentChange).toHaveBeenCalledWith(intent);
   });
 
-  it('returns to role selection without navigation or reload', () => {
+  it('returns to character selection without navigation or reload', async () => {
     renderGateway();
-    fireEvent.click(screen.getByRole('button', { name: /^Student/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Choose another path' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Choose another guide' }));
 
-    expect(screen.getByRole('heading', { name: 'How are you entering the world?' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Access Code')).not.toBeInTheDocument();
   });
 
-  it('preserves submit, loading, error, and recovery behavior inside the selected form', () => {
+  it('preserves submit, loading, error, and recovery behavior inside the selected form', async () => {
     const onSubmit = jest.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
     const { rerender } = render(
       <MemoryRouter><PortalAccessForm
@@ -98,8 +101,8 @@ describe('Enter the World role gateway', () => {
       /></MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /^Student/ }));
-    expect(screen.getByRole('alert')).toHaveTextContent('That code did not match.');
+    fireEvent.click(screen.getByRole('button', { name: 'Caiden: Continue the Adventure' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('That code did not match.');
     expect(screen.getByRole('button', { name: 'Forgot your code?' })).toBeInTheDocument();
     fireEvent.submit(screen.getByRole('button', { name: 'Enter the World' }).closest('form')!);
     expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -117,6 +120,6 @@ describe('Enter the World role gateway', () => {
         onPortalIntentChange={jest.fn()}
       /></MemoryRouter>,
     );
-    expect(screen.getByRole('button', { name: 'Unlocking…' })).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Unlocking…' })).toBeDisabled());
   });
 });
