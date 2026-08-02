@@ -8353,6 +8353,7 @@ a.ffl-ctaSecondary {
 .cc-portal-guide-stage {
   max-width: 61rem;
   margin-inline: auto;
+  transform: translateY(-2.75rem);
 }
 
 .cc-portal-gateway,
@@ -8627,6 +8628,10 @@ a.ffl-ctaSecondary {
 
   .cc-portal-hero--gateway .cc-section-hero-title {
     font-size: 2.35rem;
+  }
+
+  .cc-portal-guide-stage {
+    transform: translateY(-1.25rem);
   }
 
   .cc-portal-hero--gateway .cc-section-hero-description {

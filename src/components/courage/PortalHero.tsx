@@ -62,10 +62,7 @@ export default function PortalHero({
       <div className="cc-portal-hero-inner relative z-10 mx-auto flex w-full max-w-[75rem] flex-1 flex-col justify-center px-4 sm:px-6 lg:px-8">
         <div className="cc-portal-guide-stage w-full">
           <div className="cc-portal-hero-copy min-w-0 text-center">
-            <p className="cc-section-hero-eyebrow text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-400 sm:text-[11px]">
-              ENTER THE WORLD
-            </p>
-            <h1 className="cc-section-hero-title mt-4 font-display font-extrabold leading-[1.06] text-white sm:mt-5">
+            <h1 className="cc-section-hero-title font-display font-extrabold leading-[1.06] text-white">
               Choose your guide.
             </h1>
             <p className="cc-portal-hero-atmosphere">Your adventure begins here.</p>
