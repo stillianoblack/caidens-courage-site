@@ -3515,7 +3515,7 @@ a.pilot-overviewMiniCard:hover {
   max-width: none;
   object-fit: contain;
   object-position: center;
-  transform: translateY(-2%);
+  transform: translateY(-12%);
   filter: drop-shadow(0 12px 16px rgba(13, 23, 50, 0.3));
 }
 .pilot-rosterLauncherEyebrow { font-size: .67rem; font-weight: 900; letter-spacing: .15em; color: #ffe199; }
