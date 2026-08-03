@@ -39,11 +39,13 @@ export default function FacilitatorProgramCoachPanel({
       aria-labelledby="pilot-program-coach-title"
     >
       <header className="pilot-programCoachHeader">
-        <B4AnimatedHead
-          className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
-          variant="orange"
-          alt="B-4"
-        />
+        <span className="pilot-programCoachAvatar pilot-programCoachAvatar--guide">
+          <B4AnimatedHead
+            className="pilot-programCoachAvatarImage"
+            variant="orange"
+            alt="B-4"
+          />
+        </span>
         <div className="pilot-programCoachIntro">
           <h2 id="pilot-program-coach-title" className="pilot-programCoachTitle">
             B-4 Guide

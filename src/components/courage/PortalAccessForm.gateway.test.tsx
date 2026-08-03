@@ -78,6 +78,8 @@ describe('Enter the World character gateway', () => {
       '/images/Choose-Your-Guide/b-4facilitator.webp',
     );
     expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/B-4orange.webp');
+    expect(document.querySelectorAll('.cc-portal-characterImage--default.b4-animatedHead')).toHaveLength(3);
+    expect(document.querySelectorAll('.cc-portal-characterImage--default .b4-animatedHeadFrame--closed')).toHaveLength(3);
     expect(document.querySelectorAll('.cc-portal-characterImage--hover')).toHaveLength(3);
     expect(Array.from(document.querySelectorAll<HTMLImageElement>('.cc-portal-characterImage--hover')).map((image) => image.src)).toEqual([
       expect.stringContaining('/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp'),

@@ -15,6 +15,7 @@ import type { RememberedDeviceSession } from '../../lib/rememberedDeviceSession'
 import PortalWelcomeBackCard from './PortalWelcomeBackCard';
 import RememberedDeviceResumeCard from './RememberedDeviceResumeCard';
 import PortalCodeRecovery from './PortalCodeRecovery';
+import B4AnimatedHead, { type B4ColorVariant } from '../b4/B4AnimatedHead';
 
 type PortalAccessFormProps = {
   variant: PortalUnlockVariant;
@@ -107,6 +108,11 @@ export default function PortalAccessForm({
     selectedImageSrc?: string;
   };
   const guideDisplayOrder: PortalLoginIntent[] = ['student', 'facilitator', 'parent'];
+  const guideVariant: Record<PortalLoginIntent, B4ColorVariant> = {
+    student: 'blue',
+    facilitator: 'orange',
+    parent: 'green',
+  };
   const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string; guide: CharacterGuide }> = {
     student: {
       title: 'Continue Students',
@@ -221,13 +227,11 @@ export default function PortalAccessForm({
                 onClick={() => chooseGuide(item.id)}
               >
                 <span className={`cc-portal-characterPortrait cc-portal-characterPortrait--${item.id}`}>
-                  <img
+                  <B4AnimatedHead
                     className="cc-portal-characterImage cc-portal-characterImage--default"
-                    src={roleCopy[item.id].guide.imageSrc}
+                    variant={guideVariant[item.id]}
+                    openSrc={roleCopy[item.id].guide.imageSrc}
                     alt={roleCopy[item.id].guide.imageAlt}
-                    width="320"
-                    height="360"
-                    loading={item.id === 'student' ? 'eager' : 'lazy'}
                   />
                   <img
                     className="cc-portal-characterImage cc-portal-characterImage--hover"

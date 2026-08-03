@@ -54,12 +54,24 @@
   width: 6.6rem;
   height: 6.6rem;
   padding: 0.4rem;
-  object-fit: contain;
   border-width: 3px;
   border-color: rgba(249, 198, 104, 0.7);
   background: radial-gradient(circle, rgba(242, 151, 71, 0.28), rgba(255,255,255,0.06));
   box-shadow: 0 12px 28px rgba(8, 20, 43, 0.32), 0 0 30px rgba(242, 151, 71, 0.18);
   animation: pilot-guide-float 5s ease-in-out infinite;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.pilot-programCoachAvatarImage {
+  width: 82%;
+  height: 82%;
+  max-width: 82%;
+  max-height: 82%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .pilot-programCoachHeader { align-items: center; }

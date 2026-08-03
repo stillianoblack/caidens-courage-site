@@ -8478,7 +8478,7 @@ a.ffl-ctaSecondary {
   box-shadow: 0 14px 28px -18px rgb(25 76 145 / 0.72);
 }
 
-.cc-portal-characterPortrait img {
+.cc-portal-characterPortrait .cc-portal-characterImage {
   position: absolute;
   inset: 8%;
   width: 84%;
@@ -8556,9 +8556,9 @@ a.ffl-ctaSecondary {
   transform: none;
 }
 
-.cc-portal-characterOption:hover .cc-portal-characterPortrait img,
-.cc-portal-characterOption.is-selected .cc-portal-characterPortrait img,
-.cc-portal-characterOption:focus-visible .cc-portal-characterPortrait img {
+.cc-portal-characterOption:hover .cc-portal-characterPortrait .cc-portal-characterImage,
+.cc-portal-characterOption.is-selected .cc-portal-characterPortrait .cc-portal-characterImage,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPortrait .cc-portal-characterImage {
   filter: saturate(1.05) brightness(1.18);
   transform: scale(0.94);
 }
@@ -8818,7 +8818,7 @@ a.ffl-ctaSecondary {
   }
 
   .cc-portal-characterOption,
-  .cc-portal-characterPortrait img {
+  .cc-portal-characterPortrait .cc-portal-characterImage {
     transition: none;
   }
 

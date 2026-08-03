@@ -40,7 +40,8 @@ function resolveGalleryTab(value: string | null): GalleryTabId {
 export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
   const { programCode: programCodeProp, groupName: groupNameProp } = props;
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = resolveGalleryTab(searchParams.get('tab'));
+  const requestedTab = resolveGalleryTab(searchParams.get('tab'));
+  const [activeTab, setActiveTab] = useState<GalleryTabId>(requestedTab);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadFormRef = useRef<HTMLFormElement>(null);
   const [pendingItems, setPendingItems] = useState<
@@ -63,6 +64,19 @@ export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
 
   useEffect(() => {
     trackEvent('gallery_viewed');
+  }, []);
+
+  useEffect(() => {
+    setActiveTab(requestedTab);
+  }, [requestedTab]);
+
+  useEffect(() => {
+    const syncFromHistory = () => {
+      const value = new URLSearchParams(window.location.search).get('tab');
+      setActiveTab(resolveGalleryTab(value));
+    };
+    window.addEventListener('popstate', syncFromHistory);
+    return () => window.removeEventListener('popstate', syncFromHistory);
   }, []);
 
   const [title, setTitle] = useState('');
@@ -89,13 +103,14 @@ export default function PilotGalleryPanel(props: PilotGalleryPanelProps = {}) {
 
   const selectTab = useCallback(
     (tab: GalleryTabId) => {
+      setActiveTab(tab);
       const nextParams = new URLSearchParams(searchParams);
       if (tab === 'program') {
         nextParams.delete('tab');
       } else {
         nextParams.set('tab', tab);
       }
-      setSearchParams(nextParams, { replace: true });
+      setSearchParams(nextParams);
     },
     [searchParams, setSearchParams],
   );

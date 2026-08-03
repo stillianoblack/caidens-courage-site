@@ -20,7 +20,7 @@ const CLOSED_HEADS: Record<B4ColorVariant, string> = {
   purple: '/assets/b4/pattern/blinking/b4-pattern-blinking.png',
 };
 
-type B4AnimatedHeadProps = {
+export type B4AnimatedHeadProps = {
   variant?: B4ColorVariant;
   className?: string;
   alt?: string;

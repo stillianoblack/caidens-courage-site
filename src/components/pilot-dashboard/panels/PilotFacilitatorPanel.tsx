@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import {
@@ -24,8 +24,21 @@ export default function PilotFacilitatorPanel({ results }: { results?: React.Rea
   const activeProgram = readActivePilotProgram();
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get('section');
-  const section: TrainingSection = requested === 'dr-victoria' || requested === 'uncle-t' ? requested : 'results';
+  const requestedSection: TrainingSection = requested === 'dr-victoria' || requested === 'uncle-t' ? requested : 'results';
+  const [section, setSection] = useState<TrainingSection>(requestedSection);
+  useEffect(() => {
+    setSection(requestedSection);
+  }, [requestedSection]);
+  useEffect(() => {
+    const syncFromHistory = () => {
+      const value = new URLSearchParams(window.location.search).get('section');
+      setSection(value === 'dr-victoria' || value === 'uncle-t' ? value : 'results');
+    };
+    window.addEventListener('popstate', syncFromHistory);
+    return () => window.removeEventListener('popstate', syncFromHistory);
+  }, []);
   const selectSection = (next: TrainingSection) => {
+    setSection(next);
     const params = new URLSearchParams(searchParams);
     if (next === 'results') params.delete('section');
     else params.set('section', next);

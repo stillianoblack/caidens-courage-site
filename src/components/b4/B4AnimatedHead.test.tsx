@@ -61,4 +61,19 @@ describe('B4AnimatedHead', () => {
     expect(rootRule).not.toMatch(/\bheight\s*:/);
     expect(rootRule).not.toMatch(/\baspect-ratio\s*:/);
   });
+
+  it('is constrained by a separate clipping frame in the facilitator guide', () => {
+    const guide = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/pilot-dashboard/coach/FacilitatorProgramCoachPanel.tsx'),
+      'utf8',
+    );
+    const guideCss = fs.readFileSync(
+      path.join(process.cwd(), 'src/components/pilot-dashboard/coach/facilitator-program-coach.css'),
+      'utf8',
+    );
+    expect(guide).toContain('<span className="pilot-programCoachAvatar pilot-programCoachAvatar--guide">');
+    expect(guide).toContain('className="pilot-programCoachAvatarImage"');
+    expect(guideCss).toContain('overflow: hidden;');
+    expect(guideCss).toContain('box-sizing: border-box;');
+  });
 });

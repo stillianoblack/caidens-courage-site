@@ -23,10 +23,23 @@ const DEFAULT_CATEGORY: ActivityCategoryId = 'coloring-pages';
 export default function PilotActivitiesPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const initialCategory = tabParam && isActivityLibraryTab(tabParam) ? tabParam : DEFAULT_CATEGORY;
-  const [category, setCategory] = useState<ActivityCategoryId>(initialCategory);
+  const requestedCategory = tabParam && isActivityLibraryTab(tabParam) ? tabParam : DEFAULT_CATEGORY;
+  const [category, setCategory] = useState<ActivityCategoryId>(requestedCategory);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const { modules } = useAdventureModules('all');
+
+  useEffect(() => {
+    setCategory(requestedCategory);
+  }, [requestedCategory]);
+
+  useEffect(() => {
+    const syncFromHistory = () => {
+      const value = new URLSearchParams(window.location.search).get('tab');
+      setCategory(value && isActivityLibraryTab(value) ? value : DEFAULT_CATEGORY);
+    };
+    window.addEventListener('popstate', syncFromHistory);
+    return () => window.removeEventListener('popstate', syncFromHistory);
+  }, []);
 
   const activityAssets = useMemo(() => {
     const cmsAssets = buildCmsActivityAssets(modules);
@@ -40,12 +53,6 @@ export default function PilotActivitiesPanel() {
     };
     return merged;
   }, [modules]);
-
-  useEffect(() => {
-    if (tabParam && isActivityLibraryTab(tabParam) && tabParam !== category) {
-      setCategory(tabParam);
-    }
-  }, [tabParam, category]);
 
   const selectCategory = useCallback(
     (next: ActivityCategoryId) => {
