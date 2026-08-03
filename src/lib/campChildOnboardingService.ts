@@ -1,6 +1,5 @@
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
-import { getGradeBand } from './getGradeBand';
 import {
   isValidSupabaseParticipantId,
   resolveExistingStudentParticipant,
@@ -74,7 +73,6 @@ async function insertCampChildParticipant(input: {
   const nickname = input.nickname.trim() || firstName;
   const campProgramCode = input.campProgramCode.trim();
   const gradeLevel = normalizeGradeLevelStorage(input.gradeLevel) ?? undefined;
-  const gradeBand = gradeLevel ? getGradeBand(gradeLevel) : undefined;
 
   if (!isSupabaseConfigured() || !supabase) {
     return { error: 'Supabase is not configured. Cannot add camp child.' };
@@ -98,7 +96,6 @@ async function insertCampChildParticipant(input: {
       };
       if (gradeLevel) {
         updatePayload.grade_level = gradeLevel;
-        updatePayload.grade_band = gradeBand!;
       }
 
       const { error: updateError } = await withTimeout(
@@ -149,7 +146,6 @@ async function insertCampChildParticipant(input: {
       };
       if (gradeLevel) {
         updatePayload.grade_level = gradeLevel;
-        updatePayload.grade_band = gradeBand!;
       }
 
       const { error: updateError } = await withTimeout(
@@ -175,7 +171,6 @@ async function insertCampChildParticipant(input: {
     };
     if (gradeLevel) {
       insertPayload.grade_level = gradeLevel;
-      insertPayload.grade_band = gradeBand!;
     }
 
     const { data, error: insertError } = await withTimeout(

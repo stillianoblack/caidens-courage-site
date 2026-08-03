@@ -91,7 +91,10 @@ function updateLocalParticipantGrade(
   });
 }
 
-/** Save canonical grade_level (auto-computes grade_band via getGradeBand) */
+/**
+ * Save canonical grade_level while preserving the legacy persisted grade_band.
+ * Adaptive bands are derived at runtime and must not be written to that constrained column.
+ */
 export async function saveParticipantGradeSettings(
   participantId: string,
   input: SaveParticipantGradeInput,
@@ -135,7 +138,6 @@ export async function saveParticipantGradeSettings(
     }
 
     const payload: Record<string, unknown> = {
-      grade_band: settings.grade_band,
       allow_stretch_level: settings.allow_stretch_level,
     };
     if (settings.grade_level) {

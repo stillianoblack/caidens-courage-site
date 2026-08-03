@@ -1,6 +1,5 @@
 import { DASHBOARD_FETCH_TIMEOUT_MS, withTimeout } from './fetchWithTimeout';
 import { normalizeGradeLevelStorage, type GradeLevel } from '../data/gradeLevelOptions';
-import { getGradeBand } from './getGradeBand';
 import {
   isValidSupabaseParticipantId,
   resolveExistingStudentParticipant,
@@ -91,8 +90,6 @@ export async function createAdminEmergencyStudent(
   }
 
   const programAccess = await fetchPilotProgramAccessCodes(campProgramCode);
-  const gradeBand = getGradeBand(gradeLevel);
-
   try {
     const existing = await resolveExistingStudentParticipant({
       programCode: campProgramCode,
@@ -150,7 +147,6 @@ export async function createAdminEmergencyStudent(
       program_code: campProgramCode,
       group_name: groupName,
       grade_level: gradeLevel,
-      grade_band: gradeBand,
     };
 
     const { data, error: insertError } = await withTimeout(

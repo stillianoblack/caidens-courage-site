@@ -7,6 +7,8 @@ import {
   isLegacyPersistedGradeBand,
   normalizeGradeLevel,
 } from '../../shared/gradeContract';
+import fs from 'fs';
+import path from 'path';
 
 const matrix = [
   ['Kindergarten', 'kindergarten', 'K-1', null, 'Kindergarten'],
@@ -45,5 +47,20 @@ describe('canonical grade contract', () => {
   test('rejects unsupported grade input', () => {
     expect(normalizeGradeLevel('9')).toBeNull();
     expect(getAdaptiveGradeBand('unknown')).toBeNull();
+  });
+
+  test('participant creation and ordinary grade edits never write legacy grade_band', () => {
+    const sourceFiles = [
+      'src/lib/campChildOnboardingService.ts',
+      'src/lib/adminEmergencyAddStudentService.ts',
+      'src/lib/participantGradeService.ts',
+      'netlify/functions/_lib/campCompatibilityAuth.js',
+    ];
+
+    for (const sourceFile of sourceFiles) {
+      const source = fs.readFileSync(path.join(process.cwd(), sourceFile), 'utf8');
+      expect(source).not.toMatch(/(?:insertPayload|updatePayload|payload)\.grade_band\s*=/);
+      expect(source).not.toContain('grade_band: gradeBand');
+    }
   });
 });
