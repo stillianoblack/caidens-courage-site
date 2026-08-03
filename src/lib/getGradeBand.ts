@@ -2,6 +2,7 @@ import {
   normalizeGradeLevelStorage,
   type GradeLevel,
 } from '../data/gradeLevelOptions';
+import { getAdaptiveGradeBand } from '../shared/gradeContract';
 import { isFamilyGradeBand, type FamilyGradeBand } from '../data/familyGradeBandOptions';
 import {
   isMirandaGradeBand,
@@ -18,23 +19,7 @@ export function getStretchedBand(band: MirandaGradeBand): MirandaGradeBand {
 
 /** Map canonical grade_level → adaptive content band */
 export function getGradeBand(gradeLevel: GradeLevel): MirandaGradeBand {
-  switch (gradeLevel) {
-    case 'kindergarten':
-    case '1':
-      return 'K-1';
-    case '2':
-    case '3':
-      return '2-3';
-    case '4':
-    case '5':
-      return '4-5';
-    case '6':
-    case '7':
-    case '8':
-      return '6-8';
-    default:
-      return '2-3';
-  }
+  return getAdaptiveGradeBand(gradeLevel) ?? '2-3';
 }
 
 export function getGradeBandFromStorage(

@@ -1,4 +1,7 @@
 const crypto = require('crypto');
+const {
+  normalizeGradeLevel,
+} = require('../../../src/shared/gradeContract');
 
 function safeText(value, max = 160) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -7,17 +10,11 @@ function safeText(value, max = 160) {
 const { generateFamilyClaimCode, generateStudentPin, hashStudentPin } = require('./studentPinCrypto');
 const { validateClientRuntime } = require('./supabaseRuntime');
 
-const GRADE_BANDS = {
-  kindergarten: 'k-2', '1': 'k-2', '2': 'k-2',
-  '3': '3-5', '4': '3-5', '5': '3-5',
-  '6': '6-8', '7': '6-8', '8': '6-8',
-};
-
 function reportSafeIdentifier(value) {
   return crypto.createHash('sha256').update(String(value || '')).digest('hex').slice(0, 12);
 }
 
-function logCreateParticipantStage(context, stage, status, errorCategory) {
+function logCreateParticipantStage(context, stage, status, errorCategory, databaseError) {
   console.info('[CREATE_PARTICIPANT_TRANSACTION]', {
     correlationId: context.correlationId,
     participantRef: context.participantId ? reportSafeIdentifier(context.participantId) : null,
@@ -25,7 +22,53 @@ function logCreateParticipantStage(context, stage, status, errorCategory) {
     operationStage: stage,
     status,
     ...(errorCategory ? { errorCategory } : {}),
+    ...(databaseError || {}),
   });
+}
+
+function safeDatabaseIdentifier(value) {
+  const identifier = String(value || '').trim();
+  return /^[a-z_][a-z0-9_]{0,62}$/i.test(identifier) ? identifier : null;
+}
+
+function sanitizeParticipantInsertError(error) {
+  const databaseCode = /^[A-Z0-9]{3,10}$/i.test(String(error?.code || ''))
+    ? String(error.code)
+    : null;
+  const message = String(error?.message || '');
+  const relation = safeDatabaseIdentifier(
+    error?.relation || message.match(/relation ["']([a-z_][a-z0-9_]*)["']/i)?.[1],
+  );
+  const constraint = safeDatabaseIdentifier(
+    error?.constraint || message.match(/constraint ["']([a-z_][a-z0-9_]*)["']/i)?.[1],
+  );
+  let errorCategory = 'unknown_database_error';
+  let sanitizedMessage = 'Participant insert failed.';
+  if (databaseCode === '23514' && constraint === 'participants_grade_band_check') {
+    errorCategory = 'grade_band_constraint_violation';
+    sanitizedMessage = 'Participant grade storage was incompatible with the production schema.';
+  } else if (databaseCode === '23505') {
+    errorCategory = 'unique_constraint_violation';
+    sanitizedMessage = 'Participant insert conflicted with an existing unique value.';
+  } else if (databaseCode === '23503') {
+    errorCategory = 'foreign_key_violation';
+    sanitizedMessage = 'Participant insert referenced an unavailable related record.';
+  } else if (databaseCode === '42501' || databaseCode === 'PGRST301') {
+    errorCategory = 'permission_failure';
+    sanitizedMessage = 'Participant insert was not authorized.';
+  } else if (databaseCode?.startsWith('22')) {
+    errorCategory = 'invalid_input';
+    sanitizedMessage = 'Participant insert contained an invalid value.';
+  }
+  return {
+    errorCategory,
+    metadata: {
+      databaseCode,
+      relation,
+      constraint,
+      sanitizedMessage,
+    },
+  };
 }
 
 function normalizeParticipantPinStatus(row) {
@@ -40,12 +83,12 @@ async function createParticipantForCamp(supabase, programCode, input, context = 
   const firstName = safeText(input.childFirstName, 80);
   const lastName = safeText(input.childLastName, 80) || null;
   const nickname = safeText(input.childNickname, 80) || firstName;
-  const gradeLevel = safeText(input.gradeLevel, 20).toLowerCase();
+  const gradeLevel = normalizeGradeLevel(safeText(input.gradeLevel, 20));
   const parentEmail = safeText(input.parentEmail, 200).toLowerCase() || null;
   const parentFirstName = safeText(input.parentFirstName, 80) || null;
   const parentLastName = safeText(input.parentLastName, 80) || null;
   const parentPhone = safeText(input.parentPhone, 40) || null;
-  if (!firstName || (!lastName && !safeText(input.childNickname, 80)) || !GRADE_BANDS[gradeLevel]) {
+  if (!firstName || (!lastName && !safeText(input.childNickname, 80)) || !gradeLevel) {
     logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'validation_error');
     return { status: 400, code: 'validation_error' };
   }
@@ -83,7 +126,6 @@ async function createParticipantForCamp(supabase, programCode, input, context = 
     program_code: programCode,
     group_name: null,
     grade_level: gradeLevel,
-    grade_band: GRADE_BANDS[gradeLevel],
     student_pin_hash: hash,
     student_pin_fingerprint: fingerprint,
     student_pin_reveal_value: pin,
@@ -101,7 +143,14 @@ async function createParticipantForCamp(supabase, programCode, input, context = 
     .select('id')
     .single();
   if (participantError || !participant?.id) {
-    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'participant_insert_failed');
+    const sanitizedError = sanitizeParticipantInsertError(participantError);
+    logCreateParticipantStage(
+      logContext,
+      'create_participant_failed',
+      'failed',
+      sanitizedError.errorCategory,
+      sanitizedError.metadata,
+    );
     return { status: 503, code: 'participant_create_failed' };
   }
   logContext.participantId = participant.id;
@@ -277,6 +326,7 @@ module.exports = {
   participantDirectoryForCamp,
   participantForCamp,
   normalizeParticipantPinStatus,
+  sanitizeParticipantInsertError,
   safeText,
   sessionForCamp,
 };

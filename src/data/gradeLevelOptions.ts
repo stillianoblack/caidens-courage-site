@@ -1,5 +1,9 @@
 import type { MirandaGradeBand } from '../types/mirandaAdaptiveQuest';
-import { getGradeBand } from '../lib/getGradeBand';
+import {
+  formatGradeLevelLabel as formatCanonicalGradeLevelLabel,
+  getAdaptiveGradeBand,
+  normalizeGradeLevel,
+} from '../shared/gradeContract';
 
 /** Canonical values stored on participants.grade_level */
 export const GRADE_LEVEL_VALUES = [
@@ -39,23 +43,6 @@ export const GRADE_LEVEL_PROMPT = 'What grade are you in?';
 export const GRADE_LEVEL_ENCOURAGE = 'Grade level helps us personalize activities.';
 export const GRADE_LEVEL_UNKNOWN_LABEL = 'Grade unknown';
 
-const LEGACY_DISPLAY_TO_CANONICAL: Record<string, GradeLevel> = {
-  kindergarten: 'kindergarten',
-  Kindergarten: 'kindergarten',
-  '1st Grade': '1',
-  '2nd Grade': '2',
-  '3rd Grade': '3',
-  '4th Grade': '4',
-  '5th Grade': '5',
-  '6th Grade': '6',
-  '7th Grade': '7',
-  '8th Grade': '8',
-};
-
-const CANONICAL_LABELS: Record<GradeLevel, string> = Object.fromEntries(
-  GRADE_LEVEL_OPTIONS.map((option) => [option.value, option.label]),
-) as Record<GradeLevel, string>;
-
 export function isGradeLevel(value: string | null | undefined): value is GradeLevel {
   return GRADE_LEVEL_VALUES.includes(value as GradeLevel);
 }
@@ -64,14 +51,11 @@ export function isGradeLevel(value: string | null | undefined): value is GradeLe
 export function normalizeGradeLevelStorage(
   value: string | null | undefined,
 ): GradeLevel | null {
-  const trimmed = value?.trim();
-  if (!trimmed) return null;
-  if (isGradeLevel(trimmed)) return trimmed;
-  return LEGACY_DISPLAY_TO_CANONICAL[trimmed] ?? null;
+  return normalizeGradeLevel(value);
 }
 
 export function formatGradeLevelLabel(gradeLevel: GradeLevel): string {
-  return CANONICAL_LABELS[gradeLevel];
+  return formatCanonicalGradeLevelLabel(gradeLevel) ?? GRADE_LEVEL_UNKNOWN_LABEL;
 }
 
 export function formatGradeLevelDisplay(gradeLevel: string | null | undefined): string {
@@ -79,7 +63,7 @@ export function formatGradeLevelDisplay(gradeLevel: string | null | undefined): 
   return normalized ? formatGradeLevelLabel(normalized) : GRADE_LEVEL_UNKNOWN_LABEL;
 }
 
-/** @deprecated Use getGradeBand from ../lib/getGradeBand */
+/** @deprecated Use getAdaptiveGradeBand from ../shared/gradeContract */
 export function mapGradeLevelToContentBand(gradeLevel: GradeLevel): MirandaGradeBand {
-  return getGradeBand(gradeLevel);
+  return getAdaptiveGradeBand(gradeLevel) ?? '2-3';
 }
