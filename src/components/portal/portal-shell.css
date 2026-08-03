@@ -40,6 +40,18 @@
     0 6px 16px -12px rgba(26, 47, 82, 0.18);
 }
 
+.portal-environmentBanner {
+  flex-shrink: 0;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid rgba(154, 91, 17, 0.22);
+  background: #fff4d6;
+  color: #73420b;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  text-align: center;
+}
+
 .portal-shell .family-content,
 .portal-shell .pilot-content {
   flex: 1;

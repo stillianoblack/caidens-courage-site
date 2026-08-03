@@ -21,6 +21,10 @@ const program = {
 };
 const participantId = '11111111-1111-4111-8111-111111111111';
 const sessionId = '22222222-2222-4222-8222-222222222222';
+const runtimeHeaders = {
+  'x-cc-deploy-context': 'production',
+  'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
+};
 
 function query(result: Record<string, unknown>) {
   const value: Record<string, jest.Mock> = {};
@@ -38,16 +42,21 @@ function event(body: Record<string, unknown>, headers = true) {
     httpMethod: 'POST',
     headers: headers
       ? {
+          ...runtimeHeaders,
           'x-family-program-code': program.program_code,
           'x-family-access-code': program.family_access_code,
         }
-      : {},
+      : runtimeHeaders,
     body: JSON.stringify(body),
   };
 }
 
 describe('family child session endpoint', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env.CONTEXT = 'production';
+    process.env.PRODUCTION_SUPABASE_PROJECT_REF = 'bnopaocdqkknjzmmkaen';
+  });
 
   test('returns only allowlisted child-session resume metadata', () => {
     expect(endpoint._test.sanitizeResumePayload({

@@ -7,9 +7,13 @@ const {
   requireAdmin,
   sessionCookie,
 } = require('./_lib/adminAuth');
+const { validateClientRuntime } = require('./_lib/supabaseRuntime');
 
 exports.handler = async (event) => {
   const id = correlationId(event);
+  if (!validateClientRuntime(event)) {
+    return json(503, { error: 'Runtime context mismatch.' }, id);
+  }
   if (event.httpMethod === 'POST') {
     let payload;
     try {

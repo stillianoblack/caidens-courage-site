@@ -1,6 +1,7 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActiveAccessCode, readActivePortalRole } from '../config/portalContext';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
+import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 
 export type CampChildSessionResult = {
   session: KidPlaySessionRow;
@@ -55,6 +56,7 @@ export function campCompatibilityHeaders(sessionId?: string | null): Record<stri
     'X-Camp-Program-Id': program.id.trim(),
     'X-Camp-Program-Code': program.programCode.trim(),
     'X-Camp-Access-Code': accessCode.trim(),
+    ...browserRuntimeHeaders(),
     ...(sessionId?.trim() ? { 'X-Kid-Session-Id': sessionId.trim() } : {}),
   };
 }

@@ -23,6 +23,10 @@ const program = {
   admin_first_name: 'Parent',
   group_name: 'Trace Family',
 };
+const runtimeHeaders = {
+  'x-cc-deploy-context': 'production',
+  'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
+};
 
 function chain(result: Record<string, unknown>) {
   const value: Record<string, jest.Mock> = {};
@@ -37,6 +41,8 @@ function chain(result: Record<string, unknown>) {
 describe('family compatibility children endpoint', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.CONTEXT = 'production';
+    process.env.PRODUCTION_SUPABASE_PROJECT_REF = 'bnopaocdqkknjzmmkaen';
     mockFrom.mockImplementation((table: string) => {
       if (table === 'pilot_programs') return chain({ data: program, error: null });
       if (table === 'participants') return chain({ data: [{ id: '11111111-1111-4111-8111-111111111111', role: 'student', program_code: program.program_code }], error: null });
@@ -49,6 +55,7 @@ describe('family compatibility children endpoint', () => {
     const response = await handler({
       httpMethod: 'GET',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
       },
@@ -72,6 +79,7 @@ describe('family compatibility children endpoint', () => {
     const response = await handler({
       httpMethod: 'POST',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
         'x-idempotency-key': 'family-child-request-1234',
@@ -90,7 +98,7 @@ describe('family compatibility children endpoint', () => {
   });
 
   test('does not expose children when the family session is absent', async () => {
-    const response = await handler({ httpMethod: 'GET', headers: {} });
+    const response = await handler({ httpMethod: 'GET', headers: runtimeHeaders });
     expect(response.statusCode).toBe(401);
     expect(mockRpc).not.toHaveBeenCalled();
   });
@@ -118,6 +126,7 @@ describe('family compatibility children endpoint', () => {
     const response = await handler({
       httpMethod: 'PATCH',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
       },

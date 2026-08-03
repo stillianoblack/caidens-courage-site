@@ -3,6 +3,7 @@ function safeText(value, max = 160) {
 }
 
 const { generateFamilyClaimCode, generateStudentPin, hashStudentPin } = require('./studentPinCrypto');
+const { validateClientRuntime } = require('./supabaseRuntime');
 
 const GRADE_BANDS = {
   kindergarten: 'k-2', '1': 'k-2', '2': 'k-2',
@@ -110,6 +111,7 @@ async function createParticipantForCamp(supabase, programCode, input) {
 const CAMP_SESSION_SOURCES = new Set(['facilitator_roster_launch']);
 
 async function authorizeCampProgram(event, supabase) {
+  if (!validateClientRuntime(event)) return { status: 503, code: 'runtime_context_mismatch' };
   const programId = safeText(event.headers?.['x-camp-program-id'], 80);
   const programCode = safeText(event.headers?.['x-camp-program-code'], 120);
   const accessCode = safeText(event.headers?.['x-camp-access-code'], 160);

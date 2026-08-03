@@ -3,6 +3,7 @@ import type {
   PilotOutcomeProgram,
   PilotOutcomeSummary,
 } from '../types/pilotOutcomes';
+import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 
 async function authorizedJson<T>(url: string, _token: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -10,6 +11,7 @@ async function authorizedJson<T>(url: string, _token: string, init?: RequestInit
     credentials: 'same-origin',
     headers: {
       ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+      ...browserRuntimeHeaders(),
       ...init?.headers,
     },
   });
@@ -63,7 +65,7 @@ export async function downloadPilotOutcomesReport(
   const response = await fetch('/.netlify/functions/admin-pilot-outcomes-report', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...browserRuntimeHeaders() },
     body: JSON.stringify(payload),
   });
   if (!response.ok) {
@@ -103,6 +105,7 @@ export async function downloadAcademyReport(format: 'pdf' | 'html' | 'executive'
   const response = await fetch(`/.netlify/functions/admin-academy-report?format=${format}`, {
     method: 'POST',
     credentials: 'same-origin',
+    headers: browserRuntimeHeaders(),
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));

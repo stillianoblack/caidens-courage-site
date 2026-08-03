@@ -1,5 +1,6 @@
 import React from 'react';
 import PortalLayout from './PortalLayout';
+import { isNonProductionPortalBuild } from '../../lib/supabaseRuntimeContext';
 import './portal-shell.css';
 import './portal-layout.css';
 
@@ -38,6 +39,11 @@ export default function PortalShell({
       {sidebar}
       <div className={mainClass}>
         {topBar}
+        {isNonProductionPortalBuild() ? (
+          <div className="portal-environmentBanner" role="status">
+            Testing Environment — No production data
+          </div>
+        ) : null}
         <PortalLayout rightRail={rightRail}>
           <div className={contentClass}>{children}</div>
         </PortalLayout>

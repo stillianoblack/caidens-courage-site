@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { getProductionSupabase } = require('./supabaseRuntime');
+const { validateClientRuntime } = require('./supabaseRuntime');
 
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const ADMIN_SESSION_COOKIE = 'cc_admin_session';
@@ -98,6 +99,9 @@ function authenticateCredentials(email, passcode) {
 
 async function requireAdmin(event, suppliedClient) {
   const id = correlationId(event);
+  if (!validateClientRuntime(event)) {
+    return { response: json(503, { error: 'Runtime context mismatch.' }, id) };
+  }
   const credentials = configuredCredentials();
   if (!credentials) {
     console.error('[ADMIN_AUTH_CONFIG_MISSING]', { correlationId: id });

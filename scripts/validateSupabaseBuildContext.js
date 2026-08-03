@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const productionContext = process.env.CONTEXT === 'production';
-const previewContext = ['deploy-preview', 'branch-deploy', 'dev'].includes(process.env.CONTEXT || '');
+const context = String(process.env.CONTEXT || '').trim().toLowerCase();
+const productionContext = context === 'production';
+const previewContext = ['deploy-preview', 'branch-deploy', 'dev', 'development'].includes(context);
 const clientUrl = process.env.REACT_APP_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const clientPublicKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 const productionRef = process.env.PRODUCTION_SUPABASE_PROJECT_REF || '';
@@ -60,13 +61,16 @@ if (clientCredentialReference) {
   fail(`Client-side admin credential reference found in ${path.relative(process.cwd(), clientCredentialReference)}.`);
 }
 
+if (!productionContext && !previewContext) {
+  fail('Unknown or missing Netlify context.');
+}
+
+if (!clientUrl || !clientPublicKey || !expectedRef) {
+  fail('Builds require a Supabase URL, browser public key, and expected project reference.');
+}
+
 if (productionContext) {
-  if (!clientUrl || !clientPublicKey || !productionRef) {
-    fail(
-      'Production builds require a Supabase URL, browser public key, and PRODUCTION_SUPABASE_PROJECT_REF.',
-    );
-  }
-  if (projectRef !== productionRef || (expectedRef && expectedRef !== productionRef)) {
+  if (!productionRef || expectedRef !== productionRef || projectRef !== productionRef) {
     fail('Production Supabase configuration does not match the approved production project.');
   }
   if (
@@ -78,24 +82,22 @@ if (productionContext) {
   if (!clientKeyClaims && !clientPublicKey.startsWith('sb_publishable_')) {
     fail('Production browser credential is not a recognized public Supabase credential.');
   }
-}
-
-if (
-  previewContext &&
-  productionRef &&
-  (projectRef === productionRef || expectedRef === productionRef) &&
-  process.env.ALLOW_PREVIEW_PRODUCTION_SUPABASE !== 'true'
-) {
-  fail('Preview and branch builds may not target production without explicit approval.');
-}
-
-if (
-  previewContext &&
-  clientKeyClaims &&
-  projectRef &&
-  clientKeyClaims.ref !== projectRef
-) {
-  fail('Browser Supabase URL and credential belong to different projects.');
+} else {
+  if (!productionRef) {
+    fail('Preview builds require the production project reference as a deny-list safeguard.');
+  }
+  if (projectRef === productionRef || expectedRef === productionRef) {
+    fail('Preview and branch builds must never target production.');
+  }
+  if (projectRef !== expectedRef) {
+    fail('Preview Supabase URL does not match the configured staging project.');
+  }
+  if (clientKeyClaims && (clientKeyClaims.ref !== expectedRef || clientKeyClaims.role !== 'anon')) {
+    fail('Preview browser credential does not match the configured staging project.');
+  }
+  if (!clientKeyClaims && !clientPublicKey.startsWith('sb_publishable_')) {
+    fail('Preview browser credential is not a recognized public Supabase credential.');
+  }
 }
 
 console.info('[supabase-build-context] deploy context validated');

@@ -24,6 +24,7 @@ import { normalizeAccessCodeInput } from './portalAccessCodes';
 import { generateStablePilotCodeToken } from './portalCodeIdentity';
 import { logProgramCodeLookup } from './portalDebug';
 import { isSupabaseConfigured, supabase } from './supabaseClient';
+import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 import {
   fetchPortalProgramAccess,
   type PortalProgramAccessClaimContext,
@@ -268,6 +269,7 @@ export async function fetchAllPilotProgramsForAdmin(
     const response = await fetch('/.netlify/functions/admin-pilot-programs', {
       method: 'GET',
       credentials: 'same-origin',
+      headers: browserRuntimeHeaders(),
     });
     if (response.status === 401) return { programs: [], error: 'unauthenticated' };
     if (response.status === 403) return { programs: [], error: 'forbidden' };

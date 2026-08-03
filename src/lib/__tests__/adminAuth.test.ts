@@ -8,12 +8,23 @@ export {};
 
 describe('minimal server admin authorization', () => {
   const originalEnv = process.env;
+  const runtimeEnv = {
+    CONTEXT: 'production',
+    PRODUCTION_SUPABASE_PROJECT_REF: 'bnopaocdqkknjzmmkaen',
+    SUPABASE_URL: 'https://bnopaocdqkknjzmmkaen.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
+  };
+  const runtimeHeaders = {
+    'x-cc-deploy-context': 'production',
+    'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
+  };
 
   beforeEach(() => {
     process.env = {
       ...originalEnv,
       ADMIN_EMAIL: 'admin@example.com',
       ADMIN_PASSCODE: 'server-only-passcode',
+      ...runtimeEnv,
     };
   });
 
@@ -35,7 +46,7 @@ describe('minimal server admin authorization', () => {
   });
 
   it('rejects an anonymous request with 401', async () => {
-    const result = await requireAdmin({ headers: {} }, {});
+    const result = await requireAdmin({ headers: runtimeHeaders }, {}, process.env);
     expect(result.response.statusCode).toBe(401);
   });
 
@@ -43,8 +54,9 @@ describe('minimal server admin authorization', () => {
     const token = issueAdminToken('server-only-passcode');
     const client = {};
     const result = await requireAdmin(
-      { headers: { cookie: `cc_admin_session=${encodeURIComponent(token)}` } },
+      { headers: { ...runtimeHeaders, cookie: `cc_admin_session=${encodeURIComponent(token)}` } },
       client,
+      process.env,
     );
     expect(result.response).toBeUndefined();
     expect(result.context.supabase).toBe(client);

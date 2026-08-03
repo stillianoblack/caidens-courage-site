@@ -1,5 +1,6 @@
 const { correlationId, getServerSupabase, json } = require('./_lib/crmAuth');
 const { safeText } = require('./_lib/familyCompatibilityAuth');
+const { validateClientRuntime } = require('./_lib/supabaseRuntime');
 
 const ACCESS_CODE_RE = /^[A-Z0-9-]{3,120}$/;
 const CLAIM_CODE_RE = /^CLAIM-/;
@@ -183,6 +184,9 @@ exports.handler = async (event) => {
   const id = correlationId(event);
   if (event.httpMethod !== 'POST') {
     return json(405, { success: false, code: 'method_not_allowed' }, id);
+  }
+  if (!validateClientRuntime(event)) {
+    return json(503, { success: false, code: 'runtime_context_mismatch' }, id);
   }
 
   const supabase = getServerSupabase();

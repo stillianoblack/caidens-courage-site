@@ -19,6 +19,10 @@ const program = {
   family_access_code: 'FAM-ABC123',
 };
 const participantId = '11111111-1111-4111-8111-111111111111';
+const runtimeHeaders = {
+  'x-cc-deploy-context': 'production',
+  'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
+};
 
 function chain(result: Record<string, unknown>) {
   const value: Record<string, jest.Mock> = {};
@@ -35,6 +39,8 @@ function chain(result: Record<string, unknown>) {
 describe('family child progress endpoint', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.CONTEXT = 'production';
+    process.env.PRODUCTION_SUPABASE_PROJECT_REF = 'bnopaocdqkknjzmmkaen';
     mockFrom.mockImplementation((table: string) => {
       if (table === 'pilot_programs') return chain({ data: program, error: null });
       if (table === 'participants') {
@@ -53,6 +59,7 @@ describe('family child progress endpoint', () => {
     const response = await handler({
       httpMethod: 'GET',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
       },
@@ -72,7 +79,7 @@ describe('family child progress endpoint', () => {
     });
     const response = await handler({
       httpMethod: 'GET',
-      headers: {},
+      headers: runtimeHeaders,
       rawQuery: `participantId=${participantId}&weekId=week-3&view=summary`,
     });
     expect(response.statusCode).toBe(401);
@@ -97,6 +104,7 @@ describe('family child progress endpoint', () => {
     const response = await handler({
       httpMethod: 'POST',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
       },
@@ -139,6 +147,7 @@ describe('family child progress endpoint', () => {
     const response = await handler({
       httpMethod: 'POST',
       headers: {
+        ...runtimeHeaders,
         'x-family-program-code': program.program_code,
         'x-family-access-code': program.family_access_code,
       },

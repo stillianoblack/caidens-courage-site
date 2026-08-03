@@ -68,6 +68,8 @@ describe('send-welcome-email endpoint', () => {
       ...originalEnv,
       SUPABASE_URL: 'https://bnopaocdqkknjzmmkaen.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-role',
+      CONTEXT: 'production',
+      PRODUCTION_SUPABASE_PROJECT_REF: 'bnopaocdqkknjzmmkaen',
       RESEND_API_KEY: 'test-resend-key',
     };
   });

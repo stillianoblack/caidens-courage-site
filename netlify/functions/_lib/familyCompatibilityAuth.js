@@ -1,8 +1,11 @@
+const { validateClientRuntime } = require('./supabaseRuntime');
+
 function safeText(value, max = 160) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
 async function authorizeFamilyCompatibilitySession(event, supabase) {
+  if (!validateClientRuntime(event)) return { status: 503, code: 'runtime_context_mismatch' };
   const programCode = safeText(event.headers?.['x-family-program-code']);
   const accessCode = safeText(event.headers?.['x-family-access-code']);
   if (!programCode || !accessCode) return { status: 401, code: 'missing_session' };

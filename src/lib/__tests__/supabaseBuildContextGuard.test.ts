@@ -55,6 +55,17 @@ describe('Supabase build context guard', () => {
     expect(result.status).toBe(0);
   });
 
+  it('D: accepts the configured staging browser in deploy-preview', () => {
+    const result = run({
+      CONTEXT: 'deploy-preview',
+      PRODUCTION_SUPABASE_PROJECT_REF: productionRef,
+      REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: stagingRef,
+      REACT_APP_SUPABASE_URL: `https://${stagingRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(stagingRef),
+    });
+    expect(result.status).toBe(0);
+  });
+
   it('rejects staging configuration in production', () => {
     const result = run({
       CONTEXT: 'production',
@@ -98,6 +109,21 @@ describe('Supabase build context guard', () => {
       REACT_APP_SUPABASE_ANON_KEY: publicJwt(productionRef),
     });
     expect(result.status).toBe(1);
+  });
+
+  it('G: rejects a missing or unknown context and expected project', () => {
+    const missing = run({
+      REACT_APP_SUPABASE_URL: `https://${stagingRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(stagingRef),
+    });
+    expect(missing.status).toBe(1);
+    const unknown = run({
+      CONTEXT: 'unknown',
+      REACT_APP_SUPABASE_EXPECTED_PROJECT_REF: stagingRef,
+      REACT_APP_SUPABASE_URL: `https://${stagingRef}.supabase.co`,
+      REACT_APP_SUPABASE_ANON_KEY: publicJwt(stagingRef),
+    });
+    expect(unknown.status).toBe(1);
   });
 
   it('rejects mismatched preview URL and browser credential projects', () => {

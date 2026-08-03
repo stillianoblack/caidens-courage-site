@@ -9,7 +9,9 @@ describe('minimal admin session endpoint', () => {
       ...originalEnv,
       ADMIN_EMAIL: 'admin@example.com',
       ADMIN_PASSCODE: 'server-only-passcode',
-      SUPABASE_URL: 'https://example.supabase.co',
+      CONTEXT: 'production',
+      PRODUCTION_SUPABASE_PROJECT_REF: 'bnopaocdqkknjzmmkaen',
+      SUPABASE_URL: 'https://bnopaocdqkknjzmmkaen.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'server-role',
     };
   });
@@ -21,6 +23,7 @@ describe('minimal admin session endpoint', () => {
   it('returns 403 for incorrect credentials', async () => {
     const response = await handler({
       httpMethod: 'POST',
+      headers: { 'x-cc-deploy-context': 'production', 'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen' },
       body: JSON.stringify({ email: 'admin@example.com', passcode: 'wrong' }),
     });
     expect(response.statusCode).toBe(403);
@@ -30,6 +33,7 @@ describe('minimal admin session endpoint', () => {
   it('returns a secure HttpOnly session cookie for correct credentials', async () => {
     const response = await handler({
       httpMethod: 'POST',
+      headers: { 'x-cc-deploy-context': 'production', 'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen' },
       body: JSON.stringify({ email: 'admin@example.com', passcode: 'server-only-passcode' }),
     });
     const payload = JSON.parse(response.body);
@@ -44,7 +48,7 @@ describe('minimal admin session endpoint', () => {
   });
 
   it('clears the server session cookie on sign-out', async () => {
-    const response = await handler({ httpMethod: 'DELETE', headers: {} });
+    const response = await handler({ httpMethod: 'DELETE', headers: { 'x-cc-deploy-context': 'production', 'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen' } });
     expect(response.statusCode).toBe(200);
     expect(response.headers['Set-Cookie']).toContain('Max-Age=0');
   });

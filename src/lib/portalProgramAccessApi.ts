@@ -1,4 +1,5 @@
 import type { ActivePilotProgram } from '../types/pilotProgram';
+import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 
 export type PortalProgramAccessIntent = 'student' | 'parent' | 'facilitator';
 
@@ -26,7 +27,7 @@ export async function fetchPortalProgramAccess(input: {
   try {
     response = await fetch('/.netlify/functions/portal-program-access', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...browserRuntimeHeaders() },
       body: JSON.stringify({
         accessCode: input.accessCode,
         intent: input.intent,

@@ -3,6 +3,7 @@ import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readFamilyPortalSession } from '../config/familyPortalAccess';
 import type { StudentParticipantRecord } from './pilotTrackingService';
 import type { StudentFamilyLink } from './studentFamilyLinkService';
+import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 
 export type FamilyCompatibilityChildren = {
   participants: StudentParticipantRecord[];
@@ -25,6 +26,7 @@ function sessionHeaders(): Record<string, string> {
   }
   return {
     'Content-Type': 'application/json',
+    ...browserRuntimeHeaders(),
     'X-Family-Program-Code': program.programCode.trim(),
     'X-Family-Access-Code': accessCode.trim(),
   };

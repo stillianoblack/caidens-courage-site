@@ -42,6 +42,11 @@ const facilitatorProgram = {
   facilitator_access_code: 'FAC-TRACE-2026',
 };
 
+const runtimeHeaders = {
+  'x-cc-deploy-context': 'production',
+  'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
+};
+
 function chain(result: Record<string, unknown>) {
   const value: Record<string, jest.Mock> = {};
   ['select', 'or', 'eq', 'limit'].forEach((method) => {
@@ -55,7 +60,7 @@ function chain(result: Record<string, unknown>) {
 function request(body: Record<string, unknown>) {
   return handler({
     httpMethod: 'POST',
-    headers: {},
+    headers: runtimeHeaders,
     body: JSON.stringify(body),
   });
 }
@@ -87,7 +92,13 @@ function mockCodeLookup(input: {
 }
 
 describe('server-mediated portal program access', () => {
+  const originalEnv = process.env;
   beforeEach(() => {
+    process.env = {
+      ...originalEnv,
+      CONTEXT: 'production',
+      PRODUCTION_SUPABASE_PROJECT_REF: 'bnopaocdqkknjzmmkaen',
+    };
     jest.clearAllMocks();
     mockFrom.mockImplementation((table: string) => {
       if (table === 'pilot_programs') return chain({ data: [program], error: null });
@@ -95,6 +106,8 @@ describe('server-mediated portal program access', () => {
       throw new Error(`Unexpected table: ${table}`);
     });
   });
+
+  afterAll(() => { process.env = originalEnv; });
 
   test('returns only mapped session metadata after validating an independent parent', async () => {
     const response = await request({

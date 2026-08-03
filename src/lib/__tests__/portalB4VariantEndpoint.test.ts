@@ -6,6 +6,11 @@ export {};
 describe('portal B-4 variant endpoint', () => {
   const endpoint = require('../../../netlify/functions/portal-b4-variant');
 
+  beforeEach(() => {
+    process.env.CONTEXT = 'production';
+    process.env.PRODUCTION_SUPABASE_PROJECT_REF = 'bnopaocdqkknjzmmkaen';
+  });
+
   it('accepts only the approved keys and writes legacy spark as courage', () => {
     expect(endpoint._test.normalizeVariant('spark')).toBe('courage');
     expect(endpoint._test.normalizeVariant('fusion')).toBe('fusion');
@@ -62,6 +67,8 @@ describe('portal B-4 variant endpoint', () => {
     };
     const result = await endpoint._test.authorizeCampKidSession({
       headers: {
+        'x-cc-deploy-context': 'production',
+        'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
         'x-camp-program-id': 'program-1',
         'x-camp-program-code': 'CAMP-TEST',
         'x-camp-access-code': 'FAC-TEST',

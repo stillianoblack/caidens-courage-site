@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { browserRuntimeHeaders } from '../lib/supabaseRuntimeContext';
 
 type AdminAuthValue = {
   token: string | null;
@@ -13,7 +14,10 @@ const AdminAuthContext = createContext<AdminAuthValue | null>(null);
 
 async function validateSession(): Promise<boolean> {
   try {
-    const response = await fetch('/.netlify/functions/admin-session', { credentials: 'same-origin' });
+    const response = await fetch('/.netlify/functions/admin-session', {
+      credentials: 'same-origin',
+      headers: browserRuntimeHeaders(),
+    });
     return response.ok;
   } catch {
     return false;
@@ -39,7 +43,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/.netlify/functions/admin-session', {
         method: 'POST',
         credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...browserRuntimeHeaders() },
         body: JSON.stringify({ email: email.trim(), passcode }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -64,6 +68,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     await fetch('/.netlify/functions/admin-session', {
       method: 'DELETE',
       credentials: 'same-origin',
+      headers: browserRuntimeHeaders(),
     }).catch(() => undefined);
     setToken(null);
     setError(null);
