@@ -58,24 +58,54 @@
   will-change: opacity;
 }
 
-.b4-animatedHeadFrame--closed {
+.b4-animatedHead--blue { --b4-eye-cover: #f2f3ed; --b4-eyelid-line: #172d55; }
+.b4-animatedHead--orange { --b4-eye-cover: #f8ddc3; --b4-eyelid-line: #5e351e; }
+.b4-animatedHead--green { --b4-eye-cover: #c5eadf; --b4-eyelid-line: #155744; }
+.b4-animatedHead--pink { --b4-eye-cover: #f4d9e4; --b4-eyelid-line: #613447; }
+.b4-animatedHead--purple { --b4-eye-cover: #e1d9f1; --b4-eyelid-line: #3d315e; }
+
+.b4-animatedHeadEyelid {
+  position: absolute;
+  z-index: 2;
   opacity: 0;
+  overflow: hidden;
+  border-radius: 24%;
+  background: var(--b4-eye-cover, #f2f3ed);
   pointer-events: none;
+  will-change: opacity;
 }
 
-/* Keep the open illustration in place and cover only its eye panels. */
-.b4-animatedHeadFrame--closedLeft {
-  clip-path: inset(24% 47% 25% 28%);
+.b4-animatedHeadEyelid::after {
+  content: '';
+  position: absolute;
+  left: 13%;
+  top: 48%;
+  width: 74%;
+  height: 34%;
+  border-top: 2px solid var(--b4-eyelid-line, #172d55);
+  border-radius: 50%;
 }
 
-.b4-animatedHeadFrame--closedRight {
-  clip-path: inset(31% 8% 19% 70%);
+.b4-animatedHeadEyelid--left {
+  left: 38.2%;
+  top: 40%;
+  width: 10.6%;
+  height: 18.5%;
+  transform: rotate(4deg);
 }
 
-.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame--closed,
-.b4-animatedHead[data-blink-phase='closed'] .b4-animatedHeadFrame--closed { opacity: 1; }
-.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame--closed { transition: opacity 160ms ease-in; }
-.b4-animatedHead[data-blink-phase='opening'] .b4-animatedHeadFrame--closed { transition: opacity 185ms ease-out; }
+.b4-animatedHeadEyelid--right {
+  left: 79.2%;
+  top: 45.2%;
+  width: 8.9%;
+  height: 17.2%;
+  transform: rotate(4deg);
+}
+
+.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadEyelid,
+.b4-animatedHead[data-blink-phase='closed'] .b4-animatedHeadEyelid { opacity: 1; }
+.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadEyelid { transition: opacity 160ms ease-in; }
+.b4-animatedHead[data-blink-phase='opening'] .b4-animatedHeadEyelid { transition: opacity 185ms ease-out; }
 
 @keyframes b4-natural-float {
   from { transform: translateY(0); }
@@ -96,6 +126,5 @@
 @media (prefers-reduced-motion: reduce) {
   .b4-animatedHeadFloat { animation: none; transform: none; }
   .b4-animatedHeadShadow { animation: none; transform: translateX(-50%) scaleX(0.84); opacity: 0.22; }
-  .b4-animatedHeadFrame { transition: none; }
-  .b4-animatedHeadFrame--closed { display: none; }
+  .b4-animatedHeadEyelid { display: none; transition: none; }
 }

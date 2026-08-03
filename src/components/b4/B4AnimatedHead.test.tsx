@@ -24,17 +24,15 @@ describe('B4AnimatedHead', () => {
     jest.restoreAllMocks();
   });
 
-  it('uses an approved closed-eye frame without layout replacement', () => {
+  it('closes only the eye regions without replacing the open illustration', () => {
     jest.spyOn(Math, 'random').mockReturnValue(0.5);
     const { container } = render(<B4AnimatedHead variant="orange" alt="B-4 facilitator guide" />);
     expect(screen.getByAltText('B-4 facilitator guide')).toHaveAttribute(
       'src',
       '/assets/b4/anchor/idle/b4-anchor-idle.png',
     );
-    expect(container.querySelector('.b4-animatedHeadFrame--closed')).toHaveAttribute(
-      'src',
-      '/assets/b4/anchor/blinking/b4-anchor-blinking.png',
-    );
+    expect(container.querySelectorAll('.b4-animatedHeadFrame')).toHaveLength(1);
+    expect(container.querySelectorAll('.b4-animatedHeadEyelid')).toHaveLength(2);
     act(() => jest.advanceTimersByTime(6751));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'closing');
     act(() => jest.advanceTimersByTime(161));
@@ -67,11 +65,11 @@ describe('B4AnimatedHead', () => {
     expect(rootRule).not.toMatch(/\baspect-ratio\s*:/);
   });
 
-  it('keeps both eye states inside one fixed-size stage', () => {
+  it('keeps the open artwork and both eyelids inside one fixed-size stage', () => {
     const { container } = render(<B4AnimatedHead />);
     const stage = container.querySelector('.b4-animatedHeadStage');
     expect(stage?.querySelectorAll('.b4-animatedHeadFrame--open')).toHaveLength(1);
-    expect(stage?.querySelectorAll('.b4-animatedHeadFrame--closed')).toHaveLength(2);
+    expect(stage?.querySelectorAll('.b4-animatedHeadEyelid')).toHaveLength(2);
     const css = fs.readFileSync(path.join(process.cwd(), 'src/components/b4/b4-animated-head.css'), 'utf8');
     const frameRule = css.match(/\.b4-animatedHeadFrame\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(frameRule).toContain('position: absolute');
@@ -82,8 +80,9 @@ describe('B4AnimatedHead', () => {
     expect(frameRule).not.toMatch(/\btransform\s*:/);
     expect(frameRule).not.toMatch(/\bscale\s*:/);
     expect(container.querySelector('.b4-animatedHeadFrame--open')).toBeVisible();
-    expect(container.querySelectorAll('.b4-animatedHeadFrame--closedLeft')).toHaveLength(1);
-    expect(container.querySelectorAll('.b4-animatedHeadFrame--closedRight')).toHaveLength(1);
+    expect(container.querySelectorAll('.b4-animatedHeadEyelid--left')).toHaveLength(1);
+    expect(container.querySelectorAll('.b4-animatedHeadEyelid--right')).toHaveLength(1);
+    expect(css).not.toContain('.b4-animatedHeadFrame--closed');
   });
 
   it('applies stable per-instance floating variables outside the blink stage', () => {

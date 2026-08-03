@@ -12,14 +12,6 @@ const OPEN_HEADS: Record<B4ColorVariant, string> = {
   purple: '/assets/b4/pattern/idle/b4-pattern-idle.png',
 };
 
-const CLOSED_HEADS: Record<B4ColorVariant, string> = {
-  blue: '/assets/b4/courage/blinking/b4-courage-blinking.png',
-  orange: '/assets/b4/anchor/blinking/b4-anchor-blinking.png',
-  green: '/assets/b4/fusion/blinking/b4-fusion-blinking.png',
-  pink: '/assets/b4/shield/blinking/b4-shield-blinking.png',
-  purple: '/assets/b4/pattern/blinking/b4-pattern-blinking.png',
-};
-
 export type B4AnimatedHeadProps = {
   variant?: B4ColorVariant;
   className?: string;
@@ -27,7 +19,6 @@ export type B4AnimatedHeadProps = {
   decorative?: boolean;
   animate?: boolean;
   openSrc?: string;
-  closedSrc?: string;
   floatProfile?: B4FloatProfile;
 };
 
@@ -44,7 +35,6 @@ export default function B4AnimatedHead({
   decorative = false,
   animate = true,
   openSrc,
-  closedSrc,
   floatProfile,
 }: B4AnimatedHeadProps) {
   const { rootRef, blinkPhase, reduceMotion } = useB4Blink<HTMLSpanElement>(animate);
@@ -68,8 +58,8 @@ export default function B4AnimatedHead({
       <span className="b4-animatedHeadFloat">
         <span className="b4-animatedHeadStage">
           <img className="b4-animatedHeadFrame b4-animatedHeadFrame--open" src={openSrc ?? OPEN_HEADS[variant]} alt={resolvedAlt} />
-          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed b4-animatedHeadFrame--closedLeft" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
-          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed b4-animatedHeadFrame--closedRight" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
+          <span className="b4-animatedHeadEyelid b4-animatedHeadEyelid--left" aria-hidden="true" />
+          <span className="b4-animatedHeadEyelid b4-animatedHeadEyelid--right" aria-hidden="true" />
         </span>
       </span>
     </span>
