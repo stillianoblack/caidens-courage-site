@@ -4,8 +4,8 @@ export type B4BlinkPhase = 'open' | 'closing' | 'closed' | 'opening';
 
 export function nextB4BlinkDelay(random: () => number = Math.random): number {
   return random() < 0.12
-    ? 10000 + random() * 4000
-    : 4500 + random() * 4500;
+    ? 11000 + random() * 4000
+    : 5500 + random() * 4500;
 }
 
 export function useB4Blink<T extends HTMLElement = HTMLElement>(enabled = true) {
@@ -60,9 +60,9 @@ export function useB4Blink<T extends HTMLElement = HTMLElement>(enabled = true) 
     const schedule = () => {
       later(() => {
         if (cancelled) return;
-        const closingMs = 140 + Math.random() * 40;
-        const closedMs = 140 + Math.random() * 60;
-        const openingMs = 160 + Math.random() * 50;
+        const closingMs = 50;
+        const closedMs = 80 + Math.random() * 40;
+        const openingMs = 60;
         setBlinkPhase('closing');
         later(() => {
           if (cancelled) return;

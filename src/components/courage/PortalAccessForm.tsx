@@ -236,7 +236,6 @@ export default function PortalAccessForm({
                   <B4AnimatedHead
                     className="cc-portal-characterImage cc-portal-characterImage--default"
                     variant={guideVariant[item.id]}
-                    openSrc={roleCopy[item.id].guide.imageSrc}
                     alt={roleCopy[item.id].guide.imageAlt}
                     floatProfile={GUIDE_FLOAT_PROFILES[item.id]}
                   />

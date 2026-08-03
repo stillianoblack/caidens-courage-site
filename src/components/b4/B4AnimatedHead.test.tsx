@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import B4AnimatedHead from './B4AnimatedHead';
 import { nextB4BlinkDelay } from '../../hooks/useB4Blink';
 import fs from 'fs';
@@ -24,23 +24,44 @@ describe('B4AnimatedHead', () => {
     jest.restoreAllMocks();
   });
 
-  it('closes only the eye regions without replacing the open illustration', () => {
+  const loadBothFrames = (container: HTMLElement) => {
+    fireEvent.load(container.querySelector('.b4-animatedHeadFrame--open')!);
+    fireEvent.load(container.querySelector('.b4-animatedHeadFrame--closed')!);
+  };
+
+  it('uses the approved matched idle and blink assets as a quick frame swap', () => {
     jest.spyOn(Math, 'random').mockReturnValue(0.5);
     const { container } = render(<B4AnimatedHead variant="orange" alt="B-4 facilitator guide" />);
     expect(screen.getByAltText('B-4 facilitator guide')).toHaveAttribute(
       'src',
       '/assets/b4/anchor/idle/b4-anchor-idle.png',
     );
-    expect(container.querySelectorAll('.b4-animatedHeadFrame')).toHaveLength(1);
-    expect(container.querySelectorAll('.b4-animatedHeadEyelid')).toHaveLength(2);
-    act(() => jest.advanceTimersByTime(6751));
+    expect(container.querySelector('.b4-animatedHeadFrame--closed')).toHaveAttribute(
+      'src',
+      '/assets/b4/anchor/blinking/b4-anchor-blinking.png',
+    );
+    expect(container.querySelectorAll('.b4-animatedHeadFrame')).toHaveLength(2);
+    loadBothFrames(container);
+    expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-assets-ready', 'true');
+    act(() => jest.advanceTimersByTime(7751));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'closing');
-    act(() => jest.advanceTimersByTime(161));
+    act(() => jest.advanceTimersByTime(51));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'closed');
-    act(() => jest.advanceTimersByTime(171));
+    act(() => jest.advanceTimersByTime(101));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'opening');
-    act(() => jest.advanceTimersByTime(186));
+    act(() => jest.advanceTimersByTime(61));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'open');
+  });
+
+  it('does not schedule the first blink until both frames have loaded', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.5);
+    const { container } = render(<B4AnimatedHead />);
+    fireEvent.load(container.querySelector('.b4-animatedHeadFrame--open')!);
+    act(() => jest.advanceTimersByTime(20_000));
+    expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'open');
+    expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-assets-ready', 'false');
+    fireEvent.load(container.querySelector('.b4-animatedHeadFrame--closed')!);
+    expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-assets-ready', 'true');
   });
 
   it('stays static when reduced motion is requested', () => {
@@ -52,7 +73,8 @@ describe('B4AnimatedHead', () => {
 
   it('cleans up its blink timer on unmount', () => {
     const clearTimeoutSpy = jest.spyOn(window, 'clearTimeout');
-    const { unmount } = render(<B4AnimatedHead />);
+    const { container, unmount } = render(<B4AnimatedHead />);
+    loadBothFrames(container);
     unmount();
     expect(clearTimeoutSpy).toHaveBeenCalled();
   });
@@ -65,11 +87,11 @@ describe('B4AnimatedHead', () => {
     expect(rootRule).not.toMatch(/\baspect-ratio\s*:/);
   });
 
-  it('keeps the open artwork and both eyelids inside one fixed-size stage', () => {
+  it('keeps the idle and blink frames inside one fixed-size stage', () => {
     const { container } = render(<B4AnimatedHead />);
     const stage = container.querySelector('.b4-animatedHeadStage');
     expect(stage?.querySelectorAll('.b4-animatedHeadFrame--open')).toHaveLength(1);
-    expect(stage?.querySelectorAll('.b4-animatedHeadEyelid')).toHaveLength(2);
+    expect(stage?.querySelectorAll('.b4-animatedHeadFrame--closed')).toHaveLength(1);
     const css = fs.readFileSync(path.join(process.cwd(), 'src/components/b4/b4-animated-head.css'), 'utf8');
     const frameRule = css.match(/\.b4-animatedHeadFrame\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(frameRule).toContain('position: absolute');
@@ -80,12 +102,13 @@ describe('B4AnimatedHead', () => {
     expect(frameRule).not.toMatch(/\btransform\s*:/);
     expect(frameRule).not.toMatch(/\bscale\s*:/);
     expect(container.querySelector('.b4-animatedHeadFrame--open')).toBeVisible();
-    expect(container.querySelectorAll('.b4-animatedHeadEyelid--left')).toHaveLength(1);
-    expect(container.querySelectorAll('.b4-animatedHeadEyelid--right')).toHaveLength(1);
-    expect(css).not.toContain('.b4-animatedHeadFrame--closed');
-    expect(css).toContain('scaleY(0)');
-    expect(css).toContain('scaleY(1)');
-    expect(css).not.toContain('transition: opacity 160ms');
+    expect(container.querySelectorAll('.b4-animatedHeadFrame--closed')).toHaveLength(1);
+    const closedRule = css.match(/\.b4-animatedHeadFrame--closed\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(closedRule).toContain('opacity: 0');
+    expect(closedRule).not.toMatch(/\btransform\s*:/);
+    expect(css).not.toContain('b4-animatedHeadEyelid');
+    expect(css).toContain('transition: opacity 50ms ease-in');
+    expect(css).toContain('transition: opacity 60ms ease-out');
   });
 
   it('applies stable per-instance floating variables outside the blink stage', () => {
@@ -107,9 +130,9 @@ describe('B4AnimatedHead', () => {
   });
 
   it('keeps randomized delays inside the normal and extended bounds', () => {
-    expect(nextB4BlinkDelay(() => 0.5)).toBe(6750);
+    expect(nextB4BlinkDelay(() => 0.5)).toBe(7750);
     const longValues = [0.05, 0.75];
-    expect(nextB4BlinkDelay(() => longValues.shift() ?? 0)).toBe(13000);
+    expect(nextB4BlinkDelay(() => longValues.shift() ?? 0)).toBe(14000);
   });
 
   it('disables continuous floating for reduced motion', () => {

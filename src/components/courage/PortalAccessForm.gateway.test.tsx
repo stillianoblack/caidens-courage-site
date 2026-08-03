@@ -71,15 +71,15 @@ describe('Enter the World character gateway', () => {
     expect(screen.queryByText('For Facilitator / Teachers')).not.toBeInTheDocument();
     expect(screen.getByAltText('Student B-4 guide')).toHaveAttribute(
       'src',
-      '/images/Choose-Your-Guide/B-4student.webp',
+      '/assets/b4/courage/idle/b4-courage-idle.png',
     );
     expect(screen.getByAltText('Parent and guardian B-4 guide')).toHaveAttribute(
       'src',
-      '/images/Choose-Your-Guide/b-4facilitator.webp',
+      '/assets/b4/fusion/idle/b4-fusion-idle.png',
     );
-    expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/B-4orange.webp');
+    expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/assets/b4/anchor/idle/b4-anchor-idle.png');
     expect(document.querySelectorAll('.cc-portal-characterImage--default.b4-animatedHead')).toHaveLength(3);
-    expect(document.querySelectorAll('.cc-portal-characterImage--default .b4-animatedHeadEyelid')).toHaveLength(6);
+    expect(document.querySelectorAll('.cc-portal-characterImage--default .b4-animatedHeadFrame--closed')).toHaveLength(3);
     const floatingGuides = Array.from(
       document.querySelectorAll<HTMLElement>('.cc-portal-characterImage--default.b4-animatedHead'),
     );
