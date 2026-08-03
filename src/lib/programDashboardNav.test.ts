@@ -19,6 +19,12 @@ describe('facilitator navigation reconciliation', () => {
     expect(resolveProgramDashboardTab(`${PROGRAM_DASHBOARD_PATH}/weekly-modules`)).toBe('weekly-modules');
     expect(resolveProgramDashboardTab(`${PROGRAM_DASHBOARD_PATH}/results`)).toBe('results');
     expect(resolveProgramDashboardTab(`${PROGRAM_DASHBOARD_PATH}/certificates`)).toBe('certificates');
+    expect(resolveProgramDashboardTab(`${PROGRAM_DASHBOARD_PATH}/explorers`)).toBe('roster');
+  });
+
+  it('keeps Explorers on the established roster destination', () => {
+    const explorers = PROGRAM_SIDEBAR_NAV.find(({ label }) => label === 'Explorers');
+    expect(explorers?.id).toBe('roster');
   });
 
   it('keeps facilitator hub content derived from the current URL', () => {

@@ -300,6 +300,7 @@ const appRouteChildren = (
       <Route path={PROGRAM_DASHBOARD_PATH} element={<ProgramDashboardPage />}>
         <Route index element={<ProgramOverviewTabRoute />} />
         <Route path="roster" element={<ProgramRosterTabRoute />} />
+        <Route path="explorers" element={<Navigate to="../roster" replace />} />
         <Route path="weekly-modules" element={<ProgramWeeklyModulesTabRoute />} />
         <Route path="activities-library" element={<ProgramActivitiesTabRoute />} />
         <Route path="assessments" element={<ProgramAssessmentsTabRoute />} />

@@ -5,6 +5,7 @@ import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTo
 import { AppShell } from '../components/portal-design-system';
 import PilotProgramWelcomeCard from '../components/pilot-program/PilotProgramWelcomeCard';
 import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import PortalAccessRequired from '../components/portal/PortalAccessRequired';
 import { GoalsOnboardingDrawer } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/portal/portal-header.css';
@@ -12,12 +13,9 @@ import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { clearProgramPortalContext, readActivePortalRole } from '../config/portalContext';
+import { readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
-import {
-  PORTAL_PATH,
-  PROGRAM_DASHBOARD_PATH,
-} from '../config/courageRoutes';
+import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
 import {
   PILOT_DASHBOARD_TITLE,
@@ -74,7 +72,6 @@ export default function ProgramDashboardPage() {
   const activeNav = resolveProgramDashboardTab(location.pathname);
   const showOverviewCoach = !isKidsRoute && activeNav === 'overview';
   const programCode = activeProgram?.programCode;
-  const hasActiveProgram = Boolean(activeProgram);
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
   const isIndependentFamily = isIndependentFamilyProgram(activeProgram);
@@ -152,41 +149,24 @@ export default function ProgramDashboardPage() {
   }, [location.hash, navigate]);
 
   useEffect(() => {
-    if (!hasActiveProgram) {
-      navigate(PORTAL_PATH, {
-        replace: true,
-        state: {
-          redirect: location.pathname,
-          message: 'Open your facilitator portal again to restore this dashboard.',
-          reason: 'missing_active_program',
-        },
-      });
-      return;
-    }
     if (isIndependentFamily) {
       navigate(resolveFamilyKidDefaultLandingPath(), { replace: true });
-      return;
     }
-    if (!sessionValid) {
-      clearProgramPortalContext();
-      navigate(PORTAL_PATH, {
-        replace: true,
-        state: {
-          redirect: location.pathname,
-          message: 'Your facilitator session needs to be reopened.',
-          reason: 'invalid_facilitator_session',
-        },
-      });
-    }
-  }, [hasActiveProgram, hasUnlock, isIndependentFamily, location.pathname, navigate, programCode, role, sessionValid]);
+  }, [isIndependentFamily, navigate]);
 
   const dismissWelcome = useCallback(() => {
     searchParams.delete('welcome');
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  if (!activeProgram) {
-    return null;
+  if (!activeProgram || !sessionValid) {
+    return (
+      <PortalAccessRequired
+        message="We couldn’t restore your facilitator session. Retry, or return to Enter the World to sign in again."
+        showRetry
+        linkLabel="Return to Enter the World"
+      />
+    );
   }
 
   return (

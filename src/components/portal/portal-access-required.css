@@ -27,9 +27,22 @@
   color: #fff;
   font-weight: 600;
   text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .portalAccessRequiredBtn:hover {
   background: #152a45;
   color: #fff;
+}
+
+.portalAccessRequiredBtn--secondary {
+  background: #f1c75b;
+  color: #17345f;
+}
+
+.portalAccessRequiredBtn--secondary:hover {
+  background: #e4b84a;
+  color: #17345f;
 }

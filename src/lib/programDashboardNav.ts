@@ -33,6 +33,10 @@ export function resolveProgramDashboardTab(pathname: string): PilotSidebarNavId 
     return segment as PilotSidebarNavId;
   }
 
+  if (segment === 'explorers') {
+    return 'roster';
+  }
+
   return 'overview';
 }
 

@@ -1,4 +1,5 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
+import { readPortalSessionUnlock } from '../config/portalAccess';
 import { readActivePortalRole, type PortalRole } from '../config/portalContext';
 import { isIndependentFamilyProgram } from './independentFamilyProgram';
 
@@ -13,7 +14,11 @@ export function hasFamilyPortalSession(): boolean {
 }
 
 export function hasFacilitatorPortalSession(): boolean {
-  return readActivePortalRole() === 'facilitator' && hasActiveProgramSession();
+  return Boolean(
+    readActivePortalRole() === 'facilitator' &&
+    hasActiveProgramSession() &&
+    readPortalSessionUnlock()
+  );
 }
 
 export function isPortalRoleAllowed(pathname: string): boolean {
