@@ -34,9 +34,14 @@ describe('camp child protected data paths', () => {
 
   test('server validates program, facilitator proof, participant membership, and session scope', () => {
     const helper = source('netlify/functions/_lib/campCompatibilityAuth.js');
-    expect(helper).toContain(".eq('id', programId)");
-    expect(helper).toContain(".eq('program_code', programCode)");
-    expect(helper).toContain(".eq('facilitator_access_code', accessCode)");
+    const sessionHelper = source('netlify/functions/_lib/facilitatorSession.js');
+    expect(helper).toContain('readFacilitatorSession');
+    expect(helper).toContain('authenticated.program.id !== programId');
+    expect(helper).toContain('authenticated.program.program_code !== programCode');
+    expect(helper).not.toContain("['x-camp-access-code']");
+    expect(sessionHelper).toContain("from('facilitator_compatibility_sessions')");
+    expect(sessionHelper).toContain(".eq('token_hash', hashToken(token))");
+    expect(sessionHelper).toContain(".eq('program_code', session.program_code)");
     expect(helper).toContain("data.role !== 'student'");
     expect(helper).toContain('data.program_code !== programCode');
     expect(helper).toContain(".eq('organization_id', program.id)");

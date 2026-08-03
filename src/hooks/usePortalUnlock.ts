@@ -6,7 +6,7 @@ import {
 } from '../config/courageRoutes';
 import { resolveFamilyKidDefaultLandingPath, resolveFamilyPortalOverviewPath } from '../lib/familyKidLanding';
 import { writeBlueRibbonUnlock } from '../config/blueRibbonPortalAccess';
-import { applyProgramPortalUnlock, writeActivePortalRole } from '../config/portalContext';
+import { writeActivePortalRole } from '../config/portalContext';
 import { writeFamilyPortalSession } from '../config/familyPortalAccess';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../lib/parentClaimViaStudentPin';
 import type { PortalLoginIntent } from '../config/portalLoginIntent';
 import { isLegacyDemoUnlockAllowed } from '../lib/portalAuthConfig';
-import { verifyFacilitatorProgramEmail } from '../lib/portalFacilitatorAuth';
+import { activateSecureFacilitatorSession } from '../lib/facilitatorSessionClient';
 import { facilitatorReturnSessionPath } from '../lib/kidPlayReturnSessionRoute';
 import {
   PORTAL_ACCESS_NOT_FOUND_MESSAGE,
@@ -201,6 +201,7 @@ export function usePortalUnlock(
             lookupPortalProgramByAccessCodeDetailed(trimmedCode, {
               intent: portalIntent,
               credential: parentEmail.trim(),
+              rememberDevice: portalIntent === 'facilitator' ? rememberDevice : undefined,
             }),
             PORTAL_LOGIN_TIMEOUT_MS,
             'portal_program_lookup',
@@ -517,30 +518,11 @@ export function usePortalUnlock(
             clearParentClaimContext();
             clearStudentPinSession();
 
-            const facilitatorVerified = verifyFacilitatorProgramEmail(program, email, trimmedCode);
-            if (!facilitatorVerified.success) {
-              setError(
-                hasRememberedProgram && portalIntent === 'facilitator'
-                  ? PORTAL_EMAIL_NOT_CONNECTED_MESSAGE
-                  : (facilitatorVerified.message ?? PORTAL_ACCESS_NOT_FOUND_MESSAGE),
-              );
-              setSubmitting(false);
-              return;
-            }
-
-            applyProgramPortalUnlock(program, role, trimmedCode);
-            writeLastPilotProgram(program, role, email, trimmedCode);
+            activateSecureFacilitatorSession(program);
             trackKitFacilitatorSignup({
               facilitatorEmail: email,
               eventName: 'facilitator_unlock',
               metadata: { program_code: program.programCode, source: 'portal_unlock' },
-            });
-            persistRememberedDevice({
-              rememberDevice,
-              userType: 'facilitator',
-              accessCode: trimmedCode,
-              program,
-              facilitatorId: email.trim().toLowerCase(),
             });
             setAccessCode('');
             setParentEmail('');

@@ -1,6 +1,5 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { readActiveAccessCode } from '../config/portalContext';
 import { kidPlaySessionStartPath } from '../config/courageRoutes';
 import { setActiveChild } from './activeChildContext';
 import { resolveFacilitatorKidPlayLaunch } from './facilitatorKidPlayLaunch';
@@ -23,6 +22,7 @@ export type FacilitatorStudentContinuityRecord = {
   programCode: string;
   campProgramCode?: string;
   familyProgramCode?: string;
+  /** @deprecated Legacy input is accepted but is never persisted or restored. */
   activeAccessCode?: string;
   displayName?: string;
   resumePayload?: KidPlayResumePayload;
@@ -62,7 +62,6 @@ export function readFacilitatorStudentContinuity(): FacilitatorStudentContinuity
       programCode: parsed.programCode.trim(),
       campProgramCode: parsed.campProgramCode?.trim() || undefined,
       familyProgramCode: parsed.familyProgramCode?.trim() || undefined,
-      activeAccessCode: parsed.activeAccessCode?.trim() || undefined,
       displayName: parsed.displayName?.trim() || undefined,
       resumePayload: parseKidPlayResumePayload(parsed.resumePayload as Record<string, unknown> | undefined) ?? undefined,
     };
@@ -83,7 +82,6 @@ export function writeFacilitatorStudentContinuity(record: FacilitatorStudentCont
         programCode: record.programCode.trim(),
         campProgramCode: record.campProgramCode?.trim() || undefined,
         familyProgramCode: record.familyProgramCode?.trim() || undefined,
-        activeAccessCode: record.activeAccessCode?.trim() || undefined,
         displayName: record.displayName?.trim() || undefined,
         resumePayload: record.resumePayload ?? undefined,
       }),
@@ -194,7 +192,6 @@ export async function persistFacilitatorStudentContinuityFromSessionEnd(input: {
     lastSessionTimestamp: new Date().toISOString(),
     programCode,
     campProgramCode: programCode,
-    activeAccessCode: readActiveAccessCode()?.trim() || undefined,
     displayName: input.childDisplayName?.trim() || undefined,
     resumePayload,
   });
@@ -224,6 +221,7 @@ export async function writeFacilitatorStudentContinuityForLaunch(input: {
   programCode?: string;
   campProgramCode?: string;
   familyProgramCode?: string | null;
+  /** @deprecated Ignored. Facilitator credentials are server-side only. */
   activeAccessCode?: string | null;
 }): Promise<void> {
   const childId = input.childId.trim();
@@ -241,7 +239,6 @@ export async function writeFacilitatorStudentContinuityForLaunch(input: {
     programCode,
     campProgramCode: input.campProgramCode?.trim() || programCode,
     familyProgramCode: input.familyProgramCode?.trim() || undefined,
-    activeAccessCode: input.activeAccessCode?.trim() || readActiveAccessCode()?.trim() || undefined,
     displayName: input.childDisplayName?.trim() || undefined,
   });
 }

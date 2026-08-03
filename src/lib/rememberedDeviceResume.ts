@@ -18,6 +18,8 @@ import {
   touchRememberedDeviceSession,
   type RememberedDeviceSession,
 } from './rememberedDeviceSession';
+import { fetchCurrentFacilitatorSession } from './facilitatorSessionApi';
+import { activateSecureFacilitatorSession } from './facilitatorSessionClient';
 
 export type RememberedDeviceResumeResult =
   | { kind: 'routed'; destination: string }
@@ -50,6 +52,11 @@ function restoreParentSession(session: RememberedDeviceSession, program: ActiveP
 }
 
 export async function resumeRememberedDeviceSession(): Promise<RememberedDeviceResumeResult> {
+  const facilitatorSession = await fetchCurrentFacilitatorSession();
+  if (facilitatorSession.status === 'authenticated') {
+    activateSecureFacilitatorSession(facilitatorSession.program);
+    return { kind: 'routed', destination: PROGRAM_DASHBOARD_PATH };
+  }
   const session = readRememberedDeviceSession();
   if (!session?.program) return { kind: 'none' };
 
@@ -72,17 +79,6 @@ export async function resumeRememberedDeviceSession(): Promise<RememberedDeviceR
   if (session.user_type === 'parent') {
     restoreParentSession(session, program);
     return { kind: 'routed', destination: resolveFamilyKidDefaultLandingPath() };
-  }
-
-  if (session.user_type === 'facilitator') {
-    applyProgramPortalUnlock(program, 'facilitator', session.access_code);
-    writeLastPilotProgram(
-      program,
-      'facilitator',
-      session.facilitator_id || program.adminEmail,
-      session.access_code,
-    );
-    return { kind: 'routed', destination: PROGRAM_DASHBOARD_PATH };
   }
 
   return { kind: 'needs_unlock', session };

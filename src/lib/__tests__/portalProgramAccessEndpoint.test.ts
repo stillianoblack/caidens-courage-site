@@ -9,6 +9,21 @@ jest.mock('../../../netlify/functions/_lib/crmAuth', () => ({
   }),
 }));
 
+jest.mock('../../../netlify/functions/_lib/facilitatorSession', () => ({
+  cookieHeader: () => '__Host-cc_facilitator_session=opaque; Path=/; HttpOnly; Secure; SameSite=Lax',
+  createFacilitatorSession: async () => ({ token: 'opaque', ttl: 28800 }),
+  originIsSameHost: () => true,
+  safeProgram: (program: Record<string, unknown>) => ({
+    id: program.id,
+    programName: program.program_name,
+    programCode: program.program_code,
+    programType: program.program_type,
+    adminEmail: '',
+    familyAccessCode: '',
+    facilitatorAccessCode: null,
+  }),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { handler } = require('../../../netlify/functions/portal-program-access');
 
@@ -60,7 +75,7 @@ function chain(result: Record<string, unknown>) {
 function request(body: Record<string, unknown>) {
   return handler({
     httpMethod: 'POST',
-    headers: runtimeHeaders,
+    headers: { ...runtimeHeaders, host: 'caidenscourage.com', origin: 'https://caidenscourage.com' },
     body: JSON.stringify(body),
   });
 }
@@ -160,7 +175,9 @@ describe('server-mediated portal program access', () => {
     const body = JSON.parse(response.body);
     expect(response.statusCode).toBe(200);
     expect(body.role).toBe('facilitator');
-    expect(body.program.facilitatorAccessCode).toBe(facilitatorProgram.facilitator_access_code);
+    expect(body.program.facilitatorAccessCode).toBeNull();
+    expect(body.program.adminEmail).toBe('');
+    expect(response.headers['Set-Cookie']).toContain('HttpOnly');
   });
 
   test('resolves an existing alias through its active target program', async () => {

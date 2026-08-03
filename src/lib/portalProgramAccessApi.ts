@@ -22,16 +22,19 @@ export async function fetchPortalProgramAccess(input: {
   accessCode: string;
   intent?: PortalProgramAccessIntent;
   credential?: string;
+  rememberDevice?: boolean;
 }): Promise<PortalProgramAccessResult> {
   let response: Response;
   try {
     response = await fetch('/.netlify/functions/portal-program-access', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...browserRuntimeHeaders() },
       body: JSON.stringify({
         accessCode: input.accessCode,
         intent: input.intent,
         credential: input.credential,
+        rememberDevice: input.rememberDevice,
       }),
     });
   } catch {

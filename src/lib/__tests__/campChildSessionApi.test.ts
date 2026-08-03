@@ -30,12 +30,11 @@ describe('camp child session transport', () => {
     jest.restoreAllMocks();
   });
 
-  test('sends program identity and facilitator proof without participant secrets', () => {
+  test('sends scoped program identity while facilitator proof remains in the HttpOnly cookie', () => {
     expect(campCompatibilityHeaders(sessionId)).toEqual({
       'Content-Type': 'application/json',
       'X-Camp-Program-Id': '33333333-3333-4333-8333-333333333333',
       'X-Camp-Program-Code': 'CAMP-TEST',
-      'X-Camp-Access-Code': 'FAC-TEST',
       'X-Kid-Session-Id': sessionId,
     });
   });
@@ -118,7 +117,8 @@ describe('camp child session transport', () => {
       '/.netlify/functions/family-child-session',
       expect.objectContaining({
         method: 'POST',
-        headers: expect.objectContaining({ 'X-Camp-Access-Code': 'FAC-TEST' }),
+        credentials: 'include',
+        headers: expect.not.objectContaining({ 'X-Camp-Access-Code': expect.anything() }),
       }),
     );
     expect(String(fetchMock.mock.calls[0][1]?.body)).toContain('create-participant');

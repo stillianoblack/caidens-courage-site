@@ -14,6 +14,7 @@ import { clearRememberedDeviceSession } from '../lib/rememberedDeviceSession';
 import { clearAllPortalAuthState, clearStalePortalIdentityState } from '../lib/portalIdentityReset';
 import { writePortalSessionUnlock, clearPortalSessionUnlock } from './portalAccess';
 import { notifyPortalSessionChanged } from '../lib/portalSessionEvents';
+import { revokeCurrentFacilitatorSession } from '../lib/facilitatorSessionApi';
 
 export type PortalRole = 'facilitator' | 'family';
 
@@ -202,6 +203,7 @@ export function clearPortalReturnSession(): void {
 
 /** Sign out — clear portal session; user must re-enter access code at /portal. */
 export function signOutPortal(): void {
+  if (readActivePortalRole() === 'facilitator') void revokeCurrentFacilitatorSession();
   clearAllPortalAuthState('sign_out');
   clearFamilyPortalSession();
   clearPortalSessionUnlock();

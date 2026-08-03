@@ -12,7 +12,6 @@ import '../components/portal/portal-header.css';
 import '../components/pilot-dashboard/pilot-dashboard.css';
 import '../components/pilot-program/pilot-program.css';
 import '../components/portal/portal-shell.css';
-import { readActivePilotProgram } from '../config/activePilotProgram';
 import { readActivePortalRole } from '../config/portalContext';
 import { readPortalSessionUnlock } from '../config/portalAccess';
 import { PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
@@ -46,6 +45,9 @@ import { useFacilitatorMobileNav } from '../hooks/useFacilitatorMobileNav';
 import FacilitatorAdventureSnapshot, {
   type FacilitatorAdventureSnapshotData,
 } from '../components/pilot-dashboard/FacilitatorAdventureSnapshot';
+import { fetchCurrentFacilitatorSession } from '../lib/facilitatorSessionApi';
+import { activateSecureFacilitatorSession } from '../lib/facilitatorSessionClient';
+import type { ActivePilotProgram } from '../types/pilotProgram';
 
 const FacilitatorOverviewCoachRail = lazy(
   () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
@@ -64,9 +66,26 @@ export default function ProgramDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeProgram = readActivePilotProgram();
+  const [activeProgram, setActiveProgram] = useState<ActivePilotProgram | null>(null);
+  const [sessionCheck, setSessionCheck] = useState<'checking' | 'ready' | 'invalid'>('checking');
   const showWelcome = searchParams.get('welcome') === '1';
   const [rosterSnapshot, setRosterSnapshot] = useState<FacilitatorAdventureSnapshotData | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchCurrentFacilitatorSession().then((result) => {
+      if (cancelled) return;
+      if (result.status === 'authenticated') {
+        activateSecureFacilitatorSession(result.program);
+        setActiveProgram(result.program);
+        setSessionCheck('ready');
+      } else {
+        setActiveProgram(null);
+        setSessionCheck('invalid');
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const isKidsRoute = isProgramDashboardKidsPath(location.pathname);
   const activeNav = resolveProgramDashboardTab(location.pathname);
@@ -75,7 +94,7 @@ export default function ProgramDashboardPage() {
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
   const isIndependentFamily = isIndependentFamilyProgram(activeProgram);
-  const sessionValid = Boolean(
+  const sessionValid = sessionCheck === 'ready' && Boolean(
     activeProgram &&
       !isIndependentFamily &&
       role === 'facilitator' &&
@@ -158,6 +177,10 @@ export default function ProgramDashboardPage() {
     searchParams.delete('welcome');
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
+
+  if (sessionCheck === 'checking') {
+    return <PortalRouteLoader message="Restoring your facilitator session..." academy />;
+  }
 
   if (!activeProgram || !sessionValid) {
     return (

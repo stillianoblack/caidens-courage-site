@@ -53,13 +53,11 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
           : await verifyStudentPinLoginWithProgramFallback({
               pin: trimmedPin,
               campProgramCodeHint: continuity?.campProgramCode || continuity?.programCode,
-              accessCodeHint: continuity?.activeAccessCode,
             });
         if (!verified.success && programCode) {
           verified = await verifyStudentPinLoginWithProgramFallback({
             pin: trimmedPin,
             campProgramCodeHint: continuity?.campProgramCode || continuity?.programCode || programCode,
-            accessCodeHint: continuity?.activeAccessCode,
           });
         }
         if (!verified.success) {

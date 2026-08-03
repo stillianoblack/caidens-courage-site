@@ -15,7 +15,8 @@ describe('B-4 camp-session client transport', () => {
     );
     expect(transport).toContain("'X-Camp-Program-Id'");
     expect(transport).toContain("'X-Camp-Program-Code'");
-    expect(transport).toContain("'X-Camp-Access-Code'");
+    expect(transport).not.toContain("'X-Camp-Access-Code'");
+    expect(transport).toContain("credentials: 'include'");
     expect(transport).toContain("'X-Kid-Session-Id'");
     expect(transport).not.toContain('student_pin');
     expect(transport).not.toContain('admin_email');

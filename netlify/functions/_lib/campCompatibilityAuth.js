@@ -9,6 +9,7 @@ function safeText(value, max = 160) {
 
 const { generateFamilyClaimCode, generateStudentPin, hashStudentPin } = require('./studentPinCrypto');
 const { validateClientRuntime } = require('./supabaseRuntime');
+const { readFacilitatorSession } = require('./facilitatorSession');
 
 function reportSafeIdentifier(value) {
   return crypto.createHash('sha256').update(String(value || '')).digest('hex').slice(0, 12);
@@ -207,24 +208,15 @@ async function authorizeCampProgram(event, supabase) {
   if (!validateClientRuntime(event)) return { status: 503, code: 'runtime_context_mismatch' };
   const programId = safeText(event.headers?.['x-camp-program-id'], 80);
   const programCode = safeText(event.headers?.['x-camp-program-code'], 120);
-  const accessCode = safeText(event.headers?.['x-camp-access-code'], 160);
-  if (!programId || !programCode || !accessCode) {
+  if (!programId || !programCode) {
     return { status: 401, code: 'missing_camp_session' };
   }
-
-  const { data, error } = await supabase
-    .from('pilot_programs')
-    .select('id, program_code, program_name, program_type, group_name')
-    .eq('id', programId)
-    .eq('program_code', programCode)
-    .eq('facilitator_access_code', accessCode)
-    .neq('pilot_status', 'archived')
-    .maybeSingle();
-  if (error) return { status: 503, code: 'camp_program_lookup_failed' };
-  if (!data || data.program_type === 'independent_family') {
+  const authenticated = await readFacilitatorSession(event, supabase);
+  if (!authenticated.session) return authenticated;
+  if (authenticated.program.id !== programId || authenticated.program.program_code !== programCode) {
     return { status: 403, code: 'invalid_camp_session' };
   }
-  return { program: data };
+  return { program: authenticated.program };
 }
 
 async function participantForCamp(supabase, participantId, programCode) {

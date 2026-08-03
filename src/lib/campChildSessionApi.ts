@@ -1,5 +1,5 @@
 import { readActivePilotProgram } from '../config/activePilotProgram';
-import { readActiveAccessCode, readActivePortalRole } from '../config/portalContext';
+import { readActivePortalRole } from '../config/portalContext';
 import type { KidPlaySessionRow } from './kidPlaySessionTypes';
 import { browserRuntimeHeaders } from './supabaseRuntimeContext';
 
@@ -44,12 +44,10 @@ export type CampParticipantCreateResult = {
 
 export function campCompatibilityHeaders(sessionId?: string | null): Record<string, string> {
   const program = readActivePilotProgram();
-  const accessCode = readActiveAccessCode();
   if (
     readActivePortalRole() !== 'facilitator' ||
     !program?.id?.trim() ||
-    !program.programCode?.trim() ||
-    !accessCode?.trim()
+    !program.programCode?.trim()
   ) {
     throw new Error('Camp facilitator session is unavailable.');
   }
@@ -57,7 +55,6 @@ export function campCompatibilityHeaders(sessionId?: string | null): Record<stri
     'Content-Type': 'application/json',
     'X-Camp-Program-Id': program.id.trim(),
     'X-Camp-Program-Code': program.programCode.trim(),
-    'X-Camp-Access-Code': accessCode.trim(),
     ...browserRuntimeHeaders(),
     ...(sessionId?.trim() ? { 'X-Kid-Session-Id': sessionId.trim() } : {}),
   };
@@ -82,6 +79,7 @@ async function request(
   const query = input.sessionId ? `?sessionId=${encodeURIComponent(input.sessionId)}` : '';
   const response = await fetch(`/.netlify/functions/family-child-session${query}`, {
     method,
+    credentials: 'include',
     headers: campCompatibilityHeaders(input.sessionId),
     body: method === 'GET' ? undefined : JSON.stringify(input),
   });
@@ -107,6 +105,7 @@ const launchRequests = new Map<string, Promise<CampChildSessionResult>>();
 export async function getCampCompatibilityParticipantDirectory(): Promise<CampParticipantDirectoryRow[]> {
   const response = await fetch('/.netlify/functions/family-child-session', {
     method: 'POST',
+    credentials: 'include',
     headers: campCompatibilityHeaders(),
     body: JSON.stringify({ action: 'roster' }),
   });
@@ -132,6 +131,7 @@ export async function createCampCompatibilityParticipant(input: {
 }): Promise<CampParticipantCreateResult> {
   const response = await fetch('/.netlify/functions/family-child-session', {
     method: 'POST',
+    credentials: 'include',
     headers: campCompatibilityHeaders(),
     body: JSON.stringify({ action: 'create-participant', ...input }),
   });

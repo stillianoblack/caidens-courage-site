@@ -3,6 +3,17 @@ import path from 'path';
 
 export {};
 
+jest.mock('../../../netlify/functions/_lib/facilitatorSession', () => ({
+  readFacilitatorSession: async () => ({
+    session: { id: 'facilitator-session-1' },
+    program: {
+      id: 'program-1',
+      program_code: 'CAMP-TEST',
+      program_type: 'Camp / Youth Program',
+    },
+  }),
+}));
+
 describe('portal B-4 variant endpoint', () => {
   const endpoint = require('../../../netlify/functions/portal-b4-variant');
 
@@ -30,7 +41,8 @@ describe('portal B-4 variant endpoint', () => {
       path.join(process.cwd(), 'netlify/functions/_lib/campCompatibilityAuth.js'),
       'utf8',
     );
-    expect(helper).toContain(".eq('facilitator_access_code', accessCode)");
+    expect(helper).toContain('readFacilitatorSession');
+    expect(helper).not.toContain("['x-camp-access-code']");
     expect(helper).toContain(".from('kid_play_sessions')");
     expect(helper).toContain(".eq('organization_id', program.id)");
     expect(source).not.toContain('portalOwnershipAuth');
@@ -71,7 +83,6 @@ describe('portal B-4 variant endpoint', () => {
         'x-cc-supabase-project': 'bnopaocdqkknjzmmkaen',
         'x-camp-program-id': 'program-1',
         'x-camp-program-code': 'CAMP-TEST',
-        'x-camp-access-code': 'FAC-TEST',
         'x-kid-session-id': 'session-1',
       },
     }, supabase, participantId);

@@ -113,7 +113,6 @@ describe('facilitatorSessionContinuity', () => {
       programCode: 'CAMP-2026',
       campProgramCode: 'CAMP-GDI-2026',
       familyProgramCode: 'FAMILY-STILLS-2026',
-      activeAccessCode: 'FAC-GDI-2026',
       resumePayload: { module: 'weekly-adventures', week: 2 },
     });
   });
@@ -123,7 +122,6 @@ describe('facilitatorSessionContinuity', () => {
       programCode: 'CAMP-GDI-2026',
       campProgramCode: 'CAMP-GDI-2026',
       familyProgramCode: 'FAMILY-STILLS-2026',
-      activeAccessCode: 'FAC-GDI-2026',
     });
 
     expect(

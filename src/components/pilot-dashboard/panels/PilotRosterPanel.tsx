@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate, useOutletContext, useSearchParams } fro
 import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
 import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
-import { readActiveAccessCode } from '../../../config/portalContext';
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import {
   filterRosterRows,
@@ -506,7 +505,6 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
           programCode: row.programCode || program?.programCode || resolvedProgramCode,
           campProgramCode: row.campProgramCode || row.programCode || resolvedProgramCode,
           familyProgramCode: row.familyProgramCode || undefined,
-          activeAccessCode: readActiveAccessCode(),
         });
         kidShellAwareNavigate(navigate, kidPlaySessionStartPath(result.session.id));
       } finally {

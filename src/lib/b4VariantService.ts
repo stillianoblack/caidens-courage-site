@@ -174,6 +174,7 @@ async function requestOnce(participantId: string, init?: RequestInit): Promise<B
       `/.netlify/functions/portal-b4-variant?participantId=${encodeURIComponent(participantId)}`,
       {
         ...init,
+        credentials: 'include',
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',

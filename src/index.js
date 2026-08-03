@@ -8,6 +8,7 @@ import { installInternalLinkReloadFallback } from './lib/internalLinkReloadFallb
 import { installPortalClickDebug } from './lib/portalClickDebug';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { clearInsecureFacilitatorCredentialStorage } from './lib/facilitatorCredentialStorage';
 
 const SW_RELOAD_FLAG = 'cc-sw-reload-pending';
 const CHUNK_RELOAD_FLAG = 'cc-chunk-reload-pending';
@@ -35,6 +36,7 @@ function initAnalyticsAfterFirstPaint() {
 }
 
 installInternalLinkReloadFallback();
+clearInsecureFacilitatorCredentialStorage();
 installPortalClickDebug();
 initAnalyticsAfterFirstPaint();
 logAppVersion();

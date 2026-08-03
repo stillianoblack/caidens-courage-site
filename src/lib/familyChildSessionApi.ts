@@ -27,6 +27,7 @@ async function request(
   const query = input.sessionId ? `?sessionId=${encodeURIComponent(input.sessionId)}` : '';
   const response = await fetch(`/.netlify/functions/family-child-session${query}`, {
     method,
+    credentials: 'include',
     headers: childSessionHeaders(input.sessionId),
     body: method === 'GET' ? undefined : JSON.stringify(input),
   });
@@ -76,6 +77,7 @@ export async function saveFamilyCompatibilityChildGrade(
   const response = await fetch(
     `/.netlify/functions/family-child-session?sessionId=${encodeURIComponent(sessionId)}`,
     {
+      credentials: 'include',
       method: 'PATCH',
       headers: childSessionHeaders(sessionId),
       body: JSON.stringify({ action: 'grade', gradeLevel }),
@@ -100,6 +102,7 @@ export async function saveFamilyCompatibilityChildBaseline(
   const response = await fetch(
     `/.netlify/functions/family-child-session?sessionId=${encodeURIComponent(sessionId)}`,
     {
+      credentials: 'include',
       method: 'PATCH',
       headers: childSessionHeaders(sessionId),
       body: JSON.stringify({

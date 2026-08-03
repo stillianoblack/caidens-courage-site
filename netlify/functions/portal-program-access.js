@@ -1,6 +1,12 @@
 const { correlationId, getServerSupabase, json } = require('./_lib/crmAuth');
 const { safeText } = require('./_lib/familyCompatibilityAuth');
 const { validateClientRuntime } = require('./_lib/supabaseRuntime');
+const {
+  cookieHeader,
+  createFacilitatorSession,
+  originIsSameHost,
+  safeProgram,
+} = require('./_lib/facilitatorSession');
 
 const ACCESS_CODE_RE = /^[A-Z0-9-]{3,120}$/;
 const CLAIM_CODE_RE = /^CLAIM-/;
@@ -137,7 +143,8 @@ function credentialMatches(program, role, intent, credential) {
   const shouldVerify =
     (role === 'family' && program.program_type === 'independent_family' && intent === 'parent') ||
     (role === 'facilitator' && intent === 'facilitator');
-  if (!shouldVerify || !credential) return { valid: true, verified: false };
+  if (!shouldVerify) return { valid: true, verified: false };
+  if (!credential) return { valid: role !== 'facilitator', verified: false };
   return {
     valid: normalizeEmail(program.admin_email) === credential,
     verified: normalizeEmail(program.admin_email) === credential,
@@ -188,6 +195,9 @@ exports.handler = async (event) => {
   if (!validateClientRuntime(event)) {
     return json(503, { success: false, code: 'runtime_context_mismatch' }, id);
   }
+  if (!originIsSameHost(event)) {
+    return json(403, { success: false, code: 'invalid_request_origin' }, id);
+  }
 
   const supabase = getServerSupabase();
   if (!supabase) return json(503, { success: false, code: 'service_unavailable' }, id);
@@ -204,6 +214,7 @@ exports.handler = async (event) => {
     ? body.intent
     : null;
   const credential = normalizeEmail(body.credential);
+  const rememberDevice = Boolean(body.rememberDevice);
   if (!ACCESS_CODE_RE.test(accessCode)) {
     return json(400, { success: false, code: 'invalid_access_code' }, id);
   }
@@ -240,6 +251,32 @@ exports.handler = async (event) => {
   );
   if (!credentialCheck.valid) {
     return json(403, { success: false, code: 'credential_not_connected' }, id);
+  }
+
+  if (result.role === 'facilitator') {
+    const created = await createFacilitatorSession(
+      supabase,
+      result.program,
+      credential,
+      rememberDevice,
+    );
+    if (!created.token) {
+      return json(503, { success: false, code: created.error }, id);
+    }
+    const response = json(200, {
+      success: true,
+      role: 'facilitator',
+      program: safeProgram(result.program),
+    }, id);
+    return {
+      ...response,
+      headers: {
+        ...response.headers,
+        'Cache-Control': 'no-store, private',
+        Pragma: 'no-cache',
+        'Set-Cookie': cookieHeader(created.token, created.ttl),
+      },
+    };
   }
 
   return json(200, {
