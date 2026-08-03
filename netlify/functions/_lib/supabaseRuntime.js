@@ -21,18 +21,41 @@ function projectRefFromUrl(value) {
   }
 }
 
+function generatedRuntimeContext() {
+  if (process.env.NODE_ENV === 'test') return null;
+  try {
+    // Created from Netlify's contextual build variables immediately before
+    // Functions are bundled. It contains project identity only, never keys.
+    // eslint-disable-next-line global-require, import/no-unresolved
+    return require('./generatedRuntimeContext');
+  } catch {
+    return null;
+  }
+}
+
 function resolveExpectedProjectRef(env = process.env) {
-  const context = normalizeContext(env.CONTEXT || env.NETLIFY_CONTEXT);
+  const generated = generatedRuntimeContext();
+  const context = normalizeContext(env.CONTEXT || env.NETLIFY_CONTEXT || generated?.context);
   if (!context) return { context: null, expectedProjectRef: null, production: false };
+  if (generated && normalizeContext(generated.context) !== context) {
+    return { context, expectedProjectRef: null, production: context === 'production' };
+  }
   if (context === 'production') {
     const configuredProductionRef = String(env.PRODUCTION_SUPABASE_PROJECT_REF || '').trim();
-    if (configuredProductionRef !== PRODUCTION_PROJECT_REF) {
+    if (
+      configuredProductionRef !== PRODUCTION_PROJECT_REF ||
+      (generated && generated.expectedProjectRef !== PRODUCTION_PROJECT_REF)
+    ) {
       return { context, expectedProjectRef: null, production: true };
     }
     return { context, expectedProjectRef: PRODUCTION_PROJECT_REF, production: true };
   }
   const expectedProjectRef = String(env.REACT_APP_SUPABASE_EXPECTED_PROJECT_REF || '').trim();
-  if (!expectedProjectRef || expectedProjectRef === PRODUCTION_PROJECT_REF) {
+  if (
+    !expectedProjectRef ||
+    expectedProjectRef === PRODUCTION_PROJECT_REF ||
+    (generated && generated.expectedProjectRef !== expectedProjectRef)
+  ) {
     return { context, expectedProjectRef: null, production: false };
   }
   return { context, expectedProjectRef, production: false };

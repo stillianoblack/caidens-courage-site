@@ -41,6 +41,7 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+netlify/functions/_lib/generatedRuntimeContext.js
 public/optimized/
 public/optimized/**
 public/images/optimized/
