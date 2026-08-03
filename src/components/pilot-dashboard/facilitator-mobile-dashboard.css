@@ -63,6 +63,22 @@
     color: var(--pilot-navy-deep, #1a2f52);
   }
 
+  .facilitator-mobileOverviewHeroEyebrow {
+    margin: 0 0 0.28rem;
+    color: #b97925;
+    font-size: 0.625rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .facilitator-mobileOverviewHeroMessage {
+    margin: 0.45rem 0 0;
+    color: rgba(36, 62, 112, 0.76);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
   .facilitator-mobileOverviewHeroSub {
     margin: var(--mobile-card-title-gap) 0 0;
     font-size: 0.75rem;

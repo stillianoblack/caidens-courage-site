@@ -31,24 +31,26 @@ export default function FacilitatorMobileOverviewHero({
   return (
     <section className="facilitator-mobileOverviewHero" aria-labelledby="facilitator-mobile-overview-title">
       <div className="facilitator-mobileOverviewHeroHead">
+        <p className="facilitator-mobileOverviewHeroEyebrow">Today&apos;s Camp</p>
         <h2 id="facilitator-mobile-overview-title" className="facilitator-mobileOverviewHeroTitle">
           {title}
         </h2>
         <p className="facilitator-mobileOverviewHeroSub">{subtitle}</p>
+        <p className="facilitator-mobileOverviewHeroMessage">Your campers are ready for today&apos;s adventure.</p>
       </div>
 
       {metrics ? (
         <dl className="facilitator-mobileOverviewStats">
           <div>
-            <dt>Program Students</dt>
+            <dt>Explorers</dt>
             <dd>{metrics.studentsEnrolled}</dd>
           </div>
           <div>
-            <dt>Baseline Checks</dt>
+            <dt>Focus Flames</dt>
             <dd>{metrics.baselineChecksCompleted}</dd>
           </div>
           <div>
-            <dt>Module Completions</dt>
+            <dt>Adventures</dt>
             <dd>{metrics.moduleCompletions}</dd>
           </div>
         </dl>

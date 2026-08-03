@@ -15,20 +15,24 @@ type AttentionItem =
       key: keyof PilotNeedsAttentionCounts;
       filter: RosterFilterId;
       highlight?: boolean;
+      icon: string;
+      tone: string;
     }
   | {
       label: string;
       countKey: 'missingPin';
       filter: RosterFilterId;
       highlight?: boolean;
+      icon: string;
+      tone: string;
     };
 
 const ATTENTION_ITEMS: AttentionItem[] = [
-  { label: 'Missing baseline', key: 'missingBaseline', filter: 'missing-baseline' },
-  { label: 'Inactive 7+ days', key: 'inactive7PlusDays', filter: 'inactive' },
-  { label: 'No modules completed', key: 'noModules', filter: 'no-modules' },
-  { label: 'Certificate ready', key: 'certificateReady', filter: 'certificate-ready', highlight: true },
-  { label: 'Missing student PINs', countKey: 'missingPin', filter: 'missing-pin' },
+  { label: 'Focus Flame waiting', key: 'missingBaseline', filter: 'missing-baseline', icon: '✦', tone: 'flame' },
+  { label: 'Inactive explorers', key: 'inactive7PlusDays', filter: 'inactive', icon: '◷', tone: 'time' },
+  { label: 'Adventures waiting', key: 'noModules', filter: 'no-modules', icon: '▤', tone: 'learning' },
+  { label: 'Certificates ready', key: 'certificateReady', filter: 'certificate-ready', highlight: true, icon: '★', tone: 'award' },
+  { label: 'Access setup needed', countKey: 'missingPin', filter: 'missing-pin', icon: '●', tone: 'access' },
 ];
 
 export default function PilotNeedsAttentionCard({
@@ -38,8 +42,8 @@ export default function PilotNeedsAttentionCard({
   return (
     <section className="pilot-panelBlock pilot-needsAttention">
       <div className="pilot-panelBlockHead">
-        <h2 className="pilot-panelBlockTitle">Needs Attention</h2>
-        <p className="pilot-panelBlockSub">Quick flags for follow-up with students and families.</p>
+        <h2 className="pilot-panelBlockTitle">Adventure Watch</h2>
+        <p className="pilot-panelBlockSub">Friendly signals that help every explorer stay on the path.</p>
       </div>
       <div className="pilot-needsAttentionGrid">
         {ATTENTION_ITEMS.map((item) => {
@@ -54,12 +58,13 @@ export default function PilotNeedsAttentionCard({
             <Link
               key={item.label}
               to={destination}
-              className={`pilot-needsAttentionItem pilot-needsAttentionItem--link${
+              className={`pilot-needsAttentionItem pilot-needsAttentionItem--link pilot-needsAttentionItem--${item.tone}${
                 item.highlight ? ' pilot-needsAttentionItem--highlight' : ''
               }`}
             >
-              <p className="pilot-needsAttentionValue">{value}</p>
-              <p className="pilot-needsAttentionLabel">{item.label}</p>
+              <span className="pilot-needsAttentionIcon" aria-hidden="true">{item.icon}</span>
+              <div><p className="pilot-needsAttentionValue">{value}</p>
+              <p className="pilot-needsAttentionLabel">{item.label}</p></div>
             </Link>
           );
         })}

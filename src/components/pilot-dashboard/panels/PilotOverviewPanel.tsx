@@ -200,6 +200,12 @@ export default function PilotOverviewPanel({
     }
   };
 
+  const readyCount = Math.max(0, metrics.studentsEnrolled - needsAttention.missingBaseline);
+  const missionProgress = metrics.studentsEnrolled > 0
+    ? Math.round((readyCount / metrics.studentsEnrolled) * 100)
+    : 0;
+  const programName = activeProgram?.groupName || activeProgram?.programName || 'Today\'s Camp';
+
   if (loading) {
     return (
       <div className="pilot-panel pilot-panel--overview">
@@ -222,6 +228,34 @@ export default function PilotOverviewPanel({
       {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
 
       {!isMobileNav ? (
+        <section className="pilot-commandHero" aria-labelledby="pilot-command-hero-title">
+          <div className="pilot-commandHeroCopy">
+            <p className="pilot-commandHeroEyebrow">Today&apos;s Camp</p>
+            <h2 id="pilot-command-hero-title">{programName}</h2>
+            <p className="pilot-commandHeroMessage">Your campers are ready for today&apos;s adventure.</p>
+            <div className="pilot-commandHeroStats" aria-label="Camp readiness summary">
+              <span><strong>{metrics.studentsEnrolled}</strong> Explorers</span>
+              <span><strong>{readyCount}</strong> Ready</span>
+              <span><strong>{needsAttention.missingBaseline}</strong> Need Setup</span>
+            </div>
+            <div className="pilot-commandHeroProgress">
+              <div className="pilot-commandHeroProgressHead"><span>Mission progress</span><strong>{missionProgress}%</strong></div>
+              <div className="pilot-commandHeroTrack"><span style={{ width: `${missionProgress}%` }} /></div>
+            </div>
+            <Link className="pilot-commandHeroCta" to={`${PROGRAM_DASHBOARD_PATH}/weekly-modules`}>
+              Launch Weekly Adventure <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className="pilot-commandHeroB4" aria-hidden="true">
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
+            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/b-4facilitator.webp" alt="" />
+          </div>
+        </section>
+      ) : null}
+
+      {!isMobileNav ? (
         <PilotResultsKpiGrid
           metrics={metrics}
           compact
@@ -235,7 +269,7 @@ export default function PilotOverviewPanel({
 
       <section className="pilot-panelBlock pilot-panelBlock--studentActivity">
         <div className="pilot-panelBlockHead">
-          <h2 className="pilot-panelBlockTitle">Recent Student Activity</h2>
+          <h2 className="pilot-panelBlockTitle">Today&apos;s Camp Journal</h2>
         </div>
         {recentStudentActivity.length === 0 ? (
           <p className="pilot-emptyNote">No recent activity yet.</p>
@@ -243,7 +277,9 @@ export default function PilotOverviewPanel({
           <ul className="pilot-activityList">
             {recentStudentActivity.map((item) => (
               <li key={item.id} className="pilot-activityItem">
-                <span className="pilot-activityDot" aria-hidden="true" />
+                <span className={`pilot-activityStoryIcon pilot-activityStoryIcon--${(recentStudentActivity.indexOf(item) % 4) + 1}`} aria-hidden="true">
+                  {['✦', '●', '★', '▤'][recentStudentActivity.indexOf(item) % 4]}
+                </span>
                 <div className="pilot-activityBody">
                   <p className="pilot-activityLabel">{item.label}</p>
                 </div>

@@ -1,11 +1,7 @@
 import React from 'react';
-import { B4_AVATAR_SRC } from '../../../data/b4/avatar';
 import type { FacilitatorProgramCoachModel } from '../../../lib/facilitatorProgramCoachModel';
 import CoachActionLink from './CoachActionLink';
-import CoachChecklistItem from './CoachChecklistItem';
-import CoachInsightCard from './CoachInsightCard';
 import CoachProgressBar from './CoachProgressBar';
-import CoachReadinessItem from './CoachReadinessItem';
 import './facilitator-program-coach.css';
 
 export type FacilitatorProgramCoachPanelProps = {
@@ -40,17 +36,17 @@ export default function FacilitatorProgramCoachPanel({
     >
       <header className="pilot-programCoachHeader">
         <img
-          className="pilot-programCoachAvatar"
-          src={B4_AVATAR_SRC}
+          className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
+          src="/images/Choose-Your-Guide/b-4facilitator.webp"
           alt=""
           decoding="async"
         />
         <div className="pilot-programCoachIntro">
           <h2 id="pilot-program-coach-title" className="pilot-programCoachTitle">
-            B-4 Program Coach
+            B-4 Guide
           </h2>
-          <p className="pilot-programCoachGreeting">Hi, I&apos;m B-4</p>
-          <p className="pilot-programCoachSubtitle">Your Focus Flame Journey is active.</p>
+          <p className="pilot-programCoachGreeting">Welcome back.</p>
+          <p className="pilot-programCoachSubtitle">Your campers are making great progress.</p>
         </div>
       </header>
 
@@ -58,68 +54,26 @@ export default function FacilitatorProgramCoachPanel({
 
       <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-readiness-heading">
         <h3 id="pilot-coach-readiness-heading" className="pilot-programCoachSectionTitle">
-          Camp Readiness Summary
+          Today&apos;s Journey
         </h3>
-        <ul className="pilot-coachReadinessList">
-          {model.campReadiness.items.map((item) => (
-            <CoachReadinessItem key={item.id} {...item} />
-          ))}
+        <ul className="pilot-guideJourneyList">
+          <li><span className="pilot-guideJourneyMark pilot-guideJourneyMark--complete">✓</span><span><strong>{model.counts.studentCount - model.counts.missingBaselineCount}</strong> explorers discovered their Focus Flame</span></li>
+          <li><span className="pilot-guideJourneyMark pilot-guideJourneyMark--parent">✓</span><span><strong>{Math.max(0, model.counts.studentCount - model.counts.parentNotConnectedCount)}</strong> parent connections are active</span></li>
+          <li><span className="pilot-guideJourneyMark pilot-guideJourneyMark--award">★</span><span><strong>{model.counts.certificateReady}</strong> certificates waiting</span></li>
+          {model.counts.missingBaselineCount > 0 ? <li><span className="pilot-guideJourneyMark pilot-guideJourneyMark--warning">!</span><span><strong>{model.counts.missingBaselineCount}</strong> explorers haven&apos;t discovered their Focus Flame</span></li> : null}
+          {model.counts.missingWeek1Count > 0 ? <li><span className="pilot-guideJourneyMark pilot-guideJourneyMark--learning">▤</span><span>Week 1 is waiting for <strong>{model.counts.missingWeek1Count}</strong> explorers</span></li> : null}
         </ul>
-      </section>
-
-      <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-checklist-heading">
-        <h3 id="pilot-coach-checklist-heading" className="pilot-programCoachSectionTitle">
-          Setup Checklist
-        </h3>
-        <ul className="pilot-coachChecklist">
-          {model.checklist.map((item) => (
-            <CoachChecklistItem
-              key={item.id}
-              label={item.label}
-              description={item.description}
-              status={item.status}
-              warningText={item.warningText}
-              href={item.href}
-              onClick={item.onClick}
-            />
-          ))}
-        </ul>
-      </section>
-
-      <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-insights-heading">
-        <h3 id="pilot-coach-insights-heading" className="pilot-programCoachSectionTitle">
-          Needs Attention
-        </h3>
-        {model.showSuccessState ? (
-          <div className="pilot-coachInsight pilot-coachInsight--success">
-            <p className="pilot-coachInsightMessage">
-              Everything looks good. Your program is ready for the next activity.
-            </p>
-          </div>
-        ) : (
-          <div className="pilot-coachInsightList">
-            {model.insights.map((insight) => (
-              <CoachInsightCard
-                key={insight.id}
-                title={insight.title}
-                message={insight.message}
-                tone={insight.tone}
-                href={insight.href}
-              />
-            ))}
-          </div>
-        )}
       </section>
 
       <section className="pilot-programCoachSection" aria-labelledby="pilot-coach-actions-heading">
         <h3 id="pilot-coach-actions-heading" className="pilot-programCoachSectionTitle">
-          Quick Actions
+          Choose the next step
         </h3>
         <div className="pilot-coachActions">
-          {model.quickActions.map((action) => (
+          {model.quickActions.filter((action) => ['week-1-modules', 'roster'].includes(action.id)).map((action) => (
             <CoachActionLink
               key={action.id}
-              label={action.label}
+              label={action.id === 'week-1-modules' ? "Launch Today's Adventure" : 'View Full Program'}
               href={action.href}
               onClick={action.onClick}
             />

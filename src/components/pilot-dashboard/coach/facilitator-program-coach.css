@@ -13,11 +13,26 @@
   max-width: 100%;
   padding: 1.125rem 1.125rem 1.25rem;
   border-radius: 1.125rem;
-  background: linear-gradient(165deg, var(--coach-navy-card) 0%, var(--coach-navy) 100%);
+  background:
+    radial-gradient(circle at 70% 4%, rgba(241, 162, 84, 0.23), transparent 34%),
+    linear-gradient(165deg, #263f70 0%, var(--coach-navy) 72%);
   color: var(--coach-text);
   border: 1px solid rgba(229, 192, 106, 0.18);
   box-shadow: 0 14px 36px rgba(26, 47, 82, 0.18);
 }
+
+.pilot-programCoach::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(245, 192, 103, 0.36), transparent 52%);
+  filter: blur(12px);
+  opacity: 0.5;
+}
+
+.pilot-programCoach { position: relative; isolation: isolate; overflow: hidden; }
 
 .pilot-programCoachHeader {
   display: flex;
@@ -33,6 +48,66 @@
   border: 2px solid rgba(229, 192, 106, 0.45);
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.pilot-programCoachAvatar--guide {
+  width: 6.6rem;
+  height: 6.6rem;
+  padding: 0.4rem;
+  object-fit: contain;
+  border-width: 3px;
+  border-color: rgba(249, 198, 104, 0.7);
+  background: radial-gradient(circle, rgba(242, 151, 71, 0.28), rgba(255,255,255,0.06));
+  box-shadow: 0 12px 28px rgba(8, 20, 43, 0.32), 0 0 30px rgba(242, 151, 71, 0.18);
+  animation: pilot-guide-float 5s ease-in-out infinite;
+}
+
+.pilot-programCoachHeader { align-items: center; }
+
+.pilot-guideJourneyList {
+  list-style: none;
+  display: grid;
+  gap: 0.52rem;
+  margin: 0;
+  padding: 0;
+}
+
+.pilot-guideJourneyList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.62rem 0.68rem;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 0.8rem;
+  background: rgba(255,255,255,0.045);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.pilot-guideJourneyMark {
+  display: grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.74rem;
+  font-weight: 900;
+  background: #3d9b6a;
+}
+.pilot-guideJourneyMark--parent { background: #2ca889; }
+.pilot-guideJourneyMark--award { background: #8b6bc5; }
+.pilot-guideJourneyMark--warning { background: #d9853f; }
+.pilot-guideJourneyMark--learning { background: #6c63b8; }
+
+@keyframes pilot-guide-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilot-programCoachAvatar--guide { animation: none; }
 }
 
 .pilot-programCoachIntro {

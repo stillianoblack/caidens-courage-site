@@ -175,31 +175,31 @@ function buildCompactCards(metrics: PilotTrackingMetrics): KpiCardDef[] {
   return [
     {
       id: 'participation',
-      labelLines: ['Participation'],
+      labelLines: ['Camp', 'Participation'],
       value: String(metrics.studentsEnrolled),
       topic: 'participation',
     },
     {
       id: 'baseline-completion',
-      labelLines: ['Baseline', 'Completion'],
+      labelLines: ['Focus Flame', 'Discovery'],
       value: String(metrics.baselineChecksCompleted),
       topic: 'baseline',
     },
     {
       id: 'overall-baseline',
-      labelLines: ['Overall Baseline', 'Average'],
+      labelLines: ['Focus Flame', 'Average'],
       value: formatAdminPct(metrics.baselineScores.overall),
       topic: 'baseline',
     },
     {
       id: 'module-completions',
-      labelLines: ['Module', 'Completions'],
+      labelLines: ['Adventure', 'Progress'],
       value: String(metrics.moduleCompletions),
       topic: 'modules',
     },
     {
       id: 'program-health',
-      labelLines: ['Program', 'Health'],
+      labelLines: ['Camp', 'Readiness'],
       value: `${metrics.completionRate}%`,
       hint: 'Participation rate',
       topic: 'program-health',
