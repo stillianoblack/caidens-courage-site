@@ -28,6 +28,13 @@ export type B4AnimatedHeadProps = {
   animate?: boolean;
   openSrc?: string;
   closedSrc?: string;
+  floatProfile?: B4FloatProfile;
+};
+
+export type B4FloatProfile = {
+  travelPx: number;
+  durationSeconds: number;
+  delaySeconds: number;
 };
 
 export default function B4AnimatedHead({
@@ -38,18 +45,30 @@ export default function B4AnimatedHead({
   animate = true,
   openSrc,
   closedSrc,
+  floatProfile,
 }: B4AnimatedHeadProps) {
-  const { rootRef, isBlinking } = useB4Blink<HTMLSpanElement>(animate);
+  const { rootRef, blinkPhase, reduceMotion } = useB4Blink<HTMLSpanElement>(animate);
 
   const resolvedAlt = decorative ? '' : alt;
+  const floatStyle = floatProfile ? ({
+    '--b4-float-travel': `${floatProfile.travelPx}px`,
+    '--b4-float-duration': `${floatProfile.durationSeconds}s`,
+    '--b4-float-delay': `${floatProfile.delaySeconds}s`,
+  } as React.CSSProperties) : undefined;
   return (
     <span
       ref={rootRef}
       className={`b4-animatedHead b4-animatedHead--${variant} ${className}`.trim()}
-      data-blinking={isBlinking ? 'true' : 'false'}
+      data-blink-phase={blinkPhase}
+      data-floating={floatProfile ? 'true' : 'false'}
+      data-reduce-motion={reduceMotion ? 'true' : 'false'}
     >
-      <img className="b4-animatedHeadFrame b4-animatedHeadFrame--open" src={openSrc ?? OPEN_HEADS[variant]} alt={resolvedAlt} />
-      <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
+      <span className="b4-animatedHeadFloat" style={floatStyle}>
+        <span className="b4-animatedHeadStage">
+          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--open" src={openSrc ?? OPEN_HEADS[variant]} alt={resolvedAlt} />
+          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
+        </span>
+      </span>
     </span>
   );
 }

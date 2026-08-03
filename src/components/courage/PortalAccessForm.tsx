@@ -17,6 +17,12 @@ import RememberedDeviceResumeCard from './RememberedDeviceResumeCard';
 import PortalCodeRecovery from './PortalCodeRecovery';
 import B4AnimatedHead, { type B4ColorVariant } from '../b4/B4AnimatedHead';
 
+const GUIDE_FLOAT_PROFILES = {
+  student: { travelPx: 8, durationSeconds: 6.2, delaySeconds: -1.1 },
+  facilitator: { travelPx: 11, durationSeconds: 7.1, delaySeconds: -3.4 },
+  parent: { travelPx: 7, durationSeconds: 5.4, delaySeconds: -2.2 },
+} as const;
+
 type PortalAccessFormProps = {
   variant: PortalUnlockVariant;
   accessCode: string;
@@ -232,6 +238,7 @@ export default function PortalAccessForm({
                     variant={guideVariant[item.id]}
                     openSrc={roleCopy[item.id].guide.imageSrc}
                     alt={roleCopy[item.id].guide.imageAlt}
+                    floatProfile={GUIDE_FLOAT_PROFILES[item.id]}
                   />
                   <img
                     className="cc-portal-characterImage cc-portal-characterImage--hover"

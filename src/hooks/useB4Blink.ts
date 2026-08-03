@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
-function nextBlinkDelay(initial: boolean): number {
-  if (initial) return 700 + Math.random() * 4300;
-  const occasionalPause = Math.random() < 0.18 ? 2500 + Math.random() * 2500 : 0;
-  return 4000 + Math.random() * 4000 + occasionalPause;
+export type B4BlinkPhase = 'open' | 'closing' | 'closed' | 'opening';
+
+export function nextB4BlinkDelay(random: () => number = Math.random): number {
+  return random() < 0.12
+    ? 10000 + random() * 4000
+    : 4500 + random() * 4500;
 }
 
 export function useB4Blink<T extends HTMLElement = HTMLElement>(enabled = true) {
   const rootRef = useRef<T | null>(null);
-  const [isBlinking, setIsBlinking] = useState(false);
+  const [blinkPhase, setBlinkPhase] = useState<B4BlinkPhase>('open');
   const [isVisible, setIsVisible] = useState(true);
   const [pageVisible, setPageVisible] = useState(() => typeof document === 'undefined' || !document.hidden);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -41,30 +43,49 @@ export function useB4Blink<T extends HTMLElement = HTMLElement>(enabled = true) 
 
   useEffect(() => {
     if (!enabled || reduceMotion || !pageVisible || !isVisible) {
-      setIsBlinking(false);
+      setBlinkPhase('open');
       return;
     }
-    let blinkTimer: number | undefined;
-    let openTimer: number | undefined;
+    const timers = new Set<number>();
     let cancelled = false;
-    const schedule = (initial = false) => {
-      blinkTimer = window.setTimeout(() => {
-        if (cancelled) return;
-        setIsBlinking(true);
-        openTimer = window.setTimeout(() => {
-          if (cancelled) return;
-          setIsBlinking(false);
-          schedule(false);
-        }, 120 + Math.random() * 60);
-      }, nextBlinkDelay(initial));
+
+    const later = (callback: () => void, delay: number) => {
+      const timer = window.setTimeout(() => {
+        timers.delete(timer);
+        callback();
+      }, delay);
+      timers.add(timer);
     };
-    schedule(true);
+
+    const schedule = () => {
+      later(() => {
+        if (cancelled) return;
+        const closingMs = 90 + Math.random() * 50;
+        const closedMs = 100 + Math.random() * 80;
+        const openingMs = 120 + Math.random() * 60;
+        setBlinkPhase('closing');
+        later(() => {
+          if (cancelled) return;
+          setBlinkPhase('closed');
+          later(() => {
+            if (cancelled) return;
+            setBlinkPhase('opening');
+            later(() => {
+              if (cancelled) return;
+              setBlinkPhase('open');
+              schedule();
+            }, openingMs);
+          }, closedMs);
+        }, closingMs);
+      }, nextB4BlinkDelay());
+    };
+    schedule();
     return () => {
       cancelled = true;
-      if (blinkTimer) window.clearTimeout(blinkTimer);
-      if (openTimer) window.clearTimeout(openTimer);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      timers.clear();
     };
   }, [enabled, isVisible, pageVisible, reduceMotion]);
 
-  return { rootRef, isBlinking, reduceMotion };
+  return { rootRef, blinkPhase, isBlinking: blinkPhase !== 'open', reduceMotion };
 }

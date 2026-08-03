@@ -80,6 +80,18 @@ describe('Enter the World character gateway', () => {
     expect(screen.getByAltText('Facilitator B-4 guide')).toHaveAttribute('src', '/images/Choose-Your-Guide/B-4orange.webp');
     expect(document.querySelectorAll('.cc-portal-characterImage--default.b4-animatedHead')).toHaveLength(3);
     expect(document.querySelectorAll('.cc-portal-characterImage--default .b4-animatedHeadFrame--closed')).toHaveLength(3);
+    const floatingGuides = Array.from(
+      document.querySelectorAll<HTMLElement>('.cc-portal-characterImage--default .b4-animatedHeadFloat'),
+    );
+    expect(floatingGuides.map((guide) => [
+      guide.style.getPropertyValue('--b4-float-travel'),
+      guide.style.getPropertyValue('--b4-float-duration'),
+      guide.style.getPropertyValue('--b4-float-delay'),
+    ])).toEqual([
+      ['8px', '6.2s', '-1.1s'],
+      ['11px', '7.1s', '-3.4s'],
+      ['7px', '5.4s', '-2.2s'],
+    ]);
     expect(document.querySelectorAll('.cc-portal-characterImage--hover')).toHaveLength(3);
     expect(Array.from(document.querySelectorAll<HTMLImageElement>('.cc-portal-characterImage--hover')).map((image) => image.src)).toEqual([
       expect.stringContaining('/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp'),
