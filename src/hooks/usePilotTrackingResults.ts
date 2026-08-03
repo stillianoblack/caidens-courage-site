@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { loadAssessmentResults } from '../lib/assessmentResultsService';
 import { computePilotTrackingMetrics, type PilotTrackingMetrics } from '../lib/pilotTrackingMetrics';
 import { loadPilotDashboardTracking } from '../lib/pilotDashboardTrackingLoader';
@@ -25,6 +25,8 @@ export function usePilotTrackingResults(
   const [legacySource, setLegacySource] = useState<'supabase' | 'local'>('supabase');
   const [trackingSource, setTrackingSource] = useState<'supabase' | 'local' | 'hybrid'>('supabase');
   const [warning, setWarning] = useState<string | undefined>();
+  const [familyWarning, setFamilyWarning] = useState<string | undefined>();
+  const requestIdRef = useRef(0);
   const [legacyResults, setLegacyResults] = useState<
     Awaited<ReturnType<typeof loadAssessmentResults>>['results']
   >([]);
@@ -38,12 +40,15 @@ export function usePilotTrackingResults(
   const [familyLinks, setFamilyLinks] = useState<StudentFamilyLink[]>([]);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     const code = programCode?.trim();
     if (!code) {
       setParticipants([]);
       setModuleResults([]);
       setAssessmentResults([]);
       setFamilyLinks([]);
+      setWarning(undefined);
+      setFamilyWarning(undefined);
       return;
     }
 
@@ -51,6 +56,8 @@ export function usePilotTrackingResults(
     try {
       const { legacyPayload, trackingPayload, familyLinksPayload, directoryPayload } =
         await loadPilotDashboardTracking(code);
+
+      if (requestId !== requestIdRef.current) return;
 
       if (process.env.NODE_ENV === 'development') {
         console.info('[PILOT_PARTICIPANT_LOOKUP]', {
@@ -69,15 +76,19 @@ export function usePilotTrackingResults(
       setTrackingSource(trackingPayload.source);
       setWarning(
         resolveSyncWarningMessage(
-          legacyPayload.warning ??
-            trackingPayload.warning ??
-            directoryPayload.errors[0] ??
-            familyLinksPayload.error ??
-            undefined,
+          directoryPayload.errors[0] ?? undefined,
         ) ?? undefined,
       );
+      setFamilyWarning(
+        legacyPayload.warning || trackingPayload.warning || familyLinksPayload.error
+          ? 'We couldn’t load the latest guide snapshot. Your program tools are still available.'
+          : undefined,
+      );
+    } catch (error) {
+      if (requestId !== requestIdRef.current) return;
+      setWarning('We couldn’t load the latest program details. Please refresh and try again.');
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [programCode]);
 
@@ -121,6 +132,7 @@ export function usePilotTrackingResults(
         | 'supabase'
         | 'local',
     warning,
+    familyWarning,
     loading: enabled && loading,
     refresh,
   };

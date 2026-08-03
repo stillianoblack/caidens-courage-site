@@ -8,7 +8,7 @@ export default function FacilitatorOverviewCoachRail() {
 
   return (
     <div className="portal-rightRailCoach portal-rightRailCoach--rail">
-      <FacilitatorProgramCoachPanel model={context.coachModel} loading={context.loading} />
+      <FacilitatorProgramCoachPanel model={context.coachModel} loading={context.loading} warning={context.guideWarning} />
     </div>
   );
 }

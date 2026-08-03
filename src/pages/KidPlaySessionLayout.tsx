@@ -53,6 +53,27 @@ import '../components/kid-play-shell/kid-play-collections.css';
 import '../components/kid-play-shell/kid-play-character-missions.css';
 import '../components/kid-play-shell/kid-play-character-collection.css';
 
+const SESSION_BOOT_TIMEOUT_MS = 15000;
+
+function withSessionBootDeadline<T>(request: Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error('session_boot_timeout')),
+      SESSION_BOOT_TIMEOUT_MS,
+    );
+    request.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 export default function KidPlaySessionLayout() {
   return (
     <PortalSessionProvider>
@@ -71,6 +92,7 @@ function KidPlaySessionLayoutContent() {
   const [firstName, setFirstName] = useState('');
   const [gradeLevel, setGradeLevel] = useState<string | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
+  const [bootAttempt, setBootAttempt] = useState(0);
   const [showBootLoader, setShowBootLoader] = useState(true);
   const [bootLoaderExiting, setBootLoaderExiting] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
@@ -97,15 +119,16 @@ function KidPlaySessionLayoutContent() {
     setDisplayName('');
     setFirstName('');
     setGradeLevel(null);
+    setBootError(null);
 
     async function boot() {
       const sessionId = kidPlaySessionId.trim();
       if (!sessionId) {
-        if (!cancelled) setBootError('Missing session.');
+        if (!cancelled) setBootError('We couldn’t find this adventure session. Please return to the roster and try again.');
         return;
       }
 
-      const row = await getKidPlaySessionById(sessionId);
+      const row = await withSessionBootDeadline(getKidPlaySessionById(sessionId));
       if (!row || row.status !== 'active') {
         if (!cancelled) {
           kidPlayShellNavigate(
@@ -124,7 +147,7 @@ function KidPlaySessionLayoutContent() {
         row.session_source === 'facilitator_roster_launch' || row.session_source === 'family_home';
       const { participants } = serverHydratedSession
         ? { participants: [] }
-        : await fetchParticipantsByIds([row.child_id]);
+        : await withSessionBootDeadline(fetchParticipantsByIds([row.child_id]));
       const participant = participants[0];
       const sessionDisplayName = String(row.resume_payload?.participant_display_name || '').trim();
       const sessionFirstName = String(row.resume_payload?.participant_first_name || '').trim();
@@ -173,12 +196,16 @@ function KidPlaySessionLayoutContent() {
       }
     }
 
-    void boot();
+    void boot().catch(() => {
+      if (!cancelled) {
+        setBootError('We couldn’t open this adventure right now. Please try again.');
+      }
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [kidPlaySessionId]);
+  }, [bootAttempt, kidPlaySessionId]);
 
   const isBooting = !session || !displayName;
   const showLoaderOverlay = isBooting || showBootLoader;
@@ -268,8 +295,17 @@ function KidPlaySessionLayoutContent() {
 
   if (bootError) {
     return (
-      <div className="kid-play-shellLoader kid-play-shellLoader--error" role="alert">
-        {bootError}
+      <div className="kidPlayShellLoader kidPlayShellLoader--fullScreen kidPlayShellLoader--error" role="alert">
+        <p className="kidPlayShellLoaderErrorTitle">Adventure paused</p>
+        <p className="kidPlayShellLoaderText">{bootError}</p>
+        <div className="kidPlayShellLoaderActions">
+          <button type="button" onClick={() => setBootAttempt((attempt) => attempt + 1)}>
+            Try again
+          </button>
+          <button type="button" onClick={() => navigate('/program-dashboard/roster')}>
+            Return to roster
+          </button>
+        </div>
       </div>
     );
   }

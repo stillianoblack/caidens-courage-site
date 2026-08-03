@@ -1,8 +1,7 @@
 @import '../../design-system/components/focus-flame-mark.css';
 
 .portal-routeLoader {
-  padding: 0.5rem 0 1.5rem;
-  min-height: 12rem;
+  box-sizing: border-box;
 }
 
 .portal-routeLoaderMessage {
@@ -10,47 +9,6 @@
   font-size: 0.9375rem;
   font-weight: 600;
   color: #4e6a86;
-}
-
-.portal-routeLoaderSkeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.portal-routeLoaderLine {
-  height: 0.875rem;
-  border-radius: 0.5rem;
-  background: linear-gradient(90deg, #e8eef5 0%, #f4f7fb 50%, #e8eef5 100%);
-  background-size: 200% 100%;
-  animation: portal-routeLoader-pulse 1.4s ease-in-out infinite;
-}
-
-.portal-routeLoaderLine--title {
-  height: 1.25rem;
-  width: 42%;
-}
-
-.portal-routeLoaderLine--short {
-  width: 68%;
-}
-
-.portal-routeLoaderBlock {
-  margin-top: 0.5rem;
-  height: 7rem;
-  border-radius: 1rem;
-  background: linear-gradient(90deg, #e8eef5 0%, #f4f7fb 50%, #e8eef5 100%);
-  background-size: 200% 100%;
-  animation: portal-routeLoader-pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes portal-routeLoader-pulse {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
 }
 
 .portal-routeLoader--academy {
@@ -63,6 +21,22 @@
   text-align: center;
 }
 
+.portal-routeLoader--fullScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  min-height: 100dvh;
+  padding: 2rem;
+  background: #08152b;
+}
+
+.portal-routeLoader--inline {
+  min-height: min(52vh, 24rem);
+  padding: 2rem 1rem;
+  border-radius: 1rem;
+  background: #0d1f3d;
+}
+
 .portal-routeLoaderMark {
   width: clamp(3.25rem, 12vw, 4.5rem);
   height: clamp(3.25rem, 12vw, 4.5rem);
@@ -70,7 +44,7 @@
 
 .portal-routeLoaderMessage--academy {
   margin: 0;
-  color: #4e6a86;
+  color: rgba(244, 233, 201, 0.92);
 }
 
 .portal-routeLoaderRecovery {
@@ -114,4 +88,8 @@
 .portal-routeLoaderActions button:hover,
 .portal-routeLoaderActions a:hover {
   background: #fff1d4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-routeLoaderMark { animation: none !important; }
 }

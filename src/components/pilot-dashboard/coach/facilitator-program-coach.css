@@ -138,6 +138,17 @@
   color: var(--coach-text-muted);
 }
 
+.pilot-programCoachWarning {
+  margin: 0 0 1rem;
+  border: 1px solid rgba(240, 196, 94, 0.45);
+  border-radius: 0.75rem;
+  background: rgba(255, 248, 226, 0.1);
+  padding: 0.7rem 0.8rem;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 .pilot-programCoachSection {
   display: flex;
   flex-direction: column;

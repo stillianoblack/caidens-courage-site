@@ -63,6 +63,28 @@
     color: var(--pilot-navy-deep, #1a2f52);
   }
 
+  .facilitator-mobileOverviewHeroHead {
+    display: grid;
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .facilitator-mobileOverviewHeroHead > div { min-width: 0; }
+
+  .facilitator-mobileOverviewHeroTitle {
+    overflow-wrap: anywhere;
+  }
+
+  .facilitator-mobileOverviewHeroGuide {
+    display: block;
+    width: 100%;
+    max-height: 7.5rem;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 10px rgba(36, 62, 112, 0.18));
+  }
+
   .facilitator-mobileOverviewHeroEyebrow {
     margin: 0 0 0.28rem;
     color: #b97925;

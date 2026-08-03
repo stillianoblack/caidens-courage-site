@@ -24,6 +24,7 @@ export type FacilitatorOverviewContextValue = {
   familyLinks: StudentFamilyLink[];
   loading: boolean;
   warning?: string | null;
+  guideWarning?: string | null;
   coachModel: FacilitatorProgramCoachModel | undefined;
   coachPlacement: CoachViewportPlacement;
 };
@@ -57,6 +58,7 @@ export function FacilitatorOverviewCoachProvider({
     participantLookup,
     loading,
     warning,
+    familyWarning,
   } = usePilotTrackingResults(0, resolvedProgramCode, enabled);
   const { rows: rosterRows } = usePilotRosterData(resolvedProgramCode, enabled);
   const parentNotConnectedCount = rosterRows.filter(
@@ -89,6 +91,7 @@ export function FacilitatorOverviewCoachProvider({
     familyLinks,
     loading: enabled && loading,
     warning: warning ?? null,
+    guideWarning: familyWarning ?? null,
     coachModel: enabled ? coachModel : undefined,
     coachPlacement,
   };
@@ -122,7 +125,7 @@ export function FacilitatorOverviewCoachSlot({ slot }: FacilitatorOverviewCoachS
 
   return (
     <div className={['portal-rightRailCoach', 'portal-rightRailCoach--inline', placementClass].join(' ')}>
-      <FacilitatorProgramCoachPanel model={context.coachModel} loading={context.loading} />
+      <FacilitatorProgramCoachPanel model={context.coachModel} loading={context.loading} warning={context.guideWarning} />
     </div>
   );
 }

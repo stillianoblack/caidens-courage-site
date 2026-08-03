@@ -6,6 +6,7 @@ import { facilitatorTabPath } from '../../lib/facilitatorMobileNav';
 import { openFacilitatorProgramSettings } from '../../lib/openFacilitatorProgramSettings';
 import { resolveFacilitatorRosterProgramCode } from '../../lib/resolveFacilitatorRosterProgramCode';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../config/courageRoutes';
+import { FACILITATOR_B4_ASSETS } from '../../config/facilitatorB4Assets';
 
 type FacilitatorMobileOverviewHeroProps = {
   activeProgram?: ActivePilotProgram | null;
@@ -31,16 +32,19 @@ export default function FacilitatorMobileOverviewHero({
   return (
     <section className="facilitator-mobileOverviewHero" aria-labelledby="facilitator-mobile-overview-title">
       <div className="facilitator-mobileOverviewHeroHead">
-        <p className="facilitator-mobileOverviewHeroEyebrow">Today&apos;s Camp</p>
-        <h2 id="facilitator-mobile-overview-title" className="facilitator-mobileOverviewHeroTitle">
-          {title}
-        </h2>
-        <p className="facilitator-mobileOverviewHeroSub">{subtitle}</p>
-        <p className="facilitator-mobileOverviewHeroMessage">
-          {metrics && metrics.studentsEnrolled > 0 && metrics.moduleCompletions > 0
-            ? 'Your campers are ready for today\'s adventure.'
-            : 'Let’s get your explorers ready for their first adventure.'}
-        </p>
+        <img className="facilitator-mobileOverviewHeroGuide" src={FACILITATOR_B4_ASSETS.fullBody} alt="" />
+        <div>
+          <p className="facilitator-mobileOverviewHeroEyebrow">Today&apos;s Camp</p>
+          <h2 id="facilitator-mobile-overview-title" className="facilitator-mobileOverviewHeroTitle">
+            {title}
+          </h2>
+          <p className="facilitator-mobileOverviewHeroSub">{subtitle}</p>
+          <p className="facilitator-mobileOverviewHeroMessage">
+            {metrics && metrics.studentsEnrolled > 0 && metrics.moduleCompletions > 0
+              ? 'Your campers are ready for today\'s adventure.'
+              : 'Let’s get your explorers ready for their first adventure.'}
+          </p>
+        </div>
       </div>
 
       {metrics ? (

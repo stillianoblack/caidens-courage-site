@@ -4,8 +4,10 @@ import './portal-route-loader.css';
 
 type PortalRouteLoaderProps = {
   message?: string;
-  /** Show Focus Flame Academy mark (weekly adventures launch, kid game routes). */
+  /** Retained for backwards compatibility; every portal loader is now branded. */
   academy?: boolean;
+  /** Cover the viewport only during the initial app-level portal bootstrap. */
+  fullScreen?: boolean;
 };
 
 /**
@@ -14,7 +16,7 @@ type PortalRouteLoaderProps = {
  */
 export default function PortalRouteLoader({
   message = 'Loading Focus Flame Academy...',
-  academy = false,
+  fullScreen = false,
 }: PortalRouteLoaderProps) {
   const [timedOut, setTimedOut] = useState(false);
 
@@ -35,35 +37,25 @@ export default function PortalRouteLoader({
     </div>
   ) : null;
 
-  if (academy) {
-    return (
-      <div
-        className="portal-routeLoader portal-routeLoader--academy"
-        aria-live="polite"
-        aria-busy="true"
-        aria-label={message}
-      >
-        <img
-          className="focusFlameMark focusFlameMark--animate portal-routeLoaderMark"
-          src={FOCUS_FLAME_ACADEMY_MARK_SRC}
-          alt=""
-          decoding="async"
-        />
-        <p className="portal-routeLoaderMessage portal-routeLoaderMessage--academy">{message}</p>
-        {recovery}
-      </div>
-    );
-  }
-
   return (
-    <div className="portal-routeLoader" aria-live="polite" aria-busy="true" aria-label={message}>
-      <p className="portal-routeLoaderMessage">{message}</p>
-      <div className="portal-routeLoaderSkeleton">
-        <div className="portal-routeLoaderLine portal-routeLoaderLine--title" />
-        <div className="portal-routeLoaderLine" />
-        <div className="portal-routeLoaderLine portal-routeLoaderLine--short" />
-        <div className="portal-routeLoaderBlock" />
-      </div>
+    <div
+      className={[
+        'portal-routeLoader',
+        'portal-routeLoader--academy',
+        fullScreen ? 'portal-routeLoader--fullScreen' : 'portal-routeLoader--inline',
+      ].join(' ')}
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label={message}
+    >
+      <img
+        className="focusFlameMark focusFlameMark--animate portal-routeLoaderMark"
+        src={FOCUS_FLAME_ACADEMY_MARK_SRC}
+        alt=""
+        decoding="sync"
+      />
+      <p className="portal-routeLoaderMessage portal-routeLoaderMessage--academy">{message}</p>
       {recovery}
     </div>
   );

@@ -5,6 +5,7 @@ import {
   PORTAL_FRIENDLY_ERROR_COPY,
 } from '../portalFriendlyError';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../config/courageRoutes';
+import { FACILITATOR_B4_ASSETS } from '../../config/facilitatorB4Assets';
 
 const read = (relativePath: string): string =>
   fs.readFileSync(path.join(process.cwd(), relativePath), 'utf8');
@@ -31,10 +32,54 @@ describe('facilitator game huddle refinement', () => {
     const overview = read('src/components/pilot-dashboard/panels/PilotOverviewPanel.tsx');
     const mobile = read('src/components/pilot-dashboard/FacilitatorMobileOverviewHero.tsx');
 
-    expect(overview).toContain('/images/Choose-Your-Guide/B-4orange-hover.webp');
+    expect(FACILITATOR_B4_ASSETS.fullBody).toBe('/images/Choose-Your-Guide/B-4orange-hover.webp');
+    expect(FACILITATOR_B4_ASSETS.head).toBe('/images/Choose-Your-Guide/B-4orange.webp');
+    expect(overview).toContain('FACILITATOR_B4_ASSETS.fullBody');
     expect(overview).toContain('Let’s get your explorers ready for their first adventure.');
     expect(mobile).toContain('Let’s get your explorers ready for their first adventure.');
     expect(overview).toContain("activeProgram?.programName || activeProgram?.groupName");
+  });
+
+  test('keeps full-body and head-only facilitator art on one shared mapping', () => {
+    const overview = read('src/components/pilot-dashboard/panels/PilotOverviewPanel.tsx');
+    const guide = read('src/components/pilot-dashboard/coach/FacilitatorProgramCoachPanel.tsx');
+
+    expect(overview.indexOf('pilot-commandHeroB4')).toBeLessThan(
+      overview.indexOf('pilot-commandHeroCopy'),
+    );
+    expect(guide).toContain('src={FACILITATOR_B4_ASSETS.head}');
+    expect(guide).not.toContain('src={FACILITATOR_B4_ASSETS.fullBody}');
+  });
+
+  test('uses one branded portal loader without generic bootstrap skeletons', () => {
+    const loader = read('src/components/portal/PortalRouteLoader.tsx');
+    const app = read('src/App.tsx');
+
+    expect(loader).toContain('FOCUS_FLAME_ACADEMY_MARK_SRC');
+    expect(loader).not.toContain('portal-routeLoaderSkeleton');
+    expect(loader).not.toContain('portal-routeLoaderBlock');
+    expect(app).toContain('fullScreen');
+  });
+
+  test('localizes family aggregation warnings and ignores stale tracking responses', () => {
+    const tracking = read('src/hooks/usePilotTrackingResults.ts');
+    const guide = read('src/components/pilot-dashboard/coach/FacilitatorProgramCoachPanel.tsx');
+
+    expect(tracking).toContain('requestId !== requestIdRef.current');
+    expect(tracking).toContain('setFamilyWarning');
+    expect(tracking).toContain('legacyPayload.warning || trackingPayload.warning || familyLinksPayload.error');
+    expect(tracking).toContain('directoryPayload.errors[0] ?? undefined');
+    expect(guide).toContain('pilot-programCoachWarning');
+  });
+
+  test('student session loader has bounded retry and safe roster recovery', () => {
+    const session = read('src/pages/KidPlaySessionLayout.tsx');
+
+    expect(session).toContain('SESSION_BOOT_TIMEOUT_MS = 15000');
+    expect(session).toContain('Try again');
+    expect(session).toContain('Return to roster');
+    expect(session).toContain("navigate('/program-dashboard/roster')");
+    expect(session).not.toContain('Supabase');
   });
 
   test('anchors and focuses the launcher without launching or changing a student', () => {

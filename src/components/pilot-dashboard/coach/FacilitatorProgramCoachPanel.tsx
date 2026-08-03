@@ -4,17 +4,20 @@ import CoachActionLink from './CoachActionLink';
 import CoachProgressBar from './CoachProgressBar';
 import './facilitator-program-coach.css';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../../config/courageRoutes';
+import { FACILITATOR_B4_ASSETS } from '../../../config/facilitatorB4Assets';
 
 export type FacilitatorProgramCoachPanelProps = {
   model?: FacilitatorProgramCoachModel;
   loading?: boolean;
   className?: string;
+  warning?: string | null;
 };
 
 export default function FacilitatorProgramCoachPanel({
   model,
   loading = false,
   className = '',
+  warning = null,
 }: FacilitatorProgramCoachPanelProps) {
   if (loading || !model) {
     return (
@@ -38,8 +41,8 @@ export default function FacilitatorProgramCoachPanel({
       <header className="pilot-programCoachHeader">
         <img
           className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
-          src="/images/Choose-Your-Guide/B-4orange-hover.webp"
-          alt=""
+          src={FACILITATOR_B4_ASSETS.head}
+          alt="B-4"
           decoding="async"
         />
         <div className="pilot-programCoachIntro">
@@ -50,6 +53,8 @@ export default function FacilitatorProgramCoachPanel({
           <p className="pilot-programCoachSubtitle">Your campers are making great progress.</p>
         </div>
       </header>
+
+      {warning ? <p className="pilot-programCoachWarning" role="status">{warning}</p> : null}
 
       <CoachProgressBar label="Focus Flame Journey" percent={model.progressPercent} />
 

@@ -11,7 +11,7 @@ describe('Kid Play navigation performance contracts', () => {
 
     expect(layout).toContain('<Outlet key={location.pathname} />');
     expect(layout).toContain('const navigateRef = useRef(navigate);');
-    expect(layout).toContain('}, [kidPlaySessionId]);');
+    expect(layout).toContain('}, [bootAttempt, kidPlaySessionId]);');
     expect(layout).toContain('route: location.pathname + location.search,');
     expect(layout).toContain('}, [location.pathname, location.search, session]);');
     expect(navigation).toContain('shouldUseSoftShellNavigation');

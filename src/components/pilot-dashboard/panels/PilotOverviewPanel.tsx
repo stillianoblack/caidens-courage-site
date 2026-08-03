@@ -32,6 +32,7 @@ import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import { FacilitatorOverviewCoachSlot } from '../coach/FacilitatorOverviewCoachProvider';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
+import { FACILITATOR_B4_ASSETS } from '../../../config/facilitatorB4Assets';
 import { FACILITATOR_B4_RESULTS_PATH, FACILITATOR_GAME_HUDDLE_PATH, PROGRAM_DASHBOARD_PATH } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
@@ -232,6 +233,9 @@ export default function PilotOverviewPanel({
 
       {!isMobileNav ? (
         <section className="pilot-commandHero" aria-labelledby="pilot-command-hero-title">
+          <div className="pilot-commandHeroB4" aria-hidden="true">
+            <img className="pilot-commandHeroGuide" src={FACILITATOR_B4_ASSETS.fullBody} alt="" />
+          </div>
           <div className="pilot-commandHeroCopy">
             <p className="pilot-commandHeroEyebrow">Today&apos;s Camp</p>
             <h2 id="pilot-command-hero-title">{programName}</h2>
@@ -253,11 +257,10 @@ export default function PilotOverviewPanel({
               Launch Game Huddle <span aria-hidden="true">→</span>
             </Link>
           </div>
-          <div className="pilot-commandHeroB4" aria-hidden="true">
+          <div className="pilot-commandHeroDecor" aria-hidden="true">
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
-            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/B-4orange-hover.webp" alt="" />
           </div>
         </section>
       ) : null}

@@ -591,7 +591,7 @@ const AppLayout: React.FC = () => {
             isKidPlayShell ? (
               <KidPlayShellLoader />
             ) : isPortalShellRoute ? (
-              <PortalRouteLoader message={portalLoaderMessage} academy={portalLoaderAcademy} />
+              <PortalRouteLoader message={portalLoaderMessage} academy={portalLoaderAcademy} fullScreen />
             ) : (
               <NavigationLoader />
             )
