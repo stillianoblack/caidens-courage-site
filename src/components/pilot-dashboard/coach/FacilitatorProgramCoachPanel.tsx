@@ -3,6 +3,7 @@ import type { FacilitatorProgramCoachModel } from '../../../lib/facilitatorProgr
 import CoachActionLink from './CoachActionLink';
 import CoachProgressBar from './CoachProgressBar';
 import './facilitator-program-coach.css';
+import { FACILITATOR_GAME_HUDDLE_PATH } from '../../../config/courageRoutes';
 
 export type FacilitatorProgramCoachPanelProps = {
   model?: FacilitatorProgramCoachModel;
@@ -37,7 +38,7 @@ export default function FacilitatorProgramCoachPanel({
       <header className="pilot-programCoachHeader">
         <img
           className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
-          src="/images/Choose-Your-Guide/b-4facilitator.webp"
+          src="/images/Choose-Your-Guide/b-4facilitator-hover.webp"
           alt=""
           decoding="async"
         />
@@ -73,9 +74,9 @@ export default function FacilitatorProgramCoachPanel({
           {model.quickActions.filter((action) => ['week-1-modules', 'roster'].includes(action.id)).map((action) => (
             <CoachActionLink
               key={action.id}
-              label={action.id === 'week-1-modules' ? "Launch Today's Adventure" : 'View Full Program'}
-              href={action.href}
-              onClick={action.onClick}
+              label={action.id === 'week-1-modules' ? 'Launch Game Huddle' : 'View Full Program'}
+              href={action.id === 'week-1-modules' ? FACILITATOR_GAME_HUDDLE_PATH : action.href}
+              onClick={action.id === 'week-1-modules' ? undefined : action.onClick}
             />
           ))}
         </div>

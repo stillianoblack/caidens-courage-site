@@ -32,7 +32,7 @@ import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
 import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import { FacilitatorOverviewCoachSlot } from '../coach/FacilitatorOverviewCoachProvider';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
-import { FACILITATOR_B4_RESULTS_PATH, PROGRAM_DASHBOARD_PATH } from '../../../config/courageRoutes';
+import { FACILITATOR_B4_RESULTS_PATH, FACILITATOR_GAME_HUDDLE_PATH, PROGRAM_DASHBOARD_PATH } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
 import {
@@ -41,6 +41,7 @@ import {
 } from '../../../lib/studentGalleryService';
 import { useFacilitatorMobileNav } from '../../../hooks/useFacilitatorMobileNav';
 import FacilitatorMobileOverviewHero from '../FacilitatorMobileOverviewHero';
+import { friendlyPortalWarning } from '../../../lib/portalFriendlyError';
 
 type PilotOverviewPanelProps = {
   metrics: PilotTrackingMetrics;
@@ -204,7 +205,9 @@ export default function PilotOverviewPanel({
   const missionProgress = metrics.studentsEnrolled > 0
     ? Math.round((readyCount / metrics.studentsEnrolled) * 100)
     : 0;
-  const programName = activeProgram?.groupName || activeProgram?.programName || 'Today\'s Camp';
+  const programName = activeProgram?.programName || activeProgram?.groupName || 'Today\'s Camp';
+  const overviewWarning = useMemo(() => friendlyPortalWarning(warning), [warning]);
+  const hasReadyAdventure = readyCount > 0 && metrics.moduleCompletions > 0;
 
   if (loading) {
     return (
@@ -225,14 +228,18 @@ export default function PilotOverviewPanel({
       ) : null}
       {isMobileNav ? <FacilitatorOverviewCoachSlot slot="afterHero" /> : null}
       {!isMobileNav && activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
-      {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
+      {overviewWarning ? <p className="pilot-syncWarning" role="status">{overviewWarning}</p> : null}
 
       {!isMobileNav ? (
         <section className="pilot-commandHero" aria-labelledby="pilot-command-hero-title">
           <div className="pilot-commandHeroCopy">
             <p className="pilot-commandHeroEyebrow">Today&apos;s Camp</p>
             <h2 id="pilot-command-hero-title">{programName}</h2>
-            <p className="pilot-commandHeroMessage">Your campers are ready for today&apos;s adventure.</p>
+            <p className="pilot-commandHeroMessage">
+              {hasReadyAdventure
+                ? 'Your campers are ready for today\'s adventure.'
+                : 'Let’s get your explorers ready for their first adventure.'}
+            </p>
             <div className="pilot-commandHeroStats" aria-label="Camp readiness summary">
               <span><strong>{metrics.studentsEnrolled}</strong> Explorers</span>
               <span><strong>{readyCount}</strong> Ready</span>
@@ -242,15 +249,15 @@ export default function PilotOverviewPanel({
               <div className="pilot-commandHeroProgressHead"><span>Mission progress</span><strong>{missionProgress}%</strong></div>
               <div className="pilot-commandHeroTrack"><span style={{ width: `${missionProgress}%` }} /></div>
             </div>
-            <Link className="pilot-commandHeroCta" to={`${PROGRAM_DASHBOARD_PATH}/weekly-modules`}>
-              Launch Weekly Adventure <span aria-hidden="true">→</span>
+            <Link className="pilot-commandHeroCta" to={FACILITATOR_GAME_HUDDLE_PATH}>
+              Launch Game Huddle <span aria-hidden="true">→</span>
             </Link>
           </div>
           <div className="pilot-commandHeroB4" aria-hidden="true">
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
-            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/b-4facilitator.webp" alt="" />
+            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/b-4facilitator-hover.webp" alt="" />
           </div>
         </section>
       ) : null}

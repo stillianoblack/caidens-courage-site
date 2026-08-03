@@ -5,6 +5,7 @@ import type { PilotTrackingMetrics } from '../../lib/pilotTrackingMetrics';
 import { facilitatorTabPath } from '../../lib/facilitatorMobileNav';
 import { openFacilitatorProgramSettings } from '../../lib/openFacilitatorProgramSettings';
 import { resolveFacilitatorRosterProgramCode } from '../../lib/resolveFacilitatorRosterProgramCode';
+import { FACILITATOR_GAME_HUDDLE_PATH } from '../../config/courageRoutes';
 
 type FacilitatorMobileOverviewHeroProps = {
   activeProgram?: ActivePilotProgram | null;
@@ -25,7 +26,6 @@ export default function FacilitatorMobileOverviewHero({
   const subtitle = activeProgram?.groupName || brandSubtitle || 'Facilitator Portal';
 
   const rosterPath = `${facilitatorTabPath('roster', location.pathname)}?addStudent=1`;
-  const weeklyModulesPath = facilitatorTabPath('weekly-modules', location.pathname);
   const resultsPath = facilitatorTabPath('results', location.pathname);
 
   return (
@@ -36,7 +36,11 @@ export default function FacilitatorMobileOverviewHero({
           {title}
         </h2>
         <p className="facilitator-mobileOverviewHeroSub">{subtitle}</p>
-        <p className="facilitator-mobileOverviewHeroMessage">Your campers are ready for today&apos;s adventure.</p>
+        <p className="facilitator-mobileOverviewHeroMessage">
+          {metrics && metrics.studentsEnrolled > 0 && metrics.moduleCompletions > 0
+            ? 'Your campers are ready for today\'s adventure.'
+            : 'Let’s get your explorers ready for their first adventure.'}
+        </p>
       </div>
 
       {metrics ? (
@@ -60,8 +64,8 @@ export default function FacilitatorMobileOverviewHero({
         <Link to={rosterPath} className="facilitator-mobileOverviewAction facilitator-mobileOverviewAction--primary">
           Add Student
         </Link>
-        <Link to={weeklyModulesPath} className="facilitator-mobileOverviewAction">
-          Open Weekly Modules
+        <Link to={FACILITATOR_GAME_HUDDLE_PATH} className="facilitator-mobileOverviewAction">
+          Launch Game Huddle
         </Link>
         <Link to={resultsPath} className="facilitator-mobileOverviewAction">
           View Results

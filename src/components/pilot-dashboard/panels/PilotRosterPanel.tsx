@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useToast } from '../../portal-design-system/ToastProvider';
-import { Link, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import { writeFacilitatorStudentContinuityForLaunch } from '../../../lib/facilitatorSessionContinuity';
 import { kidPlaySessionStartPath } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
@@ -36,6 +36,7 @@ import { inviteParentForStudent } from '../../../lib/inviteParentForStudent';
 import FacilitatorAdventureSnapshot, {
   type FacilitatorAdventureSnapshotData,
 } from '../FacilitatorAdventureSnapshot';
+import { friendlyPortalWarning } from '../../../lib/portalFriendlyError';
 
 type FacilitatorRosterOutletContext = {
   setRosterSnapshot: React.Dispatch<React.SetStateAction<FacilitatorAdventureSnapshotData | null>>;
@@ -48,6 +49,7 @@ type PilotRosterPanelProps = {
 
 export default function PilotRosterPanel({ programCode, loading: externalLoading }: PilotRosterPanelProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const resolvedProgramCode = resolveFacilitatorRosterProgramCode(programCode);
   const { rows, participants, familyLinks, assessmentResults, moduleResults, loading, warning, refresh, updateParticipantGrade } =
     usePilotRosterData(resolvedProgramCode, true);
@@ -70,11 +72,14 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
   const [inviteParentRow, setInviteParentRow] = useState<PilotRosterRow | null>(null);
   const [inviteParentSubmitting, setInviteParentSubmitting] = useState(false);
   const [inviteParentError, setInviteParentError] = useState<string | null>(null);
+  const [launcherEmphasis, setLauncherEmphasis] = useState(false);
+  const launcherRef = useRef<HTMLElement | null>(null);
   const program = readActivePilotProgram();
   const { showToast } = useToast();
   const showLoading = externalLoading || loading;
   const outletContext = useOutletContext<FacilitatorRosterOutletContext | undefined>();
   const setRosterSnapshot = outletContext?.setRosterSnapshot;
+  const rosterWarning = useMemo(() => friendlyPortalWarning(warning), [warning]);
 
   const resolveAccessContext = useCallback(
     (participantId: string | null, row?: PilotRosterRow | null): StudentRosterAccessContext | null => {
@@ -404,6 +409,18 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     [assessmentResults, moduleResults, rosterFilter, rows],
   );
 
+  useEffect(() => {
+    if (location.hash !== '#student-session-launcher' || displayRows.length === 0) return;
+    const launcher = launcherRef.current;
+    if (!launcher) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    launcher.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+    launcher.focus({ preventScroll: true });
+    setLauncherEmphasis(true);
+    const timeout = window.setTimeout(() => setLauncherEmphasis(false), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [displayRows.length, location.hash]);
+
   const clearFilter = () => {
     const next = new URLSearchParams(searchParams);
     next.delete('filter');
@@ -555,10 +572,16 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         </div>
       ) : null}
 
-      {warning ? <p className="pilot-syncWarning">{warning}</p> : null}
+      {rosterWarning ? <p className="pilot-syncWarning" role="status">{rosterWarning}</p> : null}
 
       {displayRows.length > 0 ? (
-        <section className="pilot-rosterLauncherCard" aria-labelledby="student-session-launcher-title">
+        <section
+          id="student-session-launcher"
+          ref={launcherRef}
+          tabIndex={-1}
+          className={`pilot-rosterLauncherCard${launcherEmphasis ? ' pilot-rosterLauncherCard--arrival' : ''}`}
+          aria-labelledby="student-session-launcher-title"
+        >
           <div className="pilot-rosterLauncherGuide">
             <div className="pilot-rosterLauncherPortrait">
               <img

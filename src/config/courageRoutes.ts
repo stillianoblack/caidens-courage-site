@@ -79,6 +79,7 @@ export const FACILITATOR_B4_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b
 export const FACILITATOR_B4_BASELINE_RESULTS_PATH = `${FACILITATOR_PORTAL_PATH}/results/b4-baseline`;
 
 export const PROGRAM_DASHBOARD_PATH = '/program-dashboard';
+export const FACILITATOR_GAME_HUDDLE_PATH = `${PROGRAM_DASHBOARD_PATH}/roster#student-session-launcher`;
 export const PROGRAM_DASHBOARD_KIDS_BASE = `${PROGRAM_DASHBOARD_PATH}/kids`;
 export const FACILITATOR_BASELINE_CHECK_PATH = `${FACILITATOR_PORTAL_PATH}/baseline-check`;
 export const PROGRAM_BASELINE_CHECK_PATH = `${PROGRAM_DASHBOARD_PATH}/baseline-check`;
