@@ -26,11 +26,11 @@ describe('B4AnimatedHead', () => {
     const { container } = render(<B4AnimatedHead variant="orange" alt="B-4 facilitator guide" />);
     expect(screen.getByAltText('B-4 facilitator guide')).toHaveAttribute(
       'src',
-      '/images/Choose-Your-Guide/B-4orange.webp',
+      '/assets/b4/anchor/idle/b4-anchor-idle.png',
     );
     expect(container.querySelector('.b4-animatedHeadFrame--closed')).toHaveAttribute(
       'src',
-      '/images/B-4FlightGame/Blinking/Blinking@2x.png',
+      '/assets/b4/anchor/blinking/b4-anchor-blinking.png',
     );
     act(() => jest.advanceTimersByTime(701));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blinking', 'true');

@@ -4,7 +4,6 @@ import CoachActionLink from './CoachActionLink';
 import CoachProgressBar from './CoachProgressBar';
 import './facilitator-program-coach.css';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../../config/courageRoutes';
-import { FACILITATOR_B4_ASSETS } from '../../../config/facilitatorB4Assets';
 import B4AnimatedHead from '../../b4/B4AnimatedHead';
 
 export type FacilitatorProgramCoachPanelProps = {
@@ -42,7 +41,6 @@ export default function FacilitatorProgramCoachPanel({
       <header className="pilot-programCoachHeader">
         <B4AnimatedHead
           className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
-          openSrc={FACILITATOR_B4_ASSETS.head}
           variant="orange"
           alt="B-4"
         />

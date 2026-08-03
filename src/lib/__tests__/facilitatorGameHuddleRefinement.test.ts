@@ -47,7 +47,7 @@ describe('facilitator game huddle refinement', () => {
     expect(overview.indexOf('pilot-commandHeroB4')).toBeLessThan(
       overview.indexOf('pilot-commandHeroCopy'),
     );
-    expect(guide).toContain('openSrc={FACILITATOR_B4_ASSETS.head}');
+    expect(guide).toContain('variant="orange"');
     expect(guide).not.toContain('src={FACILITATOR_B4_ASSETS.fullBody}');
   });
 
