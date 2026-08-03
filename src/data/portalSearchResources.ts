@@ -30,7 +30,7 @@ function facilitatorTabPath(section: PilotSidebarNavId): string {
 export const FAMILY_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
   {
     id: 'family-overview',
-    title: 'Overview',
+    title: 'Headquarters',
     description: 'Family dashboard with progress and next steps',
     category: 'Navigation',
     tags: ['home', 'dashboard', 'family'],
@@ -254,9 +254,9 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
   },
   {
     id: 'facilitator-activities',
-    title: 'Activities Library',
+    title: 'Library',
     description: 'Coloring pages, printables, journals, and reset tools',
-    category: 'Activities Library',
+    category: 'Library',
     tags: ['activities', 'downloads', 'library'],
     href: facilitatorTabPath('activities-library'),
   },
@@ -274,7 +274,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Pilot progress charts and baseline submissions',
     category: 'Results',
     tags: ['results', 'data', 'progress'],
-    href: facilitatorTabPath('results'),
+    href: `${facilitatorTabPath('facilitator-center')}?section=results`,
   },
   {
     id: 'facilitator-certificates',
@@ -282,7 +282,7 @@ export const FACILITATOR_PORTAL_SEARCH_RESOURCES: PortalSearchResource[] = [
     description: 'Student and camp completion certificate templates',
     category: 'Downloads',
     tags: ['certificates', 'templates'],
-    href: facilitatorTabPath('certificates'),
+    href: `${facilitatorTabPath('activities-library')}?tab=certificates`,
   },
   {
     id: 'facilitator-gallery',

@@ -42,6 +42,7 @@ import {
 } from '../../../lib/studentGalleryService';
 import { useFacilitatorMobileNav } from '../../../hooks/useFacilitatorMobileNav';
 import FacilitatorMobileOverviewHero from '../FacilitatorMobileOverviewHero';
+import B4AnimatedHead from '../../b4/B4AnimatedHead';
 import { friendlyPortalWarning } from '../../../lib/portalFriendlyError';
 
 type PilotOverviewPanelProps = {
@@ -258,9 +259,9 @@ export default function PilotOverviewPanel({
             </Link>
           </div>
           <div className="pilot-commandHeroDecor" aria-hidden="true">
-            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
-            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
-            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><B4AnimatedHead variant="blue" decorative /></span>
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><B4AnimatedHead variant="green" decorative /></span>
+            <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><B4AnimatedHead variant="purple" decorative /></span>
           </div>
         </section>
       ) : null}

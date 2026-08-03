@@ -1,7 +1,12 @@
 import { PROGRAM_DASHBOARD_KIDS_BASE, PROGRAM_DASHBOARD_PATH } from '../config/courageRoutes';
 import { PROGRAM_SIDEBAR_NAV, type PilotSidebarNavId } from '../data/pilotDashboardContent';
 
-const VALID_NAV_IDS = new Set(PROGRAM_SIDEBAR_NAV.map((item) => item.id));
+const VALID_NAV_IDS = new Set<PilotSidebarNavId>([
+  ...PROGRAM_SIDEBAR_NAV.map((item) => item.id),
+  'weekly-modules',
+  'results',
+  'certificates',
+]);
 
 const RESERVED_SEGMENTS = new Set(['kids', 'adult-assessment', 'baseline-check']);
 

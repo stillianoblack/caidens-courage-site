@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import {
   PILOT_ADULT_TRAINING_CARDS,
@@ -11,17 +11,45 @@ import AdultTrainingCard from '../../shared/AdultTrainingCard';
 import { trackDownload } from '../../../lib/analytics';
 import { PortalPageIntro } from '../../portal-design-system';
 
-export default function PilotFacilitatorPanel() {
+type TrainingSection = 'results' | 'dr-victoria' | 'uncle-t';
+
+export default function PilotFacilitatorPanel({ results }: { results?: React.ReactNode }) {
   const activeProgram = readActivePilotProgram();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get('section');
+  const section: TrainingSection = requested === 'dr-victoria' || requested === 'uncle-t' ? requested : 'results';
+  const selectSection = (next: TrainingSection) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'results') params.delete('section');
+    else params.set('section', next);
+    setSearchParams(params);
+  };
+  const trainingCards = PILOT_ADULT_TRAINING_CARDS.filter((card) =>
+    section === 'dr-victoria' ? card.theme === 'victoria' : card.theme === 'uncle-t',
+  );
 
   return (
     <div className="pilot-panel">
+      <div className="pilot-activitiesCategories" role="tablist" aria-label="Training and results sections">
+        {([
+          ['results', 'Results'],
+          ['dr-victoria', 'Dr. Victoria Training'],
+          ['uncle-t', 'Uncle T Training'],
+        ] as const).map(([id, label]) => (
+          <button key={id} type="button" role="tab" aria-selected={section === id} className={`pilot-activityCatBtn${section === id ? ' pilot-activityCatBtn--active' : ''}`} onClick={() => selectSection(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {section === 'results' ? results : (
+      <>
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} /> : null}
 
       <PortalPageIntro>{PILOT_ADULT_TRAINING_INTRO.subtitle}</PortalPageIntro>
 
       <div className="adultTraining-grid">
-        {PILOT_ADULT_TRAINING_CARDS.map((card) => (
+        {trainingCards.map((card) => (
           <AdultTrainingCard key={card.title} card={card} />
         ))}
       </div>
@@ -62,6 +90,8 @@ export default function PilotFacilitatorPanel() {
           })}
         </div>
       </section>
+      </>
+      )}
     </div>
   );
 }

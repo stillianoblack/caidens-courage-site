@@ -6,6 +6,7 @@ import {
   type B4VariantKey,
 } from '../../data/b4/variantManifest';
 import './b4-circle-avatar.css';
+import { useB4Blink } from '../../hooks/useB4Blink';
 
 type B4CircleAvatarProps = {
   variant?: string | null;
@@ -14,6 +15,7 @@ type B4CircleAvatarProps = {
   loading?: boolean;
   alt?: string;
   className?: string;
+  animate?: boolean;
 };
 
 export default function B4CircleAvatar({
@@ -23,10 +25,13 @@ export default function B4CircleAvatar({
   loading = false,
   alt = '',
   className = '',
+  animate = true,
 }: B4CircleAvatarProps) {
   const validVariant: B4VariantKey | null =
     variant === 'spark' ? 'courage' : isB4VariantKey(variant) ? variant : null;
-  const requestedSrc = validVariant ? B4_VARIANTS[validVariant].states[state].src : null;
+  const { rootRef, isBlinking } = useB4Blink<HTMLSpanElement>(animate && state === 'idle' && !loading);
+  const requestedState = isBlinking && state === 'idle' ? 'blinking' : state;
+  const requestedSrc = validVariant ? B4_VARIANTS[validVariant].states[requestedState].src : null;
   const [assetFailed, setAssetFailed] = useState(false);
 
   useEffect(() => setAssetFailed(false), [requestedSrc]);
@@ -35,6 +40,7 @@ export default function B4CircleAvatar({
 
   return (
     <span
+      ref={rootRef}
       className={`b4CircleAvatar b4CircleAvatar--${size}${showPlaceholder ? ' b4CircleAvatar--placeholder' : ''}${className ? ` ${className}` : ''}`}
       aria-busy={loading || undefined}
     >

@@ -27,7 +27,7 @@ export default function FacilitatorMobileOverviewHero({
   const subtitle = activeProgram?.groupName || brandSubtitle || 'Facilitator Portal';
 
   const rosterPath = `${facilitatorTabPath('roster', location.pathname)}?addStudent=1`;
-  const resultsPath = facilitatorTabPath('results', location.pathname);
+  const resultsPath = `${facilitatorTabPath('facilitator-center', location.pathname)}?section=results`;
 
   return (
     <section className="facilitator-mobileOverviewHero" aria-labelledby="facilitator-mobile-overview-title">
@@ -66,7 +66,7 @@ export default function FacilitatorMobileOverviewHero({
 
       <div className="facilitator-mobileOverviewActions">
         <Link to={rosterPath} className="facilitator-mobileOverviewAction facilitator-mobileOverviewAction--primary">
-          Add Student
+          View Explorers
         </Link>
         <Link to={FACILITATOR_GAME_HUDDLE_PATH} className="facilitator-mobileOverviewAction">
           Launch Game Huddle

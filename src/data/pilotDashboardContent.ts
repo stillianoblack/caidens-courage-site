@@ -46,7 +46,8 @@ export type ActivityCategoryId =
   | 'reflection-journals'
   | 'b4-reset-tools'
   | 'focus-flame-lab'
-  | 'weekly-activities';
+  | 'weekly-activities'
+  | 'certificates';
 
 export type ActivityAssetStatus = 'available' | 'locked';
 
@@ -84,20 +85,15 @@ export const PILOT_SIDEBAR_NAV: Array<{
   label: string;
   icon: PilotSidebarNavId;
 }> = [
-  { id: 'overview', label: 'Overview', icon: 'overview' },
-  { id: 'roster', label: 'Roster', icon: 'roster' },
-  { id: 'weekly-modules', label: 'Weekly Modules', icon: 'weekly-modules' },
-  { id: 'activities-library', label: 'Activities Library', icon: 'activities-library' },
+  { id: 'overview', label: 'Headquarters', icon: 'overview' },
+  { id: 'roster', label: 'Explorers', icon: 'roster' },
+  { id: 'activities-library', label: 'Library', icon: 'activities-library' },
   { id: 'assessments', label: 'Assessments', icon: 'assessments' },
-  { id: 'results', label: 'Results', icon: 'results' },
-  { id: 'certificates', label: 'Certificates', icon: 'certificates' },
+  { id: 'facilitator-center', label: 'Training + Results', icon: 'facilitator-center' },
   { id: 'student-gallery', label: 'Student Gallery', icon: 'student-gallery' },
-  { id: 'facilitator-center', label: 'Adult Training', icon: 'facilitator-center' },
 ];
 
-export const PROGRAM_SIDEBAR_NAV = PILOT_SIDEBAR_NAV.map((item) =>
-  item.id === 'facilitator-center' ? { ...item, label: 'Training & Resources' } : item,
-);
+export const PROGRAM_SIDEBAR_NAV = PILOT_SIDEBAR_NAV;
 
 export const PILOT_PAGE_SUBTITLES: Partial<Record<PilotSidebarNavId, string>> = {
   'facilitator-center':
@@ -193,6 +189,7 @@ export const PILOT_ACTIVITY_CATEGORIES: Array<{
   { id: 'b4-reset-tools', label: 'B-4 Reset Tools' },
   { id: 'focus-flame-lab', label: 'Focus Flame Lab' },
   { id: 'weekly-activities', label: 'Weekly Activities' },
+  { id: 'certificates', label: 'Certificates' },
 ];
 
 /** Weekly activity downloads — derived from PILOT_WEEKLY_JOURNEY kit links. */
@@ -205,7 +202,7 @@ export function buildWeeklyActivityAssets(): ActivityAsset[] {
   }));
 }
 
-export const PILOT_ACTIVITY_ASSETS: Record<Exclude<ActivityCategoryId, 'focus-flame-lab'>, ActivityAsset[]> = {
+export const PILOT_ACTIVITY_ASSETS: Record<Exclude<ActivityCategoryId, 'focus-flame-lab' | 'certificates'>, ActivityAsset[]> = {
   'coloring-pages': PORTAL_COLORING_PAGES.map((page) => ({
     id: page.id,
     title: page.title,

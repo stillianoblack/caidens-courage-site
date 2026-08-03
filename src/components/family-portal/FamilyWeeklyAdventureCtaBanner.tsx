@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { B4_AVATAR_SRC } from '../../data/b4/avatar';
 import { familyPortalPath } from '../../lib/familyPortalPaths';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 
 export default function FamilyWeeklyAdventureCtaBanner() {
   const location = useLocation();
@@ -22,13 +22,10 @@ export default function FamilyWeeklyAdventureCtaBanner() {
           </Link>
         </div>
         <div className="family-weeklyAdventureCtaArt" aria-hidden="true">
-          <img
-            src={B4_AVATAR_SRC}
+          <B4CircleAvatar
+            variant="courage"
+            size="medium"
             alt=""
-            width={88}
-            height={88}
-            loading="lazy"
-            decoding="async"
             className="family-weeklyAdventureCtaAvatar"
           />
         </div>

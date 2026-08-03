@@ -19,17 +19,14 @@ export const FACILITATOR_BOTTOM_NAV: Array<{
   label: string;
   tab: PilotSidebarNavId | 'more';
 }> = [
-  { id: 'home', label: 'Home', tab: 'overview' },
-  { id: 'roster', label: 'Roster', tab: 'roster' },
-  { id: 'activities', label: 'Activities', tab: 'activities-library' },
-  { id: 'results', label: 'Results', tab: 'results' },
+  { id: 'home', label: 'Headquarters', tab: 'overview' },
+  { id: 'roster', label: 'Explorers', tab: 'roster' },
+  { id: 'activities', label: 'Library', tab: 'activities-library' },
+  { id: 'results', label: 'Assessments', tab: 'assessments' },
   { id: 'more', label: 'More', tab: 'more' },
 ];
 
 const MORE_NAV_IDS: PilotSidebarNavId[] = [
-  'weekly-modules',
-  'assessments',
-  'certificates',
   'student-gallery',
   'facilitator-center',
 ];
@@ -86,7 +83,7 @@ export function resolveFacilitatorBottomNavId(
       return 'roster';
     case 'activities-library':
       return 'activities';
-    case 'results':
+    case 'assessments':
       return 'results';
     default:
       return 'more';

@@ -15,6 +15,7 @@ import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages'
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import { setPortalReturnPath } from '../../../lib/portalReturnNav';
 import PilotStatusPill from '../PilotStatusPill';
+import PilotCertificatesPanel from './PilotCertificatesPanel';
 
 const DEFAULT_CATEGORY: ActivityCategoryId = 'coloring-pages';
 
@@ -28,7 +29,7 @@ export default function PilotActivitiesPanel() {
 
   const activityAssets = useMemo(() => {
     const cmsAssets = buildCmsActivityAssets(modules);
-    const merged: Record<Exclude<ActivityCategoryId, 'focus-flame-lab'>, ActivityAsset[]> = {
+    const merged: Record<Exclude<ActivityCategoryId, 'focus-flame-lab' | 'certificates'>, ActivityAsset[]> = {
       ...PILOT_ACTIVITY_ASSETS,
       'coloring-pages': [...PILOT_ACTIVITY_ASSETS['coloring-pages'], ...cmsAssets.filter((a) => a.id.includes('coloring'))],
       'printable-activities': [...PILOT_ACTIVITY_ASSETS['printable-activities'], ...cmsAssets.filter((a) => a.id.includes('module') || a.id.includes('comic'))],
@@ -54,7 +55,7 @@ export default function PilotActivitiesPanel() {
       } else {
         nextParams.set('tab', next);
       }
-      setSearchParams(nextParams, { replace: true });
+      setSearchParams(nextParams);
     },
     [searchParams, setSearchParams],
   );
@@ -73,11 +74,13 @@ export default function PilotActivitiesPanel() {
   return (
     <div className="pilot-panel">
       <div className="pilot-activitiesLayout">
-        <div className="pilot-activitiesCategories">
+        <div className="pilot-activitiesCategories" role="tablist" aria-label="Library categories">
           {PILOT_ACTIVITY_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               type="button"
+              role="tab"
+              aria-selected={category === cat.id}
               className={`pilot-activityCatBtn${category === cat.id ? ' pilot-activityCatBtn--active' : ''}`}
               onClick={() => selectCategory(cat.id)}
             >
@@ -86,8 +89,10 @@ export default function PilotActivitiesPanel() {
           ))}
         </div>
 
-        <div className="pilot-activitiesAssets">
-          {category === 'focus-flame-lab' ? (
+        <div className="pilot-activitiesAssets" role="tabpanel" aria-live="polite">
+          {category === 'certificates' ? (
+            <PilotCertificatesPanel embedded />
+          ) : category === 'focus-flame-lab' ? (
             <div className="pilot-activitySpecialCard">
               <h3 className="pilot-dash-cardTitle">Focus Flame Lab</h3>
               <p className="pilot-dash-cardDesc">{PILOT_FOCUS_FLAME_LAB_CARD.description}</p>

@@ -106,5 +106,24 @@ export function ProgramGalleryTabRoute() {
 }
 
 export function ProgramFacilitatorCenterTabRoute() {
-  return <PilotFacilitatorPanel />;
+  const activeProgram = readActivePilotProgram();
+  const programCode = activeProgram?.programCode;
+  const tracking = usePilotTrackingResults(0, programCode, true);
+  return (
+    <PilotFacilitatorPanel
+      results={
+        <PilotResultsPanel
+          refreshKey={0}
+          moduleResults={tracking.moduleResults}
+          assessmentResults={tracking.assessmentResults}
+          participantLookup={tracking.participantLookup}
+          participants={tracking.participants}
+          familyLinks={tracking.familyLinks}
+          metrics={tracking.metrics}
+          warning={tracking.warning}
+          loading={tracking.loading}
+        />
+      }
+    />
+  );
 }

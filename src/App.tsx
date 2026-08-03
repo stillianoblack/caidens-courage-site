@@ -173,16 +173,6 @@ const ProgramAssessmentsTabRoute = React.lazy(() =>
     default: module.ProgramAssessmentsTabRoute,
   })),
 );
-const ProgramResultsTabRoute = React.lazy(() =>
-  import('./routes/programDashboardTabRoutes').then((module) => ({
-    default: module.ProgramResultsTabRoute,
-  })),
-);
-const ProgramCertificatesTabRoute = React.lazy(() =>
-  import('./routes/programDashboardTabRoutes').then((module) => ({
-    default: module.ProgramCertificatesTabRoute,
-  })),
-);
 const ProgramGalleryTabRoute = React.lazy(() =>
   import('./routes/programDashboardTabRoutes').then((module) => ({
     default: module.ProgramGalleryTabRoute,
@@ -313,8 +303,8 @@ const appRouteChildren = (
         <Route path="weekly-modules" element={<ProgramWeeklyModulesTabRoute />} />
         <Route path="activities-library" element={<ProgramActivitiesTabRoute />} />
         <Route path="assessments" element={<ProgramAssessmentsTabRoute />} />
-        <Route path="results" element={<ProgramResultsTabRoute />} />
-        <Route path="certificates" element={<ProgramCertificatesTabRoute />} />
+        <Route path="results" element={<Navigate to="../facilitator-center?section=results" replace />} />
+        <Route path="certificates" element={<Navigate to="../activities-library?tab=certificates" replace />} />
         <Route path="student-gallery" element={<ProgramGalleryTabRoute />} />
         <Route path="facilitator-center" element={<ProgramFacilitatorCenterTabRoute />} />
         <Route path="kids/caiden" element={<CaidenQuestHubPage />} />

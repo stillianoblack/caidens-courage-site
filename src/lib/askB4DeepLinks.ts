@@ -11,6 +11,7 @@ const ACTIVITY_TAB_IDS = new Set<ActivityCategoryId>([
   'b4-reset-tools',
   'focus-flame-lab',
   'weekly-activities',
+  'certificates',
 ]);
 
 export function isActivityLibraryTab(value: string): value is ActivityCategoryId {
@@ -26,7 +27,7 @@ export function rosterFilterPath(filter: RosterFilterId): string {
 }
 
 export function certificatesReadyFilterPath(): string {
-  return `${programDashboardTabPath('certificates')}?filter=ready`;
+  return `${activitiesLibraryTabPath('certificates')}&filter=ready`;
 }
 
 export function facilitatorBaselineCheckPath(studentId?: string): string {
@@ -37,7 +38,7 @@ export function facilitatorBaselineCheckPath(studentId?: string): string {
 }
 
 export function resultsNeedsAttentionPath(): string {
-  return `${programDashboardTabPath('results')}#needs-attention`;
+  return `${programDashboardTabPath('facilitator-center')}?section=results#needs-attention`;
 }
 
 export function studentGalleryPendingPath(): string {
@@ -72,7 +73,7 @@ export function resolveAskB4PromptDeepLink(
     'help me choose program goals': programGoalsPath(),
     'what should we do for week 1?': programDashboardTabPath('weekly-modules'),
     'open program settings': programDashboardTabPath('overview'),
-    'where are certificates?': programDashboardTabPath('certificates'),
+    'where are certificates?': activitiesLibraryTabPath('certificates'),
     'open community gallery': studentGalleryCommunityPath(),
   };
 

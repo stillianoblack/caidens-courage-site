@@ -8,7 +8,7 @@ import { PILOT_CERTIFICATES } from '../../../data/pilotDashboardContent';
 import { trackDownload, trackEvent } from '../../../lib/analytics';
 import { PortalPageIntro } from '../../portal-design-system';
 
-export default function PilotCertificatesPanel() {
+export default function PilotCertificatesPanel({ embedded = false }: { embedded?: boolean }) {
   const [searchParams] = useSearchParams();
   const filter = searchParams.get('filter');
   const activeProgram = readActivePilotProgram();
@@ -22,7 +22,7 @@ export default function PilotCertificatesPanel() {
   }, []);
 
   return (
-    <div className="pilot-panel pilot-panel--certificates">
+    <div className={`${embedded ? '' : 'pilot-panel '}pilot-panel--certificates`}>
       {filter === 'ready' ? (
         <div className="pilot-rosterFilterBanner">
           <span className="pilot-rosterFilterChip">

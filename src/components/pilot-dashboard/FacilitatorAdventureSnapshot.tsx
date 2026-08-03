@@ -1,5 +1,6 @@
 import React from 'react';
 import { openProgramGoals } from '../../lib/openProgramGoals';
+import B4AnimatedHead from '../b4/B4AnimatedHead';
 
 export type FacilitatorAdventureSnapshotData = {
   studentsEnrolled: number;
@@ -24,10 +25,10 @@ export default function FacilitatorAdventureSnapshot({
       className={`pilot-adventureSnapshot pilot-adventureSnapshot--${placement}`}
       aria-labelledby={`academy-adventure-title-${placement}`}
     >
-      <img
+      <B4AnimatedHead
         className="pilot-adventureSnapshotB4"
-        src="/images/Choose-Your-Guide/B-4orange.webp"
-        alt=""
+        variant="orange"
+        decorative
       />
       <span className="pilot-adventureSnapshotEyebrow">LIVE PROGRAM SNAPSHOT</span>
       <h3 id={`academy-adventure-title-${placement}`}>Your Academy Adventure</h3>

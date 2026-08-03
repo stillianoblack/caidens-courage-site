@@ -546,7 +546,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
     <div className="pilot-panel pilot-panel--roster">
       <div className="pilot-panelIntro pilot-panelIntro--roster">
         <div>
-          <h2 className="pilot-panelIntroTitle">Program Roster</h2>
+          <h2 className="pilot-panelIntroTitle">Explorer Roster</h2>
           <PortalPageIntro>
             Students enrolled in the active program with Parent/Guardian contact and progress summary.
           </PortalPageIntro>

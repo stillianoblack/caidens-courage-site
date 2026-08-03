@@ -56,6 +56,9 @@ const FacilitatorOverviewCoachRail = lazy(
 const NAV_TITLE: Record<PilotSidebarNavId, string> = Object.fromEntries(
   PROGRAM_SIDEBAR_NAV.map((item) => [item.id, item.label]),
 ) as Record<PilotSidebarNavId, string>;
+NAV_TITLE['weekly-modules'] = 'Weekly Modules';
+NAV_TITLE.results = 'Training + Results';
+NAV_TITLE.certificates = 'Library';
 
 const VALID_NAV_IDS = new Set(PROGRAM_SIDEBAR_NAV.map((item) => item.id));
 

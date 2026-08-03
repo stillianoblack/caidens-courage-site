@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { FamilyRecommendedNext } from '../../lib/familyOverviewRecommendations';
 
-const B4_AVATAR_SRC = '/images/icons/B4_Chat_Icon.webp';
+import B4CircleAvatar from '../b4/B4CircleAvatar';
 
 type FamilyRecommendedNextCardProps = {
   recommendation: FamilyRecommendedNext;
@@ -23,14 +23,11 @@ export default function FamilyRecommendedNextCard({
       </div>
       <div className="family-nextCard">
         <div className="family-nextStepHero">
-          <img
-            src={B4_AVATAR_SRC}
+          <B4CircleAvatar
+            variant="courage"
+            size="small"
             alt=""
             className="family-charCardAvatar family-charCardAvatar--sm family-recommendedNextB4"
-            width={72}
-            height={72}
-            loading="lazy"
-            decoding="async"
           />
           <div>
             <h3 className="family-nextTitle">{recommendation.headline}</h3>

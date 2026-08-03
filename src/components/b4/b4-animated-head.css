@@ -1,0 +1,33 @@
+.b4-animatedHead {
+  --b4-head-size: 100%;
+  position: relative;
+  display: inline-grid;
+  width: var(--b4-head-size);
+  max-width: 100%;
+  aspect-ratio: 1.32;
+  place-items: center;
+  isolation: isolate;
+}
+
+.b4-animatedHeadFrame {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 40ms linear;
+}
+
+.b4-animatedHeadFrame--closed { opacity: 0; }
+.b4-animatedHead[data-blinking='true'] .b4-animatedHeadFrame--open { opacity: 0; }
+.b4-animatedHead[data-blinking='true'] .b4-animatedHeadFrame--closed { opacity: 1; }
+
+.b4-animatedHead--orange .b4-animatedHeadFrame--closed { filter: sepia(1) saturate(5.5) hue-rotate(338deg) brightness(1.18); }
+.b4-animatedHead--green .b4-animatedHeadFrame--closed { filter: sepia(1) saturate(3.2) hue-rotate(92deg) brightness(1.2); }
+.b4-animatedHead--pink .b4-animatedHeadFrame--closed { filter: sepia(1) saturate(4) hue-rotate(280deg) brightness(1.18); }
+.b4-animatedHead--purple .b4-animatedHeadFrame--closed { filter: sepia(1) saturate(4.5) hue-rotate(205deg) brightness(0.95); }
+
+@media (prefers-reduced-motion: reduce) {
+  .b4-animatedHeadFrame { transition: none; }
+  .b4-animatedHeadFrame--closed { display: none; }
+}

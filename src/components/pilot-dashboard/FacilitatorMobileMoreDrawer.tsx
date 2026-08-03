@@ -85,7 +85,7 @@ export default function FacilitatorMobileMoreDrawer({
         className="facilitator-mobileMoreDrawer"
         eyebrow="FACILITATOR TOOLS"
         title="More"
-        description="Weekly tools, gallery, training, and program settings."
+        description="Gallery, training, results, and program settings."
         characterSrc="/images/Choose-Your-Guide/b-4facilitator.webp"
         accent="navy"
         size="standard"
