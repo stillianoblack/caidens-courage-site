@@ -4,7 +4,8 @@ import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardS
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import { AppShell } from '../components/portal-design-system';
 import PilotProgramWelcomeCard from '../components/pilot-program/PilotProgramWelcomeCard';
-import PortalRouteLoader from '../components/portal/PortalRouteLoader';
+import DashboardWidgetSkeleton from '../components/pilot-dashboard/DashboardWidgetSkeleton';
+import FacilitatorPortalBootScreen from '../components/portal/FacilitatorPortalBootScreen';
 import PortalAccessRequired from '../components/portal/PortalAccessRequired';
 import { GoalsOnboardingDrawer } from '../components/portal-design-system';
 import '../components/portal-design-system/portal-design-system.css';
@@ -45,9 +46,10 @@ import { useFacilitatorMobileNav } from '../hooks/useFacilitatorMobileNav';
 import FacilitatorAdventureSnapshot, {
   type FacilitatorAdventureSnapshotData,
 } from '../components/pilot-dashboard/FacilitatorAdventureSnapshot';
-import { fetchCurrentFacilitatorSession } from '../lib/facilitatorSessionApi';
-import { activateSecureFacilitatorSession } from '../lib/facilitatorSessionClient';
-import type { ActivePilotProgram } from '../types/pilotProgram';
+import {
+  FACILITATOR_BOOT_EXIT_MS,
+  useFacilitatorPortalBoot,
+} from '../hooks/useFacilitatorPortalBoot';
 
 const FacilitatorOverviewCoachRail = lazy(
   () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
@@ -66,26 +68,19 @@ export default function ProgramDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeProgram, setActiveProgram] = useState<ActivePilotProgram | null>(null);
-  const [sessionCheck, setSessionCheck] = useState<'checking' | 'ready' | 'invalid'>('checking');
+  const { state: bootState, program: activeProgram, retry: retryBoot } = useFacilitatorPortalBoot();
+  const [bootVisible, setBootVisible] = useState(true);
   const showWelcome = searchParams.get('welcome') === '1';
   const [rosterSnapshot, setRosterSnapshot] = useState<FacilitatorAdventureSnapshotData | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    void fetchCurrentFacilitatorSession().then((result) => {
-      if (cancelled) return;
-      if (result.status === 'authenticated') {
-        activateSecureFacilitatorSession(result.program);
-        setActiveProgram(result.program);
-        setSessionCheck('ready');
-      } else {
-        setActiveProgram(null);
-        setSessionCheck('invalid');
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
+    if (bootState !== 'ready') {
+      setBootVisible(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setBootVisible(false), FACILITATOR_BOOT_EXIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [bootState]);
 
   const isKidsRoute = isProgramDashboardKidsPath(location.pathname);
   const activeNav = resolveProgramDashboardTab(location.pathname);
@@ -94,7 +89,7 @@ export default function ProgramDashboardPage() {
   const role = readActivePortalRole();
   const hasUnlock = readPortalSessionUnlock();
   const isIndependentFamily = isIndependentFamilyProgram(activeProgram);
-  const sessionValid = sessionCheck === 'ready' && Boolean(
+  const sessionValid = bootState === 'ready' && Boolean(
     activeProgram &&
       !isIndependentFamily &&
       role === 'facilitator' &&
@@ -178,8 +173,14 @@ export default function ProgramDashboardPage() {
     setSearchParams(searchParams, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  if (sessionCheck === 'checking') {
-    return <PortalRouteLoader message="Restoring your facilitator session..." academy />;
+  if (bootVisible && (bootState === 'booting' || bootState === 'ready' || bootState === 'recoverable_error')) {
+    return (
+      <FacilitatorPortalBootScreen
+        state={bootState}
+        exiting={bootState === 'ready'}
+        onRetry={retryBoot}
+      />
+    );
   }
 
   if (!activeProgram || !sessionValid) {
@@ -235,14 +236,7 @@ export default function ProgramDashboardPage() {
       {showWelcome && !isKidsRoute && activeNav === 'overview' ? (
         <PilotProgramWelcomeCard program={activeProgram} onDismiss={dismissWelcome} />
       ) : null}
-      <Suspense
-        fallback={
-          <PortalRouteLoader
-            message={isKidsRoute ? 'Loading game...' : 'Loading dashboard...'}
-            academy={isKidsRoute}
-          />
-        }
-      >
+      <Suspense fallback={<DashboardWidgetSkeleton showActivity />}>
         <Outlet
           key={resolvePortalOutletKey(location.pathname, location.search)}
           context={{ setRosterSnapshot }}

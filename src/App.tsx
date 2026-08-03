@@ -130,6 +130,9 @@ import {
   STUDENT_PIN_LOGIN_PATH,
 } from './config/courageRoutes';
 import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
+// The facilitator shell owns its complete boot lifecycle. Keeping this route eager
+// prevents the app-level Suspense fallback from flashing before session restoration.
+import ProgramDashboardPage from './pages/ProgramDashboardPage';
 
 const Portal = React.lazy(() => import('./pages/Portal'));
 const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
@@ -140,7 +143,6 @@ const AdminPortalPage = React.lazy(() => import('./pages/AdminPortalPage'));
 const AdminAdventurePreviewPage = React.lazy(() => import('./pages/AdminAdventurePreviewPage'));
 const AdminRouteLayout = React.lazy(() => import('./pages/AdminRouteLayout'));
 const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
-const ProgramDashboardPage = React.lazy(() => import('./pages/ProgramDashboardPage'));
 const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
 const KidPlaySessionLayout = React.lazy(() => import('./pages/KidPlaySessionLayout'));

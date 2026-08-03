@@ -1,0 +1,96 @@
+@import '../../design-system/components/focus-flame-mark.css';
+
+.facilitatorBoot {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background: #08152b;
+  color: rgba(244, 233, 201, 0.94);
+  opacity: 1;
+  transition: opacity 240ms ease;
+}
+
+.facilitatorBoot--exiting { opacity: 0; }
+
+.facilitatorBoot__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.facilitatorBoot__center p {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.facilitatorBoot__mark {
+  width: clamp(3.75rem, 12vw, 5rem);
+  height: clamp(3.75rem, 12vw, 5rem);
+}
+
+.facilitatorBoot__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 0.25rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.facilitatorBoot__progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0.1);
+  transform-origin: left center;
+  border-radius: 999px;
+  background: #efc45d;
+  animation: facilitator-boot-progress 12s cubic-bezier(0.2, 0.65, 0.3, 1) forwards;
+}
+
+.facilitatorBoot[data-boot-state='ready'] .facilitatorBoot__progress span {
+  transform: scaleX(1);
+  transition: transform 220ms ease-out;
+}
+
+.facilitatorBoot__recovery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.facilitatorBoot__recovery button,
+.facilitatorBoot__recovery a {
+  border: 1px solid #efc45d;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff8e6;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+}
+
+@keyframes facilitator-boot-progress {
+  from { transform: scaleX(0.1); }
+  to { transform: scaleX(0.88); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .facilitatorBoot { transition: none; }
+  .facilitatorBoot__mark,
+  .facilitatorBoot__progress span { animation: none !important; }
+  .facilitatorBoot__progress span { transform: scaleX(0.68); }
+}
