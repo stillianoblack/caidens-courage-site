@@ -1368,6 +1368,7 @@ export type StudentParticipantRecord = {
   allow_stretch_level?: boolean | null;
   b4_variant_key?: string | null;
   b4_variant_selected_at?: string | null;
+  pin_status?: 'ready' | 'missing' | 'disabled';
 };
 
 const STUDENT_PARTICIPANT_SELECT_MINIMAL =

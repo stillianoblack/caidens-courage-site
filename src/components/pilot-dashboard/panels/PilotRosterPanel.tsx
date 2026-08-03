@@ -674,6 +674,7 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
         moduleResults={moduleResults}
         programCode={drawerAccess?.programCode ?? resolvedProgramCode}
         hasPin={drawerAccess?.hasPin}
+        pinStatus={rows.find((row) => row.participantId === drawerParticipantId)?.pinStatus}
         pinLastRotatedAt={drawerAccess?.pinLastRotatedAt ?? null}
         lastStudentLoginAt={
           rows.find((row) => row.participantId === drawerParticipantId)?.lastActivityAt ?? null

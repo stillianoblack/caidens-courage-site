@@ -57,6 +57,7 @@ export type PilotRosterRow = {
   parentConnectionStatus: ParentConnectionStatus;
   parentConnectionLabel: string;
   hasPin: boolean;
+  pinStatus?: 'ready' | 'missing' | 'disabled';
   pinLastRotatedAt: string | null;
   familyClaimCode: string | null;
   familyClaimUrl: string | null;
@@ -162,6 +163,12 @@ export function usePilotRosterData(
         const familyClaimCode = access?.family_claim_code ?? null;
         const participantProgramCode = participant.program_code?.trim() || code;
 
+        const pinStatus = resolveRosterPinStatus({
+          compatibilitySession: hasCampCompatibilitySession(),
+          compatibilityStatus: participant.pin_status,
+          access,
+        });
+
         return {
           participantId: participant.id,
           childName: resolveStudentDisplayNameOrFallback({
@@ -199,7 +206,8 @@ export function usePilotRosterData(
           gradeBand: participant.grade_band?.trim() || null,
           parentConnectionStatus,
           parentConnectionLabel: parentConnection.label,
-          hasPin: Boolean(access?.hasPin),
+          hasPin: pinStatus === 'ready',
+          pinStatus,
           pinLastRotatedAt: access?.pinLastRotatedAt ?? null,
           familyClaimCode,
           familyClaimUrl: familyClaimCode ? buildFamilyClaimUrl(familyClaimCode) : null,
@@ -243,4 +251,14 @@ export function usePilotRosterData(
     resolveDisplayName: (participantId: string) =>
       resolveParticipantDisplayName(participantId, participantLookup),
   };
+}
+
+export function resolveRosterPinStatus(input: {
+  compatibilitySession: boolean;
+  compatibilityStatus?: StudentParticipantRecord['pin_status'];
+  access?: StudentAccessFields;
+}): 'ready' | 'missing' | 'disabled' {
+  if (input.compatibilitySession) return input.compatibilityStatus ?? 'missing';
+  if (input.access?.student_pin_enabled === false) return 'disabled';
+  return input.access?.hasPin ? 'ready' : 'missing';
 }

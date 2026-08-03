@@ -54,6 +54,7 @@ export default function PilotAddStudentDrawer({
   const wasOpenRef = useRef(false);
   const childFirstNameRef = useRef<HTMLInputElement>(null);
   const childLastNameRef = useRef<HTMLInputElement>(null);
+  const childNicknameRef = useRef<HTMLInputElement>(null);
   const parentFirstNameRef = useRef<HTMLInputElement>(null);
   const parentLastNameRef = useRef<HTMLInputElement>(null);
   const parentEmailRef = useRef<HTMLInputElement>(null);
@@ -258,6 +259,7 @@ export default function PilotAddStudentDrawer({
               <span>Child first name</span>
               <input
                 ref={childFirstNameRef}
+                data-testid="add-student-first-name"
                 type="text"
                 value={childFirstName}
                 onChange={(event) => setChildFirstName(event.target.value)}
@@ -269,6 +271,7 @@ export default function PilotAddStudentDrawer({
               <span>Child last name</span>
               <input
                 ref={childLastNameRef}
+                data-testid="add-student-last-name"
                 type="text"
                 value={childLastName}
                 onChange={(event) => setChildLastName(event.target.value)}
@@ -278,7 +281,8 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Child nickname (optional if last name provided)</span>
               <input
-                ref={parentFirstNameRef}
+                ref={childNicknameRef}
+                data-testid="add-student-nickname"
                 type="text"
                 value={childNickname}
                 onChange={(event) => setChildNickname(event.target.value)}
@@ -292,7 +296,8 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Parent/Guardian first name (optional)</span>
               <input
-                ref={parentLastNameRef}
+                ref={parentFirstNameRef}
+                data-testid="add-student-parent-first-name"
                 type="text"
                 value={parentFirstName}
                 onChange={(event) => setParentFirstName(event.target.value)}
@@ -302,6 +307,8 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Parent/Guardian last name (optional)</span>
               <input
+                ref={parentLastNameRef}
+                data-testid="add-student-parent-last-name"
                 type="text"
                 value={parentLastName}
                 onChange={(event) => setParentLastName(event.target.value)}
@@ -312,6 +319,7 @@ export default function PilotAddStudentDrawer({
               <span>Parent/Guardian email (optional)</span>
               <input
                 ref={parentEmailRef}
+                data-testid="add-student-parent-email"
                 type="email"
                 value={parentEmail}
                 onChange={(event) => setParentEmail(event.target.value)}
@@ -321,6 +329,7 @@ export default function PilotAddStudentDrawer({
             <label className="pilot-drawerField">
               <span>Parent/Guardian phone (optional)</span>
               <input
+                data-testid="add-student-parent-phone"
                 type="tel"
                 value={parentPhone}
                 onChange={(event) => setParentPhone(event.target.value)}
@@ -331,6 +340,7 @@ export default function PilotAddStudentDrawer({
               <span>{GRADE_LEVEL_LABEL}</span>
               <select
                 ref={gradeLevelRef}
+                data-testid="add-student-grade-level"
                 value={gradeLevel}
                 onChange={(event) => {
                   const next = event.target.value;
@@ -358,6 +368,7 @@ export default function PilotAddStudentDrawer({
             </button>
             <button
               type="submit"
+              data-testid="add-student-submit"
               className="pilot-drawerBtnPrimary"
               disabled={submitting}
               aria-disabled={submitting}

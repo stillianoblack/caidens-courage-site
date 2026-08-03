@@ -184,11 +184,14 @@ function buildRosterColumns(
             header: 'Student Access',
             mobileRole: 'detail' as const,
             className: 'pilot-adminCellText',
-            render: (row: PilotRosterRow) => (
-              <RosterStatusPill tone={row.hasPin ? 'ready' : 'pending'}>
-                {row.hasPin ? 'Ready to Play' : 'Missing PIN'}
-              </RosterStatusPill>
-            ),
+            render: (row: PilotRosterRow) => {
+              const pinStatus = row.pinStatus ?? (row.hasPin ? 'ready' : 'missing');
+              return (
+                <RosterStatusPill tone={pinStatus === 'ready' ? 'ready' : pinStatus === 'disabled' ? 'neutral' : 'pending'}>
+                  {pinStatus === 'ready' ? 'PIN Ready' : pinStatus === 'disabled' ? 'Disabled' : 'Missing PIN'}
+                </RosterStatusPill>
+              );
+            },
           },
           ...(onInviteParent
             ? [

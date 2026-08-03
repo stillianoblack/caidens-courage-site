@@ -113,6 +113,7 @@ describe('family child session endpoint', () => {
       allow_stretch_level: true,
       b4_variant_key: 'courage',
       b4_variant_selected_at: null,
+      pin_status: 'missing',
     }]);
   });
 

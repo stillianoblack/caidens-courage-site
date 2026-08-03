@@ -421,7 +421,16 @@ exports.handler = async (event) => {
       }, id);
     }
     if (mode === 'camp' && body.action === 'create-participant') {
-      const created = await createParticipantForCamp(supabase, program.program_code, body);
+      console.info('[CREATE_PARTICIPANT_TRANSACTION]', {
+        correlationId: id,
+        participantRef: null,
+        programRef: require('crypto').createHash('sha256').update(program.program_code).digest('hex').slice(0, 12),
+        operationStage: 'create_participant_request_received',
+        status: 'received',
+      });
+      const created = await createParticipantForCamp(supabase, program.program_code, body, {
+        correlationId: id,
+      });
       if (!created.participantId) {
         return json(created.status || 503, { success: false, code: created.code }, id);
       }

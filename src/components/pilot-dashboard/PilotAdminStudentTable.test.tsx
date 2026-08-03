@@ -29,6 +29,7 @@ const row: PilotRosterRow = {
   parentConnectionStatus: 'unclaimed',
   parentConnectionLabel: 'Parent Not Connected',
   hasPin: true,
+  pinStatus: 'ready',
   pinLastRotatedAt: null,
   familyClaimCode: null,
   familyClaimUrl: null,

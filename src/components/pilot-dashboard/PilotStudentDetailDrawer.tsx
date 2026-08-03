@@ -24,6 +24,7 @@ type PilotStudentDetailDrawerProps = {
   moduleResults: LocalModuleResultRecord[];
   programCode?: string;
   hasPin?: boolean;
+  pinStatus?: 'ready' | 'missing' | 'disabled';
   pinLastRotatedAt?: string | null;
   lastStudentLoginAt?: string | null;
   parentConnectionLabel?: string;
@@ -59,6 +60,7 @@ export default function PilotStudentDetailDrawer({
   moduleResults,
   programCode,
   hasPin = false,
+  pinStatus,
   pinLastRotatedAt = null,
   lastStudentLoginAt = null,
   parentConnectionLabel,
@@ -122,7 +124,13 @@ export default function PilotStudentDetailDrawer({
                 Use this when the child needs to return to the game.
               </p>
             </div>
-            <span className="pilot-studentAccessStatus">{hasPin ? 'PIN ready' : 'Missing PIN'}</span>
+            <span className="pilot-studentAccessStatus">
+              {(pinStatus ?? (hasPin ? 'ready' : 'missing')) === 'ready'
+                ? 'PIN ready'
+                : pinStatus === 'disabled'
+                  ? 'Disabled'
+                  : 'Missing PIN'}
+            </span>
           </div>
 
           <div className="pilot-studentPinBlock">

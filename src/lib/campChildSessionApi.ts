@@ -28,6 +28,8 @@ export type CampParticipantDirectoryRow = {
   allow_stretch_level: boolean | null;
   b4_variant_key: string | null;
   b4_variant_selected_at: string | null;
+  /** Server-normalized readiness only. No PIN material is returned to the browser. */
+  pin_status: 'ready' | 'missing' | 'disabled';
 };
 
 export type CampParticipantCreateResult = {

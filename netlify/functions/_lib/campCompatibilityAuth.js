@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 function safeText(value, max = 160) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
@@ -11,7 +13,30 @@ const GRADE_BANDS = {
   '6': '6-8', '7': '6-8', '8': '6-8',
 };
 
-async function createParticipantForCamp(supabase, programCode, input) {
+function reportSafeIdentifier(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex').slice(0, 12);
+}
+
+function logCreateParticipantStage(context, stage, status, errorCategory) {
+  console.info('[CREATE_PARTICIPANT_TRANSACTION]', {
+    correlationId: context.correlationId,
+    participantRef: context.participantId ? reportSafeIdentifier(context.participantId) : null,
+    programRef: reportSafeIdentifier(context.programCode),
+    operationStage: stage,
+    status,
+    ...(errorCategory ? { errorCategory } : {}),
+  });
+}
+
+function normalizeParticipantPinStatus(row) {
+  if (row.student_pin_enabled === false) return 'disabled';
+  return row.student_pin_enabled === true && Boolean(
+    row.student_pin_hash || row.student_pin_fingerprint || row.student_pin_reveal_value,
+  ) ? 'ready' : 'missing';
+}
+
+async function createParticipantForCamp(supabase, programCode, input, context = {}) {
+  const logContext = { correlationId: context.correlationId || null, programCode, participantId: null };
   const firstName = safeText(input.childFirstName, 80);
   const lastName = safeText(input.childLastName, 80) || null;
   const nickname = safeText(input.childNickname, 80) || firstName;
@@ -21,9 +46,11 @@ async function createParticipantForCamp(supabase, programCode, input) {
   const parentLastName = safeText(input.parentLastName, 80) || null;
   const parentPhone = safeText(input.parentPhone, 40) || null;
   if (!firstName || (!lastName && !safeText(input.childNickname, 80)) || !GRADE_BANDS[gradeLevel]) {
+    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'validation_error');
     return { status: 400, code: 'validation_error' };
   }
   if (parentEmail && (!parentFirstName || !parentLastName)) {
+    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'parent_validation_error');
     return { status: 400, code: 'parent_validation_error' };
   }
 
@@ -35,8 +62,14 @@ async function createParticipantForCamp(supabase, programCode, input) {
     .ilike('nickname', nickname);
   if (lastName) duplicateQuery = duplicateQuery.ilike('last_name', lastName);
   const { data: duplicates, error: duplicateError } = await duplicateQuery.limit(1);
-  if (duplicateError) return { status: 503, code: 'participant_duplicate_check_failed' };
-  if (duplicates?.length) return { status: 409, code: 'participant_already_exists' };
+  if (duplicateError) {
+    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'duplicate_check_failed');
+    return { status: 503, code: 'participant_duplicate_check_failed' };
+  }
+  if (duplicates?.length) {
+    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'participant_already_exists');
+    return { status: 409, code: 'participant_already_exists' };
+  }
 
   const pin = generateStudentPin();
   const { hash, fingerprint } = hashStudentPin(programCode, pin);
@@ -68,8 +101,11 @@ async function createParticipantForCamp(supabase, programCode, input) {
     .select('id')
     .single();
   if (participantError || !participant?.id) {
+    logCreateParticipantStage(logContext, 'create_participant_failed', 'failed', 'participant_insert_failed');
     return { status: 503, code: 'participant_create_failed' };
   }
+  logContext.participantId = participant.id;
+  logCreateParticipantStage(logContext, 'participant_insert_succeeded', 'succeeded');
 
   const { data: link, error: linkError } = await supabase
     .from('student_family_links')
@@ -92,11 +128,19 @@ async function createParticipantForCamp(supabase, programCode, input) {
       .delete()
       .eq('id', participant.id)
       .eq('program_code', programCode);
+    logCreateParticipantStage(
+      logContext,
+      rollbackError ? 'create_participant_failed' : 'create_participant_compensated',
+      rollbackError ? 'failed' : 'compensated',
+      rollbackError ? 'participant_compensation_failed' : 'family_link_insert_failed',
+    );
     return {
       status: 503,
       code: rollbackError ? 'participant_create_rollback_failed' : 'family_link_create_failed',
     };
   }
+  logCreateParticipantStage(logContext, 'family_link_insert_succeeded', 'succeeded');
+  logCreateParticipantStage(logContext, 'create_participant_committed', 'committed');
 
   return {
     participantId: participant.id,
@@ -149,6 +193,10 @@ async function participantForCamp(supabase, participantId, programCode) {
 
 async function participantDirectoryForCamp(supabase, programCode) {
   const selects = [
+    'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level, b4_variant_key, b4_variant_selected_at, student_pin_enabled, student_pin_hash, student_pin_fingerprint, student_pin_reveal_value',
+    'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level, student_pin_enabled, student_pin_hash, student_pin_fingerprint, student_pin_reveal_value',
+    'id, nickname, first_name, last_name, role, program_code, created_at, student_pin_enabled, student_pin_hash, student_pin_fingerprint, student_pin_reveal_value',
+    'id, nickname, first_name, role, program_code, created_at, student_pin_enabled, student_pin_hash, student_pin_fingerprint, student_pin_reveal_value',
     'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level, b4_variant_key, b4_variant_selected_at',
     'id, nickname, first_name, last_name, role, program_code, created_at, grade_level, grade_band, allow_stretch_level',
     'id, nickname, first_name, last_name, role, program_code, created_at',
@@ -197,6 +245,7 @@ async function participantDirectoryForCamp(supabase, programCode) {
         : null,
       b4_variant_key: safeText(row.b4_variant_key, 20) || null,
       b4_variant_selected_at: row.b4_variant_selected_at || null,
+      pin_status: normalizeParticipantPinStatus(row),
     })),
   };
 }
@@ -227,6 +276,7 @@ module.exports = {
   createParticipantForCamp,
   participantDirectoryForCamp,
   participantForCamp,
+  normalizeParticipantPinStatus,
   safeText,
   sessionForCamp,
 };
