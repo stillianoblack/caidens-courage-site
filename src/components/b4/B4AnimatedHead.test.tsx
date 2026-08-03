@@ -83,6 +83,9 @@ describe('B4AnimatedHead', () => {
     expect(container.querySelectorAll('.b4-animatedHeadEyelid--left')).toHaveLength(1);
     expect(container.querySelectorAll('.b4-animatedHeadEyelid--right')).toHaveLength(1);
     expect(css).not.toContain('.b4-animatedHeadFrame--closed');
+    expect(css).toContain('scaleY(0)');
+    expect(css).toContain('scaleY(1)');
+    expect(css).not.toContain('transition: opacity 160ms');
   });
 
   it('applies stable per-instance floating variables outside the blink stage', () => {
