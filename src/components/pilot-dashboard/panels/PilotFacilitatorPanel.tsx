@@ -10,8 +10,15 @@ import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import AdultTrainingCard from '../../shared/AdultTrainingCard';
 import { trackDownload } from '../../../lib/analytics';
 import { PortalPageIntro } from '../../portal-design-system';
+import PortalCategoryLayout from '../PortalCategoryLayout';
 
 type TrainingSection = 'results' | 'dr-victoria' | 'uncle-t';
+
+const TRAINING_SECTIONS = [
+  { id: 'results', label: 'Results' },
+  { id: 'dr-victoria', label: 'Dr. Victoria Training' },
+  { id: 'uncle-t', label: 'Uncle T Training' },
+] as const;
 
 export default function PilotFacilitatorPanel({ results }: { results?: React.ReactNode }) {
   const activeProgram = readActivePilotProgram();
@@ -30,19 +37,13 @@ export default function PilotFacilitatorPanel({ results }: { results?: React.Rea
 
   return (
     <div className="pilot-panel">
-      <div className="pilot-activitiesCategories" role="tablist" aria-label="Training and results sections">
-        {([
-          ['results', 'Results'],
-          ['dr-victoria', 'Dr. Victoria Training'],
-          ['uncle-t', 'Uncle T Training'],
-        ] as const).map(([id, label]) => (
-          <button key={id} type="button" role="tab" aria-selected={section === id} className={`pilot-activityCatBtn${section === id ? ' pilot-activityCatBtn--active' : ''}`} onClick={() => selectSection(id)}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {section === 'results' ? results : (
+      <PortalCategoryLayout
+        items={TRAINING_SECTIONS}
+        activeItem={section}
+        ariaLabel="Training and results sections"
+        onSelect={selectSection}
+      >
+        {section === 'results' ? results : (
       <>
       {activeProgram ? <ProgramAccessCodesCard program={activeProgram} /> : null}
 
@@ -91,7 +92,8 @@ export default function PilotFacilitatorPanel({ results }: { results?: React.Rea
         </div>
       </section>
       </>
-      )}
+        )}
+      </PortalCategoryLayout>
     </div>
   );
 }

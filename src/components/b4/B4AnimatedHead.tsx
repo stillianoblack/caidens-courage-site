@@ -22,7 +22,6 @@ const CLOSED_HEADS: Record<B4ColorVariant, string> = {
 
 type B4AnimatedHeadProps = {
   variant?: B4ColorVariant;
-  size?: number | string;
   className?: string;
   alt?: string;
   decorative?: boolean;
@@ -33,7 +32,6 @@ type B4AnimatedHeadProps = {
 
 export default function B4AnimatedHead({
   variant = 'blue',
-  size = '100%',
   className = '',
   alt = 'B-4 guide',
   decorative = false,
@@ -44,13 +42,10 @@ export default function B4AnimatedHead({
   const { rootRef, isBlinking } = useB4Blink<HTMLSpanElement>(animate);
 
   const resolvedAlt = decorative ? '' : alt;
-  const style = { '--b4-head-size': typeof size === 'number' ? `${size}px` : size } as React.CSSProperties;
-
   return (
     <span
       ref={rootRef}
       className={`b4-animatedHead b4-animatedHead--${variant} ${className}`.trim()}
-      style={style}
       data-blinking={isBlinking ? 'true' : 'false'}
     >
       <img className="b4-animatedHeadFrame b4-animatedHeadFrame--open" src={openSrc ?? OPEN_HEADS[variant]} alt={resolvedAlt} />

@@ -15,6 +15,7 @@ import { downloadAllColoringPages } from '../../../lib/downloadAllColoringPages'
 import { programDashboardTabPath } from '../../../lib/programDashboardNav';
 import { setPortalReturnPath } from '../../../lib/portalReturnNav';
 import PilotStatusPill from '../PilotStatusPill';
+import PortalCategoryLayout from '../PortalCategoryLayout';
 import PilotCertificatesPanel from './PilotCertificatesPanel';
 
 const DEFAULT_CATEGORY: ActivityCategoryId = 'coloring-pages';
@@ -73,23 +74,12 @@ export default function PilotActivitiesPanel() {
 
   return (
     <div className="pilot-panel">
-      <div className="pilot-activitiesLayout">
-        <div className="pilot-activitiesCategories" role="tablist" aria-label="Library categories">
-          {PILOT_ACTIVITY_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              role="tab"
-              aria-selected={category === cat.id}
-              className={`pilot-activityCatBtn${category === cat.id ? ' pilot-activityCatBtn--active' : ''}`}
-              onClick={() => selectCategory(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="pilot-activitiesAssets" role="tabpanel" aria-live="polite">
+      <PortalCategoryLayout
+        items={PILOT_ACTIVITY_CATEGORIES}
+        activeItem={category}
+        ariaLabel="Library categories"
+        onSelect={selectCategory}
+      >
           {category === 'certificates' ? (
             <PilotCertificatesPanel embedded />
           ) : category === 'focus-flame-lab' ? (
@@ -191,8 +181,7 @@ export default function PilotActivitiesPanel() {
               ))}
             </ul>
           )}
-        </div>
-      </div>
+      </PortalCategoryLayout>
 
       <section className="pilot-gameLibraryPreview" aria-labelledby="pilot-game-library-heading">
         <h3 id="pilot-game-library-heading" className="pilot-dash-cardTitle">

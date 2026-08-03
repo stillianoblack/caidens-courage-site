@@ -1,6 +1,8 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import B4AnimatedHead from './B4AnimatedHead';
+import fs from 'fs';
+import path from 'path';
 
 function setReducedMotion(matches: boolean) {
   window.matchMedia = jest.fn().mockReturnValue({
@@ -50,5 +52,13 @@ describe('B4AnimatedHead', () => {
     const { unmount } = render(<B4AnimatedHead />);
     unmount();
     expect(clearTimeoutSpy).toHaveBeenCalled();
+  });
+
+  it('does not impose presentation dimensions on its host', () => {
+    const css = fs.readFileSync(path.join(process.cwd(), 'src/components/b4/b4-animated-head.css'), 'utf8');
+    const rootRule = css.match(/\.b4-animatedHead\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(rootRule).not.toMatch(/\bwidth\s*:/);
+    expect(rootRule).not.toMatch(/\bheight\s*:/);
+    expect(rootRule).not.toMatch(/\baspect-ratio\s*:/);
   });
 });

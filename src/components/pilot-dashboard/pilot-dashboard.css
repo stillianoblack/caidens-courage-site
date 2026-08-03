@@ -2987,7 +2987,8 @@ button.pilot-dash-card:hover {
 .pilot-commandHeroGuide { display: block; width: 100%; height: auto; max-height: 18.5rem; object-fit: contain; filter: drop-shadow(0 20px 20px rgba(4,12,27,0.4)); animation: pilot-guide-float 5s ease-in-out infinite; }
 .pilot-commandHeroDecor { position: absolute; inset: 0; pointer-events: none; }
 .pilot-commandHeroOrb { position: absolute; display: grid; place-items: center; width: 3.4rem; height: 3.4rem; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18); }
-.pilot-commandHeroOrb img { width: 85%; filter: drop-shadow(0 5px 7px rgba(0,0,0,0.2)); }
+.pilot-commandHeroOrb > .b4-animatedHead { width: 85%; height: 85%; }
+.pilot-commandHeroOrb img { width: 100%; filter: drop-shadow(0 5px 7px rgba(0,0,0,0.2)); }
 .pilot-commandHeroOrb--blue { top: 12%; right: 8%; }
 .pilot-commandHeroOrb--green { top: 42%; right: 3%; }
 .pilot-commandHeroOrb--green img { filter: hue-rotate(105deg) saturate(1.1); }
