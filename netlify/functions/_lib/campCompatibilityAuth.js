@@ -9,7 +9,7 @@ function safeText(value, max = 160) {
 
 const { generateFamilyClaimCode, generateStudentPin, hashStudentPin } = require('./studentPinCrypto');
 const { validateClientRuntime } = require('./supabaseRuntime');
-const { readFacilitatorSession } = require('./facilitatorSession');
+const { originIsSameHost, readFacilitatorSession } = require('./facilitatorSession');
 
 function reportSafeIdentifier(value) {
   return crypto.createHash('sha256').update(String(value || '')).digest('hex').slice(0, 12);
@@ -206,6 +206,9 @@ const CAMP_SESSION_SOURCES = new Set(['facilitator_roster_launch']);
 
 async function authorizeCampProgram(event, supabase) {
   if (!validateClientRuntime(event)) return { status: 503, code: 'runtime_context_mismatch' };
+  if (event.httpMethod !== 'GET' && !originIsSameHost(event)) {
+    return { status: 403, code: 'invalid_request_origin' };
+  }
   const programId = safeText(event.headers?.['x-camp-program-id'], 80);
   const programCode = safeText(event.headers?.['x-camp-program-code'], 120);
   if (!programId || !programCode) {

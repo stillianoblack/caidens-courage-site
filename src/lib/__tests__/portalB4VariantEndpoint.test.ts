@@ -4,6 +4,7 @@ import path from 'path';
 export {};
 
 jest.mock('../../../netlify/functions/_lib/facilitatorSession', () => ({
+  originIsSameHost: () => true,
   readFacilitatorSession: async () => ({
     session: { id: 'facilitator-session-1' },
     program: {

@@ -16,6 +16,7 @@ describe('secure facilitator session architecture', () => {
     expect(source).toContain('SameSite=Lax');
     expect(source).toContain("createHash('sha256')");
     expect(source).toContain("from('facilitator_compatibility_sessions')");
+    expect(source).toContain("revoke_reason: 'reauthorized'");
     expect(source).not.toContain('facilitator_access_code');
   });
 

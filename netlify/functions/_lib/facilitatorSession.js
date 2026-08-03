@@ -76,6 +76,20 @@ async function createFacilitatorSession(supabase, program, credential, rememberD
   const identityHash = credential
     ? crypto.createHash('sha256').update(String(credential).trim().toLowerCase()).digest('hex')
     : null;
+  if (identityHash) {
+    const { error: rotationError } = await supabase
+      .from('facilitator_compatibility_sessions')
+      .update({
+        revoked_at: now.toISOString(),
+        revoke_reason: 'reauthorized',
+      })
+      .eq('environment', runtime.context)
+      .eq('role', 'facilitator')
+      .eq('program_id', program.id)
+      .eq('facilitator_identity_hash', identityHash)
+      .is('revoked_at', null);
+    if (rotationError) return { error: 'facilitator_session_rotation_failed' };
+  }
   const { error } = await supabase.from('facilitator_compatibility_sessions').insert({
     token_hash: hashToken(token),
     environment: runtime.context,
