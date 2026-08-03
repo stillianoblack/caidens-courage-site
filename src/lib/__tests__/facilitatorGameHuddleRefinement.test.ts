@@ -31,7 +31,7 @@ describe('facilitator game huddle refinement', () => {
     const overview = read('src/components/pilot-dashboard/panels/PilotOverviewPanel.tsx');
     const mobile = read('src/components/pilot-dashboard/FacilitatorMobileOverviewHero.tsx');
 
-    expect(overview).toContain('/images/Choose-Your-Guide/b-4facilitator-hover.webp');
+    expect(overview).toContain('/images/Choose-Your-Guide/B-4orange-hover.webp');
     expect(overview).toContain('Let’s get your explorers ready for their first adventure.');
     expect(mobile).toContain('Let’s get your explorers ready for their first adventure.');
     expect(overview).toContain("activeProgram?.programName || activeProgram?.groupName");

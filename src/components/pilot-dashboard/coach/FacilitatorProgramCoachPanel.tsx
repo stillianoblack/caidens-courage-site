@@ -38,7 +38,7 @@ export default function FacilitatorProgramCoachPanel({
       <header className="pilot-programCoachHeader">
         <img
           className="pilot-programCoachAvatar pilot-programCoachAvatar--guide"
-          src="/images/Choose-Your-Guide/b-4facilitator-hover.webp"
+          src="/images/Choose-Your-Guide/B-4orange-hover.webp"
           alt=""
           decoding="async"
         />

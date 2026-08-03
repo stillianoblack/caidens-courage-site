@@ -257,7 +257,7 @@ export default function PilotOverviewPanel({
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--blue"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--green"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
             <span className="pilot-commandHeroOrb pilot-commandHeroOrb--purple"><img src="/images/Choose-Your-Guide/B-4student.webp" alt="" /></span>
-            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/b-4facilitator-hover.webp" alt="" />
+            <img className="pilot-commandHeroGuide" src="/images/Choose-Your-Guide/B-4orange-hover.webp" alt="" />
           </div>
         </section>
       ) : null}
