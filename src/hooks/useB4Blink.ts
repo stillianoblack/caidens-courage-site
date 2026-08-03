@@ -60,9 +60,9 @@ export function useB4Blink<T extends HTMLElement = HTMLElement>(enabled = true) 
     const schedule = () => {
       later(() => {
         if (cancelled) return;
-        const closingMs = 90 + Math.random() * 50;
-        const closedMs = 100 + Math.random() * 80;
-        const openingMs = 120 + Math.random() * 60;
+        const closingMs = 140 + Math.random() * 40;
+        const closedMs = 140 + Math.random() * 60;
+        const openingMs = 160 + Math.random() * 50;
         setBlinkPhase('closing');
         later(() => {
           if (cancelled) return;

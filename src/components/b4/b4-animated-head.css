@@ -17,6 +17,27 @@
   will-change: transform;
 }
 
+.b4-animatedHeadShadow {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 17%;
+  width: 38%;
+  height: 5.5%;
+  border-radius: 50%;
+  background: rgba(25, 42, 77, 0.2);
+  transform: translateX(-50%) scaleX(0.72);
+  transform-origin: center;
+  opacity: 0.2;
+  animation: b4-natural-shadow var(--b4-float-duration, 6.2s) ease-in-out var(--b4-float-delay, 0s) infinite alternate;
+  will-change: transform, opacity;
+}
+
+.b4-animatedHeadFloat {
+  position: relative;
+  z-index: 1;
+}
+
 .b4-animatedHeadStage {
   position: relative;
   overflow: visible;
@@ -37,21 +58,44 @@
   will-change: opacity;
 }
 
-.b4-animatedHeadFrame--closed { opacity: 0; }
-.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame--open,
-.b4-animatedHead[data-blink-phase='closed'] .b4-animatedHeadFrame--open { opacity: 0; }
+.b4-animatedHeadFrame--closed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Keep the open illustration in place and cover only its eye panels. */
+.b4-animatedHeadFrame--closedLeft {
+  clip-path: inset(24% 47% 25% 28%);
+}
+
+.b4-animatedHeadFrame--closedRight {
+  clip-path: inset(31% 8% 19% 70%);
+}
+
 .b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame--closed,
 .b4-animatedHead[data-blink-phase='closed'] .b4-animatedHeadFrame--closed { opacity: 1; }
-.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame { transition: opacity 120ms ease-in; }
-.b4-animatedHead[data-blink-phase='opening'] .b4-animatedHeadFrame { transition: opacity 150ms ease-out; }
+.b4-animatedHead[data-blink-phase='closing'] .b4-animatedHeadFrame--closed { transition: opacity 160ms ease-in; }
+.b4-animatedHead[data-blink-phase='opening'] .b4-animatedHeadFrame--closed { transition: opacity 185ms ease-out; }
 
 @keyframes b4-natural-float {
   from { transform: translateY(0); }
   to { transform: translateY(calc(-1 * var(--b4-float-travel, 8px))); }
 }
 
+@keyframes b4-natural-shadow {
+  from {
+    transform: translateX(-50%) scaleX(0.72);
+    opacity: 0.18;
+  }
+  to {
+    transform: translateX(-50%) scaleX(1.05);
+    opacity: 0.3;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .b4-animatedHeadFloat { animation: none; transform: none; }
+  .b4-animatedHeadShadow { animation: none; transform: translateX(-50%) scaleX(0.84); opacity: 0.22; }
   .b4-animatedHeadFrame { transition: none; }
   .b4-animatedHeadFrame--closed { display: none; }
 }

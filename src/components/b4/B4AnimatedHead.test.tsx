@@ -37,11 +37,11 @@ describe('B4AnimatedHead', () => {
     );
     act(() => jest.advanceTimersByTime(6751));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'closing');
-    act(() => jest.advanceTimersByTime(116));
+    act(() => jest.advanceTimersByTime(161));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'closed');
-    act(() => jest.advanceTimersByTime(141));
+    act(() => jest.advanceTimersByTime(171));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'opening');
-    act(() => jest.advanceTimersByTime(151));
+    act(() => jest.advanceTimersByTime(186));
     expect(container.querySelector('.b4-animatedHead')).toHaveAttribute('data-blink-phase', 'open');
   });
 
@@ -70,7 +70,8 @@ describe('B4AnimatedHead', () => {
   it('keeps both eye states inside one fixed-size stage', () => {
     const { container } = render(<B4AnimatedHead />);
     const stage = container.querySelector('.b4-animatedHeadStage');
-    expect(stage?.querySelectorAll('.b4-animatedHeadFrame')).toHaveLength(2);
+    expect(stage?.querySelectorAll('.b4-animatedHeadFrame--open')).toHaveLength(1);
+    expect(stage?.querySelectorAll('.b4-animatedHeadFrame--closed')).toHaveLength(2);
     const css = fs.readFileSync(path.join(process.cwd(), 'src/components/b4/b4-animated-head.css'), 'utf8');
     const frameRule = css.match(/\.b4-animatedHeadFrame\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(frameRule).toContain('position: absolute');
@@ -80,6 +81,9 @@ describe('B4AnimatedHead', () => {
     expect(frameRule).toContain('object-fit: contain');
     expect(frameRule).not.toMatch(/\btransform\s*:/);
     expect(frameRule).not.toMatch(/\bscale\s*:/);
+    expect(container.querySelector('.b4-animatedHeadFrame--open')).toBeVisible();
+    expect(container.querySelectorAll('.b4-animatedHeadFrame--closedLeft')).toHaveLength(1);
+    expect(container.querySelectorAll('.b4-animatedHeadFrame--closedRight')).toHaveLength(1);
   });
 
   it('applies stable per-instance floating variables outside the blink stage', () => {
@@ -87,11 +91,12 @@ describe('B4AnimatedHead', () => {
       <B4AnimatedHead floatProfile={{ travelPx: 11, durationSeconds: 7.1, delaySeconds: -3.4 }} />,
     );
     const root = container.querySelector('.b4-animatedHead');
-    const float = container.querySelector<HTMLElement>('.b4-animatedHeadFloat');
+    const rootWithProfile = container.querySelector<HTMLElement>('.b4-animatedHead');
     expect(root).toHaveAttribute('data-floating', 'true');
-    expect(float?.style.getPropertyValue('--b4-float-travel')).toBe('11px');
-    expect(float?.style.getPropertyValue('--b4-float-duration')).toBe('7.1s');
-    expect(float?.style.getPropertyValue('--b4-float-delay')).toBe('-3.4s');
+    expect(rootWithProfile?.style.getPropertyValue('--b4-float-travel')).toBe('11px');
+    expect(rootWithProfile?.style.getPropertyValue('--b4-float-duration')).toBe('7.1s');
+    expect(rootWithProfile?.style.getPropertyValue('--b4-float-delay')).toBe('-3.4s');
+    expect(container.querySelector('.b4-animatedHeadShadow')).toBeInTheDocument();
   });
 
   it('keeps regular hosts static unless a floating profile is supplied', () => {

@@ -62,11 +62,14 @@ export default function B4AnimatedHead({
       data-blink-phase={blinkPhase}
       data-floating={floatProfile ? 'true' : 'false'}
       data-reduce-motion={reduceMotion ? 'true' : 'false'}
+      style={floatStyle}
     >
-      <span className="b4-animatedHeadFloat" style={floatStyle}>
+      {floatProfile ? <span className="b4-animatedHeadShadow" aria-hidden="true" /> : null}
+      <span className="b4-animatedHeadFloat">
         <span className="b4-animatedHeadStage">
           <img className="b4-animatedHeadFrame b4-animatedHeadFrame--open" src={openSrc ?? OPEN_HEADS[variant]} alt={resolvedAlt} />
-          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
+          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed b4-animatedHeadFrame--closedLeft" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
+          <img className="b4-animatedHeadFrame b4-animatedHeadFrame--closed b4-animatedHeadFrame--closedRight" src={closedSrc ?? CLOSED_HEADS[variant]} alt="" aria-hidden="true" />
         </span>
       </span>
     </span>
