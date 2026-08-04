@@ -37,3 +37,9 @@ export function clearKidPlayRosterLockWithEmail(email: string): boolean {
   clearFacilitatorStudentContinuity();
   return true;
 }
+
+/** Clear the presentation lock after server-side facilitator authorization. */
+export function clearKidPlayRosterLockForSecureSession(): void {
+  setKidPlayRosterLocked(false);
+  clearFacilitatorStudentContinuity();
+}

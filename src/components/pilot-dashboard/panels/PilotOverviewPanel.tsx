@@ -33,6 +33,7 @@ import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import { FacilitatorOverviewCoachSlot } from '../coach/FacilitatorOverviewCoachProvider';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import { FACILITATOR_B4_ASSETS } from '../../../config/facilitatorB4Assets';
+import B4AnimatedImage from '../../b4/B4AnimatedImage';
 import { FACILITATOR_B4_RESULTS_PATH, FACILITATOR_GAME_HUDDLE_PATH, PROGRAM_DASHBOARD_PATH } from '../../../config/courageRoutes';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import type { ActivePilotProgram } from '../../../types/pilotProgram';
@@ -235,7 +236,12 @@ export default function PilotOverviewPanel({
       {!isMobileNav ? (
         <section className="pilot-commandHero" aria-labelledby="pilot-command-hero-title">
           <div className="pilot-commandHeroB4" aria-hidden="true">
-            <img className="pilot-commandHeroGuide" src={FACILITATOR_B4_ASSETS.fullBody} alt="" />
+            <B4AnimatedImage
+              assetType="full-body"
+              idleSrc={FACILITATOR_B4_ASSETS.fullBody}
+              className="pilot-commandHeroGuide"
+              floatProfile={{ travelPx: 7, durationSeconds: 8.2, delaySeconds: -2.7 }}
+            />
           </div>
           <div className="pilot-commandHeroCopy">
             <p className="pilot-commandHeroEyebrow">Today&apos;s Camp</p>

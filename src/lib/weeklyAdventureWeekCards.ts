@@ -25,8 +25,13 @@ import {
   WEEKLY_WEEK_PARAM,
   weeklyAdventureWeekAnchor,
 } from './weeklyAdventureRouteContext';
+import { resolveActivityCharacter } from './activityCharacterContract';
 
 export type WeeklyAdventureJourneyCardItem = WeeklyAdventureWeekRowItem & {
+  activityId: string;
+  characterId: string;
+  characterName: string;
+  characterAsset: string;
   rewardPreview: string;
   rewardImageUrl?: string | null;
   journeyState: 'completed' | 'current' | 'locked';
@@ -221,7 +226,7 @@ export function buildJourneyWeeklyAdventureCards(input: {
   monthComingSoon?: boolean;
   completedByWeek?: Record<number, readonly string[]>;
 }): WeeklyAdventureJourneyCardItem[] {
-  return input.weekNumbers.map((weekNumber) => {
+  return input.weekNumbers.map((weekNumber, activityIndex) => {
     const cmsModule = input.cmsModules.find((row) => row.week_number === weekNumber) ?? null;
     const trailWeek =
       input.weeks.find((row) => row.week === weekNumber) ??
@@ -277,15 +282,24 @@ export function buildJourneyWeeklyAdventureCards(input: {
       : effectiveVariant === 'locked'
         ? 'locked'
         : 'current';
+    const activityCharacter = resolveActivityCharacter({
+      activityIndex,
+      cmsModule,
+      missionCharacterId: cmsModule?.hotspots?.[activityIndex]?.character_key,
+    });
 
     return {
+      activityId: `month-${resolveDefaultMonthNumber(weekNumber)}-week-${weekNumber}-${activityCharacter.characterId}`,
+      characterId: activityCharacter.characterId,
+      characterName: activityCharacter.characterName,
+      characterAsset: activityCharacter.characterAsset,
       id: weekNumber,
       weekNumber,
       title: resolveJourneyWeekTitle(cmsModule, trailWeek, weekNumber),
       selFocus: resolveWeeklyCardSelFocus(cmsModule, trailWeek.selFocus),
-      thumbnailUrl: isKidShellDisplayImageUrl(thumbnailResolution.url)
-        ? thumbnailResolution.url
-        : null,
+      thumbnailUrl: activityCharacter.characterAsset || (
+        isKidShellDisplayImageUrl(thumbnailResolution.url) ? thumbnailResolution.url : null
+      ),
       thumbnailSource: thumbnailResolution.source,
       statusLabel: resolveWeekStatusLabel(
         trailWeek,

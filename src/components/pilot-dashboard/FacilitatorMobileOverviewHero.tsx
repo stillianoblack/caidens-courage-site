@@ -7,6 +7,7 @@ import { openFacilitatorProgramSettings } from '../../lib/openFacilitatorProgram
 import { resolveFacilitatorRosterProgramCode } from '../../lib/resolveFacilitatorRosterProgramCode';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../config/courageRoutes';
 import { FACILITATOR_B4_ASSETS } from '../../config/facilitatorB4Assets';
+import B4AnimatedImage from '../b4/B4AnimatedImage';
 
 type FacilitatorMobileOverviewHeroProps = {
   activeProgram?: ActivePilotProgram | null;
@@ -32,7 +33,12 @@ export default function FacilitatorMobileOverviewHero({
   return (
     <section className="facilitator-mobileOverviewHero" aria-labelledby="facilitator-mobile-overview-title">
       <div className="facilitator-mobileOverviewHeroHead">
-        <img className="facilitator-mobileOverviewHeroGuide" src={FACILITATOR_B4_ASSETS.fullBody} alt="" />
+        <B4AnimatedImage
+          assetType="full-body"
+          idleSrc={FACILITATOR_B4_ASSETS.fullBody}
+          className="facilitator-mobileOverviewHeroGuide"
+          floatProfile={{ travelPx: 6, durationSeconds: 7.4, delaySeconds: -4.1 }}
+        />
         <div>
           <p className="facilitator-mobileOverviewHeroEyebrow">Today&apos;s Camp</p>
           <h2 id="facilitator-mobile-overview-title" className="facilitator-mobileOverviewHeroTitle">

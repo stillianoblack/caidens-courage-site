@@ -133,6 +133,10 @@ import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
 // The facilitator shell owns its complete boot lifecycle. Keeping this route eager
 // prevents the app-level Suspense fallback from flashing before session restoration.
 import ProgramDashboardPage from './pages/ProgramDashboardPage';
+// Kid Shell owns the complete My Adventures readiness lifecycle. Keeping the
+// shell eager prevents a second app-level Focus Flame fallback before its
+// coordinated session loader mounts.
+import KidPlaySessionLayout from './pages/KidPlaySessionLayout';
 
 const Portal = React.lazy(() => import('./pages/Portal'));
 const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
@@ -145,7 +149,6 @@ const AdminRouteLayout = React.lazy(() => import('./pages/AdminRouteLayout'));
 const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
 const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
-const KidPlaySessionLayout = React.lazy(() => import('./pages/KidPlaySessionLayout'));
 const StudentPinLoginPage = React.lazy(() => import('./pages/StudentPinLoginPage'));
 const FamilyClaimByCodePage = React.lazy(() => import('./pages/FamilyClaimByCodePage'));
 const FamilyClaimRedirect = React.lazy(() => import('./pages/FamilyClaimRedirect'));

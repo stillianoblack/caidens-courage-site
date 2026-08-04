@@ -121,7 +121,7 @@ export default function CourageHubHudExploreWeekStrip({
         const hasThumbnail = isKidShellDisplayImageUrl(card.thumbnailUrl);
 
         return (
-          <li key={card.weekNumber}>
+          <li key={card.activityId}>
             <article
               className={[
                 'courageHubHudCard',
@@ -160,7 +160,7 @@ export default function CourageHubHudExploreWeekStrip({
                   Week {monthSlot} · {card.title}
                 </p>
                 {selFocusLine ? (
-                  <p className="courageHubHudCardSub">SEL · {selFocusLine}</p>
+                  <p className="courageHubHudCardSub">{card.characterName} · SEL · {selFocusLine}</p>
                 ) : null}
                 <p className="courageHubHudCardStatus">{statusLabel}</p>
               </div>

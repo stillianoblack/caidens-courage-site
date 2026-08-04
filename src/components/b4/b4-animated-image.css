@@ -1,0 +1,60 @@
+.b4-animatedImage,
+.b4-animatedImageFloat,
+.b4-animatedImageStage {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.b4-animatedImage { position: relative; isolation: isolate; }
+.b4-animatedImageFloat { position: relative; z-index: 1; }
+.b4-animatedImageStage { position: relative; }
+
+.b4-animatedImage[data-floating='true'] .b4-animatedImageFloat {
+  animation: b4-image-float var(--b4-image-float-duration, 7.5s) ease-in-out var(--b4-image-float-delay, 0s) infinite alternate;
+  will-change: transform;
+}
+
+.b4-animatedImageFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.b4-animatedImageFrame--blink { opacity: 0; pointer-events: none; }
+.b4-animatedImage[data-blink-phase='closing'] .b4-animatedImageFrame--blink,
+.b4-animatedImage[data-blink-phase='closed'] .b4-animatedImageFrame--blink { opacity: 1; }
+.b4-animatedImage[data-blink-phase='closing'] .b4-animatedImageFrame--blink { transition: opacity 50ms ease-in; }
+.b4-animatedImage[data-blink-phase='opening'] .b4-animatedImageFrame--blink { transition: opacity 60ms ease-out; }
+
+.b4-animatedImageShadow {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 42%;
+  height: 4%;
+  border-radius: 50%;
+  background: rgba(15, 28, 54, 0.2);
+  transform: translateX(-50%) scaleX(0.75);
+  animation: b4-image-shadow var(--b4-image-float-duration, 7.5s) ease-in-out var(--b4-image-float-delay, 0s) infinite alternate;
+}
+
+@keyframes b4-image-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-1 * var(--b4-image-float-travel, 7px))); }
+}
+@keyframes b4-image-shadow {
+  from { transform: translateX(-50%) scaleX(0.75); opacity: 0.18; }
+  to { transform: translateX(-50%) scaleX(1.02); opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b4-animatedImageFloat,
+  .b4-animatedImageShadow { animation: none !important; transform: none; }
+  .b4-animatedImageFrame--blink { display: none; }
+}

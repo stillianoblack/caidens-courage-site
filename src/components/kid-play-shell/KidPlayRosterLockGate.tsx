@@ -1,15 +1,25 @@
-import React, { useCallback, useState, type FormEvent } from 'react';
+import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PORTAL_PATH } from '../../config/courageRoutes';
 import { readActivePilotProgram } from '../../config/activePilotProgram';
 import { FOCUS_FLAME_ACADEMY_MARK_SRC } from '../../design-system/brand/brandLogos';
 import {
+  clearFacilitatorStudentContinuity,
   continuityDecisionMessage,
   evaluateFacilitatorStudentContinuity,
   readFacilitatorStudentContinuity,
   resolveFacilitatorReturnPinProgramCode,
   restoreFacilitatorStudentViaPin,
 } from '../../lib/facilitatorSessionContinuity';
-import { setKidPlayRosterLocked, clearKidPlayRosterLockWithEmail } from '../../lib/kidPlayRosterLock';
+import {
+  clearKidPlayRosterLockForSecureSession,
+  setKidPlayRosterLocked,
+} from '../../lib/kidPlayRosterLock';
+import {
+  verifyFacilitatorSessionForProgram,
+  type ScopedFacilitatorSessionResult,
+} from '../../lib/facilitatorSessionApi';
+import { replaceWithPortalRoute } from '../../lib/portalHardNavigation';
 import { buildPinFingerprint } from '../../lib/studentPinCrypto';
 import { verifyStudentPinLogin } from '../../lib/studentPinService';
 import { verifyStudentPinLoginWithProgramFallback } from '../../lib/studentPinProgramScope';
@@ -25,9 +35,28 @@ const INVALID_PIN_MESSAGE = 'That PIN did not match. Try again or ask a facilita
 export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRosterLockGateProps) {
   const navigate = useNavigate();
   const [studentPin, setStudentPin] = useState('');
-  const [facilitatorEmail, setFacilitatorEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [facilitatorSession, setFacilitatorSession] = useState<ScopedFacilitatorSessionResult | null>(null);
+
+  const checkFacilitatorSession = useCallback(async () => {
+    const programCode =
+      readFacilitatorStudentContinuity()?.campProgramCode?.trim() ||
+      readFacilitatorStudentContinuity()?.programCode?.trim() ||
+      readActivePilotProgram()?.programCode?.trim() ||
+      '';
+    setSubmitting(true);
+    setError(null);
+    const result = await verifyFacilitatorSessionForProgram(programCode);
+    setFacilitatorSession(result);
+    setSubmitting(false);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    void checkFacilitatorSession();
+  }, [checkFacilitatorSession, open]);
 
   const handleStudentPinSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -92,7 +121,6 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
 
         setKidPlayRosterLocked(false);
         setStudentPin('');
-        setFacilitatorEmail('');
         onUnlocked();
       } finally {
         setSubmitting(false);
@@ -101,32 +129,30 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
     [navigate, onUnlocked, studentPin],
   );
 
-  const handleFacilitatorSubmit = useCallback(
-    (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setError(null);
+  const handleFacilitatorReturn = useCallback(async () => {
+    const result = facilitatorSession?.status === 'authorized'
+      ? facilitatorSession
+      : await checkFacilitatorSession();
+    if (result.status !== 'authorized') {
+      setError(
+        result.status === 'wrong_program'
+          ? 'This facilitator session belongs to a different program. Sign in to this program to continue.'
+          : 'Your facilitator session is no longer available. Sign in again to continue.',
+      );
+      return;
+    }
+    clearKidPlayRosterLockForSecureSession();
+    setStudentPin('');
+    onUnlocked();
+  }, [checkFacilitatorSession, facilitatorSession, onUnlocked]);
 
-      const trimmed = facilitatorEmail.trim();
-      if (!trimmed) {
-        setError('Enter your facilitator email to continue.');
-        return;
-      }
-
-      setSubmitting(true);
-      const ok = clearKidPlayRosterLockWithEmail(trimmed);
-      setSubmitting(false);
-
-      if (!ok) {
-        setError('Email does not match this program facilitator account.');
-        return;
-      }
-
-      setStudentPin('');
-      setFacilitatorEmail('');
-      onUnlocked();
-    },
-    [facilitatorEmail, onUnlocked],
-  );
+  const handleEndStudentSession = useCallback(() => {
+    clearFacilitatorStudentContinuity();
+    setKidPlayRosterLocked(false);
+    setStudentPin('');
+    setError(null);
+    onUnlocked();
+  }, [onUnlocked]);
 
   if (!open) return null;
 
@@ -187,29 +213,43 @@ export default function KidPlayRosterLockGate({ open, onUnlocked }: KidPlayRoste
           </button>
         </form>
 
-        <form
-          className="kidPlayRosterLockForm kidPlayReturnSessionForm kidPlayRosterLockFacilitatorForm"
-          onSubmit={handleFacilitatorSubmit}
-        >
+        <div className="kidPlayRosterLockForm kidPlayReturnSessionForm kidPlayRosterLockFacilitatorForm">
           <p className="kidPlayRosterLockDividerLabel">Facilitator unlock</p>
-          <div className="kidPlayReturnSessionField">
-            <label className="kidPlayRosterLockLabel" htmlFor="kid-play-roster-lock-email">
-              Facilitator email
-            </label>
-            <input
-              id="kid-play-roster-lock-email"
-              className="kidPlayRosterLockInput"
-              type="email"
-              autoComplete="email"
-              value={facilitatorEmail}
-              onChange={(event) => setFacilitatorEmail(event.target.value)}
-              disabled={submitting}
-            />
-          </div>
-          <button type="submit" className="kidPlayRosterLockEndSession" disabled={submitting}>
-            Continue to roster
+          <button
+            type="button"
+            className="kidPlayRosterLockEndSession"
+            disabled={submitting || facilitatorSession?.status !== 'authorized'}
+            onClick={() => void handleFacilitatorReturn()}
+          >
+            {submitting ? 'Checking session…' : 'Return to Explorers'}
           </button>
-        </form>
+          <button
+            type="button"
+            className="portal-welcomeBackLink kidPlayReturnSessionSwitchProgram"
+            disabled={submitting}
+            onClick={() => void checkFacilitatorSession()}
+          >
+            Retry secure facilitator session
+          </button>
+          {facilitatorSession && facilitatorSession.status !== 'authorized' ? (
+            <button
+              type="button"
+              className="portal-welcomeBackLink kidPlayReturnSessionSwitchProgram"
+              disabled={submitting}
+              onClick={() => replaceWithPortalRoute(PORTAL_PATH)}
+            >
+              Return to Enter the World
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="portal-welcomeBackLink kidPlayReturnSessionSwitchProgram"
+            disabled={submitting}
+            onClick={handleEndStudentSession}
+          >
+            End this student session
+          </button>
+        </div>
       </div>
     </div>
   );
