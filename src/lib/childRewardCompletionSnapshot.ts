@@ -7,7 +7,6 @@ import {
   type ChildProgressStatus,
   type WeekProgressOptions,
 } from './childProgressStatus';
-import { loadParticipantQuests } from './participantQuestService';
 import { resolveActiveWeekNumbersFromModules } from './weeklyBadgeUnlock';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
@@ -137,14 +136,6 @@ export async function auditChildRewardCompletion(
   const snapshot = await loadChildRewardCompletionSnapshot(participantId, options);
   if (!snapshot) return null;
 
-  const weekId = 'week-1';
-  const week1 = snapshot.weekProgressByWeek[1];
-  const quests = await loadParticipantQuests(participantId, weekId, {
-    completedWeekMissions: week1?.completed ?? 0,
-    monthlyCoinsEarned: 0,
-    dailyAdventureComplete: false,
-  });
-
   if (process.env.NODE_ENV === 'development') {
     console.info('[CHILD_REWARD_AUDIT]', {
       participantId,
@@ -155,13 +146,8 @@ export async function auditChildRewardCompletion(
       discoveries: snapshot.earnedDiscoveries.map((row) => row.definition.id),
       discoveryByCharacter: snapshot.discoveryCountByCharacter,
       weekProgress: snapshot.weekProgressByWeek,
-      quests: quests.map((row) => ({
-        key: row.questKey,
-        period: row.period,
-        progress: row.progressCount,
-        target: row.targetCount,
-        claimed: row.claimed,
-      })),
+      // Quest progress remains a future server-mediated contract and is not
+      // requested by the simplified Weekly Adventures presentation.
       coinBalance: snapshot.coinBalance,
       completedMissionIds: snapshot.weeklyBadgeState.completedMissionIds,
     });

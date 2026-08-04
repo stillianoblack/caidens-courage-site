@@ -19,13 +19,15 @@ type Props = {
   participantId: string;
   displayName: string;
   currentWeek: number;
-  focusCoins: number;
-  focusCoinsLoading: boolean;
   months: MyAdventuresMonthItem[];
   selectedMonthNumber: number;
   currentMonthNumber: number;
   selectedMonthRecord: AdventureMonthRecord | null;
+  currentAdventureTitle: string;
+  currentAdventureProgress: string;
+  completedAdventures: Array<{ week: number; title: string }>;
   onSelectMonth: (monthNumber: number) => void;
+  onContinueCurrentAdventure: () => void;
 };
 
 function focusableElements(container: HTMLElement): HTMLElement[] {
@@ -40,13 +42,15 @@ export default function MyAdventuresDrawer({
   participantId,
   displayName,
   currentWeek,
-  focusCoins,
-  focusCoinsLoading,
   months,
   selectedMonthNumber,
   currentMonthNumber,
   selectedMonthRecord,
+  currentAdventureTitle,
+  currentAdventureProgress,
+  completedAdventures,
   onSelectMonth,
+  onContinueCurrentAdventure,
 }: Props) {
   const { open, closeDrawer } = useMyAdventures();
   const titleId = useId();
@@ -136,7 +140,7 @@ export default function MyAdventuresDrawer({
               <div>
                 <p className="myAdventuresCard__label">Playing as</p>
                 <h2 id="my-adventures-player">{displayName}</h2>
-                <p>Week {currentWeek} · {focusCoinsLoading ? 'Loading coins…' : `${focusCoins} Focus Coins`}</p>
+                <p>Week {currentWeek}</p>
               </div>
             </div>
             {!b4Loading && selectionRequired ? (
@@ -175,6 +179,23 @@ export default function MyAdventuresDrawer({
                 </button>
               </div>
             ) : null}
+          </section>
+
+          <section className="myAdventuresCard myAdventuresCurrent" aria-labelledby="my-adventures-current">
+            <p className="myAdventuresCard__label">Current adventure</p>
+            <h2 id="my-adventures-current">
+              Week {currentWeek} · {currentAdventureTitle}
+            </h2>
+            <p>{currentAdventureProgress}</p>
+            <button type="button" onClick={onContinueCurrentAdventure}>
+              Continue Adventure
+            </button>
+          </section>
+
+          <section className="myAdventuresCard myAdventuresGoals" aria-labelledby="my-adventures-goals">
+            <p className="myAdventuresCard__label">Active goals</p>
+            <h2 id="my-adventures-goals">More goals coming soon</h2>
+            <p>Your next personal goals will appear here when they are ready.</p>
           </section>
 
           <section aria-labelledby="my-adventures-months">
@@ -250,6 +271,22 @@ export default function MyAdventuresDrawer({
               </div>
             </section>
           ) : null}
+
+          <section className="myAdventuresCard" aria-labelledby="my-adventures-completed">
+            <p className="myAdventuresCard__label">Completed adventures</p>
+            <h2 id="my-adventures-completed">
+              {completedAdventures.length > 0
+                ? `${completedAdventures.length} completed journey${completedAdventures.length === 1 ? '' : 's'}`
+                : 'Your completed adventures will appear here'}
+            </h2>
+            {completedAdventures.length > 0 ? (
+              <ul className="myAdventuresCompletedList">
+                {completedAdventures.map((adventure) => (
+                  <li key={adventure.week}>✓ Week {adventure.week} · {adventure.title}</li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
         </div>
       </aside>
     </div>,

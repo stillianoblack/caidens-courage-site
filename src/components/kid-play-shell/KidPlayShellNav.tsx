@@ -10,6 +10,8 @@ import './kid-play-shell-nav.css';
 import KidPlayB4ProfileControl from './KidPlayB4ProfileControl';
 import { useMyAdventures } from '../../context/MyAdventuresContext';
 import { preserveWeeklyAdventureSelectionSearch } from '../../lib/weeklyAdventureRouteContext';
+import FocusCoinWalletBadge from '../rewards/FocusCoinWalletBadge';
+import CourageHubSoundToggle from '../courage-in-the-dark/CourageHubSoundToggle';
 
 export type { KidPlayShellModuleId };
 
@@ -121,6 +123,8 @@ export default function KidPlayShellNav({
       </nav>
       <div className="kidPlayShellNavActions">
         <KidPlayB4ProfileControl participantId={participantId} displayName={displayName} />
+        <FocusCoinWalletBadge compact className="kidPlayShellCoinBalance" />
+        <CourageHubSoundToggle />
         <button
           type="button"
           className="kidPlayShellPowerBtn"

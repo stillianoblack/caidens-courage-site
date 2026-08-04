@@ -9,13 +9,21 @@ type CourageHubAudioContextValue = {
 
 const noop = () => undefined;
 
-const CourageHubAudioContext = createContext<CourageHubAudioContextValue>({
+const FALLBACK_AUDIO_CONTEXT: CourageHubAudioContextValue = {
   soundEnabled: false,
   toggleSound: noop,
   playClick: noop,
-});
+};
+
+const CourageHubAudioContext = createContext<CourageHubAudioContextValue | null>(null);
 
 export function CourageHubAudioProvider({ children }: { children: React.ReactNode }) {
+  const parent = useContext(CourageHubAudioContext);
+  if (parent) return <>{children}</>;
+  return <CourageHubAudioProviderLocal>{children}</CourageHubAudioProviderLocal>;
+}
+
+function CourageHubAudioProviderLocal({ children }: { children: React.ReactNode }) {
   const { soundEnabled, toggleSound, playClick } = useCourageAdventureHubAudio();
 
   const value = useMemo(
@@ -33,5 +41,5 @@ export function CourageHubAudioProvider({ children }: { children: React.ReactNod
 }
 
 export function useCourageHubAudio() {
-  return useContext(CourageHubAudioContext);
+  return useContext(CourageHubAudioContext) ?? FALLBACK_AUDIO_CONTEXT;
 }

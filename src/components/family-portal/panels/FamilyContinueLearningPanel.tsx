@@ -7,7 +7,6 @@ import WeeklySetupReminderCard from '../WeeklySetupReminderCard';
 import CourageInTheDarkAdventureHub from '../../courage-in-the-dark/CourageInTheDarkAdventureHub';
 import WeeklyAdventureJourneyMonth from '../../../design-system/components/WeeklyAdventureJourneyMonth';
 import WeeklyAdventureMonthSelector from '../../../design-system/components/WeeklyAdventureMonthSelector';
-import RewardClaimModal from '../../rewards/RewardClaimModal';
 import { readActivePilotProgram } from '../../../config/activePilotProgram';
 import { kidPlayShellNavigate } from '../../../lib/kidShellNav';
 import {
@@ -27,6 +26,7 @@ import {
   parseWeeklyAdventureMonthParam,
   WEEKLY_WEEK_PARAM,
   parseWeeklyAdventureWeekParam,
+  normalizeWeeklyAdventureWorldLocation,
   weeklyAdventureHeroAnchor,
 } from '../../../lib/weeklyAdventureRouteContext';
 import { resolveSelectableWeekNumber } from '../../../lib/resolveSelectableWeekNumber';
@@ -57,12 +57,10 @@ import {
   resolveMonthForWeek,
 } from '../../../lib/adventureMonthService';
 import {
-  countCompletedMapMissions,
   resolveFullyCompletedWeekNumbers,
 } from '../../../lib/adventureWeekCompletion';
 import {
   resolveWeekExtrasPaths,
-  resolveWeeklyQuestReward,
 } from '../../../lib/adventureWeekAssets';
 import {
   areAllChildrenPlayReady,
@@ -88,22 +86,16 @@ import { useAdventureWeekCompletions } from '../../../hooks/useAdventureWeekComp
 import { useWeeklyAdventureTrail } from '../../../hooks/useWeeklyAdventureTrail';
 import { useCourageInTheDarkProgress } from '../../../hooks/useCourageInTheDarkProgress';
 import { useChildRewardCompletion } from '../../../hooks/useChildRewardCompletion';
-import { useParticipantQuests } from '../../../hooks/useParticipantQuests';
 import { useAdventureModules } from '../../../hooks/useAdventureModules';
 import { useAdventureMonths } from '../../../hooks/useAdventureMonths';
 import { resolveTrackingProgramCode } from '../../../lib/activeProgramContext';
 import { resolveFamilyBasePath } from '../../../lib/familyPortalNav';
 import { familyPortalPath } from '../../../lib/familyPortalPaths';
-import { resolveWeekMissionProgressFromSnapshot } from '../../../lib/childRewardCompletionSnapshot';
 import { getPortalRoute, resolvePortalKidsBasePath } from '../../../lib/portalGamePaths';
-import type { QuestPeriod } from '../../../lib/participantQuestService';
 import { resolveReviewWeekContext } from '../../../lib/weekReviewPanelData';
 import { resolveCourageWeekId } from '../../../lib/courageInTheDarkProgress';
 import { resolvePilotStartDate } from '../../../lib/pilotWeekUnlock';
 import { ensureWeekGradeLevel } from '../../../lib/participantWeekGradeService';
-import { isDailyAdventureComplete } from '../../../lib/courageWeeklyMissionCompletion';
-import { readMonthlyCoinsEarned } from '../../../lib/monthlyCoinsEarnedTracking';
-import { questResultToRewardClaim, type RewardClaimResult } from '../../../lib/rewardClaimService';
 import '../../courage-in-the-dark/courage-adventure-hub.css';
 import '../../courage-in-the-dark/courage-in-the-dark-map.css';
 import '../family-children-dashboard-grid.css';
@@ -260,6 +252,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   );
 
   const initialHubView = ((): CourageHubViewMode | undefined => {
+    if (kidPlayShell) return 'explore';
     const view = searchParams.get(WEEKLY_VIEW_PARAM);
     if (view === WEEKLY_VIEW_EXPLORE_VALUE || view === WEEKLY_VIEW_MAP_VALUE) return 'explore';
     if (view === WEEKLY_VIEW_MISSIONS_VALUE || view === WEEKLY_VIEW_LIST_VALUE) return 'missions';
@@ -267,6 +260,21 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     if (view === WEEKLY_VIEW_QUESTS_VALUE) return 'quests';
     return undefined;
   })();
+
+  useEffect(() => {
+    if (!kidPlayShell) return;
+    const normalized = normalizeWeeklyAdventureWorldLocation(location.search, location.hash);
+    if (!normalized.changed) return;
+    kidPlayShellNavigate(
+      navigate,
+      {
+        pathname: location.pathname,
+        search: normalized.search,
+        hash: normalized.hash,
+      },
+      { replace: true },
+    );
+  }, [kidPlayShell, location.hash, location.pathname, location.search, navigate]);
 
   const { weeks: trailWeeks } = useWeeklyAdventureTrail(
     activeChild?.participantId,
@@ -607,70 +615,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     ],
   );
 
-  const completedWeekMissions = useMemo(() => {
-    if (rewardSnapshot) {
-      return resolveWeekMissionProgressFromSnapshot(rewardSnapshot, heroWeekNumber).completed;
-    }
-    return countCompletedMapMissions(mapMissions, heroWeekProgress.completedMissionIds);
-  }, [heroWeekNumber, heroWeekProgress.completedMissionIds, mapMissions, rewardSnapshot]);
-
-  const dailyAdventureComplete = isDailyAdventureComplete(activeChild?.participantId);
-  const monthlyCoinsEarned = readMonthlyCoinsEarned(activeChild?.participantId);
-
-  const weeklyQuestReward = useMemo(
-    () => resolveWeeklyQuestReward(heroCmsModule),
-    [heroCmsModule],
-  );
-
-  const {
-    quests,
-    loading: questsLoading,
-    error: questsError,
-    claimQuest,
-    claimingKey,
-    refresh: retryQuests,
-  } = useParticipantQuests({
-    participantId: activeChild?.participantId,
-    weekId: heroWeekId,
-    completedWeekMissions,
-    monthlyCoinsEarned,
-    dailyAdventureComplete,
-    weeklyQuestReward,
-  });
-
-  const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
   const inventoryPath = familyPortalPath('collections', location.pathname);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'development' || !activeChild?.participantId) return;
-    const daily = quests.find((quest) => quest.period === 'daily');
-    const weekly = quests.find((quest) => quest.period === 'weekly');
-    const monthly = quests.find((quest) => quest.period === 'monthly');
-    console.info('[QUEST_PROGRESS_DEBUG]', {
-      childId: activeChild.participantId,
-      weekId: heroWeekId,
-      completedMissionIds: completedWeekMissions,
-      daily: daily?.progressCount ?? 0,
-      weekly: weekly?.progressCount ?? 0,
-      monthly: monthly?.progressCount ?? 0,
-    });
-  }, [activeChild?.participantId, completedWeekMissions, heroWeekId, quests]);
-
-  const handleClaimQuest = async (questKey: string, period: QuestPeriod) => {
-    const result = await claimQuest(questKey, period);
-    if (result.ok) {
-      setRewardClaimResult(questResultToRewardClaim(result));
-    }
-  };
-
-  const questPanel = {
-    quests,
-    loading: questsLoading,
-    error: questsError,
-    onRetry: retryQuests,
-    claimingKey,
-    onClaim: handleClaimQuest,
-  };
 
   const weekExtrasPaths = useMemo(
     () =>
@@ -853,9 +798,11 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   }, [heroWeekNumber, heroWeekProgress, reviewWeekNumber]);
 
   const reviewWeeklyRewardClaimed = useMemo(() => {
-    if (!reviewWeekNumber || reviewWeekNumber !== heroWeekNumber) return false;
-    return quests.some((quest) => quest.period === 'weekly' && quest.claimed);
-  }, [heroWeekNumber, quests, reviewWeekNumber]);
+    if (!reviewWeekNumber) return false;
+    return Boolean(
+      rewardSnapshot?.weeklyBadgeState.claimedWeeklyWeeks?.has(reviewWeekNumber),
+    );
+  }, [reviewWeekNumber, rewardSnapshot]);
 
   useEffect(() => {
     void refresh();
@@ -1044,7 +991,7 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
             kidPlayShell={kidPlayShell}
             initialViewMode={initialHubView}
             week1ExtrasPaths={weekExtrasPaths}
-            questPanel={questPanel}
+            singleAdventurePresentation={kidPlayShell}
             mapBackgroundSrc={mapBackgroundSrc}
             mapMissions={mapMissions}
             kidsBasePath={kidsBase}
@@ -1111,13 +1058,6 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
           baselinePath={baselinePath}
         />
       ) : null}
-
-      <RewardClaimModal
-        result={rewardClaimResult}
-        inventoryPath={inventoryPath}
-        inventoryLabel="Collections"
-        onClose={() => setRewardClaimResult(null)}
-      />
 
       {reviewWeekNumber && reviewWeekContext ? (
         <Suspense fallback={null}>

@@ -69,8 +69,6 @@ function DrawerHarness({ onSelectMonth }: { onSelectMonth: jest.Mock }) {
         participantId="child-1"
         displayName="Nova"
         currentWeek={5}
-        focusCoins={42}
-        focusCoinsLoading={false}
         months={[
           { month: month(1, 4), locked: false },
           { month: month(2, 1), locked: false },
@@ -79,7 +77,11 @@ function DrawerHarness({ onSelectMonth }: { onSelectMonth: jest.Mock }) {
         selectedMonthNumber={2}
         currentMonthNumber={2}
         selectedMonthRecord={null}
+        currentAdventureTitle="The Courage Signal"
+        currentAdventureProgress="1 of 3 adventure steps complete."
+        completedAdventures={[]}
         onSelectMonth={onSelectMonth}
+        onContinueCurrentAdventure={jest.fn()}
       />
     </>
   );

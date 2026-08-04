@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdventureModules } from '../../hooks/useAdventureModules';
 import { useAdventureMonths } from '../../hooks/useAdventureMonths';
 import { useAdventureWeekCompletions } from '../../hooks/useAdventureWeekCompletions';
-import { useFocusCoinWallet } from '../../hooks/useFocusCoinWallet';
 import { useWeeklyAdventureTrail } from '../../hooks/useWeeklyAdventureTrail';
 import { resolveFullyCompletedWeekNumbers } from '../../lib/adventureWeekCompletion';
 import { resolveDefaultMonthNumber } from '../../lib/adventureMonthService';
@@ -42,7 +41,6 @@ export default function KidPlayMyAdventures({
   const { modules } = useAdventureModules('family');
   const { months: cmsMonths } = useAdventureMonths('family');
   const { completedByWeek } = useAdventureWeekCompletions(participantId);
-  const { totalCoins, loading: focusCoinsLoading } = useFocusCoinWallet();
   const paths = useMemo(
     () => ({
       kidsBasePath: getKidPlayShellKidsBase(sessionId),
@@ -137,18 +135,40 @@ export default function KidPlayMyAdventures({
     [monthItems, navigate, sessionId, weeks],
   );
 
+  const handleContinueCurrentAdventure = useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
+    params.set(WEEKLY_MONTH_PARAM, String(currentMonthNumber));
+    params.set(WEEKLY_WEEK_PARAM, String(currentWeek));
+    kidPlayShellNavigate(
+      navigate,
+      `${getKidPlayShellRoute(sessionId, 'weekly-adventures')}?${params.toString()}`,
+    );
+  }, [currentMonthNumber, currentWeek, location.search, navigate, sessionId]);
+
+  const currentAdventure = weeks.find((week) => week.week === currentWeek);
+  const currentAdventureStepsCompleted = completedByWeek[currentWeek]?.length ?? 0;
+  const currentAdventureStepsTotal = currentAdventure?.nodes.length ?? 0;
+  const completedAdventures = weeks
+    .filter((week) => completedWeekNumbers.includes(week.week))
+    .map((week) => ({ week: week.week, title: week.title }));
+
   return (
     <MyAdventuresDrawer
       participantId={participantId}
       displayName={displayName}
       currentWeek={currentWeek}
-      focusCoins={totalCoins}
-      focusCoinsLoading={focusCoinsLoading}
       months={monthItems}
       selectedMonthNumber={selectedMonthNumber}
       currentMonthNumber={currentMonthNumber}
       selectedMonthRecord={selectedMonthRecord}
+      currentAdventureTitle={currentAdventure?.title || 'Weekly Adventure'}
+      currentAdventureProgress={currentAdventureStepsTotal > 0
+        ? `${currentAdventureStepsCompleted} of ${currentAdventureStepsTotal} adventure steps complete.`
+        : 'Continue your character-led story, activity, challenge, reflection, and reward.'}
+      completedAdventures={completedAdventures}
       onSelectMonth={handleSelectMonth}
+      onContinueCurrentAdventure={handleContinueCurrentAdventure}
     />
   );
 }

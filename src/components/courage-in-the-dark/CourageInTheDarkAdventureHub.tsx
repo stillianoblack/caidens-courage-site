@@ -1,7 +1,6 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CourageHubViewMode } from './CourageHubViewToggle';
 import type { CourageInTheDarkMission } from '../../data/courageInTheDarkMap';
-import type { QuestProgressRow } from '../../lib/participantQuestService';
 import { useToast } from '../portal-design-system/ToastProvider';
 import { useCourageAdventureHub } from '../../hooks/useCourageAdventureHub';
 import { useMobileHubLayout } from '../../hooks/useMobileHubLayout';
@@ -16,7 +15,6 @@ import CourageMapMissionCard, {
   type CourageMissionCardAnchor,
 } from './CourageMapMissionCard';
 import CourageMissionListPanel from './CourageMissionListPanel';
-import CourageQuestListPanel from './CourageQuestListPanel';
 import { type Week1ExtrasPaths } from './Week1ExtrasCards';
 import { CourageHubAudioProvider } from './CourageHubAudioContext';
 import HeroCinematicPlayerHud from './HeroCinematicPlayerHud';
@@ -25,7 +23,6 @@ import CourageHubBottomHudTray from './CourageHubBottomHudTray';
 import {
   CourageHubHudActivitiesStrip,
   CourageHubHudMissionStrip,
-  CourageHubHudQuestStrip,
 } from './CourageHubBottomHudStrips';
 import CourageHubHudExploreWeekStrip from './CourageHubHudExploreWeekStrip';
 import HeroExploreOverlay from './HeroExploreOverlay';
@@ -58,15 +55,6 @@ function resolveCardLayout(): CardLayout {
   return 'float';
 }
 
-export type CourageHubQuestPanelProps = {
-  quests: QuestProgressRow[];
-  loading?: boolean;
-  error?: string | null;
-  onRetry?: () => void;
-  claimingKey?: string | null;
-  onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
-};
-
 type CourageInTheDarkAdventureHubProps = {
   weekNodes: AdventureTrailNodeView[];
   supplementaryNodes?: AdventureTrailNodeView[];
@@ -88,7 +76,8 @@ type CourageInTheDarkAdventureHubProps = {
   /** @deprecated Use hideActivitiesTab */
   kidPlayShell?: boolean;
   week1ExtrasPaths?: Week1ExtrasPaths;
-  questPanel?: CourageHubQuestPanelProps;
+  /** Student shell presentation: one character-led world with no taxonomy tabs. */
+  singleAdventurePresentation?: boolean;
   mapMissions?: CourageInTheDarkMission[];
   headerTrailing?: React.ReactNode;
   cinematicWeekSelectorEnabled?: boolean;
@@ -130,7 +119,7 @@ export default function CourageInTheDarkAdventureHub({
   initialViewMode,
   embeddedInFamilyPortal = false,
   week1ExtrasPaths,
-  questPanel,
+  singleAdventurePresentation = false,
   mapMissions,
   headerTrailing,
   cinematicWeekSelectorEnabled = false,
@@ -189,14 +178,19 @@ export default function CourageInTheDarkAdventureHub({
   const { showWelcome, dismissWelcome } = useCourageWeekWelcome(week);
 
   useEffect(() => {
-    if (initialViewMode) {
+    if (singleAdventurePresentation) {
+      setViewMode('explore');
+    } else if (initialViewMode) {
       setViewMode(initialViewMode);
     }
-  }, [initialViewMode]);
+  }, [initialViewMode, singleAdventurePresentation]);
 
-  const showQuestsTab = Boolean(questPanel);
+  const showQuestsTab = false;
   const showActivitiesTab =
-    !hideActivitiesTab && !kidPlayShell && (embeddedInFamilyPortal || Boolean(week1ExtrasPaths));
+    !singleAdventurePresentation &&
+    !hideActivitiesTab &&
+    !kidPlayShell &&
+    (embeddedInFamilyPortal || Boolean(week1ExtrasPaths));
 
   useEffect(() => {
     if (viewMode === 'quests' && !showQuestsTab) {
@@ -214,14 +208,15 @@ export default function CourageInTheDarkAdventureHub({
   }, [viewMode]);
 
   const handleViewModeChange = useCallback((mode: CourageHubViewMode) => {
+    if (singleAdventurePresentation) return;
     setViewMode(mode);
     onViewModeChange?.(mode);
-  }, [onViewModeChange]);
+  }, [onViewModeChange, singleAdventurePresentation]);
 
   const showPlayerHud = Boolean(cinematicAdventureMode && playerHud);
 
   const desktopMapPills = useMemo(
-    () => (
+    () => singleAdventurePresentation ? null : (
       <CourageHubControls
         variant="overlay"
         viewMode={viewMode}
@@ -238,12 +233,13 @@ export default function CourageInTheDarkAdventureHub({
       showActivitiesTab,
       showPlayerHud,
       showQuestsTab,
+      singleAdventurePresentation,
       viewMode,
     ],
   );
 
   const mobileControlsBar = useMemo(
-    () => (
+    () => singleAdventurePresentation ? null : (
       <CourageHubControls
         variant="mobileBar"
         viewMode={viewMode}
@@ -261,6 +257,7 @@ export default function CourageInTheDarkAdventureHub({
       showActivitiesTab,
       showPlayerHud,
       showQuestsTab,
+      singleAdventurePresentation,
       viewMode,
     ],
   );
@@ -418,17 +415,6 @@ export default function CourageInTheDarkAdventureHub({
     />
   );
 
-  const questListPanel = questPanel ? (
-    <CourageQuestListPanel
-      quests={questPanel.quests}
-      loading={questPanel.loading}
-      error={questPanel.error}
-      onRetry={questPanel.onRetry}
-      claimingKey={questPanel.claimingKey}
-      onClaim={questPanel.onClaim}
-    />
-  ) : null;
-
   const activitiesPanel =
     viewMode === 'activities' && week1ExtrasPaths ? (
       <Suspense fallback={<p className="courageActivitiesPanelLoading">Loading activities…</p>}>
@@ -492,6 +478,11 @@ export default function CourageInTheDarkAdventureHub({
 
   const handleWeekCardLaunch = useCallback(
     (weekNumber: number, source: 'week-card' | 'week-card-cta') => {
+      if (singleAdventurePresentation) {
+        if (onWeekSelectorLaunchWeek?.(weekNumber, source)) return true;
+        onWeekSelectorSelectWeek?.(weekNumber);
+        return false;
+      }
       if (isMobileLayout) {
         if (weekNumber !== week) {
           onWeekSelectorSelectWeek?.(weekNumber);
@@ -505,7 +496,13 @@ export default function CourageInTheDarkAdventureHub({
       }
       return false;
     },
-    [isMobileLayout, onWeekSelectorLaunchWeek, onWeekSelectorSelectWeek, week],
+    [
+      isMobileLayout,
+      onWeekSelectorLaunchWeek,
+      onWeekSelectorSelectWeek,
+      singleAdventurePresentation,
+      week,
+    ],
   );
 
   const exploreWeekStrip =
@@ -541,27 +538,14 @@ export default function CourageInTheDarkAdventureHub({
                 paths={week1ExtrasPaths}
               />
             )
-          : viewMode === 'quests' && questPanel
-            ? (
-                <CourageHubHudQuestStrip
-                  quests={questPanel.quests}
-                  loading={questPanel.loading}
-                  error={questPanel.error}
-                  onRetry={questPanel.onRetry}
-                  claimingKey={questPanel.claimingKey}
-                  onClaim={questPanel.onClaim}
-                />
-              )
-            : null;
+          : null;
 
   const missionControlContent =
     viewMode === 'missions'
       ? missionListPanel
       : viewMode === 'activities' && week1ExtrasPaths
         ? activitiesPanel
-        : viewMode === 'quests' && questListPanel
-          ? questListPanel
-          : null;
+        : null;
 
   const showBottomHudTray = Boolean(
     bottomHudTrayEnabled &&
@@ -649,7 +633,7 @@ export default function CourageInTheDarkAdventureHub({
           {monthHeroOverlay}
         </div>
       ) : null}
-      {!isMobileLayout ? (
+      {!isMobileLayout && desktopMapPills ? (
         <div className="courageMapCanvasHeroOverlay courageMapCanvasHeroOverlay--pillsOnly">
           {desktopMapPills}
         </div>
@@ -703,8 +687,6 @@ export default function CourageInTheDarkAdventureHub({
       missionListPanel
     ) : viewMode === 'activities' && week1ExtrasPaths ? (
       activitiesPanel
-    ) : viewMode === 'quests' && questListPanel ? (
-      questListPanel
     ) : null;
 
   const desktopPanelId =
@@ -822,22 +804,6 @@ export default function CourageInTheDarkAdventureHub({
                 </div>
               ) : null}
 
-              {viewMode === 'quests' && (useHudPills ? bottomHudTrayContent : questListPanel) ? (
-                <div
-                  id="courage-hub-panel-quests"
-                  role="tabpanel"
-                  aria-labelledby="courage-hub-tab-quests"
-                  className={
-                    useHudPills
-                      ? 'courageHubMobileHudPills'
-                      : cinematicAdventureMode
-                        ? 'courageHubMobileDarkSection'
-                        : 'courageAdventureHubMobileQuests'
-                  }
-                >
-                  {useHudPills ? bottomHudTrayContent : questListPanel}
-                </div>
-              ) : null}
             </div>
           ) : (
             <div

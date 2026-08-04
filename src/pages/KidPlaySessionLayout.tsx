@@ -38,6 +38,7 @@ import B4FocusFlightUnlockModal from '../components/kid-play-shell/B4FocusFlight
 import B4UnitOnboardingModal from '../components/b4/B4UnitOnboardingModal';
 import KidPlayMyAdventures from '../components/kid-play-shell/KidPlayMyAdventures';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
+import { CourageHubAudioProvider } from '../components/courage-in-the-dark/CourageHubAudioContext';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import {
   B4_FOCUS_FLIGHT_UNLOCK_EVENT,
@@ -323,6 +324,7 @@ function KidPlaySessionLayoutContent() {
         >
           <KidPlaySessionProvider session={session}>
             <MyAdventuresProvider participantId={session.child_id}>
+            <CourageHubAudioProvider>
             <B4UnitOnboardingModal
               key={session.child_id}
               participantId={session.child_id}
@@ -367,6 +369,7 @@ function KidPlaySessionLayoutContent() {
                 onDismiss={handleB4UnlockDismiss}
               />
               </div>
+            </CourageHubAudioProvider>
             </MyAdventuresProvider>
           </KidPlaySessionProvider>
         </KidPlaySessionParticipantProvider>

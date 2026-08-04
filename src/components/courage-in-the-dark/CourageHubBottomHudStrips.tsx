@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import MissionActionCard from '../../design-system/kids-adventure/MissionActionCard';
 import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureIcon';
@@ -6,8 +6,6 @@ import {
   courageInTheDarkMissions,
   type CourageInTheDarkMission,
 } from '../../data/courageInTheDarkMap';
-import type { QuestProgressRow } from '../../lib/participantQuestService';
-import { QUEST_DEFINITIONS } from '../../lib/participantQuestService';
 import {
   isKidShellDisplayImageUrl,
   resolveHudThumbBackgroundStyle,
@@ -227,131 +225,6 @@ export function CourageHubHudActivitiesStrip({
                 <p className="courageHubHudCardSub">{card.label}</p>
               </div>
               {cta}
-            </article>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-type QuestStripProps = {
-  quests: QuestProgressRow[];
-  loading?: boolean;
-  error?: string | null;
-  onRetry?: () => void;
-  claimingKey?: string | null;
-  onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
-};
-
-function questTitle(questKey: string): string {
-  return QUEST_DEFINITIONS.find((row) => row.key === questKey)?.title ?? 'Quest';
-}
-
-function periodLabel(period: QuestProgressRow['period']): string {
-  if (period === 'daily') return 'Daily';
-  if (period === 'monthly') return 'Monthly';
-  return 'Weekly';
-}
-
-export function CourageHubHudQuestStrip({
-  quests,
-  loading = false,
-  error = null,
-  onRetry,
-  claimingKey = null,
-  onClaim,
-}: QuestStripProps) {
-  const { playClick } = useCourageHubAudio();
-  const handleClaim = useCallback(
-    (questKey: string, period: QuestProgressRow['period']) => {
-      playClick();
-      onClaim?.(questKey, period);
-    },
-    [onClaim, playClick],
-  );
-
-  if (loading && quests.length === 0) {
-    return <p className="courageHubHudStripEmpty">Loading quests…</p>;
-  }
-
-  if (error && quests.length === 0) {
-    return (
-      <div className="courageHubHudStripEmpty" role="alert">
-        <p>{error}</p>
-        <button type="button" className="courageHubHudRetry" onClick={onRetry}>Try again</button>
-      </div>
-    );
-  }
-
-  if (quests.length === 0) {
-    return <p className="courageHubHudStripEmpty">No quests available yet.</p>;
-  }
-
-  const scrollRow = quests.length > HUD_ROW_SCROLL_THRESHOLD;
-
-  return (
-    <ul
-      className={[
-        'courageHubHudStripRow',
-        scrollRow ? 'courageHubHudStripRow--scroll' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      {quests.map((quest) => {
-        const progressPct = Math.min(
-          100,
-          Math.round((quest.progressCount / Math.max(quest.targetCount, 1)) * 100),
-        );
-
-        const claimCta = quest.claimed ? (
-          <span className="courageHubHudCardCta courageHubHudCardCta--disabled">Claimed</span>
-        ) : quest.claimable ? (
-          <button
-            type="button"
-            className="courageHubHudCardCta courageHubHudCardCta--claim"
-            disabled={claimingKey === quest.questKey}
-            onClick={() => handleClaim(quest.questKey, quest.period)}
-          >
-            {claimingKey === quest.questKey ? '…' : 'Claim'}
-          </button>
-        ) : null;
-
-        return (
-          <li key={`${quest.period}-${quest.questKey}`}>
-            <article
-              className={[
-                'courageHubHudCard',
-                'courageHubHudCard--quest',
-                quest.claimable ? 'courageHubHudCard--ready' : '',
-                quest.claimed ? 'courageHubHudCard--claimed' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <div className="courageHubHudCardQuestHead">
-                <span className="courageHubHudCardPeriod">{periodLabel(quest.period)}</span>
-                <div className="courageHubHudCardCopy">
-                  <p className="courageHubHudCardTitle">{questTitle(quest.questKey)}</p>
-                  <p className="courageHubHudCardSub">{quest.rewardLabel}</p>
-                </div>
-                {claimCta}
-              </div>
-              <div className="courageHubHudCardQuestProgress">
-                <div
-                  className="courageHubHudCardBar"
-                  role="progressbar"
-                  aria-valuenow={quest.progressCount}
-                  aria-valuemin={0}
-                  aria-valuemax={quest.targetCount}
-                >
-                  <span className="courageHubHudCardBarFill" style={{ width: `${progressPct}%` }} />
-                </div>
-                <span className="courageHubHudCardProgress">
-                  {quest.progressCount}/{quest.targetCount}
-                </span>
-              </div>
             </article>
           </li>
         );

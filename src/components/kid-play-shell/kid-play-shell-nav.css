@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.5rem 6rem 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: linear-gradient(180deg, rgba(7, 11, 20, 0.98) 0%, rgba(7, 11, 20, 0.88) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
@@ -150,13 +150,23 @@
 }
 
 .kidPlayShellNavActions {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
+  position: static;
   z-index: 22;
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  flex: none;
+}
+
+.kidPlayShellNavActions .focusCoinWalletBadge {
+  color: #fff5d6;
+  background: rgba(242, 198, 95, 0.12);
+  border-color: rgba(242, 198, 95, 0.42);
+  box-shadow: none;
+}
+
+.kidPlayShellNavActions .courageHubSoundToggle {
+  position: static;
   flex: none;
 }
 
@@ -333,10 +343,11 @@
 
 @media (max-width: 600px) {
   .kidPlayShellNavBar {
-    padding: max(.5rem, env(safe-area-inset-top)) 5.4rem .5rem .5rem;
+    align-items: flex-start;
+    padding: max(.5rem, env(safe-area-inset-top)) .5rem .5rem;
   }
-  .kidPlayShellNavActions { top: max(.5rem, env(safe-area-inset-top)); right: 0.5rem; }
   .kidPlayShellNavActions { gap: 0.3rem; }
+  .kidPlayShellNavActions .focusCoinWalletBadge { padding-inline: .4rem !important; }
   .kidPlayB4ProfileBtn { width: 2.4rem; height: 2.4rem; }
   .kidPlayB4ProfileBtn .b4CircleAvatar { --b4-avatar-size: 2.25rem; }
   .kidPlayShellPowerBtn { width: 2rem; height: 2rem; }

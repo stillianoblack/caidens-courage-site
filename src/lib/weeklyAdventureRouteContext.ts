@@ -76,6 +76,53 @@ export const WEEKLY_VIEW_MAP_VALUE = 'map';
 /** @deprecated Use WEEKLY_VIEW_MISSIONS_VALUE */
 export const WEEKLY_VIEW_LIST_VALUE = 'list';
 
+const LEGACY_WEEKLY_WORLD_VIEWS = new Set([
+  WEEKLY_VIEW_EXPLORE_VALUE,
+  WEEKLY_VIEW_MISSIONS_VALUE,
+  WEEKLY_VIEW_QUESTS_VALUE,
+  WEEKLY_VIEW_ACTIVITIES_VALUE,
+  WEEKLY_VIEW_MAP_VALUE,
+  WEEKLY_VIEW_LIST_VALUE,
+]);
+
+const LEGACY_WEEKLY_WORLD_HASHES = new Set([
+  '#explore',
+  '#missions',
+  '#quests',
+  '#activities',
+  '#map',
+  '#list',
+]);
+
+/**
+ * The student shell now presents one character-led Weekly Adventures world.
+ * Legacy view values remain accepted as inputs but normalize to Explore without
+ * adding history entries or disturbing week/month selection.
+ */
+export function normalizeWeeklyAdventureWorldLocation(
+  search: string,
+  hash: string,
+): { search: string; hash: string; changed: boolean } {
+  const params = new URLSearchParams(search);
+  const view = params.get(WEEKLY_VIEW_PARAM)?.trim().toLowerCase() ?? '';
+  let changed = false;
+
+  if (view && LEGACY_WEEKLY_WORLD_VIEWS.has(view) && view !== WEEKLY_VIEW_EXPLORE_VALUE) {
+    params.set(WEEKLY_VIEW_PARAM, WEEKLY_VIEW_EXPLORE_VALUE);
+    changed = true;
+  }
+
+  const normalizedHash = LEGACY_WEEKLY_WORLD_HASHES.has(hash.toLowerCase()) ? '' : hash;
+  if (normalizedHash !== hash) changed = true;
+
+  const serialized = params.toString();
+  return {
+    search: serialized ? `?${serialized}` : '',
+    hash: normalizedHash,
+    changed,
+  };
+}
+
 const WEEKLY_SELECTION_PARAMS = [
   WEEKLY_VIEW_PARAM,
   WEEKLY_MONTH_PARAM,
