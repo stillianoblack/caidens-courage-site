@@ -622,7 +622,14 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
     [heroCmsModule],
   );
 
-  const { quests, loading: questsLoading, claimQuest, claimingKey } = useParticipantQuests({
+  const {
+    quests,
+    loading: questsLoading,
+    error: questsError,
+    claimQuest,
+    claimingKey,
+    refresh: retryQuests,
+  } = useParticipantQuests({
     participantId: activeChild?.participantId,
     weekId: heroWeekId,
     completedWeekMissions,
@@ -659,6 +666,8 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
   const questPanel = {
     quests,
     loading: questsLoading,
+    error: questsError,
+    onRetry: retryQuests,
     claimingKey,
     onClaim: handleClaimQuest,
   };

@@ -8,6 +8,8 @@ type CourageQuestListViewProps = {
   viewMode: CourageHubViewMode;
   quests: QuestProgressRow[];
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   claimingKey?: string | null;
   onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
 };
@@ -17,6 +19,8 @@ export default function CourageQuestListView({
   viewMode,
   quests,
   loading,
+  error,
+  onRetry,
   claimingKey,
   onClaim,
 }: CourageQuestListViewProps) {
@@ -32,6 +36,8 @@ export default function CourageQuestListView({
       <CourageQuestListPanel
         quests={quests}
         loading={loading}
+        error={error}
+        onRetry={onRetry}
         claimingKey={claimingKey}
         onClaim={onClaim}
       />

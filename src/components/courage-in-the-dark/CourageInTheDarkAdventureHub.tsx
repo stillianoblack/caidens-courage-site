@@ -61,6 +61,8 @@ function resolveCardLayout(): CardLayout {
 export type CourageHubQuestPanelProps = {
   quests: QuestProgressRow[];
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   claimingKey?: string | null;
   onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
 };
@@ -420,6 +422,8 @@ export default function CourageInTheDarkAdventureHub({
     <CourageQuestListPanel
       quests={questPanel.quests}
       loading={questPanel.loading}
+      error={questPanel.error}
+      onRetry={questPanel.onRetry}
       claimingKey={questPanel.claimingKey}
       onClaim={questPanel.onClaim}
     />
@@ -542,6 +546,8 @@ export default function CourageInTheDarkAdventureHub({
                 <CourageHubHudQuestStrip
                   quests={questPanel.quests}
                   loading={questPanel.loading}
+                  error={questPanel.error}
+                  onRetry={questPanel.onRetry}
                   claimingKey={questPanel.claimingKey}
                   onClaim={questPanel.onClaim}
                 />

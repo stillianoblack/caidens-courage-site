@@ -51,6 +51,26 @@
   color: rgba(26, 47, 82, 0.62);
 }
 
+.courageQuestListPanelEmpty p {
+  margin: 0 0 0.65rem;
+}
+
+.courageQuestListPanelRetry {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: #1a2f52;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.courageQuestListPanelRetry:focus-visible {
+  outline: 3px solid rgba(232, 191, 79, 0.7);
+  outline-offset: 2px;
+}
+
 .courageQuestListRows {
   list-style: none;
   margin: 0;

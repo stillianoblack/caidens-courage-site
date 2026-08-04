@@ -104,11 +104,11 @@ export const CHARACTER_HOTSPOT_IMAGES: Record<CharacterThemeId, string> = {
 
 /** Comic/game portrait icons for mission cards and list rows. */
 export const CHARACTER_COMIC_ICONS: Record<CharacterThemeId, string> = {
-  caiden: '/images/characters/caiden_photo_icon_game.webp',
-  miranda: '/images/characters/miranda_photo_icon_game.webp',
-  zeke: '/images/characters/zeke_photo_icon_game.webp',
-  charlie: '/images/characters/charlieperk_photo_icon_game.webp',
-  b4: '/images/characters/b-4_photo_icon_game.webp',
+  caiden: CHARACTER_HOTSPOT_IMAGES.caiden,
+  miranda: CHARACTER_HOTSPOT_IMAGES.miranda,
+  zeke: CHARACTER_HOTSPOT_IMAGES.zeke,
+  charlie: CHARACTER_HOTSPOT_IMAGES.charlie,
+  b4: CHARACTER_HOTSPOT_IMAGES.b4,
 };
 
 /** Solid collectible card fills keyed by character. */

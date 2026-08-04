@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MODULE_COMPLETE_EVENT } from '../lib/activeChildContext';
 import { FOCUS_COIN_WALLET_EVENT } from '../hooks/useFocusCoinWallet';
 import {
@@ -19,6 +19,34 @@ type UseParticipantQuestsInput = {
   weeklyQuestReward?: WeeklyQuestRewardConfig | null;
 };
 
+export const QUEST_LOAD_TIMEOUT_MS = 12_000;
+
+export class QuestLoadTimeoutError extends Error {
+  constructor() {
+    super('Quest loading timed out.');
+    this.name = 'QuestLoadTimeoutError';
+  }
+}
+
+export function loadQuestsWithTimeout(
+  request: Promise<QuestProgressRow[]>,
+  timeoutMs = QUEST_LOAD_TIMEOUT_MS,
+): Promise<QuestProgressRow[]> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => reject(new QuestLoadTimeoutError()), timeoutMs);
+    request.then(
+      (rows) => {
+        window.clearTimeout(timeoutId);
+        resolve(rows);
+      },
+      (error) => {
+        window.clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
+}
+
 export function useParticipantQuests({
   participantId,
   weekId,
@@ -29,17 +57,38 @@ export function useParticipantQuests({
 }: UseParticipantQuestsInput) {
   const [quests, setQuests] = useState<QuestProgressRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [claimingKey, setClaimingKey] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
-    const rows = await loadParticipantQuests(participantId, weekId, {
-      completedWeekMissions,
-      monthlyCoinsEarned,
-      dailyAdventureComplete,
-    }, weeklyQuestReward);
-    setQuests(rows);
-    setLoading(false);
+    setError(null);
+    try {
+      const rows = await loadQuestsWithTimeout(
+        loadParticipantQuests(participantId, weekId, {
+          completedWeekMissions,
+          monthlyCoinsEarned,
+          dailyAdventureComplete,
+        }, weeklyQuestReward),
+      );
+      if (requestId === requestIdRef.current) {
+        setQuests(rows);
+      }
+    } catch (requestError) {
+      if (requestId === requestIdRef.current) {
+        setError(
+          requestError instanceof QuestLoadTimeoutError
+            ? 'Quests took too long to load.'
+            : 'We couldn\'t load quests right now.',
+        );
+      }
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
+    }
   }, [
     participantId,
     weekId,
@@ -51,6 +100,9 @@ export function useParticipantQuests({
 
   useEffect(() => {
     void refresh();
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [refresh]);
 
   useEffect(() => {
@@ -87,5 +139,5 @@ export function useParticipantQuests({
     [participantId, refresh, weekId, weeklyQuestReward],
   );
 
-  return { quests, loading, claimQuest, claimingKey, refresh };
+  return { quests, loading, error, claimQuest, claimingKey, refresh };
 }

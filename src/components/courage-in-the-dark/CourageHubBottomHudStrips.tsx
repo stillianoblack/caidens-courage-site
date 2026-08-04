@@ -238,6 +238,8 @@ export function CourageHubHudActivitiesStrip({
 type QuestStripProps = {
   quests: QuestProgressRow[];
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   claimingKey?: string | null;
   onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
 };
@@ -255,6 +257,8 @@ function periodLabel(period: QuestProgressRow['period']): string {
 export function CourageHubHudQuestStrip({
   quests,
   loading = false,
+  error = null,
+  onRetry,
   claimingKey = null,
   onClaim,
 }: QuestStripProps) {
@@ -269,6 +273,19 @@ export function CourageHubHudQuestStrip({
 
   if (loading && quests.length === 0) {
     return <p className="courageHubHudStripEmpty">Loading quests…</p>;
+  }
+
+  if (error && quests.length === 0) {
+    return (
+      <div className="courageHubHudStripEmpty" role="alert">
+        <p>{error}</p>
+        <button type="button" className="courageHubHudRetry" onClick={onRetry}>Try again</button>
+      </div>
+    );
+  }
+
+  if (quests.length === 0) {
+    return <p className="courageHubHudStripEmpty">No quests available yet.</p>;
   }
 
   const scrollRow = quests.length > HUD_ROW_SCROLL_THRESHOLD;

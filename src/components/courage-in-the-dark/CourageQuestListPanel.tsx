@@ -7,6 +7,8 @@ import './courage-quest-list-panel.css';
 type CourageQuestListPanelProps = {
   quests: QuestProgressRow[];
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   claimingKey?: string | null;
   onClaim?: (questKey: string, period: QuestProgressRow['period']) => void;
 };
@@ -32,6 +34,8 @@ function QuestIcon({ icon }: { icon: QuestProgressRow['icon'] }) {
 export default function CourageQuestListPanel({
   quests,
   loading = false,
+  error = null,
+  onRetry,
   claimingKey = null,
   onClaim,
 }: CourageQuestListPanelProps) {
@@ -51,6 +55,19 @@ export default function CourageQuestListPanel({
 
       {loading && quests.length === 0 ? (
         <p className="courageQuestListPanelEmpty">Loading quests…</p>
+      ) : null}
+
+      {!loading && error && quests.length === 0 ? (
+        <div className="courageQuestListPanelEmpty" role="alert">
+          <p>{error}</p>
+          <button type="button" className="courageQuestListPanelRetry" onClick={onRetry}>
+            Try again
+          </button>
+        </div>
+      ) : null}
+
+      {!loading && !error && quests.length === 0 ? (
+        <p className="courageQuestListPanelEmpty">No quests available yet.</p>
       ) : null}
 
       <ul className="courageQuestListRows">

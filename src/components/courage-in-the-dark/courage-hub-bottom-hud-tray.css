@@ -71,6 +71,26 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
+.courageHubHudStripEmpty p {
+  margin: 0 0 0.45rem;
+}
+
+.courageHubHudRetry {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.courageHubHudRetry:focus-visible {
+  outline: 2px solid #f0d078;
+  outline-offset: 2px;
+}
+
 /* Shared glass pill */
 .courageHubHudCard {
   display: flex;
@@ -100,7 +120,10 @@
 }
 
 .courageHubHudCardThumb--hasImage {
-  background-color: rgba(7, 11, 20, 0.55);
+  background-color: transparent;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .courageHubHudCardThumb--explore {
