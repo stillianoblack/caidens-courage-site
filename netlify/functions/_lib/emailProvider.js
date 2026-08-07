@@ -55,27 +55,47 @@ async function sendResendEmail(payload) {
     "Caiden's Courage <hello@caidenscourage.com>";
 
   try {
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+    if (payload.idempotencyKey) {
+      headers['Idempotency-Key'] = String(payload.idempotencyKey).slice(0, 256);
+    }
     const response = await fetch(RESEND_ENDPOINT, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         from,
         to: payload.to,
         subject: payload.subject,
         html: payload.html,
         text: payload.text,
+        ...(payload.replyTo ? { reply_to: payload.replyTo } : {}),
       }),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return { success: false, error: data.message || `Resend failed with ${response.status}.` };
+      return {
+        success: false,
+        error: data.message || `Resend failed with ${response.status}.`,
+        providerStatus: response.status,
+        providerErrorCode:
+          typeof data.name === 'string'
+            ? data.name
+            : typeof data.code === 'string'
+              ? data.code
+              : null,
+      };
     }
     return { success: true, providerMessageId: data.id || null };
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Resend delivery failed.' };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Resend delivery failed.',
+      providerStatus: null,
+      providerErrorCode: 'network_error',
+    };
   }
 }
 
@@ -85,6 +105,8 @@ function sendWelcomeEmail(payload) {
     subject: payload.subject || "Welcome to Caiden's Courage",
     html: payload.html || welcomeEmailHtml(payload),
     text: payload.body || payload.text,
+    replyTo: payload.replyTo || process.env.RESEND_REPLY_TO_EMAIL,
+    idempotencyKey: payload.idempotencyKey,
   });
 }
 
