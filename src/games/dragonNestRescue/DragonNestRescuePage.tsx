@@ -18,6 +18,7 @@ export default function DragonNestRescuePage() {
   const [ready, setReady] = useState(false);
   const [hud, setHud] = useState(initialHud);
   const [result, setResult] = useState<DragonNestResult | null>(null);
+  const handleReady = useCallback(() => setReady(true), []);
 
   const restart = useCallback(() => {
     setResult(null);
@@ -43,7 +44,7 @@ export default function DragonNestRescuePage() {
         <div className="dnr-objective"><span>OBJECTIVE</span><strong>{hud.objective}</strong></div>
         <div className="dnr-guidance" role="status" aria-live="polite">{hud.message}</div>
 
-        <DragonNestRescueGame ref={gameRef} onReady={() => setReady(true)} onHud={setHud} onResult={setResult} />
+        <DragonNestRescueGame ref={gameRef} onReady={handleReady} onHud={setHud} onResult={setResult} />
 
         {!ready ? (
           <div className="dnr-loader" aria-busy="true" aria-live="polite">
