@@ -32,11 +32,13 @@ const readFlag = (key: string): boolean => {
 type KidArcadePanelProps = {
   storyQuestPathOverride?: string;
   b4GamePathOverride?: string;
+  dragonNestPathOverride?: string;
 };
 
 export default function KidArcadePanel({
   storyQuestPathOverride,
   b4GamePathOverride,
+  dragonNestPathOverride,
 }: KidArcadePanelProps = {}) {
   const { participantId } = useActiveParticipant();
   const { variant } = useB4Variant(participantId);
@@ -134,6 +136,20 @@ export default function KidArcadePanel({
           highlight={highlightB4Card}
           onPlay={() => kidPlayShellNavigate(navigate, b4GamePath)}
         />
+        {dragonNestPathOverride ? (
+          <GameCard
+            title="Dragon Nest Rescue"
+            description="Follow the Focus Flame trail, find the baby dragon, and bring it safely back to the nest."
+            statusLabel="Prototype Level"
+            starsLabel="4–8 min"
+            ctaLabel="Play Prototype"
+            variant="dragon"
+            artworkSrc="/images/focus-flame-lab/thecave_block_image.webp"
+            thumbnailSrc="/images/characters/dragon_img_profile.webp"
+            badgeLabel="New Prototype"
+            onPlay={() => kidPlayShellNavigate(navigate, dragonNestPathOverride)}
+          />
+        ) : null}
         <GameCard
           title="Dragon Flight"
           description="Soar with courage through windy skies."

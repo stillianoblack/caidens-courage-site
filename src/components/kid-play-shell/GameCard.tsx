@@ -14,6 +14,7 @@ export type GameCardProps = {
   artworkSrc?: string;
   artLabel?: string;
   newTraining?: boolean;
+  badgeLabel?: string;
   highlight?: boolean;
   onPlay?: () => void;
 };
@@ -32,6 +33,7 @@ export default function GameCard({
   artworkSrc,
   artLabel,
   newTraining = false,
+  badgeLabel,
   highlight = false,
   onPlay,
 }: GameCardProps) {
@@ -52,7 +54,7 @@ export default function GameCard({
       </div>
       <div className="kidArcadeGameCardCopy">
         <div className="kidArcadeGameCardMeta">
-          {newTraining ? <span className="kidArcadeGameCardNewPill">New Training Sim</span> : null}
+          {badgeLabel || newTraining ? <span className="kidArcadeGameCardNewPill">{badgeLabel ?? 'New Training Sim'}</span> : null}
           <span>{statusLabel}</span>
           <span>{starsLabel ?? `${bestScore ?? 0} best`}</span>
         </div>
