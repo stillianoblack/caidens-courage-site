@@ -44,13 +44,13 @@ const characters: Character[] = [
     name: 'B-4',
     role: 'Companion',
     bio: 'Part guide, part gadget, part best friend. B-4 helps Caiden stay grounded, spot patterns, and make bold choices—especially when the world gets loud.',
-    image: '/images/characters/b4_img_profile_192w.webp'
+    image: '/images/characters/b4_img_profile.webp'
   },
   {
-    name: 'Ollie Buck',
+    name: 'Charlie Perk',
     role: 'Ally',
-    bio: 'Wise, steady, and unexpectedly funny. Ollie Buck reminds Caiden that slow thinking can be a superpower—and that every journey needs patience.',
-    image: '/images/characters/ollie_img_profile_192w.webp'
+    bio: 'Charlie Perk brings science-based missions that teach observation, testing ideas, evidence, and problem solving — with humor that stays smart and kid-friendly.',
+    image: '/images/characters/charlieperk_photo_icon_game.webp'
   },
   {
     name: 'Breath of Life',
@@ -71,10 +71,10 @@ const characters: Character[] = [
     image: '/images/characters/unclet_img_profile.webp'
   },
   {
-    name: 'Maria',
+    name: 'Miranda',
     role: 'Anchor',
-    bio: 'Smart, grounded, and fearless in her own way. Maria challenges Caiden to be accountable and brave—and never lets him forget who he is.',
-    image: '/images/characters/maria_img_profile.webp'
+    bio: 'Miranda sees patterns, clues, and details that help the team solve problems. Her missions help kids build reading comprehension, vocabulary, observation, and confidence.',
+    image: '/images/characters/miranda_photo_icon_game.webp'
   }
 ];
 
@@ -322,7 +322,7 @@ const Characters: React.FC = () => {
                         style={{
                           objectPosition: character.name === 'Uncle T' 
                             ? 'center 30%' 
-                            : character.name === 'Maria' 
+                            : character.name === 'Miranda'
                             ? 'center 25%' 
                             : character.name === 'B-4' 
                             ? 'center 20%' 
