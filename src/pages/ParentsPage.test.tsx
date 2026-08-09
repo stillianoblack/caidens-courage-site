@@ -34,7 +34,7 @@ describe('ParentsPage', () => {
     expect(screen.getByText('Builds confidence and self-advocacy')).toBeInTheDocument();
     expect(screen.getAllByText('Brave affirmation prompts').length).toBeGreaterThan(0);
     expect(screen.getByText('Cancel anytime. You’ll keep access to all resources and downloads as long as your subscription is active.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Enter the World' })).toHaveAttribute('href', '/story');
+    expect(screen.getByRole('link', { name: 'Enter the World' })).toHaveAttribute('href', '/portal');
     expect(screen.queryByText('Portal', { selector: 'header *' })).not.toBeInTheDocument();
   });
 });

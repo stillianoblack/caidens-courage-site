@@ -19,7 +19,7 @@ describe('CourageHeader', () => {
     expect(screen.getByRole('button', { name: /kids/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^for/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Games' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Enter the World' })).toHaveAttribute('href', '/story');
+    expect(screen.getByRole('link', { name: 'Enter the World' })).toHaveAttribute('href', '/portal');
     expect(screen.queryByText('Portal')).not.toBeInTheDocument();
   });
 });
