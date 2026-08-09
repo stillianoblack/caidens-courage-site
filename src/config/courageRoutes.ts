@@ -6,6 +6,7 @@ export const STORY_BOOKS_PATH = '/story/books';
 export const STORY_CHARACTERS_PATH = '/story/characters';
 export const STORY_MODE_PATH = '/story-mode';
 export const ARCADE_PREVIEW_PATH = '/preview/arcade';
+export const GAMES_PATH = '/games';
 
 export const BRAVE_MIND_CLUB_PATH = '/brave-mind-club';
 export const BMC_COLORING_PATH = '/brave-mind-club/coloring-pages';

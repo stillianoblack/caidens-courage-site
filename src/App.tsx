@@ -51,6 +51,7 @@ import {
   FocusFlameLabPage,
   FormSuccessPage,
   HomePage,
+  GamesPage,
   JourneyPage,
   KidsHubPage,
   KidsPortalPage,
@@ -130,6 +131,7 @@ import {
   KID_PLAY_SESSION_PATH,
   STUDENT_PIN_LOGIN_PATH,
   ARCADE_PREVIEW_PATH,
+  GAMES_PATH,
 } from './config/courageRoutes';
 import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
 import { ENABLE_DEVELOPMENT_PREVIEWS } from './config/developmentPreview';
@@ -274,6 +276,7 @@ const appRouteChildren = (
       <Route path={BMC_RESET_TOOLS_PATH} element={<B4ClickerPage />} />
 
       {/* Interactive */}
+      <Route path={GAMES_PATH} element={<GamesPage />} />
       <Route path={B4_BASELINE_CHECK_PATH} element={<B4BaselineCheckPage />} />
       <Route path={WEEK_0_ASSESSMENT_ALIAS_PATH} element={<Navigate to={B4_BASELINE_CHECK_PATH} replace />} />
       <Route path={WEEK_0_ASSESSMENT_PATH} element={<Week0AssessmentPage />} />

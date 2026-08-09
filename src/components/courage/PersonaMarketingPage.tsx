@@ -8,6 +8,7 @@ import Button from '../ui/Button';
 import useHashScroll from '../../hooks/useHashScroll';
 import type { PersonaPageConfig } from '../../config/personaPages';
 import { trackCtaClick, trackSalesFunnel } from '../../lib/analytics';
+import PersonaEditorialMarketingPage from './PersonaEditorialMarketingPage';
 
 type PersonaMarketingPageProps = {
   config: PersonaPageConfig;
@@ -180,21 +181,12 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
     return () => observer.disconnect();
   }, []);
 
+  if (config.slug === 'parents' || config.slug === 'teachers') {
+    return <PersonaEditorialMarketingPage config={config}>{children}</PersonaEditorialMarketingPage>;
+  }
+
   const howItWorksItems = config.howItWorks ?? config.faq ?? [];
-  const isFamilyPage = config.slug === 'parents';
-  const personaHeroVisual = config.slug === 'parents'
-    ? {
-        src: '/images/Choose-Your-Guide/b-4facilitator-hover.webp',
-        alt: 'Parent and guardian B-4 guide',
-        tone: 'family',
-      }
-    : config.slug === 'teachers'
-      ? {
-          src: '/images/Choose-Your-Guide/B-4orange-hover.webp',
-          alt: 'Facilitator and teacher B-4 guide',
-          tone: 'teacher',
-        }
-      : null;
+  const isFamilyPage = false;
   const familyAudienceDescriptions: Record<string, string> = {
     'Parents and caregivers': 'Tools to support everyday conversations and stronger connections.',
     'Homeschool families': 'Flexible resources for learning, growth, and emotional development.',
@@ -207,22 +199,11 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       <CourageHeader />
 
       <SectionHero
-        className={personaHeroVisual ? `persona-marketingHero persona-marketingHero--${personaHeroVisual.tone}` : ''}
-        variant={personaHeroVisual ? 'compact' : 'default'}
+        variant="default"
         eyebrow={config.eyebrow}
         title={config.heroTitle}
         description={config.heroSubtitle}
         supportingText={config.intro}
-        visual={personaHeroVisual ? (
-          <div className="persona-marketingHeroGuide">
-            <div className="persona-marketingHeroGuideGlow" />
-            <img
-              className="persona-marketingHeroB4"
-              src={personaHeroVisual.src}
-              alt={personaHeroVisual.alt}
-            />
-          </div>
-        ) : undefined}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Button

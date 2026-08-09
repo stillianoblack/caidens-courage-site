@@ -33,6 +33,7 @@ describe('shared Courage navigation refinement', () => {
 
     expect(screen.getByRole('link', { name: /Enter the World/ })).toHaveAttribute('href', '/portal');
     expect(screen.getByRole('link', { name: /Enter the World/ })).toHaveClass('min-h-[50px]');
+    expect(screen.getByRole('link', { name: 'Games' })).toHaveAttribute('href', '/games');
   });
 
   it('supports keyboard activation and returns focus after Escape', () => {

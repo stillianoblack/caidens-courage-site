@@ -167,12 +167,6 @@ export default function PilotProgramSignupPage() {
             </div>
           </div>
 
-          <ol className="pilotSignup-progress" aria-label="Signup progress">
-            <li><span>1</span>Program</li>
-            <li><span>2</span>Explorers</li>
-            <li><span>3</span>Ready to Go</li>
-          </ol>
-
           <PilotProgramSignupForm
             onSubmit={handleSubmit}
             onRetry={handleRetry}

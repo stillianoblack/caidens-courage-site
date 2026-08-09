@@ -4,6 +4,7 @@ import {
   COURAGE_LOGO_SRC,
   flattenKidsMegaNav,
   FOR_DROPDOWN,
+  GAMES_PATH,
   isNavPathActive,
   KIDS_MEGA_DROPDOWN,
   KIDS_NAV_PATHS,
@@ -460,15 +461,7 @@ export default function CourageHeader() {
     isNavPathActive(KIDS_NAV_PATHS, location.pathname) ||
     isDropdownActive(kidsFlatLinks, location.pathname, location.hash, location.search);
   const forActive = isDropdownActive(FOR_DROPDOWN, location.pathname, location.hash, location.search);
-  const gamesActive = KIDS_MEGA_DROPDOWN.columns.some((column) =>
-    column.sections.some((section) =>
-      section.items.some(
-        (item) =>
-          item.pilotInterest === 'focus_flame_lab' &&
-          isNavHrefActive(item.href, location.pathname, location.hash, location.search),
-      ),
-    ),
-  );
+  const gamesActive = location.pathname === GAMES_PATH;
   return (
     <header
       className={[
@@ -529,12 +522,7 @@ export default function CourageHeader() {
               onClose={() => setForOpen(false)}
               active={forActive}
             />
-            <PilotAccessNavLink
-              label="Games"
-              className={navPillClass(gamesActive)}
-              interestType="focus_flame_lab"
-              clickSource="header_games"
-            />
+            <NavLink to={GAMES_PATH} className={navPillClass(gamesActive)}>Games</NavLink>
             <NavLink to={PORTAL_PATH} className="ml-2 inline-flex min-h-[50px] items-center rounded-full bg-golden-500 px-8 text-base font-bold text-navy-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-golden-400 active:translate-y-0 active:bg-golden-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/70 focus-visible:ring-offset-2">
               Enter the World <span className="ml-2" aria-hidden>→</span>
             </NavLink>
@@ -609,13 +597,7 @@ export default function CourageHeader() {
                 onClose={closeMenu}
               />
               <li>
-                <PilotAccessNavLink
-                  label="Games"
-                  className={navPillClass(gamesActive, true)}
-                  interestType="focus_flame_lab"
-                  clickSource="header_games_mobile"
-                  onNavigate={closeMenu}
-                />
+                <NavLink to={GAMES_PATH} className={navPillClass(gamesActive, true)} onClick={closeMenu}>Games</NavLink>
               </li>
               <li>
                 <NavLink

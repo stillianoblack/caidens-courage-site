@@ -134,8 +134,7 @@ export default function PilotProgramSignupForm({
 
   return (
     <form className="pilotSignup-form" onSubmit={handleSubmit} noValidate>
-      <fieldset className="pilotSignup-section">
-        <legend><span>Your Program</span></legend>
+      <fieldset className="pilotSignup-section" aria-label="Program details">
       <div className="pilotSignup-field">
         <label htmlFor="pilot-program-type">Program Type</label>
         <select
@@ -214,8 +213,7 @@ export default function PilotProgramSignupForm({
 
       </fieldset>
 
-      <fieldset className="pilotSignup-section">
-        <legend><span>Your Information</span></legend>
+      <fieldset className="pilotSignup-section" aria-label="Contact information">
 
       {!isIndependentFamily ? (
         <div className="pilotSignup-field">
@@ -255,8 +253,7 @@ export default function PilotProgramSignupForm({
 
       </fieldset>
 
-      <fieldset className="pilotSignup-section">
-        <legend><span>Your Explorers</span></legend>
+      <fieldset className="pilotSignup-section" aria-label="Explorer details">
 
       {isIndependentFamily ? null : (
         <div className="pilotSignup-field">

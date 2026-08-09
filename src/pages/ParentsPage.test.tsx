@@ -29,10 +29,12 @@ describe('ParentsPage', () => {
     );
     expect(screen.getAllByRole('link', { name: 'Explore Kids Activities' })[0]).toHaveAttribute('href', '/kids');
     expect(screen.getByText('Parents and caregivers')).toBeInTheDocument();
-    expect(screen.getByText('Tools to support everyday conversations and stronger connections.')).toBeInTheDocument();
+    expect(screen.getByText('Turn everyday moments into calmer conversations and stronger connection.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Tools you can use together' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'One place to keep the journey going.' })).toBeInTheDocument();
     expect(screen.getByText('Neurodivergent-friendly home learning')).toBeInTheDocument();
-    expect(screen.getByText('Builds confidence and self-advocacy')).toBeInTheDocument();
-    expect(screen.getAllByText('Brave affirmation prompts').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Builds confidence and self-advocacy/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Brave affirmation prompts/).length).toBeGreaterThan(0);
     expect(screen.getByText('Cancel anytime. You’ll keep access to all resources and downloads as long as your subscription is active.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enter the World' })).toHaveAttribute('href', '/portal');
     expect(screen.queryByText('Portal', { selector: 'header *' })).not.toBeInTheDocument();

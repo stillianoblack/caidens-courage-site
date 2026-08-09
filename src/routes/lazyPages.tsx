@@ -4,6 +4,7 @@ import { lazy } from 'react';
 /* Heavy routes — loaded on demand to shrink the initial bundle. */
 
 export const HomePage = lazy(() => import('../pages/Home'));
+export const GamesPage = lazy(() => import('../pages/GamesPage'));
 export const ClassicHomePage = lazy(() => import('../pages/ClassicHome'));
 export const KidsHubPage = lazy(() => import('../pages/KidsHub'));
 export const SchoolsPage = lazy(() => import('../pages/Schools'));

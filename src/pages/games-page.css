@@ -1,0 +1,38 @@
+.gamesLanding { --games-gold: #f2c456; background: #fbfaf6; color: #0b2852; min-height: 100vh; overflow-x: clip; }
+.gamesLanding__hero { align-items: center; background: #071b39 url('../../public/images/B-4FlightGame/background/GameplayBackgrounds.webp') center / cover no-repeat; display: flex; isolation: isolate; min-height: clamp(620px, 76vh, 820px); position: relative; }
+.gamesLanding__heroShade { background: linear-gradient(90deg,rgba(3,16,35,.98),rgba(4,21,45,.9) 42%,rgba(4,21,45,.3) 72%,rgba(3,16,35,.62)),linear-gradient(0deg,rgba(3,16,35,.7),transparent 55%); inset: 0; position: absolute; z-index: -1; }
+.gamesLanding__heroInner,.gamesLanding__worlds { margin: auto; max-width: 1280px; padding-inline: clamp(24px,6vw,88px); width: 100%; }
+.gamesLanding__heroInner { align-items: center; display: grid; gap: 42px; grid-template-columns: minmax(0,1.05fr) minmax(320px,.95fr); }
+.gamesLanding__heroCopy { color: #fff; max-width: 680px; }
+.gamesLanding__eyebrow { color: var(--games-gold); font-size: .82rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.gamesLanding__hero h1 { font-family: var(--font-display); font-size: clamp(3rem,5.7vw,5.4rem); font-weight: 800; letter-spacing: -.035em; line-height: .98; margin: 22px 0; }
+.gamesLanding__heroCopy>p:last-of-type { color: #dbe6f4; font-size: clamp(1.08rem,1.6vw,1.35rem); line-height: 1.65; max-width: 620px; }
+.gamesLanding__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+.gamesLanding__actions a:nth-child(2) { border-color: rgba(255,255,255,.55); color: #fff; }
+.gamesLanding__heroB4 { align-items: center; display: flex; filter: drop-shadow(0 28px 28px rgba(0,0,0,.4)); justify-content: center; }
+.gamesLanding__heroB4 img { height: auto; max-width: 620px; width: 100%; }
+.gamesLanding__worlds { padding-block: clamp(72px,9vw,124px); }
+.gamesLanding__sectionHeading { margin: 0 auto 48px; max-width: 760px; text-align: center; }
+.gamesLanding__sectionHeading h2,.gamesLanding__final h2 { font-family: var(--font-display); font-size: clamp(2.25rem,4vw,4rem); line-height: 1.05; margin: 14px 0; }
+.gamesLanding__sectionHeading>p:last-child { color: #526783; font-size: 1.16rem; line-height: 1.65; }
+.gamesLanding__grid { display: grid; gap: 24px; grid-template-columns: repeat(3,minmax(0,1fr)); }
+.gamesLanding__card { background: #fff; border: 1px solid rgba(11,40,82,.1); border-radius: 28px; box-shadow: 0 18px 46px rgba(8,32,66,.1); display: flex; flex-direction: column; overflow: hidden; }
+.gamesLanding__cardArt { align-items: center; display: flex; height: 320px; justify-content: center; overflow: hidden; padding: 28px; position: relative; }
+.gamesLanding__cardArt::after { background: radial-gradient(circle at 50% 60%,rgba(255,255,255,.08),transparent 62%); content: ''; inset: 0; position: absolute; }
+.gamesLanding__cardArt img { max-height: 100%; max-width: 100%; object-fit: contain; position: relative; z-index: 1; }
+.gamesLanding__card--flight .gamesLanding__cardArt { background: #173b72 url('../../public/images/B-4FlightGame/background/GameplayBackgrounds.webp') center / cover; }
+.gamesLanding__card--story .gamesLanding__cardArt { background: #071d3b url('../../public/images/backgrounds/backgroundFocusFlame.webp') center / cover; }
+.gamesLanding__card--story .gamesLanding__cardArt img { filter: drop-shadow(0 18px 14px rgba(0,0,0,.4)); }
+.gamesLanding__card--dragon .gamesLanding__cardArt { background: linear-gradient(145deg,#0f315b,#071a34); }
+.gamesLanding__cardBody { display: flex; flex: 1; flex-direction: column; padding: 28px; }
+.gamesLanding__cardBody>span:first-child { color: #a66f00; font-size: .76rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.gamesLanding__cardBody h3 { font-family: var(--font-display); font-size: 1.7rem; margin: 10px 0; }
+.gamesLanding__cardBody p { color: #526783; line-height: 1.6; }
+.gamesLanding__cardBody a,.gamesLanding__soon { color: #164988; font-weight: 800; margin-top: auto; padding-top: 24px; }
+.gamesLanding__soon { color: #7b8491; }
+.gamesLanding__final { background: #061a35 url('../../public/images/backgrounds/backgroundFocusFlame.webp') center / cover; color: #fff; isolation: isolate; padding: clamp(72px,9vw,120px) 24px; position: relative; text-align: center; }
+.gamesLanding__final::before { background: rgba(2,14,31,.72); content: ''; inset: 0; position: absolute; z-index: -1; }
+.gamesLanding__final>div { margin: auto; max-width: 780px; }
+.gamesLanding__final a { margin-top: 20px; }
+@media (max-width: 900px) { .gamesLanding__heroInner { grid-template-columns: 1fr; text-align: center; } .gamesLanding__heroCopy { margin: auto; } .gamesLanding__actions { justify-content: center; } .gamesLanding__heroB4 img { max-width: 410px; } .gamesLanding__grid { grid-template-columns: 1fr; } .gamesLanding__card { display: grid; grid-template-columns: minmax(240px,.8fr) 1fr; } .gamesLanding__cardArt { height: 100%; min-height: 300px; } }
+@media (max-width: 640px) { .gamesLanding__hero { min-height: 760px; padding-block: 56px; } .gamesLanding__hero h1 { font-size: clamp(2.65rem,13vw,4rem); } .gamesLanding__heroInner { gap: 28px; } .gamesLanding__actions { align-items: stretch; flex-direction: column; } .gamesLanding__heroB4 img { max-width: 300px; } .gamesLanding__worlds { padding-inline: 18px; } .gamesLanding__card { display: flex; } .gamesLanding__cardArt { height: 260px; min-height: 0; } .gamesLanding__cardBody { padding: 24px; } .gamesLanding__sectionHeading { margin-bottom: 32px; } }
