@@ -20,6 +20,12 @@ export type WelcomeEmailResult = {
   reason?: string;
 };
 
+function maskEmail(value: string): string {
+  const [local = '', domain = ''] = value.trim().split('@');
+  if (!local || !domain) return 'masked';
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
 export function buildWelcomeEmailBody(input: WelcomeEmailInput): string {
   const parentFirstName = input.parentFirstName?.trim() || 'there';
   const accessLabel = input.familyAccessCode?.trim().startsWith('CLAIM-')
@@ -95,7 +101,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
       }
       console.info('[WELCOME_EMAIL]', {
         provider: 'Resend',
-        recipient_email: recipientEmail,
+        recipient_email: maskEmail(recipientEmail),
         success: false,
         skipped: response.status === 503,
         reason,
@@ -111,7 +117,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
 
     console.info('[WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: recipientEmail,
+      recipient_email: maskEmail(recipientEmail),
       success: true,
       skipped: false,
     });
@@ -119,7 +125,7 @@ export async function queueWelcomeEmail(input: WelcomeEmailInput): Promise<Welco
   } catch {
     console.info('[WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: recipientEmail,
+      recipient_email: maskEmail(recipientEmail),
       success: false,
       skipped: true,
       reason: 'send_function_unavailable',

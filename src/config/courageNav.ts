@@ -11,6 +11,7 @@ import {
   STORY_BOOKS_PATH,
   STORY_CHARACTERS_PATH,
   STORY_PATH,
+  THE_STORY_PATH,
   TEACHERS_PATH,
   CAMPS_PATH,
 } from './courageRoutes';
@@ -21,6 +22,8 @@ import type { PilotInterestType } from '../types/pilotWaitlist';
 export type CourageNavLink = {
   label: string;
   href: string;
+  description?: string;
+  icon?: 'story' | 'characters' | 'world' | 'vale';
   pilotInterest?: PilotInterestType;
 };
 
@@ -59,13 +62,15 @@ export {
   TEACHERS_PATH,
   CAMPS_PATH,
   STORY_PATH,
+  THE_STORY_PATH,
 };
 
 /** Story world — Caiden Vale graphic novel, characters, books. */
 export const STORY_DROPDOWN: CourageNavLink[] = [
-  { label: 'Caiden Vale', href: STORY_PATH },
-  { label: 'Characters', href: STORY_CHARACTERS_PATH },
-  { label: 'Books', href: STORY_BOOKS_PATH },
+  { label: 'The Story', href: THE_STORY_PATH, description: 'Discover the first graphic novel adventure.', icon: 'story' },
+  { label: 'Characters', href: 'https://caidenvale.com/story/characters', description: 'Meet the heroes, guides, and guardians.', icon: 'characters' },
+  { label: 'The World', href: 'https://caidenvale.com/world', description: 'Explore the hidden realm of Caiden Vale.', icon: 'world' },
+  { label: 'Learn More About Caiden Vale', href: 'https://caidenvale.com/', description: 'Enter the world behind the story.', icon: 'vale' },
 ];
 
 /** Kid-facing mega menu — decision-based CREATE / PRACTICE / PLAY. */
@@ -170,7 +175,7 @@ export const GAMES_DROPDOWN: CourageNavLink[] = [
 ];
 
 /** Paths that activate each nav dropdown (includes legacy aliases). */
-export const STORY_NAV_PATHS = [STORY_PATH, STORY_BOOKS_PATH, STORY_CHARACTERS_PATH, '/world', '/mission', '/comicbook', '/characters'];
+export const STORY_NAV_PATHS = [THE_STORY_PATH, STORY_PATH, STORY_BOOKS_PATH, STORY_CHARACTERS_PATH, '/world', '/mission', '/comicbook', '/characters'];
 export const KIDS_NAV_PATHS = [
   BRAVE_MIND_CLUB_PATH,
   BMC_COLORING_PATH,

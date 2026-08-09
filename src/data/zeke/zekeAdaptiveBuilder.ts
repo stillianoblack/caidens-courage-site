@@ -15,16 +15,13 @@ import type {
 } from '../../types/zekeAdaptiveQuest';
 import { ZEKE_ADAPTIVE_COACH } from './zekeCoachCopy';
 import { ZEKE_AVATAR_SRC } from './sharedAssets';
+import { ZEKE_ADAPTIVE_MISSION_REGISTRY } from './zekeAdaptiveRegistry';
 
-export const ZEKE_ADAPTIVE_MISSION_REGISTRY: Record<string, ZekeAdaptiveMissionFile> = {};
-
-export function registerZekeAdaptiveMission(mission: ZekeAdaptiveMissionFile): void {
-  ZEKE_ADAPTIVE_MISSION_REGISTRY[mission.id] = mission;
-}
-
-export function isZekeAdaptiveMissionId(missionId: string): boolean {
-  return missionId in ZEKE_ADAPTIVE_MISSION_REGISTRY;
-}
+export {
+  ZEKE_ADAPTIVE_MISSION_REGISTRY,
+  isZekeAdaptiveMissionId,
+  registerZekeAdaptiveMission,
+} from './zekeAdaptiveRegistry';
 
 const LEGACY_DEFAULT_BAND: ZekeGradeBand = '2-3';
 

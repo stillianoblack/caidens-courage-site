@@ -7,7 +7,7 @@ import { writeKidPlayFamilyReturnBase } from './kidPlayShellRoutes';
 
 export type LaunchFamilyKidPlayResult =
   | { ok: true }
-  | { ok: false; message: string };
+  | { ok: false; message: string; supportCode?: string | null };
 
 /** Resolve/create a family Kid Shell session and navigate to full-screen weekly adventures. */
 export async function launchFamilyKidPlay(input: {
@@ -22,7 +22,7 @@ export async function launchFamilyKidPlay(input: {
 
   const result = await resolveFamilyKidPlayLaunch({ childId });
   if (result.kind === 'error') {
-    return { ok: false, message: result.message };
+    return { ok: false, message: result.message, supportCode: result.supportCode };
   }
 
   setKidPlayFamilySoftLocked(false);

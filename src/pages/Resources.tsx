@@ -305,13 +305,25 @@ const Resources: React.FC = () => {
 
       <SectionHero
         id="resources-header"
+        className="bmc-resourcesHero"
+        variant="compact"
         eyebrow="Brave Mind Club"
         title="Brave Mind Club"
         description="Free activities, coloring pages, B-4 reset tools, and printable adventures for brave minds."
         supportingText="Most resources are free and designed for neurodivergent-friendly learning at home and in the classroom."
+        visual={(
+          <div className="bmc-resourcesHeroGuide">
+            <div className="bmc-resourcesHeroGuideGlow" />
+            <img
+              className="bmc-resourcesHeroB4"
+              src="/images/Choose-Your-Guide/B-4student-hover.webp"
+              alt=""
+            />
+          </div>
+        )}
       />
 
-      <section className="border-b border-navy-100 bg-white py-6">
+      <section className="border-b border-navy-100 bg-white py-4 sm:py-5">
         <div className="cc-site-container mx-auto flex flex-wrap gap-2 px-4 sm:px-6 lg:px-8">
           {BMC_CATEGORIES.map((category) => (
             <Link
@@ -329,7 +341,7 @@ const Resources: React.FC = () => {
       <div 
         id="resources-filters"
         data-section="filters"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
       >
         {/* White Card Container - Filters (hidden when HIDE_FILTERS) */}
         {!HIDE_FILTERS && (
@@ -1043,4 +1055,3 @@ const Resources: React.FC = () => {
 };
 
 export default Resources;
-

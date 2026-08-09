@@ -1,9 +1,10 @@
 const crypto = require('crypto');
+const WebSocket = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
 const ROLE_PERMISSIONS = {
-  internal_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'provider:read', 'provider:write', 'bootstrap:read']),
-  audience_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'provider:read', 'provider:write']),
+  internal_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'provider:read', 'provider:write', 'content:read', 'content:write', 'bootstrap:read']),
+  audience_admin: new Set(['crm:read', 'crm:write', 'organizations:read', 'classification:read', 'activities:read', 'activities:write', 'segments:read', 'segments:evaluate', 'provider:read', 'provider:write', 'content:read', 'content:write']),
   organization_admin: new Set(['crm:read', 'organizations:read', 'activities:read', 'activities:write']),
   read_only_admin: new Set(['crm:read', 'organizations:read', 'classification:read']),
 };
@@ -37,7 +38,7 @@ function getServerSupabase() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    realtime: { enabled: false },
+    realtime: { transport: WebSocket },
   });
 }
 

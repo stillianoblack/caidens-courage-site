@@ -1,0 +1,3 @@
+const crypto=require('crypto');const {getServerSupabase,json}=require('./_lib/crmAuth');const {prepareWeeklySummaries}=require('./_lib/weeklyLearningSummary');
+exports.config={schedule:'0 14 * * 1'};
+exports.handler=async()=>{const id=crypto.randomUUID();if(process.env.WEEKLY_SUMMARY_PREPARATION_ENABLED!=='true')return json(200,{status:'disabled',providerQueued:false},id);const supabase=getServerSupabase();if(!supabase)return json(503,{error:'Summary service unavailable.'},id);try{const result=await prepareWeeklySummaries(supabase);return json(200,{status:'prepared',...result,kitDeliveryEnabled:process.env.WEEKLY_SUMMARY_KIT_DELIVERY_ENABLED==='true'},id);}catch{return json(503,{error:'Weekly summaries could not be prepared.'},id);}};

@@ -18,7 +18,7 @@ export default function AdminManageAccountsTab({ programs, onCopied }: AdminMana
   const families = filtered.filter((program) => Boolean(program.family_access_code));
 
   return (
-    <>
+    <div className="adminPortal-stack">
       <SettingsCard
         title="Manage Accounts"
         subtitle="Search by program code, email, child name, organization, or access code. Admin-only tools — no raw SQL is shown to portal users."
@@ -75,6 +75,6 @@ export default function AdminManageAccountsTab({ programs, onCopied }: AdminMana
       </SettingsCard>
 
       <AdminParticipantReassignment onCopied={onCopied} />
-    </>
+    </div>
   );
 }

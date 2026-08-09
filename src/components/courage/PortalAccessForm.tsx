@@ -1,5 +1,4 @@
-import React, { useId, useRef, useState } from 'react';
-import BrandLogo from '../../design-system/components/BrandLogo';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import Button from '../ui/Button';
 import type { PortalUnlockVariant } from '../../hooks/usePortalUnlock';
 import type { PortalLoginIntent } from '../../config/portalLoginIntent';
@@ -72,7 +71,10 @@ export default function PortalAccessForm({
   const [hideWelcomeBack, setHideWelcomeBack] = useState(false);
   const [hideRememberedResume, setHideRememberedResume] = useState(false);
   const [showRecovery, setShowRecovery] = useState(false);
+  const [selectedIntent, setSelectedIntent] = useState<PortalLoginIntent | null>(null);
+  const [pendingIntent, setPendingIntent] = useState<PortalLoginIntent | null>(null);
   const accessCodeInputRef = useRef<HTMLInputElement>(null);
+  const selectionTimerRef = useRef<number | null>(null);
   const showRememberedResume =
     isHero &&
     Boolean(rememberedSession?.program) &&
@@ -94,9 +96,83 @@ export default function PortalAccessForm({
     PORTAL_LOGIN_INTENTS.find((item) => item.id === portalIntent) ?? PORTAL_LOGIN_INTENTS[0];
   const credentialAutoComplete =
     portalIntent === 'student' ? 'off' : portalIntent === 'facilitator' ? 'email' : 'email';
+  type CharacterGuide = {
+    name: string;
+    label: string;
+    pillLabel: string;
+    description: string;
+    imageSrc: string;
+    hoverImageSrc: string;
+    imageAlt: string;
+    selectedImageSrc?: string;
+  };
+  const guideDisplayOrder: PortalLoginIntent[] = ['student', 'facilitator', 'parent'];
+  const roleCopy: Record<PortalLoginIntent, { title: string; description: string; optionDescription: string; cta: string; guide: CharacterGuide }> = {
+    student: {
+      title: 'Continue Students',
+      description: 'Enter your access information to continue your quests and adventures.',
+      optionDescription: 'Continue the Adventure',
+      cta: 'Enter the World',
+      guide: {
+        name: 'Caiden',
+        label: 'Continue the Adventure',
+        pillLabel: 'Students',
+        description: 'Continue Your Quests, Games, And Weekly Adventures.',
+        imageSrc: '/images/Choose-Your-Guide/B-4student.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4student-hover-bkgrd.webp',
+        imageAlt: 'Student B-4 guide',
+      },
+    },
+    parent: {
+      title: 'Continue as Parent / Guardian',
+      description: 'Access the connected family experience and support your child’s journey.',
+      optionDescription: 'Support the Journey',
+      cta: 'Continue to Family Portal',
+      guide: {
+        name: 'Dr. Victoria',
+        label: 'Support the Journey',
+        pillLabel: 'Parents / Guardians',
+        description: 'Access Family Tools And View Your Child’s Experience.',
+        imageSrc: '/images/Choose-Your-Guide/b-4facilitator.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/b-4facilitator-hover-bkgrd.webp',
+        imageAlt: 'Parent and guardian B-4 guide',
+      },
+    },
+    facilitator: {
+      title: 'Continue as Facilitator',
+      description: 'Access your program tools, students, and learning resources.',
+      optionDescription: 'Guide the Program',
+      cta: 'Open Facilitator Portal',
+      guide: {
+        name: 'Uncle T',
+        label: 'Guide the Program',
+        pillLabel: 'Facilitator',
+        description: 'Students, Activities, And Program Progress.',
+        imageSrc: '/images/Choose-Your-Guide/B-4orange.webp',
+        hoverImageSrc: '/images/Choose-Your-Guide/B-4orange-hover-bkgrd.webp',
+        imageAlt: 'Facilitator B-4 guide',
+      },
+    },
+  };
+
+  useEffect(() => () => {
+    if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+  }, []);
+
+  const chooseGuide = (intent: PortalLoginIntent) => {
+    if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+    setPendingIntent(intent);
+    setShowRecovery(false);
+    onPortalIntentChange?.(intent);
+    selectionTimerRef.current = window.setTimeout(() => {
+      setSelectedIntent(intent);
+      setPendingIntent(null);
+      selectionTimerRef.current = null;
+    }, 260);
+  };
 
   const cardClass = isHero
-    ? 'cc-portal-access-card rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7'
+    ? `cc-portal-access-card ${!selectedIntent ? 'cc-portal-access-card--selector' : 'cc-portal-access-card--form'} rounded-2xl border border-white/10 bg-white p-6 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.45)] sm:p-7`
     : 'cc-portal-access-form--nav';
 
   const handleUseDifferentCode = () => {
@@ -124,62 +200,83 @@ export default function PortalAccessForm({
 
   return (
     <div id={id} className={cardClass}>
-      {isHero && showManualEntry ? (
-        <div className="flex flex-col items-center text-center">
-          <BrandLogo variant="facilitator" size="accessCode" decorative />
-          {cardAudienceLabel ? (
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-navy-500/70">
-              {cardAudienceLabel}
-            </p>
-          ) : null}
-          <h2
-            className={`font-display text-lg font-extrabold text-navy-500 sm:text-xl ${cardAudienceLabel ? 'mt-2' : 'mt-4'}`}
-          >
-            {hasRememberedProgram ? 'Welcome back' : 'Have a Courage Access Code?'}
-          </h2>
-          <p className="mt-1.5 text-sm text-navy-600">
-            {hasRememberedProgram
-              ? portalIntent === 'student'
-                ? 'Enter your student PIN to continue.'
-                : 'Enter your email to continue.'
-              : 'Enter your code to unlock your resources.'}
-          </p>
-        </div>
-      ) : null}
-
-      {showManualEntry && onPortalIntentChange ? (
-        <fieldset className="cc-portal-roleSelector mt-4 space-y-2 border-0 p-0">
-          <legend className="mb-2 block w-full text-left text-sm font-semibold text-navy-600">
-            Who are you? <span className="font-normal text-red-600">*</span>
-          </legend>
-          <div className="grid gap-2" role="radiogroup" aria-label="Who are you?">
-            {PORTAL_LOGIN_INTENTS.map((item) => {
-              const selected = portalIntent === item.id;
+      {isHero && showManualEntry && !selectedIntent && onPortalIntentChange ? (
+        <div className="cc-portal-gateway" data-testid="portal-character-gateway">
+          {cardAudienceLabel ? <p className="cc-portal-gatewayEyebrow">{cardAudienceLabel}</p> : null}
+          <div className="cc-portal-characterOptions" role="group" aria-label="Choose your guide">
+            {guideDisplayOrder.map((intentId) => {
+              const item = PORTAL_LOGIN_INTENTS.find((candidate) => candidate.id === intentId)!;
+              const hoverLabel = intentId === 'student'
+                ? 'Continue Your Adventure'
+                : intentId === 'facilitator'
+                  ? 'Teach the Academy'
+                  : 'Help Young Heroes';
               return (
-                <label
-                  key={item.id}
-                  className={`cc-portal-roleCard flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
-                    selected
-                      ? 'border-golden-500 bg-golden-50 ring-2 ring-golden-500/30'
-                      : 'border-navy-200/80 bg-[#FAF9F7] hover:border-navy-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`${formId}-portal-role`}
-                    className="mt-1"
-                    checked={selected}
-                    onChange={() => onPortalIntentChange(item.id)}
+              <button
+                key={item.id}
+                type="button"
+                className={`cc-portal-characterOption ${pendingIntent === item.id ? 'is-selected' : ''}`}
+                aria-pressed={pendingIntent === item.id}
+                aria-label={`${roleCopy[item.id].guide.name}: ${roleCopy[item.id].guide.label}`}
+                onClick={() => chooseGuide(item.id)}
+              >
+                <span className={`cc-portal-characterPortrait cc-portal-characterPortrait--${item.id}`}>
+                  <img
+                    className="cc-portal-characterImage cc-portal-characterImage--default"
+                    src={roleCopy[item.id].guide.imageSrc}
+                    alt={roleCopy[item.id].guide.imageAlt}
+                    width="320"
+                    height="360"
+                    loading={item.id === 'student' ? 'eager' : 'lazy'}
                   />
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-navy-700">{item.label}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-navy-500">{item.helperText}</span>
+                  <img
+                    className="cc-portal-characterImage cc-portal-characterImage--hover"
+                    src={roleCopy[item.id].guide.hoverImageSrc}
+                    alt=""
+                    width="320"
+                    height="360"
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                  <span className={`cc-portal-characterPill cc-portal-characterPill--${item.id}`}>
+                    <span className="cc-portal-characterPillDefault">{roleCopy[item.id].guide.pillLabel}</span>
+                    <span className="cc-portal-characterPillHover">{hoverLabel}</span>
                   </span>
-                </label>
+                </span>
+                <span className="cc-portal-characterText">
+                  <small>{roleCopy[item.id].guide.description}</small>
+                </span>
+              </button>
               );
             })}
           </div>
-        </fieldset>
+        </div>
+      ) : null}
+
+      {isHero && showManualEntry && selectedIntent ? (
+        <div className="cc-portal-selectedIntro cc-portal-guideIntro" aria-live="polite">
+          <button
+            type="button"
+            className="cc-portal-back"
+            onClick={() => {
+              if (selectionTimerRef.current !== null) window.clearTimeout(selectionTimerRef.current);
+              onPortalIntentChange?.(selectedIntent);
+              setSelectedIntent(null);
+              setPendingIntent(null);
+              setShowRecovery(false);
+            }}
+          >
+            <span aria-hidden="true">←</span> Choose another guide
+          </button>
+          <img
+            className="cc-portal-guideIntroImage"
+            src={roleCopy[selectedIntent].guide.selectedImageSrc ?? roleCopy[selectedIntent].guide.hoverImageSrc}
+            alt=""
+            width="320"
+            height="360"
+          />
+          <p className="cc-portal-guideIntroCaption">{roleCopy[selectedIntent].guide.description}</p>
+        </div>
       ) : null}
 
       {showRememberedResume && rememberedSession ? (
@@ -200,13 +297,25 @@ export default function PortalAccessForm({
         />
       ) : null}
 
-      {showManualEntry ? (
+      {showManualEntry && (!isHero || selectedIntent) ? (
         <form
           className={isHero ? 'mt-5 space-y-3.5' : 'space-y-3'}
           onSubmit={onSubmit}
           noValidate
           aria-describedby={error ? errorId : undefined}
         >
+          {isHero && selectedIntent ? (
+            <div className="cc-portal-formIntro">
+              <h2>{hasRememberedProgram ? 'Welcome back' : roleCopy[selectedIntent].title}</h2>
+              <p>
+                {hasRememberedProgram
+                  ? selectedIntent === 'student'
+                    ? 'Enter your student PIN to continue.'
+                    : 'Enter your email to continue.'
+                  : roleCopy[selectedIntent].description}
+              </p>
+            </div>
+          ) : null}
           {!hideAccessCodeField ? (
             <div>
               <label
@@ -310,7 +419,7 @@ export default function PortalAccessForm({
             className="!w-full"
             disabled={submitting}
           >
-            {submitting ? 'Unlocking…' : isHero ? 'Unlock Portal' : 'Unlock'}
+            {submitting ? 'Unlocking…' : isHero && selectedIntent ? roleCopy[selectedIntent].cta : 'Unlock'}
           </Button>
 
           {hasRememberedProgram ? (
@@ -321,7 +430,7 @@ export default function PortalAccessForm({
         </form>
       ) : null}
 
-      {isHero && showManualEntry && !hasRememberedProgram ? (
+      {isHero && showManualEntry && selectedIntent && !hasRememberedProgram ? (
         <button
           type="button"
           className="portal-forgotCodeLink"
@@ -342,7 +451,7 @@ export default function PortalAccessForm({
 
       {isHero && showRecovery ? <PortalCodeRecovery onClose={() => setShowRecovery(false)} /> : null}
 
-      {isHero && showManualEntry ? (
+      {isHero && showManualEntry && selectedIntent ? (
         <p className="mt-4 text-xs leading-relaxed text-navy-500/80">
           Current access codes are used for pilot testing. Checkout and secure accounts are coming soon.
         </p>

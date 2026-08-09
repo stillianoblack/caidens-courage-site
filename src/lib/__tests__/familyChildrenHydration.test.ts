@@ -126,4 +126,29 @@ describe('family children hydration', () => {
     expect(result.visibleChildren).toHaveLength(0);
     expect(result.allowedStudentIds).toEqual([]);
   });
+
+  test('does not render a synthetic child card for an orphaned relationship', async () => {
+    mockedLinks.mockResolvedValue({
+      links: [
+        {
+          id: 'orphan-link',
+          student_id: 'missing-child',
+          family_program_code: 'FAMILY-GDI-LONDON-Q4M2',
+          camp_program_code: 'CAMP-GDI-2026',
+          parent_email: 'parent@example.com',
+          parent_first_name: null,
+          parent_last_name: null,
+          parent_phone: null,
+          relationship: 'parent',
+          parent_claimed: true,
+          claimed_at: '2026-01-01T00:00:00.000Z',
+          created_at: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    const result = await hydrateExistingFamilyChildren('FAMILY-GDI-LONDON-Q4M2');
+
+    expect(result.visibleChildren).toEqual([]);
+  });
 });

@@ -9,6 +9,7 @@ import {
   resolveB4AssetUrl,
   resolveB4BackgroundLayerUrl,
 } from '../assetKeys';
+import { B4_STATE_KEYS, B4_VARIANT_KEYS, B4_VARIANTS, getB4TextureKey } from '../../../../data/b4/variantManifest';
 
 const createSoftDotTexture = (
   scene: Phaser.Scene,
@@ -81,6 +82,9 @@ export default class PreloadScene extends Phaser.Scene {
       // B-4 sprite sheets once final production animation exports are ready.
       this.load.image(asset.key, 'url' in asset ? asset.url : resolveB4AssetUrl(asset.folder, asset.file));
     });
+    B4_VARIANT_KEYS.forEach((variant) => B4_STATE_KEYS.forEach((state) => {
+      this.load.image(getB4TextureKey(variant, state), B4_VARIANTS[variant].states[state].src);
+    }));
 
     B4_AUDIO_SOURCES.forEach((asset) => {
       this.load.audio(asset.key, resolveB4AudioUrl(asset.file));

@@ -57,6 +57,8 @@ import {
 import type { StudentGalleryItem } from '../../../lib/studentGalleryService';
 import '../../focus-skills/focus-skills-snapshot.css';
 import '../../portal-design-system/portal-design-system.css';
+import DashboardOnboardingCard from '../../onboarding/DashboardOnboardingCard';
+import { useProgramDashboardOnboarding } from '../../../hooks/useDashboardOnboarding';
 
 const RECENT_ACTIVITY_EMPTY =
   'No recent activity yet. Try a short activity with your child to get started.';
@@ -101,6 +103,7 @@ export default function FamilyOverviewPanel() {
   const [rewardClaimResult, setRewardClaimResult] = useState<RewardClaimResult | null>(null);
   const inventoryPath = familyPortalPath('collections', location.pathname);
   const onboarding = useFamilyOnboardingStatus();
+  const dashboardOnboarding = useProgramDashboardOnboarding(programCode ?? '', 'family');
 
   const galleryPendingCount = useMemo(
     () => galleryItems.filter((item) => normalizeGalleryStatus(item.status) === 'pending').length,
@@ -471,6 +474,13 @@ export default function FamilyOverviewPanel() {
 
   return (
     <div className="family-overviewPage">
+      {dashboardOnboarding.visible ? (
+        <DashboardOnboardingCard
+          role="family"
+          busy={dashboardOnboarding.saving}
+          onDismiss={() => void dashboardOnboarding.dismiss()}
+        />
+      ) : null}
       <FamilyWeeklyAdventureCtaBanner />
       <FamilyJourneyCoachInline />
       <div className="family-panel family-panel--overview">

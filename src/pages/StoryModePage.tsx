@@ -1,255 +1,281 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
-import StoryTimeline from '../components/story-mode/StoryTimeline';
-import StoryReader from '../components/story-mode/StoryReader';
-import DialogueCard from '../components/story-mode/DialogueCard';
-import ChoiceCard from '../components/story-mode/ChoiceCard';
 import ChapterCompleteScreen from '../components/story-mode/ChapterCompleteScreen';
-import StoryNarratorCard from '../components/story-mode/StoryNarratorCard';
+import StoryQuestionCard from '../components/story-mode/StoryQuestionCard';
 import {
   completeStoryChapter,
   readStoryProgress,
-  saveStoryChoice,
+  saveStoryQuestionResponse,
   unlockStoryChapter,
   type StoryProgress,
 } from '../components/story-mode/storyProgress';
 import '../components/story-mode/story-mode.css';
 import {
+  DRAGONS_NEST_CAMPAIGN,
   getNextStoryChapter,
+  getQuestionVariant,
   getStoryChapterById,
   getStoryChapterIndex,
+  getStoryQuestionsForChapter,
+  resolveStoryQuestGradeBand,
   STORY_CHAPTERS,
 } from '../data/storyMode';
-import { CAIDEN_QUEST_HUB_PATH, STORY_MODE_PATH } from '../config/courageRoutes';
+import { STORY_MODE_PATH } from '../config/courageRoutes';
+import { useActiveParticipant } from '../hooks/useActiveParticipant';
+import { useKidPlaySession } from '../context/KidPlaySessionContext';
+import { getKidPlayShellRoute, parseKidPlayShellPath } from '../lib/kidPlayShellRoutes';
 
-type StoryStep = 'detail' | 'reader' | 'dialogue' | 'choice' | 'mission' | 'complete';
+type StoryModePageProps = {
+  storyBasePathOverride?: string;
+};
 
-function buildChapterPath(chapterId: string, search = ''): string {
-  return `${STORY_MODE_PATH}/${chapterId}${search}`;
-}
+const QUESTIONS_PER_CHAPTER = 5;
 
-function getStepFromSearch(search: string): StoryStep {
-  const step = new URLSearchParams(search).get('step');
-  if (
-    step === 'reader' ||
-    step === 'dialogue' ||
-    step === 'choice' ||
-    step === 'mission' ||
-    step === 'complete'
-  ) {
-    return step;
-  }
-  return 'detail';
-}
-
-export default function StoryModePage() {
+// Story Quest intentionally routes directly from chapter entry to questions.
+export default function StoryModePage({ storyBasePathOverride }: StoryModePageProps = {}) {
   const { chapterId } = useParams<{ chapterId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const [progress, setProgress] = useState<StoryProgress>(() => readStoryProgress());
-  const [readerIndex, setReaderIndex] = useState(0);
-  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const kidSession = useKidPlaySession();
+  const activeParticipant = useActiveParticipant();
+  const shellContext = parseKidPlayShellPath(location.pathname);
+  const storyBasePath = storyBasePathOverride ?? (shellContext
+    ? `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/story`
+    : STORY_MODE_PATH);
+  const arcadePath = storyBasePath.endsWith('/story') ? storyBasePath.slice(0, -6) : '/kids/games';
+  const participantId = activeParticipant.participantId || kidSession?.session.child_id || '';
+  const isPreview = Boolean(storyBasePathOverride);
+  const progressScope = participantId || kidSession?.sessionId || 'guest';
+  const rosterGrade = activeParticipant.roster.find((entry) => entry.participantId === participantId)?.gradeLevel;
+  const sessionGrade = String(kidSession?.session.resume_payload?.participant_grade_level ?? '').trim();
+  const gradeBand = resolveStoryQuestGradeBand(rosterGrade || sessionGrade || null);
+  const [progress, setProgress] = useState<StoryProgress>(() => readStoryProgress(progressScope));
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [feedback, setFeedback] = useState<'correct' | 'hint' | null>(null);
+  const [complete, setComplete] = useState(false);
+  const [chaptersOpen, setChaptersOpen] = useState(false);
+  const [runCorrectQuestionIds, setRunCorrectQuestionIds] = useState<Set<string>>(() => new Set());
 
   const chapter = getStoryChapterById(chapterId);
-  const step = getStepFromSearch(location.search);
-  const selectedChoice = chapter?.choice ? progress.choices[chapter.choice.id] : undefined;
+  const questions = useMemo(() => {
+    if (!chapter) return [];
+    const chapterQuestions = getStoryQuestionsForChapter(chapter.id);
+    return isPreview
+      ? chapterQuestions
+      : chapterQuestions.filter((question) => question.contentStatus === 'playable');
+  }, [chapter, isPreview]);
+  const currentQuestion = questions[questionIndex];
+  const storedVariant = currentQuestion ? getQuestionVariant(currentQuestion, gradeBand) : null;
+  const currentVariant = currentQuestion?.contentStatus === 'needs_canon_detail' && isPreview
+    ? {
+      prompt: storedVariant?.prompt ?? 'Story question',
+      answers: ['Preview selection A', 'Preview selection B', 'Preview selection C', 'Preview selection D'],
+      correctAnswer: 'Preview selection A',
+      hint: 'Preview access: choose another selection to test the retry state.',
+      b4Feedback: 'Preview access: this question slot and progression are working. Final story answers still need canon approval.',
+    }
+    : storedVariant;
   const nextChapter = getNextStoryChapter(chapter?.id);
+  const nextChapterHasQuestions = nextChapter
+    ? getStoryQuestionsForChapter(nextChapter.id).some((question) => question.contentStatus === 'playable')
+    : false;
+  const firstPlayableChapter = STORY_CHAPTERS.find((item) =>
+    getStoryQuestionsForChapter(item.id).some((question) => question.contentStatus === 'playable')) ?? STORY_CHAPTERS[0];
+  const currentPlayableChapter = getStoryChapterById(progress.lastUnlockedChapterId)
+    && getStoryQuestionsForChapter(progress.lastUnlockedChapterId).some((question) => question.contentStatus === 'playable')
+    ? getStoryChapterById(progress.lastUnlockedChapterId)!
+    : firstPlayableChapter;
 
-  const lastUnlockedChapter = useMemo(
-    () => getStoryChapterById(progress.lastUnlockedChapterId) ?? STORY_CHAPTERS[0],
-    [progress.lastUnlockedChapterId],
-  );
-
+  useEffect(() => { document.title = "The Dragon's Nest Story Quest | Caiden's Courage"; }, []);
   useEffect(() => {
-    document.title = "Story Mode | Caiden's Courage";
-  }, []);
+    setProgress(readStoryProgress(progressScope));
+    setQuestionIndex(0);
+    setSelectedAnswer(null);
+    setAttempts(0);
+    setFeedback(null);
+    setComplete(false);
+    setChaptersOpen(false);
+    setRunCorrectQuestionIds(new Set());
+  }, [chapterId, progressScope]);
 
-  useEffect(() => {
-    setProgress(readStoryProgress());
-    setReaderIndex(0);
-    setDialogueIndex(0);
-  }, [chapterId]);
+  const buildChapterPath = (id: string) => `${storyBasePath}/${id}`;
 
-  if (!chapterId) {
-    const continueHref = lastUnlockedChapter
-      ? buildChapterPath(lastUnlockedChapter.id, '?step=detail')
-      : STORY_MODE_PATH;
-
-    return (
-      <main className="storyModePage">
-        <div className="storyModeShell">
-          <header className="storyModeHero">
-            <div>
-              <span>Story Mode</span>
-              <h1>Caiden's Courage Campaign</h1>
-              <p>
-                Step into Caiden's world, follow each scene, and begin the mission when
-                the Focus Flame is ready.
-              </p>
-            </div>
-            <StoryNarratorCard message="I will guide the journey. Watch the scene, listen for the focus clue, then choose the next brave step." />
-            <Link to={continueHref}>Continue Journey</Link>
-          </header>
-          <StoryTimeline
-            chapters={STORY_CHAPTERS}
-            progress={progress}
-            buildChapterHref={(id) => buildChapterPath(id)}
-          />
-        </div>
-      </main>
-    );
-  }
-
-  if (!chapter) {
-    return <Navigate to={STORY_MODE_PATH} replace />;
-  }
+  if (!chapterId) return <Navigate to={buildChapterPath(currentPlayableChapter.id)} replace />;
+  if (!chapter) return <Navigate to={buildChapterPath(firstPlayableChapter.id)} replace />;
 
   const chapterIndex = getStoryChapterIndex(chapter.id);
   const unlockedIndex = getStoryChapterIndex(progress.lastUnlockedChapterId);
+  if (!isPreview && chapterIndex > unlockedIndex) return <Navigate to={storyBasePath} replace />;
+  if (questions.length === 0) return <Navigate to={buildChapterPath(firstPlayableChapter.id)} replace />;
 
-  if (chapterIndex > unlockedIndex) {
-    return <Navigate to={STORY_MODE_PATH} replace />;
-  }
-
-  const goToStep = (nextStep: StoryStep) => {
-    navigate(`${buildChapterPath(chapter.id)}?step=${nextStep}`);
+  const resetQuestionFeedback = () => {
+    setSelectedAnswer(null);
+    setAttempts(0);
+    setFeedback(null);
   };
 
-  const handleReaderContinue = () => {
-    if (readerIndex < chapter.comicPanels.length - 1) {
-      setReaderIndex((current) => current + 1);
-      return;
+  const handleAnswer = (answer: string) => {
+    if (!currentQuestion || !currentVariant || feedback === 'correct') return;
+    const nextAttempts = attempts + 1;
+    const correct = answer === currentVariant.correctAnswer;
+    setSelectedAnswer(answer);
+    setAttempts(nextAttempts);
+    setFeedback(correct ? 'correct' : 'hint');
+    const updated = saveStoryQuestionResponse(progress, {
+      questionId: currentQuestion.id,
+      chapterId: chapter.id,
+      category: currentQuestion.category,
+      gradeBand,
+      selectedAnswer: answer,
+      correct,
+      attempts: nextAttempts,
+      answeredAt: new Date().toISOString(),
+    }, correct, progressScope);
+    setProgress(updated);
+    if (correct) {
+      setRunCorrectQuestionIds((current) => {
+        const next = new Set(current);
+        next.add(currentQuestion.id);
+        return next;
+      });
     }
-    goToStep('dialogue');
+    kidSession?.touchResume({
+      storyQuest: {
+        campaignId: DRAGONS_NEST_CAMPAIGN.id,
+        chapterId: chapter.id,
+        questionId: currentQuestion.id,
+        correct,
+        attempts: nextAttempts,
+      },
+    });
   };
 
-  const handleDialogueContinue = () => {
-    if (dialogueIndex < chapter.dialogue.length - 1) {
-      setDialogueIndex((current) => current + 1);
-      return;
-    }
-    goToStep('choice');
-  };
-
-  const handleChoiceSelect = (option: string) => {
-    setProgress((current) => saveStoryChoice(current, chapter.choice.id, option));
-  };
-
-  const handleComplete = () => {
-    const completed = completeStoryChapter(progress, chapter.id, nextChapter?.id);
-    const unlocked = nextChapter ? unlockStoryChapter(completed, nextChapter.id) : completed;
+  const finishChapter = () => {
+    const nextPlayableChapterId = nextChapter && nextChapterHasQuestions ? nextChapter.id : undefined;
+    const completed = completeStoryChapter(progress, chapter.id, nextPlayableChapterId, progressScope);
+    const unlocked = nextPlayableChapterId
+      ? unlockStoryChapter(completed, nextPlayableChapterId, progressScope)
+      : completed;
     setProgress(unlocked);
-    goToStep('complete');
+    setComplete(true);
+    kidSession?.touchResume({
+      storyQuestCompletion: {
+        campaignId: DRAGONS_NEST_CAMPAIGN.id,
+        chapterId: chapter.id,
+        totalCorrect: runCorrectQuestionIds.size,
+        totalQuestions: questions.length,
+        completedAt: new Date().toISOString(),
+      },
+    });
   };
 
-  const missionHref = `${CAIDEN_QUEST_HUB_PATH}/${chapter.missionId}`;
+  const handleQuestionContinue = () => {
+    if (questionIndex < questions.length - 1) {
+      setQuestionIndex((value) => value + 1);
+      resetQuestionFeedback();
+      return;
+    }
+    if (questions.length === QUESTIONS_PER_CHAPTER) {
+      finishChapter();
+      return;
+    }
+    navigate(arcadePath);
+  };
+
+  const correctCount = runCorrectQuestionIds.size;
+  const sparks = runCorrectQuestionIds.size;
 
   return (
-    <main className="storyModePage">
-      <div className="storyModeShell">
-        <header className="storyModeHero">
+    <main className="storyModePage storyModePage--game">
+      <div className="storyModeShell storyModeShell--game">
+        <header className="storyModeHero storyModeHero--compact">
           <div>
             <span>Chapter {chapterIndex + 1}</span>
             <h1>{chapter.title}</h1>
-            <p>{chapter.description}</p>
           </div>
-          <Link to={STORY_MODE_PATH}>Timeline</Link>
+          <div className="storyModeHero__actions">
+            <Link to={arcadePath}>Back to Arcade</Link>
+            <button type="button" onClick={() => setChaptersOpen(true)}>Chapters</button>
+          </div>
         </header>
 
-        {step === 'detail' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="Welcome back, hero. This chapter opens a new Focus Flame path. Look for what matters first." />
-            <section className="storyChapterDetail">
-              <img src={chapter.coverImage} alt="" />
-              <div>
-                <h1>{chapter.title}</h1>
-                <p>{chapter.description}</p>
-                <div className="storyChapterDetail__actions">
-                  <Link to={`${buildChapterPath(chapter.id)}?step=reader`}>Enter Scene</Link>
-                  <Link to={STORY_MODE_PATH}>Back to Timeline</Link>
-                </div>
-              </div>
+        {chaptersOpen ? (
+          <div className="storyChapterSelector" role="dialog" aria-modal="true" aria-labelledby="story-chapters-title">
+            <button className="storyChapterSelector__backdrop" type="button" aria-label="Close chapters" onClick={() => setChaptersOpen(false)} />
+            <section className="storyChapterSelector__panel">
+              <header>
+                <div><span>{isPreview ? 'Preview access' : 'Story Quest'}</span><h2 id="story-chapters-title">Story Chapters</h2></div>
+                <button type="button" aria-label="Close chapters" onClick={() => setChaptersOpen(false)}>×</button>
+              </header>
+              <ol>
+                {STORY_CHAPTERS.map((storyChapter, index) => {
+                  const completed = progress.completedChapterIds.includes(storyChapter.id);
+                  const current = storyChapter.id === progress.lastUnlockedChapterId;
+                  const locked = !completed && !current && index > unlockedIndex;
+                  const status = completed ? 'Complete' : current ? 'Current' : 'Locked';
+                  const canOpen = isPreview || completed || current || !locked;
+                  return (
+                    <li key={storyChapter.id}>
+                      {canOpen ? (
+                        <Link to={buildChapterPath(storyChapter.id)} onClick={() => setChaptersOpen(false)}>
+                          <span>{String(index + 1).padStart(2, '0')}</span>
+                          <strong>{storyChapter.title}</strong>
+                          <small>{status}</small>
+                        </Link>
+                      ) : (
+                        <div aria-disabled="true">
+                          <span>{String(index + 1).padStart(2, '0')}</span>
+                          <strong>{storyChapter.title}</strong>
+                          <small>{status}</small>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
             </section>
           </div>
         ) : null}
 
-        {step === 'reader' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="Read the scene like a clue map. The right next step is hiding in what Caiden notices." />
-            <StoryReader
-              panel={chapter.comicPanels[readerIndex] ?? chapter.comicPanels[0]}
-              currentStep={readerIndex + 1}
-              totalSteps={chapter.comicPanels.length}
-              onContinue={handleReaderContinue}
-            />
-          </div>
-        ) : null}
-
-        {step === 'dialogue' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="Character signals can point to feelings, plans, and brave choices. Listen for the focus clue." />
-            <DialogueCard
-              line={chapter.dialogue[dialogueIndex] ?? chapter.dialogue[0]}
-              onContinue={handleDialogueContinue}
-            />
-          </div>
-        ) : null}
-
-        {step === 'choice' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="Focus Flame prompt: choose the option that helps Caiden take the next brave step." />
-            <ChoiceCard
-              choice={chapter.choice}
-              selectedOption={selectedChoice}
-              onSelect={handleChoiceSelect}
-              onContinue={() => goToStep('mission')}
-            />
-          </div>
-        ) : null}
-
-        {step === 'mission' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="It's your turn now. Carry the Focus Flame into the mission." />
-            <section className="storyMissionGate">
-              <span>Mission Ready</span>
-              <h2>{chapter.title}</h2>
-              <p>
-                The scene opens into Caiden's existing quest flow. Complete the mission,
-                then return here to close the chapter and unlock the next path.
-              </p>
-              <div className="storyMissionGate__meta">
-                <div>
-                  <strong>Mission</strong>
-                  {chapter.missionId}
-                </div>
-                <div>
-                  <strong>Reflection</strong>
-                  {chapter.reflectionId}
-                </div>
-                <div>
-                  <strong>Reward</strong>
-                  {chapter.rewardId}
-                </div>
-              </div>
-              <div className="storyMissionGate__actions">
-                <Link to={missionHref}>Begin Mission</Link>
-                <button type="button" onClick={handleComplete}>
-                  Mark Chapter Complete
-                </button>
-              </div>
-            </section>
-          </div>
-        ) : null}
-
-        {step === 'complete' ? (
-          <div className="storyModeStage">
-            <StoryNarratorCard message="Nice work. The next chapter glows brighter because you kept moving." />
-            <ChapterCompleteScreen
-              chapter={chapter}
-              timelineHref={STORY_MODE_PATH}
-              nextChapterHref={nextChapter ? buildChapterPath(nextChapter.id) : undefined}
-            />
-          </div>
+        {complete ? (
+          <ChapterCompleteScreen
+            chapter={chapter}
+            nextChapterHref={nextChapter && nextChapterHasQuestions
+              ? buildChapterPath(nextChapter.id)
+              : undefined}
+            arcadeHref={arcadePath}
+            chapterNumber={chapterIndex + 1}
+            correctCount={correctCount}
+            totalQuestions={QUESTIONS_PER_CHAPTER}
+            message={chapter.id === 'chapter-2'
+              ? 'Nice work. You remembered how Caiden kept moving even when he wasn’t sure what was waiting for him.'
+              : undefined}
+          />
+        ) : currentQuestion && currentVariant ? (
+          <section className="storyQuestionGame" aria-label={`Question ${questionIndex + 1} of ${QUESTIONS_PER_CHAPTER}`}>
+            <div className="storyQuestionGame__companion" aria-hidden="true">
+              <img src="/images/Choose-Your-Guide/B-4student-hover.webp" alt="" />
+            </div>
+            <div className="storyQuestionGame__content">
+              <StoryQuestionCard
+                question={currentQuestion}
+                variant={currentVariant}
+                questionNumber={questionIndex + 1}
+                selectedAnswer={selectedAnswer}
+                attempts={attempts}
+                feedback={feedback}
+                sparkCount={sparks}
+                totalSparks={QUESTIONS_PER_CHAPTER}
+                onSelect={handleAnswer}
+                onContinue={handleQuestionContinue}
+                continueLabel={questionIndex === questions.length - 1
+                  ? questions.length === QUESTIONS_PER_CHAPTER ? 'Complete Chapter' : 'Back to Arcade'
+                  : 'Next Question'}
+              />
+            </div>
+          </section>
         ) : null}
       </div>
     </main>

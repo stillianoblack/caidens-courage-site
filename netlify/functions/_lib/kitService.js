@@ -11,7 +11,9 @@ function normalizeEmail(value) {
 }
 
 function getKitBaseUrl() {
-  return (process.env.KIT_API_BASE_URL || DEFAULT_KIT_BASE_URL).replace(/\/+$/, '');
+  return (process.env.KIT_API_BASE_URL || DEFAULT_KIT_BASE_URL)
+    .replace(/\/+$/, '')
+    .replace(/\/v4$/i, '');
 }
 
 function isKitEnabled() {

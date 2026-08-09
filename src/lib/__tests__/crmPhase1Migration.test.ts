@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const migrationPath = path.resolve(process.cwd(), 'supabase/migrations/20260711_audience_crm_phase1_foundation.sql');
+const migrationPath = path.resolve(process.cwd(), 'supabase/migrations/20260711000100_audience_crm_phase1_foundation.sql');
 
 describe('CRM Phase 1 additive migration', () => {
   const sql = fs.readFileSync(migrationPath, 'utf8');

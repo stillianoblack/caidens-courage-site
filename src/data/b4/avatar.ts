@@ -1,2 +1,4 @@
-/** Canonical B-4 avatar for portal games, cards, and assessments. */
-export const B4_AVATAR_SRC = '/images/characters/b-4_photo_icon_game.webp';
+import { getB4Asset } from './variantManifest';
+
+/** Canonical default B-4 avatar for legacy surfaces. Participant-aware surfaces use the manifest directly. */
+export const B4_AVATAR_SRC = getB4Asset('courage', 'idle');

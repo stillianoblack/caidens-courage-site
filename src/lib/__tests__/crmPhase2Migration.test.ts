@@ -1,6 +1,6 @@
 import fs from 'fs'; import path from 'path';
 describe('CRM Phase 2 migration safety', () => {
-  const sql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/migrations/20260711_audience_crm_phase2_workflows.sql'), 'utf8');
+  const sql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/migrations/20260711000200_audience_crm_phase2_workflows.sql'), 'utf8');
   const executable = sql.replace(/--.*$/gm, '');
   test('is additive and default-deny', () => {
     expect(executable).not.toMatch(/\b(drop|truncate|delete)\b/i);

@@ -17,7 +17,7 @@
 --   function when it literally equals CAMP-BLUERIBBON-2026.
 --
 -- Prerequisite:
--- - Run 20260628_pilot_program_code_transaction.sql first.
+-- - Run 20260628000100_pilot_program_code_transaction.sql first.
 
 do $$
 declare

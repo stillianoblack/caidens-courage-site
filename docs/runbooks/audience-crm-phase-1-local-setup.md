@@ -4,7 +4,7 @@
 
 Use only an isolated local/test Supabase project. Confirm its project reference is not production before running any SQL. This implementation did not connect to or migrate a database.
 
-1. Apply `supabase/migrations/20260711_audience_crm_phase1_foundation.sql` in the isolated project.
+1. Apply `supabase/migrations/20260711000100_audience_crm_phase1_foundation.sql` in the isolated project.
 2. Set server-only Supabase URL/service-role variables in the local Netlify runtime.
 3. Set `AUDIENCE_CRM_READ_ENABLED=true`, `AUDIENCE_ORGANIZATIONS_ENABLED=true`, and optionally `AUDIENCE_CLASSIFICATION_PREVIEW_ENABLED=true`.
 4. Set `CRM_PSEUDONYM_SALT` to a local secret.

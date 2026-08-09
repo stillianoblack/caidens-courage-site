@@ -1,14 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import GameCard from './GameCard';
 import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { getKidPlayShellRoute, parseKidPlayShellPath } from '../../lib/kidPlayShellRoutes';
 import {
   clearB4FocusFlightHighlight,
+  getParticipantB4FlightStorageKey,
   getB4FocusFlightUnlockState,
   markB4FocusFlightArcadeVisited,
 } from '../../lib/b4FocusFlightUnlock';
 import './kid-arcade.css';
+import { useActiveParticipant } from '../../hooks/useActiveParticipant';
+import { useB4Variant } from '../../hooks/useB4Variant';
+import { getB4Asset } from '../../data/b4/variantManifest';
+import { readStoryProgress } from '../story-mode/storyProgress';
 
 const B4_BEST_SCORE_KEY = 'b4-focus-flight:best-score';
 const B4_LEVEL_1_COMPLETE_KEY = 'b4-focus-flight:level-1-complete';
@@ -24,7 +29,17 @@ const readFlag = (key: string): boolean => {
   return window.localStorage.getItem(key) === 'true';
 };
 
-export default function KidArcadePanel() {
+type KidArcadePanelProps = {
+  storyQuestPathOverride?: string;
+  b4GamePathOverride?: string;
+};
+
+export default function KidArcadePanel({
+  storyQuestPathOverride,
+  b4GamePathOverride,
+}: KidArcadePanelProps = {}) {
+  const { participantId } = useActiveParticipant();
+  const { variant } = useB4Variant(participantId);
   const navigate = useNavigate();
   const location = useLocation();
   const shellContext = parseKidPlayShellPath(location.pathname);
@@ -33,19 +48,24 @@ export default function KidArcadePanel() {
   const [highlightB4Card, setHighlightB4Card] = useState(false);
   const [showB4NewPill, setShowB4NewPill] = useState(false);
   const launchB4FromUnlock = new URLSearchParams(location.search).get('launch') === 'b4-focus-flight';
+  const storyProgress = readStoryProgress(participantId || 'guest');
 
   const b4GamePath = useMemo(() => {
+    if (b4GamePathOverride) return b4GamePathOverride;
     if (!shellContext) return '/kids/games/b4-focus-flight';
     return `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/b4-focus-flight`;
-  }, [shellContext]);
+  }, [b4GamePathOverride, shellContext]);
+  const storyQuestPath = storyQuestPathOverride ?? (shellContext
+    ? `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/story`
+    : '/story-mode');
 
   useEffect(() => {
-    setBestScore(readNumber(B4_BEST_SCORE_KEY));
-    setLevelComplete(readFlag(B4_LEVEL_1_COMPLETE_KEY));
-    const unlockState = getB4FocusFlightUnlockState();
+    setBestScore(readNumber(getParticipantB4FlightStorageKey(B4_BEST_SCORE_KEY, participantId)));
+    setLevelComplete(readFlag(getParticipantB4FlightStorageKey(B4_LEVEL_1_COMPLETE_KEY, participantId)));
+    const unlockState = getB4FocusFlightUnlockState(participantId);
     setHighlightB4Card(unlockState.shouldHighlightCard || launchB4FromUnlock);
     setShowB4NewPill(unlockState.unlocked && !unlockState.played);
-    markB4FocusFlightArcadeVisited();
+    markB4FocusFlightArcadeVisited(participantId);
 
     if (launchB4FromUnlock) {
       const launchTimer = window.setTimeout(
@@ -58,12 +78,12 @@ export default function KidArcadePanel() {
     if (unlockState.shouldHighlightCard) {
       const timer = window.setTimeout(() => {
         setHighlightB4Card(false);
-        clearB4FocusFlightHighlight();
+        clearB4FocusFlightHighlight(participantId);
       }, 4200);
       return () => window.clearTimeout(timer);
     }
     return undefined;
-  }, [b4GamePath, launchB4FromUnlock, navigate]);
+  }, [b4GamePath, launchB4FromUnlock, navigate, participantId]);
 
   // TODO(progress): Unlock B-4 after Week 1 completion, unlock Level 2 after
   // Level 1 completion, and unlock Dragon Flight after Week 3 once profile
@@ -75,6 +95,30 @@ export default function KidArcadePanel() {
         <p className="kidArcadeSubtitle">Choose your courage game</p>
       </header>
 
+      <section className="kidArcadeFeatured" aria-labelledby="kid-arcade-featured-title">
+        <p className="kidArcadeSectionLabel">Featured Story Experience</p>
+        <article className="kidArcadeStoryQuestCard">
+          <div className="kidArcadeStoryQuestCard__copy">
+            <span>Story Quest</span>
+            <p id="kid-arcade-featured-title" className="kidArcadeStoryQuestCard__brand">Caiden Vale and the Focus Flame</p>
+            <p>Play through Caiden’s adventure, follow the clues, and strengthen your Focus Flame.</p>
+            <div className="kidArcadeStoryQuestCard__meta">
+              <span>6 Chapters</span><span>Story + Focus + Courage</span>
+              <span>{storyProgress.completedChapterIds.length} Complete</span>
+            </div>
+            {storyQuestPathOverride ? (
+              <Link className="kidArcadeStoryQuestCard__cta" to={storyQuestPath}>Enter Story</Link>
+            ) : (
+              <button type="button" onClick={() => kidPlayShellNavigate(navigate, storyQuestPath)}>Enter Story</button>
+            )}
+          </div>
+          <div className="kidArcadeStoryQuestCard__book" aria-hidden="true">
+            <img src="/images/Caiden-vale-book/caidenvale_book_hero.webp" alt="" />
+          </div>
+        </article>
+      </section>
+
+      <p className="kidArcadeSectionLabel kidArcadeSectionLabel--games">Courage Games</p>
       <div className="kidArcadeGrid" role="list">
         <GameCard
           title="B-4 Focus Flight"
@@ -83,7 +127,7 @@ export default function KidArcadePanel() {
           bestScore={bestScore}
           ctaLabel="Play"
           variant="blue"
-          thumbnailSrc="/images/B-4FlightGame/Idle/Idle@2x-transparent.png"
+          thumbnailSrc={getB4Asset(variant, 'idle')}
           newTraining={showB4NewPill}
           highlight={highlightB4Card}
           onPlay={() => kidPlayShellNavigate(navigate, b4GamePath)}

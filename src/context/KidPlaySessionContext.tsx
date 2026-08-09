@@ -19,13 +19,16 @@ const KidPlaySessionContext = createContext<KidPlaySessionContextValue | null>(n
 
 export function KidPlaySessionProvider({
   session,
+  persistActivity = true,
   children,
 }: {
   session: KidPlaySessionRow;
+  persistActivity?: boolean;
   children: ReactNode;
 }) {
   const touchResume = useCallback(
     (patch: Record<string, unknown>) => {
+      if (!persistActivity) return;
       void updateKidPlaySessionActivity(session.id, {
         ...(session.resume_payload ?? {}),
         ...patch,
@@ -33,7 +36,7 @@ export function KidPlaySessionProvider({
         updatedAt: new Date().toISOString(),
       });
     },
-    [session.id, session.resume_payload],
+    [persistActivity, session.id, session.resume_payload],
   );
 
   const value = useMemo<KidPlaySessionContextValue>(

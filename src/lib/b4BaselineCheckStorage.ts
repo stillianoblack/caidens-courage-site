@@ -175,6 +175,54 @@ export function loadB4BaselineState(participantId?: string): B4BaselinePersisted
   }
 }
 
+export function recoverCompletedBaselineStateForParticipant(input: {
+  participantId: string;
+  displayName: string;
+}): B4BaselinePersistedState | null {
+  if (typeof window === 'undefined') return null;
+  const participantId = input.participantId.trim();
+  const displayName = input.displayName.trim().toLocaleLowerCase();
+  if (!participantId || !displayName) return null;
+
+  const current = loadB4BaselineState(participantId);
+  if (hasAllBaselineModules(current.completedModules) && current.record?.completedAt) {
+    return current;
+  }
+
+  const candidates: B4BaselinePersistedState[] = [];
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(`${STORAGE_KEY_PREFIX}:`)) continue;
+    const sourceParticipantId = key.slice(STORAGE_KEY_PREFIX.length + 1).trim();
+    if (!sourceParticipantId || sourceParticipantId === participantId) continue;
+    const state = loadB4BaselineState(sourceParticipantId);
+    const candidateName = (state.record?.nickname || state.profile?.nickname || '')
+      .trim()
+      .toLocaleLowerCase();
+    if (
+      candidateName === displayName &&
+      hasAllBaselineModules(state.completedModules) &&
+      state.record?.completedAt
+    ) {
+      candidates.push(state);
+    }
+  }
+
+  if (candidates.length !== 1) return null;
+  const candidate = candidates[0];
+  const recovered: B4BaselinePersistedState = {
+    ...candidate,
+    profile: candidate.profile
+      ? { ...candidate.profile, participantId, nickname: input.displayName.trim() }
+      : null,
+    record: candidate.record
+      ? { ...candidate.record, participantId, nickname: input.displayName.trim() }
+      : null,
+  };
+  saveB4BaselineState(recovered, participantId);
+  return recovered;
+}
+
 export function saveB4BaselineState(
   state: B4BaselinePersistedState,
   participantId?: string,

@@ -20,6 +20,7 @@ import {
   parseWeekNumberFromPayload,
   resolveWeekMissionsTotal,
 } from './weekBadgeProgression';
+import { recordAchievementFromProof } from './achievementEvents';
 
 async function readWeekMissionIds(participantId: string, weekId: string): Promise<string[]> {
   if (!supabase) return [];
@@ -300,6 +301,10 @@ export async function completeMissionWithSupabase(
         });
       }
       throw progressError;
+    }
+
+    if (progressData?.id) {
+      recordAchievementFromProof('player_progress', progressData.id as string);
     }
 
     const completedMissionIds = Array.from(

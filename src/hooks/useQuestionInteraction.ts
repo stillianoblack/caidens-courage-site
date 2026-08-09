@@ -11,7 +11,7 @@ export type UseQuestionInteractionOptions = {
   isAnswerComplete: (answer: GameAnswerValue) => boolean;
   isAnswerCorrect: (answer: GameAnswerValue) => boolean;
   getCorrectFeedback: () => string;
-  getIncorrectFeedback: () => string;
+  getIncorrectFeedback: (answer: GameAnswerValue) => string;
   explainMore?: string;
 };
 
@@ -113,7 +113,7 @@ export function useQuestionInteraction(
 
     setAttemptsCount(nextAttempts);
     setChecked(true);
-    setFeedback(correct ? getCorrectFeedback() : getIncorrectFeedback());
+    setFeedback(correct ? getCorrectFeedback() : getIncorrectFeedback(answer));
     setFeedbackTone(correct ? 'success' : 'try');
   }, [
     answer,

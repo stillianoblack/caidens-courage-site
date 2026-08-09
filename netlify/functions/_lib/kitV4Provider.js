@@ -19,7 +19,9 @@ function cleanError(payload, status) {
 class KitV4Provider {
   constructor(options = {}) {
     this.apiKey = options.apiKey || process.env.KIT_API_KEY;
-    this.baseUrl = (options.baseUrl || process.env.KIT_API_BASE_URL || BASE_URL).replace(/\/+$/, '');
+    this.baseUrl = (options.baseUrl || process.env.KIT_API_BASE_URL || BASE_URL)
+      .replace(/\/+$/, '')
+      .replace(/\/v4$/i, '');
     this.fetch = options.fetch || global.fetch;
   }
   listCapabilities() { return { ...CAPABILITIES }; }

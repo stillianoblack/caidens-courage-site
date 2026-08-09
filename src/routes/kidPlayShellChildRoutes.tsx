@@ -3,6 +3,8 @@ import { Navigate, Route } from 'react-router-dom';
 import FamilyContinueLearningPanel from '../components/family-portal/panels/FamilyContinueLearningPanel';
 import FamilyInventoryPanel from '../components/family-portal/panels/FamilyInventoryPanel';
 import FamilyCharacterProfilePage from '../components/family-portal/panels/FamilyCharacterProfilePage';
+import StoryModePage from '../pages/StoryModePage';
+// Story Quest chapter routes open directly into questions.
 import {
   B4FocusFlightPage,
   B4PortalCheckInPage,
@@ -23,6 +25,7 @@ import KidPlayShellComingSoonPanel from '../components/kid-play-shell/KidPlayShe
 import KidPlayCharacterCollectionPanel from '../components/kid-play-shell/KidPlayCharacterCollectionPanel';
 import KidArcadePanel from '../components/kid-play-shell/KidArcadePanel';
 import KidPlayShellPage from '../components/kid-play-shell/KidPlayShellPage';
+import QuestionBankRoute from '../components/learning/QuestionBankRoute';
 
 /** Nested kid play shell routes — missions stay under /play/session/:id/kids/... */
 export const kidPlayShellChildRoutes = (
@@ -38,6 +41,7 @@ export const kidPlayShellChildRoutes = (
       }
     />
     <Route path="inventory" element={<Navigate to="../collections" replace />} />
+    <Route path="learning-check/:weekNumber" element={<KidPlayShellPage><QuestionBankRoute /></KidPlayShellPage>} />
     <Route path="characters">
       <Route
         index
@@ -59,6 +63,8 @@ export const kidPlayShellChildRoutes = (
         }
       />
       <Route path="b4-focus-flight" element={<B4FocusFlightPage />} />
+      <Route path="story" element={<StoryModePage />} />
+      <Route path="story/:chapterId" element={<StoryModePage />} />
     </Route>
     <Route
       path="rewards"

@@ -11,6 +11,14 @@ describe('Kit v4 adapter contract', () => {
     expect(calls[0][0]).toContain('/v4/subscribers'); expect(calls[0][0]).toContain('after=cursor');
     expect(calls[0][1].headers['X-Kit-Api-Key']).toBe('server-secret'); expect(JSON.stringify(result)).not.toContain('server-secret'); expect(result.nextCursor).toBe('next');
   });
+
+  test('normalizes a configured base URL that already ends in v4', async () => {
+    const fetch = jest.fn(async (..._args: any[]) => response({ subscribers: [], pagination: {} }));
+    const provider = new KitV4Provider({ apiKey: 'server-secret', baseUrl: 'https://api.kit.com/v4/', fetch });
+    await provider.listSubscribers({ limit: 1 });
+    expect(fetch.mock.calls[0][0]).toMatch(/^https:\/\/api\.kit\.com\/v4\/subscribers\?/);
+    expect(fetch.mock.calls[0][0]).not.toContain('/v4/v4/');
+  });
   test('upsert refuses missing consent and sends adult allowlist only', async () => {
     const fetch = jest.fn(async (_url, options) => response({ subscriber: { id: 9, state: 'active' } })); const provider = new KitV4Provider({ apiKey: 'key', fetch });
     await expect(provider.upsertContact({ email: 'adult@example.com' })).rejects.toMatchObject({ code: 'consent_required' });

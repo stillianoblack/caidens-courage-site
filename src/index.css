@@ -8183,6 +8183,107 @@ a.ffl-ctaSecondary {
   font-size: clamp(2.25rem, 5.2vw, 4.5rem);
 }
 
+.cc-section-hero--with-visual .cc-section-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+
+.cc-section-hero-visual {
+  position: relative;
+  min-width: 0;
+}
+
+/* Brave Mind Club resource hero — compact, kid-facing Student B-4 composition. */
+.bmc-resourcesHero.cc-section-hero--courage {
+  min-height: 21rem;
+  padding-bottom: 2rem;
+}
+
+.bmc-resourcesHero .cc-section-hero-copy {
+  max-width: 46rem;
+}
+
+.bmc-resourcesHero .cc-section-hero-inner {
+  max-width: var(--cc-site-container-max, 80rem);
+}
+
+.bmc-resourcesHeroGuide {
+  position: relative;
+  width: min(18rem, 68vw);
+  height: 15rem;
+  margin: 1rem auto 0;
+}
+
+.bmc-resourcesHeroGuideGlow {
+  position: absolute;
+  inset: 22% 3% 0;
+  border-radius: 50%;
+  background: rgba(94, 143, 229, 0.2);
+  filter: blur(20px);
+}
+
+.bmc-resourcesHeroB4 {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1rem 1rem rgba(3, 11, 31, 0.34));
+  animation: bmc-student-b4-float 5.5s ease-in-out infinite;
+}
+
+@keyframes bmc-student-b4-float {
+  50% { transform: translateY(-6px); }
+}
+
+@media (min-width: 768px) {
+  .bmc-resourcesHero.cc-section-hero--courage {
+    min-height: 20.5rem;
+    padding-top: calc(var(--courage-header-height) + 1rem);
+    padding-bottom: 1.75rem;
+  }
+
+  .bmc-resourcesHero.cc-section-hero--with-visual .cc-section-hero-inner {
+    grid-template-columns: minmax(15rem, .72fr) minmax(0, 1.65fr);
+    gap: clamp(2rem, 6vw, 5rem);
+  }
+
+  .bmc-resourcesHero .cc-section-hero-title {
+    margin-top: .75rem;
+    font-size: clamp(2.5rem, 4.5vw, 3.6rem);
+  }
+
+  .bmc-resourcesHero .cc-section-hero-description {
+    margin-top: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .bmc-resourcesHero .cc-section-hero-support {
+    margin-top: .65rem;
+    font-size: .9rem;
+  }
+
+  .bmc-resourcesHeroGuide {
+    width: 100%;
+    max-width: 18rem;
+    height: 18rem;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bmc-resourcesHero.cc-section-hero--courage {
+    min-height: 21rem;
+    padding-top: calc(var(--courage-header-height) + .75rem);
+    padding-bottom: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bmc-resourcesHeroB4 { animation: none; }
+}
+
 /* Tighter hero — text sits higher under CourageHeader */
 .cc-section-hero--compact.cc-section-hero--courage {
   padding-top: calc(3.5rem + 1rem);
@@ -8205,6 +8306,326 @@ a.ffl-ctaSecondary {
   .cc-section-hero--compact.cc-section-hero--courage {
     padding-top: calc(var(--courage-header-height) + 1.75rem);
     padding-bottom: 4rem;
+  }
+}
+
+/* The sticky CourageHeader remains in document flow, so this compact hero does
+   not need a second header-height offset. Keep the approved band near 336px. */
+@media (min-width: 768px) {
+  .bmc-resourcesHero.cc-section-hero--compact.cc-section-hero--courage {
+    min-height: 21rem;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+}
+
+/* Family persona hero — approved green Parent/Guardian B-4, using the shared
+   character-first SectionHero structure introduced for Brave Mind Club. */
+.persona-familyHero .cc-section-hero-copy {
+  order: 1;
+}
+
+.persona-familyHero .cc-section-hero-visual {
+  order: 2;
+}
+
+.persona-familyHeroGuide {
+  position: relative;
+  width: min(17rem, 68vw);
+  height: 16rem;
+  margin: 1.25rem auto 0;
+}
+
+.persona-familyHeroGuideGlow {
+  position: absolute;
+  inset: 20% 4% 2%;
+  border-radius: 50%;
+  background: rgba(55, 190, 154, 0.18);
+  filter: blur(22px);
+}
+
+.persona-familyHeroB4 {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1rem 1rem rgba(3, 11, 31, 0.32));
+  animation: bmc-student-b4-float 5.5s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .persona-familyHero.cc-section-hero--with-visual .cc-section-hero-inner {
+    grid-template-columns: minmax(15rem, .72fr) minmax(0, 1.75fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .persona-familyHero.cc-section-hero--compact.cc-section-hero--courage {
+    min-height: 24.75rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .persona-familyHero .cc-section-hero-copy,
+  .persona-familyHero .cc-section-hero-visual {
+    order: initial;
+  }
+
+  .persona-familyHero .cc-section-hero-title {
+    margin-top: .65rem;
+    max-width: 42rem;
+    font-size: clamp(2.25rem, 3.8vw, 3.45rem);
+  }
+
+  .persona-familyHero .cc-section-hero-description {
+    margin-top: .8rem;
+    font-size: 1.05rem;
+  }
+
+  .persona-familyHero .cc-section-hero-support {
+    margin-top: .55rem;
+    font-size: .9rem;
+  }
+
+  .persona-familyHero .cc-section-hero-actions {
+    margin-top: 1rem;
+  }
+
+  .persona-familyHeroGuide {
+    width: 100%;
+    max-width: 18rem;
+    height: 18rem;
+    margin: 0 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .persona-familyHeroB4 { animation: none; }
+}
+
+/* Families page rhythm and storybook accents. Scoped to the Parents persona so
+   the shared Teachers, Camps, and Schools renderer remains visually unchanged. */
+.persona-familyWho,
+.persona-familyBenefits,
+.persona-familyIncluded,
+.persona-familyFinalCta {
+  position: relative;
+  overflow: hidden;
+}
+
+.persona-familyWho::before,
+.persona-familyIncluded::after,
+.persona-familyBenefits::after {
+  position: absolute;
+  color: rgba(29, 143, 109, .22);
+  font-family: var(--font-display, inherit);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.persona-familyWho::before {
+  content: '✦  ·  ✧';
+  top: 2rem;
+  right: 2.5vw;
+  font-size: 2rem;
+  transform: rotate(8deg);
+}
+
+.persona-familyBenefits::after {
+  content: '∿  ✦';
+  right: 2vw;
+  bottom: 2rem;
+  font-size: 2.25rem;
+  transform: rotate(-8deg);
+}
+
+.persona-familyIncluded::after {
+  content: '·  ✧  ·';
+  left: 2vw;
+  bottom: 1.75rem;
+  font-size: 2rem;
+}
+
+.persona-familyWhoGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.persona-familyWhoCard {
+  position: relative;
+  display: flex;
+  min-height: 15rem;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid rgba(30, 68, 98, .12);
+  border-radius: 1.25rem;
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px rgba(31, 60, 99, .06);
+}
+
+.persona-familyIcon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dff4e9;
+  color: #176e57;
+  font-family: var(--font-display, inherit);
+  font-weight: 800;
+}
+
+.persona-familyWhoCard strong {
+  display: block;
+  color: var(--navy-500, #1f3c63);
+  font-family: var(--font-display, inherit);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.persona-familyWhoCard strong + span {
+  display: block;
+  margin-top: .7rem;
+  color: var(--navy-600, #294f78);
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+.persona-familyWhoCard i {
+  width: 2.75rem;
+  height: 3px;
+  margin-top: auto;
+  border-radius: 999px;
+  background: #41ae84;
+}
+
+.persona-familyBenefits {
+  background: #f6faf7;
+}
+
+.persona-familyTileGrid,
+.persona-familyIncludedGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: .9rem;
+}
+
+.persona-familyTile,
+.persona-familyIncludedTile {
+  display: flex;
+  min-height: 5.5rem;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid rgba(30, 68, 98, .11);
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.1rem 1.25rem;
+}
+
+.persona-familyTile p,
+.persona-familyIncludedTile span:last-child {
+  font-weight: 650;
+}
+
+.persona-familyIncludedTile .persona-familyIcon,
+.persona-familyTile .persona-familyIcon {
+  width: 2.1rem;
+  height: 2.1rem;
+  flex-basis: 2.1rem;
+  font-size: .8rem;
+}
+
+.persona-familyPricingCard {
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.persona-familyPricingNote {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
+}
+
+.persona-familyInfoIcon {
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31, 60, 99, .28);
+  border-radius: 999px;
+  color: var(--navy-500, #1f3c63);
+  font-family: serif;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.persona-familyFinalCta {
+  border: 0;
+  background: var(--cream, #faf9f7);
+  color: #fff;
+}
+
+.persona-familyFinalCta .cc-schools-final-cta-inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  background: var(--navy-500, #1f3c63);
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.25rem, 5vw, 4rem);
+}
+
+.persona-familyFinalCta .cc-schools-final-cta-inner::before,
+.persona-familyFinalCta .cc-schools-final-cta-inner::after {
+  position: absolute;
+  color: rgba(242, 190, 70, .55);
+  content: '✦';
+  pointer-events: none;
+}
+
+.persona-familyFinalCta .cc-schools-final-cta-inner::before {
+  top: 1.25rem;
+  left: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.persona-familyFinalCta .cc-schools-final-cta-inner::after {
+  right: 1.75rem;
+  bottom: 1.25rem;
+  font-size: 2rem;
+}
+
+@media (min-width: 640px) {
+  .persona-familyWhoGrid,
+  .persona-familyTileGrid,
+  .persona-familyIncludedGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .persona-familyWhoGrid,
+  .persona-familyTileGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .persona-familyIncludedGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .persona-familyWho::before,
+  .persona-familyBenefits::after,
+  .persona-familyIncluded::after {
+    display: none;
+  }
+
+  .persona-familyWhoCard {
+    min-height: 12rem;
   }
 }
 
@@ -8295,6 +8716,541 @@ a.ffl-ctaSecondary {
 
 .cc-portal-hero-inner {
   width: 100%;
+}
+
+/* Enter the World — cinematic character gateway */
+.cc-portal-hero--gateway.cc-section-hero--courage {
+  isolation: isolate;
+  padding-top: 0;
+  padding-bottom: 0;
+  background:
+    linear-gradient(90deg, rgb(4 17 36 / 0.96) 0%, rgb(5 22 44 / 0.86) 43%, rgb(5 20 39 / 0.58) 70%, rgb(4 15 31 / 0.72) 100%),
+    url('../public/images/backgrounds/backgroundFocusFlame.webp') center / cover no-repeat;
+}
+
+.cc-portal-hero--gateway .cc-portal-hero-inner {
+  justify-content: flex-start;
+  padding-top: clamp(3.5rem, 7vh, 5.5rem);
+  padding-bottom: 3rem;
+}
+
+.cc-portal-hero--gateway::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 72% 46%, transparent 0%, rgb(3 13 28 / 0.2) 45%, rgb(3 13 28 / 0.58) 100%),
+    linear-gradient(180deg, rgb(2 12 26 / 0.1), rgb(2 12 26 / 0.38));
+}
+
+.cc-portal-hero--gateway .cc-section-hero-glow,
+.cc-portal-hero--gateway .cc-section-hero-noise {
+  opacity: 0.18;
+}
+
+.cc-portal-hero--gateway .cc-portal-hero-copy {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.cc-portal-hero-atmosphere {
+  margin: 0.75rem 0 0;
+  color: rgb(244 212 119 / 0.92);
+  font-family: var(--font-display, inherit);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.cc-portal-hero--gateway .cc-portal-access-card {
+  width: 100%;
+  border: 1px solid rgb(255 255 255 / 0.62);
+  border-radius: 1.5rem;
+  background: rgb(255 253 248 / 0.96);
+  box-shadow: 0 28px 70px -30px rgb(0 0 0 / 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.cc-portal-hero--gateway .cc-portal-access-card--selector {
+  border-color: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / 0.98);
+  box-shadow: 0 34px 86px -38px rgb(0 0 0 / 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.cc-portal-guide-stage {
+  max-width: 61rem;
+  margin-inline: auto;
+  transform: none;
+}
+
+.cc-portal-gateway,
+.cc-portal-selectedIntro,
+.cc-portal-access-card form,
+.cc-portal-access-card .portal-recovery {
+  animation: cc-portal-card-enter 220ms ease-out both;
+}
+
+.cc-portal-gatewayEyebrow {
+  margin: 0 0 0.55rem;
+  color: rgb(36 62 112 / 0.64);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cc-portal-selectedIntro h2 {
+  margin: 0;
+  color: #172e55;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.16;
+  text-align: center;
+}
+
+.cc-portal-selectedIntro p {
+  margin: 0.55rem auto 0;
+  color: rgb(36 62 112 / 0.78);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.cc-portal-characterOptions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cc-portal-characterOption {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 24rem;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.cc-portal-characterOption:hover {
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+.cc-portal-characterOption:focus-visible,
+.cc-portal-back:focus-visible {
+  outline: 3px solid rgb(218 174 67 / 0.62);
+  outline-offset: 3px;
+}
+
+.cc-portal-characterOption.is-selected,
+.cc-portal-characterOption[aria-pressed='true'],
+.cc-portal-characterOption:focus-visible {
+  transform: translateY(-4px);
+  background: transparent;
+  color: #10284d;
+  box-shadow: none;
+}
+
+.cc-portal-characterPortrait {
+  position: relative;
+  display: flex;
+  width: 100%;
+  aspect-ratio: 0.86 / 1;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background: #bdcce7;
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.cc-portal-characterPortrait--facilitator {
+  background: #ffe27a;
+}
+
+.cc-portal-characterPortrait--parent {
+  background: #c8eadb;
+}
+
+.cc-portal-characterPortrait::after {
+  content: none;
+}
+
+.cc-portal-characterOption.is-selected .cc-portal-characterPortrait,
+.cc-portal-characterOption[aria-pressed='true'] .cc-portal-characterPortrait,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPortrait {
+  border-color: #245da8;
+  background: #ffe17d;
+  box-shadow: 0 14px 28px -18px rgb(25 76 145 / 0.72);
+}
+
+.cc-portal-characterPortrait img {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  object-position: center;
+  filter: saturate(0.98) brightness(1.04);
+  transform: scale(0.9);
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
+  border-radius: calc(1rem - 1px);
+}
+
+.cc-portal-characterPortrait .cc-portal-characterImage--hover {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  object-fit: cover;
+  transform: none;
+}
+
+.cc-portal-characterPill {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: #36588d;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  box-shadow: 0 5px 14px -8px rgb(0 0 0 / 0.55);
+}
+
+.cc-portal-characterPill--facilitator {
+  background: #ee8c2d;
+}
+
+.cc-portal-characterPill--parent {
+  background: #38b97d;
+}
+
+.cc-portal-characterPillHover {
+  display: none;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterPillDefault,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPillDefault,
+.cc-portal-characterOption.is-selected .cc-portal-characterPillDefault {
+  display: none;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterPillHover,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPillHover,
+.cc-portal-characterOption.is-selected .cc-portal-characterPillHover {
+  display: inline;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterImage--default,
+.cc-portal-characterOption:focus-visible .cc-portal-characterImage--default,
+.cc-portal-characterOption.is-selected .cc-portal-characterImage--default {
+  opacity: 0;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterImage--hover,
+.cc-portal-characterOption:focus-visible .cc-portal-characterImage--hover,
+.cc-portal-characterOption.is-selected .cc-portal-characterImage--hover {
+  opacity: 1;
+  transform: none;
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterPortrait img,
+.cc-portal-characterOption.is-selected .cc-portal-characterPortrait img,
+.cc-portal-characterOption:focus-visible .cc-portal-characterPortrait img {
+  filter: saturate(1.05) brightness(1.18);
+  transform: scale(0.94);
+}
+
+.cc-portal-characterOption:hover .cc-portal-characterImage--hover,
+.cc-portal-characterOption.is-selected .cc-portal-characterImage--hover,
+.cc-portal-characterOption:focus-visible .cc-portal-characterImage--hover {
+  filter: saturate(1.02) brightness(1.02);
+  transform: none;
+}
+
+.cc-portal-characterText {
+  position: relative;
+  z-index: 1;
+  min-height: 4.5rem;
+  padding: 1rem 0.1rem 0;
+}
+
+.cc-portal-characterText strong,
+.cc-portal-characterText small {
+  display: block;
+}
+
+.cc-portal-characterText strong {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.cc-portal-characterText small {
+  margin-top: 0;
+  color: #252b35;
+  font-size: 0.84rem;
+  line-height: 1.22;
+}
+
+.cc-portal-characterText span {
+  display: block;
+  margin-top: 0.5rem;
+  color: #31598d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cc-portal-selectedIntro {
+  text-align: center;
+}
+
+.cc-portal-access-card--form {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.72fr) minmax(0, 1.28fr);
+  gap: 0 2.25rem;
+  align-items: start;
+}
+
+.cc-portal-access-card--form .cc-portal-selectedIntro {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+}
+
+.cc-portal-access-card--form form,
+.cc-portal-access-card--form > .portal-forgotCodeLink,
+.cc-portal-access-card--form > .portal-recovery,
+.cc-portal-access-card--form > p:last-child {
+  grid-column: 2;
+}
+
+.cc-portal-access-card--form form {
+  margin-top: 0;
+}
+
+.cc-portal-access-card--form .cc-portal-selectedIntro,
+.cc-portal-access-card--form form {
+  animation: none;
+}
+
+.cc-portal-formIntro {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.cc-portal-formIntro h2 {
+  margin: 0;
+  color: #172e55;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.16;
+}
+
+.cc-portal-formIntro p {
+  margin: 0.45rem 0 0;
+  color: rgb(36 62 112 / 0.7);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.cc-portal-guideIntroImage {
+  display: block;
+  width: min(100%, 15rem);
+  height: auto;
+  aspect-ratio: 0.86 / 1;
+  margin: 0.2rem auto 0.7rem;
+  border-radius: 1rem;
+  object-fit: cover;
+  object-position: center;
+}
+
+.cc-portal-guideIntroCaption {
+  max-width: 15rem;
+  margin: 0 auto !important;
+  color: #252b35 !important;
+  font-size: 0.82rem !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+}
+
+.cc-portal-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  gap: 0.45rem;
+  margin: -0.4rem auto 0.6rem 0;
+  padding: 0.35rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: #243e70;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@keyframes cc-portal-card-enter {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.cc-portal-ambientMist {
+  z-index: 1;
+  opacity: 0.16;
+  background: radial-gradient(ellipse at 35% 70%, rgb(205 225 255 / 0.3), transparent 45%);
+  animation: cc-portal-mist-drift 46s ease-in-out infinite alternate;
+}
+
+.cc-portal-b4Pass {
+  top: 69%;
+  left: -8rem;
+  z-index: 2;
+  opacity: 0;
+  filter: blur(0.6px) saturate(0.72);
+  animation: cc-portal-b4-crossing 42s linear infinite;
+}
+
+.cc-portal-b4Pass img {
+  display: block;
+  width: clamp(3.2rem, 5vw, 5rem);
+  height: auto;
+}
+
+@keyframes cc-portal-mist-drift {
+  from { transform: translate3d(-2%, 0, 0); }
+  to { transform: translate3d(3%, -1%, 0); }
+}
+
+@keyframes cc-portal-b4-crossing {
+  0%, 58% { opacity: 0; transform: translate3d(-8rem, 0, 0); }
+  62% { opacity: 0.42; }
+  92% { opacity: 0.38; }
+  96%, 100% { opacity: 0; transform: translate3d(calc(100vw + 12rem), -2rem, 0); }
+}
+
+@media (max-width: 1023px) {
+  .cc-portal-hero--gateway.cc-section-hero--courage {
+    background:
+      linear-gradient(180deg, rgb(4 17 36 / 0.72) 0%, rgb(4 17 36 / 0.9) 40%, rgb(4 17 36 / 0.96) 100%),
+      url('../public/images/backgrounds/backgroundFocusFlame.webp') 62% center / cover no-repeat;
+  }
+
+  .cc-portal-hero--gateway .cc-portal-hero-copy {
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+
+  .cc-portal-characterOptions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cc-portal-characterOption {
+    min-height: 19rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .cc-portal-hero--gateway.cc-section-hero--courage {
+    min-height: auto;
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+  }
+
+  .cc-portal-hero-atmosphere {
+    display: none;
+  }
+
+  .cc-portal-hero--gateway .cc-section-hero-title {
+    font-size: 2.35rem;
+  }
+
+  .cc-portal-guide-stage {
+    transform: none;
+  }
+
+  .cc-portal-hero--gateway .cc-portal-hero-inner {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+  }
+
+  .cc-portal-hero--gateway .cc-section-hero-description {
+    margin-top: 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .cc-portal-hero--gateway .cc-portal-access-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .cc-portal-characterOptions {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .cc-portal-characterOption {
+    min-height: auto;
+  }
+
+  .cc-portal-access-card--selector {
+    background: rgb(255 255 255 / 0.98) !important;
+  }
+
+  .cc-portal-access-card--form {
+    display: block;
+  }
+
+  .cc-portal-b4Pass {
+    top: 82%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-portal-gateway,
+  .cc-portal-selectedIntro,
+  .cc-portal-access-card form,
+  .cc-portal-access-card .portal-recovery {
+    animation: none;
+  }
+
+  .cc-portal-characterOption,
+  .cc-portal-characterPortrait img {
+    transition: none;
+  }
+
+  .cc-portal-ambientMist,
+  .cc-portal-b4Pass {
+    animation: none;
+  }
+
+  .cc-portal-b4Pass {
+    display: none;
+  }
 }
 
 .cc-portal-hero-panel {
@@ -8668,6 +9624,82 @@ a.ffl-ctaSecondary {
   box-shadow:
     0 20px 48px -28px rgb(7 20 38 / 0.45),
     0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+/* Homepage story-first hero evolution */
+.cc-hero-mask--story {
+  background:
+    linear-gradient(90deg, rgb(7 24 48 / 0.98) 0%, rgb(8 30 59 / 0.93) 42%, rgb(8 29 56 / 0.48) 72%, rgb(7 24 48 / 0.35) 100%),
+    url('../public/images/backgrounds/backgroundFocusFlame.webp') center / cover no-repeat;
+}
+
+.cc-hero-mask--story::after {
+  display: none;
+}
+
+.cc-hero-mask--story .cc-hero-layout {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+}
+
+.cc-hero-mask--story .cc-hero-copy {
+  max-width: 40rem;
+}
+
+.cc-hero-mask--story .cc-hero-brand-visual::before,
+.cc-hero-mask--story .cc-hero-brand-visual::after {
+  display: none;
+}
+
+.cc-story-book-visual {
+  min-height: 22rem;
+}
+
+.cc-story-book-hero {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: min(100%, 32rem);
+  max-height: 32rem;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 32px rgb(0 0 0 / 0.42));
+}
+
+.cc-home-video-section {
+  background: #f4f7fa;
+}
+
+.cc-home-video-wrap {
+  width: min(100%, 58rem);
+}
+
+.cc-home-video-wrap .cc-hero-video-card {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .cc-hero-mask--story {
+    background:
+      linear-gradient(180deg, rgb(7 24 48 / 0.48) 0%, rgb(7 24 48 / 0.92) 42%, rgb(7 24 48 / 0.99) 100%),
+      url('../public/images/backgrounds/backgroundFocusFlame.webp') 62% center / cover no-repeat;
+  }
+
+  .cc-story-book-visual {
+    min-height: auto;
+    margin-top: 1rem;
+  }
+
+  .cc-story-book-hero {
+    width: min(88%, 21rem);
+    max-height: 18.5rem;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cc-story-book-hero {
+    width: min(100%, 25rem);
+    max-height: 26rem;
+  }
 }
 
 /* Dotted texture — right side of hero header card */

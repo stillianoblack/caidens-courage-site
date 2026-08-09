@@ -5,9 +5,11 @@ import GameScene from './scenes/GameScene';
 import PreloadScene from './scenes/PreloadScene';
 import ResultsScene from './scenes/ResultsScene';
 import StartScene from './scenes/StartScene';
+import type { B4VariantKey } from '../../../data/b4/variantManifest';
 
 interface B4FocusFlightGameOptions {
   mobileGraphics?: boolean;
+  variant?: B4VariantKey;
 }
 
 export const createB4FocusFlightGame = (
@@ -51,6 +53,7 @@ export const createB4FocusFlightGame = (
     callbacks: {
       preBoot: (game) => {
         game.registry.set('b4MobileGraphics', Boolean(options.mobileGraphics));
+        game.registry.set('b4Variant', options.variant ?? 'courage');
       },
     },
   });

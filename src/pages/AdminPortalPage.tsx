@@ -11,6 +11,7 @@ import AdminAddStudentTab from '../components/admin/tabs/AdminAddStudentTab';
 import AdminManageAccountsTab from '../components/admin/tabs/AdminManageAccountsTab';
 import AdminDesignSystemTab from '../components/admin/tabs/AdminDesignSystemTab';
 import AdminPilotProgramsTab from '../components/admin/tabs/AdminPilotProgramsTab';
+import AdminPilotOutcomesTab from '../components/admin/tabs/AdminPilotOutcomesTab';
 import AdminDataCleanupTab from '../components/admin/tabs/AdminDataCleanupTab';
 import AdminAdventuresTab from '../components/admin/tabs/AdminAdventuresTab';
 import AdminCommerceTab, {
@@ -20,6 +21,10 @@ import AdminCommerceTab, {
 import AdminCrmTab from '../components/admin/tabs/AdminCrmTab';
 import AdminCrmWorkflowTab from '../components/admin/tabs/AdminCrmWorkflowTab';
 import AdminCrmProviderTab from '../components/admin/tabs/AdminCrmProviderTab';
+import AdminDashboardTab from '../components/admin/tabs/AdminDashboardTab';
+import AdminGroupedNavigation from '../components/admin/AdminGroupedNavigation';
+import AdminQuestionBankTab from '../components/admin/tabs/AdminQuestionBankTab';
+import AdminKitDiagnosticsTab from '../components/admin/tabs/AdminKitDiagnosticsTab';
 import SettingsPageLayout from '../components/family-portal/settings/SettingsPageLayout';
 import {
   ADMIN_PORTAL_PAGE,
@@ -28,13 +33,18 @@ import {
 } from '../data/adminPortalContent';
 import { fetchAllPilotProgramsForAdmin } from '../lib/pilotProgramService';
 import { resolveAdminPortalTab } from '../lib/adminPortalPaths';
+import { adminPortalTabPath } from '../lib/adminPortalPaths';
 import type { PilotProgramRecord } from '../types/pilotProgram';
+import {
+  clearAdminAnalyticsSession,
+  establishAdminAnalyticsSession,
+} from '../lib/adminAnalyticsSession';
 import '../components/family-portal/family-dashboard.css';
 import '../components/portal-design-system/portal-design-system.css';
 import '../components/admin/admin-portal.css';
 
 export default function AdminPortalPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
@@ -53,7 +63,6 @@ export default function AdminPortalPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-
   const configured = isAdminAccessConfigured();
 
   useEffect(() => {
@@ -107,20 +116,9 @@ export default function AdminPortalPage() {
 
   const selectTab = useCallback(
     (next: AdminPortalTabId) => {
-      setActiveTab(next);
-      if (next === 'commerce') {
-        navigate('/admin/commerce?tab=products');
-        return;
-      }
-      const nextParams = new URLSearchParams(searchParams);
-      if (next === 'manage-accounts') {
-        nextParams.delete('tab');
-      } else {
-        nextParams.set('tab', next);
-      }
-      setSearchParams(nextParams, { replace: true });
+      navigate(adminPortalTabPath(next));
     },
-    [navigate, searchParams, setSearchParams],
+    [navigate],
   );
 
   const selectCommerceSubtab = useCallback(
@@ -131,7 +129,7 @@ export default function AdminPortalPage() {
     [navigate],
   );
 
-  const handleUnlock = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleUnlock = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError(null);
 
@@ -139,18 +137,18 @@ export default function AdminPortalPage() {
       setAuthError('Admin access is not configured.');
       return;
     }
-
     if (!verifyAdminCredentials(email, passcode)) {
       setAuthError('Invalid admin email or passcode.');
       return;
     }
-
+    await establishAdminAnalyticsSession(email, passcode);
     writeAdminSession(email);
     setUnlocked(true);
     setPasscode('');
   };
 
   const handleSignOut = () => {
+    void clearAdminAnalyticsSession();
     clearAdminSession();
     setUnlocked(false);
     setPrograms([]);
@@ -163,6 +161,8 @@ export default function AdminPortalPage() {
     switch (activeTab) {
       case 'manage-accounts':
         return <AdminManageAccountsTab programs={programs} onCopied={handleCopied} />;
+      case 'dashboard':
+        return <AdminDashboardTab pilotProgramCount={programs.length} onNavigate={selectTab} />;
       case 'add-student':
         return <AdminAddStudentTab programs={programs} onCopied={handleCopied} />;
       case 'design-system':
@@ -177,6 +177,8 @@ export default function AdminPortalPage() {
             onChanged={() => void loadPrograms()}
           />
         );
+      case 'pilot-outcomes':
+        return <AdminPilotOutcomesTab token="" />;
       case 'adventures':
         return <AdminAdventuresTab onCopied={handleCopied} />;
       case 'data-cleanup':
@@ -217,6 +219,10 @@ export default function AdminPortalPage() {
         return <AdminCrmProviderTab view="sync" />;
       case 'crm-provider-settings':
         return <AdminCrmProviderTab view="settings" />;
+      case 'question-bank':
+        return <AdminQuestionBankTab />;
+      case 'kit-diagnostics':
+        return <AdminKitDiagnosticsTab />;
       default:
         return null;
     }
@@ -276,6 +282,7 @@ export default function AdminPortalPage() {
             showPageTitle
             panelClassName="family-panel family-panel--settings adminPortal-settingsPanel"
             tabAriaLabel="Admin portal sections"
+            navigation={<AdminGroupedNavigation activeTab={activeTab} />}
             toolbar={
               <button type="button" className="adminPortal-btn adminPortal-btn--ghost" onClick={handleSignOut}>
                 Sign out

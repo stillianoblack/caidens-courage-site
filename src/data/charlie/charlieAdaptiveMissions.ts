@@ -1,6 +1,6 @@
 import type { CharlieAdaptiveMissionFile } from '../../types/charlieAdaptiveQuest';
 import { registerModuleTracking } from '../moduleTrackingRegistry';
-import { registerCharlieAdaptiveMission } from './charlieAdaptiveBuilder';
+import { registerCharlieAdaptiveMission } from './charlieAdaptiveRegistry';
 import { CHARLIE_MISSION_1_FILE } from './missions/mission1MysteryFootprints';
 import { CHARLIE_MISSION_2_FILE } from './missions/mission2FloatingOrange';
 import { CHARLIE_MISSION_3_FILE } from './missions/mission3MysterySound';

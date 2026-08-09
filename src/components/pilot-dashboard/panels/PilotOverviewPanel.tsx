@@ -41,6 +41,8 @@ import {
 } from '../../../lib/studentGalleryService';
 import { useFacilitatorMobileNav } from '../../../hooks/useFacilitatorMobileNav';
 import FacilitatorMobileOverviewHero from '../FacilitatorMobileOverviewHero';
+import DashboardOnboardingCard from '../../onboarding/DashboardOnboardingCard';
+import { useProgramDashboardOnboarding } from '../../../hooks/useDashboardOnboarding';
 
 type PilotOverviewPanelProps = {
   metrics: PilotTrackingMetrics;
@@ -94,6 +96,7 @@ export default function PilotOverviewPanel({
   const [insightStudentId, setInsightStudentId] = useState<string | null>(null);
   const [galleryItems, setGalleryItems] = useState<StudentGalleryItem[]>([]);
   const programCode = activeProgram?.programCode?.trim() ?? '';
+  const dashboardOnboarding = useProgramDashboardOnboarding(programCode, 'facilitator');
 
   const needsAttention = useMemo(
     () =>
@@ -211,6 +214,13 @@ export default function PilotOverviewPanel({
 
   return (
     <div className={`pilot-panel pilot-panel--overview${isMobileNav ? ' pilot-panel--overviewMobile' : ''}`}>
+      {dashboardOnboarding.visible ? (
+        <DashboardOnboardingCard
+          role="facilitator"
+          busy={dashboardOnboarding.saving}
+          onDismiss={() => void dashboardOnboarding.dismiss()}
+        />
+      ) : null}
       {isMobileNav ? (
         <FacilitatorMobileOverviewHero
           activeProgram={activeProgram}

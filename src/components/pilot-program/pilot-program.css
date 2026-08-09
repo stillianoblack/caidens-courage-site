@@ -1,43 +1,121 @@
 .pilotSignup-page {
   min-height: 100dvh;
-  background: linear-gradient(180deg, #faf9f7 0%, #f0f4fa 100%);
+  overflow-x: hidden;
+  background: linear-gradient(180deg, #171437 0 26rem, #f8f1e6 42rem, #f7f4ef 100%);
+}
+
+.pilotSignup-stage {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, transparent 0 32rem, #f7f4ef 32rem 100%);
 }
 
 .pilotSignup-hero {
-  padding: 6.5rem 1.5rem 2rem;
-  text-align: center;
-  background: linear-gradient(135deg, #243e70 0%, #1a2f52 100%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 31rem;
+  padding: 7.25rem 1.5rem 5rem;
+  background:
+    radial-gradient(circle at 78% 35%, rgba(255, 177, 51, 0.22), transparent 25%),
+    radial-gradient(circle at 22% 20%, rgba(128, 82, 190, 0.32), transparent 34%),
+    linear-gradient(135deg, #111b3d 0%, #282052 52%, #161938 100%);
   color: #fff;
+}
+
+.pilotSignup-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 7rem;
+  z-index: -1;
+  background: linear-gradient(180deg, transparent, rgba(240, 126, 29, 0.09));
+}
+
+.pilotSignup-heroInner {
+  width: min(68rem, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(17rem, 0.85fr);
+  align-items: center;
+  gap: 3rem;
+}
+
+.pilotSignup-heroCopy { max-width: 39rem; }
+
+.pilotSignup-eyebrow {
+  margin: 0 0 0.85rem;
+  color: #ffd487;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .pilotSignup-heroTitle {
   margin: 0;
   font-family: var(--font-display, Nunito, sans-serif);
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 800;
+  font-size: clamp(2.35rem, 5vw, 4.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 900;
 }
 
 .pilotSignup-heroSub {
-  margin: 0.75rem auto 0;
-  max-width: 36rem;
-  font-size: 1rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.82);
+  margin: 1.15rem 0 0;
+  max-width: 34rem;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.86);
 }
 
+.pilotSignup-heroGuide { position: relative; height: 22rem; }
+.pilotSignup-guideHalo,
+.pilotSignup-heroGlow {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(244, 142, 43, 0.2);
+  filter: blur(20px);
+}
+.pilotSignup-guideHalo { inset: 18% 4% 0; }
+.pilotSignup-heroGlow { width: 28rem; height: 28rem; right: -12rem; top: -10rem; z-index: -1; }
+.pilotSignup-heroB4 {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1.4rem 1.4rem rgba(4, 7, 27, 0.42));
+  animation: pilotSignup-float 5s ease-in-out infinite;
+}
+.pilotSignup-spark { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #ffd98b; box-shadow: 0 0 15px 4px rgba(255, 183, 69, .35); }
+.pilotSignup-spark--one { left: 9%; top: 38%; }
+.pilotSignup-spark--two { right: 44%; top: 24%; width: 3px; height: 3px; }
+@keyframes pilotSignup-float { 50% { transform: translateY(-8px); } }
+
 .pilotSignup-main {
-  max-width: 32rem;
-  margin: -2rem auto 3rem;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 38rem;
+  margin: -3.5rem auto 4rem;
   padding: 0 1.25rem;
 }
 
 .pilotSignup-card {
-  background: #fff;
-  border: 1px solid rgba(36, 62, 112, 0.12);
-  border-radius: 1.25rem;
-  padding: 1.75rem 1.5rem 2rem;
-  box-shadow: 0 18px 40px -24px rgba(36, 62, 112, 0.35);
+  background: #fffdf8;
+  border: 1px solid rgba(220, 158, 55, 0.48);
+  border-radius: 1.75rem;
+  padding: clamp(1.35rem, 4vw, 2.25rem);
+  box-shadow: 0 30px 70px -32px rgba(24, 21, 57, 0.5), 0 0 45px rgba(243, 161, 54, 0.08);
 }
+
+.pilotSignup-cardIntro { display: flex; align-items: center; gap: 1rem; }
+.pilotSignup-cardB4 { width: 4rem; height: 4rem; flex: 0 0 4rem; object-fit: contain; }
+.pilotSignup-progress { display: flex; align-items: center; margin: 1.5rem 0 1.8rem; padding: 0; list-style: none; }
+.pilotSignup-progress li { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: .35rem; color: #655f76; font-size: .69rem; font-weight: 800; text-align: center; }
+.pilotSignup-progress li:not(:last-child)::after { content: ''; position: absolute; top: .8rem; left: calc(50% + 1.1rem); width: calc(100% - 2.2rem); height: 2px; background: linear-gradient(90deg, #ef8b2c, #e8c98e); }
+.pilotSignup-progress span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border: 1px solid #e7bd74; border-radius: 50%; background: #fff8e9; color: #a95011; font-size: .7rem; }
 
 .pilotSignup-cardTitle {
   margin: 0 0 0.35rem;
@@ -47,7 +125,7 @@
 }
 
 .pilotSignup-cardSub {
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-size: 0.9375rem;
   line-height: 1.5;
   color: rgba(36, 62, 112, 0.72);
@@ -56,8 +134,13 @@
 .pilotSignup-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
 }
+
+.pilotSignup-section { display: flex; flex-direction: column; gap: 1rem; min-width: 0; margin: 0; padding: 1.15rem; border: 1px solid rgba(224, 180, 105, .32); border-radius: 1rem; background: rgba(255, 250, 239, .6); }
+.pilotSignup-section legend { padding: 0 .45rem; color: #a54d12; font-size: .72rem; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+.pilotSignup-section legend span { display: inline-flex; align-items: center; gap: .45rem; }
+.pilotSignup-section legend span::before { content: ''; width: .42rem; height: .42rem; border-radius: 50%; background: #ee8626; box-shadow: 0 0 0 4px rgba(238,134,38,.12); }
 
 .pilotSignup-field {
   display: flex;
@@ -76,7 +159,8 @@
   width: 100%;
   padding: 0.65rem 0.75rem;
   border: 1px solid rgba(36, 62, 112, 0.18);
-  border-radius: 0.625rem;
+  min-height: 2.85rem;
+  border-radius: 0.75rem;
   font-size: 0.9375rem;
   color: #1a2f52;
   background: #fff;
@@ -84,8 +168,10 @@
 
 .pilotSignup-field input:focus,
 .pilotSignup-field select:focus {
-  outline: 2px solid rgba(36, 62, 112, 0.25);
+  border-color: #df812b;
+  outline: 3px solid rgba(239, 139, 44, 0.18);
   outline-offset: 1px;
+  background: #fffaf0;
 }
 
 .pilotSignup-fieldHint {
@@ -129,15 +215,21 @@
 
 .pilotSignup-submit {
   margin-top: 0.25rem;
-  padding: 0.75rem 1rem;
+  min-height: 3.2rem;
+  padding: 0.85rem 1rem;
   border: none;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, #243e70 0%, #1a2f52 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #ffb63e 0%, #ee7d24 62%, #d96018 100%);
+  color: #27152a;
+  box-shadow: 0 10px 22px -12px rgba(213, 83, 16, .8), inset 0 1px rgba(255,255,255,.45);
   font-size: 0.9375rem;
   font-weight: 800;
   cursor: pointer;
 }
+
+.pilotSignup-submit:not(:disabled):hover { transform: translateY(-1px); filter: saturate(1.08); }
+.pilotSignup-submit:focus-visible { outline: 3px solid rgba(239, 139, 44, .35); outline-offset: 3px; }
+.pilotSignup-trust { margin: -.45rem 0 0; color: #6c6576; font-size: .76rem; line-height: 1.4; text-align: center; }
 
 .pilotSignup-submit:disabled {
   opacity: 0.55;
@@ -273,7 +365,137 @@
 }
 
 @media (max-width: 767px) {
+  .pilotSignup-hero { min-height: 35rem; padding: 6.5rem 1.25rem 5.5rem; text-align: center; }
+  .pilotSignup-heroInner { grid-template-columns: 1fr; gap: 1rem; }
+  .pilotSignup-heroCopy { margin: 0 auto; }
+  .pilotSignup-heroSub { margin-left: auto; margin-right: auto; }
+  .pilotSignup-heroGuide { height: 13rem; }
+  .pilotSignup-heroB4 { max-width: 17rem; margin: 0 auto; }
   .pilotSignup-main {
-    margin-top: -1.5rem;
+    margin-top: -3.25rem;
   }
+  .pilotSignup-card { border-radius: 1.35rem; }
+  .pilotSignup-cardB4 { width: 3.25rem; height: 3.25rem; flex-basis: 3.25rem; }
+  .pilotSignup-section { padding: 1rem; }
+}
+
+@media (min-width: 900px) {
+  .pilotSignup-page {
+    background: #f7f4ef;
+  }
+
+  .pilotSignup-stage {
+    --pilotSignup-hero-boundary: clamp(40rem, 80vh, 48rem);
+    min-height: calc(100dvh - 5rem);
+    padding: 6.25rem max(2rem, calc((100vw - var(--cc-site-container-max, 80rem)) / 2)) 2.25rem;
+    display: grid;
+    grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
+    align-items: start;
+    gap: clamp(2.25rem, 3.5vw, 3.75rem);
+    background:
+      radial-gradient(circle at 19% 14%, rgba(127, 78, 190, .3), transparent 25rem),
+      radial-gradient(circle at 48% 13%, rgba(255, 173, 54, .15), transparent 20rem),
+      linear-gradient(180deg, #17163b 0 var(--pilotSignup-hero-boundary), #f7f4ef var(--pilotSignup-hero-boundary) 100%);
+    overflow: hidden;
+  }
+
+  .pilotSignup-stage::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 auto;
+    height: var(--pilotSignup-hero-boundary);
+    background: linear-gradient(125deg, rgba(12, 25, 58, .72), rgba(45, 27, 78, .2));
+  }
+
+  .pilotSignup-hero {
+    min-height: 0;
+    height: auto;
+    padding: .9rem 0 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    background: none;
+    text-align: left;
+  }
+
+  .pilotSignup-hero::after { display: none; }
+  .pilotSignup-heroCopy { width: 100%; max-width: 33.5rem; }
+  .pilotSignup-heroGuide { width: clamp(12rem, 17vw, 15.5rem); height: 18rem; margin: .8rem 0 0 1.25rem; }
+  .pilotSignup-heroB4 { width: 100%; height: 100%; }
+  .pilotSignup-guideHalo { inset: 18% 0 2%; }
+  .pilotSignup-eyebrow { margin-bottom: .65rem; font-size: .67rem; letter-spacing: .115em; }
+  .pilotSignup-heroTitle { max-width: 33.5rem; font-size: clamp(2.65rem, 3.5vw, 3.65rem); line-height: 1.01; }
+  .pilotSignup-heroSub { max-width: 32.5rem; margin-top: .9rem; font-size: .98rem; line-height: 1.5; }
+
+  .pilotSignup-main {
+    width: 100%;
+    max-width: 48rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pilotSignup-card {
+    padding: 1.35rem 1.55rem 1.25rem;
+    border-radius: 1.45rem;
+  }
+
+  .pilotSignup-cardIntro { gap: .8rem; }
+  .pilotSignup-cardB4 { width: 3rem; height: 3rem; flex-basis: 3rem; }
+  .pilotSignup-cardTitle { margin-bottom: .15rem; font-size: 1.12rem; }
+  .pilotSignup-cardSub { font-size: .82rem; }
+
+  .pilotSignup-progress {
+    height: 2rem;
+    margin: .7rem 0 .85rem;
+  }
+  .pilotSignup-progress li { flex-direction: row; justify-content: center; gap: .3rem; font-size: .65rem; }
+  .pilotSignup-progress span { width: 1.35rem; height: 1.35rem; font-size: .61rem; }
+  .pilotSignup-progress li:not(:last-child)::after { top: 50%; left: calc(50% + 2.5rem); width: calc(100% - 5rem); }
+
+  .pilotSignup-form { gap: .65rem; }
+  .pilotSignup-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+    row-gap: .65rem;
+    padding: .6rem 0 .72rem;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(207, 151, 60, .25);
+    background: none;
+  }
+  .pilotSignup-section legend { grid-column: 1 / -1; margin-bottom: .1rem; padding: 0; }
+  .pilotSignup-section legend span::before { width: .35rem; height: .35rem; box-shadow: 0 0 0 3px rgba(238,134,38,.1); }
+  .pilotSignup-field { gap: .25rem; }
+  .pilotSignup-field label { font-size: .75rem; }
+  .pilotSignup-field input,
+  .pilotSignup-field select { min-height: 2.7rem; padding: .55rem .7rem; font-size: .86rem; }
+  .pilotSignup-fieldHint { font-size: .7rem; }
+  .pilotSignup-terms { margin-top: .05rem; }
+  .pilotSignup-termsLabel { font-size: .72rem; line-height: 1.35; }
+  .pilotSignup-submit { min-height: 2.85rem; margin-top: 0; padding: .65rem 1rem; }
+  .pilotSignup-trust { margin-top: -.35rem; font-size: .69rem; }
+  .pilotSignup-card > .pilotSignup-cardSub { margin-top: .8rem !important; font-size: .72rem; }
+}
+
+@media (min-width: 900px) and (max-width: 1160px) {
+  .pilotSignup-stage {
+    grid-template-columns: minmax(0, 41fr) minmax(0, 59fr);
+    gap: 2rem;
+  }
+  .pilotSignup-heroGuide { width: 11rem; height: 13.5rem; margin-left: .5rem; }
+  .pilotSignup-heroTitle { font-size: 2.25rem; }
+}
+
+@media (max-width: 380px) {
+  .pilotSignup-main { padding: 0 .75rem; }
+  .pilotSignup-progress li { font-size: .62rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilotSignup-heroB4 { animation: none; }
+  .pilotSignup-submit { transition: none; }
 }

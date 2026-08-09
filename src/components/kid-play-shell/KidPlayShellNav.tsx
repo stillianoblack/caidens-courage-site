@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { kidPlayShellNavigate } from '../../lib/kidShellNav';
 import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
-import { readActiveChildParticipantId } from '../../config/activeChildParticipant';
 import {
   getKidPlayShellRoute,
   type KidPlayShellModuleId,
 } from '../../lib/kidPlayShellRoutes';
 import './kid-play-shell-nav.css';
+import KidPlayB4ProfileControl from './KidPlayB4ProfileControl';
 
 export type { KidPlayShellModuleId };
 
@@ -29,6 +29,8 @@ type KidPlayShellNavProps = {
   sessionId: string;
   activeModule: KidPlayShellModuleId;
   showArcadeNewBadge?: boolean;
+  participantId: string;
+  displayName: string;
   onExitClick: () => void;
 };
 
@@ -36,10 +38,11 @@ export default function KidPlayShellNav({
   sessionId,
   activeModule,
   showArcadeNewBadge = false,
+  participantId,
+  displayName,
   onExitClick,
 }: KidPlayShellNavProps) {
   const navigate = useNavigate();
-  const participantId = readActiveChildParticipantId();
   const collectionsBadgeCount = useInventoryNotificationBadge(participantId);
   const resolvedActiveModule = activeModule === 'inventory' ? 'collections' : activeModule;
 
@@ -88,17 +91,20 @@ export default function KidPlayShellNav({
           })}
         </ul>
       </nav>
-      <button
-        type="button"
-        className="kidPlayShellPowerBtn"
-        onClick={onExitClick}
-        aria-label="Exit game"
-        title="Exit game"
-      >
-        <span className="kidPlayShellPowerBtnIcon" aria-hidden="true">
-          ⏻
-        </span>
-      </button>
+      <div className="kidPlayShellNavActions">
+        <KidPlayB4ProfileControl participantId={participantId} displayName={displayName} />
+        <button
+          type="button"
+          className="kidPlayShellPowerBtn"
+          onClick={onExitClick}
+          aria-label="Exit game"
+          title="Exit game"
+        >
+          <span className="kidPlayShellPowerBtnIcon" aria-hidden="true">
+            ⏻
+          </span>
+        </button>
+      </div>
     </header>
   );
 }

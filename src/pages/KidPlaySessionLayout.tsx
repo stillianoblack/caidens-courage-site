@@ -34,6 +34,7 @@ import { IdleSessionGuard } from '../design-system/narration';
 import KidPlayShellNav from '../components/kid-play-shell/KidPlayShellNav';
 import KidPlayShellExitModal from '../components/kid-play-shell/KidPlayShellExitModal';
 import B4FocusFlightUnlockModal from '../components/kid-play-shell/B4FocusFlightUnlockModal';
+import B4UnitOnboardingModal from '../components/b4/B4UnitOnboardingModal';
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import {
@@ -65,6 +66,7 @@ function KidPlaySessionLayoutContent() {
   const [session, setSession] = useState<KidPlaySessionRow | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [gradeLevel, setGradeLevel] = useState<string | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
   const [showBootLoader, setShowBootLoader] = useState(true);
   const [bootLoaderExiting, setBootLoaderExiting] = useState(false);
@@ -87,6 +89,7 @@ function KidPlaySessionLayoutContent() {
     setSession(null);
     setDisplayName('');
     setFirstName('');
+    setGradeLevel(null);
 
     async function boot() {
       const sessionId = kidPlaySessionId.trim();
@@ -108,16 +111,20 @@ function KidPlaySessionLayoutContent() {
       writeLocalKidPlaySessionId(row.id);
       const { participants } = await fetchParticipantsByIds([row.child_id]);
       const participant = participants[0];
+      const sessionDisplayName = String(row.resume_payload?.participant_display_name || '').trim();
+      const sessionFirstName = String(row.resume_payload?.participant_first_name || '').trim();
+      const sessionGradeLevel = String(row.resume_payload?.participant_grade_level || '').trim();
       const name = participant
         ? resolveParticipantDisplayName(participant.id, buildParticipantNameLookup([participant]))
-        : 'Player';
-      const legalFirstName = participant?.first_name?.trim() || name.split(/\s+/)[0] || name;
+        : sessionDisplayName || 'Player';
+      const legalFirstName = participant?.first_name?.trim() || sessionFirstName || name.split(/\s+/)[0] || name;
 
       if (cancelled) return;
 
       setSession(row);
       setDisplayName(name);
       setFirstName(legalFirstName);
+      setGradeLevel(sessionGradeLevel || participant?.grade_level?.trim() || null);
       void updateKidPlaySessionActivity(row.id);
 
       const behavior = resolveKidPlaySessionBehaviorFromRow(row);
@@ -179,7 +186,7 @@ function KidPlaySessionLayoutContent() {
     if (showLoaderOverlay || !session) return undefined;
 
     const refreshUnlockState = () => {
-      const unlockState = getB4FocusFlightUnlockState();
+      const unlockState = getB4FocusFlightUnlockState(session.child_id);
       setShowArcadeNewBadge(unlockState.shouldShowArcadeBadge);
       setShowB4UnlockModal(unlockState.shouldShowModal);
     };
@@ -226,15 +233,15 @@ function KidPlaySessionLayoutContent() {
   }, [handleEndSession]);
 
   const handleB4UnlockDismiss = useCallback(() => {
-    markB4FocusFlightUnlockSeen();
+    markB4FocusFlightUnlockSeen(session?.child_id);
     setShowB4UnlockModal(false);
-    setShowArcadeNewBadge(getB4FocusFlightUnlockState().shouldShowArcadeBadge);
-  }, []);
+    setShowArcadeNewBadge(getB4FocusFlightUnlockState(session?.child_id).shouldShowArcadeBadge);
+  }, [session?.child_id]);
 
   const handleB4UnlockPlayNow = useCallback(() => {
     if (!session) return;
-    markB4FocusFlightUnlockSeen();
-    requestB4FocusFlightHighlight();
+    markB4FocusFlightUnlockSeen(session.child_id);
+    requestB4FocusFlightHighlight(session.child_id);
     setShowB4UnlockModal(false);
     setShowArcadeNewBadge(false);
     kidPlayShellNavigate(navigate, `${getKidPlayShellRoute(session.id, 'arcade')}?launch=b4-focus-flight`);
@@ -257,12 +264,22 @@ function KidPlaySessionLayoutContent() {
           participantId={session.child_id}
           displayName={displayName}
           firstName={firstName}
+          gradeLevel={gradeLevel}
         >
-          <KidPlaySessionProvider session={session}>
+      <KidPlaySessionProvider session={session}>
+        {activeModule === 'weekly-adventures' ? (
+          <B4UnitOnboardingModal
+            key={session.child_id}
+            participantId={session.child_id}
+            enforce
+          />
+        ) : null}
             <div className="kid-play-shell">
               <KidPlayShellNav
                 sessionId={session.id}
                 activeModule={activeModule}
+                participantId={session.child_id}
+                displayName={displayName}
                 showArcadeNewBadge={showArcadeNewBadge}
                 onExitClick={() => setExitOpen(true)}
               />

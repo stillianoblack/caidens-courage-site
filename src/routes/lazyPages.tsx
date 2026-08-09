@@ -11,7 +11,9 @@ export const ParentsPage = lazy(() => import('../pages/ParentsPage'));
 export const TeachersPage = lazy(() => import('../pages/TeachersPage'));
 export const CampsPage = lazy(() => import('../pages/CampsPage'));
 export const StoryHubPage = lazy(() => import('../pages/StoryHub'));
+export const TheStoryPage = lazy(() => import('../pages/TheStoryPage'));
 export const StoryModePage = lazy(() => import('../pages/StoryModePage'));
+// Public Story Quest uses the same direct-question page.
 export const ResourcesPage = lazy(() => import('../pages/Resources'));
 export const ProductPage = lazy(() => import('../pages/Product'));
 export const PreviewPage = lazy(() => import('../pages/Preview'));

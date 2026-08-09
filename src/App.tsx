@@ -70,6 +70,7 @@ import {
   ResourcesPage,
   SchoolsPage,
   StoryHubPage,
+  TheStoryPage,
   StoryModePage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
@@ -91,6 +92,7 @@ import {
   STORY_CHARACTERS_PATH,
   STORY_MODE_PATH,
   STORY_PATH,
+  THE_STORY_PATH,
   B4_GUIDE_PATH,
   B4_BASELINE_CHECK_PATH,
   B4_RESULTS_ADMIN_PATH,
@@ -126,8 +128,10 @@ import {
   STUDENT_GALLERY_PUBLIC_PATH,
   KID_PLAY_SESSION_PATH,
   STUDENT_PIN_LOGIN_PATH,
+  ARCADE_PREVIEW_PATH,
 } from './config/courageRoutes';
 import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
+import { ENABLE_DEVELOPMENT_PREVIEWS } from './config/developmentPreview';
 
 const Portal = React.lazy(() => import('./pages/Portal'));
 const PortalDashboard = React.lazy(() => import('./pages/PortalDashboard'));
@@ -143,6 +147,7 @@ const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
 const KidPlaySessionLayout = React.lazy(() => import('./pages/KidPlaySessionLayout'));
 const StudentPinLoginPage = React.lazy(() => import('./pages/StudentPinLoginPage'));
+const PreviewArcadeLayout = React.lazy(() => import('./pages/PreviewArcadeLayout'));
 const FamilyClaimByCodePage = React.lazy(() => import('./pages/FamilyClaimByCodePage'));
 const FamilyClaimRedirect = React.lazy(() => import('./pages/FamilyClaimRedirect'));
 
@@ -260,6 +265,7 @@ const appRouteChildren = (
 
       {/* Story world */}
       <Route path={STORY_PATH} element={<StoryHubPage />} />
+      <Route path={THE_STORY_PATH} element={<TheStoryPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
       <Route path={STORY_MODE_PATH} element={<StoryModePage />} />
@@ -283,6 +289,9 @@ const appRouteChildren = (
       <Route path={`${KID_PLAY_SESSION_PATH}/:kidPlaySessionId`} element={<KidPlaySessionLayout />}>
         {kidPlayShellChildRoutes}
       </Route>
+      {ENABLE_DEVELOPMENT_PREVIEWS ? (
+        <Route path={`${ARCADE_PREVIEW_PATH}/*`} element={<PreviewArcadeLayout />} />
+      ) : null}
 
       {/* Focus Flame Academy */}
       <Route
@@ -537,8 +546,13 @@ const AppLayout: React.FC = () => {
   const isKidPlayShell =
     location.pathname === KID_PLAY_SESSION_PATH ||
     location.pathname.startsWith(`${KID_PLAY_SESSION_PATH}/`);
+  const isArcadePreview =
+    ENABLE_DEVELOPMENT_PREVIEWS &&
+    (location.pathname === ARCADE_PREVIEW_PATH ||
+      location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/`));
   const isImmersiveKidsGame =
     isKidPlayShell ||
+    isArcadePreview ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
     location.pathname === B4_GUIDE_PATH ||
@@ -562,6 +576,7 @@ const AppLayout: React.FC = () => {
   /** Hide global Ask B-4 during gameplay and on portal shells (AppShell mounts B4Assistant). */
   const hideAskB4Chat =
     isKidPlayShell ||
+    isArcadePreview ||
     !ENABLE_B4_CHAT ||
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||

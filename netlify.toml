@@ -4,6 +4,17 @@
   command = "yarn build"
   functions = "netlify/functions"
 
+# Preview-only client routes. Production intentionally has no matching value,
+# so the router never mounts these shortcuts on the live site.
+[context.deploy-preview.environment]
+  REACT_APP_ENABLE_DEVELOPMENT_PREVIEWS = "true"
+
+[context.branch-deploy.environment]
+  REACT_APP_ENABLE_DEVELOPMENT_PREVIEWS = "true"
+
+[context.staging.environment]
+  REACT_APP_ENABLE_DEVELOPMENT_PREVIEWS = "true"
+
 # CRA already emits optimized hashed assets. Avoid Netlify post-processing so
 # dynamic import chunks deploy exactly as the build generated them.
 [build.processing]
@@ -36,27 +47,33 @@
     Cache-Control = "public, max-age=0, must-revalidate"
     Netlify-CDN-Cache-Control = "no-store"
 
-# Cache hashed static assets aggressively (1 year)
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Service workers must revalidate so update checks see the latest file.
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
+# Root JavaScript and CSS files are not assumed to be content hashed.
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
+
+# Revalidate browser copies so Netlify Dev's stable bundle names cannot go stale.
+# Production's content-hashed assets retain long-lived caching at the CDN edge.
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "public, s-maxage=31536000, immutable"
+
+# Keep this rule after the general JavaScript rule so update checks always revalidate.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-Cache-Control = "no-store"
 
 [[headers]]
   for = "/*.woff"

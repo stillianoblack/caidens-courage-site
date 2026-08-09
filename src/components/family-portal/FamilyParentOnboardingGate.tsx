@@ -42,7 +42,10 @@ export default function FamilyParentOnboardingGate({
   children,
   onFinished,
 }: FamilyParentOnboardingGateProps) {
-  const parentClaim = readParentClaimContext({ programCode });
+  const parentClaim = useMemo(
+    () => readParentClaimContext({ programCode }),
+    [programCode],
+  );
   const { participant: activeChild } = useActiveParticipant();
   const participantId =
     activeChild?.participantId?.trim() || children[0]?.participantId?.trim() || '';
@@ -82,14 +85,19 @@ export default function FamilyParentOnboardingGate({
   );
 
   useEffect(() => {
-    setVisibility(
-      shouldShowFamilyOnboarding({
-        programCode,
-        parentSession: { parentEmail: loggedInEmail, parentClaim },
-        familyLinks,
-        activeChild: { participantId, displayName: childDisplayName },
-        childDisplayName,
-      }),
+    const nextVisibility = shouldShowFamilyOnboarding({
+      programCode,
+      parentSession: { parentEmail: loggedInEmail, parentClaim },
+      familyLinks,
+      activeChild: { participantId, displayName: childDisplayName },
+      childDisplayName,
+    });
+
+    setVisibility((currentVisibility) =>
+      currentVisibility.show === nextVisibility.show &&
+      currentVisibility.goalsOnly === nextVisibility.goalsOnly
+        ? currentVisibility
+        : nextVisibility,
     );
   }, [
     childDisplayName,

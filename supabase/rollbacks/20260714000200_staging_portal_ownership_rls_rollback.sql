@@ -1,0 +1,16 @@
+drop policy if exists portal_ownership_select on public.pilot_programs;
+drop policy if exists portal_ownership_select on public.participants;
+drop policy if exists portal_ownership_select on public.student_family_links;
+drop policy if exists portal_ownership_select on public.assessment_results;
+drop policy if exists portal_ownership_select on public.assessment_results_v2;
+drop policy if exists portal_ownership_select on public.module_results;
+drop policy if exists portal_ownership_select on public.player_progress;
+drop policy if exists portal_ownership_select on public.player_wallets;
+drop policy if exists portal_ownership_select on public.player_badges;
+drop policy if exists portal_ownership_select on public.player_reward_claims;
+drop policy if exists portal_ownership_select on public.kid_play_sessions;
+drop policy if exists portal_ownership_select on public.participant_ui_state;
+drop policy if exists portal_ownership_select on public.question_attempts;
+drop policy if exists portal_ownership_select on public.family_child_goals;
+drop policy if exists portal_ownership_select on public.program_goals;
+drop policy if exists portal_ownership_select on public.student_gallery_items;

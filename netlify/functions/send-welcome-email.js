@@ -1,5 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 const { sendWelcomeEmail } = require('./_lib/emailProvider');
+
+function maskEmail(value) {
+  const [local = '', domain = ''] = String(value || '').trim().split('@');
+  if (!local || !domain) return 'masked';
+  return `${local.slice(0, 1)}***@${domain}`;
+}
 
 function json(statusCode, body) {
   return {
@@ -15,6 +22,7 @@ function getSupabase() {
   if (!url || !key) return null;
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { transport: WebSocket },
   });
 }
 
@@ -84,7 +92,7 @@ exports.handler = async (event) => {
   }
 
   console.info('[PARENT_EMAIL_ATTEMPTED]', {
-    recipient_email: payload.recipientEmail,
+    recipient_email: maskEmail(payload.recipientEmail),
     email_type: payload.emailType || 'welcome',
     related_student_id: payload.relatedStudentId || null,
     related_program_id: payload.relatedProgramId || null,
@@ -94,7 +102,7 @@ exports.handler = async (event) => {
   if (!process.env.RESEND_API_KEY) {
     console.info('[SEND_WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_email: maskEmail(payload.recipientEmail),
       success: false,
       skipped: true,
       reason: 'RESEND_API_KEY missing',
@@ -114,7 +122,7 @@ exports.handler = async (event) => {
   if (!result.success) {
     console.info('[SEND_WELCOME_EMAIL]', {
       provider: 'Resend',
-      recipient_email: payload.recipientEmail,
+      recipient_email: maskEmail(payload.recipientEmail),
       success: false,
       skipped: false,
       reason: result.error,
@@ -135,7 +143,7 @@ exports.handler = async (event) => {
   });
   console.info('[SEND_WELCOME_EMAIL]', {
     provider: 'Resend',
-    recipient_email: payload.recipientEmail,
+    recipient_email: maskEmail(payload.recipientEmail),
     success: true,
     skipped: false,
     provider_message_id: result.providerMessageId ?? null,

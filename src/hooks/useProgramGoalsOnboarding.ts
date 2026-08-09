@@ -11,6 +11,7 @@ import {
   writeProgramGoalsSkippedLocal,
   type ProgramGoalsRecord,
 } from '../lib/programGoalsService';
+import { ENABLE_INITIAL_GOAL_SELECTION } from '../config/featureFlags';
 
 export type GoalsDismissReason = 'close' | 'remind' | 'skip';
 
@@ -48,7 +49,13 @@ export function useProgramGoalsOnboarding({
   }, [enabled, refresh]);
 
   useEffect(() => {
-    if (!enabled || loading || autoShownRef.current || !programCode.trim()) return;
+    if (
+      !enabled ||
+      !ENABLE_INITIAL_GOAL_SELECTION ||
+      loading ||
+      autoShownRef.current ||
+      !programCode.trim()
+    ) return;
     // Family portal uses inline Parent/Guardian child goals checklist on Home.
     if (portalType === 'family') return;
 

@@ -38,11 +38,12 @@ function CheckList({ items, className = '' }: { items: readonly string[]; classN
   );
 }
 
-function PricingTierCard({ tier }: { tier: PersonaPageConfig['pricing'][number] }) {
+function PricingTierCard({ tier, family = false }: { tier: PersonaPageConfig['pricing'][number]; family?: boolean }) {
   return (
     <div
       className={[
         'flex flex-col rounded-3xl border-2 bg-white p-8 shadow-sm',
+        family ? 'persona-familyPricingCard' : '',
         tier.featured ? 'border-golden-400 ring-2 ring-golden-400/30' : 'border-navy-100',
       ].join(' ')}
     >
@@ -180,16 +181,35 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
   }, []);
 
   const howItWorksItems = config.howItWorks ?? config.faq ?? [];
+  const isFamilyPage = config.slug === 'parents';
+  const familyAudienceDescriptions: Record<string, string> = {
+    'Parents and caregivers': 'Tools to support everyday conversations and stronger connections.',
+    'Homeschool families': 'Flexible resources for learning, growth, and emotional development.',
+    'Kids ages 7–12': 'Age-appropriate tools to build confidence and independence.',
+    'Neurodivergent-friendly home learning': 'Designed with inclusivity and all kinds of learners in mind.',
+  };
 
   return (
     <div className="min-h-screen overflow-x-clip bg-cream font-body">
       <CourageHeader />
 
       <SectionHero
+        className={isFamilyPage ? 'persona-familyHero' : ''}
+        variant={isFamilyPage ? 'compact' : 'default'}
         eyebrow={config.eyebrow}
         title={config.heroTitle}
         description={config.heroSubtitle}
         supportingText={config.intro}
+        visual={isFamilyPage ? (
+          <div className="persona-familyHeroGuide">
+            <div className="persona-familyHeroGuideGlow" />
+            <img
+              className="persona-familyHeroB4"
+              src="/images/Choose-Your-Guide/b-4facilitator-hover.webp"
+              alt=""
+            />
+          </div>
+        ) : undefined}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Button
@@ -217,17 +237,27 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       </SectionHero>
 
       {/* Who it's for */}
-      <section id="who-its-for" className="cc-schools-section scroll-mt-24 border-b border-navy-100/80 bg-white">
+      <section id="who-its-for" className={`cc-schools-section scroll-mt-24 border-b border-navy-100/80 bg-white ${isFamilyPage ? 'persona-familyWho' : ''}`}>
         <PersonaContainer>
           <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl lg:text-4xl">Who it&apos;s for</h2>
-          <ul className="cc-schools-card-grid mt-8">
+          <ul className={isFamilyPage ? 'persona-familyWhoGrid mt-8' : 'cc-schools-card-grid mt-8'}>
             {config.whoItsFor.map((item) => (
               <li
                 key={item}
-                className="flex min-h-[88px] items-center gap-4 rounded-2xl border border-navy-100 bg-cream px-6 py-5 font-display text-lg font-semibold text-navy-500 sm:text-xl"
+                className={isFamilyPage ? 'persona-familyWhoCard' : 'flex min-h-[88px] items-center gap-4 rounded-2xl border border-navy-100 bg-cream px-6 py-5 font-display text-lg font-semibold text-navy-500 sm:text-xl'}
               >
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-golden-500" aria-hidden />
-                {item}
+                {isFamilyPage ? (
+                  <>
+                    <span className="persona-familyIcon" aria-hidden>✦</span>
+                    <span>
+                      <strong>{item}</strong>
+                      <span>{familyAudienceDescriptions[item]}</span>
+                    </span>
+                    <i aria-hidden />
+                  </>
+                ) : (
+                  <><span className="h-2.5 w-2.5 shrink-0 rounded-full bg-golden-500" aria-hidden />{item}</>
+                )}
               </li>
             ))}
           </ul>
@@ -235,15 +265,16 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       </section>
 
       {/* Benefits */}
-      <section id="benefits" className="cc-schools-section scroll-mt-24">
+      <section id="benefits" className={`cc-schools-section scroll-mt-24 ${isFamilyPage ? 'persona-familyBenefits' : ''}`}>
         <PersonaContainer>
           <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl lg:text-4xl">Benefits</h2>
-          <div className="cc-schools-card-grid mt-8">
+          <div className={isFamilyPage ? 'persona-familyTileGrid mt-8' : 'cc-schools-card-grid mt-8'}>
             {config.benefits.map((benefit) => (
               <div
                 key={benefit}
-                className="rounded-3xl border-2 border-navy-100 bg-white p-6 shadow-sm transition-transform duration-200 md:hover:-translate-y-0.5 sm:p-8"
+                className={isFamilyPage ? 'persona-familyTile' : 'rounded-3xl border-2 border-navy-100 bg-white p-6 shadow-sm transition-transform duration-200 md:hover:-translate-y-0.5 sm:p-8'}
               >
+                {isFamilyPage ? <span className="persona-familyIcon" aria-hidden>✓</span> : null}
                 <p className="text-base leading-relaxed text-navy-600 sm:text-lg">{benefit}</p>
               </div>
             ))}
@@ -252,15 +283,16 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       </section>
 
       {/* What's included */}
-      <section id="whats-included" className="cc-schools-section scroll-mt-24 border-y border-navy-100/80 bg-white">
+      <section id="whats-included" className={`cc-schools-section scroll-mt-24 border-y border-navy-100/80 bg-white ${isFamilyPage ? 'persona-familyIncluded' : ''}`}>
         <PersonaContainer>
           <h2 className="font-display text-2xl font-extrabold text-navy-500 sm:text-3xl lg:text-4xl">What&apos;s included</h2>
-          <ul className="cc-schools-included-grid mt-8">
+          <ul className={isFamilyPage ? 'persona-familyIncludedGrid mt-8' : 'cc-schools-included-grid mt-8'}>
             {config.whatsIncluded.map((item) => (
               <li
                 key={item}
-                className="rounded-3xl border-2 border-navy-100 bg-cream p-6 shadow-sm transition-transform duration-200 md:hover:-translate-y-0.5"
+                className={isFamilyPage ? 'persona-familyIncludedTile' : 'rounded-3xl border-2 border-navy-100 bg-cream p-6 shadow-sm transition-transform duration-200 md:hover:-translate-y-0.5'}
               >
+                {isFamilyPage ? <span className="persona-familyIcon" aria-hidden>✓</span> : null}
                 <span className="font-display text-base font-bold text-navy-500 sm:text-lg">{item}</span>
               </li>
             ))}
@@ -279,11 +311,12 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
             ].join(' ')}
           >
             {config.pricing.map((tier) => (
-              <PricingTierCard key={tier.title} tier={tier} />
+              <PricingTierCard key={tier.title} tier={tier} family={isFamilyPage} />
             ))}
           </div>
           {config.pricingFooterNotes?.length ? (
-            <div className="mt-8 rounded-2xl border border-navy-100 bg-cream px-6 py-5">
+            <div className={`mt-8 rounded-2xl border border-navy-100 bg-cream px-6 py-5 ${isFamilyPage ? 'persona-familyPricingNote' : ''}`}>
+              {isFamilyPage ? <span className="persona-familyInfoIcon" aria-hidden>i</span> : null}
               {config.pricingFooterNotes.map((note) => (
                 <p key={note} className="text-sm leading-relaxed text-navy-600 sm:text-base">
                   {note}
@@ -295,11 +328,15 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       </section>
 
       {/* CTA banner */}
-      <section className="cc-schools-section cc-schools-section--compact scroll-mt-24 border-y border-navy-100/80 bg-navy-500 text-white">
+      <section className={`cc-schools-section cc-schools-section--compact scroll-mt-24 border-y border-navy-100/80 bg-navy-500 text-white ${isFamilyPage ? 'persona-familyFinalCta' : ''}`}>
         <PersonaContainer>
           <div className="cc-schools-final-cta-inner text-center">
             <h2 className="font-display text-2xl font-extrabold sm:text-3xl">Ready to get started?</h2>
-            <p className="mt-4 text-base text-white/85 sm:text-lg">{config.intro}</p>
+            <p className="mt-4 text-base text-white/85 sm:text-lg">
+              {isFamilyPage
+                ? 'Give your child the tools to build confidence, focus, and emotional strength—right at home.'
+                : config.intro}
+            </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap">
               <Button
                 variant="primary"

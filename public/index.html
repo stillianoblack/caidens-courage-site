@@ -2,6 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script>
+      (function () {
+        var isLocalPreview = /^(localhost|127\.0\.0\.1|::1)$/.test(window.location.hostname);
+        if (!isLocalPreview) return;
+
+        function isMetaMaskExtensionFailure(value) {
+          var message = value && value.message ? value.message : String(value || '');
+          var stack = value && value.stack ? value.stack : '';
+          return /Failed to connect to MetaMask/i.test(message) && /chrome-extension:/i.test(stack);
+        }
+
+        window.addEventListener('unhandledrejection', function (event) {
+          if (!isMetaMaskExtensionFailure(event.reason)) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }, true);
+
+        window.addEventListener('error', function (event) {
+          if (!isMetaMaskExtensionFailure(event.error)) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }, true);
+      })();
+    </script>
     <link rel="icon" href="/images/icons/favcon_C.svg" />
     <link rel="icon" type="image/svg+xml" href="/images/icons/favcon_C.svg" />
     <link rel="apple-touch-icon" href="/images/icons/favcon_C.svg" />

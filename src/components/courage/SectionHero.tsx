@@ -29,6 +29,10 @@ export type SectionHeroProps = {
   ctaHref?: string;
   /** Button click handler for CTA */
   ctaOnClick?: () => void;
+  /** Optional decorative or supporting visual rendered beside the copy. */
+  visual?: React.ReactNode;
+  /** Optional page-specific class for scoped presentation refinements. */
+  className?: string;
 };
 
 function SectionHeroCta({
@@ -93,6 +97,8 @@ export default function SectionHero({
   ctaLabel,
   ctaHref,
   ctaOnClick,
+  visual,
+  className = '',
 }: SectionHeroProps) {
   const ctaContent = children ?? (
     <SectionHeroCta ctaLabel={ctaLabel} ctaHref={ctaHref} ctaOnClick={ctaOnClick} />
@@ -106,12 +112,16 @@ export default function SectionHero({
         'cc-section-hero relative overflow-hidden text-left text-white',
         headerOffset === 'vale' ? 'cc-section-hero--vale' : 'cc-section-hero--courage',
         variant === 'compact' || variant === 'kids' ? 'cc-section-hero--compact' : '',
+        visual ? 'cc-section-hero--with-visual' : '',
+        className,
       ].join(' ')}
     >
       <div className="cc-section-hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="cc-section-hero-noise pointer-events-none absolute inset-0" aria-hidden="true" />
 
       <div className="cc-section-hero-inner relative z-10 mx-auto max-w-[75rem] px-4 sm:px-6 lg:px-8">
+        {visual ? <div className="cc-section-hero-visual" aria-hidden="true">{visual}</div> : null}
+        <div className="cc-section-hero-copy">
         <p className="cc-section-hero-eyebrow text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-400 sm:text-[11px]">
           {eyebrow}
         </p>
@@ -134,6 +144,7 @@ export default function SectionHero({
           </p>
         ) : null}
         {ctaContent ? <div className="cc-section-hero-actions mt-8 sm:mt-10">{ctaContent}</div> : null}
+        </div>
       </div>
     </section>
   );

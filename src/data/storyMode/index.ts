@@ -1,42 +1,23 @@
-import chaptersJson from './chapters.json';
+import { DRAGONS_NEST_CAMPAIGN } from './dragonNestCampaign';
 
-export type StoryComicPanel = {
-  id: string;
-  image: string;
-  alt: string;
-  narration: string;
-};
+export {
+  DRAGONS_NEST_CAMPAIGN,
+  getQuestionVariant,
+  resolveStoryQuestGradeBand,
+  type StoryChapter,
+  type StoryComicPanel,
+  type StoryChoice,
+  type StoryDialogueLine,
+  type StoryQuestionCategory,
+  type StoryQuestionVariant,
+  type StoryQuestCampaign,
+  type StoryQuestGradeBand,
+  type StoryQuestQuestion,
+} from './dragonNestCampaign';
 
-export type StoryDialogueLine = {
-  id: string;
-  characterName: string;
-  portrait: string;
-  text: string;
-};
+export const STORY_CHAPTERS = DRAGONS_NEST_CAMPAIGN.chapters;
 
-export type StoryChoice = {
-  id: string;
-  prompt: string;
-  options: string[];
-};
-
-export type StoryChapter = {
-  id: string;
-  title: string;
-  description: string;
-  coverImage: string;
-  comicPanels: StoryComicPanel[];
-  dialogue: StoryDialogueLine[];
-  choice: StoryChoice;
-  missionId: string;
-  reflectionId: string;
-  challengeId: string;
-  rewardId: string;
-};
-
-export const STORY_CHAPTERS = chaptersJson as StoryChapter[];
-
-export function getStoryChapterById(chapterId: string | undefined): StoryChapter | undefined {
+export function getStoryChapterById(chapterId: string | undefined) {
   if (!chapterId) return undefined;
   return STORY_CHAPTERS.find((chapter) => chapter.id === chapterId);
 }
@@ -46,8 +27,11 @@ export function getStoryChapterIndex(chapterId: string | undefined): number {
   return STORY_CHAPTERS.findIndex((chapter) => chapter.id === chapterId);
 }
 
-export function getNextStoryChapter(chapterId: string | undefined): StoryChapter | undefined {
+export function getNextStoryChapter(chapterId: string | undefined) {
   const index = getStoryChapterIndex(chapterId);
-  if (index < 0) return undefined;
-  return STORY_CHAPTERS[index + 1];
+  return index < 0 ? undefined : STORY_CHAPTERS[index + 1];
+}
+
+export function getStoryQuestionsForChapter(chapterId: string) {
+  return DRAGONS_NEST_CAMPAIGN.questions.filter((question) => question.chapterId === chapterId);
 }

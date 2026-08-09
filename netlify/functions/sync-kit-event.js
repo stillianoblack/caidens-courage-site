@@ -18,6 +18,9 @@ function normalizeEmail(value) {
 }
 
 exports.handler = async (event) => {
+  if (process.env.LEGACY_KIT_EVENT_ENDPOINT_ENABLED !== 'true') {
+    return json(410, { success: false, error: 'Legacy Kit event endpoint is disabled.' });
+  }
   if (event.httpMethod !== 'POST') {
     return json(405, { success: false, error: 'Method not allowed.' });
   }

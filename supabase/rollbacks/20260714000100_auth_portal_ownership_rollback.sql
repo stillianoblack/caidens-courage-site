@@ -1,0 +1,10 @@
+revoke all on function public.grant_portal_ownership(uuid,uuid,text,uuid,text,text,uuid)
+  from public, anon, authenticated, service_role;
+drop function if exists public.grant_portal_ownership(uuid,uuid,text,uuid,text,text,uuid);
+drop function if exists private.portal_can_access_participant_text(text);
+drop function if exists private.portal_can_access_participant(uuid);
+drop function if exists private.portal_can_access_program_code(text);
+drop function if exists private.portal_can_access_program_id(uuid);
+drop table if exists public.portal_ownership_audit_events;
+drop table if exists public.portal_participant_access;
+drop table if exists public.portal_program_memberships;

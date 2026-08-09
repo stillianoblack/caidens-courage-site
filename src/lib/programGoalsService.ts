@@ -11,6 +11,7 @@ export type ProgramGoalsRecord = {
   custom_goal?: string | null;
   completed_at?: string | null;
   dismissed_until?: string | null;
+  dashboard_onboarding_dismissed_at?: string | null;
 };
 
 export const PROGRAM_GOALS_SAVED_EVENT = 'caidens:program-goals-saved';
@@ -199,6 +200,7 @@ async function fetchProgramGoalsImpl(
       custom_goal: data.custom_goal,
       completed_at: data.completed_at,
       dismissed_until: data.dismissed_until ?? localDismissedUntil,
+      dashboard_onboarding_dismissed_at: data.dashboard_onboarding_dismissed_at ?? null,
     };
     writeProgramGoalsLocal(record);
     if (record.dismissed_until) {
@@ -247,6 +249,8 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
         custom_goal: record.custom_goal?.trim() || null,
         completed_at: record.completed_at ?? null,
         dismissed_until: record.dismissed_until ?? null,
+        dashboard_onboarding_dismissed_at:
+          record.dashboard_onboarding_dismissed_at ?? null,
         updated_at: now,
       };
 
@@ -267,6 +271,8 @@ export async function saveProgramGoals(record: ProgramGoalsRecord): Promise<Prog
           custom_goal: data.custom_goal,
           completed_at: data.completed_at,
           dismissed_until: data.dismissed_until,
+          dashboard_onboarding_dismissed_at:
+            data.dashboard_onboarding_dismissed_at ?? null,
         };
         writeProgramGoalsLocal(saved);
         if (saved.dismissed_until) {
