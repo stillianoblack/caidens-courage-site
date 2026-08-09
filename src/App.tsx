@@ -156,6 +156,7 @@ const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
 const StudentPinLoginPage = React.lazy(() => import('./pages/StudentPinLoginPage'));
 const PreviewArcadeLayout = React.lazy(() => import('./pages/PreviewArcadeLayout'));
+const B4FlameRunPage = React.lazy(() => import('./games/b4FlameRun/B4FlameRunPage'));
 const FamilyClaimByCodePage = React.lazy(() => import('./pages/FamilyClaimByCodePage'));
 const FamilyClaimRedirect = React.lazy(() => import('./pages/FamilyClaimRedirect'));
 
@@ -289,7 +290,10 @@ const appRouteChildren = (
         {kidPlayShellChildRoutes}
       </Route>
       {ENABLE_DEVELOPMENT_PREVIEWS ? (
-        <Route path={`${ARCADE_PREVIEW_PATH}/*`} element={<PreviewArcadeLayout />} />
+        <>
+          <Route path={`${ARCADE_PREVIEW_PATH}/*`} element={<PreviewArcadeLayout />} />
+          <Route path="/preview/games/b4-flame-run" element={<B4FlameRunPage />} />
+        </>
       ) : null}
 
       {/* Focus Flame Academy */}
@@ -549,7 +553,8 @@ const AppLayout: React.FC = () => {
   const isArcadePreview =
     ENABLE_DEVELOPMENT_PREVIEWS &&
     (location.pathname === ARCADE_PREVIEW_PATH ||
-      location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/`));
+      location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/`) ||
+      location.pathname === '/preview/games/b4-flame-run');
   const isImmersiveKidsGame =
     isKidPlayShell ||
     isArcadePreview ||

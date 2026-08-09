@@ -7,7 +7,6 @@ import { KidPlaySessionProvider } from '../context/KidPlaySessionContext';
 import { PortalSessionProvider } from '../context/PortalSessionContext';
 import StoryModePage from './StoryModePage';
 import StoryQuestIntroPage from './StoryQuestIntroPage';
-import DragonNestRescuePage from '../games/dragonNestRescue/DragonNestRescuePage';
 // Story Quest preview reuses the production question flow.
 import type { KidPlaySessionRow } from '../lib/kidPlaySessionTypes';
 import { ARCADE_PREVIEW_PATH } from '../config/courageRoutes';
@@ -52,7 +51,6 @@ function PreviewFrame({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [previewB4, setPreviewB4] = useState<B4VariantKey>('courage');
   const inStory = location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/story`);
-  const inGame = location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/dragon-nest-rescue`);
   const changePreviewB4 = (variant: B4VariantKey) => {
     setPreviewB4(variant);
     window.dispatchEvent(new CustomEvent(B4_VARIANT_UPDATED_EVENT, {
@@ -68,7 +66,7 @@ function PreviewFrame({ children }: { children: React.ReactNode }) {
             {Object.values(B4_VARIANTS).map((definition) => <option key={definition.key} value={definition.key}>{definition.name}</option>)}
           </select>
         </label>
-        {inStory || inGame ? <Link to={ARCADE_PREVIEW_PATH}>Back to Arcade</Link> : null}
+        {inStory ? <Link to={ARCADE_PREVIEW_PATH}>Back to Arcade</Link> : null}
       </div>
       {children}
     </div>
@@ -97,14 +95,13 @@ export default function PreviewArcadeLayout() {
                     <KidArcadePanel
                       storyQuestPathOverride={storyPath}
                       b4GamePathOverride="/kids/games/b4-focus-flight"
-                      dragonNestPathOverride={`${ARCADE_PREVIEW_PATH}/dragon-nest-rescue`}
+                      flameRunPathOverride="/preview/games/b4-flame-run"
                     />
                   </KidPlayShellPage>
                 }
               />
               <Route path="story" element={<StoryQuestIntroPage storyBasePathOverride={storyPath} />} />
               <Route path="story/:chapterId" element={<StoryModePage storyBasePathOverride={storyPath} />} />
-              <Route path="dragon-nest-rescue" element={<DragonNestRescuePage />} />
               <Route path="*" element={<Navigate to={ARCADE_PREVIEW_PATH} replace />} />
             </Routes>
           </PreviewFrame>
