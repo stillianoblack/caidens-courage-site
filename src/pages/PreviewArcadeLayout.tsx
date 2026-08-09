@@ -6,6 +6,7 @@ import { KidPlaySessionParticipantProvider } from '../context/ActiveParticipantC
 import { KidPlaySessionProvider } from '../context/KidPlaySessionContext';
 import { PortalSessionProvider } from '../context/PortalSessionContext';
 import StoryModePage from './StoryModePage';
+import StoryQuestIntroPage from './StoryQuestIntroPage';
 // Story Quest preview reuses the production question flow.
 import type { KidPlaySessionRow } from '../lib/kidPlaySessionTypes';
 import { ARCADE_PREVIEW_PATH } from '../config/courageRoutes';
@@ -98,7 +99,7 @@ export default function PreviewArcadeLayout() {
                   </KidPlayShellPage>
                 }
               />
-              <Route path="story" element={<StoryModePage storyBasePathOverride={storyPath} />} />
+              <Route path="story" element={<StoryQuestIntroPage storyBasePathOverride={storyPath} />} />
               <Route path="story/:chapterId" element={<StoryModePage storyBasePathOverride={storyPath} />} />
               <Route path="*" element={<Navigate to={ARCADE_PREVIEW_PATH} replace />} />
             </Routes>

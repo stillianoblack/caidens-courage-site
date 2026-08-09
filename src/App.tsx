@@ -72,6 +72,7 @@ import {
   StoryHubPage,
   TheStoryPage,
   StoryModePage,
+  StoryQuestIntroPage,
   StudentGalleryPublicPage,
   StudentGallerySubmitPage,
   SuccessPage,
@@ -263,7 +264,7 @@ const appRouteChildren = (
       <Route path={THE_STORY_PATH} element={<TheStoryPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
-      <Route path={STORY_MODE_PATH} element={<StoryModePage />} />
+      <Route path={STORY_MODE_PATH} element={<StoryQuestIntroPage />} />
       <Route path={`${STORY_MODE_PATH}/:chapterId`} element={<StoryModePage />} />
 
       {/* Brave Mind Club */}

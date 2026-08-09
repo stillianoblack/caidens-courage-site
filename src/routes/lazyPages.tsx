@@ -13,6 +13,7 @@ export const CampsPage = lazy(() => import('../pages/CampsPage'));
 export const StoryHubPage = lazy(() => import('../pages/StoryHub'));
 export const TheStoryPage = lazy(() => import('../pages/TheStoryPage'));
 export const StoryModePage = lazy(() => import('../pages/StoryModePage'));
+export const StoryQuestIntroPage = lazy(() => import('../pages/StoryQuestIntroPage'));
 export const ResourcesPage = lazy(() => import('../pages/Resources'));
 export const ProductPage = lazy(() => import('../pages/Product'));
 export const PreviewPage = lazy(() => import('../pages/Preview'));

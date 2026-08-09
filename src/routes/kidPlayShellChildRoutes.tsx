@@ -4,6 +4,7 @@ import FamilyContinueLearningPanel from '../components/family-portal/panels/Fami
 import FamilyInventoryPanel from '../components/family-portal/panels/FamilyInventoryPanel';
 import FamilyCharacterProfilePage from '../components/family-portal/panels/FamilyCharacterProfilePage';
 import StoryModePage from '../pages/StoryModePage';
+import StoryQuestIntroPage from '../pages/StoryQuestIntroPage';
 import {
   B4FocusFlightPage,
   B4PortalCheckInPage,
@@ -60,7 +61,7 @@ export const kidPlayShellChildRoutes = (
         }
       />
       <Route path="b4-focus-flight" element={<B4FocusFlightPage />} />
-      <Route path="story" element={<StoryModePage />} />
+      <Route path="story" element={<StoryQuestIntroPage />} />
       <Route path="story/:chapterId" element={<StoryModePage />} />
     </Route>
     <Route

@@ -58,9 +58,7 @@ export default function KidArcadePanel({
   const storyQuestBasePath = storyQuestPathOverride ?? (shellContext
     ? `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/story`
     : '/story-mode');
-  // Enter the first playable question directly. Redirecting from the story index
-  // inside a mounted nested route could update the URL without rematching the view.
-  const storyQuestPath = `${storyQuestBasePath}/chapter-1`;
+  const storyQuestPath = storyQuestBasePath;
 
   useEffect(() => {
     setBestScore(readNumber(getParticipantB4FlightStorageKey(B4_BEST_SCORE_KEY, participantId)));
@@ -121,7 +119,7 @@ export default function KidArcadePanel({
         </article>
       </section>
 
-      <p className="kidArcadeSectionLabel kidArcadeSectionLabel--games">Courage Games</p>
+      <p className="kidArcadeSectionLabel kidArcadeSectionLabel--games">Choose Your Next Adventure</p>
       <div className="kidArcadeGrid" role="list">
         <GameCard
           title="B-4 Focus Flight"
@@ -130,6 +128,7 @@ export default function KidArcadePanel({
           bestScore={bestScore}
           ctaLabel="Play"
           variant="blue"
+          artworkSrc="/images/B-4FlightGame/background/GameplayBackgrounds.webp"
           thumbnailSrc={getB4Asset(variant, 'idle')}
           newTraining={showB4NewPill}
           highlight={highlightB4Card}
@@ -143,45 +142,9 @@ export default function KidArcadePanel({
           ctaLabel="Play"
           variant="dragon"
           locked
-          artLabel="DF"
+          artworkSrc="/images/characters/dragon_img_profile.webp"
           unlockText="Unlocks after Week 3"
         />
-        <GameCard
-          title="Memory Match"
-          description="Match courage tools and grow your focus."
-          statusLabel="Coming Soon"
-          starsLabel="0 stars"
-          ctaLabel="Play"
-          variant="memory"
-          locked
-          artLabel="MM"
-          unlockText="Coming soon"
-        />
-        <GameCard
-          title="Focus Builder"
-          description="Practice steady choices in quick mini-challenges."
-          statusLabel="Coming Soon"
-          starsLabel="0 stars"
-          ctaLabel="Play"
-          variant="focus"
-          locked
-          artLabel="FB"
-          unlockText="Coming soon"
-        />
-        {Array.from({ length: 5 }).map((_, index) => (
-          <GameCard
-            key={`future-${index}`}
-            title="Mystery Game"
-            description="A new courage challenge will land here soon."
-            statusLabel="Coming Soon"
-            starsLabel="0 stars"
-            ctaLabel="Play"
-            variant="empty"
-            locked
-            artLabel="?"
-            unlockText="Coming soon"
-          />
-        ))}
       </div>
     </section>
   );

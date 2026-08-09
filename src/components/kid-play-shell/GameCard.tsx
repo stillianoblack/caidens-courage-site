@@ -11,6 +11,7 @@ export type GameCardProps = {
   locked?: boolean;
   unlockText?: string;
   thumbnailSrc?: string;
+  artworkSrc?: string;
   artLabel?: string;
   newTraining?: boolean;
   highlight?: boolean;
@@ -28,6 +29,7 @@ export default function GameCard({
   locked = false,
   unlockText,
   thumbnailSrc,
+  artworkSrc,
   artLabel,
   newTraining = false,
   highlight = false,
@@ -43,6 +45,7 @@ export default function GameCard({
       ].filter(Boolean).join(' ')}
     >
       <div className="kidArcadeGameCardArt" aria-hidden="true">
+        {artworkSrc ? <img className="kidArcadeGameCardBackdrop" src={artworkSrc} alt="" loading="lazy" decoding="async" /> : null}
         {thumbnailSrc ? <img src={thumbnailSrc} alt="" loading="lazy" decoding="async" /> : null}
         {!thumbnailSrc && artLabel ? <span className="kidArcadeGameCardGlyph">{artLabel}</span> : null}
         {locked ? <span className="kidArcadeGameCardLock">Locked</span> : null}

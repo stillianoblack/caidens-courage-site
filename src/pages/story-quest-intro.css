@@ -1,0 +1,122 @@
+.storyQuestIntro {
+  position: relative;
+  display: grid;
+  min-height: min(820px, calc(100vh - 4rem));
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(1.25rem, 5vw, 4rem);
+  background: #07162c url('../../public/images/caidenscourage/Game assets/storygame_thumbnail.webp') center 28% / cover no-repeat;
+}
+
+.storyQuestIntro__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(4, 14, 31, 0.34), rgba(4, 14, 31, 0.78)),
+    radial-gradient(circle at 50% 42%, rgba(18, 52, 99, 0.08), rgba(3, 10, 24, 0.56) 78%);
+}
+
+.storyQuestIntro__card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 42rem);
+  border: 1px solid rgba(240, 197, 76, 0.58);
+  border-radius: 1.75rem;
+  padding: clamp(1.6rem, 5vw, 3.2rem);
+  background: rgba(5, 18, 40, 0.9);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(1, 6, 18, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(9px);
+}
+
+.storyQuestIntro__eyebrow {
+  margin: 0;
+  color: #f1c95d;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.storyQuestIntro h1 {
+  margin: 0.8rem auto 0;
+  color: #fff;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.03;
+}
+
+.storyQuestIntro__body {
+  max-width: 32rem;
+  margin: 1rem auto 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.storyQuestIntro__progress {
+  margin: 1rem 0 0;
+  color: #f3d982;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.storyQuestIntro__actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.storyQuestIntro__actions a {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.75rem 1.4rem;
+  font-weight: 1000;
+  text-decoration: none;
+}
+
+.storyQuestIntro__primary {
+  min-width: 13rem;
+  background: #edc657;
+  color: #102b59;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12), 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.storyQuestIntro__secondary {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+}
+
+.storyQuestIntro__actions a:hover,
+.storyQuestIntro__actions a:focus-visible {
+  transform: translateY(-2px);
+  outline: 3px solid rgba(242, 203, 91, 0.62);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .storyQuestIntro {
+    min-height: calc(100vh - 3rem);
+    align-items: end;
+    padding: 1rem;
+    background-position: 52% 22%;
+  }
+
+  .storyQuestIntro__card {
+    border-radius: 1.35rem;
+    padding: 1.5rem 1.15rem;
+  }
+
+  .storyQuestIntro__actions {
+    flex-direction: column;
+  }
+
+  .storyQuestIntro__actions a {
+    width: 100%;
+  }
+}
