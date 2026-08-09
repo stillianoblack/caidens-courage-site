@@ -61,22 +61,11 @@ export default function StoryModePage({ storyBasePathOverride }: StoryModePagePr
   const chapter = getStoryChapterById(chapterId);
   const questions = useMemo(() => {
     if (!chapter) return [];
-    const chapterQuestions = getStoryQuestionsForChapter(chapter.id);
-    return isPreview
-      ? chapterQuestions
-      : chapterQuestions.filter((question) => question.contentStatus === 'playable');
-  }, [chapter, isPreview]);
+    return getStoryQuestionsForChapter(chapter.id)
+      .filter((question) => question.contentStatus === 'playable');
+  }, [chapter]);
   const currentQuestion = questions[questionIndex];
-  const storedVariant = currentQuestion ? getQuestionVariant(currentQuestion, gradeBand) : null;
-  const currentVariant = currentQuestion?.contentStatus === 'needs_canon_detail' && isPreview
-    ? {
-      prompt: storedVariant?.prompt ?? 'Story question',
-      answers: ['Preview selection A', 'Preview selection B', 'Preview selection C', 'Preview selection D'],
-      correctAnswer: 'Preview selection A',
-      hint: 'Preview access: choose another selection to test the retry state.',
-      b4Feedback: 'Preview access: this question slot and progression are working. Final story answers still need canon approval.',
-    }
-    : storedVariant;
+  const currentVariant = currentQuestion ? getQuestionVariant(currentQuestion, gradeBand) : null;
   const nextChapter = getNextStoryChapter(chapter?.id);
   const nextChapterHasQuestions = nextChapter
     ? getStoryQuestionsForChapter(nextChapter.id).some((question) => question.contentStatus === 'playable')
@@ -211,11 +200,13 @@ export default function StoryModePage({ storyBasePathOverride }: StoryModePagePr
               </header>
               <ol>
                 {STORY_CHAPTERS.map((storyChapter, index) => {
+                  const playable = getStoryQuestionsForChapter(storyChapter.id)
+                    .some((question) => question.contentStatus === 'playable');
                   const completed = progress.completedChapterIds.includes(storyChapter.id);
                   const current = storyChapter.id === progress.lastUnlockedChapterId;
-                  const locked = !completed && !current && index > unlockedIndex;
-                  const status = completed ? 'Complete' : current ? 'Current' : 'Locked';
-                  const canOpen = isPreview || completed || current || !locked;
+                  const locked = !playable || (!completed && !current && index > unlockedIndex);
+                  const status = !playable ? 'Locked' : completed ? 'Complete' : current ? 'Current' : 'Locked';
+                  const canOpen = playable && (isPreview || completed || current || !locked);
                   return (
                     <li key={storyChapter.id}>
                       {canOpen ? (

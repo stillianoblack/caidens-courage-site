@@ -255,10 +255,10 @@ const playableChapterOne: Record<number, Record<StoryQuestGradeBand, StoryQuesti
     simple: 'What changes Caiden’s ordinary day at Courage Camp into something much more dangerous?',
     middle: 'What changes Caiden’s ordinary day at Courage Camp into something much more dangerous?',
     advanced: 'What changes Caiden’s ordinary day at Courage Camp into something much more dangerous?',
-    answers: ['Caiden gets lost during a game', 'A storm and earthquake', 'Everyone decides to leave camp early', 'A camp competition begins'],
-    correct: 'A storm and earthquake',
+    answers: ['Caiden gets lost during a game', 'A powerful storm', 'Everyone decides to leave camp early', 'A camp competition begins'],
+    correct: 'A powerful storm',
     hint: 'Think about the sudden event that changes everything happening at camp.',
-    feedback: 'Correct. The storm and earthquake change everything and push Caiden into the larger adventure.',
+    feedback: 'Correct. The storm changes everything and pushes Caiden into the larger adventure.',
   }),
   5: variants({
     simple: 'Even though Caiden feels unsure, what does he do as things around him begin to change?',
