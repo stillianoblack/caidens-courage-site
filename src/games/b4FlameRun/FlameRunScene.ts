@@ -12,6 +12,8 @@ type MovingBody = Phaser.Physics.Arcade.Image & { kind?: string };
 export default class FlameRunScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
   private ground!: Phaser.GameObjects.TileSprite;
+  private foreground!: Phaser.GameObjects.TileSprite;
+  private aura!: Phaser.GameObjects.Arc;
   private layers: { sprite: Phaser.GameObjects.TileSprite; factor: number }[] = [];
   private obstacles!: Phaser.Physics.Arcade.Group;
   private flames!: Phaser.Physics.Arcade.Group;
@@ -19,6 +21,10 @@ export default class FlameRunScene extends Phaser.Scene {
   private started = false;
   private ended = false;
   private sliding = false;
+  private paused = false;
+  private wasGrounded = true;
+  private focusWasActive = false;
+  private lastTrailAt = 0;
   private invulnerableUntil = 0;
   private startedAt = 0;
   private lastTick = 0;
@@ -54,9 +60,10 @@ export default class FlameRunScene extends Phaser.Scene {
     this.createWorld();
     this.obstacles = this.physics.add.group({ allowGravity: false, immovable: true });
     this.flames = this.physics.add.group({ allowGravity: false, immovable: true });
-    this.player = this.physics.add.sprite(330, FLOOR_Y - 72, 'run-b4').setDisplaySize(174, 112).setDepth(15);
+    this.player = this.physics.add.sprite(330, FLOOR_Y - 56, 'run-b4').setDisplaySize(174, 112).setDepth(15);
     this.player.setCollideWorldBounds(true).setGravityY(1550);
-    this.setPlayerBody(132, 72, 20, 20);
+    this.setPlayerBody(132, 66, 20, 40);
+    this.aura = this.add.circle(this.player.x, this.player.y, 82, 0xffd65a, 0).setDepth(14).setBlendMode(Phaser.BlendModes.ADD);
     this.physics.add.collider(this.player, this.ground);
     this.physics.add.overlap(this.player, this.flames, (_player, flame) => this.collect(flame as MovingBody));
     this.physics.add.overlap(this.player, this.obstacles, (_player, obstacle) => this.hit(obstacle as MovingBody));
@@ -68,9 +75,12 @@ export default class FlameRunScene extends Phaser.Scene {
     this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', this.slide, this);
     this.jumpKey.on('down', this.jump, this);
     this.downKey.on('down', this.slide, this);
+    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', this.togglePause, this);
     this.game.events.on(FLAME_RUN_EVENTS.start, this.startRun, this);
     this.game.events.on(FLAME_RUN_EVENTS.jump, this.jump, this);
     this.game.events.on(FLAME_RUN_EVENTS.slide, this.slide, this);
+    this.game.events.on(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
+    this.game.events.on(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
     this.game.events.on(FLAME_RUN_EVENTS.restart, this.restart, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       Object.values(FLAME_RUN_EVENTS).forEach((event) => this.game.events.removeAllListeners(event));
@@ -80,18 +90,24 @@ export default class FlameRunScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (!this.started || this.ended) return;
+    if (!this.started || this.ended || this.paused) return;
     const elapsed = (time - this.startedAt) / 1000;
     const speed = scrollSpeedFor(elapsed);
     this.layers.forEach(({ sprite, factor }) => { sprite.tilePositionX += speed * factor * delta / 1000; });
     this.ground.tilePositionX += speed * delta / 1000;
+    this.foreground.tilePositionX += speed * 1.18 * delta / 1000;
     [...this.obstacles.getChildren(), ...this.flames.getChildren()].forEach((child) => {
       const body = child as MovingBody;
       body.x -= speed * delta / 1000;
       body.body?.updateFromGameObject();
       if (body.x < -120) body.destroy();
     });
-    if (this.player.body?.blocked.down && this.player.y > FLOOR_Y - 90) this.player.setAngle(this.sliding ? 8 : 0);
+    const grounded = Boolean(this.player.body?.blocked.down || this.player.body?.touching.down) && this.player.y > FLOOR_Y - 85;
+    if (!grounded) this.player.angle = (this.player.angle + delta * .48) % 360;
+    if (grounded && !this.wasGrounded) this.land();
+    if (grounded && !this.sliding) this.player.angle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.player.angle), 0, .12) * Phaser.Math.RAD_TO_DEG;
+    this.wasGrounded = grounded;
+    this.aura.setPosition(this.player.x, this.player.y);
     if (time - this.lastSpawn > Math.max(1050, 1900 - speed)) {
       this.spawnPattern();
       this.lastSpawn = time;
@@ -101,8 +117,12 @@ export default class FlameRunScene extends Phaser.Scene {
       this.lastTick = time;
     }
     const focusMode = this.state.focusModeUntil > time;
-    this.player.setTint(focusMode ? 0xffe281 : 0xffffff);
-    if (focusMode && Phaser.Math.Between(0, 5) === 0) this.addFocusTrail();
+    if (focusMode !== this.focusWasActive) this.transitionFocusMode(focusMode);
+    this.focusWasActive = focusMode;
+    if (time - this.lastTrailAt > (focusMode ? 55 : this.sliding ? 70 : 190)) {
+      this.addThrusterTrail(focusMode ? 'focus' : this.sliding ? 'slide' : 'run');
+      this.lastTrailAt = time;
+    }
     if (time - this.lastHud > 100) { this.emitHud(focusMode ? 'B-4: Focus Mode!' : this.messageForStreak()); this.lastHud = time; }
   }
 
@@ -111,8 +131,34 @@ export default class FlameRunScene extends Phaser.Scene {
     const base = this.add.tileSprite(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 'run-base').setDisplaySize(WIDTH, HEIGHT).setDepth(0);
     this.layers.push({ sprite: base, factor: .025 });
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x06172c, .2).setDepth(8);
-    this.ground = this.add.tileSprite(WIDTH / 2, FLOOR_Y + 78, WIDTH, 158, 'run-base').setTint(0x10293c).setDepth(10);
+    this.createTerrainTextures();
+    this.ground = this.add.tileSprite(WIDTH / 2, FLOOR_Y + 64, WIDTH, 128, 'run-ground').setDepth(10);
     this.physics.add.existing(this.ground, true);
+    this.foreground = this.add.tileSprite(WIDTH / 2, FLOOR_Y + 116, WIDTH, 92, 'run-foreground').setDepth(18).setAlpha(.88);
+  }
+
+  private createTerrainTextures(): void {
+    if (!this.textures.exists('run-ground')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0x102538).fillRect(0, 0, 360, 128);
+      graphics.fillStyle(0x35506a).fillRect(0, 0, 360, 9);
+      graphics.fillStyle(0x6ecfe2, .38).fillRect(0, 9, 360, 4);
+      for (let x = -25; x < 380; x += 72) {
+        graphics.fillStyle(x % 144 === 0 ? 0x1a354b : 0x172f44).fillRoundedRect(x, 18, 66, 46, 10);
+        graphics.lineStyle(2, 0x29485e, .8).strokeRoundedRect(x, 18, 66, 46, 10);
+        graphics.fillStyle(0x0b1c2d).fillTriangle(x + 10, 75, x + 44, 58, x + 70, 92);
+      }
+      graphics.generateTexture('run-ground', 360, 128).destroy();
+    }
+    if (!this.textures.exists('run-foreground')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0x061321, .96).fillRect(0, 38, 360, 54);
+      for (let x = 0; x < 360; x += 44) {
+        graphics.fillStyle(x % 88 === 0 ? 0x173a45 : 0x0d2a36).fillTriangle(x, 55, x + 13, 10 + (x % 3) * 6, x + 24, 55);
+        graphics.fillStyle(0x24516a, .8).fillCircle(x + 30, 48, 12);
+      }
+      graphics.generateTexture('run-foreground', 360, 92).destroy();
+    }
   }
 
   private startRun(): void {
@@ -129,15 +175,16 @@ export default class FlameRunScene extends Phaser.Scene {
     if (body.blocked.down || body.touching.down || this.player.y > FLOOR_Y - 88) {
       this.endSlide();
       this.player.setVelocityY(-660);
-      this.tweens.add({ targets: this.player, angle: -7, duration: 90, yoyo: true });
+      this.player.angle = 0;
     }
   }
 
   private slide(): void {
     if (!this.started || this.ended || this.sliding) return;
     this.sliding = true;
-    this.player.setAngle(8).setDisplaySize(188, 74);
-    this.setPlayerBody(142, 44, 15, 48);
+    this.player.setAngle(12).setDisplaySize(190, 76);
+    this.tweens.add({ targets: this.player, x: 344, duration: 120, ease: 'Quad.Out' });
+    this.setPlayerBody(144, 42, 14, 62);
     this.time.delayedCall(760, () => this.endSlide());
   }
 
@@ -145,7 +192,8 @@ export default class FlameRunScene extends Phaser.Scene {
     if (!this.sliding) return;
     this.sliding = false;
     this.player.setDisplaySize(174, 112).setAngle(0);
-    this.setPlayerBody(132, 72, 20, 20);
+    this.tweens.add({ targets: this.player, x: 330, duration: 150, ease: 'Quad.Out' });
+    this.setPlayerBody(132, 66, 20, 40);
   }
 
   private setPlayerBody(width: number, height: number, offsetX: number, offsetY: number): void {
@@ -199,8 +247,8 @@ export default class FlameRunScene extends Phaser.Scene {
     this.state = loseCourage(this.state);
     this.player.setTexture('run-b4-hurt');
     this.sound.play('run-hit', { volume: .24 });
-    this.cameras.main.shake(180, .008);
-    this.tweens.add({ targets: this.player, alpha: .3, duration: 90, yoyo: true, repeat: 5, onComplete: () => this.player.setAlpha(1).setTexture('run-b4') });
+    this.cameras.main.shake(180, .007);
+    this.tweens.add({ targets: this.player, x: 306, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => this.player.setX(330).setAlpha(1).setTexture('run-b4') });
     obstacle.destroy();
     if (isRunOver(this.state)) this.finishRun();
   }
@@ -224,9 +272,55 @@ export default class FlameRunScene extends Phaser.Scene {
     }
   }
 
-  private addFocusTrail(): void {
-    const spark = this.add.image(this.player.x - 78, this.player.y + 18, 'run-flame').setDisplaySize(20, 26).setDepth(14).setAlpha(.75);
-    this.tweens.add({ targets: spark, x: spark.x - 90, alpha: 0, duration: 420, onComplete: () => spark.destroy() });
+  private addThrusterTrail(mode: 'run' | 'slide' | 'focus'): void {
+    const size = mode === 'focus' ? 26 : mode === 'slide' ? 20 : 11;
+    const distance = mode === 'focus' ? 130 : mode === 'slide' ? 105 : 48;
+    const spark = this.add.image(this.player.x - 82, this.player.y + (this.sliding ? 22 : 30), 'run-flame').setDisplaySize(size, size * 1.3).setDepth(13).setAlpha(mode === 'run' ? .42 : .8).setTint(mode === 'focus' ? 0xffdc57 : 0xffb43b);
+    this.tweens.add({ targets: spark, x: spark.x - distance, y: spark.y + Phaser.Math.Between(-7, 7), alpha: 0, duration: mode === 'focus' ? 460 : 320, onComplete: () => spark.destroy() });
+  }
+
+  private land(): void {
+    this.player.angle = 0;
+    this.player.setDisplaySize(184, 98);
+    this.tweens.add({ targets: this.player, displayWidth: 174, displayHeight: 112, duration: 130, ease: 'Back.Out' });
+    for (let i = 0; i < 4; i += 1) {
+      const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), FLOOR_Y - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
+      this.tweens.add({ targets: spark, y: spark.y - Phaser.Math.Between(12, 28), x: spark.x - Phaser.Math.Between(8, 28), alpha: 0, duration: 240, onComplete: () => spark.destroy() });
+    }
+  }
+
+  private transitionFocusMode(active: boolean): void {
+    if (active) {
+      this.player.setTint(0xffc72c);
+      this.aura.setAlpha(0).setScale(.8);
+      this.tweens.add({ targets: this.aura, alpha: .34, scale: 1.18, duration: 220, yoyo: true, repeat: -1 });
+      this.cameras.main.flash(240, 255, 214, 90, false);
+      this.burst(this.player.x, this.player.y);
+    } else {
+      this.player.clearTint();
+      this.tweens.killTweensOf(this.aura);
+      this.tweens.add({ targets: this.aura, alpha: 0, scale: .9, duration: 340 });
+    }
+  }
+
+  private togglePause(): void { if (this.paused) this.resumeRun(); else this.pauseRun(); }
+  private pauseRun(): void {
+    if (!this.started || this.ended || this.paused) return;
+    this.paused = true;
+    this.physics.world.pause();
+    this.tweens.pauseAll();
+    this.time.paused = true;
+    this.sound.pauseAll();
+    this.game.events.emit(FLAME_RUN_EVENTS.pauseState, true);
+  }
+  private resumeRun(): void {
+    if (!this.paused) return;
+    this.paused = false;
+    this.physics.world.resume();
+    this.tweens.resumeAll();
+    this.time.paused = false;
+    this.sound.resumeAll();
+    this.game.events.emit(FLAME_RUN_EVENTS.pauseState, false);
   }
 
   private messageForStreak(): string {

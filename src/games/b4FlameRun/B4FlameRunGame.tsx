@@ -3,11 +3,11 @@ import Phaser from 'phaser';
 import FlameRunScene from './FlameRunScene';
 import { FLAME_RUN_EVENTS, type FlameRunHud, type FlameRunResult } from './types';
 
-export type B4FlameRunGameHandle = { start: () => void; jump: () => void; slide: () => void; restart: () => void };
+export type B4FlameRunGameHandle = { start: () => void; jump: () => void; slide: () => void; pause: () => void; resume: () => void; restart: () => void };
 
-type Props = { onReady: () => void; onHud: (hud: FlameRunHud) => void; onResult: (result: FlameRunResult) => void };
+type Props = { onReady: () => void; onHud: (hud: FlameRunHud) => void; onResult: (result: FlameRunResult) => void; onPauseChange: (paused: boolean) => void };
 
-const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud, onResult }, ref) => {
+const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud, onResult, onPauseChange }, ref) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
 
@@ -15,6 +15,8 @@ const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud
     start: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.start),
     jump: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.jump),
     slide: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.slide),
+    pause: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.pause),
+    resume: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.resume),
     restart: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.restart),
   }));
 
@@ -36,18 +38,24 @@ const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud
     game.events.on(FLAME_RUN_EVENTS.ready, onReady);
     game.events.on(FLAME_RUN_EVENTS.hud, onHud);
     game.events.on(FLAME_RUN_EVENTS.result, onResult);
+    game.events.on(FLAME_RUN_EVENTS.pauseState, onPauseChange);
+    const handleVisibility = () => {
+      if (document.hidden) game.events.emit(FLAME_RUN_EVENTS.pause);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       game.events.off(FLAME_RUN_EVENTS.ready, onReady);
       game.events.off(FLAME_RUN_EVENTS.hud, onHud);
       game.events.off(FLAME_RUN_EVENTS.result, onResult);
+      game.events.off(FLAME_RUN_EVENTS.pauseState, onPauseChange);
       game.destroy(true);
       gameRef.current = null;
     };
-  }, [onHud, onReady, onResult]);
+  }, [onHud, onPauseChange, onReady, onResult]);
 
   return <div ref={hostRef} className="b4run-gameHost" aria-label="B-4 Flame Run game canvas" />;
 });
 
 B4FlameRunGame.displayName = 'B4FlameRunGame';
 export default B4FlameRunGame;
-

@@ -12,11 +12,13 @@ export default function B4FlameRunPage() {
   const [ready, setReady] = useState(false);
   const [started, setStarted] = useState(false);
   const [countdown, setCountdown] = useState<string | null>(null);
+  const [paused, setPaused] = useState(false);
   const [hud, setHud] = useState(initialHud);
   const [result, setResult] = useState<FlameRunResult | null>(null);
   const handleReady = useCallback(() => setReady(true), []);
   const handleHud = useCallback((next: FlameRunHud) => setHud(next), []);
   const handleResult = useCallback((next: FlameRunResult) => setResult(next), []);
+  const handlePauseChange = useCallback((next: boolean) => setPaused(next), []);
 
   const start = useCallback(() => {
     if (!ready || countdown) return;
@@ -32,6 +34,7 @@ export default function B4FlameRunPage() {
     setResult(null);
     setStarted(false);
     setCountdown(null);
+    setPaused(false);
     setHud(initialHud);
     gameRef.current?.restart();
   }, []);
@@ -48,10 +51,11 @@ export default function B4FlameRunPage() {
         <div className="b4run-hud b4run-hud--score"><span>SCORE</span><strong>{Math.round(hud.score).toLocaleString()}</strong></div>
         <div className="b4run-hud b4run-hud--flames"><span>FOCUS FLAMES</span><strong>{hud.flames}</strong></div>
         <div className="b4run-streak"><span>STREAK</span><strong>x{hud.multiplier}</strong></div>
+        {started && !result ? <button type="button" className="b4run-pauseButton" style={{ right: 154, top: 17 }} aria-label="Pause run" onClick={() => gameRef.current?.pause()}>Ⅱ</button> : null}
         {hud.focusMode ? <div className="b4run-focusMode">FOCUS MODE</div> : null}
         <div className="b4run-message" aria-live="polite">{hud.message}</div>
 
-        <B4FlameRunGame ref={gameRef} onReady={handleReady} onHud={handleHud} onResult={handleResult} />
+        <B4FlameRunGame ref={gameRef} onReady={handleReady} onHud={handleHud} onResult={handleResult} onPauseChange={handlePauseChange} />
 
         {!started ? (
           <div className="b4run-intro">
@@ -65,6 +69,12 @@ export default function B4FlameRunPage() {
         ) : null}
 
         {countdown ? <div className="b4run-countdown" aria-live="assertive">{countdown}</div> : null}
+
+        {paused ? (
+          <div className="b4run-pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="b4run-pause-title">
+            <div><p>Brave pause</p><h2 id="b4run-pause-title">PAUSED</h2><button type="button" onClick={() => gameRef.current?.resume()}>Resume</button><button type="button" onClick={restart}>Restart Run</button><Link to="/preview/arcade">Back to Arcade</Link></div>
+          </div>
+        ) : null}
 
         {started && !result ? (
           <div className="b4run-mobileControls" aria-label="Touch controls">
@@ -94,4 +104,3 @@ export default function B4FlameRunPage() {
     </main>
   );
 }
-
