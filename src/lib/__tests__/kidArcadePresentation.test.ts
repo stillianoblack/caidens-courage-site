@@ -26,7 +26,10 @@ describe('Kid Arcade presentation', () => {
 
   it('routes Enter Story through one splash with dynamic progress copy', () => {
     expect(arcade).toContain('const storyQuestPath = storyQuestBasePath');
-    expect(introCss).toContain('storygame_thumbnail.webp');
+    expect(intro).toContain('storygame_thumbnail.webp');
+    expect(introCss).toContain('backgroundFocusFlame.webp');
+    expect(introCss).not.toMatch(/background:[^;]*storygame_thumbnail\.webp/);
+    expect(intro).toContain('className="storyQuestIntro__thumbnail"');
     expect(intro).toContain("hasProgress ? 'Continue Story Quest' : 'Start Story Quest'");
     expect(intro).toContain('Back to Arcade');
     expect(intro).toMatch(/to=\{`\$\{storyBasePath\}\/\$\{targetChapterId\}`\}/);

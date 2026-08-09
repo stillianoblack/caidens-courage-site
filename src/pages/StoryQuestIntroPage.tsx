@@ -33,6 +33,11 @@ export default function StoryQuestIntroPage({ storyBasePathOverride }: StoryQues
     <main className="storyQuestIntro">
       <div className="storyQuestIntro__overlay" />
       <section className="storyQuestIntro__card" aria-labelledby="story-quest-intro-title">
+        <img
+          className="storyQuestIntro__thumbnail"
+          src="/images/caidenscourage/Game assets/storygame_thumbnail.webp"
+          alt="Caiden"
+        />
         <p className="storyQuestIntro__eyebrow">Story Quest</p>
         <h1 id="story-quest-intro-title">Think you know Caiden’s story?</h1>
         <p className="storyQuestIntro__body">

@@ -5,15 +5,15 @@
   place-items: center;
   overflow: hidden;
   padding: clamp(1.25rem, 5vw, 4rem);
-  background: #07162c url('../../public/images/caidenscourage/Game assets/storygame_thumbnail.webp') center 28% / cover no-repeat;
+  background: #07162c url('../../public/images/backgrounds/backgroundFocusFlame.webp') center 42% / cover no-repeat;
 }
 
 .storyQuestIntro__overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(4, 14, 31, 0.34), rgba(4, 14, 31, 0.78)),
-    radial-gradient(circle at 50% 42%, rgba(18, 52, 99, 0.08), rgba(3, 10, 24, 0.56) 78%);
+    linear-gradient(180deg, rgba(3, 12, 28, 0.48), rgba(3, 12, 28, 0.78)),
+    radial-gradient(circle at 50% 42%, rgba(20, 55, 103, 0.04), rgba(2, 8, 21, 0.5) 80%);
 }
 
 .storyQuestIntro__card {
@@ -28,6 +28,19 @@
   text-align: center;
   box-shadow: 0 24px 70px rgba(1, 6, 18, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(9px);
+}
+
+.storyQuestIntro__thumbnail {
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 1rem;
+  border: 3px solid #e9c45d;
+  border-radius: 50%;
+  background: #132c54;
+  object-fit: cover;
+  object-position: center 35%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(14, 37, 72, 0.72);
 }
 
 .storyQuestIntro__eyebrow {
@@ -104,12 +117,18 @@
     min-height: calc(100vh - 3rem);
     align-items: end;
     padding: 1rem;
-    background-position: 52% 22%;
+    background-position: center 38%;
   }
 
   .storyQuestIntro__card {
     border-radius: 1.35rem;
     padding: 1.5rem 1.15rem;
+  }
+
+  .storyQuestIntro__thumbnail {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 0.85rem;
   }
 
   .storyQuestIntro__actions {
