@@ -4,12 +4,500 @@
     radial-gradient(circle at 50% 0%, rgba(255, 184, 77, 0.16), transparent 34rem),
     linear-gradient(150deg, #06111d 0%, #0b1d2b 42%, #10171f 100%);
   color: #f7fbff;
-  padding: 18px clamp(14px, 4vw, 48px) 42px;
+  padding: 12px clamp(14px, 4vw, 48px) 30px;
 }
 
 .storyModeShell {
   width: min(1160px, 100%);
   margin: 0 auto;
+}
+
+.storyEntryHero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 300px);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  align-items: center;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(255, 210, 122, 0.2);
+  border-radius: 24px;
+  background:
+    linear-gradient(100deg, rgba(5, 18, 34, 0.98) 0%, rgba(6, 27, 51, 0.82) 52%, rgba(5, 25, 38, 0.54) 100%),
+    url('../../../public/images/backgrounds/backgroundFocusFlame.webp') center / cover;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.storyEntryHero__copy > span,
+.storyCurrentChapter > div > span,
+.storyJourneyProgress > div > span {
+  color: #ffd27a;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.storyEntryHero h1 {
+  max-width: 680px;
+  margin: 0.65rem 0 0;
+  color: #fff;
+  font-size: clamp(2.2rem, 5vw, 4.5rem);
+  line-height: 0.98;
+}
+
+.storyEntryHero h2 {
+  margin: 0.5rem 0 0;
+  color: #ffd27a;
+  font-size: clamp(1.15rem, 2.4vw, 1.8rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storyEntryHero p {
+  max-width: 650px;
+  color: #d3deea;
+  line-height: 1.55;
+}
+
+.storyEntryHero__book {
+  width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.42));
+  transform: rotate(2deg);
+}
+
+.storyCurrentChapter {
+  display: grid;
+  grid-template-columns: minmax(220px, 42%) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(173, 219, 255, 0.18);
+  border-radius: 22px;
+  background: rgba(8, 24, 38, 0.82);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.storyCurrentChapter__companion {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 48% 72%, rgba(62, 155, 220, 0.2), transparent 48%),
+    linear-gradient(145deg, rgba(18, 52, 72, 0.72), rgba(5, 18, 31, 0.96));
+}
+
+.storyCurrentChapter__companion::after {
+  position: absolute;
+  right: 8%;
+  bottom: 4%;
+  left: 8%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 201, 92, 0.24), transparent 68%);
+  content: '';
+  filter: blur(8px);
+}
+
+.storyCurrentChapter__companion img {
+  position: absolute;
+  z-index: 1;
+  right: 8%;
+  bottom: -5%;
+  width: 100%;
+  height: 94%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.42));
+}
+
+.storyCurrentChapter__copy {
+  padding: clamp(1.4rem, 4vw, 2.5rem);
+}
+
+.storyCurrentChapter > div > p:first-of-type {
+  margin: 0.65rem 0 0;
+  color: #ffd27a;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.storyCurrentChapter h2 {
+  margin: 0.25rem 0 0.75rem;
+  color: #fff7dd;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.storyCurrentChapter > div > p {
+  color: #c9d7e4;
+  line-height: 1.5;
+}
+
+.storyCurrentChapter > div > a {
+  display: inline-flex;
+  min-width: 11rem;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffcf68, #f39a3c);
+  color: #1b1309;
+  font-weight: 1000;
+  text-decoration: none;
+}
+
+.storyCurrentChapter .storyNarratorCard {
+  position: static;
+  margin-top: 1rem;
+  background: rgba(5, 17, 31, 0.7);
+}
+
+.storyJourneyProgress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1rem 1.2rem;
+}
+
+.storyJourneyProgress > div strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #fff;
+}
+
+.storyJourneyProgress ol {
+  display: flex;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.storyJourneyProgress li span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #91a6b9;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.storyJourneyProgress li.is-reached span {
+  border-color: #ffd27a;
+  background: #ffd27a;
+  color: #12233b;
+}
+
+.storyJourneyProgress button {
+  border: 0;
+  background: transparent;
+  color: #ffd27a;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.storyChapterList {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.storyChapterList > div {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  border-radius: 14px;
+  background: rgba(8, 24, 38, 0.78);
+  padding: 0.8rem 1rem;
+}
+
+.storyChapterList > div.is-locked {
+  opacity: 0.55;
+}
+
+.storyChapterList > div > span,
+.storyChapterList strong,
+.storyChapterList small {
+  color: #f5f8fb;
+}
+
+.storyChapterList small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #9fb5c9;
+}
+
+.storyChapterList a {
+  color: #ffd27a;
+  font-weight: 900;
+}
+
+.storyGameplayStage {
+  display: grid;
+  grid-template-columns: minmax(260px, 42%) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.storyGameplayStage--compact {
+  grid-template-columns: minmax(180px, 28%) minmax(0, 1fr);
+}
+
+.storyGameplayStage--none {
+  display: block;
+  width: min(780px, 100%);
+  margin: 0 auto;
+}
+
+.storyGameplayScene {
+  position: sticky;
+  top: 1rem;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #020810;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.storyGameplayScene img {
+  display: block;
+  width: 100%;
+  min-height: 430px;
+  object-fit: cover;
+}
+
+.storyGameplayStage--compact .storyGameplayScene img {
+  min-height: 220px;
+  max-height: 320px;
+}
+
+.storyGameplayScene span {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  border-radius: 999px;
+  background: rgba(3, 13, 26, 0.82);
+  color: #ffd27a;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.storyGameplayInteraction {
+  display: grid;
+  gap: 1rem;
+}
+
+.storyGameplayMoment {
+  margin: 0;
+  color: #ffd27a;
+  font-size: 0.76rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.storyGameplayInteraction .storyNarratorCard {
+  position: static;
+}
+
+.storyModeShell--game {
+  width: min(1040px, 100%);
+}
+
+.storyModeHero--compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.storyModeHero--compact h1 {
+  margin-bottom: 0;
+  font-size: clamp(2rem, 5vw, 3.35rem);
+}
+
+.storyModeHero--compact > a {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.storyModeHero__actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.storyModeHero__actions a,
+.storyModeHero__actions button {
+  width: auto;
+  min-height: 42px;
+}
+
+.storyModeHero__actions button {
+  border: 1px solid rgba(255, 215, 135, 0.34);
+  border-radius: 999px;
+  background: rgba(228, 241, 255, 0.1);
+  color: #e7f1ff;
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.storyChapterSelector {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.storyChapterSelector__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(1, 8, 16, 0.72);
+  backdrop-filter: blur(6px);
+  cursor: default;
+}
+
+.storyChapterSelector__panel {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(680px, calc(100vh - 2rem));
+  overflow: auto;
+  border: 1px solid rgba(255, 210, 122, 0.28);
+  border-radius: 22px;
+  background: #0a1c2d;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+  padding: 1.2rem;
+}
+
+.storyChapterSelector__panel > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.storyChapterSelector__panel header span {
+  color: #ffd27a;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.storyChapterSelector__panel h2 {
+  margin: 0.25rem 0 0;
+  color: #fff7dd;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+}
+
+.storyChapterSelector__panel > header > button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.storyChapterSelector ol {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.storyChapterSelector li a,
+.storyChapterSelector li > div {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  border: 1px solid rgba(173, 219, 255, 0.12);
+  border-radius: 13px;
+  background: rgba(231, 244, 255, 0.06);
+  color: #eef6ff;
+  padding: 0.8rem;
+  text-decoration: none;
+}
+
+.storyChapterSelector li a:hover {
+  border-color: rgba(255, 210, 122, 0.5);
+  background: rgba(255, 178, 74, 0.12);
+}
+
+.storyChapterSelector li > div {
+  opacity: 0.52;
+}
+
+.storyChapterSelector li span {
+  color: #ffd27a;
+  font-weight: 1000;
+}
+
+.storyChapterSelector li small {
+  color: #9fb5c9;
+  font-weight: 850;
+}
+
+.storyQuestionGame {
+  display: grid;
+  grid-template-columns: minmax(220px, 36%) minmax(0, 1fr);
+  gap: clamp(1rem, 4vw, 2.5rem);
+  align-items: stretch;
+}
+
+.storyQuestionGame__companion {
+  position: relative;
+  min-height: 450px;
+  overflow: hidden;
+  border: 1px solid rgba(173, 219, 255, 0.14);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 76%, rgba(71, 159, 219, 0.22), transparent 46%),
+    linear-gradient(150deg, rgba(17, 49, 71, 0.86), rgba(4, 15, 27, 0.98));
+}
+
+.storyQuestionGame__companion img {
+  position: absolute;
+  right: 3%;
+  bottom: -4%;
+  width: 94%;
+  height: 96%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 24px 25px rgba(0, 0, 0, 0.42));
+}
+
+.storyQuestionGame__content {
+  display: flex;
+  align-items: center;
+}
+
+.storyQuestionGame__content .storyQuestionCard {
+  width: 100%;
 }
 
 .storyModeHero {
@@ -115,6 +603,186 @@
   backdrop-filter: blur(18px);
 }
 
+.storyModeHero__brand {
+  margin: 0.4rem 0 0 !important;
+  color: #fff !important;
+  font-size: 0.9rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.storyModeHero__progress {
+  display: flex;
+  width: min(100%, 28rem);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  border: 1px solid rgba(255, 210, 122, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 1rem;
+  color: #f4f8ff;
+}
+
+.storyModeHero__progress strong {
+  color: #ffd27a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.storyContentStatus {
+  color: #ffd27a;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storyFocusClue,
+.storyQuestionCard {
+  border: 1px solid rgba(255, 210, 122, 0.28);
+  border-radius: 20px;
+  background: rgba(8, 24, 38, 0.82);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+.storyFocusClue > span,
+.storyQuestionCard__meta > span,
+.storyQuestionCard__moment {
+  color: #ffd27a;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.storyFocusClue h2,
+.storyQuestionCard h2 {
+  margin: 0.65rem 0;
+  color: #fff7dd;
+  font-size: clamp(1.55rem, 4vw, 2.45rem);
+  line-height: 1.12;
+}
+
+.storyFocusClue p,
+.storyQuestionCard p {
+  color: #c9d7e4;
+  line-height: 1.55;
+}
+
+.storyFocusClue button,
+.storyQuestionCard__feedback button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffcf68, #f39a3c);
+  color: #1b1309;
+  padding: 0 1.25rem;
+  font: inherit;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.storyQuestionCard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.storyQuestionCard__meta strong {
+  border-radius: 999px;
+  background: rgba(255, 178, 74, 0.15);
+  color: #ffe4a7;
+  padding: 0.42rem 0.7rem;
+}
+
+.storyQuestionCard__answers {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.storyQuestionCard__answers button {
+  min-height: 54px;
+  border: 1px solid rgba(173, 219, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(231, 244, 255, 0.09);
+  color: #f3f8ff;
+  padding: 0.85rem 1rem;
+  font: inherit;
+  font-weight: 850;
+  text-align: left;
+  cursor: pointer;
+}
+
+.storyQuestionCard__answers button:hover,
+.storyQuestionCard__answers button.is-selected {
+  border-color: rgba(255, 210, 122, 0.74);
+  background: rgba(255, 178, 74, 0.2);
+}
+
+.storyQuestionCard__answers button.is-incorrect {
+  border-color: rgba(224, 126, 116, 0.62);
+  background: rgba(155, 63, 60, 0.18);
+}
+
+.storyQuestionCard__answers button.is-correct {
+  border-color: rgba(255, 210, 122, 0.88);
+  background: rgba(255, 178, 74, 0.24);
+}
+
+.storyQuestionCard__feedback {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  column-gap: 0.8rem;
+  align-items: center;
+  margin-top: 1.1rem;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.storyQuestionCard__feedback > img {
+  grid-row: 1 / span 3;
+  box-sizing: border-box;
+  width: 54px;
+  height: 54px;
+  border-radius: 13px;
+  background: rgba(8, 27, 45, 0.7);
+  object-fit: contain;
+  padding: 6px;
+}
+
+.storyQuestionCard__feedback strong {
+  color: #fff7dd;
+}
+
+.storyQuestionCard__feedback p {
+  margin: 0.35rem 0 0.65rem;
+}
+
+.storyQuestionCard__feedback button {
+  width: fit-content;
+}
+
+.storyQuestionCard__feedback--hint {
+  border: 1px solid rgba(123, 190, 255, 0.35);
+  background: rgba(64, 133, 201, 0.15);
+}
+
+.storyQuestionCard__feedback--hint small {
+  color: #a9c9e6;
+}
+
+.storyQuestionCard__feedback--spark {
+  border: 1px solid rgba(255, 210, 122, 0.42);
+  background: rgba(255, 178, 74, 0.14);
+}
+
 .storyNarratorCard {
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
@@ -133,8 +801,51 @@
   border: 2px solid rgba(255, 210, 122, 0.58);
   border-radius: 16px;
   background: #10283a;
-  object-fit: cover;
+  box-sizing: border-box;
+  object-fit: contain;
+  padding: 7px;
   box-shadow: 0 0 20px rgba(255, 199, 94, 0.18);
+}
+
+.storyCanonRequired {
+  border: 1px solid rgba(255, 210, 122, 0.28);
+  border-radius: 20px;
+  background: rgba(8, 24, 38, 0.82);
+  padding: clamp(1.4rem, 4vw, 2.5rem);
+}
+
+.storyCanonRequired > span {
+  color: #ffd27a;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.storyCanonRequired h2 {
+  margin: 0.55rem 0;
+  color: #fff7dd;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  text-transform: uppercase;
+}
+
+.storyCanonRequired p {
+  max-width: 660px;
+  color: #c9d7e4;
+  line-height: 1.6;
+}
+
+.storyCanonRequired a {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  margin-top: 0.75rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffcf68, #f39a3c);
+  color: #1b1309;
+  padding: 0 1.25rem;
+  font-weight: 1000;
+  text-decoration: none;
 }
 
 .storyNarratorCard p {
@@ -142,6 +853,52 @@
   color: #e5f0fb;
   font-weight: 750;
   line-height: 1.45;
+}
+
+.storyCompleteScreen {
+  width: min(680px, 100%);
+  margin: 2rem auto 0;
+  text-align: center;
+}
+
+.storyCompleteScreen__message {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 1rem auto;
+  text-align: left;
+}
+
+.storyCompleteScreen__message img {
+  box-sizing: border-box;
+  width: 72px;
+  height: 60px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  background: rgba(9, 29, 47, 0.72);
+  object-fit: contain;
+  padding: 8px;
+}
+
+.storyCompleteScreen__message p {
+  max-width: 430px;
+  margin: 0;
+}
+
+.storyCompleteScreen__actions {
+  justify-content: center;
+}
+
+.storyCompleteScreen__actions button:disabled {
+  min-height: 46px;
+  border: 1px solid rgba(177, 193, 207, 0.18);
+  border-radius: 999px;
+  background: rgba(177, 193, 207, 0.12);
+  color: #8999a7;
+  padding: 0 20px;
+  font: inherit;
+  font-weight: 900;
 }
 
 .storyTimeline {
@@ -377,6 +1134,50 @@
   .storyDialogueCard,
   .storyMissionGate__meta {
     grid-template-columns: 1fr;
+  }
+
+  .storyEntryHero,
+  .storyCurrentChapter,
+  .storyGameplayStage,
+  .storyQuestionGame {
+    grid-template-columns: 1fr;
+  }
+
+  .storyModeHero--compact {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .storyQuestionGame__companion {
+    min-height: 240px;
+  }
+
+  .storyQuestionGame__companion img {
+    right: auto;
+    left: 50%;
+    width: min(62%, 230px);
+    transform: translateX(-50%);
+  }
+
+  .storyEntryHero__book {
+    width: min(72%, 260px);
+    justify-self: center;
+  }
+
+  .storyCurrentChapter__companion,
+  .storyGameplayScene img {
+    min-height: 230px;
+    max-height: 300px;
+  }
+
+  .storyGameplayScene {
+    position: relative;
+    top: auto;
+  }
+
+  .storyJourneyProgress {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .storyChapterCard__footer,

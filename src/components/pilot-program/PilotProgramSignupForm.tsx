@@ -134,6 +134,8 @@ export default function PilotProgramSignupForm({
 
   return (
     <form className="pilotSignup-form" onSubmit={handleSubmit} noValidate>
+      <fieldset className="pilotSignup-section">
+        <legend><span>Your Program</span></legend>
       <div className="pilotSignup-field">
         <label htmlFor="pilot-program-type">Program Type</label>
         <select
@@ -210,6 +212,11 @@ export default function PilotProgramSignupForm({
         </div>
       )}
 
+      </fieldset>
+
+      <fieldset className="pilotSignup-section">
+        <legend><span>Your Information</span></legend>
+
       {!isIndependentFamily ? (
         <div className="pilotSignup-field">
           <label htmlFor="pilot-admin-first">Admin First Name</label>
@@ -245,6 +252,11 @@ export default function PilotProgramSignupForm({
           </p>
         ) : null}
       </div>
+
+      </fieldset>
+
+      <fieldset className="pilotSignup-section">
+        <legend><span>Your Explorers</span></legend>
 
       {isIndependentFamily ? null : (
         <div className="pilotSignup-field">
@@ -311,6 +323,8 @@ export default function PilotProgramSignupForm({
         </div>
       )}
 
+      </fieldset>
+
       <div className="pilotSignup-terms">
         <label className="pilotSignup-termsLabel">
           <input
@@ -348,8 +362,9 @@ export default function PilotProgramSignupForm({
             : 'Creating Program…'
           : isIndependentFamily
             ? 'Create Family Access'
-            : 'Create Pilot Program'}
+            : 'Start My Adventure'}
       </button>
+      <p className="pilotSignup-trust">Takes about 2 minutes <span aria-hidden="true">•</span> You can update these details later</p>
     </form>
   );
 }

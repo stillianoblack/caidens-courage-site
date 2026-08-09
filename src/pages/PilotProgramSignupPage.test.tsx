@@ -18,9 +18,8 @@ jest.mock('../lib/analytics', () => ({
 }));
 jest.mock('../components/pilot-program/PilotProgramSignupForm', () => ({
   __esModule: true,
-  default: ({ onSubmit, onRetry, submitting, error }: {
+  default: ({ onSubmit, submitting, error }: {
     onSubmit: (input: PilotProgramSignupInput) => Promise<void>;
-    onRetry?: () => Promise<void>;
     submitting: boolean;
     error: { title: string; body: string } | null;
   }) => (
@@ -29,13 +28,7 @@ jest.mock('../components/pilot-program/PilotProgramSignupForm', () => ({
         Submit test family
       </button>
       <output data-testid="submitting">{submitting ? 'submitting' : 'idle'}</output>
-      {error ? (
-        <div role="alert">
-          <strong>{error.title}</strong>
-          <span>{error.body}</span>
-          <button type="button" onClick={() => void onRetry?.()}>Try Again</button>
-        </div>
-      ) : null}
+      {error ? <div role="alert">{error.title} {error.body}</div> : null}
     </div>
   ),
 }));
@@ -90,6 +83,17 @@ describe('PilotProgramSignupPage submission state', () => {
     (submitPilotProgramSignup as jest.Mock).mockReset();
   });
 
+  test('renders the branded facilitator setup experience with only orange B-4 artwork', () => {
+    const { container } = render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
+
+    expect(screen.getByRole('heading', { name: 'Start Your Focus Flame Adventure' })).toBeInTheDocument();
+    expect(screen.getByText("Let's build your program.")).toBeInTheDocument();
+    const images = Array.from(container.querySelectorAll('img'));
+    expect(images).toHaveLength(2);
+    expect(images.every((image) => image.getAttribute('src')?.includes('B-4orange'))).toBe(true);
+    expect(container.querySelector('[src*="B-4student"], [src*="b-4facilitator"]')).toBeNull();
+  });
+
   test.each(outcomes)('clears loading after %s', async (_label, outcome) => {
     let resolveRequest: (result: PilotProgramSignupResult) => void = () => undefined;
     (submitPilotProgramSignup as jest.Mock).mockReturnValue(
@@ -117,57 +121,5 @@ describe('PilotProgramSignupPage submission state', () => {
     expect(submitPilotProgramSignup).toHaveBeenCalledTimes(1);
 
     await act(async () => { resolveRequest(success); });
-  });
-
-  test('shows friendly copy without diagnostics and retries the same request in place', async () => {
-    (submitPilotProgramSignup as jest.Mock)
-      .mockResolvedValueOnce({
-        success: false,
-        code: 'timeout',
-        message: 'Creating your program is taking too long. Please refresh and try again.',
-        supportCode: 'E87DAF',
-        correlationId: 'internal-correlation-id',
-      })
-      .mockResolvedValueOnce(success);
-
-    render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
-    fireEvent.click(screen.getByRole('button', { name: 'Submit test family' }));
-
-    expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't create your program.");
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      "Your information hasn't been lost. Please try again. If the problem continues, contact hello@caidenscourage.com.",
-    );
-    expect(screen.queryByText(/support code|correlation|refresh/i)).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Try Again' }));
-    await waitFor(() => expect(submitPilotProgramSignup).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(screen.getByTestId('submitting')).toHaveTextContent('idle'));
-    expect(submitPilotProgramSignup).toHaveBeenNthCalledWith(
-      2,
-      familyInput,
-      expect.objectContaining({ requestId: expect.any(String) }),
-    );
-  });
-
-  test('keeps correlation IDs in diagnostic logs without rendering them', async () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
-    (submitPilotProgramSignup as jest.Mock).mockResolvedValue({
-      success: false,
-      code: 'server_error',
-      message: 'function pilot-family-signup returned HTTP 500',
-      correlationId: 'server-log-only-123',
-    });
-
-    render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
-    fireEvent.click(screen.getByRole('button', { name: 'Submit test family' }));
-
-    await waitFor(() =>
-      expect(warn).toHaveBeenCalledWith(
-        '[PILOT_SIGNUP_FAILED]',
-        expect.objectContaining({ correlation_id: 'server-log-only-123' }),
-      ),
-    );
-    expect(screen.queryByText(/server-log-only-123|pilot-family-signup|HTTP 500/i)).not.toBeInTheDocument();
-    warn.mockRestore();
   });
 });

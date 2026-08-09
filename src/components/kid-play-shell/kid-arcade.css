@@ -13,6 +13,132 @@
   line-height: 1.45;
 }
 
+.kidArcadeSectionLabel {
+  margin: 0 0 0.7rem;
+  color: #e8c45f;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.kidArcadeSectionLabel--games {
+  margin-top: 1.75rem;
+}
+
+.kidArcadeStoryQuestCard {
+  position: relative;
+  min-height: 350px;
+  overflow: hidden;
+  border: 1px solid rgba(232, 196, 95, 0.42);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(90deg, rgba(3, 14, 32, 0.97) 0%, rgba(6, 25, 53, 0.9) 46%, rgba(6, 24, 50, 0.3) 100%),
+    url('../../../public/images/backgrounds/caidenvale_book_hero.webp') center 42% / cover no-repeat;
+  box-shadow: inset 0 -7px 0 rgba(0, 0, 0, 0.18), 0 18px 34px rgba(2, 6, 23, 0.36);
+}
+
+.kidArcadeStoryQuestCard__copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(60%, 40rem);
+  min-height: 350px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1.4rem, 4vw, 3rem);
+}
+
+.kidArcadeStoryQuestCard__book {
+  position: absolute;
+  z-index: 0;
+  top: 8%;
+  right: 4%;
+  width: min(38%, 24rem);
+  aspect-ratio: 4 / 5;
+  transform: rotate(2.5deg);
+}
+
+.kidArcadeStoryQuestCard__book img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.42));
+}
+
+.kidArcadeStoryQuestCard__copy > span {
+  border-radius: 999px;
+  background: #e8c45f;
+  color: #10274e;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kidArcadeStoryQuestCard__brand {
+  margin: 1rem 0 0 !important;
+  color: #e8c45f !important;
+  font-size: 0.85rem !important;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kidArcadeStoryQuestCard h2 {
+  margin: 0.15rem 0 0;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 0.98;
+}
+
+.kidArcadeStoryQuestCard__copy > p:not(.kidArcadeStoryQuestCard__brand) {
+  max-width: 32rem;
+  margin: 0.85rem 0 0;
+  color: rgba(255, 255, 255, 0.86);
+  line-height: 1.55;
+}
+
+.kidArcadeStoryQuestCard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.kidArcadeStoryQuestCard__meta span {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.kidArcadeStoryQuestCard button,
+.kidArcadeStoryQuestCard__cta {
+  min-width: 11rem;
+  min-height: 48px;
+  margin-top: 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: #e8c45f;
+  color: #10274e;
+  font: inherit;
+  font-weight: 1000;
+  cursor: pointer;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.kidArcadeStoryQuestCard__cta {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .kidArcadeGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -235,6 +361,27 @@
 }
 
 @media (max-width: 640px) {
+  .kidArcadeStoryQuestCard {
+    min-height: 440px;
+    background:
+      linear-gradient(180deg, rgba(3, 14, 32, 0.38), rgba(3, 14, 32, 0.96) 48%),
+      url('../../../public/images/backgrounds/caidenvale_book_hero.webp') center top / cover no-repeat;
+  }
+
+  .kidArcadeStoryQuestCard__copy {
+    min-height: 440px;
+    justify-content: flex-end;
+    width: 100%;
+    padding-top: 13.5rem;
+  }
+
+  .kidArcadeStoryQuestCard__book {
+    top: 1rem;
+    right: 1rem;
+    width: 9.5rem;
+    height: 12rem;
+  }
+
   .kidArcadeGrid {
     grid-template-columns: 1fr;
   }

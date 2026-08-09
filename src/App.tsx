@@ -128,8 +128,10 @@ import {
   STUDENT_GALLERY_PUBLIC_PATH,
   KID_PLAY_SESSION_PATH,
   STUDENT_PIN_LOGIN_PATH,
+  ARCADE_PREVIEW_PATH,
 } from './config/courageRoutes';
 import { kidPlayShellChildRoutes } from './routes/kidPlayShellChildRoutes';
+import { ENABLE_DEVELOPMENT_PREVIEWS } from './config/developmentPreview';
 // The facilitator shell owns its complete boot lifecycle. Keeping this route eager
 // prevents the app-level Suspense fallback from flashing before session restoration.
 import ProgramDashboardPage from './pages/ProgramDashboardPage';
@@ -150,6 +152,7 @@ const DesignSystemPage = React.lazy(() => import('./pages/DesignSystemPage'));
 const FamilyHubLayout = React.lazy(() => import('./pages/FamilyHubLayout'));
 const FamilyPortalLayout = React.lazy(() => import('./pages/FamilyPortalLayout'));
 const StudentPinLoginPage = React.lazy(() => import('./pages/StudentPinLoginPage'));
+const PreviewArcadeLayout = React.lazy(() => import('./pages/PreviewArcadeLayout'));
 const FamilyClaimByCodePage = React.lazy(() => import('./pages/FamilyClaimByCodePage'));
 const FamilyClaimRedirect = React.lazy(() => import('./pages/FamilyClaimRedirect'));
 
@@ -281,6 +284,9 @@ const appRouteChildren = (
       <Route path={`${KID_PLAY_SESSION_PATH}/:kidPlaySessionId`} element={<KidPlaySessionLayout />}>
         {kidPlayShellChildRoutes}
       </Route>
+      {ENABLE_DEVELOPMENT_PREVIEWS ? (
+        <Route path={`${ARCADE_PREVIEW_PATH}/*`} element={<PreviewArcadeLayout />} />
+      ) : null}
 
       {/* Focus Flame Academy */}
       <Route
@@ -536,8 +542,13 @@ const AppLayout: React.FC = () => {
   const isKidPlayShell =
     location.pathname === KID_PLAY_SESSION_PATH ||
     location.pathname.startsWith(`${KID_PLAY_SESSION_PATH}/`);
+  const isArcadePreview =
+    ENABLE_DEVELOPMENT_PREVIEWS &&
+    (location.pathname === ARCADE_PREVIEW_PATH ||
+      location.pathname.startsWith(`${ARCADE_PREVIEW_PATH}/`));
   const isImmersiveKidsGame =
     isKidPlayShell ||
+    isArcadePreview ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||
     location.pathname.startsWith(`${FOCUS_FLAME_LAB_PATH}/`) ||
     location.pathname === B4_GUIDE_PATH ||
@@ -561,6 +572,7 @@ const AppLayout: React.FC = () => {
   /** Hide global Ask B-4 during gameplay and on portal shells (AppShell mounts B4Assistant). */
   const hideAskB4Chat =
     isKidPlayShell ||
+    isArcadePreview ||
     !ENABLE_B4_CHAT ||
     missionPhase === 'quiz' ||
     location.pathname === FOCUS_FLAME_LAB_PATH ||

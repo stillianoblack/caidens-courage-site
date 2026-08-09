@@ -127,21 +127,51 @@ export default function PilotProgramSignupPage() {
     <div className="pilotSignup-page flex min-h-screen flex-col">
       <CourageHeader />
 
-      <header className="pilotSignup-hero">
-        <h1 className="pilotSignup-heroTitle">Focus Flame Academy Pilot Signup</h1>
-        <p className="pilotSignup-heroSub">
-          Create a camp, classroom, or independent family account. Get your access codes and start
-          using games, assessments, and family-ready resources.
-        </p>
-      </header>
+      <section className="pilotSignup-stage">
+        <div className="pilotSignup-heroGlow" aria-hidden="true" />
+        <div className="pilotSignup-spark pilotSignup-spark--one" aria-hidden="true" />
+        <div className="pilotSignup-spark pilotSignup-spark--two" aria-hidden="true" />
+        <header className="pilotSignup-hero">
+          <div className="pilotSignup-heroCopy">
+            <p className="pilotSignup-eyebrow">Focus Flame Academy <span aria-hidden="true">•</span> Program Setup</p>
+            <h1 className="pilotSignup-heroTitle">Start Your Focus Flame Adventure</h1>
+            <p className="pilotSignup-heroSub">
+              Create your program, invite your explorers, and we&apos;ll help you get everything ready
+              for your first adventure.
+            </p>
+          </div>
+          <div className="pilotSignup-heroGuide" aria-hidden="true">
+            <div className="pilotSignup-guideHalo" />
+            <img
+              className="pilotSignup-heroB4"
+              src="/images/Choose-Your-Guide/B-4orange-hover.webp"
+              alt=""
+            />
+          </div>
+        </header>
 
-      <main className="pilotSignup-main">
-        <div className="pilotSignup-card">
-          <h2 className="pilotSignup-cardTitle">Start Your Pilot Program</h2>
-          <p className="pilotSignup-cardSub">
-            Tell us about your camp, classroom, homeschool group, or family. We&apos;ll generate your
-            codes and open your portal right away.
-          </p>
+        <main className="pilotSignup-main">
+          <div className="pilotSignup-card">
+          <div className="pilotSignup-cardIntro">
+            <img
+              className="pilotSignup-cardB4"
+              src="/images/Choose-Your-Guide/B-4orange.webp"
+              alt=""
+              aria-hidden="true"
+            />
+            <div>
+              <h2 className="pilotSignup-cardTitle">Let&apos;s build your program.</h2>
+              <p className="pilotSignup-cardSub">
+                Tell me a little about your group and I&apos;ll get your Academy ready.
+              </p>
+            </div>
+          </div>
+
+          <ol className="pilotSignup-progress" aria-label="Signup progress">
+            <li><span>1</span>Program</li>
+            <li><span>2</span>Explorers</li>
+            <li><span>3</span>Ready to Go</li>
+          </ol>
 
           <PilotProgramSignupForm
             onSubmit={handleSubmit}
@@ -154,8 +184,9 @@ export default function PilotProgramSignupPage() {
             Already have a Blue Ribbon pilot?{' '}
             <Link to="/portal/blueribbon2026">Open Blue Ribbon Dashboard</Link>
           </p>
-        </div>
-      </main>
+          </div>
+        </main>
+      </section>
 
       <CourageFooter />
     </div>

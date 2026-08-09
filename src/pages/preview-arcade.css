@@ -1,0 +1,42 @@
+.previewArcadeShell {
+  min-height: 100vh;
+  background: var(--kid-shell-bg, #f5f7fb);
+}
+
+.previewArcadeMarker {
+  align-items: center;
+  background: #102b5c;
+  color: #fff;
+  display: flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  justify-content: space-between;
+  letter-spacing: 0.03em;
+  padding: 0.55rem clamp(1rem, 4vw, 3rem);
+}
+
+.previewArcadeMarker a {
+  color: #f2ca68;
+}
+
+.previewArcadeMarker label {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.previewArcadeMarker select {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: #fff;
+  color: #102b5c;
+  padding: 0.25rem 0.55rem;
+}
+
+@media (max-width: 640px) {
+  .previewArcadeMarker {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+}

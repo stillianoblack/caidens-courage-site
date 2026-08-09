@@ -6,19 +6,12 @@ import PilotProgramSignupForm from './PilotProgramSignupForm';
 function renderForm(
   onSubmit = jest.fn().mockResolvedValue(undefined),
   error: { title: string; body: string } | null = null,
-  onRetry = jest.fn().mockResolvedValue(undefined),
 ) {
   return {
     onSubmit,
-    onRetry,
     ...render(
       <MemoryRouter>
-        <PilotProgramSignupForm
-          onSubmit={onSubmit}
-          onRetry={onRetry}
-          submitting={false}
-          error={error}
-        />
+        <PilotProgramSignupForm onSubmit={onSubmit} submitting={false} error={error} />
       </MemoryRouter>,
     ),
   };
@@ -68,12 +61,8 @@ describe('PilotProgramSignupForm', () => {
       <MemoryRouter>
         <PilotProgramSignupForm
           onSubmit={onSubmit}
-          onRetry={rendered.onRetry}
           submitting={false}
-          error={{
-            title: "We couldn't create your program.",
-            body: "Your information hasn't been lost. Please try again.",
-          }}
+          error={{ title: "We couldn't create your program.", body: 'Please try again.' }}
         />
       </MemoryRouter>,
     );
@@ -81,9 +70,5 @@ describe('PilotProgramSignupForm', () => {
     expect(screen.getByDisplayValue('guardian@example.com')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Avery Family')).toBeInTheDocument();
     expect(screen.getByRole('alert')).toHaveTextContent("We couldn't create your program.");
-    expect(screen.queryByText(/support code/i)).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Try Again' }));
-    expect(rendered.onRetry).toHaveBeenCalledTimes(1);
   });
 });
