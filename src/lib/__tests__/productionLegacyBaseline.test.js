@@ -2,9 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..', '..', '..');
-const inventory = JSON.parse(
-  fs.readFileSync(path.join(root, 'docs/audits/production-schema-inventory.json'), 'utf8'),
-);
+const inventoryCounts = require('./fixtures/productionLegacyBaselineCounts.json');
 const baseline = fs.readFileSync(
   path.join(root, 'supabase/schema/production_legacy_baseline.sql'),
   'utf8',
@@ -17,21 +15,11 @@ const cleanup = fs.readFileSync(
 
 describe('production-compatible staging artifacts', () => {
   test('baseline object counts match captured production metadata', () => {
-    const publicTableCount = inventory.tables.filter(
-      (table) => table.schema_name === 'public' && ['r', 'p'].includes(table.relation_kind),
-    ).length;
-    const publicFunctionCount = inventory.functions.filter(
-      (fn) => fn.schema_name === 'public',
-    ).length;
-    const publicTriggerCount = inventory.triggers.filter(
-      (trigger) => trigger.schema_name === 'public',
-    ).length;
-
-    expect((baseline.match(/^CREATE TABLE /gm) || []).length).toBe(publicTableCount);
+    expect((baseline.match(/^CREATE TABLE /gm) || []).length).toBe(inventoryCounts.publicTableCount);
     expect((baseline.match(/^CREATE POLICY /gm) || []).length).toBe(0);
     expect(baseline).toContain('staging_legacy_rls.sql');
-    expect((baseline.match(/^CREATE OR REPLACE FUNCTION /gm) || []).length).toBe(publicFunctionCount);
-    expect((baseline.match(/^CREATE TRIGGER /gm) || []).length).toBe(publicTriggerCount);
+    expect((baseline.match(/^CREATE OR REPLACE FUNCTION /gm) || []).length).toBe(inventoryCounts.publicFunctionCount);
+    expect((baseline.match(/^CREATE TRIGGER /gm) || []).length).toBe(inventoryCounts.publicTriggerCount);
   });
 
   test('baseline is guarded and contains no application-row inserts', () => {

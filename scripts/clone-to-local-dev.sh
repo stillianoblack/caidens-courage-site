@@ -25,7 +25,7 @@ pwd
 
 echo "5) Cleaning and reinstalling dependencies..."
 rm -rf node_modules
-yarn install
+yarn install --frozen-lockfile --non-interactive
 
 echo "6) Starting dev server..."
 yarn start

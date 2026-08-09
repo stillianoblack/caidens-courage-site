@@ -2,6 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
     "@testing-library/jest-dom": "^5.16.5",
