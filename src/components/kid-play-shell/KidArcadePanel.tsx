@@ -55,9 +55,12 @@ export default function KidArcadePanel({
     if (!shellContext) return '/kids/games/b4-focus-flight';
     return `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/b4-focus-flight`;
   }, [b4GamePathOverride, shellContext]);
-  const storyQuestPath = storyQuestPathOverride ?? (shellContext
+  const storyQuestBasePath = storyQuestPathOverride ?? (shellContext
     ? `${getKidPlayShellRoute(shellContext.sessionId, 'arcade')}/story`
     : '/story-mode');
+  // Enter the first playable question directly. Redirecting from the story index
+  // inside a mounted nested route could update the URL without rematching the view.
+  const storyQuestPath = `${storyQuestBasePath}/chapter-1`;
 
   useEffect(() => {
     setBestScore(readNumber(getParticipantB4FlightStorageKey(B4_BEST_SCORE_KEY, participantId)));
@@ -113,7 +116,7 @@ export default function KidArcadePanel({
             )}
           </div>
           <div className="kidArcadeStoryQuestCard__book" aria-hidden="true">
-            <img src="/images/Caiden-vale-book/caidenvale_book_hero.webp" alt="" />
+            <img src="/images/backgrounds/caidenvale_book_hero.webp" alt="" />
           </div>
         </article>
       </section>

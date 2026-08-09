@@ -15,8 +15,8 @@ describe('ParentsPage', () => {
       </MemoryRouter>,
     );
 
-    const hero = container.querySelector('.persona-familyHero');
-    const character = hero?.querySelector<HTMLImageElement>('.persona-familyHeroB4');
+    const hero = container.querySelector('.persona-marketingHero--family');
+    const character = hero?.querySelector<HTMLImageElement>('.persona-marketingHeroB4');
     const copy = hero?.querySelector('.cc-section-hero-copy');
 
     expect(hero).not.toBeNull();

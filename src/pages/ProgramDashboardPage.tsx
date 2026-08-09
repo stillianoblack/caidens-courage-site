@@ -4,7 +4,7 @@ import PilotDashboardSidebar from '../components/pilot-dashboard/PilotDashboardS
 import PilotDashboardTopBar from '../components/pilot-dashboard/PilotDashboardTopBar';
 import { AppShell } from '../components/portal-design-system';
 import PilotProgramWelcomeCard from '../components/pilot-program/PilotProgramWelcomeCard';
-import DashboardWidgetSkeleton from '../components/pilot-dashboard/DashboardWidgetSkeleton';
+import PortalRouteLoader from '../components/portal/PortalRouteLoader';
 import FacilitatorPortalBootScreen from '../components/portal/FacilitatorPortalBootScreen';
 import PortalAccessRequired from '../components/portal/PortalAccessRequired';
 import { GoalsOnboardingDrawer } from '../components/portal-design-system';
@@ -236,7 +236,7 @@ export default function ProgramDashboardPage() {
       {showWelcome && !isKidsRoute && activeNav === 'overview' ? (
         <PilotProgramWelcomeCard program={activeProgram} onDismiss={dismissWelcome} />
       ) : null}
-      <Suspense fallback={<DashboardWidgetSkeleton showActivity />}>
+      <Suspense fallback={<PortalRouteLoader message="Loading Focus Flame Academy..." academy fullScreen />}>
         <Outlet
           key={resolvePortalOutletKey(location.pathname, location.search)}
           context={{ setRosterSnapshot }}

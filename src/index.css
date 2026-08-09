@@ -8183,6 +8183,90 @@ a.ffl-ctaSecondary {
   font-size: clamp(2.25rem, 5.2vw, 4.5rem);
 }
 
+/* Shared B-4 composition for Kids, Family, and Teacher marketing heroes. */
+.persona-marketingHero .cc-section-hero-inner {
+  display: grid;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+.persona-marketingHero .cc-section-hero-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.persona-marketingHeroGuide {
+  position: relative;
+  display: grid;
+  width: min(72vw, 20rem);
+  height: clamp(14rem, 36vw, 22rem);
+  place-items: center;
+}
+
+.persona-marketingHeroGuideGlow {
+  position: absolute;
+  inset: 14% 8% 4%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 196, 95, 0.22), transparent 68%);
+  filter: blur(10px);
+}
+
+.persona-marketingHero--kids .persona-marketingHeroGuideGlow {
+  background: radial-gradient(circle, rgba(111, 154, 229, 0.28), transparent 68%);
+}
+
+.persona-marketingHero--family .persona-marketingHeroGuideGlow {
+  background: radial-gradient(circle, rgba(72, 211, 168, 0.25), transparent 68%);
+}
+
+.persona-marketingHero--teacher .persona-marketingHeroGuideGlow {
+  background: radial-gradient(circle, rgba(255, 153, 64, 0.25), transparent 68%);
+}
+
+.persona-marketingHeroB4 {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 22rem;
+  object-fit: contain;
+  filter: drop-shadow(0 1.35rem 1.25rem rgba(0, 0, 0, 0.32));
+}
+
+@media (min-width: 768px) {
+  .persona-marketingHero .cc-section-hero-inner {
+    grid-template-columns: minmax(15rem, 0.78fr) minmax(0, 1.22fr);
+  }
+
+  .persona-marketingHero .cc-section-hero-copy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .persona-marketingHero .cc-section-hero-visual {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .persona-marketingHero .cc-section-hero-visual {
+    order: 2;
+  }
+
+  .persona-marketingHeroGuide {
+    height: 13rem;
+  }
+
+  .persona-marketingHeroB4 {
+    max-height: 13rem;
+  }
+}
+
 /* Tighter hero — text sits higher under CourageHeader */
 .cc-section-hero--compact.cc-section-hero--courage {
   padding-top: calc(3.5rem + 1rem);

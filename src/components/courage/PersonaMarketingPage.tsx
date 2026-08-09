@@ -182,6 +182,19 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
 
   const howItWorksItems = config.howItWorks ?? config.faq ?? [];
   const isFamilyPage = config.slug === 'parents';
+  const personaHeroVisual = config.slug === 'parents'
+    ? {
+        src: '/images/Choose-Your-Guide/b-4facilitator-hover.webp',
+        alt: 'Parent and guardian B-4 guide',
+        tone: 'family',
+      }
+    : config.slug === 'teachers'
+      ? {
+          src: '/images/Choose-Your-Guide/B-4orange-hover.webp',
+          alt: 'Facilitator and teacher B-4 guide',
+          tone: 'teacher',
+        }
+      : null;
   const familyAudienceDescriptions: Record<string, string> = {
     'Parents and caregivers': 'Tools to support everyday conversations and stronger connections.',
     'Homeschool families': 'Flexible resources for learning, growth, and emotional development.',
@@ -194,19 +207,19 @@ export default function PersonaMarketingPage({ config, children }: PersonaMarket
       <CourageHeader />
 
       <SectionHero
-        className={isFamilyPage ? 'persona-familyHero' : ''}
-        variant={isFamilyPage ? 'compact' : 'default'}
+        className={personaHeroVisual ? `persona-marketingHero persona-marketingHero--${personaHeroVisual.tone}` : ''}
+        variant={personaHeroVisual ? 'compact' : 'default'}
         eyebrow={config.eyebrow}
         title={config.heroTitle}
         description={config.heroSubtitle}
         supportingText={config.intro}
-        visual={isFamilyPage ? (
-          <div className="persona-familyHeroGuide">
-            <div className="persona-familyHeroGuideGlow" />
+        visual={personaHeroVisual ? (
+          <div className="persona-marketingHeroGuide">
+            <div className="persona-marketingHeroGuideGlow" />
             <img
-              className="persona-familyHeroB4"
-              src="/images/Choose-Your-Guide/b-4facilitator-hover.webp"
-              alt=""
+              className="persona-marketingHeroB4"
+              src={personaHeroVisual.src}
+              alt={personaHeroVisual.alt}
             />
           </div>
         ) : undefined}

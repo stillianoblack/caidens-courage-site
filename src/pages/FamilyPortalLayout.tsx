@@ -136,7 +136,7 @@ export default function FamilyPortalLayout() {
   if (isPlayPauseRoute) {
     return (
       <ActiveParticipantProvider programCode={programCode}>
-        <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
+        <Suspense fallback={<PortalRouteLoader message="Loading your adventure..." fullScreen />}>
           <Outlet />
         </Suspense>
       </ActiveParticipantProvider>
@@ -180,7 +180,7 @@ export default function FamilyPortalLayout() {
           }
         >
           <FamilyPortalDevDiagnosticBanner />
-          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
+          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." fullScreen />}>
             <Outlet />
           </Suspense>
         </AppShell>

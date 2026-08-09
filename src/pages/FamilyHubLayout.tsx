@@ -165,7 +165,7 @@ function FamilyHubLayoutContent() {
   if (isPlayPauseRoute) {
     return (
       <ActiveParticipantProvider programCode={programCode}>
-        <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
+        <Suspense fallback={<PortalRouteLoader message="Loading your adventure..." fullScreen />}>
           <Outlet />
         </Suspense>
       </ActiveParticipantProvider>
@@ -215,7 +215,7 @@ function FamilyHubLayoutContent() {
           footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
         >
           <FamilyPortalDevDiagnosticBanner />
-          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
+          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." fullScreen />}>
             <Outlet />
           </Suspense>
         </AppShell>

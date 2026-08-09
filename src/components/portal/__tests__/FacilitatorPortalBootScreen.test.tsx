@@ -41,9 +41,10 @@ describe('FacilitatorPortalBootScreen', () => {
     expect(app).not.toContain("React.lazy(() => import('./pages/ProgramDashboardPage'))");
   });
 
-  test('uses a local dashboard skeleton after the shell is ready', () => {
+  test('keeps the branded transition active while the primary dashboard route loads', () => {
     const page = read('src/pages/ProgramDashboardPage.tsx');
-    expect(page).toContain('<Suspense fallback={<DashboardWidgetSkeleton showActivity />}>');
+    expect(page).toContain('<Suspense fallback={<PortalRouteLoader message="Loading Focus Flame Academy..." academy fullScreen />}>');
+    expect(page).not.toContain('<Suspense fallback={<DashboardWidgetSkeleton');
     expect(page).not.toContain('Loading dashboard...');
     expect(page).not.toContain('Restoring your facilitator session...');
   });

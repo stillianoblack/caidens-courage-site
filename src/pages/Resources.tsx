@@ -305,10 +305,22 @@ const Resources: React.FC = () => {
 
       <SectionHero
         id="resources-header"
+        className="persona-marketingHero persona-marketingHero--kids"
+        variant="compact"
         eyebrow="Brave Mind Club"
         title="Brave Mind Club"
         description="Free activities, coloring pages, B-4 reset tools, and printable adventures for brave minds."
         supportingText="Most resources are free and designed for neurodivergent-friendly learning at home and in the classroom."
+        visual={(
+          <div className="persona-marketingHeroGuide">
+            <div className="persona-marketingHeroGuideGlow" />
+            <img
+              className="persona-marketingHeroB4"
+              src="/images/Choose-Your-Guide/B-4student-hover.webp"
+              alt="Student B-4 guide"
+            />
+          </div>
+        )}
       />
 
       <section className="border-b border-navy-100 bg-white py-6">
@@ -1043,4 +1055,3 @@ const Resources: React.FC = () => {
 };
 
 export default Resources;
-
