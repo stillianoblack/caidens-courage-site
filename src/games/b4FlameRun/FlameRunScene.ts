@@ -10,11 +10,17 @@ const PLAYER_HEIGHT = 60;
 const SLIDE_WIDTH = 116;
 const SLIDE_HEIGHT = 40;
 const JUMP_DURATION = 760;
+const FOCUS_LEAP_DURATION = 980;
+const FOCUS_LEAP_HOLD_MS = 300;
+const FOCUS_LEAP_THRUST = 980;
 const MILESTONE_SECONDS = 100;
+const PLATFORM_TOP = { low: FLOOR_Y - 72, medium: FLOOR_Y - 126, high: FLOOR_Y - 182 } as const;
 const BEST_SCORE_KEY = 'b4-flame-run:best-score';
 
 type MovingBody = Phaser.Physics.Arcade.Image & { kind?: string };
 type Zone = 1 | 2 | 3;
+type PlatformConfig = { x: number; top: number; width: number; gold?: boolean; moving?: 'vertical' | 'horizontal' };
+type ChunkName = 'forest-arc' | 'step-up' | 'step-down' | 'upper-bonus' | 'platform-gap' | 'leap-slide' | 'staircase' | 'long-runway';
 
 export default class FlameRunScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -31,6 +37,12 @@ export default class FlameRunScene extends Phaser.Scene {
   private zone: Zone = 1;
   private supportY = FLOOR_Y;
   private milestoneShown = false;
+  private jumpHeld = false;
+  private jumpActive = false;
+  private jumpStartedAt = 0;
+  private jumpRotation = 0;
+  private focusLeapActive = false;
+  private tutorialStage = 0;
   private state: FlameRunState = createFlameRunState();
   private started = false;
   private ended = false;
@@ -88,14 +100,19 @@ export default class FlameRunScene extends Phaser.Scene {
 
     this.jumpKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE) as Phaser.Input.Keyboard.Key;
     this.downKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN) as Phaser.Input.Keyboard.Key;
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.UP).on('down', this.jump, this);
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W).on('down', this.jump, this);
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', this.slide, this);
+    const upKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.UP) as Phaser.Input.Keyboard.Key;
+    const wKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) as Phaser.Input.Keyboard.Key;
+    const sKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) as Phaser.Input.Keyboard.Key;
+    upKey.on('down', this.jump, this).on('up', this.releaseJump, this);
+    wKey.on('down', this.jump, this).on('up', this.releaseJump, this);
+    sKey.on('down', this.slide, this);
     this.jumpKey.on('down', this.jump, this);
+    this.jumpKey.on('up', this.releaseJump, this);
     this.downKey.on('down', this.slide, this);
     this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', this.togglePause, this);
     this.game.events.on(FLAME_RUN_EVENTS.start, this.startRun, this);
     this.game.events.on(FLAME_RUN_EVENTS.jump, this.jump, this);
+    this.game.events.on(FLAME_RUN_EVENTS.jumpEnd, this.releaseJump, this);
     this.game.events.on(FLAME_RUN_EVENTS.slide, this.slide, this);
     this.game.events.on(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
     this.game.events.on(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
@@ -119,6 +136,17 @@ export default class FlameRunScene extends Phaser.Scene {
     [...this.obstacles.getChildren(), ...this.flames.getChildren(), ...this.platforms.getChildren()].forEach((child) => {
       const body = child as MovingBody;
       body.x -= speed * delta / 1000;
+      if (body.kind === 'platform') {
+        const movement = body.getData('movement') as PlatformConfig['moving'];
+        const phase = Math.sin((time + body.getData('phase')) / 850);
+        if (movement === 'vertical') body.y = body.getData('baseY') + phase * 28;
+        if (movement === 'horizontal') {
+          const previousOffset = Number(body.getData('lastOffset') ?? 0);
+          const nextOffset = phase * 34;
+          body.x += nextOffset - previousOffset;
+          body.setData('lastOffset', nextOffset);
+        }
+      }
       body.body?.updateFromGameObject();
       if (body.x < -360) body.destroy();
     });
@@ -128,6 +156,17 @@ export default class FlameRunScene extends Phaser.Scene {
     if (grounded) {
       this.player.y = this.supportY - (this.sliding ? SLIDE_HEIGHT : PLAYER_HEIGHT) / 2;
       if (!this.sliding) this.player.setAngle(0);
+    } else if (this.jumpActive) {
+      const heldFor = time - this.jumpStartedAt;
+      const body = this.player.body as Phaser.Physics.Arcade.Body;
+      if (this.jumpHeld && heldFor <= FOCUS_LEAP_HOLD_MS && body.velocity.y < 0) {
+        const focusStrength = this.state.focusModeUntil > time ? 1.1 : 1;
+        body.setVelocityY(body.velocity.y - FOCUS_LEAP_THRUST * focusStrength * delta / 1000);
+        if (heldFor > 90) this.engageFocusLeap();
+      }
+      const rotationDuration = this.focusLeapActive ? FOCUS_LEAP_DURATION : JUMP_DURATION;
+      this.jumpRotation = Math.min(360, this.jumpRotation + 360 * delta / rotationDuration);
+      this.player.setAngle(this.jumpRotation);
     }
     this.wasGrounded = grounded;
     this.aura.setPosition(this.player.x, this.player.y);
@@ -144,8 +183,8 @@ export default class FlameRunScene extends Phaser.Scene {
     const focusMode = this.state.focusModeUntil > time;
     if (focusMode !== this.focusWasActive) this.transitionFocusMode(focusMode);
     this.focusWasActive = focusMode;
-    if (time - this.lastTrailAt > (focusMode ? 55 : this.sliding ? 70 : 190)) {
-      this.addThrusterTrail(focusMode ? 'focus' : this.sliding ? 'slide' : 'run');
+    if (time - this.lastTrailAt > (focusMode || this.focusLeapActive ? 55 : this.sliding ? 70 : 190)) {
+      this.addThrusterTrail(focusMode || this.focusLeapActive ? 'focus' : this.sliding ? 'slide' : 'run');
       this.lastTrailAt = time;
     }
     if (time - this.lastHud > 100) { this.emitHud(focusMode ? 'B-4: Focus Mode!' : this.messageForStreak()); this.lastHud = time; }
@@ -233,20 +272,37 @@ export default class FlameRunScene extends Phaser.Scene {
     this.startedAt = this.time.now;
     this.lastSpawn = this.time.now - 900;
     this.sound.play('run-start-sfx', { volume: .3 });
+    this.tutorialStage = 0;
   }
 
   private jump(): void {
     if (!this.started || this.ended) return;
     const body = this.player.body as Phaser.Physics.Arcade.Body;
-    if (body.blocked.down || body.touching.down || this.player.y > this.supportY - 88) {
+    if (body.blocked.down || body.touching.down) {
       this.endSlide();
       this.tweens.killTweensOf(this.player);
       this.player.setAngle(0).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .94);
       this.tweens.add({ targets: this.player, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 105, ease: 'Quad.Out' });
-      this.tweens.add({ targets: this.player, angle: 360, duration: JUMP_DURATION, ease: 'Sine.InOut' });
       this.player.setVelocityY(-590);
-      this.player.angle = 0;
+      this.jumpHeld = true;
+      this.jumpActive = true;
+      this.focusLeapActive = false;
+      this.jumpStartedAt = this.time.now;
+      this.jumpRotation = 0;
+      if (this.tutorialStage === 0) {
+        this.tutorialStage = 1;
+        this.time.delayedCall(1800, () => { if (this.tutorialStage === 1) this.tutorialStage = 2; });
+      }
     }
+  }
+
+  private releaseJump(): void { this.jumpHeld = false; }
+
+  private engageFocusLeap(): void {
+    if (this.focusLeapActive) return;
+    this.focusLeapActive = true;
+    if (this.tutorialStage <= 2) this.tutorialStage = 3;
+    for (let index = 0; index < 3; index += 1) this.addThrusterTrail('focus');
   }
 
   private slide(): void {
@@ -274,15 +330,54 @@ export default class FlameRunScene extends Phaser.Scene {
   }
 
   private spawnPattern(): void {
-    const pattern = this.nextPattern++ % 8;
-    if (pattern === 0) { this.spawnObstacle(this.zone === 1 ? 'log' : 'crystal', FLOOR_Y - 24, 72, 48); this.spawnFlameArc(FLOOR_Y - 92); }
-    if (pattern === 1) { this.spawnObstacle('root', FLOOR_Y - 66, 112, 44); this.spawnFlameLine(FLOOR_Y - 26); }
-    if (pattern === 2) this.spawnPlatformSequence('low');
-    if (pattern === 3) { this.spawnObstacle(this.zone === 3 ? 'energy' : 'crystal', FLOOR_Y - 31, 56, 62); this.spawnFlameArc(FLOOR_Y - 116); }
-    if (pattern === 4) this.spawnPlatformSequence('medium');
-    if (pattern === 5) { this.spawnFlameZigzag(); }
-    if (pattern === 6) this.spawnPlatformSequence(this.zone === 1 ? 'long' : 'gap');
-    if (pattern === 7) this.spawnFlameLine(FLOOR_Y - 36);
+    const pools: Record<Zone, ChunkName[]> = {
+      1: ['step-up', 'forest-arc', 'platform-gap', 'long-runway'],
+      2: ['step-up', 'step-down', 'upper-bonus', 'staircase', 'platform-gap'],
+      3: ['upper-bonus', 'leap-slide', 'staircase', 'long-runway', 'step-down'],
+    };
+    const pool = pools[this.zone];
+    this.spawnAuthoredChunk(pool[this.nextPattern++ % pool.length]);
+  }
+
+  private spawnAuthoredChunk(chunk: ChunkName): void {
+    if (chunk === 'forest-arc') {
+      this.spawnObstacle('log', FLOOR_Y - 24, 72, 48);
+      this.spawnFlameArc(FLOOR_Y - 92);
+      return;
+    }
+    if (chunk === 'step-up') this.spawnPlatformSequence([
+      { x: WIDTH + 150, top: PLATFORM_TOP.low, width: 170 },
+      { x: WIDTH + 380, top: PLATFORM_TOP.medium, width: 180 },
+      { x: WIDTH + 625, top: PLATFORM_TOP.high, width: 210 },
+    ], true);
+    if (chunk === 'step-down') this.spawnPlatformSequence([
+      { x: WIDTH + 170, top: PLATFORM_TOP.high, width: 220 },
+      { x: WIDTH + 430, top: PLATFORM_TOP.medium, width: 190 },
+      { x: WIDTH + 665, top: PLATFORM_TOP.low, width: 180 },
+    ], true);
+    if (chunk === 'upper-bonus') this.spawnPlatformSequence([
+      { x: WIDTH + 230, top: PLATFORM_TOP.medium, width: 340, gold: this.zone === 3 },
+      { x: WIDTH + 590, top: PLATFORM_TOP.high, width: 280, gold: this.zone === 3 },
+    ], true, 2);
+    if (chunk === 'platform-gap') this.spawnPlatformSequence([
+      { x: WIDTH + 150, top: PLATFORM_TOP.low, width: 180 },
+      { x: WIDTH + 410, top: PLATFORM_TOP.low, width: 190 },
+    ], false);
+    if (chunk === 'leap-slide') {
+      const configs: PlatformConfig[] = [{ x: WIDTH + 260, top: PLATFORM_TOP.medium, width: 420, gold: true }];
+      this.spawnPlatformSequence(configs, true, 2);
+      this.spawnObstacle('root', PLATFORM_TOP.medium - 58, 112, 44, WIDTH + 345);
+    }
+    if (chunk === 'staircase') this.spawnPlatformSequence([
+      { x: WIDTH + 125, top: PLATFORM_TOP.low, width: 145 },
+      { x: WIDTH + 325, top: PLATFORM_TOP.medium, width: 150, moving: this.zone === 2 ? 'vertical' : undefined },
+      { x: WIDTH + 535, top: PLATFORM_TOP.high, width: 170, gold: this.zone === 3 },
+    ], true);
+    if (chunk === 'long-runway') {
+      const configs: PlatformConfig[] = [{ x: WIDTH + 260, top: PLATFORM_TOP.low, width: 430, moving: this.zone === 2 ? 'horizontal' : undefined }];
+      this.spawnPlatformSequence(configs, false);
+      this.spawnObstacle(this.zone === 1 ? 'log' : 'crystal', PLATFORM_TOP.low - 25, 48, 50, WIDTH + 350);
+    }
   }
 
   private spawnObstacle(kind: string, y: number, width: number, height: number, x = WIDTH + 120): void {
@@ -294,22 +389,35 @@ export default class FlameRunScene extends Phaser.Scene {
     (obstacle.body as Phaser.Physics.Arcade.Body).setSize(width * .75, height * .7);
   }
 
-  private spawnPlatformSequence(type: 'low' | 'medium' | 'long' | 'gap'): void {
-    const configs = type === 'low' ? [{ x: WIDTH + 160, top: FLOOR_Y - 72, width: 150 }]
-      : type === 'medium' ? [{ x: WIDTH + 170, top: FLOOR_Y - 118, width: 180 }]
-        : type === 'long' ? [{ x: WIDTH + 230, top: FLOOR_Y - 92, width: 360 }]
-          : [{ x: WIDTH + 130, top: FLOOR_Y - 92, width: 160 }, { x: WIDTH + 390, top: FLOOR_Y - 130, width: 180 }];
+  private spawnPlatformSequence(configs: PlatformConfig[], highRoute = false, rewardMultiplier = 1): void {
+    if (!this.isPlatformSequenceSafe(configs)) return;
     configs.forEach((config, index) => {
       const platform = this.platforms.create(config.x, config.top + 27, 'run-platform') as MovingBody;
       platform.kind = 'platform';
       platform.setDisplaySize(config.width, 54).setDepth(12);
+      if (config.gold) platform.setTint(0xffc84d);
       const body = platform.body as Phaser.Physics.Arcade.Body;
       body.setSize(config.width / platform.scaleX, 12 / platform.scaleY).setOffset(0, 0);
+      platform.setData({ movement: config.moving, baseY: platform.y, phase: index * 430, lastOffset: 0 });
       const flameY = config.top - 45;
-      for (let flameIndex = 0; flameIndex < Math.max(2, Math.floor(config.width / 80)); flameIndex += 1) {
+      const flameCount = Math.max(2, Math.floor(config.width / 90)) * rewardMultiplier;
+      for (let flameIndex = 0; flameIndex < flameCount; flameIndex += 1) {
         this.spawnFlame(config.x - config.width / 2 + 45 + flameIndex * 70, flameY - (index % 2) * 18);
       }
-      if ((type === 'medium' || type === 'long') && index === 0) this.spawnObstacle('crystal', config.x + config.width * .25, config.top - 25, 42, 50);
+    });
+    if (highRoute) {
+      for (let index = 0; index < 3; index += 1) this.spawnFlame(WIDTH + 90 + index * 110, FLOOR_Y - 34);
+    }
+  }
+
+  private isPlatformSequenceSafe(configs: PlatformConfig[]): boolean {
+    return configs.every((config, index) => {
+      if (config.width < 140 || config.top < PLATFORM_TOP.high - 8 || config.top > PLATFORM_TOP.low + 8) return false;
+      if (index === 0) return FLOOR_Y - config.top <= 190;
+      const previous = configs[index - 1];
+      const horizontalGap = config.x - config.width / 2 - (previous.x + previous.width / 2);
+      const rise = previous.top - config.top;
+      return horizontalGap <= 130 && rise <= 112;
     });
   }
 
@@ -423,12 +531,20 @@ export default class FlameRunScene extends Phaser.Scene {
 
   private land(): void {
     this.tweens.killTweensOf(this.player);
+    const completedFocusLeap = this.focusLeapActive;
+    this.jumpHeld = false;
+    this.jumpActive = false;
+    this.focusLeapActive = false;
     this.player.angle = 0;
     this.player.setY(this.supportY - PLAYER_HEIGHT * .93 / 2).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .93);
     this.tweens.add({ targets: this.player, y: this.supportY - PLAYER_HEIGHT / 2, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 130, ease: 'Back.Out' });
     for (let i = 0; i < 4; i += 1) {
       const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), this.supportY - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
       this.tweens.add({ targets: spark, y: spark.y - Phaser.Math.Between(12, 28), x: spark.x - Phaser.Math.Between(8, 28), alpha: 0, duration: 240, onComplete: () => spark.destroy() });
+    }
+    if (completedFocusLeap && this.supportY < FLOOR_Y && this.tutorialStage === 3) {
+      this.tutorialStage = 4;
+      this.time.delayedCall(1200, () => { if (this.tutorialStage === 4) this.tutorialStage = 5; });
     }
   }
 
@@ -467,6 +583,10 @@ export default class FlameRunScene extends Phaser.Scene {
   }
 
   private messageForStreak(): string {
+    if (this.tutorialStage === 0) return 'TAP TO JUMP';
+    if (this.tutorialStage === 1 || this.tutorialStage === 2) return 'HOLD TO LEAP HIGHER';
+    if (this.tutorialStage === 3) return 'B-4: Follow the higher flame trail!';
+    if (this.tutorialStage === 4) return 'NICE LEAP!';
     if (this.state.streak >= 10) return 'B-4: Focus streak!';
     if (this.state.streak >= 5) return 'B-4: Nice! Keep going!';
     return 'B-4: Jump, slide, and follow the flames!';

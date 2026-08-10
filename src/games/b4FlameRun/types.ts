@@ -9,6 +9,7 @@ export const FLAME_RUN_EVENTS = {
   result: 'flame-run:result',
   start: 'flame-run:start',
   jump: 'flame-run:jump',
+  jumpEnd: 'flame-run:jump-end',
   slide: 'flame-run:slide',
   pause: 'flame-run:pause',
   resume: 'flame-run:resume',

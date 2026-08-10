@@ -80,7 +80,7 @@ export default function B4FlameRunPage() {
 
         {started && !result ? (
           <div className="b4run-mobileControls" aria-label="Touch controls">
-            <button type="button" onPointerDown={() => gameRef.current?.jump()}>↑<span>JUMP</span></button>
+            <button type="button" onPointerDown={() => gameRef.current?.jump()} onPointerUp={() => gameRef.current?.releaseJump()} onPointerCancel={() => gameRef.current?.releaseJump()} onPointerLeave={() => gameRef.current?.releaseJump()}>↑<span>JUMP / HOLD</span></button>
             <button type="button" onPointerDown={() => gameRef.current?.slide()}>↓<span>SLIDE</span></button>
           </div>
         ) : null}
