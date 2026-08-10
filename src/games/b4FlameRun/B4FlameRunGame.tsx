@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import FlameRunScene from './FlameRunScene';
 import { FLAME_RUN_EVENTS, type FlameRunHud, type FlameRunResult } from './types';
 
-export type B4FlameRunGameHandle = { start: () => void; jump: () => void; releaseJump: () => void; slide: () => void; pause: () => void; resume: () => void; restart: () => void };
+export type B4FlameRunGameHandle = { start: () => void; jump: () => void; slide: () => void; pause: () => void; resume: () => void; restart: () => void };
 
 type Props = { onReady: () => void; onHud: (hud: FlameRunHud) => void; onResult: (result: FlameRunResult) => void; onPauseChange: (paused: boolean) => void };
 
@@ -27,11 +27,15 @@ const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud
   useImperativeHandle(ref, () => ({
     start: () => emitWhenSceneIsActive(FLAME_RUN_EVENTS.start),
     jump: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.jump),
-    releaseJump: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.jumpEnd),
     slide: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.slide),
     pause: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.pause),
     resume: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.resume),
-    restart: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.restart),
+    restart: () => {
+      const game = gameRef.current;
+      if (!game) return;
+      game.events.once(FLAME_RUN_EVENTS.ready, () => game.events.emit(FLAME_RUN_EVENTS.start));
+      game.scene.getScene('B4FlameRun').scene.restart();
+    },
   }));
 
   useEffect(() => {

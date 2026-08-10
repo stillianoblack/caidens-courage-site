@@ -10,9 +10,6 @@ const PLAYER_HEIGHT = 60;
 const SLIDE_WIDTH = 116;
 const SLIDE_HEIGHT = 40;
 const JUMP_DURATION = 760;
-const FOCUS_LEAP_DURATION = 980;
-const FOCUS_LEAP_HOLD_MS = 300;
-const FOCUS_LEAP_THRUST = 980;
 const MILESTONE_SECONDS = 100;
 const PLATFORM_TOP = { low: FLOOR_Y - 72, medium: FLOOR_Y - 126, high: FLOOR_Y - 182 } as const;
 const BEST_SCORE_KEY = 'b4-flame-run:best-score';
@@ -37,11 +34,8 @@ export default class FlameRunScene extends Phaser.Scene {
   private zone: Zone = 1;
   private supportY = FLOOR_Y;
   private milestoneShown = false;
-  private jumpHeld = false;
   private jumpActive = false;
-  private jumpStartedAt = 0;
   private jumpRotation = 0;
-  private focusLeapActive = false;
   private tutorialStage = 0;
   private state: FlameRunState = createFlameRunState();
   private started = false;
@@ -59,6 +53,10 @@ export default class FlameRunScene extends Phaser.Scene {
   private nextPattern = 0;
   private jumpKey!: Phaser.Input.Keyboard.Key;
   private downKey!: Phaser.Input.Keyboard.Key;
+  private upKey!: Phaser.Input.Keyboard.Key;
+  private wKey!: Phaser.Input.Keyboard.Key;
+  private sKey!: Phaser.Input.Keyboard.Key;
+  private escapeKey!: Phaser.Input.Keyboard.Key;
 
   constructor() { super('B4FlameRun'); }
 
@@ -76,13 +74,10 @@ export default class FlameRunScene extends Phaser.Scene {
     this.load.image('run-leaves', '/images/B-4FlightGame/background/layers/forground_leaves.png');
     this.load.image('run-caverns', '/images/characters/thecave_block_image.webp');
     this.load.image('run-dragon-nest', '/images/focus-flame-lab/theceremony_block_image.webp');
-    this.load.audio('run-pickup', '/audio/b4/flame-tap-1.mp3');
-    this.load.audio('run-start-sfx', '/audio/b4/flame-start.mp3');
-    this.load.audio('run-hit', '/audio/b4/b4-pause.mp3');
-    this.load.audio('run-focus', '/audio/b4/reward.mp3');
   }
 
   create(): void {
+    this.resetRuntimeState();
     this.createWorld();
     this.createGameplayTextures();
     this.obstacles = this.physics.add.group({ allowGravity: false, immovable: true });
@@ -98,36 +93,76 @@ export default class FlameRunScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.flames, (_player, flame) => this.collect(flame as MovingBody));
     this.physics.add.overlap(this.player, this.obstacles, (_player, obstacle) => this.hit(obstacle as MovingBody));
 
-    this.jumpKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE) as Phaser.Input.Keyboard.Key;
-    this.downKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN) as Phaser.Input.Keyboard.Key;
-    const upKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.UP) as Phaser.Input.Keyboard.Key;
-    const wKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.W) as Phaser.Input.Keyboard.Key;
-    const sKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.S) as Phaser.Input.Keyboard.Key;
-    upKey.on('down', this.jump, this).on('up', this.releaseJump, this);
-    wKey.on('down', this.jump, this).on('up', this.releaseJump, this);
-    sKey.on('down', this.slide, this);
+    if (!this.input.keyboard) throw new Error('B-4 Flame Run requires Phaser keyboard input.');
+    this.input.keyboard.enabled = true;
+    this.jumpKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+    this.upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+    this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.escapeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.upKey.on('down', this.jump, this);
+    this.wKey.on('down', this.jump, this);
+    this.sKey.on('down', this.slide, this);
     this.jumpKey.on('down', this.jump, this);
-    this.jumpKey.on('up', this.releaseJump, this);
     this.downKey.on('down', this.slide, this);
-    this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.ESC).on('down', this.togglePause, this);
-    this.game.events.on(FLAME_RUN_EVENTS.start, this.startRun, this);
-    this.game.events.on(FLAME_RUN_EVENTS.jump, this.jump, this);
-    this.game.events.on(FLAME_RUN_EVENTS.jumpEnd, this.releaseJump, this);
-    this.game.events.on(FLAME_RUN_EVENTS.slide, this.slide, this);
-    this.game.events.on(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
-    this.game.events.on(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
-    this.game.events.on(FLAME_RUN_EVENTS.restart, this.restart, this);
+    this.escapeKey.on('down', this.togglePause, this);
+    this.bindGameEvents();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.game.events.off(FLAME_RUN_EVENTS.start, this.startRun, this);
-      this.game.events.off(FLAME_RUN_EVENTS.jump, this.jump, this);
-      this.game.events.off(FLAME_RUN_EVENTS.jumpEnd, this.releaseJump, this);
-      this.game.events.off(FLAME_RUN_EVENTS.slide, this.slide, this);
-      this.game.events.off(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
-      this.game.events.off(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
-      this.game.events.off(FLAME_RUN_EVENTS.restart, this.restart, this);
+      this.input.keyboard?.removeCapture([
+        Phaser.Input.Keyboard.KeyCodes.UP,
+        Phaser.Input.Keyboard.KeyCodes.DOWN,
+        Phaser.Input.Keyboard.KeyCodes.SPACE,
+      ]);
+      this.upKey.off('down', this.jump, this);
+      this.wKey.off('down', this.jump, this);
+      this.sKey.off('down', this.slide, this);
+      this.jumpKey.off('down', this.jump, this);
+      this.downKey.off('down', this.slide, this);
+      this.escapeKey.off('down', this.togglePause, this);
     });
     this.emitHud('B-4: Ready to run!');
     this.game.events.emit(FLAME_RUN_EVENTS.ready);
+  }
+
+  private bindGameEvents(): void {
+    this.game.events.off(FLAME_RUN_EVENTS.start, this.startRun, this);
+    this.game.events.off(FLAME_RUN_EVENTS.jump, this.jump, this);
+    this.game.events.off(FLAME_RUN_EVENTS.slide, this.slide, this);
+    this.game.events.off(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
+    this.game.events.off(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
+    this.game.events.on(FLAME_RUN_EVENTS.start, this.startRun, this);
+    this.game.events.on(FLAME_RUN_EVENTS.jump, this.jump, this);
+    this.game.events.on(FLAME_RUN_EVENTS.slide, this.slide, this);
+    this.game.events.on(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
+    this.game.events.on(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
+  }
+
+  private resetRuntimeState(): void {
+    this.physics.world.resume();
+    this.tweens.resumeAll();
+    this.time.paused = false;
+    this.layers = [];
+    this.zone = 1;
+    this.supportY = FLOOR_Y;
+    this.milestoneShown = false;
+    this.jumpActive = false;
+    this.jumpRotation = 0;
+    this.tutorialStage = 0;
+    this.state = createFlameRunState();
+    this.started = false;
+    this.ended = false;
+    this.sliding = false;
+    this.paused = false;
+    this.wasGrounded = true;
+    this.focusWasActive = false;
+    this.lastTrailAt = 0;
+    this.invulnerableUntil = 0;
+    this.startedAt = 0;
+    this.lastTick = 0;
+    this.lastSpawn = 0;
+    this.lastHud = 0;
+    this.nextPattern = 0;
   }
 
   update(time: number, delta: number): void {
@@ -163,15 +198,7 @@ export default class FlameRunScene extends Phaser.Scene {
       this.player.y = this.supportY - (this.sliding ? SLIDE_HEIGHT : PLAYER_HEIGHT) / 2;
       if (!this.sliding) this.player.setAngle(0);
     } else if (this.jumpActive) {
-      const heldFor = time - this.jumpStartedAt;
-      const body = this.player.body as Phaser.Physics.Arcade.Body;
-      if (this.jumpHeld && heldFor <= FOCUS_LEAP_HOLD_MS && body.velocity.y < 0) {
-        const focusStrength = this.state.focusModeUntil > time ? 1.1 : 1;
-        body.setVelocityY(body.velocity.y - FOCUS_LEAP_THRUST * focusStrength * delta / 1000);
-        if (heldFor > 90) this.engageFocusLeap();
-      }
-      const rotationDuration = this.focusLeapActive ? FOCUS_LEAP_DURATION : JUMP_DURATION;
-      this.jumpRotation = Math.min(360, this.jumpRotation + 360 * delta / rotationDuration);
+      this.jumpRotation = Math.min(360, this.jumpRotation + 360 * delta / JUMP_DURATION);
       this.player.setAngle(this.jumpRotation);
     }
     this.wasGrounded = grounded;
@@ -189,8 +216,8 @@ export default class FlameRunScene extends Phaser.Scene {
     const focusMode = this.state.focusModeUntil > time;
     if (focusMode !== this.focusWasActive) this.transitionFocusMode(focusMode);
     this.focusWasActive = focusMode;
-    if (time - this.lastTrailAt > (focusMode || this.focusLeapActive ? 55 : this.sliding ? 70 : 190)) {
-      this.addThrusterTrail(focusMode || this.focusLeapActive ? 'focus' : this.sliding ? 'slide' : 'run');
+    if (time - this.lastTrailAt > (focusMode ? 55 : this.sliding ? 70 : 190)) {
+      this.addThrusterTrail(focusMode ? 'focus' : this.sliding ? 'slide' : 'run');
       this.lastTrailAt = time;
     }
     if (time - this.lastHud > 100) { this.emitHud(focusMode ? 'B-4: Focus Mode!' : this.messageForStreak()); this.lastHud = time; }
@@ -277,7 +304,13 @@ export default class FlameRunScene extends Phaser.Scene {
     this.started = true;
     this.startedAt = this.time.now;
     this.lastSpawn = this.time.now - 900;
-    this.sound.play('run-start-sfx', { volume: .3 });
+    this.input.keyboard?.addCapture([
+      Phaser.Input.Keyboard.KeyCodes.UP,
+      Phaser.Input.Keyboard.KeyCodes.DOWN,
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+    ]);
+    this.game.canvas.tabIndex = -1;
+    this.game.canvas.focus({ preventScroll: true });
     this.tutorialStage = 0;
   }
 
@@ -290,25 +323,13 @@ export default class FlameRunScene extends Phaser.Scene {
       this.player.setAngle(0).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .94);
       this.tweens.add({ targets: this.player, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 105, ease: 'Quad.Out' });
       this.player.setVelocityY(-590);
-      this.jumpHeld = true;
       this.jumpActive = true;
-      this.focusLeapActive = false;
-      this.jumpStartedAt = this.time.now;
       this.jumpRotation = 0;
       if (this.tutorialStage === 0) {
         this.tutorialStage = 1;
         this.time.delayedCall(1800, () => { if (this.tutorialStage === 1) this.tutorialStage = 2; });
       }
     }
-  }
-
-  private releaseJump(): void { this.jumpHeld = false; }
-
-  private engageFocusLeap(): void {
-    if (this.focusLeapActive) return;
-    this.focusLeapActive = true;
-    if (this.tutorialStage <= 2) this.tutorialStage = 3;
-    for (let index = 0; index < 3; index += 1) this.addThrusterTrail('focus');
   }
 
   private slide(): void {
@@ -486,10 +507,8 @@ export default class FlameRunScene extends Phaser.Scene {
     const focusBefore = this.state.focusModeUntil > this.time.now;
     flame.disableBody(true, true);
     this.state = collectFlame(this.state, this.time.now);
-    this.sound.play('run-pickup', { volume: .22 });
     this.burst(flame.x, flame.y);
     if (!focusBefore && this.state.focusModeUntil > this.time.now) {
-      this.sound.play('run-focus', { volume: .3 });
       this.cameras.main.flash(300, 255, 220, 110, false);
     }
   }
@@ -499,7 +518,6 @@ export default class FlameRunScene extends Phaser.Scene {
     this.invulnerableUntil = this.time.now + 1350;
     this.state = loseCourage(this.state);
     this.player.setTint(0xff7a63);
-    this.sound.play('run-hit', { volume: .24 });
     this.cameras.main.shake(180, .007);
     this.tweens.add({ targets: this.player, x: 282, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => {
       this.player.setX(300).setAlpha(1);
@@ -519,8 +537,6 @@ export default class FlameRunScene extends Phaser.Scene {
     this.game.events.emit(FLAME_RUN_EVENTS.result, result);
   }
 
-  private restart(): void { this.scene.restart(); }
-
   private burst(x: number, y: number): void {
     for (let i = 0; i < 6; i += 1) {
       const spark = this.add.image(x, y, 'run-flame').setDisplaySize(14, 18).setDepth(20);
@@ -537,20 +553,13 @@ export default class FlameRunScene extends Phaser.Scene {
 
   private land(): void {
     this.tweens.killTweensOf(this.player);
-    const completedFocusLeap = this.focusLeapActive;
-    this.jumpHeld = false;
     this.jumpActive = false;
-    this.focusLeapActive = false;
     this.player.angle = 0;
     this.player.setY(this.supportY - PLAYER_HEIGHT * .93 / 2).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .93);
     this.tweens.add({ targets: this.player, y: this.supportY - PLAYER_HEIGHT / 2, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 130, ease: 'Back.Out' });
     for (let i = 0; i < 4; i += 1) {
       const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), this.supportY - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
       this.tweens.add({ targets: spark, y: spark.y - Phaser.Math.Between(12, 28), x: spark.x - Phaser.Math.Between(8, 28), alpha: 0, duration: 240, onComplete: () => spark.destroy() });
-    }
-    if (completedFocusLeap && this.supportY < FLOOR_Y && this.tutorialStage === 3) {
-      this.tutorialStage = 4;
-      this.time.delayedCall(1200, () => { if (this.tutorialStage === 4) this.tutorialStage = 5; });
     }
   }
 
@@ -572,11 +581,10 @@ export default class FlameRunScene extends Phaser.Scene {
   private pauseRun(): void {
     if (!this.started || this.ended || this.paused) return;
     this.paused = true;
+    this.game.events.emit(FLAME_RUN_EVENTS.pauseState, true);
     this.physics.world.pause();
     this.tweens.pauseAll();
     this.time.paused = true;
-    this.sound.pauseAll();
-    this.game.events.emit(FLAME_RUN_EVENTS.pauseState, true);
   }
   private resumeRun(): void {
     if (!this.paused) return;
@@ -584,7 +592,6 @@ export default class FlameRunScene extends Phaser.Scene {
     this.physics.world.resume();
     this.tweens.resumeAll();
     this.time.paused = false;
-    this.sound.resumeAll();
     this.game.events.emit(FLAME_RUN_EVENTS.pauseState, false);
   }
 

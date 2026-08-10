@@ -32,7 +32,7 @@ export default function B4FlameRunPage() {
 
   const restart = useCallback(() => {
     setResult(null);
-    setStarted(false);
+    setStarted(true);
     setCountdown(null);
     setPaused(false);
     setHud(initialHud);
@@ -79,7 +79,7 @@ export default function B4FlameRunPage() {
 
         {started && !result ? (
           <div className="b4run-mobileControls" aria-label="Jump and slide controls">
-            <button type="button" aria-label="Jump or hold to leap higher" onPointerDown={() => gameRef.current?.jump()} onPointerUp={() => gameRef.current?.releaseJump()} onPointerCancel={() => gameRef.current?.releaseJump()} onPointerLeave={() => gameRef.current?.releaseJump()}>↑<span>JUMP / HOLD</span></button>
+            <button type="button" aria-label="Jump" onPointerDown={() => gameRef.current?.jump()}>↑<span>JUMP</span></button>
             <button type="button" aria-label="Slide" onPointerDown={() => gameRef.current?.slide()}>↓<span>SLIDE</span></button>
           </div>
         ) : null}
