@@ -11,8 +11,21 @@ const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud
   const hostRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
 
+  const emitWhenSceneIsActive = (event: string) => {
+    const attempt = () => {
+      const game = gameRef.current;
+      if (!game) return;
+      if (game.scene.scenes.some((scene) => scene.scene.isActive())) {
+        game.events.emit(event);
+        return;
+      }
+      window.setTimeout(attempt, 50);
+    };
+    attempt();
+  };
+
   useImperativeHandle(ref, () => ({
-    start: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.start),
+    start: () => emitWhenSceneIsActive(FLAME_RUN_EVENTS.start),
     jump: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.jump),
     releaseJump: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.jumpEnd),
     slide: () => gameRef.current?.events.emit(FLAME_RUN_EVENTS.slide),
@@ -36,17 +49,29 @@ const B4FlameRunGame = forwardRef<B4FlameRunGameHandle, Props>(({ onReady, onHud
       render: { antialias: true, pixelArt: false, powerPreference: 'high-performance' },
     });
     gameRef.current = game;
-    game.events.on(FLAME_RUN_EVENTS.ready, onReady);
+    let readyPoll: number | undefined;
+    const handleSceneReady = () => {
+      if (readyPoll !== undefined) window.clearInterval(readyPoll);
+      onReady();
+    };
+    game.events.on(FLAME_RUN_EVENTS.ready, handleSceneReady);
     game.events.on(FLAME_RUN_EVENTS.hud, onHud);
     game.events.on(FLAME_RUN_EVENTS.result, onResult);
     game.events.on(FLAME_RUN_EVENTS.pauseState, onPauseChange);
+    // Cached assets can let a remounted scene finish before these listeners attach.
+    // Poll only during boot to reconcile that synchronous-ready case.
+    readyPoll = window.setInterval(() => {
+      if (game.scene.scenes.some((scene) => scene.scene.isActive())) handleSceneReady();
+    }, 50);
+    if (game.scene.scenes.some((scene) => scene.scene.isActive())) handleSceneReady();
     const handleVisibility = () => {
       if (document.hidden) game.events.emit(FLAME_RUN_EVENTS.pause);
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
-      game.events.off(FLAME_RUN_EVENTS.ready, onReady);
+      if (readyPoll !== undefined) window.clearInterval(readyPoll);
+      game.events.off(FLAME_RUN_EVENTS.ready, handleSceneReady);
       game.events.off(FLAME_RUN_EVENTS.hud, onHud);
       game.events.off(FLAME_RUN_EVENTS.result, onResult);
       game.events.off(FLAME_RUN_EVENTS.pauseState, onPauseChange);

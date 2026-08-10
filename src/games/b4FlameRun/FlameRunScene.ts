@@ -118,7 +118,13 @@ export default class FlameRunScene extends Phaser.Scene {
     this.game.events.on(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
     this.game.events.on(FLAME_RUN_EVENTS.restart, this.restart, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      Object.values(FLAME_RUN_EVENTS).forEach((event) => this.game.events.removeAllListeners(event));
+      this.game.events.off(FLAME_RUN_EVENTS.start, this.startRun, this);
+      this.game.events.off(FLAME_RUN_EVENTS.jump, this.jump, this);
+      this.game.events.off(FLAME_RUN_EVENTS.jumpEnd, this.releaseJump, this);
+      this.game.events.off(FLAME_RUN_EVENTS.slide, this.slide, this);
+      this.game.events.off(FLAME_RUN_EVENTS.pause, this.pauseRun, this);
+      this.game.events.off(FLAME_RUN_EVENTS.resume, this.resumeRun, this);
+      this.game.events.off(FLAME_RUN_EVENTS.restart, this.restart, this);
     });
     this.emitHud('B-4: Ready to run!');
     this.game.events.emit(FLAME_RUN_EVENTS.ready);

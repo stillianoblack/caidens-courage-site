@@ -10,26 +10,25 @@ const initialHud: FlameRunHud = { ...createFlameRunState(), focusMode: false, me
 
 export default function B4FlameRunPage() {
   const gameRef = useRef<B4FlameRunGameHandle>(null);
-  const [ready, setReady] = useState(false);
   const [started, setStarted] = useState(false);
   const [countdown, setCountdown] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
   const [hud, setHud] = useState(initialHud);
   const [result, setResult] = useState<FlameRunResult | null>(null);
-  const handleReady = useCallback(() => setReady(true), []);
+  const handleReady = useCallback(() => undefined, []);
   const handleHud = useCallback((next: FlameRunHud) => setHud(next), []);
   const handleResult = useCallback((next: FlameRunResult) => setResult(next), []);
   const handlePauseChange = useCallback((next: boolean) => setPaused(next), []);
 
   const start = useCallback(() => {
-    if (!ready || countdown) return;
+    if (countdown) return;
     setStarted(true);
     setCountdown('3');
     window.setTimeout(() => setCountdown('2'), 500);
     window.setTimeout(() => setCountdown('1'), 1000);
     window.setTimeout(() => setCountdown('GO!'), 1500);
     window.setTimeout(() => { setCountdown(null); gameRef.current?.start(); }, 1900);
-  }, [countdown, ready]);
+  }, [countdown]);
 
   const restart = useCallback(() => {
     setResult(null);
@@ -66,7 +65,7 @@ export default function B4FlameRunPage() {
             <h2>B-4 FLAME RUN</h2>
             <p>Help B-4 race through Caiden Vale and collect as many Focus Flames as you can.</p>
             <div className="b4run-introControls"><span><kbd>SPACE</kbd> JUMP</span><span><kbd>↓</kbd> SLIDE</span></div>
-            <button type="button" onClick={start} disabled={!ready}>{ready ? 'START RUN' : 'IGNITING THE TRAIL…'}</button>
+            <button type="button" onClick={start}>START RUN</button>
           </div>
         ) : null}
 
@@ -79,9 +78,9 @@ export default function B4FlameRunPage() {
         ) : null}
 
         {started && !result ? (
-          <div className="b4run-mobileControls" aria-label="Touch controls">
-            <button type="button" onPointerDown={() => gameRef.current?.jump()} onPointerUp={() => gameRef.current?.releaseJump()} onPointerCancel={() => gameRef.current?.releaseJump()} onPointerLeave={() => gameRef.current?.releaseJump()}>↑<span>JUMP / HOLD</span></button>
-            <button type="button" onPointerDown={() => gameRef.current?.slide()}>↓<span>SLIDE</span></button>
+          <div className="b4run-mobileControls" aria-label="Jump and slide controls">
+            <button type="button" aria-label="Jump or hold to leap higher" onPointerDown={() => gameRef.current?.jump()} onPointerUp={() => gameRef.current?.releaseJump()} onPointerCancel={() => gameRef.current?.releaseJump()} onPointerLeave={() => gameRef.current?.releaseJump()}>↑<span>JUMP / HOLD</span></button>
+            <button type="button" aria-label="Slide" onPointerDown={() => gameRef.current?.slide()}>↓<span>SLIDE</span></button>
           </div>
         ) : null}
 
