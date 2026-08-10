@@ -5,6 +5,8 @@ import type { PilotProgramSignupInput } from '../types/pilotProgram';
 import PilotProgramSignupPage from './PilotProgramSignupPage';
 import { submitPilotProgramSignup, type PilotProgramSignupResult } from '../lib/pilotProgramService';
 import { replaceWithAuthenticatedPortalRoute } from '../lib/portalHardNavigation';
+import { fetchPortalProgramAccess } from '../lib/portalProgramAccessApi';
+import { activateSecureFacilitatorSession } from '../lib/facilitatorSessionClient';
 
 jest.mock('../components/courage/CourageHeader', () => () => null);
 jest.mock('../components/courage/CourageFooter', () => () => null);
@@ -13,6 +15,8 @@ jest.mock('../lib/independentFamilyPortalSignup', () => ({
   activateIndependentFamilyPortalSession: jest.fn(),
 }));
 jest.mock('../lib/portalHardNavigation', () => ({ replaceWithAuthenticatedPortalRoute: jest.fn() }));
+jest.mock('../lib/portalProgramAccessApi', () => ({ fetchPortalProgramAccess: jest.fn() }));
+jest.mock('../lib/facilitatorSessionClient', () => ({ activateSecureFacilitatorSession: jest.fn() }));
 jest.mock('../lib/analytics', () => ({
   refreshAnalyticsIdentity: jest.fn(),
   trackContactFormSubmitted: jest.fn(),
@@ -27,6 +31,9 @@ jest.mock('../components/pilot-program/PilotProgramSignupForm', () => ({
     <div>
       <button type="button" onClick={() => onSubmit(familyInput)} disabled={submitting}>
         Submit test family
+      </button>
+      <button type="button" onClick={() => onSubmit(mockFacilitatorInput)} disabled={submitting}>
+        Submit test facilitator
       </button>
       <output data-testid="submitting">{submitting ? 'submitting' : 'idle'}</output>
       {error ? <div role="alert">{error.title} {error.body}</div> : null}
@@ -47,6 +54,14 @@ const familyInput: PilotProgramSignupInput = {
   ageRange: 'Ages 8–10',
   groupName: 'Release Test Family',
   agreedToTerms: true,
+};
+
+const mockFacilitatorInput: PilotProgramSignupInput = {
+  ...familyInput,
+  programType: 'Teacher / Classroom',
+  childFirstName: '',
+  programName: 'Release Test Classroom',
+  groupName: 'Release Test Classroom',
 };
 
 const success: PilotProgramSignupResult = {
@@ -72,6 +87,18 @@ const success: PilotProgramSignupResult = {
   reused: false,
 };
 
+const facilitatorSuccess: PilotProgramSignupResult = {
+  success: true,
+  program: {
+    ...success.program,
+    programType: 'Teacher / Classroom',
+    programCode: 'CMP-TEACHER',
+    familyAccessCode: 'FAM-TEACHER',
+    facilitatorAccessCode: 'FAC-TEACHER',
+  },
+  redirectDestination: '/program-dashboard?welcome=1',
+};
+
 const outcomes: Array<[string, PilotProgramSignupResult]> = [
   ['success', success],
   ['HTTP 400', { success: false, code: 'validation_error', message: 'Check the submitted details.' }],
@@ -83,6 +110,8 @@ describe('PilotProgramSignupPage submission state', () => {
   beforeEach(() => {
     (submitPilotProgramSignup as jest.Mock).mockReset();
     (replaceWithAuthenticatedPortalRoute as jest.Mock).mockReset();
+    (fetchPortalProgramAccess as jest.Mock).mockReset();
+    (activateSecureFacilitatorSession as jest.Mock).mockReset();
   });
 
   test('renders the branded facilitator setup experience with only orange B-4 artwork', () => {
@@ -137,5 +166,48 @@ describe('PilotProgramSignupPage submission state', () => {
     await waitFor(() => {
       expect(replaceWithAuthenticatedPortalRoute).toHaveBeenCalledWith('/family-hub');
     });
+  });
+
+  test('creates the secure facilitator cookie before opening the dashboard', async () => {
+    const safeProgram = {
+      ...facilitatorSuccess.program,
+      adminEmail: '',
+      familyAccessCode: '',
+      facilitatorAccessCode: null,
+    };
+    (submitPilotProgramSignup as jest.Mock).mockResolvedValue(facilitatorSuccess);
+    (fetchPortalProgramAccess as jest.Mock).mockResolvedValue({
+      status: 'found',
+      role: 'facilitator',
+      program: safeProgram,
+    });
+    render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit test facilitator' }));
+
+    await waitFor(() => {
+      expect(fetchPortalProgramAccess).toHaveBeenCalledWith({
+        accessCode: 'FAC-TEACHER',
+        intent: 'facilitator',
+        credential: mockFacilitatorInput.adminEmail,
+        rememberDevice: true,
+      });
+      expect(activateSecureFacilitatorSession).toHaveBeenCalledWith(safeProgram);
+      expect(replaceWithAuthenticatedPortalRoute).toHaveBeenCalledWith(
+        '/program-dashboard?welcome=1',
+      );
+    });
+  });
+
+  test('does not redirect or invite a duplicate signup when secure session creation fails', async () => {
+    (submitPilotProgramSignup as jest.Mock).mockResolvedValue(facilitatorSuccess);
+    (fetchPortalProgramAccess as jest.Mock).mockResolvedValue({ status: 'unavailable' });
+    render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit test facilitator' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Your program was created.');
+    expect(screen.getByRole('alert')).toHaveTextContent('Do not create the program again');
+    expect(replaceWithAuthenticatedPortalRoute).not.toHaveBeenCalled();
   });
 });

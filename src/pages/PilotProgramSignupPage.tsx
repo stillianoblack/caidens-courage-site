@@ -4,7 +4,6 @@ import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import PilotProgramSignupForm from '../components/pilot-program/PilotProgramSignupForm';
 import '../components/pilot-program/pilot-program.css';
-import { applyProgramPortalUnlock } from '../config/portalContext';
 import { writeLastPilotProgram } from '../config/lastPilotProgram';
 import { resolveFamilyKidDefaultLandingPath } from '../lib/familyKidLanding';
 import { activateIndependentFamilyPortalSession } from '../lib/independentFamilyPortalSignup';
@@ -14,12 +13,20 @@ import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/anal
 import { trackKitFacilitatorSignup } from '../lib/kitIntegration';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
 import { replaceWithAuthenticatedPortalRoute } from '../lib/portalHardNavigation';
+import { fetchPortalProgramAccess } from '../lib/portalProgramAccessApi';
+import { activateSecureFacilitatorSession } from '../lib/facilitatorSessionClient';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
 
 const SIGNUP_ERROR = {
   title: "We couldn't create your program.",
   body:
     "Your information hasn't been lost. Please try again. If the problem continues, contact hello@caidenscourage.com.",
+};
+
+const FACILITATOR_SESSION_ERROR = {
+  title: 'Your program was created.',
+  body:
+    "We couldn't sign you in automatically. Do not create the program again. Return to Enter the World and use the facilitator access information sent to your email.",
 };
 
 export default function PilotProgramSignupPage() {
@@ -96,8 +103,28 @@ export default function PilotProgramSignupPage() {
         setError(SIGNUP_ERROR);
         return;
       }
-      applyProgramPortalUnlock(result.program, 'facilitator', facilitatorCode);
-      writeLastPilotProgram(result.program, 'facilitator', input.adminEmail, facilitatorCode);
+      step('secure_session_create');
+      const facilitatorSession = await fetchPortalProgramAccess({
+        accessCode: facilitatorCode,
+        intent: 'facilitator',
+        credential: input.adminEmail,
+        rememberDevice: true,
+      });
+      if (facilitatorSession.status !== 'found' || facilitatorSession.role !== 'facilitator') {
+        console.warn('[PILOT_SIGNUP_SESSION_FAILED]', {
+          request_id: signupRequestId,
+          status: facilitatorSession.status,
+        });
+        setError(FACILITATOR_SESSION_ERROR);
+        return;
+      }
+      activateSecureFacilitatorSession(facilitatorSession.program);
+      writeLastPilotProgram(
+        facilitatorSession.program,
+        'facilitator',
+        input.adminEmail,
+        facilitatorCode,
+      );
       trackKitFacilitatorSignup({
         facilitatorEmail: input.adminEmail,
         eventName: 'facilitator_signup',
