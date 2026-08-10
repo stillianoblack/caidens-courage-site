@@ -122,7 +122,7 @@ async function findProgramByCode(supabase, accessCode) {
 async function findProgramByClaimCode(supabase, claimCode) {
   const { data: participant, error: participantError } = await supabase
     .from('participants')
-    .select('id, first_name, nickname, program_code')
+    .select('id, first_name, nickname, program_code, guardian_email')
     .eq('family_claim_code', claimCode)
     .eq('role', 'student')
     .maybeSingle();
@@ -134,6 +134,7 @@ async function findProgramByClaimCode(supabase, claimCode) {
   return {
     ...result,
     role: 'family',
+    invitedParentEmail: normalizeEmail(participant.guardian_email),
     claimCodeContext: {
       participantId: String(participant.id),
       childDisplayName:
@@ -149,14 +150,31 @@ async function completeParentClaim(supabase, result, claimCode, parentEmail) {
     return { status: 403, code: 'credential_not_connected' };
   }
 
-  const { data: link, error: linkError } = await supabase
+  const { data: links, error: linkError } = await supabase
     .from('student_family_links')
     .select('*')
     .eq('student_id', context.participantId)
     .eq('camp_program_code', context.campProgramCode)
-    .eq('parent_email', parentEmail)
-    .maybeSingle();
+    .limit(20);
   if (linkError) return { status: 503, code: 'parent_link_lookup_failed' };
+  let link = (links || []).find((row) => normalizeEmail(row.parent_email) === parentEmail) || null;
+
+  // The participant invite is the canonical recipient record. Older rows can
+  // retain a prior parent email when a facilitator re-sends an invitation.
+  // Repair that stale mapping server-side only after both the private claim
+  // code and the participant's invited email have matched.
+  if (!link && result.invitedParentEmail === parentEmail && links?.[0]?.id) {
+    const repaired = await supabase
+      .from('student_family_links')
+      .update({ parent_email: parentEmail })
+      .eq('id', links[0].id)
+      .select('*')
+      .single();
+    if (repaired.error || !repaired.data) {
+      return { status: 503, code: 'parent_link_repair_failed' };
+    }
+    link = repaired.data;
+  }
   if (!link) return { status: 403, code: 'credential_not_connected' };
 
   const familyProgramCode = safeText(link.family_program_code, 120) || parentFamilyProgramCode(parentEmail);

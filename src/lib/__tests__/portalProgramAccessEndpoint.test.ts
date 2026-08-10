@@ -160,6 +160,7 @@ describe('server-mediated portal program access', () => {
       first_name: 'Nova',
       nickname: 'Nova Test',
       program_code: facilitatorProgram.program_code,
+      guardian_email: 'parent@example.com',
     };
     const familyProgram = {
       ...program,
@@ -194,7 +195,7 @@ describe('server-mediated portal program access', () => {
       }
       if (table === 'student_family_links') {
         familyLinkCalls += 1;
-        return chain(familyLinkCalls === 1 ? { data: link, error: null } : { data: null, error: null });
+        return chain(familyLinkCalls === 1 ? { data: [link], error: null } : { data: null, error: null });
       }
       throw new Error(`Unexpected table: ${table}`);
     });
