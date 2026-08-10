@@ -1,7 +1,9 @@
 import { PORTAL_PATH } from '../config/courageRoutes';
 import { generateClaimAccessCode } from './portalCodeIdentity';
 
-const CLAIM_CODE_PATTERN = /^CLAIM-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+// Current codes use 4-character groups; established pilot records can contain
+// the earlier 5-character groups. Both are server-issued claim identifiers.
+const CLAIM_CODE_PATTERN = /^CLAIM-[A-Z0-9]{4,5}-[A-Z0-9]{4,5}$/;
 
 export function isFamilyClaimCode(value: string): boolean {
   return CLAIM_CODE_PATTERN.test(value.trim().toUpperCase());

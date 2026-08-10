@@ -7,6 +7,9 @@ import { resolveCanonicalProgramCodeAlias } from '../portalCodeIdentity';
 import { programScopesMatch } from '../portalProgramScope';
 
 describe('portal code identity', () => {
+  test('recognizes established five-character family claim groups', () => {
+    expect(isFamilyClaimCode('CLAIM-NDQNQ-MBG8J')).toBe(true);
+  });
   test('new generated family/program/claim codes are unique and collision-resistant', () => {
     const generated = Array.from({ length: 50 }, () =>
       generateProgramCodes('Camp / Youth Program', 'Example Camp', 2026),
