@@ -13,7 +13,7 @@ import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { refreshAnalyticsIdentity, trackContactFormSubmitted } from '../lib/analytics';
 import { trackKitFacilitatorSignup } from '../lib/kitIntegration';
 import { submitPilotProgramSignup } from '../lib/pilotProgramService';
-import { replaceWithPortalRoute } from '../lib/portalHardNavigation';
+import { replaceWithAuthenticatedPortalRoute } from '../lib/portalHardNavigation';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
 
 const SIGNUP_ERROR = {
@@ -81,7 +81,9 @@ export default function PilotProgramSignupPage() {
         refreshAnalyticsIdentity();
         trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
         step('redirect');
-        replaceWithPortalRoute(result.redirectDestination || resolveFamilyKidDefaultLandingPath());
+        replaceWithAuthenticatedPortalRoute(
+          result.redirectDestination || resolveFamilyKidDefaultLandingPath(),
+        );
         return;
       }
 
@@ -104,7 +106,9 @@ export default function PilotProgramSignupPage() {
       refreshAnalyticsIdentity();
       trackContactFormSubmitted(PILOT_PROGRAM_SIGNUP_PATH);
       step('redirect');
-      replaceWithPortalRoute(result.redirectDestination || `${PROGRAM_DASHBOARD_PATH}?welcome=1`);
+      replaceWithAuthenticatedPortalRoute(
+        result.redirectDestination || `${PROGRAM_DASHBOARD_PATH}?welcome=1`,
+      );
     } catch (caught) {
       step('unexpected_error');
       console.warn('[PILOT_SIGNUP_FAILED]', {

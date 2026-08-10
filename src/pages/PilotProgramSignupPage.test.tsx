@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import type { PilotProgramSignupInput } from '../types/pilotProgram';
 import PilotProgramSignupPage from './PilotProgramSignupPage';
 import { submitPilotProgramSignup, type PilotProgramSignupResult } from '../lib/pilotProgramService';
+import { replaceWithAuthenticatedPortalRoute } from '../lib/portalHardNavigation';
 
 jest.mock('../components/courage/CourageHeader', () => () => null);
 jest.mock('../components/courage/CourageFooter', () => () => null);
@@ -11,7 +12,7 @@ jest.mock('../lib/pilotProgramService', () => ({ submitPilotProgramSignup: jest.
 jest.mock('../lib/independentFamilyPortalSignup', () => ({
   activateIndependentFamilyPortalSession: jest.fn(),
 }));
-jest.mock('../lib/portalHardNavigation', () => ({ replaceWithPortalRoute: jest.fn() }));
+jest.mock('../lib/portalHardNavigation', () => ({ replaceWithAuthenticatedPortalRoute: jest.fn() }));
 jest.mock('../lib/analytics', () => ({
   refreshAnalyticsIdentity: jest.fn(),
   trackContactFormSubmitted: jest.fn(),
@@ -81,6 +82,7 @@ const outcomes: Array<[string, PilotProgramSignupResult]> = [
 describe('PilotProgramSignupPage submission state', () => {
   beforeEach(() => {
     (submitPilotProgramSignup as jest.Mock).mockReset();
+    (replaceWithAuthenticatedPortalRoute as jest.Mock).mockReset();
   });
 
   test('renders the branded facilitator setup experience with only orange B-4 artwork', () => {
@@ -121,5 +123,19 @@ describe('PilotProgramSignupPage submission state', () => {
     expect(submitPilotProgramSignup).toHaveBeenCalledTimes(1);
 
     await act(async () => { resolveRequest(success); });
+  });
+
+  test('hands a completed family signup directly to the Family dashboard', async () => {
+    (submitPilotProgramSignup as jest.Mock).mockResolvedValue({
+      ...success,
+      redirectDestination: '/family-hub',
+    });
+    render(<MemoryRouter><PilotProgramSignupPage /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit test family' }));
+
+    await waitFor(() => {
+      expect(replaceWithAuthenticatedPortalRoute).toHaveBeenCalledWith('/family-hub');
+    });
   });
 });
