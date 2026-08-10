@@ -13,6 +13,10 @@ const CLAIM_CODE_RE = /^CLAIM-/;
 const OPTIONAL_ALIAS_OBJECT_CODES = new Set(['PGRST205', '42P01']);
 const ALIAS_PERMISSION_CODES = new Set(['42501']);
 
+function parentFamilyProgramCode(parentEmail) {
+  return `FAMILY-${require('crypto').createHash('sha256').update(parentEmail).digest('hex').slice(0, 12).toUpperCase()}`;
+}
+
 function normalizeAccessCode(value) {
   return safeText(value, 120).toUpperCase().replace(/\s+/g, '');
 }
@@ -139,6 +143,101 @@ async function findProgramByClaimCode(supabase, claimCode) {
   };
 }
 
+async function completeParentClaim(supabase, result, claimCode, parentEmail) {
+  const context = result.claimCodeContext;
+  if (!context?.participantId || !parentEmail) {
+    return { status: 403, code: 'credential_not_connected' };
+  }
+
+  const { data: link, error: linkError } = await supabase
+    .from('student_family_links')
+    .select('*')
+    .eq('student_id', context.participantId)
+    .eq('camp_program_code', context.campProgramCode)
+    .eq('parent_email', parentEmail)
+    .maybeSingle();
+  if (linkError) return { status: 503, code: 'parent_link_lookup_failed' };
+  if (!link) return { status: 403, code: 'credential_not_connected' };
+
+  const familyProgramCode = safeText(link.family_program_code, 120) || parentFamilyProgramCode(parentEmail);
+  let { data: familyProgram, error: familyLookupError } = await supabase
+    .from('pilot_programs')
+    .select('*')
+    .eq('program_code', familyProgramCode)
+    .maybeSingle();
+  if (familyLookupError) return { status: 503, code: 'family_program_lookup_failed' };
+
+  if (!familyProgram) {
+    const parentFirstName = safeText(link.parent_first_name, 80) || 'Parent';
+    const parentLastName = safeText(link.parent_last_name, 80) || 'Family';
+    const programName = `${parentLastName} Family`;
+    const now = new Date().toISOString();
+    const payload = {
+      program_name: programName,
+      program_code: familyProgramCode,
+      program_type: 'independent_family',
+      admin_first_name: parentFirstName,
+      admin_email: parentEmail,
+      estimated_students: 1,
+      estimated_student_count_range: '1 child',
+      account_context: 'household',
+      portal_type: 'family',
+      age_grade_band: 'Mixed Ages',
+      age_grade_notes: null,
+      feature_flags: {
+        can_manage_students: false,
+        can_invite_families: true,
+        can_view_group_progress: false,
+        can_print_modules: true,
+        can_upload_homework: false,
+        can_manage_certificates: false,
+        can_send_notifications: false,
+        can_access_facilitator_portal: false,
+      },
+      age_range: 'Mixed Ages',
+      group_name: programName,
+      family_access_code: `${familyProgramCode}-FAMILY`,
+      facilitator_access_code: null,
+      pricing_tier: 'independent_family',
+      payment_status: 'paid',
+      pilot_status: 'active',
+      agreed_to_terms: true,
+      agreed_at: now,
+      signup_idempotency_key: `parent-claim:${familyProgramCode}`,
+    };
+    const inserted = await supabase.from('pilot_programs').insert(payload).select('*').single();
+    if (inserted.error || !inserted.data) {
+      if (inserted.error?.code !== '23505') return { status: 503, code: 'family_program_create_failed' };
+      const raced = await supabase.from('pilot_programs').select('*').eq('program_code', familyProgramCode).maybeSingle();
+      if (raced.error || !raced.data) return { status: 503, code: 'family_program_create_failed' };
+      familyProgram = raced.data;
+    } else {
+      familyProgram = inserted.data;
+    }
+  }
+
+  if (normalizeEmail(familyProgram.admin_email) !== parentEmail) {
+    return { status: 403, code: 'credential_not_connected' };
+  }
+
+  const claimedAt = new Date().toISOString();
+  const linkUpdate = await supabase
+    .from('student_family_links')
+    .update({ family_program_code: familyProgram.program_code, parent_claimed: true, claimed_at: claimedAt })
+    .eq('id', link.id)
+    .eq('parent_email', parentEmail);
+  if (linkUpdate.error) return { status: 503, code: 'parent_link_claim_failed' };
+
+  const participantUpdate = await supabase
+    .from('participants')
+    .update({ parent_connection_status: 'connected', family_claim_code_used_at: claimedAt })
+    .eq('id', context.participantId)
+    .eq('family_claim_code', claimCode);
+  if (participantUpdate.error) return { status: 503, code: 'parent_connection_update_failed' };
+
+  return { familyProgram, matchedStudentIds: [context.participantId] };
+}
+
 function credentialMatches(program, role, intent, credential) {
   const shouldVerify =
     (role === 'family' && program.program_type === 'independent_family' && intent === 'parent') ||
@@ -215,6 +314,7 @@ exports.handler = async (event) => {
     : null;
   const credential = normalizeEmail(body.credential);
   const rememberDevice = Boolean(body.rememberDevice);
+  const completeClaim = body.completeParentClaim === true;
   if (!ACCESS_CODE_RE.test(accessCode)) {
     return json(400, { success: false, code: 'invalid_access_code' }, id);
   }
@@ -241,6 +341,23 @@ exports.handler = async (event) => {
       });
     }
     return json(404, { success: false, code: 'program_not_found', lookupStatus }, id);
+  }
+
+  if (completeClaim) {
+    if (!CLAIM_CODE_RE.test(accessCode) || intent !== 'parent') {
+      return json(400, { success: false, code: 'invalid_claim_request' }, id);
+    }
+    const claim = await completeParentClaim(supabase, result, accessCode, credential);
+    if (!claim.familyProgram) {
+      return json(claim.status, { success: false, code: claim.code }, id);
+    }
+    return json(200, {
+      success: true,
+      role: 'family',
+      program: sessionProgram(claim.familyProgram, 'family', normalizeAccessCode(claim.familyProgram.family_access_code), credential, true),
+      claimCodeContext: result.claimCodeContext,
+      matchedStudentIds: claim.matchedStudentIds,
+    }, id);
   }
 
   const credentialCheck = credentialMatches(

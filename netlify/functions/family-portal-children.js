@@ -20,25 +20,37 @@ function normalizeGradeLevel(value) {
 }
 
 async function readChildren(supabase, program) {
-  const participantsResult = await supabase
+  const linksResult = await supabase
+    .from('student_family_links')
+    .select('*')
+    .eq('family_program_code', program.program_code)
+    .eq('parent_claimed', true)
+    .order('created_at', { ascending: true });
+  if (linksResult.error) return { error: linksResult.error };
+  const linkedParticipantIds = (linksResult.data || []).map((row) => row.student_id).filter(Boolean);
+
+  const familyParticipants = await supabase
     .from('participants')
     .select('id, nickname, first_name, role, program_code, created_at, child_age_range, grade_level, grade_band, allow_stretch_level, b4_variant_key, b4_variant_selected_at, updated_at')
     .eq('program_code', program.program_code)
     .eq('role', 'student')
     .order('created_at', { ascending: true });
-  if (participantsResult.error) return { error: participantsResult.error };
+  if (familyParticipants.error) return { error: familyParticipants.error };
 
-  const participantIds = (participantsResult.data || []).map((row) => row.id);
-  const linksResult = participantIds.length
+  const linkedParticipants = linkedParticipantIds.length
     ? await supabase
-      .from('student_family_links')
-      .select('*')
-      .eq('family_program_code', program.program_code)
-      .in('student_id', participantIds)
-      .order('created_at', { ascending: true })
+      .from('participants')
+      .select('id, nickname, first_name, role, program_code, created_at, child_age_range, grade_level, grade_band, allow_stretch_level, b4_variant_key, b4_variant_selected_at, updated_at')
+      .in('id', linkedParticipantIds)
+      .eq('role', 'student')
     : { data: [], error: null };
-  if (linksResult.error) return { error: linksResult.error };
-  return { participants: participantsResult.data || [], links: linksResult.data || [] };
+  if (linkedParticipants.error) return { error: linkedParticipants.error };
+
+  const participantsById = new Map();
+  for (const participant of [...(familyParticipants.data || []), ...(linkedParticipants.data || [])]) {
+    participantsById.set(participant.id, participant);
+  }
+  return { participants: Array.from(participantsById.values()), links: linksResult.data || [] };
 }
 
 exports.handler = async (event) => {

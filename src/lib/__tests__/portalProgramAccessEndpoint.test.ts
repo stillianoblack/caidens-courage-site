@@ -64,10 +64,11 @@ const runtimeHeaders = {
 
 function chain(result: Record<string, unknown>) {
   const value: Record<string, jest.Mock> = {};
-  ['select', 'or', 'eq', 'limit'].forEach((method) => {
+  ['select', 'or', 'eq', 'limit', 'update', 'insert'].forEach((method) => {
     value[method] = jest.fn(() => value);
   });
   value.maybeSingle = jest.fn().mockResolvedValue(result);
+  value.single = jest.fn().mockResolvedValue(result);
   value.then = jest.fn((resolve) => Promise.resolve(result).then(resolve));
   return value;
 }
@@ -151,6 +152,65 @@ describe('server-mediated portal program access', () => {
     expect(response.statusCode).toBe(403);
     expect(body.code).toBe('credential_not_connected');
     expect(body).not.toHaveProperty('program');
+  });
+
+  test('completes an invited parent claim through the server and returns the private family program', async () => {
+    const participant = {
+      id: '00000000-0000-4000-8000-000000000103',
+      first_name: 'Nova',
+      nickname: 'Nova Test',
+      program_code: facilitatorProgram.program_code,
+    };
+    const familyProgram = {
+      ...program,
+      program_code: 'FAMILY-PARENT123',
+      family_access_code: 'FAMILY-PARENT123-FAMILY',
+      admin_email: 'parent@example.com',
+    };
+    const link = {
+      id: '00000000-0000-4000-8000-000000000104',
+      student_id: participant.id,
+      camp_program_code: facilitatorProgram.program_code,
+      family_program_code: familyProgram.program_code,
+      parent_email: 'parent@example.com',
+      parent_first_name: 'Parent',
+      parent_last_name: 'Family',
+    };
+    let pilotProgramCalls = 0;
+    let participantCalls = 0;
+    let familyLinkCalls = 0;
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'participants') {
+        participantCalls += 1;
+        return chain(participantCalls === 1 ? { data: participant, error: null } : { data: null, error: null });
+      }
+      if (table === 'pilot_programs') {
+        pilotProgramCalls += 1;
+        return chain(
+          pilotProgramCalls === 1
+            ? { data: [facilitatorProgram], error: null }
+            : { data: familyProgram, error: null },
+        );
+      }
+      if (table === 'student_family_links') {
+        familyLinkCalls += 1;
+        return chain(familyLinkCalls === 1 ? { data: link, error: null } : { data: null, error: null });
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const response = await request({
+      accessCode: 'CLAIM-NDQNQ-MBG8J',
+      intent: 'parent',
+      credential: 'parent@example.com',
+      completeParentClaim: true,
+    });
+    const body = JSON.parse(response.body);
+    expect(response.statusCode).toBe(200);
+    expect(body.role).toBe('family');
+    expect(body.program.programCode).toBe(familyProgram.program_code);
+    expect(body.program.familyAccessCode).toBe(familyProgram.family_access_code);
+    expect(body.matchedStudentIds).toEqual([participant.id]);
   });
 
   test('does not exchange a public program code for the private family access code', async () => {

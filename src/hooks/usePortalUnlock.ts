@@ -15,6 +15,7 @@ import {
   writePortalSessionUnlock,
 } from '../config/portalAccess';
 import { claimParentFamilyPortal } from '../lib/parentClaimService';
+import { activatePrivateFamilyPortalFromClaim } from '../lib/parentClaimFamilyPortalService';
 import { unlockIndependentFamilyPortal } from '../lib/independentFamilyPortalSignup';
 import { isIndependentFamilyProgram } from '../lib/independentFamilyProgram';
 import { lookupPortalProgramByAccessCodeDetailed } from '../lib/portalAccessResolve';
@@ -48,6 +49,7 @@ import { launchStudentPinKidPlay } from '../lib/studentPinLoginLaunch';
 import { resolveOngoingFamilyAccessCode } from '../lib/portalUnlockRoute';
 import { clearParentClaimContext } from '../config/parentClaimContext';
 import { clearStudentPinSession } from '../lib/studentPinSession';
+import { setActiveChild } from '../lib/activeChildContext';
 import {
   defaultRememberDeviceForUserType,
   readRememberedDeviceSession,
@@ -364,6 +366,72 @@ export function usePortalUnlock(
             }
 
             clearStudentPinSession();
+
+            if (isFamilyClaimCode(trimmedCode) && lookup.claimCodeContext) {
+              let completed: Awaited<ReturnType<typeof lookupPortalProgramByAccessCodeDetailed>>;
+              try {
+                completed = await withTimeout(
+                  lookupPortalProgramByAccessCodeDetailed(trimmedCode, {
+                    intent: 'parent',
+                    credential,
+                    completeParentClaim: true,
+                  }),
+                  PORTAL_LOGIN_TIMEOUT_MS,
+                  'portal_family_claim_complete',
+                );
+              } catch (err) {
+                setError(
+                  err instanceof FetchTimeoutError
+                    ? PORTAL_SLOW_LOAD_MESSAGE
+                    : PORTAL_CONNECTION_ERROR_MESSAGE,
+                );
+                setSubmitting(false);
+                return;
+              }
+
+              if (completed.status === 'invalid_credential') {
+                setError(PORTAL_EMAIL_NOT_CONNECTED_MESSAGE);
+                setSubmitting(false);
+                return;
+              }
+              if (completed.status !== 'found' || !completed.result) {
+                setError(
+                  completed.status === 'not_found'
+                    ? PORTAL_ACCESS_NOT_FOUND_MESSAGE
+                    : PORTAL_CONNECTION_ERROR_MESSAGE,
+                );
+                setSubmitting(false);
+                return;
+              }
+
+              const familyProgram = completed.result.program;
+              const ongoingAccessCode = familyProgram.familyAccessCode;
+              activatePrivateFamilyPortalFromClaim({
+                familyProgram,
+                accessCode: ongoingAccessCode,
+                parentEmail: credential,
+                campProgramCode: lookup.claimCodeContext.campProgramCode,
+              });
+              setActiveChild({
+                participantId: lookup.claimCodeContext.participantId,
+                displayName: lookup.claimCodeContext.childDisplayName,
+              });
+              persistRememberedDevice({
+                rememberDevice,
+                userType: 'parent',
+                accessCode: ongoingAccessCode,
+                program: familyProgram,
+                parentId: credential.trim().toLowerCase(),
+              });
+              setAccessCode('');
+              setParentEmail('');
+              setParentLastName('');
+              setNeedsLastNameConfirm(false);
+              navigateToPortal(resolveFamilyPortalOverviewPath(), 'parent-claim-code-complete');
+              setSubmitting(false);
+              onUnlock?.();
+              return;
+            }
 
             if (isIndependentFamilyProgram(program)) {
               let unlock: Awaited<ReturnType<typeof unlockIndependentFamilyPortal>>;

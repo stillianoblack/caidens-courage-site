@@ -15,6 +15,7 @@ export type PortalProgramAccessResult =
       role: 'facilitator' | 'family';
       program: ActivePilotProgram;
       claimCodeContext?: PortalProgramAccessClaimContext;
+      matchedStudentIds?: string[];
     }
   | { status: 'not_found' | 'invalid_credential' | 'unavailable' | 'error' };
 
@@ -23,6 +24,7 @@ export async function fetchPortalProgramAccess(input: {
   intent?: PortalProgramAccessIntent;
   credential?: string;
   rememberDevice?: boolean;
+  completeParentClaim?: boolean;
 }): Promise<PortalProgramAccessResult> {
   let response: Response;
   try {
@@ -35,6 +37,7 @@ export async function fetchPortalProgramAccess(input: {
         intent: input.intent,
         credential: input.credential,
         rememberDevice: input.rememberDevice,
+        completeParentClaim: input.completeParentClaim,
       }),
     });
   } catch {
@@ -61,5 +64,6 @@ export async function fetchPortalProgramAccess(input: {
     role: body.role,
     program: body.program as ActivePilotProgram,
     ...(body.claimCodeContext ? { claimCodeContext: body.claimCodeContext } : {}),
+    ...(Array.isArray(body.matchedStudentIds) ? { matchedStudentIds: body.matchedStudentIds } : {}),
   };
 }

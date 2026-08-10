@@ -17,7 +17,12 @@ export type PortalProgramLookupResponse = PilotProgramLookupResponse & {
 /** Resolve program from family access code, program code, or per-student family claim code. */
 export async function lookupPortalProgramByAccessCodeDetailed(
   rawCode: string,
-  options: { intent?: PortalProgramAccessIntent; credential?: string; rememberDevice?: boolean } = {},
+  options: {
+    intent?: PortalProgramAccessIntent;
+    credential?: string;
+    rememberDevice?: boolean;
+    completeParentClaim?: boolean;
+  } = {},
 ): Promise<PortalProgramLookupResponse> {
   return lookupPilotProgramByAccessCodeDetailed(rawCode, options);
 }
