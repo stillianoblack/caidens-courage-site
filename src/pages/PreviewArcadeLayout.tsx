@@ -95,7 +95,6 @@ export default function PreviewArcadeLayout() {
                     <KidArcadePanel
                       storyQuestPathOverride={storyPath}
                       b4GamePathOverride="/kids/games/b4-focus-flight"
-                      flameRunPathOverride="/preview/games/b4-flame-run"
                     />
                   </KidPlayShellPage>
                 }
