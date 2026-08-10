@@ -37,6 +37,10 @@ import { isPortalRoleAllowed } from '../lib/portalSessionGuard';
 import { prefetchFacilitatorPortalRoutes } from '../lib/portalRoutePrefetch';
 import { useProgramGoalsOnboarding } from '../hooks/useProgramGoalsOnboarding';
 import { OPEN_PROGRAM_GOALS_EVENT } from '../lib/openProgramGoals';
+import {
+  OPEN_FACILITATOR_ACCESS_CODES_EVENT,
+  type FacilitatorAccessCodesFocus,
+} from '../lib/openFacilitatorAccessCodes';
 import { clearPageTransitionOverlay } from '../lib/pageTransition';
 import { FacilitatorOverviewCoachProvider } from '../components/pilot-dashboard/coach/FacilitatorOverviewCoachProvider';
 import FacilitatorPortalMobileChrome, {
@@ -50,6 +54,7 @@ import {
   FACILITATOR_BOOT_EXIT_MS,
   useFacilitatorPortalBoot,
 } from '../hooks/useFacilitatorPortalBoot';
+import FacilitatorShareInviteDrawer from '../components/pilot-dashboard/FacilitatorShareInviteDrawer';
 
 const FacilitatorOverviewCoachRail = lazy(
   () => import('../components/pilot-dashboard/coach/FacilitatorOverviewCoachRail'),
@@ -72,6 +77,8 @@ export default function ProgramDashboardPage() {
   const [bootVisible, setBootVisible] = useState(true);
   const showWelcome = searchParams.get('welcome') === '1';
   const [rosterSnapshot, setRosterSnapshot] = useState<FacilitatorAdventureSnapshotData | null>(null);
+  const [shareInviteOpen, setShareInviteOpen] = useState(false);
+  const [shareInviteFocus, setShareInviteFocus] = useState<FacilitatorAccessCodesFocus | undefined>();
 
   useEffect(() => {
     if (bootState !== 'ready') {
@@ -128,6 +135,20 @@ export default function ProgramDashboardPage() {
     window.addEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
     return () => window.removeEventListener(OPEN_PROGRAM_GOALS_EVENT, handleOpenGoals);
   }, [openGoalsDrawer]);
+
+  const openShareInvite = useCallback((focus?: FacilitatorAccessCodesFocus) => {
+    setShareInviteFocus(focus);
+    setShareInviteOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const handleOpenShareInvite = (event: Event) => {
+      const detail = (event as CustomEvent<{ focus?: FacilitatorAccessCodesFocus }>).detail;
+      openShareInvite(detail?.focus);
+    };
+    window.addEventListener(OPEN_FACILITATOR_ACCESS_CODES_EVENT, handleOpenShareInvite);
+    return () => window.removeEventListener(OPEN_FACILITATOR_ACCESS_CODES_EVENT, handleOpenShareInvite);
+  }, [openShareInvite]);
 
   useEffect(() => {
     if (searchParams.get('openGoals') !== '1') return;
@@ -227,6 +248,7 @@ export default function ProgramDashboardPage() {
       topBar={
         <PilotDashboardTopBar
           pageTitle={pageTitle}
+          onOpenShareInvite={() => openShareInvite()}
           onOpenProgramGoals={openGoalsDrawer}
           mobileFacilitatorNav={showMobileNav && isMobileNav}
         />
@@ -252,6 +274,13 @@ export default function ProgramDashboardPage() {
         onSave={saveGoals}
         onRemindLater={remindGoalsLater}
         onSkip={skipGoalsForNow}
+      />
+
+      <FacilitatorShareInviteDrawer
+        open={shareInviteOpen}
+        onClose={() => setShareInviteOpen(false)}
+        program={activeProgram}
+        focus={shareInviteFocus}
       />
 
       <FacilitatorPortalMobileChrome

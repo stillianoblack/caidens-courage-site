@@ -29,7 +29,6 @@ import { computeNeedsAttention } from '../../../lib/pilotStudentProgress';
 import { buildB4Recommendation, buildRecentStudentActivityFeed } from '../../../lib/pilotOverviewInsights';
 import type { StudentParticipantRecord } from '../../../lib/pilotTrackingService';
 import type { StudentFamilyLink } from '../../../lib/studentFamilyLinkService';
-import ProgramAccessCodesCard from '../../pilot-program/ProgramAccessCodesCard';
 import { FacilitatorOverviewCoachSlot } from '../coach/FacilitatorOverviewCoachProvider';
 import DashboardWidgetSkeleton from '../DashboardWidgetSkeleton';
 import { FACILITATOR_B4_ASSETS } from '../../../config/facilitatorB4Assets';
@@ -215,7 +214,6 @@ export default function PilotOverviewPanel({
   if (loading) {
     return (
       <div className="pilot-panel pilot-panel--overview">
-        {activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
         <DashboardWidgetSkeleton kpiCount={5} showGrowth showActivity />
       </div>
     );
@@ -230,7 +228,6 @@ export default function PilotOverviewPanel({
         />
       ) : null}
       {isMobileNav ? <FacilitatorOverviewCoachSlot slot="afterHero" /> : null}
-      {!isMobileNav && activeProgram ? <ProgramAccessCodesCard program={activeProgram} compact /> : null}
       {overviewWarning ? <p className="pilot-syncWarning" role="status">{overviewWarning}</p> : null}
 
       {!isMobileNav ? (

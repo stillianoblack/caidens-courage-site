@@ -5,6 +5,7 @@ import CoachProgressBar from './CoachProgressBar';
 import './facilitator-program-coach.css';
 import { FACILITATOR_GAME_HUDDLE_PATH } from '../../../config/courageRoutes';
 import B4AnimatedHead from '../../b4/B4AnimatedHead';
+import { openFacilitatorAccessCodes } from '../../../lib/openFacilitatorAccessCodes';
 
 export type FacilitatorProgramCoachPanelProps = {
   model?: FacilitatorProgramCoachModel;
@@ -85,6 +86,17 @@ export default function FacilitatorProgramCoachPanel({
               onClick={action.id === 'week-1-modules' ? undefined : action.onClick}
             />
           ))}
+          <button
+            type="button"
+            className="pilot-coachAction pilot-coachAction--inviteFamily"
+            onClick={() => openFacilitatorAccessCodes('family')}
+          >
+            <span className="pilot-coachActionCopy">
+              <strong>INVITE FAMILIES</strong>
+              <span>Help parents connect to their child&apos;s Focus Flame journey.</span>
+            </span>
+            <span className="pilot-coachActionCta">Share Family Access</span>
+          </button>
         </div>
       </section>
     </div>

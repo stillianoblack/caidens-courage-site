@@ -1,0 +1,13 @@
+.facilitatorShareDrawer { display: grid; gap: 1rem; }
+.facilitatorShareSection { scroll-margin-block: 2rem; padding: 1.25rem; border: 1px solid rgba(36,62,112,.14); border-radius: 1rem; background: #fff; transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease; }
+.facilitatorShareSection--highlighted { border-color: #ddb04e; background: #fffaf0; box-shadow: 0 0 0 3px rgba(221,176,78,.18); }
+.facilitatorShareSection h3 { margin: 0 0 .8rem; color: #203f73; font-size: .76rem; font-weight: 900; letter-spacing: .11em; }
+.facilitatorShareSection p { margin: .8rem 0 0; color: #667797; font-size: .9rem; line-height: 1.5; }
+.facilitatorShareCodeRow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.facilitatorShareCodeRow > div { min-width: 0; }
+.facilitatorShareCodeLabel { display: block; margin-bottom: .3rem; color: #5f7192; font-size: .78rem; font-weight: 800; }
+.facilitatorShareCodeValue { display: block; overflow-wrap: anywhere; color: #132f5b; font-size: 1rem; }
+.facilitatorShareCopyBtn { flex: 0 0 auto; min-height: 2.55rem; padding: .65rem 1rem; border: 0; border-radius: 999px; background: #244a80; color: #fff; font: inherit; font-size: .86rem; font-weight: 800; cursor: pointer; }
+.facilitatorShareCopyBtn:hover { background: #173761; }
+.facilitatorShareCopyBtn:focus-visible { outline: 3px solid #e3bb5d; outline-offset: 2px; }
+@media (max-width: 480px) { .facilitatorShareCodeRow { align-items: stretch; flex-direction: column; }.facilitatorShareCopyBtn { width: 100%; }.facilitatorShareSection { padding: 1rem; } }

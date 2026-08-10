@@ -1,6 +1,8 @@
 export const OPEN_FACILITATOR_ACCESS_CODES_EVENT = 'caidens:open-facilitator-access-codes';
 
-export function openFacilitatorAccessCodes(): void {
+export type FacilitatorAccessCodesFocus = 'program' | 'family' | 'facilitator';
+
+export function openFacilitatorAccessCodes(focus?: FacilitatorAccessCodesFocus): void {
   if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(OPEN_FACILITATOR_ACCESS_CODES_EVENT));
+  window.dispatchEvent(new CustomEvent(OPEN_FACILITATOR_ACCESS_CODES_EVENT, { detail: { focus } }));
 }

@@ -16,6 +16,7 @@ type PortalHeaderProps = {
   pageTitle: string;
   portal: 'family' | 'facilitator';
   onOpenProgramGoals?: () => void;
+  onOpenShareInvite?: () => void;
   linkedCampLabel?: string | null;
   notifications?: FamilyPortalNotification[];
   onOpenMobileNav?: () => void;
@@ -45,10 +46,25 @@ function FacilitatorGoalsButton({ onOpenProgramGoals }: { onOpenProgramGoals: ()
   );
 }
 
+function FacilitatorShareInviteButton({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button type="button" className="portal-headerShareBtn" onClick={onOpen} aria-label="Share or invite">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <circle cx="6" cy="10" r="2.2" />
+        <circle cx="14" cy="5" r="2.2" />
+        <circle cx="14" cy="15" r="2.2" />
+        <path d="M8 9l4-2.6M8 11l4 2.6" strokeLinecap="round" />
+      </svg>
+      <span>Share / Invite</span>
+    </button>
+  );
+}
+
 export default function PortalHeader({
   pageTitle,
   portal,
   onOpenProgramGoals,
+  onOpenShareInvite,
   linkedCampLabel = null,
   notifications = [],
   onOpenMobileNav,
@@ -174,6 +190,7 @@ export default function PortalHeader({
         </div>
       </div>
       <div className="portal-headerTools portal-headerTools--facilitatorDesktop">
+        {onOpenShareInvite ? <FacilitatorShareInviteButton onOpen={onOpenShareInvite} /> : null}
         {onOpenProgramGoals ? <FacilitatorGoalsButton onOpenProgramGoals={onOpenProgramGoals} /> : null}
         <PortalUpdatesPill portal="facilitator" className="portal-headerUpdates" />
         <PortalResourceSearch portal={portal} className="portal-headerSearch" collapsibleOnMobile />

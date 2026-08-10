@@ -15,6 +15,7 @@ import PilotProgramSettingsDrawer, {
 } from './PilotProgramSettingsDrawer';
 import PilotUpgradePricingModal from './PilotUpgradePricingModal';
 import { OPEN_FACILITATOR_PROGRAM_SETTINGS_EVENT } from '../../lib/openFacilitatorProgramSettings';
+import { openFacilitatorAccessCodes } from '../../lib/openFacilitatorAccessCodes';
 
 type FacilitatorMobileMoreDrawerProps = {
   open: boolean;
@@ -126,6 +127,22 @@ export default function FacilitatorMobileMoreDrawer({
             </ul>
 
             <ul className="facilitator-mobileMoreList facilitator-mobileMoreList--secondary">
+              <li>
+                <button
+                  type="button"
+                  className="facilitator-mobileMoreRow facilitator-mobileMoreRow--button"
+                  onClick={() => {
+                    openFacilitatorAccessCodes();
+                    onClose();
+                  }}
+                >
+                  <span className="facilitator-mobileMoreRowText">
+                    <span className="facilitator-mobileMoreRowLabel">Share / Invite</span>
+                    <span className="facilitator-mobileMoreRowHelper">Copy access for students, families, or facilitators.</span>
+                  </span>
+                  <ChevronIcon />
+                </button>
+              </li>
               <li>
                 <button
                   type="button"
