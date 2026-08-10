@@ -17,7 +17,7 @@ describe('portal acceptance polish', () => {
 
   it('leads the Family Hub with the weekly challenge and preserves the B-4 journey', () => {
     const overview = read('src/components/family-portal/panels/FamilyOverviewPanel.tsx');
-    const weeklyChallengeIndex = overview.indexOf('<FamilyWeeklyAdventureCtaBanner />');
+    const weeklyChallengeIndex = overview.indexOf('<FamilyWeeklyAdventureCtaBanner');
     const journeyIndex = overview.indexOf('<FamilyJourneyCoachInline />');
 
     expect(weeklyChallengeIndex).toBeGreaterThan(-1);

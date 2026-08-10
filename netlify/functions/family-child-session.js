@@ -77,15 +77,37 @@ function publicSession(row, participant) {
   };
 }
 
-async function participantForFamily(supabase, participantId, programCode) {
+async function participantForFamily(supabase, participantId, familyProgramCode) {
   const { data, error } = await supabase
     .from('participants')
     .select('id, role, program_code, first_name, nickname, grade_level, student_pin_enabled, student_pin_hash, student_pin_fingerprint')
     .eq('id', participantId)
     .maybeSingle();
   if (error) return { error: 'participant_lookup_failed' };
-  if (!participantBelongsToFamily(data, programCode)) return { denied: true };
-  return { participant: data };
+  if (!data || data.role !== 'student') return { denied: true };
+
+  const directlyOwned = participantBelongsToFamily(data, familyProgramCode);
+  if (!directlyOwned) {
+    const { data: familyLink, error: familyLinkError } = await supabase
+      .from('student_family_links')
+      .select('id, student_id, family_program_code, parent_claimed')
+      .eq('student_id', participantId)
+      .eq('family_program_code', familyProgramCode)
+      .eq('parent_claimed', true)
+      .maybeSingle();
+    if (familyLinkError) return { error: 'family_link_lookup_failed' };
+    if (!familyLink) return { denied: true };
+  }
+
+  const { data: childProgram, error: childProgramError } = await supabase
+    .from('pilot_programs')
+    .select('id, program_code, program_name, program_type')
+    .eq('program_code', data.program_code)
+    .neq('pilot_status', 'archived')
+    .maybeSingle();
+  if (childProgramError) return { error: 'child_program_lookup_failed' };
+  if (!childProgram) return { denied: true };
+  return { participant: data, childProgram };
 }
 
 async function sessionForFamily(supabase, sessionId, program) {
@@ -93,7 +115,6 @@ async function sessionForFamily(supabase, sessionId, program) {
     .from('kid_play_sessions')
     .select('*')
     .eq('id', sessionId)
-    .eq('organization_id', program.id)
     .eq('session_source', 'family_home')
     .maybeSingle();
   if (error) return { error: 'session_lookup_failed' };
@@ -104,6 +125,7 @@ async function sessionForFamily(supabase, sessionId, program) {
     program.program_code,
   );
   if (!participant.participant) return participant;
+  if (data.organization_id !== participant.childProgram.id) return { denied: true };
   return { session: data, participant: participant.participant };
 }
 
@@ -146,6 +168,7 @@ async function launchSession(supabase, program, participantId, id) {
   );
   if (participantResult.error) return { status: 503, code: participantResult.error };
   if (!participantResult.participant) return { status: 403, code: 'participant_access_denied' };
+  const childProgram = participantResult.childProgram;
 
   // Resolve PIN/access state on the server without returning hashes, fingerprints, or reveal values.
   const pinResolved = Boolean(
@@ -157,7 +180,8 @@ async function launchSession(supabase, program, participantId, id) {
   const { data: activeRows, error: activeError } = await supabase
     .from('kid_play_sessions')
     .select('*')
-    .eq('organization_id', program.id)
+    .eq('organization_id', childProgram.id)
+    .eq('child_id', participantId)
     .eq('session_source', 'family_home')
     .eq('status', 'active')
     .order('last_activity_at', { ascending: false });
@@ -166,9 +190,6 @@ async function launchSession(supabase, program, participantId, id) {
   const reusable = (activeRows || []).find(
     (row) => (row.participant_id || row.child_id) === participantId,
   );
-  const supersededIds = (activeRows || [])
-    .filter((row) => !reusable || row.id !== reusable.id)
-    .map((row) => row.id);
   const timestamp = new Date().toISOString();
   const displayName = safeText(
     participantResult.participant.nickname || participantResult.participant.first_name,
@@ -178,20 +199,6 @@ async function launchSession(supabase, program, participantId, id) {
     participant_display_name: displayName,
     participant_first_name: safeText(participantResult.participant.first_name, 80) || displayName,
   };
-
-  if (supersededIds.length) {
-    const { error } = await supabase
-      .from('kid_play_sessions')
-      .update({
-        status: 'ended',
-        ended_at: timestamp,
-        ended_reason: 'superseded_by_family_child_switch',
-        updated_at: timestamp,
-      })
-      .in('id', supersededIds)
-      .eq('status', 'active');
-    if (error) return { status: 503, code: 'session_switch_failed' };
-  }
 
   let session = reusable;
   if (session) {
@@ -214,7 +221,7 @@ async function launchSession(supabase, program, participantId, id) {
       .insert({
         child_id: participantId,
         participant_id: participantId,
-        organization_id: program.id,
+        organization_id: childProgram.id,
         launched_by_user_id: null,
         session_source: 'family_home',
         device_mode: 'home_device',

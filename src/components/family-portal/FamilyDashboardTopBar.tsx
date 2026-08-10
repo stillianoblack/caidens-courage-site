@@ -8,6 +8,7 @@ type FamilyDashboardTopBarProps = {
   notifications?: FamilyPortalNotification[];
   onOpenMobileNav?: () => void;
   mobileFamilySimplified?: boolean;
+  onOpenShareInvite?: () => void;
 };
 
 export default function FamilyDashboardTopBar({
@@ -16,6 +17,7 @@ export default function FamilyDashboardTopBar({
   notifications = [],
   onOpenMobileNav,
   mobileFamilySimplified = false,
+  onOpenShareInvite,
 }: FamilyDashboardTopBarProps) {
   return (
     <PortalHeader
@@ -25,6 +27,7 @@ export default function FamilyDashboardTopBar({
       notifications={notifications}
       onOpenMobileNav={onOpenMobileNav}
       mobileFamilySimplified={mobileFamilySimplified}
+      onOpenShareInvite={onOpenShareInvite}
     />
   );
 }

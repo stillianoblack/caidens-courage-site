@@ -99,6 +99,7 @@ export default function PortalHeader({
               className="familyPortalMobileHeader-lead"
             />
             <div className="portal-headerFamilyToolsEnd">
+              {onOpenShareInvite ? <FacilitatorShareInviteButton onOpen={onOpenShareInvite} /> : null}
               <FocusCoinWalletBadge className="portal-headerCoins family-portalMobileChip" />
               <PortalUpdatesPill portal="family" compact className="portal-headerUpdates" />
               <FamilyNotificationBell items={notifications} className="portal-headerBell" />
@@ -125,6 +126,7 @@ export default function PortalHeader({
           </div>
         </div>
         <div className="portal-headerTools portal-headerTools--familyDesktop">
+          {onOpenShareInvite ? <FacilitatorShareInviteButton onOpen={onOpenShareInvite} /> : null}
           <FocusCoinWalletBadge className="portal-headerCoins" />
           <PortalUpdatesPill portal="family" className="portal-headerUpdates" />
           <FamilyNotificationBell items={notifications} className="portal-headerBell" />

@@ -45,6 +45,7 @@ import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import FamilyParentOnboardingGate from '../components/family-portal/FamilyParentOnboardingGate';
 import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
 import '../components/family-portal/parent-first-login-wizard.css';
+import FamilyShareInviteDrawer from '../components/family-portal/FamilyShareInviteDrawer';
 
 export default function FamilyHubLayout() {
   return (
@@ -70,6 +71,7 @@ function FamilyHubLayoutContent() {
     () => resolveTrackingProgramCode() ?? sessionProgramCode ?? '',
   );
   const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
+  const [shareInviteOpen, setShareInviteOpen] = useState(false);
   useEffect(() => {
     setFamilySoftLocked(isKidPlayFamilySoftLocked());
   }, [location.pathname]);
@@ -209,6 +211,7 @@ function FamilyHubLayoutContent() {
                   linkedCampLabel={linkedCampLabel}
                   notifications={notifications}
                   mobileFamilySimplified={isMobileNav}
+                  onOpenShareInvite={() => setShareInviteOpen(true)}
                 />
               )
           }
@@ -221,6 +224,11 @@ function FamilyHubLayoutContent() {
         </AppShell>
       </div>
       {isMobileNav && !isMobileGameRoute ? <FamilyMobileBottomNav /> : null}
+      <FamilyShareInviteDrawer
+        open={shareInviteOpen}
+        onClose={() => setShareInviteOpen(false)}
+        program={activeProgram}
+      />
     </ActiveParticipantProvider>
   );
 }

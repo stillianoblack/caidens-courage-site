@@ -32,34 +32,20 @@ export type FamilySidebarNavItem = {
 
 function buildFamilySidebarNav(basePath: string): FamilySidebarNavItem[] {
   return [
-    { id: 'overview', label: 'Home', path: basePath, icon: 'overview' },
+    { id: 'overview', label: 'Headquarters', path: basePath, icon: 'overview' },
     {
       id: 'continue-learning',
-      label: 'Weekly Adventures',
-      path: `${basePath}/continue-learning`,
+      label: 'Play Adventures',
+      path: `${basePath}/weekly-adventures`,
       icon: 'continue-learning',
     },
     {
       id: 'character-hub',
-      label: 'Character Hub',
+      label: 'Characters',
       path: `${basePath}/characters`,
       icon: 'character-hub',
     },
-    {
-      id: 'inventory',
-      label: 'Collections',
-      path: `${basePath}/collections`,
-      icon: 'inventory',
-    },
-    { id: 'downloads', label: 'Parent Resources', path: `${basePath}/downloads`, icon: 'downloads' },
-    { id: 'guide', label: 'Parent Corner', path: `${basePath}/guide`, icon: 'guide' },
-    { id: 'gallery', label: 'Gallery', path: `${basePath}/gallery`, icon: 'gallery' },
-    {
-      id: 'certificates',
-      label: 'Certificates',
-      path: `${basePath}/certificates`,
-      icon: 'certificates',
-    },
+    { id: 'guide', label: 'Parents Corner', path: `${basePath}/parents-corner`, icon: 'guide' },
   ];
 }
 
@@ -80,7 +66,7 @@ export function resolveFamilyPortalBrand(isProgramHub: boolean): { title: string
 }
 
 export const FAMILY_PAGE_SUBTITLES: Partial<Record<FamilySidebarNavId, string>> = {
-  guide: 'Guides, discussion tools, and adult learning activities for supporting kids at home.',
+  guide: 'At-home guidance, printables, gallery moments, and certificates in one place.',
   downloads: 'Parent-friendly activities, printables, and calm-down tools to try at home.',
   inventory: 'Badges, stickers, and decorations earned from Courage in the Dark adventures.',
 };

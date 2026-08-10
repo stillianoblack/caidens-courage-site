@@ -471,7 +471,7 @@ export default function FamilyOverviewPanel() {
 
   return (
     <div className="family-overviewPage">
-      <FamilyWeeklyAdventureCtaBanner />
+      <FamilyWeeklyAdventureCtaBanner childName={activeChildSummary?.displayName} />
       <FamilyJourneyCoachInline />
       <div className="family-panel family-panel--overview">
       <FamilyParentClaimStatus status={claimStatus} showDetail className="family-overviewClaim" />

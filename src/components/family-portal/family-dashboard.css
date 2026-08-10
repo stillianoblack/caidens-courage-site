@@ -4089,3 +4089,14 @@ a.family-dash-card:hover {
     display: block;
   }
 }
+.family-consolidatedLayout .family-consolidatedContent { min-width: 0; }
+.family-consolidatedLayout .family-consolidatedContent > .family-panel { padding: 0; }
+.family-launchError { max-width: 44rem; margin: 3rem auto; text-align: center; }
+.family-launchError h2 { margin: 0 0 .75rem; color: #173761; }
+.family-launchError p { color: #667797; }
+.family-launchErrorActions { display: flex; justify-content: center; gap: .75rem; margin-top: 1.25rem; }
+.family-launchErrorActions .family-nextCta { border: 0; cursor: pointer; }
+@media (max-width: 640px) {
+  .family-launchErrorActions { align-items: stretch; flex-direction: column; }
+  .family-launchErrorActions .family-nextCta { width: 100%; }
+}

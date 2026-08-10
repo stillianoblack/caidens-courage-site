@@ -297,11 +297,54 @@ describe('family child session endpoint', () => {
           error: null,
         });
       }
+      if (table === 'student_family_links') return query({ data: null, error: null });
       throw new Error(`Unexpected table ${table}`);
     });
     const response = await endpoint.handler(event({ participantId }));
     expect(response.statusCode).toBe(403);
     expect(JSON.parse(response.body).code).toBe('participant_access_denied');
+  });
+
+  test('authorizes a claimed linked child and resolves the child program for play', async () => {
+    const childProgram = {
+      id: '33333333-3333-4333-8333-333333333333',
+      program_code: 'CAMP-LINKED',
+      program_name: 'Linked Academy',
+      program_type: 'camp',
+    };
+    const participant = {
+      id: participantId,
+      role: 'student',
+      program_code: childProgram.program_code,
+      first_name: 'Nova',
+      nickname: 'Nova',
+    };
+    const supabase = {
+      from: (table: string) => {
+        if (table === 'participants') return query({ data: participant, error: null });
+        if (table === 'student_family_links') {
+          return query({
+            data: {
+              id: 'family-link-1',
+              student_id: participantId,
+              family_program_code: program.program_code,
+              parent_claimed: true,
+            },
+            error: null,
+          });
+        }
+        if (table === 'pilot_programs') return query({ data: childProgram, error: null });
+        throw new Error(`Unexpected table ${table}`);
+      },
+    };
+
+    const result = await endpoint._test.participantForFamily(
+      supabase,
+      participantId,
+      program.program_code,
+    );
+    expect(result.participant).toEqual(participant);
+    expect(result.childProgram).toEqual(childProgram);
   });
 
   test('reuses the exact active family child session without inserting another', async () => {

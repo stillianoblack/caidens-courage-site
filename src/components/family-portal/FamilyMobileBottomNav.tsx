@@ -4,7 +4,7 @@ import KidsAdventureIcon from '../../design-system/kids-adventure/KidsAdventureI
 import { useActiveChild } from '../../hooks/useActiveChild';
 import { useFamilyDashboardMetrics } from '../../hooks/useFamilyDashboardMetrics';
 import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
-import { familyPortalPath, familySettingsPath } from '../../lib/familyPortalPaths';
+import { familyPortalPath } from '../../lib/familyPortalPaths';
 import { resolveFamilyBasePath } from '../../lib/familyPortalNav';
 import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
 import MobileBottomNavigation, {
@@ -15,7 +15,6 @@ export type FamilyMobileBottomNavId =
   | 'home'
   | 'adventures'
   | 'characters'
-  | 'inventory'
   | 'profile';
 
 type FamilyMobileBottomNavIconId = 'home' | 'adventures' | 'characters' | 'inventory' | 'settings';
@@ -24,7 +23,6 @@ const NAV_ICON_MAP: Record<FamilyMobileBottomNavId, FamilyMobileBottomNavIconId>
   home: 'home',
   adventures: 'adventures',
   characters: 'characters',
-  inventory: 'inventory',
   profile: 'settings',
 };
 
@@ -34,18 +32,17 @@ function buildNavItems(
   inventoryBadgeCount: number,
 ): MobileBottomNavigationItem[] {
   const defs: Array<{ id: FamilyMobileBottomNavId; label: string; path: string }> = [
-    { id: 'home', label: 'Home', path: basePath },
-    { id: 'adventures', label: 'Adventures', path: familyPortalPath('weekly-adventures', basePath) },
+    { id: 'home', label: 'Headquarters', path: basePath },
+    { id: 'adventures', label: 'Play Adventures', path: familyPortalPath('weekly-adventures', basePath) },
     { id: 'characters', label: 'Characters', path: familyPortalPath('characters', basePath) },
-    { id: 'inventory', label: 'Collections', path: familyPortalPath('collections', basePath) },
-    { id: 'profile', label: 'Profile', path: familySettingsPath(basePath) },
+    { id: 'profile', label: 'Parents Corner', path: `${basePath}/parents-corner` },
   ];
 
   return defs.map((item) => ({
     id: item.id,
     label: item.label,
     href: item.path,
-    badgeCount: item.id === 'inventory' ? inventoryBadgeCount : undefined,
+    badgeCount: item.id === 'characters' ? inventoryBadgeCount : undefined,
     icon: (
       <KidsAdventureIcon
         name={NAV_ICON_MAP[item.id]}
@@ -77,7 +74,7 @@ function resolveActiveNavId(pathname: string, basePath: string): FamilyMobileBot
   }
 
   if (remainder.startsWith('inventory') || remainder.startsWith('collections')) {
-    return 'inventory';
+    return 'characters';
   }
 
   if (

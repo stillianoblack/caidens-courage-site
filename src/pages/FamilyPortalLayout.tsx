@@ -40,6 +40,7 @@ import ActiveParticipantPickerGate from '../components/family-portal/ActiveParti
 import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamilySoftLockGate';
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
+import FamilyShareInviteDrawer from '../components/family-portal/FamilyShareInviteDrawer';
 
 export default function FamilyPortalLayout() {
   const navigate = useNavigate();
@@ -54,6 +55,7 @@ export default function FamilyPortalLayout() {
     () => resolveTrackingProgramCode() ?? activeProgram?.programCode ?? '',
   );
   const [familySoftLocked, setFamilySoftLocked] = useState(() => isKidPlayFamilySoftLocked());
+  const [shareInviteOpen, setShareInviteOpen] = useState(false);
 
   useEffect(() => {
     setFamilySoftLocked(isKidPlayFamilySoftLocked());
@@ -172,6 +174,7 @@ export default function FamilyPortalLayout() {
                   linkedCampLabel={linkedCampLabel}
                   notifications={notifications}
                   mobileFamilySimplified={isMobileNav}
+                  onOpenShareInvite={() => setShareInviteOpen(true)}
                 />
               )
           }
@@ -186,6 +189,13 @@ export default function FamilyPortalLayout() {
         </AppShell>
       </div>
       {isMobileNav && !isMobileGameRoute ? <FamilyMobileBottomNav /> : null}
+      {activeProgram ? (
+        <FamilyShareInviteDrawer
+          open={shareInviteOpen}
+          onClose={() => setShareInviteOpen(false)}
+          program={activeProgram}
+        />
+      ) : null}
     </ActiveParticipantProvider>
   );
 }

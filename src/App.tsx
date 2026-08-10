@@ -204,29 +204,17 @@ const FamilyResultsPanel = React.lazy(() =>
 const FamilyWeeklyAdventuresLauncher = React.lazy(() =>
   import('./components/family-portal/panels/FamilyWeeklyAdventuresLauncher'),
 );
-const FamilyInventoryPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyInventoryPanel'),
-);
 const FamilyBaselineCheckPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyBaselineCheckPanel'),
 );
-const FamilyCharactersPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyCharactersPanel'),
+const FamilyCharactersHubPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyCharactersHubPanel'),
+);
+const FamilyParentsCornerHubPanel = React.lazy(() =>
+  import('./components/family-portal/panels/FamilyParentsCornerHubPanel'),
 );
 const FamilyCharacterProfilePage = React.lazy(() =>
   import('./components/family-portal/panels/FamilyCharacterProfilePage'),
-);
-const FamilyDownloadsPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyDownloadsPanel'),
-);
-const FamilyGalleryPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyGalleryPanel'),
-);
-const FamilyCertificatesPanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyCertificatesPanel'),
-);
-const FamilyGuidePanel = React.lazy(() =>
-  import('./components/family-portal/panels/FamilyGuidePanel'),
 );
 const FamilyProgramSettingsPanel = React.lazy(() =>
   import('./components/family-portal/panels/FamilyProgramSettingsPanel'),
@@ -372,18 +360,19 @@ const appRouteChildren = (
           <Route path="continue-learning" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="weekly-adventures" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="play-pause" element={<FamilyPlayPausePage />} />
-          <Route path="collections" element={<FamilyInventoryPanel />} />
-          <Route path="inventory" element={<Navigate to="collections" replace />} />
+          <Route path="collections" element={<Navigate to="../characters?tab=collections" replace />} />
+          <Route path="inventory" element={<Navigate to="../characters?tab=collections" replace />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
-            <Route index element={<FamilyCharactersPanel />} />
+            <Route index element={<FamilyCharactersHubPanel />} />
             <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
           </Route>
           <Route path="games" element={<Navigate to="characters" replace />} />
-          <Route path="downloads" element={<FamilyDownloadsPanel />} />
-          <Route path="gallery" element={<FamilyGalleryPanel />} />
-          <Route path="certificates" element={<FamilyCertificatesPanel />} />
-          <Route path="guide" element={<FamilyGuidePanel />} />
+          <Route path="parents-corner" element={<FamilyParentsCornerHubPanel />} />
+          <Route path="downloads" element={<Navigate to="../parents-corner?tab=printables" replace />} />
+          <Route path="gallery" element={<Navigate to="../parents-corner?tab=gallery" replace />} />
+          <Route path="certificates" element={<Navigate to="../parents-corner?tab=certificates" replace />} />
+          <Route path="guide" element={<Navigate to="../parents-corner" replace />} />
           <Route path="settings" element={<FamilyProgramSettingsPanel />} />
           <Route path="claim" element={<FamilyClaimRedirect />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />
@@ -430,21 +419,22 @@ const appRouteChildren = (
           <Route path="results" element={<FamilyResultsPanel />} />
           <Route path="children" element={<Navigate to="characters" replace />} />
           <Route path="continue-learning" element={<FamilyWeeklyAdventuresLauncher />} />
-          <Route path="collections" element={<FamilyInventoryPanel />} />
-          <Route path="inventory" element={<Navigate to="collections" replace />} />
+          <Route path="collections" element={<Navigate to="../characters?tab=collections" replace />} />
+          <Route path="inventory" element={<Navigate to="../characters?tab=collections" replace />} />
           <Route path="weekly-adventures" element={<FamilyWeeklyAdventuresLauncher />} />
           <Route path="play-pause" element={<FamilyPlayPausePage />} />
           <Route path="baseline-check" element={<FamilyBaselineCheckPanel />} />
           <Route path="characters">
-            <Route index element={<FamilyCharactersPanel />} />
+            <Route index element={<FamilyCharactersHubPanel />} />
             <Route path=":characterId" element={<FamilyCharacterProfilePage />} />
           </Route>
           <Route path="games" element={<Navigate to="characters" replace />} />
-          <Route path="downloads" element={<FamilyDownloadsPanel />} />
-          <Route path="gallery" element={<FamilyGalleryPanel />} />
-          <Route path="certificates" element={<FamilyCertificatesPanel />} />
-          <Route path="guide" element={<FamilyGuidePanel />} />
-          <Route path="parent-corner" element={<FamilyGuidePanel />} />
+          <Route path="parents-corner" element={<FamilyParentsCornerHubPanel />} />
+          <Route path="downloads" element={<Navigate to="../parents-corner?tab=printables" replace />} />
+          <Route path="gallery" element={<Navigate to="../parents-corner?tab=gallery" replace />} />
+          <Route path="certificates" element={<Navigate to="../parents-corner?tab=certificates" replace />} />
+          <Route path="guide" element={<Navigate to="../parents-corner" replace />} />
+          <Route path="parent-corner" element={<Navigate to="../parents-corner" replace />} />
           <Route path="settings" element={<FamilyProgramSettingsPanel />} />
           <Route path="claim" element={<FamilyClaimRedirect />} />
           <Route path="adult-assessment/:phase" element={<FamilyAdultAssessmentPanel />} />

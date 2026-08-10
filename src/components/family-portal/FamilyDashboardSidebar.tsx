@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   FAMILY_SIDEBAR_NAV,
@@ -9,12 +9,6 @@ import {
   resolveFamilyBasePath,
 } from '../../lib/familyPortalNav';
 import { isWeeklyAdventureSource } from '../../lib/weeklyAdventureRouteContext';
-import { useFamilyGalleryNewApprovedCount } from '../../hooks/useGalleryNavCounts';
-import { useInventoryNotificationBadge } from '../../hooks/useInventoryNotificationBadge';
-import { useActiveChild } from '../../hooks/useActiveChild';
-import { useFamilyDashboardMetrics } from '../../hooks/useFamilyDashboardMetrics';
-import { resolveTrackingProgramCode } from '../../lib/activeProgramContext';
-import { formatGalleryNavLabel } from '../../lib/galleryNavCounts';
 import { resetPortalScroll } from '../../lib/portalScroll';
 import FamilyNavIcon from './FamilyNavIcon';
 import BrandLogo from '../../design-system/components/BrandLogo';
@@ -32,28 +26,11 @@ type FamilyDashboardSidebarProps = {
 
 export default function FamilyDashboardSidebar({
   navItems = FAMILY_SIDEBAR_NAV,
-  programCode,
   showUpgradeCard = true,
   variant = 'rail',
   onNavigate,
   showRailCopyright,
 }: FamilyDashboardSidebarProps) {
-  const galleryNewCount = useFamilyGalleryNewApprovedCount(programCode);
-  const trackingProgramCode = resolveTrackingProgramCode() ?? programCode;
-  const { visibleChildren } = useFamilyDashboardMetrics(trackingProgramCode);
-  const selectableChildren = useMemo(
-    () =>
-      visibleChildren
-        .map((child) => ({
-          participantId: child.studentId,
-          displayName: child.displayName,
-          firstName: child.displayName,
-        }))
-        .filter((child) => Boolean(child.participantId)),
-    [visibleChildren],
-  );
-  const { activeChild } = useActiveChild(selectableChildren);
-  const inventoryBadgeCount = useInventoryNotificationBadge(activeChild?.participantId);
   const location = useLocation();
   const basePath = resolveFamilyBasePath(location.pathname);
   const weeklyLaunch = isWeeklyAdventureSource(location.search);
@@ -106,17 +83,8 @@ export default function FamilyDashboardSidebar({
                   >
                     <span className="family-railIcon">
                       <FamilyNavIcon name={item.icon} />
-                      {item.id === 'inventory' && inventoryBadgeCount > 0 ? (
-                        <span className="family-railNavBadge" aria-hidden="true">
-                          {inventoryBadgeCount > 99 ? '99+' : inventoryBadgeCount}
-                        </span>
-                      ) : null}
                     </span>
-                    <span className="family-railNavLabel">
-                      {item.id === 'gallery'
-                        ? formatGalleryNavLabel(item.label, galleryNewCount)
-                        : item.label}
-                    </span>
+                    <span className="family-railNavLabel">{item.label}</span>
                   </NavLink>
                 </li>
               );

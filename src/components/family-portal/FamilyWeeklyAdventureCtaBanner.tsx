@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { familyPortalPath } from '../../lib/familyPortalPaths';
 import B4CircleAvatar from '../b4/B4CircleAvatar';
 
-export default function FamilyWeeklyAdventureCtaBanner() {
+export default function FamilyWeeklyAdventureCtaBanner({ childName }: { childName?: string | null }) {
   const location = useLocation();
   const adventuresPath = familyPortalPath('weekly-adventures', location.pathname);
 
@@ -12,13 +12,13 @@ export default function FamilyWeeklyAdventureCtaBanner() {
       <div className="family-weeklyAdventureCtaInner">
         <div className="family-weeklyAdventureCtaCopy">
           <h2 id="family-weekly-adventure-cta-title" className="family-weeklyAdventureCtaTitle">
-            Play This Week&apos;s Challenge
+            READY FOR AN ADVENTURE?
           </h2>
           <p className="family-weeklyAdventureCtaText">
-            Start your Focus Flame adventure and earn rewards.
+            Continue {childName?.trim() || 'your child'}&apos;s Focus Flame journey.
           </p>
           <Link to={adventuresPath} className="family-weeklyAdventureCtaBtn">
-            Go to Weekly Adventures
+            Play Adventures
           </Link>
         </div>
         <div className="family-weeklyAdventureCtaArt" aria-hidden="true">

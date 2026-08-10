@@ -95,6 +95,7 @@ export function isFamilyNestedRoute(pathname: string, basePath: string): boolean
     '/certificates',
     '/guide',
     '/parent-corner',
+    '/parents-corner',
     '/characters',
     '/inventory',
     '/collections',
@@ -127,6 +128,9 @@ export function resolvePortalNavId(
   if (pathname.startsWith(`${basePath}/guide`)) {
     return 'guide';
   }
+  if (pathname.startsWith(`${basePath}/parents-corner`)) {
+    return 'guide';
+  }
 
   const segments: Array<{ id: FamilySidebarNavId; segment: string; exact?: boolean }> = [
     { id: 'overview', segment: basePath, exact: true },
@@ -141,6 +145,7 @@ export function resolvePortalNavId(
     { id: 'certificates', segment: `${basePath}/certificates` },
     { id: 'guide', segment: `${basePath}/guide` },
     { id: 'guide', segment: `${basePath}/parent-corner` },
+    { id: 'guide', segment: `${basePath}/parents-corner` },
   ];
 
   const match = segments.find((item) =>
@@ -183,7 +188,10 @@ export function resolvePortalPageTitle(pathname: string, basePath = resolveFamil
       : "Dr. Victoria\u2019s Understanding Different Minds";
   }
   if (pathname.startsWith(`${basePath}/guide`)) {
-    return 'Parent Corner';
+    return 'Parents Corner';
+  }
+  if (pathname.startsWith(`${basePath}/parents-corner`)) {
+    return 'Parents Corner';
   }
   if (pathname.includes('/adult-assessment/baseline')) {
     return 'Adult Baseline Assessment';

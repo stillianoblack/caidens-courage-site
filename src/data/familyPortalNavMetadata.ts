@@ -17,13 +17,13 @@ export type FamilySidebarNavId =
   | 'guide';
 
 export const FAMILY_NAV_TITLE: Record<FamilySidebarNavId, string> = {
-  overview: 'Home',
+  overview: 'Headquarters',
   results: 'Results',
-  'continue-learning': 'Weekly Adventures',
-  'character-hub': 'Character Hub',
+  'continue-learning': 'Play Adventures',
+  'character-hub': 'Characters',
   inventory: 'Collections',
   downloads: 'Parent Resources',
   gallery: 'Gallery',
   certificates: 'Certificates',
-  guide: 'Parent Corner',
+  guide: 'Parents Corner',
 };
