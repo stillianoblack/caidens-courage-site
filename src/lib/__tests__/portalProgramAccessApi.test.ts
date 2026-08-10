@@ -49,6 +49,28 @@ describe('portal program access client', () => {
     })).resolves.toEqual({ status: 'invalid_credential' });
   });
 
+  test('forwards the explicit server-side parent claim action', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        role: 'family',
+        program: { programCode: 'FAMILY-ABC123', programName: 'Trace Family' },
+      }),
+    });
+
+    await fetchPortalProgramAccess({
+      accessCode: 'CLAIM-ABCD-EFGH',
+      intent: 'parent',
+      credential: 'parent@example.com',
+      completeParentClaim: true,
+    });
+
+    const request = fetchMock.mock.calls[0][1];
+    expect(JSON.parse(request.body)).toMatchObject({ completeParentClaim: true });
+  });
+
   test('maps an unknown code to not found when the optional alias layer is unavailable', async () => {
     fetchMock.mockResolvedValue({
       ok: false,

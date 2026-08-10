@@ -63,7 +63,12 @@ export async function lookupPilotProgramByAccessCode(
 /** Supabase-only lookup — never falls back to browser-stored programs. */
 export async function lookupPilotProgramByAccessCodeDetailed(
   rawCode: string,
-  options: { intent?: PortalProgramAccessIntent; credential?: string; rememberDevice?: boolean } = {},
+  options: {
+    intent?: PortalProgramAccessIntent;
+    credential?: string;
+    rememberDevice?: boolean;
+    completeParentClaim?: boolean;
+  } = {},
 ): Promise<PilotProgramLookupResponse> {
   const normalized = normalizePilotAccessCode(rawCode);
   if (!normalized) return { status: 'not_found', result: null };
@@ -72,6 +77,7 @@ export async function lookupPilotProgramByAccessCodeDetailed(
     intent: options.intent,
     credential: options.credential,
     rememberDevice: options.rememberDevice,
+    completeParentClaim: options.completeParentClaim,
   });
   const response: PilotProgramLookupResponse =
     lookup.status === 'found'
