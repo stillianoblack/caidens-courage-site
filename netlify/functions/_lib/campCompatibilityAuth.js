@@ -338,6 +338,7 @@ async function inviteParentForCamp(supabase, programCode, input) {
     parent_email: parentEmail,
     parent_first_name: parentFirstName,
     parent_last_name: parentLastName,
+    family_program_code: null,
     relationship: 'parent',
     parent_claimed: false,
   };

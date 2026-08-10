@@ -177,7 +177,10 @@ async function completeParentClaim(supabase, result, claimCode, parentEmail) {
   }
   if (!link) return { status: 403, code: 'credential_not_connected' };
 
-  const familyProgramCode = safeText(link.family_program_code, 120) || parentFamilyProgramCode(parentEmail);
+  // A re-invited student link may still reference the previous recipient's
+  // private family program. The current, verified invite email determines the
+  // family account; never exchange a new invite for an older parent's account.
+  const familyProgramCode = parentFamilyProgramCode(parentEmail);
   let { data: familyProgram, error: familyLookupError } = await supabase
     .from('pilot_programs')
     .select('*')
