@@ -25,6 +25,19 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+async function buildParentInviteDeliveryKey(
+  participantId: string,
+  parentEmail: string,
+): Promise<string> {
+  const normalizedEmail = parentEmail.trim().toLowerCase();
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalizedEmail));
+  const recipientHash = Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  return `participant:${participantId}:parent-welcome:${recipientHash}`;
+}
+
 export async function inviteParentForStudent(
   input: InviteParentForStudentInput,
 ): Promise<InviteParentForStudentResult> {
@@ -74,6 +87,7 @@ export async function inviteParentForStudent(
       },
     });
 
+    const deliveryEventKey = await buildParentInviteDeliveryKey(participantId, parentEmail);
     const emailResult = await queueWelcomeEmail({
       parentEmail,
       parentFirstName: input.parentFirstName,
@@ -84,7 +98,7 @@ export async function inviteParentForStudent(
       templateType: 'camp_parent',
       programType: 'Camp / Youth Program',
       recipientRole: 'parent_guardian',
-      deliveryEventKey: `participant:${participantId}:parent-welcome`,
+      deliveryEventKey,
       relatedStudentId: participantId,
       relatedProgramId: programCode,
     });
