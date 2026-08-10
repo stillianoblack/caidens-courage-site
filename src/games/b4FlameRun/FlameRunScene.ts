@@ -5,6 +5,11 @@ import { FLAME_RUN_EVENTS, type FlameRunHud, type FlameRunResult } from './types
 const WIDTH = 1200;
 const HEIGHT = 675;
 const FLOOR_Y = 548;
+const PLAYER_WIDTH = 108;
+const PLAYER_HEIGHT = 60;
+const SLIDE_WIDTH = 116;
+const SLIDE_HEIGHT = 40;
+const JUMP_DURATION = 760;
 const BEST_SCORE_KEY = 'b4-flame-run:best-score';
 
 type MovingBody = Phaser.Physics.Arcade.Image & { kind?: string };
@@ -14,6 +19,7 @@ export default class FlameRunScene extends Phaser.Scene {
   private ground!: Phaser.GameObjects.TileSprite;
   private foreground!: Phaser.GameObjects.TileSprite;
   private aura!: Phaser.GameObjects.Arc;
+  private groundShadow!: Phaser.GameObjects.Ellipse;
   private layers: { sprite: Phaser.GameObjects.TileSprite; factor: number }[] = [];
   private obstacles!: Phaser.Physics.Arcade.Group;
   private flames!: Phaser.Physics.Arcade.Group;
@@ -60,10 +66,11 @@ export default class FlameRunScene extends Phaser.Scene {
     this.createWorld();
     this.obstacles = this.physics.add.group({ allowGravity: false, immovable: true });
     this.flames = this.physics.add.group({ allowGravity: false, immovable: true });
-    this.player = this.physics.add.sprite(330, FLOOR_Y - 56, 'run-b4').setDisplaySize(174, 112).setDepth(15);
+    this.groundShadow = this.add.ellipse(300, FLOOR_Y + 4, 82, 18, 0x020914, .3).setDepth(13);
+    this.player = this.physics.add.sprite(300, FLOOR_Y - PLAYER_HEIGHT / 2, 'run-b4').setOrigin(.5).setDisplaySize(PLAYER_WIDTH, PLAYER_HEIGHT).setDepth(15);
     this.player.setCollideWorldBounds(true).setGravityY(1550);
-    this.setPlayerBody(132, 66, 20, 40);
-    this.aura = this.add.circle(this.player.x, this.player.y, 82, 0xffd65a, 0).setDepth(14).setBlendMode(Phaser.BlendModes.ADD);
+    this.setPlayerBodyWorld(82, 42, 13, 14);
+    this.aura = this.add.circle(this.player.x, this.player.y, 50, 0xffd65a, 0).setDepth(14).setBlendMode(Phaser.BlendModes.ADD);
     this.physics.add.collider(this.player, this.ground);
     this.physics.add.overlap(this.player, this.flames, (_player, flame) => this.collect(flame as MovingBody));
     this.physics.add.overlap(this.player, this.obstacles, (_player, obstacle) => this.hit(obstacle as MovingBody));
@@ -102,12 +109,16 @@ export default class FlameRunScene extends Phaser.Scene {
       body.body?.updateFromGameObject();
       if (body.x < -120) body.destroy();
     });
-    const grounded = Boolean(this.player.body?.blocked.down || this.player.body?.touching.down) && this.player.y > FLOOR_Y - 85;
-    if (!grounded) this.player.angle = (this.player.angle + delta * .48) % 360;
+    const grounded = Boolean(this.player.body?.blocked.down || this.player.body?.touching.down) && this.player.y > FLOOR_Y - 70;
     if (grounded && !this.wasGrounded) this.land();
-    if (grounded && !this.sliding) this.player.angle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.player.angle), 0, .12) * Phaser.Math.RAD_TO_DEG;
+    if (grounded) {
+      this.player.y = FLOOR_Y - (this.sliding ? SLIDE_HEIGHT : PLAYER_HEIGHT) / 2;
+      if (!this.sliding) this.player.setAngle(0);
+    }
     this.wasGrounded = grounded;
     this.aura.setPosition(this.player.x, this.player.y);
+    const altitude = Phaser.Math.Clamp((FLOOR_Y - (this.player.y + this.player.displayHeight / 2)) / 112, 0, 1);
+    this.groundShadow.setPosition(this.player.x, FLOOR_Y + 4).setScale(1 - altitude * .34, 1 - altitude * .18).setAlpha(.3 - altitude * .18);
     if (time - this.lastSpawn > Math.max(1050, 1900 - speed)) {
       this.spawnPattern();
       this.lastSpawn = time;
@@ -174,7 +185,11 @@ export default class FlameRunScene extends Phaser.Scene {
     const body = this.player.body as Phaser.Physics.Arcade.Body;
     if (body.blocked.down || body.touching.down || this.player.y > FLOOR_Y - 88) {
       this.endSlide();
-      this.player.setVelocityY(-660);
+      this.tweens.killTweensOf(this.player);
+      this.player.setAngle(0).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .94);
+      this.tweens.add({ targets: this.player, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 105, ease: 'Quad.Out' });
+      this.tweens.add({ targets: this.player, angle: 360, duration: JUMP_DURATION, ease: 'Sine.InOut' });
+      this.player.setVelocityY(-590);
       this.player.angle = 0;
     }
   }
@@ -182,30 +197,32 @@ export default class FlameRunScene extends Phaser.Scene {
   private slide(): void {
     if (!this.started || this.ended || this.sliding) return;
     this.sliding = true;
-    this.player.setAngle(12).setDisplaySize(190, 76);
-    this.tweens.add({ targets: this.player, x: 344, duration: 120, ease: 'Quad.Out' });
-    this.setPlayerBody(144, 42, 14, 62);
+    this.tweens.killTweensOf(this.player);
+    this.player.setY(FLOOR_Y - SLIDE_HEIGHT / 2).setAngle(11).setDisplaySize(SLIDE_WIDTH, SLIDE_HEIGHT);
+    this.tweens.add({ targets: this.player, x: 310, duration: 120, ease: 'Quad.Out' });
+    this.setPlayerBodyWorld(92, 28, 12, 10);
     this.time.delayedCall(760, () => this.endSlide());
   }
 
   private endSlide(): void {
     if (!this.sliding) return;
     this.sliding = false;
-    this.player.setDisplaySize(174, 112).setAngle(0);
-    this.tweens.add({ targets: this.player, x: 330, duration: 150, ease: 'Quad.Out' });
-    this.setPlayerBody(132, 66, 20, 40);
+    this.player.setY(FLOOR_Y - PLAYER_HEIGHT / 2).setDisplaySize(PLAYER_WIDTH, PLAYER_HEIGHT).setAngle(0);
+    this.tweens.add({ targets: this.player, x: 300, duration: 150, ease: 'Quad.Out' });
+    this.setPlayerBodyWorld(82, 42, 13, 14);
   }
 
-  private setPlayerBody(width: number, height: number, offsetX: number, offsetY: number): void {
+  private setPlayerBodyWorld(width: number, height: number, offsetX: number, offsetY: number): void {
     const body = this.player.body as Phaser.Physics.Arcade.Body;
-    body.setSize(width, height).setOffset(offsetX, offsetY);
+    body.setSize(width / this.player.scaleX, height / this.player.scaleY)
+      .setOffset(offsetX / this.player.scaleX, offsetY / this.player.scaleY);
   }
 
   private spawnPattern(): void {
     const pattern = this.nextPattern++ % 4;
-    if (pattern === 0) { this.spawnObstacle('log', FLOOR_Y - 38, 112, 72); this.spawnFlameArc(FLOOR_Y - 130); }
-    if (pattern === 1) { this.spawnObstacle('branch', FLOOR_Y - 146, 170, 60); this.spawnFlameLine(FLOOR_Y - 58); }
-    if (pattern === 2) { this.spawnObstacle('crystal', FLOOR_Y - 50, 78, 98); this.spawnFlameArc(FLOOR_Y - 165); }
+    if (pattern === 0) { this.spawnObstacle('log', FLOOR_Y - 22, 72, 44); this.spawnFlameArc(FLOOR_Y - 90); }
+    if (pattern === 1) { this.spawnObstacle('branch', FLOOR_Y - 68, 110, 42); this.spawnFlameLine(FLOOR_Y - 28); }
+    if (pattern === 2) { this.spawnObstacle('crystal', FLOOR_Y - 31, 50, 62); this.spawnFlameArc(FLOOR_Y - 112); }
     if (pattern === 3) { this.spawnFlameZigzag(); }
   }
 
@@ -248,7 +265,7 @@ export default class FlameRunScene extends Phaser.Scene {
     this.player.setTexture('run-b4-hurt');
     this.sound.play('run-hit', { volume: .24 });
     this.cameras.main.shake(180, .007);
-    this.tweens.add({ targets: this.player, x: 306, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => this.player.setX(330).setAlpha(1).setTexture('run-b4') });
+    this.tweens.add({ targets: this.player, x: 282, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => this.player.setX(300).setAlpha(1).setTexture('run-b4') });
     obstacle.destroy();
     if (isRunOver(this.state)) this.finishRun();
   }
@@ -275,14 +292,15 @@ export default class FlameRunScene extends Phaser.Scene {
   private addThrusterTrail(mode: 'run' | 'slide' | 'focus'): void {
     const size = mode === 'focus' ? 26 : mode === 'slide' ? 20 : 11;
     const distance = mode === 'focus' ? 130 : mode === 'slide' ? 105 : 48;
-    const spark = this.add.image(this.player.x - 82, this.player.y + (this.sliding ? 22 : 30), 'run-flame').setDisplaySize(size, size * 1.3).setDepth(13).setAlpha(mode === 'run' ? .42 : .8).setTint(mode === 'focus' ? 0xffdc57 : 0xffb43b);
+    const spark = this.add.image(this.player.x - 52, FLOOR_Y - (this.sliding ? 4 : 9), 'run-flame').setDisplaySize(size, size * 1.3).setDepth(13).setAlpha(mode === 'run' ? .42 : .8).setTint(mode === 'focus' ? 0xffdc57 : 0xffb43b);
     this.tweens.add({ targets: spark, x: spark.x - distance, y: spark.y + Phaser.Math.Between(-7, 7), alpha: 0, duration: mode === 'focus' ? 460 : 320, onComplete: () => spark.destroy() });
   }
 
   private land(): void {
+    this.tweens.killTweensOf(this.player);
     this.player.angle = 0;
-    this.player.setDisplaySize(184, 98);
-    this.tweens.add({ targets: this.player, displayWidth: 174, displayHeight: 112, duration: 130, ease: 'Back.Out' });
+    this.player.setY(FLOOR_Y - PLAYER_HEIGHT * .93 / 2).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .93);
+    this.tweens.add({ targets: this.player, y: FLOOR_Y - PLAYER_HEIGHT / 2, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 130, ease: 'Back.Out' });
     for (let i = 0; i < 4; i += 1) {
       const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), FLOOR_Y - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
       this.tweens.add({ targets: spark, y: spark.y - Phaser.Math.Between(12, 28), x: spark.x - Phaser.Math.Between(8, 28), alpha: 0, duration: 240, onComplete: () => spark.destroy() });
