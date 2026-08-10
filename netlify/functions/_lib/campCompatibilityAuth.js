@@ -294,6 +294,73 @@ async function participantDirectoryForCamp(supabase, programCode) {
   };
 }
 
+async function inviteParentForCamp(supabase, programCode, input) {
+  const participantId = safeText(input.participantId, 80);
+  const parentEmail = safeText(input.parentEmail, 320).toLowerCase();
+  const parentFirstName = safeText(input.parentFirstName, 80) || null;
+  const parentLastName = safeText(input.parentLastName, 80) || 'Family';
+  if (!participantId || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) {
+    return { status: 400, code: 'validation_error' };
+  }
+
+  const { data: participant, error: participantError } = await supabase
+    .from('participants')
+    .select('id, role, program_code, first_name, nickname, family_claim_code')
+    .eq('id', participantId)
+    .maybeSingle();
+  if (participantError) return { status: 503, code: 'camp_participant_lookup_failed' };
+  if (!participant || participant.role !== 'student' || participant.program_code !== programCode) {
+    return { status: 403, code: 'camp_participant_mismatch' };
+  }
+
+  const familyClaimCode = safeText(participant.family_claim_code, 120) || generateFamilyClaimCode();
+  const participantUpdate = await supabase
+    .from('participants')
+    .update({
+      parent_connection_status: 'invited',
+      guardian_email: parentEmail,
+      family_claim_code: familyClaimCode,
+      family_claim_code_created_at: new Date().toISOString(),
+    })
+    .eq('id', participantId)
+    .eq('program_code', programCode);
+  if (participantUpdate.error) return { status: 503, code: 'parent_invite_participant_update_failed' };
+
+  const existingLink = await supabase
+    .from('student_family_links')
+    .select('id')
+    .eq('student_id', participantId)
+    .eq('camp_program_code', programCode)
+    .limit(1);
+  if (existingLink.error) return { status: 503, code: 'parent_invite_link_lookup_failed' };
+
+  const linkPayload = {
+    parent_email: parentEmail,
+    parent_first_name: parentFirstName,
+    parent_last_name: parentLastName,
+    relationship: 'parent',
+    parent_claimed: false,
+  };
+  const linkResult = existingLink.data?.[0]?.id
+    ? await supabase.from('student_family_links').update(linkPayload).eq('id', existingLink.data[0].id)
+    : await supabase.from('student_family_links').insert({
+        student_id: participantId,
+        camp_program_code: programCode,
+        family_program_code: null,
+        parent_phone: null,
+        ...linkPayload,
+      });
+  if (linkResult.error) return { status: 503, code: 'parent_invite_link_update_failed' };
+
+  return {
+    participantId,
+    childName: safeText(participant.nickname, 80) || safeText(participant.first_name, 80) || 'Student',
+    familyClaimCode,
+    familyClaimUrl: `/portal?code=${encodeURIComponent(familyClaimCode)}&audience=parents&claim=1`,
+    parentConnectionStatus: 'invited',
+  };
+}
+
 async function sessionForCamp(supabase, sessionId, program) {
   const { data, error } = await supabase
     .from('kid_play_sessions')
@@ -318,6 +385,7 @@ module.exports = {
   CAMP_SESSION_SOURCES,
   authorizeCampProgram,
   createParticipantForCamp,
+  inviteParentForCamp,
   participantDirectoryForCamp,
   participantForCamp,
   normalizeParticipantPinStatus,

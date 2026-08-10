@@ -1,13 +1,6 @@
-import { ensureStudentAccessReady } from './ensureStudentAccessReady';
-import {
-  backfillStudentFamilyLinkParentContact,
-  ensureCampStudentFamilyLink,
-  fetchParticipantsByIds,
-} from './studentFamilyLinkService';
+import { inviteCampCompatibilityParent } from './campChildSessionApi';
 import { trackKitParentSignup } from './kitIntegration';
 import type { ParentConnectionStatus } from './studentPinService';
-import { resolveStudentDisplayNameOrFallback } from './studentDisplayName';
-import { isSupabaseConfigured, supabase } from './supabaseClient';
 import { queueWelcomeEmail } from './welcomeEmailService';
 
 export type InviteParentForStudentInput = {
@@ -46,53 +39,28 @@ export async function inviteParentForStudent(
     return { success: false, message: 'Missing student or program.' };
   }
 
-  const ready = await ensureStudentAccessReady({
-    participantId,
-    programCodeHint: campProgramCode,
-  });
-  if (!ready.success) {
-    return { success: false, message: ready.error };
+  let invite;
+  try {
+    invite = await inviteCampCompatibilityParent({
+      participantId,
+      parentEmail,
+      parentFirstName: input.parentFirstName,
+      parentLastName: input.parentLastName,
+    });
+  } catch (caught) {
+    const error = caught as Error & { correlationId?: string | null };
+    return {
+      success: false,
+      message: error.correlationId
+        ? `B-4 couldn't connect this parent yet. Support code: ${error.correlationId.slice(0, 8)}.`
+        : "B-4 couldn't connect this parent yet. Please try again.",
+    };
   }
 
-  const programCode = ready.access.programCode;
-
-  const ensureLink = await ensureCampStudentFamilyLink({ studentId: participantId, campProgramCode: programCode });
-  if (!ensureLink.success || !ensureLink.link) {
-    return { success: false, message: ensureLink.error ?? 'Could not prepare family link.' };
-  }
-
-  const backfill = await backfillStudentFamilyLinkParentContact({
-    linkId: ensureLink.link.id,
-    parentEmail,
-    parentFirstName: input.parentFirstName,
-    parentLastName: input.parentLastName || 'Family',
-  });
-
-  if (!backfill.success) {
-    return { success: false, message: backfill.error ?? 'Could not save parent email.' };
-  }
-
-  const familyClaimCode = ready.access.familyClaimCode ?? undefined;
-  const familyClaimUrl = ready.access.familyClaimUrl ?? undefined;
-
-  if (isSupabaseConfigured() && supabase) {
-    await supabase
-      .from('participants')
-      .update({
-        parent_connection_status: 'invited',
-        guardian_email: parentEmail,
-      })
-      .eq('id', participantId);
-  }
-
-  const { participants } = await fetchParticipantsByIds([participantId]);
-  const participant = participants[0];
-  const childName = participant
-    ? resolveStudentDisplayNameOrFallback(
-        { nickname: participant.nickname, first_name: participant.first_name },
-        'Student',
-      )
-    : 'Student';
+  const programCode = campProgramCode;
+  const familyClaimCode = invite.familyClaimCode;
+  const familyClaimUrl = invite.familyClaimUrl;
+  const childName = invite.childName;
 
   let welcomeEmailSkipped = false;
   if (input.sendWelcomeEmail !== false) {

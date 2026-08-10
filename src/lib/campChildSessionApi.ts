@@ -42,6 +42,15 @@ export type CampParticipantCreateResult = {
   correlationId: string | null;
 };
 
+export type CampParentInviteResult = {
+  participantId: string;
+  childName: string;
+  familyClaimCode: string;
+  familyClaimUrl: string;
+  parentConnectionStatus: 'invited';
+  correlationId: string | null;
+};
+
 export function campCompatibilityHeaders(sessionId?: string | null): Record<string, string> {
   const program = readActivePilotProgram();
   if (
@@ -144,6 +153,31 @@ export async function createCampCompatibilityParticipant(input: {
   }
   return {
     ...(body.participant as Omit<CampParticipantCreateResult, 'correlationId'>),
+    correlationId: response.headers.get('X-Correlation-Id') || body?.correlationId || null,
+  };
+}
+
+export async function inviteCampCompatibilityParent(input: {
+  participantId: string;
+  parentEmail: string;
+  parentFirstName?: string;
+  parentLastName?: string;
+}): Promise<CampParentInviteResult> {
+  const response = await fetch('/.netlify/functions/family-child-session', {
+    method: 'POST',
+    credentials: 'include',
+    headers: campCompatibilityHeaders(),
+    body: JSON.stringify({ action: 'invite-parent', ...input }),
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok || !body?.success || !body?.invite?.participantId) {
+    const error = new Error(body?.code || 'camp_parent_invite_failed') as CampChildSessionError;
+    error.status = response.status;
+    error.correlationId = response.headers.get('X-Correlation-Id') || body?.correlationId || null;
+    throw error;
+  }
+  return {
+    ...(body.invite as Omit<CampParentInviteResult, 'correlationId'>),
     correlationId: response.headers.get('X-Correlation-Id') || body?.correlationId || null,
   };
 }

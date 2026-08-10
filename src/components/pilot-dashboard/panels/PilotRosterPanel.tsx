@@ -291,20 +291,9 @@ export default function PilotRosterPanel({ programCode, loading: externalLoading
       setInviteParentSubmitting(true);
       setInviteParentError(null);
 
-      const ready = await ensureStudentAccessReady({
-        participantId: ctx.participantId,
-        programCodeHint: ctx.programCode,
-        displayNameHint: ctx.childName,
-      });
-      if (!ready.success) {
-        setInviteParentSubmitting(false);
-        setInviteParentError(ready.error);
-        return;
-      }
-
       const result = await inviteParentForStudent({
         participantId: ctx.participantId,
-        campProgramCode: ready.access.programCode,
+        campProgramCode: ctx.programCode,
         parentEmail: input.parentEmail,
         parentFirstName: input.parentFirstName,
         parentLastName: input.parentLastName,

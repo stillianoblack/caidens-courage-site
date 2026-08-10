@@ -7,6 +7,7 @@ const {
 const {
   authorizeCampProgram,
   createParticipantForCamp,
+  inviteParentForCamp,
   participantDirectoryForCamp,
   participantForCamp,
   sessionForCamp,
@@ -442,6 +443,20 @@ exports.handler = async (event) => {
         participantId: suffix(created.participantId),
       });
       return json(201, { success: true, participant: created }, id);
+    }
+    if (mode === 'camp' && body.action === 'invite-parent') {
+      const invited = await inviteParentForCamp(supabase, program.program_code, body);
+      if (!invited.participantId) {
+        return json(invited.status || 503, { success: false, code: invited.code }, id);
+      }
+      console.info('[FAMILY_CHILD_SESSION]', {
+        correlationId: id,
+        action: 'invite_parent',
+        result: 'success',
+        programId: suffix(program.id),
+        participantId: suffix(invited.participantId),
+      });
+      return json(200, { success: true, invite: invited }, id);
     }
     const participantId = safeText(body.participantId, 80);
     if (!UUID.test(participantId)) {
