@@ -27,9 +27,10 @@ describe('B-4 Flame Run state', () => {
   });
 
   test('increases difficulty smoothly and caps speed', () => {
-    expect(scrollSpeedFor(0)).toBe(300);
-    expect(scrollSpeedFor(48)).toBe(364);
-    expect(scrollSpeedFor(999)).toBe(590);
+    expect(scrollSpeedFor(0)).toBe(355);
+    expect(scrollSpeedFor(30)).toBe(387);
+    expect(scrollSpeedFor(60)).toBe(419);
+    expect(scrollSpeedFor(90)).toBe(451);
+    expect(scrollSpeedFor(999)).toBe(660);
   });
 });
-

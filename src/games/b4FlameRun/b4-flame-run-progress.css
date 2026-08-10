@@ -1,0 +1,37 @@
+.b4run-progress {
+  position: absolute;
+  z-index: 22;
+  top: 17px;
+  left: 50%;
+  width: min(34%, 360px);
+  height: 10px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(3, 12, 25, 0.72);
+}
+
+.b4run-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f2b33c, #ffe478);
+  box-shadow: 0 0 14px rgba(255, 210, 75, 0.65);
+  transition: width 0.3s linear;
+}
+
+.b4run-progress strong {
+  position: absolute;
+  left: calc(100% + 9px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.b4run-hud--score { top: 42px; }
+
+@media (max-width: 800px) {
+  .b4run-progress { top: 12px; width: 28%; }
+  .b4run-hud--score { top: 36px; }
+}

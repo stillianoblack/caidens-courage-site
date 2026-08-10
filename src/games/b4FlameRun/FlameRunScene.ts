@@ -10,9 +10,11 @@ const PLAYER_HEIGHT = 60;
 const SLIDE_WIDTH = 116;
 const SLIDE_HEIGHT = 40;
 const JUMP_DURATION = 760;
+const MILESTONE_SECONDS = 100;
 const BEST_SCORE_KEY = 'b4-flame-run:best-score';
 
 type MovingBody = Phaser.Physics.Arcade.Image & { kind?: string };
+type Zone = 1 | 2 | 3;
 
 export default class FlameRunScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -23,6 +25,12 @@ export default class FlameRunScene extends Phaser.Scene {
   private layers: { sprite: Phaser.GameObjects.TileSprite; factor: number }[] = [];
   private obstacles!: Phaser.Physics.Arcade.Group;
   private flames!: Phaser.Physics.Arcade.Group;
+  private platforms!: Phaser.Physics.Arcade.Group;
+  private zoneBackground!: Phaser.GameObjects.Image;
+  private zoneTint!: Phaser.GameObjects.Rectangle;
+  private zone: Zone = 1;
+  private supportY = FLOOR_Y;
+  private milestoneShown = false;
   private state: FlameRunState = createFlameRunState();
   private started = false;
   private ended = false;
@@ -44,9 +52,7 @@ export default class FlameRunScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image('run-b4', '/images/B-4FlightGame/Idle/Idle@2x-transparent.png');
-    this.load.image('run-b4-hurt', '/images/B-4FlightGame/Hurt/Hurt@2x.png');
     this.load.image('run-flame', '/images/icons/FocusFlameIcon/focus-flame-transparent.png');
-    this.load.image('run-log', '/images/B-4FlightGame/logs/logos@2x.png');
     this.load.image('run-cloud', '/images/B-4FlightGame/Clouds/Cloud@2x.png');
     this.load.image('run-base', '/images/B-4FlightGame/background/GameplayBackgrounds.webp');
     this.load.image('run-sky', '/images/B-4FlightGame/background/layers/sky.png');
@@ -56,6 +62,8 @@ export default class FlameRunScene extends Phaser.Scene {
     this.load.image('run-trees-mid', '/images/B-4FlightGame/background/layers/trees_mid.png');
     this.load.image('run-fog', '/images/B-4FlightGame/background/layers/fog.png');
     this.load.image('run-leaves', '/images/B-4FlightGame/background/layers/forground_leaves.png');
+    this.load.image('run-caverns', '/images/characters/thecave_block_image.webp');
+    this.load.image('run-dragon-nest', '/images/focus-flame-lab/theceremony_block_image.webp');
     this.load.audio('run-pickup', '/audio/b4/flame-tap-1.mp3');
     this.load.audio('run-start-sfx', '/audio/b4/flame-start.mp3');
     this.load.audio('run-hit', '/audio/b4/b4-pause.mp3');
@@ -64,14 +72,17 @@ export default class FlameRunScene extends Phaser.Scene {
 
   create(): void {
     this.createWorld();
+    this.createGameplayTextures();
     this.obstacles = this.physics.add.group({ allowGravity: false, immovable: true });
     this.flames = this.physics.add.group({ allowGravity: false, immovable: true });
+    this.platforms = this.physics.add.group({ allowGravity: false, immovable: true });
     this.groundShadow = this.add.ellipse(300, FLOOR_Y + 4, 82, 18, 0x020914, .3).setDepth(13);
     this.player = this.physics.add.sprite(300, FLOOR_Y - PLAYER_HEIGHT / 2, 'run-b4').setOrigin(.5).setDisplaySize(PLAYER_WIDTH, PLAYER_HEIGHT).setDepth(15);
     this.player.setCollideWorldBounds(true).setGravityY(1550);
     this.setPlayerBodyWorld(82, 42, 13, 14);
     this.aura = this.add.circle(this.player.x, this.player.y, 50, 0xffd65a, 0).setDepth(14).setBlendMode(Phaser.BlendModes.ADD);
     this.physics.add.collider(this.player, this.ground);
+    this.physics.add.collider(this.player, this.platforms, undefined, (_player, platform) => this.canLandOnPlatform(platform as MovingBody), this);
     this.physics.add.overlap(this.player, this.flames, (_player, flame) => this.collect(flame as MovingBody));
     this.physics.add.overlap(this.player, this.obstacles, (_player, obstacle) => this.hit(obstacle as MovingBody));
 
@@ -100,25 +111,28 @@ export default class FlameRunScene extends Phaser.Scene {
     if (!this.started || this.ended || this.paused) return;
     const elapsed = (time - this.startedAt) / 1000;
     const speed = scrollSpeedFor(elapsed);
+    const nextZone: Zone = elapsed >= 65 ? 3 : elapsed >= 30 ? 2 : 1;
+    if (nextZone !== this.zone) this.transitionZone(nextZone);
     this.layers.forEach(({ sprite, factor }) => { sprite.tilePositionX += speed * factor * delta / 1000; });
     this.ground.tilePositionX += speed * delta / 1000;
     this.foreground.tilePositionX += speed * 1.18 * delta / 1000;
-    [...this.obstacles.getChildren(), ...this.flames.getChildren()].forEach((child) => {
+    [...this.obstacles.getChildren(), ...this.flames.getChildren(), ...this.platforms.getChildren()].forEach((child) => {
       const body = child as MovingBody;
       body.x -= speed * delta / 1000;
       body.body?.updateFromGameObject();
-      if (body.x < -120) body.destroy();
+      if (body.x < -360) body.destroy();
     });
-    const grounded = Boolean(this.player.body?.blocked.down || this.player.body?.touching.down) && this.player.y > FLOOR_Y - 70;
+    const grounded = Boolean(this.player.body?.blocked.down || this.player.body?.touching.down);
+    if (grounded) this.supportY = this.findSupportingSurfaceY();
     if (grounded && !this.wasGrounded) this.land();
     if (grounded) {
-      this.player.y = FLOOR_Y - (this.sliding ? SLIDE_HEIGHT : PLAYER_HEIGHT) / 2;
+      this.player.y = this.supportY - (this.sliding ? SLIDE_HEIGHT : PLAYER_HEIGHT) / 2;
       if (!this.sliding) this.player.setAngle(0);
     }
     this.wasGrounded = grounded;
     this.aura.setPosition(this.player.x, this.player.y);
-    const altitude = Phaser.Math.Clamp((FLOOR_Y - (this.player.y + this.player.displayHeight / 2)) / 112, 0, 1);
-    this.groundShadow.setPosition(this.player.x, FLOOR_Y + 4).setScale(1 - altitude * .34, 1 - altitude * .18).setAlpha(.3 - altitude * .18);
+    const altitude = Phaser.Math.Clamp((this.supportY - (this.player.y + this.player.displayHeight / 2)) / 112, 0, 1);
+    this.groundShadow.setPosition(this.player.x, this.supportY + 4).setScale(1 - altitude * .34, 1 - altitude * .18).setAlpha(.3 - altitude * .18);
     if (time - this.lastSpawn > Math.max(1050, 1900 - speed)) {
       this.spawnPattern();
       this.lastSpawn = time;
@@ -135,12 +149,15 @@ export default class FlameRunScene extends Phaser.Scene {
       this.lastTrailAt = time;
     }
     if (time - this.lastHud > 100) { this.emitHud(focusMode ? 'B-4: Focus Mode!' : this.messageForStreak()); this.lastHud = time; }
+    if (!this.milestoneShown && elapsed >= MILESTONE_SECONDS) this.reachMilestone();
   }
 
   private createWorld(): void {
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x07172b);
     const base = this.add.tileSprite(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 'run-base').setDisplaySize(WIDTH, HEIGHT).setDepth(0);
     this.layers.push({ sprite: base, factor: .025 });
+    this.zoneBackground = this.add.image(WIDTH / 2, HEIGHT / 2, 'run-base').setDisplaySize(WIDTH, HEIGHT).setDepth(1).setAlpha(0);
+    this.zoneTint = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x07172b, 0).setDepth(7);
     this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x06172c, .2).setDepth(8);
     this.createTerrainTextures();
     this.ground = this.add.tileSprite(WIDTH / 2, FLOOR_Y + 64, WIDTH, 128, 'run-ground').setDepth(10);
@@ -172,6 +189,44 @@ export default class FlameRunScene extends Phaser.Scene {
     }
   }
 
+  private createGameplayTextures(): void {
+    if (!this.textures.exists('run-platform')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0x172f44).fillRoundedRect(0, 0, 360, 54, 8);
+      graphics.fillStyle(0x6ecfe2, .72).fillRoundedRect(0, 0, 360, 8, 5);
+      graphics.lineStyle(2, 0x355f78, .9).strokeRoundedRect(1, 1, 358, 52, 8);
+      for (let x = 18; x < 350; x += 52) graphics.fillStyle(0x0c2133, .85).fillTriangle(x, 45, x + 18, 20, x + 36, 45);
+      graphics.generateTexture('run-platform', 360, 54).destroy();
+    }
+    if (!this.textures.exists('run-log-clean')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0x51351f).fillRoundedRect(3, 9, 90, 34, 16);
+      graphics.fillStyle(0x9a6538).fillEllipse(84, 26, 22, 34);
+      graphics.lineStyle(3, 0xd59a55, .75).strokeEllipse(84, 26, 12, 22);
+      graphics.lineStyle(3, 0x2d251b, .9).lineBetween(16, 13, 65, 39);
+      graphics.generateTexture('run-log-clean', 96, 52).destroy();
+    }
+    if (!this.textures.exists('run-crystal-clean')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0x58cbea, .92).fillTriangle(0, 64, 19, 5, 34, 64);
+      graphics.fillStyle(0xb7f2ff, .9).fillTriangle(15, 64, 30, 18, 48, 64);
+      graphics.lineStyle(2, 0xe8fbff, .85).lineBetween(19, 5, 15, 64);
+      graphics.generateTexture('run-crystal-clean', 50, 66).destroy();
+    }
+    if (!this.textures.exists('run-root-clean')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.lineStyle(13, 0x563922, 1).lineBetween(2, 42, 30, 10).lineBetween(30, 10, 60, 30).lineBetween(60, 30, 84, 44).lineBetween(84, 44, 112, 10);
+      graphics.lineStyle(4, 0xb17a40, .7).lineBetween(2, 38, 30, 7).lineBetween(30, 7, 60, 26).lineBetween(60, 26, 84, 40).lineBetween(84, 40, 112, 8);
+      graphics.generateTexture('run-root-clean', 116, 52).destroy();
+    }
+    if (!this.textures.exists('run-energy-hazard')) {
+      const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+      graphics.fillStyle(0xffa93a, .88).fillTriangle(0, 62, 18, 8, 34, 62).fillTriangle(25, 62, 44, 2, 62, 62);
+      graphics.lineStyle(3, 0xffe279, .95).lineBetween(18, 8, 0, 62).lineBetween(44, 2, 62, 62);
+      graphics.generateTexture('run-energy-hazard', 64, 64).destroy();
+    }
+  }
+
   private startRun(): void {
     if (this.started) return;
     this.started = true;
@@ -183,7 +238,7 @@ export default class FlameRunScene extends Phaser.Scene {
   private jump(): void {
     if (!this.started || this.ended) return;
     const body = this.player.body as Phaser.Physics.Arcade.Body;
-    if (body.blocked.down || body.touching.down || this.player.y > FLOOR_Y - 88) {
+    if (body.blocked.down || body.touching.down || this.player.y > this.supportY - 88) {
       this.endSlide();
       this.tweens.killTweensOf(this.player);
       this.player.setAngle(0).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .94);
@@ -198,7 +253,7 @@ export default class FlameRunScene extends Phaser.Scene {
     if (!this.started || this.ended || this.sliding) return;
     this.sliding = true;
     this.tweens.killTweensOf(this.player);
-    this.player.setY(FLOOR_Y - SLIDE_HEIGHT / 2).setAngle(11).setDisplaySize(SLIDE_WIDTH, SLIDE_HEIGHT);
+    this.player.setY(this.supportY - SLIDE_HEIGHT / 2).setAngle(11).setDisplaySize(SLIDE_WIDTH, SLIDE_HEIGHT);
     this.tweens.add({ targets: this.player, x: 310, duration: 120, ease: 'Quad.Out' });
     this.setPlayerBodyWorld(92, 28, 12, 10);
     this.time.delayedCall(760, () => this.endSlide());
@@ -207,7 +262,7 @@ export default class FlameRunScene extends Phaser.Scene {
   private endSlide(): void {
     if (!this.sliding) return;
     this.sliding = false;
-    this.player.setY(FLOOR_Y - PLAYER_HEIGHT / 2).setDisplaySize(PLAYER_WIDTH, PLAYER_HEIGHT).setAngle(0);
+    this.player.setY(this.supportY - PLAYER_HEIGHT / 2).setDisplaySize(PLAYER_WIDTH, PLAYER_HEIGHT).setAngle(0);
     this.tweens.add({ targets: this.player, x: 300, duration: 150, ease: 'Quad.Out' });
     this.setPlayerBodyWorld(82, 42, 13, 14);
   }
@@ -219,20 +274,87 @@ export default class FlameRunScene extends Phaser.Scene {
   }
 
   private spawnPattern(): void {
-    const pattern = this.nextPattern++ % 4;
-    if (pattern === 0) { this.spawnObstacle('log', FLOOR_Y - 22, 72, 44); this.spawnFlameArc(FLOOR_Y - 90); }
-    if (pattern === 1) { this.spawnObstacle('branch', FLOOR_Y - 68, 110, 42); this.spawnFlameLine(FLOOR_Y - 28); }
-    if (pattern === 2) { this.spawnObstacle('crystal', FLOOR_Y - 31, 50, 62); this.spawnFlameArc(FLOOR_Y - 112); }
-    if (pattern === 3) { this.spawnFlameZigzag(); }
+    const pattern = this.nextPattern++ % 8;
+    if (pattern === 0) { this.spawnObstacle(this.zone === 1 ? 'log' : 'crystal', FLOOR_Y - 24, 72, 48); this.spawnFlameArc(FLOOR_Y - 92); }
+    if (pattern === 1) { this.spawnObstacle('root', FLOOR_Y - 66, 112, 44); this.spawnFlameLine(FLOOR_Y - 26); }
+    if (pattern === 2) this.spawnPlatformSequence('low');
+    if (pattern === 3) { this.spawnObstacle(this.zone === 3 ? 'energy' : 'crystal', FLOOR_Y - 31, 56, 62); this.spawnFlameArc(FLOOR_Y - 116); }
+    if (pattern === 4) this.spawnPlatformSequence('medium');
+    if (pattern === 5) { this.spawnFlameZigzag(); }
+    if (pattern === 6) this.spawnPlatformSequence(this.zone === 1 ? 'long' : 'gap');
+    if (pattern === 7) this.spawnFlameLine(FLOOR_Y - 36);
   }
 
-  private spawnObstacle(kind: string, y: number, width: number, height: number): void {
-    const texture = kind === 'branch' ? 'run-log' : kind === 'crystal' ? 'run-flame' : 'run-log';
-    const obstacle = this.obstacles.create(WIDTH + 120, y, texture) as MovingBody;
+  private spawnObstacle(kind: string, y: number, width: number, height: number, x = WIDTH + 120): void {
+    const texture = kind === 'crystal' ? 'run-crystal-clean' : kind === 'root' ? 'run-root-clean' : kind === 'energy' ? 'run-energy-hazard' : 'run-log-clean';
+    const obstacle = this.obstacles.create(x, y, texture) as MovingBody;
     obstacle.kind = kind;
-    obstacle.setDisplaySize(width, height).setDepth(13).setTint(kind === 'crystal' ? 0x7bd8ff : kind === 'branch' ? 0x6f472c : 0xffffff);
-    if (kind === 'branch') obstacle.setAngle(180);
+    obstacle.setDisplaySize(width, height).setDepth(13);
+    if (kind === 'root') obstacle.setAngle(180);
     (obstacle.body as Phaser.Physics.Arcade.Body).setSize(width * .75, height * .7);
+  }
+
+  private spawnPlatformSequence(type: 'low' | 'medium' | 'long' | 'gap'): void {
+    const configs = type === 'low' ? [{ x: WIDTH + 160, top: FLOOR_Y - 72, width: 150 }]
+      : type === 'medium' ? [{ x: WIDTH + 170, top: FLOOR_Y - 118, width: 180 }]
+        : type === 'long' ? [{ x: WIDTH + 230, top: FLOOR_Y - 92, width: 360 }]
+          : [{ x: WIDTH + 130, top: FLOOR_Y - 92, width: 160 }, { x: WIDTH + 390, top: FLOOR_Y - 130, width: 180 }];
+    configs.forEach((config, index) => {
+      const platform = this.platforms.create(config.x, config.top + 27, 'run-platform') as MovingBody;
+      platform.kind = 'platform';
+      platform.setDisplaySize(config.width, 54).setDepth(12);
+      const body = platform.body as Phaser.Physics.Arcade.Body;
+      body.setSize(config.width / platform.scaleX, 12 / platform.scaleY).setOffset(0, 0);
+      const flameY = config.top - 45;
+      for (let flameIndex = 0; flameIndex < Math.max(2, Math.floor(config.width / 80)); flameIndex += 1) {
+        this.spawnFlame(config.x - config.width / 2 + 45 + flameIndex * 70, flameY - (index % 2) * 18);
+      }
+      if ((type === 'medium' || type === 'long') && index === 0) this.spawnObstacle('crystal', config.x + config.width * .25, config.top - 25, 42, 50);
+    });
+  }
+
+  private canLandOnPlatform(platform: MovingBody): boolean {
+    const body = this.player.body as Phaser.Physics.Arcade.Body;
+    const platformTop = platform.getBounds().top;
+    return body.velocity.y >= 0 && this.player.getBounds().bottom <= platformTop + 16;
+  }
+
+  private findSupportingSurfaceY(): number {
+    const playerBounds = this.player.getBounds();
+    let surface = FLOOR_Y;
+    this.platforms.getChildren().forEach((child) => {
+      const platform = child as MovingBody;
+      const bounds = platform.getBounds();
+      const horizontallyAligned = playerBounds.right > bounds.left + 8 && playerBounds.left < bounds.right - 8;
+      if (horizontallyAligned && Math.abs(playerBounds.bottom - bounds.top) < 24) surface = Math.min(surface, bounds.top);
+    });
+    return surface;
+  }
+
+  private transitionZone(zone: Zone): void {
+    this.zone = zone;
+    const texture = zone === 2 ? 'run-caverns' : 'run-dragon-nest';
+    const tint = zone === 2 ? 0x24164d : 0x5a2c12;
+    const incoming = this.add.image(WIDTH / 2, HEIGHT / 2, texture).setDisplaySize(WIDTH, HEIGHT).setDepth(2).setAlpha(0);
+    this.tweens.add({ targets: incoming, alpha: .72, duration: 1600, ease: 'Sine.InOut', onComplete: () => {
+      this.zoneBackground.setTexture(texture).setDisplaySize(WIDTH, HEIGHT).setAlpha(.72);
+      incoming.destroy();
+    } });
+    this.tweens.add({ targets: this.zoneTint, fillColor: tint, alpha: zone === 2 ? .28 : .22, duration: 1600 });
+    const label = this.add.text(WIDTH / 2, 112, zone === 2 ? 'FOCUS CAVERNS' : 'DRAGON NEST APPROACH', {
+      fontFamily: 'Arial', fontSize: '28px', fontStyle: 'bold', color: '#ffe27f', letterSpacing: 4,
+    }).setOrigin(.5).setDepth(22).setAlpha(0);
+    this.tweens.add({ targets: label, alpha: 1, yoyo: true, hold: 900, duration: 450, onComplete: () => label.destroy() });
+  }
+
+  private reachMilestone(): void {
+    this.milestoneShown = true;
+    this.state = { ...this.state, score: this.state.score + 1000 };
+    const label = this.add.text(WIDTH / 2, 160, 'DRAGON NEST REACHED', {
+      fontFamily: 'Arial', fontSize: '32px', fontStyle: 'bold', color: '#ffe27f', stroke: '#07172b', strokeThickness: 6,
+    }).setOrigin(.5).setDepth(24);
+    this.burst(this.player.x, this.player.y);
+    this.tweens.add({ targets: label, alpha: 0, y: 135, delay: 1200, duration: 600, onComplete: () => label.destroy() });
   }
 
   private spawnFlameLine(y: number): void { for (let i = 0; i < 5; i += 1) this.spawnFlame(WIDTH + 130 + i * 72, y); }
@@ -262,10 +384,13 @@ export default class FlameRunScene extends Phaser.Scene {
     if (!obstacle.active || this.time.now < this.invulnerableUntil) return;
     this.invulnerableUntil = this.time.now + 1350;
     this.state = loseCourage(this.state);
-    this.player.setTexture('run-b4-hurt');
+    this.player.setTint(0xff7a63);
     this.sound.play('run-hit', { volume: .24 });
     this.cameras.main.shake(180, .007);
-    this.tweens.add({ targets: this.player, x: 282, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => this.player.setX(300).setAlpha(1).setTexture('run-b4') });
+    this.tweens.add({ targets: this.player, x: 282, alpha: .35, duration: 85, yoyo: true, repeat: 5, onComplete: () => {
+      this.player.setX(300).setAlpha(1);
+      if (this.state.focusModeUntil > this.time.now) this.player.setTint(0xffc72c); else this.player.clearTint();
+    } });
     obstacle.destroy();
     if (isRunOver(this.state)) this.finishRun();
   }
@@ -292,17 +417,17 @@ export default class FlameRunScene extends Phaser.Scene {
   private addThrusterTrail(mode: 'run' | 'slide' | 'focus'): void {
     const size = mode === 'focus' ? 26 : mode === 'slide' ? 20 : 11;
     const distance = mode === 'focus' ? 130 : mode === 'slide' ? 105 : 48;
-    const spark = this.add.image(this.player.x - 52, FLOOR_Y - (this.sliding ? 4 : 9), 'run-flame').setDisplaySize(size, size * 1.3).setDepth(13).setAlpha(mode === 'run' ? .42 : .8).setTint(mode === 'focus' ? 0xffdc57 : 0xffb43b);
+    const spark = this.add.image(this.player.x - 52, this.player.y + (this.sliding ? 8 : 13), 'run-flame').setDisplaySize(size, size * 1.3).setDepth(13).setAlpha(mode === 'run' ? .42 : .8).setTint(mode === 'focus' ? 0xffdc57 : 0xffb43b);
     this.tweens.add({ targets: spark, x: spark.x - distance, y: spark.y + Phaser.Math.Between(-7, 7), alpha: 0, duration: mode === 'focus' ? 460 : 320, onComplete: () => spark.destroy() });
   }
 
   private land(): void {
     this.tweens.killTweensOf(this.player);
     this.player.angle = 0;
-    this.player.setY(FLOOR_Y - PLAYER_HEIGHT * .93 / 2).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .93);
-    this.tweens.add({ targets: this.player, y: FLOOR_Y - PLAYER_HEIGHT / 2, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 130, ease: 'Back.Out' });
+    this.player.setY(this.supportY - PLAYER_HEIGHT * .93 / 2).setDisplaySize(PLAYER_WIDTH * 1.06, PLAYER_HEIGHT * .93);
+    this.tweens.add({ targets: this.player, y: this.supportY - PLAYER_HEIGHT / 2, displayWidth: PLAYER_WIDTH, displayHeight: PLAYER_HEIGHT, duration: 130, ease: 'Back.Out' });
     for (let i = 0; i < 4; i += 1) {
-      const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), FLOOR_Y - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
+      const spark = this.add.image(this.player.x + Phaser.Math.Between(-40, 40), this.supportY - 8, 'run-flame').setDisplaySize(9, 12).setDepth(14).setAlpha(.6);
       this.tweens.add({ targets: spark, y: spark.y - Phaser.Math.Between(12, 28), x: spark.x - Phaser.Math.Between(8, 28), alpha: 0, duration: 240, onComplete: () => spark.destroy() });
     }
   }
@@ -348,7 +473,9 @@ export default class FlameRunScene extends Phaser.Scene {
   }
 
   private emitHud(message: string): void {
-    const hud: FlameRunHud = { ...this.state, focusMode: this.state.focusModeUntil > this.time.now, message };
+    const elapsed = this.started ? (this.time.now - this.startedAt) / 1000 : 0;
+    const zone = this.zone === 1 ? 'Focus Flame Forest' : this.zone === 2 ? 'Focus Caverns' : 'Dragon Nest Approach';
+    const hud: FlameRunHud = { ...this.state, focusMode: this.state.focusModeUntil > this.time.now, message, progress: Math.min(100, Math.round(elapsed / MILESTONE_SECONDS * 100)), zone };
     this.game.events.emit(FLAME_RUN_EVENTS.hud, hud);
   }
 }

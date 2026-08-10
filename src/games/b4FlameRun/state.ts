@@ -55,6 +55,5 @@ export const loseCourage = (state: FlameRunState): FlameRunState => ({
 export const isRunOver = (state: FlameRunState): boolean => state.courage === 0;
 
 export const scrollSpeedFor = (elapsedSeconds: number): number => (
-  Math.min(590, 300 + Math.floor(elapsedSeconds / 24) * 32)
+  Math.min(660, 355 + Math.floor(elapsedSeconds / 30) * 32)
 );
-

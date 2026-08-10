@@ -1,6 +1,6 @@
 import type { FlameRunState } from './state';
 
-export type FlameRunHud = FlameRunState & { focusMode: boolean; message: string };
+export type FlameRunHud = FlameRunState & { focusMode: boolean; message: string; progress: number; zone: string };
 export type FlameRunResult = Pick<FlameRunState, 'score' | 'distance' | 'flames' | 'bestStreak'> & { bestScore: number };
 
 export const FLAME_RUN_EVENTS = {

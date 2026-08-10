@@ -4,8 +4,9 @@ import B4FlameRunGame, { type B4FlameRunGameHandle } from './B4FlameRunGame';
 import { createFlameRunState } from './state';
 import type { FlameRunHud, FlameRunResult } from './types';
 import './b4-flame-run.css';
+import './b4-flame-run-progress.css';
 
-const initialHud: FlameRunHud = { ...createFlameRunState(), focusMode: false, message: 'B-4: Ready to run!' };
+const initialHud: FlameRunHud = { ...createFlameRunState(), focusMode: false, message: 'B-4: Ready to run!', progress: 0, zone: 'Focus Flame Forest' };
 
 export default function B4FlameRunPage() {
   const gameRef = useRef<B4FlameRunGameHandle>(null);
@@ -47,6 +48,7 @@ export default function B4FlameRunPage() {
       </header>
 
       <section className={`b4run-stage${hud.focusMode ? ' is-focus-mode' : ''}`} aria-label="B-4 Flame Run prototype">
+        <div className="b4run-progress" aria-label={`${hud.progress}% to Dragon Nest`}><i style={{ width: `${hud.progress}%` }} /><strong>{hud.progress}%</strong></div>
         <div className="b4run-hud b4run-hud--courage"><span>COURAGE</span><strong>{'🔥'.repeat(hud.courage)}{'◇'.repeat(3 - hud.courage)}</strong></div>
         <div className="b4run-hud b4run-hud--score"><span>SCORE</span><strong>{Math.round(hud.score).toLocaleString()}</strong></div>
         <div className="b4run-hud b4run-hud--flames"><span>FOCUS FLAMES</span><strong>{hud.flames}</strong></div>
