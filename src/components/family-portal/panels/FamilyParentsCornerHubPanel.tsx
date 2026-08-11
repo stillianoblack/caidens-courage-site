@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyGuidePanel from './FamilyGuidePanel';
 import FamilyDownloadsPanel from './FamilyDownloadsPanel';
@@ -36,12 +36,14 @@ export default function FamilyParentsCornerHubPanel() {
               onClick={() => selectTab(id)}>{label}</button>
           ))}
         </div>
-        <div className="family-consolidatedContent" key={tab}>
-          {tab === 'at-home' ? <FamilyGuidePanel /> : null}
-          {tab === 'printables' ? <FamilyDownloadsPanel /> : null}
-          {tab === 'gallery' ? <FamilyGalleryPanel /> : null}
-          {tab === 'certificates' ? <FamilyCertificatesPanel /> : null}
-        </div>
+        <Suspense key={tab} fallback={<p className="family-panelLoading" role="status">Loading {tab}…</p>}>
+          <div className="family-consolidatedContent">
+            {tab === 'at-home' ? <FamilyGuidePanel /> : null}
+            {tab === 'printables' ? <FamilyDownloadsPanel /> : null}
+            {tab === 'gallery' ? <FamilyGalleryPanel /> : null}
+            {tab === 'certificates' ? <FamilyCertificatesPanel /> : null}
+          </div>
+        </Suspense>
       </div>
     </div>
   );

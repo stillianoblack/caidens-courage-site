@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyCharactersPanel from './FamilyCharactersPanel';
 import FamilyInventoryPanel from './FamilyInventoryPanel';
@@ -29,9 +29,11 @@ export default function FamilyCharactersHubPanel() {
             </button>
           ))}
         </div>
-        <div className="family-consolidatedContent" key={tab}>
-          {tab === 'characters' ? <FamilyCharactersPanel /> : <FamilyInventoryPanel />}
-        </div>
+        <Suspense key={tab} fallback={<p className="family-panelLoading" role="status">Loading {tab}…</p>}>
+          <div className="family-consolidatedContent">
+            {tab === 'characters' ? <FamilyCharactersPanel /> : <FamilyInventoryPanel />}
+          </div>
+        </Suspense>
       </div>
     </div>
   );
