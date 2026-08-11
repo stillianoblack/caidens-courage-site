@@ -1,7 +1,7 @@
 const { correlationId, getServerSupabase, json } = require('./_lib/crmAuth');
 const {
   authorizeFamilyCompatibilitySession,
-  participantBelongsToFamily,
+  participantAccessibleToFamily,
 } = require('./_lib/familyCompatibilityAuth');
 const {
   authorizeCampProgram,
@@ -61,7 +61,11 @@ exports.handler = async (event) => {
       .select('id, role, program_code')
       .eq('id', participantId)
       .maybeSingle();
-    authorized = !error && participantBelongsToFamily(participant, familySession.program.program_code);
+    authorized = !error && await participantAccessibleToFamily(
+      supabase,
+      participant,
+      familySession.program.program_code,
+    );
     if (authorized) authorizationMode = 'family_compatibility';
   }
   if (!authorized) {

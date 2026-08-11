@@ -6,12 +6,13 @@ import path from 'path';
 
 const mockLoad = jest.fn();
 const mockReadCache = jest.fn();
+const mockSave = jest.fn();
 
 jest.mock('../b4VariantService', () => ({
   B4_VARIANT_UPDATED_EVENT: 'b4:variant-updated',
   loadB4Variant: (...args: unknown[]) => mockLoad(...args),
   readCachedB4Preference: (...args: unknown[]) => mockReadCache(...args),
-  saveB4Variant: jest.fn(),
+  saveB4Variant: (...args: unknown[]) => mockSave(...args),
 }));
 
 jest.mock('../portalSessionEvents', () => ({
@@ -29,10 +30,39 @@ function Probe({ participantId }: { participantId: string }) {
   );
 }
 
+function SaveProbe({ participantId }: { participantId: string }) {
+  const state = useB4Variant(participantId);
+  return (
+    <div>
+      <span data-testid="variant">{state.variant}</span>
+      <button type="button" onClick={() => void state.save('pattern').catch(() => undefined)}>
+        Save pattern
+      </button>
+    </div>
+  );
+}
+
 describe('B-4 participant lifecycle resilience', () => {
   beforeEach(() => {
     mockLoad.mockReset();
     mockReadCache.mockReset();
+    mockSave.mockReset();
+  });
+
+  test('keeps the chosen variant visible after a failed save so retry does not require refresh', async () => {
+    mockReadCache.mockReturnValue({ variant: 'courage', selectionRequired: false });
+    mockLoad.mockReturnValue(new Promise(() => undefined));
+    mockSave.mockRejectedValue(new Error('temporary save failure'));
+
+    render(<SaveProbe participantId="child-1" />);
+    await act(async () => {
+      screen.getByRole('button', { name: 'Save pattern' }).click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId('variant')).toHaveTextContent('pattern');
+    expect(mockLoad).toHaveBeenCalledTimes(1);
   });
 
   test('renders the saved participant immediately while background revalidation is pending', async () => {

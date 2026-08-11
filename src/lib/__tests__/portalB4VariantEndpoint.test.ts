@@ -25,7 +25,9 @@ describe('portal B-4 variant endpoint', () => {
 
   it('accepts only the approved keys and writes legacy spark as courage', () => {
     expect(endpoint._test.normalizeVariant('spark')).toBe('courage');
-    expect(endpoint._test.normalizeVariant('fusion')).toBe('fusion');
+    for (const variant of ['courage', 'pattern', 'shield', 'anchor', 'fusion']) {
+      expect(endpoint._test.normalizeVariant(variant)).toBe(variant);
+    }
     expect(endpoint._test.normalizeVariant('diagnostic-label')).toBeNull();
   });
 
@@ -35,7 +37,7 @@ describe('portal B-4 variant endpoint', () => {
       'utf8',
     );
     expect(source).toContain('authorizeFamilyCompatibilitySession');
-    expect(source).toContain('participantBelongsToFamily');
+    expect(source).toContain('participantAccessibleToFamily');
     expect(source).toContain('authorizeCampKidSession');
     expect(source).toContain("require('./_lib/campCompatibilityAuth')");
     const helper = fs.readFileSync(
@@ -48,6 +50,42 @@ describe('portal B-4 variant endpoint', () => {
     expect(helper).toContain(".eq('organization_id', program.id)");
     expect(source).not.toContain('portalOwnershipAuth');
     expect(source).not.toContain('getCrmRoles');
+  });
+
+  it('authorizes a claimed family-linked child without treating the family program as the child program', async () => {
+    const helper = require('../../../netlify/functions/_lib/familyCompatibilityAuth');
+    const participant = {
+      id: '00000000-0000-4000-8000-000000000103',
+      role: 'student',
+      program_code: 'STAGING-CLASSROOM-2026',
+    };
+    const calls: Array<{ table: string; filters: Array<[string, unknown]> }> = [];
+    const supabase = {
+      from: (table: string) => {
+        const filters: Array<[string, unknown]> = [];
+        calls.push({ table, filters });
+        const chain: any = {
+          select: () => chain,
+          eq: (column: string, value: unknown) => { filters.push([column, value]); return chain; },
+          maybeSingle: async () => ({ data: { id: 'family-link-1' }, error: null }),
+        };
+        return chain;
+      },
+    };
+
+    await expect(helper.participantAccessibleToFamily(
+      supabase,
+      participant,
+      'STAGING-LANTERN-2026',
+    )).resolves.toBe(true);
+    expect(calls).toEqual([{
+      table: 'student_family_links',
+      filters: [
+        ['student_id', participant.id],
+        ['family_program_code', 'STAGING-LANTERN-2026'],
+        ['parent_claimed', true],
+      ],
+    }]);
   });
 
   it('authorizes an active facilitator-launched camp session only when program and participant match', async () => {

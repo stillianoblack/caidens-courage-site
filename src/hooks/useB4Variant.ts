@@ -85,10 +85,11 @@ export function useB4Variant(participantId?: string | null) {
   const save = useCallback(async (next: B4VariantKey) => {
     const id = participantId?.trim();
     if (!id) throw new Error('Choose a participant first.');
+    requestSequenceRef.current += 1;
     setVariant(next);
     try { const saved = await saveB4Variant(id, next); setVariant(saved); setSelectionRequired(false); setError(null); return saved; }
-    catch (caught) { await refresh(); throw caught; }
-  }, [participantId, refresh]);
+    catch (caught) { throw caught; }
+  }, [participantId]);
 
   const normalizedParticipantId = participantId?.trim() || null;
   const participantChanging = Boolean(normalizedParticipantId && loadedParticipantId !== normalizedParticipantId);

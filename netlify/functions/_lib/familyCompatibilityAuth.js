@@ -27,8 +27,24 @@ function participantBelongsToFamily(participant, programCode) {
   return participant?.role === 'student' && participant?.program_code === programCode;
 }
 
+async function participantAccessibleToFamily(supabase, participant, programCode) {
+  if (participantBelongsToFamily(participant, programCode)) return true;
+  if (participant?.role !== 'student' || !participant?.id || !programCode) return false;
+
+  const { data, error } = await supabase
+    .from('student_family_links')
+    .select('id')
+    .eq('student_id', participant.id)
+    .eq('family_program_code', programCode)
+    .eq('parent_claimed', true)
+    .maybeSingle();
+
+  return !error && Boolean(data);
+}
+
 module.exports = {
   authorizeFamilyCompatibilitySession,
+  participantAccessibleToFamily,
   participantBelongsToFamily,
   safeText,
 };
