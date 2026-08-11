@@ -1,25 +1,24 @@
 import React, { Suspense, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyGuidePanel from './FamilyGuidePanel';
 import FamilyDownloadsPanel from './FamilyDownloadsPanel';
 import FamilyGalleryPanel from './FamilyGalleryPanel';
 import FamilyCertificatesPanel from './FamilyCertificatesPanel';
+import { useFamilyQueryTabLocation } from '../../../hooks/useFamilyQueryTabLocation';
 
 type ParentTab = 'at-home' | 'printables' | 'gallery' | 'certificates';
 
 export default function FamilyParentsCornerHubPanel() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const searchParams = new URLSearchParams(location.search);
+  const { search, navigateSearch } = useFamilyQueryTabLocation();
+  const searchParams = new URLSearchParams(search);
   const requested = searchParams.get('tab');
   const tab: ParentTab = requested === 'printables' || requested === 'gallery' || requested === 'certificates'
     ? requested : 'at-home';
   const selectTab = useCallback((next: ParentTab) => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     if (next === 'at-home') params.delete('tab');
     else params.set('tab', next);
-    navigate({ pathname: location.pathname, search: params.toString() ? `?${params}` : '' });
-  }, [location.pathname, location.search, navigate]);
+    navigateSearch(params);
+  }, [navigateSearch, search]);
 
   return (
     <div className="family-panel family-consolidatedLayout">

@@ -1,21 +1,20 @@
 import React, { Suspense, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyCharactersPanel from './FamilyCharactersPanel';
 import FamilyInventoryPanel from './FamilyInventoryPanel';
+import { useFamilyQueryTabLocation } from '../../../hooks/useFamilyQueryTabLocation';
 
 type CharactersTab = 'characters' | 'collections';
 
 export default function FamilyCharactersHubPanel() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const searchParams = new URLSearchParams(location.search);
+  const { search, navigateSearch } = useFamilyQueryTabLocation();
+  const searchParams = new URLSearchParams(search);
   const tab: CharactersTab = searchParams.get('tab') === 'collections' ? 'collections' : 'characters';
   const selectTab = useCallback((next: CharactersTab) => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(search);
     if (next === 'characters') params.delete('tab');
     else params.set('tab', next);
-    navigate({ pathname: location.pathname, search: params.toString() ? `?${params}` : '' });
-  }, [location.pathname, location.search, navigate]);
+    navigateSearch(params);
+  }, [navigateSearch, search]);
 
   return (
     <div className="family-panel family-consolidatedLayout">

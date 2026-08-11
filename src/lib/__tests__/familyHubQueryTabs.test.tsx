@@ -1,6 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import FamilyCharactersHubPanel from '../../components/family-portal/panels/FamilyCharactersHubPanel';
 import FamilyParentsCornerHubPanel from '../../components/family-portal/panels/FamilyParentsCornerHubPanel';
 
@@ -28,11 +28,12 @@ function HistoryControls() {
 
 describe('family hub query tabs', () => {
   test('Characters deep links render immediately and preserve browser history', async () => {
+    window.history.pushState({}, '', '/family-hub/characters');
     render(
-      <MemoryRouter initialEntries={['/family-hub/characters']}>
+      <BrowserRouter>
         <HistoryControls />
         <Routes><Route path="/family-hub/characters" element={<FamilyCharactersHubPanel />} /></Routes>
-      </MemoryRouter>,
+      </BrowserRouter>,
     );
     expect(screen.getByText('Character directory')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Collections' }));
@@ -40,24 +41,25 @@ describe('family hub query tabs', () => {
     expect(screen.queryByText('Character directory')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('/family-hub/characters?tab=collections');
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByText('Character directory')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Character directory')).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Forward' }));
     expect(await screen.findByText('Collection shelf')).toBeInTheDocument();
   });
 
   test('Parents Corner deep links and tab clicks render without a reload', async () => {
+    window.history.pushState({}, '', '/family-hub/parents-corner?tab=gallery');
     render(
-      <MemoryRouter initialEntries={['/family-hub/parents-corner?tab=gallery']}>
+      <BrowserRouter>
         <HistoryControls />
         <Routes><Route path="/family-hub/parents-corner" element={<FamilyParentsCornerHubPanel />} /></Routes>
-      </MemoryRouter>,
+      </BrowserRouter>,
     );
     expect(await screen.findByText('Family gallery')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Certificates' }));
     expect(await screen.findByText('Certificate shelf')).toBeInTheDocument();
     expect(screen.queryByText('Family gallery')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByText('Family gallery')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Family gallery')).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Forward' }));
     expect(await screen.findByText('Certificate shelf')).toBeInTheDocument();
   });
