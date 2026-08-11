@@ -50,6 +50,7 @@ describe('Netlify Function Supabase runtime guard', () => {
 
   test('G: missing or unknown context and project fail closed', () => {
     expect(resolve({ CONTEXT: '', SUPABASE_URL: `https://${stagingRef}.supabase.co` })).toBeNull();
+    expect(resolve({ CONTEXT: '', SUPABASE_URL: `https://${productionRef}.supabase.co` })).toBeNull();
     expect(resolve({ CONTEXT: 'unknown', SUPABASE_URL: `https://${stagingRef}.supabase.co` })).toBeNull();
     expect(resolve({
       CONTEXT: 'deploy-preview',
