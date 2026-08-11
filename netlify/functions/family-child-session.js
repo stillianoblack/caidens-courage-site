@@ -71,6 +71,10 @@ function publicSession(row, participant) {
       ...(participant?.grade_level
         ? { participant_grade_level: participant.grade_level }
         : {}),
+      participant_b4_variant_key: safeText(participant?.b4_variant_key, 20) || 'courage',
+      participant_b4_variant_selected: Boolean(
+        participant?.b4_variant_key && participant?.b4_variant_selected_at,
+      ),
     },
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -80,7 +84,7 @@ function publicSession(row, participant) {
 async function participantForFamily(supabase, participantId, familyProgramCode) {
   const { data, error } = await supabase
     .from('participants')
-    .select('id, role, program_code, first_name, nickname, grade_level, student_pin_enabled, student_pin_hash, student_pin_fingerprint')
+    .select('id, role, program_code, first_name, nickname, grade_level, b4_variant_key, b4_variant_selected_at, student_pin_enabled, student_pin_hash, student_pin_fingerprint')
     .eq('id', participantId)
     .maybeSingle();
   if (error) return { error: 'participant_lookup_failed' };
@@ -198,6 +202,11 @@ async function launchSession(supabase, program, participantId, id) {
   const sessionIdentity = {
     participant_display_name: displayName,
     participant_first_name: safeText(participantResult.participant.first_name, 80) || displayName,
+    participant_b4_variant_key: safeText(participantResult.participant.b4_variant_key, 20) || 'courage',
+    participant_b4_variant_selected: Boolean(
+      participantResult.participant.b4_variant_key &&
+      participantResult.participant.b4_variant_selected_at,
+    ),
   };
 
   let session = reusable;
@@ -289,6 +298,11 @@ async function launchCampSession(supabase, program, participantId, input, id) {
     ...(participantResult.participant.grade_level
       ? { participant_grade_level: participantResult.participant.grade_level }
       : {}),
+    participant_b4_variant_key: safeText(participantResult.participant.b4_variant_key, 20) || 'courage',
+    participant_b4_variant_selected: Boolean(
+      participantResult.participant.b4_variant_key &&
+      participantResult.participant.b4_variant_selected_at,
+    ),
   };
 
   if (moveFromSessionId) {

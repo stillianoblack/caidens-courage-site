@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyGuidePanel from './FamilyGuidePanel';
 import FamilyDownloadsPanel from './FamilyDownloadsPanel';
 import FamilyGalleryPanel from './FamilyGalleryPanel';
@@ -8,16 +8,18 @@ import FamilyCertificatesPanel from './FamilyCertificatesPanel';
 type ParentTab = 'at-home' | 'printables' | 'gallery' | 'certificates';
 
 export default function FamilyParentsCornerHubPanel() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
   const requested = searchParams.get('tab');
   const tab: ParentTab = requested === 'printables' || requested === 'gallery' || requested === 'certificates'
     ? requested : 'at-home';
   const selectTab = useCallback((next: ParentTab) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(location.search);
     if (next === 'at-home') params.delete('tab');
     else params.set('tab', next);
-    setSearchParams(params, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate({ pathname: location.pathname, search: params.toString() ? `?${params}` : '' });
+  }, [location.pathname, location.search, navigate]);
 
   return (
     <div className="family-panel family-consolidatedLayout">
@@ -34,7 +36,7 @@ export default function FamilyParentsCornerHubPanel() {
               onClick={() => selectTab(id)}>{label}</button>
           ))}
         </div>
-        <div className="family-consolidatedContent">
+        <div className="family-consolidatedContent" key={tab}>
           {tab === 'at-home' ? <FamilyGuidePanel /> : null}
           {tab === 'printables' ? <FamilyDownloadsPanel /> : null}
           {tab === 'gallery' ? <FamilyGalleryPanel /> : null}

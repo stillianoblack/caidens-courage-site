@@ -18,10 +18,6 @@ type CourageHubHudExploreWeekStripProps = {
   onLaunchWeek?: (weekNumber: number, source: 'week-card' | 'week-card-cta') => boolean;
 };
 
-function resolveMonthSlot(weekNumber: number): number {
-  return ((Math.max(1, weekNumber) - 1) % 4) + 1;
-}
-
 function resolveStatusLabel(card: WeeklyAdventureJourneyCardItem, isSelected: boolean): string {
   if (card.variant === 'complete') return 'Complete';
   if (card.variant === 'locked') return 'Locked';
@@ -111,7 +107,6 @@ export default function CourageHubHudExploreWeekStrip({
     <ul className="courageHubHudStripRow courageHubHudStripRow--explore">
       {cards.map((card) => {
         const isSelected = card.weekNumber === selectedWeekNumber;
-        const monthSlot = resolveMonthSlot(card.weekNumber);
         const weekAccent = resolveWeeklyAdventureWeekAccent(card.weekNumber);
         const selFocusLine = formatSelFocusLine(card.selFocus) ?? card.selFocus;
         const locked = card.variant === 'locked' || card.disabled;
@@ -157,7 +152,7 @@ export default function CourageHubHudExploreWeekStrip({
               ) : null}
               <div className="courageHubHudCardCopy">
                 <p className="courageHubHudCardTitle">
-                  Week {monthSlot} · {card.title}
+                  Week {card.weekNumber} · {card.title}
                 </p>
                 {selFocusLine ? (
                   <p className="courageHubHudCardSub">{card.characterName} · SEL · {selFocusLine}</p>

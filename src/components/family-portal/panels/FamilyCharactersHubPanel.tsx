@@ -1,19 +1,21 @@
 import React, { useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FamilyCharactersPanel from './FamilyCharactersPanel';
 import FamilyInventoryPanel from './FamilyInventoryPanel';
 
 type CharactersTab = 'characters' | 'collections';
 
 export default function FamilyCharactersHubPanel() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
   const tab: CharactersTab = searchParams.get('tab') === 'collections' ? 'collections' : 'characters';
   const selectTab = useCallback((next: CharactersTab) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(location.search);
     if (next === 'characters') params.delete('tab');
     else params.set('tab', next);
-    setSearchParams(params, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate({ pathname: location.pathname, search: params.toString() ? `?${params}` : '' });
+  }, [location.pathname, location.search, navigate]);
 
   return (
     <div className="family-panel family-consolidatedLayout">
@@ -27,7 +29,7 @@ export default function FamilyCharactersHubPanel() {
             </button>
           ))}
         </div>
-        <div className="family-consolidatedContent">
+        <div className="family-consolidatedContent" key={tab}>
           {tab === 'characters' ? <FamilyCharactersPanel /> : <FamilyInventoryPanel />}
         </div>
       </div>

@@ -69,6 +69,7 @@ import {
 import {
   buildHeroWeekView,
   buildJourneyWeeklyAdventureCards,
+  resolveKidShellExploreCards,
 } from '../../../lib/weeklyAdventureWeekCards';
 import { buildAdventureJourneyMonthViews } from '../../../lib/weeklyAdventureJourneyMonths';
 import { warnWhenNoChildrenInDevelopment } from '../../../lib/familySupabaseEnv';
@@ -649,11 +650,16 @@ export default function FamilyContinueLearningPanel({ kidPlayShell = false }: Fa
 
   const heroMonthExploreCards = useMemo(() => {
     if (!ENABLE_CINEMATIC_WEEK_SELECTOR || !heroMonth) return [];
+    if (kidPlayShell) {
+      return resolveKidShellExploreCards(
+        journeyMonthSections.map((section) => section.cards),
+      );
+    }
     const section = journeyMonthSections.find(
       (row) => row.month.monthNumber === heroMonth.month_number,
     );
     return section?.cards ?? [];
-  }, [heroMonth, journeyMonthSections]);
+  }, [heroMonth, journeyMonthSections, kidPlayShell]);
 
   const currentMonthNumber = resolveDefaultMonthNumber(playableWeekNumber);
   const selectedMonthNumber = heroMonth?.month_number ?? currentMonthNumber;

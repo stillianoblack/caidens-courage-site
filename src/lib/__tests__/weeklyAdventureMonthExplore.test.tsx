@@ -4,6 +4,7 @@ import WeeklyAdventureMonthHero from '../../design-system/components/WeeklyAdven
 import WeeklyAdventureMonthSelector from '../../design-system/components/WeeklyAdventureMonthSelector';
 import { resolveMonthForWeek } from '../adventureMonthService';
 import { resolveHeroWeekNumber } from '../resolveHeroWeekNumber';
+import { resolveKidShellExploreCards, type WeeklyAdventureJourneyCardItem } from '../weeklyAdventureWeekCards';
 import type { AdventureMonthRecord } from '../../types/adventureMonth';
 import type { AdventureTrailWeekView } from '../../types/adventureTrail';
 
@@ -29,6 +30,19 @@ const monthTwo: AdventureMonthRecord = {
 };
 
 describe('Weekly Adventures month Explore metadata', () => {
+  it('includes the canonical fifth Zeke adventure in the Kid Shell rail', () => {
+    const cards = ['caiden', 'miranda', 'b4', 'charlie', 'zeke'].map((characterId, index) => ({
+      activityId: `activity-${index + 1}`,
+      characterId,
+      weekNumber: index + 1,
+    })) as WeeklyAdventureJourneyCardItem[];
+
+    expect(resolveKidShellExploreCards([cards.slice(0, 4), cards.slice(4)])).toEqual(cards);
+    expect(resolveKidShellExploreCards([cards.slice(0, 4), cards.slice(4)]).at(-1)).toEqual(
+      expect.objectContaining({ characterId: 'zeke', weekNumber: 5 }),
+    );
+  });
+
   it('resolves Month 2 as soon as Week 5 is the active unlocked week', () => {
     const trailWeeks = Array.from({ length: 8 }, (_, index) => ({
       week: index + 1,

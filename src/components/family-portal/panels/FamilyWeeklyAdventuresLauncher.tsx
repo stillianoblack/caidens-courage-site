@@ -116,7 +116,7 @@ export default function FamilyWeeklyAdventuresLauncher() {
             </button>
           </div>
         </section>
-      ) : <PortalRouteLoader message={statusMessage} academy />}
+      ) : <PortalRouteLoader message={statusMessage} academy fullScreen />}
       <ActiveParticipantPickerModal
         open={pickerOpen}
         roster={roster}

@@ -76,6 +76,29 @@ describe('family child session endpoint', () => {
     });
   });
 
+  test('hydrates the canonical selected B-4 in the public play-session payload', () => {
+    const session = endpoint._test.publicSession({
+      id: sessionId,
+      child_id: participantId,
+      participant_id: participantId,
+      organization_id: program.id,
+      session_source: 'family_home',
+      device_mode: 'home_device',
+      status: 'active',
+      resume_payload: null,
+    }, {
+      nickname: 'Nova',
+      first_name: 'Nova',
+      b4_variant_key: 'fusion',
+      b4_variant_selected_at: '2026-08-01T00:00:00.000Z',
+    });
+
+    expect(session.resume_payload).toEqual(expect.objectContaining({
+      participant_b4_variant_key: 'fusion',
+      participant_b4_variant_selected: true,
+    }));
+  });
+
   test('returns only sanitized participant directory fields for a camp program', async () => {
     const participantQuery = query({
       data: [{

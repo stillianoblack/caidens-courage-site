@@ -40,7 +40,7 @@ function cacheKey(participantId: string): string {
   return `${B4_CACHE_PREFIX}${participantId}`;
 }
 
-function writeCachedB4Preference(participantId: string, preference: B4Preference): void {
+export function primeB4Preference(participantId: string, preference: B4Preference): void {
   const id = participantId.trim();
   if (!id) return;
   preferenceCache.set(id, preference);
@@ -228,7 +228,7 @@ export function loadB4Variant(participantId: string): Promise<B4Preference> {
   if (existing) return existing;
   const pending = request(id)
     .then((preference) => {
-      writeCachedB4Preference(id, preference);
+      primeB4Preference(id, preference);
       return preference;
     })
     .finally(() => {
@@ -240,7 +240,7 @@ export function loadB4Variant(participantId: string): Promise<B4Preference> {
 
 export async function saveB4Variant(participantId: string, variant: B4VariantKey): Promise<B4VariantKey> {
   const saved = await request(participantId, { method: 'PUT', body: JSON.stringify({ variant }) });
-  writeCachedB4Preference(participantId, {
+  primeB4Preference(participantId, {
     variant: saved.variant,
     selectionRequired: false,
   });

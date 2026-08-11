@@ -26,6 +26,7 @@ import {
   weeklyAdventureWeekAnchor,
 } from './weeklyAdventureRouteContext';
 import { resolveActivityCharacter } from './activityCharacterContract';
+import { APPROVED_ACTIVITY_CHARACTER_ORDER } from './activityCharacterContract';
 
 export type WeeklyAdventureJourneyCardItem = WeeklyAdventureWeekRowItem & {
   activityId: string;
@@ -42,6 +43,15 @@ export type WeeklyAdventureJourneyCardItem = WeeklyAdventureWeekRowItem & {
   activitiesCount?: number;
   downloadsCount?: number;
 };
+
+/** The Kid Shell rail exposes the complete canonical character sequence, including locked weeks. */
+export function resolveKidShellExploreCards(
+  monthCards: readonly (readonly WeeklyAdventureJourneyCardItem[])[],
+): WeeklyAdventureJourneyCardItem[] {
+  return monthCards
+    .flatMap((cards) => [...cards])
+    .slice(0, APPROVED_ACTIVITY_CHARACTER_ORDER.length);
+}
 
 function countWeekDownloads(cmsModule: AdventureModuleRecord | null): number {
   if (!cmsModule) return 0;

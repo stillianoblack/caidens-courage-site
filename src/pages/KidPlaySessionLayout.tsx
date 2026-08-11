@@ -23,6 +23,8 @@ import {
 } from '../lib/kidPlaySessionResume';
 import { kidPlayShellNavigate } from '../lib/kidShellNav';
 import { clearPageTransitionOverlay } from '../lib/pageTransition';
+import { primeB4Preference } from '../lib/b4VariantService';
+import { normalizeB4Variant } from '../data/b4/variantManifest';
 import {
   getKidPlayShellRoute,
   logKidShellIdle,
@@ -153,6 +155,8 @@ function KidPlaySessionLayoutContent() {
       const sessionDisplayName = String(row.resume_payload?.participant_display_name || '').trim();
       const sessionFirstName = String(row.resume_payload?.participant_first_name || '').trim();
       const sessionGradeLevel = String(row.resume_payload?.participant_grade_level || '').trim();
+      const sessionB4Variant = String(row.resume_payload?.participant_b4_variant_key || '').trim();
+      const sessionB4Selected = row.resume_payload?.participant_b4_variant_selected === true;
       const name = participant
         ? resolveParticipantDisplayName(participant.id, buildParticipantNameLookup([participant]))
         : sessionDisplayName || 'Player';
@@ -164,6 +168,10 @@ function KidPlaySessionLayoutContent() {
       setDisplayName(name);
       setFirstName(legalFirstName);
       setGradeLevel(sessionGradeLevel || participant?.grade_level?.trim() || null);
+      primeB4Preference(row.child_id, {
+        variant: normalizeB4Variant(sessionB4Variant),
+        selectionRequired: !sessionB4Selected,
+      });
       void updateKidPlaySessionActivity(row.id);
 
       const behavior = resolveKidPlaySessionBehaviorFromRow(row);
