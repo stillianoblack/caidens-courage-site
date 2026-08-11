@@ -50,7 +50,18 @@ export function resolveKidShellExploreCards(
 ): WeeklyAdventureJourneyCardItem[] {
   return monthCards
     .flatMap((cards) => [...cards])
-    .slice(0, APPROVED_ACTIVITY_CHARACTER_ORDER.length);
+    .slice(0, APPROVED_ACTIVITY_CHARACTER_ORDER.length)
+    .map((card, activityIndex) => {
+      const activityCharacter = resolveActivityCharacter({ activityIndex });
+      return {
+        ...card,
+        activityId: `month-${resolveDefaultMonthNumber(card.weekNumber)}-week-${card.weekNumber}-${activityCharacter.characterId}`,
+        characterId: activityCharacter.characterId,
+        characterName: activityCharacter.characterName,
+        characterAsset: activityCharacter.characterAsset,
+        thumbnailUrl: activityCharacter.characterAsset,
+      };
+    });
 }
 
 function countWeekDownloads(cmsModule: AdventureModuleRecord | null): number {

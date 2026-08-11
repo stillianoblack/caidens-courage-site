@@ -37,9 +37,16 @@ describe('Weekly Adventures month Explore metadata', () => {
       weekNumber: index + 1,
     })) as WeeklyAdventureJourneyCardItem[];
 
-    expect(resolveKidShellExploreCards([cards.slice(0, 4), cards.slice(4)])).toEqual(cards);
-    expect(resolveKidShellExploreCards([cards.slice(0, 4), cards.slice(4)]).at(-1)).toEqual(
-      expect.objectContaining({ characterId: 'zeke', weekNumber: 5 }),
+    const resolved = resolveKidShellExploreCards([cards.slice(0, 4), cards.slice(4)]);
+    expect(resolved.map((card) => card.characterId)).toEqual([
+      'caiden',
+      'miranda',
+      'b4',
+      'charlie',
+      'zeke',
+    ]);
+    expect(resolved.at(-1)).toEqual(
+      expect.objectContaining({ characterId: 'zeke', characterName: 'Zeke', weekNumber: 5 }),
     );
   });
 
