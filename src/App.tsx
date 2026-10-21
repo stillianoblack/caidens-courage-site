@@ -67,6 +67,9 @@ import {
   PreviewPage,
   PrivacyPolicyPage,
   ProductPage,
+  BookstoreDownloadPage,
+  BookstoreBundleClaimPage,
+  MyBooksPage,
   ResourcesPage,
   SchoolsPage,
   StoryHubPage,
@@ -89,6 +92,9 @@ import {
   BMC_RESET_TOOLS_PATH,
   BRAVE_MIND_CLUB_PATH,
   STORY_BOOKS_PATH,
+  STORY_BOOKS_DOWNLOAD_PATH,
+  STORY_BOOKS_CLAIM_PATH,
+  STORY_BOOKS_LIBRARY_PATH,
   STORY_CHARACTERS_PATH,
   STORY_MODE_PATH,
   STORY_PATH,
@@ -266,6 +272,9 @@ const appRouteChildren = (
       {/* Story world */}
       <Route path={STORY_PATH} element={<StoryHubPage />} />
       <Route path={THE_STORY_PATH} element={<TheStoryPage />} />
+      <Route path={STORY_BOOKS_DOWNLOAD_PATH} element={<BookstoreDownloadPage />} />
+      <Route path={STORY_BOOKS_CLAIM_PATH} element={<BookstoreBundleClaimPage />} />
+      <Route path={STORY_BOOKS_LIBRARY_PATH} element={<MyBooksPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
       <Route path={STORY_MODE_PATH} element={<StoryModePage />} />

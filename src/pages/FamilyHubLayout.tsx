@@ -44,6 +44,8 @@ import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamil
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import FamilyParentOnboardingGate from '../components/family-portal/FamilyParentOnboardingGate';
 import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
+import { isProtectedAcademyPath } from '../lib/academyAccessPaths';
+import AcademyMembershipGate from '../components/family-portal/AcademyMembershipGate';
 import '../components/family-portal/parent-first-login-wizard.css';
 
 export default function FamilyHubLayout() {
@@ -162,12 +164,22 @@ function FamilyHubLayoutContent() {
     return null;
   }
 
+  const pageBody = (
+    <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
+      {isProtectedAcademyPath(location.pathname) ? (
+        <AcademyMembershipGate programCode={programCode}>
+          <Outlet />
+        </AcademyMembershipGate>
+      ) : (
+        <Outlet />
+      )}
+    </Suspense>
+  );
+
   if (isPlayPauseRoute) {
     return (
       <ActiveParticipantProvider programCode={programCode}>
-        <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
-          <Outlet />
-        </Suspense>
+        {pageBody}
       </ActiveParticipantProvider>
     );
   }
@@ -215,9 +227,7 @@ function FamilyHubLayoutContent() {
           footer={<footer className="family-miniFooter">© 2026 Caiden&apos;s Courage™ Family Portal</footer>}
         >
           <FamilyPortalDevDiagnosticBanner />
-          <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-            <Outlet />
-          </Suspense>
+          {pageBody}
         </AppShell>
       </div>
       {isMobileNav && !isMobileGameRoute ? <FamilyMobileBottomNav /> : null}

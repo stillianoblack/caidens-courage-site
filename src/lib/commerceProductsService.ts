@@ -18,7 +18,8 @@ let activeProductsCache: { products: CommerceProduct[]; fetchedAt: number } | nu
 let activeProductsPromise: Promise<CommerceProduct[]> | null = null;
 
 function mapCommerceProductRow(row: CommerceProductRow): CommerceProduct {
-  return {
+  const catalogExtended = Object.prototype.hasOwnProperty.call(row, 'availability');
+  const product: CommerceProduct = {
     id: row.id,
     key: row.key,
     title: row.title,
@@ -30,7 +31,20 @@ function mapCommerceProductRow(row: CommerceProductRow): CommerceProduct {
     isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    catalogExtended,
+    subtitle: row.subtitle ?? null,
+    description: row.description ?? null,
+    availability: row.availability ?? null,
+    fulfillmentType: row.fulfillment_type ?? null,
+    sortOrder: row.sort_order ?? null,
+    isFeatured: Boolean(row.is_featured),
+    digitalSalesEnabled: Boolean(row.digital_sales_enabled),
+    kindleProductUrl: row.kindle_product_url ?? null,
   };
+  if (Object.prototype.hasOwnProperty.call(row, 'payment_link_verified_at')) {
+    product.paymentLinkVerifiedAt = row.payment_link_verified_at ?? null;
+  }
+  return product;
 }
 
 function normalizeInput(input: CommerceProductInput) {
@@ -42,6 +56,18 @@ function normalizeInput(input: CommerceProductInput) {
     stripe_product_id: input.stripeProductId?.trim() || null,
     stripe_price_id: input.stripePriceId?.trim() || null,
     is_active: input.isActive,
+    ...(input.availability
+      ? {
+          subtitle: input.subtitle?.trim() || null,
+          description: input.description?.trim() || null,
+          availability: input.availability,
+          fulfillment_type: input.fulfillmentType || 'physical',
+          sort_order: input.sortOrder ?? 100,
+          is_featured: Boolean(input.isFeatured),
+          digital_sales_enabled: Boolean(input.digitalSalesEnabled),
+          kindle_product_url: input.kindleProductUrl?.trim() || null,
+        }
+      : {}),
   };
 }
 
@@ -84,8 +110,17 @@ export function validateCommerceProductInput(
   if (normalized.stripe_price_id && !normalized.stripe_price_id.startsWith('price_')) {
     errors.push('Stripe Price ID must start with price_.');
   }
-  if (normalized.is_active && !normalized.payment_link_url) {
+  const digitalCheckout = input.fulfillmentType === 'digital';
+  if (digitalCheckout && input.digitalSalesEnabled) {
+    if (!normalized.stripe_price_id) {
+      errors.push('Digital sales require a Stripe Price ID before they can be enabled.');
+    }
+  } else if (normalized.is_active && !digitalCheckout && !normalized.payment_link_url) {
     errors.push('Active products require a Stripe Payment Link URL.');
+  }
+  const kindleProductUrl = input.kindleProductUrl?.trim();
+  if (kindleProductUrl && (kindleProductUrl === 'https://www.amazon.com/author/tarusdstills' || kindleProductUrl.includes('/author/'))) {
+    errors.push('Kindle product URL must be a specific Amazon product page, not the author page.');
   }
   if (
     current &&
@@ -151,6 +186,23 @@ export async function getActiveCommerceProducts(options?: { forceRefresh?: boole
   return activeProductsPromise;
 }
 
+export async function commerceCatalogExtensionsAvailable(): Promise<boolean> {
+  const client = await requireCommerceClient();
+  const { error } = await client.from(COMMERCE_TABLE).select('availability').limit(1);
+  return !error;
+}
+
+export async function getCommerceProductsByKeys(keys: string[]): Promise<CommerceProduct[]> {
+  if (keys.length === 0) return [];
+  const client = await requireCommerceClient();
+  const { data, error } = await client.from(COMMERCE_TABLE).select('*').in('key', keys);
+  if (error) {
+    console.error('[commerce] Failed to load bookstore products.', error);
+    throw error;
+  }
+  return ((data ?? []) as CommerceProductRow[]).map(mapCommerceProductRow);
+}
+
 export async function getCommerceProduct(
   key: CommerceProductKey,
   options?: { activeOnly?: boolean; forceRefresh?: boolean },
@@ -179,24 +231,7 @@ export async function updateCommerceProduct(
   if (validation.errors.length > 0) {
     throw new Error(validation.errors.join(' '));
   }
-
-  const client = await requireCommerceClient();
-  const payload = {
-    key,
-    ...normalizeInput(input),
-  };
-
-  const { data, error } = await client
-    .from(COMMERCE_TABLE)
-    .upsert(payload, { onConflict: 'key' })
-    .select('*')
-    .single();
-
-  if (error) {
-    console.error(`[commerce] Failed to save commerce product "${key}".`, error);
-    throw error;
-  }
-
-  invalidateCommerceProductsCache();
-  return mapCommerceProductRow(data as CommerceProductRow);
+  void key;
+  void input;
+  throw new Error('Catalog updates must be saved by the server admin function.');
 }

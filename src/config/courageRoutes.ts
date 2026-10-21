@@ -3,6 +3,9 @@
 export const STORY_PATH = '/story';
 export const THE_STORY_PATH = '/the-story';
 export const STORY_BOOKS_PATH = '/story/books';
+export const STORY_BOOKS_DOWNLOAD_PATH = '/story/books/download';
+export const STORY_BOOKS_LIBRARY_PATH = '/story/books/library';
+export const STORY_BOOKS_CLAIM_PATH = '/story/books/claim';
 export const STORY_CHARACTERS_PATH = '/story/characters';
 export const STORY_MODE_PATH = '/story-mode';
 export const ARCADE_PREVIEW_PATH = '/preview/arcade';

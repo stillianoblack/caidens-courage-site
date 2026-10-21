@@ -95,6 +95,29 @@ function getClarity(): ClarityFn | null {
   return isBrowser && typeof window.clarity === 'function' ? window.clarity : null;
 }
 
+function stripSensitiveQuery(search: string): string {
+  if (!search || !search.includes('=')) return search;
+  const params = new URLSearchParams(search.replace(/^\?/, ''));
+  params.delete('token');
+  params.delete('session_id');
+  const next = params.toString();
+  return next ? `?${next}` : '';
+}
+
+function stripSensitiveHash(hash: string): string {
+  if (!hash || !hash.includes('=')) return hash;
+  const params = new URLSearchParams(hash.replace(/^#/, ''));
+  params.delete('token');
+  const next = params.toString();
+  return next ? `#${next}` : '';
+}
+
+export function sanitizeAnalyticsPagePath(value: string): string {
+  const match = String(value || '').match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+  const pathname = match?.[1] || '';
+  return `${pathname}${stripSensitiveQuery(match?.[2] || '')}${stripSensitiveHash(match?.[3] || '')}`;
+}
+
 function sanitizeParams(params: AnalyticsEventParams): Record<string, string | number | boolean> {
   const clean: Record<string, string | number | boolean> = {};
   for (const [key, value] of Object.entries(params)) {
@@ -347,12 +370,13 @@ export function trackPageView(overrides: Partial<PageViewParams> = {}): void {
   const pathname = window.location.pathname;
   const search = window.location.search;
   const hash = window.location.hash;
-  const page_path = overrides.page_path ?? `${pathname}${search}${hash}`;
+  const safeHash = sanitizeAnalyticsPagePath(`/${hash}`).slice(1);
+  const page_path = sanitizeAnalyticsPagePath(overrides.page_path ?? `${pathname}${search}${hash}`);
   const portal_type = overrides.portal_type ?? resolvePortalType(pathname);
   const page_title =
-    overrides.page_title ?? resolveAnalyticsPageTitle(pathname, hash);
+    overrides.page_title ?? resolveAnalyticsPageTitle(pathname, safeHash);
   const page_section =
-    overrides.page_section ?? resolveAnalyticsPageSection(pathname, hash);
+    overrides.page_section ?? resolveAnalyticsPageSection(pathname, safeHash);
   const user_role = overrides.user_role ?? resolveCurrentUserRole();
   const program_code = overrides.program_code ?? resolveCurrentProgramCode();
 

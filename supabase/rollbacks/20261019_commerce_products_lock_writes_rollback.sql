@@ -1,0 +1,3 @@
+-- Do not restore anonymous write access to commerce_products.
+-- Leaving the lock in place does not delete catalog rows, orders, or files.
+-- Administrative changes stay on the service-role save function.

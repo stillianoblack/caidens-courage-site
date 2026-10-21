@@ -22,6 +22,9 @@ import {
 } from '../lib/kidPlaySessionResume';
 import { kidPlayShellNavigate } from '../lib/kidShellNav';
 import { clearPageTransitionOverlay } from '../lib/pageTransition';
+import { readActivePilotProgram } from '../config/activePilotProgram';
+import { isProtectedAcademyPath } from '../lib/academyAccessPaths';
+import AcademyMembershipGate from '../components/family-portal/AcademyMembershipGate';
 import {
   getKidPlayShellRoute,
   logKidShellIdle,
@@ -284,7 +287,13 @@ function KidPlaySessionLayoutContent() {
                 onExitClick={() => setExitOpen(true)}
               />
               <Suspense fallback={null}>
-                <Outlet key={`${location.pathname}${location.search}`} />
+                {isProtectedAcademyPath(location.pathname) ? (
+                  <AcademyMembershipGate programCode={readActivePilotProgram()?.programCode || ''}>
+                    <Outlet key={`${location.pathname}${location.search}`} />
+                  </AcademyMembershipGate>
+                ) : (
+                  <Outlet key={`${location.pathname}${location.search}`} />
+                )}
               </Suspense>
               <KidPlayShellExitModal
                 open={exitOpen}
