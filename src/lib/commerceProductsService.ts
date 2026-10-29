@@ -18,7 +18,8 @@ let activeProductsCache: { products: CommerceProduct[]; fetchedAt: number } | nu
 let activeProductsPromise: Promise<CommerceProduct[]> | null = null;
 
 function mapCommerceProductRow(row: CommerceProductRow): CommerceProduct {
-  return {
+  const catalogExtended = Object.prototype.hasOwnProperty.call(row, 'availability');
+  const product: CommerceProduct = {
     id: row.id,
     key: row.key,
     title: row.title,
@@ -30,7 +31,20 @@ function mapCommerceProductRow(row: CommerceProductRow): CommerceProduct {
     isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    catalogExtended,
+    subtitle: row.subtitle ?? null,
+    description: row.description ?? null,
+    availability: row.availability ?? null,
+    fulfillmentType: row.fulfillment_type ?? null,
+    sortOrder: row.sort_order ?? null,
+    isFeatured: Boolean(row.is_featured),
+    digitalSalesEnabled: Boolean(row.digital_sales_enabled),
+    kindleProductUrl: row.kindle_product_url ?? null,
   };
+  if (Object.prototype.hasOwnProperty.call(row, 'payment_link_verified_at')) {
+    product.paymentLinkVerifiedAt = row.payment_link_verified_at ?? null;
+  }
+  return product;
 }
 
 function normalizeInput(input: CommerceProductInput) {
@@ -149,6 +163,17 @@ export async function getActiveCommerceProducts(options?: { forceRefresh?: boole
   });
 
   return activeProductsPromise;
+}
+
+export async function getCommerceProductsByKeys(keys: string[]): Promise<CommerceProduct[]> {
+  if (keys.length === 0) return [];
+  const client = await requireCommerceClient();
+  const { data, error } = await client.from(COMMERCE_TABLE).select('*').in('key', keys);
+  if (error) {
+    console.error('[commerce] Failed to load bookstore products.', error);
+    throw error;
+  }
+  return ((data ?? []) as CommerceProductRow[]).map(mapCommerceProductRow);
 }
 
 export async function getCommerceProduct(
