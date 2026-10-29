@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { STORY_BOOKS_PATH } from '../config/courageRoutes';
 import { getStripePreorderUrl, getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
+import { paymentLinkCheckoutAllowed } from '../lib/checkoutEnvironment';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -617,6 +618,7 @@ const Preview = () => {
                 variant="primary"
                 size="md"
                 onClick={handlePhysicalCopyClick}
+                disabled={!paymentLinkCheckoutAllowed()}
               >
                 Pre-order Physical Copy
               </Button>

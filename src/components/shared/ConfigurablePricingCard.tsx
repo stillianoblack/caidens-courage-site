@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PricingPlanRecord } from '../../types/pricingPlans';
+import { visibleCheckoutHref } from '../../lib/checkoutEnvironment';
 import { isStripeLinkConfigured, warnMissingStripeLink } from '../../lib/pricingPlansService';
 
 type ConfigurablePricingCardProps = {
@@ -19,6 +20,7 @@ type ConfigurablePricingCardProps = {
 
 export default function ConfigurablePricingCard({ plan, classNames = {} }: ConfigurablePricingCardProps) {
   const stripeReady = isStripeLinkConfigured(plan.stripeUrl);
+  const checkoutHref = visibleCheckoutHref(plan.stripeUrl);
   if (!stripeReady) warnMissingStripeLink(plan);
 
   const cardClass = [
@@ -40,9 +42,9 @@ export default function ConfigurablePricingCard({ plan, classNames = {} }: Confi
           <li key={item}>{item}</li>
         ))}
       </ul>
-      {stripeReady ? (
+      {stripeReady && checkoutHref ? (
         <a
-          href={plan.stripeUrl}
+          href={checkoutHref}
           target="_blank"
           rel="noopener noreferrer"
           className={classNames.cta ?? 'pilot-pricingCardCta'}
@@ -54,7 +56,9 @@ export default function ConfigurablePricingCard({ plan, classNames = {} }: Confi
           <button type="button" className={classNames.ctaDisabled ?? 'pilot-pricingCardCta pilot-pricingCardCta--disabled'} disabled>
             {plan.ctaLabel}
           </button>
-          <p className={classNames.missingNote ?? 'pilot-pricingMissingNote'}>Payment link not configured</p>
+          <p className={classNames.missingNote ?? 'pilot-pricingMissingNote'}>
+            {stripeReady ? 'Checkout is not open on this site' : 'Payment link not configured'}
+          </p>
         </>
       )}
     </article>

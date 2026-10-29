@@ -49,3 +49,6 @@ public/images/optimized/**
 # Nested/duplicate repos (do not track)
 /caidens-courage-site/
 /caidenscourage/
+
+# Private bookstore files. Never commit the EPUB or other delivery assets.
+/private-assets/

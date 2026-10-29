@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { getWaitlistUrl, openExternalUrl, productLinks } from '../config/externalLinks';
+import { getWaitlistUrl, openExternalUrl } from '../config/externalLinks';
 import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import GlobalNotification from '../components/GlobalNotification';
-import { useCommerceProduct } from '../hooks/useCommerceProduct';
-import {
-  formatCommercePrice,
-  HARDCOVER_BUNDLE_KEY,
-} from '../lib/commerceProductsService';
+import BookstoreOffers from '../components/bookstore/BookstoreOffers';
 
 // Reusable InsideCard Component for "What's Inside" section
 interface InsideCardProps {
@@ -136,16 +131,6 @@ const Product: React.FC = () => {
   const location = useLocation();
   const [isPreorderOpen, setIsPreorderOpen] = useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
-  const [showDigitalNotice, setShowDigitalNotice] = useState(false);
-  const {
-    product: hardcoverBundleProduct,
-    loading: hardcoverBundleLoading,
-    error: hardcoverBundleError,
-  } = useCommerceProduct(HARDCOVER_BUNDLE_KEY);
-
-  const handleDigitalClick = () => {
-    setShowDigitalNotice(true);
-  };
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [helpView, setHelpView] = useState<'kids' | 'parents' | 'teachers'>('kids');
@@ -191,21 +176,6 @@ const Product: React.FC = () => {
   const handleComingSoonClick = useCallback(() => {
     setIsComingSoonModalOpen(true);
   }, []);
-
-  const hardcoverBundleCheckoutUrl = hardcoverBundleProduct?.paymentLinkUrl?.trim() || '';
-  const isHardcoverBundleCheckoutUnavailable =
-    hardcoverBundleLoading || Boolean(hardcoverBundleError) || !hardcoverBundleCheckoutUrl;
-  const hardcoverBundlePrice = hardcoverBundleProduct
-    ? formatCommercePrice(hardcoverBundleProduct.displayPriceCents, hardcoverBundleProduct.currency)
-    : '—';
-
-  const handleHardcoverBundleCheckout = () => {
-    if (!hardcoverBundleCheckoutUrl) {
-      console.error('[commerce] Missing active Hardcover Bundle checkout configuration.');
-      return;
-    }
-    openExternalUrl(hardcoverBundleCheckoutUrl);
-  };
 
   return (
     <div className="min-h-screen bg-cream font-body">
@@ -415,122 +385,18 @@ const Product: React.FC = () => {
                   132 Pages
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  Digital Access to the Focus Flame Academy
+                  Academy membership sold separately
                 </span>
               </div>
 
-              {/* Pricing Blocks - Stacked */}
-              <div className="flex flex-col gap-4 mb-6">
-                {/* Block 1: Founder's Edition - Sold Out */}
-                <div className="rounded-2xl border border-gray-200 bg-gray-50/50 p-4 sm:p-5 opacity-75">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
-                    <h3 className="font-display font-bold text-navy-500 text-lg">Founder's Edition</h3>
-                    <span className="text-navy-400">
-                      <span className="line-through">$24</span>
-                      <span className="ml-2 text-sm font-medium text-navy-500">Sold Out</span>
-                    </span>
-                  </div>
-                  <p className="text-sm text-navy-600 leading-relaxed">
-                    Thank you to everyone who believed in Caiden from the very beginning.
-                    <br />
-                    <br />
-                    Every Founder’s Edition preorder has been upgraded to the new hardcover edition as a thank-you for helping bring this world to life.
-                    <br />
-                    <br />
-                    You'll always be the first Guardians of the Focus Flame.
-                  </p>
-                </div>
-
-                {/* Block 2: Pre-Order Bundle - Primary */}
-                <div className="rounded-2xl border-2 border-navy-200 bg-white p-4 sm:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-                    <h3 className="font-display font-bold text-navy-500 text-lg">Pre-Order Bundle</h3>
-                    <span className="font-bold text-navy-600 text-xl">{hardcoverBundlePrice}</span>
-                  </div>
-                  <ul className="space-y-1.5 mb-3 text-sm text-navy-600">
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      132-page Hardcover Graphic Novel
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      Courage Companion Activity Workbook
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      <span className="font-semibold">Signed First Edition Copy</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      Digital Access to the Focus Flame Academy
-                    </li>
-                  </ul>
-                  <p className="text-xs text-navy-400 mb-4">Limited First Edition Release</p>
-                  {isHardcoverBundleCheckoutUnavailable && !hardcoverBundleLoading ? (
-                    <p className="text-sm font-semibold text-red-700 mb-3">
-                      Checkout is temporarily unavailable. Please try again shortly.
-                    </p>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={handleHardcoverBundleCheckout}
-                    disabled={isHardcoverBundleCheckoutUnavailable}
-                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 shadow-[0_10px_24px_rgba(245,210,107,0.35)] transition hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(245,210,107,0.45)] active:translate-y-0 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
-                    style={{ backgroundColor: '#F2D06B' }}
-                  >
-                    {hardcoverBundleLoading ? 'Loading checkout...' : 'Pre-order Hardcover Bundle'}
-                  </button>
-                </div>
-
-                {/* Block 3: Paperback Edition */}
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-                    <h3 className="font-display font-bold text-navy-500 text-lg">Paperback Edition</h3>
-                    <span className="font-bold text-navy-600 text-xl">$30</span>
-                  </div>
-                  <ul className="space-y-1.5 mb-4 text-sm text-navy-600">
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      132-page full-color paperback
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-navy-400/60 mr-2 mt-0.5 flex-shrink-0">•</span>
-                      Perfect for young readers & classrooms
-                    </li>
-                  </ul>
-                  <button
-                    type="button"
-                    onClick={() => productLinks.paperback && openExternalUrl(productLinks.paperback)}
-                    className="w-full md:w-auto inline-flex items-center justify-center rounded-full border-2 border-navy-500 bg-transparent px-7 py-4 text-[16px] font-semibold text-navy-600 transition hover:bg-navy-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-300 focus-visible:ring-offset-2"
-                  >
-                    Pre-order Paperback
-                  </button>
-                </div>
-
-                {/* Digital - Secondary */}
-                <button
-                  type="button"
-                  onClick={handleDigitalClick}
-                  aria-describedby="digital-download-notice"
-                  className="w-full md:w-auto inline-flex items-center justify-center rounded-full border border-gray-300 bg-white px-6 py-3 text-[15px] font-medium text-navy-600 transition hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-300 focus-visible:ring-offset-2"
-                >
-                  Download Digital Edition
-                </button>
+              <div className="mb-6">
+                <BookstoreOffers />
               </div>
 
               {/* Trust Line */}
               <p className="text-xs text-navy-400 mb-6">
                 First print copies are part of the official launch edition of Caiden's Courage.
               </p>
-              <GlobalNotification
-                show={showDigitalNotice}
-                title="Digital edition coming soon"
-                message="Digital downloads aren't available for pre-order yet — please grab your physical copy while supplies last."
-                tone="info"
-                durationMs={4000}
-                autoClose
-                onClose={() => setShowDigitalNotice(false)}
-              />
             </div>
           </div>
         </div>
@@ -805,7 +671,7 @@ const Product: React.FC = () => {
             <InsideCard
               title="A Big Adventure"
               bullets={[
-                "Full-color graphic novel (30+ pages)",
+                "132-page full-color graphic novel",
                 "Fantasy, friendship, and courage",
                 "A story kids actually want to finish"
               ]}

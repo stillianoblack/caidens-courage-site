@@ -8,6 +8,7 @@ import Button from '../ui/Button';
 import useHashScroll from '../../hooks/useHashScroll';
 import type { PersonaPageConfig } from '../../config/personaPages';
 import { trackCtaClick, trackSalesFunnel } from '../../lib/analytics';
+import { isStripeCheckoutUrl, visibleCheckoutHref } from '../../lib/checkoutEnvironment';
 
 type PersonaMarketingPageProps = {
   config: PersonaPageConfig;
@@ -118,12 +119,16 @@ function PricingTierCard({ tier }: { tier: PersonaPageConfig['pricing'][number] 
 
       {tier.cta ? (
         <div className="mt-auto pt-8">
-          {tier.cta.external || tier.cta.href.startsWith('http') ? (
+          {isStripeCheckoutUrl(tier.cta.href) && !visibleCheckoutHref(tier.cta.href) ? (
+            <Button variant="primary" size="lg" leftIconSrc={null} className="w-full" disabled>
+              {tier.cta.label}
+            </Button>
+          ) : tier.cta.external || tier.cta.href.startsWith('http') ? (
             <Button
               variant="primary"
               size="lg"
               as="a"
-              href={tier.cta.href}
+              href={visibleCheckoutHref(tier.cta.href) || tier.cta.href}
               target="_blank"
               rel="noopener noreferrer"
               leftIconSrc={null}

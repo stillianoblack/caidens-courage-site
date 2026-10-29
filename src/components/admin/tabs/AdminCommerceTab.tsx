@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminAcademyMembershipPanel from './AdminAcademyMembershipPanel';
 import AdminCommerceProductsTab from './AdminCommerceProductsTab';
 import AdminPricingPlansTab from './AdminPricingPlansTab';
 
@@ -53,7 +54,10 @@ export default function AdminCommerceTab({
       {activeSubtab === 'products' ? (
         <AdminCommerceProductsTab onCopied={onCopied} />
       ) : (
-        <AdminPricingPlansTab onCopied={onCopied} />
+        <>
+          <AdminAcademyMembershipPanel />
+          <AdminPricingPlansTab onCopied={onCopied} />
+        </>
       )}
     </div>
   );

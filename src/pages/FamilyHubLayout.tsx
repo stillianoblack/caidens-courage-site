@@ -44,6 +44,8 @@ import KidPlayFamilySoftLockGate from '../components/kid-play-shell/KidPlayFamil
 import { isKidPlayFamilySoftLocked } from '../lib/kidPlayFamilySoftLock';
 import FamilyParentOnboardingGate from '../components/family-portal/FamilyParentOnboardingGate';
 import { resolvePwaStandaloneLaunchPath } from '../lib/pwaStandaloneLaunch';
+import { isProtectedAcademyPath } from '../lib/academyAccessPaths';
+import AcademyMembershipGate from '../components/family-portal/AcademyMembershipGate';
 import '../components/family-portal/parent-first-login-wizard.css';
 
 export default function FamilyHubLayout() {
@@ -162,11 +164,19 @@ function FamilyHubLayoutContent() {
     return null;
   }
 
+  const gatedOutlet = isProtectedAcademyPath(location.pathname) ? (
+    <AcademyMembershipGate programCode={programCode}>
+      <Outlet />
+    </AcademyMembershipGate>
+  ) : (
+    <Outlet />
+  );
+
   if (isPlayPauseRoute) {
     return (
       <ActiveParticipantProvider programCode={programCode}>
         <Suspense fallback={<PortalRouteLoader message="Loading..." />}>
-          <Outlet />
+          {gatedOutlet}
         </Suspense>
       </ActiveParticipantProvider>
     );
@@ -216,7 +226,7 @@ function FamilyHubLayoutContent() {
         >
           <FamilyPortalDevDiagnosticBanner />
           <Suspense fallback={<PortalRouteLoader message="Loading Family Portal..." />}>
-            <Outlet />
+            {gatedOutlet}
           </Suspense>
         </AppShell>
       </div>

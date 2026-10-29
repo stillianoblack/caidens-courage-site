@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import { initAnalytics } from './lib/analytics';
+import { captureBookstoreRecoveryToken } from './lib/bookstoreRecoveryHandoff';
+import { captureAcademyClaimToken } from './lib/academyClaimHandoff';
 import { APP_VERSION, logAppVersion } from './lib/appVersion';
+import { installCheckoutNavigationGuard } from './lib/checkoutNavigationGuard';
 import { installInternalLinkReloadFallback } from './lib/internalLinkReloadFallback';
 import { installPortalClickDebug } from './lib/portalClickDebug';
 import App from './App';
@@ -34,7 +37,10 @@ function initAnalyticsAfterFirstPaint() {
   window.setTimeout(run, 1500);
 }
 
+captureBookstoreRecoveryToken();
+captureAcademyClaimToken();
 installInternalLinkReloadFallback();
+installCheckoutNavigationGuard();
 installPortalClickDebug();
 initAnalyticsAfterFirstPaint();
 logAppVersion();

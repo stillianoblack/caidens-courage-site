@@ -60,6 +60,7 @@ async function sendResendEmail(payload) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        ...(payload.idempotencyKey ? { 'Idempotency-Key': payload.idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from,
@@ -108,6 +109,56 @@ function sendInactiveReminderEmail(payload) {
   return sendResendEmail(payload);
 }
 
+function resendConfigured() {
+  return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
+}
+
+function bookstoreRecoveryEmailHtml(downloadPageUrl) {
+  const href = escapeHtml(downloadPageUrl);
+  return brandedShell(
+    'Your download link',
+    `
+      <p style="margin:0 0 18px;">Use this one-time link to open your digital edition download page. It expires in 30 minutes and works once.</p>
+      <p style="margin:0 0 20px;"><a href="${href}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#e5c06a;color:#10213d;text-decoration:none;font-weight:700;">Open download page</a></p>
+      <p style="margin:0;color:#a7b4cc;">This email does not include the book file. When you need the book again, request a new link from My Books.</p>
+    `,
+  );
+}
+
+function academyClaimEmailHtml({ claimUrl, days, productTitle }) {
+  const href = escapeHtml(claimUrl);
+  return brandedShell(
+    'Activate your Academy access',
+    `
+      <p style="margin:0 0 18px;">Thank you for purchasing ${escapeHtml(productTitle)}. A parent can activate ${escapeHtml(String(days))} days of Focus Flame Academy access for the family.</p>
+      <p style="margin:0 0 18px;">This invitation expires in 30 minutes and works once. The access period starts when you activate it, not when you bought the bundle. Activate within 180 days of purchase. This does not start a paid membership.</p>
+      <p style="margin:0 0 20px;"><a href="${href}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#e5c06a;color:#10213d;text-decoration:none;font-weight:700;">Activate Academy access</a></p>
+      <p style="margin:0;color:#a7b4cc;">If this link expires, request another invitation from the bookstore claim page. The new link is sent only to the purchase email.</p>
+    `,
+  );
+}
+
+function sendAcademyClaimEmail(payload) {
+  return sendResendEmail({
+    to: payload.to,
+    subject: 'Activate your Focus Flame Academy access',
+    html: academyClaimEmailHtml(payload),
+    text: `Activate ${payload.days} days of Focus Flame Academy access for ${payload.productTitle}. Open this one-time link: ${payload.claimUrl}\nThe link expires in 30 minutes. Access starts when a parent activates it and must be claimed within 180 days of purchase. This does not start a paid membership.`,
+    idempotencyKey: payload.idempotencyKey,
+  });
+}
+
+function sendBookstoreRecoveryEmail(payload) {
+  const downloadPageUrl = payload.downloadPageUrl;
+  return sendResendEmail({
+    to: payload.to,
+    subject: 'Your Caiden Vale download link',
+    html: bookstoreRecoveryEmailHtml(downloadPageUrl),
+    text: `Open this one-time download page: ${downloadPageUrl}\nThe link expires in 30 minutes and works once. This email does not include the book file.`,
+    idempotencyKey: payload.idempotencyKey,
+  });
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendAccessCodeEmail,
@@ -115,4 +166,7 @@ module.exports = {
   sendCertificateEmail,
   sendMissionCompletedEmail,
   sendInactiveReminderEmail,
+  sendBookstoreRecoveryEmail,
+  sendAcademyClaimEmail,
+  resendConfigured,
 };
