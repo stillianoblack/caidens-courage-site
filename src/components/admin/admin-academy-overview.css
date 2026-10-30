@@ -20,7 +20,7 @@
 .academyOverview-populations dt { color: #66758a; font-size: .72rem; }
 .academyOverview-populations dd { margin: .15rem 0 0; color: #14345f; font-weight: 850; }
 .academyOverview-panel--formal { border-color: #d5c27b; background: #fffdf5; }
-.academyOverview-sectionHeading { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.academyOverview-sectionHeading { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
 .academyOverview-sectionHeading h3 { margin: .1rem 0 .35rem; }
 .academyOverview-scopeBadge { display: inline-flex; width: max-content; border-radius: 999px; background: #e7f0fb; color: #174f88; padding: .28rem .55rem; font-size: .65rem; font-weight: 850; }
 .academyOverview-programTableWrap { overflow-x: auto; margin-top: 1rem; }
