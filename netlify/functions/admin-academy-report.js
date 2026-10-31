@@ -198,12 +198,17 @@ function executiveShareoutPdf(academy) {
     academy.cohortSummary.latestActivity || preparedAt,
   );
   const a = academy.aggregate;
-  const asset = (name) => {
-    const candidate = path.join(__dirname, '..', '..', 'public', name);
-    return fs.existsSync(candidate) ? candidate : null;
-  };
-  const logo = asset('logo.png');
-  const hero = asset('images/CaidensCourage_SocialImage.png');
+  const firstExisting = (candidates) => candidates.find((candidate) => fs.existsSync(candidate)) || null;
+  // Static paths only. A variable joined onto public/ makes the bundler package the whole directory.
+  // The function-root paths match Netlify included_files. The source-relative paths match local runs.
+  const logo = firstExisting([
+    path.join(__dirname, 'public', 'logo.png'),
+    path.join(__dirname, '..', '..', 'public', 'logo.png'),
+  ]);
+  const hero = firstExisting([
+    path.join(__dirname, 'public', 'images', 'CaidensCourage_SocialImage.png'),
+    path.join(__dirname, '..', '..', 'public', 'images', 'CaidensCourage_SocialImage.png'),
+  ]);
   const page = (eyebrow, title, intro) => {
     doc.addPage();
     doc.fillColor(BRAND.gold).font('Helvetica-Bold').fontSize(8).text(eyebrow.toUpperCase(), { characterSpacing: 1.2 });
