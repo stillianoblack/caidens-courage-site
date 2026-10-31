@@ -11,19 +11,13 @@ import {
   HARDCOVER_BUNDLE_UPGRADE_NOTE,
   BUNDLE_CLAIM_WINDOW_NOTE,
   FOUNDERS_EDITION_MESSAGE,
-  HISTORICAL_HARDCOVER_DETAILS,
-  HISTORICAL_HARDCOVER_PAYMENT_LINK,
-  HISTORICAL_HARDCOVER_TITLE,
-  HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL,
 } from '../../config/bookstoreCatalog';
 import { PARENTS_PATH } from '../../config/courageRoutes';
 import { productLinks, openExternalUrl } from '../../config/externalLinks';
-import { useCommerceProduct } from '../../hooks/useCommerceProduct';
 import { useBookstoreProducts } from '../../hooks/useBookstoreProducts';
-import { HARDCOVER_BUNDLE_KEY, isApprovedStripeCheckoutUrl } from '../../lib/commerceProductsService';
+import { isApprovedStripeCheckoutUrl } from '../../lib/commerceProductsService';
 import { navigateToVerifiedTestCheckout, paymentLinkCheckoutAllowed } from '../../lib/checkoutEnvironment';
 import {
-  historicalHardcoverCheckoutTarget,
   resolveBookstoreOffer,
   type ResolvedBookstoreOffer,
 } from '../../lib/bookstoreOffers';
@@ -85,56 +79,6 @@ function openBookstorePaymentLink(url: string) {
   if (!isApprovedStripeCheckoutUrl(url)) return;
   if (url.includes('cs_test_') || url.includes('cs_live_')) return;
   openExternalUrl(url);
-}
-
-function HistoricalHardcoverOffer() {
-  const { product, loading, error } = useCommerceProduct(HARDCOVER_BUNDLE_KEY);
-  const target = historicalHardcoverCheckoutTarget(product);
-  const checkoutOpen = Boolean(target) && paymentLinkCheckoutAllowed();
-
-  if (loading) {
-    return <p className="text-sm text-navy-500">Loading the current hardcover pre-order...</p>;
-  }
-
-  if (error || !target) {
-    return (
-      <section aria-label="Current hardcover pre-order" className="rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy-400">Existing pre-order</p>
-        <p className="mt-2 text-sm leading-relaxed text-navy-600">
-          The current hardcover bundle checkout is hidden until its Stripe price and contents are confirmed.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section aria-label="Current hardcover pre-order" className="rounded-2xl border-2 border-navy-200 bg-white p-4 sm:p-5 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy-400">
-        Existing pre-order · separate from Founder&apos;s Reserve
-      </p>
-      <div className="mt-2 flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="font-display text-lg font-bold text-navy-500">{HISTORICAL_HARDCOVER_TITLE}</h3>
-        <span className="text-xl font-bold text-navy-600">{HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL}</span>
-      </div>
-      <ul className="mt-3 space-y-1.5 text-sm text-navy-600">
-        {HISTORICAL_HARDCOVER_DETAILS.map((detail) => (
-          <li key={detail}>{detail}</li>
-        ))}
-      </ul>
-      <p className="mt-3 text-sm leading-relaxed text-navy-500">
-        Product price {HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL}. Shipping is added at checkout.
-      </p>
-      <button
-        type="button"
-        className={`${goldButtonClass} mt-4`}
-        style={{ backgroundColor: '#F2D06B' }}
-        disabled={!checkoutOpen}
-        onClick={() => openBookstorePaymentLink(HISTORICAL_HARDCOVER_PAYMENT_LINK)}
-      >
-        Pre-order current hardcover bundle
-      </button>
-    </section>
-  );
 }
 
 function displayDetails(offer: ResolvedBookstoreOffer): string[] {
@@ -281,8 +225,6 @@ export default function BookstoreOffers() {
         </summary>
         <p className="mt-3 text-sm leading-relaxed text-navy-600">{FOUNDERS_EDITION_MESSAGE}</p>
       </details>
-
-      <HistoricalHardcoverOffer />
 
       {previewCheckoutClosed && !error ? (
         <p className="text-sm text-navy-500">Purchases are disabled in this preview.</p>

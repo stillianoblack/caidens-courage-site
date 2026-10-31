@@ -12,25 +12,15 @@ import {
   BUNDLE_CLAIM_WINDOW_NOTE,
   HISTORICAL_HARDCOVER_PAYMENT_LINK,
   HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK,
-  HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL,
 } from '../../config/bookstoreCatalog';
 import { productLinks } from '../../config/externalLinks';
-import { historicalHardcoverCheckoutTarget, kindleAsinFromUrl, resolveBookstoreOffer } from '../bookstoreOffers';
+import { kindleAsinFromUrl, resolveBookstoreOffer } from '../bookstoreOffers';
 import type { CommerceProduct } from '../../types/commerce';
 
 const mockCheckoutAllowed = jest.fn(() => false);
-const mockCommerceState: { product: CommerceProduct | null; loading: boolean; error: Error | null } = {
-  product: null,
-  loading: false,
-  error: null,
-};
 
 jest.mock('../../hooks/useBookstoreProducts', () => ({
   useBookstoreProducts: () => ({ products: {}, loading: false, error: null }),
-}));
-
-jest.mock('../../hooks/useCommerceProduct', () => ({
-  useCommerceProduct: () => mockCommerceState,
 }));
 
 jest.mock('../../lib/checkoutEnvironment', () => {
@@ -73,22 +63,9 @@ function serverProduct(overrides: Partial<CommerceProduct>): CommerceProduct {
   };
 }
 
-function historicalProduct(overrides: Partial<CommerceProduct> = {}): CommerceProduct {
-  return serverProduct({
-    key: 'hardcover_bundle',
-    title: 'Pre-Order Bundle',
-    displayPriceCents: 5999,
-    paymentLinkUrl: HISTORICAL_HARDCOVER_PAYMENT_LINK,
-    ...overrides,
-  });
-}
-
 describe('bookstore release offers', () => {
   beforeEach(() => {
     mockCheckoutAllowed.mockReturnValue(false);
-    mockCommerceState.product = null;
-    mockCommerceState.loading = false;
-    mockCommerceState.error = null;
   });
 
   test('keeps new products closed and preserves the sold-out founders section', () => {
@@ -106,8 +83,12 @@ describe('bookstore release offers', () => {
     expect(screen.getAllByText('Purchases are disabled in this preview.')).toHaveLength(1);
     expect(screen.queryByText('Checkout is temporarily unavailable. Please try again shortly.')).not.toBeInTheDocument();
     expect(screen.queryByText(/Already Purchased/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/hidden until its Stripe price and contents are confirmed/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Existing pre-order/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Hardcover + Companion Workbook')).not.toBeInTheDocument();
+    expect(screen.queryByText('$59.00')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Pre-order current hardcover bundle' })).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain(HISTORICAL_HARDCOVER_PAYMENT_LINK);
+    expect(container.innerHTML).not.toContain(HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK);
     expect(screen.getByRole('radio', { name: 'Hardcover From $49.99' })).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByRole('button', { name: 'Get the Hardcover Bundle' })).toBeDisabled();
     expect(screen.getAllByText('$75.99').length).toBeGreaterThan(0);
@@ -139,12 +120,11 @@ describe('bookstore release offers', () => {
     expect(author.getAttribute('href')).not.toBe(kindle.getAttribute('href'));
   });
 
-  test('opens only the verified historical and paperback targets', () => {
-    mockCommerceState.product = historicalProduct();
+  test('opens the paperback checkout and leaves the historical bundle off the storefront', () => {
     mockCheckoutAllowed.mockReturnValue(true);
     const open = jest.spyOn(window, 'open').mockImplementation(() => null);
 
-    render(
+    const { container } = render(
       <MemoryRouter>
         <BookstoreOffers />
       </MemoryRouter>,
@@ -152,16 +132,19 @@ describe('bookstore release offers', () => {
 
     expect(screen.queryByText('Purchases are disabled in this preview.')).not.toBeInTheDocument();
     expect(screen.getByText('Checkout is temporarily unavailable. Please try again shortly.')).toBeInTheDocument();
-    expect(screen.getByText(HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL)).toBeInTheDocument();
-    expect(screen.queryByText('$59.99', { selector: 'section[aria-label="Current hardcover pre-order"] *' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Pre-order current hardcover bundle' }));
-    expect(open).toHaveBeenCalledWith(HISTORICAL_HARDCOVER_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
-    expect(open).not.toHaveBeenCalledWith(HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+    expect(screen.queryByText(/Existing pre-order/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Hardcover + Companion Workbook')).not.toBeInTheDocument();
+    expect(screen.queryByText('$59.00')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pre-order current hardcover bundle' })).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain(HISTORICAL_HARDCOVER_PAYMENT_LINK);
+    expect(container.innerHTML).not.toContain(HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Paperback From $30' }));
     fireEvent.click(screen.getByRole('radio', { name: /Paperback Edition/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Pre-order Paperback' }));
     expect(open).toHaveBeenCalledWith(productLinks.paperback, '_blank', 'noopener,noreferrer');
+    expect(open).not.toHaveBeenCalledWith(HISTORICAL_HARDCOVER_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+    expect(open).not.toHaveBeenCalledWith(HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
     open.mockRestore();
   });
 
@@ -184,13 +167,6 @@ describe('bookstore release offers', () => {
       expect(offer.paymentLink).not.toBe(paymentLinkUrl);
     }
     delete process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED;
-
-    expect(historicalHardcoverCheckoutTarget(historicalProduct())).toBe(HISTORICAL_HARDCOVER_PAYMENT_LINK);
-    expect(historicalHardcoverCheckoutTarget(historicalProduct({
-      paymentLinkUrl: HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK,
-    }))).toBeNull();
-    expect(historicalHardcoverCheckoutTarget(historicalProduct({ displayPriceCents: 7599 }))).toBeNull();
-    expect(historicalHardcoverCheckoutTarget(historicalProduct({ displayPriceCents: 5900 }))).toBeNull();
 
     const paperback = BOOKSTORE_PRODUCTS.find((product) => product.key === 'paperback')!;
     mockCheckoutAllowed.mockReturnValue(true);

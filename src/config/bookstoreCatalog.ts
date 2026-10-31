@@ -36,28 +36,15 @@ export const FOUNDERS_EDITION_MESSAGE =
   "Thank you to everyone who believed in Caiden from the very beginning. Every Founder's Edition preorder has been upgraded to the new hardcover edition as a thank-you for helping bring this world to life. You'll always be the first Guardians of the Focus Flame.";
 
 /**
- * Production hardcover_bundle Payment Link verified on 2026-10-29.
- * Stripe charges $59.00 for the book and adds shipping at checkout.
- * The catalog row still says 5999 cents, so that figure is only a fingerprint.
+ * Reserved production hardcover_bundle Payment Links.
+ * They stay on the historical catalog row and must not be shown or reused
+ * by a new storefront offer.
  */
 export const HISTORICAL_HARDCOVER_PAYMENT_LINK =
   'https://buy.stripe.com/4gMaEW3DVcWkdAHebS3Ru07';
 
 export const HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK =
   'https://buy.stripe.com/fZufZggqHbSg7cjd7O3Ru04';
-
-export const HISTORICAL_HARDCOVER_CATALOG_CENTS = 5999;
-
-export const HISTORICAL_HARDCOVER_VERIFIED_PRICE_LABEL = '$59.00';
-
-export const HISTORICAL_HARDCOVER_TITLE = 'Hardcover + Companion Workbook';
-
-export const HISTORICAL_HARDCOVER_DETAILS = [
-  '132-page hardcover graphic novel',
-  'Courage Companion activity workbook',
-  'First edition print',
-  'Limited first print run',
-] as const;
 
 export const DIGITAL_COVER_SRC = '/images/Caiden-vale-book/Caiden-vale-book.webp';
 

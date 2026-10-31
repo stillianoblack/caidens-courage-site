@@ -2,7 +2,6 @@ import {
   AMAZON_AUTHOR_PAGE_URL,
   AMAZON_KINDLE_PRODUCT_URL,
   BOOKSTORE_KEYS,
-  HISTORICAL_HARDCOVER_CATALOG_CENTS,
   HISTORICAL_HARDCOVER_PAYMENT_LINK,
   HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK,
   type BookstoreProductDefinition,
@@ -92,20 +91,6 @@ function isReservedHistoricalPaymentLink(value: string | null | undefined): bool
     || link === HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK
     || link.includes('4gMaEW3DVcWkdAHebS3Ru07')
     || link.includes('fZufZggqHbSg7cjd7O3Ru04');
-}
-
-export function historicalHardcoverCheckoutTarget(product: Pick<
-  CommerceProduct,
-  'key' | 'isActive' | 'currency' | 'displayPriceCents' | 'paymentLinkUrl'
-> | null): string | null {
-  if (!product) return null;
-  if (product.key !== BOOKSTORE_KEYS.legacyHardcoverBundle) return null;
-  if (!product.isActive) return null;
-  if (String(product.currency || '').toLowerCase() !== 'usd') return null;
-  if (product.displayPriceCents !== HISTORICAL_HARDCOVER_CATALOG_CENTS) return null;
-  const link = String(product.paymentLinkUrl || '').trim();
-  if (link !== HISTORICAL_HARDCOVER_PAYMENT_LINK) return null;
-  return HISTORICAL_HARDCOVER_PAYMENT_LINK;
 }
 
 function availabilityFor(
