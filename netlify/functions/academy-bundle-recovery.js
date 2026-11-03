@@ -1,6 +1,6 @@
 const { sendAcademyClaimEmail } = require('./_lib/emailProvider');
 const { getServiceClient, jsonResponse, publicSiteOrigin } = require('./_lib/bookstoreDelivery');
-const { createInvitationToken, hashClaimCode, normalizeEmail } = require('./_lib/academyMembership');
+const { academyClaimOrigin, createInvitationToken, hashClaimCode, normalizeEmail } = require('./_lib/academyMembership');
 
 const PUBLIC_MESSAGE = 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.';
 
@@ -41,6 +41,9 @@ exports.handler = async function academyBundleRecovery(event) {
     return jsonResponse(200, { message: PUBLIC_MESSAGE });
   }
 
+  const origin = academyClaimOrigin(publicSiteOrigin());
+  if (!origin) return jsonResponse(503, { error: 'staging_origin_required', message: PUBLIC_MESSAGE });
+
   const token = createInvitationToken();
   const { error } = await client.from('academy_claim_tokens').insert({
     claim_id: claim.id,
@@ -50,7 +53,6 @@ exports.handler = async function academyBundleRecovery(event) {
   });
   if (error) return jsonResponse(200, { message: PUBLIC_MESSAGE });
 
-  const origin = publicSiteOrigin().replace(/\/$/, '');
   const sent = await sendAcademyClaimEmail({
     to: email,
     claimUrl: `${origin}/story/books/claim#token=${encodeURIComponent(token)}`,

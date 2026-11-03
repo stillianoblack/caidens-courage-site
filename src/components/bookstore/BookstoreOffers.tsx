@@ -28,15 +28,19 @@ function OfferCard({
   offer,
   onDigitalCheckout,
   onBundleCheckout,
+  onPhysicalCheckout,
   digitalMessage,
   bundleMessage,
+  physicalMessage,
   catalogLoading,
 }: {
   offer: ResolvedBookstoreOffer;
   onDigitalCheckout: () => void;
   onBundleCheckout: () => void;
+  onPhysicalCheckout: () => void;
   digitalMessage: string | null;
   bundleMessage: string | null;
+  physicalMessage: string | null;
   catalogLoading: boolean;
 }) {
   const featured = offer.featured || offer.key === BOOKSTORE_KEYS.adventureBundle;
@@ -113,6 +117,7 @@ function OfferCard({
               onClick={() => {
                 if (offer.checkoutMode === 'digital_session') onDigitalCheckout();
                 if (offer.checkoutMode === 'bundle_session') onBundleCheckout();
+                if (offer.checkoutMode === 'physical_session') onPhysicalCheckout();
                 if (offer.checkoutMode === 'payment_link' && offer.paymentLink) openExternalUrl(offer.paymentLink);
               }}
             >
@@ -141,6 +146,9 @@ function OfferCard({
           {bundleMessage && (offer.key === BOOKSTORE_KEYS.paperbackBundle || offer.key === BOOKSTORE_KEYS.adventureBundle) ? (
             <p className="mt-3 text-sm font-semibold text-red-700">{bundleMessage}</p>
           ) : null}
+          {physicalMessage && offer.key === BOOKSTORE_KEYS.hardcover ? (
+            <p className="mt-3 text-sm font-semibold text-red-700">{physicalMessage}</p>
+          ) : null}
           {!catalogLoading && !offer.legacy && offer.checkoutMode === 'none' && offer.key !== 'digital_edition' && offer.cta ? (
             <p className="mt-3 text-sm font-semibold text-red-700">
               Checkout is temporarily unavailable. Please try again shortly.
@@ -163,6 +171,7 @@ export default function BookstoreOffers() {
   const { products, loading, error } = useBookstoreProducts();
   const [digitalMessage, setDigitalMessage] = useState<string | null>(null);
   const [bundleMessage, setBundleMessage] = useState<string | null>(null);
+  const [physicalMessage, setPhysicalMessage] = useState<string | null>(null);
   const [digitalPending, setDigitalPending] = useState(false);
   const kindleEnvUrl = process.env.REACT_APP_KINDLE_PRODUCT_URL;
 
@@ -215,6 +224,27 @@ export default function BookstoreOffers() {
     }
   };
 
+  const startPhysicalCheckout = async () => {
+    setPhysicalMessage(null);
+    setDigitalPending(true);
+    try {
+      const response = await fetch('/.netlify/functions/bookstore-physical-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productKey: BOOKSTORE_KEYS.hardcover }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.url || !navigateToVerifiedTestCheckout(payload.url)) {
+        setPhysicalMessage('Hardcover checkout is not open.');
+        return;
+      }
+    } catch {
+      setPhysicalMessage('Hardcover checkout is not open.');
+    } finally {
+      setDigitalPending(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4" aria-busy={loading}>
       {error ? (
@@ -231,12 +261,16 @@ export default function BookstoreOffers() {
           }}
           digitalMessage={digitalMessage}
           bundleMessage={bundleMessage}
+          physicalMessage={physicalMessage}
           catalogLoading={loading}
           onDigitalCheckout={() => {
             void startDigitalCheckout();
           }}
           onBundleCheckout={() => {
             void startBundleCheckout(offer.key);
+          }}
+          onPhysicalCheckout={() => {
+            void startPhysicalCheckout();
           }}
         />
       ))}

@@ -4,10 +4,17 @@ const MONTHLY_CENTS = 999;
 const ANNUAL_CENTS = 9900;
 const PAPERBACK_BUNDLE_KEY = 'courage_adventure_paperback_bundle';
 const HARDCOVER_BUNDLE_KEY = 'courage_adventure_bundle';
+const HARDCOVER_EDITION_KEY = 'hardcover';
+const HARDCOVER_EDITION_CENTS = 4999;
 const PAPERBACK_BUNDLE_DAYS = 30;
 const HARDCOVER_BUNDLE_DAYS = 90;
+const RESERVED_HISTORICAL_PAYMENT_LINK_IDS = [
+  '4gMaEW3DVcWkdAHebS3Ru07',
+  'fZufZggqHbSg7cjd7O3Ru04',
+];
 const TRANSITION_DAYS = 30;
 const UNCLAIMED_OFFER_DAYS = 180;
+const STAGING_CLAIM_ORIGIN = 'https://caidens-courage-staging.netlify.app';
 const ACCESS_STATUSES = new Set(['active', 'trialing']);
 
 const PLANS = {
@@ -302,11 +309,61 @@ function decryptClaimCode(payload, secret) {
   ]).toString('utf8');
 }
 
+const CHECKOUT_SHIPPING_COUNTRIES = ['US'];
+
 function approvedShippingRateIds(value) {
   return String(value || '')
     .split(',')
     .map((item) => item.trim())
     .filter((item) => item.startsWith('shr_'));
+}
+
+function applyCheckoutShippingCountries(body) {
+  CHECKOUT_SHIPPING_COUNTRIES.forEach((country, index) => {
+    body.set(`shipping_address_collection[allowed_countries][${index}]`, country);
+  });
+}
+
+function shippingCountryAllowed(country) {
+  return CHECKOUT_SHIPPING_COUNTRIES.includes(String(country || '').trim().toUpperCase());
+}
+
+function isReservedHistoricalPaymentLink(value) {
+  const link = String(value || '');
+  return RESERVED_HISTORICAL_PAYMENT_LINK_IDS.some((id) => link.includes(id));
+}
+
+function academyClaimOrigin(origin) {
+  try {
+    const url = new URL(String(origin || ''));
+    if (url.protocol !== 'https:' || url.origin !== STAGING_CLAIM_ORIGIN) return null;
+    return STAGING_CLAIM_ORIGIN;
+  } catch {
+    return null;
+  }
+}
+
+function stripeProductIdFrom(price) {
+  if (!price) return null;
+  if (typeof price.product === 'string') return price.product;
+  return price.product?.id || null;
+}
+
+function bundlePriceMatches(price, plan) {
+  const productId = stripeProductIdFrom(price);
+  return Boolean(
+    price
+    && price.id === plan.priceId
+    && price.livemode !== true
+    && price.active !== false
+    && price.unit_amount === plan.amountCents
+    && String(price.currency || '').toLowerCase() === 'usd'
+    && productId
+    && productId === plan.stripeProductId
+    && String(productId).startsWith('prod_')
+    && !price.recurring
+    && price.type !== 'recurring',
+  );
 }
 
 function planBundleCheckout({
@@ -320,14 +377,20 @@ function planBundleCheckout({
   if (stripeKeyMode(secretKey) !== 'test') return { ok: false, status: 503, reason: 'checkout_not_configured' };
   if (salesEnabled !== true) return { ok: false, status: 409, reason: 'bundle_sales_disabled' };
   if (emailConfigured !== true) return { ok: false, status: 409, reason: 'invitation_email_not_configured' };
-  if (!product || product.key === 'hardcover_bundle') return { ok: false, status: 409, reason: 'historical_record_locked' };
+  if (!product || product.key === 'hardcover_bundle' || isReservedHistoricalPaymentLink(product.paymentLinkUrl)) {
+    return { ok: false, status: 409, reason: 'historical_record_locked' };
+  }
   const days = bundleDurationDays(product.key);
   if (!days) return { ok: false, status: 404, reason: 'unknown_product' };
   const expected = days === PAPERBACK_BUNDLE_DAYS ? 5999 : 7599;
   if (product.displayPriceCents !== expected || String(product.currency || '').toLowerCase() !== 'usd') {
     return { ok: false, status: 409, reason: 'price_mismatch' };
   }
-  if (product.isActive !== true || !String(product.stripePriceId || '').startsWith('price_') || !product.paymentLinkVerifiedAt) {
+  if (
+    product.isActive !== true
+    || !String(product.stripePriceId || '').startsWith('price_')
+    || !String(product.stripeProductId || '').startsWith('prod_')
+  ) {
     return { ok: false, status: 409, reason: 'price_not_verified' };
   }
   const rates = approvedShippingRateIds(Array.isArray(shippingRateIds) ? shippingRateIds.join(',') : shippingRateIds);
@@ -340,12 +403,49 @@ function planBundleCheckout({
     currency: 'usd',
     days,
     priceId: product.stripePriceId,
+    stripeProductId: product.stripeProductId,
+    shippingRateIds: rates,
+  };
+}
+
+function planPhysicalCheckout({
+  secretKey,
+  salesEnabled,
+  product,
+  shippingRateIds = [],
+}) {
+  if (stripeKeyMode(secretKey) === 'live') return { ok: false, status: 409, reason: 'live_billing_disabled' };
+  if (stripeKeyMode(secretKey) !== 'test') return { ok: false, status: 503, reason: 'checkout_not_configured' };
+  if (salesEnabled !== true) return { ok: false, status: 409, reason: 'physical_sales_disabled' };
+  if (!product) return { ok: false, status: 404, reason: 'unknown_product' };
+  if (product.key === 'hardcover_bundle' || isReservedHistoricalPaymentLink(product.paymentLinkUrl)) {
+    return { ok: false, status: 409, reason: 'historical_record_locked' };
+  }
+  if (product.key !== HARDCOVER_EDITION_KEY) return { ok: false, status: 404, reason: 'unknown_product' };
+  if (product.displayPriceCents !== HARDCOVER_EDITION_CENTS || String(product.currency || '').toLowerCase() !== 'usd') {
+    return { ok: false, status: 409, reason: 'price_mismatch' };
+  }
+  if (product.isActive !== true || !String(product.stripePriceId || '').startsWith('price_') || !product.paymentLinkVerifiedAt) {
+    return { ok: false, status: 409, reason: 'price_not_verified' };
+  }
+  const rates = approvedShippingRateIds(Array.isArray(shippingRateIds) ? shippingRateIds.join(',') : shippingRateIds);
+  if (!rates.length) return { ok: false, status: 409, reason: 'shipping_not_configured' };
+  return {
+    ok: true,
+    productKey: HARDCOVER_EDITION_KEY,
+    title: product.title,
+    amountCents: HARDCOVER_EDITION_CENTS,
+    currency: 'usd',
+    days: 0,
+    purpose: 'physical_book',
+    priceId: product.stripePriceId,
     shippingRateIds: rates,
   };
 }
 
 function planBundleFulfillment({ session, approvedRates = [] }) {
   if (!session || session.metadata?.purpose !== 'academy_bundle') return { ok: false, reason: 'not_bundle' };
+  if (session.mode && session.mode !== 'payment') return { ok: false, reason: 'subscription_not_allowed' };
   const productKey = session.metadata.product_key;
   if (productKey === 'hardcover_bundle') return { ok: false, reason: 'historical_record_locked' };
   const days = bundleDurationDays(productKey);
@@ -359,6 +459,11 @@ function planBundleFulfillment({ session, approvedRates = [] }) {
     return { ok: false, reason: 'price_not_verified' };
   }
   if (price.livemode === true) return { ok: false, reason: 'live_price_rejected' };
+  if (price.recurring || price.type === 'recurring') return { ok: false, reason: 'subscription_not_allowed' };
+  const productId = stripeProductIdFrom(price);
+  if (!productId || !String(productId).startsWith('prod_') || productId !== session.metadata.stripe_product_id) {
+    return { ok: false, reason: 'price_not_verified' };
+  }
   if (price.unit_amount !== expected || String(price.currency || '').toLowerCase() !== 'usd') {
     return { ok: false, reason: 'price_mismatch' };
   }
@@ -374,6 +479,7 @@ function planBundleFulfillment({ session, approvedRates = [] }) {
   if (!address?.line1 || !address.city || !address.postal_code || !address.country) {
     return { ok: false, reason: 'shipping_address_missing' };
   }
+  if (!shippingCountryAllowed(address.country)) return { ok: false, reason: 'shipping_country_not_approved' };
   const rawRate = session.shipping_cost?.shipping_rate;
   const rateId = typeof rawRate === 'string' ? rawRate : rawRate?.id;
   if (!rateId || !String(rateId).startsWith('shr_')) return { ok: false, reason: 'shipping_method_missing' };
@@ -401,6 +507,99 @@ function planBundleFulfillment({ session, approvedRates = [] }) {
       rateId,
       methodLabel: (typeof rawRate === 'object' && rawRate.display_name) || 'Shipping',
     },
+  };
+}
+
+function planPhysicalFulfillment({ session, approvedRates = [] }) {
+  if (!session || session.metadata?.purpose !== 'physical_book') return { ok: false, reason: 'not_physical' };
+  if (session.mode && session.mode !== 'payment') return { ok: false, reason: 'subscription_not_allowed' };
+  if (session.metadata.academy_days || session.metadata.subscription) {
+    return { ok: false, reason: 'subscription_not_allowed' };
+  }
+  const productKey = session.metadata.product_key;
+  if (productKey === 'hardcover_bundle') return { ok: false, reason: 'historical_record_locked' };
+  if (productKey !== HARDCOVER_EDITION_KEY) return { ok: false, reason: 'unknown_product' };
+  if (session.payment_status !== 'paid') return { ok: false, reason: 'unpaid' };
+  if (String(session.currency || '').toLowerCase() !== 'usd') return { ok: false, reason: 'currency_mismatch' };
+  const line = session.line_items?.data?.[0];
+  const price = line && typeof line.price === 'object' ? line.price : null;
+  if (!line || line.quantity !== 1 || !price?.id || !String(price.id).startsWith('price_')) {
+    return { ok: false, reason: 'price_not_verified' };
+  }
+  if (price.livemode === true) return { ok: false, reason: 'live_price_rejected' };
+  if (price.unit_amount !== HARDCOVER_EDITION_CENTS || String(price.currency || '').toLowerCase() !== 'usd') {
+    return { ok: false, reason: 'price_mismatch' };
+  }
+  if (Number(session.metadata.amount_cents) !== HARDCOVER_EDITION_CENTS) return { ok: false, reason: 'quoted_price_mismatch' };
+  if (session.amount_subtotal !== HARDCOVER_EDITION_CENTS) return { ok: false, reason: 'subtotal_mismatch' };
+  const taxCents = Number(session.total_details?.amount_tax || 0);
+  const shippingCents = Number(session.total_details?.amount_shipping || 0);
+  if (!Number.isInteger(taxCents) || taxCents < 0 || !Number.isInteger(shippingCents) || shippingCents < 0) {
+    return { ok: false, reason: 'total_mismatch' };
+  }
+  if (session.amount_total !== HARDCOVER_EDITION_CENTS + taxCents + shippingCents) return { ok: false, reason: 'total_mismatch' };
+  const address = session.shipping_details?.address;
+  if (!address?.line1 || !address.city || !address.postal_code || !address.country) {
+    return { ok: false, reason: 'shipping_address_missing' };
+  }
+  if (!shippingCountryAllowed(address.country)) return { ok: false, reason: 'shipping_country_not_approved' };
+  const rawRate = session.shipping_cost?.shipping_rate;
+  const rateId = typeof rawRate === 'string' ? rawRate : rawRate?.id;
+  if (!rateId || !String(rateId).startsWith('shr_')) return { ok: false, reason: 'shipping_method_missing' };
+  if (approvedRates.length && !approvedRates.includes(rateId)) return { ok: false, reason: 'shipping_method_not_approved' };
+  const customerEmail = normalizeEmail(session.customer_details?.email || session.customer_email);
+  if (!customerEmail) return { ok: false, reason: 'missing_customer_email' };
+  return {
+    ok: true,
+    productKey,
+    days: 0,
+    amountCents: HARDCOVER_EDITION_CENTS,
+    taxCents,
+    shippingCents,
+    totalCents: session.amount_total,
+    currency: 'usd',
+    customerEmail,
+    shipping: {
+      name: session.shipping_details?.name || '',
+      line1: address.line1,
+      line2: address.line2 || '',
+      city: address.city,
+      state: address.state || '',
+      postalCode: address.postal_code,
+      country: address.country,
+      rateId,
+      methodLabel: (typeof rawRate === 'object' && rawRate.display_name) || 'Shipping',
+    },
+  };
+}
+
+function planCommerceRefund({ order, charge, entitlement }) {
+  if (!order) return { ok: false, mutate: false, revoke: false, reason: 'order_not_found' };
+  if (order.productKey === 'hardcover_bundle' || isReservedHistoricalPaymentLink(order.paymentLinkUrl)) {
+    return { ok: false, mutate: false, revoke: false, reason: 'historical_record_locked' };
+  }
+  const covered = new Set([HARDCOVER_EDITION_KEY, PAPERBACK_BUNDLE_KEY, HARDCOVER_BUNDLE_KEY]);
+  if (!covered.has(order.productKey)) return { ok: false, mutate: false, revoke: false, reason: 'not_applicable' };
+  if (entitlement && (
+    entitlement.kind === 'unrestricted_promise'
+    || entitlement.kind === 'subscription'
+    || entitlement.kind === 'complimentary_transition'
+    || PRESERVED_PROMISE_SOURCES.has(entitlement.promiseSource)
+  )) {
+    return { ok: true, mutate: false, revoke: false, reason: 'historical_access_preserved' };
+  }
+  const amountRefunded = Number(charge?.amount_refunded || 0);
+  const full = charge?.refunded === true
+    && Number.isInteger(amountRefunded)
+    && amountRefunded >= Number(order.amountCents)
+    && Number(order.amountCents) > 0
+    && String(charge.currency || order.currency || 'usd').toLowerCase() === 'usd';
+  if (!full) return { ok: true, mutate: false, revoke: false, reason: 'partial_refund' };
+  return {
+    ok: true,
+    mutate: true,
+    revoke: order.productKey !== HARDCOVER_EDITION_KEY && entitlement?.kind === 'bundle_included',
+    reason: 'full_refund',
   };
 }
 
@@ -446,6 +645,12 @@ async function fulfillVerifiedBundlePurchase({
     if (decision.reason === 'not_bundle') return { httpStatus: 200, outcome: 'not_applicable', granted: false };
     await store.recordEvent(event.id, event.type, decision.reason);
     return { httpStatus: 200, outcome: decision.reason, granted: false };
+  }
+  const claimOrigin = academyClaimOrigin(origin);
+  if (!claimOrigin) {
+    const error = new Error('staging_origin_required');
+    error.retryable = true;
+    throw error;
   }
 
   const order = await store.saveBundleOrder({
@@ -499,7 +704,7 @@ async function fulfillVerifiedBundlePurchase({
     tokenHash,
     expiresAt,
   });
-  const claimUrl = `${String(origin || '').replace(/\/$/, '')}/story/books/claim#token=${encodeURIComponent(token)}`;
+  const claimUrl = `${claimOrigin}/story/books/claim#token=${encodeURIComponent(token)}`;
   const sent = await mailer.send({
     to: decision.customerEmail,
     claimUrl,
@@ -525,6 +730,112 @@ function createClaimCode() {
 
 function hashClaimCode(code) {
   return crypto.createHash('sha256').update(String(code)).digest('hex');
+}
+
+function paymentIntentIdFrom(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  return value.id || null;
+}
+
+async function fulfillVerifiedPhysicalPurchase({
+  event,
+  session,
+  store,
+  now = new Date(),
+  approvedRates = [],
+}) {
+  if (!event?.id || !event.type) return { httpStatus: 400, outcome: 'invalid_event', granted: false };
+  if (await store.hasEvent(event.id)) return { httpStatus: 200, outcome: 'duplicate', granted: false };
+
+  if (event.type === 'checkout.session.async_payment_failed' || event.type === 'checkout.session.expired') {
+    if (session?.metadata?.purpose !== 'physical_book') {
+      return { httpStatus: 200, outcome: 'not_applicable', granted: false };
+    }
+    if (store.markBundleOrderStatus) {
+      await store.markBundleOrderStatus({
+        sessionId: session.id,
+        status: event.type === 'checkout.session.expired' ? 'expired' : 'failed',
+      });
+    }
+    await store.recordEvent(event.id, event.type, 'payment_not_completed');
+    return { httpStatus: 200, outcome: 'payment_not_completed', granted: false };
+  }
+
+  const decision = planPhysicalFulfillment({ session, approvedRates });
+  if (!decision.ok) {
+    if (decision.reason === 'not_physical') return { httpStatus: 200, outcome: 'not_applicable', granted: false };
+    await store.recordEvent(event.id, event.type, decision.reason);
+    return { httpStatus: 200, outcome: decision.reason, granted: false };
+  }
+
+  const order = await store.saveBundleOrder({
+    sessionId: session.id,
+    paymentIntentId: paymentIntentIdFrom(session.payment_intent),
+    productKey: decision.productKey,
+    title: session.metadata.product_title || 'Hardcover Edition',
+    amountCents: decision.totalCents,
+    currency: 'usd',
+    customerEmail: decision.customerEmail,
+    status: 'paid',
+  });
+  await store.saveFulfillment({
+    orderId: order.id,
+    sessionId: session.id,
+    ...decision.shipping,
+    shippingCents: decision.shippingCents,
+    taxCents: decision.taxCents,
+    subtotalCents: decision.amountCents,
+    fulfillmentStatus: 'unfulfilled',
+  });
+  await store.recordEvent(event.id, event.type, 'physical_order_recorded');
+  return {
+    httpStatus: 200,
+    outcome: 'physical_order_recorded',
+    granted: false,
+    academyDays: 0,
+    recordedAt: now.toISOString(),
+  };
+}
+
+async function applyCommerceRefund({ event, store, stripe }) {
+  const object = event.data?.object || {};
+  let charge = object.object === 'charge' ? object : null;
+  if (!charge && stripe?.retrieveCharge) {
+    const chargeId = typeof object.charge === 'string' ? object.charge : object.charge?.id;
+    if (chargeId) charge = await stripe.retrieveCharge(chargeId);
+  }
+  const paymentIntentId = paymentIntentIdFrom(charge?.payment_intent) || paymentIntentIdFrom(object.payment_intent);
+  if (!paymentIntentId || typeof store.findOrderByPaymentIntent !== 'function') {
+    await store.recordEvent(event.id, event.type, 'not_applicable');
+    return { httpStatus: 200, outcome: 'not_applicable', granted: false };
+  }
+  const order = await store.findOrderByPaymentIntent(paymentIntentId);
+  if (!order) {
+    await store.recordEvent(event.id, event.type, 'not_applicable');
+    return { httpStatus: 200, outcome: 'not_applicable', granted: false };
+  }
+  const entitlement = typeof store.findBundleEntitlement === 'function'
+    ? await store.findBundleEntitlement(order)
+    : null;
+  const decision = planCommerceRefund({ order, charge, entitlement });
+  if (!decision.mutate) {
+    await store.recordEvent(event.id, event.type, decision.reason);
+    return { httpStatus: 200, outcome: decision.reason, granted: false, revoked: false };
+  }
+  if (typeof store.markOrderRefunded === 'function') {
+    await store.markOrderRefunded(order.id, {
+      amountRefunded: Number(charge.amount_refunded || 0),
+      chargeId: charge.id || null,
+    });
+  }
+  let revoked = false;
+  if (decision.revoke && entitlement && typeof store.revokeBundleEntitlement === 'function') {
+    const result = await store.revokeBundleEntitlement(entitlement.id);
+    revoked = result?.revoked === true;
+  }
+  await store.recordEvent(event.id, event.type, decision.reason);
+  return { httpStatus: 200, outcome: decision.reason, granted: false, revoked };
 }
 
 async function processAcademyWebhookEvent({
@@ -574,8 +885,23 @@ async function processAcademyWebhookEvent({
     return { httpStatus: 200, outcome: 'payment_recorded', granted: false };
   }
 
-  if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_failed' || event.type === 'checkout.session.expired') {
+  if (
+    event.type === 'checkout.session.completed'
+    || event.type === 'checkout.session.async_payment_succeeded'
+    || event.type === 'checkout.session.async_payment_failed'
+    || event.type === 'checkout.session.expired'
+  ) {
     const session = event.data?.object;
+    if (session?.metadata?.purpose === 'physical_book') {
+      const verified = stripe?.retrieveCheckoutSession ? await stripe.retrieveCheckoutSession(session.id) : session;
+      return fulfillVerifiedPhysicalPurchase({
+        event,
+        session: verified,
+        store,
+        now,
+        approvedRates: stripe?.approvedRates || [],
+      });
+    }
     if (session?.metadata?.purpose !== 'academy_bundle') {
       return { httpStatus: 200, outcome: 'not_applicable', granted: false };
     }
@@ -592,6 +918,10 @@ async function processAcademyWebhookEvent({
     });
   }
 
+  if (event.type === 'charge.refunded' || event.type === 'refund.created' || event.type === 'refund.updated') {
+    return applyCommerceRefund({ event, store, stripe });
+  }
+
   return { httpStatus: 200, outcome: 'not_applicable', granted: false };
 }
 
@@ -600,6 +930,8 @@ module.exports = {
   ANNUAL_CENTS,
   PAPERBACK_BUNDLE_KEY,
   HARDCOVER_BUNDLE_KEY,
+  HARDCOVER_EDITION_KEY,
+  HARDCOVER_EDITION_CENTS,
   PAPERBACK_BUNDLE_DAYS,
   HARDCOVER_BUNDLE_DAYS,
   TRANSITION_DAYS,
@@ -620,9 +952,19 @@ module.exports = {
   planAdminPriceSave,
   buildTransitionNotice,
   planTransitionEmail,
+  CHECKOUT_SHIPPING_COUNTRIES,
   approvedShippingRateIds,
+  applyCheckoutShippingCountries,
+  shippingCountryAllowed,
+  STAGING_CLAIM_ORIGIN,
+  isReservedHistoricalPaymentLink,
+  academyClaimOrigin,
+  bundlePriceMatches,
   planBundleCheckout,
+  planPhysicalCheckout,
   planBundleFulfillment,
+  planPhysicalFulfillment,
+  planCommerceRefund,
   planClaimTokenUse,
   createInvitationToken,
   fulfillVerifiedBundlePurchase,

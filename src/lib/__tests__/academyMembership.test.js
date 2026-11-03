@@ -10,9 +10,14 @@ const {
   classifyHistoricalPromise,
   processAcademyWebhookEvent,
   planBundleCheckout,
+  planPhysicalCheckout,
+  planBundleFulfillment,
   planClaimTokenUse,
+  bundlePriceMatches,
+  applyCheckoutShippingCountries,
   PAPERBACK_BUNDLE_KEY,
   HARDCOVER_BUNDLE_KEY,
+  HARDCOVER_EDITION_KEY,
 } = require('../../../netlify/functions/_lib/academyMembership');
 
 const monthlyPrice = {
@@ -39,6 +44,7 @@ function memoryStore() {
   const orders = [];
   const fulfillments = [];
   const tokens = [];
+  const entitlements = [];
   return {
     events,
     subscriptions,
@@ -48,6 +54,7 @@ function memoryStore() {
     orders,
     fulfillments,
     tokens,
+    entitlements,
     async hasEvent(id) { return events.has(id); },
     async recordEvent(id) { events.add(id); },
     async saveSubscription(decision) { subscriptions.push(decision); },
@@ -73,6 +80,25 @@ function memoryStore() {
       const claim = offers.find((offer) => offer.id === claimId);
       if (claim) claim.invitationSentAt = sentAt;
     },
+    async findOrderByPaymentIntent(paymentIntentId) {
+      return orders.find((order) => order.paymentIntentId === paymentIntentId) || null;
+    },
+    async markOrderRefunded(orderId, details) {
+      const order = orders.find((item) => item.id === orderId);
+      if (!order || order.productKey === 'hardcover_bundle') return null;
+      order.status = 'refunded';
+      order.refundedAmountCents = details.amountRefunded;
+      return order;
+    },
+    async findBundleEntitlement(order) {
+      return entitlements.find((item) => item.orderReference === order.sessionId && item.kind === 'bundle_included') || null;
+    },
+    async revokeBundleEntitlement(entitlementId) {
+      const entitlement = entitlements.find((item) => item.id === entitlementId);
+      if (!entitlement || entitlement.kind !== 'bundle_included') return { revoked: false };
+      entitlement.status = 'canceled';
+      return { revoked: true };
+    },
   };
 }
 
@@ -90,9 +116,20 @@ function paidBundleSession({ productKey, amount, tax = 480, shipping = 599, emai
       product_key: productKey,
       amount_cents: String(amount),
       product_title: productKey,
+      stripe_product_id: 'prod_bundle_test',
     },
     line_items: {
-      data: [{ quantity: 1, price: { id: 'price_bundle_test', unit_amount: amount, currency: 'usd', livemode: false } }],
+      data: [{
+        quantity: 1,
+        price: {
+          id: 'price_bundle_test',
+          unit_amount: amount,
+          currency: 'usd',
+          livemode: false,
+          type: 'one_time',
+          product: 'prod_bundle_test',
+        },
+      }],
     },
     shipping_details: {
       name: 'Parent',
@@ -204,6 +241,8 @@ describe('academy membership decisions', () => {
     });
     expect(paperback.ok).toBe(true);
     expect(paperback.days).toBe(30);
+    expect(paperback.startsAt).toBe(now.toISOString());
+    expect(paperback.startsAt).not.toBe(paidAt);
     expect(new Date(paperback.endsAt).getTime() - now.getTime()).toBe(30 * 24 * 60 * 60 * 1000);
 
     const hardcover = planBundleClaim({
@@ -261,7 +300,7 @@ describe('academy membership decisions', () => {
       stripe: {
         retrieveCheckoutSession: async () => session,
         mailer: { send: async (payload) => { sent.push(payload); return { success: true }; } },
-        origin: 'https://example.test',
+        origin: 'https://caidens-courage-staging.netlify.app',
         approvedRates: ['shr_test_ground'],
       },
       now,
@@ -271,7 +310,7 @@ describe('academy membership decisions', () => {
     expect(store.offers[0].claimCode).toBeUndefined();
     expect(store.orders).toHaveLength(1);
     expect(store.fulfillments[0]).toMatchObject({ line1: '1 Vale Lane', taxCents: 480, shippingCents: 599, methodLabel: 'Ground' });
-    expect(sent[0].claimUrl).toContain('https://example.test/story/books/claim#token=');
+    expect(sent[0].claimUrl).toContain('https://caidens-courage-staging.netlify.app/story/books/claim#token=');
     expect(sent[0].claimUrl).not.toContain('parent@example.com');
     expect(JSON.stringify(store.tokens[0])).not.toContain(sent[0].claimUrl.split('token=')[1]);
     expect(store.tokens[0].tokenHash).toHaveLength(64);
@@ -286,6 +325,77 @@ describe('academy membership decisions', () => {
     expect(sent).toHaveLength(1);
   });
 
+  test('fulfills a paid asynchronous checkout and does not record it before payment', async () => {
+    const store = memoryStore();
+    const sent = [];
+    const session = paidBundleSession({ productKey: PAPERBACK_BUNDLE_KEY, amount: 5999 });
+    session.id = 'cs_async';
+    const unpaid = { ...session, payment_status: 'unpaid' };
+    const stripe = {
+      retrieveCheckoutSession: async () => unpaid,
+      mailer: { send: async (payload) => { sent.push(payload); return { success: true }; } },
+      origin: 'https://caidens-courage-staging.netlify.app',
+      approvedRates: ['shr_test_ground'],
+    };
+    const pending = await processAcademyWebhookEvent({
+      event: { id: 'evt_async_pending', type: 'checkout.session.async_payment_succeeded', data: { object: unpaid } },
+      store,
+      stripe,
+      now,
+    });
+    expect(pending.outcome).toBe('unpaid');
+    expect(store.orders).toHaveLength(0);
+    expect(sent).toHaveLength(0);
+
+    const paid = await processAcademyWebhookEvent({
+      event: { id: 'evt_async_paid', type: 'checkout.session.async_payment_succeeded', data: { object: session } },
+      store,
+      stripe: { ...stripe, retrieveCheckoutSession: async () => session },
+      now,
+    });
+    expect(paid).toMatchObject({ granted: false, outcome: 'invitation_sent' });
+    expect(store.orders).toHaveLength(1);
+    expect(sent).toHaveLength(1);
+  });
+
+  test('refuses a production claim host and a recurring bundle price', async () => {
+    const store = memoryStore();
+    const session = paidBundleSession({ productKey: PAPERBACK_BUNDLE_KEY, amount: 5999 });
+    await expect(processAcademyWebhookEvent({
+      event: { id: 'evt_origin', type: 'checkout.session.completed', data: { object: session } },
+      store,
+      stripe: {
+        retrieveCheckoutSession: async () => session,
+        mailer: { send: async () => ({ success: true }) },
+        origin: 'https://caidenscourage.com',
+        approvedRates: ['shr_test_ground'],
+      },
+      now,
+    })).rejects.toThrow('staging_origin_required');
+    expect(store.orders).toHaveLength(0);
+    expect(store.events.has('evt_origin')).toBe(false);
+
+    const recurringStore = memoryStore();
+    const recurring = paidBundleSession({ productKey: HARDCOVER_BUNDLE_KEY, amount: 7599 });
+    recurring.id = 'cs_recurring';
+    recurring.line_items.data[0].price.recurring = { interval: 'month' };
+    recurring.line_items.data[0].price.type = 'recurring';
+    const recurringResult = await processAcademyWebhookEvent({
+      event: { id: 'evt_recurring', type: 'checkout.session.completed', data: { object: recurring } },
+      store: recurringStore,
+      stripe: {
+        retrieveCheckoutSession: async () => recurring,
+        mailer: { send: async () => ({ success: true }) },
+        origin: 'https://caidens-courage-staging.netlify.app',
+        approvedRates: ['shr_test_ground'],
+      },
+      now,
+    });
+    expect(recurringResult.outcome).toBe('subscription_not_allowed');
+    expect(recurringStore.orders).toHaveLength(0);
+    expect(recurringStore.offers).toHaveLength(0);
+  });
+
   test('records the signature reserve purchase as 90 days and rejects failed, mismatched, and historical payments', async () => {
     const store = memoryStore();
     const session = paidBundleSession({ productKey: HARDCOVER_BUNDLE_KEY, amount: 7599, email: 'parent@example.com' });
@@ -296,7 +406,7 @@ describe('academy membership decisions', () => {
       stripe: {
         retrieveCheckoutSession: async () => session,
         mailer: { send: async (payload) => { sent.push(payload); return { success: true }; } },
-        origin: 'https://example.test',
+        origin: 'https://caidens-courage-staging.netlify.app',
       },
       now,
     });
@@ -346,7 +456,7 @@ describe('academy membership decisions', () => {
       stripe: {
         retrieveCheckoutSession: async () => session,
         mailer: { send: async () => ({ success: false }) },
-        origin: 'https://example.test',
+        origin: 'https://caidens-courage-staging.netlify.app',
       },
       now,
     })).rejects.toThrow('invitation_email_failed');
@@ -404,5 +514,274 @@ describe('academy membership decisions', () => {
     const checkout = fs.readFileSync(path.join(process.cwd(), 'netlify/functions/bookstore-checkout.js'), 'utf8');
     expect(checkout).toContain('DIGITAL_PRODUCT_KEY');
     expect(checkout).not.toContain('courage_adventure_paperback_bundle');
+  });
+
+  test('opens a test-mode hardcover session only and never starts Academy access', () => {
+    const product = {
+      key: HARDCOVER_EDITION_KEY,
+      title: 'Hardcover Edition',
+      displayPriceCents: 4999,
+      currency: 'usd',
+      isActive: true,
+      stripePriceId: 'price_hardcover_test',
+      paymentLinkVerifiedAt: '2026-10-20T00:00:00Z',
+    };
+    expect(planPhysicalCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      shippingRateIds: ['shr_test_ground'],
+      product,
+    })).toMatchObject({ ok: true, amountCents: 4999, days: 0, purpose: 'physical_book' });
+    expect(planPhysicalCheckout({
+      secretKey: 'sk_live_123',
+      salesEnabled: true,
+      shippingRateIds: ['shr_test_ground'],
+      product,
+    }).reason).toBe('live_billing_disabled');
+    expect(planPhysicalCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: false,
+      shippingRateIds: ['shr_test_ground'],
+      product,
+    }).reason).toBe('physical_sales_disabled');
+    expect(planPhysicalCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      shippingRateIds: [],
+      product,
+    }).reason).toBe('shipping_not_configured');
+    expect(planPhysicalCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      shippingRateIds: ['shr_test_ground'],
+      product: { ...product, paymentLinkUrl: 'https://buy.stripe.com/4gMaEW3DVcWkdAHebS3Ru07' },
+    }).reason).toBe('historical_record_locked');
+    expect(planBundleCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      emailConfigured: true,
+      shippingRateIds: ['shr_test_ground'],
+      product: {
+        key: PAPERBACK_BUNDLE_KEY,
+        displayPriceCents: 5999,
+        currency: 'usd',
+        isActive: true,
+        stripePriceId: 'price_bundle_test',
+        stripeProductId: 'prod_paperback_bundle',
+        paymentLinkUrl: 'https://buy.stripe.com/4gMaEW3DVcWkdAHebS3Ru07',
+      },
+    }).reason).toBe('historical_record_locked');
+    expect(planBundleCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      emailConfigured: true,
+      shippingRateIds: ['shr_test_ground'],
+      product: {
+        key: PAPERBACK_BUNDLE_KEY,
+        title: 'Paperback Adventure Bundle',
+        displayPriceCents: 5999,
+        currency: 'usd',
+        isActive: true,
+        stripePriceId: 'price_paperback_bundle',
+        stripeProductId: 'prod_paperback_bundle',
+      },
+    })).toMatchObject({ ok: true, amountCents: 5999, days: 30, stripeProductId: 'prod_paperback_bundle' });
+    expect(planBundleCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      emailConfigured: true,
+      shippingRateIds: ['shr_test_ground'],
+      product: {
+        key: HARDCOVER_BUNDLE_KEY,
+        title: 'Signature Reserve Hardcover Bundle',
+        displayPriceCents: 7599,
+        currency: 'usd',
+        isActive: true,
+        stripePriceId: 'price_founders_reserve',
+        stripeProductId: 'prod_founders_reserve',
+      },
+    })).toMatchObject({ ok: true, amountCents: 7599, days: 90, stripeProductId: 'prod_founders_reserve' });
+    expect(planBundleCheckout({
+      secretKey: 'sk_test_123',
+      salesEnabled: true,
+      emailConfigured: true,
+      shippingRateIds: ['shr_test_ground'],
+      product: {
+        key: PAPERBACK_BUNDLE_KEY,
+        displayPriceCents: 5999,
+        currency: 'usd',
+        isActive: true,
+        stripePriceId: 'price_paperback_bundle',
+      },
+    }).reason).toBe('price_not_verified');
+    expect(bundlePriceMatches({
+      id: 'price_paperback_bundle',
+      unit_amount: 5999,
+      currency: 'usd',
+      livemode: false,
+      type: 'one_time',
+      product: 'prod_paperback_bundle',
+    }, {
+      priceId: 'price_paperback_bundle',
+      amountCents: 5999,
+      stripeProductId: 'prod_paperback_bundle',
+    })).toBe(true);
+    expect(bundlePriceMatches({
+      id: 'price_paperback_bundle',
+      unit_amount: 5900,
+      currency: 'usd',
+      product: 'prod_paperback_bundle',
+    }, {
+      priceId: 'price_paperback_bundle',
+      amountCents: 5999,
+      stripeProductId: 'prod_paperback_bundle',
+    })).toBe(false);
+
+    const physicalSource = fs.readFileSync(path.join(process.cwd(), 'netlify/functions/bookstore-physical-checkout.js'), 'utf8');
+    expect(physicalSource).toContain("body.set('mode', 'payment')");
+    expect(physicalSource).not.toContain('academy_days');
+    expect(physicalSource).not.toContain("mode', 'subscription'");
+    expect(physicalSource).toContain("metadata[purpose]', 'physical_book'");
+    expect(physicalSource).toContain('STRIPE_AUTOMATIC_TAX_ENABLED');
+    const { buildPhysicalCheckoutParams } = require('../../../netlify/functions/bookstore-physical-checkout');
+    const params = buildPhysicalCheckoutParams({
+      plan: { priceId: 'price_hardcover_test', productKey: 'hardcover', title: 'Hardcover Edition', amountCents: 4999, shippingRateIds: ['shr_test_ground'] },
+      successUrl: 'https://example.test/story/books?hardcover=submitted',
+      cancelUrl: 'https://example.test/story/books',
+      automaticTax: false,
+    });
+    expect(params.get('mode')).toBe('payment');
+    expect(params.get('shipping_address_collection[allowed_countries][0]')).toBe('US');
+    expect(params.get('shipping_address_collection[allowed_countries][1]')).toBeNull();
+    expect(params.get('shipping_options[0][shipping_rate]')).toBe('shr_test_ground');
+    expect(params.get('automatic_tax[enabled]')).toBeNull();
+    expect(params.get('metadata[academy_days]')).toBeNull();
+    const bundleSource = fs.readFileSync(path.join(process.cwd(), 'netlify/functions/academy-bundle-checkout.js'), 'utf8');
+    expect(bundleSource).toContain('applyCheckoutShippingCountries');
+    expect(bundleSource).not.toContain("'CA'");
+    const countries = new URLSearchParams();
+    applyCheckoutShippingCountries(countries);
+    expect(countries.get('shipping_address_collection[allowed_countries][0]')).toBe('US');
+    expect(countries.get('shipping_address_collection[allowed_countries][1]')).toBeNull();
+    const canada = paidBundleSession({ productKey: PAPERBACK_BUNDLE_KEY, amount: 5999 });
+    canada.shipping_details.address.country = 'CA';
+    expect(planBundleFulfillment({ session: canada, approvedRates: ['shr_test_ground'] }).reason).toBe('shipping_country_not_approved');
+  });
+
+  test('records a hardcover order without an invitation and refunds only the matching bundle entitlement', async () => {
+    const store = memoryStore();
+    const session = {
+      ...paidBundleSession({ productKey: HARDCOVER_EDITION_KEY, amount: 4999, tax: 0 }),
+      id: 'cs_hardcover',
+      mode: 'payment',
+      payment_intent: 'pi_hardcover',
+      metadata: {
+        purpose: 'physical_book',
+        product_key: HARDCOVER_EDITION_KEY,
+        amount_cents: '4999',
+        product_title: 'Hardcover Edition',
+      },
+    };
+    const sent = [];
+    const result = await processAcademyWebhookEvent({
+      event: { id: 'evt_hardcover', type: 'checkout.session.completed', data: { object: session } },
+      store,
+      stripe: {
+        retrieveCheckoutSession: async () => session,
+        mailer: { send: async (payload) => { sent.push(payload); return { success: true }; } },
+        approvedRates: ['shr_test_ground'],
+      },
+      now,
+    });
+    expect(result).toMatchObject({ granted: false, outcome: 'physical_order_recorded', academyDays: 0 });
+    expect(store.offers).toHaveLength(0);
+    expect(store.orders).toHaveLength(1);
+    expect(store.fulfillments[0]).toMatchObject({ taxCents: 0, shippingCents: 599, rateId: 'shr_test_ground' });
+    expect(sent).toHaveLength(0);
+
+    const duplicate = await processAcademyWebhookEvent({
+      event: { id: 'evt_hardcover', type: 'checkout.session.completed', data: { object: session } },
+      store,
+      stripe: { retrieveCheckoutSession: async () => session },
+    });
+    expect(duplicate.outcome).toBe('duplicate');
+    expect(store.orders).toHaveLength(1);
+
+    store.entitlements.push(
+      { id: 'ent_family', kind: 'unrestricted_promise', status: 'active', orderReference: 'historical', promiseSource: 'founders_guardian_language' },
+      { id: 'ent_bundle', kind: 'bundle_included', status: 'active', orderReference: 'cs_bundle_refund' },
+    );
+    const bundleSession = paidBundleSession({ productKey: PAPERBACK_BUNDLE_KEY, amount: 5999 });
+    bundleSession.id = 'cs_bundle_refund';
+    bundleSession.payment_intent = 'pi_bundle_refund';
+    await processAcademyWebhookEvent({
+      event: { id: 'evt_bundle_refund_purchase', type: 'checkout.session.completed', data: { object: bundleSession } },
+      store,
+      stripe: {
+        retrieveCheckoutSession: async () => bundleSession,
+        mailer: { send: async () => ({ success: true }) },
+        origin: 'https://caidens-courage-staging.netlify.app',
+        approvedRates: ['shr_test_ground'],
+      },
+      now,
+    });
+    const bundleOrder = store.orders.find((order) => order.sessionId === 'cs_bundle_refund');
+    const partial = await processAcademyWebhookEvent({
+      event: {
+        id: 'evt_partial',
+        type: 'charge.refunded',
+        data: { object: { object: 'charge', id: 'ch_partial', refunded: false, amount_refunded: 100, currency: 'usd', payment_intent: 'pi_bundle_refund' } },
+      },
+      store,
+      stripe: {},
+    });
+    expect(partial).toMatchObject({ outcome: 'partial_refund', revoked: false });
+    expect(bundleOrder.status).toBe('paid');
+    expect(store.entitlements.find((item) => item.id === 'ent_bundle').status).toBe('active');
+
+    const full = await processAcademyWebhookEvent({
+      event: {
+        id: 'evt_full',
+        type: 'charge.refunded',
+        data: { object: { object: 'charge', id: 'ch_full', refunded: true, amount_refunded: bundleOrder.amountCents, currency: 'usd', payment_intent: 'pi_bundle_refund' } },
+      },
+      store,
+      stripe: {},
+    });
+    expect(full).toMatchObject({ outcome: 'full_refund', revoked: true });
+    expect(bundleOrder.status).toBe('refunded');
+    expect(store.entitlements.find((item) => item.id === 'ent_bundle').status).toBe('canceled');
+    expect(store.entitlements.find((item) => item.id === 'ent_family').status).toBe('active');
+
+    const hardcoverOrder = store.orders.find((order) => order.sessionId === 'cs_hardcover');
+    const hardcoverRefund = await processAcademyWebhookEvent({
+      event: {
+        id: 'evt_hardcover_refund',
+        type: 'charge.refunded',
+        data: { object: { object: 'charge', id: 'ch_hardcover', refunded: true, amount_refunded: hardcoverOrder.amountCents, currency: 'usd', payment_intent: 'pi_hardcover' } },
+      },
+      store,
+      stripe: {},
+    });
+    expect(hardcoverRefund).toMatchObject({ outcome: 'full_refund', revoked: false });
+    expect(hardcoverOrder.status).toBe('refunded');
+    expect(store.entitlements.find((item) => item.id === 'ent_family').status).toBe('active');
+
+    expect(planBundleClaim({
+      now,
+      parentEmail: 'parent@example.com',
+      order: {
+        proof: 'stripe_webhook',
+        status: 'refunded',
+        customerEmail: 'parent@example.com',
+        productKey: PAPERBACK_BUNDLE_KEY,
+        paidAt: '2026-10-01T00:00:00Z',
+      },
+    }).reason).toBe('purchase_not_verified');
+
+    const { handler } = require('../../../netlify/functions/academy-stripe-webhook');
+    const unsigned = await handler({ httpMethod: 'POST', body: '{}', headers: {}, isBase64Encoded: false });
+    expect(unsigned.statusCode).toBe(400);
+    expect(JSON.parse(unsigned.body).error).toBe('invalid_signature');
   });
 });

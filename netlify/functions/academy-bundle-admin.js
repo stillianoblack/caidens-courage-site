@@ -1,7 +1,7 @@
 const { requireAdmin } = require('./_lib/adminAuth');
 const { sendAcademyClaimEmail } = require('./_lib/emailProvider');
 const { jsonResponse, publicSiteOrigin } = require('./_lib/bookstoreDelivery');
-const { createInvitationToken, hashClaimCode } = require('./_lib/academyMembership');
+const { academyClaimOrigin, createInvitationToken, hashClaimCode } = require('./_lib/academyMembership');
 
 const BUNDLE_KEYS = ['courage_adventure_paperback_bundle', 'courage_adventure_bundle'];
 
@@ -93,6 +93,9 @@ exports.handler = async function academyBundleAdmin(event) {
   if (!claimResult.data || claimResult.data.activated_at) return jsonResponse(409, { error: 'invitation_not_resendable' });
   if (claimResult.data.customer_email !== orderResult.data.customer_email) return jsonResponse(409, { error: 'email_mismatch' });
 
+  const origin = academyClaimOrigin(publicSiteOrigin());
+  if (!origin) return jsonResponse(503, { error: 'staging_origin_required' });
+
   const token = createInvitationToken();
   const { error } = await client.from('academy_claim_tokens').insert({
     claim_id: claimResult.data.id,
@@ -101,7 +104,6 @@ exports.handler = async function academyBundleAdmin(event) {
     expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
   });
   if (error) return jsonResponse(500, { error: 'invitation_not_saved' });
-  const origin = publicSiteOrigin().replace(/\/$/, '');
   const sent = await sendAcademyClaimEmail({
     to: orderResult.data.customer_email,
     claimUrl: `${origin}/story/books/claim#token=${encodeURIComponent(token)}`,

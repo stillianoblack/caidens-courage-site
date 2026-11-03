@@ -1,6 +1,9 @@
 const { resendConfigured } = require('./_lib/emailProvider');
 const {
   approvedShippingRateIds,
+  applyCheckoutShippingCountries,
+  bundlePriceMatches,
+  isReservedHistoricalPaymentLink,
   planBundleCheckout,
 } = require('./_lib/academyMembership');
 const {
@@ -23,8 +26,7 @@ async function createBundleCheckoutSession({ secretKey, plan, successUrl, cancel
   body.set('success_url', successUrl);
   body.set('cancel_url', cancelUrl);
   body.set('billing_address_collection', 'required');
-  body.set('shipping_address_collection[allowed_countries][0]', 'US');
-  body.set('shipping_address_collection[allowed_countries][1]', 'CA');
+  applyCheckoutShippingCountries(body);
   plan.shippingRateIds.forEach((rateId, index) => {
     body.set(`shipping_options[${index}][shipping_rate]`, rateId);
   });
@@ -33,6 +35,7 @@ async function createBundleCheckoutSession({ secretKey, plan, successUrl, cancel
   body.set('metadata[product_key]', plan.productKey);
   body.set('metadata[product_title]', plan.title);
   body.set('metadata[amount_cents]', String(plan.amountCents));
+  body.set('metadata[stripe_product_id]', plan.stripeProductId);
   body.set('metadata[fulfillment]', 'physical_bundle');
   body.set('metadata[academy_days]', String(plan.days));
   body.set('client_reference_id', plan.productKey);
@@ -74,11 +77,11 @@ exports.handler = async function academyBundleCheckout(event) {
 
   const { data, error } = await client
     .from('commerce_products')
-    .select('key, title, display_price_cents, currency, stripe_price_id, is_active, payment_link_verified_at, payment_link_url')
+    .select('key, title, display_price_cents, currency, stripe_product_id, stripe_price_id, is_active, payment_link_verified_at, payment_link_url')
     .eq('key', requestBody.productKey)
     .maybeSingle();
   if (error) return jsonResponse(500, { error: 'catalog_unavailable' });
-  if (data?.payment_link_url && String(data.payment_link_url).includes('fZufZggqHbSg7cjd7O3Ru04')) {
+  if (isReservedHistoricalPaymentLink(data?.payment_link_url)) {
     return jsonResponse(409, { error: 'historical_record_locked' });
   }
 
@@ -94,8 +97,10 @@ exports.handler = async function academyBundleCheckout(event) {
           displayPriceCents: data.display_price_cents,
           currency: data.currency,
           stripePriceId: data.stripe_price_id,
+          stripeProductId: data.stripe_product_id,
           isActive: data.is_active === true,
           paymentLinkVerifiedAt: data.payment_link_verified_at,
+          paymentLinkUrl: data.payment_link_url,
         }
       : null,
   });
@@ -104,7 +109,7 @@ exports.handler = async function academyBundleCheckout(event) {
   const stripe = createStripeBookstoreClient(stripeSecret);
   try {
     const price = await stripe.retrievePrice(plan.priceId);
-    if (!price || price.id !== plan.priceId || price.livemode === true || price.unit_amount !== plan.amountCents || String(price.currency || '').toLowerCase() !== 'usd' || price.active === false) {
+    if (!bundlePriceMatches(price, plan)) {
       return jsonResponse(409, { error: 'price_not_verified', granted: false });
     }
   } catch (priceError) {

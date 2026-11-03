@@ -210,5 +210,84 @@ describe('bookstore offers', () => {
     delete process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED;
     expect(open.canCheckout).toBe(false);
     expect(open.paymentLink).toBeNull();
+
+    process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED = 'true';
+    const founders = BOOKSTORE_PRODUCTS.find((product) => product.key === 'courage_adventure_bundle')!;
+    const paperbackReady = resolveBookstoreOffer(bundle, serverProduct({
+      key: 'courage_adventure_paperback_bundle',
+      displayPriceCents: 5999,
+      currency: 'usd',
+      isActive: true,
+      stripeProductId: 'prod_paperback_bundle',
+      stripePriceId: 'price_paperback_bundle',
+      fulfillmentType: 'bundle',
+    }));
+    const foundersReady = resolveBookstoreOffer(founders, serverProduct({
+      key: 'courage_adventure_bundle',
+      displayPriceCents: 7599,
+      currency: 'usd',
+      isActive: true,
+      stripeProductId: 'prod_founders_reserve',
+      stripePriceId: 'price_founders_reserve',
+      fulfillmentType: 'bundle',
+    }));
+    const wrongAmount = resolveBookstoreOffer(bundle, serverProduct({
+      key: 'courage_adventure_paperback_bundle',
+      displayPriceCents: 5900,
+      currency: 'usd',
+      isActive: true,
+      stripeProductId: 'prod_paperback_bundle',
+      stripePriceId: 'price_paperback_bundle',
+      fulfillmentType: 'bundle',
+    }));
+    delete process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED;
+    expect(paperbackReady.checkoutMode).toBe('bundle_session');
+    expect(paperbackReady.paymentLink).toBeNull();
+    expect(foundersReady.checkoutMode).toBe('bundle_session');
+    expect(foundersReady.paymentLink).toBeNull();
+    expect(wrongAmount.canCheckout).toBe(false);
+  });
+
+  test('keeps the hardcover session closed until a verified test price is explicitly enabled', () => {
+    const hardcover = BOOKSTORE_PRODUCTS.find((product) => product.key === 'hardcover')!;
+    const closed = resolveBookstoreOffer(hardcover, serverProduct({
+      key: 'hardcover',
+      displayPriceCents: 4999,
+      currency: 'usd',
+      isActive: true,
+      stripePriceId: 'price_hardcover_test',
+      paymentLinkVerifiedAt: '2026-10-20T00:00:00Z',
+      paymentLinkUrl: 'https://buy.stripe.com/4gMaEW3DVcWkdAHebS3Ru07',
+      fulfillmentType: 'physical',
+    }));
+    expect(closed.canCheckout).toBe(false);
+    expect(closed.checkoutMode).toBe('none');
+    expect(closed.paymentLink).toBeNull();
+
+    process.env.REACT_APP_BOOKSTORE_PHYSICAL_CHECKOUT_ENABLED = 'true';
+    const historical = resolveBookstoreOffer(hardcover, serverProduct({
+      key: 'hardcover',
+      displayPriceCents: 4999,
+      currency: 'usd',
+      isActive: true,
+      stripePriceId: 'price_hardcover_test',
+      paymentLinkVerifiedAt: '2026-10-20T00:00:00Z',
+      paymentLinkUrl: 'https://buy.stripe.com/4gMaEW3DVcWkdAHebS3Ru07',
+      fulfillmentType: 'physical',
+    }));
+    const ready = resolveBookstoreOffer(hardcover, serverProduct({
+      key: 'hardcover',
+      displayPriceCents: 4999,
+      currency: 'usd',
+      isActive: true,
+      stripePriceId: 'price_hardcover_test',
+      paymentLinkVerifiedAt: '2026-10-20T00:00:00Z',
+      fulfillmentType: 'physical',
+    }));
+    delete process.env.REACT_APP_BOOKSTORE_PHYSICAL_CHECKOUT_ENABLED;
+    expect(historical.canCheckout).toBe(false);
+    expect(historical.paymentLink).toBeNull();
+    expect(ready.checkoutMode).toBe('physical_session');
+    expect(ready.paymentLink).toBeNull();
   });
 });

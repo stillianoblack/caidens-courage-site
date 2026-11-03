@@ -9,7 +9,17 @@ import { paymentLinkCheckoutAllowed } from './checkoutEnvironment';
 import { isApprovedStripeCheckoutUrl } from './commerceProductsService';
 import type { BookstoreAvailability, CommerceProduct } from '../types/commerce';
 
-export type BookstoreCheckoutMode = 'payment_link' | 'digital_session' | 'bundle_session' | 'none';
+export type BookstoreCheckoutMode = 'payment_link' | 'digital_session' | 'bundle_session' | 'physical_session' | 'none';
+
+const RESERVED_HISTORICAL_PAYMENT_LINK_IDS = [
+  '4gMaEW3DVcWkdAHebS3Ru07',
+  'fZufZggqHbSg7cjd7O3Ru04',
+];
+
+function isReservedHistoricalPaymentLink(value?: string | null) {
+  const link = value || '';
+  return RESERVED_HISTORICAL_PAYMENT_LINK_IDS.some((id) => link.includes(id));
+}
 
 export type ResolvedBookstoreOffer = {
   key: string;
@@ -151,9 +161,24 @@ export function resolveBookstoreOffer(
     definition.key === BOOKSTORE_KEYS.paperbackBundle || definition.key === BOOKSTORE_KEYS.adventureBundle;
   if (definition.purchasable && !options?.checkoutLocked && priceCents != null && priceCents > 0) {
     if (bundleCheckoutKey) {
-      const historicalLink = String(server?.paymentLinkUrl || '').includes('fZufZggqHbSg7cjd7O3Ru04');
+      const historicalLink = isReservedHistoricalPaymentLink(server?.paymentLinkUrl);
       const verifiedTestPrice = Boolean(
         process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED === 'true'
+        && server?.isActive
+        && server.stripeProductId?.startsWith('prod_')
+        && server.stripePriceId?.startsWith('price_')
+        && server.displayPriceCents === definition.priceCents
+        && String(server.currency || '').toLowerCase() === 'usd'
+        && !historicalLink,
+      );
+      if (verifiedTestPrice) {
+        checkoutMode = 'bundle_session';
+        canCheckout = true;
+      }
+    } else if (definition.key === BOOKSTORE_KEYS.hardcover) {
+      const historicalLink = isReservedHistoricalPaymentLink(server?.paymentLinkUrl);
+      const verifiedTestPrice = Boolean(
+        process.env.REACT_APP_BOOKSTORE_PHYSICAL_CHECKOUT_ENABLED === 'true'
         && server?.isActive
         && server.paymentLinkVerifiedAt
         && server.stripePriceId?.startsWith('price_')
@@ -162,7 +187,7 @@ export function resolveBookstoreOffer(
         && !historicalLink,
       );
       if (verifiedTestPrice) {
-        checkoutMode = 'bundle_session';
+        checkoutMode = 'physical_session';
         canCheckout = true;
       }
     } else if (definition.fulfillment === 'digital') {

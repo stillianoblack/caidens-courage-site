@@ -16,6 +16,7 @@ const BookstoreBundleClaimPage: React.FC = () => {
   const [programCode, setProgramCode] = useState('');
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [pending, setPending] = useState(false);
+  const [activated, setActivated] = useState(false);
 
   useEffect(() => {
     const token = captureAcademyClaimToken();
@@ -69,6 +70,7 @@ const BookstoreBundleClaimPage: React.FC = () => {
           : 'The invitation could not be activated.');
         return;
       }
+      setActivated(true);
       setMessage(payload.duplicate
         ? 'This Academy access is already on the family account.'
         : `Academy access is active through ${new Date(payload.endsAt).toLocaleDateString()}.`);
@@ -123,6 +125,13 @@ const BookstoreBundleClaimPage: React.FC = () => {
           Email a new invitation
         </button>
       </form>
+      {activated ? (
+        <p className="mt-6">
+          <Link className="inline-block rounded-full bg-[#F2D06B] px-5 py-3 font-semibold text-navy-600" to={FAMILY_PORTAL_PATH}>
+            Enter Focus Flame Academy
+          </Link>
+        </p>
+      ) : null}
       <p className="mt-6 text-sm">
         New families can <Link className="font-semibold underline" to={PILOT_PROGRAM_SIGNUP_PATH}>create a family account</Link> first, then return with the invitation.
         Existing families can <Link className="font-semibold underline" to={FAMILY_PORTAL_PATH}>open the family portal</Link> with the same parent email.

@@ -61,10 +61,24 @@ exports.handler = async function academyBundleClaim(event) {
   const claim = claimResult.data;
   if (!claim) return jsonResponse(404, { error: 'claim_not_found' });
 
+  let orderStatus = 'paid';
+  if (claim.checkout_session_id) {
+    const orderResult = await client
+      .from('bookstore_orders')
+      .select('status, product_key')
+      .eq('stripe_checkout_session_id', claim.checkout_session_id)
+      .maybeSingle();
+    if (orderResult.error) return jsonResponse(503, { error: 'claim_unavailable' });
+    if (orderResult.data?.product_key === 'hardcover_bundle') {
+      return jsonResponse(409, { error: 'historical_record_locked', granted: false });
+    }
+    if (orderResult.data?.status) orderStatus = orderResult.data.status;
+  }
+
   const decision = planBundleClaim({
     order: {
       proof: 'stripe_webhook',
-      status: 'paid',
+      status: orderStatus,
       customerEmail: claim.customer_email,
       productKey: claim.product_key,
       paidAt: claim.purchase_verified_at,

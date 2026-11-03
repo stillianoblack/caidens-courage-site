@@ -166,6 +166,66 @@ function createStore(client) {
         .eq('id', claimId);
       if (error) throw error;
     },
+    async findOrderByPaymentIntent(paymentIntentId) {
+      const { data, error } = await client
+        .from('bookstore_orders')
+        .select('id, status, product_key, amount_cents, currency, stripe_checkout_session_id, stripe_payment_intent_id')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .neq('product_key', 'hardcover_bundle')
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        id: data.id,
+        status: data.status,
+        productKey: data.product_key,
+        amountCents: data.amount_cents,
+        currency: data.currency,
+        sessionId: data.stripe_checkout_session_id,
+        paymentIntentId: data.stripe_payment_intent_id,
+      };
+    },
+    async markOrderRefunded(orderId, { amountRefunded, chargeId }) {
+      const { error } = await client
+        .from('bookstore_orders')
+        .update({
+          status: 'refunded',
+          refunded_amount_cents: amountRefunded,
+          stripe_charge_id: chargeId,
+        })
+        .eq('id', orderId)
+        .eq('status', 'paid')
+        .neq('product_key', 'hardcover_bundle');
+      if (error) throw error;
+    },
+    async findBundleEntitlement(order) {
+      const { data, error } = await client
+        .from('academy_entitlements')
+        .select('id, kind, status, product_key, promise_source')
+        .eq('order_reference', order.sessionId)
+        .eq('kind', 'bundle_included')
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        id: data.id,
+        kind: data.kind,
+        status: data.status,
+        productKey: data.product_key,
+        promiseSource: data.promise_source,
+      };
+    },
+    async revokeBundleEntitlement(entitlementId) {
+      const { data, error } = await client
+        .from('academy_entitlements')
+        .update({ status: 'canceled', ends_at: new Date().toISOString() })
+        .eq('id', entitlementId)
+        .eq('kind', 'bundle_included')
+        .select('id')
+        .maybeSingle();
+      if (error) throw error;
+      return { revoked: Boolean(data) };
+    },
   };
 }
 
@@ -230,9 +290,13 @@ exports.handler = async function academyStripeWebhook(event) {
               secretKey,
               `checkout/sessions/${encodeURIComponent(id)}?expand[]=line_items.data.price&expand[]=shipping_cost.shipping_rate`,
             ),
+            retrieveCharge: (id) => stripeGet(secretKey, `charges/${encodeURIComponent(id)}`),
             mailer: { send: sendAcademyClaimEmail },
             origin: publicSiteOrigin(),
-            approvedRates: approvedShippingRateIds(process.env.STRIPE_BUNDLE_SHIPPING_RATE_IDS),
+            approvedRates: approvedShippingRateIds([
+              process.env.STRIPE_BUNDLE_SHIPPING_RATE_IDS,
+              process.env.STRIPE_PHYSICAL_SHIPPING_RATE_IDS,
+            ].filter(Boolean).join(',')),
           }
         : null,
       expectedPrices: verifiedPrices,

@@ -52,3 +52,6 @@ public/images/optimized/**
 
 # Private bookstore files. Never commit the EPUB or other delivery assets.
 /private-assets/
+
+# Generated Stripe test-catalog ids. The setup script writes this only after a verified test-mode run.
+scripts/stripe/out/
