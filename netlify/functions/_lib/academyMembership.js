@@ -443,6 +443,19 @@ function planPhysicalCheckout({
   };
 }
 
+function shippingAddressComplete(details) {
+  const address = details?.address;
+  return Boolean(address?.line1 && address.city && address.postal_code && address.country);
+}
+
+function checkoutShippingDetails(session) {
+  const current = session?.collected_information?.shipping_details;
+  const legacy = session?.shipping_details;
+  if (shippingAddressComplete(current)) return current;
+  if (shippingAddressComplete(legacy)) return legacy;
+  return current || legacy || null;
+}
+
 function planBundleFulfillment({ session, approvedRates = [] }) {
   if (!session || session.metadata?.purpose !== 'academy_bundle') return { ok: false, reason: 'not_bundle' };
   if (session.mode && session.mode !== 'payment') return { ok: false, reason: 'subscription_not_allowed' };
@@ -475,7 +488,8 @@ function planBundleFulfillment({ session, approvedRates = [] }) {
     return { ok: false, reason: 'total_mismatch' };
   }
   if (session.amount_total !== expected + taxCents + shippingCents) return { ok: false, reason: 'total_mismatch' };
-  const address = session.shipping_details?.address;
+  const shippingDetails = checkoutShippingDetails(session);
+  const address = shippingDetails?.address;
   if (!address?.line1 || !address.city || !address.postal_code || !address.country) {
     return { ok: false, reason: 'shipping_address_missing' };
   }
@@ -497,7 +511,7 @@ function planBundleFulfillment({ session, approvedRates = [] }) {
     currency: 'usd',
     customerEmail,
     shipping: {
-      name: session.shipping_details?.name || '',
+      name: shippingDetails?.name || '',
       line1: address.line1,
       line2: address.line2 || '',
       city: address.city,
@@ -538,7 +552,8 @@ function planPhysicalFulfillment({ session, approvedRates = [] }) {
     return { ok: false, reason: 'total_mismatch' };
   }
   if (session.amount_total !== HARDCOVER_EDITION_CENTS + taxCents + shippingCents) return { ok: false, reason: 'total_mismatch' };
-  const address = session.shipping_details?.address;
+  const shippingDetails = checkoutShippingDetails(session);
+  const address = shippingDetails?.address;
   if (!address?.line1 || !address.city || !address.postal_code || !address.country) {
     return { ok: false, reason: 'shipping_address_missing' };
   }
@@ -560,7 +575,7 @@ function planPhysicalFulfillment({ session, approvedRates = [] }) {
     currency: 'usd',
     customerEmail,
     shipping: {
-      name: session.shipping_details?.name || '',
+      name: shippingDetails?.name || '',
       line1: address.line1,
       line2: address.line2 || '',
       city: address.city,
@@ -625,9 +640,19 @@ async function fulfillVerifiedBundlePurchase({
   origin,
   tokenTtlSeconds = 1800,
   approvedRates = [],
+  resumeRecordedFailure = false,
 }) {
   if (!event?.id || !event.type) return { httpStatus: 400, outcome: 'invalid_event', granted: false };
-  if (await store.hasEvent(event.id)) return { httpStatus: 200, outcome: 'duplicate', granted: false };
+  if (await store.hasEvent(event.id)) {
+    const recordedOutcome = typeof store.eventOutcome === 'function' ? await store.eventOutcome(event.id) : null;
+    const existingClaim = session?.id && typeof store.findClaimBySession === 'function'
+      ? await store.findClaimBySession(session.id)
+      : null;
+    const canResume = resumeRecordedFailure
+      && recordedOutcome === 'shipping_address_missing'
+      && !existingClaim?.invitationSentAt;
+    if (!canResume) return { httpStatus: 200, outcome: 'duplicate', granted: false };
+  }
 
   if (event.type === 'checkout.session.async_payment_failed' || event.type === 'checkout.session.expired') {
     if (session?.metadata?.purpose !== 'academy_bundle') {
@@ -720,6 +745,39 @@ async function fulfillVerifiedBundlePurchase({
   await store.markInvitationSent(claim.id, now.toISOString());
   await store.recordEvent(event.id, event.type, 'invitation_sent');
   return { httpStatus: 200, outcome: 'invitation_sent', granted: false, claimUrl };
+}
+
+async function recoverRecordedBundlePurchase({
+  recordedEvent,
+  session,
+  store,
+  mailer,
+  origin,
+  now = new Date(),
+  approvedRates = [],
+}) {
+  if (session?.livemode === true) return { httpStatus: 409, outcome: 'live_billing_disabled', granted: false };
+  if (origin !== STAGING_CLAIM_ORIGIN) return { httpStatus: 409, outcome: 'staging_origin_required', granted: false };
+  if (!recordedEvent?.id || recordedEvent.type !== 'checkout.session.completed' || recordedEvent.outcome !== 'shipping_address_missing') {
+    return { httpStatus: 409, outcome: 'event_not_recoverable', granted: false };
+  }
+  if (!(await store.hasEvent(recordedEvent.id))) {
+    return { httpStatus: 409, outcome: 'event_not_recorded', granted: false };
+  }
+  const recordedOutcome = typeof store.eventOutcome === 'function' ? await store.eventOutcome(recordedEvent.id) : null;
+  if (recordedOutcome !== 'shipping_address_missing') {
+    return { httpStatus: 200, outcome: 'duplicate', granted: false };
+  }
+  return fulfillVerifiedBundlePurchase({
+    event: { id: recordedEvent.id, type: recordedEvent.type },
+    session,
+    store,
+    mailer,
+    origin,
+    now,
+    approvedRates,
+    resumeRecordedFailure: true,
+  });
 }
 
 function createClaimCode() {
@@ -967,7 +1025,9 @@ module.exports = {
   planCommerceRefund,
   planClaimTokenUse,
   createInvitationToken,
+  checkoutShippingDetails,
   fulfillVerifiedBundlePurchase,
+  recoverRecordedBundlePurchase,
   createClaimCode,
   hashClaimCode,
   encryptClaimCode,

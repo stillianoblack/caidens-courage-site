@@ -78,6 +78,7 @@ describe('bookstore offers', () => {
     expect(screen.getByText('$49.99')).toBeInTheDocument();
     expect(screen.getByText(HARDCOVER_BUNDLE_UPGRADE_NOTE)).toBeInTheDocument();
     expect(screen.getAllByText(BUNDLE_CLAIM_WINDOW_NOTE).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Pre-order Hardcover' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Pre-order Paperback' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Get the Paperback Bundle' })).not.toBeInTheDocument();
@@ -112,6 +113,22 @@ describe('bookstore offers', () => {
     expect(author).toHaveAttribute('target', '_blank');
     expect(author).toHaveAttribute('rel', 'noopener noreferrer');
     expect(author.getAttribute('href')).not.toBe(kindle.getAttribute('href'));
+  });
+
+  test('shows a checkout return notice without treating the query as proof of payment', () => {
+    const { container } = render(
+      <MemoryRouter initialEntries={['/story/books?bundle=submitted']}>
+        <BookstoreOffers />
+      </MemoryRouter>,
+    );
+
+    const notice = screen.getByRole('status');
+    expect(notice).toHaveTextContent('Payment confirmation and the Academy invitation may take a short time.');
+    expect(notice).toHaveTextContent('This page does not confirm payment or activate Academy access.');
+    expect(screen.getByRole('radio', { name: 'Hardcover From $49.99' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: "Founder's Reserve — Hardcover Bundle" })).toHaveAttribute('aria-checked', 'true');
+    expect(container.innerHTML).not.toContain('cs_test_');
+    expect(container.innerHTML).not.toContain('cs_live_');
   });
 
   test('sends the selected card to staging checkout and never opens a payment link', async () => {

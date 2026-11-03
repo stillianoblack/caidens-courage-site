@@ -18,6 +18,25 @@ function createStore(client) {
       if (error) throw error;
       return Boolean(data);
     },
+    async eventOutcome(eventId) {
+      const { data, error } = await client
+        .from('academy_webhook_events')
+        .select('outcome')
+        .eq('stripe_event_id', eventId)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.outcome || null;
+    },
+    async findOrderBySession(sessionId) {
+      const { data, error } = await client
+        .from('bookstore_orders')
+        .select('id, status, product_key')
+        .eq('stripe_checkout_session_id', sessionId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return { id: data.id, status: data.status, productKey: data.product_key, sessionId };
+    },
     async recordEvent(eventId, eventType, outcome) {
       const { error } = await client.from('academy_webhook_events').insert({
         stripe_event_id: eventId,

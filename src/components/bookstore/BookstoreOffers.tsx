@@ -226,10 +226,10 @@ export default function BookstoreOffers() {
   return (
     <div className="flex flex-col gap-5" aria-busy={loading}>
       {bundleReturned ? (
-        <div className="rounded-2xl border border-[#E5C06A] bg-[#fff8e6] p-4 text-sm leading-relaxed text-navy-600">
-          <p className="font-semibold text-navy-500">Included Academy access is not active yet.</p>
+        <div role="status" className="rounded-2xl border border-[#E5C06A] bg-[#fff8e6] p-4 text-sm leading-relaxed text-navy-600">
+          <p className="font-semibold text-navy-500">Checkout returned to the bookstore.</p>
           <p className="mt-1">
-            Returning from checkout does not grant access and does not start a paid membership.
+            Payment confirmation and the Academy invitation may take a short time. This page does not confirm payment or activate Academy access.
           </p>
         </div>
       ) : null}

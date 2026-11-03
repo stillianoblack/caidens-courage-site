@@ -12,6 +12,8 @@ const {
   planBundleCheckout,
   planPhysicalCheckout,
   planBundleFulfillment,
+  planPhysicalFulfillment,
+  recoverRecordedBundlePurchase,
   planClaimTokenUse,
   bundlePriceMatches,
   applyCheckoutShippingCountries,
@@ -36,7 +38,7 @@ const annualPrice = {
 };
 
 function memoryStore() {
-  const events = new Set();
+  const events = new Map();
   const subscriptions = [];
   const offers = [];
   const payments = [];
@@ -56,7 +58,11 @@ function memoryStore() {
     tokens,
     entitlements,
     async hasEvent(id) { return events.has(id); },
-    async recordEvent(id) { events.add(id); },
+    async recordEvent(id, _type, outcome) {
+      if (!events.has(id)) events.set(id, outcome || 'recorded');
+    },
+    async eventOutcome(id) { return events.has(id) ? events.get(id) : null; },
+    async findOrderBySession(sessionId) { return orders.find((order) => order.sessionId === sessionId) || null; },
     async saveSubscription(decision) { subscriptions.push(decision); },
     async markPaymentFailed(failure) { failures.push(failure); },
     async recordPayment(payment) { payments.push(payment); },
@@ -354,6 +360,119 @@ describe('academy membership decisions', () => {
       now,
     });
     expect(paid).toMatchObject({ granted: false, outcome: 'invitation_sent' });
+    expect(store.orders).toHaveLength(1);
+    expect(sent).toHaveLength(1);
+  });
+
+  test('reads the current shipping address, keeps a missing address from creating an order, and recovers it once', async () => {
+    const legacy = paidBundleSession({ productKey: HARDCOVER_BUNDLE_KEY, amount: 7599, tax: 0, shipping: 1000 });
+    const current = {
+      ...legacy,
+      id: 'cs_current_shipping',
+      shipping_details: undefined,
+      collected_information: {
+        shipping_details: {
+          name: 'Parent',
+          address: { line1: '9 Current St', city: 'Portland', state: 'OR', postal_code: '97201', country: 'US' },
+        },
+      },
+    };
+    expect(planBundleFulfillment({ session: current, approvedRates: ['shr_test_ground'] }).shipping).toMatchObject({
+      line1: '9 Current St',
+      country: 'US',
+    });
+    const outside = {
+      ...current,
+      collected_information: {
+        shipping_details: {
+          name: 'Parent',
+          address: { line1: '9 Current St', city: 'Toronto', state: 'ON', postal_code: 'M5V', country: 'CA' },
+        },
+      },
+    };
+    expect(planBundleFulfillment({ session: outside, approvedRates: ['shr_test_ground'] }).reason).toBe('shipping_country_not_approved');
+
+    const physical = {
+      ...current,
+      id: 'cs_physical',
+      metadata: {
+        purpose: 'physical_book',
+        product_key: HARDCOVER_EDITION_KEY,
+        amount_cents: '4999',
+      },
+      amount_subtotal: 4999,
+      amount_total: 5999,
+      total_details: { amount_tax: 0, amount_shipping: 1000 },
+      line_items: {
+        data: [{
+          quantity: 1,
+          price: {
+            id: 'price_hardcover_test',
+            unit_amount: 4999,
+            currency: 'usd',
+            livemode: false,
+            type: 'one_time',
+            product: 'prod_hardcover_test',
+          },
+        }],
+      },
+    };
+    expect(planPhysicalFulfillment({ session: physical, approvedRates: ['shr_test_ground'] }).shipping.line1).toBe('9 Current St');
+
+    const store = memoryStore();
+    const sent = [];
+    const missing = { ...legacy, id: 'cs_missing_shipping', shipping_details: undefined };
+    const stripe = {
+      retrieveCheckoutSession: async () => missing,
+      mailer: { send: async (payload) => { sent.push(payload); return { success: true }; } },
+      origin: 'https://caidens-courage-staging.netlify.app',
+      approvedRates: ['shr_test_ground'],
+    };
+    const failed = await processAcademyWebhookEvent({
+      event: { id: 'evt_missing_address', type: 'checkout.session.completed', data: { object: missing } },
+      store,
+      stripe,
+      now,
+    });
+    expect(failed.outcome).toBe('shipping_address_missing');
+    expect(store.orders).toHaveLength(0);
+    expect(sent).toHaveLength(0);
+
+    const replay = await processAcademyWebhookEvent({
+      event: { id: 'evt_missing_address', type: 'checkout.session.completed', data: { object: current } },
+      store,
+      stripe: { ...stripe, retrieveCheckoutSession: async () => current },
+      now,
+    });
+    expect(replay.outcome).toBe('duplicate');
+    expect(store.orders).toHaveLength(0);
+    expect(sent).toHaveLength(0);
+
+    const recoveredSession = { ...current, id: 'cs_missing_shipping' };
+    const recovered = await recoverRecordedBundlePurchase({
+      recordedEvent: { id: 'evt_missing_address', type: 'checkout.session.completed', outcome: 'shipping_address_missing' },
+      session: recoveredSession,
+      store,
+      mailer: stripe.mailer,
+      origin: 'https://caidens-courage-staging.netlify.app',
+      approvedRates: ['shr_test_ground'],
+      now,
+    });
+    expect(recovered).toMatchObject({ granted: false, outcome: 'invitation_sent' });
+    expect(store.orders).toHaveLength(1);
+    expect(sent).toHaveLength(1);
+    await expect(store.eventOutcome('evt_missing_address')).resolves.toBe('shipping_address_missing');
+
+    const second = await recoverRecordedBundlePurchase({
+      recordedEvent: { id: 'evt_missing_address', type: 'checkout.session.completed', outcome: 'shipping_address_missing' },
+      session: recoveredSession,
+      store,
+      mailer: stripe.mailer,
+      origin: 'https://caidens-courage-staging.netlify.app',
+      approvedRates: ['shr_test_ground'],
+      now,
+    });
+    expect(second.outcome).toBe('duplicate');
     expect(store.orders).toHaveLength(1);
     expect(sent).toHaveLength(1);
   });
