@@ -4,6 +4,7 @@ import {
   BOOKSTORE_KEYS,
   HISTORICAL_HARDCOVER_PAYMENT_LINK,
   HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK,
+  VERIFIED_HARDCOVER_PAYMENT_LINK,
   type BookstoreProductDefinition,
 } from '../config/bookstoreCatalog';
 import { productLinks } from '../config/externalLinks';
@@ -101,15 +102,20 @@ function availabilityFor(
   return server?.availability || definition.defaultAvailability;
 }
 
+function approvedLivePaymentLink(definitionKey: string): string | null {
+  if (definitionKey === BOOKSTORE_KEYS.paperback) return productLinks.paperback;
+  if (definitionKey === BOOKSTORE_KEYS.hardcover) return VERIFIED_HARDCOVER_PAYMENT_LINK;
+  return null;
+}
+
 function verifiedPhysicalLink(definitionKey: string, server: CommerceProduct | null, candidate: string): boolean {
-  if (!isApprovedStripeCheckoutUrl(candidate)) return false;
-  if (!server) return definitionKey === BOOKSTORE_KEYS.paperback;
-  if (!Object.prototype.hasOwnProperty.call(server, 'paymentLinkVerifiedAt')) return true;
-  if (server.paymentLinkVerifiedAt) return true;
-  return definitionKey === BOOKSTORE_KEYS.paperback
-    && server.displayPriceCents === 3000
-    && server.currency.toLowerCase() === 'usd'
-    && candidate === productLinks.paperback;
+  if (!isApprovedStripeCheckoutUrl(candidate) || isReservedHistoricalPaymentLink(candidate)) return false;
+  const approved = approvedLivePaymentLink(definitionKey);
+  if (!approved || candidate !== approved) return false;
+  if (!server) return true;
+  return server.displayPriceCents === (
+    definitionKey === BOOKSTORE_KEYS.paperback ? 3000 : 4999
+  ) && String(server.currency || '').toLowerCase() === 'usd';
 }
 
 function callToAction(
@@ -157,33 +163,22 @@ export function resolveBookstoreOffer(
   let checkoutMode: BookstoreCheckoutMode = 'none';
   let canCheckout = false;
 
-  const bundleCheckoutKey =
+  const academyBundle =
     definition.key === BOOKSTORE_KEYS.paperbackBundle || definition.key === BOOKSTORE_KEYS.adventureBundle;
-  if (definition.purchasable && !options?.checkoutLocked && priceCents != null && priceCents > 0) {
-    if (bundleCheckoutKey) {
-      const historicalLink = isReservedHistoricalPaymentLink(server?.paymentLinkUrl);
-      const verifiedTestPrice = Boolean(
-        process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED === 'true'
-        && server?.isActive
-        && server.paymentLinkVerifiedAt
-        && server.stripePriceId?.startsWith('price_')
-        && server.displayPriceCents === definition.priceCents
-        && String(server.currency || '').toLowerCase() === 'usd'
-        && !historicalLink,
-      );
-      if (verifiedTestPrice) {
-        checkoutMode = 'bundle_session';
-        canCheckout = true;
-      }
-    } else if (definition.fulfillment === 'digital') {
-      checkoutMode = 'digital_session';
-      canCheckout = Boolean(server?.digitalSalesEnabled && server.stripePriceId?.startsWith('price_'));
-    } else if (availability === 'in_stock' || availability === 'preorder') {
-      const serverLink = server?.isActive ? server.paymentLinkUrl : null;
-      const fallbackLink =
-        !server && definition.key === BOOKSTORE_KEYS.paperback ? options?.paperbackFallbackLink : null;
-      const candidate = (serverLink || fallbackLink || '').trim();
-      if (verifiedPhysicalLink(definition.key, server, candidate) && paymentLinkCheckoutAllowed()) {
+  if (definition.purchasable && !options?.checkoutLocked && priceCents != null && priceCents > 0 && !academyBundle && definition.fulfillment !== 'digital') {
+    if (availability === 'in_stock' || availability === 'preorder') {
+      const approved = approvedLivePaymentLink(definition.key);
+      const serverLink = server?.paymentLinkUrl?.trim() || '';
+      const candidate = approved && (!serverLink || serverLink === approved || isReservedHistoricalPaymentLink(serverLink))
+        ? approved
+        : (definition.key === BOOKSTORE_KEYS.paperback ? (options?.paperbackFallbackLink || '').trim() : '');
+      if (
+        candidate === approved
+        && priceCents === definition.priceCents
+        && String(currency || '').toLowerCase() === 'usd'
+        && verifiedPhysicalLink(definition.key, server, candidate)
+        && paymentLinkCheckoutAllowed()
+      ) {
         paymentLink = candidate;
         checkoutMode = 'payment_link';
         canCheckout = true;

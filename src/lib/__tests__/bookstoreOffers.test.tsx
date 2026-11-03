@@ -12,6 +12,7 @@ import {
   BUNDLE_CLAIM_WINDOW_NOTE,
   HISTORICAL_HARDCOVER_PAYMENT_LINK,
   HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK,
+  VERIFIED_HARDCOVER_PAYMENT_LINK,
 } from '../../config/bookstoreCatalog';
 import { productLinks } from '../../config/externalLinks';
 import { kindleAsinFromUrl, resolveBookstoreOffer } from '../bookstoreOffers';
@@ -77,8 +78,10 @@ describe('bookstore release offers', () => {
 
     const foundersSummary = screen.getByText("Founder's Edition · Sold Out");
     expect(foundersSummary.tagName).toBe('SUMMARY');
-    expect(foundersSummary.closest('details')).not.toBeNull();
-    expect(screen.getByText(FOUNDERS_EDITION_MESSAGE)).toBeInTheDocument();
+    expect(foundersSummary.closest('details')).not.toHaveAttribute('open');
+    for (const paragraph of FOUNDERS_EDITION_MESSAGE.split('\n\n')) {
+      expect(screen.getByText(paragraph)).toBeInTheDocument();
+    }
     expect(screen.queryByText('$24')).not.toBeInTheDocument();
     expect(screen.getAllByText('Purchases are disabled in this preview.')).toHaveLength(1);
     expect(screen.queryByText('Checkout is temporarily unavailable. Please try again shortly.')).not.toBeInTheDocument();
@@ -101,6 +104,11 @@ describe('bookstore release offers', () => {
     expect(container.innerHTML).not.toContain('checkout.stripe.com');
     expect(container.innerHTML).not.toContain('cs_test_');
     expect(container.innerHTML).not.toContain('cs_live_');
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover Edition' }));
+    expect(screen.getByRole('button', { name: 'Pre-order Hardcover' })).toBeDisabled();
+    expect(screen.queryByText('Product price $49.99. Shipping is added at checkout.')).not.toBeInTheDocument();
+    expect(container.innerHTML).not.toContain(VERIFIED_HARDCOVER_PAYMENT_LINK);
 
     fireEvent.click(screen.getByRole('radio', { name: 'Paperback From $30' }));
     expect(screen.getByRole('button', { name: 'Get the Paperback Bundle' })).toBeDisabled();
@@ -145,6 +153,17 @@ describe('bookstore release offers', () => {
     expect(open).toHaveBeenCalledWith(productLinks.paperback, '_blank', 'noopener,noreferrer');
     expect(open).not.toHaveBeenCalledWith(HISTORICAL_HARDCOVER_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
     expect(open).not.toHaveBeenCalledWith(HISTORICAL_HARDCOVER_UNUSED_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover From $49.99' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover Edition' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pre-order Hardcover' }));
+    expect(open).toHaveBeenCalledWith(VERIFIED_HARDCOVER_PAYMENT_LINK, '_blank', 'noopener,noreferrer');
+    fireEvent.click(screen.getByRole('radio', { name: "Founder's Reserve — Hardcover Bundle" }));
+    expect(screen.getByRole('button', { name: 'Get the Hardcover Bundle' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('radio', { name: 'Digital $15.99' }));
+    expect(screen.getByRole('button', { name: 'Buy Digital Edition — $15.99' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('radio', { name: 'Paperback From $30' }));
+    expect(screen.getByRole('button', { name: 'Get the Paperback Bundle' })).toBeDisabled();
     open.mockRestore();
   });
 
@@ -187,8 +206,56 @@ describe('bookstore release offers', () => {
     expect(closedDigital.canCheckout).toBe(false);
 
     const hardcover = BOOKSTORE_PRODUCTS.find((product) => product.key === 'hardcover')!;
-    const closedHardcover = resolveBookstoreOffer(hardcover, null);
-    expect(closedHardcover.canCheckout).toBe(false);
-    expect(closedHardcover.priceCents).toBe(4999);
+    const openHardcover = resolveBookstoreOffer(hardcover, null);
+    expect(openHardcover.canCheckout).toBe(true);
+    expect(openHardcover.paymentLink).toBe(VERIFIED_HARDCOVER_PAYMENT_LINK);
+    expect(openHardcover.priceCents).toBe(4999);
+
+    const mismatched = resolveBookstoreOffer(hardcover, serverProduct({
+      key: 'hardcover',
+      displayPriceCents: 4999,
+      currency: 'usd',
+      isActive: true,
+      paymentLinkUrl: HISTORICAL_HARDCOVER_PAYMENT_LINK,
+      fulfillmentType: 'physical',
+    }));
+    expect(mismatched.paymentLink).toBe(VERIFIED_HARDCOVER_PAYMENT_LINK);
+
+    const wrongPrice = resolveBookstoreOffer(hardcover, serverProduct({
+      key: 'hardcover',
+      displayPriceCents: 5900,
+      currency: 'usd',
+      isActive: true,
+      fulfillmentType: 'physical',
+    }));
+    expect(wrongPrice.canCheckout).toBe(false);
+    expect(wrongPrice.paymentLink).toBeNull();
+
+    mockCheckoutAllowed.mockReturnValue(false);
+    expect(resolveBookstoreOffer(hardcover, null).canCheckout).toBe(false);
+    expect(resolveBookstoreOffer(hardcover, null).paymentLink).toBeNull();
+
+    const paperbackBundle = BOOKSTORE_PRODUCTS.find((product) => product.key === 'courage_adventure_paperback_bundle')!;
+    const blockedBundle = resolveBookstoreOffer(paperbackBundle, serverProduct({
+      key: 'courage_adventure_paperback_bundle',
+      displayPriceCents: 5999,
+      currency: 'usd',
+      isActive: true,
+      paymentLinkUrl: HISTORICAL_HARDCOVER_PAYMENT_LINK,
+      fulfillmentType: 'bundle',
+    }));
+    expect(blockedBundle.canCheckout).toBe(false);
+    expect(blockedBundle.paymentLink).toBeNull();
+
+    const digitalOpen = resolveBookstoreOffer(digital, serverProduct({
+      key: 'digital_edition',
+      displayPriceCents: 1599,
+      fulfillmentType: 'digital',
+      digitalSalesEnabled: true,
+      stripePriceId: 'price_digital',
+      paymentLinkUrl: 'https://buy.stripe.com/dRm14mfmDe0oeELaZG3Ru0a',
+    }));
+    expect(digitalOpen.canCheckout).toBe(false);
+    expect(digitalOpen.paymentLink).toBeNull();
   });
 });
