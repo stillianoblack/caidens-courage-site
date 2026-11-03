@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import BookstoreOffers from '../../components/bookstore/BookstoreOffers';
 import {
   AMAZON_AUTHOR_PAGE_URL,
   AMAZON_KINDLE_ASIN,
   AMAZON_KINDLE_PRODUCT_URL,
+  BOOKSTORE_KEYS,
   BOOKSTORE_PRODUCTS,
   FOUNDERS_EDITION_MESSAGE,
   HARDCOVER_BUNDLE_UPGRADE_NOTE,
@@ -15,8 +16,10 @@ import { productLinks } from '../../config/externalLinks';
 import { kindleAsinFromUrl, resolveBookstoreOffer } from '../bookstoreOffers';
 import type { CommerceProduct } from '../../types/commerce';
 
+const mockUseBookstoreProducts = jest.fn();
+
 jest.mock('../../hooks/useBookstoreProducts', () => ({
-  useBookstoreProducts: () => ({ products: {}, loading: false, error: null }),
+  useBookstoreProducts: () => mockUseBookstoreProducts(),
 }));
 
 function serverProduct(overrides: Partial<CommerceProduct>): CommerceProduct {
@@ -46,34 +49,57 @@ function serverProduct(overrides: Partial<CommerceProduct>): CommerceProduct {
 }
 
 describe('bookstore offers', () => {
-  test('renders the catalog without a crossed-out founders price or a kindle author-page purchase', () => {
+  beforeEach(() => {
+    mockUseBookstoreProducts.mockReturnValue({ products: {}, loading: false, error: null });
+  });
+
+  test('opens on the hardcover tab with only the selected Founder\'s Reserve purchase button', () => {
     const { container } = render(
       <MemoryRouter>
         <BookstoreOffers />
       </MemoryRouter>,
     );
 
+    const foundersSummary = screen.getByText("Founder's Edition · Sold Out");
+    expect(foundersSummary.tagName).toBe('SUMMARY');
+    expect(foundersSummary.closest('details')).not.toHaveAttribute('open');
     expect(screen.getByText(FOUNDERS_EDITION_MESSAGE)).toBeInTheDocument();
     expect(screen.queryByText('$24')).not.toBeInTheDocument();
+    expect(screen.queryByText('Purchases are disabled in this preview.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Already purchased/i)).not.toBeInTheDocument();
     expect(container.innerHTML).not.toContain('line-through');
-    expect(screen.getByRole('button', { name: 'Get the Paperback Bundle' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Get the Hardcover Bundle' })).toBeDisabled();
-    expect(screen.getByText('$59.99')).toBeInTheDocument();
-    expect(screen.getByText(HARDCOVER_BUNDLE_UPGRADE_NOTE)).toBeInTheDocument();
-    expect(screen.getAllByText(BUNDLE_CLAIM_WINDOW_NOTE)).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Pre-order Hardcover' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Pre-order Paperback' })).toBeDisabled();
     expect(container.innerHTML).not.toContain('buy.stripe.com');
     expect(container.innerHTML).not.toContain('checkout.stripe.com');
-    expect(screen.getByRole('button', { name: 'Buy Digital Edition — $15.99' })).toBeDisabled();
+    expect(screen.getByRole('radio', { name: 'Hardcover From $49.99' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: "Founder's Reserve — Hardcover Bundle" })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('button', { name: 'Get the Hardcover Bundle' })).toBeDisabled();
+    expect(screen.getByText('Checkout is temporarily unavailable. Please try again shortly.')).toBeInTheDocument();
     expect(screen.getByText('$75.99')).toBeInTheDocument();
     expect(screen.getByText('$49.99')).toBeInTheDocument();
+    expect(screen.getByText(HARDCOVER_BUNDLE_UPGRADE_NOTE)).toBeInTheDocument();
+    expect(screen.getAllByText(BUNDLE_CLAIM_WINDOW_NOTE).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: 'Pre-order Hardcover' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pre-order Paperback' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Get the Paperback Bundle' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Buy Digital Edition — $15.99' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Buy Book Now')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover Edition' }));
+    expect(screen.getByRole('button', { name: 'Pre-order Hardcover' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Get the Hardcover Bundle' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Paperback From $30' }));
+    expect(screen.getByRole('radio', { name: 'Courage Adventure Bundle — Paperback' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('button', { name: 'Get the Paperback Bundle' })).toBeDisabled();
+    expect(screen.getByText('$59.99')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'Paperback Edition' }));
+    expect(screen.getByRole('button', { name: 'Pre-order Paperback' })).toBeDisabled();
+    expect(screen.getByText('Product price $30. Shipping is added at checkout.')).toBeInTheDocument();
     expect(screen.getByText('$30')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Digital $15.99' }));
+    expect(screen.getByRole('button', { name: 'Buy Digital Edition — $15.99' })).toBeDisabled();
     expect(screen.getByText('Format: EPUB')).toBeInTheDocument();
-    expect(screen.getByAltText('Cover of Caiden Vale and the Focus Flame')).toHaveAttribute(
-      'src',
-      '/images/Caiden-vale-book/Caiden-vale-book.webp',
-    );
 
     const kindle = screen.getByRole('link', { name: 'Buy on Amazon Kindle' });
     expect(kindle).toHaveAttribute('href', AMAZON_KINDLE_PRODUCT_URL);
@@ -86,8 +112,116 @@ describe('bookstore offers', () => {
     expect(author).toHaveAttribute('target', '_blank');
     expect(author).toHaveAttribute('rel', 'noopener noreferrer');
     expect(author.getAttribute('href')).not.toBe(kindle.getAttribute('href'));
-    expect(screen.getByRole('button', { name: 'Buy Digital Edition — $15.99' })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: /Founder's Edition/i })).not.toBeInTheDocument();
+  });
+
+  test('sends the selected card to staging checkout and never opens a payment link', async () => {
+    process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED = 'true';
+    process.env.REACT_APP_BOOKSTORE_PHYSICAL_CHECKOUT_ENABLED = 'true';
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({}),
+    });
+    const originalFetch = global.fetch;
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const open = jest.spyOn(window, 'open').mockReturnValue(null);
+    mockUseBookstoreProducts.mockReturnValue({
+      products: {
+        [BOOKSTORE_KEYS.hardcover]: serverProduct({
+          key: BOOKSTORE_KEYS.hardcover,
+          displayPriceCents: 4999,
+          isActive: true,
+          stripePriceId: 'price_hardcover_test',
+          paymentLinkVerifiedAt: '2026-10-20T00:00:00Z',
+          paymentLinkUrl: null,
+          fulfillmentType: 'physical',
+        }),
+        [BOOKSTORE_KEYS.paperbackBundle]: serverProduct({
+          key: BOOKSTORE_KEYS.paperbackBundle,
+          displayPriceCents: 5999,
+          isActive: true,
+          stripeProductId: 'prod_paperback_bundle',
+          stripePriceId: 'price_paperback_bundle',
+          paymentLinkUrl: null,
+          fulfillmentType: 'bundle',
+        }),
+        [BOOKSTORE_KEYS.adventureBundle]: serverProduct({
+          key: BOOKSTORE_KEYS.adventureBundle,
+          displayPriceCents: 7599,
+          isActive: true,
+          stripeProductId: 'prod_founders_reserve',
+          stripePriceId: 'price_founders_reserve',
+          paymentLinkUrl: null,
+          fulfillmentType: 'bundle',
+        }),
+        [BOOKSTORE_KEYS.digitalEdition]: serverProduct({
+          key: BOOKSTORE_KEYS.digitalEdition,
+          title: 'Caiden Vale and the Focus Flame',
+          displayPriceCents: 1599,
+          fulfillmentType: 'digital',
+          digitalSalesEnabled: true,
+          stripePriceId: 'price_digital',
+        }),
+      },
+      loading: false,
+      error: null,
+    });
+
+    const { container } = render(
+      <MemoryRouter>
+        <BookstoreOffers />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover Edition' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pre-order Hardcover' }));
+    expect(await screen.findByText('Hardcover checkout is not open.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'Paperback From $30' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Get the Paperback Bundle' }));
+    expect(await screen.findByText('Bundle checkout is not open.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'Hardcover From $49.99' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Get the Hardcover Bundle' }));
+    expect(await screen.findByText('Bundle checkout is not open.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'Digital $15.99' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Buy Digital Edition — $15.99' }));
+    expect(await screen.findByText('Digital checkout is not open.')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/.netlify/functions/bookstore-physical-checkout',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ productKey: BOOKSTORE_KEYS.hardcover }),
+        }),
+      );
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/academy-bundle-checkout',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ productKey: BOOKSTORE_KEYS.paperbackBundle }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/academy-bundle-checkout',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ productKey: BOOKSTORE_KEYS.adventureBundle }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/.netlify/functions/bookstore-checkout',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ productKey: BOOKSTORE_KEYS.digitalEdition }),
+      }),
+    );
+    expect(open).not.toHaveBeenCalled();
+    expect(container.innerHTML).not.toContain('buy.stripe.com');
+
+    delete process.env.REACT_APP_BOOKSTORE_BUNDLE_CHECKOUT_ENABLED;
+    delete process.env.REACT_APP_BOOKSTORE_PHYSICAL_CHECKOUT_ENABLED;
+    global.fetch = originalFetch;
+    open.mockRestore();
   });
 
   test('uses the server price with that product payment link and keeps the bundle key stable when renamed', () => {

@@ -33,7 +33,7 @@ export const AMAZON_KINDLE_ASIN = 'B0HNDXXRBV';
 export const AMAZON_KINDLE_LINK_LABEL = 'Buy on Amazon Kindle';
 
 export const FOUNDERS_EDITION_MESSAGE =
-  "Thank you to everyone who believed in Caiden from the very beginning. Every Founder's Edition preorder has been upgraded to the new premium paperback edition, complete with a collectible bookmark and sticker as a special thank-you. You'll always be the first Guardians of the Focus Flame.";
+  "Thank you to everyone who believed in Caiden from the very beginning. Every Founder's Edition preorder has been upgraded to the new hardcover edition as a thank-you for helping bring this world to life. You'll always be the first Guardians of the Focus Flame.";
 
 export const DIGITAL_COVER_SRC = '/images/Caiden-vale-book/Caiden-vale-book.webp';
 

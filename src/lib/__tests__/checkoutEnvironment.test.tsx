@@ -160,7 +160,7 @@ describe('checkout environment guard', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('Live catalog settings could not be loaded. Checkout stays closed until the catalog is available.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Pre-order Paperback' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Get the Hardcover Bundle' })).toBeDisabled();
     expect(document.body.innerHTML).not.toContain('buy.stripe.com');
 
     installCheckoutNavigationGuard();

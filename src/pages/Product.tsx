@@ -5,6 +5,7 @@ import { DISABLE_HEROES } from '../config/heroes';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import BookstoreAcademyPreview from '../components/bookstore/BookstoreAcademyPreview';
 import BookstoreOffers from '../components/bookstore/BookstoreOffers';
 
 // Reusable InsideCard Component for "What's Inside" section
@@ -385,7 +386,7 @@ const Product: React.FC = () => {
                   132 Pages
                 </span>
                 <span className="px-3 py-1.5 bg-gray-50 text-navy-600 rounded-full text-xs font-medium border border-gray-200">
-                  Academy membership sold separately
+                  Digital Access to the Focus Flame Academy
                 </span>
               </div>
 
@@ -401,6 +402,8 @@ const Product: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <BookstoreAcademyPreview />
 
       {/* Section 2: This Story Helps With - NOW THE ONLY STORY SECTION */}
       <section className="py-16 sm:py-24 bg-cream relative overflow-hidden">
@@ -671,7 +674,7 @@ const Product: React.FC = () => {
             <InsideCard
               title="A Big Adventure"
               bullets={[
-                "132-page full-color graphic novel",
+                "Full-color graphic novel (30+ pages)",
                 "Fantasy, friendship, and courage",
                 "A story kids actually want to finish"
               ]}
