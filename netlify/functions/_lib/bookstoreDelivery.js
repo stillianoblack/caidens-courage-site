@@ -1123,7 +1123,13 @@ function getServiceClient() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  // createClient always constructs RealtimeClient. On Node 20 that constructor
+  // throws unless a WebSocket transport is supplied. Checkout uses PostgREST only.
+  const realtime = typeof WebSocket === 'undefined' ? { transport: require('ws') } : undefined;
+  return createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    ...(realtime ? { realtime } : {}),
+  });
 }
 
 function digitalSalesEnvEnabled() {
