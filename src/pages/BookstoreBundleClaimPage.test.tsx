@@ -74,8 +74,11 @@ describe('BookstoreBundleClaimPage', () => {
 
     renderPage();
 
-    expect(await screen.findByRole('link', { name: 'Create a family account' })).toHaveAttribute('href', '/pilot-program-signup');
-    expect(screen.getByRole('link', { name: 'Sign in to your family' })).toHaveAttribute('href', '/portal/family');
+    expect(await screen.findByRole('heading', { name: 'Your Adventure Starts Here!' })).toBeInTheDocument();
+    expect(screen.getByText("Founder's Reserve includes 90 days of Focus Flame Academy. These days start when you activate access.")).toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Create a Family Account' })).toHaveAttribute('href', '/pilot-program-signup');
+    expect(screen.getByRole('link', { name: 'Already Have an Account? Sign In' })).toHaveAttribute('href', '/portal/family');
     expect(screen.queryByLabelText(/family access code/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/parent email/i)).not.toBeInTheDocument();
     expect(releaseAcademyClaimToken).toHaveBeenCalled();
@@ -89,7 +92,7 @@ describe('BookstoreBundleClaimPage', () => {
     writeActivePortalRole('family');
     fireEvent.focus(window);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Activate included access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Activate My Academy Access' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     const claim = fetchMock.mock.calls[1];
     expect(String(claim[0])).toContain('academy-bundle-claim');
@@ -99,7 +102,9 @@ describe('BookstoreBundleClaimPage', () => {
     });
     expect(claim[1].body).not.toContain('invite-fixture-token');
     expect(claim[1].body).not.toContain('programCode');
-    expect(await screen.findByRole('link', { name: 'Enter Focus Flame Academy' })).toHaveAttribute('href', '/portal/family');
+    expect(await screen.findByRole('heading', { name: 'Welcome to Focus Flame Academy!' })).toBeInTheDocument();
+    expect(screen.getByText(/Your included Academy access is now active/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Enter Family Portal' })).toHaveAttribute('href', '/portal/family');
   });
 
   test('an existing signed-in family can activate without typing a code', async () => {
@@ -114,8 +119,10 @@ describe('BookstoreBundleClaimPage', () => {
 
     renderPage();
 
-    expect(await screen.findByRole('button', { name: 'Activate included access' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Create a family account' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Activate My Academy Access' })).toBeInTheDocument();
+    expect(screen.getByText("Founder's Reserve includes 90 days of Focus Flame Academy. These days start when you activate access.")).toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Create a Family Account' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/family access code/i)).not.toBeInTheDocument();
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({});
   });
@@ -132,7 +139,7 @@ describe('BookstoreBundleClaimPage', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/does not create another order/i)).toBeInTheDocument();
+    expect(await screen.findByText(/invitation link has expired or is no longer available/i)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Purchase email'), { target: { value: 'parent@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Email a new invitation' }));
 
@@ -154,9 +161,10 @@ describe('BookstoreBundleClaimPage', () => {
     });
 
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: 'Activate included access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Activate My Academy Access' }));
     expect(await screen.findByText(/family account for the purchase email/i)).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Enter Focus Flame Academy' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Enter Family Portal' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
   });
 
   test('a duplicate activation tells the family access is already on the account', async () => {
@@ -170,7 +178,57 @@ describe('BookstoreBundleClaimPage', () => {
     });
 
     renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: 'Activate included access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Activate My Academy Access' }));
     expect(await screen.findByText(/already on the family account/i)).toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Enter Family Portal' })).toBeInTheDocument();
+  });
+
+  test('a paperback invitation shows 30 days and does not say access is active', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, {
+      granted: false,
+      ready: true,
+      days: 30,
+      productKey: 'courage_adventure_paperback_bundle',
+    }));
+
+    renderPage();
+
+    expect(await screen.findByText('Paperback Adventure Bundle includes 30 days of Focus Flame Academy. These days start when you activate access.')).toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/90 days/i)).not.toBeInTheDocument();
+  });
+
+  test('a refunded claim does not show the welcome state', async () => {
+    writeLastPilotProgram(family, 'family', family.adminEmail, family.familyAccessCode);
+    writeActivePortalRole('family');
+    fetchMock.mockImplementation(async (url: string) => {
+      if (String(url).includes('academy-bundle-claim')) {
+        return jsonResponse(409, { error: 'refunded', granted: false });
+      }
+      return jsonResponse(200, { granted: false, ready: true, days: 30, productKey: 'courage_adventure_paperback_bundle' });
+    });
+
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Activate My Academy Access' }));
+    expect(await screen.findByText(/invitation link has expired or is no longer available/i)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Welcome to Focus Flame Academy!' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/now active/i)).not.toBeInTheDocument();
+  });
+
+  test('a failed recovery keeps the form and explains that no invitation was sent', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (String(url).includes('academy-bundle-recovery')) {
+        return jsonResponse(503, { error: 'invitation_email_failed' });
+      }
+      return jsonResponse(409, { error: 'token_expired', granted: false });
+    });
+
+    renderPage();
+    fireEvent.change(await screen.findByLabelText('Purchase email'), { target: { value: 'parent@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Email a new invitation' }));
+    expect(await screen.findByText(/couldn't send a new invitation/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('Purchase email')).toHaveValue('parent@example.com');
+    expect(screen.queryByText(/one-time link is on its way/i)).not.toBeInTheDocument();
   });
 });

@@ -8,17 +8,31 @@ type Phase = 'checking' | 'ready' | 'expired' | 'claimed' | 'activated' | 'misma
 
 type ReadyInvitation = {
   days: number;
+  productKey: string;
 };
 
-const buttonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#F2D06B] px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60 sm:w-auto';
-const secondaryButtonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full border-2 border-[#16284a] bg-white px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60 sm:w-auto';
-const inputClass = 'mt-1 w-full rounded-xl border-2 border-[#203864] bg-white px-3 py-3 text-base text-[#16284a]';
+type RecoveryNotice = 'sent' | 'error' | null;
+
+const buttonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#F2D06B] px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
+const secondaryButtonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full border-2 border-[#16284a] bg-white px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
+const inputClass = 'mt-2 w-full rounded-xl border-2 border-[#203864] bg-white px-3 py-3 text-base text-[#16284a]';
+
+const EXPIRED_MESSAGE = "Your invitation link has expired or is no longer available. Enter the email used for your purchase and we'll send you a new one.";
+const RECOVERY_ERROR = "We couldn't send a new invitation just now. Try again in a moment.";
+
+function bundleName(productKey: string): string {
+  if (productKey === 'courage_adventure_bundle') return "Founder's Reserve";
+  if (productKey === 'courage_adventure_paperback_bundle') return 'Paperback Adventure Bundle';
+  return 'This bundle';
+}
 
 const BookstoreBundleClaimPage: React.FC = () => {
   const [phase, setPhase] = useState<Phase>('checking');
   const [invitation, setInvitation] = useState<ReadyInvitation | null>(null);
   const [family, setFamily] = useState(readSignedInFamilyForActivation);
   const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryNotice, setRecoveryNotice] = useState<RecoveryNotice>(null);
+  const [recoveryMessage, setRecoveryMessage] = useState('');
   const [pending, setPending] = useState(false);
   const [endsAt, setEndsAt] = useState('');
 
@@ -53,7 +67,12 @@ const BookstoreBundleClaimPage: React.FC = () => {
           setPhase(payload.error === 'already_claimed' ? 'claimed' : 'expired');
           return;
         }
-        setInvitation({ days: Number(payload.days) });
+        const days = Number(payload.days);
+        if (!Number.isFinite(days) || days <= 0) {
+          setPhase('expired');
+          return;
+        }
+        setInvitation({ days, productKey: String(payload.productKey || '') });
         setPhase('ready');
       })
       .catch(() => {
@@ -108,59 +127,81 @@ const BookstoreBundleClaimPage: React.FC = () => {
         body: JSON.stringify({ email: recoveryEmail }),
       });
       const payload = await response.json().catch(() => ({}));
-      setRecoveryEmail('');
       setPhase('expired');
       setInvitation(null);
-      setEndsAt(payload.message || 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.');
+      if (!response.ok) {
+        setRecoveryNotice('error');
+        setRecoveryMessage(RECOVERY_ERROR);
+        return;
+      }
+      setRecoveryEmail('');
+      setRecoveryNotice('sent');
+      setRecoveryMessage(payload.message || 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.');
+    } catch {
+      setRecoveryNotice('error');
+      setRecoveryMessage(RECOVERY_ERROR);
     } finally {
       setPending(false);
     }
   };
 
   const days = invitation?.days;
+  const duration = days
+    ? `${bundleName(invitation?.productKey || '')} includes ${days} days of Focus Flame Academy. These days start when you activate access.`
+    : '';
+  let headline = 'Activate included Academy access';
   let message = 'Checking your invitation.';
-  if (phase === 'ready' && family && days) {
-    message = `This purchase includes ${days} days of Academy access for the family signed in on this browser. The included days start when you activate access.`;
-  } else if (phase === 'ready' && days) {
-    message = `This purchase includes ${days} days of Academy access. Create a family account or sign in with the email that received the invitation. Choose Independent Family if this is a new family. This browser keeps the invitation ready. Return to this page to activate access.`;
+  if (phase === 'ready') {
+    headline = 'Your Adventure Starts Here!';
+    message = family
+      ? 'Your book bundle includes access to Focus Flame Academy. Activate access for the family signed in on this browser.'
+      : 'Your book bundle includes access to Focus Flame Academy. Create or sign into your Family account to begin your adventure.';
   } else if (phase === 'mismatch') {
     message = 'This invitation can only be added to the family account for the purchase email. Sign in with that email, then return to this page.';
   } else if (phase === 'activated') {
+    headline = 'Welcome to Focus Flame Academy!';
     message = endsAt
-      ? `Academy access is active through ${new Date(endsAt).toLocaleDateString()}.`
-      : 'Academy access is active.';
+      ? `Your included Academy access is now active. It runs through ${new Date(endsAt).toLocaleDateString()}.`
+      : 'Your included Academy access is now active.';
   } else if (phase === 'claimed') {
     message = 'This Academy access is already on the family account.';
   } else if (phase === 'expired') {
-    message = endsAt || 'This invitation is no longer ready. Request a new link for the purchase email. That sends an invitation only and does not create another order.';
+    headline = 'Invitation unavailable';
+    message = EXPIRED_MESSAGE;
   }
 
   return (
-    <main className="min-h-screen bg-[#faf9f7] px-4 py-10 text-[#16284a] sm:py-14">
+    <main className="min-h-screen bg-[#faf9f7] px-4 py-12 text-[#16284a] sm:px-6 sm:py-16">
       <div className="mx-auto max-w-xl">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#16284a]">Focus Flame Academy</p>
-        <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-[#16284a]">Activate included Academy access</h1>
+        <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-[#16284a] sm:text-4xl">{headline}</h1>
         <p className="mt-4 text-base leading-relaxed text-[#16284a]" role="status">{message}</p>
+        {phase === 'ready' && duration ? (
+          <p className="mt-3 text-base font-bold leading-relaxed text-[#16284a]">{duration}</p>
+        ) : null}
         {phase === 'ready' && family ? (
-          <div className="mt-6">
+          <div className="mt-8">
             <button className={buttonClass} type="button" onClick={activate} disabled={pending}>
-              Activate included access
+              Activate My Academy Access
             </button>
           </div>
         ) : null}
         {phase === 'ready' && !family ? (
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link className={buttonClass} to={PILOT_PROGRAM_SIGNUP_PATH}>Create a family account</Link>
-            <Link className={secondaryButtonClass} to={FAMILY_PORTAL_PATH}>Sign in to your family</Link>
+          <div className="mt-8 flex flex-col gap-3">
+            <Link className={buttonClass} to={PILOT_PROGRAM_SIGNUP_PATH}>Create a Family Account</Link>
+            <Link className={secondaryButtonClass} to={FAMILY_PORTAL_PATH}>Already Have an Account? Sign In</Link>
           </div>
         ) : null}
         {phase === 'mismatch' ? (
-          <p className="mt-6">
-            <Link className={secondaryButtonClass} to={FAMILY_PORTAL_PATH}>Sign in to your family</Link>
+          <p className="mt-8">
+            <Link className={secondaryButtonClass} to={FAMILY_PORTAL_PATH}>Already Have an Account? Sign In</Link>
           </p>
         ) : null}
         {phase === 'expired' ? (
-          <form className="mt-8 space-y-3" onSubmit={recover}>
+          <form className="mt-8 space-y-4" onSubmit={recover}>
+            {recoveryNotice ? (
+              <p className="text-base leading-relaxed text-[#16284a]" role="status">{recoveryMessage}</p>
+            ) : null}
             <label className="block text-base font-bold" htmlFor="bundle-recovery-email">
               Purchase email
               <input
@@ -173,14 +214,14 @@ const BookstoreBundleClaimPage: React.FC = () => {
                 required
               />
             </label>
-            <button className={secondaryButtonClass} type="submit" disabled={pending}>
+            <button className={buttonClass} type="submit" disabled={pending}>
               Email a new invitation
             </button>
           </form>
         ) : null}
         {phase === 'activated' || phase === 'claimed' ? (
-          <p className="mt-6">
-            <Link className={buttonClass} to={FAMILY_PORTAL_PATH}>Enter Focus Flame Academy</Link>
+          <p className="mt-8">
+            <Link className={buttonClass} to={FAMILY_PORTAL_PATH}>Enter Family Portal</Link>
           </p>
         ) : null}
       </div>
