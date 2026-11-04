@@ -87,6 +87,16 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+function sendAcademyVerificationEmail(payload) {
+  const code = escapeHtml(payload.code);
+  return sendResendEmail({
+    to: payload.to,
+    subject: 'Your Focus Flame Academy verification code',
+    html: `<p>Your verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes and can be used once.</p>`,
+    text: `Your Focus Flame Academy verification code is ${payload.code}. It expires in 10 minutes and can be used once.`,
+  });
+}
+
 function sendAcademyClaimEmail(payload) {
   const claimUrl = escapeHtml(payload.claimUrl);
   const days = escapeHtml(String(payload.days || ''));
@@ -108,4 +118,5 @@ module.exports = {
   sendMissionCompletedEmail,
   sendInactiveReminderEmail,
   sendAcademyClaimEmail,
+  sendAcademyVerificationEmail,
 };

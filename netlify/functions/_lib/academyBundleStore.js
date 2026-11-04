@@ -71,6 +71,16 @@ function createSupabaseBundleStore(client) {
       if (!result.data) return null;
       return { id: result.data.id, adminEmail: result.data.admin_email };
     },
+    async familyById(id) {
+      const result = await client
+        .from('pilot_programs')
+        .select('id, admin_email')
+        .eq('id', id)
+        .maybeSingle();
+      if (result.error) throw unavailable(result.error);
+      if (!result.data) return null;
+      return { id: result.data.id, adminEmail: result.data.admin_email };
+    },
     async orderBySession(sessionId) {
       const result = await client
         .from('bookstore_orders')

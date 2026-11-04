@@ -12,6 +12,7 @@ type ReadyInvitation = {
 };
 
 type RecoveryNotice = 'sent' | 'error' | null;
+type VerificationStep = 'needed' | 'code' | 'verified';
 
 const buttonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#F2D06B] px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
 const secondaryButtonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full border-2 border-[#16284a] bg-white px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
@@ -35,6 +36,9 @@ const BookstoreBundleClaimPage: React.FC = () => {
   const [recoveryMessage, setRecoveryMessage] = useState('');
   const [pending, setPending] = useState(false);
   const [endsAt, setEndsAt] = useState('');
+  const [verificationStep, setVerificationStep] = useState<VerificationStep>('needed');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   useEffect(() => {
     const refreshFamily = () => setFamily(readSignedInFamilyForActivation());
@@ -83,26 +87,90 @@ const BookstoreBundleClaimPage: React.FC = () => {
     };
   }, []);
 
-  const activate = async () => {
+  const sendVerification = async () => {
     const signedIn = readSignedInFamilyForActivation();
     if (!signedIn) {
       setFamily(null);
       return;
     }
     setPending(true);
+    setVerificationMessage('');
     try {
-      const response = await fetch('/.netlify/functions/academy-bundle-claim', {
+      const response = await fetch('/.netlify/functions/academy-bundle-verification', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          parentEmail: signedIn.parentEmail,
+          action: 'send',
           familyAccessCode: signedIn.familyAccessCode,
         }),
       });
       const payload = await response.json().catch(() => ({}));
       if (payload.error === 'email_mismatch') {
         setPhase('mismatch');
+        return;
+      }
+      if (payload.error === 'resend_limited') {
+        setVerificationMessage('Please wait before requesting another verification code.');
+        return;
+      }
+      if (!response.ok || !payload.sent) {
+        setVerificationMessage("We couldn't send a verification code just now. Try again in a moment.");
+        return;
+      }
+      setVerificationCode('');
+      setVerificationStep('code');
+      setVerificationMessage('Enter the verification code sent to your Family account email.');
+    } catch {
+      setVerificationMessage("We couldn't send a verification code just now. Try again in a moment.");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const confirmVerification = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPending(true);
+    setVerificationMessage('');
+    try {
+      const response = await fetch('/.netlify/functions/academy-bundle-verification', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm', code: verificationCode }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.verified) {
+        setVerificationMessage('That verification code is not valid.');
+        return;
+      }
+      setVerificationCode('');
+      setVerificationStep('verified');
+      setVerificationMessage('Your Family email is verified. The included days start when you activate access.');
+    } catch {
+      setVerificationMessage('That verification code is not valid.');
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const activate = async () => {
+    setPending(true);
+    try {
+      const response = await fetch('/.netlify/functions/academy-bundle-claim', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (payload.error === 'email_mismatch') {
+        setPhase('mismatch');
+        return;
+      }
+      if (payload.error === 'verification_required') {
+        setVerificationStep('needed');
+        setVerificationMessage('Verify your Family email before activating access.');
         return;
       }
       if (!response.ok || !payload.granted) {
@@ -154,7 +222,7 @@ const BookstoreBundleClaimPage: React.FC = () => {
   if (phase === 'ready') {
     headline = 'Your Adventure Starts Here!';
     message = family
-      ? 'Your book bundle includes access to Focus Flame Academy. Activate access for the family signed in on this browser.'
+      ? 'Your book bundle includes access to Focus Flame Academy. We verify the email on your Family account before access starts.'
       : 'Your book bundle includes access to Focus Flame Academy. Create or sign into your Family account to begin your adventure.';
   } else if (phase === 'mismatch') {
     message = 'This invitation can only be added to the family account for the purchase email. Sign in with that email, then return to this page.';
@@ -179,8 +247,44 @@ const BookstoreBundleClaimPage: React.FC = () => {
         {phase === 'ready' && duration ? (
           <p className="mt-3 text-base font-bold leading-relaxed text-[#16284a]">{duration}</p>
         ) : null}
-        {phase === 'ready' && family ? (
-          <div className="mt-8">
+        {phase === 'ready' && family && verificationStep === 'needed' ? (
+          <div className="mt-8 space-y-4">
+            {verificationMessage ? (
+              <p className="text-base leading-relaxed text-[#16284a]" role="status">{verificationMessage}</p>
+            ) : null}
+            <button className={buttonClass} type="button" onClick={sendVerification} disabled={pending}>
+              Email verification code
+            </button>
+          </div>
+        ) : null}
+        {phase === 'ready' && family && verificationStep === 'code' ? (
+          <form className="mt-8 space-y-4" onSubmit={confirmVerification}>
+            {verificationMessage ? (
+              <p className="text-base leading-relaxed text-[#16284a]" role="status">{verificationMessage}</p>
+            ) : null}
+            <label className="block text-base font-bold" htmlFor="academy-verification-code">
+              Verification code
+              <input
+                id="academy-verification-code"
+                className={inputClass}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={8}
+                value={verificationCode}
+                onChange={(event) => setVerificationCode(event.target.value)}
+                required
+              />
+            </label>
+            <button className={buttonClass} type="submit" disabled={pending}>
+              Verify email
+            </button>
+          </form>
+        ) : null}
+        {phase === 'ready' && family && verificationStep === 'verified' ? (
+          <div className="mt-8 space-y-4">
+            {verificationMessage ? (
+              <p className="text-base leading-relaxed text-[#16284a]" role="status">{verificationMessage}</p>
+            ) : null}
             <button className={buttonClass} type="button" onClick={activate} disabled={pending}>
               Activate My Academy Access
             </button>

@@ -15,6 +15,12 @@ const {
 } = require('../../../netlify/functions/_lib/academyBundleActivation');
 const { handleBundleExchange } = require('../../../netlify/functions/academy-bundle-exchange');
 const { handleBundleClaim } = require('../../../netlify/functions/academy-bundle-claim');
+const { handleBundleVerification } = require('../../../netlify/functions/academy-bundle-verification');
+const {
+  confirmActivationVerification,
+  createMemoryVerificationStore,
+  sendActivationVerification,
+} = require('../../../netlify/functions/_lib/academyActivationVerification');
 const { createSupabaseBundleStore } = require('../../../netlify/functions/_lib/academyBundleStore');
 const { RECOVERED_FOUNDERS_RESERVE_SESSION_ID } = require('../../../netlify/functions/_lib/activationPreviewGuard');
 
@@ -85,6 +91,9 @@ function memoryStore(overrides = {}) {
     async familyByAccessCode(code) {
       lookups.push(code);
       return families.find((family) => family.accessCode === code) || null;
+    },
+    async familyById(id) {
+      return families.find((family) => family.id === id) || null;
     },
     async orderBySession(sessionId) {
       return orders.find((order) => order.sessionId === sessionId) || null;
@@ -198,9 +207,9 @@ describe('bundle invitation handoff', () => {
     expect(resumed).toMatchObject({ ok: false, reason: 'token_expired' });
     const blocked = await activateBundleForSignedInFamily({
       store,
+      verificationStore: createMemoryVerificationStore(),
       handoffSecret: HANDOFF,
-      familyAccessCode: 'FAM-EXAMPLE',
-      parentEmail: PURCHASE_EMAIL,
+      ownerSecret: 'owner-secret',
       now: NOW,
     });
     expect(blocked).toMatchObject({ ok: false, reason: 'token_expired' });
@@ -217,16 +226,48 @@ describe('bundle invitation handoff', () => {
 });
 
 describe('bundle activation for a signed-in family', () => {
-  async function openAndActivate(store, { accessCode = 'FAM-EXAMPLE', email = PURCHASE_EMAIL, now = NOW, env } = {}) {
+  function recordingMailer() {
+    const messages = [];
+    return {
+      messages,
+      async send(payload) {
+        messages.push(payload);
+        return { success: true };
+      },
+    };
+  }
+
+  async function openAndActivate(store, { accessCode = 'FAM-EXAMPLE', now = NOW, env, verificationStore = createMemoryVerificationStore(), mailer = recordingMailer(), code = '12345678' } = {}) {
     await establishBundleHandoff({ store, invitationToken: INVITE, now, secret: HANDOFF });
-    return activateBundleForSignedInFamily({
+    const sent = await sendActivationVerification({
       store,
+      verificationStore,
       handoffSecret: HANDOFF,
       familyAccessCode: accessCode,
-      parentEmail: email,
+      now,
+      env,
+      mailer,
+      code,
+    });
+    if (!sent.ok) return { result: sent, verificationStore, mailer };
+    const confirmed = await confirmActivationVerification({
+      store,
+      verificationStore,
+      handoffSecret: HANDOFF,
+      code,
+      now,
+      authorizationSecret: 'owner-secret',
+    });
+    if (!confirmed.ok) return { result: confirmed, verificationStore, mailer };
+    const result = await activateBundleForSignedInFamily({
+      store,
+      verificationStore,
+      handoffSecret: HANDOFF,
+      ownerSecret: 'owner-secret',
       now,
       env,
     });
+    return { result, verificationStore, mailer };
   }
 
   test('preparation cannot activate the recovered founders reserve claim', async () => {
@@ -249,7 +290,8 @@ describe('bundle activation for a signed-in family', () => {
       }],
     });
     const blocked = await openAndActivate(store, { env: {} });
-    expect(blocked).toMatchObject({ ok: false, granted: false, reason: 'recovered_claim_locked' });
+    expect(blocked.result).toMatchObject({ ok: false, granted: false, reason: 'recovered_claim_locked' });
+    expect(blocked.mailer.messages).toHaveLength(0);
     expect(activeGrants(store)).toHaveLength(0);
     expect(store.claims[0].activatedAt).toBeNull();
     expect(store.orderWrites).toBe(0);
@@ -259,10 +301,12 @@ describe('bundle activation for a signed-in family', () => {
   test('new and existing families activate the original claim once', async () => {
     const store = memoryStore();
     const first = await openAndActivate(store);
-    expect(first).toMatchObject({ granted: true, duplicate: false });
-    expect(first.startsAt).toBe(NOW.toISOString());
-    expect(first.startsAt).not.toBe(store.claims[0].purchaseVerifiedAt);
-    expect(first.endsAt).toBe(expectedEndsAt(NOW, 90));
+    expect(first.result).toMatchObject({ granted: true, duplicate: false });
+    expect(first.result.startsAt).toBe(NOW.toISOString());
+    expect(first.result.startsAt).not.toBe(store.claims[0].purchaseVerifiedAt);
+    expect(first.result.endsAt).toBe(expectedEndsAt(NOW, 90));
+    expect(first.mailer.messages[0].to).toBe(PURCHASE_EMAIL);
+    expect(JSON.stringify(first.result)).not.toContain('12345678');
     expect(activeGrants(store)).toHaveLength(1);
     expect(activeGrants(store)[0]).toMatchObject({
       familyProgramId: 'program-1',
@@ -273,9 +317,9 @@ describe('bundle activation for a signed-in family', () => {
 
     const second = await activateBundleForSignedInFamily({
       store,
+      verificationStore: first.verificationStore,
       handoffSecret: HANDOFF,
-      familyAccessCode: 'FAM-EXAMPLE',
-      parentEmail: PURCHASE_EMAIL,
+      ownerSecret: 'owner-secret',
       now: new Date('2026-11-03T15:40:00.000Z'),
     });
     expect(second).toMatchObject({ granted: true, duplicate: true });
@@ -301,8 +345,8 @@ describe('bundle activation for a signed-in family', () => {
       orders: [{ sessionId: 'cs_test_existing', status: 'paid', productKey: PAPERBACK_BUNDLE_KEY }],
     });
     const result = await openAndActivate(store);
-    expect(result.startsAt).toBe(NOW.toISOString());
-    expect(result.endsAt).toBe(expectedEndsAt(NOW, 30));
+    expect(result.result.startsAt).toBe(NOW.toISOString());
+    expect(result.result.endsAt).toBe(expectedEndsAt(NOW, 30));
     expect(activeGrants(store)).toHaveLength(1);
   });
 
@@ -314,26 +358,36 @@ describe('bundle activation for a signed-in family', () => {
       ],
     });
     await establishBundleHandoff({ store, invitationToken: INVITE, now: NOW, secret: HANDOFF });
-    const mismatched = await handleBundleClaim({
+    const verificationStore = createMemoryVerificationStore();
+    const mailer = { messages: [], async send(payload) { this.messages.push(payload); return { success: true }; } };
+    const mismatched = await handleBundleVerification({
       httpMethod: 'POST',
       headers: { cookie: buildAcademyHandoffCookie(HANDOFF) },
       body: JSON.stringify({
+        action: 'send',
         programCode: 'CMP-EXAMPLE',
         familyAccessCode: 'FAM-OTHER',
         parentEmail: PURCHASE_EMAIL,
       }),
-    }, { store, now: NOW });
+    }, { store, verificationStore, now: NOW, mailer });
     expect(mismatched.statusCode).toBe(409);
     expect(JSON.parse(mismatched.body)).toMatchObject({ error: 'email_mismatch', granted: false });
+    expect(mismatched.body).not.toContain(PURCHASE_EMAIL);
     expect(store.lookups).toEqual(['FAM-OTHER']);
+    expect(mailer.messages).toHaveLength(0);
     expect(activeGrants(store)).toHaveLength(0);
 
-    const codeOnly = await handleBundleClaim({
+    const ignoredBody = await handleBundleClaim({
       httpMethod: 'POST',
       headers: { cookie: buildAcademyHandoffCookie(HANDOFF) },
-      body: JSON.stringify({ programCode: 'CMP-EXAMPLE' }),
-    }, { store, now: NOW });
-    expect(codeOnly.statusCode).toBe(400);
+      body: JSON.stringify({
+        programCode: 'CMP-EXAMPLE',
+        familyAccessCode: 'FAM-EXAMPLE',
+        parentEmail: PURCHASE_EMAIL,
+      }),
+    }, { store, verificationStore, now: NOW });
+    expect(ignoredBody.statusCode).toBe(409);
+    expect(JSON.parse(ignoredBody.body)).toMatchObject({ error: 'verification_required', granted: false });
     expect(store.lookups).toEqual(['FAM-OTHER']);
     expect(activeGrants(store)).toHaveLength(0);
   });
@@ -343,7 +397,7 @@ describe('bundle activation for a signed-in family', () => {
       orders: [{ sessionId: 'cs_test_existing', status: 'refunded', productKey: HARDCOVER_BUNDLE_KEY }],
     });
     const result = await openAndActivate(store);
-    expect(result).toMatchObject({ ok: false, reason: 'purchase_not_verified' });
+    expect(result.result).toMatchObject({ ok: false, reason: 'purchase_not_verified' });
     expect(activeGrants(store)).toHaveLength(0);
     expect(store.claims[0].activatedAt).toBeNull();
 
@@ -362,15 +416,8 @@ describe('bundle activation for a signed-in family', () => {
   test('a lost activation update cannot leave a second active entitlement', async () => {
     const store = memoryStore();
     store.loseNextUpdate();
-    await establishBundleHandoff({ store, invitationToken: INVITE, now: NOW, secret: HANDOFF });
-    const lost = await activateBundleForSignedInFamily({
-      store,
-      handoffSecret: HANDOFF,
-      familyAccessCode: 'FAM-EXAMPLE',
-      parentEmail: PURCHASE_EMAIL,
-      now: NOW,
-    });
-    expect(lost).toMatchObject({ granted: true, duplicate: true });
+    const lost = await openAndActivate(store);
+    expect(lost.result).toMatchObject({ granted: true, duplicate: true });
     expect(activeGrants(store)).toHaveLength(0);
     expect(store.entitlements).toHaveLength(1);
     expect(store.entitlements[0].status).toBe('canceled');
@@ -388,7 +435,7 @@ describe('bundle activation for a signed-in family', () => {
       }],
     });
     const result = await openAndActivate(store);
-    expect(result.duplicate).toBe(true);
+    expect(result.result.duplicate).toBe(true);
     expect(store.entitlements).toHaveLength(1);
     expect(store.claims[0].entitlementId).toBe('ent-existing');
   });

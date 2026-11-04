@@ -171,16 +171,18 @@ async function readBundleHandoff({ store, handoffSecret, now = new Date() } = {}
 
 async function activateBundleForSignedInFamily({
   store,
+  verificationStore,
   handoffSecret,
-  familyAccessCode,
-  parentEmail,
+  ownerSecret,
   now = new Date(),
   env = process.env,
 } = {}) {
   const presented = String(handoffSecret || '').trim();
-  const accessCode = String(familyAccessCode || '').trim();
-  const email = normalizeEmail(parentEmail);
-  if (!presented || !accessCode || !email) return { ok: false, status: 400, reason: 'invalid_request' };
+  const owner = String(ownerSecret || '').trim();
+  if (!presented) return { ok: false, status: 400, reason: 'invalid_request' };
+  if (!verificationStore || typeof verificationStore.consumeAuthorization !== 'function') {
+    return { ok: false, status: 503, reason: 'verification_unavailable', granted: false };
+  }
 
   const token = await store.tokenByHash(hashClaimCode(presented));
   if (!token || token.purpose !== 'activation') return { ok: false, status: 409, reason: 'token_invalid' };
@@ -197,13 +199,30 @@ async function activateBundleForSignedInFamily({
   const handoff = planClaimTokenUse({ tokenRow: token, now, purpose: 'activation' });
   if (!handoff.ok) return { ok: false, status: 409, reason: handoff.reason };
 
+  let familyProgramId = null;
+  try {
+    familyProgramId = owner
+      ? await verificationStore.consumeAuthorization({
+        claimId: claim.id,
+        authorizationHash: hashClaimCode(owner),
+        now,
+      })
+      : null;
+  } catch {
+    return { ok: false, status: 503, reason: 'verification_unavailable', granted: false };
+  }
+  if (!familyProgramId) {
+    return { ok: false, status: 409, reason: 'verification_required', granted: false };
+  }
+
   const order = claim.checkoutSessionId ? await store.orderBySession(claim.checkoutSessionId) : null;
   if (!order) return { ok: false, status: 409, reason: 'purchase_not_verified' };
   if (order.productKey === 'hardcover_bundle') {
     return { ok: false, status: 409, reason: 'historical_record_locked' };
   }
 
-  const program = await store.familyByAccessCode(accessCode);
+  const program = await store.familyById(familyProgramId);
+  const email = normalizeEmail(claim.customerEmail);
   const decision = planAuthenticatedFamilyActivation({
     program,
     parentEmail: email,

@@ -1,38 +1,35 @@
 const { jsonResponse } = require('./_lib/bookstoreDelivery');
 const { createActivationServiceClient } = require('./_lib/activationPreviewGuard');
 const { createSupabaseBundleStore } = require('./_lib/academyBundleStore');
+const { createSupabaseVerificationStore } = require('./_lib/academyActivationVerification');
 const {
   activateBundleForSignedInFamily,
   cookieHeaderFrom,
   publicActivationBody,
   readAcademyHandoff,
 } = require('./_lib/academyBundleActivation');
+const { readOwnerCookie } = require('./_lib/academyActivationVerification');
 
 async function handleBundleClaim(event, deps = {}) {
-  if (event.httpMethod !== 'POST') return jsonResponse(405, { error: 'method_not_allowed' });
-  let body = {};
-  try {
-    body = event.body ? JSON.parse(event.body) : {};
-  } catch {
-    return jsonResponse(400, { error: 'invalid_json' });
-  }
+  if (event.httpMethod !== 'POST') return jsonResponse(405, { error: 'method_not_allowed', granted: false });
 
   const client = deps.store ? null : createActivationServiceClient(deps.env);
   const store = deps.store || (client ? createSupabaseBundleStore(client) : null);
-  if (!store) return jsonResponse(503, { error: 'claim_not_configured' });
+  const verificationStore = deps.verificationStore || (client ? createSupabaseVerificationStore(client) : null);
+  if (!store || !verificationStore) return jsonResponse(503, { error: 'claim_not_configured', granted: false });
 
   try {
     const result = await activateBundleForSignedInFamily({
       store,
-      handoffSecret: readAcademyHandoff(cookieHeaderFrom(event)),
-      familyAccessCode: body.familyAccessCode,
-      parentEmail: body.parentEmail,
+      verificationStore,
+      handoffSecret: deps.handoffSecret || readAcademyHandoff(cookieHeaderFrom(event)),
+      ownerSecret: deps.ownerSecret || readOwnerCookie(cookieHeaderFrom(event)),
       now: deps.now,
       env: deps.env,
     });
     return jsonResponse(result.status || 503, publicActivationBody(result));
-  } catch (error) {
-    return jsonResponse(error.status || 503, { error: error.reason || 'claim_unavailable', granted: false });
+  } catch {
+    return jsonResponse(503, { error: 'claim_unavailable', granted: false });
   }
 }
 
