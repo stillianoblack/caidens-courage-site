@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { PersonaPageConfig } from '../../config/personaPages';
 import { trackCtaClick } from '../../lib/analytics';
+import { isStripeCheckoutUrl, visibleCheckoutHref } from '../../lib/checkoutEnvironment';
 import Button from '../ui/Button';
 
 export function PersonaContainer({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -20,7 +21,15 @@ export function EditorialPricingTierCard({ tier, family = false }: { tier: Perso
       {tier.launchOffer ? <p className="personaEditorial__offer">{tier.launchOffer}</p> : null}
       {tier.notes?.map((note) => <p className="personaEditorial__tierNote" key={note}>{note}</p>)}
       {tier.notIncluded?.length ? <div className="personaEditorial__notIncluded"><b>Not included</b><ul>{tier.notIncluded.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
-      {tier.cta ? <Button variant="primary" size="lg" as={tier.cta.external || tier.cta.href.startsWith('http') ? 'a' : Link} {...(tier.cta.external || tier.cta.href.startsWith('http') ? { href: tier.cta.href, target: '_blank', rel: 'noopener noreferrer' } : { to: tier.cta.href })} leftIconSrc={null} className="personaEditorial__pricingCta" onClick={() => trackCtaClick(tier.cta!.label, tier.cta!.href)}>{tier.cta.label}</Button> : null}
+      {tier.cta ? (
+        isStripeCheckoutUrl(tier.cta.href) && !visibleCheckoutHref(tier.cta.href) ? (
+          <Button variant="primary" size="lg" leftIconSrc={null} className="personaEditorial__pricingCta" disabled>
+            {tier.cta.label}
+          </Button>
+        ) : (
+          <Button variant="primary" size="lg" as={tier.cta.external || tier.cta.href.startsWith('http') ? 'a' : Link} {...(tier.cta.external || tier.cta.href.startsWith('http') ? { href: visibleCheckoutHref(tier.cta.href) || tier.cta.href, target: '_blank', rel: 'noopener noreferrer' } : { to: tier.cta.href })} leftIconSrc={null} className="personaEditorial__pricingCta" onClick={() => trackCtaClick(tier.cta!.label, tier.cta!.href)}>{tier.cta.label}</Button>
+        )
+      ) : null}
     </article>
   );
 }

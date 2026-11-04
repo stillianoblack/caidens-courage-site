@@ -17,6 +17,7 @@ export const StoryModePage = lazy(() => import('../pages/StoryModePage'));
 export const StoryQuestIntroPage = lazy(() => import('../pages/StoryQuestIntroPage'));
 export const ResourcesPage = lazy(() => import('../pages/Resources'));
 export const ProductPage = lazy(() => import('../pages/Product'));
+export const BookstoreBundleClaimPage = lazy(() => import('../pages/BookstoreBundleClaimPage'));
 export const PreviewPage = lazy(() => import('../pages/Preview'));
 export const MissionPage = lazy(() => import('../pages/Mission'));
 export const AboutPage = lazy(() => import('../pages/About'));

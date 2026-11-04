@@ -22,6 +22,7 @@ import { ToastProvider } from './components/portal-design-system';
 import { PilotAccessProvider } from './components/courage/PilotAccessProvider';
 import {
   AboutPage,
+  BookstoreBundleClaimPage,
   B4ClickerPage,
   B4FocusFlightPage,
   B4BaselineCheckPage,
@@ -90,6 +91,7 @@ import {
   BMC_COLORING_PATH,
   BMC_RESET_TOOLS_PATH,
   BRAVE_MIND_CLUB_PATH,
+  STORY_BOOKS_CLAIM_PATH,
   STORY_BOOKS_PATH,
   STORY_CHARACTERS_PATH,
   STORY_MODE_PATH,
@@ -254,6 +256,7 @@ const appRouteChildren = (
       <Route path={STORY_PATH} element={<StoryHubPage />} />
       <Route path={THE_STORY_PATH} element={<TheStoryPage />} />
       <Route path={STORY_BOOKS_PATH} element={<ProductPage />} />
+      <Route path={STORY_BOOKS_CLAIM_PATH} element={<BookstoreBundleClaimPage />} />
       <Route path={STORY_CHARACTERS_PATH} element={<CharactersPage />} />
       <Route path={STORY_MODE_PATH} element={<StoryQuestIntroPage />} />
       <Route path={`${STORY_MODE_PATH}/:chapterId`} element={<StoryModePage />} />

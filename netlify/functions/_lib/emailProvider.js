@@ -18,6 +18,7 @@ async function sendResendEmail(payload) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        ...(payload.idempotencyKey ? { 'Idempotency-Key': payload.idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from,
@@ -78,6 +79,27 @@ function sendInactiveReminderEmail(payload) {
   return sendResendEmail(payload);
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function sendAcademyClaimEmail(payload) {
+  const claimUrl = escapeHtml(payload.claimUrl);
+  const days = escapeHtml(String(payload.days || ''));
+  const productTitle = escapeHtml(payload.productTitle || 'your bundle');
+  return sendResendEmail({
+    to: payload.to,
+    subject: 'Activate your Focus Flame Academy access',
+    html: `<p>Thank you for purchasing ${productTitle}. A parent can activate ${days} days of Focus Flame Academy access for the family.</p><p><a href="${claimUrl}">Activate Academy access</a></p><p>This invitation expires in 30 minutes. Access starts when a parent activates it.</p>`,
+    text: `Activate ${payload.days} days of Focus Flame Academy access for ${payload.productTitle}. Open this one-time link: ${payload.claimUrl}\nThe link expires in 30 minutes. Access starts when a parent activates it.`,
+    idempotencyKey: payload.idempotencyKey,
+  });
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendAccessCodeEmail,
@@ -85,4 +107,5 @@ module.exports = {
   sendCertificateEmail,
   sendMissionCompletedEmail,
   sendInactiveReminderEmail,
+  sendAcademyClaimEmail,
 };

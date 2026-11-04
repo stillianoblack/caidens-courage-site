@@ -1,3 +1,5 @@
+import { canOpenExternalUrl } from '../lib/checkoutEnvironment';
+
 export function getStripePreorderUrl(): string | undefined {
   // Limited Edition Pre-order Stripe Payment Link
   return 'https://buy.stripe.com/9B6bJ03DVe0ogMTaZG3Ru00';
@@ -19,9 +21,11 @@ export function getWaitlistUrl(): string | undefined {
   return undefined;
 }
 
-export function openExternalUrl(url: string) {
+export function openExternalUrl(url: string): boolean {
+  if (!canOpenExternalUrl(url)) return false;
   // Open external purchase links in a new tab safely (prevents window.opener attacks)
   const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
   if (newWindow) newWindow.opener = null;
+  return Boolean(newWindow);
 }
 
