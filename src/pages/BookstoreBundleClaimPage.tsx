@@ -11,14 +11,16 @@ type ReadyInvitation = {
   productKey: string;
 };
 
-type RecoveryNotice = 'sent' | 'error' | null;
+type RecoveryNotice = 'acknowledged' | 'error' | null;
+type RecoveryBundle = 'paperback' | 'hardcover' | '';
 type VerificationStep = 'needed' | 'code' | 'verified';
 
 const buttonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#F2D06B] px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
 const secondaryButtonClass = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-full border-2 border-[#16284a] bg-white px-5 py-3 text-base font-bold text-[#16284a] disabled:opacity-60';
 const inputClass = 'mt-2 w-full rounded-xl border-2 border-[#203864] bg-white px-3 py-3 text-base text-[#16284a]';
 
-const EXPIRED_MESSAGE = "Your invitation link has expired or is no longer available. Enter the email used for your purchase and we'll send you a new one.";
+const EXPIRED_MESSAGE = 'Your invitation link has expired or is no longer available. Choose the bundle and enter the purchase email to request another one-time link.';
+const RECOVERY_ACK = 'If an eligible purchase matches this request, a new one-time link is emailed to that purchase email.';
 const RECOVERY_ERROR = "We couldn't send a new invitation just now. Try again in a moment.";
 
 function bundleName(productKey: string): string {
@@ -32,6 +34,8 @@ const BookstoreBundleClaimPage: React.FC = () => {
   const [invitation, setInvitation] = useState<ReadyInvitation | null>(null);
   const [family, setFamily] = useState(readSignedInFamilyForActivation);
   const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryBundle, setRecoveryBundle] = useState<RecoveryBundle>('');
+  const [recoveryDate, setRecoveryDate] = useState('');
   const [recoveryNotice, setRecoveryNotice] = useState<RecoveryNotice>(null);
   const [recoveryMessage, setRecoveryMessage] = useState('');
   const [pending, setPending] = useState(false);
@@ -192,7 +196,11 @@ const BookstoreBundleClaimPage: React.FC = () => {
       const response = await fetch('/.netlify/functions/academy-bundle-recovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: recoveryEmail }),
+        body: JSON.stringify({
+          email: recoveryEmail,
+          bundle: recoveryBundle,
+          ...(recoveryDate ? { purchaseDate: recoveryDate } : {}),
+        }),
       });
       const payload = await response.json().catch(() => ({}));
       setPhase('expired');
@@ -202,9 +210,8 @@ const BookstoreBundleClaimPage: React.FC = () => {
         setRecoveryMessage(RECOVERY_ERROR);
         return;
       }
-      setRecoveryEmail('');
-      setRecoveryNotice('sent');
-      setRecoveryMessage(payload.message || 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.');
+      setRecoveryNotice('acknowledged');
+      setRecoveryMessage(payload.message || RECOVERY_ACK);
     } catch {
       setRecoveryNotice('error');
       setRecoveryMessage(RECOVERY_ERROR);
@@ -306,6 +313,33 @@ const BookstoreBundleClaimPage: React.FC = () => {
             {recoveryNotice ? (
               <p className="text-base leading-relaxed text-[#16284a]" role="status">{recoveryMessage}</p>
             ) : null}
+            <fieldset className="space-y-2">
+              <legend className="text-base font-bold">Bundle</legend>
+              <label className="flex items-center gap-2 text-base" htmlFor="bundle-recovery-paperback">
+                <input
+                  id="bundle-recovery-paperback"
+                  name="recovery-bundle"
+                  type="radio"
+                  value="paperback"
+                  checked={recoveryBundle === 'paperback'}
+                  onChange={() => setRecoveryBundle('paperback')}
+                  required
+                />
+                Paperback Adventure Bundle
+              </label>
+              <label className="flex items-center gap-2 text-base" htmlFor="bundle-recovery-hardcover">
+                <input
+                  id="bundle-recovery-hardcover"
+                  name="recovery-bundle"
+                  type="radio"
+                  value="hardcover"
+                  checked={recoveryBundle === 'hardcover'}
+                  onChange={() => setRecoveryBundle('hardcover')}
+                  required
+                />
+                Founder's Reserve
+              </label>
+            </fieldset>
             <label className="block text-base font-bold" htmlFor="bundle-recovery-email">
               Purchase email
               <input
@@ -318,8 +352,19 @@ const BookstoreBundleClaimPage: React.FC = () => {
                 required
               />
             </label>
-            <button className={buttonClass} type="submit" disabled={pending}>
-              Email a new invitation
+            <label className="block text-base font-bold" htmlFor="bundle-recovery-date">
+              Purchase date
+              <input
+                id="bundle-recovery-date"
+                className={inputClass}
+                type="date"
+                value={recoveryDate}
+                onChange={(event) => setRecoveryDate(event.target.value)}
+              />
+            </label>
+            <p className="text-sm leading-relaxed text-[#16284a]">Add the purchase date if you bought the same bundle more than once.</p>
+            <button className={buttonClass} type="submit" disabled={pending || !recoveryBundle}>
+              Request a new invitation
             </button>
           </form>
         ) : null}

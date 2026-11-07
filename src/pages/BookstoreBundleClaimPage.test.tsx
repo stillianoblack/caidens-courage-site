@@ -147,7 +147,7 @@ describe('BookstoreBundleClaimPage', () => {
     fetchMock.mockImplementation(async (url: string) => {
       if (String(url).includes('academy-bundle-recovery')) {
         return jsonResponse(200, {
-          message: 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.',
+          message: 'If an eligible purchase matches this request, a new one-time link is emailed to that purchase email.',
         });
       }
       return jsonResponse(409, { error: 'token_expired', granted: false });
@@ -156,14 +156,19 @@ describe('BookstoreBundleClaimPage', () => {
     renderPage();
 
     expect(await screen.findByText(/invitation link has expired or is no longer available/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Founder\'s Reserve'));
     fireEvent.change(screen.getByLabelText('Purchase email'), { target: { value: 'parent@example.com' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Email a new invitation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Request a new invitation' }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     expect(String(fetchMock.mock.calls[1][0])).toContain('academy-bundle-recovery');
-    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ email: 'parent@example.com' });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+      email: 'parent@example.com',
+      bundle: 'hardcover',
+    });
     expect(fetchMock.mock.calls.some((call) => String(call[0]).includes('checkout'))).toBe(false);
-    expect(await screen.findByText(/new one-time link is on its way/i)).toBeInTheDocument();
+    expect(await screen.findByText(/if an eligible purchase matches this request/i)).toBeInTheDocument();
+    expect(screen.queryByText(/on its way/i)).not.toBeInTheDocument();
   });
 
   test('shows a purchase-email mismatch without activating', async () => {
@@ -261,10 +266,11 @@ describe('BookstoreBundleClaimPage', () => {
     });
 
     renderPage();
-    fireEvent.change(await screen.findByLabelText('Purchase email'), { target: { value: 'parent@example.com' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Email a new invitation' }));
+    fireEvent.click(await screen.findByLabelText('Paperback Adventure Bundle'));
+    fireEvent.change(screen.getByLabelText('Purchase email'), { target: { value: 'parent@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Request a new invitation' }));
     expect(await screen.findByText(/couldn't send a new invitation/i)).toBeInTheDocument();
     expect(screen.getByLabelText('Purchase email')).toHaveValue('parent@example.com');
-    expect(screen.queryByText(/one-time link is on its way/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/is emailed to that purchase email/i)).not.toBeInTheDocument();
   });
 });
