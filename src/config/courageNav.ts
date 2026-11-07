@@ -78,7 +78,7 @@ export const STORY_DROPDOWN: CourageNavLink[] = [
 /** Kid-facing mega menu — decision-based CREATE / PRACTICE / PLAY. */
 export const KIDS_MEGA_DROPDOWN: CourageKidsMegaNav = {
   intro: {
-    label: 'Kids',
+    label: 'Focus Flame Academy',
     description: 'Free games, activities, worksheets, and focus tools.',
   },
   columns: [
@@ -122,6 +122,10 @@ export const KIDS_MEGA_DROPDOWN: CourageKidsMegaNav = {
               label: 'Focus Flame Adventures',
               href: FOCUS_FLAME_LAB_PATH,
               pilotInterest: 'focus_flame_lab',
+            },
+            {
+              label: 'Games',
+              href: GAMES_PATH,
             },
           ],
         },

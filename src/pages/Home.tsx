@@ -1,12 +1,10 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import CourageHeader from '../components/courage/CourageHeader';
 import CourageFooter from '../components/courage/CourageFooter';
 import ThreeWaysSection from '../components/courage/ThreeWaysSection';
-import Button from '../components/ui/Button';
 import useHashScroll from '../hooks/useHashScroll';
+import CourageHeroCarousel from '../components/courage/CourageHeroCarousel';
 import HeroVideoPreview from '../components/courage/HeroVideoPreview';
-import { VALE_COMICBOOK_URL } from '../config/valeLinks';
 
 const FocusFlameLabCallout = React.lazy(() => import('../components/courage/FocusFlameLabCallout'));
 const ChoosePathSection = React.lazy(() => import('../components/courage/ChoosePathSection'));
@@ -350,46 +348,7 @@ const Home: React.FC = () => {
     <div className="min-h-screen overflow-x-clip bg-cream font-body">
       <CourageHeader />
 
-      {/* Hero — story-first graphic novel introduction */}
-      <section className="bg-cream px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5 lg:px-8 lg:pb-8">
-        <div className="cc-site-container mx-auto">
-          <div className="cc-hero-mask cc-hero-mask--brand cc-hero-mask--story relative overflow-hidden rounded-[1.35rem] sm:rounded-[1.75rem] lg:rounded-[2rem]">
-            <div className="cc-hero-content relative z-10">
-              <div className="cc-hero-layout">
-                <div className="cc-hero-main">
-                  <div className="cc-hero-copy">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-golden-600 sm:text-[11px]">
-                      STORY-POWERED SEL
-                    </p>
-                    <h1 className="cc-hero-title mt-2.5 font-display font-extrabold leading-[1.08] text-navy-500 sm:mt-4 sm:text-5xl lg:text-6xl">
-                      The story where focus becomes a superpower.
-                    </h1>
-                    <p className="cc-hero-subtitle mt-2.5 text-[0.9375rem] leading-snug text-[#B0E0E6] sm:mt-4 sm:max-w-none sm:text-lg sm:leading-relaxed lg:text-xl">
-                      An unforgettable graphic novel adventure helping kids discover focus, confidence, courage, and the hidden power already inside them.
-                    </p>
-                  </div>
-                  <div className="cc-hero-ctas">
-                    <Button variant="primary" size="lg" as="a" href={VALE_COMICBOOK_URL} className="cc-hero-cta">
-                      Order the Book
-                    </Button>
-                    <Button variant="secondary" size="lg" as={Link} to="/kids" className="cc-hero-cta cc-hero-secondary-cta">
-                      Explore Kids Activities
-                    </Button>
-                  </div>
-                </div>
-                <div className="cc-hero-brand-visual cc-story-book-visual">
-                  <img
-                    src="/images/backgrounds/caidenvale_book_hero.webp"
-                    alt="Caiden Vale and the Focus Flame hardcover graphic novel"
-                    className="cc-story-book-hero"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CourageHeroCarousel />
 
       <ThreeWaysSection />
 

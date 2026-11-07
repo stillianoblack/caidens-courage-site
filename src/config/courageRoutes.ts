@@ -27,6 +27,7 @@ export const PARENTS_PATH = '/parents';
 export const TEACHERS_PATH = '/teachers';
 export const CAMPS_PATH = '/camps';
 export const SCHOOLS_PATH = '/schools';
+export const HOLIDAY_PATH = '/holiday';
 
 export const PORTAL_PATH = '/portal';
 /** Public parent claim deep link — scoped claim code only (?code=CLAIM-…). */

@@ -11,29 +11,33 @@ describe('shared Courage navigation refinement', () => {
   it('uses semantic, mutually exclusive dropdown buttons and preserves the portal destination', () => {
     renderHeader();
     const story = screen.getByRole('button', { name: 'The Story' });
-    const kids = screen.getByRole('button', { name: 'Kids' });
-    const forMenu = screen.getByRole('button', { name: 'For' });
+    const academy = screen.getByRole('button', { name: 'Focus Flame Academy' });
+    const audiences = screen.getByRole('button', { name: 'Who We Serve' });
 
-    [story, kids, forMenu].forEach((trigger) => {
+    [story, academy, audiences].forEach((trigger) => {
       expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
       expect(trigger).toHaveAttribute('aria-expanded', 'false');
     });
 
     fireEvent.click(story);
     expect(story).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(kids);
+    fireEvent.click(academy);
     expect(story).toHaveAttribute('aria-expanded', 'false');
-    expect(kids).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(kids);
-    expect(kids).toHaveAttribute('aria-expanded', 'false');
-    fireEvent.click(forMenu);
-    expect(forMenu).toHaveAttribute('aria-expanded', 'true');
+    expect(academy).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('link', { name: 'Games' })).toHaveAttribute('href', '/games');
+    expect(screen.getByRole('link', { name: 'Coloring Pages' })).toHaveAttribute('href', '/brave-mind-club/coloring-pages');
+    fireEvent.click(academy);
+    expect(academy).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(audiences);
+    expect(audiences).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('menuitem', { name: 'Parents' })).toHaveAttribute('href', '/parents');
+    expect(screen.getByRole('menuitem', { name: 'Schools & Districts' })).toHaveAttribute('href', '/schools');
     fireEvent.mouseDown(document.body);
-    expect(forMenu).toHaveAttribute('aria-expanded', 'false');
+    expect(audiences).toHaveAttribute('aria-expanded', 'false');
 
     expect(screen.getByRole('link', { name: /Enter the World/ })).toHaveAttribute('href', '/portal');
     expect(screen.getByRole('link', { name: /Enter the World/ })).toHaveClass('min-h-[50px]');
-    expect(screen.getByRole('link', { name: 'Games' })).toHaveAttribute('href', '/games');
+    expect(screen.getByRole('link', { name: 'Shop' })).toHaveAttribute('href', 'https://caidenvale.com/story/books');
   });
 
   it('supports keyboard activation and returns focus after Escape', () => {

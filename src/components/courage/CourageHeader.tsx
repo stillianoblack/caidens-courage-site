@@ -14,6 +14,7 @@ import {
   type CourageKidsMegaNav,
   type CourageNavLink,
 } from '../../config/courageNav';
+import { VALE_COMICBOOK_URL } from '../../config/valeLinks';
 import PilotAccessNavLink from './PilotAccessNavLink';
 
 function navPillClass(isActive: boolean, mobile = false) {
@@ -269,7 +270,7 @@ function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: Ki
           active ? 'bg-navy-500 text-white' : 'text-navy-500 hover:bg-navy-50'
         }`}
       >
-        Kids
+        Focus Flame Academy
         <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
         </svg>
@@ -279,7 +280,7 @@ function DesktopKidsMegaDropdown({ mega, isOpen, onToggle, onClose, active }: Ki
           ref={panelRef}
           id="courage-kids-menu"
           role="menu"
-          aria-label="Kids"
+          aria-label="Focus Flame Academy"
           style={panelStyle}
           className="absolute top-full z-50 mt-2 w-[min(880px,calc(100vw-3rem))] max-w-[min(900px,calc(100vw-3rem))] rounded-2xl border border-navy-100 bg-white p-5 shadow-xl"
         >
@@ -369,13 +370,13 @@ function MobileKidsMegaGroup({ mega, isOpen, onToggle, onClose }: Omit<KidsMegaD
         aria-controls="courage-mobile-kids-menu"
         className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-semibold text-navy-500 hover:bg-navy-50"
       >
-        Kids
+        Focus Flame Academy
         <svg className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
         </svg>
       </button>
       {isOpen ? (
-        <div id="courage-mobile-kids-menu" className="mt-1 pl-2" aria-label="Kids">
+        <div id="courage-mobile-kids-menu" className="mt-1 pl-2" aria-label="Focus Flame Academy">
           {mega.intro ? (
             <div className="mb-4 px-4 pb-3">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-navy-400">{mega.intro.label}</p>
@@ -461,7 +462,7 @@ export default function CourageHeader() {
     isNavPathActive(KIDS_NAV_PATHS, location.pathname) ||
     isDropdownActive(kidsFlatLinks, location.pathname, location.hash, location.search);
   const forActive = isDropdownActive(FOR_DROPDOWN, location.pathname, location.hash, location.search);
-  const gamesActive = location.pathname === GAMES_PATH;
+  const academyActive = kidsActive || location.pathname === GAMES_PATH;
   return (
     <header
       className={[
@@ -508,10 +509,10 @@ export default function CourageHeader() {
                 setForOpen(false);
               }}
               onClose={() => setKidsOpen(false)}
-              active={kidsActive}
+              active={academyActive}
             />
             <DesktopDropdown
-              label="For"
+              label="Who We Serve"
               items={FOR_DROPDOWN}
               isOpen={forOpen}
               onToggle={() => {
@@ -522,7 +523,7 @@ export default function CourageHeader() {
               onClose={() => setForOpen(false)}
               active={forActive}
             />
-            <NavLink to={GAMES_PATH} className={navPillClass(gamesActive)}>Games</NavLink>
+            <a href={VALE_COMICBOOK_URL} className={navPillClass(false)}>Shop</a>
             <NavLink to={PORTAL_PATH} className="ml-2 inline-flex min-h-[50px] items-center rounded-full bg-golden-500 px-8 text-base font-bold text-navy-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-golden-400 active:translate-y-0 active:bg-golden-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-golden-500/70 focus-visible:ring-offset-2">
               Enter the World <span className="ml-2" aria-hidden>→</span>
             </NavLink>
@@ -586,7 +587,7 @@ export default function CourageHeader() {
                 onClose={closeMenu}
               />
               <MobileDropdownGroup
-                label="For"
+                label="Who We Serve"
                 items={FOR_DROPDOWN}
                 isOpen={mobileForOpen}
                 onToggle={() => {
@@ -597,7 +598,7 @@ export default function CourageHeader() {
                 onClose={closeMenu}
               />
               <li>
-                <NavLink to={GAMES_PATH} className={navPillClass(gamesActive, true)} onClick={closeMenu}>Games</NavLink>
+                <a href={VALE_COMICBOOK_URL} className={navPillClass(false, true)} onClick={closeMenu}>Shop</a>
               </li>
               <li>
                 <NavLink

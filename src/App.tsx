@@ -51,6 +51,7 @@ import {
   FocusFlameLabPage,
   FormSuccessPage,
   HomePage,
+  HolidayPage,
   GamesPage,
   JourneyPage,
   KidsHubPage,
@@ -108,6 +109,7 @@ import {
   WEEK_0_ASSESSMENT_ALIAS_PATH,
   WEEK_0_ASSESSMENT_PATH,
   FOCUS_FLAME_LAB_PATH,
+  HOLIDAY_PATH,
   PILOT_DASHBOARD_PATH,
   BLUE_RIBBON_PILOT_PATH,
   PROGRAM_DASHBOARD_PATH,
@@ -508,6 +510,7 @@ const appRouteChildren = (
       <Route path="/braveminds/b4-tools-library" element={<B4ToolsLibraryPage />} />
 
       <Route path="/focus-flame-academy" element={<LegacySchoolRouteRedirect />} />
+      <Route path={HOLIDAY_PATH} element={<HolidayPage />} />
       <Route path="/classic-home" element={<ClassicHomePage />} />
       <Route path="/camp-courage" element={<LegacyCampCourageRedirect />} />
       <Route path="/camp-courage/toolkit-success" element={<ToolkitSuccessPage />} />

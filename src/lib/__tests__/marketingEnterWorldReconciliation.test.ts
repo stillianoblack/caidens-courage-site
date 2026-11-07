@@ -7,6 +7,7 @@ describe('marketing and Enter the World reconciliation', () => {
   const header = read('src/components/courage/CourageHeader.tsx');
   const nav = read('src/config/courageNav.ts');
   const home = read('src/pages/Home.tsx');
+  const hero = read('src/components/courage/CourageHeroCarousel.tsx');
   const app = read('src/App.tsx');
   const lazyPages = read('src/routes/lazyPages.tsx');
   const portal = read('src/pages/Portal.tsx');
@@ -26,11 +27,12 @@ describe('marketing and Enter the World reconciliation', () => {
   });
 
   it('keeps the approved story-first homepage and lower video section', () => {
-    expect(home).toContain('The story where focus becomes a superpower.');
-    expect(home).toContain('/images/backgrounds/caidenvale_book_hero.webp');
+    expect(home).toContain('<CourageHeroCarousel />');
+    expect(hero).toContain('The story where focus becomes a superpower.');
+    expect(hero).toContain('/images/backgrounds/caidenvale_book_hero.webp');
     expect(styles).toContain('backgroundFocusFlame.webp');
-    expect(home).toContain('Order the Book');
-    expect(home).toContain('Explore Kids Activities');
+    expect(hero).toContain('Order the Book');
+    expect(hero).toContain('Explore Kids Activities');
     expect(home).toContain("See Caiden&apos;s Courage in Action");
     expect(home.indexOf('<ThreeWaysSection />')).toBeLessThan(home.indexOf('cc-home-video-section'));
     expect(home).not.toContain('cc-hero-video-preview');
