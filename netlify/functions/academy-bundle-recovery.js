@@ -1,6 +1,11 @@
 const { sendAcademyClaimEmail } = require('./_lib/emailProvider');
-const { getServiceClient, jsonResponse, publicSiteOrigin } = require('./_lib/bookstoreDelivery');
-const { academyClaimOrigin, createInvitationToken, hashClaimCode, normalizeEmail } = require('./_lib/academyMembership');
+const { jsonResponse, publicSiteOrigin } = require('./_lib/bookstoreDelivery');
+const { createInvitationToken, hashClaimCode, normalizeEmail } = require('./_lib/academyMembership');
+const {
+  claimLinkOrigin,
+  createActivationServiceClient,
+  recoveredClaimLocked,
+} = require('./_lib/activationPreviewGuard');
 
 const PUBLIC_MESSAGE = 'If an unclaimed Academy invitation matches that email, a new one-time link is on its way.';
 
@@ -14,7 +19,7 @@ exports.handler = async function academyBundleRecovery(event) {
   }
   const email = normalizeEmail(body.email);
   if (!email) return jsonResponse(400, { error: 'invalid_request' });
-  const client = getServiceClient();
+  const client = createActivationServiceClient();
   if (!client) return jsonResponse(200, { message: PUBLIC_MESSAGE });
 
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -30,7 +35,7 @@ exports.handler = async function academyBundleRecovery(event) {
 
   const claimResult = await client
     .from('academy_bundle_claims')
-    .select('id, product_key, duration_days, claim_deadline_at, activated_at')
+    .select('id, product_key, duration_days, claim_deadline_at, activated_at, checkout_session_id')
     .eq('customer_email', email)
     .is('activated_at', null)
     .order('purchase_verified_at', { ascending: true })
@@ -41,7 +46,9 @@ exports.handler = async function academyBundleRecovery(event) {
     return jsonResponse(200, { message: PUBLIC_MESSAGE });
   }
 
-  const origin = academyClaimOrigin(publicSiteOrigin());
+  if (recoveredClaimLocked(claim)) return jsonResponse(200, { message: PUBLIC_MESSAGE });
+
+  const origin = claimLinkOrigin({ publicOrigin: publicSiteOrigin() });
   if (!origin) return jsonResponse(503, { error: 'staging_origin_required', message: PUBLIC_MESSAGE });
 
   const token = createInvitationToken();

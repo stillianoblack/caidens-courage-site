@@ -109,6 +109,16 @@ function sendInactiveReminderEmail(payload) {
   return sendResendEmail(payload);
 }
 
+function sendAcademyVerificationEmail(payload) {
+  const code = escapeHtml(payload.code);
+  return sendResendEmail({
+    to: payload.to,
+    subject: 'Your Focus Flame Academy verification code',
+    html: `<p>Your verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes and can be used once.</p>`,
+    text: `Your Focus Flame Academy verification code is ${payload.code}. It expires in 10 minutes and can be used once.`,
+  });
+}
+
 function resendConfigured() {
   return Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
 }
@@ -168,5 +178,6 @@ module.exports = {
   sendInactiveReminderEmail,
   sendBookstoreRecoveryEmail,
   sendAcademyClaimEmail,
+  sendAcademyVerificationEmail,
   resendConfigured,
 };

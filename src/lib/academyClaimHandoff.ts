@@ -20,3 +20,8 @@ export function captureAcademyClaimToken(): string {
   }
   return onClaimPage ? fromHash || claimTokenHandoff : '';
 }
+
+/** Drop the invitation secret after the claim page has posted it once. */
+export function releaseAcademyClaimToken(): void {
+  claimTokenHandoff = '';
+}
